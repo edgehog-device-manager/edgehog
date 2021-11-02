@@ -1,0 +1,11 @@
+version: "3.3"
+services:
+  postgresql:
+    image: postgres:14.0
+    environment:
+      POSTGRES_USER: edgehog
+      POSTGRES_PASSWORD: edgehog
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+volumes:
+  postgresql-data:
