@@ -7,5 +7,21 @@ services:
       POSTGRES_PASSWORD: edgehog
     volumes:
       - postgresql-data:/var/lib/postgresql/data
+
+  edgehog-backend:
+    image: clea-platform/edgehog-backend:snapshot
+    build:
+      context: backend
+    environment:
+      DATABASE_USERNAME: edgehog
+      DATABASE_PASSWORD: edgehog
+      DATABASE_HOSTNAME: postgresql
+      DATABASE_NAME: postgres
+      SECRET_KEY_BASE: KKtB6BEPk1NVk6EmBfQCafphxLj7EW1M+BGPIFCT8X2LTywTFuGC6lM3yc8e3VKH
+    ports:
+      - 4000:4000
+    restart: on-failure
+    depends_on:
+      - postgresql
 volumes:
   postgresql-data:
