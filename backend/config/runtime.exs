@@ -7,17 +7,18 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-  database_url =
-    System.get_env("DATABASE_URL") ||
-      raise """
-      environment variable DATABASE_URL is missing.
-      For example: ecto://USER:PASS@HOST/DATABASE
-      """
+  database_username = System.fetch_env!("DATABASE_USERNAME")
+  database_password = System.fetch_env!("DATABASE_PASSWORD")
+  database_hostname = System.fetch_env!("DATABASE_HOSTNAME")
+  database_name = System.fetch_env!("DATABASE_NAME")
 
   config :edgehog, Edgehog.Repo,
     # ssl: true,
     # socket_options: [:inet6],
-    url: database_url,
+    username: database_username,
+    password: database_password,
+    hostname: database_hostname,
+    database: database_name,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
@@ -33,6 +34,7 @@ if config_env() == :prod do
       """
 
   config :edgehog, EdgehogWeb.Endpoint,
+    server: true,
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
