@@ -1,0 +1,63 @@
+name: Build and Test Backend
+
+on:
+  # Run when pushing to stable branches
+  push:
+    paths:
+    - 'backend/**'
+    - '.github/workflows/backend-test.yaml'
+    branches:
+    - 'master'
+  # Run on pull requests matching apps
+  pull_request:
+    paths:
+    - 'backend/**'
+    - '.github/workflows/backend-test.yaml'
+
+env:
+  elixir_version: "1.12.3"
+  otp_version: "24.1"
+jobs:
+  test-coverage:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+        - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      MIX_ENV: test
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: backend/deps
+        key: ${{ runner.os }}-deps-${{ env.otp_version }}-${{ env.elixir_version }}-${{ hashFiles(format('{0}{1}{2}', github.workspace, '/backend/', '/mix.lock')) }}
+    - uses: actions/cache@v1
+      with:
+        path: backend/_build
+        key: ${{ runner.os }}-_build-${{ env.otp_version }}-${{ env.elixir_version }}
+    - uses: erlef/setup-elixir@v1.6.0
+      with:
+        otp-version: ${{ env.otp_version }}
+        elixir-version: ${{ env.elixir_version }}
+    - name: Install Dependencies
+      working-directory: backend
+      run: mix deps.get
+    - name: Check formatting
+      working-directory: backend
+      run: mix format --check-formatted
+    - name: Compile
+      working-directory: backend
+      run: mix do compile
+    - name: Test
+      working-directory: backend
+      run: mix test
