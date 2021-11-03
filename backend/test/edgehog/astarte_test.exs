@@ -118,4 +118,60 @@ defmodule Edgehog.AstarteTest do
       assert %Ecto.Changeset{} = Astarte.change_realm(realm)
     end
   end
+
+  describe "devices" do
+    alias Edgehog.Astarte.Device
+
+    import Edgehog.AstarteFixtures
+
+    @invalid_attrs %{device_id: nil, name: nil}
+
+    test "list_devices/0 returns all devices" do
+      device = device_fixture()
+      assert Astarte.list_devices() == [device]
+    end
+
+    test "get_device!/1 returns the device with given id" do
+      device = device_fixture()
+      assert Astarte.get_device!(device.id) == device
+    end
+
+    test "create_device/1 with valid data creates a device" do
+      valid_attrs = %{device_id: "some device_id", name: "some name"}
+
+      assert {:ok, %Device{} = device} = Astarte.create_device(valid_attrs)
+      assert device.device_id == "some device_id"
+      assert device.name == "some name"
+    end
+
+    test "create_device/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Astarte.create_device(@invalid_attrs)
+    end
+
+    test "update_device/2 with valid data updates the device" do
+      device = device_fixture()
+      update_attrs = %{device_id: "some updated device_id", name: "some updated name"}
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert device.device_id == "some updated device_id"
+      assert device.name == "some updated name"
+    end
+
+    test "update_device/2 with invalid data returns error changeset" do
+      device = device_fixture()
+      assert {:error, %Ecto.Changeset{}} = Astarte.update_device(device, @invalid_attrs)
+      assert device == Astarte.get_device!(device.id)
+    end
+
+    test "delete_device/1 deletes the device" do
+      device = device_fixture()
+      assert {:ok, %Device{}} = Astarte.delete_device(device)
+      assert_raise Ecto.NoResultsError, fn -> Astarte.get_device!(device.id) end
+    end
+
+    test "change_device/1 returns a device changeset" do
+      device = device_fixture()
+      assert %Ecto.Changeset{} = Astarte.change_device(device)
+    end
+  end
 end

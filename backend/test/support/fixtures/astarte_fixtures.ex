@@ -34,4 +34,19 @@ defmodule Edgehog.AstarteFixtures do
 
     realm
   end
+
+  @doc """
+  Generate a device.
+  """
+  def device_fixture(attrs \\ %{}) do
+    {:ok, device} =
+      attrs
+      |> Enum.into(%{
+        device_id: "some device_id",
+        name: "some name"
+      })
+      |> Edgehog.Astarte.create_device()
+
+    device
+  end
 end
