@@ -25,6 +25,7 @@
     "check-format": "prettier --check src",
     "lint": "eslint --fix src",
     "check-lint": "eslint src",
+    "check-types": "tsc --noEmit",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
