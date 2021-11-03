@@ -33,21 +33,32 @@
     "typescript": "^4.4.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "init": "npm run relay:compile",
+    "start": "craco start",
+    "prestart": "npm run init",
+    "build": "craco build",
+    "prebuild": "npm run init",
+    "relay:download-schema": "npx get-graphql-schema http://localhost:4000/api > src/api/schema.graphql",
+    "relay:compile": "relay-compiler --schema ./src/api/schema.graphql --customScalars.Upload=File --src ./src/ --artifactDirectory ./src/api/__generated__ --language typescript --watchman false $@",
     "format": "prettier --write src",
     "check-format": "prettier --check src",
     "lint": "eslint --fix src",
     "check-lint": "eslint src",
     "check-types": "tsc --noEmit",
+    "precheck-types": "npm run init",
+    "jest:test": "TZ=UTC craco test",
+    "prejest:test": "npm run init",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest",
+      "plugin:relay/recommended",
       "prettier"
+    ],
+    "plugins": [
+      "relay"
     ]
   },
   "browserslist": {
@@ -61,5 +72,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "proxy": "http://localhost:4000/"
 }
