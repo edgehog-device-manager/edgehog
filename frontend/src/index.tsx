@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { RelayEnvironmentProvider } from "react-relay/hooks";
+import { BrowserRouter as RouterProvider } from "react-router-dom";
 
 import { relayEnvironment } from "api";
 import I18nProvider from "i18n";
@@ -10,9 +11,11 @@ import "./index.scss";
 ReactDOM.render(
   <React.StrictMode>
     <RelayEnvironmentProvider environment={relayEnvironment}>
-      <I18nProvider>
-        <App />
-      </I18nProvider>
+      <RouterProvider>
+        <I18nProvider>
+          <App />
+        </I18nProvider>
+      </RouterProvider>
     </RelayEnvironmentProvider>
   </React.StrictMode>,
   document.getElementById("root")
