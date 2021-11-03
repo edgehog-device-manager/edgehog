@@ -58,4 +58,60 @@ defmodule Edgehog.AstarteTest do
       assert %Ecto.Changeset{} = Astarte.change_cluster(cluster)
     end
   end
+
+  describe "realms" do
+    alias Edgehog.Astarte.Realm
+
+    import Edgehog.AstarteFixtures
+
+    @invalid_attrs %{name: nil, private_key: nil}
+
+    test "list_realms/0 returns all realms" do
+      realm = realm_fixture()
+      assert Astarte.list_realms() == [realm]
+    end
+
+    test "get_realm!/1 returns the realm with given id" do
+      realm = realm_fixture()
+      assert Astarte.get_realm!(realm.id) == realm
+    end
+
+    test "create_realm/1 with valid data creates a realm" do
+      valid_attrs = %{name: "some name", private_key: "some private_key"}
+
+      assert {:ok, %Realm{} = realm} = Astarte.create_realm(valid_attrs)
+      assert realm.name == "some name"
+      assert realm.private_key == "some private_key"
+    end
+
+    test "create_realm/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Astarte.create_realm(@invalid_attrs)
+    end
+
+    test "update_realm/2 with valid data updates the realm" do
+      realm = realm_fixture()
+      update_attrs = %{name: "some updated name", private_key: "some updated private_key"}
+
+      assert {:ok, %Realm{} = realm} = Astarte.update_realm(realm, update_attrs)
+      assert realm.name == "some updated name"
+      assert realm.private_key == "some updated private_key"
+    end
+
+    test "update_realm/2 with invalid data returns error changeset" do
+      realm = realm_fixture()
+      assert {:error, %Ecto.Changeset{}} = Astarte.update_realm(realm, @invalid_attrs)
+      assert realm == Astarte.get_realm!(realm.id)
+    end
+
+    test "delete_realm/1 deletes the realm" do
+      realm = realm_fixture()
+      assert {:ok, %Realm{}} = Astarte.delete_realm(realm)
+      assert_raise Ecto.NoResultsError, fn -> Astarte.get_realm!(realm.id) end
+    end
+
+    test "change_realm/1 returns a realm changeset" do
+      realm = realm_fixture()
+      assert %Ecto.Changeset{} = Astarte.change_realm(realm)
+    end
+  end
 end
