@@ -1,0 +1,52 @@
+name: Build and Test Frontend
+
+on:
+  # Run when pushing to stable branches
+  push:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-test.yaml"
+    branches:
+      - "main"
+  # Run on pull requests matching apps
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-test.yaml"
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: frontend/dep
+          key: ${{ runner.os }}-node-${{ hashFiles('**/frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Check formatting
+        working-directory: frontend
+        run: npm run check-format
+      - name: Check linting
+        working-directory: frontend
+        run: npm run check-lint
+      - name: Check Typescript
+        working-directory: frontend
+        run: npm run check-types
+      - name: Run tests
+        working-directory: frontend
+        run: npm run jest:test

@@ -23,5 +23,16 @@ services:
     restart: on-failure
     depends_on:
       - postgresql
+
+  edgehog-frontend:
+    image: edgehogdevicemanager/edgehog-frontend:snapshot
+    build:
+      context: frontend
+      args:
+        backend_url: http://localhost:4000/api
+    ports:
+      - 8080:80
+    restart: on-failure
+
 volumes:
   postgresql-data:
