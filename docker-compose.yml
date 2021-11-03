@@ -9,7 +9,7 @@ services:
       - postgresql-data:/var/lib/postgresql/data
 
   edgehog-backend:
-    image: clea-platform/edgehog-backend:snapshot
+    image: edgehogdevicemanager/edgehog-backend:snapshot
     build:
       context: backend
     environment:
