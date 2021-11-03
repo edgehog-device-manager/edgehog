@@ -1,0 +1,7 @@
+.pagination .page-item .page-link {
+  border: none;
+}
+
+.pagination .page-item.active .page-link {
+  border-radius: 0.25rem;
+}
