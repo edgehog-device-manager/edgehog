@@ -3,10 +3,16 @@ defmodule EdgehogWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug EdgehogWeb.PopulateTenant
+    plug EdgehogWeb.Context
   end
 
-  scope "/api", EdgehogWeb do
+  scope "/api" do
     pipe_through :api
+
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema
+
+    forward "/", Absinthe.Plug, schema: EdgehogWeb.Schema
   end
 
   # Enables the Swoosh mailbox preview in development.
