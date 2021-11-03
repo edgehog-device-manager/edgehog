@@ -2,11 +2,13 @@ defmodule Edgehog.Astarte.Device do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Astarte.Realm
+
   schema "devices" do
     field :device_id, :string
     field :name, :string
-    field :realm_id, :id
     field :tenant_id, :id
+    belongs_to :realm, Realm
 
     timestamps()
   end

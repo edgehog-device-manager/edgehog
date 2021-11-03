@@ -234,15 +234,15 @@ defmodule Edgehog.Astarte do
 
   ## Examples
 
-      iex> create_device(%{field: value})
+      iex> create_device(%Realm{}, %{field: value})
       {:ok, %Device{}}
 
-      iex> create_device(%{field: bad_value})
+      iex> create_device(%Realm{}, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_device(attrs \\ %{}) do
-    %Device{}
+  def create_device(%Realm{} = realm, attrs \\ %{}) do
+    %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
     |> Device.changeset(attrs)
     |> Repo.insert()
   end

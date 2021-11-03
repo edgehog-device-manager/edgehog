@@ -124,32 +124,38 @@ defmodule Edgehog.AstarteTest do
 
     import Edgehog.AstarteFixtures
 
+    setup do
+      cluster = cluster_fixture()
+
+      %{realm: realm_fixture(cluster)}
+    end
+
     @invalid_attrs %{device_id: nil, name: nil}
 
-    test "list_devices/0 returns all devices" do
-      device = device_fixture()
+    test "list_devices/0 returns all devices", %{realm: realm} do
+      device = device_fixture(realm)
       assert Astarte.list_devices() == [device]
     end
 
-    test "get_device!/1 returns the device with given id" do
-      device = device_fixture()
+    test "get_device!/1 returns the device with given id", %{realm: realm} do
+      device = device_fixture(realm)
       assert Astarte.get_device!(device.id) == device
     end
 
-    test "create_device/1 with valid data creates a device" do
+    test "create_device/1 with valid data creates a device", %{realm: realm} do
       valid_attrs = %{device_id: "some device_id", name: "some name"}
 
-      assert {:ok, %Device{} = device} = Astarte.create_device(valid_attrs)
+      assert {:ok, %Device{} = device} = Astarte.create_device(realm, valid_attrs)
       assert device.device_id == "some device_id"
       assert device.name == "some name"
     end
 
-    test "create_device/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Astarte.create_device(@invalid_attrs)
+    test "create_device/1 with invalid data returns error changeset", %{realm: realm} do
+      assert {:error, %Ecto.Changeset{}} = Astarte.create_device(realm, @invalid_attrs)
     end
 
-    test "update_device/2 with valid data updates the device" do
-      device = device_fixture()
+    test "update_device/2 with valid data updates the device", %{realm: realm} do
+      device = device_fixture(realm)
       update_attrs = %{device_id: "some updated device_id", name: "some updated name"}
 
       assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
@@ -157,20 +163,20 @@ defmodule Edgehog.AstarteTest do
       assert device.name == "some updated name"
     end
 
-    test "update_device/2 with invalid data returns error changeset" do
-      device = device_fixture()
+    test "update_device/2 with invalid data returns error changeset", %{realm: realm} do
+      device = device_fixture(realm)
       assert {:error, %Ecto.Changeset{}} = Astarte.update_device(device, @invalid_attrs)
       assert device == Astarte.get_device!(device.id)
     end
 
-    test "delete_device/1 deletes the device" do
-      device = device_fixture()
+    test "delete_device/1 deletes the device", %{realm: realm} do
+      device = device_fixture(realm)
       assert {:ok, %Device{}} = Astarte.delete_device(device)
       assert_raise Ecto.NoResultsError, fn -> Astarte.get_device!(device.id) end
     end
 
-    test "change_device/1 returns a device changeset" do
-      device = device_fixture()
+    test "change_device/1 returns a device changeset", %{realm: realm} do
+      device = device_fixture(realm)
       assert %Ecto.Changeset{} = Astarte.change_device(device)
     end
   end
