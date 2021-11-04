@@ -16,24 +16,25 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Astarte.Cluster do
-  use Ecto.Schema
-  import Ecto.Changeset
+defmodule Edgehog.DevicesFixtures do
+  @moduledoc """
+  This module defines test helpers for creating
+  entities via the `Edgehog.Devices` context.
+  """
 
-  alias Edgehog.Astarte.Realm
+  @doc """
+  Generate a device.
+  """
+  def device_fixture(realm, attrs \\ %{}) do
+    attrs =
+      attrs
+      |> Enum.into(%{
+        device_id: "some device_id",
+        name: "some name"
+      })
 
-  schema "clusters" do
-    field :base_api_url, :string
-    field :name, :string
-    has_many :realms, Realm
+    {:ok, device} = Edgehog.Devices.create_device(realm, attrs)
 
-    timestamps()
-  end
-
-  @doc false
-  def changeset(cluster, attrs) do
-    cluster
-    |> cast(attrs, [:name, :base_api_url])
-    |> validate_required([:name, :base_api_url])
+    device
   end
 end
