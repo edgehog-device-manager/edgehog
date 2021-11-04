@@ -22,14 +22,15 @@ defmodule Edgehog.AstarteFixtures do
   @doc """
   Generate a realm.
   """
-  def realm_fixture(attrs \\ %{}) do
-    {:ok, realm} =
+  def realm_fixture(cluster, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         name: "some name",
         private_key: "some private_key"
       })
-      |> Edgehog.Astarte.create_realm()
+
+    {:ok, realm} = Edgehog.Astarte.create_realm(cluster, attrs)
 
     realm
   end

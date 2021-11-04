@@ -64,32 +64,36 @@ defmodule Edgehog.AstarteTest do
 
     import Edgehog.AstarteFixtures
 
+    setup do
+      %{cluster: cluster_fixture()}
+    end
+
     @invalid_attrs %{name: nil, private_key: nil}
 
-    test "list_realms/0 returns all realms" do
-      realm = realm_fixture()
+    test "list_realms/0 returns all realms", %{cluster: cluster} do
+      realm = realm_fixture(cluster)
       assert Astarte.list_realms() == [realm]
     end
 
-    test "get_realm!/1 returns the realm with given id" do
-      realm = realm_fixture()
+    test "get_realm!/1 returns the realm with given id", %{cluster: cluster} do
+      realm = realm_fixture(cluster)
       assert Astarte.get_realm!(realm.id) == realm
     end
 
-    test "create_realm/1 with valid data creates a realm" do
+    test "create_realm/1 with valid data creates a realm", %{cluster: cluster} do
       valid_attrs = %{name: "some name", private_key: "some private_key"}
 
-      assert {:ok, %Realm{} = realm} = Astarte.create_realm(valid_attrs)
+      assert {:ok, %Realm{} = realm} = Astarte.create_realm(cluster, valid_attrs)
       assert realm.name == "some name"
       assert realm.private_key == "some private_key"
     end
 
-    test "create_realm/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Astarte.create_realm(@invalid_attrs)
+    test "create_realm/1 with invalid data returns error changeset", %{cluster: cluster} do
+      assert {:error, %Ecto.Changeset{}} = Astarte.create_realm(cluster, @invalid_attrs)
     end
 
-    test "update_realm/2 with valid data updates the realm" do
-      realm = realm_fixture()
+    test "update_realm/2 with valid data updates the realm", %{cluster: cluster} do
+      realm = realm_fixture(cluster)
       update_attrs = %{name: "some updated name", private_key: "some updated private_key"}
 
       assert {:ok, %Realm{} = realm} = Astarte.update_realm(realm, update_attrs)
@@ -97,20 +101,20 @@ defmodule Edgehog.AstarteTest do
       assert realm.private_key == "some updated private_key"
     end
 
-    test "update_realm/2 with invalid data returns error changeset" do
-      realm = realm_fixture()
+    test "update_realm/2 with invalid data returns error changeset", %{cluster: cluster} do
+      realm = realm_fixture(cluster)
       assert {:error, %Ecto.Changeset{}} = Astarte.update_realm(realm, @invalid_attrs)
       assert realm == Astarte.get_realm!(realm.id)
     end
 
-    test "delete_realm/1 deletes the realm" do
-      realm = realm_fixture()
+    test "delete_realm/1 deletes the realm", %{cluster: cluster} do
+      realm = realm_fixture(cluster)
       assert {:ok, %Realm{}} = Astarte.delete_realm(realm)
       assert_raise Ecto.NoResultsError, fn -> Astarte.get_realm!(realm.id) end
     end
 
-    test "change_realm/1 returns a realm changeset" do
-      realm = realm_fixture()
+    test "change_realm/1 returns a realm changeset", %{cluster: cluster} do
+      realm = realm_fixture(cluster)
       assert %Ecto.Changeset{} = Astarte.change_realm(realm)
     end
   end

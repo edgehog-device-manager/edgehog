@@ -1,5 +1,6 @@
 defmodule Edgehog.TenantsTest do
   use Edgehog.DataCase
+  @moduletag :no_tenant_fixtures
 
   alias Edgehog.Tenants
 

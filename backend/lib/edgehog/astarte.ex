@@ -138,15 +138,15 @@ defmodule Edgehog.Astarte do
 
   ## Examples
 
-      iex> create_realm(%{field: value})
+      iex> create_realm(%Cluster{}, %{field: value})
       {:ok, %Realm{}}
 
-      iex> create_realm(%{field: bad_value})
+      iex> create_realm(%Cluster{}, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_realm(attrs \\ %{}) do
-    %Realm{}
+  def create_realm(%Cluster{} = cluster, attrs \\ %{}) do
+    %Realm{cluster_id: cluster.id, tenant_id: Repo.get_tenant_id()}
     |> Realm.changeset(attrs)
     |> Repo.insert()
   end
