@@ -29,11 +29,7 @@ import {
   Routes,
 } from "react-router-dom";
 import { RelayEnvironmentProvider } from "react-relay/hooks";
-import {
-  createMockEnvironment,
-  RelayMockEnvironment,
-  MockPayloadGenerator,
-} from "relay-test-utils";
+import { createMockEnvironment, RelayMockEnvironment } from "relay-test-utils";
 
 import I18nProvider from "i18n";
 
@@ -73,6 +69,4 @@ const renderWithProviders = (
   return result;
 };
 
-const relayMockResolvers: MockPayloadGenerator.MockResolvers = {};
-
-export { relayMockResolvers, renderWithProviders };
+export { renderWithProviders };
