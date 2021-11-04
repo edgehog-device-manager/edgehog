@@ -16,22 +16,24 @@
 # limitations under the License.
 #
 
-alias Edgehog.{
-  Astarte,
-  Tenants
-}
+defmodule Edgehog.Tenants.Tenant do
+  use Ecto.Schema
+  import Ecto.Changeset
 
-{:ok, cluster} =
-  Astarte.create_cluster(%{
-    name: "Test Cluster",
-    base_api_url: "https://api.astarte.example.com"
-  })
+  alias Edgehog.Astarte.Realm
 
-{:ok, tenant} = Tenants.create_tenant(%{name: "ACME Inc"})
+  @primary_key {:tenant_id, :id, autogenerate: true}
+  schema "tenants" do
+    field :name, :string
+    has_one :realm, Realm, foreign_key: :tenant_id
 
-_ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+    timestamps()
+  end
 
-{:ok, realm} = Astarte.create_realm(cluster, %{name: "test", private_key: "notaprivatekey"})
-
-{:ok, _device} =
-  Astarte.create_device(realm, %{name: "Thingie", device_id: "DqL4H107S42WBEHmDrvPLQ"})
+  @doc false
+  def changeset(tenant, attrs) do
+    tenant
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+  end
+end

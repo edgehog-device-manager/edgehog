@@ -1,0 +1,2 @@
+# Ignore local emacs variables
+/.dir-locals.el

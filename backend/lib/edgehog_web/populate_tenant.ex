@@ -16,22 +16,19 @@
 # limitations under the License.
 #
 
-alias Edgehog.{
-  Astarte,
-  Tenants
-}
+defmodule EdgehogWeb.PopulateTenant do
+  @behaviour Plug
 
-{:ok, cluster} =
-  Astarte.create_cluster(%{
-    name: "Test Cluster",
-    base_api_url: "https://api.astarte.example.com"
-  })
+  alias Edgehog.Tenants
 
-{:ok, tenant} = Tenants.create_tenant(%{name: "ACME Inc"})
+  def init(opts), do: opts
 
-_ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+  def call(conn, _opts) do
+    # TODO: extract tenant from authentication context
+    tenant = Tenants.get_tenant!(1)
 
-{:ok, realm} = Astarte.create_realm(cluster, %{name: "test", private_key: "notaprivatekey"})
+    _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 
-{:ok, _device} =
-  Astarte.create_device(realm, %{name: "Thingie", device_id: "DqL4H107S42WBEHmDrvPLQ"})
+    Plug.Conn.assign(conn, :current_tenant, tenant)
+  end
+end

@@ -16,22 +16,31 @@
 # limitations under the License.
 #
 
-alias Edgehog.{
-  Astarte,
-  Tenants
-}
+defmodule EdgehogWeb.Schema do
+  use Absinthe.Schema
+  use Absinthe.Relay.Schema, :modern
+  import_types EdgehogWeb.Schema.AstarteTypes
 
-{:ok, cluster} =
-  Astarte.create_cluster(%{
-    name: "Test Cluster",
-    base_api_url: "https://api.astarte.example.com"
-  })
+  alias EdgehogWeb.Resolvers
 
-{:ok, tenant} = Tenants.create_tenant(%{name: "ACME Inc"})
+  node interface do
+    resolve_type fn
+      %Edgehog.Astarte.Device{}, _ ->
+        :device
 
-_ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+      _, _ ->
+        nil
+    end
+  end
 
-{:ok, realm} = Astarte.create_realm(cluster, %{name: "test", private_key: "notaprivatekey"})
+  query do
+    node field do
+      resolve fn
+        %{type: :device, id: id}, _ ->
+          Resolvers.Astarte.find_device(%{id: id}, %{})
+      end
+    end
 
-{:ok, _device} =
-  Astarte.create_device(realm, %{name: "Thingie", device_id: "DqL4H107S42WBEHmDrvPLQ"})
+    import_fields :astarte_queries
+  end
+end

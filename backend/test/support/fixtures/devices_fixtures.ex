@@ -16,22 +16,25 @@
 # limitations under the License.
 #
 
-alias Edgehog.{
-  Astarte,
-  Tenants
-}
+defmodule Edgehog.DevicesFixtures do
+  @moduledoc """
+  This module defines test helpers for creating
+  entities via the `Edgehog.Devices` context.
+  """
 
-{:ok, cluster} =
-  Astarte.create_cluster(%{
-    name: "Test Cluster",
-    base_api_url: "https://api.astarte.example.com"
-  })
+  @doc """
+  Generate a device.
+  """
+  def device_fixture(realm, attrs \\ %{}) do
+    attrs =
+      attrs
+      |> Enum.into(%{
+        device_id: "some device_id",
+        name: "some name"
+      })
 
-{:ok, tenant} = Tenants.create_tenant(%{name: "ACME Inc"})
+    {:ok, device} = Edgehog.Devices.create_device(realm, attrs)
 
-_ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-
-{:ok, realm} = Astarte.create_realm(cluster, %{name: "test", private_key: "notaprivatekey"})
-
-{:ok, _device} =
-  Astarte.create_device(realm, %{name: "Thingie", device_id: "DqL4H107S42WBEHmDrvPLQ"})
+    device
+  end
+end
