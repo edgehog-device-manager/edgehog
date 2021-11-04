@@ -24,7 +24,9 @@ defmodule Edgehog.Astarte do
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 
+  alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
+  alias Edgehog.Astarte.Device.HardwareInfo
 
   @doc """
   Returns the list of clusters.
@@ -310,5 +312,17 @@ defmodule Edgehog.Astarte do
   """
   def change_device(%Device{} = device, attrs \\ %{}) do
     Device.changeset(device, attrs)
+  end
+
+  def get_hardware_info(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      HardwareInfo.get(client, device.device_id)
+    end
+  end
+
+  defp appengine_client_from_device(%Device{} = device) do
+    %Device{realm: realm} = Repo.preload(device, [realm: [:cluster]], skip_tenant_id: true)
+
+    AppEngine.new(realm.cluster.base_api_url, realm.name, realm.private_key)
   end
 end
