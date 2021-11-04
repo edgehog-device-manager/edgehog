@@ -20,11 +20,26 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation, :modern
 
+  alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
+
+  object :hardware_info do
+    field :cpu_architecture, :string
+    field :cpu_model, :string
+    field :cpu_model_name, :string
+    field :cpu_vendor, :string
+    # TODO: since these is longinteger, should this be a string?
+    field :memory_total_bytes, :integer
+  end
 
   node object(:device) do
     field :name, non_null(:string)
     field :device_id, non_null(:string)
+
+    field :hardware_info, :hardware_info do
+      resolve &Resolvers.Astarte.get_hardware_info/3
+      middleware Middleware.ErrorHandler
+    end
   end
 
   object :astarte_queries do

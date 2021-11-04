@@ -18,6 +18,7 @@
 
 defmodule EdgehogWeb.Resolvers.Astarte do
   alias Edgehog.Astarte
+  alias Edgehog.Astarte.Device
 
   def find_device(%{id: id}, _resolution) do
     {:ok, Astarte.get_device!(id)}
@@ -25,5 +26,9 @@ defmodule EdgehogWeb.Resolvers.Astarte do
 
   def list_devices(_parent, _args, _context) do
     {:ok, Astarte.list_devices()}
+  end
+
+  def get_hardware_info(%Device{} = device, _args, _context) do
+    Astarte.get_hardware_info(device)
   end
 end
