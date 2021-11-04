@@ -18,7 +18,7 @@ defmodule Edgehog.Tenants do
 
   """
   def list_tenants do
-    Repo.all(Tenant)
+    Repo.all(Tenant, skip_tenant_id: true)
   end
 
   @doc """
@@ -35,7 +35,7 @@ defmodule Edgehog.Tenants do
       ** (Ecto.NoResultsError)
 
   """
-  def get_tenant!(id), do: Repo.get!(Tenant, id)
+  def get_tenant!(id), do: Repo.get!(Tenant, id, skip_tenant_id: true)
 
   @doc """
   Creates a tenant.
