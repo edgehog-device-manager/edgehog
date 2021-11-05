@@ -35,6 +35,9 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   node object(:device) do
     field :name, non_null(:string)
     field :device_id, non_null(:string)
+    field :online, non_null(:boolean)
+    field :last_connection, :datetime
+    field :last_disconnection, :datetime
 
     field :hardware_info, :hardware_info do
       resolve &Resolvers.Astarte.get_hardware_info/3
