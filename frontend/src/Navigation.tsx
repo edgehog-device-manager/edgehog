@@ -25,6 +25,14 @@ import type { LinkProps as RouterLinkProps } from "react-router-dom";
 enum Route {
   devices = "/devices",
   devicesEdit = "/devices/:deviceId/edit",
+  applianceModels = "/appliance-models",
+  applianceModelsNew = "/appliance-models/new",
+  applianceModelsEdit = "/appliance-models/:applianceModelId/edit",
+  hardwareTypes = "/hardware-types",
+  hardwareTypesNew = "/hardware-types/new",
+  hardwareTypesEdit = "/hardware-types/:hardwareTypeId/edit",
+  login = "/login",
+  logout = "/logout",
 }
 
 const matchPaths = (routes: Route | Route[], path: string) => {
@@ -34,7 +42,15 @@ const matchPaths = (routes: Route | Route[], path: string) => {
 
 type ParametricRoute =
   | { route: Route.devices }
-  | { route: Route.devicesEdit; params: { deviceId: string } };
+  | { route: Route.devicesEdit; params: { deviceId: string } }
+  | { route: Route.applianceModels }
+  | { route: Route.applianceModelsNew }
+  | { route: Route.applianceModelsEdit; params: { applianceModelId: string } }
+  | { route: Route.hardwareTypes }
+  | { route: Route.hardwareTypesNew }
+  | { route: Route.hardwareTypesEdit; params: { hardwareTypeId: string } }
+  | { route: Route.login }
+  | { route: Route.logout };
 
 type LinkProps = Omit<RouterLinkProps, "to"> & ParametricRoute;
 
