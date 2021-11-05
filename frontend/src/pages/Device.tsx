@@ -71,10 +71,10 @@ const FormRow: (params: {
   children: JSX.Element;
 }) => JSX.Element = ({ id, label, children }) => (
   <Form.Group as={Row} controlId={id}>
-    <Form.Label column sm={3}>
+    <Form.Label column sm={4}>
       {label}
     </Form.Label>
-    <Col sm={9}>{children}</Col>
+    <Col sm={8}>{children}</Col>
   </Form.Group>
 );
 
@@ -231,12 +231,12 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
       <Page.Header title={device.name} />
       <Page.Main>
         <Row>
-          <Col sm="4" lg="3">
+          <Col md="5" lg="4" xl="3">
             <div>
               <Figure alt={device.name} />
             </div>
           </Col>
-          <Col sm="8" lg="9">
+          <Col md="7" lg="8" xl="9">
             <Form className="ms-3">
               <Stack gap={3}>
                 <FormRow
