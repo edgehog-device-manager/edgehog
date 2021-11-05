@@ -25,7 +25,10 @@ import {
   UploadableMap,
 } from "relay-runtime";
 
-const backendUrl = process.env.REACT_APP_BACKEND_URL || "/api";
+const applicationMetatag: HTMLElement = document.head.querySelector(
+  "[name=application-name]"
+)!;
+const backendUrl = applicationMetatag.dataset?.backendUrl || "";
 
 const loadAuthToken = () => null; // TODO: implement authentication
 
