@@ -16,19 +16,8 @@
   limitations under the License.
 */
 
-import { ComponentProps } from "react";
-import RNButton from "react-bootstrap/Button";
-
-// Define the 'as' prop with correct types
-// See issue: https://github.com/react-bootstrap/react-bootstrap/issues/6103
-type RNButtonProps = ComponentProps<typeof RNButton>;
-type Props = Omit<RNButtonProps, "as"> & {
-  as?: "button" | "a" | React.ElementType;
-};
-
-const Button = (props: Props) => (
-  // @ts-expect-error wrong types
-  <RNButton {...props} />
-);
-
-export default Button;
+.Dropdown {
+  .dropdown-toggle::after {
+    display: none !important;
+  }
+}
