@@ -197,5 +197,27 @@ defmodule Edgehog.AstarteTest do
       device = device_fixture(realm)
       assert %Ecto.Changeset{} = Astarte.change_device(device)
     end
+
+    test "ensure_device_exists/1 creates a device if not existent", %{realm: realm} do
+      device_id = "does_not_exist"
+      {:ok, device} = Astarte.ensure_device_exists(realm, device_id)
+      assert %Device{device_id: ^device_id} = device
+    end
+
+    test "ensure_device_exists/1 does not create a device if already existent", %{realm: realm} do
+      device = device_fixture(realm)
+      {:ok, same_device} = Astarte.ensure_device_exists(realm, device.device_id)
+      assert same_device.id == device.id
+    end
+
+    test "process_device_event/4 ignores unknown event", %{realm: realm} do
+      device = device_fixture(realm)
+      device_id = device.device_id
+      event = %{"type" => "unknown"}
+      timestamp = DateTime.utc_now() |> DateTime.to_iso8601()
+      assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp)
+
+      assert ^device = Astarte.get_device!(device.id)
+    end
   end
 end
