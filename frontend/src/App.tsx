@@ -20,6 +20,7 @@ import { Navigate, useRoutes } from "react-router-dom";
 
 import { Route } from "Navigation";
 import Device from "pages/Device";
+import Devices from "pages/Devices";
 
 const Sidebar = () => null; // TODO: Implement
 const Topbar = () => null; // TODO: Implement
@@ -30,8 +31,9 @@ type RouterRule = {
 };
 
 const routes: RouterRule[] = [
+  { path: Route.devices, element: <Devices /> },
   { path: Route.devicesEdit, element: <Device /> },
-  { path: "*", element: <Navigate to={Route.devicesEdit} /> },
+  { path: "*", element: <Navigate to={Route.devices} /> },
 ];
 
 function App() {

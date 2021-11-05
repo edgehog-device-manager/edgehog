@@ -23,6 +23,7 @@ import { Link as RouterLink } from "react-router-dom";
 import type { LinkProps as RouterLinkProps } from "react-router-dom";
 
 enum Route {
+  devices = "/devices",
   devicesEdit = "/devices/:deviceId/edit",
 }
 
@@ -31,10 +32,9 @@ const matchPaths = (routes: Route | Route[], path: string) => {
   return r.some((route: Route) => matchPath(route, path) != null);
 };
 
-type ParametricRoute = {
-  route: Route.devicesEdit;
-  params: { deviceId: string };
-};
+type ParametricRoute =
+  | { route: Route.devices }
+  | { route: Route.devicesEdit; params: { deviceId: string } };
 
 type LinkProps = Omit<RouterLinkProps, "to"> & ParametricRoute;
 
@@ -52,7 +52,6 @@ const Link = (props: LinkProps) => {
     to = routerGeneratePath(route, params);
     forwardProps = rest;
   } else {
-    // @ts-expect-error TODO this will handle routes without params
     const { route, ...rest } = props;
     to = route;
     forwardProps = rest;

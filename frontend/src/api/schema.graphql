@@ -1,0 +1,47 @@
+schema {
+  query: RootQueryType
+}
+
+type Device implements Node {
+  deviceId: String!
+  hardwareInfo: HardwareInfo
+
+  """
+  The ID of an object
+  """
+  id: ID!
+  name: String!
+}
+
+type HardwareInfo {
+  cpuArchitecture: String
+  cpuModel: String
+  cpuModelName: String
+  cpuVendor: String
+  memoryTotalBytes: Int
+}
+
+interface Node {
+  """
+  The ID of the object.
+  """
+  id: ID!
+}
+
+type RootQueryType {
+  """
+  Get a single device
+  """
+  device(id: ID!): Device
+
+  """
+  List devices
+  """
+  devices: [Device!]!
+  node(
+    """
+    The ID of an object.
+    """
+    id: ID!
+  ): Node
+}
