@@ -25,6 +25,7 @@ defmodule Edgehog.Tenants.Tenant do
   @primary_key {:tenant_id, :id, autogenerate: true}
   schema "tenants" do
     field :name, :string
+    field :slug, :string
     has_one :realm, Realm, foreign_key: :tenant_id
 
     timestamps()
@@ -33,7 +34,12 @@ defmodule Edgehog.Tenants.Tenant do
   @doc false
   def changeset(tenant, attrs) do
     tenant
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+    |> cast(attrs, [:name, :slug])
+    |> validate_required([:name, :slug])
+    |> unique_constraint(:name)
+    |> unique_constraint(:slug)
+    |> validate_format(:slug, ~r/^[a-z\d\-]+$/,
+      message: "should only contain lower case ASCII letters (from a to z), digits and -"
+    )
   end
 end

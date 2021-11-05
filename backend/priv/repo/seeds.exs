@@ -27,7 +27,7 @@ alias Edgehog.{
     base_api_url: "https://api.astarte.example.com"
   })
 
-{:ok, tenant} = Tenants.create_tenant(%{name: "ACME Inc"})
+{:ok, tenant} = Tenants.create_tenant(%{name: "ACME Inc", slug: "acme-inc"})
 
 _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 

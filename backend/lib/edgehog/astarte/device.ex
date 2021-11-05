@@ -36,5 +36,6 @@ defmodule Edgehog.Astarte.Device do
     device
     |> cast(attrs, [:name, :device_id])
     |> validate_required([:name, :device_id])
+    |> unique_constraint([:device_id, :realm_id, :tenant_id])
   end
 end

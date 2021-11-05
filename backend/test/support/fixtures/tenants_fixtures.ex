@@ -29,7 +29,8 @@ defmodule Edgehog.TenantsFixtures do
     {:ok, tenant} =
       attrs
       |> Enum.into(%{
-        name: "some name"
+        name: "some name",
+        slug: "some-name"
       })
       |> Edgehog.Tenants.create_tenant()
 
