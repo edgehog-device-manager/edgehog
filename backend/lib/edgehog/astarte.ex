@@ -393,6 +393,16 @@ defmodule Edgehog.Astarte do
     end
   end
 
+  defp update_device_with_event(%Device{} = device, %{"type" => "device_connected"}, timestamp) do
+    change_device(device, %{online: true, last_connection: timestamp})
+    |> Repo.update()
+  end
+
+  defp update_device_with_event(%Device{} = device, %{"type" => "device_disconnected"}, timestamp) do
+    change_device(device, %{online: false, last_disconnection: timestamp})
+    |> Repo.update()
+  end
+
   defp update_device_with_event(%Device{} = device, _unhandled_event, _timestamp) do
     # Just return the same device
     {:ok, device}
