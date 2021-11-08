@@ -200,7 +200,7 @@ defmodule Edgehog.AstarteTest do
 
     test "ensure_device_exists/1 creates a device if not existent", %{realm: realm} do
       device_id = "does_not_exist"
-      {:ok, device} = Astarte.ensure_device_exists(realm, device_id)
+      {:ok, device} = Astarte.ensure_device_exists(realm, device_id, init_from_astarte: false)
       assert %Device{device_id: ^device_id} = device
     end
 

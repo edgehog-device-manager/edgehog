@@ -364,9 +364,32 @@ defmodule Edgehog.Astarte do
     end
   end
 
-  def ensure_device_exists(%Realm{} = realm, device_id) do
-    with {:error, :device_not_found} <- fetch_realm_device(realm, device_id) do
-      create_device(realm, %{device_id: device_id, name: device_id})
+  def ensure_device_exists(%Realm{} = realm, device_id, opts \\ []) do
+    device_attrs = %{device_id: device_id, name: device_id}
+
+    with {:error, :device_not_found} <- fetch_realm_device(realm, device_id),
+         {:ok, device_attrs} <-
+           maybe_populate_device_status(
+             realm,
+             device_attrs,
+             Keyword.get(opts, :init_from_astarte, true)
+           ) do
+      create_device(realm, device_attrs)
+    end
+  end
+
+  defp maybe_populate_device_status(%Realm{} = _realm, device_attrs, false = _populate) do
+    {:ok, device_attrs}
+  end
+
+  defp maybe_populate_device_status(%Realm{} = realm, device_attrs, true = _populate) do
+    with {:ok, device_status} <- get_device_status(realm, device_attrs.device_id) do
+      device_attrs =
+        device_status
+        |> Map.from_struct()
+        |> Enum.into(device_attrs)
+
+      {:ok, device_attrs}
     end
   end
 
