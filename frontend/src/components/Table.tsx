@@ -208,4 +208,4 @@ const Table = <T extends Object>({
 };
 
 export default Table;
-export type { Column };
+export type { Column, Row };
