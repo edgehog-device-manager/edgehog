@@ -59,10 +59,7 @@ const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
     <Page>
       <Page.Header
         title={
-          <FormattedMessage
-            id="pages.Devices.title"
-            defaultMessage="Device List"
-          />
+          <FormattedMessage id="pages.Devices.title" defaultMessage="Devices" />
         }
       />
       <Page.Main>
