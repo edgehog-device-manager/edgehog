@@ -33,5 +33,7 @@ defmodule Edgehog.Appliances.HardwareType do
     hardware_type
     |> cast(attrs, [:name, :handle])
     |> validate_required([:name, :handle])
+    |> unique_constraint([:tenant_id, :name])
+    |> unique_constraint([:tenant_id, :handle])
   end
 end

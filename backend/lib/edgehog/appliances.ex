@@ -68,7 +68,7 @@ defmodule Edgehog.Appliances do
 
   """
   def create_hardware_type(attrs \\ %{}) do
-    %HardwareType{}
+    %HardwareType{tenant_id: Repo.get_tenant_id()}
     |> HardwareType.changeset(attrs)
     |> Repo.insert()
   end
