@@ -39,5 +39,6 @@ defmodule Edgehog.Astarte.Realm do
     |> cast(attrs, [:name, :private_key])
     |> validate_required([:name, :private_key])
     |> foreign_key_constraint(:cluster_id)
+    |> unique_constraint([:name, :tenant_id])
   end
 end

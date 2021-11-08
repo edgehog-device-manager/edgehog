@@ -35,5 +35,6 @@ defmodule Edgehog.Astarte.Cluster do
     cluster
     |> cast(attrs, [:name, :base_api_url])
     |> validate_required([:name, :base_api_url])
+    |> unique_constraint(:name)
   end
 end

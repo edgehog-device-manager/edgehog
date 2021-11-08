@@ -154,6 +154,25 @@ defmodule Edgehog.Astarte do
   def get_realm!(id), do: Repo.get!(Realm, id)
 
   @doc """
+  Gets a single realm by name, from the current tenant
+
+  ## Examples
+
+      iex> fetch_realm_by_name("existingname")
+      {:ok, %Realm{}}
+
+      iex> fetch_realm_by_name("invalidname")
+      {:error, :realm_not_found}
+
+  """
+  def fetch_realm_by_name(realm_name) do
+    case Repo.get_by(Realm, name: realm_name) do
+      %Realm{} = realm -> {:ok, realm}
+      nil -> {:error, :realm_not_found}
+    end
+  end
+
+  @doc """
   Creates a realm.
 
   ## Examples
@@ -312,6 +331,48 @@ defmodule Edgehog.Astarte do
   """
   def change_device(%Device{} = device, attrs \\ %{}) do
     Device.changeset(device, attrs)
+  end
+
+  @doc """
+  Gets a single device by its realm and device_id.
+
+  ## Examples
+
+      iex> fetch_realm_device(realm, "existing_device_id")
+      {:ok, %Device{}}
+
+      iex> fetch_realm_device(realm, "invalid_device_id")
+      {:error, :device_not_found}
+
+  """
+  def fetch_realm_device(%Realm{id: realm_id}, device_id) do
+    case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
+      %Device{} = device -> {:ok, device}
+      nil -> {:error, :device_not_found}
+    end
+  end
+
+  @doc """
+  Processes an event coming from a trigger.
+  """
+  def process_device_event(%Realm{} = realm, device_id, event, timestamp) do
+    with {:ok, device} <- ensure_device_exists(realm, device_id),
+         {:ok, _device} <- update_device_with_event(device, event, timestamp) do
+      :ok
+    else
+      _ -> {:error, :cannot_process_device_event}
+    end
+  end
+
+  def ensure_device_exists(%Realm{} = realm, device_id) do
+    with {:error, :device_not_found} <- fetch_realm_device(realm, device_id) do
+      create_device(realm, %{device_id: device_id, name: device_id})
+    end
+  end
+
+  defp update_device_with_event(%Device{} = device, _unhandled_event, _timestamp) do
+    # Just return the same device
+    {:ok, device}
   end
 
   def get_hardware_info(%Device{} = device) do
