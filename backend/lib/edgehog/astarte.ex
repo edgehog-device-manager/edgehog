@@ -26,7 +26,7 @@ defmodule Edgehog.Astarte do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
-  alias Edgehog.Astarte.Device.HardwareInfo
+  alias Edgehog.Astarte.Device.{DeviceStatus, HardwareInfo}
 
   @doc """
   Returns the list of clusters.
@@ -375,6 +375,12 @@ defmodule Edgehog.Astarte do
     {:ok, device}
   end
 
+  defp get_device_status(%Realm{} = realm, device_id) do
+    with {:ok, client} <- appengine_client_from_realm(realm) do
+      DeviceStatus.get(client, device_id)
+    end
+  end
+
   def get_hardware_info(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       HardwareInfo.get(client, device.device_id)
@@ -383,6 +389,12 @@ defmodule Edgehog.Astarte do
 
   defp appengine_client_from_device(%Device{} = device) do
     %Device{realm: realm} = Repo.preload(device, [realm: [:cluster]], skip_tenant_id: true)
+
+    appengine_client_from_realm(realm)
+  end
+
+  defp appengine_client_from_realm(%Realm{} = realm) do
+    realm = Repo.preload(realm, [:cluster], skip_tenant_id: true)
 
     AppEngine.new(realm.cluster.base_api_url, realm.name, realm.private_key)
   end
