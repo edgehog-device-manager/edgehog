@@ -1,5 +1,14 @@
 schema {
   query: RootQueryType
+  mutation: RootMutationType
+}
+
+input CreateHardwareTypeInput {
+  hardwareType: HardwareTypeInput!
+}
+
+type CreateHardwareTypePayload {
+  hardwareType: HardwareType!
 }
 
 """
@@ -32,11 +41,33 @@ type HardwareInfo {
   memoryTotalBytes: Int
 }
 
+type HardwareType implements Node {
+  handle: String!
+
+  """
+  The ID of an object
+  """
+  id: ID!
+  name: String!
+  partNumbers: [String!]!
+}
+
+input HardwareTypeInput {
+  handle: String!
+  name: String!
+  partNumbers: [String!]!
+}
+
 interface Node {
   """
   The ID of the object.
   """
   id: ID!
+}
+
+type RootMutationType {
+  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
+  updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
 }
 
 type RootQueryType {
@@ -49,10 +80,21 @@ type RootQueryType {
   List devices
   """
   devices: [Device!]!
+  hardwareType(id: ID!): HardwareType
+  hardwareTypes: [HardwareType!]!
   node(
     """
     The ID of an object.
     """
     id: ID!
   ): Node
+}
+
+input UpdateHardwareTypeInput {
+  hardwareType: HardwareTypeInput!
+  id: ID!
+}
+
+type UpdateHardwareTypePayload {
+  hardwareType: HardwareType!
 }
