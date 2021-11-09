@@ -30,7 +30,8 @@ defmodule Edgehog.AppliancesFixtures do
       attrs
       |> Enum.into(%{
         handle: "some handle",
-        name: "some name"
+        name: "some name",
+        part_numbers: ["ABC123"]
       })
       |> Edgehog.Appliances.create_hardware_type()
 

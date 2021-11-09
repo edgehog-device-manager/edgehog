@@ -20,10 +20,12 @@ defmodule Edgehog.Appliances.HardwareTypePartNumber do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Appliances.HardwareType
+
   schema "hardware_type_part_numbers" do
     field :part_number, :string
-    field :hardware_type_id, :id
     field :tenant_id, :id
+    belongs_to :hardware_type, HardwareType
 
     timestamps()
   end

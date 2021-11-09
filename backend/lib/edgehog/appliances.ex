@@ -22,9 +22,11 @@ defmodule Edgehog.Appliances do
   """
 
   import Ecto.Query, warn: false
+  alias Ecto.Multi
   alias Edgehog.Repo
 
   alias Edgehog.Appliances.HardwareType
+  alias Edgehog.Appliances.HardwareTypePartNumber
 
   @doc """
   Returns the list of hardware_types.
@@ -37,6 +39,7 @@ defmodule Edgehog.Appliances do
   """
   def list_hardware_types do
     Repo.all(HardwareType)
+    |> Repo.preload(:part_numbers)
   end
 
   @doc """
@@ -53,7 +56,10 @@ defmodule Edgehog.Appliances do
       ** (Ecto.NoResultsError)
 
   """
-  def get_hardware_type!(id), do: Repo.get!(HardwareType, id)
+  def get_hardware_type!(id) do
+    Repo.get!(HardwareType, id)
+    |> Repo.preload(:part_numbers)
+  end
 
   @doc """
   Creates a hardware_type.
@@ -68,9 +74,61 @@ defmodule Edgehog.Appliances do
 
   """
   def create_hardware_type(attrs \\ %{}) do
-    %HardwareType{tenant_id: Repo.get_tenant_id()}
-    |> HardwareType.changeset(attrs)
-    |> Repo.insert()
+    {part_numbers, attrs} = Map.pop(attrs, :part_numbers, [])
+
+    changeset =
+      %HardwareType{tenant_id: Repo.get_tenant_id()}
+      |> HardwareType.changeset(attrs)
+
+    Multi.new()
+    |> Multi.run(:assoc_part_numbers, fn _repo, _changes ->
+      {:ok, insert_or_get_hardware_type_part_numbers(changeset, part_numbers, required: true)}
+    end)
+    |> Multi.insert(:hardware_type, fn %{assoc_part_numbers: changeset} ->
+      changeset
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{hardware_type: hardware_type}} ->
+        {:ok, Repo.preload(hardware_type, :part_numbers)}
+
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
+    end
+  end
+
+  defp insert_or_get_hardware_type_part_numbers(changeset, part_numbers, opts \\ [])
+
+  defp insert_or_get_hardware_type_part_numbers(changeset, [], opts) do
+    if opts[:required] do
+      Ecto.Changeset.add_error(changeset, :part_numbers, "are required")
+    else
+      changeset
+    end
+  end
+
+  defp insert_or_get_hardware_type_part_numbers(changeset, part_numbers, _opts) do
+    timestamp =
+      NaiveDateTime.utc_now()
+      |> NaiveDateTime.truncate(:second)
+
+    maps =
+      Enum.map(
+        part_numbers,
+        &%{
+          tenant_id: Repo.get_tenant_id(),
+          part_number: &1,
+          inserted_at: timestamp,
+          updated_at: timestamp
+        }
+      )
+
+    # TODO: check for conflicts (i.e. part numbers existing but associated with another hardware type)
+    Repo.insert_all(HardwareTypePartNumber, maps, on_conflict: :nothing)
+    query = from pn in HardwareTypePartNumber, where: pn.part_number in ^part_numbers
+    part_numbers = Repo.all(query)
+
+    Ecto.Changeset.put_assoc(changeset, :part_numbers, part_numbers)
   end
 
   @doc """
@@ -86,9 +144,25 @@ defmodule Edgehog.Appliances do
 
   """
   def update_hardware_type(%HardwareType{} = hardware_type, attrs) do
-    hardware_type
-    |> HardwareType.changeset(attrs)
-    |> Repo.update()
+    {part_numbers, attrs} = Map.pop(attrs, :part_numbers, [])
+
+    changeset = HardwareType.changeset(hardware_type, attrs)
+
+    Multi.new()
+    |> Multi.run(:assoc_part_numbers, fn _repo, _changes ->
+      {:ok, insert_or_get_hardware_type_part_numbers(changeset, part_numbers)}
+    end)
+    |> Multi.update(:hardware_type, fn %{assoc_part_numbers: changeset} ->
+      changeset
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{hardware_type: hardware_type}} ->
+        {:ok, Repo.preload(hardware_type, :part_numbers)}
+
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
+    end
   end
 
   @doc """

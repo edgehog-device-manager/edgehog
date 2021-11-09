@@ -23,10 +23,11 @@ defmodule Edgehog.AppliancesTest do
 
   describe "hardware_types" do
     alias Edgehog.Appliances.HardwareType
+    alias Edgehog.Appliances.HardwareTypePartNumber
 
     import Edgehog.AppliancesFixtures
 
-    @invalid_attrs %{handle: nil, name: nil}
+    @invalid_attrs %{handle: nil, name: nil, part_numbers: []}
 
     test "list_hardware_types/0 returns all hardware_types" do
       hardware_type = hardware_type_fixture()
@@ -39,11 +40,12 @@ defmodule Edgehog.AppliancesTest do
     end
 
     test "create_hardware_type/1 with valid data creates a hardware_type" do
-      valid_attrs = %{handle: "some handle", name: "some name"}
+      valid_attrs = %{handle: "some handle", name: "some name", part_numbers: ["ABC123"]}
 
       assert {:ok, %HardwareType{} = hardware_type} = Appliances.create_hardware_type(valid_attrs)
       assert hardware_type.handle == "some handle"
       assert hardware_type.name == "some name"
+      assert [%HardwareTypePartNumber{part_number: "ABC123"}] = hardware_type.part_numbers
     end
 
     test "create_hardware_type/1 with invalid data returns error changeset" do
@@ -52,13 +54,19 @@ defmodule Edgehog.AppliancesTest do
 
     test "update_hardware_type/2 with valid data updates the hardware_type" do
       hardware_type = hardware_type_fixture()
-      update_attrs = %{handle: "some updated handle", name: "some updated name"}
+
+      update_attrs = %{
+        handle: "some updated handle",
+        name: "some updated name",
+        part_numbers: ["DEF456"]
+      }
 
       assert {:ok, %HardwareType{} = hardware_type} =
                Appliances.update_hardware_type(hardware_type, update_attrs)
 
       assert hardware_type.handle == "some updated handle"
       assert hardware_type.name == "some updated name"
+      assert [%HardwareTypePartNumber{part_number: "DEF456"}] = hardware_type.part_numbers
     end
 
     test "update_hardware_type/2 with invalid data returns error changeset" do

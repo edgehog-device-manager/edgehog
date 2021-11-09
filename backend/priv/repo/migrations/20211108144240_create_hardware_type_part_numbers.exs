@@ -3,9 +3,11 @@ defmodule Edgehog.Repo.Migrations.CreateHardwareTypePartNumbers do
 
   def change do
     create table(:hardware_type_part_numbers) do
-      add :part_number, :string
-      add :hardware_type_id, references(:hardware_types, on_delete: :nothing)
-      add :tenant_id, references(:tenants, on_delete: :nothing)
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :part_number, :string, null: false
+      add :hardware_type_id, references(:hardware_types, on_delete: :delete_all)
 
       timestamps()
     end
