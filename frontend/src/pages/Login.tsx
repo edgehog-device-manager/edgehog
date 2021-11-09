@@ -16,19 +16,21 @@
   limitations under the License.
 */
 
-import { ComponentProps } from "react";
-import RNButton from "react-bootstrap/Button";
+import { FormattedMessage } from "react-intl";
 
-// Define the 'as' prop with correct types
-// See issue: https://github.com/react-bootstrap/react-bootstrap/issues/6103
-type RNButtonProps = ComponentProps<typeof RNButton>;
-type Props = Omit<RNButtonProps, "as"> & {
-  as?: "button" | "a" | React.ElementType;
+import Page from "components/Page";
+
+const LoginPage = () => {
+  return (
+    <Page>
+      <Page.Header
+        title={
+          <FormattedMessage id="pages.Login.title" defaultMessage="Login" />
+        }
+      />
+      <Page.Main></Page.Main>
+    </Page>
+  );
 };
 
-const Button = (props: Props) => (
-  // @ts-expect-error wrong types
-  <RNButton {...props} />
-);
-
-export default Button;
+export default LoginPage;

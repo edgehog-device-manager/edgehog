@@ -18,26 +18,46 @@
 
 import { Navigate, useRoutes } from "react-router-dom";
 
+import Sidebar from "components/Sidebar";
+import Topbar from "components/Topbar";
 import { Route } from "Navigation";
 import Device from "pages/Device";
 import Devices from "pages/Devices";
-
-const Sidebar = () => null; // TODO: Implement
-const Topbar = () => null; // TODO: Implement
+import ApplianceModel from "pages/ApplianceModel";
+import ApplianceModelCreate from "pages/ApplianceModelCreate";
+import ApplianceModels from "pages/ApplianceModels";
+import HardwareType from "pages/HardwareType";
+import HardwareTypeCreate from "pages/HardwareTypeCreate";
+import HardwareTypes from "pages/HardwareTypes";
+import Login from "pages/Login";
+import Logout from "pages/Logout";
 
 type RouterRule = {
   path: string;
   element: JSX.Element;
 };
 
-const routes: RouterRule[] = [
+const publicRoutes: RouterRule[] = [
+  { path: Route.login, element: <Login /> },
+  { path: "*", element: <Navigate to={Route.login} /> },
+];
+
+const authenticatedRoutes: RouterRule[] = [
   { path: Route.devices, element: <Devices /> },
   { path: Route.devicesEdit, element: <Device /> },
+  { path: Route.applianceModels, element: <ApplianceModels /> },
+  { path: Route.applianceModelsEdit, element: <ApplianceModel /> },
+  { path: Route.applianceModelsNew, element: <ApplianceModelCreate /> },
+  { path: Route.hardwareTypes, element: <HardwareTypes /> },
+  { path: Route.hardwareTypesEdit, element: <HardwareType /> },
+  { path: Route.hardwareTypesNew, element: <HardwareTypeCreate /> },
+  { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} /> },
 ];
 
 function App() {
   const isAuthenticated = true; // TODO: Implement authentication
+  const routes = isAuthenticated ? authenticatedRoutes : publicRoutes;
   const RouterElement = useRoutes(routes);
 
   return (

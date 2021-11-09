@@ -33,13 +33,15 @@ const Page = ({ children }: PageProps) => {
 };
 
 type PageHeaderProps = {
+  children?: React.ReactNode;
   title?: React.ReactNode;
 };
 
-const PageHeader = ({ title }: PageHeaderProps) => {
+const PageHeader = ({ children, title }: PageHeaderProps) => {
   return (
     <header className="d-flex justify-content-between align-items-center">
       {title && <h2 data-testid="page-title">{title}</h2>}
+      {children}
     </header>
   );
 };

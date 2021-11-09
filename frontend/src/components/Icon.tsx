@@ -18,17 +18,29 @@
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircle,
-  faSearch,
+  faAngleDown,
+  faAngleUp,
   faArrowDown,
   faArrowUp,
+  faCircle,
+  faCompactDisc,
+  faSearch,
+  faSwatchbook,
+  faTabletAlt,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
 const icons = {
-  circle: faCircle,
-  search: faSearch,
   arrowDown: faArrowDown,
   arrowUp: faArrowUp,
+  caretDown: faAngleDown,
+  caretUp: faAngleUp,
+  circle: faCircle,
+  devices: faTabletAlt,
+  models: faSwatchbook,
+  os: faCompactDisc,
+  profile: faUser,
+  search: faSearch,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;
