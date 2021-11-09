@@ -8,6 +8,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
+    "@hookform/resolvers": "^2.8.3",
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
@@ -33,6 +34,7 @@
     "react-bootstrap": "^2.0.1",
     "react-dom": "^17.0.2",
     "react-error-boundary": "^3.1.4",
+    "react-hook-form": "^7.19.1",
     "react-intl": "^5.21.0",
     "react-relay": "^12.0.0",
     "react-router-dom": "^6.0.0-beta.8",
@@ -42,7 +44,8 @@
     "relay-compiler-language-typescript": "^14.3.0",
     "relay-runtime": "^12.0.0",
     "relay-test-utils": "^12.0.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.4.4",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "init": "npm run relay:compile && npm run i18n:compile",
