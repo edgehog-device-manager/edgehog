@@ -9,7 +9,10 @@ export type Devices_getDevices_QueryResponse = {
     readonly devices: ReadonlyArray<{
         readonly id: string;
         readonly deviceId: string;
+        readonly lastConnection: string | null;
+        readonly lastDisconnection: string | null;
         readonly name: string;
+        readonly online: boolean;
     }>;
 };
 export type Devices_getDevices_Query = {
@@ -24,7 +27,10 @@ query Devices_getDevices_Query {
   devices {
     id
     deviceId
+    lastConnection
+    lastDisconnection
     name
+    online
   }
 }
 */
@@ -57,7 +63,28 @@ var v0 = [
         "alias": null,
         "args": null,
         "kind": "ScalarField",
+        "name": "lastConnection",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "lastDisconnection",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
         "name": "name",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "online",
         "storageKey": null
       }
     ],
@@ -82,14 +109,14 @@ return {
     "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "177a433a3dad04bb67c1650985a8eeb9",
+    "cacheID": "4af51fd4b7571ef99553422e4a8555f2",
     "id": null,
     "metadata": {},
     "name": "Devices_getDevices_Query",
     "operationKind": "query",
-    "text": "query Devices_getDevices_Query {\n  devices {\n    id\n    deviceId\n    name\n  }\n}\n"
+    "text": "query Devices_getDevices_Query {\n  devices {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '57e2bf5ffc288d9b21f85a5e0128146c';
+(node as any).hash = '390c4a179e214f3640d4f3285db26746';
 export default node;

@@ -26,7 +26,7 @@ defmodule Edgehog.Astarte do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
-  alias Edgehog.Astarte.Device.HardwareInfo
+  alias Edgehog.Astarte.Device.{DeviceStatus, HardwareInfo}
 
   @doc """
   Returns the list of clusters.
@@ -364,15 +364,54 @@ defmodule Edgehog.Astarte do
     end
   end
 
-  def ensure_device_exists(%Realm{} = realm, device_id) do
-    with {:error, :device_not_found} <- fetch_realm_device(realm, device_id) do
-      create_device(realm, %{device_id: device_id, name: device_id})
+  def ensure_device_exists(%Realm{} = realm, device_id, opts \\ []) do
+    device_attrs = %{device_id: device_id, name: device_id}
+
+    with {:error, :device_not_found} <- fetch_realm_device(realm, device_id),
+         {:ok, device_attrs} <-
+           maybe_populate_device_status(
+             realm,
+             device_attrs,
+             Keyword.get(opts, :init_from_astarte, true)
+           ) do
+      create_device(realm, device_attrs)
     end
+  end
+
+  defp maybe_populate_device_status(%Realm{} = _realm, device_attrs, false = _populate) do
+    {:ok, device_attrs}
+  end
+
+  defp maybe_populate_device_status(%Realm{} = realm, device_attrs, true = _populate) do
+    with {:ok, device_status} <- get_device_status(realm, device_attrs.device_id) do
+      device_attrs =
+        device_status
+        |> Map.from_struct()
+        |> Enum.into(device_attrs)
+
+      {:ok, device_attrs}
+    end
+  end
+
+  defp update_device_with_event(%Device{} = device, %{"type" => "device_connected"}, timestamp) do
+    change_device(device, %{online: true, last_connection: timestamp})
+    |> Repo.update()
+  end
+
+  defp update_device_with_event(%Device{} = device, %{"type" => "device_disconnected"}, timestamp) do
+    change_device(device, %{online: false, last_disconnection: timestamp})
+    |> Repo.update()
   end
 
   defp update_device_with_event(%Device{} = device, _unhandled_event, _timestamp) do
     # Just return the same device
     {:ok, device}
+  end
+
+  defp get_device_status(%Realm{} = realm, device_id) do
+    with {:ok, client} <- appengine_client_from_realm(realm) do
+      DeviceStatus.get(client, device_id)
+    end
   end
 
   def get_hardware_info(%Device{} = device) do
@@ -383,6 +422,12 @@ defmodule Edgehog.Astarte do
 
   defp appengine_client_from_device(%Device{} = device) do
     %Device{realm: realm} = Repo.preload(device, [realm: [:cluster]], skip_tenant_id: true)
+
+    appengine_client_from_realm(realm)
+  end
+
+  defp appengine_client_from_realm(%Realm{} = realm) do
+    realm = Repo.preload(realm, [:cluster], skip_tenant_id: true)
 
     AppEngine.new(realm.cluster.base_api_url, realm.name, realm.private_key)
   end

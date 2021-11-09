@@ -21,6 +21,7 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
   import_types EdgehogWeb.Schema.AppliancesTypes
+  import_types Absinthe.Type.Custom
 
   alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers

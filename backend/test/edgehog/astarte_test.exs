@@ -200,7 +200,7 @@ defmodule Edgehog.AstarteTest do
 
     test "ensure_device_exists/1 creates a device if not existent", %{realm: realm} do
       device_id = "does_not_exist"
-      {:ok, device} = Astarte.ensure_device_exists(realm, device_id)
+      {:ok, device} = Astarte.ensure_device_exists(realm, device_id, init_from_astarte: false)
       assert %Device{device_id: ^device_id} = device
     end
 
@@ -218,6 +218,42 @@ defmodule Edgehog.AstarteTest do
       assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp)
 
       assert ^device = Astarte.get_device!(device.id)
+    end
+
+    test "process_device_event/4 updates online and last_connection on device_connected event", %{
+      realm: realm
+    } do
+      device = device_fixture(realm, %{online: false, last_connection: nil})
+      assert device.online == false
+      assert device.last_connection == nil
+
+      device_id = device.device_id
+      event = %{"type" => "device_connected"}
+      timestamp = DateTime.utc_now()
+      timestamp_string = DateTime.to_iso8601(timestamp)
+      assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp_string)
+
+      assert device = Astarte.get_device!(device.id)
+      assert device.online == true
+      assert device.last_connection == timestamp |> DateTime.truncate(:second)
+    end
+
+    test "process_device_event/4 updates online and last_disconnection on device_disconnected event",
+         %{realm: realm} do
+      device = device_fixture(realm, %{online: true, last_disconnection: nil})
+
+      assert device.online == true
+      assert device.last_disconnection == nil
+
+      device_id = device.device_id
+      event = %{"type" => "device_disconnected"}
+      timestamp = DateTime.utc_now()
+      timestamp_string = DateTime.to_iso8601(timestamp)
+      assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp_string)
+
+      assert device = Astarte.get_device!(device.id)
+      assert device.online == false
+      assert device.last_disconnection == timestamp |> DateTime.truncate(:second)
     end
   end
 end

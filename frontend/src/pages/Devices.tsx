@@ -37,7 +37,10 @@ const GET_DEVICES_QUERY = graphql`
     devices {
       id
       deviceId
+      lastConnection
+      lastDisconnection
       name
+      online
     }
   }
 `;
@@ -51,7 +54,7 @@ const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
 
   // TODO: handle readonly type without mapping to mutable type
   const devices = useMemo(
-    () => devicesData.devices.map((device) => ({ ...device, online: true })),
+    () => devicesData.devices.map((device) => ({ ...device })),
     [devicesData]
   );
 

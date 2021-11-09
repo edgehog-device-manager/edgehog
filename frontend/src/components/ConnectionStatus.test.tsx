@@ -32,6 +32,6 @@ it("renders correctly", () => {
     connectedStatus.container.querySelector(".text-success")
   ).toBeInTheDocument();
   expect(
-    disconnectedStatus.container.querySelector(".text-gray")
+    disconnectedStatus.container.querySelector(".text-secondary")
   ).toBeInTheDocument();
 });

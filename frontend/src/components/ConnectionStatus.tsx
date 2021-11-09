@@ -34,7 +34,7 @@ const ConnectionStatus = ({ connected, icon = true }: Props) => {
     defaultMessage: "Connected",
   });
   if (!connected) {
-    color = "text-gray";
+    color = "text-secondary";
     label = intl.formatMessage({
       id: "components.ConnectionStatus.statusDisconnected",
       defaultMessage: "Disconnected",

@@ -19,14 +19,17 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 
+import LastSeen from "components/LastSeen";
 import Table from "components/Table";
-import type { Column } from "components/Table";
+import type { Column, Row } from "components/Table";
 import ConnectionStatus from "components/ConnectionStatus";
 import { Link, Route } from "Navigation";
 
 type DeviceProps = {
   deviceId: string;
   id: string;
+  lastConnection: string | null;
+  lastDisconnection: string | null;
   name: string;
   online: boolean;
 };
@@ -73,6 +76,30 @@ const columns: Column<DeviceProps>[] = [
       />
     ),
     sortType: "basic",
+  },
+  {
+    id: "lastSeen",
+    accessor: (device) => {
+      if (device.online) {
+        return "now";
+      } else {
+        return device.lastDisconnection || "never";
+      }
+    },
+    Header: (
+      <FormattedMessage
+        id="components.DevicesTable.lastSeenTitle"
+        defaultMessage="Last Seen"
+        description="Title for the Last Seen column of the devices table"
+      />
+    ),
+    Cell: ({ row }: { row: Row<DeviceProps> }) => (
+      <LastSeen
+        lastConnection={row.original.lastConnection}
+        lastDisconnection={row.original.lastDisconnection}
+        online={row.original.online}
+      />
+    ),
   },
 ];
 

@@ -26,6 +26,9 @@ defmodule Edgehog.Astarte.Device do
     field :device_id, :string
     field :name, :string
     field :tenant_id, :id
+    field :last_connection, :utc_datetime
+    field :last_disconnection, :utc_datetime
+    field :online, :boolean, default: false
     belongs_to :realm, Realm
 
     timestamps()
@@ -34,7 +37,13 @@ defmodule Edgehog.Astarte.Device do
   @doc false
   def changeset(device, attrs) do
     device
-    |> cast(attrs, [:name, :device_id])
+    |> cast(attrs, [
+      :name,
+      :device_id,
+      :online,
+      :last_connection,
+      :last_disconnection
+    ])
     |> validate_required([:name, :device_id])
     |> unique_constraint([:device_id, :realm_id, :tenant_id])
   end

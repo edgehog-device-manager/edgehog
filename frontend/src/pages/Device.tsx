@@ -36,6 +36,7 @@ import ConnectionStatus from "components/ConnectionStatus";
 import Col from "components/Col";
 import Figure from "components/Figure";
 import Form from "components/Form";
+import LastSeen from "components/LastSeen";
 import Page from "components/Page";
 import Result from "components/Result";
 import Row from "components/Row";
@@ -59,7 +60,10 @@ const GET_DEVICE_QUERY = graphql`
     device(id: $id) {
       id
       deviceId
+      lastConnection
+      lastDisconnection
       name
+      online
       ...Device_hardwareInfo
     }
   }
@@ -198,11 +202,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
 
   // TODO: handle readonly type without mapping to mutable type
   const device = useMemo(
-    () =>
-      deviceData.device && {
-        ...deviceData.device,
-        online: true,
-      },
+    () => deviceData.device && { ...deviceData.device },
     [deviceData.device]
   );
 
@@ -270,6 +270,23 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                 >
                   <FormValue>
                     <ConnectionStatus connected={device.online} />
+                  </FormValue>
+                </FormRow>
+                <FormRow
+                  id="form-device-last-seen"
+                  label={
+                    <FormattedMessage
+                      id="Device.lastSeen"
+                      defaultMessage="Last seen"
+                    />
+                  }
+                >
+                  <FormValue>
+                    <LastSeen
+                      lastConnection={device.lastConnection}
+                      lastDisconnection={device.lastDisconnection}
+                      online={device.online}
+                    />
                   </FormValue>
                 </FormRow>
               </Stack>
