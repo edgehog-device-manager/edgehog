@@ -34,9 +34,9 @@ defmodule Edgehog.AppliancesTest do
       assert Appliances.list_hardware_types() == [hardware_type]
     end
 
-    test "get_hardware_type!/1 returns the hardware_type with given id" do
+    test "fetch_hardware_type/1 returns the hardware_type with given id" do
       hardware_type = hardware_type_fixture()
-      assert Appliances.get_hardware_type!(hardware_type.id) == hardware_type
+      assert Appliances.fetch_hardware_type(hardware_type.id) == {:ok, hardware_type}
     end
 
     test "create_hardware_type/1 with valid data creates a hardware_type" do
@@ -75,13 +75,13 @@ defmodule Edgehog.AppliancesTest do
       assert {:error, %Ecto.Changeset{}} =
                Appliances.update_hardware_type(hardware_type, @invalid_attrs)
 
-      assert hardware_type == Appliances.get_hardware_type!(hardware_type.id)
+      assert {:ok, hardware_type} == Appliances.fetch_hardware_type(hardware_type.id)
     end
 
     test "delete_hardware_type/1 deletes the hardware_type" do
       hardware_type = hardware_type_fixture()
       assert {:ok, %HardwareType{}} = Appliances.delete_hardware_type(hardware_type)
-      assert_raise Ecto.NoResultsError, fn -> Appliances.get_hardware_type!(hardware_type.id) end
+      assert {:error, :not_found} == Appliances.fetch_hardware_type(hardware_type.id)
     end
 
     test "change_hardware_type/1 returns a hardware_type changeset" do

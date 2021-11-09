@@ -45,20 +45,25 @@ defmodule Edgehog.Appliances do
   @doc """
   Gets a single hardware_type.
 
-  Raises `Ecto.NoResultsError` if the Hardware type does not exist.
+  Returns `{:error, :not_found}` if the Hardware type does not exist.
 
   ## Examples
 
-      iex> get_hardware_type!(123)
-      %HardwareType{}
+      iex> fetch_hardware_type(123)
+      {:ok, %HardwareType{}}
 
-      iex> get_hardware_type!(456)
-      ** (Ecto.NoResultsError)
+      iex> fetch_hardware_type(456)
+      {:error, :not_found}
 
   """
-  def get_hardware_type!(id) do
-    Repo.get!(HardwareType, id)
-    |> Repo.preload(:part_numbers)
+  def fetch_hardware_type(id) do
+    case Repo.get(HardwareType, id) do
+      %HardwareType{} = hardware_type ->
+        {:ok, Repo.preload(hardware_type, :part_numbers)}
+
+      nil ->
+        {:error, :not_found}
+    end
   end
 
   @doc """
