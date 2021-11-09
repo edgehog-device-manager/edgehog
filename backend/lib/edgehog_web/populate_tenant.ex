@@ -25,7 +25,7 @@ defmodule EdgehogWeb.PopulateTenant do
 
   def call(conn, _opts) do
     # TODO: extract tenant from authentication context
-    tenant = Tenants.get_tenant!(1)
+    [tenant | _] = Tenants.list_tenants()
 
     _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 
