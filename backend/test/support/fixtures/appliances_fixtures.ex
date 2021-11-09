@@ -16,19 +16,25 @@
 # limitations under the License.
 #
 
-defmodule EdgehogWeb.PopulateTenant do
-  @behaviour Plug
+defmodule Edgehog.AppliancesFixtures do
+  @moduledoc """
+  This module defines test helpers for creating
+  entities via the `Edgehog.Appliances` context.
+  """
 
-  alias Edgehog.Tenants
+  @doc """
+  Generate a hardware_type.
+  """
+  def hardware_type_fixture(attrs \\ %{}) do
+    {:ok, hardware_type} =
+      attrs
+      |> Enum.into(%{
+        handle: "some handle",
+        name: "some name",
+        part_numbers: ["ABC123"]
+      })
+      |> Edgehog.Appliances.create_hardware_type()
 
-  def init(opts), do: opts
-
-  def call(conn, _opts) do
-    # TODO: extract tenant from authentication context
-    [tenant | _] = Tenants.list_tenants()
-
-    _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-
-    Plug.Conn.assign(conn, :current_tenant, tenant)
+    hardware_type
   end
 end

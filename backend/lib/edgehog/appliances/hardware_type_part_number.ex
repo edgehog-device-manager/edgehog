@@ -16,19 +16,24 @@
 # limitations under the License.
 #
 
-defmodule EdgehogWeb.PopulateTenant do
-  @behaviour Plug
+defmodule Edgehog.Appliances.HardwareTypePartNumber do
+  use Ecto.Schema
+  import Ecto.Changeset
 
-  alias Edgehog.Tenants
+  alias Edgehog.Appliances.HardwareType
 
-  def init(opts), do: opts
+  schema "hardware_type_part_numbers" do
+    field :part_number, :string
+    field :tenant_id, :id
+    belongs_to :hardware_type, HardwareType
 
-  def call(conn, _opts) do
-    # TODO: extract tenant from authentication context
-    [tenant | _] = Tenants.list_tenants()
+    timestamps()
+  end
 
-    _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-
-    Plug.Conn.assign(conn, :current_tenant, tenant)
+  @doc false
+  def changeset(hardware_type_part_number, attrs) do
+    hardware_type_part_number
+    |> cast(attrs, [:part_number])
+    |> validate_required([:part_number])
   end
 end

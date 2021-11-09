@@ -52,6 +52,18 @@ defmodule EdgehogWeb.ConnCase do
   setup tags do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+
+    conn = Phoenix.ConnTest.build_conn()
+
+    if tags[:no_tenant_fixtures] do
+      {:ok, conn: conn}
+    else
+      # Create a tenant fixture and populate the tenant id, so that fixtures that run
+      # before the web part use the same tenant
+      tenant = Edgehog.TenantsFixtures.tenant_fixture()
+      _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+
+      {:ok, conn: conn, tenant: tenant}
+    end
   end
 end
