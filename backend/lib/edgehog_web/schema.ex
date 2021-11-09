@@ -20,6 +20,7 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
+  import_types EdgehogWeb.Schema.AppliancesTypes
 
   alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
@@ -38,6 +39,9 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.Astarte.Device{}, _ ->
         :device
 
+      %Edgehog.Appliances.HardwareType{}, _ ->
+        :hardware_type
+
       _, _ ->
         nil
     end
@@ -48,9 +52,17 @@ defmodule EdgehogWeb.Schema do
       resolve fn
         %{type: :device, id: id}, _ ->
           Resolvers.Astarte.find_device(%{id: id}, %{})
+
+        %{type: :hardware_type, id: id}, _ ->
+          Resolvers.Appliances.find_hardware_type(%{id: id}, %{})
       end
     end
 
     import_fields :astarte_queries
+    import_fields :appliances_queries
+  end
+
+  mutation do
+    import_fields :appliances_mutations
   end
 end
