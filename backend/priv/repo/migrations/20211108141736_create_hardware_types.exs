@@ -13,8 +13,8 @@ defmodule Edgehog.Repo.Migrations.CreateHardwareTypes do
     end
 
     create index(:hardware_types, [:tenant_id])
-    create unique_index(:hardware_types, [:tenant_id, :id])
-    create unique_index(:hardware_types, [:tenant_id, :name])
-    create unique_index(:hardware_types, [:tenant_id, :handle])
+    create unique_index(:hardware_types, [:id, :tenant_id])
+    create unique_index(:hardware_types, [:name, :tenant_id])
+    create unique_index(:hardware_types, [:handle, :tenant_id])
   end
 end
