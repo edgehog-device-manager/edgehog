@@ -29,7 +29,7 @@ defmodule Edgehog.AppliancesFixtures do
     {:ok, hardware_type} =
       attrs
       |> Enum.into(%{
-        handle: "some handle",
+        handle: "some-handle",
         name: "some name",
         part_numbers: ["ABC123"]
       })
