@@ -38,5 +38,8 @@ defmodule Edgehog.Appliances.HardwareType do
     |> validate_required([:name, :handle])
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
+    |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
+      message: "should only contain lower case ASCII letters (from a to z), digits and -"
+    )
   end
 end

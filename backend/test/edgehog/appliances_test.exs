@@ -40,10 +40,10 @@ defmodule Edgehog.AppliancesTest do
     end
 
     test "create_hardware_type/1 with valid data creates a hardware_type" do
-      valid_attrs = %{handle: "some handle", name: "some name", part_numbers: ["ABC123"]}
+      valid_attrs = %{handle: "some-handle", name: "some name", part_numbers: ["ABC123"]}
 
       assert {:ok, %HardwareType{} = hardware_type} = Appliances.create_hardware_type(valid_attrs)
-      assert hardware_type.handle == "some handle"
+      assert hardware_type.handle == "some-handle"
       assert hardware_type.name == "some name"
       assert [%HardwareTypePartNumber{part_number: "ABC123"}] = hardware_type.part_numbers
     end
@@ -56,7 +56,7 @@ defmodule Edgehog.AppliancesTest do
       hardware_type = hardware_type_fixture()
 
       update_attrs = %{
-        handle: "some updated handle",
+        handle: "some-updated-handle",
         name: "some updated name",
         part_numbers: ["DEF456"]
       }
@@ -64,7 +64,7 @@ defmodule Edgehog.AppliancesTest do
       assert {:ok, %HardwareType{} = hardware_type} =
                Appliances.update_hardware_type(hardware_type, update_attrs)
 
-      assert hardware_type.handle == "some updated handle"
+      assert hardware_type.handle == "some-updated-handle"
       assert hardware_type.name == "some updated name"
       assert [%HardwareTypePartNumber{part_number: "DEF456"}] = hardware_type.part_numbers
     end
@@ -87,6 +87,12 @@ defmodule Edgehog.AppliancesTest do
     test "change_hardware_type/1 returns a hardware_type changeset" do
       hardware_type = hardware_type_fixture()
       assert %Ecto.Changeset{} = Appliances.change_hardware_type(hardware_type)
+    end
+
+    test "create_hardware_type/1 with invalid handle returns error changeset" do
+      attrs = %{handle: "INVALID HANDLE !", name: "some name", part_numbers: ["ABC123"]}
+
+      assert {:error, %Ecto.Changeset{}} = Appliances.create_hardware_type(attrs)
     end
   end
 end
