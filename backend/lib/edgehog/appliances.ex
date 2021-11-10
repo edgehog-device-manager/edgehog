@@ -242,8 +242,8 @@ defmodule Edgehog.Appliances do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_appliance_model(attrs \\ %{}) do
-    %ApplianceModel{}
+  def create_appliance_model(%HardwareType{id: hardware_type_id}, attrs \\ %{}) do
+    %ApplianceModel{tenant_id: Repo.get_tenant_id(), hardware_type_id: hardware_type_id}
     |> ApplianceModel.changeset(attrs)
     |> Repo.insert()
   end

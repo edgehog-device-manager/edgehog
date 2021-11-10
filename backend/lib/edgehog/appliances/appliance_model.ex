@@ -20,11 +20,13 @@ defmodule Edgehog.Appliances.ApplianceModel do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Appliances.HardwareType
+
   schema "appliance_models" do
     field :handle, :string
     field :name, :string
     field :tenant_id, :id
-    field :hardware_type_id, :id
+    belongs_to :hardware_type, HardwareType
 
     timestamps()
   end
@@ -34,5 +36,10 @@ defmodule Edgehog.Appliances.ApplianceModel do
     appliance_model
     |> cast(attrs, [:name, :handle])
     |> validate_required([:name, :handle])
+    |> validate_format(:handle, ~r/^[a-z\d-]+$/,
+      message: "should only contain lower case ASCII letters (from a to z), digits and -"
+    )
+    |> unique_constraint([:name, :tenant_id])
+    |> unique_constraint([:handle, :tenant_id])
   end
 end

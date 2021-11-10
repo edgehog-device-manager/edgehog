@@ -41,14 +41,15 @@ defmodule Edgehog.AppliancesFixtures do
   @doc """
   Generate a appliance_model.
   """
-  def appliance_model_fixture(attrs \\ %{}) do
-    {:ok, appliance_model} =
+  def appliance_model_fixture(hardware_type, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
-        handle: "some handle",
+        handle: "some-handle",
         name: "some name"
       })
-      |> Edgehog.Appliances.create_appliance_model()
+
+    {:ok, appliance_model} = Edgehog.Appliances.create_appliance_model(hardware_type, attrs)
 
     appliance_model
   end

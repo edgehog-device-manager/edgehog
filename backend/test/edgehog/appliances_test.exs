@@ -101,53 +101,108 @@ defmodule Edgehog.AppliancesTest do
 
     import Edgehog.AppliancesFixtures
 
+    setup do
+      hardware_type = hardware_type_fixture()
+
+      {:ok, hardware_type: hardware_type}
+    end
+
     @invalid_attrs %{handle: nil, name: nil}
 
-    test "list_appliance_models/0 returns all appliance_models" do
-      appliance_model = appliance_model_fixture()
+    test "list_appliance_models/0 returns all appliance_models", %{hardware_type: hardware_type} do
+      appliance_model = appliance_model_fixture(hardware_type)
       assert Appliances.list_appliance_models() == [appliance_model]
     end
 
-    test "get_appliance_model!/1 returns the appliance_model with given id" do
-      appliance_model = appliance_model_fixture()
+    test "get_appliance_model!/1 returns the appliance_model with given id", %{
+      hardware_type: hardware_type
+    } do
+      appliance_model = appliance_model_fixture(hardware_type)
       assert Appliances.get_appliance_model!(appliance_model.id) == appliance_model
     end
 
-    test "create_appliance_model/1 with valid data creates a appliance_model" do
-      valid_attrs = %{handle: "some handle", name: "some name"}
+    test "create_appliance_model/1 with valid data creates a appliance_model", %{
+      hardware_type: hardware_type
+    } do
+      valid_attrs = %{handle: "some-handle", name: "some name"}
 
-      assert {:ok, %ApplianceModel{} = appliance_model} = Appliances.create_appliance_model(valid_attrs)
-      assert appliance_model.handle == "some handle"
+      assert {:ok, %ApplianceModel{} = appliance_model} =
+               Appliances.create_appliance_model(hardware_type, valid_attrs)
+
+      assert appliance_model.handle == "some-handle"
       assert appliance_model.name == "some name"
     end
 
-    test "create_appliance_model/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Appliances.create_appliance_model(@invalid_attrs)
+    test "create_appliance_model/1 with invalid data returns error changeset", %{
+      hardware_type: hardware_type
+    } do
+      assert {:error, %Ecto.Changeset{}} =
+               Appliances.create_appliance_model(hardware_type, @invalid_attrs)
     end
 
-    test "update_appliance_model/2 with valid data updates the appliance_model" do
-      appliance_model = appliance_model_fixture()
-      update_attrs = %{handle: "some updated handle", name: "some updated name"}
+    test "create_appliance_model/1 with invalid handle returns error changeset", %{
+      hardware_type: hardware_type
+    } do
+      attrs = %{handle: "INVALID HANDLE++", name: "some name"}
 
-      assert {:ok, %ApplianceModel{} = appliance_model} = Appliances.update_appliance_model(appliance_model, update_attrs)
-      assert appliance_model.handle == "some updated handle"
+      assert {:error, %Ecto.Changeset{}} = Appliances.create_appliance_model(hardware_type, attrs)
+    end
+
+    test "create_appliance_model/1 with duplicate handle returns error changeset", %{
+      hardware_type: hardware_type
+    } do
+      appliance_model = appliance_model_fixture(hardware_type)
+      attrs = %{handle: appliance_model.handle, name: "some other name"}
+
+      assert {:error, %Ecto.Changeset{}} = Appliances.create_appliance_model(hardware_type, attrs)
+    end
+
+    test "create_appliance_model/1 with duplicate name returns error changeset", %{
+      hardware_type: hardware_type
+    } do
+      appliance_model = appliance_model_fixture(hardware_type)
+      attrs = %{handle: "some-other-handle", name: appliance_model.name}
+
+      assert {:error, %Ecto.Changeset{}} = Appliances.create_appliance_model(hardware_type, attrs)
+    end
+
+    test "update_appliance_model/2 with valid data updates the appliance_model", %{
+      hardware_type: hardware_type
+    } do
+      appliance_model = appliance_model_fixture(hardware_type)
+      update_attrs = %{handle: "some-updated-handle", name: "some updated name"}
+
+      assert {:ok, %ApplianceModel{} = appliance_model} =
+               Appliances.update_appliance_model(appliance_model, update_attrs)
+
+      assert appliance_model.handle == "some-updated-handle"
       assert appliance_model.name == "some updated name"
     end
 
-    test "update_appliance_model/2 with invalid data returns error changeset" do
-      appliance_model = appliance_model_fixture()
-      assert {:error, %Ecto.Changeset{}} = Appliances.update_appliance_model(appliance_model, @invalid_attrs)
+    test "update_appliance_model/2 with invalid data returns error changeset", %{
+      hardware_type: hardware_type
+    } do
+      appliance_model = appliance_model_fixture(hardware_type)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Appliances.update_appliance_model(appliance_model, @invalid_attrs)
+
       assert appliance_model == Appliances.get_appliance_model!(appliance_model.id)
     end
 
-    test "delete_appliance_model/1 deletes the appliance_model" do
-      appliance_model = appliance_model_fixture()
+    test "delete_appliance_model/1 deletes the appliance_model", %{hardware_type: hardware_type} do
+      appliance_model = appliance_model_fixture(hardware_type)
       assert {:ok, %ApplianceModel{}} = Appliances.delete_appliance_model(appliance_model)
-      assert_raise Ecto.NoResultsError, fn -> Appliances.get_appliance_model!(appliance_model.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Appliances.get_appliance_model!(appliance_model.id)
+      end
     end
 
-    test "change_appliance_model/1 returns a appliance_model changeset" do
-      appliance_model = appliance_model_fixture()
+    test "change_appliance_model/1 returns a appliance_model changeset", %{
+      hardware_type: hardware_type
+    } do
+      appliance_model = appliance_model_fixture(hardware_type)
       assert %Ecto.Changeset{} = Appliances.change_appliance_model(appliance_model)
     end
   end
