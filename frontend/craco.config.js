@@ -18,6 +18,9 @@
 
 module.exports = {
   babel: {
-    plugins: [["relay", { artifactDirectory: "./src/api/__generated__" }]],
+    plugins: [
+      ["relay", { artifactDirectory: "./src/api/__generated__" }],
+      ["@babel/plugin-proposal-nullish-coalescing-operator"],
+    ],
   },
 };

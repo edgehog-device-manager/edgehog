@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "license": "Apache-2.0",
   "dependencies": {
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.0",
     "@craco/craco": "^6.4.0",
     "@formatjs/cli": "^4.4.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
