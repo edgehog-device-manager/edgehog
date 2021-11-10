@@ -198,4 +198,100 @@ defmodule Edgehog.Appliances do
   def change_hardware_type(%HardwareType{} = hardware_type, attrs \\ %{}) do
     HardwareType.changeset(hardware_type, attrs)
   end
+
+  alias Edgehog.Appliances.ApplianceModel
+
+  @doc """
+  Returns the list of appliance_models.
+
+  ## Examples
+
+      iex> list_appliance_models()
+      [%ApplianceModel{}, ...]
+
+  """
+  def list_appliance_models do
+    Repo.all(ApplianceModel)
+  end
+
+  @doc """
+  Gets a single appliance_model.
+
+  Raises `Ecto.NoResultsError` if the Appliance model does not exist.
+
+  ## Examples
+
+      iex> get_appliance_model!(123)
+      %ApplianceModel{}
+
+      iex> get_appliance_model!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_appliance_model!(id), do: Repo.get!(ApplianceModel, id)
+
+  @doc """
+  Creates a appliance_model.
+
+  ## Examples
+
+      iex> create_appliance_model(%{field: value})
+      {:ok, %ApplianceModel{}}
+
+      iex> create_appliance_model(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_appliance_model(attrs \\ %{}) do
+    %ApplianceModel{}
+    |> ApplianceModel.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a appliance_model.
+
+  ## Examples
+
+      iex> update_appliance_model(appliance_model, %{field: new_value})
+      {:ok, %ApplianceModel{}}
+
+      iex> update_appliance_model(appliance_model, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_appliance_model(%ApplianceModel{} = appliance_model, attrs) do
+    appliance_model
+    |> ApplianceModel.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a appliance_model.
+
+  ## Examples
+
+      iex> delete_appliance_model(appliance_model)
+      {:ok, %ApplianceModel{}}
+
+      iex> delete_appliance_model(appliance_model)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_appliance_model(%ApplianceModel{} = appliance_model) do
+    Repo.delete(appliance_model)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking appliance_model changes.
+
+  ## Examples
+
+      iex> change_appliance_model(appliance_model)
+      %Ecto.Changeset{data: %ApplianceModel{}}
+
+  """
+  def change_appliance_model(%ApplianceModel{} = appliance_model, attrs \\ %{}) do
+    ApplianceModel.changeset(appliance_model, attrs)
+  end
 end
