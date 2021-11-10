@@ -35,5 +35,6 @@ defmodule Edgehog.Appliances.HardwareTypePartNumber do
     hardware_type_part_number
     |> cast(attrs, [:part_number])
     |> validate_required([:part_number])
+    |> unique_constraint([:part_number, :tenant_id])
   end
 end

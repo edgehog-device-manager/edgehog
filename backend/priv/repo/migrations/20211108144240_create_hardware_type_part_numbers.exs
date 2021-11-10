@@ -14,5 +14,6 @@ defmodule Edgehog.Repo.Migrations.CreateHardwareTypePartNumbers do
 
     create index(:hardware_type_part_numbers, [:hardware_type_id])
     create index(:hardware_type_part_numbers, [:tenant_id])
+    create unique_index(:hardware_type_part_numbers, [:part_number, :tenant_id])
   end
 end
