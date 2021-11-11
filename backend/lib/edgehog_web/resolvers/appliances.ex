@@ -19,6 +19,7 @@
 defmodule EdgehogWeb.Resolvers.Appliances do
   alias Edgehog.Appliances
   alias Edgehog.Appliances.HardwareType
+  alias Edgehog.Appliances.ApplianceModel
 
   def find_hardware_type(%{id: id}, _resolution) do
     Appliances.fetch_hardware_type(id)
@@ -49,6 +50,39 @@ defmodule EdgehogWeb.Resolvers.Appliances do
          {:ok, %HardwareType{} = hardware_type} <-
            Appliances.update_hardware_type(hardware_type, attrs) do
       {:ok, %{hardware_type: hardware_type}}
+    end
+  end
+
+  def find_appliance_model(%{id: id}, _resolution) do
+    Appliances.fetch_appliance_model(id)
+  end
+
+  def list_appliance_models(_parent, _args, _context) do
+    {:ok, Appliances.list_appliance_models()}
+  end
+
+  def extract_appliance_model_part_numbers(
+        %ApplianceModel{part_numbers: part_numbers},
+        _args,
+        _context
+      ) do
+    part_numbers = Enum.map(part_numbers, &Map.get(&1, :part_number))
+
+    {:ok, part_numbers}
+  end
+
+  def create_appliance_model(_parent, %{hardware_type_id: hw_type_id} = attrs, _context) do
+    with {:ok, hardware_type} <- Appliances.fetch_hardware_type(hw_type_id),
+         {:ok, appliance_model} <- Appliances.create_appliance_model(hardware_type, attrs) do
+      {:ok, %{appliance_model: appliance_model}}
+    end
+  end
+
+  def update_appliance_model(_parent, %{appliance_model_id: id} = attrs, _context) do
+    with {:ok, %ApplianceModel{} = appliance_model} <- Appliances.fetch_appliance_model(id),
+         {:ok, %ApplianceModel{} = appliance_model} <-
+           Appliances.update_appliance_model(appliance_model, attrs) do
+      {:ok, %{appliance_model: appliance_model}}
     end
   end
 end

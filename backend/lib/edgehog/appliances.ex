@@ -213,7 +213,7 @@ defmodule Edgehog.Appliances do
   """
   def list_appliance_models do
     Repo.all(ApplianceModel)
-    |> Repo.preload(:part_numbers)
+    |> Repo.preload([:part_numbers, :hardware_type])
   end
 
   @doc """
@@ -233,7 +233,7 @@ defmodule Edgehog.Appliances do
   def fetch_appliance_model(id) do
     case Repo.get(ApplianceModel, id) do
       %ApplianceModel{} = appliance ->
-        {:ok, Repo.preload(appliance, [:part_numbers])}
+        {:ok, Repo.preload(appliance, [:part_numbers, :hardware_type])}
 
       nil ->
         {:error, :not_found}
@@ -272,7 +272,7 @@ defmodule Edgehog.Appliances do
     |> Repo.transaction()
     |> case do
       {:ok, %{appliance_model: appliance_model}} ->
-        {:ok, Repo.preload(appliance_model, :part_numbers)}
+        {:ok, Repo.preload(appliance_model, [:part_numbers, :hardware_type])}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
@@ -306,7 +306,7 @@ defmodule Edgehog.Appliances do
     |> Repo.transaction()
     |> case do
       {:ok, %{appliance_model: appliance_model}} ->
-        {:ok, Repo.preload(appliance_model, :part_numbers)}
+        {:ok, Repo.preload(appliance_model, [:part_numbers, :hardware_type])}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}

@@ -43,6 +43,9 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.Appliances.HardwareType{}, _ ->
         :hardware_type
 
+      %Edgehog.Appliances.ApplianceModel{}, _ ->
+        :appliance_model
+
       _, _ ->
         nil
     end
@@ -56,6 +59,9 @@ defmodule EdgehogWeb.Schema do
 
         %{type: :hardware_type, id: id}, _ ->
           Resolvers.Appliances.find_hardware_type(%{id: id}, %{})
+
+        %{type: :appliance_model, id: id}, _ ->
+          Resolvers.Appliances.find_appliance_model(%{id: id}, %{})
       end
     end
 

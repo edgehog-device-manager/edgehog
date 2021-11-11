@@ -39,8 +39,9 @@ defmodule Edgehog.Appliances.ApplianceModel do
     appliance_model
     |> cast(attrs, [:name, :handle])
     |> validate_required([:name, :handle])
-    |> validate_format(:handle, ~r/^[a-z\d-]+$/,
-      message: "should only contain lower case ASCII letters (from a to z), digits and -"
+    |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
+      message:
+        "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
     )
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
