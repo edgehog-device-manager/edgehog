@@ -24,9 +24,11 @@ import {
   faArrowUp,
   faCircle,
   faCompactDisc,
+  faPlus,
   faSearch,
   faSwatchbook,
   faTabletAlt,
+  faTrash,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
@@ -36,9 +38,11 @@ const icons = {
   caretDown: faAngleDown,
   caretUp: faAngleUp,
   circle: faCircle,
+  delete: faTrash,
   devices: faTabletAlt,
   models: faSwatchbook,
   os: faCompactDisc,
+  plus: faPlus,
   profile: faUser,
   search: faSearch,
 } as const;

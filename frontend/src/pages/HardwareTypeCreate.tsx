@@ -16,11 +16,90 @@
   limitations under the License.
 */
 
+import { useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
+import graphql from "babel-plugin-relay/macro";
+import { useMutation } from "react-relay/hooks";
 
+import type { HardwareTypeCreate_createHardwareType_Mutation } from "api/__generated__/HardwareTypeCreate_createHardwareType_Mutation.graphql";
+import Alert from "components/Alert";
 import Page from "components/Page";
+import CreateHardwareTypeForm from "forms/CreateHardwareType";
+import type { HardwareTypeData } from "forms/CreateHardwareType";
+import { Route, useNavigate } from "Navigation";
+
+const CREATE_HARDWARE_TYPE_MUTATION = graphql`
+  mutation HardwareTypeCreate_createHardwareType_Mutation(
+    $input: CreateHardwareTypeInput!
+  ) {
+    createHardwareType(input: $input) {
+      hardwareType {
+        id
+        name
+        handle
+        partNumbers
+      }
+    }
+  }
+`;
 
 const HardwareTypeCreatePage = () => {
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const navigate = useNavigate();
+
+  const [createHardwareType, isCreatingHardwareType] =
+    useMutation<HardwareTypeCreate_createHardwareType_Mutation>(
+      CREATE_HARDWARE_TYPE_MUTATION
+    );
+
+  const handleCreateHardwareType = useCallback(
+    (hardwareType: HardwareTypeData) => {
+      createHardwareType({
+        variables: { input: { hardwareType } },
+        onCompleted(data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map((error) => error.message)
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          const hardwareTypeId = data.createHardwareType?.hardwareType.id;
+          if (hardwareTypeId) {
+            navigate({
+              route: Route.hardwareTypesEdit,
+              params: { hardwareTypeId },
+            });
+          } else {
+            navigate({ route: Route.hardwareTypes });
+          }
+        },
+        onError(error) {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.HardwareTypeCreate.creationErrorFeedback"
+              defaultMessage="Could not create the hardware type, please try again."
+            />
+          );
+        },
+        updater(store, data) {
+          const hardwareTypeId = data.createHardwareType?.hardwareType?.id;
+          if (hardwareTypeId) {
+            const hardwareType = store.get(hardwareTypeId);
+            const root = store.getRoot();
+            const hardwareTypes = root.getLinkedRecords("hardwareTypes");
+            if (hardwareType && hardwareTypes) {
+              root.setLinkedRecords(
+                [hardwareType, ...hardwareTypes],
+                "hardwareTypes"
+              );
+            }
+          }
+        },
+      });
+    },
+    [createHardwareType, navigate]
+  );
+
   return (
     <Page>
       <Page.Header
@@ -31,7 +110,20 @@ const HardwareTypeCreatePage = () => {
           />
         }
       />
-      <Page.Main></Page.Main>
+      <Page.Main>
+        <Alert
+          show={!!errorFeedback}
+          variant="danger"
+          onClose={() => setErrorFeedback(null)}
+          dismissible
+        >
+          {errorFeedback}
+        </Alert>
+        <CreateHardwareTypeForm
+          onSubmit={handleCreateHardwareType}
+          isLoading={isCreatingHardwareType}
+        />
+      </Page.Main>
     </Page>
   );
 };

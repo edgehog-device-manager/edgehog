@@ -1,1 +1,187 @@
-{}
+{
+  "Device.connectionStatus": {
+    "defaultMessage": "Connection"
+  },
+  "Device.deviceId": {
+    "defaultMessage": "Device ID"
+  },
+  "Device.hardwareInfo.cpuArchitecture": {
+    "defaultMessage": "CPU architecture"
+  },
+  "Device.hardwareInfo.cpuModel": {
+    "defaultMessage": "CPU model code"
+  },
+  "Device.hardwareInfo.cpuModelName": {
+    "defaultMessage": "CPU model name"
+  },
+  "Device.hardwareInfo.cpuVendor": {
+    "defaultMessage": "CPU vendor"
+  },
+  "Device.hardwareInfo.memoryTotalBytes": {
+    "defaultMessage": "Total memory"
+  },
+  "Device.lastSeen": {
+    "defaultMessage": "Last seen"
+  },
+  "Device.name": {
+    "defaultMessage": "Name"
+  },
+  "components.ConnectionStatus.statusConnected": {
+    "defaultMessage": "Connected"
+  },
+  "components.ConnectionStatus.statusDisconnected": {
+    "defaultMessage": "Disconnected"
+  },
+  "components.CreateHardwareTypeForm.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "components.CreateHardwareTypeForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.CreateHardwareTypeForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.CreateHardwareTypeForm.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.CreateHardwareTypeForm.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "components.DevicesTable.deviceIdTitle": {
+    "defaultMessage": "Device ID",
+    "description": "Title for the Device ID column of the devices table"
+  },
+  "components.DevicesTable.lastSeenTitle": {
+    "defaultMessage": "Last Seen",
+    "description": "Title for the Last Seen column of the devices table"
+  },
+  "components.DevicesTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the devices table"
+  },
+  "components.DevicesTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.HardwareTypesTable.handleTitle": {
+    "defaultMessage": "Handle"
+  },
+  "components.HardwareTypesTable.nameTitle": {
+    "defaultMessage": "Hardware Type Name"
+  },
+  "components.HardwareTypesTable.partNumbersTitle": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.LastSeen.never": {
+    "defaultMessage": "Never"
+  },
+  "components.LastSeen.now": {
+    "defaultMessage": "Now"
+  },
+  "components.Page.loadingError.feedback": {
+    "defaultMessage": "The page couldn't load."
+  },
+  "components.Page.loadingError.retryButton": {
+    "defaultMessage": "Try again"
+  },
+  "components.SearchBox.searchPlaceholder": {
+    "defaultMessage": "Search",
+    "description": "Placeholder for the search input of the SearchBox"
+  },
+  "components.Sidebar.devicesLabel": {
+    "defaultMessage": "Devices"
+  },
+  "components.Sidebar.hardwareTypesLabel": {
+    "defaultMessage": "Hardware Types"
+  },
+  "components.Sidebar.modelsGroupLabel": {
+    "defaultMessage": "Models"
+  },
+  "components.Sidebar.modelsLabel": {
+    "defaultMessage": "Appliance Models"
+  },
+  "components.Topbar.userMenu.logoutLabel": {
+    "defaultMessage": "Logout"
+  },
+  "components.UpdateHardwareTypeForm.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "components.UpdateHardwareTypeForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.UpdateHardwareTypeForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.UpdateHardwareTypeForm.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.UpdateHardwareTypeForm.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "pages.ApplianceModel.title": {
+    "defaultMessage": "Appliance Model"
+  },
+  "pages.ApplianceModelCreate.title": {
+    "defaultMessage": "Create Appliance Model"
+  },
+  "pages.ApplianceModels.createButton": {
+    "defaultMessage": "Create appliance model"
+  },
+  "pages.ApplianceModels.title": {
+    "defaultMessage": "Appliance Models"
+  },
+  "pages.Device.deviceNotFound.message": {
+    "defaultMessage": "Return to the device list."
+  },
+  "pages.Device.deviceNotFound.title": {
+    "defaultMessage": "Device not found."
+  },
+  "pages.Devices.title": {
+    "defaultMessage": "Devices"
+  },
+  "pages.HardwareType.hardwareTypeNotFound.message": {
+    "defaultMessage": "Return to the hardware type list."
+  },
+  "pages.HardwareType.hardwareTypeNotFound.title": {
+    "defaultMessage": "Hardware type not found."
+  },
+  "pages.HardwareTypeCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the hardware type, please try again."
+  },
+  "pages.HardwareTypeCreate.title": {
+    "defaultMessage": "Create Hardware Type"
+  },
+  "pages.HardwareTypeUpdate.creationErrorFeedback": {
+    "defaultMessage": "Could not update the hardware type, please try again."
+  },
+  "pages.HardwareTypes.createButton": {
+    "defaultMessage": "Create hardware type"
+  },
+  "pages.HardwareTypes.noHardwareTypes.message": {
+    "defaultMessage": "You haven't created any hardware type yet."
+  },
+  "pages.HardwareTypes.noHardwareTypes.title": {
+    "defaultMessage": "This space is empty"
+  },
+  "pages.HardwareTypes.title": {
+    "defaultMessage": "Hardware Types"
+  },
+  "pages.Login.title": {
+    "defaultMessage": "Login"
+  },
+  "pages.Logout.title": {
+    "defaultMessage": "Logout"
+  },
+  "validation.array.min": {
+    "defaultMessage": "Does not have enough values."
+  },
+  "validation.partNumber.format": {
+    "defaultMessage": "The part number must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
+  },
+  "validation.required": {
+    "defaultMessage": "Required."
+  },
+  "validation.unique": {
+    "defaultMessage": "Duplicate value."
+  }
+}

@@ -35,6 +35,13 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       memoryTotalBytes: 409600,
     };
   },
+  HardwareType() {
+    return {
+      handle: "esp32",
+      name: "ESP32",
+      partNumbers: ["PN_0000001"],
+    };
+  },
 };
 
 export { relayMockResolvers };

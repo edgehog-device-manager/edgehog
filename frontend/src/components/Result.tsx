@@ -36,12 +36,18 @@ const ResultWrapper = ({ children, image, title }: Props) => {
   );
 };
 
+// TODO: define default image for the EmptyList case
+const EmptyList = ({ image = undefined, ...restProps }: Props) => (
+  <ResultWrapper image={image} {...restProps} />
+);
+
 // TODO: define default image for the NotFound case
 const NotFound = ({ image = undefined, ...restProps }: Props) => (
   <ResultWrapper image={image} {...restProps} />
 );
 
 const Result = {
+  EmptyList,
   NotFound,
 };
 
