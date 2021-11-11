@@ -42,6 +42,15 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       partNumbers: ["PN_0000001"],
     };
   },
+  DeviceLocation() {
+    return {
+      latitude: 45.463,
+      longitude: 9.188,
+      accuracy: 10,
+      address: "Via Speronari, 7, 20123 Milano MI",
+      timestamp: "2021-11-11T09:43:54.437Z",
+    };
+  },
 };
 
 export { relayMockResolvers };
