@@ -16,20 +16,18 @@
 # limitations under the License.
 #
 
-Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
-  for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
-)
+defmodule Edgehog.Mocks.Geolocation.GeocodingProvider do
+  @behaviour Edgehog.Geolocation.GeocodingProvider
 
-Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
-  for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-)
+  @impl true
+  def reverse_geocode(%{latitude: _latitude, longitude: _longitude}) do
+    address = "4 Privet Drive, Little Whinging, Surrey, UK"
 
-Mox.defmock(Edgehog.Geolocation.IPGeolocationProviderMock,
-  for: Edgehog.Geolocation.IPGeolocationProvider
-)
+    {:ok, address}
+  end
 
-Mox.defmock(Edgehog.Geolocation.WiFiGeolocationProviderMock,
-  for: Edgehog.Geolocation.WiFiGeolocationProvider
-)
-
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)
+  @impl true
+  def reverse_geocode(_invalid_coordinates) do
+    {:error, :address_not_found}
+  end
+end
