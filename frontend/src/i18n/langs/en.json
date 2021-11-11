@@ -175,8 +175,8 @@
   "validation.array.min": {
     "defaultMessage": "Does not have enough values."
   },
-  "validation.partNumber.format": {
-    "defaultMessage": "The part number must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
+  "validation.handle.format": {
+    "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
   },
   "validation.required": {
     "defaultMessage": "Required."
