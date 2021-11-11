@@ -115,11 +115,11 @@ defmodule Edgehog.AppliancesTest do
       assert Appliances.list_appliance_models() == [appliance_model]
     end
 
-    test "get_appliance_model!/1 returns the appliance_model with given id", %{
+    test "fetch_appliance_model/1 returns the appliance_model with given id", %{
       hardware_type: hardware_type
     } do
       appliance_model = appliance_model_fixture(hardware_type)
-      assert Appliances.get_appliance_model!(appliance_model.id) == appliance_model
+      assert Appliances.fetch_appliance_model(appliance_model.id) == {:ok, appliance_model}
     end
 
     test "create_appliance_model/1 with valid data creates a appliance_model", %{
@@ -199,16 +199,14 @@ defmodule Edgehog.AppliancesTest do
       assert {:error, %Ecto.Changeset{}} =
                Appliances.update_appliance_model(appliance_model, @invalid_attrs)
 
-      assert appliance_model == Appliances.get_appliance_model!(appliance_model.id)
+      assert {:ok, appliance_model} == Appliances.fetch_appliance_model(appliance_model.id)
     end
 
     test "delete_appliance_model/1 deletes the appliance_model", %{hardware_type: hardware_type} do
       appliance_model = appliance_model_fixture(hardware_type)
       assert {:ok, %ApplianceModel{}} = Appliances.delete_appliance_model(appliance_model)
 
-      assert_raise Ecto.NoResultsError, fn ->
-        Appliances.get_appliance_model!(appliance_model.id)
-      end
+      assert Appliances.fetch_appliance_model(appliance_model.id) == {:error, :not_found}
     end
 
     test "change_appliance_model/1 returns a appliance_model changeset", %{

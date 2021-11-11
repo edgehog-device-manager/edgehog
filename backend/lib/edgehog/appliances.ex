@@ -223,16 +223,21 @@ defmodule Edgehog.Appliances do
 
   ## Examples
 
-      iex> get_appliance_model!(123)
-      %ApplianceModel{}
+      iex> fetch_appliance_model(123)
+      {:ok, %ApplianceModel{}}
 
-      iex> get_appliance_model!(456)
-      ** (Ecto.NoResultsError)
+      iex> fetch_appliance_model(456)
+      {:error, :not_found}
 
   """
-  def get_appliance_model!(id) do
-    Repo.get!(ApplianceModel, id)
-    |> Repo.preload(:part_numbers)
+  def fetch_appliance_model(id) do
+    case Repo.get(ApplianceModel, id) do
+      %ApplianceModel{} = appliance ->
+        {:ok, Repo.preload(appliance, [:part_numbers])}
+
+      nil ->
+        {:error, :not_found}
+    end
   end
 
   @doc """
