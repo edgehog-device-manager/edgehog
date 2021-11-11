@@ -19,6 +19,9 @@ export type ApplianceModel_updateApplianceModel_MutationResponse = {
             readonly id: string;
             readonly name: string;
             readonly handle: string;
+            readonly hardwareType: {
+                readonly name: string;
+            };
             readonly partNumbers: ReadonlyArray<string>;
         };
     } | null;
@@ -39,6 +42,10 @@ mutation ApplianceModel_updateApplianceModel_Mutation(
       id
       name
       handle
+      hardwareType {
+        name
+        id
+      }
       partNumbers
     }
   }
@@ -55,69 +62,85 @@ var v0 = [
 ],
 v1 = [
   {
-    "alias": null,
-    "args": [
-      {
-        "kind": "Variable",
-        "name": "input",
-        "variableName": "input"
-      }
-    ],
-    "concreteType": "UpdateApplianceModelPayload",
-    "kind": "LinkedField",
-    "name": "updateApplianceModel",
-    "plural": false,
-    "selections": [
-      {
-        "alias": null,
-        "args": null,
-        "concreteType": "ApplianceModel",
-        "kind": "LinkedField",
-        "name": "applianceModel",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "id",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "name",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "handle",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "partNumbers",
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
-      }
-    ],
-    "storageKey": null
+    "kind": "Variable",
+    "name": "input",
+    "variableName": "input"
   }
-];
+],
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+},
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "handle",
+  "storageKey": null
+},
+v5 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "partNumbers",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
     "name": "ApplianceModel_updateApplianceModel_Mutation",
-    "selections": (v1/*: any*/),
+    "selections": [
+      {
+        "alias": null,
+        "args": (v1/*: any*/),
+        "concreteType": "UpdateApplianceModelPayload",
+        "kind": "LinkedField",
+        "name": "updateApplianceModel",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "ApplianceModel",
+            "kind": "LinkedField",
+            "name": "applianceModel",
+            "plural": false,
+            "selections": [
+              (v2/*: any*/),
+              (v3/*: any*/),
+              (v4/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "HardwareType",
+                "kind": "LinkedField",
+                "name": "hardwareType",
+                "plural": false,
+                "selections": [
+                  (v3/*: any*/)
+                ],
+                "storageKey": null
+              },
+              (v5/*: any*/)
+            ],
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      }
+    ],
     "type": "RootMutationType",
     "abstractKey": null
   },
@@ -126,17 +149,57 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "ApplianceModel_updateApplianceModel_Mutation",
-    "selections": (v1/*: any*/)
+    "selections": [
+      {
+        "alias": null,
+        "args": (v1/*: any*/),
+        "concreteType": "UpdateApplianceModelPayload",
+        "kind": "LinkedField",
+        "name": "updateApplianceModel",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "ApplianceModel",
+            "kind": "LinkedField",
+            "name": "applianceModel",
+            "plural": false,
+            "selections": [
+              (v2/*: any*/),
+              (v3/*: any*/),
+              (v4/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "HardwareType",
+                "kind": "LinkedField",
+                "name": "hardwareType",
+                "plural": false,
+                "selections": [
+                  (v3/*: any*/),
+                  (v2/*: any*/)
+                ],
+                "storageKey": null
+              },
+              (v5/*: any*/)
+            ],
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      }
+    ]
   },
   "params": {
-    "cacheID": "6f48ebdf8a405d98e4066f31e1e89f2b",
+    "cacheID": "5a0bac3786d3f4923be151a021a6fd31",
     "id": null,
     "metadata": {},
     "name": "ApplianceModel_updateApplianceModel_Mutation",
     "operationKind": "mutation",
-    "text": "mutation ApplianceModel_updateApplianceModel_Mutation(\n  $input: UpdateApplianceModelInput!\n) {\n  updateApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      partNumbers\n    }\n  }\n}\n"
+    "text": "mutation ApplianceModel_updateApplianceModel_Mutation(\n  $input: UpdateApplianceModelInput!\n) {\n  updateApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      hardwareType {\n        name\n        id\n      }\n      partNumbers\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '267d734e3942e1153b75b3644ba9921d';
+(node as any).hash = 'a141651959d1f19e0258091ebe404ad1';
 export default node;
