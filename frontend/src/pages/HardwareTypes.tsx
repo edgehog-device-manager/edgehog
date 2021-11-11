@@ -81,7 +81,7 @@ const HardwareTypesContent = ({
         <Button as={Link} route={Route.hardwareTypesNew}>
           <FormattedMessage
             id="pages.HardwareTypes.createButton"
-            defaultMessage="Create hardware type"
+            defaultMessage="Create Hardware Type"
           />
         </Button>
       </Page.Header>

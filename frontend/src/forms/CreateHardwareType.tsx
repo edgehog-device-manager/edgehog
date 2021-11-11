@@ -210,7 +210,7 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
             >
               <FormattedMessage
                 id="components.CreateHardwareTypeForm.addPartNumberButton"
-                defaultMessage="Add part number"
+                defaultMessage="Add Part Number"
               />
             </Button>
           </Stack>

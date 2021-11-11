@@ -33,7 +33,7 @@
     "defaultMessage": "Disconnected"
   },
   "components.CreateHardwareTypeForm.addPartNumberButton": {
-    "defaultMessage": "Add part number"
+    "defaultMessage": "Add Part Number"
   },
   "components.CreateHardwareTypeForm.handleLabel": {
     "defaultMessage": "Handle"
@@ -82,7 +82,7 @@
     "defaultMessage": "The page couldn't load."
   },
   "components.Page.loadingError.retryButton": {
-    "defaultMessage": "Try again"
+    "defaultMessage": "Try Again"
   },
   "components.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search",
@@ -104,7 +104,7 @@
     "defaultMessage": "Logout"
   },
   "components.UpdateHardwareTypeForm.addPartNumberButton": {
-    "defaultMessage": "Add part number"
+    "defaultMessage": "Add Part Number"
   },
   "components.UpdateHardwareTypeForm.handleLabel": {
     "defaultMessage": "Handle"
@@ -125,7 +125,7 @@
     "defaultMessage": "Create Appliance Model"
   },
   "pages.ApplianceModels.createButton": {
-    "defaultMessage": "Create appliance model"
+    "defaultMessage": "Create Appliance Model"
   },
   "pages.ApplianceModels.title": {
     "defaultMessage": "Appliance Models"
@@ -155,7 +155,7 @@
     "defaultMessage": "Could not update the hardware type, please try again."
   },
   "pages.HardwareTypes.createButton": {
-    "defaultMessage": "Create hardware type"
+    "defaultMessage": "Create Hardware Type"
   },
   "pages.HardwareTypes.noHardwareTypes.message": {
     "defaultMessage": "You haven't created any hardware type yet."
