@@ -26,11 +26,44 @@
   "Device.name": {
     "defaultMessage": "Name"
   },
+  "components.ApplianceModelsTable.handleTitle": {
+    "defaultMessage": "Handle"
+  },
+  "components.ApplianceModelsTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.ApplianceModelsTable.nameTitle": {
+    "defaultMessage": "Appliance Model Name"
+  },
+  "components.ApplianceModelsTable.partNumbersTitle": {
+    "defaultMessage": "Part Numbers"
+  },
   "components.ConnectionStatus.statusConnected": {
     "defaultMessage": "Connected"
   },
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
+  },
+  "components.CreateApplianceModelForm.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "components.CreateApplianceModelForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.CreateApplianceModelForm.hardwareTypeLabel": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.CreateApplianceModelForm.hardwareTypeOption": {
+    "defaultMessage": "Select a Hardware Type"
+  },
+  "components.CreateApplianceModelForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.CreateApplianceModelForm.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.CreateApplianceModelForm.submitButton": {
+    "defaultMessage": "Create"
   },
   "components.CreateHardwareTypeForm.addPartNumberButton": {
     "defaultMessage": "Add Part Number"
@@ -103,6 +136,24 @@
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
   },
+  "components.UpdateApplianceModelForm.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "components.UpdateApplianceModelForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.UpdateApplianceModelForm.hardwareTypeLabel": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.UpdateApplianceModelForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.UpdateApplianceModelForm.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.UpdateApplianceModelForm.submitButton": {
+    "defaultMessage": "Update"
+  },
   "components.UpdateHardwareTypeForm.addPartNumberButton": {
     "defaultMessage": "Add Part Number"
   },
@@ -118,14 +169,38 @@
   "components.UpdateHardwareTypeForm.submitButton": {
     "defaultMessage": "Update"
   },
-  "pages.ApplianceModel.title": {
-    "defaultMessage": "Appliance Model"
+  "pages.ApplianceModel.applianceModelNotFound.message": {
+    "defaultMessage": "Return to the appliance model list."
+  },
+  "pages.ApplianceModel.applianceModelNotFound.title": {
+    "defaultMessage": "Appliance model not found."
+  },
+  "pages.ApplianceModelCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the appliance model, please try again."
+  },
+  "pages.ApplianceModelCreate.noHardwareTypes.createButton": {
+    "defaultMessage": "Create Hardware Type"
+  },
+  "pages.ApplianceModelCreate.noHardwareTypes.message": {
+    "defaultMessage": "You need at least one hardware type to create an application model"
+  },
+  "pages.ApplianceModelCreate.noHardwareTypes.title": {
+    "defaultMessage": "You haven't created any hardware type yet"
   },
   "pages.ApplianceModelCreate.title": {
     "defaultMessage": "Create Appliance Model"
   },
+  "pages.ApplianceModelUpdate.creationErrorFeedback": {
+    "defaultMessage": "Could not update the appliance model, please try again."
+  },
   "pages.ApplianceModels.createButton": {
     "defaultMessage": "Create Appliance Model"
+  },
+  "pages.ApplianceModels.noApplianceModels.message": {
+    "defaultMessage": "You haven't created any appliance model yet."
+  },
+  "pages.ApplianceModels.noApplianceModels.title": {
+    "defaultMessage": "This space is empty"
   },
   "pages.ApplianceModels.title": {
     "defaultMessage": "Appliance Models"
