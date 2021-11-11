@@ -69,7 +69,7 @@ const PageLoadingError = ({ onRetry }: PageLoadingErrorProps) => {
         <Button onClick={onRetry} className="mt-3 m-auto">
           <FormattedMessage
             id="components.Page.loadingError.retryButton"
-            defaultMessage="Try again"
+            defaultMessage="Try Again"
           />
         </Button>
       )}

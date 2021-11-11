@@ -219,7 +219,7 @@ const UpdateHardwareTypeForm = ({
             >
               <FormattedMessage
                 id="components.UpdateHardwareTypeForm.addPartNumberButton"
-                defaultMessage="Add part number"
+                defaultMessage="Add Part Number"
               />
             </Button>
           </Stack>

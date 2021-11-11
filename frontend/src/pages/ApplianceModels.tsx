@@ -36,7 +36,7 @@ const ApplianceModelsPage = () => {
         <Button as={Link} route={Route.applianceModelsNew}>
           <FormattedMessage
             id="pages.ApplianceModels.createButton"
-            defaultMessage="Create appliance model"
+            defaultMessage="Create Appliance Model"
           />
         </Button>
       </Page.Header>
