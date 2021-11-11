@@ -22,11 +22,14 @@ defmodule Edgehog.Appliances.ApplianceModel do
 
   alias Edgehog.Appliances.HardwareType
 
+  alias Edgehog.Appliances.ApplianceModelPartNumber
+
   schema "appliance_models" do
     field :handle, :string
     field :name, :string
     field :tenant_id, :id
     belongs_to :hardware_type, HardwareType
+    has_many :part_numbers, ApplianceModelPartNumber, on_replace: :delete
 
     timestamps()
   end

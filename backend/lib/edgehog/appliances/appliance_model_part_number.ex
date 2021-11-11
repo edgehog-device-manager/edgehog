@@ -20,10 +20,12 @@ defmodule Edgehog.Appliances.ApplianceModelPartNumber do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Appliances.ApplianceModel
+
   schema "appliance_model_part_numbers" do
     field :part_number, :string
-    field :appliance_model_id, :id
     field :tenant_id, :id
+    belongs_to :appliance_model, ApplianceModel
 
     timestamps()
   end

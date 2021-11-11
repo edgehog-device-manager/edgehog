@@ -98,6 +98,7 @@ defmodule Edgehog.AppliancesTest do
 
   describe "appliance_models" do
     alias Edgehog.Appliances.ApplianceModel
+    alias Edgehog.Appliances.ApplianceModelPartNumber
 
     import Edgehog.AppliancesFixtures
 
@@ -107,7 +108,7 @@ defmodule Edgehog.AppliancesTest do
       {:ok, hardware_type: hardware_type}
     end
 
-    @invalid_attrs %{handle: nil, name: nil}
+    @invalid_attrs %{handle: nil, name: nil, part_numbers: []}
 
     test "list_appliance_models/0 returns all appliance_models", %{hardware_type: hardware_type} do
       appliance_model = appliance_model_fixture(hardware_type)
@@ -124,13 +125,18 @@ defmodule Edgehog.AppliancesTest do
     test "create_appliance_model/1 with valid data creates a appliance_model", %{
       hardware_type: hardware_type
     } do
-      valid_attrs = %{handle: "some-handle", name: "some name"}
+      valid_attrs = %{
+        handle: "some-handle",
+        name: "some name",
+        part_numbers: ["1234-rev4"]
+      }
 
       assert {:ok, %ApplianceModel{} = appliance_model} =
                Appliances.create_appliance_model(hardware_type, valid_attrs)
 
       assert appliance_model.handle == "some-handle"
       assert appliance_model.name == "some name"
+      assert [%ApplianceModelPartNumber{part_number: "1234-rev4"}] = appliance_model.part_numbers
     end
 
     test "create_appliance_model/1 with invalid data returns error changeset", %{
@@ -170,13 +176,19 @@ defmodule Edgehog.AppliancesTest do
       hardware_type: hardware_type
     } do
       appliance_model = appliance_model_fixture(hardware_type)
-      update_attrs = %{handle: "some-updated-handle", name: "some updated name"}
+
+      update_attrs = %{
+        handle: "some-updated-handle",
+        name: "some updated name",
+        part_numbers: ["1234-rev5"]
+      }
 
       assert {:ok, %ApplianceModel{} = appliance_model} =
                Appliances.update_appliance_model(appliance_model, update_attrs)
 
       assert appliance_model.handle == "some-updated-handle"
       assert appliance_model.name == "some updated name"
+      assert [%ApplianceModelPartNumber{part_number: "1234-rev5"}] = appliance_model.part_numbers
     end
 
     test "update_appliance_model/2 with invalid data returns error changeset", %{
