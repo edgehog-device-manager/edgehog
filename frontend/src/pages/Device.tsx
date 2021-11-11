@@ -26,9 +26,10 @@ import {
   useQueryLoader,
   PreloadedQuery,
 } from "react-relay/hooks";
-import { FormattedMessage } from "react-intl";
+import { FormattedDate, FormattedMessage } from "react-intl";
 
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
+import type { Device_location$key } from "api/__generated__/Device_location.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import { Link, Route } from "Navigation";
 import Center from "components/Center";
@@ -37,11 +38,13 @@ import Col from "components/Col";
 import Figure from "components/Figure";
 import Form from "components/Form";
 import LastSeen from "components/LastSeen";
+import Map from "components/Map";
 import Page from "components/Page";
 import Result from "components/Result";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import Tabs, { Tab } from "components/Tabs";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
@@ -51,6 +54,18 @@ const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
       cpuModelName
       cpuVendor
       memoryTotalBytes
+    }
+  }
+`;
+
+const DEVICE_LOCATION_FRAGMENT = graphql`
+  fragment Device_location on Device {
+    location {
+      latitude
+      longitude
+      accuracy
+      address
+      timestamp
     }
   }
 `;
@@ -65,6 +80,7 @@ const GET_DEVICE_QUERY = graphql`
       name
       online
       ...Device_hardwareInfo
+      ...Device_location
     }
   }
 `;
@@ -193,6 +209,61 @@ const DeviceHardwareInfo = ({ deviceRef }: DeviceHardwareInfoProps) => {
   );
 };
 
+interface DeviceLocationTabProps {
+  deviceRef: Device_location$key;
+}
+
+const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
+  const { location } = useFragment(DEVICE_LOCATION_FRAGMENT, deviceRef);
+  if (!location) {
+    return null;
+  }
+  return (
+    <Tab
+      eventKey="device-location-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.geolocationTab"
+          defaultMessage="Geolocation"
+        />
+      }
+    >
+      <div className="mt-3">
+        <p>
+          <FormattedMessage
+            id="pages.Device.location.lastUpdateAt"
+            defaultMessage="Last known location, updated at {date}"
+            values={{
+              date: (
+                <FormattedDate
+                  value={new Date(location.timestamp)}
+                  year="numeric"
+                  month="long"
+                  day="numeric"
+                  hour="numeric"
+                  minute="numeric"
+                />
+              ),
+            }}
+          />
+        </p>
+        <Map
+          latitude={location.latitude}
+          longitude={location.longitude}
+          popup={
+            <div>
+              <p>{location.address}</p>
+              <p>
+                {location.latitude}, {location.longitude}
+              </p>
+            </div>
+          }
+        />
+      </div>
+    </Tab>
+  );
+};
+
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
 }
@@ -230,69 +301,81 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
     <Page>
       <Page.Header title={device.name} />
       <Page.Main>
-        <Row>
-          <Col md="5" lg="4" xl="3">
-            <div>
-              <Figure alt={device.name} />
-            </div>
-          </Col>
-          <Col md="7" lg="8" xl="9">
-            <Form className="ms-3">
-              <Stack gap={3}>
-                <FormRow
-                  id="form-device-name"
-                  label={
-                    <FormattedMessage id="Device.name" defaultMessage="Name" />
-                  }
-                >
-                  <Form.Control type="text" value={device.name} readOnly />
-                </FormRow>
-                <FormRow
-                  id="form-device-deviceId"
-                  label={
-                    <FormattedMessage
-                      id="Device.deviceId"
-                      defaultMessage="Device ID"
+        <Stack gap={3}>
+          <Row>
+            <Col md="5" lg="4" xl="3">
+              <div>
+                <Figure alt={device.name} />
+              </div>
+            </Col>
+            <Col md="7" lg="8" xl="9">
+              <Form className="ms-3">
+                <Stack gap={3}>
+                  <FormRow
+                    id="form-device-name"
+                    label={
+                      <FormattedMessage
+                        id="Device.name"
+                        defaultMessage="Name"
+                      />
+                    }
+                  >
+                    <Form.Control type="text" value={device.name} readOnly />
+                  </FormRow>
+                  <FormRow
+                    id="form-device-deviceId"
+                    label={
+                      <FormattedMessage
+                        id="Device.deviceId"
+                        defaultMessage="Device ID"
+                      />
+                    }
+                  >
+                    <Form.Control
+                      type="text"
+                      value={device.deviceId}
+                      readOnly
                     />
-                  }
-                >
-                  <Form.Control type="text" value={device.deviceId} readOnly />
-                </FormRow>
-                <DeviceHardwareInfo deviceRef={device} />
-                <FormRow
-                  id="form-device-connection-status"
-                  label={
-                    <FormattedMessage
-                      id="Device.connectionStatus"
-                      defaultMessage="Connection"
-                    />
-                  }
-                >
-                  <FormValue>
-                    <ConnectionStatus connected={device.online} />
-                  </FormValue>
-                </FormRow>
-                <FormRow
-                  id="form-device-last-seen"
-                  label={
-                    <FormattedMessage
-                      id="Device.lastSeen"
-                      defaultMessage="Last seen"
-                    />
-                  }
-                >
-                  <FormValue>
-                    <LastSeen
-                      lastConnection={device.lastConnection}
-                      lastDisconnection={device.lastDisconnection}
-                      online={device.online}
-                    />
-                  </FormValue>
-                </FormRow>
-              </Stack>
-            </Form>
-          </Col>
-        </Row>
+                  </FormRow>
+                  <DeviceHardwareInfo deviceRef={device} />
+                  <FormRow
+                    id="form-device-connection-status"
+                    label={
+                      <FormattedMessage
+                        id="Device.connectionStatus"
+                        defaultMessage="Connection"
+                      />
+                    }
+                  >
+                    <FormValue>
+                      <ConnectionStatus connected={device.online} />
+                    </FormValue>
+                  </FormRow>
+                  <FormRow
+                    id="form-device-last-seen"
+                    label={
+                      <FormattedMessage
+                        id="Device.lastSeen"
+                        defaultMessage="Last seen"
+                      />
+                    }
+                  >
+                    <FormValue>
+                      <LastSeen
+                        lastConnection={device.lastConnection}
+                        lastDisconnection={device.lastDisconnection}
+                        online={device.online}
+                      />
+                    </FormValue>
+                  </FormRow>
+                </Stack>
+              </Form>
+            </Col>
+          </Row>
+          <Tabs>
+            <DeviceLocationTab deviceRef={device} />
+          </Tabs>
+        </Stack>
       </Page.Main>
     </Page>
   );

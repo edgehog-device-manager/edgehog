@@ -16,7 +16,7 @@ export type Device_getDevice_QueryResponse = {
         readonly lastDisconnection: string | null;
         readonly name: string;
         readonly online: boolean;
-        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo">;
+        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_location">;
     } | null;
 };
 export type Device_getDevice_Query = {
@@ -38,6 +38,7 @@ query Device_getDevice_Query(
     name
     online
     ...Device_hardwareInfo
+    ...Device_location
   }
 }
 
@@ -48,6 +49,16 @@ fragment Device_hardwareInfo on Device {
     cpuModelName
     cpuVendor
     memoryTotalBytes
+  }
+}
+
+fragment Device_location on Device {
+  location {
+    latitude
+    longitude
+    accuracy
+    address
+    timestamp
   }
 }
 */
@@ -134,6 +145,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "Device_hardwareInfo"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "Device_location"
           }
         ],
         "storageKey": null
@@ -207,6 +223,52 @@ return {
               }
             ],
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "DeviceLocation",
+            "kind": "LinkedField",
+            "name": "location",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "latitude",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "longitude",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "accuracy",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "address",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "timestamp",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
           }
         ],
         "storageKey": null
@@ -214,14 +276,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "785dbc84cc8b693f346c0130823c35ad",
+    "cacheID": "5b0c99ccb978fa5c8bb55b3f5d81f3fc",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    ...Device_hardwareInfo\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    ...Device_hardwareInfo\n    ...Device_location\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '2cf91aa68b82d3e725c105e349c7c802';
+(node as any).hash = '8c7f2b5c793646afd41cf161458dcedf';
 export default node;
