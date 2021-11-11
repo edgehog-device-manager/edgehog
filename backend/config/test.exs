@@ -39,3 +39,6 @@ config :edgehog,
   ip_geolocation_provider: Edgehog.Geolocation.IPGeolocationProviderMock,
   wifi_geolocation_provider: Edgehog.Geolocation.WiFiGeolocationProviderMock,
   geocoding_provider: Edgehog.Geolocation.GeocodingProviderMock
+
+config :edgehog, Edgehog.Geolocation.Providers.FreeGeoIp, api_key: "test_api_key"
+

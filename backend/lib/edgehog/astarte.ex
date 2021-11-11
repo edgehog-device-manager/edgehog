@@ -452,7 +452,7 @@ defmodule Edgehog.Astarte do
     {:ok, device}
   end
 
-  defp get_device_status(%Realm{} = realm, device_id) do
+  def get_device_status(%Realm{} = realm, device_id) do
     with {:ok, client} <- appengine_client_from_realm(realm) do
       @device_status_module.get(client, device_id)
     end

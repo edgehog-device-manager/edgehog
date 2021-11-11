@@ -20,7 +20,8 @@ defmodule Edgehog.Astarte.Device.DeviceStatus do
   defstruct [
     :last_connection,
     :last_disconnection,
-    :online
+    :online,
+    :last_seen_ip
   ]
 
   @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
@@ -35,7 +36,8 @@ defmodule Edgehog.Astarte.Device.DeviceStatus do
       device_status = %DeviceStatus{
         last_connection: parse_datetime(data["last_connection"]),
         last_disconnection: parse_datetime(data["last_disconnection"]),
-        online: data["connected"] || false
+        online: data["connected"] || false,
+        last_seen_ip: data["last_seen_ip"]
       }
 
       {:ok, device_status}
