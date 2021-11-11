@@ -45,6 +45,20 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  config :edgehog,
+    ip_geolocation_provider: Edgehog.Geolocation.Providers.FreeGeoIp,
+    wifi_geolocation_provider: Edgehog.Geolocation.Providers.GoogleGeolocation,
+    geocoding_provider: Edgehog.Geolocation.Providers.GoogleGeocoding
+
+  config :edgehog, Edgehog.Geolocation.Providers.FreeGeoIp,
+    api_key: System.fetch_env!("FREEGEOIP_API_KEY")
+
+  config :edgehog, Edgehog.Geolocation.Providers.GoogleGeolocation,
+    api_key: System.fetch_env!("GOOGLE_GEOLOCATION_API_KEY")
+
+  config :edgehog, Edgehog.Geolocation.Providers.GoogleGeocoding,
+    api_key: System.fetch_env!("GOOGLE_GEOCODING_API_KEY")
+
   # ## Using releases
   #
   # If you are doing OTP releases, you need to instruct Phoenix
