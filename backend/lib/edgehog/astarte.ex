@@ -26,7 +26,7 @@ defmodule Edgehog.Astarte do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
-  alias Edgehog.Astarte.Device.{DeviceStatus, HardwareInfo}
+  alias Edgehog.Astarte.Device.{DeviceStatus, HardwareInfo, WiFiScanResult}
 
   @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
 
