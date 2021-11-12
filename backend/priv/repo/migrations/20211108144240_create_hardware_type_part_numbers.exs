@@ -7,7 +7,9 @@ defmodule Edgehog.Repo.Migrations.CreateHardwareTypePartNumbers do
         null: false
 
       add :part_number, :string, null: false
-      add :hardware_type_id, references(:hardware_types, on_delete: :delete_all)
+
+      add :hardware_type_id,
+          references(:hardware_types, with: [tenant_id: :tenant_id], on_delete: :delete_all)
 
       timestamps()
     end
