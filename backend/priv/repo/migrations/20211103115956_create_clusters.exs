@@ -3,8 +3,8 @@ defmodule Edgehog.Repo.Migrations.CreateClusters do
 
   def change do
     create table(:clusters) do
-      add :name, :string
-      add :base_api_url, :string
+      add :name, :string, null: false
+      add :base_api_url, :string, null: false
 
       timestamps()
     end
