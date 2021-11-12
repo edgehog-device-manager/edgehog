@@ -7,7 +7,9 @@ defmodule Edgehog.Repo.Migrations.CreateApplianceModelPartNumbers do
         null: false
 
       add :part_number, :string, null: false
-      add :appliance_model_id, references(:appliance_models, on_delete: :delete_all)
+
+      add :appliance_model_id,
+          references(:appliance_models, with: [tenant_id: :tenant_id], on_delete: :delete_all)
 
       timestamps()
     end
