@@ -32,10 +32,10 @@ const messages = defineMessages({
     id: "validation.array.min",
     defaultMessage: "Does not have enough values.",
   },
-  partNumberFormat: {
-    id: "validation.partNumber.format",
+  handleFormat: {
+    id: "validation.handle.format",
     defaultMessage:
-      "The part number must start with a letter and only contain lower case characters, numbers or the hyphen symbol -",
+      "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -",
   },
 });
 
@@ -48,8 +48,12 @@ yup.setLocale({
   },
 });
 
+const applianceModelHandleSchema = yup
+  .string()
+  .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
+
 const hardwareTypeHandleSchema = yup
   .string()
-  .matches(/^[a-z][a-z\d-]*$/, messages.partNumberFormat.id);
+  .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
 
-export { hardwareTypeHandleSchema, messages, yup };
+export { applianceModelHandleSchema, hardwareTypeHandleSchema, messages, yup };

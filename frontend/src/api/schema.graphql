@@ -3,6 +3,29 @@ schema {
   mutation: RootMutationType
 }
 
+type ApplianceModel implements Node {
+  handle: String!
+  hardwareType: HardwareType!
+
+  """
+  The ID of an object
+  """
+  id: ID!
+  name: String!
+  partNumbers: [String!]!
+}
+
+input CreateApplianceModelInput {
+  handle: String!
+  hardwareTypeId: ID!
+  name: String!
+  partNumbers: [String!]!
+}
+
+type CreateApplianceModelPayload {
+  applianceModel: ApplianceModel!
+}
+
 input CreateHardwareTypeInput {
   hardwareType: HardwareTypeInput!
 }
@@ -66,11 +89,20 @@ interface Node {
 }
 
 type RootMutationType {
+  createApplianceModel(
+    input: CreateApplianceModelInput!
+  ): CreateApplianceModelPayload
   createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
+  updateApplianceModel(
+    input: UpdateApplianceModelInput!
+  ): UpdateApplianceModelPayload
   updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
 }
 
 type RootQueryType {
+  applianceModel(id: ID!): ApplianceModel
+  applianceModels: [ApplianceModel!]!
+
   """
   Get a single device
   """
@@ -88,6 +120,17 @@ type RootQueryType {
     """
     id: ID!
   ): Node
+}
+
+input UpdateApplianceModelInput {
+  applianceModelId: ID!
+  handle: String
+  name: String
+  partNumbers: [String!]
+}
+
+type UpdateApplianceModelPayload {
+  applianceModel: ApplianceModel!
 }
 
 input UpdateHardwareTypeInput {
