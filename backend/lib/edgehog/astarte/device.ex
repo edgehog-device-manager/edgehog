@@ -21,6 +21,7 @@ defmodule Edgehog.Astarte.Device do
   import Ecto.Changeset
 
   alias Edgehog.Astarte.Realm
+  alias Edgehog.Appliances
 
   schema "devices" do
     field :device_id, :string
@@ -29,7 +30,15 @@ defmodule Edgehog.Astarte.Device do
     field :last_connection, :utc_datetime
     field :last_disconnection, :utc_datetime
     field :online, :boolean, default: false
+    field :serial_number, :string
     belongs_to :realm, Realm
+
+    belongs_to :appliance_model_part_number, Appliances.ApplianceModelPartNumber,
+      foreign_key: :part_number,
+      references: :part_number,
+      type: :string
+
+    has_one :appliance_model, through: [:appliance_model_part_number, :appliance_model]
 
     timestamps()
   end
@@ -42,7 +51,9 @@ defmodule Edgehog.Astarte.Device do
       :device_id,
       :online,
       :last_connection,
-      :last_disconnection
+      :last_disconnection,
+      :serial_number,
+      :part_number
     ])
     |> validate_required([:name, :device_id])
     |> unique_constraint([:device_id, :realm_id, :tenant_id])
