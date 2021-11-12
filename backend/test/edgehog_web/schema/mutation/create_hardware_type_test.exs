@@ -42,11 +42,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
 
       variables = %{
         input: %{
-          hardware_type: %{
-            name: name,
-            handle: handle,
-            part_numbers: [part_number]
-          }
+          name: name,
+          handle: handle,
+          part_numbers: [part_number]
         }
       }
 
@@ -75,11 +73,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
     test "fails with invalid data", %{conn: conn} do
       variables = %{
         input: %{
-          hardware_type: %{
-            name: nil,
-            handle: nil,
-            part_numbers: []
-          }
+          name: nil,
+          handle: nil,
+          part_numbers: []
         }
       }
 

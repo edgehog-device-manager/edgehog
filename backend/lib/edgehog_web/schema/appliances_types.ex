@@ -22,12 +22,6 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
 
   alias EdgehogWeb.Resolvers
 
-  input_object :hardware_type_input do
-    field :name, non_null(:string)
-    field :handle, non_null(:string)
-    field :part_numbers, non_null(list_of(non_null(:string)))
-  end
-
   node object(:hardware_type) do
     field :name, non_null(:string)
     field :handle, non_null(:string)
@@ -72,7 +66,9 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
   object :appliances_mutations do
     payload field :create_hardware_type do
       input do
-        field :hardware_type, non_null(:hardware_type_input)
+        field :name, non_null(:string)
+        field :handle, non_null(:string)
+        field :part_numbers, non_null(list_of(non_null(:string)))
       end
 
       output do
@@ -84,15 +80,17 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
 
     payload field :update_hardware_type do
       input do
-        field :id, non_null(:id)
-        field :hardware_type, non_null(:hardware_type_input)
+        field :hardware_type_id, non_null(:id)
+        field :name, :string
+        field :handle, :string
+        field :part_numbers, list_of(non_null(:string))
       end
 
       output do
         field :hardware_type, non_null(:hardware_type)
       end
 
-      middleware Absinthe.Relay.Node.ParseIDs, id: :hardware_type
+      middleware Absinthe.Relay.Node.ParseIDs, hardware_type_id: :hardware_type
       resolve &Resolvers.Appliances.update_hardware_type/3
     end
 

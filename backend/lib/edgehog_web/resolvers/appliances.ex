@@ -39,13 +39,13 @@ defmodule EdgehogWeb.Resolvers.Appliances do
     {:ok, part_numbers}
   end
 
-  def create_hardware_type(_parent, %{hardware_type: attrs}, _context) do
+  def create_hardware_type(_parent, attrs, _context) do
     with {:ok, hardware_type} <- Appliances.create_hardware_type(attrs) do
       {:ok, %{hardware_type: hardware_type}}
     end
   end
 
-  def update_hardware_type(_parent, %{id: id, hardware_type: attrs}, _context) do
+  def update_hardware_type(_parent, %{hardware_type_id: id} = attrs, _context) do
     with {:ok, %HardwareType{} = hardware_type} <- Appliances.fetch_hardware_type(id),
          {:ok, %HardwareType{} = hardware_type} <-
            Appliances.update_hardware_type(hardware_type, attrs) do

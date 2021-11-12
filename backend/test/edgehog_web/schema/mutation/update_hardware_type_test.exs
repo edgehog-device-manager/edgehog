@@ -50,12 +50,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
       variables = %{
         input: %{
-          id: id,
-          hardware_type: %{
-            name: name,
-            handle: handle,
-            part_numbers: [part_number]
-          }
+          hardware_type_id: id,
+          name: name,
+          handle: handle,
+          part_numbers: [part_number]
         }
       }
 
@@ -78,17 +76,74 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
                Appliances.fetch_hardware_type(hardware_type.id)
     end
 
+    test "updates hardware type with partial data", %{conn: conn, hardware_type: hardware_type} do
+      %HardwareType{name: initial_name, handle: initial_handle} = hardware_type
+
+      name = "Foobaz"
+      part_number = "12345/Z"
+
+      id = Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
+
+      variables = %{
+        input: %{
+          hardware_type_id: id,
+          part_numbers: [part_number]
+        }
+      }
+
+      conn = post(conn, "/api", query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "updateHardwareType" => %{
+                   "hardwareType" => %{
+                     "id" => ^id,
+                     "name" => ^initial_name,
+                     "handle" => ^initial_handle,
+                     "partNumbers" => [^part_number]
+                   }
+                 }
+               }
+             } = assert(json_response(conn, 200))
+
+      assert {:ok, %HardwareType{name: ^initial_name, handle: ^initial_handle}} =
+               Appliances.fetch_hardware_type(hardware_type.id)
+
+      variables = %{
+        input: %{
+          hardware_type_id: id,
+          name: name
+        }
+      }
+
+      conn = post(conn, "/api", query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "updateHardwareType" => %{
+                   "hardwareType" => %{
+                     "id" => ^id,
+                     "name" => ^name,
+                     "handle" => ^initial_handle,
+                     "partNumbers" => [^part_number]
+                   }
+                 }
+               }
+             } = assert(json_response(conn, 200))
+
+      assert {:ok, %HardwareType{name: ^name, handle: ^initial_handle}} =
+               Appliances.fetch_hardware_type(hardware_type.id)
+    end
+
     test "fails with invalid data", %{conn: conn, hardware_type: hardware_type} do
       id = Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
 
       variables = %{
         input: %{
-          id: id,
-          hardware_type: %{
-            name: nil,
-            handle: nil,
-            part_numbers: []
-          }
+          hardware_type_id: id,
+          name: nil,
+          handle: nil,
+          part_numbers: []
         }
       }
 
@@ -106,12 +161,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
       variables = %{
         input: %{
-          id: id,
-          hardware_type: %{
-            name: name,
-            handle: handle,
-            part_numbers: [part_number]
-          }
+          hardware_type_id: id,
+          name: name,
+          handle: handle,
+          part_numbers: [part_number]
         }
       }
 

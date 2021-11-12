@@ -27,7 +27,9 @@ type CreateApplianceModelPayload {
 }
 
 input CreateHardwareTypeInput {
-  hardwareType: HardwareTypeInput!
+  handle: String!
+  name: String!
+  partNumbers: [String!]!
 }
 
 type CreateHardwareTypePayload {
@@ -71,12 +73,6 @@ type HardwareType implements Node {
   The ID of an object
   """
   id: ID!
-  name: String!
-  partNumbers: [String!]!
-}
-
-input HardwareTypeInput {
-  handle: String!
   name: String!
   partNumbers: [String!]!
 }
@@ -134,8 +130,10 @@ type UpdateApplianceModelPayload {
 }
 
 input UpdateHardwareTypeInput {
-  hardwareType: HardwareTypeInput!
-  id: ID!
+  handle: String
+  hardwareTypeId: ID!
+  name: String
+  partNumbers: [String!]
 }
 
 type UpdateHardwareTypePayload {
