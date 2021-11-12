@@ -55,7 +55,7 @@ const HardwareTypeCreatePage = () => {
   const handleCreateHardwareType = useCallback(
     (hardwareType: HardwareTypeData) => {
       createHardwareType({
-        variables: { input: { hardwareType } },
+        variables: { input: hardwareType },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors

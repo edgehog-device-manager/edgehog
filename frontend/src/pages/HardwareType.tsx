@@ -99,8 +99,12 @@ const HardwareTypeContent = ({
 
   const handleUpdateHardwareType = useCallback(
     (hardwareType: HardwareTypeData) => {
+      const input = {
+        hardwareTypeId,
+        ...hardwareType,
+      };
       updateHardwareType({
-        variables: { input: { hardwareType, id: hardwareTypeId } },
+        variables: { input },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors

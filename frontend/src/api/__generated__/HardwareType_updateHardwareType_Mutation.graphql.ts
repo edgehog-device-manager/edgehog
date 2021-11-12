@@ -5,11 +5,8 @@
 import { ConcreteRequest } from "relay-runtime";
 
 export type UpdateHardwareTypeInput = {
-    hardwareType: HardwareTypeInput;
-    id: string;
-};
-export type HardwareTypeInput = {
     handle: string;
+    hardwareTypeId: string;
     name: string;
     partNumbers: Array<string>;
 };
