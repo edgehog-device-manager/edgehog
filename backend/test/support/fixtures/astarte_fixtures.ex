@@ -29,13 +29,15 @@ defmodule Edgehog.AstarteFixtures do
     {:ok, cluster} =
       attrs
       |> Enum.into(%{
-        base_api_url: "some base_api_url",
+        base_api_url: "https://api.astarte.example.com",
         name: "some name"
       })
       |> Edgehog.Astarte.create_cluster()
 
     cluster
   end
+
+  @private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
 
   @doc """
   Generate a realm.
@@ -44,8 +46,8 @@ defmodule Edgehog.AstarteFixtures do
     attrs =
       attrs
       |> Enum.into(%{
-        name: "some name",
-        private_key: "some private_key"
+        name: "somename",
+        private_key: @private_key
       })
 
     {:ok, realm} = Edgehog.Astarte.create_realm(cluster, attrs)
