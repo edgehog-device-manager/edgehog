@@ -37,6 +37,16 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
     end
   end
 
+  node object(:appliance_model) do
+    field :name, non_null(:string)
+    field :handle, non_null(:string)
+    field :hardware_type, non_null(:hardware_type)
+
+    field :part_numbers, non_null(list_of(non_null(:string))) do
+      resolve &Resolvers.Appliances.extract_appliance_model_part_numbers/3
+    end
+  end
+
   object :appliances_queries do
     field :hardware_types, non_null(list_of(non_null(:hardware_type))) do
       resolve &Resolvers.Appliances.list_hardware_types/3
@@ -46,6 +56,16 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
       arg :id, non_null(:id)
       middleware Absinthe.Relay.Node.ParseIDs, id: :hardware_type
       resolve &Resolvers.Appliances.find_hardware_type/2
+    end
+
+    field :appliance_models, non_null(list_of(non_null(:appliance_model))) do
+      resolve &Resolvers.Appliances.list_appliance_models/3
+    end
+
+    field :appliance_model, :appliance_model do
+      arg :id, non_null(:id)
+      middleware Absinthe.Relay.Node.ParseIDs, id: :appliance_model
+      resolve &Resolvers.Appliances.find_appliance_model/2
     end
   end
 
@@ -74,6 +94,42 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
 
       middleware Absinthe.Relay.Node.ParseIDs, id: :hardware_type
       resolve &Resolvers.Appliances.update_hardware_type/3
+    end
+
+    payload field :create_appliance_model do
+      input do
+        field :name, non_null(:string)
+        field :handle, non_null(:string)
+        field :part_numbers, non_null(list_of(non_null(:string)))
+        field :hardware_type_id, non_null(:id)
+      end
+
+      output do
+        field :appliance_model, non_null(:appliance_model)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, hardware_type_id: :hardware_type
+
+      resolve &Resolvers.Appliances.create_appliance_model/3
+    end
+
+    payload field :update_appliance_model do
+      input do
+        field :appliance_model_id, non_null(:id)
+        field :name, :string
+        field :handle, :string
+        field :part_numbers, list_of(non_null(:string))
+      end
+
+      output do
+        field :appliance_model, non_null(:appliance_model)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs,
+        appliance_model_id: :appliance_model,
+        hardware_type_id: :hardware_type
+
+      resolve &Resolvers.Appliances.update_appliance_model/3
     end
   end
 end
