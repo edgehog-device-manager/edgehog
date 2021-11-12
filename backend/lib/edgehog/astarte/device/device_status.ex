@@ -23,9 +23,12 @@ defmodule Edgehog.Astarte.Device.DeviceStatus do
     :online
   ]
 
+  @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
+
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.DeviceStatus
 
+  @impl true
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_device_status(client, device_id) do
