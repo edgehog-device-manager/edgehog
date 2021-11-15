@@ -141,6 +141,7 @@ defmodule Edgehog.AstarteTest do
     alias Edgehog.Astarte.Device
 
     import Edgehog.AstarteFixtures
+    import Edgehog.AppliancesFixtures
 
     setup do
       cluster = cluster_fixture()
@@ -254,6 +255,59 @@ defmodule Edgehog.AstarteTest do
       assert device = Astarte.get_device!(device.id)
       assert device.online == false
       assert device.last_disconnection == timestamp |> DateTime.truncate(:second)
+    end
+
+    @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
+
+    test "process_device_event/4 updates serial number on incoming_data event",
+         %{realm: realm} do
+      device = device_fixture(realm)
+
+      assert device.serial_number == nil
+
+      device_id = device.device_id
+
+      event = %{
+        "type" => "incoming_data",
+        "interface" => @appliance_info_interface,
+        "path" => "/serialNumber",
+        "value" => "42"
+      }
+
+      timestamp = DateTime.utc_now()
+      timestamp_string = DateTime.to_iso8601(timestamp)
+      assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp_string)
+
+      assert device = Astarte.get_device!(device.id)
+      assert device.serial_number == "42"
+    end
+
+    test "process_device_event/4 updates part number on incoming_data event",
+         %{realm: realm} do
+      device = device_fixture(realm)
+      assert device.part_number == nil
+
+      part_number = "XYZ123"
+
+      appliance_model =
+        appliance_model_fixture(hardware_type_fixture(), part_numbers: [part_number])
+
+      device_id = device.device_id
+
+      event = %{
+        "type" => "incoming_data",
+        "interface" => @appliance_info_interface,
+        "path" => "/partNumber",
+        "value" => part_number
+      }
+
+      timestamp = DateTime.utc_now()
+      timestamp_string = DateTime.to_iso8601(timestamp)
+      assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp_string)
+
+      assert device = Astarte.get_device!(device.id)
+      assert device.part_number == part_number
+      assert device.appliance_model.id == appliance_model.id
     end
   end
 end

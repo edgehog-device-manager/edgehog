@@ -24,6 +24,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   alias Edgehog.Astarte.Device
 
   import Edgehog.AstarteFixtures
+  import Edgehog.AppliancesFixtures
+
+  @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
 
   describe "process_event" do
     setup do
@@ -118,6 +121,71 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert response(conn, 200)
 
       assert {:ok, %Device{online: false}} = Astarte.fetch_realm_device(realm, device_id)
+    end
+
+    test "updates an existing device when receiving serial number", %{
+      conn: conn,
+      realm: realm,
+      device: %{device_id: device_id},
+      tenant: %{slug: tenant_slug}
+    } do
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      connection_event = %{
+        device_id: device_id,
+        event: %{
+          type: "incoming_data",
+          interface: @appliance_info_interface,
+          path: "/serialNumber",
+          value: "12345"
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, connection_event)
+
+      assert response(conn, 200)
+
+      assert {:ok, %Device{serial_number: "12345"}} = Astarte.fetch_realm_device(realm, device_id)
+    end
+
+    test "associates a device with an appliance model when receiving part number", %{
+      conn: conn,
+      realm: realm,
+      device: %{device_id: device_id},
+      tenant: %{slug: tenant_slug}
+    } do
+      hardware_type = hardware_type_fixture()
+      appliance_model = appliance_model_fixture(hardware_type)
+      [%{part_number: part_number}] = appliance_model.part_numbers
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      connection_event = %{
+        device_id: device_id,
+        event: %{
+          type: "incoming_data",
+          interface: @appliance_info_interface,
+          path: "/partNumber",
+          value: part_number
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, connection_event)
+
+      assert response(conn, 200)
+
+      assert {:ok, %Device{} = device} = Astarte.fetch_realm_device(realm, device_id)
+      assert device.appliance_model.id == appliance_model.id
+      assert device.appliance_model.name == appliance_model.name
+      assert device.appliance_model.handle == appliance_model.handle
     end
   end
 end

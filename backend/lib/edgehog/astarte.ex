@@ -28,6 +28,8 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.Device.{DeviceStatus, HardwareInfo}
 
+  @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
+
   @device_status_module Application.compile_env(
                           :edgehog,
                           :astarte_device_status_module,
@@ -256,6 +258,7 @@ defmodule Edgehog.Astarte do
   """
   def list_devices do
     Repo.all(Device)
+    |> Repo.preload(appliance_model: :hardware_type)
   end
 
   @doc """
@@ -272,7 +275,10 @@ defmodule Edgehog.Astarte do
       ** (Ecto.NoResultsError)
 
   """
-  def get_device!(id), do: Repo.get!(Device, id)
+  def get_device!(id) do
+    Repo.get!(Device, id)
+    |> Repo.preload(appliance_model: :hardware_type)
+  end
 
   @doc """
   Creates a device.
@@ -287,9 +293,13 @@ defmodule Edgehog.Astarte do
 
   """
   def create_device(%Realm{} = realm, attrs \\ %{}) do
-    %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
-    |> Device.changeset(attrs)
-    |> Repo.insert()
+    changeset =
+      %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
+      |> Device.changeset(attrs)
+
+    with {:ok, device} <- Repo.insert(changeset) do
+      {:ok, Repo.preload(device, appliance_model: :hardware_type)}
+    end
   end
 
   @doc """
@@ -353,7 +363,7 @@ defmodule Edgehog.Astarte do
   """
   def fetch_realm_device(%Realm{id: realm_id}, device_id) do
     case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
-      %Device{} = device -> {:ok, device}
+      %Device{} = device -> {:ok, Repo.preload(device, appliance_model: :hardware_type)}
       nil -> {:error, :device_not_found}
     end
   end
@@ -406,6 +416,34 @@ defmodule Edgehog.Astarte do
 
   defp update_device_with_event(%Device{} = device, %{"type" => "device_disconnected"}, timestamp) do
     change_device(device, %{online: false, last_disconnection: timestamp})
+    |> Repo.update()
+  end
+
+  defp update_device_with_event(
+         %Device{} = device,
+         %{
+           "type" => "incoming_data",
+           "interface" => @appliance_info_interface,
+           "path" => "/serialNumber",
+           "value" => serial_number
+         },
+         _timestamp
+       ) do
+    change_device(device, %{serial_number: serial_number})
+    |> Repo.update()
+  end
+
+  defp update_device_with_event(
+         %Device{} = device,
+         %{
+           "type" => "incoming_data",
+           "interface" => @appliance_info_interface,
+           "path" => "/partNumber",
+           "value" => part_number
+         },
+         _timestamp
+       ) do
+    change_device(device, %{part_number: part_number})
     |> Repo.update()
   end
 
