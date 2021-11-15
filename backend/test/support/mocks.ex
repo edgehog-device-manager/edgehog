@@ -16,4 +16,6 @@
 # limitations under the License.
 #
 
-Mox.defmock(Edgehog.DeviceStatusMock, for: Edgehog.Astarte.Device.DeviceStatus.Behaviour)
+Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
+  for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
+)

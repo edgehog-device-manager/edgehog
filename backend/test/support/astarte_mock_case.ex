@@ -46,7 +46,10 @@ defmodule Edgehog.AstarteMockCase do
   setup :verify_on_exit!
 
   setup do
-    Mox.stub_with(Edgehog.DeviceStatusMock, Edgehog.Mocks.DeviceStatus)
+    Mox.stub_with(
+      Edgehog.Astarte.Device.DeviceStatusMock,
+      Edgehog.Mocks.Astarte.Device.DeviceStatus
+    )
 
     :ok
   end

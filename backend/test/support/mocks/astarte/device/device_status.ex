@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Mocks.DeviceStatus do
+defmodule Edgehog.Mocks.Astarte.Device.DeviceStatus do
   @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
 
   alias Astarte.Client.AppEngine
@@ -24,12 +24,11 @@ defmodule Edgehog.Mocks.DeviceStatus do
 
   @impl true
   def get(%AppEngine{} = _client, _device_id) do
-    now = DateTime.utc_now()
-
     device_status = %DeviceStatus{
-      last_connection: DateTime.add(now, -3600),
-      last_disconnection: DateTime.add(now, -60),
-      online: false
+      last_connection: ~U[2021-11-15 10:44:57.432516Z],
+      last_disconnection: ~U[2021-11-15 10:45:57.432516Z],
+      online: false,
+      last_seen_ip: "198.51.100.25"
     }
 
     {:ok, device_status}

@@ -32,4 +32,4 @@ config :phoenix, :plug_init_mode, :runtime
 config :tesla, adapter: Tesla.Mock
 
 # Astarte mocks for tests
-config :edgehog, :astarte_device_status_module, Edgehog.DeviceStatusMock
+config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
