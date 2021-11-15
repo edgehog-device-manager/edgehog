@@ -16,40 +16,22 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Astarte.Device.DeviceStatus do
-  defstruct [
-    :last_connection,
-    :last_disconnection,
-    :online
-  ]
-
+defmodule Edgehog.Mocks.DeviceStatus do
   @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.DeviceStatus
 
   @impl true
-  def get(%AppEngine{} = client, device_id) do
-    with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_device_status(client, device_id) do
-      device_status = %DeviceStatus{
-        last_connection: parse_datetime(data["last_connection"]),
-        last_disconnection: parse_datetime(data["last_disconnection"]),
-        online: data["connected"] || false
-      }
+  def get(%AppEngine{} = _client, _device_id) do
+    now = DateTime.utc_now()
 
-      {:ok, device_status}
-    end
-  end
+    device_status = %DeviceStatus{
+      last_connection: DateTime.add(now, -3600),
+      last_disconnection: DateTime.add(now, -60),
+      online: false
+    }
 
-  defp parse_datetime(nil) do
-    nil
-  end
-
-  defp parse_datetime(datetime_string) do
-    case DateTime.from_iso8601(datetime_string) do
-      {:ok, datetime, _offset} -> datetime
-      _ -> nil
-    end
+    {:ok, device_status}
   end
 end

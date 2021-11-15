@@ -99,10 +99,10 @@ defmodule Edgehog.AstarteTest do
     end
 
     test "create_realm/1 with valid data creates a realm", %{cluster: cluster} do
-      valid_attrs = %{name: "some name", private_key: "some private_key"}
+      valid_attrs = %{name: "somename", private_key: "some private_key"}
 
       assert {:ok, %Realm{} = realm} = Astarte.create_realm(cluster, valid_attrs)
-      assert realm.name == "some name"
+      assert realm.name == "somename"
       assert realm.private_key == "some private_key"
     end
 
@@ -112,10 +112,10 @@ defmodule Edgehog.AstarteTest do
 
     test "update_realm/2 with valid data updates the realm", %{cluster: cluster} do
       realm = realm_fixture(cluster)
-      update_attrs = %{name: "some updated name", private_key: "some updated private_key"}
+      update_attrs = %{name: "someupdatedname", private_key: "some updated private_key"}
 
       assert {:ok, %Realm{} = realm} = Astarte.update_realm(realm, update_attrs)
-      assert realm.name == "some updated name"
+      assert realm.name == "someupdatedname"
       assert realm.private_key == "some updated private_key"
     end
 

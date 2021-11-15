@@ -68,7 +68,9 @@ defmodule Edgehog.MixProject do
       # TODO: remove when tesla makes a new release compatible with mime ~> 2.0
       {:mime, "~> 2.0", override: true},
       {:astarte_client, github: "astarte-platform/astarte-client-elixir"},
-      {:cors_plug, "~> 2.0"}
+      {:cors_plug, "~> 2.0"},
+      {:x509, "~> 0.8"},
+      {:mox, "~> 1.0"}
     ]
   end
 

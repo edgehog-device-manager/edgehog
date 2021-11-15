@@ -28,6 +28,12 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.Device.{DeviceStatus, HardwareInfo}
 
+  @device_status_module Application.compile_env(
+                          :edgehog,
+                          :astarte_device_status_module,
+                          DeviceStatus
+                        )
+
   @doc """
   Returns the list of clusters.
 
@@ -410,7 +416,7 @@ defmodule Edgehog.Astarte do
 
   defp get_device_status(%Realm{} = realm, device_id) do
     with {:ok, client} <- appengine_client_from_realm(realm) do
-      DeviceStatus.get(client, device_id)
+      @device_status_module.get(client, device_id)
     end
   end
 

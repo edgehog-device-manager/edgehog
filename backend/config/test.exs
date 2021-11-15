@@ -28,3 +28,6 @@ config :logger, level: :warn
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Astarte mocks for tests
+config :edgehog, :astarte_device_status_module, Edgehog.DeviceStatusMock
