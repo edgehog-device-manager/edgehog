@@ -21,6 +21,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
   use Edgehog.AstarteMockCase
   use Edgehog.GeolocationMockCase
 
+  alias Edgehog.Astarte.Device.WiFiScanResult
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
@@ -47,6 +48,14 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                longitude: 11.8788231,
                timestamp: ~U[2021-11-15 11:44:57.432516Z]
              } == location
+    end
+
+    test "fetch_wifi_scan_results/3 returns the wifi scans for a device", %{
+      device: device
+    } do
+      assert {:ok, wifi_scan_results} = Astarte.fetch_wifi_scan_results(device, %{}, %{})
+
+      assert [%WiFiScanResult{} | _rest] = wifi_scan_results
     end
   end
 end

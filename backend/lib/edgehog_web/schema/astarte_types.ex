@@ -40,6 +40,14 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :timestamp, non_null(:datetime)
   end
 
+  object :wifi_scan_result do
+    field :channel, :integer
+    field :essid, :string
+    field :mac_address, :string
+    field :rssi, :integer
+    field :timestamp, non_null(:datetime)
+  end
+
   node object(:device) do
     field :name, non_null(:string)
     field :device_id, non_null(:string)
@@ -54,6 +62,11 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     field :location, :device_location do
       resolve &Resolvers.Astarte.fetch_device_location/3
+      middleware Middleware.ErrorHandler
+    end
+
+    field :wifi_scan_results, list_of(non_null(:wifi_scan_result)) do
+      resolve &Resolvers.Astarte.fetch_wifi_scan_results/3
       middleware Middleware.ErrorHandler
     end
   end
