@@ -16,10 +16,12 @@
 # limitations under the License.
 #
 
-Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
-  for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
-)
+defmodule Edgehog.Astarte.Device.WiFiScanResult.Behaviour do
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.WiFiScanResult
 
-Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
-  for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-)
+  @type wifi_scan_results :: list(WiFiScanResult.t())
+
+  @callback get(client :: AppEngine.t(), device_id :: String.t()) ::
+              {:ok, wifi_scan_results} | {:error, term()}
+end

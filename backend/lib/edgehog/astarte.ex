@@ -35,6 +35,11 @@ defmodule Edgehog.Astarte do
                           :astarte_device_status_module,
                           DeviceStatus
                         )
+  @wifi_scan_result_module Application.compile_env(
+                             :edgehog,
+                             :astarte_wifi_scan_result_module,
+                             WiFiScanResult
+                           )
 
   @doc """
   Returns the list of clusters.
@@ -456,6 +461,12 @@ defmodule Edgehog.Astarte do
   def get_hardware_info(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       HardwareInfo.get(client, device.device_id)
+    end
+  end
+
+  def fetch_wifi_scan_results(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @wifi_scan_result_module.get(client, device.device_id)
     end
   end
 

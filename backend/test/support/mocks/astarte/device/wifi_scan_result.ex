@@ -16,10 +16,24 @@
 # limitations under the License.
 #
 
-Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
-  for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
-)
+defmodule Edgehog.Mocks.Astarte.Device.WiFiScanResult do
+  @behaviour Edgehog.Astarte.Device.WiFiScanResult.Behaviour
 
-Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
-  for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-)
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.WiFiScanResult
+
+  @impl true
+  def get(%AppEngine{} = _client, _device_id) do
+    wifi_scan_results = [
+      %WiFiScanResult{
+        channel: 11,
+        essid: nil,
+        mac_address: "01:23:45:67:89:ab",
+        rssi: -43,
+        timestamp: ~U[2021-11-15 11:44:57.432516Z]
+      }
+    ]
+
+    {:ok, wifi_scan_results}
+  end
+end
