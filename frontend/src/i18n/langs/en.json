@@ -175,6 +175,21 @@
   "components.UpdateHardwareTypeForm.submitButton": {
     "defaultMessage": "Update"
   },
+  "components.WiFiScanResultsTable.apChannelTitle": {
+    "defaultMessage": "Channel"
+  },
+  "components.WiFiScanResultsTable.apEssidTitle": {
+    "defaultMessage": "ESSID"
+  },
+  "components.WiFiScanResultsTable.apMacAddressTitle": {
+    "defaultMessage": "MAC Address"
+  },
+  "components.WiFiScanResultsTable.apRssiTitle": {
+    "defaultMessage": "RSSI"
+  },
+  "components.WiFiScanResultsTable.seenAtTitle": {
+    "defaultMessage": "Seen at"
+  },
   "pages.ApplianceModel.applianceModelNotFound.message": {
     "defaultMessage": "Return to the appliance model list."
   },
@@ -222,6 +237,15 @@
   },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
+  },
+  "pages.Device.wifiScanResultsTab": {
+    "defaultMessage": "WiFi APs"
+  },
+  "pages.Device.wifiScanResultsTab.noResults.message": {
+    "defaultMessage": "The device has not detected any WiFi AP yet."
+  },
+  "pages.Device.wifiScanResultsTab.noResults.title": {
+    "defaultMessage": "No results"
   },
   "pages.Devices.title": {
     "defaultMessage": "Devices"
