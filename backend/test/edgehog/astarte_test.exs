@@ -157,6 +157,287 @@ defmodule Edgehog.AstarteTest do
       assert Astarte.list_devices() == [device]
     end
 
+    test "list_devices/1 filters with online", %{realm: realm} do
+      device_1 = device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A", online: true)
+      _device_2 = device_fixture(realm, device_id: "nWwr7SZiR8CgZN_uKHsAJg", online: false)
+      filters = %{online: true}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 filters with device_id", %{realm: realm} do
+      device_1 = device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A")
+      _device_2 = device_fixture(realm, device_id: "nWwr7SZiR8CgZN_uKHsAJg")
+      filters = %{device_id: "7mc"}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 filters with appliance_model_part_number", %{realm: realm} do
+      hardware_type = hardware_type_fixture()
+
+      appliance_model_part_number_1 = "XYZ/1234"
+
+      _appliance_model_1 =
+        appliance_model_fixture(hardware_type,
+          name: "Foo",
+          handle: "foo",
+          part_numbers: [appliance_model_part_number_1]
+        )
+
+      appliance_model_part_number_2 = "ABC/0987"
+
+      _appliance_model_2 =
+        appliance_model_fixture(hardware_type,
+          name: "Bar",
+          handle: "bar",
+          part_numbers: [appliance_model_part_number_2]
+        )
+
+      device_1 =
+        device_fixture(realm,
+          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
+          part_number: appliance_model_part_number_1
+        )
+
+      _device_2 =
+        device_fixture(realm,
+          device_id: "nWwr7SZiR8CgZN_uKHsAJg",
+          part_number: appliance_model_part_number_2
+        )
+
+      filters = %{appliance_model_part_number: "XYZ"}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 filters with appliance_model_name", %{realm: realm} do
+      hardware_type = hardware_type_fixture()
+
+      appliance_model_part_number_1 = "XYZ/1234"
+
+      _appliance_model_1 =
+        appliance_model_fixture(hardware_type,
+          name: "Foo",
+          handle: "foo",
+          part_numbers: [appliance_model_part_number_1]
+        )
+
+      appliance_model_part_number_2 = "ABC/0987"
+
+      _appliance_model_2 =
+        appliance_model_fixture(hardware_type,
+          name: "Bar",
+          handle: "bar",
+          part_numbers: [appliance_model_part_number_2]
+        )
+
+      device_1 =
+        device_fixture(realm,
+          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
+          part_number: appliance_model_part_number_1
+        )
+
+      _device_2 =
+        device_fixture(realm,
+          device_id: "nWwr7SZiR8CgZN_uKHsAJg",
+          part_number: appliance_model_part_number_2
+        )
+
+      filters = %{appliance_model_name: "oo"}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 filters with appliance_model_handle", %{realm: realm} do
+      hardware_type = hardware_type_fixture()
+
+      appliance_model_part_number_1 = "XYZ/1234"
+
+      _appliance_model_1 =
+        appliance_model_fixture(hardware_type,
+          name: "Foo",
+          handle: "foo",
+          part_numbers: [appliance_model_part_number_1]
+        )
+
+      appliance_model_part_number_2 = "ABC/0987"
+
+      _appliance_model_2 =
+        appliance_model_fixture(hardware_type,
+          name: "Bar",
+          handle: "bar",
+          part_numbers: [appliance_model_part_number_2]
+        )
+
+      device_1 =
+        device_fixture(realm,
+          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
+          part_number: appliance_model_part_number_1
+        )
+
+      _device_2 =
+        device_fixture(realm,
+          device_id: "nWwr7SZiR8CgZN_uKHsAJg",
+          part_number: appliance_model_part_number_2
+        )
+
+      filters = %{appliance_model_name: "fo"}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 filters with hardware_type_part_number", %{realm: realm} do
+      hardware_type_1 =
+        hardware_type_fixture(name: "HW1", handle: "hw1", part_numbers: ["AAA-BBB"])
+
+      appliance_model_part_number_1 = "XYZ/1234"
+
+      _appliance_model_1 =
+        appliance_model_fixture(hardware_type_1,
+          name: "Foo",
+          handle: "foo",
+          part_numbers: [appliance_model_part_number_1]
+        )
+
+      hardware_type_2 =
+        hardware_type_fixture(name: "HW2", handle: "hw2", part_numbers: ["CCC-DDD"])
+
+      appliance_model_part_number_2 = "ABC/0987"
+
+      _appliance_model_2 =
+        appliance_model_fixture(hardware_type_2,
+          name: "Bar",
+          handle: "bar",
+          part_numbers: [appliance_model_part_number_2]
+        )
+
+      device_1 =
+        device_fixture(realm,
+          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
+          part_number: appliance_model_part_number_1
+        )
+
+      _device_2 =
+        device_fixture(realm,
+          device_id: "nWwr7SZiR8CgZN_uKHsAJg",
+          part_number: appliance_model_part_number_2
+        )
+
+      filters = %{hardware_type_part_number: "AAA"}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 filters with hardware_type_name", %{realm: realm} do
+      hardware_type_1 =
+        hardware_type_fixture(name: "HW1", handle: "hw1", part_numbers: ["AAA-BBB"])
+
+      appliance_model_part_number_1 = "XYZ/1234"
+
+      _appliance_model_1 =
+        appliance_model_fixture(hardware_type_1,
+          name: "Foo",
+          handle: "foo",
+          part_numbers: [appliance_model_part_number_1]
+        )
+
+      hardware_type_2 =
+        hardware_type_fixture(name: "HW2", handle: "hw2", part_numbers: ["CCC-DDD"])
+
+      appliance_model_part_number_2 = "ABC/0987"
+
+      _appliance_model_2 =
+        appliance_model_fixture(hardware_type_2,
+          name: "Bar",
+          handle: "bar",
+          part_numbers: [appliance_model_part_number_2]
+        )
+
+      device_1 =
+        device_fixture(realm,
+          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
+          part_number: appliance_model_part_number_1
+        )
+
+      _device_2 =
+        device_fixture(realm,
+          device_id: "nWwr7SZiR8CgZN_uKHsAJg",
+          part_number: appliance_model_part_number_2
+        )
+
+      filters = %{hardware_type_name: "HW1"}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 filters with hardware_type_handle", %{realm: realm} do
+      hardware_type_1 =
+        hardware_type_fixture(name: "HW1", handle: "hw1", part_numbers: ["AAA-BBB"])
+
+      appliance_model_part_number_1 = "XYZ/1234"
+
+      _appliance_model_1 =
+        appliance_model_fixture(hardware_type_1,
+          name: "Foo",
+          handle: "foo",
+          part_numbers: [appliance_model_part_number_1]
+        )
+
+      hardware_type_2 =
+        hardware_type_fixture(name: "HW2", handle: "hw2", part_numbers: ["CCC-DDD"])
+
+      appliance_model_part_number_2 = "ABC/0987"
+
+      _appliance_model_2 =
+        appliance_model_fixture(hardware_type_2,
+          name: "Bar",
+          handle: "bar",
+          part_numbers: [appliance_model_part_number_2]
+        )
+
+      device_1 =
+        device_fixture(realm,
+          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
+          part_number: appliance_model_part_number_1
+        )
+
+      _device_2 =
+        device_fixture(realm,
+          device_id: "nWwr7SZiR8CgZN_uKHsAJg",
+          part_number: appliance_model_part_number_2
+        )
+
+      filters = %{hardware_type_name: "1"}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 combines filters with AND", %{realm: realm} do
+      device_1 = device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A", online: true)
+      _device_2 = device_fixture(realm, device_id: "nWwr7SZiR8CgZN_uKHsAJg", online: false)
+      _device_3 = device_fixture(realm, device_id: "fsMoT420Ri-zXLjxXK6pEg", online: true)
+      filters = %{device_id: "7", online: true}
+
+      assert Astarte.list_devices(filters) == [device_1]
+    end
+
+    test "list_devices/1 returns empty list for appliance model filters if the device does not have an appliance model",
+         %{realm: realm} do
+      _device = device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A", online: true)
+      filters = %{appliance_model_name: "foo"}
+
+      assert Astarte.list_devices(filters) == []
+    end
+
+    test "list_devices/1 returns empty list for hardware type filters if the device does not have an appliance model",
+         %{realm: realm} do
+      _device = device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A", online: true)
+      filters = %{hardware_type_handle: "bar"}
+
+      assert Astarte.list_devices(filters) == []
+    end
+
     test "get_device!/1 returns the device with given id", %{realm: realm} do
       device = device_fixture(realm)
       assert Astarte.get_device!(device.id) == device

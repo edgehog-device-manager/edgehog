@@ -24,6 +24,10 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     {:ok, Astarte.get_device!(id)}
   end
 
+  def list_devices(_parent, %{filter: filter}, _context) do
+    {:ok, Astarte.list_devices(filter)}
+  end
+
   def list_devices(_parent, _args, _context) do
     {:ok, Astarte.list_devices()}
   end
