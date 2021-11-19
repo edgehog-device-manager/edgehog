@@ -66,6 +66,9 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :last_connection, :datetime
     field :last_disconnection, :datetime
 
+    @desc "The appliance model of the device."
+    field :appliance_model, :appliance_model
+
     field :hardware_info, :hardware_info do
       resolve &Resolvers.Astarte.get_hardware_info/3
       middleware Middleware.ErrorHandler
