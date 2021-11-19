@@ -54,8 +54,18 @@ type Device implements Node {
   id: ID!
   lastConnection: DateTime
   lastDisconnection: DateTime
+  location: DeviceLocation
   name: String!
   online: Boolean!
+  wifiScanResults: [WifiScanResult!]
+}
+
+type DeviceLocation {
+  accuracy: Float
+  address: String
+  latitude: Float!
+  longitude: Float!
+  timestamp: DateTime!
 }
 
 type HardwareInfo {
@@ -138,4 +148,12 @@ input UpdateHardwareTypeInput {
 
 type UpdateHardwareTypePayload {
   hardwareType: HardwareType!
+}
+
+type WifiScanResult {
+  channel: Int
+  essid: String
+  macAddress: String
+  rssi: Int
+  timestamp: DateTime!
 }

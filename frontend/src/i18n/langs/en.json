@@ -211,6 +211,12 @@
   "pages.Device.deviceNotFound.title": {
     "defaultMessage": "Device not found."
   },
+  "pages.Device.geolocationTab": {
+    "defaultMessage": "Geolocation"
+  },
+  "pages.Device.location.lastUpdateAt": {
+    "defaultMessage": "Last known location, updated at {date}"
+  },
   "pages.Devices.title": {
     "defaultMessage": "Devices"
   },
