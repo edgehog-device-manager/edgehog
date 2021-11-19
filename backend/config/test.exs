@@ -29,5 +29,19 @@ config :logger, level: :warn
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
+config :tesla, adapter: Tesla.Mock
+
 # Astarte mocks for tests
-config :edgehog, :astarte_device_status_module, Edgehog.DeviceStatusMock
+config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
+config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiScanResultMock
+
+config :edgehog,
+  ip_geolocation_provider: Edgehog.Geolocation.IPGeolocationProviderMock,
+  wifi_geolocation_provider: Edgehog.Geolocation.WiFiGeolocationProviderMock,
+  geocoding_provider: Edgehog.Geolocation.GeocodingProviderMock
+
+config :edgehog, Edgehog.Geolocation.Providers.FreeGeoIp, api_key: "test_api_key"
+
+config :edgehog, Edgehog.Geolocation.Providers.GoogleGeolocation, api_key: "test_api_key"
+
+config :edgehog, Edgehog.Geolocation.Providers.GoogleGeocoding, api_key: "test_api_key"

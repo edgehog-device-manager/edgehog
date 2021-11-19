@@ -16,20 +16,18 @@
 # limitations under the License.
 #
 
-Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
-  for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
-)
+defmodule Edgehog.Mocks.Geolocation.IPGeolocationProvider do
+  @behaviour Edgehog.Geolocation.IPGeolocationProvider
 
-Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
-  for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-)
+  @impl true
+  def geolocate(nil = _ip_address) do
+    {:error, :coordinates_not_found}
+  end
 
-Mox.defmock(Edgehog.Geolocation.IPGeolocationProviderMock,
-  for: Edgehog.Geolocation.IPGeolocationProvider
-)
+  @impl true
+  def geolocate(_ip_address) do
+    coordinates = %{accuracy: nil, latitude: 45.4019498, longitude: 11.8706081}
 
-Mox.defmock(Edgehog.Geolocation.WiFiGeolocationProviderMock,
-  for: Edgehog.Geolocation.WiFiGeolocationProvider
-)
-
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)
+    {:ok, coordinates}
+  end
+end

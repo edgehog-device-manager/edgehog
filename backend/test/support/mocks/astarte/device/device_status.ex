@@ -16,20 +16,21 @@
 # limitations under the License.
 #
 
-Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
-  for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
-)
+defmodule Edgehog.Mocks.Astarte.Device.DeviceStatus do
+  @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
 
-Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
-  for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-)
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.DeviceStatus
 
-Mox.defmock(Edgehog.Geolocation.IPGeolocationProviderMock,
-  for: Edgehog.Geolocation.IPGeolocationProvider
-)
+  @impl true
+  def get(%AppEngine{} = _client, _device_id) do
+    device_status = %DeviceStatus{
+      last_connection: ~U[2021-11-15 10:44:57.432516Z],
+      last_disconnection: ~U[2021-11-15 10:45:57.432516Z],
+      online: false,
+      last_seen_ip: "198.51.100.25"
+    }
 
-Mox.defmock(Edgehog.Geolocation.WiFiGeolocationProviderMock,
-  for: Edgehog.Geolocation.WiFiGeolocationProvider
-)
-
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)
+    {:ok, device_status}
+  end
+end

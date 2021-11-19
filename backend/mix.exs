@@ -70,7 +70,9 @@ defmodule Edgehog.MixProject do
       {:astarte_client, github: "astarte-platform/astarte-client-elixir"},
       {:cors_plug, "~> 2.0"},
       {:x509, "~> 0.8"},
-      {:mox, "~> 1.0"}
+      {:mox, "~> 1.0"},
+      {:tesla, "~> 1.4"},
+      {:finch, "~> 0.9"}
     ]
   end
 

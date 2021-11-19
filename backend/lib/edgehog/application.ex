@@ -32,6 +32,8 @@ defmodule Edgehog.Application do
       EdgehogWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Edgehog.PubSub},
+      # Start Finch
+      {Finch, name: EdgehogFinch},
       # Start the Endpoint (http/https)
       EdgehogWeb.Endpoint
       # Start a worker by calling: Edgehog.Worker.start_link(arg)

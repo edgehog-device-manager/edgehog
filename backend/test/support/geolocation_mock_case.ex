@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.AstarteMockCase do
+defmodule Edgehog.GeolocationMockCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -37,7 +37,7 @@ defmodule Edgehog.AstarteMockCase do
   using do
     quote do
       import Mox
-      import Edgehog.AstarteMockCase
+      import Edgehog.GeolocationMockCase
     end
   end
 
@@ -47,13 +47,18 @@ defmodule Edgehog.AstarteMockCase do
 
   setup do
     Mox.stub_with(
-      Edgehog.Astarte.Device.DeviceStatusMock,
-      Edgehog.Mocks.Astarte.Device.DeviceStatus
+      Edgehog.Geolocation.IPGeolocationProviderMock,
+      Edgehog.Mocks.Geolocation.IPGeolocationProvider
     )
 
     Mox.stub_with(
-      Edgehog.Astarte.Device.WiFiScanResultMock,
-      Edgehog.Mocks.Astarte.Device.WiFiScanResult
+      Edgehog.Geolocation.WiFiGeolocationProviderMock,
+      Edgehog.Mocks.Geolocation.WiFiGeolocationProvider
+    )
+
+    Mox.stub_with(
+      Edgehog.Geolocation.GeocodingProviderMock,
+      Edgehog.Mocks.Geolocation.GeocodingProvider
     )
 
     :ok

@@ -16,20 +16,16 @@
 # limitations under the License.
 #
 
-Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
-  for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
-)
+defmodule Edgehog.Geolocation.WiFiGeolocationProvider do
+  alias Edgehog.Astarte.Device.WiFiScanResult
 
-Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
-  for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-)
+  @type wifi_scan_results :: list(WiFiScanResult.t())
 
-Mox.defmock(Edgehog.Geolocation.IPGeolocationProviderMock,
-  for: Edgehog.Geolocation.IPGeolocationProvider
-)
+  @type coordinates :: %{
+          latitude: float,
+          longitude: float,
+          accuracy: number | nil
+        }
 
-Mox.defmock(Edgehog.Geolocation.WiFiGeolocationProviderMock,
-  for: Edgehog.Geolocation.WiFiGeolocationProvider
-)
-
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)
+  @callback geolocate(wifi_scan_results) :: {:ok, coordinates} | {:error, term}
+end

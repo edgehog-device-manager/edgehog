@@ -19,6 +19,7 @@
 defmodule EdgehogWeb.Resolvers.Astarte do
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
+  alias Edgehog.Geolocation
 
   def find_device(%{id: id}, _resolution) do
     {:ok, Astarte.get_device!(id)}
@@ -34,5 +35,19 @@ defmodule EdgehogWeb.Resolvers.Astarte do
 
   def get_hardware_info(%Device{} = device, _args, _context) do
     Astarte.get_hardware_info(device)
+  end
+
+  def fetch_wifi_scan_results(%Device{} = device, _args, _context) do
+    case Astarte.fetch_wifi_scan_results(device) do
+      {:ok, wifi_scan_results} -> {:ok, wifi_scan_results}
+      _ -> {:ok, nil}
+    end
+  end
+
+  def fetch_device_location(%Device{} = device, _args, _context) do
+    case Geolocation.fetch_location(device) do
+      {:ok, location} -> {:ok, location}
+      _ -> {:ok, nil}
+    end
   end
 end

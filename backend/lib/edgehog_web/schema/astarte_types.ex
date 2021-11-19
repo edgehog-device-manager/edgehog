@@ -43,6 +43,22 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :memory_total_bytes, :integer
   end
 
+  object :device_location do
+    field :latitude, non_null(:float)
+    field :longitude, non_null(:float)
+    field :accuracy, :float
+    field :address, :string
+    field :timestamp, non_null(:datetime)
+  end
+
+  object :wifi_scan_result do
+    field :channel, :integer
+    field :essid, :string
+    field :mac_address, :string
+    field :rssi, :integer
+    field :timestamp, non_null(:datetime)
+  end
+
   node object(:device) do
     field :name, non_null(:string)
     field :device_id, non_null(:string)
@@ -52,6 +68,16 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     field :hardware_info, :hardware_info do
       resolve &Resolvers.Astarte.get_hardware_info/3
+      middleware Middleware.ErrorHandler
+    end
+
+    field :location, :device_location do
+      resolve &Resolvers.Astarte.fetch_device_location/3
+      middleware Middleware.ErrorHandler
+    end
+
+    field :wifi_scan_results, list_of(non_null(:wifi_scan_result)) do
+      resolve &Resolvers.Astarte.fetch_wifi_scan_results/3
       middleware Middleware.ErrorHandler
     end
   end

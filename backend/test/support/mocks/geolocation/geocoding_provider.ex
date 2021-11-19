@@ -16,22 +16,18 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Mocks.DeviceStatus do
-  @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.DeviceStatus
+defmodule Edgehog.Mocks.Geolocation.GeocodingProvider do
+  @behaviour Edgehog.Geolocation.GeocodingProvider
 
   @impl true
-  def get(%AppEngine{} = _client, _device_id) do
-    now = DateTime.utc_now()
+  def reverse_geocode(%{latitude: _latitude, longitude: _longitude}) do
+    address = "4 Privet Drive, Little Whinging, Surrey, UK"
 
-    device_status = %DeviceStatus{
-      last_connection: DateTime.add(now, -3600),
-      last_disconnection: DateTime.add(now, -60),
-      online: false
-    }
+    {:ok, address}
+  end
 
-    {:ok, device_status}
+  @impl true
+  def reverse_geocode(_invalid_coordinates) do
+    {:error, :address_not_found}
   end
 end
