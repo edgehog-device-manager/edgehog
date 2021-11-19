@@ -23,6 +23,17 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
 
+  input_object :device_filter do
+    field :online, :boolean
+    field :device_id, :string
+    field :appliance_model_part_number, :string
+    field :appliance_model_handle, :string
+    field :appliance_model_name, :string
+    field :hardware_type_part_number, :string
+    field :hardware_type_handle, :string
+    field :hardware_type_name, :string
+  end
+
   object :hardware_info do
     field :cpu_architecture, :string
     field :cpu_model, :string
@@ -48,6 +59,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   object :astarte_queries do
     @desc "List devices"
     field :devices, non_null(list_of(non_null(:device))) do
+      arg :filter, :device_filter
       resolve &Resolvers.Astarte.list_devices/3
     end
 

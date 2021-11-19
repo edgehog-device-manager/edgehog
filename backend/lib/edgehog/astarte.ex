@@ -256,9 +256,87 @@ defmodule Edgehog.Astarte do
       [%Device{}, ...]
 
   """
-  def list_devices do
-    Repo.all(Device)
-    |> Repo.preload(appliance_model: :hardware_type)
+  def list_devices(filters \\ %{}) do
+    filters
+    |> Enum.reduce(Device, &filter_with/2)
+    |> Repo.all()
+    |> Repo.preload(appliance_model: [:hardware_type])
+  end
+
+  defp filter_with(filter, query) do
+    case filter do
+      {:online, online} ->
+        from q in query,
+          where: q.online == ^online
+
+      {:device_id, device_id} ->
+        from q in query,
+          where: ilike(q.device_id, ^"%#{device_id}%")
+
+      {:appliance_model_part_number, part_number} ->
+        from [appliance_model_part_number: ampn] in ensure_appliance_model_part_number(query),
+          where: ilike(ampn.part_number, ^"%#{part_number}%")
+
+      {:appliance_model_handle, handle} ->
+        from [appliance_model: am] in ensure_appliance_model(query),
+          where: ilike(am.handle, ^"%#{handle}%")
+
+      {:appliance_model_name, name} ->
+        from [appliance_model: am] in ensure_appliance_model(query),
+          where: ilike(am.name, ^"%#{name}%")
+
+      {:hardware_type_part_number, part_number} ->
+        from [hardware_type_part_number: htpn] in ensure_hardware_type_part_number(query),
+          where: ilike(htpn.part_number, ^"%#{part_number}%")
+
+      {:hardware_type_handle, handle} ->
+        from [hardware_type: ht] in ensure_hardware_type(query),
+          where: ilike(ht.handle, ^"%#{handle}%")
+
+      {:hardware_type_name, name} ->
+        from [hardware_type: ht] in ensure_hardware_type(query),
+          where: ilike(ht.name, ^"%#{name}%")
+    end
+  end
+
+  defp ensure_hardware_type(query) do
+    if has_named_binding?(query, :hardware_type) do
+      query
+    else
+      from [appliance_model: am] in ensure_appliance_model(query),
+        join: ht in assoc(am, :hardware_type),
+        as: :hardware_type
+    end
+  end
+
+  defp ensure_hardware_type_part_number(query) do
+    if has_named_binding?(query, :hardware_type_part_number) do
+      query
+    else
+      from [hardware_type: ht] in ensure_hardware_type(query),
+        join: htpn in assoc(ht, :part_numbers),
+        as: :hardware_type_part_number
+    end
+  end
+
+  defp ensure_appliance_model(query) do
+    if has_named_binding?(query, :appliance_model) do
+      query
+    else
+      from [appliance_model_part_number: ampn] in ensure_appliance_model_part_number(query),
+        join: am in assoc(ampn, :appliance_model),
+        as: :appliance_model
+    end
+  end
+
+  defp ensure_appliance_model_part_number(query) do
+    if has_named_binding?(query, :appliance_model_part_number) do
+      query
+    else
+      from q in query,
+        join: ampn in assoc(q, :appliance_model_part_number),
+        as: :appliance_model_part_number
+    end
   end
 
   @doc """
