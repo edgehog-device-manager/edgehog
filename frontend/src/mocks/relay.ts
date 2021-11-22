@@ -58,6 +58,13 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-11T09:43:54.437Z",
     };
   },
+  StorageUnit() {
+    return {
+      label: "Disk 0",
+      totalBytes: 268435456,
+      freeBytes: 128435456,
+    };
+  },
   WifiScanResult() {
     return {
       channel: 1,
