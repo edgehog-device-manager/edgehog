@@ -48,3 +48,6 @@ config :edgehog, Edgehog.Geolocation.Providers.FreeGeoIp, api_key: "test_api_key
 config :edgehog, Edgehog.Geolocation.Providers.GoogleGeolocation, api_key: "test_api_key"
 
 config :edgehog, Edgehog.Geolocation.Providers.GoogleGeocoding, api_key: "test_api_key"
+
+config :goth,
+  disabled: true
