@@ -102,7 +102,6 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :cpu_vendor, :string
 
     @desc "The Bytes count of memory."
-    # TODO: since these is longinteger, should this be a string?
     field :memory_total_bytes, :integer
   end
 

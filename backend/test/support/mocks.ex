@@ -20,6 +20,10 @@ Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
   for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.StorageUsageMock,
+  for: Edgehog.Astarte.Device.StorageUsage.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
   for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
 )
