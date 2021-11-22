@@ -21,6 +21,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
   use Edgehog.AstarteMockCase
   use Edgehog.GeolocationMockCase
 
+  alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
   alias Edgehog.Astarte.Device.WiFiScanResult
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
@@ -48,6 +49,20 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                longitude: 11.8788231,
                timestamp: ~U[2021-11-15 11:44:57.432516Z]
              } == location
+    end
+
+    test "fetch_storage_usage/3 returns the storage usage for a device", %{
+      device: device
+    } do
+      assert {:ok, storage_units} = Astarte.fetch_storage_usage(device, %{}, %{})
+
+      assert [
+               %StorageUnit{
+                 label: "Disk 0",
+                 total_bytes: 348_360_704,
+                 free_bytes: 281_360_704
+               }
+             ] == storage_units
     end
 
     test "fetch_wifi_scan_results/3 returns the wifi scans for a device", %{
