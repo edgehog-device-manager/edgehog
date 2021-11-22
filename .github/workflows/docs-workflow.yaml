@@ -1,0 +1,64 @@
+name: Docs generation for Github Pages
+
+on:
+  push:
+    paths:
+    # Documentation pages
+    - 'doc/**'
+    # The action itself
+    - '.github/workflows/docs-workflow.yaml'
+    branches:
+    # Create the snapshot only when it matters
+    - 'main'
+    - 'release-*'
+  # Run on branch/tag creation
+  create:
+
+jobs:
+  docs:
+    runs-on: ubuntu-20.04
+    steps:
+    # Checkout the source
+    - uses: actions/checkout@v2
+      with:
+        path: edgehog
+    # Checkout the docs repository
+    - uses: actions/checkout@v2
+      with:
+        repository: edgehog-device-manager/docs
+        path: docs
+    - uses: erlef/setup-beam@v1.7.0
+      with:
+        otp-version: "23.2"
+        elixir-version: "1.11.4"
+    - name: Install Dependencies
+      working-directory: ./edgehog/doc
+      run: mix deps.get
+    - name: Build Docs
+      working-directory: ./edgehog/doc
+      run: mix docs
+    - name: Copy Docs, preserving Device SDK docs
+      run: |
+        export DOCS_DIRNAME="$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/main/snapshot/g' | sed 's/release-//g')"
+        rm -rf docs/$DOCS_DIRNAME
+        mkdir docs/$DOCS_DIRNAME
+        # Restore Device SDK docs. Don't fail if they're not there.
+        cd docs && git restore $DOCS_DIRNAME/device-sdks || true && cd ..
+        cp -r edgehog/doc/doc/* docs/$DOCS_DIRNAME/
+    - name: Commit files
+      working-directory: ./docs
+      run: |
+        git config --local user.email "edgehog-machine@ispirata.com"
+        git config --local user.name "Edgehog Bot"
+        git add .
+        git commit -m "Update Documentation"
+    - name: Push changes
+      working-directory: ./docs
+      run: |
+        eval `ssh-agent -t 60 -s`
+        echo "${{ secrets.DOCS_DEPLOY_KEY }}" | ssh-add -
+        mkdir -p ~/.ssh/
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        git remote add topush "git@github.com:edgehog-device-manager/docs.git"
+        git fetch topush
+        git push topush main
