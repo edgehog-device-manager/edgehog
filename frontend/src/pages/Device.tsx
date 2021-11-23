@@ -30,6 +30,7 @@ import { FormattedDate, FormattedMessage } from "react-intl";
 
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
+import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import { Link, Route } from "Navigation";
 import Center from "components/Center";
@@ -45,6 +46,7 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import Tabs, { Tab } from "components/Tabs";
+import WiFiScanResultsTable from "components/WiFiScanResultsTable";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
@@ -70,6 +72,18 @@ const DEVICE_LOCATION_FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
+  fragment Device_wifiScanResults on Device {
+    wifiScanResults {
+      channel
+      essid
+      macAddress
+      rssi
+      timestamp
+    }
+  }
+`;
+
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!) {
     device(id: $id) {
@@ -87,6 +101,7 @@ const GET_DEVICE_QUERY = graphql`
       }
       ...Device_hardwareInfo
       ...Device_location
+      ...Device_wifiScanResults
     }
   }
 `;
@@ -270,6 +285,57 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
   );
 };
 
+interface DeviceWiFiScanResultsTabProps {
+  deviceRef: Device_wifiScanResults$key;
+}
+
+const DeviceWiFiScanResultsTab = ({
+  deviceRef,
+}: DeviceWiFiScanResultsTabProps) => {
+  const { wifiScanResults } = useFragment(
+    DEVICE_WIFI_SCAN_RESULTS_FRAGMENT,
+    deviceRef
+  );
+  if (!wifiScanResults) {
+    return null;
+  }
+  // TODO: handle readonly type without mapping to mutable type
+  const scanResults = wifiScanResults.map((wifiScanResult) => ({
+    ...wifiScanResult,
+  }));
+  return (
+    <Tab
+      eventKey="device-wifi-scan-results-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.wifiScanResultsTab"
+          defaultMessage="WiFi APs"
+        />
+      }
+    >
+      <div className="mt-3">
+        {scanResults.length === 0 ? (
+          <Result.EmptyList
+            title={
+              <FormattedMessage
+                id="pages.Device.wifiScanResultsTab.noResults.title"
+                defaultMessage="No results"
+              />
+            }
+          >
+            <FormattedMessage
+              id="pages.Device.wifiScanResultsTab.noResults.message"
+              defaultMessage="The device has not detected any WiFi AP yet."
+            />
+          </Result.EmptyList>
+        ) : (
+          <WiFiScanResultsTable data={scanResults} />
+        )}
+      </div>
+    </Tab>
+  );
+};
+
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
 }
@@ -412,8 +478,11 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
               </Form>
             </Col>
           </Row>
-          <Tabs>
+          <Tabs
+            tabsOrder={["device-location-tab", "device-wifi-scan-results-tab"]}
+          >
             <DeviceLocationTab deviceRef={device} />
+            <DeviceWiFiScanResultsTab deviceRef={device} />
           </Tabs>
         </Stack>
       </Page.Main>

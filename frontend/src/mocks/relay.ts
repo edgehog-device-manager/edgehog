@@ -58,6 +58,15 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-11T09:43:54.437Z",
     };
   },
+  WifiScanResult() {
+    return {
+      channel: 1,
+      essid: "MyWifi",
+      macAddress: "00:11:22:33:44:55",
+      rssi: -50,
+      timestamp: "2021-11-16T10:43:54.437Z",
+    };
+  },
 };
 
 export { relayMockResolvers };
