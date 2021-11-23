@@ -19,6 +19,13 @@
 import { MockPayloadGenerator } from "relay-test-utils";
 
 const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
+  ApplianceModel() {
+    return {
+      handle: "esp32-dev-kit-c",
+      name: "ESP32-DevKitC",
+      partNumbers: ["AM_0000001"],
+    };
+  },
   Device() {
     return {
       deviceId: "DqL4H107S42WBEHmDrvPLQ",
@@ -39,7 +46,7 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
     return {
       handle: "esp32",
       name: "ESP32",
-      partNumbers: ["PN_0000001"],
+      partNumbers: ["HT_0000001"],
     };
   },
   DeviceLocation() {

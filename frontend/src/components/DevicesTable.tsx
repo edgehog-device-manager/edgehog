@@ -32,6 +32,12 @@ type DeviceProps = {
   lastDisconnection: string | null;
   name: string;
   online: boolean;
+  applianceModel: {
+    name: string;
+    hardwareType: {
+      name: string;
+    };
+  } | null;
 };
 
 const columns: Column<DeviceProps>[] = [
@@ -76,6 +82,26 @@ const columns: Column<DeviceProps>[] = [
       />
     ),
     sortType: "basic",
+  },
+  {
+    id: "applianceModel",
+    accessor: (device) => device.applianceModel?.name,
+    Header: (
+      <FormattedMessage
+        id="Device.applianceModel"
+        defaultMessage="Appliance Model"
+      />
+    ),
+  },
+  {
+    id: "hardwareType",
+    accessor: (device) => device.applianceModel?.hardwareType.name,
+    Header: (
+      <FormattedMessage
+        id="Device.hardwareType"
+        defaultMessage="Hardware Type"
+      />
+    ),
   },
   {
     id: "lastSeen",

@@ -79,6 +79,12 @@ const GET_DEVICE_QUERY = graphql`
       lastDisconnection
       name
       online
+      applianceModel {
+        name
+        hardwareType {
+          name
+        }
+      }
       ...Device_hardwareInfo
       ...Device_location
     }
@@ -337,6 +343,40 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       readOnly
                     />
                   </FormRow>
+                  {device.applianceModel && (
+                    <>
+                      <FormRow
+                        id="form-device-appliance-model"
+                        label={
+                          <FormattedMessage
+                            id="Device.applianceModel"
+                            defaultMessage="Appliance Model"
+                          />
+                        }
+                      >
+                        <Form.Control
+                          type="text"
+                          value={device.applianceModel.name}
+                          readOnly
+                        />
+                      </FormRow>
+                      <FormRow
+                        id="form-device-hardware-type"
+                        label={
+                          <FormattedMessage
+                            id="Device.hardwareType"
+                            defaultMessage="Hardware Type"
+                          />
+                        }
+                      >
+                        <Form.Control
+                          type="text"
+                          value={device.applianceModel.hardwareType.name}
+                          readOnly
+                        />
+                      </FormRow>
+                    </>
+                  )}
                   <DeviceHardwareInfo deviceRef={device} />
                   <FormRow
                     id="form-device-connection-status"

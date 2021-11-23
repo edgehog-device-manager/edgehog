@@ -45,6 +45,10 @@ be converted to UTC if there is an offset.
 scalar DateTime
 
 type Device implements Node {
+  """
+  The appliance model of the device.
+  """
+  applianceModel: ApplianceModel
   deviceId: String!
   hardwareInfo: HardwareInfo
 
@@ -58,6 +62,17 @@ type Device implements Node {
   name: String!
   online: Boolean!
   wifiScanResults: [WifiScanResult!]
+}
+
+input DeviceFilter {
+  applianceModelHandle: String
+  applianceModelName: String
+  applianceModelPartNumber: String
+  deviceId: String
+  hardwareTypeHandle: String
+  hardwareTypeName: String
+  hardwareTypePartNumber: String
+  online: Boolean
 }
 
 type DeviceLocation {
@@ -117,7 +132,7 @@ type RootQueryType {
   """
   List devices
   """
-  devices: [Device!]!
+  devices(filter: DeviceFilter): [Device!]!
   hardwareType(id: ID!): HardwareType
   hardwareTypes: [HardwareType!]!
   node(

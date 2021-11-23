@@ -1,4 +1,7 @@
 {
+  "Device.applianceModel": {
+    "defaultMessage": "Appliance Model"
+  },
   "Device.connectionStatus": {
     "defaultMessage": "Connection"
   },
@@ -19,6 +22,9 @@
   },
   "Device.hardwareInfo.memoryTotalBytes": {
     "defaultMessage": "Total memory"
+  },
+  "Device.hardwareType": {
+    "defaultMessage": "Hardware Type"
   },
   "Device.lastSeen": {
     "defaultMessage": "Last seen"

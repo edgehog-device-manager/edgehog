@@ -17,6 +17,7 @@
 #
 
 alias Edgehog.{
+  Appliances,
   Astarte,
   Tenants
 }
@@ -33,5 +34,23 @@ _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 
 {:ok, realm} = Astarte.create_realm(cluster, %{name: "test", private_key: "notaprivatekey"})
 
+{:ok, hardware_type} =
+  Appliances.create_hardware_type(%{
+    handle: "some-hardware-type",
+    name: "Some hardware type",
+    part_numbers: ["HT-1234"]
+  })
+
+{:ok, appliance_model} =
+  Appliances.create_appliance_model(hardware_type, %{
+    handle: "some-appliance-model",
+    name: "Some appliance model",
+    part_numbers: ["AM-1234"]
+  })
+
 {:ok, _device} =
-  Astarte.create_device(realm, %{name: "Thingie", device_id: "DqL4H107S42WBEHmDrvPLQ"})
+  Astarte.create_device(realm, %{
+    name: "Thingie",
+    device_id: "DqL4H107S42WBEHmDrvPLQ",
+    part_number: "AM-1234"
+  })

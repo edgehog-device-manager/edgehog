@@ -16,6 +16,12 @@ export type Device_getDevice_QueryResponse = {
         readonly lastDisconnection: string | null;
         readonly name: string;
         readonly online: boolean;
+        readonly applianceModel: {
+            readonly name: string;
+            readonly hardwareType: {
+                readonly name: string;
+            };
+        } | null;
         readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_location">;
     } | null;
 };
@@ -37,6 +43,14 @@ query Device_getDevice_Query(
     lastDisconnection
     name
     online
+    applianceModel {
+      name
+      hardwareType {
+        name
+        id
+      }
+      id
+    }
     ...Device_hardwareInfo
     ...Device_location
   }
@@ -142,6 +156,30 @@ return {
           (v6/*: any*/),
           (v7/*: any*/),
           {
+            "alias": null,
+            "args": null,
+            "concreteType": "ApplianceModel",
+            "kind": "LinkedField",
+            "name": "applianceModel",
+            "plural": false,
+            "selections": [
+              (v6/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "HardwareType",
+                "kind": "LinkedField",
+                "name": "hardwareType",
+                "plural": false,
+                "selections": [
+                  (v6/*: any*/)
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
             "args": null,
             "kind": "FragmentSpread",
             "name": "Device_hardwareInfo"
@@ -178,6 +216,32 @@ return {
           (v5/*: any*/),
           (v6/*: any*/),
           (v7/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "ApplianceModel",
+            "kind": "LinkedField",
+            "name": "applianceModel",
+            "plural": false,
+            "selections": [
+              (v6/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "HardwareType",
+                "kind": "LinkedField",
+                "name": "hardwareType",
+                "plural": false,
+                "selections": [
+                  (v6/*: any*/),
+                  (v2/*: any*/)
+                ],
+                "storageKey": null
+              },
+              (v2/*: any*/)
+            ],
+            "storageKey": null
+          },
           {
             "alias": null,
             "args": null,
@@ -276,14 +340,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "5b0c99ccb978fa5c8bb55b3f5d81f3fc",
+    "cacheID": "89831941bd6285468fe43264c791bd17",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    ...Device_hardwareInfo\n    ...Device_location\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    applianceModel {\n      name\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_location\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '8c7f2b5c793646afd41cf161458dcedf';
+(node as any).hash = '459ff9d7db3b20242da30cf4088cff44';
 export default node;
