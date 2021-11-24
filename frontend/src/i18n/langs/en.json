@@ -139,6 +139,15 @@
   "components.Sidebar.modelsLabel": {
     "defaultMessage": "Appliance Models"
   },
+  "components.StorageTable.freeSpaceTitle": {
+    "defaultMessage": "Free Space"
+  },
+  "components.StorageTable.labelTitle": {
+    "defaultMessage": "Storage Unit"
+  },
+  "components.StorageTable.totalSpaceTitle": {
+    "defaultMessage": "Total Space"
+  },
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
   },
@@ -237,6 +246,15 @@
   },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
+  },
+  "pages.Device.storageTab": {
+    "defaultMessage": "Storage"
+  },
+  "pages.Device.storageTab.noResults.message": {
+    "defaultMessage": "The device has not detected any storage unit yet."
+  },
+  "pages.Device.storageTab.noStorage.title": {
+    "defaultMessage": "No storage"
   },
   "pages.Device.wifiScanResultsTab": {
     "defaultMessage": "WiFi APs"
