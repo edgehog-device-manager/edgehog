@@ -107,6 +107,9 @@
   "components.CreateApplianceModelForm.partNumbersLabel": {
     "defaultMessage": "Part Numbers"
   },
+  "components.CreateApplianceModelForm.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "components.CreateApplianceModelForm.submitButton": {
     "defaultMessage": "Create"
   },
@@ -204,6 +207,9 @@
   },
   "components.UpdateApplianceModelForm.partNumbersLabel": {
     "defaultMessage": "Part Numbers"
+  },
+  "components.UpdateApplianceModelForm.resetButton": {
+    "defaultMessage": "Reset"
   },
   "components.UpdateApplianceModelForm.submitButton": {
     "defaultMessage": "Update"
