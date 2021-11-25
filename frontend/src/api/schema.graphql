@@ -45,6 +45,11 @@ type ApplianceModel implements Node {
   The list of part numbers associated with the appliance model.
   """
   partNumbers: [String!]!
+
+  """
+  The URL of the related picture.
+  """
+  pictureUrl: String
 }
 
 """
@@ -139,6 +144,21 @@ input CreateApplianceModelInput {
   The list of part numbers associated with the appliance model.
   """
   partNumbers: [String!]!
+
+  """
+  The file blob of a related picture.
+
+  When this field is specified, the pictureUrl field is ignored.
+  """
+  pictureFile: Upload
+
+  """
+  The file URL of a related picture.
+
+  Specifying a null value will remove the existing picture.
+  When the pictureFile field is specified, this field is ignored.
+  """
+  pictureUrl: String
 }
 
 type CreateApplianceModelPayload {
@@ -625,6 +645,21 @@ input UpdateApplianceModelInput {
   The list of part numbers associated with the appliance model.
   """
   partNumbers: [String!]
+
+  """
+  The file blob of a related picture.
+
+  When this field is specified, the pictureUrl field is ignored.
+  """
+  pictureFile: Upload
+
+  """
+  The file URL of a related picture.
+
+  Specifying a null value will remove the existing picture.
+  When the pictureFile field is specified, this field is ignored.
+  """
+  pictureUrl: String
 }
 
 type UpdateApplianceModelPayload {
@@ -664,6 +699,11 @@ type UpdateHardwareTypePayload {
   """
   hardwareType: HardwareType!
 }
+
+"""
+Represents an uploaded file.
+"""
+scalar Upload
 
 """
 Describes the list of WiFi Access Points found by the device.
