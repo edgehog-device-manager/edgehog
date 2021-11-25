@@ -133,6 +133,7 @@ const GET_DEVICE_QUERY = graphql`
       online
       applianceModel {
         name
+        pictureUrl
         hardwareType {
           name
         }
@@ -639,7 +640,10 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
           <Row>
             <Col md="5" lg="4" xl="3">
               <div>
-                <Figure alt={device.name} />
+                <Figure
+                  alt={device.name}
+                  src={device.applianceModel?.pictureUrl || undefined}
+                />
               </div>
             </Col>
             <Col md="7" lg="8" xl="9">
