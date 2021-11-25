@@ -30,7 +30,7 @@ defmodule Edgehog.Appliances.ApplianceModel do
     field :tenant_id, :id
     belongs_to :hardware_type, HardwareType
     has_many :part_numbers, ApplianceModelPartNumber, on_replace: :delete
-    has_many :descriptions, ApplianceModelDescription
+    has_many :descriptions, ApplianceModelDescription, on_replace: :delete
 
     timestamps()
   end
@@ -46,5 +46,6 @@ defmodule Edgehog.Appliances.ApplianceModel do
     )
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
+    |> cast_assoc(:descriptions)
   end
 end

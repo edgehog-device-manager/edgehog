@@ -99,6 +99,7 @@ defmodule Edgehog.AppliancesTest do
   describe "appliance_models" do
     alias Edgehog.Appliances.ApplianceModel
     alias Edgehog.Appliances.ApplianceModelPartNumber
+    alias Edgehog.Appliances.ApplianceModelDescription
 
     import Edgehog.AppliancesFixtures
 
@@ -139,11 +140,39 @@ defmodule Edgehog.AppliancesTest do
       assert [%ApplianceModelPartNumber{part_number: "1234-rev4"}] = appliance_model.part_numbers
     end
 
+    test "create_appliance_model/1 saves descriptions", %{hardware_type: hardware_type} do
+      valid_attrs = %{
+        handle: "some-handle",
+        name: "some name",
+        part_numbers: ["1234-rev4"],
+        descriptions: [%{locale: "en-US", text: "Yadda"}]
+      }
+
+      assert {:ok, %ApplianceModel{} = appliance_model} =
+               Appliances.create_appliance_model(hardware_type, valid_attrs)
+
+      assert [%ApplianceModelDescription{text: "Yadda", locale: "en-US"}] =
+               appliance_model.descriptions
+    end
+
     test "create_appliance_model/1 with invalid data returns error changeset", %{
       hardware_type: hardware_type
     } do
       assert {:error, %Ecto.Changeset{}} =
                Appliances.create_appliance_model(hardware_type, @invalid_attrs)
+    end
+
+    test "create_appliance_model/1 with invalid description returns error changeset", %{
+      hardware_type: hardware_type
+    } do
+      attrs = %{
+        handle: "some-handle",
+        name: "some name",
+        part_numbers: ["1234-rev4"],
+        descriptions: [%{locale: "INVALID_loc4le", text: "Yadda"}]
+      }
+
+      assert {:error, %Ecto.Changeset{}} = Appliances.create_appliance_model(hardware_type, attrs)
     end
 
     test "create_appliance_model/1 with invalid handle returns error changeset", %{
@@ -175,12 +204,16 @@ defmodule Edgehog.AppliancesTest do
     test "update_appliance_model/2 with valid data updates the appliance_model", %{
       hardware_type: hardware_type
     } do
-      appliance_model = appliance_model_fixture(hardware_type)
+      appliance_model =
+        appliance_model_fixture(hardware_type,
+          descriptions: [%{locale: "en-US", text: "Yadda"}]
+        )
 
       update_attrs = %{
         handle: "some-updated-handle",
         name: "some updated name",
-        part_numbers: ["1234-rev5"]
+        part_numbers: ["1234-rev5"],
+        descriptions: [%{locale: "en-US", text: "Yadda yadda"}]
       }
 
       assert {:ok, %ApplianceModel{} = appliance_model} =

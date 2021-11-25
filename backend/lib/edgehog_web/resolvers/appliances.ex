@@ -71,18 +71,56 @@ defmodule EdgehogWeb.Resolvers.Appliances do
     {:ok, part_numbers}
   end
 
-  def create_appliance_model(_parent, %{hardware_type_id: hw_type_id} = attrs, _context) do
+  def create_appliance_model(_parent, %{hardware_type_id: hw_type_id} = attrs, %{
+        context: %{current_tenant: current_tenant}
+      }) do
+    default_locale = current_tenant.default_locale
+
     with {:ok, hardware_type} <- Appliances.fetch_hardware_type(hw_type_id),
-         {:ok, appliance_model} <- Appliances.create_appliance_model(hardware_type, attrs) do
+         :ok <- check_description_locale(attrs[:description], default_locale),
+         attrs = wrap_description(attrs),
+         {:ok, appliance_model} <-
+           Appliances.create_appliance_model(hardware_type, attrs) do
+      appliance_model =
+        appliance_model
+        |> Appliances.preload_localized_descriptions_for_appliance_model(default_locale)
+
       {:ok, %{appliance_model: appliance_model}}
     end
   end
 
-  def update_appliance_model(_parent, %{appliance_model_id: id} = attrs, _context) do
+  def update_appliance_model(_parent, %{appliance_model_id: id} = attrs, %{
+        context: %{current_tenant: current_tenant}
+      }) do
+    default_locale = current_tenant.default_locale
+
     with {:ok, %ApplianceModel{} = appliance_model} <- Appliances.fetch_appliance_model(id),
+         :ok <- check_description_locale(attrs[:description], default_locale),
+         attrs = wrap_description(attrs),
+         appliance_model =
+           appliance_model
+           |> Appliances.preload_localized_descriptions_for_appliance_model(default_locale),
          {:ok, %ApplianceModel{} = appliance_model} <-
            Appliances.update_appliance_model(appliance_model, attrs) do
+      appliance_model =
+        appliance_model
+        |> Appliances.preload_localized_descriptions_for_appliance_model(default_locale)
+
       {:ok, %{appliance_model: appliance_model}}
     end
   end
+
+  # Only allow a description that uses the tenant default locale in {create,update}_appliance_model
+  defp check_description_locale(nil, _default_locale), do: :ok
+  defp check_description_locale(%{locale: default_locale}, default_locale), do: :ok
+  defp check_description_locale(%{locale: _other}, _default), do: {:error, :not_default_locale}
+
+  # If it's there, wraps description to descriptions, as {create,update}_appliance_model expects a list
+  defp wrap_description(%{description: description} = attrs) do
+    attrs
+    |> Map.delete(:description)
+    |> Map.put(:descriptions, [description])
+  end
+
+  defp wrap_description(attrs), do: attrs
 end

@@ -66,6 +66,14 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
     field :part_numbers, non_null(list_of(non_null(:string))) do
       resolve &Resolvers.Appliances.extract_appliance_model_part_numbers/3
     end
+
+    @desc """
+    A localized description of the appliance model.
+    The language of the description can be controlled passing an \
+    Accept-Language header in the request. If no such header is present, the \
+    default tenant language is returned.
+    """
+    field :description, :localized_text
   end
 
   object :appliances_queries do
@@ -177,6 +185,12 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
         model.
         """
         field :hardware_type_id, non_null(:id)
+
+        @desc """
+        An optional localized description. This description can only use the \
+        default tenant locale.
+        """
+        field :description, :localized_text_input
       end
 
       output do
@@ -208,6 +222,12 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
 
         @desc "The list of part numbers associated with the appliance model."
         field :part_numbers, list_of(non_null(:string))
+
+        @desc """
+        An optional localized description. This description can only use the \
+        default tenant locale.
+        """
+        field :description, :localized_text_input
       end
 
       output do
