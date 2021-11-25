@@ -16,13 +16,15 @@
   limitations under the License.
 */
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
+import CloseButton from "components/CloseButton";
 import Col from "components/Col";
+import Figure from "components/Figure";
 import Form from "components/Form";
 import Icon from "components/Icon";
 import Row from "components/Row";
@@ -50,6 +52,20 @@ const FormRow = ({
 type ApplianceModelData = {
   name: string;
   handle: string;
+  description: {
+    locale: string;
+    text: string;
+  } | null;
+  hardwareType: {
+    name: string;
+  };
+  partNumbers: string[];
+  pictureUrl: string | null;
+};
+
+type ApplianceModelChanges = {
+  name: string;
+  handle: string;
   description?: {
     locale: string;
     text: string;
@@ -58,6 +74,8 @@ type ApplianceModelData = {
     name: string;
   };
   partNumbers: string[];
+  pictureFile?: File;
+  pictureUrl?: string | null;
 };
 
 type PartNumber = { value: string };
@@ -68,6 +86,7 @@ type FormData = {
   description: string;
   hardwareType: string;
   partNumbers: PartNumber[];
+  pictureFile?: FileList | null;
 };
 
 const applianceModelSchema = yup
@@ -108,8 +127,8 @@ const transformInputData = (data: ApplianceModelData): FormData => ({
 const transformOutputData = (
   locale: string,
   data: FormData
-): ApplianceModelData => {
-  let applianceModel: ApplianceModelData = {
+): ApplianceModelChanges => {
+  let applianceModel: ApplianceModelChanges = {
     name: data.name,
     handle: data.handle,
     hardwareType: {
@@ -117,6 +136,12 @@ const transformOutputData = (
     },
     partNumbers: data.partNumbers.map((pn) => pn.value),
   };
+
+  if (data.pictureFile) {
+    applianceModel.pictureFile = data.pictureFile[0];
+  } else if (data.pictureFile === null) {
+    applianceModel.pictureUrl = null;
+  }
 
   if (data.description) {
     applianceModel.description = {
@@ -128,16 +153,11 @@ const transformOutputData = (
   return applianceModel;
 };
 
-type HardwareTypeOption = {
-  name: string;
-  handle: string;
-};
-
 type Props = {
   initialData: ApplianceModelData;
   locale: string;
   isLoading?: boolean;
-  onSubmit: (data: ApplianceModelData) => void;
+  onSubmit: (data: ApplianceModelChanges) => void;
 };
 
 const UpdateApplianceModelForm = ({
@@ -146,12 +166,14 @@ const UpdateApplianceModelForm = ({
   isLoading = false,
   onSubmit,
 }: Props) => {
-  const intl = useIntl();
   const {
     control,
     register,
+    reset,
+    setValue,
     handleSubmit,
-    formState: { errors },
+    formState: { isDirty, errors },
+    watch,
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: transformInputData(initialData),
@@ -181,126 +203,183 @@ const UpdateApplianceModelForm = ({
     [partNumbers]
   );
 
+  useEffect(() => {
+    reset(transformInputData(initialData));
+  }, [initialData, reset]);
+
+  const pictureFile = watch("pictureFile");
+  const picture =
+    pictureFile instanceof FileList && pictureFile.length > 0
+      ? URL.createObjectURL(pictureFile[0]) // picture is the new file
+      : pictureFile === null
+      ? null // picture is removed
+      : initialData.pictureUrl; // picture is unchanged
+
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
-        <FormRow
-          id="appliance-model-form-name"
-          label={
-            <FormattedMessage
-              id="components.UpdateApplianceModelForm.nameLabel"
-              defaultMessage="Name"
-            />
-          }
-        >
-          <Form.Control {...register("name")} isInvalid={!!errors.name} />
-          <Form.Control.Feedback type="invalid">
-            {errors.name?.message && (
-              <FormattedMessage id={errors.name?.message} />
-            )}
-          </Form.Control.Feedback>
-        </FormRow>
-        <FormRow
-          id="appliance-model-form-handle"
-          label={
-            <FormattedMessage
-              id="components.UpdateApplianceModelForm.handleLabel"
-              defaultMessage="Handle"
-            />
-          }
-        >
-          <Form.Control {...register("handle")} isInvalid={!!errors.handle} />
-          <Form.Control.Feedback type="invalid">
-            {errors.handle?.message && (
-              <FormattedMessage id={errors.handle?.message} />
-            )}
-          </Form.Control.Feedback>
-        </FormRow>
-        <FormRow
-          id="appliance-model-form-description"
-          label={
-            <>
-              <FormattedMessage
-                id="components.CreateApplianceModelForm.descriptionLabel"
-                defaultMessage="Description"
-              />
-              <span className="small text-muted"> ({locale})</span>
-            </>
-          }
-        >
-          <Form.Control as="textarea" {...register("description")} />
-        </FormRow>
-        <FormRow
-          id="appliance-model-form-hardware-type"
-          label={
-            <FormattedMessage
-              id="components.UpdateApplianceModelForm.hardwareTypeLabel"
-              defaultMessage="Hardware Type"
-            />
-          }
-        >
-          <Form.Control {...register("hardwareType")} plaintext readOnly />
-        </FormRow>
-        <FormRow
-          id="appliance-model-form-part-numbers"
-          label={
-            <FormattedMessage
-              id="components.UpdateApplianceModelForm.partNumbersLabel"
-              defaultMessage="Part Numbers"
-            />
-          }
-        >
-          <Stack gap={3}>
-            {partNumbers.fields.map((partNumber, index) => (
-              <Stack direction="horizontal" gap={3} key={partNumber.id}>
-                <Stack>
-                  <Form.Control
-                    {...register(`partNumbers.${index}.value`)}
-                    isInvalid={!!errors.partNumbers?.[index]}
+        <Row>
+          <Col md="5" lg="4" xl="3">
+            <Stack>
+              <div className="d-flex justify-content-end">
+                {picture && (
+                  <CloseButton
+                    className="position-absolute bg-white border"
+                    onClick={() => setValue("pictureFile", null)}
                   />
-                  <Form.Control.Feedback type="invalid">
-                    {errors.partNumbers?.[index]?.value?.message && (
-                      <FormattedMessage
-                        id={errors.partNumbers?.[index]?.value?.message}
-                      />
-                    )}
-                  </Form.Control.Feedback>
+                )}
+                <Figure alt={initialData.name} src={picture || undefined} />
+              </div>
+              <Form.Group controlId="pictureFile">
+                <Form.Control
+                  type="file"
+                  accept=".jpg,.jpeg,.gif,.png,.svg"
+                  {...register("pictureFile")}
+                />
+              </Form.Group>
+            </Stack>
+          </Col>
+          <Col md="7" lg="8" xl="9">
+            <Stack gap={3}>
+              <FormRow
+                id="appliance-model-form-name"
+                label={
+                  <FormattedMessage
+                    id="components.UpdateApplianceModelForm.nameLabel"
+                    defaultMessage="Name"
+                  />
+                }
+              >
+                <Form.Control {...register("name")} isInvalid={!!errors.name} />
+                <Form.Control.Feedback type="invalid">
+                  {errors.name?.message && (
+                    <FormattedMessage id={errors.name?.message} />
+                  )}
+                </Form.Control.Feedback>
+              </FormRow>
+              <FormRow
+                id="appliance-model-form-handle"
+                label={
+                  <FormattedMessage
+                    id="components.UpdateApplianceModelForm.handleLabel"
+                    defaultMessage="Handle"
+                  />
+                }
+              >
+                <Form.Control
+                  {...register("handle")}
+                  isInvalid={!!errors.handle}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.handle?.message && (
+                    <FormattedMessage id={errors.handle?.message} />
+                  )}
+                </Form.Control.Feedback>
+              </FormRow>
+              <FormRow
+                id="appliance-model-form-description"
+                label={
+                  <>
+                    <FormattedMessage
+                      id="components.CreateApplianceModelForm.descriptionLabel"
+                      defaultMessage="Description"
+                    />
+                    <span className="small text-muted"> ({locale})</span>
+                  </>
+                }
+              >
+                <Form.Control as="textarea" {...register("description")} />
+              </FormRow>
+              <FormRow
+                id="appliance-model-form-hardware-type"
+                label={
+                  <FormattedMessage
+                    id="components.UpdateApplianceModelForm.hardwareTypeLabel"
+                    defaultMessage="Hardware Type"
+                  />
+                }
+              >
+                <Form.Control
+                  {...register("hardwareType")}
+                  plaintext
+                  readOnly
+                />
+              </FormRow>
+              <FormRow
+                id="appliance-model-form-part-numbers"
+                label={
+                  <FormattedMessage
+                    id="components.UpdateApplianceModelForm.partNumbersLabel"
+                    defaultMessage="Part Numbers"
+                  />
+                }
+              >
+                <Stack gap={3}>
+                  {partNumbers.fields.map((partNumber, index) => (
+                    <Stack direction="horizontal" gap={3} key={partNumber.id}>
+                      <Stack>
+                        <Form.Control
+                          {...register(`partNumbers.${index}.value`)}
+                          isInvalid={!!errors.partNumbers?.[index]}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.partNumbers?.[index]?.value?.message && (
+                            <FormattedMessage
+                              id={errors.partNumbers?.[index]?.value?.message}
+                            />
+                          )}
+                        </Form.Control.Feedback>
+                      </Stack>
+                      <Button
+                        className="mb-auto"
+                        variant="danger"
+                        onClick={() => handleDeletePartNumber(index)}
+                      >
+                        <Icon icon="delete" />
+                      </Button>
+                    </Stack>
+                  ))}
+                  <Button
+                    className="me-auto"
+                    variant="secondary"
+                    onClick={handleAddPartNumber}
+                  >
+                    <FormattedMessage
+                      id="components.UpdateApplianceModelForm.addPartNumberButton"
+                      defaultMessage="Add part number"
+                    />
+                  </Button>
                 </Stack>
-                <Button
-                  className="mb-auto"
-                  variant="danger"
-                  onClick={() => handleDeletePartNumber(index)}
-                >
-                  <Icon icon="delete" />
-                </Button>
-              </Stack>
-            ))}
+              </FormRow>
+            </Stack>
+          </Col>
+        </Row>
+        <div className="d-flex justify-content-end align-items-center">
+          <Stack direction="horizontal" gap={3}>
             <Button
-              className="me-auto"
+              disabled={!isDirty}
               variant="secondary"
-              onClick={handleAddPartNumber}
+              onClick={() => reset()}
             >
               <FormattedMessage
-                id="components.UpdateApplianceModelForm.addPartNumberButton"
-                defaultMessage="Add part number"
+                id="components.UpdateApplianceModelForm.resetButton"
+                defaultMessage="Reset"
+              />
+            </Button>
+            <Button variant="primary" type="submit" disabled={isLoading}>
+              {isLoading && <Spinner size="sm" className="me-2" />}
+              <FormattedMessage
+                id="components.UpdateApplianceModelForm.submitButton"
+                defaultMessage="Update"
               />
             </Button>
           </Stack>
-        </FormRow>
-        <div className="d-flex justify-content-end align-items-center">
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading && <Spinner size="sm" className="me-2" />}
-            <FormattedMessage
-              id="components.UpdateApplianceModelForm.submitButton"
-              defaultMessage="Update"
-            />
-          </Button>
         </div>
       </Stack>
     </form>
   );
 };
 
-export type { ApplianceModelData };
+export type { ApplianceModelData, ApplianceModelChanges };
 
 export default UpdateApplianceModelForm;

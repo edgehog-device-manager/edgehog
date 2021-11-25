@@ -10,6 +10,8 @@ export type CreateApplianceModelInput = {
     hardwareTypeId: string;
     name: string;
     partNumbers: Array<string>;
+    pictureFile?: File | null | undefined;
+    pictureUrl?: string | null | undefined;
 };
 export type LocalizedTextInput = {
     locale: string;

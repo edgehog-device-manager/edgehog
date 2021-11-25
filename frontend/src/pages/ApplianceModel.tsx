@@ -39,7 +39,10 @@ import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import UpdateApplianceModelForm from "forms/UpdateApplianceModel";
-import type { ApplianceModelData } from "forms/UpdateApplianceModel";
+import type {
+  ApplianceModelChanges,
+  ApplianceModelData,
+} from "forms/UpdateApplianceModel";
 
 const GET_APPLIANCE_MODEL_QUERY = graphql`
   query ApplianceModel_getApplianceModel_Query($id: ID!) {
@@ -52,9 +55,11 @@ const GET_APPLIANCE_MODEL_QUERY = graphql`
         text
       }
       hardwareType {
+        id
         name
       }
       partNumbers
+      pictureUrl
     }
   }
 `;
@@ -76,17 +81,26 @@ const UPDATE_APPLIANCE_MODEL_MUTATION = graphql`
         id
         name
         handle
+        description {
+          locale
+          text
+        }
         hardwareType {
+          id
           name
         }
         partNumbers
+        pictureUrl
       }
     }
   }
 `;
 
-const applianceModelDiff = (a1: ApplianceModelData, a2: ApplianceModelData) => {
-  let diff: Partial<ApplianceModelData> = {};
+const applianceModelDiff = (
+  a1: ApplianceModelData,
+  a2: ApplianceModelChanges
+) => {
+  let diff: Partial<ApplianceModelChanges> = {};
   if (a1.name !== a2.name) {
     diff.name = a2.name;
   }
@@ -98,6 +112,11 @@ const applianceModelDiff = (a1: ApplianceModelData, a2: ApplianceModelData) => {
   }
   if (!_.isEqual(a1.description, a2.description)) {
     diff.description = a2.description;
+  }
+  if ("pictureFile" in a2 && a2.pictureFile) {
+    diff.pictureFile = a2.pictureFile;
+  } else if (!_.isEqual(a1.pictureUrl, a2.pictureUrl)) {
+    diff.pictureUrl = a2.pictureUrl;
   }
   return diff;
 };
@@ -111,7 +130,6 @@ const ApplianceModelContent = ({
   getApplianceModelQuery,
   getDefaultTenantLocaleQuery,
 }: ApplianceModelContentProps) => {
-  const { applianceModelId = "" } = useParams();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const applianceModelData = usePreloadedQuery(
@@ -130,37 +148,30 @@ const ApplianceModelContent = ({
 
   // TODO: handle readonly type without mapping to mutable type
   const applianceModel = useMemo(() => {
-    if (!applianceModelData.applianceModel) {
+    const applianceModel = applianceModelData.applianceModel;
+    if (!applianceModel) {
       return null;
     }
-    const applianceModel = applianceModelData.applianceModel;
-    let mutableApplianceModel: ApplianceModelData = {
-      name: applianceModel.name,
-      handle: applianceModel.handle,
+    return {
+      ...applianceModel,
       hardwareType: { ...applianceModel.hardwareType },
       partNumbers: [...applianceModel.partNumbers],
     };
-    if (applianceModel.description) {
-      mutableApplianceModel.description = {
-        locale: applianceModel.description.locale,
-        text: applianceModel.description.text,
-      };
-    }
-    return mutableApplianceModel;
   }, [applianceModelData.applianceModel]);
+
   const locale = useMemo(
     () => defaultLocaleData.tenantInfo.defaultLocale,
     [defaultLocaleData]
   );
 
   const handleUpdateApplianceModel = useCallback(
-    (updatedApplianceModel: ApplianceModelData) => {
+    (applianceModelChanges: ApplianceModelChanges) => {
       if (!applianceModel) {
         return null;
       }
       const input = {
-        applianceModelId,
-        ...applianceModelDiff(applianceModel, updatedApplianceModel),
+        applianceModelId: applianceModel.id,
+        ...applianceModelDiff(applianceModel, applianceModelChanges),
       };
       updateApplianceModel({
         variables: { input },
@@ -179,6 +190,26 @@ const ApplianceModelContent = ({
               defaultMessage="Could not update the appliance model, please try again."
             />
           );
+        },
+        optimisticResponse: {
+          updateApplianceModel: {
+            applianceModel: {
+              ...applianceModel!,
+              ..._.pick(applianceModelChanges, [
+                "name",
+                "handle",
+                "partNumbers",
+                "description",
+              ]),
+              pictureUrl:
+                applianceModelChanges.pictureFile instanceof File
+                  ? URL.createObjectURL(applianceModelChanges.pictureFile)
+                  : _.isString(applianceModelChanges.pictureUrl) ||
+                    _.isNull(applianceModelChanges.pictureUrl)
+                  ? applianceModelChanges.pictureUrl
+                  : applianceModel.pictureUrl,
+            },
+          },
         },
       });
     },
