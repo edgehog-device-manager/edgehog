@@ -5,10 +5,15 @@
 import { ConcreteRequest } from "relay-runtime";
 
 export type CreateApplianceModelInput = {
+    description?: LocalizedTextInput | null | undefined;
     handle: string;
     hardwareTypeId: string;
     name: string;
     partNumbers: Array<string>;
+};
+export type LocalizedTextInput = {
+    locale: string;
+    text: string;
 };
 export type ApplianceModelCreate_createApplianceModel_MutationVariables = {
     input: CreateApplianceModelInput;
