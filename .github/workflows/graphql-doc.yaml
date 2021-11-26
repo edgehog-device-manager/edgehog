@@ -60,7 +60,7 @@ jobs:
       run: |
         git config --local user.email "edgehog-machine@ispirata.com"
         git config --local user.name "Edgehog Bot"
-        git add graphql-api-docs
+        git add .
         git commit -m "Update Documentation"
     - name: Push changes
       working-directory: ./docs
