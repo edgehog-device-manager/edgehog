@@ -26,10 +26,16 @@ export type ApplianceModelCreate_createApplianceModel_MutationResponse = {
             readonly id: string;
             readonly name: string;
             readonly handle: string;
+            readonly description: {
+                readonly locale: string;
+                readonly text: string;
+            } | null;
             readonly hardwareType: {
+                readonly id: string;
                 readonly name: string;
             };
             readonly partNumbers: ReadonlyArray<string>;
+            readonly pictureUrl: string | null;
         };
     } | null;
 };
@@ -49,11 +55,16 @@ mutation ApplianceModelCreate_createApplianceModel_Mutation(
       id
       name
       handle
+      description {
+        locale
+        text
+      }
       hardwareType {
-        name
         id
+        name
       }
       partNumbers
+      pictureUrl
     }
   }
 }
@@ -67,87 +78,118 @@ var v0 = [
     "name": "input"
   }
 ],
-v1 = [
-  {
-    "kind": "Variable",
-    "name": "input",
-    "variableName": "input"
-  }
-],
-v2 = {
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v3 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
-v4 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "handle",
-  "storageKey": null
-},
-v5 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "partNumbers",
-  "storageKey": null
-};
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "ApplianceModelCreate_createApplianceModel_Mutation",
+v3 = [
+  {
+    "alias": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "input",
+        "variableName": "input"
+      }
+    ],
+    "concreteType": "CreateApplianceModelPayload",
+    "kind": "LinkedField",
+    "name": "createApplianceModel",
+    "plural": false,
     "selections": [
       {
         "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "CreateApplianceModelPayload",
+        "args": null,
+        "concreteType": "ApplianceModel",
         "kind": "LinkedField",
-        "name": "createApplianceModel",
+        "name": "applianceModel",
         "plural": false,
         "selections": [
+          (v1/*: any*/),
+          (v2/*: any*/),
           {
             "alias": null,
             "args": null,
-            "concreteType": "ApplianceModel",
+            "kind": "ScalarField",
+            "name": "handle",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "LocalizedText",
             "kind": "LinkedField",
-            "name": "applianceModel",
+            "name": "description",
             "plural": false,
             "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v4/*: any*/),
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "HardwareType",
-                "kind": "LinkedField",
-                "name": "hardwareType",
-                "plural": false,
-                "selections": [
-                  (v3/*: any*/)
-                ],
+                "kind": "ScalarField",
+                "name": "locale",
                 "storageKey": null
               },
-              (v5/*: any*/)
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "text",
+                "storageKey": null
+              }
             ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "HardwareType",
+            "kind": "LinkedField",
+            "name": "hardwareType",
+            "plural": false,
+            "selections": [
+              (v1/*: any*/),
+              (v2/*: any*/)
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "partNumbers",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "pictureUrl",
             "storageKey": null
           }
         ],
         "storageKey": null
       }
     ],
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "ApplianceModelCreate_createApplianceModel_Mutation",
+    "selections": (v3/*: any*/),
     "type": "RootMutationType",
     "abstractKey": null
   },
@@ -156,57 +198,17 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "ApplianceModelCreate_createApplianceModel_Mutation",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "CreateApplianceModelPayload",
-        "kind": "LinkedField",
-        "name": "createApplianceModel",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "ApplianceModel",
-            "kind": "LinkedField",
-            "name": "applianceModel",
-            "plural": false,
-            "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v4/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "HardwareType",
-                "kind": "LinkedField",
-                "name": "hardwareType",
-                "plural": false,
-                "selections": [
-                  (v3/*: any*/),
-                  (v2/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v5/*: any*/)
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
-      }
-    ]
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "cbdbb635cfcec74bf4b17482554977ca",
+    "cacheID": "834882e6924982c9ec6abe63b39d65f8",
     "id": null,
     "metadata": {},
     "name": "ApplianceModelCreate_createApplianceModel_Mutation",
     "operationKind": "mutation",
-    "text": "mutation ApplianceModelCreate_createApplianceModel_Mutation(\n  $input: CreateApplianceModelInput!\n) {\n  createApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      hardwareType {\n        name\n        id\n      }\n      partNumbers\n    }\n  }\n}\n"
+    "text": "mutation ApplianceModelCreate_createApplianceModel_Mutation(\n  $input: CreateApplianceModelInput!\n) {\n  createApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      description {\n        locale\n        text\n      }\n      hardwareType {\n        id\n        name\n      }\n      partNumbers\n      pictureUrl\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = 'a62677a22f410b5881f3584a9bbbd80a';
+(node as any).hash = '48da81ed51d2f22a8c6525eb30bfe5a8';
 export default node;
