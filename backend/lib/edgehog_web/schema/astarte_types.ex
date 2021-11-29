@@ -141,6 +141,26 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   end
 
   @desc """
+  Describes the current status of the operating system of a device.
+  """
+  object :system_status do
+    @desc "The identifier of the performed boot sequence."
+    field :boot_id, :string
+
+    @desc "The number of free bytes of memory."
+    field :memory_free_bytes, :integer
+
+    @desc "The number of running tasks on the system."
+    field :task_count, :integer
+
+    @desc "The number of milliseconds since the last system boot."
+    field :uptime_milliseconds, :integer
+
+    @desc "The date at which the system status was read."
+    field :timestamp, non_null(:datetime)
+  end
+
+  @desc """
   Describes the list of WiFi Access Points found by the device.
   """
   object :wifi_scan_result do
@@ -202,6 +222,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The current usage of the storage units of the device."
     field :storage_usage, list_of(non_null(:storage_unit)) do
       resolve &Resolvers.Astarte.fetch_storage_usage/3
+      middleware Middleware.ErrorHandler
+    end
+
+    @desc "The current status of the operating system of the device."
+    field :system_status, :system_status do
+      resolve &Resolvers.Astarte.fetch_system_status/3
       middleware Middleware.ErrorHandler
     end
 

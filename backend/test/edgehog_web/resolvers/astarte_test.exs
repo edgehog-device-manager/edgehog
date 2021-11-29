@@ -22,7 +22,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
   use Edgehog.GeolocationMockCase
 
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-  alias Edgehog.Astarte.Device.WiFiScanResult
+  alias Edgehog.Astarte.Device.{SystemStatus, WiFiScanResult}
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
@@ -63,6 +63,20 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                  free_bytes: 281_360_704
                }
              ] == storage_units
+    end
+
+    test "fetch_system_status/3 returns the system status for a device", %{
+      device: device
+    } do
+      assert {:ok, system_status} = Astarte.fetch_system_status(device, %{}, %{})
+
+      assert %SystemStatus{
+               boot_id: "1c0cf72f-8428-4838-8626-1a748df5b889",
+               memory_free_bytes: 166_772,
+               task_count: 12,
+               uptime_milliseconds: 5785,
+               timestamp: ~U[2021-11-15 11:44:57.432516Z]
+             } == system_status
     end
 
     test "fetch_wifi_scan_results/3 returns the wifi scans for a device", %{

@@ -44,6 +44,13 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
+  def fetch_system_status(%Device{} = device, _args, _context) do
+    case Astarte.fetch_system_status(device) do
+      {:ok, system_status} -> {:ok, system_status}
+      _ -> {:ok, nil}
+    end
+  end
+
   def fetch_wifi_scan_results(%Device{} = device, _args, _context) do
     case Astarte.fetch_wifi_scan_results(device) do
       {:ok, wifi_scan_results} -> {:ok, wifi_scan_results}
