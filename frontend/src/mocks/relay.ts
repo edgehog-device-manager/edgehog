@@ -65,6 +65,15 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       freeBytes: 128435456,
     };
   },
+  SystemStatus() {
+    return {
+      bootId: "1c0cf72f-8428-4838-8626-1a748df5b889",
+      memoryFreeBytes: 166772,
+      taskCount: 12,
+      uptimeMilliseconds: 5785,
+      timestamp: "2021-11-15T11:44:57.432Z",
+    };
+  },
   WifiScanResult() {
     return {
       channel: 1,
