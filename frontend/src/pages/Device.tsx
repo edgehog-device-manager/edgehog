@@ -162,11 +162,11 @@ const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-interface DeviceHardwareInfoProps {
+interface DeviceHardwareInfoTabProps {
   deviceRef: Device_hardwareInfo$key;
 }
 
-const DeviceHardwareInfo = ({ deviceRef }: DeviceHardwareInfoProps) => {
+const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
   const { hardwareInfo } = useFragment(
     DEVICE_HARDWARE_INFO_FRAGMENT,
     deviceRef
@@ -175,85 +175,105 @@ const DeviceHardwareInfo = ({ deviceRef }: DeviceHardwareInfoProps) => {
     return null;
   }
   return (
-    <Stack gap={3}>
-      {hardwareInfo.cpuArchitecture != null && (
-        <FormRow
-          id="device-hardware-info-cpu-architecture"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuArchitecture"
-              defaultMessage="CPU architecture"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            value={hardwareInfo.cpuArchitecture}
-            readOnly
-          />
-        </FormRow>
-      )}
-      {hardwareInfo.cpuModel != null && (
-        <FormRow
-          id="device-hardware-info-cpu-model"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuModel"
-              defaultMessage="CPU model code"
-            />
-          }
-        >
-          <Form.Control type="text" value={hardwareInfo.cpuModel} readOnly />
-        </FormRow>
-      )}
-      {hardwareInfo.cpuModelName != null && (
-        <FormRow
-          id="device-hardware-info-cpu-model-name"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuModelName"
-              defaultMessage="CPU model name"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            value={hardwareInfo.cpuModelName}
-            readOnly
-          />
-        </FormRow>
-      )}
-      {hardwareInfo.cpuVendor != null && (
-        <FormRow
-          id="device-hardware-info-cpu-vendor"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuVendor"
-              defaultMessage="CPU vendor"
-            />
-          }
-        >
-          <Form.Control type="text" value={hardwareInfo.cpuVendor} readOnly />
-        </FormRow>
-      )}
-      {hardwareInfo.memoryTotalBytes != null && (
-        <FormRow
-          id="device-hardware-info-memory-total-bytes"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.memoryTotalBytes"
-              defaultMessage="Total memory"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            value={formatBytes(hardwareInfo.memoryTotalBytes)}
-            readOnly
-          />
-        </FormRow>
-      )}
-    </Stack>
+    <Tab
+      eventKey="device-hardware-info-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.hardwareInfoTab"
+          defaultMessage="Hardware Info"
+        />
+      }
+    >
+      <div className="mt-3">
+        <Stack gap={3}>
+          {hardwareInfo.cpuArchitecture != null && (
+            <FormRow
+              id="device-hardware-info-cpu-architecture"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuArchitecture"
+                  defaultMessage="CPU architecture"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuArchitecture}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.cpuModel != null && (
+            <FormRow
+              id="device-hardware-info-cpu-model"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuModel"
+                  defaultMessage="CPU model code"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuModel}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.cpuModelName != null && (
+            <FormRow
+              id="device-hardware-info-cpu-model-name"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuModelName"
+                  defaultMessage="CPU model name"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuModelName}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.cpuVendor != null && (
+            <FormRow
+              id="device-hardware-info-cpu-vendor"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuVendor"
+                  defaultMessage="CPU vendor"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuVendor}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.memoryTotalBytes != null && (
+            <FormRow
+              id="device-hardware-info-memory-total-bytes"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.memoryTotalBytes"
+                  defaultMessage="Total memory"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={formatBytes(hardwareInfo.memoryTotalBytes)}
+                readOnly
+              />
+            </FormRow>
+          )}
+        </Stack>
+      </div>
+    </Tab>
   );
 };
 
@@ -622,7 +642,6 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       </FormRow>
                     </>
                   )}
-                  <DeviceHardwareInfo deviceRef={device} />
                   <FormRow
                     id="form-device-connection-status"
                     label={
@@ -659,12 +678,14 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
           </Row>
           <Tabs
             tabsOrder={[
+              "device-hardware-info-tab",
               "device-system-status-tab",
               "device-storage-usage-tab",
               "device-location-tab",
               "device-wifi-scan-results-tab",
             ]}
           >
+            <DeviceHardwareInfoTab deviceRef={device} />
             <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />

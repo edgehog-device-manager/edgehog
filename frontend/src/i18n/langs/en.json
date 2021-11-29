@@ -253,6 +253,9 @@
   "pages.Device.geolocationTab": {
     "defaultMessage": "Geolocation"
   },
+  "pages.Device.hardwareInfoTab": {
+    "defaultMessage": "Hardware Info"
+  },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
   },
