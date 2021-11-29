@@ -181,6 +181,48 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   end
 
   @desc """
+  The current status of the battery.
+  """
+  enum :battery_status do
+    @desc "The battery is charging."
+    value :charging
+    @desc "The battery is discharging."
+    value :discharging
+    @desc "The battery is idle."
+    value :idle
+
+    @desc """
+    The battery is either in a charging or in an idle state, \
+    since the hardware doesn't allow to distinguish between them.
+    """
+    value :either_idle_or_charging
+    @desc "The battery is in a failed state."
+    value :failure
+    @desc "The battery is removed."
+    value :removed
+    @desc "The battery status cannot be determined."
+    value :unknown
+  end
+
+  @desc "Describes a battery slot of a device."
+  object :battery_slot do
+    @desc "The identifier of the battery slot."
+    field :slot, non_null(:string)
+
+    @desc "Battery level estimated percentage [0.0%-100.0%]"
+    field :level_percentage, :float
+
+    @desc "Battery level measurement absolute error [0.0-100.0]"
+    field :level_absolute_error, :float
+
+    @desc "The current status of the battery."
+    field :status, :battery_status do
+      resolve &Resolvers.Astarte.battery_status_to_enum/3
+      middleware Middleware.ErrorHandler
+    end
+  end
+
+  @desc """
   Denotes a device instance that connects and exchanges data.
 
   Each Device is associated to a specific ApplianceModel, which in turn is \
@@ -234,6 +276,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The list of WiFi Access Points found by the device."
     field :wifi_scan_results, list_of(non_null(:wifi_scan_result)) do
       resolve &Resolvers.Astarte.fetch_wifi_scan_results/3
+      middleware Middleware.ErrorHandler
+    end
+
+    @desc "The status of the battery slots of the device."
+    field :battery_status, list_of(non_null(:battery_slot)) do
+      resolve &Resolvers.Astarte.fetch_battery_status/3
       middleware Middleware.ErrorHandler
     end
   end

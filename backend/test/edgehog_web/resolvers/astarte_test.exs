@@ -21,6 +21,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
   use Edgehog.AstarteMockCase
   use Edgehog.GeolocationMockCase
 
+  alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
   alias Edgehog.Astarte.Device.{SystemStatus, WiFiScanResult}
   alias Edgehog.Geolocation
@@ -85,6 +86,22 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
       assert {:ok, wifi_scan_results} = Astarte.fetch_wifi_scan_results(device, %{}, %{})
 
       assert [%WiFiScanResult{} | _rest] = wifi_scan_results
+    end
+
+    test "fetch_battery_status/3 returns the battery status for a device", %{
+      device: device
+    } do
+      assert {:ok, battery_status} = Astarte.fetch_battery_status(device, %{}, %{})
+
+      assert [
+               %BatterySlot{
+                 slot: "Slot name",
+                 level_percentage: 80.3,
+                 level_absolute_error: 0.1,
+                 status: "Charging"
+               }
+               | _rest
+             ] = battery_status
     end
   end
 end
