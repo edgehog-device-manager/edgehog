@@ -27,10 +27,12 @@ import {
   PreloadedQuery,
 } from "react-relay/hooks";
 import { FormattedDate, FormattedMessage } from "react-intl";
+import dayjs from "dayjs";
 
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
+import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import { Link, Route } from "Navigation";
@@ -84,6 +86,17 @@ const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`
+  fragment Device_systemStatus on Device {
+    systemStatus {
+      memoryFreeBytes
+      taskCount
+      uptimeMilliseconds
+      timestamp
+    }
+  }
+`;
+
 const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
   fragment Device_wifiScanResults on Device {
     wifiScanResults {
@@ -114,6 +127,7 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_hardwareInfo
       ...Device_location
       ...Device_storageUsage
+      ...Device_systemStatus
       ...Device_wifiScanResults
     }
   }
@@ -344,6 +358,112 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
   );
 };
 
+interface DeviceSystemStatusTabProps {
+  deviceRef: Device_systemStatus$key;
+}
+
+const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
+  const { systemStatus } = useFragment(
+    DEVICE_SYSTEM_STATUS_FRAGMENT,
+    deviceRef
+  );
+  if (!systemStatus) {
+    return null;
+  }
+  return (
+    <Tab
+      eventKey="device-system-status-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.systemStatusTab"
+          defaultMessage="System Status"
+        />
+      }
+    >
+      <div className="mt-3">
+        <p className="text-muted">
+          <FormattedMessage
+            id="pages.Device.systemStatus.lastUpdateAt"
+            defaultMessage="Last updated at {date}"
+            values={{
+              date: (
+                <FormattedDate
+                  value={new Date(systemStatus.timestamp)}
+                  year="numeric"
+                  month="long"
+                  day="numeric"
+                  hour="numeric"
+                  minute="numeric"
+                />
+              ),
+            }}
+          />
+        </p>
+        <Stack gap={3}>
+          {systemStatus.memoryFreeBytes != null && (
+            <FormRow
+              id="device-system-status-memory-free-bytes"
+              label={
+                <FormattedMessage
+                  id="Device.systemStatus.memoryFreeBytes"
+                  defaultMessage="Free Memory"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={formatBytes(systemStatus.memoryFreeBytes)}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {systemStatus.taskCount != null && (
+            <FormRow
+              id="device-system-status-task-count"
+              label={
+                <FormattedMessage
+                  id="Device.systemStatus.taskCount"
+                  defaultMessage="Active Tasks"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={systemStatus.taskCount}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {systemStatus.uptimeMilliseconds != null && (
+            <FormRow
+              id="device-system-status-uptime"
+              label={
+                <FormattedMessage
+                  id="Device.systemStatus.uptimeMilliseconds"
+                  defaultMessage="Last boot at"
+                />
+              }
+            >
+              <FormValue>
+                <FormattedDate
+                  value={dayjs(systemStatus.timestamp)
+                    .subtract(systemStatus.uptimeMilliseconds, "millisecond")
+                    .toDate()}
+                  year="numeric"
+                  month="long"
+                  day="numeric"
+                  hour="numeric"
+                  minute="numeric"
+                />
+              </FormValue>
+            </FormRow>
+          )}
+        </Stack>
+      </div>
+    </Tab>
+  );
+};
+
 interface DeviceWiFiScanResultsTabProps {
   deviceRef: Device_wifiScanResults$key;
 }
@@ -539,11 +659,13 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
           </Row>
           <Tabs
             tabsOrder={[
+              "device-system-status-tab",
               "device-storage-usage-tab",
               "device-location-tab",
               "device-wifi-scan-results-tab",
             ]}
           >
+            <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
