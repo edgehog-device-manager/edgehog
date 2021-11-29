@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocodingTest do
   use Edgehog.DataCase
 
   import Tesla.Mock
+  alias Edgehog.Geolocation.Coordinates
   alias Edgehog.Geolocation.Providers.GoogleGeocoding
 
   describe "geocoding" do
     test "reverse_geocode/1 returns an address from coordinates" do
-      coords = %{latitude: 40.714224, longitude: -73.961452}
+      coords = %Coordinates{latitude: 40.714224, longitude: -73.961452}
 
       response = %{
         "results" => [
@@ -44,7 +45,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocodingTest do
     end
 
     test "reverse_geocode/1 returns error without results from Google" do
-      coords = %{latitude: 40.714224, longitude: -73.961452}
+      coords = %Coordinates{latitude: 40.714224, longitude: -73.961452}
 
       response = %{
         "garbage" => "error"

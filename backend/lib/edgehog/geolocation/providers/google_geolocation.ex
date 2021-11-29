@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,16 +17,41 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
-  @behaviour Edgehog.Geolocation.WiFiGeolocationProvider
+  @behaviour Edgehog.Geolocation.GeolocationProvider
 
+  alias Edgehog.Astarte
+  alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.WiFiScanResult
+  alias Edgehog.Geolocation.Position
+
   use Tesla
 
   plug Tesla.Middleware.BaseUrl, "https://www.googleapis.com/geolocation/v1/geolocate"
   plug Tesla.Middleware.JSON
 
-  @impl Edgehog.Geolocation.WiFiGeolocationProvider
-  def geolocate([%WiFiScanResult{} | _] = wifi_scan_results) do
+  @impl Edgehog.Geolocation.GeolocationProvider
+  def geolocate(%Device{} = device) do
+    with {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(device),
+         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(wifi_scan_results),
+         {:ok, position} <- geolocate_wifi(wifi_scan_results) do
+      {:ok, position}
+    end
+  end
+
+  defp filter_latest_wifi_scan_results([_scan | _] = wifi_scan_results) do
+    latest_scan = Enum.max_by(wifi_scan_results, & &1.timestamp, DateTime)
+
+    latest_wifi_scan_results =
+      Enum.filter(wifi_scan_results, &(&1.timestamp == latest_scan.timestamp))
+
+    {:ok, latest_wifi_scan_results}
+  end
+
+  defp filter_latest_wifi_scan_results(_wifi_scan_results) do
+    {:error, :wifi_scan_results_not_found}
+  end
+
+  defp geolocate_wifi([%WiFiScanResult{} | _] = wifi_scan_results) do
     config = Application.fetch_env!(:edgehog, Edgehog.Geolocation.Providers.GoogleGeolocation)
     api_key = Keyword.fetch!(config, :api_key)
 
@@ -49,20 +74,22 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
     with {:ok, %{body: body}} <- post("", body_params, query: query_params),
          {:coords, %{"location" => %{"lat" => latitude, "lng" => longitude}}}
          when is_number(latitude) and is_number(longitude) <- {:coords, body} do
-      coordinates = %{
+      timestamp = List.first(wifi_scan_results).timestamp
+
+      position = %Position{
         latitude: latitude,
         longitude: longitude,
-        accuracy: body["accuracy"]
+        accuracy: body["accuracy"],
+        timestamp: timestamp
       }
 
-      {:ok, coordinates}
+      {:ok, position}
     else
-      {:coords, _} -> {:error, :coordinates_not_found}
+      {:coords, _} -> {:error, :position_not_found}
     end
   end
 
-  @impl Edgehog.Geolocation.WiFiGeolocationProvider
-  def geolocate(_wifi_scan_results) do
-    {:error, :coordinates_not_found}
+  defp geolocate_wifi(_wifi_scan_results) do
+    {:error, :position_not_found}
   end
 end

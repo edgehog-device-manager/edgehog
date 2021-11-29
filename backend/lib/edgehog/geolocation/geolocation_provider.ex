@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,14 +16,9 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Geolocation.IPGeolocationProvider do
-  @type ip_address :: String.t()
+defmodule Edgehog.Geolocation.GeolocationProvider do
+  alias Edgehog.Astarte.Device
+  alias Edgehog.Geolocation.Position
 
-  @type coordinates :: %{
-          latitude: float,
-          longitude: float,
-          accuracy: number | nil
-        }
-
-  @callback geolocate(ip_address) :: {:ok, coordinates} | {:error, term}
+  @callback geolocate(%Device{}) :: {:ok, Position.t()} | {:error, term}
 end

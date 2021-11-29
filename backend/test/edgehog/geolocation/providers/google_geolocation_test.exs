@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,19 +18,32 @@
 
 defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
   use Edgehog.DataCase
+  use Edgehog.AstarteMockCase
 
+  import Edgehog.AstarteFixtures
   import Tesla.Mock
+  alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeolocation
 
   describe "wifi_geolocation" do
     alias Edgehog.Astarte.Device.WiFiScanResult
 
-    test "geolocate/1 returns error without input AP list" do
-      assert GoogleGeolocation.geolocate(nil) == {:error, :coordinates_not_found}
-      assert GoogleGeolocation.geolocate([]) == {:error, :coordinates_not_found}
+    setup do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+      device = device_fixture(realm)
+
+      {:ok, cluster: cluster, realm: realm, device: device}
     end
 
-    test "geolocate/1 returns coordinates from AP list" do
+    test "geolocate/1 returns error without input AP list", %{device: device} do
+      Edgehog.Astarte.Device.WiFiScanResultMock
+      |> expect(:get, fn _appengine_client, _device_id -> {:ok, []} end)
+
+      assert GoogleGeolocation.geolocate(device) == {:error, :wifi_scan_results_not_found}
+    end
+
+    test "geolocate/1 returns position from AP list", %{device: device} do
       {:ok, timestamp, _offset} = DateTime.from_iso8601("2021-11-11T09:43:54.437Z")
 
       wifi_scans = [
@@ -42,6 +55,9 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
           timestamp: timestamp
         }
       ]
+
+      Edgehog.Astarte.Device.WiFiScanResultMock
+      |> expect(:get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
 
       response = %{
         "location" => %{
@@ -56,13 +72,18 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
           json(response)
       end)
 
-      assert {:ok, coordinates} = GoogleGeolocation.geolocate(wifi_scans)
+      assert {:ok, position} = GoogleGeolocation.geolocate(device)
 
-      assert %{accuracy: 12, latitude: 45.4095285, longitude: 11.8788231} ==
-               coordinates
+      assert %Position{
+               accuracy: 12,
+               latitude: 45.4095285,
+               longitude: 11.8788231,
+               timestamp: ~U[2021-11-11 09:43:54.437Z]
+             } ==
+               position
     end
 
-    test "geolocate/1 returns error without results from Google" do
+    test "geolocate/1 returns error without results from Google", %{device: device} do
       {:ok, timestamp, _offset} = DateTime.from_iso8601("2021-11-11T09:43:54.437Z")
 
       wifi_scans = [
@@ -75,6 +96,9 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
         }
       ]
 
+      Edgehog.Astarte.Device.WiFiScanResultMock
+      |> expect(:get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
+
       response = %{
         "garbage" => "error"
       }
@@ -84,7 +108,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
           json(response)
       end)
 
-      assert {:error, :coordinates_not_found} == GoogleGeolocation.geolocate(wifi_scans)
+      assert {:error, :position_not_found} == GoogleGeolocation.geolocate(device)
     end
   end
 end

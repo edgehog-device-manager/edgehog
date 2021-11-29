@@ -47,13 +47,8 @@ defmodule Edgehog.GeolocationMockCase do
 
   setup do
     Mox.stub_with(
-      Edgehog.Geolocation.IPGeolocationProviderMock,
-      Edgehog.Mocks.Geolocation.IPGeolocationProvider
-    )
-
-    Mox.stub_with(
-      Edgehog.Geolocation.WiFiGeolocationProviderMock,
-      Edgehog.Mocks.Geolocation.WiFiGeolocationProvider
+      Edgehog.Geolocation.GeolocationProviderMock,
+      Edgehog.Mocks.Geolocation.GeolocationProvider
     )
 
     Mox.stub_with(
