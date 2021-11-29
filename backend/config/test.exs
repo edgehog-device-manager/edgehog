@@ -35,6 +35,7 @@ config :tesla, adapter: Tesla.Mock
 config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
 config :edgehog, :astarte_storage_usage_module, Edgehog.Astarte.Device.StorageUsageMock
 config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiScanResultMock
+config :edgehog, :astarte_system_status_module, Edgehog.Astarte.Device.SystemStatusMock
 
 config :edgehog,
   ip_geolocation_provider: Edgehog.Geolocation.IPGeolocationProviderMock,
