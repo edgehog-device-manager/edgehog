@@ -61,6 +61,11 @@ type Device implements Node {
   location: DeviceLocation
   name: String!
   online: Boolean!
+
+  """
+  The current usage of the storage units of the device.
+  """
+  storageUsage: [StorageUnit!]
   wifiScanResults: [WifiScanResult!]
 }
 
@@ -141,6 +146,26 @@ type RootQueryType {
     """
     id: ID!
   ): Node
+}
+
+"""
+Describes the current usage of a storage unit on a device.
+"""
+type StorageUnit {
+  """
+  The number of free bytes of the storage unit.
+  """
+  freeBytes: Int
+
+  """
+  The label of the storage unit.
+  """
+  label: String!
+
+  """
+  The total number of bytes of the storage unit.
+  """
+  totalBytes: Int
 }
 
 input UpdateApplianceModelInput {

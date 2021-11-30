@@ -30,6 +30,7 @@ import { FormattedDate, FormattedMessage } from "react-intl";
 
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
+import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import { Link, Route } from "Navigation";
@@ -45,6 +46,7 @@ import Result from "components/Result";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import StorageTable from "components/StorageTable";
 import Tabs, { Tab } from "components/Tabs";
 import WiFiScanResultsTable from "components/WiFiScanResultsTable";
 
@@ -68,6 +70,16 @@ const DEVICE_LOCATION_FRAGMENT = graphql`
       accuracy
       address
       timestamp
+    }
+  }
+`;
+
+const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
+  fragment Device_storageUsage on Device {
+    storageUsage {
+      label
+      totalBytes
+      freeBytes
     }
   }
 `;
@@ -101,6 +113,7 @@ const GET_DEVICE_QUERY = graphql`
       }
       ...Device_hardwareInfo
       ...Device_location
+      ...Device_storageUsage
       ...Device_wifiScanResults
     }
   }
@@ -124,11 +137,11 @@ const FormValue = (params: { children: React.ReactNode }) => {
 };
 
 const formatBytes = (bytes: number, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes === 0) return "0 B";
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  const sizes = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
@@ -227,6 +240,52 @@ const DeviceHardwareInfo = ({ deviceRef }: DeviceHardwareInfoProps) => {
         </FormRow>
       )}
     </Stack>
+  );
+};
+
+interface DeviceStorageUsageTabProps {
+  deviceRef: Device_storageUsage$key;
+}
+
+const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
+  const { storageUsage } = useFragment(
+    DEVICE_STORAGE_USAGE_FRAGMENT,
+    deviceRef
+  );
+  if (!storageUsage) {
+    return null;
+  }
+  const storageUnits = storageUsage.map((storageUnit) => ({ ...storageUnit }));
+  return (
+    <Tab
+      eventKey="device-storage-usage-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.storageTab"
+          defaultMessage="Storage"
+        />
+      }
+    >
+      <div className="mt-3">
+        {storageUnits.length === 0 ? (
+          <Result.EmptyList
+            title={
+              <FormattedMessage
+                id="pages.Device.storageTab.noStorage.title"
+                defaultMessage="No storage"
+              />
+            }
+          >
+            <FormattedMessage
+              id="pages.Device.storageTab.noResults.message"
+              defaultMessage="The device has not detected any storage unit yet."
+            />
+          </Result.EmptyList>
+        ) : (
+          <StorageTable data={storageUnits} />
+        )}
+      </div>
+    </Tab>
   );
 };
 
@@ -479,8 +538,13 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             </Col>
           </Row>
           <Tabs
-            tabsOrder={["device-location-tab", "device-wifi-scan-results-tab"]}
+            tabsOrder={[
+              "device-storage-usage-tab",
+              "device-location-tab",
+              "device-wifi-scan-results-tab",
+            ]}
           >
+            <DeviceStorageUsageTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
           </Tabs>

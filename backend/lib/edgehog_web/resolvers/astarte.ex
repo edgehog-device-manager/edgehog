@@ -37,6 +37,13 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     Astarte.get_hardware_info(device)
   end
 
+  def fetch_storage_usage(%Device{} = device, _args, _context) do
+    case Astarte.fetch_storage_usage(device) do
+      {:ok, storage_units} -> {:ok, storage_units}
+      _ -> {:ok, nil}
+    end
+  end
+
   def fetch_wifi_scan_results(%Device{} = device, _args, _context) do
     case Astarte.fetch_wifi_scan_results(device) do
       {:ok, wifi_scan_results} -> {:ok, wifi_scan_results}

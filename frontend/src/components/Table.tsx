@@ -107,6 +107,7 @@ type TableProps<T extends Object> = {
     columnIds: string[],
     globalFilterValue: any
   ) => Row<T>[];
+  hideSearch?: boolean;
 };
 
 const Table = <T extends Object>({
@@ -116,6 +117,7 @@ const Table = <T extends Object>({
   hiddenColumns = [],
   maxPageRows = 10,
   searchFunction,
+  hideSearch = false,
 }: TableProps<T>) => {
   const tableParams = {
     columns,
@@ -158,9 +160,11 @@ const Table = <T extends Object>({
 
   return (
     <div className={className}>
-      <div className="py-2 mb-3">
-        <SearchBox onChange={setGlobalFilter} />
-      </div>
+      {hideSearch || (
+        <div className="py-2 mb-3">
+          <SearchBox onChange={setGlobalFilter} />
+        </div>
+      )}
       <RBTable {...getTableProps()} responsive hover>
         <thead>
           {headerGroups.map((headerGroup) => (

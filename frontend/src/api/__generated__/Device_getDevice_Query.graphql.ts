@@ -22,7 +22,7 @@ export type Device_getDevice_QueryResponse = {
                 readonly name: string;
             };
         } | null;
-        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_location" | "Device_wifiScanResults">;
+        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_location" | "Device_storageUsage" | "Device_wifiScanResults">;
     } | null;
 };
 export type Device_getDevice_Query = {
@@ -53,6 +53,7 @@ query Device_getDevice_Query(
     }
     ...Device_hardwareInfo
     ...Device_location
+    ...Device_storageUsage
     ...Device_wifiScanResults
   }
 }
@@ -74,6 +75,14 @@ fragment Device_location on Device {
     accuracy
     address
     timestamp
+  }
+}
+
+fragment Device_storageUsage on Device {
+  storageUsage {
+    label
+    totalBytes
+    freeBytes
   }
 }
 
@@ -206,6 +215,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "Device_location"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "Device_storageUsage"
           },
           {
             "args": null,
@@ -354,6 +368,38 @@ return {
           {
             "alias": null,
             "args": null,
+            "concreteType": "StorageUnit",
+            "kind": "LinkedField",
+            "name": "storageUsage",
+            "plural": true,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "label",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "totalBytes",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "freeBytes",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "WifiScanResult",
             "kind": "LinkedField",
             "name": "wifiScanResults",
@@ -397,14 +443,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "91f132510af2bc4231c707351afb41ed",
+    "cacheID": "04b777a1bfa10bd674ef5570f3450194",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    applianceModel {\n      name\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_location\n    ...Device_wifiScanResults\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    applianceModel {\n      name\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_wifiScanResults\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '2a034ffb2a975c0d2bad3bb09e888dab';
+(node as any).hash = 'f82db7aed4bca7cb8442aa1dbd78004d';
 export default node;

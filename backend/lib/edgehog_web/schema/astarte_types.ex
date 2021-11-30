@@ -102,8 +102,19 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :cpu_vendor, :string
 
     @desc "The Bytes count of memory."
-    # TODO: since these is longinteger, should this be a string?
     field :memory_total_bytes, :integer
+  end
+
+  @desc "Describes the current usage of a storage unit on a device."
+  object :storage_unit do
+    @desc "The label of the storage unit."
+    field :label, non_null(:string)
+
+    @desc "The total number of bytes of the storage unit."
+    field :total_bytes, :integer
+
+    @desc "The number of free bytes of the storage unit."
+    field :free_bytes, :integer
   end
 
   @desc """
@@ -185,6 +196,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The estimated location of the device."
     field :location, :device_location do
       resolve &Resolvers.Astarte.fetch_device_location/3
+      middleware Middleware.ErrorHandler
+    end
+
+    @desc "The current usage of the storage units of the device."
+    field :storage_usage, list_of(non_null(:storage_unit)) do
+      resolve &Resolvers.Astarte.fetch_storage_usage/3
       middleware Middleware.ErrorHandler
     end
 
