@@ -189,6 +189,8 @@ defmodule Edgehog.AppliancesTest do
       assert appliance_model.handle == "some-updated-handle"
       assert appliance_model.name == "some updated name"
       assert [%ApplianceModelPartNumber{part_number: "1234-rev5"}] = appliance_model.part_numbers
+
+      assert [%ApplianceModelDescription{text: "Yadda yadda"}] = appliance_model.descriptions
     end
 
     test "update_appliance_model/2 with invalid data returns error changeset", %{
@@ -214,6 +216,60 @@ defmodule Edgehog.AppliancesTest do
     } do
       appliance_model = appliance_model_fixture(hardware_type)
       assert %Ecto.Changeset{} = Appliances.change_appliance_model(appliance_model)
+    end
+
+    test "preload_localized_descriptions_for_appliance_model/0 returns a localized description for a list",
+         %{
+           hardware_type: hardware_type
+         } do
+      descriptions_1 = [
+        %{locale: "en-US", text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      descriptions_2 = [
+        %{locale: "en-US", text: "Another appliance"}
+      ]
+
+      _appliance_model_1 =
+        appliance_model_fixture(hardware_type,
+          name: "Appliance1",
+          handle: "a1",
+          descriptions: descriptions_1
+        )
+
+      _appliance_model_2 =
+        appliance_model_fixture(hardware_type,
+          name: "Appliance2",
+          handle: "a2",
+          descriptions: descriptions_2
+        )
+
+      assert [appliance_model_1, appliance_model_2] =
+               Appliances.list_appliance_models()
+               |> Appliances.preload_localized_descriptions_for_appliance_model("it-IT")
+
+      assert [%{locale: "it-IT"}] = appliance_model_1.descriptions
+      assert [] = appliance_model_2.descriptions
+    end
+
+    test "preload_localized_descriptions_for_appliance_model/0 returns a localized description for a single struct",
+         %{
+           hardware_type: hardware_type
+         } do
+      descriptions = [
+        %{locale: "en-US", text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      appliance_model = appliance_model_fixture(hardware_type, descriptions: descriptions)
+
+      assert {:ok, appliance_model} = Appliances.fetch_appliance_model(appliance_model.id)
+
+      appliance_model =
+        Appliances.preload_localized_descriptions_for_appliance_model(appliance_model, "it-IT")
+
+      assert Enum.map(appliance_model.descriptions, & &1.locale) == ["it-IT"]
     end
   end
 end

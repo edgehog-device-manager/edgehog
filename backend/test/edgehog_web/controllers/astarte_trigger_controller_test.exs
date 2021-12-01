@@ -183,6 +183,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert response(conn, 200)
 
       assert {:ok, %Device{} = device} = Astarte.fetch_realm_device(realm, device_id)
+      device = Astarte.preload_appliance_model_for_device(device)
       assert device.appliance_model.id == appliance_model.id
       assert device.appliance_model.name == appliance_model.name
       assert device.appliance_model.handle == appliance_model.handle

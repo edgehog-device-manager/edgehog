@@ -282,7 +282,6 @@ defmodule Edgehog.Astarte do
     filters
     |> Enum.reduce(Device, &filter_with/2)
     |> Repo.all()
-    |> Repo.preload(appliance_model: [:hardware_type])
   end
 
   defp filter_with(filter, query) do
@@ -377,7 +376,6 @@ defmodule Edgehog.Astarte do
   """
   def get_device!(id) do
     Repo.get!(Device, id)
-    |> Repo.preload(appliance_model: :hardware_type)
   end
 
   @doc """
@@ -393,13 +391,24 @@ defmodule Edgehog.Astarte do
 
   """
   def create_device(%Realm{} = realm, attrs \\ %{}) do
-    changeset =
-      %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
-      |> Device.changeset(attrs)
+    %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
+    |> Device.changeset(attrs)
+    |> Repo.insert()
+  end
 
-    with {:ok, device} <- Repo.insert(changeset) do
-      {:ok, Repo.preload(device, appliance_model: :hardware_type)}
-    end
+  @doc """
+  Preloads an appliance model for a device (or a list of devices)
+
+  Supported options:
+  - `:force` a boolean indicating if the preload has to be read from the database also if it's
+  already populated. Defaults to `false`.
+  - `:preload` the option passed to the preload, can be a query or a list of atoms. Defaults to `[]`.
+  """
+  def preload_appliance_model_for_device(device_or_devices, opts \\ []) do
+    force = Keyword.get(opts, :force, false)
+    preload = Keyword.get(opts, :preload, [])
+
+    Repo.preload(device_or_devices, [appliance_model: preload], force: force)
   end
 
   @doc """
@@ -463,7 +472,7 @@ defmodule Edgehog.Astarte do
   """
   def fetch_realm_device(%Realm{id: realm_id}, device_id) do
     case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
-      %Device{} = device -> {:ok, Repo.preload(device, appliance_model: :hardware_type)}
+      %Device{} = device -> {:ok, device}
       nil -> {:error, :device_not_found}
     end
   end

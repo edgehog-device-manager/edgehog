@@ -19,8 +19,10 @@
 defmodule Edgehog.Appliances.ApplianceModelDescription do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Edgehog.Appliances.ApplianceModel
+  alias Edgehog.Appliances.ApplianceModelDescription
 
   schema "appliance_model_descriptions" do
     field :text, :string
@@ -38,5 +40,10 @@ defmodule Edgehog.Appliances.ApplianceModelDescription do
     |> validate_required([:locale, :text])
     |> validate_format(:locale, ~r/^[a-z]{2,3}-[A-Z]{2}$/, message: "is not a valid locale")
     |> unique_constraint([:locale, :appliance_model_id, :tenant_id])
+  end
+
+  def localized(locale) do
+    from d in ApplianceModelDescription,
+      where: d.locale == ^locale
   end
 end
