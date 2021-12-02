@@ -26,7 +26,14 @@ defmodule Edgehog.Astarte do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
-  alias Edgehog.Astarte.Device.{DeviceStatus, HardwareInfo, StorageUsage, WiFiScanResult}
+
+  alias Edgehog.Astarte.Device.{
+    DeviceStatus,
+    HardwareInfo,
+    StorageUsage,
+    SystemStatus,
+    WiFiScanResult
+  }
 
   @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
 
@@ -45,6 +52,11 @@ defmodule Edgehog.Astarte do
                              :astarte_wifi_scan_result_module,
                              WiFiScanResult
                            )
+  @system_status_module Application.compile_env(
+                          :edgehog,
+                          :astarte_system_status_module,
+                          SystemStatus
+                        )
 
   @doc """
   Returns the list of clusters.
@@ -550,6 +562,12 @@ defmodule Edgehog.Astarte do
   def fetch_storage_usage(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       @storage_usage_module.get(client, device.device_id)
+    end
+  end
+
+  def fetch_system_status(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @system_status_module.get(client, device.device_id)
     end
   end
 

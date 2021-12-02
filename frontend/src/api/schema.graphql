@@ -3,36 +3,96 @@ schema {
   mutation: RootMutationType
 }
 
+"""
+Represents a specific appliance model.
+
+An appliance model corresponds to what the users thinks as functionally
+equivalent appliances (e.g. two revisions of an appliance containing two
+different embedded chips but that have the same enclosure and the same
+functionality).
+Each ApplianceModel must be associated to a specific HardwareType.
+"""
 type ApplianceModel implements Node {
+  """
+  The identifier of the appliance model.
+  """
   handle: String!
+
+  """
+  The type of hardware that can be plugged into the appliance model.
+  """
   hardwareType: HardwareType!
 
   """
   The ID of an object
   """
   id: ID!
+
+  """
+  The display name of the appliance model.
+  """
   name: String!
+
+  """
+  The list of part numbers associated with the appliance model.
+  """
   partNumbers: [String!]!
 }
 
 input CreateApplianceModelInput {
+  """
+  The identifier of the appliance model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
   handle: String!
+
+  """
+  The ID of the hardware type that can be plugged into the appliance model.
+  """
   hardwareTypeId: ID!
+
+  """
+  The display name of the appliance model.
+  """
   name: String!
+
+  """
+  The list of part numbers associated with the appliance model.
+  """
   partNumbers: [String!]!
 }
 
 type CreateApplianceModelPayload {
+  """
+  The created appliance model.
+  """
   applianceModel: ApplianceModel!
 }
 
 input CreateHardwareTypeInput {
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
   handle: String!
+
+  """
+  The display name of the hardware type.
+  """
   name: String!
+
+  """
+  The list of part numbers associated with the hardware type.
+  """
   partNumbers: [String!]!
 }
 
 type CreateHardwareTypePayload {
+  """
+  The created hardware type.
+  """
   hardwareType: HardwareType!
 }
 
@@ -44,66 +104,218 @@ be converted to UTC if there is an offset.
 """
 scalar DateTime
 
+"""
+Denotes a device instance that connects and exchanges data.
+
+Each Device is associated to a specific ApplianceModel, which in turn is associated to a specific HardwareType.
+A Device also exposes info about its connection status and some sets of data read by its operating system.
+"""
 type Device implements Node {
   """
   The appliance model of the device.
   """
   applianceModel: ApplianceModel
+
+  """
+  The device ID used to connect to the Astarte cluster.
+  """
   deviceId: String!
+
+  """
+  Info read from the device's hardware.
+  """
   hardwareInfo: HardwareInfo
 
   """
   The ID of an object
   """
   id: ID!
+
+  """
+  The date at which the device last connected to Astarte.
+  """
   lastConnection: DateTime
+
+  """
+  The date at which the device last disconnected from Astarte.
+  """
   lastDisconnection: DateTime
+
+  """
+  The estimated location of the device.
+  """
   location: DeviceLocation
+
+  """
+  The display name of the device.
+  """
   name: String!
+
+  """
+  Tells whether the device is connected or not to Astarte.
+  """
   online: Boolean!
 
   """
   The current usage of the storage units of the device.
   """
   storageUsage: [StorageUnit!]
+
+  """
+  The current status of the operating system of the device.
+  """
+  systemStatus: SystemStatus
+
+  """
+  The list of WiFi Access Points found by the device.
+  """
   wifiScanResults: [WifiScanResult!]
 }
 
+"""
+Describes a set of filters to apply when fetching a list of devices.
+
+When multiple filters are specified, they are applied in an AND fashion to further refine the results.
+"""
 input DeviceFilter {
+  """
+  A string to match against the handle of the device's appliance model.
+  The match is case-insensitive and tests whether the string is included in the handle of the device's appliance model.
+  """
   applianceModelHandle: String
+
+  """
+  A string to match against the name of the device's appliance model.
+  The match is case-insensitive and tests whether the string is included in the name of the device's appliance model.
+  """
   applianceModelName: String
+
+  """
+  A string to match against the part number of the device's appliance model.
+  The match is case-insensitive and tests whether the string is included in the part number of the device's appliance model.
+  """
   applianceModelPartNumber: String
+
+  """
+  A string to match against the device ID. The match is case-insensitive and
+  tests whether the string is included in the device ID.
+  """
   deviceId: String
+
+  """
+  A string to match against the handle of the device's hardware type.
+  The match is case-insensitive and tests whether the string is included in the handle of the device's hardware type.
+  """
   hardwareTypeHandle: String
+
+  """
+  A string to match against the name of the device's hardware type.
+  The match is case-insensitive and tests whether the string is included in the name of the device's hardware type.
+  """
   hardwareTypeName: String
+
+  """
+  A string to match against the part number of the device's hardware type.
+  The match is case-insensitive and tests whether the string is included in the part number of the device's hardware type.
+  """
   hardwareTypePartNumber: String
+
+  """
+  Whether to return devices connected or not to Astarte.
+  """
   online: Boolean
 }
 
+"""
+Describes the position of a device.
+
+The position is estimated by means of Edgehog's Geolocation modules and the data published by the device.
+"""
 type DeviceLocation {
+  """
+  The accuracy of the measurement, in meters.
+  """
   accuracy: Float
+
+  """
+  The formatted address estimated for the position.
+  """
   address: String
+
+  """
+  The latitude coordinate.
+  """
   latitude: Float!
+
+  """
+  The longitude coordinate.
+  """
   longitude: Float!
+
+  """
+  The date at which the measurement was made.
+  """
   timestamp: DateTime!
 }
 
+"""
+Describes hardware-related info of a device.
+
+It exposes data read by a device's operating system about the underlying hardware.
+"""
 type HardwareInfo {
+  """
+  The architecture of the CPU.
+  """
   cpuArchitecture: String
+
+  """
+  The reference code of the CPU model.
+  """
   cpuModel: String
+
+  """
+  The display name of the CPU model.
+  """
   cpuModelName: String
+
+  """
+  The vendor's name.
+  """
   cpuVendor: String
+
+  """
+  The Bytes count of memory.
+  """
   memoryTotalBytes: Int
 }
 
+"""
+Denotes a type of hardware that devices can have.
+
+It refers to the physical components embedded in an appliance.
+This can represent, e.g., multiple revisions of a PCB (each with a different
+part number) which are functionally equivalent from the appliance point of view.
+"""
 type HardwareType implements Node {
+  """
+  The identifier of the hardware type.
+  """
   handle: String!
 
   """
   The ID of an object
   """
   id: ID!
+
+  """
+  The display name of the hardware type.
+  """
   name: String!
+
+  """
+  The list of part numbers associated with the hardware type.
+  """
   partNumbers: [String!]!
 }
 
@@ -115,30 +327,80 @@ interface Node {
 }
 
 type RootMutationType {
+  """
+  Creates a new appliance model.
+  """
   createApplianceModel(
     input: CreateApplianceModelInput!
   ): CreateApplianceModelPayload
+
+  """
+  Creates a new hardware type.
+  """
   createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
+
+  """
+  Updates an appliance model.
+  """
   updateApplianceModel(
     input: UpdateApplianceModelInput!
   ): UpdateApplianceModelPayload
+
+  """
+  Updates a hardware type.
+  """
   updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
 }
 
 type RootQueryType {
-  applianceModel(id: ID!): ApplianceModel
+  """
+  Fetches a single appliance model.
+  """
+  applianceModel(
+    """
+    The ID of the appliance model.
+    """
+    id: ID!
+  ): ApplianceModel
+
+  """
+  Fetches the list of all appliance models.
+  """
   applianceModels: [ApplianceModel!]!
 
   """
-  Get a single device
+  Fetches a single device.
   """
-  device(id: ID!): Device
+  device(
+    """
+    The ID of the device.
+    """
+    id: ID!
+  ): Device
 
   """
-  List devices
+  Fetches the list of all devices.
   """
-  devices(filter: DeviceFilter): [Device!]!
-  hardwareType(id: ID!): HardwareType
+  devices(
+    """
+    An optional set of filters to apply when fetching the devices.
+    """
+    filter: DeviceFilter
+  ): [Device!]!
+
+  """
+  Fetches a single hardware type.
+  """
+  hardwareType(
+    """
+    The ID of the hardware type.
+    """
+    id: ID!
+  ): HardwareType
+
+  """
+  Fetches the list of all hardware types.
+  """
   hardwareTypes: [HardwareType!]!
   node(
     """
@@ -168,32 +430,124 @@ type StorageUnit {
   totalBytes: Int
 }
 
+"""
+Describes the current status of the operating system of a device.
+"""
+type SystemStatus {
+  """
+  The identifier of the performed boot sequence.
+  """
+  bootId: String
+
+  """
+  The number of free bytes of memory.
+  """
+  memoryFreeBytes: Int
+
+  """
+  The number of running tasks on the system.
+  """
+  taskCount: Int
+
+  """
+  The date at which the system status was read.
+  """
+  timestamp: DateTime!
+
+  """
+  The number of milliseconds since the last system boot.
+  """
+  uptimeMilliseconds: Int
+}
+
 input UpdateApplianceModelInput {
+  """
+  The ID of the appliance model to be updated.
+  """
   applianceModelId: ID!
+
+  """
+  The identifier of the appliance model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
   handle: String
+
+  """
+  The display name of the appliance model.
+  """
   name: String
+
+  """
+  The list of part numbers associated with the appliance model.
+  """
   partNumbers: [String!]
 }
 
 type UpdateApplianceModelPayload {
+  """
+  The updated appliance model.
+  """
   applianceModel: ApplianceModel!
 }
 
 input UpdateHardwareTypeInput {
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
   handle: String
+
+  """
+  The ID of the hardware type to be updated.
+  """
   hardwareTypeId: ID!
+
+  """
+  The display name of the hardware type.
+  """
   name: String
+
+  """
+  The list of part numbers associated with the hardware type.
+  """
   partNumbers: [String!]
 }
 
 type UpdateHardwareTypePayload {
+  """
+  The updated hardware type.
+  """
   hardwareType: HardwareType!
 }
 
+"""
+Describes the list of WiFi Access Points found by the device.
+"""
 type WifiScanResult {
+  """
+  The channel used by the Access Point.
+  """
   channel: Int
+
+  """
+  The ESSID advertised by the Access Point.
+  """
   essid: String
+
+  """
+  The MAC address advertised by the Access Point.
+  """
   macAddress: String
+
+  """
+  The power of the radio signal, measured in dBm.
+  """
   rssi: Int
+
+  """
+  The date at which the device found the Access Point.
+  """
   timestamp: DateTime!
 }

@@ -27,10 +27,12 @@ import {
   PreloadedQuery,
 } from "react-relay/hooks";
 import { FormattedDate, FormattedMessage } from "react-intl";
+import dayjs from "dayjs";
 
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
+import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import { Link, Route } from "Navigation";
@@ -84,6 +86,17 @@ const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`
+  fragment Device_systemStatus on Device {
+    systemStatus {
+      memoryFreeBytes
+      taskCount
+      uptimeMilliseconds
+      timestamp
+    }
+  }
+`;
+
 const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
   fragment Device_wifiScanResults on Device {
     wifiScanResults {
@@ -114,6 +127,7 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_hardwareInfo
       ...Device_location
       ...Device_storageUsage
+      ...Device_systemStatus
       ...Device_wifiScanResults
     }
   }
@@ -148,11 +162,11 @@ const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-interface DeviceHardwareInfoProps {
+interface DeviceHardwareInfoTabProps {
   deviceRef: Device_hardwareInfo$key;
 }
 
-const DeviceHardwareInfo = ({ deviceRef }: DeviceHardwareInfoProps) => {
+const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
   const { hardwareInfo } = useFragment(
     DEVICE_HARDWARE_INFO_FRAGMENT,
     deviceRef
@@ -161,85 +175,105 @@ const DeviceHardwareInfo = ({ deviceRef }: DeviceHardwareInfoProps) => {
     return null;
   }
   return (
-    <Stack gap={3}>
-      {hardwareInfo.cpuArchitecture != null && (
-        <FormRow
-          id="device-hardware-info-cpu-architecture"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuArchitecture"
-              defaultMessage="CPU architecture"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            value={hardwareInfo.cpuArchitecture}
-            readOnly
-          />
-        </FormRow>
-      )}
-      {hardwareInfo.cpuModel != null && (
-        <FormRow
-          id="device-hardware-info-cpu-model"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuModel"
-              defaultMessage="CPU model code"
-            />
-          }
-        >
-          <Form.Control type="text" value={hardwareInfo.cpuModel} readOnly />
-        </FormRow>
-      )}
-      {hardwareInfo.cpuModelName != null && (
-        <FormRow
-          id="device-hardware-info-cpu-model-name"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuModelName"
-              defaultMessage="CPU model name"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            value={hardwareInfo.cpuModelName}
-            readOnly
-          />
-        </FormRow>
-      )}
-      {hardwareInfo.cpuVendor != null && (
-        <FormRow
-          id="device-hardware-info-cpu-vendor"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.cpuVendor"
-              defaultMessage="CPU vendor"
-            />
-          }
-        >
-          <Form.Control type="text" value={hardwareInfo.cpuVendor} readOnly />
-        </FormRow>
-      )}
-      {hardwareInfo.memoryTotalBytes != null && (
-        <FormRow
-          id="device-hardware-info-memory-total-bytes"
-          label={
-            <FormattedMessage
-              id="Device.hardwareInfo.memoryTotalBytes"
-              defaultMessage="Total memory"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            value={formatBytes(hardwareInfo.memoryTotalBytes)}
-            readOnly
-          />
-        </FormRow>
-      )}
-    </Stack>
+    <Tab
+      eventKey="device-hardware-info-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.hardwareInfoTab"
+          defaultMessage="Hardware Info"
+        />
+      }
+    >
+      <div className="mt-3">
+        <Stack gap={3}>
+          {hardwareInfo.cpuArchitecture != null && (
+            <FormRow
+              id="device-hardware-info-cpu-architecture"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuArchitecture"
+                  defaultMessage="CPU architecture"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuArchitecture}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.cpuModel != null && (
+            <FormRow
+              id="device-hardware-info-cpu-model"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuModel"
+                  defaultMessage="CPU model code"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuModel}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.cpuModelName != null && (
+            <FormRow
+              id="device-hardware-info-cpu-model-name"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuModelName"
+                  defaultMessage="CPU model name"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuModelName}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.cpuVendor != null && (
+            <FormRow
+              id="device-hardware-info-cpu-vendor"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.cpuVendor"
+                  defaultMessage="CPU vendor"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={hardwareInfo.cpuVendor}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {hardwareInfo.memoryTotalBytes != null && (
+            <FormRow
+              id="device-hardware-info-memory-total-bytes"
+              label={
+                <FormattedMessage
+                  id="Device.hardwareInfo.memoryTotalBytes"
+                  defaultMessage="Total memory"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={formatBytes(hardwareInfo.memoryTotalBytes)}
+                readOnly
+              />
+            </FormRow>
+          )}
+        </Stack>
+      </div>
+    </Tab>
   );
 };
 
@@ -339,6 +373,112 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
             </div>
           }
         />
+      </div>
+    </Tab>
+  );
+};
+
+interface DeviceSystemStatusTabProps {
+  deviceRef: Device_systemStatus$key;
+}
+
+const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
+  const { systemStatus } = useFragment(
+    DEVICE_SYSTEM_STATUS_FRAGMENT,
+    deviceRef
+  );
+  if (!systemStatus) {
+    return null;
+  }
+  return (
+    <Tab
+      eventKey="device-system-status-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.systemStatusTab"
+          defaultMessage="System Status"
+        />
+      }
+    >
+      <div className="mt-3">
+        <p className="text-muted">
+          <FormattedMessage
+            id="pages.Device.systemStatus.lastUpdateAt"
+            defaultMessage="Last updated at {date}"
+            values={{
+              date: (
+                <FormattedDate
+                  value={new Date(systemStatus.timestamp)}
+                  year="numeric"
+                  month="long"
+                  day="numeric"
+                  hour="numeric"
+                  minute="numeric"
+                />
+              ),
+            }}
+          />
+        </p>
+        <Stack gap={3}>
+          {systemStatus.memoryFreeBytes != null && (
+            <FormRow
+              id="device-system-status-memory-free-bytes"
+              label={
+                <FormattedMessage
+                  id="Device.systemStatus.memoryFreeBytes"
+                  defaultMessage="Free Memory"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={formatBytes(systemStatus.memoryFreeBytes)}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {systemStatus.taskCount != null && (
+            <FormRow
+              id="device-system-status-task-count"
+              label={
+                <FormattedMessage
+                  id="Device.systemStatus.taskCount"
+                  defaultMessage="Active Tasks"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={systemStatus.taskCount}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {systemStatus.uptimeMilliseconds != null && (
+            <FormRow
+              id="device-system-status-uptime"
+              label={
+                <FormattedMessage
+                  id="Device.systemStatus.uptimeMilliseconds"
+                  defaultMessage="Last boot at"
+                />
+              }
+            >
+              <FormValue>
+                <FormattedDate
+                  value={dayjs(systemStatus.timestamp)
+                    .subtract(systemStatus.uptimeMilliseconds, "millisecond")
+                    .toDate()}
+                  year="numeric"
+                  month="long"
+                  day="numeric"
+                  hour="numeric"
+                  minute="numeric"
+                />
+              </FormValue>
+            </FormRow>
+          )}
+        </Stack>
       </div>
     </Tab>
   );
@@ -502,7 +642,6 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       </FormRow>
                     </>
                   )}
-                  <DeviceHardwareInfo deviceRef={device} />
                   <FormRow
                     id="form-device-connection-status"
                     label={
@@ -539,11 +678,15 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
           </Row>
           <Tabs
             tabsOrder={[
+              "device-hardware-info-tab",
+              "device-system-status-tab",
               "device-storage-usage-tab",
               "device-location-tab",
               "device-wifi-scan-results-tab",
             ]}
           >
+            <DeviceHardwareInfoTab deviceRef={device} />
+            <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />

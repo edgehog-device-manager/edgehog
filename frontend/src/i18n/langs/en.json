@@ -32,6 +32,15 @@
   "Device.name": {
     "defaultMessage": "Name"
   },
+  "Device.systemStatus.memoryFreeBytes": {
+    "defaultMessage": "Free Memory"
+  },
+  "Device.systemStatus.taskCount": {
+    "defaultMessage": "Active Tasks"
+  },
+  "Device.systemStatus.uptimeMilliseconds": {
+    "defaultMessage": "Last boot at"
+  },
   "components.ApplianceModelsTable.handleTitle": {
     "defaultMessage": "Handle"
   },
@@ -244,6 +253,9 @@
   "pages.Device.geolocationTab": {
     "defaultMessage": "Geolocation"
   },
+  "pages.Device.hardwareInfoTab": {
+    "defaultMessage": "Hardware Info"
+  },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
   },
@@ -255,6 +267,12 @@
   },
   "pages.Device.storageTab.noStorage.title": {
     "defaultMessage": "No storage"
+  },
+  "pages.Device.systemStatus.lastUpdateAt": {
+    "defaultMessage": "Last updated at {date}"
+  },
+  "pages.Device.systemStatusTab": {
+    "defaultMessage": "System Status"
   },
   "pages.Device.wifiScanResultsTab": {
     "defaultMessage": "WiFi APs"
