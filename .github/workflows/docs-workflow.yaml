@@ -44,6 +44,7 @@ jobs:
         mkdir docs/$DOCS_DIRNAME
         # Restore Device SDK docs. Don't fail if they're not there.
         cd docs && git restore $DOCS_DIRNAME/device-sdks || true && cd ..
+        cd docs && git restore $DOCS_DIRNAME/graphql-api-docs || true && cd ..
         cp -r edgehog/doc/doc/* docs/$DOCS_DIRNAME/
     - name: Commit files
       working-directory: ./docs
