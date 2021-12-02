@@ -30,9 +30,27 @@ defmodule EdgehogWeb.Context do
     current_tenant = get_current_tenant(conn)
 
     %{current_tenant: current_tenant}
+    |> maybe_put_locale(conn)
   end
 
   defp get_current_tenant(conn) do
     conn.assigns[:current_tenant]
+  end
+
+  defp maybe_put_locale(context, conn) do
+    case Plug.Conn.get_req_header(conn, "accept-language") do
+      # If no header or *, we don't add an explicit locale
+      [] ->
+        context
+
+      ["*" | _] ->
+        context
+
+      # If there's one (or more) accept-language, we use the first one
+      [language | _] ->
+        [locale | _] = String.split(language, ",", parts: 2)
+
+        Map.put(context, :locale, locale)
+    end
   end
 end

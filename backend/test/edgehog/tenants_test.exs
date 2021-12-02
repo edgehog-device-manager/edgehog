@@ -45,19 +45,32 @@ defmodule Edgehog.TenantsTest do
       assert {:ok, %Tenant{} = tenant} = Tenants.create_tenant(valid_attrs)
       assert tenant.name == "some name"
       assert tenant.slug == "some-name"
+      assert tenant.default_locale == "en-US"
     end
 
     test "create_tenant/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Tenants.create_tenant(@invalid_attrs)
     end
 
+    test "create_tenant/1 with invalid default locale returns error changeset" do
+      attrs = %{name: "some name", slug: "some-name", default_locale: "not_a_locale"}
+
+      assert {:error, %Ecto.Changeset{}} = Tenants.create_tenant(attrs)
+    end
+
     test "update_tenant/2 with valid data updates the tenant" do
       tenant = tenant_fixture()
-      update_attrs = %{name: "some updated name", slug: "some-updated-name"}
+
+      update_attrs = %{
+        name: "some updated name",
+        slug: "some-updated-name",
+        default_locale: "it-IT"
+      }
 
       assert {:ok, %Tenant{} = tenant} = Tenants.update_tenant(tenant, update_attrs)
       assert tenant.name == "some updated name"
       assert tenant.slug == "some-updated-name"
+      assert tenant.default_locale == "it-IT"
     end
 
     test "update_tenant/2 with invalid data returns error changeset" do

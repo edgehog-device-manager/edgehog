@@ -26,6 +26,7 @@ defmodule Edgehog.Appliances do
   alias Edgehog.Repo
 
   alias Edgehog.Appliances.ApplianceModel
+  alias Edgehog.Appliances.ApplianceModelDescription
   alias Edgehog.Appliances.ApplianceModelPartNumber
   alias Edgehog.Appliances.HardwareType
   alias Edgehog.Appliances.HardwareTypePartNumber
@@ -238,6 +239,22 @@ defmodule Edgehog.Appliances do
       nil ->
         {:error, :not_found}
     end
+  end
+
+  @doc """
+  Preloads only descriptions with a specific locale for an `ApplianceModel` (or a list of them).
+  """
+  def preload_localized_descriptions_for_appliance_model(model_or_models, locale) do
+    descriptions_preload = ApplianceModelDescription.localized(locale)
+
+    Repo.preload(model_or_models, descriptions: descriptions_preload)
+  end
+
+  @doc """
+  Returns a query that selects only `ApplianceModelDescription` with a specific locale.
+  """
+  def localized_appliance_model_description_query(locale) do
+    ApplianceModelDescription.localized(locale)
   end
 
   @doc """

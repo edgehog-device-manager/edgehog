@@ -587,7 +587,11 @@ defmodule Edgehog.AstarteTest do
       timestamp_string = DateTime.to_iso8601(timestamp)
       assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp_string)
 
-      assert device = Astarte.get_device!(device.id)
+      assert device =
+               device.id
+               |> Astarte.get_device!()
+               |> Astarte.preload_appliance_model_for_device()
+
       assert device.part_number == part_number
       assert device.appliance_model.id == appliance_model.id
     end

@@ -22,7 +22,7 @@ defmodule Edgehog.Appliances.ApplianceModel do
 
   alias Edgehog.Appliances.HardwareType
 
-  alias Edgehog.Appliances.ApplianceModelPartNumber
+  alias Edgehog.Appliances.{ApplianceModelDescription, ApplianceModelPartNumber}
 
   schema "appliance_models" do
     field :handle, :string
@@ -30,6 +30,7 @@ defmodule Edgehog.Appliances.ApplianceModel do
     field :tenant_id, :id
     belongs_to :hardware_type, HardwareType
     has_many :part_numbers, ApplianceModelPartNumber, on_replace: :delete
+    has_many :descriptions, ApplianceModelDescription, on_replace: :delete
 
     timestamps()
   end
@@ -45,5 +46,6 @@ defmodule Edgehog.Appliances.ApplianceModel do
     )
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
+    |> cast_assoc(:descriptions)
   end
 end

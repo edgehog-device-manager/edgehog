@@ -21,6 +21,8 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
   import_types EdgehogWeb.Schema.AppliancesTypes
+  import_types EdgehogWeb.Schema.LocalizationTypes
+  import_types EdgehogWeb.Schema.TenantsTypes
   import_types Absinthe.Type.Custom
 
   alias EdgehogWeb.Middleware
@@ -67,6 +69,7 @@ defmodule EdgehogWeb.Schema do
 
     import_fields :astarte_queries
     import_fields :appliances_queries
+    import_fields :tenants_queries
   end
 
   mutation do

@@ -106,6 +106,10 @@ defmodule Edgehog.Error do
   defp metadata(:unauthorized), do: {403, "Unauthorized"}
   defp metadata(:not_found), do: {404, "Resource not found"}
 
+  defp metadata(:not_default_locale) do
+    {422, "The default tenant locale must be used when creating or updating this resource"}
+  end
+
   defp metadata(:unknown), do: {500, "Something went wrong"}
 
   defp metadata(code) do

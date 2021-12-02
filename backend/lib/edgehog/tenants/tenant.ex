@@ -26,6 +26,7 @@ defmodule Edgehog.Tenants.Tenant do
   schema "tenants" do
     field :name, :string
     field :slug, :string
+    field :default_locale, :string, default: "en-US"
     has_one :realm, Realm, foreign_key: :tenant_id
 
     timestamps()
@@ -34,12 +35,15 @@ defmodule Edgehog.Tenants.Tenant do
   @doc false
   def changeset(tenant, attrs) do
     tenant
-    |> cast(attrs, [:name, :slug])
+    |> cast(attrs, [:name, :slug, :default_locale])
     |> validate_required([:name, :slug])
     |> unique_constraint(:name)
     |> unique_constraint(:slug)
     |> validate_format(:slug, ~r/^[a-z\d\-]+$/,
       message: "should only contain lower case ASCII letters (from a to z), digits and -"
+    )
+    |> validate_format(:default_locale, ~r/^[a-z]{2,3}-[A-Z]{2}$/,
+      message: "is not a valid locale"
     )
   end
 end

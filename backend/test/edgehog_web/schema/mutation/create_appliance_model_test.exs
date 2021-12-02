@@ -40,6 +40,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
           hardwareType {
             name
           }
+          description {
+            locale
+            text
+          }
         }
       }
     }
@@ -75,7 +79,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
                      "partNumbers" => [^part_number],
                      "hardwareType" => %{
                        "name" => ^hardware_type_name
-                     }
+                     },
+                     "description" => nil
                    }
                  }
                }
@@ -102,6 +107,93 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
       conn = post(conn, "/api", query: @query, variables: variables)
 
       assert %{"errors" => _} = assert(json_response(conn, 200))
+    end
+
+    test "allows settings a description for the default locale", %{
+      conn: conn,
+      hardware_type: hardware_type,
+      tenant: tenant
+    } do
+      name = "Foobar"
+      handle = "foobar"
+      part_number = "12345/X"
+
+      hardware_type_name = hardware_type.name
+
+      hardware_type_id =
+        Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
+
+      default_locale = tenant.default_locale
+
+      variables = %{
+        input: %{
+          name: name,
+          handle: handle,
+          part_numbers: [part_number],
+          hardware_type_id: hardware_type_id,
+          description: %{
+            locale: default_locale,
+            text: "An appliance"
+          }
+        }
+      }
+
+      conn = post(conn, "/api", query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "createApplianceModel" => %{
+                   "applianceModel" => %{
+                     "id" => id,
+                     "name" => ^name,
+                     "handle" => ^handle,
+                     "partNumbers" => [^part_number],
+                     "hardwareType" => %{
+                       "name" => ^hardware_type_name
+                     },
+                     "description" => %{
+                       "locale" => ^default_locale,
+                       "text" => "An appliance"
+                     }
+                   }
+                 }
+               }
+             } = assert(json_response(conn, 200))
+
+      {:ok, %{type: :appliance_model, id: db_id}} =
+        Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
+
+      assert {:ok, %ApplianceModel{name: ^name, handle: ^handle}} =
+               Appliances.fetch_appliance_model(db_id)
+    end
+
+    test "fails when trying to set a description for non default locale", %{
+      conn: conn,
+      hardware_type: hardware_type
+    } do
+      name = "Foobar"
+      handle = "foobar"
+      part_number = "12345/X"
+
+      hardware_type_id =
+        Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
+
+      variables = %{
+        input: %{
+          name: name,
+          handle: handle,
+          part_numbers: [part_number],
+          hardware_type_id: hardware_type_id,
+          description: %{
+            locale: "it-IT",
+            text: "Un dispositivo"
+          }
+        }
+      }
+
+      conn = post(conn, "/api", query: @query, variables: variables)
+
+      assert %{"errors" => [%{"code" => "not_default_locale"}]} = assert(json_response(conn, 200))
     end
   end
 end
