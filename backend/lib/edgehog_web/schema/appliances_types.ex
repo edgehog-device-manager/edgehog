@@ -73,7 +73,9 @@ defmodule EdgehogWeb.Schema.AppliancesTypes do
     Accept-Language header in the request. If no such header is present, the \
     default tenant language is returned.
     """
-    field :description, :localized_text
+    field :description, :localized_text do
+      resolve &Resolvers.Appliances.extract_localized_description/3
+    end
   end
 
   object :appliances_queries do

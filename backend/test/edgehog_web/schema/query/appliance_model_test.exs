@@ -36,6 +36,10 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
         hardwareType {
           name
         }
+        description {
+          locale
+          text
+        }
       }
     }
     """
@@ -61,7 +65,8 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
                    "partNumbers" => [part_number],
                    "hardwareType" => %{
                      "name" => hardware_type.name
-                   }
+                   },
+                   "description" => nil
                  }
                }
              }
@@ -75,6 +80,93 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
       assert %{
                "data" => %{"applianceModel" => nil},
                "errors" => [%{"code" => "not_found", "status_code" => 404}]
+             } = json_response(conn, 200)
+    end
+
+    test "returns the default locale description", %{conn: conn, tenant: tenant} do
+      hardware_type = hardware_type_fixture()
+
+      default_locale = tenant.default_locale
+
+      descriptions = [
+        %{locale: default_locale, text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      %ApplianceModel{id: id} = appliance_model_fixture(hardware_type, descriptions: descriptions)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, "/api", query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "applianceModel" => %{
+                   "description" => %{
+                     "locale" => ^default_locale,
+                     "text" => "An appliance"
+                   }
+                 }
+               }
+             } = json_response(conn, 200)
+    end
+
+    test "returns the explicit locale description", %{conn: conn, tenant: tenant} do
+      hardware_type = hardware_type_fixture()
+
+      default_locale = tenant.default_locale
+
+      descriptions = [
+        %{locale: default_locale, text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      %ApplianceModel{id: id} = appliance_model_fixture(hardware_type, descriptions: descriptions)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, id, EdgehogWeb.Schema)}
+
+      conn =
+        conn
+        |> put_req_header("accept-language", "it-IT")
+        |> get("/api", query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "applianceModel" => %{
+                   "description" => %{
+                     "locale" => "it-IT",
+                     "text" => "Un dispositivo"
+                   }
+                 }
+               }
+             } = json_response(conn, 200)
+    end
+
+    test "returns empty description for not existing locale", %{conn: conn, tenant: tenant} do
+      hardware_type = hardware_type_fixture()
+
+      default_locale = tenant.default_locale
+
+      descriptions = [
+        %{locale: default_locale, text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      %ApplianceModel{id: id} = appliance_model_fixture(hardware_type, descriptions: descriptions)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, id, EdgehogWeb.Schema)}
+
+      conn =
+        conn
+        |> put_req_header("accept-language", "fr-FR")
+        |> get("/api", query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "applianceModel" => %{
+                   "description" => nil
+                 }
+               }
              } = json_response(conn, 200)
     end
   end

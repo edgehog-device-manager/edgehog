@@ -53,12 +53,31 @@ defmodule EdgehogWeb.Resolvers.Appliances do
     end
   end
 
-  def find_appliance_model(%{id: id}, _resolution) do
-    Appliances.fetch_appliance_model(id)
+  def find_appliance_model(%{id: id}, %{context: context}) do
+    with {:ok, appliance_model} <- Appliances.fetch_appliance_model(id) do
+      appliance_model = localize_appliance_model_description(appliance_model, context)
+      {:ok, appliance_model}
+    end
   end
 
-  def list_appliance_models(_parent, _args, _context) do
-    {:ok, Appliances.list_appliance_models()}
+  def list_appliance_models(_parent, _args, %{context: context}) do
+    appliance_models =
+      Appliances.list_appliance_models()
+      |> localize_appliance_model_description(context)
+
+    {:ok, appliance_models}
+  end
+
+  defp localize_appliance_model_description(target, %{locale: locale}) do
+    # Explicit locale, use that one
+    Appliances.preload_localized_descriptions_for_appliance_model(target, locale)
+  end
+
+  defp localize_appliance_model_description(target, %{current_tenant: tenant}) do
+    # Fallback
+    %{default_locale: default_locale} = tenant
+
+    Appliances.preload_localized_descriptions_for_appliance_model(target, default_locale)
   end
 
   def extract_appliance_model_part_numbers(
@@ -123,4 +142,13 @@ defmodule EdgehogWeb.Resolvers.Appliances do
   end
 
   defp wrap_description(attrs), do: attrs
+
+  def extract_localized_description(%ApplianceModel{descriptions: descriptions}, %{}, _context) do
+    # We should always either 0 or 1 description here since the upper layer should take care
+    # of only preloading the localized description.
+    case descriptions do
+      [description] -> {:ok, description}
+      _ -> {:ok, nil}
+    end
+  end
 end

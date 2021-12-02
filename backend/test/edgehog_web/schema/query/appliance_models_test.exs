@@ -36,6 +36,10 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
         hardwareType {
           name
         }
+        description {
+          locale
+          text
+        }
       }
     }
     """
@@ -70,6 +74,83 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
       assert appliance_model["handle"] == handle
       assert appliance_model["partNumbers"] == [part_number]
       assert appliance_model["hardwareType"]["name"] == hardware_type.name
+    end
+
+    test "returns the default locale description", %{conn: conn, tenant: tenant} do
+      hardware_type = hardware_type_fixture()
+
+      default_locale = tenant.default_locale
+
+      descriptions = [
+        %{locale: default_locale, text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      _appliance_model = appliance_model_fixture(hardware_type, descriptions: descriptions)
+
+      conn = get(conn, "/api", query: @query)
+
+      assert %{
+               "data" => %{
+                 "applianceModels" => [appliance_model]
+               }
+             } = json_response(conn, 200)
+
+      assert appliance_model["description"]["locale"] == default_locale
+      assert appliance_model["description"]["text"] == "An appliance"
+    end
+
+    test "returns an explicit locale description", %{conn: conn, tenant: tenant} do
+      hardware_type = hardware_type_fixture()
+
+      default_locale = tenant.default_locale
+
+      descriptions = [
+        %{locale: default_locale, text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      _appliance_model = appliance_model_fixture(hardware_type, descriptions: descriptions)
+
+      conn =
+        conn
+        |> put_req_header("accept-language", "it-IT")
+        |> get("/api", query: @query)
+
+      assert %{
+               "data" => %{
+                 "applianceModels" => [appliance_model]
+               }
+             } = json_response(conn, 200)
+
+      assert appliance_model["description"]["locale"] == "it-IT"
+      assert appliance_model["description"]["text"] == "Un dispositivo"
+    end
+
+    test "returns empty description for non existing locale", %{conn: conn, tenant: tenant} do
+      hardware_type = hardware_type_fixture()
+
+      default_locale = tenant.default_locale
+
+      descriptions = [
+        %{locale: default_locale, text: "An appliance"},
+        %{locale: "it-IT", text: "Un dispositivo"}
+      ]
+
+      _appliance_model = appliance_model_fixture(hardware_type, descriptions: descriptions)
+
+      conn =
+        conn
+        |> put_req_header("accept-language", "fr-FR")
+        |> get("/api", query: @query)
+
+      assert %{
+               "data" => %{
+                 "applianceModels" => [appliance_model]
+               }
+             } = json_response(conn, 200)
+
+      assert appliance_model["description"] == nil
     end
   end
 end
