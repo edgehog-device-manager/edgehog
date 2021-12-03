@@ -47,22 +47,20 @@ defmodule Edgehog.Astarte.Device.SystemStatus do
     # type Object Aggregrate.
     # For details, see https://github.com/astarte-platform/astarte/issues/630
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface) do
-      system_status_list =
-        data["systemStatus"]
-        |> Enum.map(fn ss ->
-          %SystemStatus{
-            boot_id: ss["bootId"],
-            memory_free_bytes: parse_longinteger(ss["availMemoryBytes"]),
-            task_count: ss["taskCount"],
-            uptime_milliseconds: parse_longinteger(ss["uptimeMillis"]),
-            timestamp: parse_datetime(ss["timestamp"])
-          }
-        end)
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1) do
+      case Map.fetch(data, "systemStatus") do
+        {:ok, [status]} ->
+          {:ok,
+           %SystemStatus{
+             boot_id: status["bootId"],
+             memory_free_bytes: parse_longinteger(status["availMemoryBytes"]),
+             task_count: status["taskCount"],
+             uptime_milliseconds: parse_longinteger(status["uptimeMillis"]),
+             timestamp: parse_datetime(status["timestamp"])
+           }}
 
-      case Enum.empty?(system_status_list) do
-        true -> {:error, :system_status_not_found}
-        false -> {:ok, List.first(system_status_list)}
+        _ ->
+          {:error, :system_status_not_found}
       end
     end
   end
