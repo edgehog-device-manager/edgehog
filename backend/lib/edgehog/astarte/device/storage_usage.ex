@@ -30,10 +30,12 @@ defmodule Edgehog.Astarte.Device.StorageUsage do
     # type Object Aggregrate.
     # For details, see https://github.com/astarte-platform/astarte/issues/630
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1) do
       storage_units =
         data
-        |> Enum.map(fn {label, %{"totalBytes" => total_bytes, "freeBytes" => free_bytes}} ->
+        |> Enum.map(fn {label, [storage_unit_info]} ->
+          %{"totalBytes" => total_bytes, "freeBytes" => free_bytes} = storage_unit_info
+
           %StorageUnit{
             label: label,
             total_bytes: parse_longinteger(total_bytes),
