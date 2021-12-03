@@ -21,7 +21,7 @@ defmodule Doc.MixProject do
   # Add here additional documentation files
   defp docs do
     [
-      main: "001-intro_user",
+      main: "intro_user",
       logo: "images/logo-favicon.png",
       extras: extras(),
       assets: "images/",
