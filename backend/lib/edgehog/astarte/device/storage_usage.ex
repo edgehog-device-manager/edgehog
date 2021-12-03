@@ -33,7 +33,9 @@ defmodule Edgehog.Astarte.Device.StorageUsage do
            AppEngine.Devices.get_datastream_data(client, device_id, @interface) do
       storage_units =
         data
-        |> Enum.map(fn {label, %{"totalBytes" => total_bytes, "freeBytes" => free_bytes}} ->
+        |> Enum.map(fn {label, [storage_unit_info | _rest]} ->
+          %{"totalBytes" => total_bytes, "freeBytes" => free_bytes} = storage_unit_info
+
           %StorageUnit{
             label: label,
             total_bytes: parse_longinteger(total_bytes),
