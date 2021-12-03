@@ -23,7 +23,7 @@ defmodule Doc.MixProject do
     [
       main: "001-intro_user",
       logo: "images/logo-favicon.png",
-      extras: Path.wildcard("pages/*/*.md"),
+      extras: extras(),
       assets: "images/",
       api_reference: false,
       groups_for_extras: [
@@ -31,5 +31,9 @@ defmodule Doc.MixProject do
       ],
       groups_for_modules: []
     ]
+  end
+
+  defp extras do
+    "pages/user/intro_user.md"
   end
 end
