@@ -6,9 +6,14 @@ import { ConcreteRequest } from "relay-runtime";
 
 export type UpdateApplianceModelInput = {
     applianceModelId: string;
+    description?: LocalizedTextInput | null | undefined;
     handle?: string | null | undefined;
     name?: string | null | undefined;
     partNumbers?: Array<string> | null | undefined;
+};
+export type LocalizedTextInput = {
+    locale: string;
+    text: string;
 };
 export type ApplianceModel_updateApplianceModel_MutationVariables = {
     input: UpdateApplianceModelInput;

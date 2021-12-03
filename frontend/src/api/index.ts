@@ -36,12 +36,14 @@ const fetchGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>
 ) => {
+  const userLanguage = navigator.language; // TODO allow users to overwrite this
   const authToken = loadAuthToken();
   const response = await fetch(backendUrl, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${authToken}`,
       "Content-Type": "application/json",
+      "Accept-Language": userLanguage,
     },
     body: JSON.stringify({ query, variables }),
   });

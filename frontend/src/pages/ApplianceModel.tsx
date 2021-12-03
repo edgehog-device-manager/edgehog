@@ -31,6 +31,7 @@ import _ from "lodash";
 
 import type { ApplianceModel_getApplianceModel_Query } from "api/__generated__/ApplianceModel_getApplianceModel_Query.graphql";
 import type { ApplianceModel_updateApplianceModel_Mutation } from "api/__generated__/ApplianceModel_updateApplianceModel_Mutation.graphql";
+import type { ApplianceModel_getDefaultTenantLocale_Query } from "api/__generated__/ApplianceModel_getDefaultTenantLocale_Query.graphql";
 import { Link, Route } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
@@ -46,10 +47,22 @@ const GET_APPLIANCE_MODEL_QUERY = graphql`
       id
       name
       handle
+      description {
+        locale
+        text
+      }
       hardwareType {
         name
       }
       partNumbers
+    }
+  }
+`;
+
+const GET_DEFAULT_TENANT_LOCALE_QUERY = graphql`
+  query ApplianceModel_getDefaultTenantLocale_Query {
+    tenantInfo {
+      defaultLocale
     }
   }
 `;
@@ -72,12 +85,31 @@ const UPDATE_APPLIANCE_MODEL_MUTATION = graphql`
   }
 `;
 
+const applianceModelDiff = (a1: ApplianceModelData, a2: ApplianceModelData) => {
+  let diff: Partial<ApplianceModelData> = {};
+  if (a1.name !== a2.name) {
+    diff.name = a2.name;
+  }
+  if (a1.handle !== a2.handle) {
+    diff.handle = a2.handle;
+  }
+  if (!_.isEqual(a1.partNumbers, a2.partNumbers)) {
+    diff.partNumbers = a2.partNumbers;
+  }
+  if (!_.isEqual(a1.description, a2.description)) {
+    diff.description = a2.description;
+  }
+  return diff;
+};
+
 interface ApplianceModelContentProps {
   getApplianceModelQuery: PreloadedQuery<ApplianceModel_getApplianceModel_Query>;
+  getDefaultTenantLocaleQuery: PreloadedQuery<ApplianceModel_getDefaultTenantLocale_Query>;
 }
 
 const ApplianceModelContent = ({
   getApplianceModelQuery,
+  getDefaultTenantLocaleQuery,
 }: ApplianceModelContentProps) => {
   const { applianceModelId = "" } = useParams();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
@@ -86,6 +118,10 @@ const ApplianceModelContent = ({
     GET_APPLIANCE_MODEL_QUERY,
     getApplianceModelQuery
   );
+  const defaultLocaleData = usePreloadedQuery(
+    GET_DEFAULT_TENANT_LOCALE_QUERY,
+    getDefaultTenantLocaleQuery
+  );
 
   const [updateApplianceModel, isUpdatingApplianceModel] =
     useMutation<ApplianceModel_updateApplianceModel_Mutation>(
@@ -93,23 +129,38 @@ const ApplianceModelContent = ({
     );
 
   // TODO: handle readonly type without mapping to mutable type
-  const applianceModel = useMemo(
-    () =>
-      applianceModelData.applianceModel && {
-        ...applianceModelData.applianceModel,
-        hardwareType: { ...applianceModelData.applianceModel.hardwareType },
-        partNumbers: [...applianceModelData.applianceModel.partNumbers],
-      },
-    [applianceModelData.applianceModel]
+  const applianceModel = useMemo(() => {
+    if (!applianceModelData.applianceModel) {
+      return null;
+    }
+    const applianceModel = applianceModelData.applianceModel;
+    let mutableApplianceModel: ApplianceModelData = {
+      name: applianceModel.name,
+      handle: applianceModel.handle,
+      hardwareType: { ...applianceModel.hardwareType },
+      partNumbers: [...applianceModel.partNumbers],
+    };
+    if (applianceModel.description) {
+      mutableApplianceModel.description = {
+        locale: applianceModel.description.locale,
+        text: applianceModel.description.text,
+      };
+    }
+    return mutableApplianceModel;
+  }, [applianceModelData.applianceModel]);
+  const locale = useMemo(
+    () => defaultLocaleData.tenantInfo.defaultLocale,
+    [defaultLocaleData]
   );
 
   const handleUpdateApplianceModel = useCallback(
-    (applianceModel: ApplianceModelData) => {
+    (updatedApplianceModel: ApplianceModelData) => {
+      if (!applianceModel) {
+        return null;
+      }
       const input = {
         applianceModelId,
-        name: applianceModel.name,
-        handle: applianceModel.handle,
-        partNumbers: applianceModel.partNumbers,
+        ...applianceModelDiff(applianceModel, updatedApplianceModel),
       };
       updateApplianceModel({
         variables: { input },
@@ -131,7 +182,7 @@ const ApplianceModelContent = ({
         },
       });
     },
-    [updateApplianceModel, applianceModelId]
+    [updateApplianceModel, applianceModel]
   );
 
   if (!applianceModel) {
@@ -167,12 +218,8 @@ const ApplianceModelContent = ({
           {errorFeedback}
         </Alert>
         <UpdateApplianceModelForm
-          initialData={_.pick(applianceModel, [
-            "name",
-            "handle",
-            "hardwareType",
-            "partNumbers",
-          ])}
+          initialData={applianceModel}
+          locale={applianceModel.description?.locale || locale}
           onSubmit={handleUpdateApplianceModel}
           isLoading={isUpdatingApplianceModel}
         />
@@ -188,7 +235,12 @@ const ApplianceModelPage = () => {
     useQueryLoader<ApplianceModel_getApplianceModel_Query>(
       GET_APPLIANCE_MODEL_QUERY
     );
+  const [getDefaultTenantLocaleQuery, getDefaultTenantLocale] =
+    useQueryLoader<ApplianceModel_getDefaultTenantLocale_Query>(
+      GET_DEFAULT_TENANT_LOCALE_QUERY
+    );
 
+  useEffect(() => getDefaultTenantLocale({}), [getDefaultTenantLocale]);
   useEffect(() => {
     getApplianceModel({ id: applianceModelId });
   }, [getApplianceModel, applianceModelId]);
@@ -211,9 +263,10 @@ const ApplianceModelPage = () => {
           getApplianceModel({ id: applianceModelId });
         }}
       >
-        {getApplianceModelQuery && (
+        {getApplianceModelQuery && getDefaultTenantLocaleQuery && (
           <ApplianceModelContent
             getApplianceModelQuery={getApplianceModelQuery}
+            getDefaultTenantLocaleQuery={getDefaultTenantLocaleQuery}
           />
         )}
       </ErrorBoundary>

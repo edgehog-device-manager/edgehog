@@ -12,6 +12,10 @@ export type ApplianceModel_getApplianceModel_QueryResponse = {
         readonly id: string;
         readonly name: string;
         readonly handle: string;
+        readonly description: {
+            readonly locale: string;
+            readonly text: string;
+        } | null;
         readonly hardwareType: {
             readonly name: string;
         };
@@ -33,6 +37,10 @@ query ApplianceModel_getApplianceModel_Query(
     id
     name
     handle
+    description {
+      locale
+      text
+    }
     hardwareType {
       name
       id
@@ -81,6 +89,31 @@ v4 = {
 v5 = {
   "alias": null,
   "args": null,
+  "concreteType": "LocalizedText",
+  "kind": "LinkedField",
+  "name": "description",
+  "plural": false,
+  "selections": [
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "locale",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "text",
+      "storageKey": null
+    }
+  ],
+  "storageKey": null
+},
+v6 = {
+  "alias": null,
+  "args": null,
   "kind": "ScalarField",
   "name": "partNumbers",
   "storageKey": null
@@ -103,6 +136,7 @@ return {
           (v2/*: any*/),
           (v3/*: any*/),
           (v4/*: any*/),
+          (v5/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -115,7 +149,7 @@ return {
             ],
             "storageKey": null
           },
-          (v5/*: any*/)
+          (v6/*: any*/)
         ],
         "storageKey": null
       }
@@ -140,6 +174,7 @@ return {
           (v2/*: any*/),
           (v3/*: any*/),
           (v4/*: any*/),
+          (v5/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -153,21 +188,21 @@ return {
             ],
             "storageKey": null
           },
-          (v5/*: any*/)
+          (v6/*: any*/)
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "3b28e91c81fab0d2f5323022a662027d",
+    "cacheID": "2da0bbf5b5d5e94cee41e3f5d0b3010a",
     "id": null,
     "metadata": {},
     "name": "ApplianceModel_getApplianceModel_Query",
     "operationKind": "query",
-    "text": "query ApplianceModel_getApplianceModel_Query(\n  $id: ID!\n) {\n  applianceModel(id: $id) {\n    id\n    name\n    handle\n    hardwareType {\n      name\n      id\n    }\n    partNumbers\n  }\n}\n"
+    "text": "query ApplianceModel_getApplianceModel_Query(\n  $id: ID!\n) {\n  applianceModel(id: $id) {\n    id\n    name\n    handle\n    description {\n      locale\n      text\n    }\n    hardwareType {\n      name\n      id\n    }\n    partNumbers\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '7c7bfe8025d1c2e268311a1c6dcf618f';
+(node as any).hash = '1be2fc163a66593510d19d56c6fa614a';
 export default node;

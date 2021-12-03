@@ -50,6 +50,10 @@ const FormRow = ({
 type ApplianceModelData = {
   name: string;
   handle: string;
+  description?: {
+    locale: string;
+    text: string;
+  };
   hardwareType: {
     name: string;
   };
@@ -61,6 +65,7 @@ type PartNumber = { value: string };
 type FormData = {
   name: string;
   handle: string;
+  description: string;
   hardwareType: string;
   partNumbers: PartNumber[];
 };
@@ -69,6 +74,7 @@ const applianceModelSchema = yup
   .object({
     name: yup.string().required(),
     handle: applianceModelHandleSchema.required(),
+    description: yup.string(),
     hardwareType: yup.string().required(),
     partNumbers: yup
       .array()
@@ -91,6 +97,7 @@ const applianceModelSchema = yup
 
 const transformInputData = (data: ApplianceModelData): FormData => ({
   ...data,
+  description: data.description?.text || "",
   hardwareType: data.hardwareType.name,
   partNumbers:
     data.partNumbers.length > 0
@@ -98,13 +105,28 @@ const transformInputData = (data: ApplianceModelData): FormData => ({
       : [{ value: "" }], // default with at least one empty part number
 });
 
-const transformOutputData = (data: FormData): ApplianceModelData => ({
-  ...data,
-  hardwareType: {
-    name: data.hardwareType,
-  },
-  partNumbers: data.partNumbers.map((pn) => pn.value),
-});
+const transformOutputData = (
+  locale: string,
+  data: FormData
+): ApplianceModelData => {
+  let applianceModel: ApplianceModelData = {
+    name: data.name,
+    handle: data.handle,
+    hardwareType: {
+      name: data.hardwareType,
+    },
+    partNumbers: data.partNumbers.map((pn) => pn.value),
+  };
+
+  if (data.description) {
+    applianceModel.description = {
+      locale,
+      text: data.description,
+    };
+  }
+
+  return applianceModel;
+};
 
 type HardwareTypeOption = {
   name: string;
@@ -113,12 +135,14 @@ type HardwareTypeOption = {
 
 type Props = {
   initialData: ApplianceModelData;
+  locale: string;
   isLoading?: boolean;
   onSubmit: (data: ApplianceModelData) => void;
 };
 
 const UpdateApplianceModelForm = ({
   initialData,
+  locale,
   isLoading = false,
   onSubmit,
 }: Props) => {
@@ -139,7 +163,8 @@ const UpdateApplianceModelForm = ({
     name: "partNumbers",
   });
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: FormData) =>
+    onSubmit(transformOutputData(locale, data));
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -190,6 +215,20 @@ const UpdateApplianceModelForm = ({
               <FormattedMessage id={errors.handle?.message} />
             )}
           </Form.Control.Feedback>
+        </FormRow>
+        <FormRow
+          id="appliance-model-form-description"
+          label={
+            <>
+              <FormattedMessage
+                id="components.CreateApplianceModelForm.descriptionLabel"
+                defaultMessage="Description"
+              />
+              <span className="small text-muted"> ({locale})</span>
+            </>
+          }
+        >
+          <Form.Control as="textarea" {...register("description")} />
         </FormRow>
         <FormRow
           id="appliance-model-form-hardware-type"

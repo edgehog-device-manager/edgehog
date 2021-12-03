@@ -50,6 +50,10 @@ const FormRow = ({
 type ApplianceModelData = {
   name: string;
   handle: string;
+  description?: {
+    locale: string;
+    text: string;
+  };
   hardwareTypeId: string;
   partNumbers: string[];
 };
@@ -59,6 +63,7 @@ type PartNumber = { value: string };
 type FormData = {
   name: string;
   handle: string;
+  description: string;
   hardwareTypeId: string;
   partNumbers: PartNumber[];
 };
@@ -67,6 +72,7 @@ const applianceModelSchema = yup
   .object({
     name: yup.string().required(),
     handle: applianceModelHandleSchema.required(),
+    description: yup.string(),
     hardwareTypeId: yup.string().required(),
     partNumbers: yup
       .array()
@@ -87,14 +93,31 @@ const applianceModelSchema = yup
   })
   .required();
 
-const transformOutputData = (data: FormData): ApplianceModelData => ({
-  ...data,
-  partNumbers: data.partNumbers.map((pn) => pn.value),
-});
+const transformOutputData = (
+  locale: string,
+  data: FormData
+): ApplianceModelData => {
+  let applianceModel: ApplianceModelData = {
+    name: data.name,
+    handle: data.handle,
+    hardwareTypeId: data.hardwareTypeId,
+    partNumbers: data.partNumbers.map((pn) => pn.value),
+  };
+
+  if (data.description) {
+    applianceModel.description = {
+      locale,
+      text: data.description,
+    };
+  }
+
+  return applianceModel;
+};
 
 const initialData: FormData = {
   name: "",
   handle: "",
+  description: "",
   hardwareTypeId: "",
   partNumbers: [{ value: "" }],
 };
@@ -106,12 +129,14 @@ type HardwareTypeOption = {
 
 type Props = {
   hardwareTypes: HardwareTypeOption[];
+  locale: string;
   isLoading?: boolean;
   onSubmit: (data: ApplianceModelData) => void;
 };
 
 const CreateApplianceModelForm = ({
   hardwareTypes,
+  locale,
   isLoading = false,
   onSubmit,
 }: Props) => {
@@ -132,7 +157,8 @@ const CreateApplianceModelForm = ({
     name: "partNumbers",
   });
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: FormData) =>
+    onSubmit(transformOutputData(locale, data));
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -183,6 +209,20 @@ const CreateApplianceModelForm = ({
               <FormattedMessage id={errors.handle?.message} />
             )}
           </Form.Control.Feedback>
+        </FormRow>
+        <FormRow
+          id="appliance-model-form-description"
+          label={
+            <>
+              <FormattedMessage
+                id="components.CreateApplianceModelForm.descriptionLabel"
+                defaultMessage="Description"
+              />
+              <span className="small text-muted"> ({locale})</span>
+            </>
+          }
+        >
+          <Form.Control as="textarea" {...register("description")} />
         </FormRow>
         <FormRow
           id="appliance-model-form-hardware-type"
