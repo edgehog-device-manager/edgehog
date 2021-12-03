@@ -14,6 +14,14 @@ Each ApplianceModel must be associated to a specific HardwareType.
 """
 type ApplianceModel implements Node {
   """
+  A localized description of the appliance model.
+  The language of the description can be controlled passing an Accept-Language
+  header in the request. If no such header is present, the default tenant
+  language is returned.
+  """
+  description: LocalizedText
+
+  """
   The identifier of the appliance model.
   """
   handle: String!
@@ -40,6 +48,11 @@ type ApplianceModel implements Node {
 }
 
 input CreateApplianceModelInput {
+  """
+  An optional localized description. This description can only use the default tenant locale.
+  """
+  description: LocalizedTextInput
+
   """
   The identifier of the appliance model.
 
@@ -319,6 +332,36 @@ type HardwareType implements Node {
   partNumbers: [String!]!
 }
 
+"""
+A text expressed in a specific locale.
+"""
+type LocalizedText {
+  """
+  The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)
+  """
+  locale: String!
+
+  """
+  The localized text
+  """
+  text: String!
+}
+
+"""
+Input object used to provide a localizedText as an input.
+"""
+input LocalizedTextInput {
+  """
+  The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)
+  """
+  locale: String!
+
+  """
+  The localized text
+  """
+  text: String!
+}
+
 interface Node {
   """
   The ID of the object.
@@ -408,6 +451,11 @@ type RootQueryType {
     """
     id: ID!
   ): Node
+
+  """
+  Retrieves information about the current tenant
+  """
+  tenantInfo: TenantInfo!
 }
 
 """
@@ -460,11 +508,36 @@ type SystemStatus {
   uptimeMilliseconds: Int
 }
 
+"""
+Represents information about a tenant
+"""
+type TenantInfo {
+  """
+  The default locale supported by the tenant
+  """
+  defaultLocale: String!
+
+  """
+  The tenant name
+  """
+  name: String!
+
+  """
+  The tenant slug
+  """
+  slug: String!
+}
+
 input UpdateApplianceModelInput {
   """
   The ID of the appliance model to be updated.
   """
   applianceModelId: ID!
+
+  """
+  An optional localized description. This description can only use the default tenant locale.
+  """
+  description: LocalizedTextInput
 
   """
   The identifier of the appliance model.
