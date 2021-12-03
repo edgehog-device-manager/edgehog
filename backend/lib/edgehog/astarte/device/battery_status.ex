@@ -26,23 +26,25 @@ defmodule Edgehog.Astarte.Device.BatteryStatus do
 
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface) do
-      battery_status =
-        Enum.map(data, fn {slot,
-                           %{
-                             "levelPercentage" => level_percentage,
-                             "levelAbsoluteError" => level_absolute_error,
-                             "status" => status
-                           }} ->
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1) do
+      battery_slots =
+        data
+        |> Enum.map(fn {battery_slot, [battery_slot_info]} ->
+          %{
+            "levelPercentage" => level_percentage,
+            "levelAbsoluteError" => level_absolute_error,
+            "status" => status
+          } = battery_slot_info
+
           %BatterySlot{
-            slot: slot,
+            slot: battery_slot,
             level_percentage: level_percentage,
             level_absolute_error: level_absolute_error,
             status: status
           }
         end)
 
-      {:ok, battery_status}
+      {:ok, battery_slots}
     end
   end
 end
