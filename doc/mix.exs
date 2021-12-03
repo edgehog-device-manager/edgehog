@@ -35,7 +35,8 @@ defmodule Doc.MixProject do
 
   defp extras do
     [
-      "pages/user/intro_user.md"
+      "pages/user/intro_user.md",
+      "pages/user/core_concepts.md"
     ]
   end
 end
