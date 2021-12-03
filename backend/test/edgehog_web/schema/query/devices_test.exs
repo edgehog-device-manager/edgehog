@@ -18,6 +18,7 @@
 
 defmodule EdgehogWeb.Schema.Query.DevicesTest do
   use EdgehogWeb.ConnCase
+  use Edgehog.AstarteMockCase
 
   import Edgehog.AppliancesFixtures
   import Edgehog.AstarteFixtures
@@ -173,6 +174,50 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert device["applianceModel"]["name"] == appliance_model_name
       assert device["applianceModel"]["description"]["locale"] == "it-IT"
       assert device["applianceModel"]["description"]["text"] == "Un dispositivo"
+    end
+  end
+
+  describe "device battery status query" do
+    setup do
+      cluster = cluster_fixture()
+
+      {:ok, realm: realm_fixture(cluster)}
+    end
+
+    @battery_status_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        batteryStatus {
+          slot
+          levelPercentage
+          levelAbsoluteError
+          status
+        }
+      }
+    }
+    """
+
+    test "returns battery status if available", %{conn: conn, realm: realm} do
+      %Device{
+        id: id
+      } = device_fixture(realm)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, "/api", query: @battery_status_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "batteryStatus" => [battery_slot]
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert battery_slot["slot"] == "Slot name"
+      assert battery_slot["levelPercentage"] == 80.3
+      assert battery_slot["levelAbsoluteError"] == 0.1
+      assert battery_slot["status"] == "CHARGING"
     end
   end
 end

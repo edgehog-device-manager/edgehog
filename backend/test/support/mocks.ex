@@ -32,6 +32,10 @@ Mox.defmock(Edgehog.Astarte.Device.WiFiScanResultMock,
   for: Edgehog.Astarte.Device.WiFiScanResult.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.BatteryStatusMock,
+  for: Edgehog.Astarte.Device.BatteryStatus.Behaviour
+)
+
 Mox.defmock(Edgehog.Geolocation.IPGeolocationProviderMock,
   for: Edgehog.Geolocation.IPGeolocationProvider
 )

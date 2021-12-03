@@ -20,6 +20,7 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   alias Edgehog.Appliances
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
+  alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Geolocation
 
   def find_device(%{id: id}, %{context: context}) do
@@ -92,6 +93,26 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     case Geolocation.fetch_location(device) do
       {:ok, location} -> {:ok, location}
       _ -> {:ok, nil}
+    end
+  end
+
+  def fetch_battery_status(%Device{} = device, _args, _context) do
+    case Astarte.fetch_battery_status(device) do
+      {:ok, battery_status} -> {:ok, battery_status}
+      _ -> {:ok, nil}
+    end
+  end
+
+  def battery_status_to_enum(%BatterySlot{status: status}, _args, _context) do
+    case status do
+      "Charging" -> {:ok, :charging}
+      "Discharging" -> {:ok, :discharging}
+      "Idle" -> {:ok, :idle}
+      "EitherIdleOrCharging" -> {:ok, :either_idle_or_charging}
+      "Failure" -> {:ok, :failure}
+      "Removed" -> {:ok, :removed}
+      "Unknown" -> {:ok, :unknown}
+      _other -> {:error, :invalid_battery_status}
     end
   end
 end
