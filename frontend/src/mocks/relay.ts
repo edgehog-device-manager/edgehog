@@ -26,6 +26,14 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       partNumbers: ["AM_0000001"],
     };
   },
+  BatterySlot() {
+    return {
+      levelAbsoluteError: 0.1,
+      levelPercentage: 80.3,
+      slot: "Slot identifier",
+      status: "CHARGING",
+    };
+  },
   Device() {
     return {
       deviceId: "DqL4H107S42WBEHmDrvPLQ",
