@@ -29,6 +29,7 @@ import {
 import { FormattedDate, FormattedMessage } from "react-intl";
 import dayjs from "dayjs";
 
+import type { Device_batteryStatus$key } from "api/__generated__/Device_batteryStatus.graphql";
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
@@ -51,6 +52,7 @@ import Stack from "components/Stack";
 import StorageTable from "components/StorageTable";
 import Tabs, { Tab } from "components/Tabs";
 import WiFiScanResultsTable from "components/WiFiScanResultsTable";
+import BatteryTable from "components/BatteryTable";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
@@ -109,6 +111,17 @@ const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
+  fragment Device_batteryStatus on Device {
+    batteryStatus {
+      slot
+      status
+      levelPercentage
+      levelAbsoluteError
+    }
+  }
+`;
+
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!) {
     device(id: $id) {
@@ -129,6 +142,7 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_storageUsage
       ...Device_systemStatus
       ...Device_wifiScanResults
+      ...Device_batteryStatus
     }
   }
 `;
@@ -535,6 +549,55 @@ const DeviceWiFiScanResultsTab = ({
   );
 };
 
+interface DeviceBatteryTabProps {
+  deviceRef: Device_batteryStatus$key;
+}
+
+const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
+  const { batteryStatus } = useFragment(
+    DEVICE_BATTERY_STATUS_FRAGMENT,
+    deviceRef
+  );
+  if (!batteryStatus) {
+    return null;
+  }
+  // TODO: handle readonly type without mapping to mutable type
+  const batterySlots = batteryStatus.map((batterySlot) => ({
+    ...batterySlot,
+  }));
+  return (
+    <Tab
+      eventKey="device-battery-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.BatteryStatusTab"
+          defaultMessage="Battery"
+        />
+      }
+    >
+      <div className="mt-3">
+        {batterySlots.length === 0 ? (
+          <Result.EmptyList
+            title={
+              <FormattedMessage
+                id="pages.Device.BatteryStatusTab.noBattery.title"
+                defaultMessage="No battery"
+              />
+            }
+          >
+            <FormattedMessage
+              id="pages.Device.BatteryStatusTab.noBattery.message"
+              defaultMessage="The device has not detected any battery yet."
+            />
+          </Result.EmptyList>
+        ) : (
+          <BatteryTable data={batterySlots} />
+        )}
+      </div>
+    </Tab>
+  );
+};
+
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
 }
@@ -681,6 +744,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
               "device-hardware-info-tab",
               "device-system-status-tab",
               "device-storage-usage-tab",
+              "device-battery-tab",
               "device-location-tab",
               "device-wifi-scan-results-tab",
             ]}
@@ -688,6 +752,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             <DeviceHardwareInfoTab deviceRef={device} />
             <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
+            <DeviceBatteryTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
           </Tabs>
