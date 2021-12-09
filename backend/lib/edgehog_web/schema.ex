@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.AppliancesTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.TenantsTypes
+  import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
   alias EdgehogWeb.Middleware

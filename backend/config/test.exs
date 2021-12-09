@@ -38,6 +38,13 @@ config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiSc
 config :edgehog, :astarte_system_status_module, Edgehog.Astarte.Device.SystemStatusMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
 
+# Storage mocks for tests
+config :edgehog, :assets_appliance_model_picture_module, Edgehog.Assets.ApplianceModelPictureMock
+
+# Enable s3 storage since we're using mocks for it
+config :edgehog, enable_s3_storage?: true
+
+# Geolocation mocks for tests
 config :edgehog,
   ip_geolocation_provider: Edgehog.Geolocation.IPGeolocationProviderMock,
   wifi_geolocation_provider: Edgehog.Geolocation.WiFiGeolocationProviderMock,
