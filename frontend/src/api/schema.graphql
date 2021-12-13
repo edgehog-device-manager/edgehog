@@ -47,6 +47,71 @@ type ApplianceModel implements Node {
   partNumbers: [String!]!
 }
 
+"""
+Describes a battery slot of a device.
+"""
+type BatterySlot {
+  """
+  Battery level measurement absolute error [0.0-100.0]
+  """
+  levelAbsoluteError: Float
+
+  """
+  Battery level estimated percentage [0.0%-100.0%]
+  """
+  levelPercentage: Float
+
+  """
+  The identifier of the battery slot.
+  """
+  slot: String!
+
+  """
+  The current status of the battery.
+  """
+  status: BatteryStatus
+}
+
+"""
+The current status of the battery.
+"""
+enum BatteryStatus {
+  """
+  The battery is charging.
+  """
+  CHARGING
+
+  """
+  The battery is discharging.
+  """
+  DISCHARGING
+
+  """
+  The battery is either in a charging or in an idle state, since the hardware doesn't allow to distinguish between them.
+  """
+  EITHER_IDLE_OR_CHARGING
+
+  """
+  The battery is in a failed state.
+  """
+  FAILURE
+
+  """
+  The battery is idle.
+  """
+  IDLE
+
+  """
+  The battery is removed.
+  """
+  REMOVED
+
+  """
+  The battery status cannot be determined.
+  """
+  UNKNOWN
+}
+
 input CreateApplianceModelInput {
   """
   An optional localized description. This description can only use the default tenant locale.
@@ -128,6 +193,11 @@ type Device implements Node {
   The appliance model of the device.
   """
   applianceModel: ApplianceModel
+
+  """
+  The status of the battery slots of the device.
+  """
+  batteryStatus: [BatterySlot!]
 
   """
   The device ID used to connect to the Astarte cluster.

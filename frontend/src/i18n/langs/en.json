@@ -53,6 +53,36 @@
   "components.ApplianceModelsTable.partNumbersTitle": {
     "defaultMessage": "Part Numbers"
   },
+  "components.BatteryTable.chargeLevelTitle": {
+    "defaultMessage": "Charge Level"
+  },
+  "components.BatteryTable.slotTitle": {
+    "defaultMessage": "Slot"
+  },
+  "components.BatteryTable.status.Charging": {
+    "defaultMessage": "Charging"
+  },
+  "components.BatteryTable.status.Discharging": {
+    "defaultMessage": "Discharging"
+  },
+  "components.BatteryTable.status.Either_idle_or_charging": {
+    "defaultMessage": "Idle/Charging"
+  },
+  "components.BatteryTable.status.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.BatteryTable.status.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.BatteryTable.status.Removed": {
+    "defaultMessage": "Removed"
+  },
+  "components.BatteryTable.status.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.BatteryTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
   "components.ConnectionStatus.statusConnected": {
     "defaultMessage": "Connected"
   },
@@ -243,6 +273,15 @@
   },
   "pages.ApplianceModels.title": {
     "defaultMessage": "Appliance Models"
+  },
+  "pages.Device.BatteryStatusTab": {
+    "defaultMessage": "Battery"
+  },
+  "pages.Device.BatteryStatusTab.noBattery.message": {
+    "defaultMessage": "The device has not detected any battery yet."
+  },
+  "pages.Device.BatteryStatusTab.noBattery.title": {
+    "defaultMessage": "No battery"
   },
   "pages.Device.deviceNotFound.message": {
     "defaultMessage": "Return to the device list."
