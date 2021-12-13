@@ -21,12 +21,13 @@ defmodule Edgehog.Appliances.ApplianceModel do
   import Ecto.Changeset
 
   alias Edgehog.Appliances.HardwareType
-
   alias Edgehog.Appliances.{ApplianceModelDescription, ApplianceModelPartNumber}
 
   schema "appliance_models" do
     field :handle, :string
     field :name, :string
+    field :picture_url, :string
+    field :picture_file, :any, virtual: true
     field :tenant_id, :id
     belongs_to :hardware_type, HardwareType
     has_many :part_numbers, ApplianceModelPartNumber, on_replace: :delete
@@ -38,7 +39,7 @@ defmodule Edgehog.Appliances.ApplianceModel do
   @doc false
   def changeset(appliance_model, attrs) do
     appliance_model
-    |> cast(attrs, [:name, :handle])
+    |> cast(attrs, [:name, :handle, :picture_url, :picture_file])
     |> validate_required([:name, :handle])
     |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
       message:

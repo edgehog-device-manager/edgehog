@@ -59,6 +59,59 @@ if config_env() == :prod do
   config :edgehog, Edgehog.Geolocation.Providers.GoogleGeocoding,
     api_key: System.fetch_env!("GOOGLE_GEOCODING_API_KEY")
 
+  # TODO: while you can use access key + secret key with S3-compatible storages,
+  # Waffle's default S3 adapter doesn't work well with Google Cloud Storage.
+  # To use GCP, you need to supply the JSON credentials of an authorized Service
+  # Account instead, which are used by the GCP adapter for Waffle.
+  s3 = %{
+    access_key_id: System.get_env("S3_ACCESS_KEY_ID"),
+    secret_access_key: System.get_env("S3_SECRET_ACCESS_KEY"),
+    gcp_credentials: System.get_env("S3_GCP_CREDENTIALS"),
+    region: System.get_env("S3_REGION"),
+    bucket: System.get_env("S3_BUCKET"),
+    asset_host: System.get_env("S3_ASSET_HOST"),
+    scheme: System.get_env("S3_SCHEME"),
+    host: System.get_env("S3_HOST"),
+    port: System.get_env("S3_PORT")
+  }
+
+  # Enable uploaders only when the S3 storage has been configured
+  config :edgehog,
+    enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end)
+
+  use_google_cloud_storage =
+    case s3.host do
+      "storage.googleapis.com" -> true
+      _ -> false
+    end
+
+  s3_storage_module =
+    if use_google_cloud_storage do
+      Waffle.Storage.Google.CloudStorage
+    else
+      Waffle.Storage.S3
+    end
+
+  config :waffle,
+    storage: s3_storage_module,
+    bucket: s3.bucket,
+    asset_host: s3.asset_host,
+    virtual_host: true
+
+  config :ex_aws,
+    region: s3.region,
+    access_key_id: s3.access_key_id,
+    secret_access_key: s3.secret_access_key
+
+  config :ex_aws, :s3,
+    scheme: s3.scheme,
+    host: s3.host,
+    port: s3.port
+
+  config :goth,
+    disabled: !use_google_cloud_storage,
+    json: s3.gcp_credentials
+
   # ## Using releases
   #
   # If you are doing OTP releases, you need to instruct Phoenix

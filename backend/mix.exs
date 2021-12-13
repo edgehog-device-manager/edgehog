@@ -72,7 +72,13 @@ defmodule Edgehog.MixProject do
       {:x509, "~> 0.8"},
       {:mox, "~> 1.0"},
       {:tesla, "~> 1.4"},
-      {:finch, "~> 0.9"}
+      {:finch, "~> 0.9"},
+      {:waffle, "~> 1.1"},
+      {:ex_aws, "~> 2.2"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"},
+      {:waffle_gcs, "~> 0.2"}
     ]
   end
 

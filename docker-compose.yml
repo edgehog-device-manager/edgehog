@@ -21,11 +21,22 @@ services:
       FREEGEOIP_API_KEY: ${FREEGEOIP_API_KEY:-}
       GOOGLE_GEOLOCATION_API_KEY: ${GOOGLE_GEOLOCATION_API_KEY:-}
       GOOGLE_GEOCODING_API_KEY: ${GOOGLE_GEOCODING_API_KEY:-}
+      S3_ACCESS_KEY_ID: "${S3_ACCESS_KEY_ID:-minioadmin}"
+      S3_SECRET_ACCESS_KEY: "${S3_SECRET_ACCESS_KEY:-minioadmin}"
+      S3_REGION: "${S3_REGION:-local}"
+      S3_SCHEME: "${S3_SCHEME:-http://}"
+      S3_HOST: "${S3_HOST:-minio}"
+      S3_PORT: "${S3_PORT:-9000}"
+      S3_BUCKET: "${S3_BUCKET:-edgehog}"
+      S3_ASSET_HOST: "${S3_ASSET_HOST:-http://localhost:9000/edgehog}"
+      S3_GCP_CREDENTIALS: "${S3_GCP_CREDENTIALS:-}"
     ports:
       - 4000:4000
     restart: on-failure
     depends_on:
       - postgresql
+      - minio
+      - minio-init
 
   edgehog-frontend:
     image: edgehogdevicemanager/edgehog-frontend:snapshot
@@ -37,5 +48,31 @@ services:
       - 8080:80
     restart: on-failure
 
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - "minio-data:/data"
+    environment:
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin"
+    command: server --console-address ":9001" /data
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: |
+      /bin/sh -c "
+      while ! curl -s http://minio:9000 >/dev/null; do sleep 0.1; done;
+      /usr/bin/mc alias set minio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb minio/edgehog;
+      /usr/bin/mc policy set public minio/edgehog;
+      exit 0;
+      "
+
 volumes:
   postgresql-data:
+  minio-data:
