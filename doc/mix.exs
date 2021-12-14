@@ -27,7 +27,8 @@ defmodule Doc.MixProject do
       assets: "images/",
       api_reference: false,
       groups_for_extras: [
-        "User Guide": ~r"/user/"
+        "User Guide": ~r"/user/",
+        Architecture: ~r"/architecture/"
       ],
       groups_for_modules: []
     ]
@@ -40,7 +41,8 @@ defmodule Doc.MixProject do
       "pages/user/hardware_types.md",
       "pages/user/appliance_models.md",
       "pages/user/devices.md",
-      "pages/user/interacting_with_edgehog.md"
+      "pages/user/interacting_with_edgehog.md",
+      "pages/architecture/overview.md"
     ]
   end
 end
