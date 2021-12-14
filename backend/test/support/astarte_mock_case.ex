@@ -52,6 +52,11 @@ defmodule Edgehog.AstarteMockCase do
     )
 
     Mox.stub_with(
+      Edgehog.Astarte.Device.OSInfoMock,
+      Edgehog.Mocks.Astarte.Device.OSInfo
+    )
+
+    Mox.stub_with(
       Edgehog.Astarte.Device.StorageUsageMock,
       Edgehog.Mocks.Astarte.Device.StorageUsage
     )
