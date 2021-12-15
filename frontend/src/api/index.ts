@@ -85,7 +85,11 @@ const extractUploadables = (
         ...(uploadables || {}),
         [key]: value,
       };
-    } else if (typeof value === "object" && value !== null) {
+    } else if (
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      value !== null
+    ) {
       const extracted = extractUploadables(value);
       variables[key] = extracted.variables;
       if (extracted.uploadables) {

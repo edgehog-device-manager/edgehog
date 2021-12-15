@@ -34,7 +34,7 @@ import Alert from "components/Alert";
 import Button from "components/Button";
 import Center from "components/Center";
 import CreateApplianceModelForm from "forms/CreateApplianceModel";
-import type { ApplianceModelData } from "forms/CreateApplianceModel";
+import type { ApplianceModelChanges } from "forms/CreateApplianceModel";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
@@ -66,10 +66,16 @@ const CREATE_APPLIANCE_MODEL_MUTATION = graphql`
         id
         name
         handle
+        description {
+          locale
+          text
+        }
         hardwareType {
+          id
           name
         }
         partNumbers
+        pictureUrl
       }
     }
   }
@@ -114,7 +120,7 @@ const ApplianceModelContent = ({
   );
 
   const handleCreateApplianceModel = useCallback(
-    (applianceModel: ApplianceModelData) => {
+    (applianceModel: ApplianceModelChanges) => {
       createApplianceModel({
         variables: { input: applianceModel },
         onCompleted(data, errors) {

@@ -43,7 +43,7 @@ const Figure = ({ alt, className = "", src }: Props) => {
     <RBFigure className={"w-100 " + className}>
       <RBFigure.Image
         alt={alt}
-        className="rounded border"
+        className="rounded border w-100"
         fluid
         src={imageSrc}
         onError={handleError}

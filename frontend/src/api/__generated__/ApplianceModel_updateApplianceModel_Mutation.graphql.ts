@@ -10,6 +10,8 @@ export type UpdateApplianceModelInput = {
     handle?: string | null | undefined;
     name?: string | null | undefined;
     partNumbers?: Array<string> | null | undefined;
+    pictureFile?: File | null | undefined;
+    pictureUrl?: string | null | undefined;
 };
 export type LocalizedTextInput = {
     locale: string;
@@ -24,10 +26,16 @@ export type ApplianceModel_updateApplianceModel_MutationResponse = {
             readonly id: string;
             readonly name: string;
             readonly handle: string;
+            readonly description: {
+                readonly locale: string;
+                readonly text: string;
+            } | null;
             readonly hardwareType: {
+                readonly id: string;
                 readonly name: string;
             };
             readonly partNumbers: ReadonlyArray<string>;
+            readonly pictureUrl: string | null;
         };
     } | null;
 };
@@ -47,11 +55,16 @@ mutation ApplianceModel_updateApplianceModel_Mutation(
       id
       name
       handle
+      description {
+        locale
+        text
+      }
       hardwareType {
-        name
         id
+        name
       }
       partNumbers
+      pictureUrl
     }
   }
 }
@@ -65,87 +78,118 @@ var v0 = [
     "name": "input"
   }
 ],
-v1 = [
-  {
-    "kind": "Variable",
-    "name": "input",
-    "variableName": "input"
-  }
-],
-v2 = {
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v3 = {
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
-v4 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "handle",
-  "storageKey": null
-},
-v5 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "partNumbers",
-  "storageKey": null
-};
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "ApplianceModel_updateApplianceModel_Mutation",
+v3 = [
+  {
+    "alias": null,
+    "args": [
+      {
+        "kind": "Variable",
+        "name": "input",
+        "variableName": "input"
+      }
+    ],
+    "concreteType": "UpdateApplianceModelPayload",
+    "kind": "LinkedField",
+    "name": "updateApplianceModel",
+    "plural": false,
     "selections": [
       {
         "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "UpdateApplianceModelPayload",
+        "args": null,
+        "concreteType": "ApplianceModel",
         "kind": "LinkedField",
-        "name": "updateApplianceModel",
+        "name": "applianceModel",
         "plural": false,
         "selections": [
+          (v1/*: any*/),
+          (v2/*: any*/),
           {
             "alias": null,
             "args": null,
-            "concreteType": "ApplianceModel",
+            "kind": "ScalarField",
+            "name": "handle",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "LocalizedText",
             "kind": "LinkedField",
-            "name": "applianceModel",
+            "name": "description",
             "plural": false,
             "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v4/*: any*/),
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "HardwareType",
-                "kind": "LinkedField",
-                "name": "hardwareType",
-                "plural": false,
-                "selections": [
-                  (v3/*: any*/)
-                ],
+                "kind": "ScalarField",
+                "name": "locale",
                 "storageKey": null
               },
-              (v5/*: any*/)
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "text",
+                "storageKey": null
+              }
             ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "HardwareType",
+            "kind": "LinkedField",
+            "name": "hardwareType",
+            "plural": false,
+            "selections": [
+              (v1/*: any*/),
+              (v2/*: any*/)
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "partNumbers",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "pictureUrl",
             "storageKey": null
           }
         ],
         "storageKey": null
       }
     ],
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "ApplianceModel_updateApplianceModel_Mutation",
+    "selections": (v3/*: any*/),
     "type": "RootMutationType",
     "abstractKey": null
   },
@@ -154,57 +198,17 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "ApplianceModel_updateApplianceModel_Mutation",
-    "selections": [
-      {
-        "alias": null,
-        "args": (v1/*: any*/),
-        "concreteType": "UpdateApplianceModelPayload",
-        "kind": "LinkedField",
-        "name": "updateApplianceModel",
-        "plural": false,
-        "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "ApplianceModel",
-            "kind": "LinkedField",
-            "name": "applianceModel",
-            "plural": false,
-            "selections": [
-              (v2/*: any*/),
-              (v3/*: any*/),
-              (v4/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "HardwareType",
-                "kind": "LinkedField",
-                "name": "hardwareType",
-                "plural": false,
-                "selections": [
-                  (v3/*: any*/),
-                  (v2/*: any*/)
-                ],
-                "storageKey": null
-              },
-              (v5/*: any*/)
-            ],
-            "storageKey": null
-          }
-        ],
-        "storageKey": null
-      }
-    ]
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "5a0bac3786d3f4923be151a021a6fd31",
+    "cacheID": "920a4668ae9356be0a72ec1b275b70b3",
     "id": null,
     "metadata": {},
     "name": "ApplianceModel_updateApplianceModel_Mutation",
     "operationKind": "mutation",
-    "text": "mutation ApplianceModel_updateApplianceModel_Mutation(\n  $input: UpdateApplianceModelInput!\n) {\n  updateApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      hardwareType {\n        name\n        id\n      }\n      partNumbers\n    }\n  }\n}\n"
+    "text": "mutation ApplianceModel_updateApplianceModel_Mutation(\n  $input: UpdateApplianceModelInput!\n) {\n  updateApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      description {\n        locale\n        text\n      }\n      hardwareType {\n        id\n        name\n      }\n      partNumbers\n      pictureUrl\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = 'a141651959d1f19e0258091ebe404ad1';
+(node as any).hash = '74ed7e134a496195539fe5183d49a5ff';
 export default node;
