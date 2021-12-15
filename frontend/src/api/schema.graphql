@@ -260,6 +260,11 @@ type Device implements Node {
   online: Boolean!
 
   """
+  Information about the operating system of the device.
+  """
+  osInfo: OsInfo
+
+  """
   The current usage of the storage units of the device.
   """
   storageUsage: [StorageUnit!]
@@ -457,6 +462,21 @@ interface Node {
   The ID of the object.
   """
   id: ID!
+}
+
+"""
+Describes an operating system of a device.
+"""
+type OsInfo {
+  """
+  The name of the operating system.
+  """
+  name: String
+
+  """
+  The version of the operating system.
+  """
+  version: String
 }
 
 type RootMutationType {
