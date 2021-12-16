@@ -221,7 +221,7 @@ const UpdateApplianceModelForm = ({
         <Row>
           <Col md="5" lg="4" xl="3">
             <Stack>
-              <div className="d-flex justify-content-end">
+              <div className="d-flex justify-content-end position-relative">
                 {picture && (
                   <CloseButton
                     className="position-absolute bg-white border"
