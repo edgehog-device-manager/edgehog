@@ -220,4 +220,44 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert battery_slot["status"] == "CHARGING"
     end
   end
+
+  describe "device OS info query" do
+    setup do
+      cluster = cluster_fixture()
+
+      {:ok, realm: realm_fixture(cluster)}
+    end
+
+    @os_info_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        osInfo {
+          name
+          version
+        }
+      }
+    }
+    """
+
+    test "returns OS info if available", %{conn: conn, realm: realm} do
+      %Device{
+        id: id
+      } = device_fixture(realm)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, "/api", query: @os_info_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "osInfo" => os_info
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert os_info["name"] == "esp-idf"
+      assert os_info["version"] == "v4.3.1"
+    end
+  end
 end

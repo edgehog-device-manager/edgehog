@@ -31,6 +31,7 @@ defmodule Edgehog.Astarte do
     BatteryStatus,
     DeviceStatus,
     HardwareInfo,
+    OSInfo,
     StorageUsage,
     SystemStatus,
     WiFiScanResult
@@ -63,6 +64,7 @@ defmodule Edgehog.Astarte do
                            :astarte_battery_status_module,
                            BatteryStatus
                          )
+  @os_info_module Application.compile_env(:edgehog, :astarte_os_info_module, OSInfo)
 
   @doc """
   Returns the list of clusters.
@@ -595,6 +597,12 @@ defmodule Edgehog.Astarte do
   def fetch_battery_status(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       @battery_status_module.get(client, device.device_id)
+    end
+  end
+
+  def fetch_os_info(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @os_info_module.get(client, device.device_id)
     end
   end
 

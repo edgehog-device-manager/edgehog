@@ -23,7 +23,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
 
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-  alias Edgehog.Astarte.Device.{SystemStatus, WiFiScanResult}
+  alias Edgehog.Astarte.Device.{OSInfo, SystemStatus, WiFiScanResult}
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
@@ -102,6 +102,15 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                }
                | _rest
              ] = battery_status
+    end
+
+    test "fetch_os_info/3 returns the OS info for a device", %{device: device} do
+      assert {:ok, os_info} = Astarte.fetch_os_info(device, %{}, %{})
+
+      assert %OSInfo{
+               name: "esp-idf",
+               version: "v4.3.1"
+             } == os_info
     end
   end
 end

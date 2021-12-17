@@ -140,6 +140,15 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :timestamp, non_null(:datetime)
   end
 
+  @desc "Describes an operating system of a device."
+  object :os_info do
+    @desc "The name of the operating system."
+    field :name, :string
+
+    @desc "The version of the operating system."
+    field :version, :string
+  end
+
   @desc """
   Describes the current status of the operating system of a device.
   """
@@ -282,6 +291,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The status of the battery slots of the device."
     field :battery_status, list_of(non_null(:battery_slot)) do
       resolve &Resolvers.Astarte.fetch_battery_status/3
+      middleware Middleware.ErrorHandler
+    end
+
+    @desc "Information about the operating system of the device."
+    field :os_info, :os_info do
+      resolve &Resolvers.Astarte.fetch_os_info/3
       middleware Middleware.ErrorHandler
     end
   end

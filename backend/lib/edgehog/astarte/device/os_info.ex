@@ -16,35 +16,35 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Astarte.Device.HardwareInfo do
-  defstruct [
-    :cpu_architecture,
-    :cpu_model,
-    :cpu_model_name,
-    :cpu_vendor,
-    :memory_total_bytes
-  ]
+defmodule Edgehog.Astarte.Device.OSInfo do
+  @type t :: %__MODULE__{
+          name: String.t() | nil,
+          version: String.t() | nil
+        }
+
+  @enforce_keys [:name, :version]
+  defstruct @enforce_keys
+
+  @behaviour Edgehog.Astarte.Device.OSInfo.Behaviour
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.HardwareInfo
 
-  @interface "io.edgehog.devicemanager.HardwareInfo"
+  @interface "io.edgehog.devicemanager.OSInfo"
 
+  @impl true
   def get(%AppEngine{} = client, device_id) do
-    # TODO: right now we request the whole interface at once, so `memory_total_bytes` can't
-    # be requested as string (see https://github.com/astarte-platform/astarte/issues/630).
-    # Request it as string as soon as that issue is solved.
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_properties_data(client, device_id, @interface) do
-      hardware_info = %HardwareInfo{
-        cpu_architecture: data["cpu"]["architecture"],
-        cpu_model: data["cpu"]["model"],
-        cpu_model_name: data["cpu"]["modelName"],
-        cpu_vendor: data["cpu"]["vendor"],
-        memory_total_bytes: data["mem"]["totalBytes"]
-      }
+      os_info = parse_data(data)
 
-      {:ok, hardware_info}
+      {:ok, os_info}
     end
+  end
+
+  def parse_data(data) do
+    %__MODULE__{
+      name: data["osName"],
+      version: data["osVersion"]
+    }
   end
 end

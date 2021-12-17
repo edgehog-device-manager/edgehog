@@ -103,6 +103,13 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
+  def fetch_os_info(%Device{} = device, _args, _context) do
+    case Astarte.fetch_os_info(device) do
+      {:ok, os_info} -> {:ok, os_info}
+      _ -> {:ok, nil}
+    end
+  end
+
   def battery_status_to_enum(%BatterySlot{status: status}, _args, _context) do
     case status do
       "Charging" -> {:ok, :charging}
