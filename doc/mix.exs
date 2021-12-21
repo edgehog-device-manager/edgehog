@@ -28,7 +28,8 @@ defmodule Doc.MixProject do
       api_reference: false,
       groups_for_extras: [
         "User Guide": ~r"/user/",
-        Architecture: ~r"/architecture/"
+        Architecture: ~r"/architecture/",
+        "Integrating with Edgehog": ~r"/integrating/"
       ],
       groups_for_modules: []
     ]
@@ -41,8 +42,9 @@ defmodule Doc.MixProject do
       "pages/user/hardware_types.md",
       "pages/user/appliance_models.md",
       "pages/user/devices.md",
-      "pages/user/interacting_with_edgehog.md",
-      "pages/architecture/overview.md"
+      "pages/architecture/overview.md",
+      "pages/integrating/interacting_with_edgehog.md",
+      "pages/integrating/astarte_interfaces.md"
     ]
   end
 end

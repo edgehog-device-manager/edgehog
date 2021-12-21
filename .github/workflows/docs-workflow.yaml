@@ -27,6 +27,18 @@ jobs:
       with:
         repository: edgehog-device-manager/docs
         path: docs
+    # Checkout the interfaces repository
+    - uses: actions/checkout@v2
+      with:
+        repository: edgehog-device-manager/edgehog-astarte-interfaces
+        path: edgehog-astarte-interfaces
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16.x'
+    - name: Install astarte-docs-cli
+      run: npm install -g @astarte-platform/astarte-docs-cli@0.0.7
+    - name: Generate Interfaces Docs
+      run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/doc/pages/integrating/astarte_interfaces.md
     - uses: erlef/setup-beam@v1.7.0
       with:
         otp-version: "23.2"
