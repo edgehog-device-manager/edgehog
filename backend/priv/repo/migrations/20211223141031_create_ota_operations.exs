@@ -2,13 +2,20 @@ defmodule Edgehog.Repo.Migrations.CreateOtaOperations do
   use Ecto.Migration
 
   def change do
+    create unique_index(:devices, [:id, :tenant_id])
+
     create table(:ota_operations, primary_key: false) do
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
       add :id, :binary_id, primary_key: true
-      add :image_url, :string
-      add :status, :string
+      add :image_url, :string, null: false
+      add :status, :string, default: "Pending", null: false
       add :status_code, :string
-      add :tenant_id, references(:tenants, on_delete: :nothing, type: :binary_id)
-      add :device_id, references(:hardware_type, on_delete: :nothing, type: :binary_id)
+
+      add :device_id,
+          references(:devices, with: [tenant_id: :tenant_id], match: :full, on_delete: :nothing),
+          null: false
 
       timestamps()
     end

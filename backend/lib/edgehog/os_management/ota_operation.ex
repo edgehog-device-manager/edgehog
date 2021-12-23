@@ -20,22 +20,33 @@ defmodule Edgehog.OSManagement.OTAOperation do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Astarte
+
   @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
   schema "ota_operations" do
     field :image_url, :string
-    field :status, :string
+
+    field :status, Ecto.Enum,
+      values: [pending: "Pending", in_progress: "InProgress", error: "Error", done: "Done"],
+      default: :pending
+
     field :status_code, :string
-    field :tenant_id, :binary_id
-    field :device_id, :binary_id
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
+    belongs_to :device, Astarte.Device
 
     timestamps()
   end
 
   @doc false
-  def changeset(ota_operation, attrs) do
+  def create_changeset(ota_operation, attrs) do
     ota_operation
     |> cast(attrs, [:image_url, :status, :status_code])
-    |> validate_required([:image_url, :status, :status_code])
+    |> validate_required([:image_url])
+  end
+
+  @doc false
+  def update_changeset(ota_operation, attrs) do
+    ota_operation
+    |> cast(attrs, [:status, :status_code])
   end
 end

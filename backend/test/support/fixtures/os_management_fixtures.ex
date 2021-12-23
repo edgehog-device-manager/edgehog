@@ -25,15 +25,14 @@ defmodule Edgehog.OSManagementFixtures do
   @doc """
   Generate a ota_operation.
   """
-  def ota_operation_fixture(attrs \\ %{}) do
-    {:ok, ota_operation} =
+  def ota_operation_fixture(device, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
-        image_url: "some image_url",
-        status: "some status",
-        status_code: "some status_code"
+        image_url: "https://updates.acme.com/ota_image_v2"
       })
-      |> Edgehog.OSManagement.create_ota_operation()
+
+    {:ok, ota_operation} = Edgehog.OSManagement.create_ota_operation(device, attrs)
 
     ota_operation
   end

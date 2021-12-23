@@ -24,6 +24,7 @@ defmodule Edgehog.OSManagement do
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 
+  alias Edgehog.Astarte
   alias Edgehog.OSManagement.OTAOperation
 
   @doc """
@@ -37,6 +38,7 @@ defmodule Edgehog.OSManagement do
   """
   def list_ota_operations do
     Repo.all(OTAOperation)
+    |> Repo.preload(:device)
   end
 
   @doc """
@@ -53,24 +55,32 @@ defmodule Edgehog.OSManagement do
       ** (Ecto.NoResultsError)
 
   """
-  def get_ota_operation!(id), do: Repo.get!(OTAOperation, id)
+  def get_ota_operation!(id) do
+    Repo.get!(OTAOperation, id)
+    |> Repo.preload(:device)
+  end
 
   @doc """
   Creates a ota_operation.
 
   ## Examples
 
-      iex> create_ota_operation(%{field: value})
+      iex> create_ota_operation(%Astarte.Device{} = device, %{field: value})
       {:ok, %OTAOperation{}}
 
-      iex> create_ota_operation(%{field: bad_value})
+      iex> create_ota_operation(%Astarte.Device{} = device, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_ota_operation(attrs \\ %{}) do
-    %OTAOperation{}
-    |> OTAOperation.changeset(attrs)
-    |> Repo.insert()
+  def create_ota_operation(%Astarte.Device{} = device, attrs \\ %{}) do
+    changeset =
+      %OTAOperation{}
+      |> OTAOperation.create_changeset(attrs)
+      |> Ecto.Changeset.put_assoc(:device, device)
+
+    with {:ok, ota_operation} <- Repo.insert(changeset) do
+      {:ok, Repo.preload(ota_operation, :device)}
+    end
   end
 
   @doc """
@@ -86,9 +96,13 @@ defmodule Edgehog.OSManagement do
 
   """
   def update_ota_operation(%OTAOperation{} = ota_operation, attrs) do
-    ota_operation
-    |> OTAOperation.changeset(attrs)
-    |> Repo.update()
+    changeset =
+      ota_operation
+      |> OTAOperation.update_changeset(attrs)
+
+    with {:ok, ota_operation} <- Repo.update(changeset) do
+      {:ok, Repo.preload(ota_operation, :device)}
+    end
   end
 
   @doc """
@@ -117,6 +131,6 @@ defmodule Edgehog.OSManagement do
 
   """
   def change_ota_operation(%OTAOperation{} = ota_operation, attrs \\ %{}) do
-    OTAOperation.changeset(ota_operation, attrs)
+    OTAOperation.update_changeset(ota_operation, attrs)
   end
 end
