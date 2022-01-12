@@ -69,6 +69,12 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-11T09:43:54.437Z",
     };
   },
+  OsInfo() {
+    return {
+      name: "FreeRTOS",
+      version: "v10.4.3",
+    };
+  },
   StorageUnit() {
     return {
       label: "Disk 0",

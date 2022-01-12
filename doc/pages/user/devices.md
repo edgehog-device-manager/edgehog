@@ -53,6 +53,12 @@ This section reports an overview on the general hardware capabilities of the Dev
 
 ![Device Hardware Info Screenshot](assets/device_hardware_info.png)
 
+### Operating System
+
+This section reports an overview of the operating system of the Device.
+
+![Device Operating System Screenshot](assets/device_operating_system.png)
+
 ### System status
 
 This section reports an overview on the current system status of the Device.

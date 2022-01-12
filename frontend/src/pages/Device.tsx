@@ -32,6 +32,7 @@ import dayjs from "dayjs";
 import type { Device_batteryStatus$key } from "api/__generated__/Device_batteryStatus.graphql";
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
+import type { Device_osInfo$key } from "api/__generated__/Device_osInfo.graphql";
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
@@ -62,6 +63,15 @@ const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
       cpuModelName
       cpuVendor
       memoryTotalBytes
+    }
+  }
+`;
+
+const DEVICE_OS_INFO_FRAGMENT = graphql`
+  fragment Device_osInfo on Device {
+    osInfo {
+      name
+      version
     }
   }
 `;
@@ -139,6 +149,7 @@ const GET_DEVICE_QUERY = graphql`
         }
       }
       ...Device_hardwareInfo
+      ...Device_osInfo
       ...Device_location
       ...Device_storageUsage
       ...Device_systemStatus
@@ -284,6 +295,59 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
                 value={formatBytes(hardwareInfo.memoryTotalBytes)}
                 readOnly
               />
+            </FormRow>
+          )}
+        </Stack>
+      </div>
+    </Tab>
+  );
+};
+
+interface DeviceOSInfoTabProps {
+  deviceRef: Device_osInfo$key;
+}
+
+const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
+  const { osInfo } = useFragment(DEVICE_OS_INFO_FRAGMENT, deviceRef);
+  if (!osInfo || Object.values(osInfo).every((value) => value === null)) {
+    return null;
+  }
+  return (
+    <Tab
+      eventKey="device-os-info-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.osInfoTab"
+          defaultMessage="Operating System"
+        />
+      }
+    >
+      <div className="mt-3">
+        <Stack gap={3}>
+          {osInfo.name !== null && (
+            <FormRow
+              id="device-os-info-name"
+              label={
+                <FormattedMessage
+                  id="Device.osInfo.name"
+                  defaultMessage="OS name"
+                />
+              }
+            >
+              <Form.Control type="text" value={osInfo.name} readOnly />
+            </FormRow>
+          )}
+          {osInfo.version !== null && (
+            <FormRow
+              id="device-os-info-version"
+              label={
+                <FormattedMessage
+                  id="Device.osInfo.version"
+                  defaultMessage="OS version"
+                />
+              }
+            >
+              <Form.Control type="text" value={osInfo.version} readOnly />
             </FormRow>
           )}
         </Stack>
@@ -746,6 +810,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
           <Tabs
             tabsOrder={[
               "device-hardware-info-tab",
+              "device-os-info-tab",
               "device-system-status-tab",
               "device-storage-usage-tab",
               "device-battery-tab",
@@ -754,6 +819,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             ]}
           >
             <DeviceHardwareInfoTab deviceRef={device} />
+            <DeviceOSInfoTab deviceRef={device} />
             <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
             <DeviceBatteryTab deviceRef={device} />

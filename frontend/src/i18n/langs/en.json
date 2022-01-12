@@ -32,6 +32,12 @@
   "Device.name": {
     "defaultMessage": "Name"
   },
+  "Device.osInfo.name": {
+    "defaultMessage": "OS name"
+  },
+  "Device.osInfo.version": {
+    "defaultMessage": "OS version"
+  },
   "Device.systemStatus.memoryFreeBytes": {
     "defaultMessage": "Free Memory"
   },
@@ -303,6 +309,9 @@
   },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
+  },
+  "pages.Device.osInfoTab": {
+    "defaultMessage": "Operating System"
   },
   "pages.Device.storageTab": {
     "defaultMessage": "Storage"
