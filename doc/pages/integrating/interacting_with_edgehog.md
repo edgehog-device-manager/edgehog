@@ -34,8 +34,8 @@ are automatically understood, collected and reported by Edgehog.
 Each Device is supposed to notify Astarte, e.g. on each connection, about the Appliance Model it is
 plugged into.
 
-To do so, the Device can use the `io.edgehog.devicemanager.ApplianceInfo` Astarte Interface to
-specify:
+To do so, the Device can use the [io.edgehog.devicemanager.ApplianceInfo](astarte_interfaces.html)
+Astarte Interface to specify:
 
 - the Serial Number: a code that uniquely identifies the Appliance
 - the Part Number: a code that uniquely identifies the Appliance Model
@@ -48,8 +48,8 @@ matching the Device's Part Number with the ones of the registered Appliance Mode
 Each Device can notify Astarte about the general capabilities of the Device. These info are
 hardware-related and are usually not intended to change over time.
 
-A Device can expose this set of data via the `io.edgehog.devicemanager.HardwareInfo` Astarte
-Interface.
+A Device can expose this set of data via the
+[io.edgehog.devicemanager.HardwareInfo](astarte_interfaces.html) Astarte Interface.
 
 ### Publishing info about the Device status
 
@@ -58,8 +58,10 @@ already defined for Edgehog. Their adoption is optional but recommended.
 
 This section reports an overview on the current system status of the Device.
 
-- `io.edgehog.devicemanager.SystemStatus`: reports the current OS status.
-- `io.edgehog.devicemanager.StorageUsage`: reports the capacity and usage of the storage units.
-- `io.edgehog.devicemanager.BatteryStatus`: reports the current status of the battery slots.
-- `io.edgehog.devicemanager.WiFiScanResults`: reports the list of nearby Access Points that the
-  Device found while scanning for WiFi signals.
+- [io.edgehog.devicemanager.SystemStatus](astarte_interfaces.html): reports the current OS status.
+- [io.edgehog.devicemanager.StorageUsage](astarte_interfaces.html): reports the capacity and usage
+  of the storage units.
+- [io.edgehog.devicemanager.BatteryStatus](astarte_interfaces.html): reports the current status of
+  the battery slots.
+- [io.edgehog.devicemanager.WiFiScanResults](astarte_interfaces.html): reports the list of nearby
+  Access Points that the Device found while scanning for WiFi signals.
