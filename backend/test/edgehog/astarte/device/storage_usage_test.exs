@@ -31,7 +31,9 @@ defmodule Edgehog.Astarte.Device.StorageUsageTest do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster)
       device = device_fixture(realm)
-      {:ok, appengine_client} = AppEngine.new(cluster.base_api_url, realm.name, realm.private_key)
+
+      {:ok, appengine_client} =
+        AppEngine.new(cluster.base_api_url, realm.name, private_key: realm.private_key)
 
       {:ok, cluster: cluster, realm: realm, device: device, appengine_client: appengine_client}
     end
