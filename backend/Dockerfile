@@ -24,7 +24,7 @@ ADD lib lib
 RUN mix do compile, release
 
 # Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 
 WORKDIR /app
 
