@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -99,6 +99,13 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   def fetch_battery_status(%Device{} = device, _args, _context) do
     case Astarte.fetch_battery_status(device) do
       {:ok, battery_status} -> {:ok, battery_status}
+      _ -> {:ok, nil}
+    end
+  end
+
+  def fetch_os_bundle(%Device{} = device, _args, _context) do
+    case Astarte.fetch_os_bundle(device) do
+      {:ok, os_bundle} -> {:ok, os_bundle}
       _ -> {:ok, nil}
     end
   end

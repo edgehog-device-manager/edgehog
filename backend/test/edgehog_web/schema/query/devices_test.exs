@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -258,6 +258,52 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
       assert os_info["name"] == "esp-idf"
       assert os_info["version"] == "v4.3.1"
+    end
+  end
+
+  describe "device OS bundle query" do
+    setup do
+      cluster = cluster_fixture()
+
+      {:ok, realm: realm_fixture(cluster)}
+    end
+
+    @os_bundle_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        osBundle {
+          name
+          version
+          buildId
+          fingerprint
+        }
+      }
+    }
+    """
+
+    test "returns OS info if available", %{conn: conn, realm: realm} do
+      %Device{
+        id: id
+      } = device_fixture(realm)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, "/api", query: @os_bundle_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "osBundle" => os_bundle
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert os_bundle["name"] == "esp-idf"
+      assert os_bundle["version"] == "4.3.1"
+      assert os_bundle["buildId"] == "2022-01-01 12:00:00"
+
+      assert os_bundle["fingerprint"] ==
+               "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
     end
   end
 end
