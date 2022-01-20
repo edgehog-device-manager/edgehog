@@ -37,6 +37,7 @@ config :edgehog, :astarte_storage_usage_module, Edgehog.Astarte.Device.StorageUs
 config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiScanResultMock
 config :edgehog, :astarte_system_status_module, Edgehog.Astarte.Device.SystemStatusMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
+config :edgehog, :astarte_os_bundle_module, Edgehog.Astarte.Device.OSBundleMock
 config :edgehog, :astarte_os_info_module, Edgehog.Astarte.Device.OSInfoMock
 
 # Storage mocks for tests

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
 
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-  alias Edgehog.Astarte.Device.{OSInfo, SystemStatus, WiFiScanResult}
+  alias Edgehog.Astarte.Device.{OSBundle, OSInfo, SystemStatus, WiFiScanResult}
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
@@ -111,6 +111,17 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                name: "esp-idf",
                version: "v4.3.1"
              } == os_info
+    end
+
+    test "fetch_os_bundle/3 returns the OS bundle for a device", %{device: device} do
+      assert {:ok, os_bundle} = Astarte.fetch_os_bundle(device, %{}, %{})
+
+      assert %OSBundle{
+               name: "esp-idf",
+               version: "4.3.1",
+               build_id: "2022-01-01 12:00:00",
+               fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
+             } == os_bundle
     end
   end
 end

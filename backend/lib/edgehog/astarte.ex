@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ defmodule Edgehog.Astarte do
     BatteryStatus,
     DeviceStatus,
     HardwareInfo,
+    OSBundle,
     OSInfo,
     StorageUsage,
     SystemStatus,
@@ -64,6 +65,7 @@ defmodule Edgehog.Astarte do
                            :astarte_battery_status_module,
                            BatteryStatus
                          )
+  @os_bundle_module Application.compile_env(:edgehog, :astarte_os_bundle_module, OSBundle)
   @os_info_module Application.compile_env(:edgehog, :astarte_os_info_module, OSInfo)
 
   @doc """
@@ -597,6 +599,12 @@ defmodule Edgehog.Astarte do
   def fetch_battery_status(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       @battery_status_module.get(client, device.device_id)
+    end
+  end
+
+  def fetch_os_bundle(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @os_bundle_module.get(client, device.device_id)
     end
   end
 

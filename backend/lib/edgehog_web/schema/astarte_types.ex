@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -138,6 +138,23 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     @desc "The date at which the measurement was made."
     field :timestamp, non_null(:datetime)
+  end
+
+  @desc "Describes an operating system bundle of a device."
+  object :os_bundle do
+    @desc "The name of the bundle."
+    field :name, :string
+
+    @desc "The version of the bundle."
+    field :version, :string
+
+    @desc "Human readable build identifier of the bundle."
+    field :build_id, :string
+
+    @desc """
+    A unique string that identifies the release, usually the bundle hash.
+    """
+    field :fingerprint, :string
   end
 
   @desc "Describes an operating system of a device."
@@ -291,6 +308,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The status of the battery slots of the device."
     field :battery_status, list_of(non_null(:battery_slot)) do
       resolve &Resolvers.Astarte.fetch_battery_status/3
+      middleware Middleware.ErrorHandler
+    end
+
+    @desc "Information about the operating system bundle of the device."
+    field :os_bundle, :os_bundle do
+      resolve &Resolvers.Astarte.fetch_os_bundle/3
       middleware Middleware.ErrorHandler
     end
 
