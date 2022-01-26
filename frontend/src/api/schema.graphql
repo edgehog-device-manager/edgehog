@@ -260,6 +260,11 @@ type Device implements Node {
   online: Boolean!
 
   """
+  Information about the operating system bundle of the device.
+  """
+  osBundle: OsBundle
+
+  """
   Information about the operating system of the device.
   """
   osInfo: OsInfo
@@ -462,6 +467,31 @@ interface Node {
   The ID of the object.
   """
   id: ID!
+}
+
+"""
+Describes an operating system bundle of a device.
+"""
+type OsBundle {
+  """
+  Human readable build identifier of the bundle.
+  """
+  buildId: String
+
+  """
+  A unique string that identifies the release, usually the bundle hash.
+  """
+  fingerprint: String
+
+  """
+  The name of the bundle.
+  """
+  name: String
+
+  """
+  The version of the bundle.
+  """
+  version: String
 }
 
 """

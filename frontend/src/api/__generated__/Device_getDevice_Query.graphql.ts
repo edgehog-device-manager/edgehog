@@ -23,7 +23,7 @@ export type Device_getDevice_QueryResponse = {
                 readonly name: string;
             };
         } | null;
-        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_osInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus">;
+        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_osBundle" | "Device_osInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus">;
     } | null;
 };
 export type Device_getDevice_Query = {
@@ -54,6 +54,7 @@ query Device_getDevice_Query(
       id
     }
     ...Device_hardwareInfo
+    ...Device_osBundle
     ...Device_osInfo
     ...Device_location
     ...Device_storageUsage
@@ -89,6 +90,15 @@ fragment Device_location on Device {
     accuracy
     address
     timestamp
+  }
+}
+
+fragment Device_osBundle on Device {
+  osBundle {
+    name
+    version
+    buildId
+    fingerprint
   }
 }
 
@@ -195,6 +205,13 @@ v9 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "version",
+  "storageKey": null
+},
+v10 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "timestamp",
   "storageKey": null
 };
@@ -248,6 +265,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "Device_hardwareInfo"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "Device_osBundle"
           },
           {
             "args": null,
@@ -382,19 +404,40 @@ return {
           {
             "alias": null,
             "args": null,
+            "concreteType": "OsBundle",
+            "kind": "LinkedField",
+            "name": "osBundle",
+            "plural": false,
+            "selections": [
+              (v6/*: any*/),
+              (v9/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "buildId",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "fingerprint",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "OsInfo",
             "kind": "LinkedField",
             "name": "osInfo",
             "plural": false,
             "selections": [
               (v6/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "version",
-                "storageKey": null
-              }
+              (v9/*: any*/)
             ],
             "storageKey": null
           },
@@ -434,7 +477,7 @@ return {
                 "name": "address",
                 "storageKey": null
               },
-              (v9/*: any*/)
+              (v10/*: any*/)
             ],
             "storageKey": null
           },
@@ -499,7 +542,7 @@ return {
                 "name": "uptimeMilliseconds",
                 "storageKey": null
               },
-              (v9/*: any*/)
+              (v10/*: any*/)
             ],
             "storageKey": null
           },
@@ -539,7 +582,7 @@ return {
                 "name": "rssi",
                 "storageKey": null
               },
-              (v9/*: any*/)
+              (v10/*: any*/)
             ],
             "storageKey": null
           },
@@ -588,14 +631,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "d68f40447adece0c5e2959b8d9011493",
+    "cacheID": "24193648574b4fef71d081019e97e536",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    applianceModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    applianceModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_osBundle\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osBundle on Device {\n  osBundle {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '1083036c1d2103eb2bf70bc1a08b7528';
+(node as any).hash = '740b35fa911fec496cb565e4ce09f776';
 export default node;

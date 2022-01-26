@@ -32,6 +32,18 @@
   "Device.name": {
     "defaultMessage": "Name"
   },
+  "Device.osBundle.buildId": {
+    "defaultMessage": "Build identifier"
+  },
+  "Device.osBundle.fingerprint": {
+    "defaultMessage": "Fingerprint"
+  },
+  "Device.osBundle.name": {
+    "defaultMessage": "Name"
+  },
+  "Device.osBundle.version": {
+    "defaultMessage": "Version"
+  },
   "Device.osInfo.name": {
     "defaultMessage": "OS name"
   },
@@ -309,6 +321,9 @@
   },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
+  },
+  "pages.Device.osBundleTab": {
+    "defaultMessage": "OS Bundle"
   },
   "pages.Device.osInfoTab": {
     "defaultMessage": "Operating System"
