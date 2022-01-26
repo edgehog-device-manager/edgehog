@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
   limitations under the License.
 */
 
-import { Suspense, useEffect, useMemo } from "react";
+import React, { Suspense, useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import graphql from "babel-plugin-relay/macro";
@@ -25,9 +25,11 @@ import {
   usePreloadedQuery,
   useQueryLoader,
   PreloadedQuery,
+  useMutation,
 } from "react-relay/hooks";
 import { FormattedDate, FormattedMessage } from "react-intl";
 import dayjs from "dayjs";
+import _ from "lodash";
 
 import type { Device_batteryStatus$key } from "api/__generated__/Device_batteryStatus.graphql";
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
@@ -37,8 +39,15 @@ import type { Device_osInfo$key } from "api/__generated__/Device_osInfo.graphql"
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
+import type {
+  OtaOperationStatus,
+  OtaOperationStatusCode,
+  Device_otaOperations$key,
+} from "api/__generated__/Device_otaOperations.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
+import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import { Link, Route } from "Navigation";
+import Alert from "components/Alert";
 import Center from "components/Center";
 import ConnectionStatus from "components/ConnectionStatus";
 import Col from "components/Col";
@@ -46,6 +55,7 @@ import Figure from "components/Figure";
 import Form from "components/Form";
 import LastSeen from "components/LastSeen";
 import Map from "components/Map";
+import OperationTable from "components/OperationTable";
 import Page from "components/Page";
 import Result from "components/Result";
 import Row from "components/Row";
@@ -55,6 +65,12 @@ import StorageTable from "components/StorageTable";
 import Tabs, { Tab } from "components/Tabs";
 import WiFiScanResultsTable from "components/WiFiScanResultsTable";
 import BatteryTable from "components/BatteryTable";
+import BaseImageForm from "forms/BaseImageForm";
+import type {
+  OTAOperation,
+  OTAOperationStatus,
+  OTAOperationStatusCode,
+} from "types/OTAUpdate";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
@@ -144,6 +160,20 @@ const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
+  fragment Device_otaOperations on Device {
+    id
+    otaOperations {
+      id
+      baseImageUrl
+      createdAt
+      status
+      statusCode
+      updatedAt
+    }
+  }
+`;
+
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!) {
     device(id: $id) {
@@ -168,6 +198,24 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_systemStatus
       ...Device_wifiScanResults
       ...Device_batteryStatus
+      ...Device_otaOperations
+    }
+  }
+`;
+
+const DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION = graphql`
+  mutation Device_createManualOtaOperation_Mutation(
+    $input: CreateManualOtaOperationInput!
+  ) {
+    createManualOtaOperation(input: $input) {
+      otaOperation {
+        id
+        baseImageUrl
+        createdAt
+        status
+        statusCode
+        updatedAt
+      }
     }
   }
 `;
@@ -755,6 +803,205 @@ const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
   );
 };
 
+const parseStatus = (
+  s: OtaOperationStatus | null
+): OTAOperationStatus | null => {
+  switch (s) {
+    case "PENDING":
+      return "Pending";
+
+    case "IN_PROGRESS":
+      return "InProgress";
+
+    case "ERROR":
+      return "Error";
+
+    case "DONE":
+      return "Done";
+
+    default:
+      return null;
+  }
+};
+
+const parseStatusCode = (
+  s: OtaOperationStatusCode | null
+): OTAOperationStatusCode | null => {
+  switch (s) {
+    case "NETWORK_ERROR":
+      return "NetworkError";
+
+    case "NVS_ERROR":
+      return "NVSError";
+
+    case "ALREADY_IN_PROGRESS":
+      return "AlreadyInProgress";
+
+    case "FAILED":
+      return "Failed";
+
+    case "DEPLOY_ERROR":
+      return "DeployError";
+
+    case "WRONG_PARTITION":
+      return "WrongPartition";
+
+    default:
+      return null;
+  }
+};
+
+type SoftwareUpdateTabProps = {
+  deviceRef: Device_otaOperations$key;
+};
+
+const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
+  // this assumes all devices can be updated
+  // TODO: edgehog should represent the 2 different states:
+  //       - device can be updated but never did
+  //       - device never updated because it doesn't have this capability
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const { id: deviceId, otaOperations } = useFragment(
+    DEVICE_OTA_OPERATIONS_FRAGMENT,
+    deviceRef
+  );
+  const [createOtaOperation, isCreatingOtaOperation] =
+    useMutation<Device_createManualOtaOperation_Mutation>(
+      DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION
+    );
+
+  const operations: OTAOperation[] = (otaOperations || []).map((o) => ({
+    status: parseStatus(o.status),
+    statusCode: parseStatusCode(o.statusCode),
+    baseImageUrl: o.baseImageUrl,
+    createdAt: new Date(o.createdAt),
+    updatedAt: new Date(o.updatedAt),
+  }));
+
+  const { currentOperations, pastOperations } = _.groupBy(
+    operations,
+    (operation) =>
+      operation.status === "Pending" || operation.status === "InProgress"
+        ? "currentOperations"
+        : "pastOperations"
+  );
+
+  // For now devices only support 1 update operation at a time
+  const currentOperation = currentOperations?.[0] || null;
+
+  const launchManualOTAUpdate = (file: File) => {
+    createOtaOperation({
+      variables: {
+        input: {
+          deviceId,
+          baseImageFile: file,
+        },
+      },
+      onCompleted(data, errors) {
+        if (errors) {
+          const errorFeedback = errors
+            .map((error) => error.message)
+            .join(". \n");
+          return setErrorFeedback(errorFeedback);
+        }
+      },
+      onError(error) {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.Device.otaUpdateCreationErrorFeedback"
+            defaultMessage="Could not start the OTA update, please try again."
+          />
+        );
+      },
+      updater(store, data) {
+        const otaOperationId = data.createManualOtaOperation?.otaOperation?.id;
+        if (otaOperationId) {
+          const otaOperation = store.get(otaOperationId);
+          const device = store.get(deviceId);
+          const otaOperations = device?.getLinkedRecords("otaOperations");
+          if (device && otaOperation && otaOperations) {
+            device.setLinkedRecords(
+              [otaOperation, ...otaOperations],
+              "otaOperations"
+            );
+          }
+        }
+      },
+    });
+  };
+
+  return (
+    <Tab
+      eventKey="device-software-update-tab"
+      title={
+        <FormattedMessage
+          id="pages.Device.SoftwareUpdateTab"
+          defaultMessage="Software Updates"
+        />
+      }
+    >
+      <div className="mt-3">
+        <h5>
+          <FormattedMessage
+            id="pages.Device.SoftwareUpdateTab.manualOTAUpdate"
+            defaultMessage="Manual OTA Update"
+          />
+        </h5>
+        <Alert
+          show={!!errorFeedback}
+          variant="danger"
+          onClose={() => setErrorFeedback(null)}
+          dismissible
+        >
+          {errorFeedback}
+        </Alert>
+        {currentOperation ? (
+          <div className="mt-3">
+            <FormattedMessage
+              id="pages.Device.SoftwareUpdateTab.updatingTo"
+              defaultMessage="Updating to image <a>{baseImageUrl}</a>"
+              values={{
+                a: (chunks: React.ReactNode) => (
+                  <a
+                    target="_blank"
+                    rel="noreferrer"
+                    href={currentOperation.baseImageUrl}
+                  >
+                    {chunks}
+                  </a>
+                ),
+                baseImageUrl: currentOperation.baseImageUrl,
+              }}
+            />
+          </div>
+        ) : (
+          <BaseImageForm
+            className="mt-3"
+            onSubmit={launchManualOTAUpdate}
+            isLoading={isCreatingOtaOperation}
+          />
+        )}
+        <h5 className="mt-4">
+          <FormattedMessage
+            id="pages.Device.SoftwareUpdateTab.updatesHistory"
+            defaultMessage="History"
+          />
+        </h5>
+        {pastOperations.length === 0 ? (
+          <div>
+            <FormattedMessage
+              id="pages.Device.SoftwareUpdateTab.noPreviousUpdates"
+              defaultMessage="No previous updates"
+            />
+          </div>
+        ) : (
+          <OperationTable data={pastOperations} />
+        )}
+      </div>
+    </Tab>
+  );
+};
+
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
 }
@@ -909,6 +1156,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
               "device-battery-tab",
               "device-location-tab",
               "device-wifi-scan-results-tab",
+              "device-software-update-tab",
             ]}
           >
             <DeviceHardwareInfoTab deviceRef={device} />
@@ -919,6 +1167,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             <DeviceBatteryTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
+            <SoftwareUpdateTab deviceRef={device} />
           </Tabs>
         </Stack>
       </Page.Main>
