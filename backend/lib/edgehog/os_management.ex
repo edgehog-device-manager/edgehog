@@ -24,8 +24,16 @@ defmodule Edgehog.OSManagement do
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 
+  alias Ecto.Multi
   alias Edgehog.Astarte
+  alias Edgehog.OSManagement.EphemeralImage
   alias Edgehog.OSManagement.OTAOperation
+
+  @ephemeral_image_module Application.compile_env(
+                            :edgehog,
+                            :os_management_ephemeral_image_module,
+                            EphemeralImage
+                          )
 
   @doc """
   Returns the list of ota_operations.
@@ -61,25 +69,47 @@ defmodule Edgehog.OSManagement do
   end
 
   @doc """
-  Creates a ota_operation.
+  Creates a OTAOperation by manually uploading an image.
 
   ## Examples
 
-      iex> create_ota_operation(%Astarte.Device{} = device, %{field: value})
+      iex> create_manual_ota_operation(%Astarte.Device{} = device, %Plug.Upload{})
       {:ok, %OTAOperation{}}
-
-      iex> create_ota_operation(%Astarte.Device{} = device, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
   """
-  def create_ota_operation(%Astarte.Device{} = device, attrs \\ %{}) do
-    changeset =
-      %OTAOperation{}
-      |> OTAOperation.create_changeset(attrs)
-      |> Ecto.Changeset.put_assoc(:device, device)
+  def create_manual_ota_operation(%Astarte.Device{} = device, %Plug.Upload{} = image_file) do
+    ota_operation_id = Ecto.UUID.generate()
+    tenant_id = Repo.get_tenant_id()
 
-    with {:ok, ota_operation} <- Repo.insert(changeset) do
-      {:ok, Repo.preload(ota_operation, :device)}
+    Multi.new()
+    |> Multi.run(:image_upload, fn _repo, _changes ->
+      @ephemeral_image_module.upload(tenant_id, ota_operation_id, image_file)
+    end)
+    |> Multi.run(:ota_operation, fn _repo, %{image_upload: image_url} ->
+      ota_operation = %OTAOperation{
+        id: ota_operation_id,
+        image_url: image_url,
+        device_id: device.id
+      }
+
+      Repo.insert(ota_operation)
+    end)
+    |> Multi.run(:send_ota_request, fn _repo, %{image_upload: image_url} ->
+      with :ok <- Astarte.send_ota_request(device, ota_operation_id, image_url) do
+        {:ok, nil}
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{ota_operation: ota_operation}} ->
+        {:ok, Repo.preload(ota_operation, :device)}
+
+      {:error, _failed_operation, failed_value, %{image_upload: image_url}} ->
+        # If we fail after a successful upload, we at least try to clean up the upload
+        @ephemeral_image_module.delete(tenant_id, ota_operation_id, image_url)
+        {:error, failed_value}
+
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
     end
   end
 

@@ -16,20 +16,13 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.OSManagementFixtures do
-  @moduledoc """
-  This module defines test helpers for creating
-  entities via the `Edgehog.OSManagement` context.
-  """
+defmodule Edgehog.Mocks.Astarte.Device.OTARequest do
+  @behaviour Edgehog.Astarte.Device.OTARequest.Behaviour
 
-  @doc """
-  Generate a ota_operation.
-  """
-  def ota_operation_fixture(device) do
-    fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
+  alias Astarte.Client.AppEngine
 
-    {:ok, ota_operation} = Edgehog.OSManagement.create_manual_ota_operation(device, fake_image)
-
-    ota_operation
+  @impl true
+  def post(%AppEngine{} = _client, _device_id, _uuid, _url) do
+    :ok
   end
 end

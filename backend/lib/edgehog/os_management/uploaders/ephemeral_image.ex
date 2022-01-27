@@ -16,20 +16,22 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.OSManagementFixtures do
-  @moduledoc """
-  This module defines test helpers for creating
-  entities via the `Edgehog.OSManagement` context.
-  """
+defmodule Edgehog.OSManagement.Uploaders.EphemeralImage do
+  use Waffle.Definition
 
-  @doc """
-  Generate a ota_operation.
-  """
-  def ota_operation_fixture(device) do
-    fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
+  @acl :public_read
+  @versions [:original]
 
-    {:ok, ota_operation} = Edgehog.OSManagement.create_manual_ota_operation(device, fake_image)
+  def validate(_) do
+    # TODO: everything is considered a valid OTA image for now
+    true
+  end
 
-    ota_operation
+  def gcs_optional_params(_version, {_file, _scope}) do
+    [predefinedAcl: "publicRead"]
+  end
+
+  def storage_dir(_version, {_file, %{tenant_id: tenant_id, ota_operation_id: ota_operation_id}}) do
+    "uploads/tenants/#{tenant_id}/ephemeral_ota_images/#{ota_operation_id}"
   end
 end

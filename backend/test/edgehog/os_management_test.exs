@@ -17,7 +17,9 @@
 #
 
 defmodule Edgehog.OSManagementTest do
+  use Edgehog.AstarteMockCase
   use Edgehog.DataCase
+  use Edgehog.EphemeralImageMockCase
 
   alias Edgehog.OSManagement
 
@@ -48,21 +50,86 @@ defmodule Edgehog.OSManagementTest do
       assert OSManagement.get_ota_operation!(ota_operation.id) == ota_operation
     end
 
-    test "create_ota_operation/1 with valid data creates a ota_operation", %{device: device} do
-      valid_attrs = %{
-        image_url: "https://updates.acme.com/ota_image_v2"
-      }
+    test "create_manual_ota_operation/2 with valid data creates an ota_operation", %{
+      device: device
+    } do
+      bucket_url = "https://updates.acme.com"
+      fake_image = %Plug.Upload{path: "/tmp/ota_image_v2.bin", filename: "ota_image_v2.bin"}
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:upload, fn tenant_id, ota_operation_id, upload ->
+        assert fake_image == upload
+
+        file_name =
+          "uploads/tenants/#{tenant_id}/ephemeral_ota_images/#{ota_operation_id}/#{upload.filename}"
+
+        file_url = "#{bucket_url}/#{file_name}"
+        {:ok, file_url}
+      end)
+
+      Edgehog.Astarte.Device.OTARequestMock
+      |> expect(:post, fn _client, device_id, _uuid, _url ->
+        assert device_id == device.device_id
+        :ok
+      end)
 
       assert {:ok, %OTAOperation{} = ota_operation} =
-               OSManagement.create_ota_operation(device, valid_attrs)
+               OSManagement.create_manual_ota_operation(device, fake_image)
 
-      assert ota_operation.image_url == "https://updates.acme.com/ota_image_v2"
+      assert ota_operation.image_url =~ bucket_url
+      assert ota_operation.image_url =~ ota_operation.id
+      assert ota_operation.image_url =~ fake_image.filename
       assert ota_operation.status == :pending
     end
 
-    test "create_ota_operation/1 with invalid data returns error changeset", %{device: device} do
-      assert {:error, %Ecto.Changeset{}} =
-               OSManagement.create_ota_operation(device, @invalid_attrs)
+    test "create_manual_ota_operation/2 fails if upload fails", %{device: device} do
+      fake_image = %Plug.Upload{path: "/tmp/ota_image_v2.bin", filename: "ota_image_v2.bin"}
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:upload, fn _tenant_id, _ota_operation_id, _upload ->
+        {:error, :cannot_upload}
+      end)
+
+      Edgehog.Astarte.Device.OTARequestMock
+      |> expect(:post, 0, fn _client, _device_id, _uuid, _url ->
+        :ok
+      end)
+
+      assert {:error, :cannot_upload} =
+               OSManagement.create_manual_ota_operation(device, fake_image)
+    end
+
+    test "create_manual_ota_operation/2 fails and deletes the upload if the Astarte request fails",
+         %{
+           device: device
+         } do
+      bucket_url = "https://updates.acme.com"
+      fake_image = %Plug.Upload{path: "/tmp/ota_image_v2.bin", filename: "ota_image_v2.bin"}
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:upload, fn tenant_id, ota_operation_id, upload ->
+        assert fake_image == upload
+
+        file_name =
+          "uploads/tenants/#{tenant_id}/ephemeral_ota_images/#{ota_operation_id}/#{upload.filename}"
+
+        file_url = "#{bucket_url}/#{file_name}"
+        {:ok, file_url}
+      end)
+      |> expect(:delete, fn _tenant_id, _ota_operation_id, url ->
+        assert url =~ bucket_url
+        assert url =~ fake_image.filename
+
+        :ok
+      end)
+
+      Edgehog.Astarte.Device.OTARequestMock
+      |> expect(:post, fn _client, _device_id, _uuid, _url ->
+        {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
+      end)
+
+      assert {:error, %Astarte.Client.APIError{}} =
+               OSManagement.create_manual_ota_operation(device, fake_image)
     end
 
     test "update_ota_operation/2 with valid data updates the ota_operation", %{device: device} do

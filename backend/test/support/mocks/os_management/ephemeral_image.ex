@@ -16,20 +16,22 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.OSManagementFixtures do
-  @moduledoc """
-  This module defines test helpers for creating
-  entities via the `Edgehog.OSManagement` context.
-  """
+defmodule Edgehog.Mocks.OSManagement.EphemeralImage do
+  @behaviour Edgehog.OSManagement.EphemeralImage.Behaviour
 
-  @doc """
-  Generate a ota_operation.
-  """
-  def ota_operation_fixture(device) do
-    fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
+  @bucket_url "https://sample-storage.com/bucket"
 
-    {:ok, ota_operation} = Edgehog.OSManagement.create_manual_ota_operation(device, fake_image)
+  @impl true
+  def upload(tenant_id, ota_operation_id, %Plug.Upload{} = upload) do
+    file_name =
+      "uploads/tenants/#{tenant_id}/ephemeral_ota_images/#{ota_operation_id}/#{upload.filename}"
 
-    ota_operation
+    file_url = "#{@bucket_url}/#{file_name}"
+    {:ok, file_url}
+  end
+
+  @impl true
+  def delete(_tenant_id, _ota_operation_id, _url) do
+    :ok
   end
 end
