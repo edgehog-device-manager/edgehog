@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Astarte.Device.OSBundle do
+defmodule Edgehog.Astarte.Device.BaseImage do
   @type t :: %__MODULE__{
           name: String.t() | nil,
           version: String.t() | nil,
@@ -27,19 +27,19 @@ defmodule Edgehog.Astarte.Device.OSBundle do
   @enforce_keys [:name, :version, :build_id, :fingerprint]
   defstruct @enforce_keys
 
-  @behaviour Edgehog.Astarte.Device.OSBundle.Behaviour
+  @behaviour Edgehog.Astarte.Device.BaseImage.Behaviour
 
   alias Astarte.Client.AppEngine
 
-  @interface "io.edgehog.devicemanager.OSBundle"
+  @interface "io.edgehog.devicemanager.BaseImage"
 
   @impl true
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_properties_data(client, device_id, @interface) do
-      os_bundle = parse_data(data)
+      base_image = parse_data(data)
 
-      {:ok, os_bundle}
+      {:ok, base_image}
     end
   end
 

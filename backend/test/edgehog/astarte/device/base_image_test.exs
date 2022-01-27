@@ -16,13 +16,13 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Astarte.Device.OSBundleTest do
+defmodule Edgehog.Astarte.Device.BaseImageTest do
   use ExUnit.Case
 
-  alias Edgehog.Astarte.Device.OSBundle
+  alias Edgehog.Astarte.Device.BaseImage
 
-  describe "parse_os_bundle/1" do
-    test "correctly parses OS bundle data" do
+  describe "parse_data/1" do
+    test "correctly parses Base Image data" do
       data = %{
         "name" => "esp-idf",
         "version" => "4.3.1",
@@ -30,12 +30,12 @@ defmodule Edgehog.Astarte.Device.OSBundleTest do
         "fingerprint" => "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
       }
 
-      assert %OSBundle{
+      assert %BaseImage{
                name: "esp-idf",
                version: "4.3.1",
                build_id: "2022-01-01 12:00:00",
                fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
-             } == OSBundle.parse_data(data)
+             } == BaseImage.parse_data(data)
     end
   end
 end

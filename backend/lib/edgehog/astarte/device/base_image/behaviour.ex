@@ -16,10 +16,10 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Astarte.Device.OSBundle.Behaviour do
+defmodule Edgehog.Astarte.Device.BaseImage.Behaviour do
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.OSBundle
+  alias Edgehog.Astarte.Device.BaseImage
 
   @callback get(client :: AppEngine.t(), device_id :: String.t()) ::
-              {:ok, OSBundle.t()} | {:error, term()}
+              {:ok, BaseImage.t()} | {:error, term()}
 end

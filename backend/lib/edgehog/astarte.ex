@@ -28,10 +28,10 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Astarte.Cluster
 
   alias Edgehog.Astarte.Device.{
+    BaseImage,
     BatteryStatus,
     DeviceStatus,
     HardwareInfo,
-    OSBundle,
     OSInfo,
     OTARequest,
     StorageUsage,
@@ -66,7 +66,7 @@ defmodule Edgehog.Astarte do
                            :astarte_battery_status_module,
                            BatteryStatus
                          )
-  @os_bundle_module Application.compile_env(:edgehog, :astarte_os_bundle_module, OSBundle)
+  @base_image_module Application.compile_env(:edgehog, :astarte_base_image_module, BaseImage)
   @os_info_module Application.compile_env(:edgehog, :astarte_os_info_module, OSInfo)
 
   @ota_request_module Application.compile_env(:edgehog, :astarte_ota_request_module, OTARequest)
@@ -605,9 +605,9 @@ defmodule Edgehog.Astarte do
     end
   end
 
-  def fetch_os_bundle(%Device{} = device) do
+  def fetch_base_image(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
-      @os_bundle_module.get(client, device.device_id)
+      @base_image_module.get(client, device.device_id)
     end
   end
 

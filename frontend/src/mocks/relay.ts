@@ -69,7 +69,7 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-11T09:43:54.437Z",
     };
   },
-  OsBundle() {
+  BaseImage() {
     return {
       name: "FreeRTOS",
       version: "10.4.3",

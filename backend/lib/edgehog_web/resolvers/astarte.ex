@@ -103,9 +103,9 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
-  def fetch_os_bundle(%Device{} = device, _args, _context) do
-    case Astarte.fetch_os_bundle(device) do
-      {:ok, os_bundle} -> {:ok, os_bundle}
+  def fetch_base_image(%Device{} = device, _args, _context) do
+    case Astarte.fetch_base_image(device) do
+      {:ok, base_image} -> {:ok, base_image}
       _ -> {:ok, nil}
     end
   end

@@ -16,21 +16,21 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Mocks.Astarte.Device.OSBundle do
-  @behaviour Edgehog.Astarte.Device.OSBundle.Behaviour
+defmodule Edgehog.Mocks.Astarte.Device.BaseImage do
+  @behaviour Edgehog.Astarte.Device.BaseImage.Behaviour
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.OSBundle
+  alias Edgehog.Astarte.Device.BaseImage
 
   @impl true
   def get(%AppEngine{} = _client, _device_id) do
-    os_bundle = %OSBundle{
+    base_image = %BaseImage{
       name: "esp-idf",
       version: "4.3.1",
       build_id: "2022-01-01 12:00:00",
       fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
     }
 
-    {:ok, os_bundle}
+    {:ok, base_image}
   end
 end

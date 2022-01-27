@@ -34,7 +34,7 @@ import _ from "lodash";
 import type { Device_batteryStatus$key } from "api/__generated__/Device_batteryStatus.graphql";
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
-import type { Device_osBundle$key } from "api/__generated__/Device_osBundle.graphql";
+import type { Device_baseImage$key } from "api/__generated__/Device_baseImage.graphql";
 import type { Device_osInfo$key } from "api/__generated__/Device_osInfo.graphql";
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
@@ -84,9 +84,9 @@ const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   }
 `;
 
-const DEVICE_OS_BUNDLE_FRAGMENT = graphql`
-  fragment Device_osBundle on Device {
-    osBundle {
+const DEVICE_BASE_IMAGE_FRAGMENT = graphql`
+  fragment Device_baseImage on Device {
+    baseImage {
       name
       version
       buildId
@@ -191,7 +191,7 @@ const GET_DEVICE_QUERY = graphql`
         }
       }
       ...Device_hardwareInfo
-      ...Device_osBundle
+      ...Device_baseImage
       ...Device_osInfo
       ...Device_location
       ...Device_storageUsage
@@ -363,76 +363,80 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
   );
 };
 
-interface DeviceOSBundleTabProps {
-  deviceRef: Device_osBundle$key;
+interface DeviceBaseImageTabProps {
+  deviceRef: Device_baseImage$key;
 }
 
-const DeviceOSBundleTab = ({ deviceRef }: DeviceOSBundleTabProps) => {
+const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
   const intl = useIntl();
-  const { osBundle } = useFragment(DEVICE_OS_BUNDLE_FRAGMENT, deviceRef);
-  if (!osBundle || Object.values(osBundle).every((value) => value === null)) {
+  const { baseImage } = useFragment(DEVICE_BASE_IMAGE_FRAGMENT, deviceRef);
+  if (!baseImage || Object.values(baseImage).every((value) => value === null)) {
     return null;
   }
   return (
     <Tab
-      eventKey="device-os-bundle-tab"
+      eventKey="device-base-image-tab"
       title={intl.formatMessage({
-        id: "pages.Device.osBundleTab",
-        defaultMessage: "OS Bundle",
+        id: "pages.Device.baseImageTab",
+        defaultMessage: "Base Image",
       })}
     >
       <div className="mt-3">
         <Stack gap={3}>
-          {osBundle.name !== null && (
+          {baseImage.name !== null && (
             <FormRow
-              id="device-os-bundle-name"
+              id="device-base-image-name"
               label={
                 <FormattedMessage
-                  id="Device.osBundle.name"
+                  id="Device.baseImage.name"
                   defaultMessage="Name"
                 />
               }
             >
-              <Form.Control type="text" value={osBundle.name} readOnly />
+              <Form.Control type="text" value={baseImage.name} readOnly />
             </FormRow>
           )}
-          {osBundle.version !== null && (
+          {baseImage.version !== null && (
             <FormRow
-              id="device-os-bundle-version"
+              id="device-base-image-version"
               label={
                 <FormattedMessage
-                  id="Device.osBundle.version"
+                  id="Device.baseImage.version"
                   defaultMessage="Version"
                 />
               }
             >
-              <Form.Control type="text" value={osBundle.version} readOnly />
+              <Form.Control type="text" value={baseImage.version} readOnly />
             </FormRow>
           )}
-          {osBundle.buildId !== null && (
+          {baseImage.buildId !== null && (
             <FormRow
-              id="device-os-bundle-buildId"
+              id="device-base-image-buildId"
               label={
                 <FormattedMessage
-                  id="Device.osBundle.buildId"
+                  id="Device.baseImage.buildId"
                   defaultMessage="Build identifier"
                 />
               }
             >
-              <Form.Control type="text" value={osBundle.buildId} readOnly />
+              <Form.Control type="text" value={baseImage.buildId} readOnly />
             </FormRow>
           )}
-          {osBundle.fingerprint !== null && (
+          {baseImage.fingerprint !== null && (
             <FormRow
-              id="device-os-bundle-fingerprint"
+              id="device-base-image-fingerprint"
               label={
                 <FormattedMessage
-                  id="Device.osBundle.fingerprint"
+                  id="Device.baseImage.fingerprint"
                   defaultMessage="Fingerprint"
                 />
               }
             >
-              <Form.Control type="text" value={osBundle.fingerprint} readOnly />
+              <Form.Control
+                type="text"
+                value={baseImage.fingerprint}
+                readOnly
+              />
             </FormRow>
           )}
         </Stack>
@@ -1141,7 +1145,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             tabsOrder={[
               "device-hardware-info-tab",
               "device-os-info-tab",
-              "device-os-bundle-tab",
+              "device-base-image-tab",
               "device-system-status-tab",
               "device-storage-usage-tab",
               "device-battery-tab",
@@ -1152,7 +1156,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
           >
             <DeviceHardwareInfoTab deviceRef={device} />
             <DeviceOSInfoTab deviceRef={device} />
-            <DeviceOSBundleTab deviceRef={device} />
+            <DeviceBaseImageTab deviceRef={device} />
             <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
             <DeviceBatteryTab deviceRef={device} />

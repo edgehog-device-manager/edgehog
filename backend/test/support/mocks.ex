@@ -20,8 +20,8 @@ Mox.defmock(Edgehog.Astarte.Device.DeviceStatusMock,
   for: Edgehog.Astarte.Device.DeviceStatus.Behaviour
 )
 
-Mox.defmock(Edgehog.Astarte.Device.OSBundleMock,
-  for: Edgehog.Astarte.Device.OSBundle.Behaviour
+Mox.defmock(Edgehog.Astarte.Device.BaseImageMock,
+  for: Edgehog.Astarte.Device.BaseImage.Behaviour
 )
 
 Mox.defmock(Edgehog.Astarte.Device.OSInfoMock,

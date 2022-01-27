@@ -261,17 +261,17 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     end
   end
 
-  describe "device OS bundle query" do
+  describe "device Base Image query" do
     setup do
       cluster = cluster_fixture()
 
       {:ok, realm: realm_fixture(cluster)}
     end
 
-    @os_bundle_query """
+    @base_image_query """
     query ($id: ID!) {
       device(id: $id) {
-        osBundle {
+        baseImage {
           name
           version
           buildId
@@ -288,21 +288,21 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @os_bundle_query, variables: variables)
+      conn = get(conn, "/api", query: @base_image_query, variables: variables)
 
       assert %{
                "data" => %{
                  "device" => %{
-                   "osBundle" => os_bundle
+                   "baseImage" => base_image
                  }
                }
              } = json_response(conn, 200)
 
-      assert os_bundle["name"] == "esp-idf"
-      assert os_bundle["version"] == "4.3.1"
-      assert os_bundle["buildId"] == "2022-01-01 12:00:00"
+      assert base_image["name"] == "esp-idf"
+      assert base_image["version"] == "4.3.1"
+      assert base_image["buildId"] == "2022-01-01 12:00:00"
 
-      assert os_bundle["fingerprint"] ==
+      assert base_image["fingerprint"] ==
                "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
     end
   end

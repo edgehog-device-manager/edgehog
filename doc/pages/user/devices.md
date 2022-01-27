@@ -59,11 +59,11 @@ This section reports an overview of the operating system of the Device.
 
 ![Device Operating System Screenshot](assets/device_operating_system.png)
 
-### OS Bundle
+### Base Image
 
-This section reports an overview of the OS Bundle of the Device.
+This section reports an overview of the Base Image of the Device.
 
-![Device OS Bundle Screenshot](assets/device_os_bundle.png)
+![Device Base Image Screenshot](assets/device_base_image.png)
 
 ### System status
 

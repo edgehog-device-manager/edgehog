@@ -23,7 +23,7 @@ export type Device_getDevice_QueryResponse = {
                 readonly name: string;
             };
         } | null;
-        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_osBundle" | "Device_osInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations">;
+        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_baseImage" | "Device_osInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations">;
     } | null;
 };
 export type Device_getDevice_Query = {
@@ -54,7 +54,7 @@ query Device_getDevice_Query(
       id
     }
     ...Device_hardwareInfo
-    ...Device_osBundle
+    ...Device_baseImage
     ...Device_osInfo
     ...Device_location
     ...Device_storageUsage
@@ -62,6 +62,15 @@ query Device_getDevice_Query(
     ...Device_wifiScanResults
     ...Device_batteryStatus
     ...Device_otaOperations
+  }
+}
+
+fragment Device_baseImage on Device {
+  baseImage {
+    name
+    version
+    buildId
+    fingerprint
   }
 }
 
@@ -91,15 +100,6 @@ fragment Device_location on Device {
     accuracy
     address
     timestamp
-  }
-}
-
-fragment Device_osBundle on Device {
-  osBundle {
-    name
-    version
-    buildId
-    fingerprint
   }
 }
 
@@ -289,7 +289,7 @@ return {
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "Device_osBundle"
+            "name": "Device_baseImage"
           },
           {
             "args": null,
@@ -429,9 +429,9 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "OsBundle",
+            "concreteType": "BaseImage",
             "kind": "LinkedField",
-            "name": "osBundle",
+            "name": "baseImage",
             "plural": false,
             "selections": [
               (v6/*: any*/),
@@ -691,14 +691,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "07e82948516968a7fef2aa37330b46ac",
+    "cacheID": "9d23597a2340473699d20301d812b1f3",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_osBundle\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osBundle on Device {\n  osBundle {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    createdAt\n    status\n    statusCode\n    updatedAt\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_baseImage\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n  }\n}\n\nfragment Device_baseImage on Device {\n  baseImage {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    createdAt\n    status\n    statusCode\n    updatedAt\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '5bd8701bdc166f989b24233c477c0156';
+(node as any).hash = 'e5212b56a3f24eb4ea15c67fa852152a';
 export default node;
