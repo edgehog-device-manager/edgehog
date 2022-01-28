@@ -38,8 +38,8 @@ defmodule EdgehogWeb.Schema.OSManagementTypes do
 
   @desc "An OTA update operation"
   node object(:ota_operation) do
-    @desc "The URL of the image being installed on the device"
-    field :image_url, non_null(:string)
+    @desc "The URL of the base image being installed on the device"
+    field :base_image_url, non_null(:string)
 
     @desc "The current status of the operation"
     field :status, non_null(:ota_operation_status)
@@ -71,9 +71,9 @@ defmodule EdgehogWeb.Schema.OSManagementTypes do
         field :device_id, non_null(:id)
 
         @desc """
-        An uploaded file of the OS image.
+        An uploaded file of the base image.
         """
-        field :image_file, :upload
+        field :base_image_file, :upload
       end
 
       output do

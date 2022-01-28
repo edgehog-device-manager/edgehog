@@ -94,25 +94,25 @@ defmodule Edgehog.OSManagement do
       iex> create_manual_ota_operation(%Astarte.Device{} = device, %Plug.Upload{})
       {:ok, %OTAOperation{}}
   """
-  def create_manual_ota_operation(%Astarte.Device{} = device, %Plug.Upload{} = image_file) do
+  def create_manual_ota_operation(%Astarte.Device{} = device, %Plug.Upload{} = base_image_file) do
     ota_operation_id = Ecto.UUID.generate()
     tenant_id = Repo.get_tenant_id()
 
     Multi.new()
     |> Multi.run(:image_upload, fn _repo, _changes ->
-      @ephemeral_image_module.upload(tenant_id, ota_operation_id, image_file)
+      @ephemeral_image_module.upload(tenant_id, ota_operation_id, base_image_file)
     end)
-    |> Multi.run(:ota_operation, fn _repo, %{image_upload: image_url} ->
+    |> Multi.run(:ota_operation, fn _repo, %{image_upload: base_image_url} ->
       ota_operation = %OTAOperation{
         id: ota_operation_id,
-        image_url: image_url,
+        base_image_url: base_image_url,
         device_id: device.id
       }
 
       Repo.insert(ota_operation)
     end)
-    |> Multi.run(:send_ota_request, fn _repo, %{image_upload: image_url} ->
-      with :ok <- Astarte.send_ota_request(device, ota_operation_id, image_url) do
+    |> Multi.run(:send_ota_request, fn _repo, %{image_upload: base_image_url} ->
+      with :ok <- Astarte.send_ota_request(device, ota_operation_id, base_image_url) do
         {:ok, nil}
       end
     end)
@@ -121,9 +121,9 @@ defmodule Edgehog.OSManagement do
       {:ok, %{ota_operation: ota_operation}} ->
         {:ok, Repo.preload(ota_operation, :device)}
 
-      {:error, _failed_operation, failed_value, %{image_upload: image_url}} ->
+      {:error, _failed_operation, failed_value, %{image_upload: base_image_url}} ->
         # If we fail after a successful upload, we at least try to clean up the upload
-        @ephemeral_image_module.delete(tenant_id, ota_operation_id, image_url)
+        @ephemeral_image_module.delete(tenant_id, ota_operation_id, base_image_url)
         {:error, failed_value}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->

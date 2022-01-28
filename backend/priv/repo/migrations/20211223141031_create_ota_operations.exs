@@ -9,7 +9,7 @@ defmodule Edgehog.Repo.Migrations.CreateOtaOperations do
         null: false
 
       add :id, :binary_id, primary_key: true
-      add :image_url, :string, null: false
+      add :base_image_url, :string, null: false
       add :status, :string, default: "Pending", null: false
       add :status_code, :string
 

@@ -41,7 +41,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       createManualOtaOperation(input: $input) {
         otaOperation {
           id
-          imageUrl
+          baseImageUrl
           status
           createdAt
           updatedAt
@@ -58,7 +58,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       variables = %{
         input: %{
           device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-          image_file: "fake_image"
+          base_image_file: "fake_image"
         }
       }
 
@@ -69,7 +69,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
                  "createManualOtaOperation" => %{
                    "otaOperation" => %{
                      "id" => id,
-                     "imageUrl" => image_url,
+                     "baseImageUrl" => base_image_url,
                      "status" => "PENDING",
                      "createdAt" => _created_at,
                      "updatedAt" => _updated_at,
@@ -84,7 +84,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       {:ok, %{type: :ota_operation, id: db_id}} =
         Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
 
-      assert %OTAOperation{image_url: ^image_url} = OSManagement.get_ota_operation!(db_id)
+      assert %OTAOperation{base_image_url: ^base_image_url} =
+               OSManagement.get_ota_operation!(db_id)
+
       assert device.device_id == device_id
     end
 
@@ -92,7 +94,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       variables = %{
         input: %{
           device_id: nil,
-          image_file: nil
+          base_image_file: nil
         }
       }
 

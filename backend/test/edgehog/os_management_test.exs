@@ -37,7 +37,7 @@ defmodule Edgehog.OSManagementTest do
       %{cluster: cluster, realm: realm, device: device}
     end
 
-    @invalid_attrs %{image_url: nil, status: "invalid status"}
+    @invalid_attrs %{base_image_url: nil, status: "invalid status"}
 
     test "list_ota_operations/0 returns all ota_operations", %{device: device} do
       ota_operation = ota_operation_fixture(device)
@@ -86,9 +86,9 @@ defmodule Edgehog.OSManagementTest do
       assert {:ok, %OTAOperation{} = ota_operation} =
                OSManagement.create_manual_ota_operation(device, fake_image)
 
-      assert ota_operation.image_url =~ bucket_url
-      assert ota_operation.image_url =~ ota_operation.id
-      assert ota_operation.image_url =~ fake_image.filename
+      assert ota_operation.base_image_url =~ bucket_url
+      assert ota_operation.base_image_url =~ ota_operation.id
+      assert ota_operation.base_image_url =~ fake_image.filename
       assert ota_operation.status == :pending
     end
 

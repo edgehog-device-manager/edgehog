@@ -24,7 +24,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "ota_operations" do
-    field :image_url, :string
+    field :base_image_url, :string
 
     field :status, Ecto.Enum,
       values: [pending: "Pending", in_progress: "InProgress", error: "Error", done: "Done"],
@@ -40,8 +40,8 @@ defmodule Edgehog.OSManagement.OTAOperation do
   @doc false
   def create_changeset(ota_operation, attrs) do
     ota_operation
-    |> cast(attrs, [:image_url, :status, :status_code])
-    |> validate_required([:image_url])
+    |> cast(attrs, [:base_image_url, :status, :status_code])
+    |> validate_required([:base_image_url])
   end
 
   @doc false

@@ -28,10 +28,13 @@ defmodule EdgehogWeb.Resolvers.OSManagement do
     {:ok, OSManagement.list_device_ota_operations(device)}
   end
 
-  def create_manual_ota_operation(%{device_id: device_id, image_file: image_file}, _resolution) do
+  def create_manual_ota_operation(
+        %{device_id: device_id, base_image_file: base_image_file},
+        _resolution
+      ) do
     device = Astarte.get_device!(device_id)
 
-    with {:ok, ota_operation} <- OSManagement.create_manual_ota_operation(device, image_file) do
+    with {:ok, ota_operation} <- OSManagement.create_manual_ota_operation(device, base_image_file) do
       {:ok, %{ota_operation: ota_operation}}
     end
   end
