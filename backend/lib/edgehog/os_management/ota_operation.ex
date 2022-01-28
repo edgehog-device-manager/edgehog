@@ -34,7 +34,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     belongs_to :device, Astarte.Device
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   @doc false
