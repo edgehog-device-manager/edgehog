@@ -30,12 +30,11 @@ defmodule Edgehog.OSManagementTest do
     import Edgehog.OSManagementFixtures
 
     setup do
-      device =
-        cluster_fixture()
-        |> realm_fixture()
-        |> device_fixture()
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+      device = device_fixture(realm)
 
-      %{device: device}
+      %{cluster: cluster, realm: realm, device: device}
     end
 
     @invalid_attrs %{image_url: nil, status: "invalid status"}
@@ -43,6 +42,17 @@ defmodule Edgehog.OSManagementTest do
     test "list_ota_operations/0 returns all ota_operations", %{device: device} do
       ota_operation = ota_operation_fixture(device)
       assert OSManagement.list_ota_operations() == [ota_operation]
+    end
+
+    test "list_device_ota_operations/1 just returns the device ota_operations", %{
+      device: device,
+      realm: realm
+    } do
+      ota_operation = ota_operation_fixture(device)
+      other_device = device_fixture(realm)
+      other_ota_operation = ota_operation_fixture(other_device)
+      assert OSManagement.list_ota_operations() == [ota_operation, other_ota_operation]
+      assert OSManagement.list_device_ota_operations(device) == [ota_operation]
     end
 
     test "get_ota_operation!/1 returns the ota_operation with given id", %{device: device} do

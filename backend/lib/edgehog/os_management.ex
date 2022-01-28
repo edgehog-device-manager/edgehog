@@ -50,6 +50,24 @@ defmodule Edgehog.OSManagement do
   end
 
   @doc """
+  Returns the list of ota_operations for a specific Device.
+
+  ## Examples
+
+  iex> list_device_ota_operations(%Astarte.Device{})
+  [%OTAOperation{}, ...]
+
+  """
+  def list_device_ota_operations(%Astarte.Device{id: device_id}) do
+    query =
+      from o in OTAOperation,
+        where: o.device_id == ^device_id
+
+    Repo.all(query)
+    |> Repo.preload(:device)
+  end
+
+  @doc """
   Gets a single ota_operation.
 
   Raises `Ecto.NoResultsError` if the Ota operation does not exist.
