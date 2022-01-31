@@ -30,6 +30,7 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Astarte.Device.{
     BaseImage,
     BatteryStatus,
+    CellularConnection,
     DeviceStatus,
     HardwareInfo,
     OSInfo,
@@ -68,8 +69,12 @@ defmodule Edgehog.Astarte do
                          )
   @base_image_module Application.compile_env(:edgehog, :astarte_base_image_module, BaseImage)
   @os_info_module Application.compile_env(:edgehog, :astarte_os_info_module, OSInfo)
-
   @ota_request_module Application.compile_env(:edgehog, :astarte_ota_request_module, OTARequest)
+  @cellular_connection_module Application.compile_env(
+                                :edgehog,
+                                :astarte_cellular_connection_module,
+                                CellularConnection
+                              )
 
   @doc """
   Returns the list of clusters.
@@ -620,6 +625,18 @@ defmodule Edgehog.Astarte do
   def send_ota_request(%Device{} = device, uuid, url) do
     with {:ok, client} <- appengine_client_from_device(device) do
       @ota_request_module.post(client, device.device_id, uuid, url)
+    end
+  end
+
+  def fetch_cellular_connection_properties(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @cellular_connection_module.get_modem_properties(client, device.device_id)
+    end
+  end
+
+  def fetch_cellular_connection_status(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @cellular_connection_module.get_modem_status(client, device.device_id)
     end
   end
 
