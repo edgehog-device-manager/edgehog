@@ -22,15 +22,27 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
   alias Edgehog.Astarte
 
+  @statuses [
+    pending: "Pending",
+    in_progress: "InProgress",
+    error: "Error",
+    done: "Done"
+  ]
+
+  @status_codes [
+    network_error: "OTAErrorNetwork",
+    nvs_error: "OTAErrorNvs",
+    already_in_progress: "OTAAlreadyInProgress",
+    failed: "OTAFailed",
+    deploy_error: "OTAErrorDeploy",
+    wrong_partition: "OTAErrorBootWrongPartition"
+  ]
+
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "ota_operations" do
     field :base_image_url, :string
-
-    field :status, Ecto.Enum,
-      values: [pending: "Pending", in_progress: "InProgress", error: "Error", done: "Done"],
-      default: :pending
-
-    field :status_code, :string
+    field :status, Ecto.Enum, values: @statuses, default: :pending
+    field :status_code, Ecto.Enum, values: @status_codes
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :manual?, :boolean, source: :is_manual
     belongs_to :device, Astarte.Device

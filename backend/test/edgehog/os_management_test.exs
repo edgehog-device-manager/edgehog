@@ -90,6 +90,7 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.base_image_url =~ ota_operation.id
       assert ota_operation.base_image_url =~ fake_image.filename
       assert ota_operation.status == :pending
+      assert ota_operation.status_code == nil
       assert ota_operation.manual? == true
     end
 
@@ -147,15 +148,13 @@ defmodule Edgehog.OSManagementTest do
       ota_operation = manual_ota_operation_fixture(device)
 
       update_attrs = %{
-        status: :in_progress,
-        status_code: "some updated status_code"
+        status: :in_progress
       }
 
       assert {:ok, %OTAOperation{} = ota_operation} =
                OSManagement.update_ota_operation(ota_operation, update_attrs)
 
       assert ota_operation.status == :in_progress
-      assert ota_operation.status_code == "some updated status_code"
     end
 
     test "update_ota_operation/2 with done status deletes the image for a manual ota_operation",
@@ -177,13 +176,14 @@ defmodule Edgehog.OSManagementTest do
                OSManagement.update_ota_operation(ota_operation, update_attrs)
 
       assert ota_operation.status == :done
+      assert ota_operation.status_code == nil
     end
 
     test "update_ota_operation/2 with error status deletes the image for a manual ota_operation",
          %{device: device} do
       ota_operation = manual_ota_operation_fixture(device)
 
-      update_attrs = %{status: :error, status_code: ""}
+      update_attrs = %{status: :error, status_code: "OTAErrorNetwork"}
 
       Edgehog.OSManagement.EphemeralImageMock
       |> expect(:delete, fn tenant_id, ota_operation_id, url ->
@@ -198,6 +198,7 @@ defmodule Edgehog.OSManagementTest do
                OSManagement.update_ota_operation(ota_operation, update_attrs)
 
       assert ota_operation.status == :error
+      assert ota_operation.status_code == :network_error
     end
 
     test "update_ota_operation/2 with invalid data returns error changeset", %{device: device} do

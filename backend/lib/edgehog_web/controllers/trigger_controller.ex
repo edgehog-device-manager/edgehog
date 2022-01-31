@@ -37,9 +37,11 @@ defmodule EdgehogWeb.AstarteTriggerController do
       }) do
     %{
       "uuid" => uuid,
-      "status" => status,
-      "statusCode" => status_code
+      "status" => status
     } = value
+
+    # statusCode could be nil, so we match it separately
+    status_code = value["statusCode"]
 
     ota_operation = OSManagement.get_ota_operation!(uuid)
     attrs = %{status: status, status_code: status_code}

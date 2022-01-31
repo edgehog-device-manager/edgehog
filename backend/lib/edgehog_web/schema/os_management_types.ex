@@ -36,6 +36,24 @@ defmodule EdgehogWeb.Schema.OSManagementTypes do
     value :done
   end
 
+  @desc """
+  Status code of the OTA operation.
+  """
+  enum :ota_operation_status_code do
+    @desc "A network error was encountered"
+    value :network_error
+    @desc "An NVS error was encountered"
+    value :nvs_error
+    @desc "The OTA operation is already in progress"
+    value :already_in_progress
+    @desc "The OTA operation has failed"
+    value :failed
+    @desc "A deploy error was encountered"
+    value :deploy_error
+    @desc "A boot partition error was encountered"
+    value :wrong_partition
+  end
+
   @desc "An OTA update operation"
   node object(:ota_operation) do
     @desc "The URL of the base image being installed on the device"
@@ -45,7 +63,7 @@ defmodule EdgehogWeb.Schema.OSManagementTypes do
     field :status, non_null(:ota_operation_status)
 
     @desc "The current status code of the operation"
-    field :status_code, :string
+    field :status_code, :ota_operation_status_code
 
     @desc "The device targeted from the operation"
     field :device, non_null(:device)

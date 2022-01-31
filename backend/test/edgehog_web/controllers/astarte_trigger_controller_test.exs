@@ -210,8 +210,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           path: "/response",
           value: %{
             uuid: ota_operation.id,
-            status: "InProgress",
-            statusCode: "SomeCode"
+            status: "InProgress"
           }
         },
         timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
@@ -227,7 +226,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       operation = OSManagement.get_ota_operation!(ota_operation.id)
 
       assert operation.status == :in_progress
-      assert operation.status_code == "SomeCode"
+      assert operation.status_code == nil
     end
   end
 end
