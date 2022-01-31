@@ -29,6 +29,8 @@ defmodule Edgehog.OSManagement do
   alias Edgehog.OSManagement.EphemeralImage
   alias Edgehog.OSManagement.OTAOperation
 
+  require Logger
+
   @ephemeral_image_module Application.compile_env(
                             :edgehog,
                             :os_management_ephemeral_image_module,
@@ -106,7 +108,8 @@ defmodule Edgehog.OSManagement do
       ota_operation = %OTAOperation{
         id: ota_operation_id,
         base_image_url: base_image_url,
-        device_id: device.id
+        device_id: device.id,
+        manual?: true
       }
 
       Repo.insert(ota_operation)
@@ -148,7 +151,22 @@ defmodule Edgehog.OSManagement do
       ota_operation
       |> OTAOperation.update_changeset(attrs)
 
-    with {:ok, ota_operation} <- Repo.update(changeset) do
+    with {:ok, %OTAOperation{manual?: manual?, status: status} = ota_operation} <-
+           Repo.update(changeset) do
+      if manual? and status in [:error, :done] do
+        # Manual operation ended, we have to cleanup the image
+        %OTAOperation{
+          id: id,
+          tenant_id: tenant_id,
+          base_image_url: base_image_url
+        } = ota_operation
+
+        Logger.info("OTA operation #{id} finished with status #{status}, cleaning up")
+
+        # TODO: image cleanup is currently best effort
+        @ephemeral_image_module.delete(tenant_id, id, base_image_url)
+      end
+
       {:ok, Repo.preload(ota_operation, :device)}
     end
   end

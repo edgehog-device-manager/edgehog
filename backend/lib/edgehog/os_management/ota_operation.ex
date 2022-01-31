@@ -32,6 +32,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
     field :status_code, :string
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
+    field :manual?, :boolean, source: :is_manual
     belongs_to :device, Astarte.Device
 
     timestamps(type: :utc_datetime)

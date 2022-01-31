@@ -12,6 +12,7 @@ defmodule Edgehog.Repo.Migrations.CreateOtaOperations do
       add :base_image_url, :string, null: false
       add :status, :string, default: "Pending", null: false
       add :status_code, :string
+      add :is_manual, :boolean
 
       add :device_id,
           references(:devices, with: [tenant_id: :tenant_id], match: :full, on_delete: :nothing),

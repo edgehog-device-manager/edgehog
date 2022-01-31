@@ -118,7 +118,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         id: id
       } = device
 
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 

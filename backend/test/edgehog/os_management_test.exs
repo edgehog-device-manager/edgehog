@@ -40,7 +40,7 @@ defmodule Edgehog.OSManagementTest do
     @invalid_attrs %{base_image_url: nil, status: "invalid status"}
 
     test "list_ota_operations/0 returns all ota_operations", %{device: device} do
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
       assert OSManagement.list_ota_operations() == [ota_operation]
     end
 
@@ -48,15 +48,15 @@ defmodule Edgehog.OSManagementTest do
       device: device,
       realm: realm
     } do
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
       other_device = device_fixture(realm)
-      other_ota_operation = ota_operation_fixture(other_device)
+      other_ota_operation = manual_ota_operation_fixture(other_device)
       assert OSManagement.list_ota_operations() == [ota_operation, other_ota_operation]
       assert OSManagement.list_device_ota_operations(device) == [ota_operation]
     end
 
     test "get_ota_operation!/1 returns the ota_operation with given id", %{device: device} do
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
       assert OSManagement.get_ota_operation!(ota_operation.id) == ota_operation
     end
 
@@ -90,6 +90,7 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.base_image_url =~ ota_operation.id
       assert ota_operation.base_image_url =~ fake_image.filename
       assert ota_operation.status == :pending
+      assert ota_operation.manual? == true
     end
 
     test "create_manual_ota_operation/2 fails if upload fails", %{device: device} do
@@ -143,7 +144,7 @@ defmodule Edgehog.OSManagementTest do
     end
 
     test "update_ota_operation/2 with valid data updates the ota_operation", %{device: device} do
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
 
       update_attrs = %{
         status: :in_progress,
@@ -157,8 +158,50 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.status_code == "some updated status_code"
     end
 
+    test "update_ota_operation/2 with done status deletes the image for a manual ota_operation",
+         %{device: device} do
+      ota_operation = manual_ota_operation_fixture(device)
+
+      update_attrs = %{status: :done, status_code: ""}
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, fn tenant_id, ota_operation_id, url ->
+        assert tenant_id == ota_operation.tenant_id
+        assert ota_operation_id == ota_operation.id
+        assert url == ota_operation.base_image_url
+
+        :ok
+      end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.update_ota_operation(ota_operation, update_attrs)
+
+      assert ota_operation.status == :done
+    end
+
+    test "update_ota_operation/2 with error status deletes the image for a manual ota_operation",
+         %{device: device} do
+      ota_operation = manual_ota_operation_fixture(device)
+
+      update_attrs = %{status: :error, status_code: ""}
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, fn tenant_id, ota_operation_id, url ->
+        assert tenant_id == ota_operation.tenant_id
+        assert ota_operation_id == ota_operation.id
+        assert url == ota_operation.base_image_url
+
+        :ok
+      end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.update_ota_operation(ota_operation, update_attrs)
+
+      assert ota_operation.status == :error
+    end
+
     test "update_ota_operation/2 with invalid data returns error changeset", %{device: device} do
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
 
       assert {:error, %Ecto.Changeset{}} =
                OSManagement.update_ota_operation(ota_operation, @invalid_attrs)
@@ -167,7 +210,7 @@ defmodule Edgehog.OSManagementTest do
     end
 
     test "delete_ota_operation/1 deletes the ota_operation", %{device: device} do
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
       assert {:ok, %OTAOperation{}} = OSManagement.delete_ota_operation(ota_operation)
 
       assert_raise Ecto.NoResultsError, fn ->
@@ -176,7 +219,7 @@ defmodule Edgehog.OSManagementTest do
     end
 
     test "change_ota_operation/1 returns a ota_operation changeset", %{device: device} do
-      ota_operation = ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device)
       assert %Ecto.Changeset{} = OSManagement.change_ota_operation(ota_operation)
     end
   end
