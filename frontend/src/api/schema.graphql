@@ -194,6 +194,25 @@ type CreateHardwareTypePayload {
   hardwareType: HardwareType!
 }
 
+input CreateManualOtaOperationInput {
+  """
+  An uploaded file of the base image.
+  """
+  baseImageFile: Upload
+
+  """
+  The GraphQL ID (not the Astarte Device ID) of the target device
+  """
+  deviceId: ID!
+}
+
+type CreateManualOtaOperationPayload {
+  """
+  The pending OTA operation
+  """
+  otaOperation: OtaOperation!
+}
+
 """
 The `DateTime` scalar type represents a date and time in the UTC
 timezone. The DateTime appears in a JSON response as an ISO8601 formatted
@@ -268,6 +287,11 @@ type Device implements Node {
   Information about the operating system of the device.
   """
   osInfo: OsInfo
+
+  """
+  The existing OTA operations for this device
+  """
+  otaOperations: [OtaOperation!]!
 
   """
   The current usage of the storage units of the device.
@@ -509,6 +533,106 @@ type OsInfo {
   version: String
 }
 
+"""
+An OTA update operation
+"""
+type OtaOperation implements Node {
+  """
+  The URL of the base image being installed on the device
+  """
+  baseImageUrl: String!
+
+  """
+  The creation timestamp of the operation
+  """
+  createdAt: DateTime!
+
+  """
+  The device targeted from the operation
+  """
+  device: Device!
+
+  """
+  The ID of an object
+  """
+  id: ID!
+
+  """
+  The current status of the operation
+  """
+  status: OtaOperationStatus!
+
+  """
+  The current status code of the operation
+  """
+  statusCode: OtaOperationStatusCode
+
+  """
+  The timestamp of the last update to the operation
+  """
+  updatedAt: DateTime!
+}
+
+"""
+Status of the OTA operation.
+"""
+enum OtaOperationStatus {
+  """
+  The OTA operation ended succesfully
+  """
+  DONE
+
+  """
+  The OTA operation ended with an error
+  """
+  ERROR
+
+  """
+  The OTA operation was accepted from the device
+  """
+  IN_PROGRESS
+
+  """
+  The OTA operation was created and is waiting an acknowledgment from the device
+  """
+  PENDING
+}
+
+"""
+Status code of the OTA operation.
+"""
+enum OtaOperationStatusCode {
+  """
+  The OTA operation is already in progress
+  """
+  ALREADY_IN_PROGRESS
+
+  """
+  A deploy error was encountered
+  """
+  DEPLOY_ERROR
+
+  """
+  The OTA operation has failed
+  """
+  FAILED
+
+  """
+  A network error was encountered
+  """
+  NETWORK_ERROR
+
+  """
+  An NVS error was encountered
+  """
+  NVS_ERROR
+
+  """
+  A boot partition error was encountered
+  """
+  WRONG_PARTITION
+}
+
 type RootMutationType {
   """
   Creates a new appliance model.
@@ -521,6 +645,13 @@ type RootMutationType {
   Creates a new hardware type.
   """
   createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
+
+  """
+  Initiates an OTA update with a user provided OS image
+  """
+  createManualOtaOperation(
+    input: CreateManualOtaOperationInput!
+  ): CreateManualOtaOperationPayload
 
   """
   Updates an appliance model.
