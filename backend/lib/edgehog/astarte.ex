@@ -33,6 +33,7 @@ defmodule Edgehog.Astarte do
     HardwareInfo,
     OSBundle,
     OSInfo,
+    OTARequest,
     StorageUsage,
     SystemStatus,
     WiFiScanResult
@@ -67,6 +68,8 @@ defmodule Edgehog.Astarte do
                          )
   @os_bundle_module Application.compile_env(:edgehog, :astarte_os_bundle_module, OSBundle)
   @os_info_module Application.compile_env(:edgehog, :astarte_os_info_module, OSInfo)
+
+  @ota_request_module Application.compile_env(:edgehog, :astarte_ota_request_module, OTARequest)
 
   @doc """
   Returns the list of clusters.
@@ -614,6 +617,12 @@ defmodule Edgehog.Astarte do
     end
   end
 
+  def send_ota_request(%Device{} = device, uuid, url) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @ota_request_module.post(client, device.device_id, uuid, url)
+    end
+  end
+
   defp appengine_client_from_device(%Device{} = device) do
     %Device{realm: realm} = Repo.preload(device, [realm: [:cluster]], skip_tenant_id: true)
 
@@ -623,6 +632,6 @@ defmodule Edgehog.Astarte do
   defp appengine_client_from_realm(%Realm{} = realm) do
     realm = Repo.preload(realm, [:cluster], skip_tenant_id: true)
 
-    AppEngine.new(realm.cluster.base_api_url, realm.name, realm.private_key)
+    AppEngine.new(realm.cluster.base_api_url, realm.name, private_key: realm.private_key)
   end
 end

@@ -20,6 +20,41 @@ defmodule EdgehogWeb.AstarteTriggerController do
   use EdgehogWeb, :controller
 
   alias Edgehog.Astarte
+  alias Edgehog.OSManagement
+
+  require Logger
+
+  @ota_response_interface "io.edgehog.devicemanager.OTAResponse"
+
+  # TODO: split incoming triggers with a dedicated shunt so we can route them in a clearer way
+  def process_event(conn, %{
+        "event" => %{
+          "type" => "incoming_data",
+          "interface" => @ota_response_interface,
+          "path" => "/response",
+          "value" => value
+        }
+      }) do
+    %{
+      "uuid" => uuid,
+      "status" => status
+    } = value
+
+    # statusCode could be nil, so we match it separately
+    status_code = value["statusCode"]
+
+    ota_operation = OSManagement.get_ota_operation!(uuid)
+    attrs = %{status: status, status_code: status_code}
+
+    case OSManagement.update_ota_operation(ota_operation, attrs) do
+      {:ok, _ota_operation} ->
+        send_resp(conn, :ok, "")
+
+      {:error, reason} ->
+        Logger.warning("Invalid OTAResponse: #{inspect(reason)}")
+        send_resp(conn, :bad_request, "")
+    end
+  end
 
   def process_event(conn, %{
         "device_id" => device_id,

@@ -322,6 +322,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
       resolve &Resolvers.Astarte.fetch_os_info/3
       middleware Middleware.ErrorHandler
     end
+
+    @desc "The existing OTA operations for this device"
+    field :ota_operations, non_null(list_of(non_null(:ota_operation))) do
+      # TODO: this causes an N+1 if used on the device list, we should use dataloader instead
+      resolve &Resolvers.OSManagement.ota_operations_for_device/3
+    end
   end
 
   object :astarte_queries do

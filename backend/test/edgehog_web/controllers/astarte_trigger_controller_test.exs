@@ -19,12 +19,15 @@
 defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   use EdgehogWeb.ConnCase
   use Edgehog.AstarteMockCase
+  use Edgehog.EphemeralImageMockCase
 
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
+  alias Edgehog.OSManagement
 
   import Edgehog.AstarteFixtures
   import Edgehog.AppliancesFixtures
+  import Edgehog.OSManagementFixtures
 
   @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
 
@@ -187,6 +190,43 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert device.appliance_model.id == appliance_model.id
       assert device.appliance_model.name == appliance_model.name
       assert device.appliance_model.handle == appliance_model.handle
+    end
+
+    test "updates the OTA operation when receiving an event on the OTAResponse interface", %{
+      conn: conn,
+      realm: realm,
+      device: device,
+      tenant: %{slug: tenant_slug}
+    } do
+      ota_operation = manual_ota_operation_fixture(device)
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      ota_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.OTAResponse",
+          path: "/response",
+          value: %{
+            uuid: ota_operation.id,
+            status: "InProgress"
+          }
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, ota_event)
+
+      assert response(conn, 200)
+
+      operation = OSManagement.get_ota_operation!(ota_operation.id)
+
+      assert operation.status == :in_progress
+      assert operation.status_code == nil
     end
   end
 end

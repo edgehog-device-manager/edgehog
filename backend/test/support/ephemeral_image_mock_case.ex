@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.AstarteMockCase do
+defmodule Edgehog.EphemeralImageMockCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -37,7 +37,7 @@ defmodule Edgehog.AstarteMockCase do
   using do
     quote do
       import Mox
-      import Edgehog.AstarteMockCase
+      import Edgehog.EphemeralImageMockCase
     end
   end
 
@@ -47,43 +47,8 @@ defmodule Edgehog.AstarteMockCase do
 
   setup do
     Mox.stub_with(
-      Edgehog.Astarte.Device.DeviceStatusMock,
-      Edgehog.Mocks.Astarte.Device.DeviceStatus
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.OSBundleMock,
-      Edgehog.Mocks.Astarte.Device.OSBundle
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.OSInfoMock,
-      Edgehog.Mocks.Astarte.Device.OSInfo
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.OTARequestMock,
-      Edgehog.Mocks.Astarte.Device.OTARequest
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.StorageUsageMock,
-      Edgehog.Mocks.Astarte.Device.StorageUsage
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.SystemStatusMock,
-      Edgehog.Mocks.Astarte.Device.SystemStatus
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.WiFiScanResultMock,
-      Edgehog.Mocks.Astarte.Device.WiFiScanResult
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.BatteryStatusMock,
-      Edgehog.Mocks.Astarte.Device.BatteryStatus
+      Edgehog.OSManagement.EphemeralImageMock,
+      Edgehog.Mocks.OSManagement.EphemeralImage
     )
 
     :ok

@@ -39,9 +39,11 @@ config :edgehog, :astarte_system_status_module, Edgehog.Astarte.Device.SystemSta
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
 config :edgehog, :astarte_os_bundle_module, Edgehog.Astarte.Device.OSBundleMock
 config :edgehog, :astarte_os_info_module, Edgehog.Astarte.Device.OSInfoMock
+config :edgehog, :astarte_ota_request_module, Edgehog.Astarte.Device.OTARequestMock
 
 # Storage mocks for tests
 config :edgehog, :assets_appliance_model_picture_module, Edgehog.Assets.ApplianceModelPictureMock
+config :edgehog, :os_management_ephemeral_image_module, Edgehog.OSManagement.EphemeralImageMock
 
 # Enable s3 storage since we're using mocks for it
 config :edgehog, enable_s3_storage?: true

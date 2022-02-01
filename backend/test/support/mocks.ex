@@ -28,6 +28,10 @@ Mox.defmock(Edgehog.Astarte.Device.OSInfoMock,
   for: Edgehog.Astarte.Device.OSInfo.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.OTARequestMock,
+  for: Edgehog.Astarte.Device.OTARequest.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.StorageUsageMock,
   for: Edgehog.Astarte.Device.StorageUsage.Behaviour
 )
@@ -55,3 +59,7 @@ Mox.defmock(Edgehog.Geolocation.WiFiGeolocationProviderMock,
 Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)
 
 Mox.defmock(Edgehog.Assets.ApplianceModelPictureMock, for: Edgehog.Assets.Store.Behaviour)
+
+Mox.defmock(Edgehog.OSManagement.EphemeralImageMock,
+  for: Edgehog.OSManagement.EphemeralImage.Behaviour
+)

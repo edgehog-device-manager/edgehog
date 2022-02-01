@@ -19,8 +19,10 @@
 defmodule EdgehogWeb.Schema.Query.DeviceTest do
   use EdgehogWeb.ConnCase
   use Edgehog.AstarteMockCase
+  use Edgehog.EphemeralImageMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.OSManagementFixtures
 
   alias Edgehog.Astarte.Device
 
@@ -37,18 +39,6 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         name
         deviceId
         online
-      }
-    }
-    """
-
-    @storage_usage_query """
-    query ($id: ID!) {
-      device(id: $id) {
-        storageUsage {
-          label
-          totalBytes
-          freeBytes
-        }
       }
     }
     """
@@ -76,6 +66,18 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["online"] == online
     end
 
+    @storage_usage_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        storageUsage {
+          label
+          totalBytes
+          freeBytes
+        }
+      }
+    }
+    """
+
     test "returns the storage usage if available", %{conn: conn, realm: realm} do
       %Device{
         id: id
@@ -96,6 +98,45 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert storage["label"] == "Disk 0"
       assert storage["totalBytes"] == 348_360_704
       assert storage["freeBytes"] == 281_360_704
+    end
+
+    @ota_operations_query """
+    query ($id: id!) {
+      device(id: $id) {
+        otaOperations {
+          id
+          status
+        }
+      }
+    }
+    """
+
+    test "returns the OTA operations if available", %{conn: conn, realm: realm} do
+      device = device_fixture(realm)
+
+      %Device{
+        id: id
+      } = device
+
+      ota_operation = manual_ota_operation_fixture(device)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, "/api", query: @ota_operations_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "otaOperations" => [operation]
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert {:ok, %{id: decoded_id, type: :ota_operation}} =
+               Absinthe.Relay.Node.from_global_id(operation["id"], EdgehogWeb.Schema)
+
+      assert decoded_id == ota_operation.id
+      assert operation["status"] == "PENDING"
     end
   end
 end
