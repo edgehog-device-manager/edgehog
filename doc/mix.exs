@@ -40,7 +40,7 @@ defmodule Doc.MixProject do
       "pages/user/intro_user.md",
       "pages/user/core_concepts.md",
       "pages/user/hardware_types.md",
-      "pages/user/appliance_models.md",
+      "pages/user/system_models.md",
       "pages/user/devices.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
