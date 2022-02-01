@@ -16,27 +16,25 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Mocks.Assets.ApplianceModelPicture do
-  alias Edgehog.Appliances.ApplianceModel
-  alias Edgehog.Repo
+defmodule Edgehog.Devices.HardwareTypePartNumber do
+  use Ecto.Schema
+  import Ecto.Changeset
 
-  @behaviour Edgehog.Assets.Store.Behaviour
+  alias Edgehog.Devices.HardwareType
 
-  @bucket_url "https://sample-storage.com/bucket"
+  schema "hardware_type_part_numbers" do
+    field :part_number, :string
+    field :tenant_id, :id
+    belongs_to :hardware_type, HardwareType
 
-  @impl true
-  def upload(%ApplianceModel{} = appliance_model, %Plug.Upload{} = upload) do
-    tenant_id = Repo.get_tenant_id()
-
-    file_name =
-      "tenants/#{tenant_id}/appliance_models/#{appliance_model.handle}/picture/#{upload.filename}"
-
-    file_url = "#{@bucket_url}/#{file_name}"
-    {:ok, file_url}
+    timestamps()
   end
 
-  @impl true
-  def delete(%ApplianceModel{} = _appliance_model, _picture_url) do
-    :ok
+  @doc false
+  def changeset(hardware_type_part_number, attrs) do
+    hardware_type_part_number
+    |> cast(attrs, [:part_number])
+    |> validate_required([:part_number])
+    |> unique_constraint([:part_number, :tenant_id])
   end
 end

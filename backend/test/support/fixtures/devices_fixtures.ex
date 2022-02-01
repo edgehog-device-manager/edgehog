@@ -16,10 +16,10 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.AppliancesFixtures do
+defmodule Edgehog.DevicesFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Edgehog.Appliances` context.
+  entities via the `Edgehog.Devices` context.
   """
 
   @doc """
@@ -33,15 +33,15 @@ defmodule Edgehog.AppliancesFixtures do
         name: "some name",
         part_numbers: ["ABC123"]
       })
-      |> Edgehog.Appliances.create_hardware_type()
+      |> Edgehog.Devices.create_hardware_type()
 
     hardware_type
   end
 
   @doc """
-  Generate a appliance_model.
+  Generate a system_model.
   """
-  def appliance_model_fixture(hardware_type, attrs \\ %{}) do
+  def system_model_fixture(hardware_type, attrs \\ %{}) do
     attrs =
       attrs
       |> Enum.into(%{
@@ -50,8 +50,8 @@ defmodule Edgehog.AppliancesFixtures do
         part_numbers: ["1234-rev4"]
       })
 
-    {:ok, appliance_model} = Edgehog.Appliances.create_appliance_model(hardware_type, attrs)
+    {:ok, system_model} = Edgehog.Devices.create_system_model(hardware_type, attrs)
 
-    appliance_model
+    system_model
   end
 end

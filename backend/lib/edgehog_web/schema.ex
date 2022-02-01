@@ -20,7 +20,7 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
-  import_types EdgehogWeb.Schema.AppliancesTypes
+  import_types EdgehogWeb.Schema.DevicesTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
   import_types EdgehogWeb.Schema.TenantsTypes
@@ -44,11 +44,11 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.Astarte.Device{}, _ ->
         :device
 
-      %Edgehog.Appliances.HardwareType{}, _ ->
+      %Edgehog.Devices.HardwareType{}, _ ->
         :hardware_type
 
-      %Edgehog.Appliances.ApplianceModel{}, _ ->
-        :appliance_model
+      %Edgehog.Devices.SystemModel{}, _ ->
+        :system_model
 
       %Edgehog.OSManagement.OTAOperation{}, _ ->
         :ota_operation
@@ -65,10 +65,10 @@ defmodule EdgehogWeb.Schema do
           Resolvers.Astarte.find_device(%{id: id}, context)
 
         %{type: :hardware_type, id: id}, context ->
-          Resolvers.Appliances.find_hardware_type(%{id: id}, context)
+          Resolvers.Devices.find_hardware_type(%{id: id}, context)
 
-        %{type: :appliance_model, id: id}, context ->
-          Resolvers.Appliances.find_appliance_model(%{id: id}, context)
+        %{type: :system_model, id: id}, context ->
+          Resolvers.Devices.find_system_model(%{id: id}, context)
 
         %{type: :ota_operation, id: id}, context ->
           Resolvers.OSManagement.find_ota_operation(%{id: id}, context)
@@ -76,12 +76,12 @@ defmodule EdgehogWeb.Schema do
     end
 
     import_fields :astarte_queries
-    import_fields :appliances_queries
+    import_fields :devices_queries
     import_fields :tenants_queries
   end
 
   mutation do
-    import_fields :appliances_mutations
+    import_fields :devices_mutations
     import_fields :os_management_mutations
   end
 end

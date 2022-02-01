@@ -19,11 +19,11 @@
 defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
   use EdgehogWeb.ConnCase
 
-  alias Edgehog.Appliances
-  alias Edgehog.Appliances.HardwareType
+  alias Edgehog.Devices
+  alias Edgehog.Devices.HardwareType
 
   describe "updateHardwareType field" do
-    import Edgehog.AppliancesFixtures
+    import Edgehog.DevicesFixtures
 
     setup do
       {:ok, hardware_type: hardware_type_fixture()}
@@ -73,7 +73,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
              } = assert(json_response(conn, 200))
 
       assert {:ok, %HardwareType{name: ^name, handle: ^handle}} =
-               Appliances.fetch_hardware_type(hardware_type.id)
+               Devices.fetch_hardware_type(hardware_type.id)
     end
 
     test "updates hardware type with partial data", %{conn: conn, hardware_type: hardware_type} do
@@ -107,7 +107,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
              } = assert(json_response(conn, 200))
 
       assert {:ok, %HardwareType{name: ^initial_name, handle: ^initial_handle}} =
-               Appliances.fetch_hardware_type(hardware_type.id)
+               Devices.fetch_hardware_type(hardware_type.id)
 
       variables = %{
         input: %{
@@ -132,7 +132,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
              } = assert(json_response(conn, 200))
 
       assert {:ok, %HardwareType{name: ^name, handle: ^initial_handle}} =
-               Appliances.fetch_hardware_type(hardware_type.id)
+               Devices.fetch_hardware_type(hardware_type.id)
     end
 
     test "fails with invalid data", %{conn: conn, hardware_type: hardware_type} do

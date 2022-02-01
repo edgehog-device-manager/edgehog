@@ -16,23 +16,23 @@
 # limitations under the License.
 #
 
-defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
+defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
   use EdgehogWeb.ConnCase
 
-  alias Edgehog.Appliances
-  alias Edgehog.Appliances.ApplianceModel
+  alias Edgehog.Devices
+  alias Edgehog.Devices.SystemModel
 
-  import Edgehog.AppliancesFixtures
+  import Edgehog.DevicesFixtures
 
-  describe "createApplianceModel field" do
+  describe "createSystemModel field" do
     setup do
       {:ok, hardware_type: hardware_type_fixture()}
     end
 
     @query """
-    mutation CreateApplianceModel($input: CreateApplianceModelInput!) {
-      createApplianceModel(input: $input) {
-        applianceModel {
+    mutation CreateSystemModel($input: CreateSystemModelInput!) {
+      createSystemModel(input: $input) {
+        systemModel {
           id
           name
           handle
@@ -48,7 +48,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
       }
     }
     """
-    test "creates appliance model with valid data", %{conn: conn, hardware_type: hardware_type} do
+    test "creates system model with valid data", %{conn: conn, hardware_type: hardware_type} do
       name = "Foobar"
       handle = "foobar"
       part_number = "12345/X"
@@ -71,8 +71,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
 
       assert %{
                "data" => %{
-                 "createApplianceModel" => %{
-                   "applianceModel" => %{
+                 "createSystemModel" => %{
+                   "systemModel" => %{
                      "id" => id,
                      "name" => ^name,
                      "handle" => ^handle,
@@ -86,17 +86,16 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
                }
              } = assert(json_response(conn, 200))
 
-      {:ok, %{type: :appliance_model, id: db_id}} =
+      {:ok, %{type: :system_model, id: db_id}} =
         Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
 
-      assert {:ok, %ApplianceModel{name: ^name, handle: ^handle}} =
-               Appliances.fetch_appliance_model(db_id)
+      assert {:ok, %SystemModel{name: ^name, handle: ^handle}} = Devices.fetch_system_model(db_id)
     end
 
     test "fails with invalid data", %{conn: conn} do
       variables = %{
         input: %{
-          appliance_model: %{
+          system_model: %{
             name: nil,
             handle: nil,
             part_numbers: []
@@ -133,7 +132,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
           hardware_type_id: hardware_type_id,
           description: %{
             locale: default_locale,
-            text: "An appliance"
+            text: "A system model"
           }
         }
       }
@@ -142,8 +141,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
 
       assert %{
                "data" => %{
-                 "createApplianceModel" => %{
-                   "applianceModel" => %{
+                 "createSystemModel" => %{
+                   "systemModel" => %{
                      "id" => id,
                      "name" => ^name,
                      "handle" => ^handle,
@@ -153,18 +152,17 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplianceModelTest do
                      },
                      "description" => %{
                        "locale" => ^default_locale,
-                       "text" => "An appliance"
+                       "text" => "A system model"
                      }
                    }
                  }
                }
              } = assert(json_response(conn, 200))
 
-      {:ok, %{type: :appliance_model, id: db_id}} =
+      {:ok, %{type: :system_model, id: db_id}} =
         Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
 
-      assert {:ok, %ApplianceModel{name: ^name, handle: ^handle}} =
-               Appliances.fetch_appliance_model(db_id)
+      assert {:ok, %SystemModel{name: ^name, handle: ^handle}} = Devices.fetch_system_model(db_id)
     end
 
     test "fails when trying to set a description for non default locale", %{

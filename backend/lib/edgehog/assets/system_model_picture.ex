@@ -16,25 +16,20 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Appliances.HardwareTypePartNumber do
-  use Ecto.Schema
-  import Ecto.Changeset
+defmodule Edgehog.Assets.SystemModelPicture do
+  alias Edgehog.Devices.SystemModel
+  alias Edgehog.Assets.Uploaders.SystemModelPicture
 
-  alias Edgehog.Appliances.HardwareType
+  @behaviour Edgehog.Assets.Store.Behaviour
 
-  schema "hardware_type_part_numbers" do
-    field :part_number, :string
-    field :tenant_id, :id
-    belongs_to :hardware_type, HardwareType
-
-    timestamps()
+  def upload(%SystemModel{} = scope, %Plug.Upload{} = upload) do
+    with {:ok, file_name} <- SystemModelPicture.store({upload, scope}) do
+      file_url = SystemModelPicture.url({file_name, scope})
+      {:ok, file_url}
+    end
   end
 
-  @doc false
-  def changeset(hardware_type_part_number, attrs) do
-    hardware_type_part_number
-    |> cast(attrs, [:part_number])
-    |> validate_required([:part_number])
-    |> unique_constraint([:part_number, :tenant_id])
+  def delete(%SystemModel{} = scope, url) do
+    SystemModelPicture.delete({url, scope})
   end
 end

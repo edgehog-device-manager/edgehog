@@ -16,20 +16,20 @@
 # limitations under the License.
 #
 
-defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
+defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
   use EdgehogWeb.ConnCase
 
-  import Edgehog.AppliancesFixtures
+  import Edgehog.DevicesFixtures
 
-  alias Edgehog.Appliances.{
-    ApplianceModel,
-    ApplianceModelPartNumber
+  alias Edgehog.Devices.{
+    SystemModel,
+    SystemModelPartNumber
   }
 
-  describe "applianceModels field" do
+  describe "systemModels field" do
     @query """
     {
-      applianceModels {
+      systemModels {
         name
         handle
         partNumbers
@@ -43,37 +43,37 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
       }
     }
     """
-    test "returns empty appliance models", %{conn: conn} do
+    test "returns empty system models", %{conn: conn} do
       conn = get(conn, "/api", query: @query)
 
       assert json_response(conn, 200) == %{
                "data" => %{
-                 "applianceModels" => []
+                 "systemModels" => []
                }
              }
     end
 
-    test "returns appliance models if they're present", %{conn: conn} do
+    test "returns system models if they're present", %{conn: conn} do
       hardware_type = hardware_type_fixture()
 
-      %ApplianceModel{
+      %SystemModel{
         name: name,
         handle: handle,
-        part_numbers: [%ApplianceModelPartNumber{part_number: part_number}]
-      } = appliance_model_fixture(hardware_type)
+        part_numbers: [%SystemModelPartNumber{part_number: part_number}]
+      } = system_model_fixture(hardware_type)
 
       conn = get(conn, "/api", query: @query)
 
       assert %{
                "data" => %{
-                 "applianceModels" => [appliance_model]
+                 "systemModels" => [system_model]
                }
              } = json_response(conn, 200)
 
-      assert appliance_model["name"] == name
-      assert appliance_model["handle"] == handle
-      assert appliance_model["partNumbers"] == [part_number]
-      assert appliance_model["hardwareType"]["name"] == hardware_type.name
+      assert system_model["name"] == name
+      assert system_model["handle"] == handle
+      assert system_model["partNumbers"] == [part_number]
+      assert system_model["hardwareType"]["name"] == hardware_type.name
     end
 
     test "returns the default locale description", %{conn: conn, tenant: tenant} do
@@ -82,22 +82,22 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      _appliance_model = appliance_model_fixture(hardware_type, descriptions: descriptions)
+      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
 
       conn = get(conn, "/api", query: @query)
 
       assert %{
                "data" => %{
-                 "applianceModels" => [appliance_model]
+                 "systemModels" => [system_model]
                }
              } = json_response(conn, 200)
 
-      assert appliance_model["description"]["locale"] == default_locale
-      assert appliance_model["description"]["text"] == "An appliance"
+      assert system_model["description"]["locale"] == default_locale
+      assert system_model["description"]["text"] == "A system model"
     end
 
     test "returns an explicit locale description", %{conn: conn, tenant: tenant} do
@@ -106,11 +106,11 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      _appliance_model = appliance_model_fixture(hardware_type, descriptions: descriptions)
+      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
 
       conn =
         conn
@@ -119,12 +119,12 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
 
       assert %{
                "data" => %{
-                 "applianceModels" => [appliance_model]
+                 "systemModels" => [system_model]
                }
              } = json_response(conn, 200)
 
-      assert appliance_model["description"]["locale"] == "it-IT"
-      assert appliance_model["description"]["text"] == "Un dispositivo"
+      assert system_model["description"]["locale"] == "it-IT"
+      assert system_model["description"]["text"] == "Un modello di sistema"
     end
 
     test "returns empty description for non existing locale", %{conn: conn, tenant: tenant} do
@@ -133,11 +133,11 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      _appliance_model = appliance_model_fixture(hardware_type, descriptions: descriptions)
+      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
 
       conn =
         conn
@@ -146,11 +146,11 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelsTest do
 
       assert %{
                "data" => %{
-                 "applianceModels" => [appliance_model]
+                 "systemModels" => [system_model]
                }
              } = json_response(conn, 200)
 
-      assert appliance_model["description"] == nil
+      assert system_model["description"] == nil
     end
   end
 end

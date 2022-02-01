@@ -16,34 +16,34 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Appliances.ApplianceModelDescription do
+defmodule Edgehog.Devices.SystemModelDescription do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
 
-  alias Edgehog.Appliances.ApplianceModel
-  alias Edgehog.Appliances.ApplianceModelDescription
+  alias Edgehog.Devices.SystemModel
+  alias Edgehog.Devices.SystemModelDescription
 
-  schema "appliance_model_descriptions" do
+  schema "system_model_descriptions" do
     field :text, :string
     field :locale, :string
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
-    belongs_to :appliance_model, ApplianceModel
+    belongs_to :system_model, SystemModel
 
     timestamps()
   end
 
   @doc false
-  def changeset(appliance_model_description, attrs) do
-    appliance_model_description
+  def changeset(system_model_description, attrs) do
+    system_model_description
     |> cast(attrs, [:locale, :text])
     |> validate_required([:locale, :text])
     |> validate_format(:locale, ~r/^[a-z]{2,3}-[A-Z]{2}$/, message: "is not a valid locale")
-    |> unique_constraint([:locale, :appliance_model_id, :tenant_id])
+    |> unique_constraint([:locale, :system_model_id, :tenant_id])
   end
 
   def localized(locale) do
-    from d in ApplianceModelDescription,
+    from d in SystemModelDescription,
       where: d.locale == ^locale
   end
 end

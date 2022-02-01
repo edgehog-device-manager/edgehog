@@ -16,30 +16,30 @@
 # limitations under the License.
 #
 
-defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
+defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
   use EdgehogWeb.ConnCase
 
-  alias Edgehog.Appliances
-  alias Edgehog.Appliances.ApplianceModel
+  alias Edgehog.Devices
+  alias Edgehog.Devices.SystemModel
 
-  describe "updateApplianceModel field" do
-    import Edgehog.AppliancesFixtures
+  describe "updateSystemModel field" do
+    import Edgehog.DevicesFixtures
 
     setup %{tenant: tenant} do
       hardware_type = hardware_type_fixture()
 
       descriptions = [
-        %{locale: tenant.default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: tenant.default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      {:ok, appliance_model: appliance_model_fixture(hardware_type, descriptions: descriptions)}
+      {:ok, system_model: system_model_fixture(hardware_type, descriptions: descriptions)}
     end
 
     @query """
-    mutation UpdateApplianceModel($input: UpdateApplianceModelInput!) {
-      updateApplianceModel(input: $input) {
-        applianceModel {
+    mutation UpdateSystemModel($input: UpdateSystemModelInput!) {
+      updateSystemModel(input: $input) {
+        systemModel {
           id
           name
           handle
@@ -52,20 +52,19 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
       }
     }
     """
-    test "updates appliance model with valid data", %{
+    test "updates system model with valid data", %{
       conn: conn,
-      appliance_model: appliance_model
+      system_model: system_model
     } do
       name = "Foobaz"
       handle = "foobaz"
       part_number = "12345/Z"
 
-      id =
-        Absinthe.Relay.Node.to_global_id(:appliance_model, appliance_model.id, EdgehogWeb.Schema)
+      id = Absinthe.Relay.Node.to_global_id(:system_model, system_model.id, EdgehogWeb.Schema)
 
       variables = %{
         input: %{
-          appliance_model_id: id,
+          system_model_id: id,
           name: name,
           handle: handle,
           part_numbers: [part_number]
@@ -76,8 +75,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
 
       assert %{
                "data" => %{
-                 "updateApplianceModel" => %{
-                   "applianceModel" => %{
+                 "updateSystemModel" => %{
+                   "systemModel" => %{
                      "id" => ^id,
                      "name" => ^name,
                      "handle" => ^handle,
@@ -87,17 +86,16 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
                }
              } = assert(json_response(conn, 200))
 
-      assert {:ok, %ApplianceModel{name: ^name, handle: ^handle}} =
-               Appliances.fetch_appliance_model(appliance_model.id)
+      assert {:ok, %SystemModel{name: ^name, handle: ^handle}} =
+               Devices.fetch_system_model(system_model.id)
     end
 
-    test "fails with invalid data", %{conn: conn, appliance_model: appliance_model} do
-      id =
-        Absinthe.Relay.Node.to_global_id(:appliance_model, appliance_model.id, EdgehogWeb.Schema)
+    test "fails with invalid data", %{conn: conn, system_model: system_model} do
+      id = Absinthe.Relay.Node.to_global_id(:system_model, system_model.id, EdgehogWeb.Schema)
 
       variables = %{
         input: %{
-          appliance_model_id: id,
+          system_model_id: id,
           name: nil,
           handle: nil,
           part_numbers: []
@@ -109,18 +107,17 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
       assert %{"errors" => _} = assert(json_response(conn, 200))
     end
 
-    test "updates appliance model with partial data", %{
+    test "updates system model with partial data", %{
       conn: conn,
-      appliance_model: appliance_model
+      system_model: system_model
     } do
       name = "Foobarbaz"
 
-      id =
-        Absinthe.Relay.Node.to_global_id(:appliance_model, appliance_model.id, EdgehogWeb.Schema)
+      id = Absinthe.Relay.Node.to_global_id(:system_model, system_model.id, EdgehogWeb.Schema)
 
       variables = %{
         input: %{
-          appliance_model_id: id,
+          system_model_id: id,
           name: name
         }
       }
@@ -129,16 +126,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
 
       assert %{
                "data" => %{
-                 "updateApplianceModel" => %{
-                   "applianceModel" => %{
+                 "updateSystemModel" => %{
+                   "systemModel" => %{
                      "name" => ^name
                    }
                  }
                }
              } = assert(json_response(conn, 200))
 
-      assert {:ok, %ApplianceModel{name: ^name}} =
-               Appliances.fetch_appliance_model(appliance_model.id)
+      assert {:ok, %SystemModel{name: ^name}} = Devices.fetch_system_model(system_model.id)
     end
 
     test "fails with non-existing id", %{conn: conn} do
@@ -146,11 +142,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
       handle = "foobaz"
       part_number = "12345/Z"
 
-      id = Absinthe.Relay.Node.to_global_id(:appliance_model, 10_000_000, EdgehogWeb.Schema)
+      id = Absinthe.Relay.Node.to_global_id(:system_model, 10_000_000, EdgehogWeb.Schema)
 
       variables = %{
         input: %{
-          appliance_model_id: id,
+          system_model_id: id,
           name: name,
           handle: handle,
           part_numbers: [part_number]
@@ -165,22 +161,21 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
 
     test "updates default locale description, without touching the others", %{
       conn: conn,
-      appliance_model: appliance_model,
+      system_model: system_model,
       tenant: tenant
     } do
       default_locale = tenant.default_locale
 
       description = %{
         locale: default_locale,
-        text: "Another appliance"
+        text: "Another system model"
       }
 
-      id =
-        Absinthe.Relay.Node.to_global_id(:appliance_model, appliance_model.id, EdgehogWeb.Schema)
+      id = Absinthe.Relay.Node.to_global_id(:system_model, system_model.id, EdgehogWeb.Schema)
 
       variables = %{
         input: %{
-          appliance_model_id: id,
+          system_model_id: id,
           description: description
         }
       }
@@ -189,47 +184,46 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateApplianceModelTest do
 
       assert %{
                "data" => %{
-                 "updateApplianceModel" => %{
-                   "applianceModel" => %{
+                 "updateSystemModel" => %{
+                   "systemModel" => %{
                      "description" => %{
                        "locale" => ^default_locale,
-                       "text" => "Another appliance"
+                       "text" => "Another system model"
                      }
                    }
                  }
                }
              } = assert(json_response(conn, 200))
 
-      assert {:ok, appliance_model} = Appliances.fetch_appliance_model(appliance_model.id)
+      assert {:ok, system_model} = Devices.fetch_system_model(system_model.id)
 
-      assert %ApplianceModel{descriptions: [%{locale: "en-US", text: "Another appliance"}]} =
-               Appliances.preload_localized_descriptions_for_appliance_model(
-                 appliance_model,
+      assert %SystemModel{descriptions: [%{locale: "en-US", text: "Another system model"}]} =
+               Devices.preload_localized_descriptions_for_system_model(
+                 system_model,
                  default_locale
                )
 
-      assert %ApplianceModel{descriptions: [%{locale: "it-IT", text: "Un dispositivo"}]} =
-               Appliances.preload_localized_descriptions_for_appliance_model(
-                 appliance_model,
+      assert %SystemModel{descriptions: [%{locale: "it-IT", text: "Un modello di sistema"}]} =
+               Devices.preload_localized_descriptions_for_system_model(
+                 system_model,
                  "it-IT"
                )
     end
 
     test "fails when trying to update a non default locale", %{
       conn: conn,
-      appliance_model: appliance_model
+      system_model: system_model
     } do
       description = %{
         locale: "it-IT",
         text: "Un altro dispositivo"
       }
 
-      id =
-        Absinthe.Relay.Node.to_global_id(:appliance_model, appliance_model.id, EdgehogWeb.Schema)
+      id = Absinthe.Relay.Node.to_global_id(:system_model, system_model.id, EdgehogWeb.Schema)
 
       variables = %{
         input: %{
-          appliance_model_id: id,
+          system_model_id: id,
           description: description
         }
       }

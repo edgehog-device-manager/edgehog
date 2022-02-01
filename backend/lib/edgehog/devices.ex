@@ -16,20 +16,20 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Appliances do
+defmodule Edgehog.Devices do
   @moduledoc """
-  The Appliances context.
+  The Devices context.
   """
 
   import Ecto.Query, warn: false
   alias Ecto.Multi
   alias Edgehog.Repo
 
-  alias Edgehog.Appliances.ApplianceModel
-  alias Edgehog.Appliances.ApplianceModelDescription
-  alias Edgehog.Appliances.ApplianceModelPartNumber
-  alias Edgehog.Appliances.HardwareType
-  alias Edgehog.Appliances.HardwareTypePartNumber
+  alias Edgehog.Devices.SystemModel
+  alias Edgehog.Devices.SystemModelDescription
+  alias Edgehog.Devices.SystemModelPartNumber
+  alias Edgehog.Devices.HardwareType
+  alias Edgehog.Devices.HardwareTypePartNumber
   alias Edgehog.Assets
 
   @doc """
@@ -205,37 +205,37 @@ defmodule Edgehog.Appliances do
   end
 
   @doc """
-  Returns the list of appliance_models.
+  Returns the list of system_models.
 
   ## Examples
 
-      iex> list_appliance_models()
-      [%ApplianceModel{}, ...]
+      iex> list_system_models()
+      [%SystemModel{}, ...]
 
   """
-  def list_appliance_models do
-    Repo.all(ApplianceModel)
+  def list_system_models do
+    Repo.all(SystemModel)
     |> Repo.preload([:part_numbers, :hardware_type])
   end
 
   @doc """
-  Gets a single appliance_model.
+  Gets a single system_model.
 
-  Raises `Ecto.NoResultsError` if the Appliance model does not exist.
+  Raises `Ecto.NoResultsError` if the System Model does not exist.
 
   ## Examples
 
-      iex> fetch_appliance_model(123)
-      {:ok, %ApplianceModel{}}
+      iex> fetch_system_model(123)
+      {:ok, %SystemModel{}}
 
-      iex> fetch_appliance_model(456)
+      iex> fetch_system_model(456)
       {:error, :not_found}
 
   """
-  def fetch_appliance_model(id) do
-    case Repo.get(ApplianceModel, id) do
-      %ApplianceModel{} = appliance ->
-        {:ok, Repo.preload(appliance, [:part_numbers, :hardware_type])}
+  def fetch_system_model(id) do
+    case Repo.get(SystemModel, id) do
+      %SystemModel{} = system ->
+        {:ok, Repo.preload(system, [:part_numbers, :hardware_type])}
 
       nil ->
         {:error, :not_found}
@@ -243,68 +243,66 @@ defmodule Edgehog.Appliances do
   end
 
   @doc """
-  Preloads only descriptions with a specific locale for an `ApplianceModel` (or a list of them).
+  Preloads only descriptions with a specific locale for an `SystemModel` (or a list of them).
   """
-  def preload_localized_descriptions_for_appliance_model(model_or_models, locale) do
-    descriptions_preload = ApplianceModelDescription.localized(locale)
+  def preload_localized_descriptions_for_system_model(model_or_models, locale) do
+    descriptions_preload = SystemModelDescription.localized(locale)
 
     Repo.preload(model_or_models, descriptions: descriptions_preload)
   end
 
   @doc """
-  Returns a query that selects only `ApplianceModelDescription` with a specific locale.
+  Returns a query that selects only `SystemModelDescription` with a specific locale.
   """
-  def localized_appliance_model_description_query(locale) do
-    ApplianceModelDescription.localized(locale)
+  def localized_system_model_description_query(locale) do
+    SystemModelDescription.localized(locale)
   end
 
   @doc """
-  Creates a appliance_model.
+  Creates a system_model.
 
   ## Examples
 
-      iex> create_appliance_model(%{field: value})
-      {:ok, %ApplianceModel{}}
+      iex> create_system_model(%{field: value})
+      {:ok, %SystemModel{}}
 
-      iex> create_appliance_model(%{field: bad_value})
+      iex> create_system_model(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_appliance_model(%HardwareType{id: hardware_type_id}, attrs \\ %{}) do
+  def create_system_model(%HardwareType{id: hardware_type_id}, attrs \\ %{}) do
     {part_numbers, attrs} = Map.pop(attrs, :part_numbers, [])
 
     changeset =
-      %ApplianceModel{tenant_id: Repo.get_tenant_id(), hardware_type_id: hardware_type_id}
-      |> ApplianceModel.changeset(attrs)
+      %SystemModel{tenant_id: Repo.get_tenant_id(), hardware_type_id: hardware_type_id}
+      |> SystemModel.changeset(attrs)
 
     Multi.new()
     |> Multi.run(:assoc_part_numbers, fn _repo, _changes ->
       {:ok,
-       insert_or_get_part_numbers(ApplianceModelPartNumber, changeset, part_numbers,
-         required: true
-       )}
+       insert_or_get_part_numbers(SystemModelPartNumber, changeset, part_numbers, required: true)}
     end)
-    |> Multi.insert(:appliance_model, fn %{assoc_part_numbers: changeset} ->
+    |> Multi.insert(:system_model, fn %{assoc_part_numbers: changeset} ->
       changeset
     end)
-    |> Multi.run(:upload_appliance_model_picture, fn repo, %{appliance_model: appliance_model} ->
+    |> Multi.run(:upload_system_model_picture, fn repo, %{system_model: system_model} ->
       with {:ok, picture_file} <- Ecto.Changeset.fetch_change(changeset, :picture_file),
            {:ok, picture_url} <-
-             Assets.upload_appliance_model_picture(appliance_model, picture_file) do
-        change_appliance_model(appliance_model, %{picture_url: picture_url})
+             Assets.upload_system_model_picture(system_model, picture_file) do
+        change_system_model(system_model, %{picture_url: picture_url})
         |> repo.update()
       else
         # No :picture_file, no need to change
-        :error -> {:ok, appliance_model}
+        :error -> {:ok, system_model}
         # Storage is disabled, ignore for now
-        {:error, :storage_disabled} -> {:ok, appliance_model}
+        {:error, :storage_disabled} -> {:ok, system_model}
         {:error, reason} -> {:error, reason}
       end
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{upload_appliance_model_picture: appliance_model}} ->
-        {:ok, Repo.preload(appliance_model, [:part_numbers, :hardware_type])}
+      {:ok, %{upload_system_model_picture: system_model}} ->
+        {:ok, Repo.preload(system_model, [:part_numbers, :hardware_type])}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
@@ -312,22 +310,22 @@ defmodule Edgehog.Appliances do
   end
 
   @doc """
-  Updates a appliance_model.
+  Updates a system_model.
 
   ## Examples
 
-      iex> update_appliance_model(appliance_model, %{field: new_value})
-      {:ok, %ApplianceModel{}}
+      iex> update_system_model(system_model, %{field: new_value})
+      {:ok, %SystemModel{}}
 
-      iex> update_appliance_model(appliance_model, %{field: bad_value})
+      iex> update_system_model(system_model, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_appliance_model(%ApplianceModel{} = appliance_model, attrs) do
+  def update_system_model(%SystemModel{} = system_model, attrs) do
     {part_numbers, attrs} = Map.pop(attrs, :part_numbers, [])
 
     changeset =
-      ApplianceModel.changeset(appliance_model, attrs)
+      SystemModel.changeset(system_model, attrs)
       |> Ecto.Changeset.prepare_changes(fn changeset ->
         # This handles the case of picture deletion or update with URL
         case Ecto.Changeset.fetch_change(changeset, :picture_url) do
@@ -335,7 +333,7 @@ defmodule Edgehog.Appliances do
             old_picture_url = changeset.data.picture_url
 
             # We do our best to delete the existing picture, if it's in the store
-            _ = Assets.delete_appliance_model_picture(appliance_model, old_picture_url)
+            _ = Assets.delete_system_model_picture(system_model, old_picture_url)
 
             changeset
 
@@ -346,36 +344,36 @@ defmodule Edgehog.Appliances do
 
     Multi.new()
     |> Multi.run(:assoc_part_numbers, fn _repo, _changes ->
-      {:ok, insert_or_get_part_numbers(ApplianceModelPartNumber, changeset, part_numbers)}
+      {:ok, insert_or_get_part_numbers(SystemModelPartNumber, changeset, part_numbers)}
     end)
-    |> Multi.update(:appliance_model, fn %{assoc_part_numbers: changeset} ->
+    |> Multi.update(:system_model, fn %{assoc_part_numbers: changeset} ->
       changeset
     end)
-    |> Multi.run(:upload_appliance_model_picture, fn repo, %{appliance_model: appliance_model} ->
+    |> Multi.run(:upload_system_model_picture, fn repo, %{system_model: system_model} ->
       # This handles the case of picture update
       with {:ok, picture_file} <- Ecto.Changeset.fetch_change(changeset, :picture_file),
            {:ok, picture_url} <-
-             Assets.upload_appliance_model_picture(appliance_model, picture_file) do
+             Assets.upload_system_model_picture(system_model, picture_file) do
         # Retrieve the old picture, if any, from the original changeset
         old_picture_url = changeset.data.picture_url
         # Ignore the result here for now: a failure to delete the old picture shouldn't
         # compromise the success of the operation (we would leave another orphan image anyway)
-        _ = Assets.delete_appliance_model_picture(appliance_model, old_picture_url)
+        _ = Assets.delete_system_model_picture(system_model, old_picture_url)
 
-        change_appliance_model(appliance_model, %{picture_url: picture_url})
+        change_system_model(system_model, %{picture_url: picture_url})
         |> repo.update()
       else
         # No :picture_file, no need to change
-        :error -> {:ok, appliance_model}
+        :error -> {:ok, system_model}
         # Storage is disabled, ignore for now
-        {:error, :storage_disabled} -> {:ok, appliance_model}
+        {:error, :storage_disabled} -> {:ok, system_model}
         {:error, reason} -> {:error, reason}
       end
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{upload_appliance_model_picture: appliance_model}} ->
-        {:ok, Repo.preload(appliance_model, [:part_numbers, :hardware_type])}
+      {:ok, %{upload_system_model_picture: system_model}} ->
+        {:ok, Repo.preload(system_model, [:part_numbers, :hardware_type])}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
@@ -383,36 +381,36 @@ defmodule Edgehog.Appliances do
   end
 
   @doc """
-  Deletes a appliance_model.
+  Deletes a system_model.
 
   ## Examples
 
-      iex> delete_appliance_model(appliance_model)
-      {:ok, %ApplianceModel{}}
+      iex> delete_system_model(system_model)
+      {:ok, %SystemModel{}}
 
-      iex> delete_appliance_model(appliance_model)
+      iex> delete_system_model(system_model)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_appliance_model(%ApplianceModel{} = appliance_model) do
+  def delete_system_model(%SystemModel{} = system_model) do
     # Delete the picture as well, if any.
     # Ignore the result, a failure to delete the picture shouldn't compromise the success of
     # the operation (we would leave another orphan image anyway)
-    _ = Assets.delete_appliance_model_picture(appliance_model, appliance_model.picture_url)
+    _ = Assets.delete_system_model_picture(system_model, system_model.picture_url)
 
-    Repo.delete(appliance_model)
+    Repo.delete(system_model)
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking appliance_model changes.
+  Returns an `%Ecto.Changeset{}` for tracking system_model changes.
 
   ## Examples
 
-      iex> change_appliance_model(appliance_model)
-      %Ecto.Changeset{data: %ApplianceModel{}}
+      iex> change_system_model(system_model)
+      %Ecto.Changeset{data: %SystemModel{}}
 
   """
-  def change_appliance_model(%ApplianceModel{} = appliance_model, attrs \\ %{}) do
-    ApplianceModel.changeset(appliance_model, attrs)
+  def change_system_model(%SystemModel{} = system_model, attrs \\ %{}) do
+    SystemModel.changeset(system_model, attrs)
   end
 end

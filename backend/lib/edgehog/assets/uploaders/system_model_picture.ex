@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Assets.Uploaders.ApplianceModelPicture do
+defmodule Edgehog.Assets.Uploaders.SystemModelPicture do
   use Waffle.Definition
 
   @acl :public_read
@@ -45,7 +45,7 @@ defmodule Edgehog.Assets.Uploaders.ApplianceModelPicture do
     [predefinedAcl: "publicRead"]
   end
 
-  def storage_dir(_version, {_file, appliance_model}) do
-    "uploads/tenants/#{appliance_model.tenant_id}/appliance_models/#{appliance_model.handle}/picture"
+  def storage_dir(_version, {_file, system_model}) do
+    "uploads/tenants/#{system_model.tenant_id}/system_models/#{system_model.handle}/picture"
   end
 end

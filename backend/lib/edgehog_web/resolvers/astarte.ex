@@ -17,7 +17,7 @@
 #
 
 defmodule EdgehogWeb.Resolvers.Astarte do
-  alias Edgehog.Appliances
+  alias Edgehog.Devices
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
@@ -26,7 +26,7 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   def find_device(%{id: id}, %{context: context}) do
     device =
       Astarte.get_device!(id)
-      |> preload_appliance_model_for_device(context)
+      |> preload_system_model_for_device(context)
 
     {:ok, device}
   end
@@ -34,7 +34,7 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   def list_devices(_parent, %{filter: filter}, %{context: context}) do
     devices =
       Astarte.list_devices(filter)
-      |> preload_appliance_model_for_device(context)
+      |> preload_system_model_for_device(context)
 
     {:ok, devices}
   end
@@ -42,26 +42,26 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   def list_devices(_parent, _args, %{context: context}) do
     devices =
       Astarte.list_devices()
-      |> preload_appliance_model_for_device(context)
+      |> preload_system_model_for_device(context)
 
     {:ok, devices}
   end
 
-  defp preload_appliance_model_for_device(target, %{locale: locale}) do
+  defp preload_system_model_for_device(target, %{locale: locale}) do
     # Explicit locale, use that one
-    descriptions_query = Appliances.localized_appliance_model_description_query(locale)
+    descriptions_query = Devices.localized_system_model_description_query(locale)
     preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
 
-    Astarte.preload_appliance_model_for_device(target, preload: preload)
+    Astarte.preload_system_model_for_device(target, preload: preload)
   end
 
-  defp preload_appliance_model_for_device(target, %{current_tenant: tenant}) do
+  defp preload_system_model_for_device(target, %{current_tenant: tenant}) do
     # Fallback
     %{default_locale: default_locale} = tenant
-    descriptions_query = Appliances.localized_appliance_model_description_query(default_locale)
+    descriptions_query = Devices.localized_system_model_description_query(default_locale)
     preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
 
-    Astarte.preload_appliance_model_for_device(target, preload: preload)
+    Astarte.preload_system_model_for_device(target, preload: preload)
   end
 
   def get_hardware_info(%Device{} = device, _args, _context) do

@@ -42,7 +42,7 @@ config :edgehog, :astarte_os_info_module, Edgehog.Astarte.Device.OSInfoMock
 config :edgehog, :astarte_ota_request_module, Edgehog.Astarte.Device.OTARequestMock
 
 # Storage mocks for tests
-config :edgehog, :assets_appliance_model_picture_module, Edgehog.Assets.ApplianceModelPictureMock
+config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
 config :edgehog, :os_management_ephemeral_image_module, Edgehog.OSManagement.EphemeralImageMock
 
 # Enable s3 storage since we're using mocks for it

@@ -40,25 +40,25 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :device_id, :string
 
     @desc """
-    A string to match against the part number of the device's appliance model.
+    A string to match against the part number of the device's system model.
     The match is case-insensitive and tests whether the string is included in \
-    the part number of the device's appliance model.
+    the part number of the device's system model.
     """
-    field :appliance_model_part_number, :string
+    field :system_model_part_number, :string
 
     @desc """
-    A string to match against the handle of the device's appliance model.
+    A string to match against the handle of the device's system model.
     The match is case-insensitive and tests whether the string is included in \
-    the handle of the device's appliance model.
+    the handle of the device's system model.
     """
-    field :appliance_model_handle, :string
+    field :system_model_handle, :string
 
     @desc """
-    A string to match against the name of the device's appliance model.
+    A string to match against the name of the device's system model.
     The match is case-insensitive and tests whether the string is included in \
-    the name of the device's appliance model.
+    the name of the device's system model.
     """
-    field :appliance_model_name, :string
+    field :system_model_name, :string
 
     @desc """
     A string to match against the part number of the device's hardware type.
@@ -251,7 +251,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   @desc """
   Denotes a device instance that connects and exchanges data.
 
-  Each Device is associated to a specific ApplianceModel, which in turn is \
+  Each Device is associated to a specific SystemModel, which in turn is \
   associated to a specific HardwareType.
   A Device also exposes info about its connection status and some sets of \
   data read by its operating system.
@@ -272,8 +272,8 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The date at which the device last disconnected from Astarte."
     field :last_disconnection, :datetime
 
-    @desc "The appliance model of the device."
-    field :appliance_model, :appliance_model
+    @desc "The system model of the device."
+    field :system_model, :system_model
 
     @desc "Info read from the device's hardware."
     field :hardware_info, :hardware_info do

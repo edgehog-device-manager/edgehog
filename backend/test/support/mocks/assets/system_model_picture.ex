@@ -16,20 +16,27 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Assets.ApplianceModelPicture do
-  alias Edgehog.Appliances.ApplianceModel
-  alias Edgehog.Assets.Uploaders.ApplianceModelPicture
+defmodule Edgehog.Mocks.Assets.SystemModelPicture do
+  alias Edgehog.Devices.SystemModel
+  alias Edgehog.Repo
 
   @behaviour Edgehog.Assets.Store.Behaviour
 
-  def upload(%ApplianceModel{} = scope, %Plug.Upload{} = upload) do
-    with {:ok, file_name} <- ApplianceModelPicture.store({upload, scope}) do
-      file_url = ApplianceModelPicture.url({file_name, scope})
-      {:ok, file_url}
-    end
+  @bucket_url "https://sample-storage.com/bucket"
+
+  @impl true
+  def upload(%SystemModel{} = system_model, %Plug.Upload{} = upload) do
+    tenant_id = Repo.get_tenant_id()
+
+    file_name =
+      "tenants/#{tenant_id}/system_models/#{system_model.handle}/picture/#{upload.filename}"
+
+    file_url = "#{@bucket_url}/#{file_name}"
+    {:ok, file_url}
   end
 
-  def delete(%ApplianceModel{} = scope, url) do
-    ApplianceModelPicture.delete({url, scope})
+  @impl true
+  def delete(%SystemModel{} = _system_model, _picture_url) do
+    :ok
   end
 end

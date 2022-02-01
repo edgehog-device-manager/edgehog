@@ -16,29 +16,29 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Appliances.ApplianceModel do
+defmodule Edgehog.Devices.SystemModel do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Edgehog.Appliances.HardwareType
-  alias Edgehog.Appliances.{ApplianceModelDescription, ApplianceModelPartNumber}
+  alias Edgehog.Devices.HardwareType
+  alias Edgehog.Devices.{SystemModelDescription, SystemModelPartNumber}
 
-  schema "appliance_models" do
+  schema "system_models" do
     field :handle, :string
     field :name, :string
     field :picture_url, :string
     field :picture_file, :any, virtual: true
     field :tenant_id, :id
     belongs_to :hardware_type, HardwareType
-    has_many :part_numbers, ApplianceModelPartNumber, on_replace: :delete
-    has_many :descriptions, ApplianceModelDescription, on_replace: :delete
+    has_many :part_numbers, SystemModelPartNumber, on_replace: :delete
+    has_many :descriptions, SystemModelDescription, on_replace: :delete
 
     timestamps()
   end
 
   @doc false
-  def changeset(appliance_model, attrs) do
-    appliance_model
+  def changeset(system_model, attrs) do
+    system_model
     |> cast(attrs, [:name, :handle, :picture_url, :picture_file])
     |> validate_required([:name, :handle])
     |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,

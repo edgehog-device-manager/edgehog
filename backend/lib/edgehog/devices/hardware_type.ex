@@ -16,24 +16,32 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Appliances.ApplianceModelPartNumber do
+defmodule Edgehog.Devices.HardwareType do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Edgehog.Appliances.ApplianceModel
+  alias Edgehog.Devices.SystemModel
+  alias Edgehog.Devices.HardwareTypePartNumber
 
-  schema "appliance_model_part_numbers" do
-    field :part_number, :string
+  schema "hardware_types" do
+    field :handle, :string
+    field :name, :string
     field :tenant_id, :id
-    belongs_to :appliance_model, ApplianceModel
+    has_many :part_numbers, HardwareTypePartNumber, on_replace: :delete
+    has_many :system_models, SystemModel
 
     timestamps()
   end
 
   @doc false
-  def changeset(appliance_model_part_number, attrs) do
-    appliance_model_part_number
-    |> cast(attrs, [:part_number])
-    |> validate_required([:part_number])
+  def changeset(hardware_type, attrs) do
+    hardware_type
+    |> cast(attrs, [:name, :handle])
+    |> validate_required([:name, :handle])
+    |> unique_constraint([:name, :tenant_id])
+    |> unique_constraint([:handle, :tenant_id])
+    |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
+      message: "should only contain lower case ASCII letters (from a to z), digits and -"
+    )
   end
 end

@@ -16,20 +16,20 @@
 # limitations under the License.
 #
 
-defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
+defmodule EdgehogWeb.Schema.Query.SystemModelTest do
   use EdgehogWeb.ConnCase
 
-  import Edgehog.AppliancesFixtures
+  import Edgehog.DevicesFixtures
 
-  alias Edgehog.Appliances.{
-    ApplianceModel,
-    ApplianceModelPartNumber
+  alias Edgehog.Devices.{
+    SystemModel,
+    SystemModelPartNumber
   }
 
-  describe "applianceModel field" do
+  describe "systemModel field" do
     @query """
     query ($id: ID!) {
-      applianceModel(id: $id) {
+      systemModel(id: $id) {
         name
         handle
         partNumbers
@@ -43,23 +43,23 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
       }
     }
     """
-    test "returns appliance model if present", %{conn: conn} do
+    test "returns system model if present", %{conn: conn} do
       hardware_type = hardware_type_fixture()
 
-      %ApplianceModel{
+      %SystemModel{
         id: id,
         name: name,
         handle: handle,
-        part_numbers: [%ApplianceModelPartNumber{part_number: part_number}]
-      } = appliance_model_fixture(hardware_type)
+        part_numbers: [%SystemModelPartNumber{part_number: part_number}]
+      } = system_model_fixture(hardware_type)
 
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, id, EdgehogWeb.Schema)}
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
       conn = get(conn, "/api", query: @query, variables: variables)
 
       assert json_response(conn, 200) == %{
                "data" => %{
-                 "applianceModel" => %{
+                 "systemModel" => %{
                    "name" => name,
                    "handle" => handle,
                    "partNumbers" => [part_number],
@@ -73,12 +73,12 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
     end
 
     test "returns not found if non existing", %{conn: conn} do
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, 1, EdgehogWeb.Schema)}
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, 1, EdgehogWeb.Schema)}
 
       conn = get(conn, "/api", query: @query, variables: variables)
 
       assert %{
-               "data" => %{"applianceModel" => nil},
+               "data" => %{"systemModel" => nil},
                "errors" => [%{"code" => "not_found", "status_code" => 404}]
              } = json_response(conn, 200)
     end
@@ -89,22 +89,22 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      %ApplianceModel{id: id} = appliance_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
 
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, id, EdgehogWeb.Schema)}
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
       conn = get(conn, "/api", query: @query, variables: variables)
 
       assert %{
                "data" => %{
-                 "applianceModel" => %{
+                 "systemModel" => %{
                    "description" => %{
                      "locale" => ^default_locale,
-                     "text" => "An appliance"
+                     "text" => "A system model"
                    }
                  }
                }
@@ -117,13 +117,13 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      %ApplianceModel{id: id} = appliance_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
 
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, id, EdgehogWeb.Schema)}
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
       conn =
         conn
@@ -132,10 +132,10 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
 
       assert %{
                "data" => %{
-                 "applianceModel" => %{
+                 "systemModel" => %{
                    "description" => %{
                      "locale" => "it-IT",
-                     "text" => "Un dispositivo"
+                     "text" => "Un modello di sistema"
                    }
                  }
                }
@@ -148,13 +148,13 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      %ApplianceModel{id: id} = appliance_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
 
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:appliance_model, id, EdgehogWeb.Schema)}
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
       conn =
         conn
@@ -163,7 +163,7 @@ defmodule EdgehogWeb.Schema.Query.ApplianceModelTest do
 
       assert %{
                "data" => %{
-                 "applianceModel" => %{
+                 "systemModel" => %{
                    "description" => nil
                  }
                }

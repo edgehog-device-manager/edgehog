@@ -142,7 +142,7 @@ defmodule Edgehog.AstarteTest do
     alias Edgehog.Astarte.Device
 
     import Edgehog.AstarteFixtures
-    import Edgehog.AppliancesFixtures
+    import Edgehog.DevicesFixtures
 
     setup do
       cluster = cluster_fixture()
@@ -173,116 +173,116 @@ defmodule Edgehog.AstarteTest do
       assert Astarte.list_devices(filters) == [device_1]
     end
 
-    test "list_devices/1 filters with appliance_model_part_number", %{realm: realm} do
+    test "list_devices/1 filters with system_model_part_number", %{realm: realm} do
       hardware_type = hardware_type_fixture()
 
-      appliance_model_part_number_1 = "XYZ/1234"
+      system_model_part_number_1 = "XYZ/1234"
 
-      _appliance_model_1 =
-        appliance_model_fixture(hardware_type,
+      _system_model_1 =
+        system_model_fixture(hardware_type,
           name: "Foo",
           handle: "foo",
-          part_numbers: [appliance_model_part_number_1]
+          part_numbers: [system_model_part_number_1]
         )
 
-      appliance_model_part_number_2 = "ABC/0987"
+      system_model_part_number_2 = "ABC/0987"
 
-      _appliance_model_2 =
-        appliance_model_fixture(hardware_type,
+      _system_model_2 =
+        system_model_fixture(hardware_type,
           name: "Bar",
           handle: "bar",
-          part_numbers: [appliance_model_part_number_2]
+          part_numbers: [system_model_part_number_2]
         )
 
       device_1 =
         device_fixture(realm,
           device_id: "7mcE8JeZQkSzjLyYuh5N9A",
-          part_number: appliance_model_part_number_1
+          part_number: system_model_part_number_1
         )
 
       _device_2 =
         device_fixture(realm,
           device_id: "nWwr7SZiR8CgZN_uKHsAJg",
-          part_number: appliance_model_part_number_2
+          part_number: system_model_part_number_2
         )
 
-      filters = %{appliance_model_part_number: "XYZ"}
+      filters = %{system_model_part_number: "XYZ"}
 
       assert Astarte.list_devices(filters) == [device_1]
     end
 
-    test "list_devices/1 filters with appliance_model_name", %{realm: realm} do
+    test "list_devices/1 filters with system_model_name", %{realm: realm} do
       hardware_type = hardware_type_fixture()
 
-      appliance_model_part_number_1 = "XYZ/1234"
+      system_model_part_number_1 = "XYZ/1234"
 
-      _appliance_model_1 =
-        appliance_model_fixture(hardware_type,
+      _system_model_1 =
+        system_model_fixture(hardware_type,
           name: "Foo",
           handle: "foo",
-          part_numbers: [appliance_model_part_number_1]
+          part_numbers: [system_model_part_number_1]
         )
 
-      appliance_model_part_number_2 = "ABC/0987"
+      system_model_part_number_2 = "ABC/0987"
 
-      _appliance_model_2 =
-        appliance_model_fixture(hardware_type,
+      _system_model_2 =
+        system_model_fixture(hardware_type,
           name: "Bar",
           handle: "bar",
-          part_numbers: [appliance_model_part_number_2]
+          part_numbers: [system_model_part_number_2]
         )
 
       device_1 =
         device_fixture(realm,
           device_id: "7mcE8JeZQkSzjLyYuh5N9A",
-          part_number: appliance_model_part_number_1
+          part_number: system_model_part_number_1
         )
 
       _device_2 =
         device_fixture(realm,
           device_id: "nWwr7SZiR8CgZN_uKHsAJg",
-          part_number: appliance_model_part_number_2
+          part_number: system_model_part_number_2
         )
 
-      filters = %{appliance_model_name: "oo"}
+      filters = %{system_model_name: "oo"}
 
       assert Astarte.list_devices(filters) == [device_1]
     end
 
-    test "list_devices/1 filters with appliance_model_handle", %{realm: realm} do
+    test "list_devices/1 filters with system_model_handle", %{realm: realm} do
       hardware_type = hardware_type_fixture()
 
-      appliance_model_part_number_1 = "XYZ/1234"
+      system_model_part_number_1 = "XYZ/1234"
 
-      _appliance_model_1 =
-        appliance_model_fixture(hardware_type,
+      _system_model_1 =
+        system_model_fixture(hardware_type,
           name: "Foo",
           handle: "foo",
-          part_numbers: [appliance_model_part_number_1]
+          part_numbers: [system_model_part_number_1]
         )
 
-      appliance_model_part_number_2 = "ABC/0987"
+      system_model_part_number_2 = "ABC/0987"
 
-      _appliance_model_2 =
-        appliance_model_fixture(hardware_type,
+      _system_model_2 =
+        system_model_fixture(hardware_type,
           name: "Bar",
           handle: "bar",
-          part_numbers: [appliance_model_part_number_2]
+          part_numbers: [system_model_part_number_2]
         )
 
       device_1 =
         device_fixture(realm,
           device_id: "7mcE8JeZQkSzjLyYuh5N9A",
-          part_number: appliance_model_part_number_1
+          part_number: system_model_part_number_1
         )
 
       _device_2 =
         device_fixture(realm,
           device_id: "nWwr7SZiR8CgZN_uKHsAJg",
-          part_number: appliance_model_part_number_2
+          part_number: system_model_part_number_2
         )
 
-      filters = %{appliance_model_name: "fo"}
+      filters = %{system_model_name: "fo"}
 
       assert Astarte.list_devices(filters) == [device_1]
     end
@@ -291,37 +291,37 @@ defmodule Edgehog.AstarteTest do
       hardware_type_1 =
         hardware_type_fixture(name: "HW1", handle: "hw1", part_numbers: ["AAA-BBB"])
 
-      appliance_model_part_number_1 = "XYZ/1234"
+      system_model_part_number_1 = "XYZ/1234"
 
-      _appliance_model_1 =
-        appliance_model_fixture(hardware_type_1,
+      _system_model_1 =
+        system_model_fixture(hardware_type_1,
           name: "Foo",
           handle: "foo",
-          part_numbers: [appliance_model_part_number_1]
+          part_numbers: [system_model_part_number_1]
         )
 
       hardware_type_2 =
         hardware_type_fixture(name: "HW2", handle: "hw2", part_numbers: ["CCC-DDD"])
 
-      appliance_model_part_number_2 = "ABC/0987"
+      system_model_part_number_2 = "ABC/0987"
 
-      _appliance_model_2 =
-        appliance_model_fixture(hardware_type_2,
+      _system_model_2 =
+        system_model_fixture(hardware_type_2,
           name: "Bar",
           handle: "bar",
-          part_numbers: [appliance_model_part_number_2]
+          part_numbers: [system_model_part_number_2]
         )
 
       device_1 =
         device_fixture(realm,
           device_id: "7mcE8JeZQkSzjLyYuh5N9A",
-          part_number: appliance_model_part_number_1
+          part_number: system_model_part_number_1
         )
 
       _device_2 =
         device_fixture(realm,
           device_id: "nWwr7SZiR8CgZN_uKHsAJg",
-          part_number: appliance_model_part_number_2
+          part_number: system_model_part_number_2
         )
 
       filters = %{hardware_type_part_number: "AAA"}
@@ -333,37 +333,37 @@ defmodule Edgehog.AstarteTest do
       hardware_type_1 =
         hardware_type_fixture(name: "HW1", handle: "hw1", part_numbers: ["AAA-BBB"])
 
-      appliance_model_part_number_1 = "XYZ/1234"
+      system_model_part_number_1 = "XYZ/1234"
 
-      _appliance_model_1 =
-        appliance_model_fixture(hardware_type_1,
+      _system_model_1 =
+        system_model_fixture(hardware_type_1,
           name: "Foo",
           handle: "foo",
-          part_numbers: [appliance_model_part_number_1]
+          part_numbers: [system_model_part_number_1]
         )
 
       hardware_type_2 =
         hardware_type_fixture(name: "HW2", handle: "hw2", part_numbers: ["CCC-DDD"])
 
-      appliance_model_part_number_2 = "ABC/0987"
+      system_model_part_number_2 = "ABC/0987"
 
-      _appliance_model_2 =
-        appliance_model_fixture(hardware_type_2,
+      _system_model_2 =
+        system_model_fixture(hardware_type_2,
           name: "Bar",
           handle: "bar",
-          part_numbers: [appliance_model_part_number_2]
+          part_numbers: [system_model_part_number_2]
         )
 
       device_1 =
         device_fixture(realm,
           device_id: "7mcE8JeZQkSzjLyYuh5N9A",
-          part_number: appliance_model_part_number_1
+          part_number: system_model_part_number_1
         )
 
       _device_2 =
         device_fixture(realm,
           device_id: "nWwr7SZiR8CgZN_uKHsAJg",
-          part_number: appliance_model_part_number_2
+          part_number: system_model_part_number_2
         )
 
       filters = %{hardware_type_name: "HW1"}
@@ -375,37 +375,37 @@ defmodule Edgehog.AstarteTest do
       hardware_type_1 =
         hardware_type_fixture(name: "HW1", handle: "hw1", part_numbers: ["AAA-BBB"])
 
-      appliance_model_part_number_1 = "XYZ/1234"
+      system_model_part_number_1 = "XYZ/1234"
 
-      _appliance_model_1 =
-        appliance_model_fixture(hardware_type_1,
+      _system_model_1 =
+        system_model_fixture(hardware_type_1,
           name: "Foo",
           handle: "foo",
-          part_numbers: [appliance_model_part_number_1]
+          part_numbers: [system_model_part_number_1]
         )
 
       hardware_type_2 =
         hardware_type_fixture(name: "HW2", handle: "hw2", part_numbers: ["CCC-DDD"])
 
-      appliance_model_part_number_2 = "ABC/0987"
+      system_model_part_number_2 = "ABC/0987"
 
-      _appliance_model_2 =
-        appliance_model_fixture(hardware_type_2,
+      _system_model_2 =
+        system_model_fixture(hardware_type_2,
           name: "Bar",
           handle: "bar",
-          part_numbers: [appliance_model_part_number_2]
+          part_numbers: [system_model_part_number_2]
         )
 
       device_1 =
         device_fixture(realm,
           device_id: "7mcE8JeZQkSzjLyYuh5N9A",
-          part_number: appliance_model_part_number_1
+          part_number: system_model_part_number_1
         )
 
       _device_2 =
         device_fixture(realm,
           device_id: "nWwr7SZiR8CgZN_uKHsAJg",
-          part_number: appliance_model_part_number_2
+          part_number: system_model_part_number_2
         )
 
       filters = %{hardware_type_name: "1"}
@@ -422,15 +422,15 @@ defmodule Edgehog.AstarteTest do
       assert Astarte.list_devices(filters) == [device_1]
     end
 
-    test "list_devices/1 returns empty list for appliance model filters if the device does not have an appliance model",
+    test "list_devices/1 returns empty list for system model filters if the device does not have a system model",
          %{realm: realm} do
       _device = device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A", online: true)
-      filters = %{appliance_model_name: "foo"}
+      filters = %{system_model_name: "foo"}
 
       assert Astarte.list_devices(filters) == []
     end
 
-    test "list_devices/1 returns empty list for hardware type filters if the device does not have an appliance model",
+    test "list_devices/1 returns empty list for hardware type filters if the device does not have a system model",
          %{realm: realm} do
       _device = device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A", online: true)
       filters = %{hardware_type_handle: "bar"}
@@ -539,7 +539,7 @@ defmodule Edgehog.AstarteTest do
       assert device.last_disconnection == timestamp |> DateTime.truncate(:second)
     end
 
-    @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
+    @system_info_interface "io.edgehog.devicemanager.SystemInfo"
 
     test "process_device_event/4 updates serial number on incoming_data event",
          %{realm: realm} do
@@ -551,7 +551,7 @@ defmodule Edgehog.AstarteTest do
 
       event = %{
         "type" => "incoming_data",
-        "interface" => @appliance_info_interface,
+        "interface" => @system_info_interface,
         "path" => "/serialNumber",
         "value" => "42"
       }
@@ -571,14 +571,13 @@ defmodule Edgehog.AstarteTest do
 
       part_number = "XYZ123"
 
-      appliance_model =
-        appliance_model_fixture(hardware_type_fixture(), part_numbers: [part_number])
+      system_model = system_model_fixture(hardware_type_fixture(), part_numbers: [part_number])
 
       device_id = device.device_id
 
       event = %{
         "type" => "incoming_data",
-        "interface" => @appliance_info_interface,
+        "interface" => @system_info_interface,
         "path" => "/partNumber",
         "value" => part_number
       }
@@ -590,10 +589,10 @@ defmodule Edgehog.AstarteTest do
       assert device =
                device.id
                |> Astarte.get_device!()
-               |> Astarte.preload_appliance_model_for_device()
+               |> Astarte.preload_system_model_for_device()
 
       assert device.part_number == part_number
-      assert device.appliance_model.id == appliance_model.id
+      assert device.system_model.id == system_model.id
     end
   end
 end
