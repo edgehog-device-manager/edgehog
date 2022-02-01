@@ -23,7 +23,7 @@ import Table from "components/Table";
 import type { Column } from "components/Table";
 import { Link, Route } from "Navigation";
 
-type ApplianceModelProps = {
+type SystemModelProps = {
   id: string;
   handle: string;
   name: string;
@@ -33,19 +33,19 @@ type ApplianceModelProps = {
   partNumbers: string[];
 };
 
-const columns: Column<ApplianceModelProps>[] = [
+const columns: Column<SystemModelProps>[] = [
   {
     accessor: "name",
     Header: (
       <FormattedMessage
-        id="components.ApplianceModelsTable.nameTitle"
-        defaultMessage="Appliance Model Name"
+        id="components.SystemModelsTable.nameTitle"
+        defaultMessage="System Model Name"
       />
     ),
     Cell: ({ row, value }) => (
       <Link
-        route={Route.applianceModelsEdit}
-        params={{ applianceModelId: row.original.id }}
+        route={Route.systemModelsEdit}
+        params={{ systemModelId: row.original.id }}
       >
         {value}
       </Link>
@@ -55,7 +55,7 @@ const columns: Column<ApplianceModelProps>[] = [
     accessor: "handle",
     Header: (
       <FormattedMessage
-        id="components.ApplianceModelsTable.handleTitle"
+        id="components.SystemModelsTable.handleTitle"
         defaultMessage="Handle"
       />
     ),
@@ -66,7 +66,7 @@ const columns: Column<ApplianceModelProps>[] = [
     accessor: (row) => row.hardwareType.name,
     Header: (
       <FormattedMessage
-        id="components.ApplianceModelsTable.hardwareType"
+        id="components.SystemModelsTable.hardwareType"
         defaultMessage="Hardware Type"
       />
     ),
@@ -78,7 +78,7 @@ const columns: Column<ApplianceModelProps>[] = [
     accessor: "partNumbers",
     Header: (
       <FormattedMessage
-        id="components.ApplianceModelsTable.partNumbersTitle"
+        id="components.SystemModelsTable.partNumbersTitle"
         defaultMessage="Part Numbers"
       />
     ),
@@ -95,13 +95,13 @@ const columns: Column<ApplianceModelProps>[] = [
 
 interface Props {
   className?: string;
-  data: ApplianceModelProps[];
+  data: SystemModelProps[];
 }
 
-const ApplianceModelsTable = ({ className, data }: Props) => {
+const SystemModelsTable = ({ className, data }: Props) => {
   return <Table className={className} columns={columns} data={data} />;
 };
 
-export type { ApplianceModelProps };
+export type { SystemModelProps };
 
-export default ApplianceModelsTable;
+export default SystemModelsTable;

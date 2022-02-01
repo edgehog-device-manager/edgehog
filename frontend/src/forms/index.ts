@@ -48,7 +48,7 @@ yup.setLocale({
   },
 });
 
-const applianceModelHandleSchema = yup
+const systemModelHandleSchema = yup
   .string()
   .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
 
@@ -56,4 +56,4 @@ const hardwareTypeHandleSchema = yup
   .string()
   .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
 
-export { applianceModelHandleSchema, hardwareTypeHandleSchema, messages, yup };
+export { systemModelHandleSchema, hardwareTypeHandleSchema, messages, yup };

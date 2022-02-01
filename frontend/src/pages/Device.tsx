@@ -183,7 +183,7 @@ const GET_DEVICE_QUERY = graphql`
       lastDisconnection
       name
       online
-      applianceModel {
+      systemModel {
         name
         pictureUrl
         hardwareType {
@@ -1036,7 +1036,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
               <div>
                 <Figure
                   alt={device.name}
-                  src={device.applianceModel?.pictureUrl || undefined}
+                  src={device.systemModel?.pictureUrl || undefined}
                 />
               </div>
             </Col>
@@ -1069,20 +1069,20 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       readOnly
                     />
                   </FormRow>
-                  {device.applianceModel && (
+                  {device.systemModel && (
                     <>
                       <FormRow
-                        id="form-device-appliance-model"
+                        id="form-device-system-model"
                         label={
                           <FormattedMessage
-                            id="Device.applianceModel"
-                            defaultMessage="Appliance Model"
+                            id="Device.systemModel"
+                            defaultMessage="System Model"
                           />
                         }
                       >
                         <Form.Control
                           type="text"
-                          value={device.applianceModel.name}
+                          value={device.systemModel.name}
                           readOnly
                         />
                       </FormRow>
@@ -1097,7 +1097,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       >
                         <Form.Control
                           type="text"
-                          value={device.applianceModel.hardwareType.name}
+                          value={device.systemModel.hardwareType.name}
                           readOnly
                         />
                       </FormRow>

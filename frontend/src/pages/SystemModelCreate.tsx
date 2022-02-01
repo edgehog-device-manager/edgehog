@@ -27,21 +27,21 @@ import {
   PreloadedQuery,
 } from "react-relay/hooks";
 
-import type { ApplianceModelCreate_getHardwareTypes_Query } from "api/__generated__/ApplianceModelCreate_getHardwareTypes_Query.graphql";
-import type { ApplianceModelCreate_createApplianceModel_Mutation } from "api/__generated__/ApplianceModelCreate_createApplianceModel_Mutation.graphql";
-import type { ApplianceModelCreate_getDefaultTenantLocale_Query } from "api/__generated__/ApplianceModelCreate_getDefaultTenantLocale_Query.graphql";
+import type { SystemModelCreate_getHardwareTypes_Query } from "api/__generated__/SystemModelCreate_getHardwareTypes_Query.graphql";
+import type { SystemModelCreate_createSystemModel_Mutation } from "api/__generated__/SystemModelCreate_createSystemModel_Mutation.graphql";
+import type { SystemModelCreate_getDefaultTenantLocale_Query } from "api/__generated__/SystemModelCreate_getDefaultTenantLocale_Query.graphql";
 import Alert from "components/Alert";
 import Button from "components/Button";
 import Center from "components/Center";
-import CreateApplianceModelForm from "forms/CreateApplianceModel";
-import type { ApplianceModelChanges } from "forms/CreateApplianceModel";
+import CreateSystemModelForm from "forms/CreateSystemModel";
+import type { SystemModelChanges } from "forms/CreateSystemModel";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import { Link, Route, useNavigate } from "Navigation";
 
 const GET_HARDWARE_TYPES_QUERY = graphql`
-  query ApplianceModelCreate_getHardwareTypes_Query {
+  query SystemModelCreate_getHardwareTypes_Query {
     hardwareTypes {
       id
       name
@@ -50,19 +50,19 @@ const GET_HARDWARE_TYPES_QUERY = graphql`
 `;
 
 const GET_DEFAULT_TENANT_LOCALE_QUERY = graphql`
-  query ApplianceModelCreate_getDefaultTenantLocale_Query {
+  query SystemModelCreate_getDefaultTenantLocale_Query {
     tenantInfo {
       defaultLocale
     }
   }
 `;
 
-const CREATE_APPLIANCE_MODEL_MUTATION = graphql`
-  mutation ApplianceModelCreate_createApplianceModel_Mutation(
-    $input: CreateApplianceModelInput!
+const CREATE_SYSTEM_MODEL_MUTATION = graphql`
+  mutation SystemModelCreate_createSystemModel_Mutation(
+    $input: CreateSystemModelInput!
   ) {
-    createApplianceModel(input: $input) {
-      applianceModel {
+    createSystemModel(input: $input) {
+      systemModel {
         id
         name
         handle
@@ -81,15 +81,15 @@ const CREATE_APPLIANCE_MODEL_MUTATION = graphql`
   }
 `;
 
-type ApplianceModelContentProps = {
-  getHardwareTypesQuery: PreloadedQuery<ApplianceModelCreate_getHardwareTypes_Query>;
-  getDefaultTenantLocaleQuery: PreloadedQuery<ApplianceModelCreate_getDefaultTenantLocale_Query>;
+type SystemModelContentProps = {
+  getHardwareTypesQuery: PreloadedQuery<SystemModelCreate_getHardwareTypes_Query>;
+  getDefaultTenantLocaleQuery: PreloadedQuery<SystemModelCreate_getDefaultTenantLocale_Query>;
 };
 
-const ApplianceModelContent = ({
+const SystemModelContent = ({
   getHardwareTypesQuery,
   getDefaultTenantLocaleQuery,
-}: ApplianceModelContentProps) => {
+}: SystemModelContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
   const hardwareTypesData = usePreloadedQuery(
@@ -101,9 +101,9 @@ const ApplianceModelContent = ({
     getDefaultTenantLocaleQuery
   );
 
-  const [createApplianceModel, isCreatingApplianceModel] =
-    useMutation<ApplianceModelCreate_createApplianceModel_Mutation>(
-      CREATE_APPLIANCE_MODEL_MUTATION
+  const [createSystemModel, isCreatingSystemModel] =
+    useMutation<SystemModelCreate_createSystemModel_Mutation>(
+      CREATE_SYSTEM_MODEL_MUTATION
     );
 
   // TODO: handle readonly type without mapping to mutable type
@@ -119,10 +119,10 @@ const ApplianceModelContent = ({
     [defaultLocaleData]
   );
 
-  const handleCreateApplianceModel = useCallback(
-    (applianceModel: ApplianceModelChanges) => {
-      createApplianceModel({
-        variables: { input: applianceModel },
+  const handleCreateSystemModel = useCallback(
+    (systemModel: SystemModelChanges) => {
+      createSystemModel({
+        variables: { input: systemModel },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
@@ -130,41 +130,41 @@ const ApplianceModelContent = ({
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          const applianceModelId = data.createApplianceModel?.applianceModel.id;
-          if (applianceModelId) {
+          const systemModelId = data.createSystemModel?.systemModel.id;
+          if (systemModelId) {
             navigate({
-              route: Route.applianceModelsEdit,
-              params: { applianceModelId },
+              route: Route.systemModelsEdit,
+              params: { systemModelId },
             });
           } else {
-            navigate({ route: Route.applianceModels });
+            navigate({ route: Route.systemModels });
           }
         },
         onError(error) {
           setErrorFeedback(
             <FormattedMessage
-              id="pages.ApplianceModelCreate.creationErrorFeedback"
-              defaultMessage="Could not create the appliance model, please try again."
+              id="pages.SystemModelCreate.creationErrorFeedback"
+              defaultMessage="Could not create the system model, please try again."
             />
           );
         },
         updater(store, data) {
-          const applianceModelId = data.createApplianceModel?.applianceModel.id;
-          if (applianceModelId) {
-            const applianceModel = store.get(applianceModelId);
+          const systemModelId = data.createSystemModel?.systemModel.id;
+          if (systemModelId) {
+            const systemModel = store.get(systemModelId);
             const root = store.getRoot();
-            const applianceModels = root.getLinkedRecords("applianceModels");
-            if (applianceModel && applianceModels) {
+            const systemModels = root.getLinkedRecords("systemModels");
+            if (systemModel && systemModels) {
               root.setLinkedRecords(
-                [applianceModel, ...applianceModels],
-                "applianceModels"
+                [systemModel, ...systemModels],
+                "systemModels"
               );
             }
           }
         },
       });
     },
-    [createApplianceModel, navigate]
+    [createSystemModel, navigate]
   );
 
   return (
@@ -172,8 +172,8 @@ const ApplianceModelContent = ({
       <Page.Header
         title={
           <FormattedMessage
-            id="pages.ApplianceModelCreate.title"
-            defaultMessage="Create Appliance Model"
+            id="pages.SystemModelCreate.title"
+            defaultMessage="Create System Model"
           />
         }
       />
@@ -182,20 +182,20 @@ const ApplianceModelContent = ({
           <Result.EmptyList
             title={
               <FormattedMessage
-                id="pages.ApplianceModelCreate.noHardwareTypes.title"
+                id="pages.SystemModelCreate.noHardwareTypes.title"
                 defaultMessage="You haven't created any hardware type yet"
               />
             }
           >
             <p>
               <FormattedMessage
-                id="pages.ApplianceModelCreate.noHardwareTypes.message"
+                id="pages.SystemModelCreate.noHardwareTypes.message"
                 defaultMessage="You need at least one hardware type to create an application model"
               />
             </p>
             <Button as={Link} route={Route.hardwareTypesNew}>
               <FormattedMessage
-                id="pages.ApplianceModelCreate.noHardwareTypes.createButton"
+                id="pages.SystemModelCreate.noHardwareTypes.createButton"
                 defaultMessage="Create Hardware Type"
               />
             </Button>
@@ -210,11 +210,11 @@ const ApplianceModelContent = ({
             >
               {errorFeedback}
             </Alert>
-            <CreateApplianceModelForm
+            <CreateSystemModelForm
               hardwareTypes={hardwareTypes}
               locale={locale}
-              onSubmit={handleCreateApplianceModel}
-              isLoading={isCreatingApplianceModel}
+              onSubmit={handleCreateSystemModel}
+              isLoading={isCreatingSystemModel}
             />
           </>
         )}
@@ -223,13 +223,13 @@ const ApplianceModelContent = ({
   );
 };
 
-const ApplianceModelCreatePage = () => {
+const SystemModelCreatePage = () => {
   const [getHardwareTypesQuery, getHardwareTypes] =
-    useQueryLoader<ApplianceModelCreate_getHardwareTypes_Query>(
+    useQueryLoader<SystemModelCreate_getHardwareTypes_Query>(
       GET_HARDWARE_TYPES_QUERY
     );
   const [getDefaultTenantLocaleQuery, getDefaultTenantLocale] =
-    useQueryLoader<ApplianceModelCreate_getDefaultTenantLocale_Query>(
+    useQueryLoader<SystemModelCreate_getDefaultTenantLocale_Query>(
       GET_DEFAULT_TENANT_LOCALE_QUERY
     );
 
@@ -253,7 +253,7 @@ const ApplianceModelCreatePage = () => {
         onReset={() => getHardwareTypes({})}
       >
         {getHardwareTypesQuery && getDefaultTenantLocaleQuery && (
-          <ApplianceModelContent
+          <SystemModelContent
             getHardwareTypesQuery={getHardwareTypesQuery}
             getDefaultTenantLocaleQuery={getDefaultTenantLocaleQuery}
           />
@@ -263,4 +263,4 @@ const ApplianceModelCreatePage = () => {
   );
 };
 
-export default ApplianceModelCreatePage;
+export default SystemModelCreatePage;

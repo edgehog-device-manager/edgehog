@@ -26,18 +26,18 @@ import {
   PreloadedQuery,
 } from "react-relay/hooks";
 
-import type { ApplianceModels_getApplianceModels_Query } from "api/__generated__/ApplianceModels_getApplianceModels_Query.graphql";
+import type { SystemModels_getSystemModels_Query } from "api/__generated__/SystemModels_getSystemModels_Query.graphql";
 import Button from "components/Button";
 import Center from "components/Center";
-import ApplianceModelsTable from "components/ApplianceModelsTable";
+import SystemModelsTable from "components/SystemModelsTable";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
-const GET_APPLIANCE_MODELS_QUERY = graphql`
-  query ApplianceModels_getApplianceModels_Query {
-    applianceModels {
+const GET_SYSTEM_MODELS_QUERY = graphql`
+  query SystemModels_getSystemModels_Query {
+    systemModels {
       id
       handle
       name
@@ -49,26 +49,26 @@ const GET_APPLIANCE_MODELS_QUERY = graphql`
   }
 `;
 
-type ApplianceModelsContentProps = {
-  getApplianceModelsQuery: PreloadedQuery<ApplianceModels_getApplianceModels_Query>;
+type SystemModelsContentProps = {
+  getSystemModelsQuery: PreloadedQuery<SystemModels_getSystemModels_Query>;
 };
 
-const ApplianceModelsContent = ({
-  getApplianceModelsQuery,
-}: ApplianceModelsContentProps) => {
-  const applianceModelsData = usePreloadedQuery(
-    GET_APPLIANCE_MODELS_QUERY,
-    getApplianceModelsQuery
+const SystemModelsContent = ({
+  getSystemModelsQuery,
+}: SystemModelsContentProps) => {
+  const systemModelsData = usePreloadedQuery(
+    GET_SYSTEM_MODELS_QUERY,
+    getSystemModelsQuery
   );
 
   // TODO: handle readonly type without mapping to mutable type
-  const applianceModels = useMemo(
+  const systemModels = useMemo(
     () =>
-      applianceModelsData.applianceModels.map((applianceModel) => ({
-        ...applianceModel,
-        partNumbers: [...applianceModel.partNumbers],
+      systemModelsData.systemModels.map((systemModel) => ({
+        ...systemModel,
+        partNumbers: [...systemModel.partNumbers],
       })),
-    [applianceModelsData]
+    [systemModelsData]
   );
 
   return (
@@ -76,48 +76,46 @@ const ApplianceModelsContent = ({
       <Page.Header
         title={
           <FormattedMessage
-            id="pages.ApplianceModels.title"
-            defaultMessage="Appliance Models"
+            id="pages.SystemModels.title"
+            defaultMessage="System Models"
           />
         }
       >
-        <Button as={Link} route={Route.applianceModelsNew}>
+        <Button as={Link} route={Route.systemModelsNew}>
           <FormattedMessage
-            id="pages.ApplianceModels.createButton"
-            defaultMessage="Create Appliance Model"
+            id="pages.SystemModels.createButton"
+            defaultMessage="Create System Model"
           />
         </Button>
       </Page.Header>
       <Page.Main>
-        {applianceModels.length === 0 ? (
+        {systemModels.length === 0 ? (
           <Result.EmptyList
             title={
               <FormattedMessage
-                id="pages.ApplianceModels.noApplianceModels.title"
+                id="pages.SystemModels.noSystemModels.title"
                 defaultMessage="This space is empty"
               />
             }
           >
             <FormattedMessage
-              id="pages.ApplianceModels.noApplianceModels.message"
-              defaultMessage="You haven't created any appliance model yet."
+              id="pages.SystemModels.noSystemModels.message"
+              defaultMessage="You haven't created any system model yet."
             />
           </Result.EmptyList>
         ) : (
-          <ApplianceModelsTable data={applianceModels} />
+          <SystemModelsTable data={systemModels} />
         )}
       </Page.Main>
     </Page>
   );
 };
 
-const ApplianceModelsPage = () => {
-  const [getApplianceModelsQuery, getApplianceModels] =
-    useQueryLoader<ApplianceModels_getApplianceModels_Query>(
-      GET_APPLIANCE_MODELS_QUERY
-    );
+const SystemModelsPage = () => {
+  const [getSystemModelsQuery, getSystemModels] =
+    useQueryLoader<SystemModels_getSystemModels_Query>(GET_SYSTEM_MODELS_QUERY);
 
-  useEffect(() => getApplianceModels({}), [getApplianceModels]);
+  useEffect(() => getSystemModels({}), [getSystemModels]);
 
   return (
     <Suspense
@@ -133,16 +131,14 @@ const ApplianceModelsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => getApplianceModels({})}
+        onReset={() => getSystemModels({})}
       >
-        {getApplianceModelsQuery && (
-          <ApplianceModelsContent
-            getApplianceModelsQuery={getApplianceModelsQuery}
-          />
+        {getSystemModelsQuery && (
+          <SystemModelsContent getSystemModelsQuery={getSystemModelsQuery} />
         )}
       </ErrorBoundary>
     </Suspense>
   );
 };
 
-export default ApplianceModelsPage;
+export default SystemModelsPage;

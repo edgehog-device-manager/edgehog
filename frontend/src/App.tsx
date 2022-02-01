@@ -23,9 +23,9 @@ import Topbar from "components/Topbar";
 import { Route } from "Navigation";
 import Device from "pages/Device";
 import Devices from "pages/Devices";
-import ApplianceModel from "pages/ApplianceModel";
-import ApplianceModelCreate from "pages/ApplianceModelCreate";
-import ApplianceModels from "pages/ApplianceModels";
+import SystemModel from "pages/SystemModel";
+import SystemModelCreate from "pages/SystemModelCreate";
+import SystemModels from "pages/SystemModels";
 import HardwareType from "pages/HardwareType";
 import HardwareTypeCreate from "pages/HardwareTypeCreate";
 import HardwareTypes from "pages/HardwareTypes";
@@ -45,9 +45,9 @@ const publicRoutes: RouterRule[] = [
 const authenticatedRoutes: RouterRule[] = [
   { path: Route.devices, element: <Devices /> },
   { path: Route.devicesEdit, element: <Device /> },
-  { path: Route.applianceModels, element: <ApplianceModels /> },
-  { path: Route.applianceModelsEdit, element: <ApplianceModel /> },
-  { path: Route.applianceModelsNew, element: <ApplianceModelCreate /> },
+  { path: Route.systemModels, element: <SystemModels /> },
+  { path: Route.systemModelsEdit, element: <SystemModel /> },
+  { path: Route.systemModelsNew, element: <SystemModelCreate /> },
   { path: Route.hardwareTypes, element: <HardwareTypes /> },
   { path: Route.hardwareTypesEdit, element: <HardwareType /> },
   { path: Route.hardwareTypesNew, element: <HardwareTypeCreate /> },

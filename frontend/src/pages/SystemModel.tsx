@@ -29,24 +29,24 @@ import {
 import { FormattedMessage } from "react-intl";
 import _ from "lodash";
 
-import type { ApplianceModel_getApplianceModel_Query } from "api/__generated__/ApplianceModel_getApplianceModel_Query.graphql";
-import type { ApplianceModel_updateApplianceModel_Mutation } from "api/__generated__/ApplianceModel_updateApplianceModel_Mutation.graphql";
-import type { ApplianceModel_getDefaultTenantLocale_Query } from "api/__generated__/ApplianceModel_getDefaultTenantLocale_Query.graphql";
+import type { SystemModel_getSystemModel_Query } from "api/__generated__/SystemModel_getSystemModel_Query.graphql";
+import type { SystemModel_updateSystemModel_Mutation } from "api/__generated__/SystemModel_updateSystemModel_Mutation.graphql";
+import type { SystemModel_getDefaultTenantLocale_Query } from "api/__generated__/SystemModel_getDefaultTenantLocale_Query.graphql";
 import { Link, Route } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
-import UpdateApplianceModelForm from "forms/UpdateApplianceModel";
+import UpdateSystemModelForm from "forms/UpdateSystemModel";
 import type {
-  ApplianceModelChanges,
-  ApplianceModelData,
-} from "forms/UpdateApplianceModel";
+  SystemModelChanges,
+  SystemModelData,
+} from "forms/UpdateSystemModel";
 
-const GET_APPLIANCE_MODEL_QUERY = graphql`
-  query ApplianceModel_getApplianceModel_Query($id: ID!) {
-    applianceModel(id: $id) {
+const GET_SYSTEM_MODEL_QUERY = graphql`
+  query SystemModel_getSystemModel_Query($id: ID!) {
+    systemModel(id: $id) {
       id
       name
       handle
@@ -65,19 +65,19 @@ const GET_APPLIANCE_MODEL_QUERY = graphql`
 `;
 
 const GET_DEFAULT_TENANT_LOCALE_QUERY = graphql`
-  query ApplianceModel_getDefaultTenantLocale_Query {
+  query SystemModel_getDefaultTenantLocale_Query {
     tenantInfo {
       defaultLocale
     }
   }
 `;
 
-const UPDATE_APPLIANCE_MODEL_MUTATION = graphql`
-  mutation ApplianceModel_updateApplianceModel_Mutation(
-    $input: UpdateApplianceModelInput!
+const UPDATE_SYSTEM_MODEL_MUTATION = graphql`
+  mutation SystemModel_updateSystemModel_Mutation(
+    $input: UpdateSystemModelInput!
   ) {
-    updateApplianceModel(input: $input) {
-      applianceModel {
+    updateSystemModel(input: $input) {
+      systemModel {
         id
         name
         handle
@@ -96,11 +96,8 @@ const UPDATE_APPLIANCE_MODEL_MUTATION = graphql`
   }
 `;
 
-const applianceModelDiff = (
-  a1: ApplianceModelData,
-  a2: ApplianceModelChanges
-) => {
-  let diff: Partial<ApplianceModelChanges> = {};
+const systemModelDiff = (a1: SystemModelData, a2: SystemModelChanges) => {
+  let diff: Partial<SystemModelChanges> = {};
   if (a1.name !== a2.name) {
     diff.name = a2.name;
   }
@@ -121,59 +118,59 @@ const applianceModelDiff = (
   return diff;
 };
 
-interface ApplianceModelContentProps {
-  getApplianceModelQuery: PreloadedQuery<ApplianceModel_getApplianceModel_Query>;
-  getDefaultTenantLocaleQuery: PreloadedQuery<ApplianceModel_getDefaultTenantLocale_Query>;
+interface SystemModelContentProps {
+  getSystemModelQuery: PreloadedQuery<SystemModel_getSystemModel_Query>;
+  getDefaultTenantLocaleQuery: PreloadedQuery<SystemModel_getDefaultTenantLocale_Query>;
 }
 
-const ApplianceModelContent = ({
-  getApplianceModelQuery,
+const SystemModelContent = ({
+  getSystemModelQuery,
   getDefaultTenantLocaleQuery,
-}: ApplianceModelContentProps) => {
+}: SystemModelContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const applianceModelData = usePreloadedQuery(
-    GET_APPLIANCE_MODEL_QUERY,
-    getApplianceModelQuery
+  const systemModelData = usePreloadedQuery(
+    GET_SYSTEM_MODEL_QUERY,
+    getSystemModelQuery
   );
   const defaultLocaleData = usePreloadedQuery(
     GET_DEFAULT_TENANT_LOCALE_QUERY,
     getDefaultTenantLocaleQuery
   );
 
-  const [updateApplianceModel, isUpdatingApplianceModel] =
-    useMutation<ApplianceModel_updateApplianceModel_Mutation>(
-      UPDATE_APPLIANCE_MODEL_MUTATION
+  const [updateSystemModel, isUpdatingSystemModel] =
+    useMutation<SystemModel_updateSystemModel_Mutation>(
+      UPDATE_SYSTEM_MODEL_MUTATION
     );
 
   // TODO: handle readonly type without mapping to mutable type
-  const applianceModel = useMemo(() => {
-    const applianceModel = applianceModelData.applianceModel;
-    if (!applianceModel) {
+  const systemModel = useMemo(() => {
+    const systemModel = systemModelData.systemModel;
+    if (!systemModel) {
       return null;
     }
     return {
-      ...applianceModel,
-      hardwareType: { ...applianceModel.hardwareType },
-      partNumbers: [...applianceModel.partNumbers],
+      ...systemModel,
+      hardwareType: { ...systemModel.hardwareType },
+      partNumbers: [...systemModel.partNumbers],
     };
-  }, [applianceModelData.applianceModel]);
+  }, [systemModelData.systemModel]);
 
   const locale = useMemo(
     () => defaultLocaleData.tenantInfo.defaultLocale,
     [defaultLocaleData]
   );
 
-  const handleUpdateApplianceModel = useCallback(
-    (applianceModelChanges: ApplianceModelChanges) => {
-      if (!applianceModel) {
+  const handleUpdateSystemModel = useCallback(
+    (systemModelChanges: SystemModelChanges) => {
+      if (!systemModel) {
         return null;
       }
       const input = {
-        applianceModelId: applianceModel.id,
-        ...applianceModelDiff(applianceModel, applianceModelChanges),
+        systemModelId: systemModel.id,
+        ...systemModelDiff(systemModel, systemModelChanges),
       };
-      updateApplianceModel({
+      updateSystemModel({
         variables: { input },
         onCompleted(data, errors) {
           if (errors) {
@@ -186,50 +183,50 @@ const ApplianceModelContent = ({
         onError(error) {
           setErrorFeedback(
             <FormattedMessage
-              id="pages.ApplianceModelUpdate.creationErrorFeedback"
-              defaultMessage="Could not update the appliance model, please try again."
+              id="pages.SystemModelUpdate.creationErrorFeedback"
+              defaultMessage="Could not update the system model, please try again."
             />
           );
         },
         optimisticResponse: {
-          updateApplianceModel: {
-            applianceModel: {
-              ...applianceModel!,
-              ..._.pick(applianceModelChanges, [
+          updateSystemModel: {
+            systemModel: {
+              ...systemModel!,
+              ..._.pick(systemModelChanges, [
                 "name",
                 "handle",
                 "partNumbers",
                 "description",
               ]),
               pictureUrl:
-                applianceModelChanges.pictureFile instanceof File
-                  ? URL.createObjectURL(applianceModelChanges.pictureFile)
-                  : _.isString(applianceModelChanges.pictureUrl) ||
-                    _.isNull(applianceModelChanges.pictureUrl)
-                  ? applianceModelChanges.pictureUrl
-                  : applianceModel.pictureUrl,
+                systemModelChanges.pictureFile instanceof File
+                  ? URL.createObjectURL(systemModelChanges.pictureFile)
+                  : _.isString(systemModelChanges.pictureUrl) ||
+                    _.isNull(systemModelChanges.pictureUrl)
+                  ? systemModelChanges.pictureUrl
+                  : systemModel.pictureUrl,
             },
           },
         },
       });
     },
-    [updateApplianceModel, applianceModel]
+    [updateSystemModel, systemModel]
   );
 
-  if (!applianceModel) {
+  if (!systemModel) {
     return (
       <Result.NotFound
         title={
           <FormattedMessage
-            id="pages.ApplianceModel.applianceModelNotFound.title"
-            defaultMessage="Appliance model not found."
+            id="pages.SystemModel.systemModelNotFound.title"
+            defaultMessage="System model not found."
           />
         }
       >
-        <Link route={Route.applianceModels}>
+        <Link route={Route.systemModels}>
           <FormattedMessage
-            id="pages.ApplianceModel.applianceModelNotFound.message"
-            defaultMessage="Return to the appliance model list."
+            id="pages.SystemModel.systemModelNotFound.message"
+            defaultMessage="Return to the system model list."
           />
         </Link>
       </Result.NotFound>
@@ -238,7 +235,7 @@ const ApplianceModelContent = ({
 
   return (
     <Page>
-      <Page.Header title={applianceModel.name} />
+      <Page.Header title={systemModel.name} />
       <Page.Main>
         <Alert
           show={!!errorFeedback}
@@ -248,33 +245,31 @@ const ApplianceModelContent = ({
         >
           {errorFeedback}
         </Alert>
-        <UpdateApplianceModelForm
-          initialData={applianceModel}
-          locale={applianceModel.description?.locale || locale}
-          onSubmit={handleUpdateApplianceModel}
-          isLoading={isUpdatingApplianceModel}
+        <UpdateSystemModelForm
+          initialData={systemModel}
+          locale={systemModel.description?.locale || locale}
+          onSubmit={handleUpdateSystemModel}
+          isLoading={isUpdatingSystemModel}
         />
       </Page.Main>
     </Page>
   );
 };
 
-const ApplianceModelPage = () => {
-  const { applianceModelId = "" } = useParams();
+const SystemModelPage = () => {
+  const { systemModelId = "" } = useParams();
 
-  const [getApplianceModelQuery, getApplianceModel] =
-    useQueryLoader<ApplianceModel_getApplianceModel_Query>(
-      GET_APPLIANCE_MODEL_QUERY
-    );
+  const [getSystemModelQuery, getSystemModel] =
+    useQueryLoader<SystemModel_getSystemModel_Query>(GET_SYSTEM_MODEL_QUERY);
   const [getDefaultTenantLocaleQuery, getDefaultTenantLocale] =
-    useQueryLoader<ApplianceModel_getDefaultTenantLocale_Query>(
+    useQueryLoader<SystemModel_getDefaultTenantLocale_Query>(
       GET_DEFAULT_TENANT_LOCALE_QUERY
     );
 
   useEffect(() => getDefaultTenantLocale({}), [getDefaultTenantLocale]);
   useEffect(() => {
-    getApplianceModel({ id: applianceModelId });
-  }, [getApplianceModel, applianceModelId]);
+    getSystemModel({ id: systemModelId });
+  }, [getSystemModel, systemModelId]);
 
   return (
     <Suspense
@@ -291,12 +286,12 @@ const ApplianceModelPage = () => {
           </Center>
         )}
         onReset={() => {
-          getApplianceModel({ id: applianceModelId });
+          getSystemModel({ id: systemModelId });
         }}
       >
-        {getApplianceModelQuery && getDefaultTenantLocaleQuery && (
-          <ApplianceModelContent
-            getApplianceModelQuery={getApplianceModelQuery}
+        {getSystemModelQuery && getDefaultTenantLocaleQuery && (
+          <SystemModelContent
+            getSystemModelQuery={getSystemModelQuery}
             getDefaultTenantLocaleQuery={getDefaultTenantLocaleQuery}
           />
         )}
@@ -305,4 +300,4 @@ const ApplianceModelPage = () => {
   );
 };
 
-export default ApplianceModelPage;
+export default SystemModelPage;

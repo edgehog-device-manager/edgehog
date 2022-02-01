@@ -1,7 +1,4 @@
 {
-  "Device.applianceModel": {
-    "defaultMessage": "Appliance Model"
-  },
   "Device.connectionStatus": {
     "defaultMessage": "Connection"
   },
@@ -50,6 +47,9 @@
   "Device.osInfo.version": {
     "defaultMessage": "OS version"
   },
+  "Device.systemModel": {
+    "defaultMessage": "System Model"
+  },
   "Device.systemStatus.memoryFreeBytes": {
     "defaultMessage": "Free Memory"
   },
@@ -58,18 +58,6 @@
   },
   "Device.systemStatus.uptimeMilliseconds": {
     "defaultMessage": "Last boot at"
-  },
-  "components.ApplianceModelsTable.handleTitle": {
-    "defaultMessage": "Handle"
-  },
-  "components.ApplianceModelsTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.ApplianceModelsTable.nameTitle": {
-    "defaultMessage": "Appliance Model Name"
-  },
-  "components.ApplianceModelsTable.partNumbersTitle": {
-    "defaultMessage": "Part Numbers"
   },
   "components.BaseImageForm.baseImageLabel": {
     "defaultMessage": "Base image file"
@@ -113,33 +101,6 @@
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
   },
-  "components.CreateApplianceModelForm.addPartNumberButton": {
-    "defaultMessage": "Add part number"
-  },
-  "components.CreateApplianceModelForm.descriptionLabel": {
-    "defaultMessage": "Description"
-  },
-  "components.CreateApplianceModelForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.CreateApplianceModelForm.hardwareTypeLabel": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.CreateApplianceModelForm.hardwareTypeOption": {
-    "defaultMessage": "Select a Hardware Type"
-  },
-  "components.CreateApplianceModelForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateApplianceModelForm.partNumbersLabel": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.CreateApplianceModelForm.resetButton": {
-    "defaultMessage": "Reset"
-  },
-  "components.CreateApplianceModelForm.submitButton": {
-    "defaultMessage": "Create"
-  },
   "components.CreateHardwareTypeForm.addPartNumberButton": {
     "defaultMessage": "Add Part Number"
   },
@@ -153,6 +114,33 @@
     "defaultMessage": "Part Numbers"
   },
   "components.CreateHardwareTypeForm.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "components.CreateSystemModelForm.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "components.CreateSystemModelForm.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "components.CreateSystemModelForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.CreateSystemModelForm.hardwareTypeLabel": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.CreateSystemModelForm.hardwareTypeOption": {
+    "defaultMessage": "Select a Hardware Type"
+  },
+  "components.CreateSystemModelForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.CreateSystemModelForm.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.CreateSystemModelForm.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "components.CreateSystemModelForm.submitButton": {
     "defaultMessage": "Create"
   },
   "components.DevicesTable.deviceIdTitle": {
@@ -218,7 +206,7 @@
     "defaultMessage": "Models"
   },
   "components.Sidebar.modelsLabel": {
-    "defaultMessage": "Appliance Models"
+    "defaultMessage": "System Models"
   },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
@@ -229,29 +217,20 @@
   "components.StorageTable.totalSpaceTitle": {
     "defaultMessage": "Total Space"
   },
-  "components.Topbar.userMenu.logoutLabel": {
-    "defaultMessage": "Logout"
-  },
-  "components.UpdateApplianceModelForm.addPartNumberButton": {
-    "defaultMessage": "Add part number"
-  },
-  "components.UpdateApplianceModelForm.handleLabel": {
+  "components.SystemModelsTable.handleTitle": {
     "defaultMessage": "Handle"
   },
-  "components.UpdateApplianceModelForm.hardwareTypeLabel": {
+  "components.SystemModelsTable.hardwareType": {
     "defaultMessage": "Hardware Type"
   },
-  "components.UpdateApplianceModelForm.nameLabel": {
-    "defaultMessage": "Name"
+  "components.SystemModelsTable.nameTitle": {
+    "defaultMessage": "System Model Name"
   },
-  "components.UpdateApplianceModelForm.partNumbersLabel": {
+  "components.SystemModelsTable.partNumbersTitle": {
     "defaultMessage": "Part Numbers"
   },
-  "components.UpdateApplianceModelForm.resetButton": {
-    "defaultMessage": "Reset"
-  },
-  "components.UpdateApplianceModelForm.submitButton": {
-    "defaultMessage": "Update"
+  "components.Topbar.userMenu.logoutLabel": {
+    "defaultMessage": "Logout"
   },
   "components.UpdateHardwareTypeForm.addPartNumberButton": {
     "defaultMessage": "Add Part Number"
@@ -266,6 +245,27 @@
     "defaultMessage": "Part Numbers"
   },
   "components.UpdateHardwareTypeForm.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "components.UpdateSystemModelForm.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "components.UpdateSystemModelForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.UpdateSystemModelForm.hardwareTypeLabel": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.UpdateSystemModelForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.UpdateSystemModelForm.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.UpdateSystemModelForm.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "components.UpdateSystemModelForm.submitButton": {
     "defaultMessage": "Update"
   },
   "components.WiFiScanResultsTable.apChannelTitle": {
@@ -297,42 +297,6 @@
   },
   "device.otaOperationStatus.Unknown": {
     "defaultMessage": "Unknown"
-  },
-  "pages.ApplianceModel.applianceModelNotFound.message": {
-    "defaultMessage": "Return to the appliance model list."
-  },
-  "pages.ApplianceModel.applianceModelNotFound.title": {
-    "defaultMessage": "Appliance model not found."
-  },
-  "pages.ApplianceModelCreate.creationErrorFeedback": {
-    "defaultMessage": "Could not create the appliance model, please try again."
-  },
-  "pages.ApplianceModelCreate.noHardwareTypes.createButton": {
-    "defaultMessage": "Create Hardware Type"
-  },
-  "pages.ApplianceModelCreate.noHardwareTypes.message": {
-    "defaultMessage": "You need at least one hardware type to create an application model"
-  },
-  "pages.ApplianceModelCreate.noHardwareTypes.title": {
-    "defaultMessage": "You haven't created any hardware type yet"
-  },
-  "pages.ApplianceModelCreate.title": {
-    "defaultMessage": "Create Appliance Model"
-  },
-  "pages.ApplianceModelUpdate.creationErrorFeedback": {
-    "defaultMessage": "Could not update the appliance model, please try again."
-  },
-  "pages.ApplianceModels.createButton": {
-    "defaultMessage": "Create Appliance Model"
-  },
-  "pages.ApplianceModels.noApplianceModels.message": {
-    "defaultMessage": "You haven't created any appliance model yet."
-  },
-  "pages.ApplianceModels.noApplianceModels.title": {
-    "defaultMessage": "This space is empty"
-  },
-  "pages.ApplianceModels.title": {
-    "defaultMessage": "Appliance Models"
   },
   "pages.Device.BatteryStatusTab": {
     "defaultMessage": "Battery"
@@ -441,6 +405,42 @@
   },
   "pages.Logout.title": {
     "defaultMessage": "Logout"
+  },
+  "pages.SystemModel.systemModelNotFound.message": {
+    "defaultMessage": "Return to the system model list."
+  },
+  "pages.SystemModel.systemModelNotFound.title": {
+    "defaultMessage": "System model not found."
+  },
+  "pages.SystemModelCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the system model, please try again."
+  },
+  "pages.SystemModelCreate.noHardwareTypes.createButton": {
+    "defaultMessage": "Create Hardware Type"
+  },
+  "pages.SystemModelCreate.noHardwareTypes.message": {
+    "defaultMessage": "You need at least one hardware type to create an application model"
+  },
+  "pages.SystemModelCreate.noHardwareTypes.title": {
+    "defaultMessage": "You haven't created any hardware type yet"
+  },
+  "pages.SystemModelCreate.title": {
+    "defaultMessage": "Create System Model"
+  },
+  "pages.SystemModelUpdate.creationErrorFeedback": {
+    "defaultMessage": "Could not update the system model, please try again."
+  },
+  "pages.SystemModels.createButton": {
+    "defaultMessage": "Create System Model"
+  },
+  "pages.SystemModels.noSystemModels.message": {
+    "defaultMessage": "You haven't created any system model yet."
+  },
+  "pages.SystemModels.noSystemModels.title": {
+    "defaultMessage": "This space is empty"
+  },
+  "pages.SystemModels.title": {
+    "defaultMessage": "System Models"
   },
   "validation.array.min": {
     "defaultMessage": "Does not have enough values."

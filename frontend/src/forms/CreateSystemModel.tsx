@@ -16,9 +16,9 @@
   limitations under the License.
 */
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,7 +30,7 @@ import Icon from "components/Icon";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
-import { applianceModelHandleSchema, messages, yup } from "forms";
+import { systemModelHandleSchema, messages, yup } from "forms";
 
 const FormRow = ({
   id,
@@ -49,30 +49,14 @@ const FormRow = ({
   </Form.Group>
 );
 
-type ApplianceModelData = {
-  name: string;
-  handle: string;
-  description: {
-    locale: string;
-    text: string;
-  } | null;
-  hardwareType: {
-    name: string;
-  };
-  partNumbers: string[];
-  pictureUrl: string | null;
-};
-
-type ApplianceModelChanges = {
+type SystemModelChanges = {
   name: string;
   handle: string;
   description?: {
     locale: string;
     text: string;
   };
-  hardwareType: {
-    name: string;
-  };
+  hardwareTypeId: string;
   partNumbers: string[];
   pictureFile?: File;
   pictureUrl?: string | null;
@@ -84,17 +68,17 @@ type FormData = {
   name: string;
   handle: string;
   description: string;
-  hardwareType: string;
+  hardwareTypeId: string;
   partNumbers: PartNumber[];
   pictureFile?: FileList | null;
 };
 
-const applianceModelSchema = yup
+const systemModelSchema = yup
   .object({
     name: yup.string().required(),
-    handle: applianceModelHandleSchema.required(),
+    handle: systemModelHandleSchema.required(),
     description: yup.string(),
-    hardwareType: yup.string().required(),
+    hardwareTypeId: yup.string().required(),
     partNumbers: yup
       .array()
       .required()
@@ -114,58 +98,60 @@ const applianceModelSchema = yup
   })
   .required();
 
-const transformInputData = (data: ApplianceModelData): FormData => ({
-  ...data,
-  description: data.description?.text || "",
-  hardwareType: data.hardwareType.name,
-  partNumbers:
-    data.partNumbers.length > 0
-      ? data.partNumbers.map((pn) => ({ value: pn }))
-      : [{ value: "" }], // default with at least one empty part number
-});
-
 const transformOutputData = (
   locale: string,
   data: FormData
-): ApplianceModelChanges => {
-  let applianceModel: ApplianceModelChanges = {
+): SystemModelChanges => {
+  let systemModel: SystemModelChanges = {
     name: data.name,
     handle: data.handle,
-    hardwareType: {
-      name: data.hardwareType,
-    },
+    hardwareTypeId: data.hardwareTypeId,
     partNumbers: data.partNumbers.map((pn) => pn.value),
   };
 
   if (data.pictureFile) {
-    applianceModel.pictureFile = data.pictureFile[0];
+    systemModel.pictureFile = data.pictureFile[0];
   } else if (data.pictureFile === null) {
-    applianceModel.pictureUrl = null;
+    systemModel.pictureUrl = null;
   }
 
   if (data.description) {
-    applianceModel.description = {
+    systemModel.description = {
       locale,
       text: data.description,
     };
   }
 
-  return applianceModel;
+  return systemModel;
+};
+
+const initialData: FormData = {
+  name: "",
+  handle: "",
+  description: "",
+  hardwareTypeId: "",
+  partNumbers: [{ value: "" }],
+};
+
+type HardwareTypeOption = {
+  id: string;
+  name: string;
 };
 
 type Props = {
-  initialData: ApplianceModelData;
+  hardwareTypes: HardwareTypeOption[];
   locale: string;
   isLoading?: boolean;
-  onSubmit: (data: ApplianceModelChanges) => void;
+  onSubmit: (data: SystemModelChanges) => void;
 };
 
-const UpdateApplianceModelForm = ({
-  initialData,
+const CreateSystemModelForm = ({
+  hardwareTypes,
   locale,
   isLoading = false,
   onSubmit,
 }: Props) => {
+  const intl = useIntl();
   const {
     control,
     register,
@@ -176,8 +162,8 @@ const UpdateApplianceModelForm = ({
     watch,
   } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: transformInputData(initialData),
-    resolver: yupResolver(applianceModelSchema),
+    defaultValues: initialData,
+    resolver: yupResolver(systemModelSchema),
   });
 
   const partNumbers = useFieldArray({
@@ -203,17 +189,11 @@ const UpdateApplianceModelForm = ({
     [partNumbers]
   );
 
-  useEffect(() => {
-    reset(transformInputData(initialData));
-  }, [initialData, reset]);
-
   const pictureFile = watch("pictureFile");
   const picture =
     pictureFile instanceof FileList && pictureFile.length > 0
       ? URL.createObjectURL(pictureFile[0]) // picture is the new file
-      : pictureFile === null
-      ? null // picture is removed
-      : initialData.pictureUrl; // picture is unchanged
+      : null;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -242,10 +222,10 @@ const UpdateApplianceModelForm = ({
           <Col md="7" lg="8" xl="9">
             <Stack gap={3}>
               <FormRow
-                id="appliance-model-form-name"
+                id="system-model-form-name"
                 label={
                   <FormattedMessage
-                    id="components.UpdateApplianceModelForm.nameLabel"
+                    id="components.CreateSystemModelForm.nameLabel"
                     defaultMessage="Name"
                   />
                 }
@@ -258,10 +238,10 @@ const UpdateApplianceModelForm = ({
                 </Form.Control.Feedback>
               </FormRow>
               <FormRow
-                id="appliance-model-form-handle"
+                id="system-model-form-handle"
                 label={
                   <FormattedMessage
-                    id="components.UpdateApplianceModelForm.handleLabel"
+                    id="components.CreateSystemModelForm.handleLabel"
                     defaultMessage="Handle"
                   />
                 }
@@ -277,11 +257,11 @@ const UpdateApplianceModelForm = ({
                 </Form.Control.Feedback>
               </FormRow>
               <FormRow
-                id="appliance-model-form-description"
+                id="system-model-form-description"
                 label={
                   <>
                     <FormattedMessage
-                      id="components.CreateApplianceModelForm.descriptionLabel"
+                      id="components.CreateSystemModelForm.descriptionLabel"
                       defaultMessage="Description"
                     />
                     <span className="small text-muted"> ({locale})</span>
@@ -291,25 +271,44 @@ const UpdateApplianceModelForm = ({
                 <Form.Control as="textarea" {...register("description")} />
               </FormRow>
               <FormRow
-                id="appliance-model-form-hardware-type"
+                id="system-model-form-hardware-type"
                 label={
                   <FormattedMessage
-                    id="components.UpdateApplianceModelForm.hardwareTypeLabel"
+                    id="components.CreateSystemModelForm.hardwareTypeLabel"
                     defaultMessage="Hardware Type"
                   />
                 }
               >
-                <Form.Control
-                  {...register("hardwareType")}
-                  plaintext
-                  readOnly
-                />
+                <Form.Select
+                  {...register("hardwareTypeId")}
+                  isInvalid={!!errors.hardwareTypeId}
+                >
+                  <option value="" disabled>
+                    {intl.formatMessage({
+                      id: "components.CreateSystemModelForm.hardwareTypeOption",
+                      defaultMessage: "Select a Hardware Type",
+                    })}
+                  </option>
+                  {hardwareTypes.map((hardwareTypeOption) => (
+                    <option
+                      key={hardwareTypeOption.id}
+                      value={hardwareTypeOption.id}
+                    >
+                      {hardwareTypeOption.name}
+                    </option>
+                  ))}
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">
+                  {errors.hardwareTypeId?.message && (
+                    <FormattedMessage id={errors.hardwareTypeId?.message} />
+                  )}
+                </Form.Control.Feedback>
               </FormRow>
               <FormRow
-                id="appliance-model-form-part-numbers"
+                id="system-model-form-part-numbers"
                 label={
                   <FormattedMessage
-                    id="components.UpdateApplianceModelForm.partNumbersLabel"
+                    id="components.CreateSystemModelForm.partNumbersLabel"
                     defaultMessage="Part Numbers"
                   />
                 }
@@ -345,7 +344,7 @@ const UpdateApplianceModelForm = ({
                     onClick={handleAddPartNumber}
                   >
                     <FormattedMessage
-                      id="components.UpdateApplianceModelForm.addPartNumberButton"
+                      id="components.CreateSystemModelForm.addPartNumberButton"
                       defaultMessage="Add part number"
                     />
                   </Button>
@@ -362,15 +361,15 @@ const UpdateApplianceModelForm = ({
               onClick={() => reset()}
             >
               <FormattedMessage
-                id="components.UpdateApplianceModelForm.resetButton"
+                id="components.CreateSystemModelForm.resetButton"
                 defaultMessage="Reset"
               />
             </Button>
             <Button variant="primary" type="submit" disabled={isLoading}>
               {isLoading && <Spinner size="sm" className="me-2" />}
               <FormattedMessage
-                id="components.UpdateApplianceModelForm.submitButton"
-                defaultMessage="Update"
+                id="components.CreateSystemModelForm.submitButton"
+                defaultMessage="Create"
               />
             </Button>
           </Stack>
@@ -380,6 +379,6 @@ const UpdateApplianceModelForm = ({
   );
 };
 
-export type { ApplianceModelData, ApplianceModelChanges };
+export type { SystemModelChanges };
 
-export default UpdateApplianceModelForm;
+export default CreateSystemModelForm;
