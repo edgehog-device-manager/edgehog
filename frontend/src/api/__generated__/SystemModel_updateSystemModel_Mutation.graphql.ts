@@ -4,25 +4,25 @@
 
 import { ConcreteRequest } from "relay-runtime";
 
-export type UpdateApplianceModelInput = {
-    applianceModelId: string;
+export type UpdateSystemModelInput = {
     description?: LocalizedTextInput | null | undefined;
     handle?: string | null | undefined;
     name?: string | null | undefined;
     partNumbers?: Array<string> | null | undefined;
     pictureFile?: File | null | undefined;
     pictureUrl?: string | null | undefined;
+    systemModelId: string;
 };
 export type LocalizedTextInput = {
     locale: string;
     text: string;
 };
-export type ApplianceModel_updateApplianceModel_MutationVariables = {
-    input: UpdateApplianceModelInput;
+export type SystemModel_updateSystemModel_MutationVariables = {
+    input: UpdateSystemModelInput;
 };
-export type ApplianceModel_updateApplianceModel_MutationResponse = {
-    readonly updateApplianceModel: {
-        readonly applianceModel: {
+export type SystemModel_updateSystemModel_MutationResponse = {
+    readonly updateSystemModel: {
+        readonly systemModel: {
             readonly id: string;
             readonly name: string;
             readonly handle: string;
@@ -39,19 +39,19 @@ export type ApplianceModel_updateApplianceModel_MutationResponse = {
         };
     } | null;
 };
-export type ApplianceModel_updateApplianceModel_Mutation = {
-    readonly response: ApplianceModel_updateApplianceModel_MutationResponse;
-    readonly variables: ApplianceModel_updateApplianceModel_MutationVariables;
+export type SystemModel_updateSystemModel_Mutation = {
+    readonly response: SystemModel_updateSystemModel_MutationResponse;
+    readonly variables: SystemModel_updateSystemModel_MutationVariables;
 };
 
 
 
 /*
-mutation ApplianceModel_updateApplianceModel_Mutation(
-  $input: UpdateApplianceModelInput!
+mutation SystemModel_updateSystemModel_Mutation(
+  $input: UpdateSystemModelInput!
 ) {
-  updateApplianceModel(input: $input) {
-    applianceModel {
+  updateSystemModel(input: $input) {
+    systemModel {
       id
       name
       handle
@@ -102,17 +102,17 @@ v3 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "UpdateApplianceModelPayload",
+    "concreteType": "UpdateSystemModelPayload",
     "kind": "LinkedField",
-    "name": "updateApplianceModel",
+    "name": "updateSystemModel",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "ApplianceModel",
+        "concreteType": "SystemModel",
         "kind": "LinkedField",
-        "name": "applianceModel",
+        "name": "systemModel",
         "plural": false,
         "selections": [
           (v1/*: any*/),
@@ -188,7 +188,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "ApplianceModel_updateApplianceModel_Mutation",
+    "name": "SystemModel_updateSystemModel_Mutation",
     "selections": (v3/*: any*/),
     "type": "RootMutationType",
     "abstractKey": null
@@ -197,18 +197,18 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "ApplianceModel_updateApplianceModel_Mutation",
+    "name": "SystemModel_updateSystemModel_Mutation",
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "920a4668ae9356be0a72ec1b275b70b3",
+    "cacheID": "dec24da9f9d4c93090499bf7b7dc665d",
     "id": null,
     "metadata": {},
-    "name": "ApplianceModel_updateApplianceModel_Mutation",
+    "name": "SystemModel_updateSystemModel_Mutation",
     "operationKind": "mutation",
-    "text": "mutation ApplianceModel_updateApplianceModel_Mutation(\n  $input: UpdateApplianceModelInput!\n) {\n  updateApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      description {\n        locale\n        text\n      }\n      hardwareType {\n        id\n        name\n      }\n      partNumbers\n      pictureUrl\n    }\n  }\n}\n"
+    "text": "mutation SystemModel_updateSystemModel_Mutation(\n  $input: UpdateSystemModelInput!\n) {\n  updateSystemModel(input: $input) {\n    systemModel {\n      id\n      name\n      handle\n      description {\n        locale\n        text\n      }\n      hardwareType {\n        id\n        name\n      }\n      partNumbers\n      pictureUrl\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '74ed7e134a496195539fe5183d49a5ff';
+(node as any).hash = '137b5cd9bc35b763b5de5338e64b8e96';
 export default node;

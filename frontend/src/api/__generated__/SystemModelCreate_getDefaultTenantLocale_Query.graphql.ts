@@ -4,21 +4,21 @@
 
 import { ConcreteRequest } from "relay-runtime";
 
-export type ApplianceModelCreate_getDefaultTenantLocale_QueryVariables = {};
-export type ApplianceModelCreate_getDefaultTenantLocale_QueryResponse = {
+export type SystemModelCreate_getDefaultTenantLocale_QueryVariables = {};
+export type SystemModelCreate_getDefaultTenantLocale_QueryResponse = {
     readonly tenantInfo: {
         readonly defaultLocale: string;
     };
 };
-export type ApplianceModelCreate_getDefaultTenantLocale_Query = {
-    readonly response: ApplianceModelCreate_getDefaultTenantLocale_QueryResponse;
-    readonly variables: ApplianceModelCreate_getDefaultTenantLocale_QueryVariables;
+export type SystemModelCreate_getDefaultTenantLocale_Query = {
+    readonly response: SystemModelCreate_getDefaultTenantLocale_QueryResponse;
+    readonly variables: SystemModelCreate_getDefaultTenantLocale_QueryVariables;
 };
 
 
 
 /*
-query ApplianceModelCreate_getDefaultTenantLocale_Query {
+query SystemModelCreate_getDefaultTenantLocale_Query {
   tenantInfo {
     defaultLocale
   }
@@ -51,7 +51,7 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "ApplianceModelCreate_getDefaultTenantLocale_Query",
+    "name": "SystemModelCreate_getDefaultTenantLocale_Query",
     "selections": (v0/*: any*/),
     "type": "RootQueryType",
     "abstractKey": null
@@ -60,18 +60,18 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "ApplianceModelCreate_getDefaultTenantLocale_Query",
+    "name": "SystemModelCreate_getDefaultTenantLocale_Query",
     "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "64cd0dd038346ffc39a72069a1d95aff",
+    "cacheID": "22c5ab295ab3e055d600075bbc525f42",
     "id": null,
     "metadata": {},
-    "name": "ApplianceModelCreate_getDefaultTenantLocale_Query",
+    "name": "SystemModelCreate_getDefaultTenantLocale_Query",
     "operationKind": "query",
-    "text": "query ApplianceModelCreate_getDefaultTenantLocale_Query {\n  tenantInfo {\n    defaultLocale\n  }\n}\n"
+    "text": "query SystemModelCreate_getDefaultTenantLocale_Query {\n  tenantInfo {\n    defaultLocale\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '5a9124a99f887191bc9a57343e64422a';
+(node as any).hash = '3744e831f6fc97c695deab11c612030f';
 export default node;

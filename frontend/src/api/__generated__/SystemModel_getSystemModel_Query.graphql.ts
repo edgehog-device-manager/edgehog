@@ -4,11 +4,11 @@
 
 import { ConcreteRequest } from "relay-runtime";
 
-export type ApplianceModel_getApplianceModel_QueryVariables = {
+export type SystemModel_getSystemModel_QueryVariables = {
     id: string;
 };
-export type ApplianceModel_getApplianceModel_QueryResponse = {
-    readonly applianceModel: {
+export type SystemModel_getSystemModel_QueryResponse = {
+    readonly systemModel: {
         readonly id: string;
         readonly name: string;
         readonly handle: string;
@@ -24,18 +24,18 @@ export type ApplianceModel_getApplianceModel_QueryResponse = {
         readonly pictureUrl: string | null;
     } | null;
 };
-export type ApplianceModel_getApplianceModel_Query = {
-    readonly response: ApplianceModel_getApplianceModel_QueryResponse;
-    readonly variables: ApplianceModel_getApplianceModel_QueryVariables;
+export type SystemModel_getSystemModel_Query = {
+    readonly response: SystemModel_getSystemModel_QueryResponse;
+    readonly variables: SystemModel_getSystemModel_QueryVariables;
 };
 
 
 
 /*
-query ApplianceModel_getApplianceModel_Query(
+query SystemModel_getSystemModel_Query(
   $id: ID!
 ) {
-  applianceModel(id: $id) {
+  systemModel(id: $id) {
     id
     name
     handle
@@ -85,9 +85,9 @@ v3 = [
         "variableName": "id"
       }
     ],
-    "concreteType": "ApplianceModel",
+    "concreteType": "SystemModel",
     "kind": "LinkedField",
-    "name": "applianceModel",
+    "name": "systemModel",
     "plural": false,
     "selections": [
       (v1/*: any*/),
@@ -160,7 +160,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "ApplianceModel_getApplianceModel_Query",
+    "name": "SystemModel_getSystemModel_Query",
     "selections": (v3/*: any*/),
     "type": "RootQueryType",
     "abstractKey": null
@@ -169,18 +169,18 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "ApplianceModel_getApplianceModel_Query",
+    "name": "SystemModel_getSystemModel_Query",
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "4c60baf2218fff9a867a3bec1cf50c97",
+    "cacheID": "581675987ad56a64d5ee73e6b099c3a7",
     "id": null,
     "metadata": {},
-    "name": "ApplianceModel_getApplianceModel_Query",
+    "name": "SystemModel_getSystemModel_Query",
     "operationKind": "query",
-    "text": "query ApplianceModel_getApplianceModel_Query(\n  $id: ID!\n) {\n  applianceModel(id: $id) {\n    id\n    name\n    handle\n    description {\n      locale\n      text\n    }\n    hardwareType {\n      id\n      name\n    }\n    partNumbers\n    pictureUrl\n  }\n}\n"
+    "text": "query SystemModel_getSystemModel_Query(\n  $id: ID!\n) {\n  systemModel(id: $id) {\n    id\n    name\n    handle\n    description {\n      locale\n      text\n    }\n    hardwareType {\n      id\n      name\n    }\n    partNumbers\n    pictureUrl\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '7f1de306fc4a2d232e7d9525087a5542';
+(node as any).hash = '9df2d20636e4b5e30ebab4c70300f4af';
 export default node;

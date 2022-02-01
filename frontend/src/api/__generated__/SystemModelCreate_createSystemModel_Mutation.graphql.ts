@@ -4,7 +4,7 @@
 
 import { ConcreteRequest } from "relay-runtime";
 
-export type CreateApplianceModelInput = {
+export type CreateSystemModelInput = {
     description?: LocalizedTextInput | null | undefined;
     handle: string;
     hardwareTypeId: string;
@@ -17,12 +17,12 @@ export type LocalizedTextInput = {
     locale: string;
     text: string;
 };
-export type ApplianceModelCreate_createApplianceModel_MutationVariables = {
-    input: CreateApplianceModelInput;
+export type SystemModelCreate_createSystemModel_MutationVariables = {
+    input: CreateSystemModelInput;
 };
-export type ApplianceModelCreate_createApplianceModel_MutationResponse = {
-    readonly createApplianceModel: {
-        readonly applianceModel: {
+export type SystemModelCreate_createSystemModel_MutationResponse = {
+    readonly createSystemModel: {
+        readonly systemModel: {
             readonly id: string;
             readonly name: string;
             readonly handle: string;
@@ -39,19 +39,19 @@ export type ApplianceModelCreate_createApplianceModel_MutationResponse = {
         };
     } | null;
 };
-export type ApplianceModelCreate_createApplianceModel_Mutation = {
-    readonly response: ApplianceModelCreate_createApplianceModel_MutationResponse;
-    readonly variables: ApplianceModelCreate_createApplianceModel_MutationVariables;
+export type SystemModelCreate_createSystemModel_Mutation = {
+    readonly response: SystemModelCreate_createSystemModel_MutationResponse;
+    readonly variables: SystemModelCreate_createSystemModel_MutationVariables;
 };
 
 
 
 /*
-mutation ApplianceModelCreate_createApplianceModel_Mutation(
-  $input: CreateApplianceModelInput!
+mutation SystemModelCreate_createSystemModel_Mutation(
+  $input: CreateSystemModelInput!
 ) {
-  createApplianceModel(input: $input) {
-    applianceModel {
+  createSystemModel(input: $input) {
+    systemModel {
       id
       name
       handle
@@ -102,17 +102,17 @@ v3 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "CreateApplianceModelPayload",
+    "concreteType": "CreateSystemModelPayload",
     "kind": "LinkedField",
-    "name": "createApplianceModel",
+    "name": "createSystemModel",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "ApplianceModel",
+        "concreteType": "SystemModel",
         "kind": "LinkedField",
-        "name": "applianceModel",
+        "name": "systemModel",
         "plural": false,
         "selections": [
           (v1/*: any*/),
@@ -188,7 +188,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "ApplianceModelCreate_createApplianceModel_Mutation",
+    "name": "SystemModelCreate_createSystemModel_Mutation",
     "selections": (v3/*: any*/),
     "type": "RootMutationType",
     "abstractKey": null
@@ -197,18 +197,18 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "ApplianceModelCreate_createApplianceModel_Mutation",
+    "name": "SystemModelCreate_createSystemModel_Mutation",
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "834882e6924982c9ec6abe63b39d65f8",
+    "cacheID": "99ca278b5be113b57ef16aefdf6335a6",
     "id": null,
     "metadata": {},
-    "name": "ApplianceModelCreate_createApplianceModel_Mutation",
+    "name": "SystemModelCreate_createSystemModel_Mutation",
     "operationKind": "mutation",
-    "text": "mutation ApplianceModelCreate_createApplianceModel_Mutation(\n  $input: CreateApplianceModelInput!\n) {\n  createApplianceModel(input: $input) {\n    applianceModel {\n      id\n      name\n      handle\n      description {\n        locale\n        text\n      }\n      hardwareType {\n        id\n        name\n      }\n      partNumbers\n      pictureUrl\n    }\n  }\n}\n"
+    "text": "mutation SystemModelCreate_createSystemModel_Mutation(\n  $input: CreateSystemModelInput!\n) {\n  createSystemModel(input: $input) {\n    systemModel {\n      id\n      name\n      handle\n      description {\n        locale\n        text\n      }\n      hardwareType {\n        id\n        name\n      }\n      partNumbers\n      pictureUrl\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '48da81ed51d2f22a8c6525eb30bfe5a8';
+(node as any).hash = '974bd67d4943c8842d7db0ef2c529ae9';
 export default node;

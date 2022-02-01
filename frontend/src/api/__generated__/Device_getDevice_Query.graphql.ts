@@ -16,7 +16,7 @@ export type Device_getDevice_QueryResponse = {
         readonly lastDisconnection: string | null;
         readonly name: string;
         readonly online: boolean;
-        readonly applianceModel: {
+        readonly systemModel: {
             readonly name: string;
             readonly pictureUrl: string | null;
             readonly hardwareType: {
@@ -44,7 +44,7 @@ query Device_getDevice_Query(
     lastDisconnection
     name
     online
-    applianceModel {
+    systemModel {
       name
       pictureUrl
       hardwareType {
@@ -259,9 +259,9 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "ApplianceModel",
+            "concreteType": "SystemModel",
             "kind": "LinkedField",
-            "name": "applianceModel",
+            "name": "systemModel",
             "plural": false,
             "selections": [
               (v6/*: any*/),
@@ -356,9 +356,9 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "ApplianceModel",
+            "concreteType": "SystemModel",
             "kind": "LinkedField",
-            "name": "applianceModel",
+            "name": "systemModel",
             "plural": false,
             "selections": [
               (v6/*: any*/),
@@ -691,14 +691,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "9e33e2e6c72fbd41472a9c22d028abf4",
+    "cacheID": "07e82948516968a7fef2aa37330b46ac",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    applianceModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_osBundle\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osBundle on Device {\n  osBundle {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    createdAt\n    status\n    statusCode\n    updatedAt\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_osBundle\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osBundle on Device {\n  osBundle {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    createdAt\n    status\n    statusCode\n    updatedAt\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '6e90cbcb4d79c279d746c2dd47c4ba37';
+(node as any).hash = '5bd8701bdc166f989b24233c477c0156';
 export default node;

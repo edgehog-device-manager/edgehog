@@ -4,22 +4,22 @@
 
 import { ConcreteRequest } from "relay-runtime";
 
-export type ApplianceModelCreate_getHardwareTypes_QueryVariables = {};
-export type ApplianceModelCreate_getHardwareTypes_QueryResponse = {
+export type SystemModelCreate_getHardwareTypes_QueryVariables = {};
+export type SystemModelCreate_getHardwareTypes_QueryResponse = {
     readonly hardwareTypes: ReadonlyArray<{
         readonly id: string;
         readonly name: string;
     }>;
 };
-export type ApplianceModelCreate_getHardwareTypes_Query = {
-    readonly response: ApplianceModelCreate_getHardwareTypes_QueryResponse;
-    readonly variables: ApplianceModelCreate_getHardwareTypes_QueryVariables;
+export type SystemModelCreate_getHardwareTypes_Query = {
+    readonly response: SystemModelCreate_getHardwareTypes_QueryResponse;
+    readonly variables: SystemModelCreate_getHardwareTypes_QueryVariables;
 };
 
 
 
 /*
-query ApplianceModelCreate_getHardwareTypes_Query {
+query SystemModelCreate_getHardwareTypes_Query {
   hardwareTypes {
     id
     name
@@ -60,7 +60,7 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "ApplianceModelCreate_getHardwareTypes_Query",
+    "name": "SystemModelCreate_getHardwareTypes_Query",
     "selections": (v0/*: any*/),
     "type": "RootQueryType",
     "abstractKey": null
@@ -69,18 +69,18 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "ApplianceModelCreate_getHardwareTypes_Query",
+    "name": "SystemModelCreate_getHardwareTypes_Query",
     "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "61d6ac6911c0daa47c3cbc827190d666",
+    "cacheID": "76e3daaae73ddb9bc24547c388760ec4",
     "id": null,
     "metadata": {},
-    "name": "ApplianceModelCreate_getHardwareTypes_Query",
+    "name": "SystemModelCreate_getHardwareTypes_Query",
     "operationKind": "query",
-    "text": "query ApplianceModelCreate_getHardwareTypes_Query {\n  hardwareTypes {\n    id\n    name\n  }\n}\n"
+    "text": "query SystemModelCreate_getHardwareTypes_Query {\n  hardwareTypes {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '548a070dc1e3db501ad4dbdd7ac90c94';
+(node as any).hash = '4774a09b2bd80451f008336047267152';
 export default node;

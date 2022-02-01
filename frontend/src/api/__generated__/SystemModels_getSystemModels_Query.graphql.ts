@@ -4,9 +4,9 @@
 
 import { ConcreteRequest } from "relay-runtime";
 
-export type ApplianceModels_getApplianceModels_QueryVariables = {};
-export type ApplianceModels_getApplianceModels_QueryResponse = {
-    readonly applianceModels: ReadonlyArray<{
+export type SystemModels_getSystemModels_QueryVariables = {};
+export type SystemModels_getSystemModels_QueryResponse = {
+    readonly systemModels: ReadonlyArray<{
         readonly id: string;
         readonly handle: string;
         readonly name: string;
@@ -16,16 +16,16 @@ export type ApplianceModels_getApplianceModels_QueryResponse = {
         readonly partNumbers: ReadonlyArray<string>;
     }>;
 };
-export type ApplianceModels_getApplianceModels_Query = {
-    readonly response: ApplianceModels_getApplianceModels_QueryResponse;
-    readonly variables: ApplianceModels_getApplianceModels_QueryVariables;
+export type SystemModels_getSystemModels_Query = {
+    readonly response: SystemModels_getSystemModels_QueryResponse;
+    readonly variables: SystemModels_getSystemModels_QueryVariables;
 };
 
 
 
 /*
-query ApplianceModels_getApplianceModels_Query {
-  applianceModels {
+query SystemModels_getSystemModels_Query {
+  systemModels {
     id
     handle
     name
@@ -72,14 +72,14 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "ApplianceModels_getApplianceModels_Query",
+    "name": "SystemModels_getSystemModels_Query",
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "ApplianceModel",
+        "concreteType": "SystemModel",
         "kind": "LinkedField",
-        "name": "applianceModels",
+        "name": "systemModels",
         "plural": true,
         "selections": [
           (v0/*: any*/),
@@ -109,14 +109,14 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "ApplianceModels_getApplianceModels_Query",
+    "name": "SystemModels_getSystemModels_Query",
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "ApplianceModel",
+        "concreteType": "SystemModel",
         "kind": "LinkedField",
-        "name": "applianceModels",
+        "name": "systemModels",
         "plural": true,
         "selections": [
           (v0/*: any*/),
@@ -142,14 +142,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "aaf361608339c841c9f62256f71b0f5b",
+    "cacheID": "7a39aa36dfc3d3f67c9525ddeffc6dd7",
     "id": null,
     "metadata": {},
-    "name": "ApplianceModels_getApplianceModels_Query",
+    "name": "SystemModels_getSystemModels_Query",
     "operationKind": "query",
-    "text": "query ApplianceModels_getApplianceModels_Query {\n  applianceModels {\n    id\n    handle\n    name\n    hardwareType {\n      name\n      id\n    }\n    partNumbers\n  }\n}\n"
+    "text": "query SystemModels_getSystemModels_Query {\n  systemModels {\n    id\n    handle\n    name\n    hardwareType {\n      name\n      id\n    }\n    partNumbers\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '801811fbacb566b2bea4ab1814946729';
+(node as any).hash = '88c1d0553cfbbfcf7c4fa349dd408ebb';
 export default node;
