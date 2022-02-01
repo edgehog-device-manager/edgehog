@@ -306,4 +306,74 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
                "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
     end
   end
+
+  describe "device cellular connection query" do
+    setup do
+      cluster = cluster_fixture()
+
+      {:ok, realm: realm_fixture(cluster)}
+    end
+
+    @cellular_connection_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        cellularConnection {
+          slot
+          apn
+          imei
+          imsi
+          carrier
+          cellId
+          mobileCountryCode
+          mobileNetworkCode
+          localAreaCode
+          registrationStatus
+          rssi
+          technology
+        }
+      }
+    }
+    """
+
+    test "returns cellular connection if available", %{conn: conn, realm: realm} do
+      %Device{
+        id: id
+      } = device_fixture(realm)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, "/api", query: @cellular_connection_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "cellularConnection" => [modem1, modem2, modem3]
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert modem1["slot"] == "modem_1"
+      assert modem1["apn"] == "company.com"
+      assert modem1["imei"] == "509504877678976"
+      assert modem1["imsi"] == "313460000000001"
+      assert modem1["carrier"] == "Carrier"
+      assert modem1["cellId"] == 170_402_199
+      assert modem1["mobileCountryCode"] == 310
+      assert modem1["mobileNetworkCode"] == 410
+      assert modem1["localAreaCode"] == 35632
+      assert modem1["registrationStatus"] == "REGISTERED"
+      assert modem1["rssi"] == -60
+      assert modem1["technology"] == "GSM"
+
+      assert modem2["slot"] == "modem_2"
+      assert modem2["apn"] == "internet"
+      assert modem2["imei"] == "338897112874161"
+      assert modem2["registrationStatus"] == "NOT_REGISTERED"
+
+      assert modem3["slot"] == "modem_3"
+      assert modem3["apn"] == "internet"
+      assert modem3["imei"] == "338897112874162"
+      assert modem3["registrationStatus"] == nil
+    end
+  end
 end

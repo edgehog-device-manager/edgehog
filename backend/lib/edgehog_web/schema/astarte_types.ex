@@ -249,6 +249,82 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   end
 
   @desc """
+  The current GSM/LTE registration status of the modem.
+  """
+  enum :modem_registration_status do
+    @desc "Not registered, modem is not currently searching a new operator to register to."
+    value :not_registered
+    @desc "Registered, home network."
+    value :registered
+    @desc "Not registered, but modem is currently searching a new operator to register to."
+    value :searching_operator
+    @desc "Registration denied."
+    value :registration_denied
+    @desc "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
+    value :unknown
+    @desc "Registered, roaming."
+    value :registrered_roaming
+  end
+
+  @desc """
+  The current access technology of the serving cell.
+  """
+  enum :modem_technology do
+    @desc "GSM."
+    value :gsm
+    @desc "GSM Compact."
+    value :gsm_compact
+    @desc "UTRAN."
+    value :utran
+    @desc "GSM with EGPRS."
+    value :gsm_egprs
+    @desc "UTRAN with HSDPA."
+    value :utran_hsdpa
+    @desc "UTRAN with HSUPA."
+    value :utran_hsupa
+    @desc "UTRAN with HSDPA and HSUPA."
+    value :utran_hsdpa_hsupa
+    @desc "E-UTRAN."
+    value :eutran
+  end
+
+  @desc "Describes a modem of a device."
+  object :modem do
+    @desc "The identifier of the modem."
+    field :slot, non_null(:string)
+    @desc "The operator apn address."
+    field :apn, :string
+    @desc "The modem IMEI code."
+    field :imei, :string
+    @desc "The SIM IMSI code."
+    field :imsi, :string
+    @desc "Carrier operator name."
+    field :carrier, :string
+    @desc "Unique identifier of the cell."
+    field :cell_id, :integer
+    @desc "The cell tower's Mobile Country Code (MCC)."
+    field :mobile_country_code, :integer
+    @desc "The cell tower's Mobile Network Code."
+    field :mobile_network_code, :integer
+    @desc "The Local Area Code."
+    field :local_area_code, :integer
+    @desc "The current registration status of the modem."
+    field :registration_status, :modem_registration_status do
+      resolve &Resolvers.Astarte.modem_registration_status_to_enum/3
+      middleware Middleware.ErrorHandler
+    end
+
+    @desc "Signal strength in dBm."
+    field :rssi, :float
+
+    @desc "Access Technology"
+    field :technology, :modem_technology do
+      resolve &Resolvers.Astarte.modem_technology_to_enum/3
+      middleware Middleware.ErrorHandler
+    end
+  end
+
+  @desc """
   Denotes a device instance that connects and exchanges data.
 
   Each Device is associated to a specific SystemModel, which in turn is \
@@ -327,6 +403,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :ota_operations, non_null(list_of(non_null(:ota_operation))) do
       # TODO: this causes an N+1 if used on the device list, we should use dataloader instead
       resolve &Resolvers.OSManagement.ota_operations_for_device/3
+    end
+
+    @desc "The status of cellular connection of the device."
+    field :cellular_connection, list_of(non_null(:modem)) do
+      resolve &Resolvers.Astarte.fetch_cellular_connection/3
+      middleware Middleware.ErrorHandler
     end
   end
 
