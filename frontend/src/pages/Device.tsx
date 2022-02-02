@@ -987,7 +987,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
             defaultMessage="History"
           />
         </h5>
-        {pastOperations.length === 0 ? (
+        {!pastOperations || pastOperations.length === 0 ? (
           <div>
             <FormattedMessage
               id="pages.Device.SoftwareUpdateTab.noPreviousUpdates"
