@@ -27,7 +27,7 @@ import {
   PreloadedQuery,
   useMutation,
 } from "react-relay/hooks";
-import { FormattedDate, FormattedMessage } from "react-intl";
+import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import _ from "lodash";
 
@@ -254,6 +254,7 @@ interface DeviceHardwareInfoTabProps {
 }
 
 const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
+  const intl = useIntl();
   const { hardwareInfo } = useFragment(
     DEVICE_HARDWARE_INFO_FRAGMENT,
     deviceRef
@@ -264,12 +265,10 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
   return (
     <Tab
       eventKey="device-hardware-info-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.hardwareInfoTab"
-          defaultMessage="Hardware Info"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.hardwareInfoTab",
+        defaultMessage: "Hardware Info",
+      })}
     >
       <div className="mt-3">
         <Stack gap={3}>
@@ -369,6 +368,7 @@ interface DeviceOSBundleTabProps {
 }
 
 const DeviceOSBundleTab = ({ deviceRef }: DeviceOSBundleTabProps) => {
+  const intl = useIntl();
   const { osBundle } = useFragment(DEVICE_OS_BUNDLE_FRAGMENT, deviceRef);
   if (!osBundle || Object.values(osBundle).every((value) => value === null)) {
     return null;
@@ -376,12 +376,10 @@ const DeviceOSBundleTab = ({ deviceRef }: DeviceOSBundleTabProps) => {
   return (
     <Tab
       eventKey="device-os-bundle-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.osBundleTab"
-          defaultMessage="OS Bundle"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.osBundleTab",
+        defaultMessage: "OS Bundle",
+      })}
     >
       <div className="mt-3">
         <Stack gap={3}>
@@ -448,6 +446,7 @@ interface DeviceOSInfoTabProps {
 }
 
 const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
+  const intl = useIntl();
   const { osInfo } = useFragment(DEVICE_OS_INFO_FRAGMENT, deviceRef);
   if (!osInfo || Object.values(osInfo).every((value) => value === null)) {
     return null;
@@ -455,12 +454,10 @@ const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
   return (
     <Tab
       eventKey="device-os-info-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.osInfoTab"
-          defaultMessage="Operating System"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.osInfoTab",
+        defaultMessage: "Operating System",
+      })}
     >
       <div className="mt-3">
         <Stack gap={3}>
@@ -501,6 +498,7 @@ interface DeviceStorageUsageTabProps {
 }
 
 const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
+  const intl = useIntl();
   const { storageUsage } = useFragment(
     DEVICE_STORAGE_USAGE_FRAGMENT,
     deviceRef
@@ -512,12 +510,10 @@ const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
   return (
     <Tab
       eventKey="device-storage-usage-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.storageTab"
-          defaultMessage="Storage"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.storageTab",
+        defaultMessage: "Storage",
+      })}
     >
       <div className="mt-3">
         {storageUnits.length === 0 ? (
@@ -547,6 +543,7 @@ interface DeviceLocationTabProps {
 }
 
 const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
+  const intl = useIntl();
   const { location } = useFragment(DEVICE_LOCATION_FRAGMENT, deviceRef);
   if (!location) {
     return null;
@@ -554,12 +551,10 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
   return (
     <Tab
       eventKey="device-location-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.geolocationTab"
-          defaultMessage="Geolocation"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.geolocationTab",
+        defaultMessage: "Geolocation",
+      })}
     >
       <div className="mt-3">
         <p>
@@ -602,6 +597,7 @@ interface DeviceSystemStatusTabProps {
 }
 
 const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
+  const intl = useIntl();
   const { systemStatus } = useFragment(
     DEVICE_SYSTEM_STATUS_FRAGMENT,
     deviceRef
@@ -612,12 +608,10 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
   return (
     <Tab
       eventKey="device-system-status-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.systemStatusTab"
-          defaultMessage="System Status"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.systemStatusTab",
+        defaultMessage: "System Status",
+      })}
     >
       <div className="mt-3">
         <p className="text-muted">
@@ -710,6 +704,7 @@ interface DeviceWiFiScanResultsTabProps {
 const DeviceWiFiScanResultsTab = ({
   deviceRef,
 }: DeviceWiFiScanResultsTabProps) => {
+  const intl = useIntl();
   const { wifiScanResults } = useFragment(
     DEVICE_WIFI_SCAN_RESULTS_FRAGMENT,
     deviceRef
@@ -724,12 +719,10 @@ const DeviceWiFiScanResultsTab = ({
   return (
     <Tab
       eventKey="device-wifi-scan-results-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.wifiScanResultsTab"
-          defaultMessage="WiFi APs"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.wifiScanResultsTab",
+        defaultMessage: "WiFi APs",
+      })}
     >
       <div className="mt-3">
         {scanResults.length === 0 ? (
@@ -759,6 +752,7 @@ interface DeviceBatteryTabProps {
 }
 
 const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
+  const intl = useIntl();
   const { batteryStatus } = useFragment(
     DEVICE_BATTERY_STATUS_FRAGMENT,
     deviceRef
@@ -773,12 +767,10 @@ const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
   return (
     <Tab
       eventKey="device-battery-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.BatteryStatusTab"
-          defaultMessage="Battery"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.BatteryStatusTab",
+        defaultMessage: "Battery",
+      })}
     >
       <div className="mt-3">
         {batterySlots.length === 0 ? (
@@ -861,6 +853,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
   //       - device can be updated but never did
   //       - device never updated because it doesn't have this capability
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const intl = useIntl();
   const { id: deviceId, otaOperations } = useFragment(
     DEVICE_OTA_OPERATIONS_FRAGMENT,
     deviceRef
@@ -933,12 +926,10 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
   return (
     <Tab
       eventKey="device-software-update-tab"
-      title={
-        <FormattedMessage
-          id="pages.Device.SoftwareUpdateTab"
-          defaultMessage="Software Updates"
-        />
-      }
+      title={intl.formatMessage({
+        id: "pages.Device.SoftwareUpdateTab",
+        defaultMessage: "Software Updates",
+      })}
     >
       <div className="mt-3">
         <h5>
