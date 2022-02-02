@@ -102,6 +102,7 @@ type TableProps<T extends Object> = {
   className?: string;
   maxPageRows?: number;
   hiddenColumns?: string[];
+  sortBy?: Array<{ id: string; desc: boolean }>;
   searchFunction?: (
     rows: Row<T>[],
     columnIds: string[],
@@ -115,6 +116,7 @@ const Table = <T extends Object>({
   data,
   className,
   hiddenColumns = [],
+  sortBy = [],
   maxPageRows = 10,
   searchFunction,
   hideSearch = false,
@@ -124,6 +126,7 @@ const Table = <T extends Object>({
     data,
     initialState: {
       hiddenColumns,
+      sortBy,
     },
     filterTypes: {
       text: searchFunction ? searchFunction : defaultSearchFunction,

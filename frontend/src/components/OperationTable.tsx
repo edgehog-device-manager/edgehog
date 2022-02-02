@@ -146,8 +146,17 @@ type OperationTableProps = {
   data: OTAOperation[];
 };
 
+const initialSortedColumns = [{ id: "updatedAt", desc: true }];
+
 const OperationTable = ({ className, data }: OperationTableProps) => {
-  return <Table className={className} columns={columns} data={data} />;
+  return (
+    <Table
+      className={className}
+      columns={columns}
+      data={data}
+      sortBy={initialSortedColumns}
+    />
+  );
 };
 
 export type { OperationTableProps };
