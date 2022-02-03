@@ -20,12 +20,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
   use EdgehogWeb.ConnCase
   use Edgehog.AstarteMockCase
 
-  import Edgehog.AppliancesFixtures
+  import Edgehog.DevicesFixtures
   import Edgehog.AstarteFixtures
 
   alias Edgehog.Astarte.Device
 
-  describe "applianceModels field" do
+  describe "systemModels field" do
     setup do
       cluster = cluster_fixture()
 
@@ -38,7 +38,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         name
         deviceId
         online
-        applianceModel {
+        systemModel {
           name
           description {
             locale
@@ -102,24 +102,24 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert device["online"] == online
     end
 
-    test "returns appliance model description with default locale", %{
+    test "returns system model description with default locale", %{
       conn: conn,
       realm: realm,
       tenant: tenant
     } do
-      alias Edgehog.Appliances.ApplianceModel
+      alias Edgehog.Devices.SystemModel
 
       hardware_type = hardware_type_fixture()
 
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      %ApplianceModel{name: appliance_model_name, part_numbers: [pn]} =
-        appliance_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{name: system_model_name, part_numbers: [pn]} =
+        system_model_fixture(hardware_type, descriptions: descriptions)
 
       part_number = pn.part_number
       _device = device_fixture(realm, part_number: part_number)
@@ -132,29 +132,29 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
                }
              } = json_response(conn, 200)
 
-      assert device["applianceModel"]["name"] == appliance_model_name
-      assert device["applianceModel"]["description"]["locale"] == default_locale
-      assert device["applianceModel"]["description"]["text"] == "An appliance"
+      assert device["systemModel"]["name"] == system_model_name
+      assert device["systemModel"]["description"]["locale"] == default_locale
+      assert device["systemModel"]["description"]["text"] == "A system model"
     end
 
-    test "returns appliance model description with explicit locale", %{
+    test "returns system model description with explicit locale", %{
       conn: conn,
       realm: realm,
       tenant: tenant
     } do
-      alias Edgehog.Appliances.ApplianceModel
+      alias Edgehog.Devices.SystemModel
 
       hardware_type = hardware_type_fixture()
 
       default_locale = tenant.default_locale
 
       descriptions = [
-        %{locale: default_locale, text: "An appliance"},
-        %{locale: "it-IT", text: "Un dispositivo"}
+        %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 
-      %ApplianceModel{name: appliance_model_name, part_numbers: [pn]} =
-        appliance_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{name: system_model_name, part_numbers: [pn]} =
+        system_model_fixture(hardware_type, descriptions: descriptions)
 
       part_number = pn.part_number
 
@@ -171,9 +171,9 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
                }
              } = json_response(conn, 200)
 
-      assert device["applianceModel"]["name"] == appliance_model_name
-      assert device["applianceModel"]["description"]["locale"] == "it-IT"
-      assert device["applianceModel"]["description"]["text"] == "Un dispositivo"
+      assert device["systemModel"]["name"] == system_model_name
+      assert device["systemModel"]["description"]["locale"] == "it-IT"
+      assert device["systemModel"]["description"]["text"] == "Un modello di sistema"
     end
   end
 

@@ -10,8 +10,8 @@ For each Device the following information can be displayed:
 
 - Name: a user friendly name
 - Device ID: the ID that uniquely identifies the device connecting to Astarte
-- Appliance Model: the Appliance Model associated to the Device
-- Hardware Type: the Hardware Type associated to the Device's Appliance Model
+- System Model: the System Model associated to the Device
+- Hardware Type: the Hardware Type associated to the Device's System Model
 - Status: Reports the connection status, indicating whether the Device is connected to Astarte
 - Last Seen: Reports the time of the last connection activity of the Device
 
@@ -23,20 +23,20 @@ Each Device will become visible in Edgehog automatically the first time it conne
 Indeed, Astarte informs Edgehog about the Device's presence and activity via Astarte Triggers, which
 should be configured to relay the appropriate events.
 
-## Associating a Device to an Appliance Model
+## Associating a Device to a System Model
 
-Each Device is associated to a specific Appliance, hence a specific Appliance Model. The Appliance
-Model is the fundamental identifier when it comes to software updates, since it dictates which
-software is supported and what functionalities should be configured.
+Each Device is associated to a specific System Model. The System Model is the fundamental identifier
+when it comes to software updates, since it dictates which software is supported and what
+functionalities should be configured.
 
-However, during its lifetime, a Device can be tied to different Appliance Models. Say, for example,
+However, during its lifetime, a Device can be tied to different System Models. Say, for example,
 that two different models of e-bikes are sent to maintenance; if they share the same hardware, the
 working PCB board of one model could be fitted into the other one.
 
-For this reason, each time a Device connects to Astarte, it can notify Astarte about the Appliance
-Model it is plugged into, exposing its Part Number. Astarte then informs Edgehog via Astarte
-Triggers, so that Edgehog can associate the Device to the correct Appliance Model by matching the
-Device's Part Number with the ones of the Appliance Model.
+For this reason, each time a Device connects to Astarte, it can notify Astarte about the System
+Model it refers to, exposing its Part Number. Astarte then informs Edgehog via Astarte Triggers, so
+that Edgehog can associate the Device to the correct System Model by matching the Device's Part
+Number with the ones of the System Model.
 
 ## Device info
 

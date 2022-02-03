@@ -32,7 +32,7 @@ type DeviceProps = {
   lastDisconnection: string | null;
   name: string;
   online: boolean;
-  applianceModel: {
+  systemModel: {
     name: string;
     hardwareType: {
       name: string;
@@ -84,18 +84,15 @@ const columns: Column<DeviceProps>[] = [
     sortType: "basic",
   },
   {
-    id: "applianceModel",
-    accessor: (device) => device.applianceModel?.name,
+    id: "systemModel",
+    accessor: (device) => device.systemModel?.name,
     Header: (
-      <FormattedMessage
-        id="Device.applianceModel"
-        defaultMessage="Appliance Model"
-      />
+      <FormattedMessage id="Device.systemModel" defaultMessage="System Model" />
     ),
   },
   {
     id: "hardwareType",
-    accessor: (device) => device.applianceModel?.hardwareType.name,
+    accessor: (device) => device.systemModel?.hardwareType.name,
     Header: (
       <FormattedMessage
         id="Device.hardwareType"

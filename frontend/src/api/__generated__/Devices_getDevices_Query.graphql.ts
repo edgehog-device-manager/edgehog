@@ -13,7 +13,7 @@ export type Devices_getDevices_QueryResponse = {
         readonly lastDisconnection: string | null;
         readonly name: string;
         readonly online: boolean;
-        readonly applianceModel: {
+        readonly systemModel: {
             readonly name: string;
             readonly hardwareType: {
                 readonly name: string;
@@ -37,7 +37,7 @@ query Devices_getDevices_Query {
     lastDisconnection
     name
     online
-    applianceModel {
+    systemModel {
       name
       hardwareType {
         name
@@ -116,9 +116,9 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "ApplianceModel",
+            "concreteType": "SystemModel",
             "kind": "LinkedField",
-            "name": "applianceModel",
+            "name": "systemModel",
             "plural": false,
             "selections": [
               (v4/*: any*/),
@@ -167,9 +167,9 @@ return {
           {
             "alias": null,
             "args": null,
-            "concreteType": "ApplianceModel",
+            "concreteType": "SystemModel",
             "kind": "LinkedField",
-            "name": "applianceModel",
+            "name": "systemModel",
             "plural": false,
             "selections": [
               (v4/*: any*/),
@@ -196,14 +196,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "52328bac7ed037bef1a50d940822809f",
+    "cacheID": "f2e10f3e1a76a7507fe6c437feb84f5b",
     "id": null,
     "metadata": {},
     "name": "Devices_getDevices_Query",
     "operationKind": "query",
-    "text": "query Devices_getDevices_Query {\n  devices {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    applianceModel {\n      name\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n  }\n}\n"
+    "text": "query Devices_getDevices_Query {\n  devices {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '2af107e537c10d78e81fb90db9342bfe';
+(node as any).hash = '290893818640c25c5a3299d46589159d';
 export default node;

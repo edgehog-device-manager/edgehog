@@ -113,14 +113,14 @@ const Sidebar = () => (
         label={
           <FormattedMessage
             id="components.Sidebar.modelsLabel"
-            defaultMessage="Appliance Models"
+            defaultMessage="System Models"
           />
         }
-        route={Route.applianceModels}
+        route={Route.systemModels}
         activeRoutes={[
-          Route.applianceModels,
-          Route.applianceModelsNew,
-          Route.applianceModelsEdit,
+          Route.systemModels,
+          Route.systemModelsNew,
+          Route.systemModelsEdit,
         ]}
       />
       <SidebarItem

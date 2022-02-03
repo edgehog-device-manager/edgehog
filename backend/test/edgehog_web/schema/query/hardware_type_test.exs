@@ -19,9 +19,9 @@
 defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
   use EdgehogWeb.ConnCase
 
-  import Edgehog.AppliancesFixtures
+  import Edgehog.DevicesFixtures
 
-  alias Edgehog.Appliances.{
+  alias Edgehog.Devices.{
     HardwareType,
     HardwareTypePartNumber
   }

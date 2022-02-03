@@ -47,8 +47,8 @@ defmodule Edgehog.AssetsStoreMockCase do
 
   setup do
     Mox.stub_with(
-      Edgehog.Assets.ApplianceModelPictureMock,
-      Edgehog.Mocks.Assets.ApplianceModelPicture
+      Edgehog.Assets.SystemModelPictureMock,
+      Edgehog.Mocks.Assets.SystemModelPicture
     )
 
     :ok

@@ -14,7 +14,7 @@ _Users_ are actual users, applications or anything else which needs to interact 
 To interact with Edgehog, several options are available:
 
 - Edgehog's dashboard interface: it provides a built-in UI that can be used for managing Devices,
-  Hardware Types, and Appliance Models. It is meant to be a graphical, user-friendly tool to manage
+  Hardware Types, and System Models. It is meant to be a graphical, user-friendly tool to manage
   those entities.
 - [Edgehog's GraphQL APIs](graphql-api-docs/): they are meant as a machine-friendly way to perform
   operations on Edgehog's entities and for integrating 3rd party applications.
@@ -29,19 +29,18 @@ Hence, data that devices send via
 [Edgehog's Astarte Interfaces](https://github.com/edgehog-device-manager/edgehog-astarte-interfaces/)
 are automatically understood, collected and reported by Edgehog.
 
-### Publishing info about the Appliance
+### Publishing info about the System
 
-Each Device is supposed to notify Astarte, e.g. on each connection, about the Appliance Model it is
-plugged into.
+Each Device is supposed to notify Astarte, e.g. on each connection, about its System.
 
-To do so, the Device can use the [io.edgehog.devicemanager.ApplianceInfo](astarte_interfaces.html)
+To do so, the Device can use the [io.edgehog.devicemanager.SystemInfo](astarte_interfaces.html)
 Astarte Interface to specify:
 
-- the Serial Number: a code that uniquely identifies the Appliance
-- the Part Number: a code that uniquely identifies the Appliance Model
+- the Serial Number: a code that uniquely identifies the System
+- the Part Number: a code that uniquely identifies the System Model
 
-When exposing the Part Number, Edgehog can associate the Device to the correct Appliance Model by
-matching the Device's Part Number with the ones of the registered Appliance Model.
+When exposing the Part Number, Edgehog can associate the Device to the correct System Model by
+matching the Device's Part Number with the ones of the registered System Model.
 
 ### Publishing info about the hardware
 

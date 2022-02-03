@@ -28,11 +28,9 @@ it("renders correctly", async () => {
   expect(devicesLink).toBeInTheDocument();
   expect(devicesLink).toHaveTextContent("Devices");
 
-  const applianceModelsLink = container.querySelector(
-    "a[href='/appliance-models']"
-  );
-  expect(applianceModelsLink).toBeInTheDocument();
-  expect(applianceModelsLink).toHaveTextContent("Appliance Models");
+  const systemModelsLink = container.querySelector("a[href='/system-models']");
+  expect(systemModelsLink).toBeInTheDocument();
+  expect(systemModelsLink).toHaveTextContent("System Models");
 
   const hardwareTypesLink = container.querySelector(
     "a[href='/hardware-types']"
@@ -42,7 +40,7 @@ it("renders correctly", async () => {
 
   const menuGroups = container.querySelectorAll(".accordion");
   expect(menuGroups).toHaveLength(1);
-  expect(menuGroups[0]).toHaveTextContent("Appliance Models");
+  expect(menuGroups[0]).toHaveTextContent("System Models");
   expect(menuGroups[0]).toHaveTextContent("Hardware Types");
 });
 
@@ -52,9 +50,7 @@ it("shows links as active when route matches", async () => {
   });
 
   const devicesLink = container.querySelector("a[href='/devices']");
-  const applianceModelsLink = container.querySelector(
-    "a[href='/appliance-models']"
-  );
+  const systemModelsLink = container.querySelector("a[href='/system-models']");
   expect(devicesLink).toHaveClass("bg-primary");
-  expect(applianceModelsLink).not.toHaveClass("bg-primary");
+  expect(systemModelsLink).not.toHaveClass("bg-primary");
 });

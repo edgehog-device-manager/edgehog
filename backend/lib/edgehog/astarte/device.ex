@@ -21,7 +21,7 @@ defmodule Edgehog.Astarte.Device do
   import Ecto.Changeset
 
   alias Edgehog.Astarte.Realm
-  alias Edgehog.Appliances
+  alias Edgehog.Devices
 
   schema "devices" do
     field :device_id, :string
@@ -33,12 +33,12 @@ defmodule Edgehog.Astarte.Device do
     field :serial_number, :string
     belongs_to :realm, Realm
 
-    belongs_to :appliance_model_part_number, Appliances.ApplianceModelPartNumber,
+    belongs_to :system_model_part_number, Devices.SystemModelPartNumber,
       foreign_key: :part_number,
       references: :part_number,
       type: :string
 
-    has_one :appliance_model, through: [:appliance_model_part_number, :appliance_model]
+    has_one :system_model, through: [:system_model_part_number, :system_model]
 
     timestamps()
   end

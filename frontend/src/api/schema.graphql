@@ -4,55 +4,6 @@ schema {
 }
 
 """
-Represents a specific appliance model.
-
-An appliance model corresponds to what the users thinks as functionally
-equivalent appliances (e.g. two revisions of an appliance containing two
-different embedded chips but that have the same enclosure and the same
-functionality).
-Each ApplianceModel must be associated to a specific HardwareType.
-"""
-type ApplianceModel implements Node {
-  """
-  A localized description of the appliance model.
-  The language of the description can be controlled passing an Accept-Language
-  header in the request. If no such header is present, the default tenant
-  language is returned.
-  """
-  description: LocalizedText
-
-  """
-  The identifier of the appliance model.
-  """
-  handle: String!
-
-  """
-  The type of hardware that can be plugged into the appliance model.
-  """
-  hardwareType: HardwareType!
-
-  """
-  The ID of an object
-  """
-  id: ID!
-
-  """
-  The display name of the appliance model.
-  """
-  name: String!
-
-  """
-  The list of part numbers associated with the appliance model.
-  """
-  partNumbers: [String!]!
-
-  """
-  The URL of the related picture.
-  """
-  pictureUrl: String
-}
-
-"""
 Describes a battery slot of a device.
 """
 type BatterySlot {
@@ -117,57 +68,6 @@ enum BatteryStatus {
   UNKNOWN
 }
 
-input CreateApplianceModelInput {
-  """
-  An optional localized description. This description can only use the default tenant locale.
-  """
-  description: LocalizedTextInput
-
-  """
-  The identifier of the appliance model.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  """
-  The ID of the hardware type that can be plugged into the appliance model.
-  """
-  hardwareTypeId: ID!
-
-  """
-  The display name of the appliance model.
-  """
-  name: String!
-
-  """
-  The list of part numbers associated with the appliance model.
-  """
-  partNumbers: [String!]!
-
-  """
-  The file blob of a related picture.
-
-  When this field is specified, the pictureUrl field is ignored.
-  """
-  pictureFile: Upload
-
-  """
-  The file URL of a related picture.
-
-  Specifying a null value will remove the existing picture.
-  When the pictureFile field is specified, this field is ignored.
-  """
-  pictureUrl: String
-}
-
-type CreateApplianceModelPayload {
-  """
-  The created appliance model.
-  """
-  applianceModel: ApplianceModel!
-}
-
 input CreateHardwareTypeInput {
   """
   The identifier of the hardware type.
@@ -213,6 +113,57 @@ type CreateManualOtaOperationPayload {
   otaOperation: OtaOperation!
 }
 
+input CreateSystemModelInput {
+  """
+  An optional localized description. This description can only use the default tenant locale.
+  """
+  description: LocalizedTextInput
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  """
+  The ID of the hardware type that can be used by devices of this model.
+  """
+  hardwareTypeId: ID!
+
+  """
+  The display name of the system model.
+  """
+  name: String!
+
+  """
+  The list of part numbers associated with the system model.
+  """
+  partNumbers: [String!]!
+
+  """
+  The file blob of a related picture.
+
+  When this field is specified, the pictureUrl field is ignored.
+  """
+  pictureFile: Upload
+
+  """
+  The file URL of a related picture.
+
+  Specifying a null value will remove the existing picture.
+  When the pictureFile field is specified, this field is ignored.
+  """
+  pictureUrl: String
+}
+
+type CreateSystemModelPayload {
+  """
+  The created system model.
+  """
+  systemModel: SystemModel!
+}
+
 """
 The `DateTime` scalar type represents a date and time in the UTC
 timezone. The DateTime appears in a JSON response as an ISO8601 formatted
@@ -224,15 +175,10 @@ scalar DateTime
 """
 Denotes a device instance that connects and exchanges data.
 
-Each Device is associated to a specific ApplianceModel, which in turn is associated to a specific HardwareType.
+Each Device is associated to a specific SystemModel, which in turn is associated to a specific HardwareType.
 A Device also exposes info about its connection status and some sets of data read by its operating system.
 """
 type Device implements Node {
-  """
-  The appliance model of the device.
-  """
-  applianceModel: ApplianceModel
-
   """
   The status of the battery slots of the device.
   """
@@ -299,6 +245,11 @@ type Device implements Node {
   storageUsage: [StorageUnit!]
 
   """
+  The system model of the device.
+  """
+  systemModel: SystemModel
+
+  """
   The current status of the operating system of the device.
   """
   systemStatus: SystemStatus
@@ -315,24 +266,6 @@ Describes a set of filters to apply when fetching a list of devices.
 When multiple filters are specified, they are applied in an AND fashion to further refine the results.
 """
 input DeviceFilter {
-  """
-  A string to match against the handle of the device's appliance model.
-  The match is case-insensitive and tests whether the string is included in the handle of the device's appliance model.
-  """
-  applianceModelHandle: String
-
-  """
-  A string to match against the name of the device's appliance model.
-  The match is case-insensitive and tests whether the string is included in the name of the device's appliance model.
-  """
-  applianceModelName: String
-
-  """
-  A string to match against the part number of the device's appliance model.
-  The match is case-insensitive and tests whether the string is included in the part number of the device's appliance model.
-  """
-  applianceModelPartNumber: String
-
   """
   A string to match against the device ID. The match is case-insensitive and
   tests whether the string is included in the device ID.
@@ -361,6 +294,24 @@ input DeviceFilter {
   Whether to return devices connected or not to Astarte.
   """
   online: Boolean
+
+  """
+  A string to match against the handle of the device's system model.
+  The match is case-insensitive and tests whether the string is included in the handle of the device's system model.
+  """
+  systemModelHandle: String
+
+  """
+  A string to match against the name of the device's system model.
+  The match is case-insensitive and tests whether the string is included in the name of the device's system model.
+  """
+  systemModelName: String
+
+  """
+  A string to match against the part number of the device's system model.
+  The match is case-insensitive and tests whether the string is included in the part number of the device's system model.
+  """
+  systemModelPartNumber: String
 }
 
 """
@@ -430,9 +381,9 @@ type HardwareInfo {
 """
 Denotes a type of hardware that devices can have.
 
-It refers to the physical components embedded in an appliance.
+It refers to the physical components embedded in a device.
 This can represent, e.g., multiple revisions of a PCB (each with a different
-part number) which are functionally equivalent from the appliance point of view.
+part number) which are functionally equivalent from the device point of view.
 """
 type HardwareType implements Node {
   """
@@ -635,13 +586,6 @@ enum OtaOperationStatusCode {
 
 type RootMutationType {
   """
-  Creates a new appliance model.
-  """
-  createApplianceModel(
-    input: CreateApplianceModelInput!
-  ): CreateApplianceModelPayload
-
-  """
   Creates a new hardware type.
   """
   createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
@@ -654,34 +598,22 @@ type RootMutationType {
   ): CreateManualOtaOperationPayload
 
   """
-  Updates an appliance model.
+  Creates a new system model.
   """
-  updateApplianceModel(
-    input: UpdateApplianceModelInput!
-  ): UpdateApplianceModelPayload
+  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelPayload
 
   """
   Updates a hardware type.
   """
   updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
+
+  """
+  Updates a system model.
+  """
+  updateSystemModel(input: UpdateSystemModelInput!): UpdateSystemModelPayload
 }
 
 type RootQueryType {
-  """
-  Fetches a single appliance model.
-  """
-  applianceModel(
-    """
-    The ID of the appliance model.
-    """
-    id: ID!
-  ): ApplianceModel
-
-  """
-  Fetches the list of all appliance models.
-  """
-  applianceModels: [ApplianceModel!]!
-
   """
   Fetches a single device.
   """
@@ -724,6 +656,21 @@ type RootQueryType {
   ): Node
 
   """
+  Fetches a single system model.
+  """
+  systemModel(
+    """
+    The ID of the system model.
+    """
+    id: ID!
+  ): SystemModel
+
+  """
+  Fetches the list of all system models.
+  """
+  systemModels: [SystemModel!]!
+
+  """
   Retrieves information about the current tenant
   """
   tenantInfo: TenantInfo!
@@ -747,6 +694,54 @@ type StorageUnit {
   The total number of bytes of the storage unit.
   """
   totalBytes: Int
+}
+
+"""
+Represents a specific system model.
+
+A system model corresponds to what the users thinks as functionally equivalent
+devices (e.g. two revisions of a device containing two different embedded chips
+but having the same enclosure and the same functionality).Each SystemModel must
+be associated to a specific HardwareType.
+"""
+type SystemModel implements Node {
+  """
+  A localized description of the system model.
+  The language of the description can be controlled passing an Accept-Language
+  header in the request. If no such header is present, the default tenant
+  language is returned.
+  """
+  description: LocalizedText
+
+  """
+  The identifier of the system model.
+  """
+  handle: String!
+
+  """
+  The type of hardware that can be plugged into the system model.
+  """
+  hardwareType: HardwareType!
+
+  """
+  The ID of an object
+  """
+  id: ID!
+
+  """
+  The display name of the system model.
+  """
+  name: String!
+
+  """
+  The list of part numbers associated with the system model.
+  """
+  partNumbers: [String!]!
+
+  """
+  The URL of the related picture.
+  """
+  pictureUrl: String
 }
 
 """
@@ -799,57 +794,6 @@ type TenantInfo {
   slug: String!
 }
 
-input UpdateApplianceModelInput {
-  """
-  The ID of the appliance model to be updated.
-  """
-  applianceModelId: ID!
-
-  """
-  An optional localized description. This description can only use the default tenant locale.
-  """
-  description: LocalizedTextInput
-
-  """
-  The identifier of the appliance model.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  """
-  The display name of the appliance model.
-  """
-  name: String
-
-  """
-  The list of part numbers associated with the appliance model.
-  """
-  partNumbers: [String!]
-
-  """
-  The file blob of a related picture.
-
-  When this field is specified, the pictureUrl field is ignored.
-  """
-  pictureFile: Upload
-
-  """
-  The file URL of a related picture.
-
-  Specifying a null value will remove the existing picture.
-  When the pictureFile field is specified, this field is ignored.
-  """
-  pictureUrl: String
-}
-
-type UpdateApplianceModelPayload {
-  """
-  The updated appliance model.
-  """
-  applianceModel: ApplianceModel!
-}
-
 input UpdateHardwareTypeInput {
   """
   The identifier of the hardware type.
@@ -879,6 +823,57 @@ type UpdateHardwareTypePayload {
   The updated hardware type.
   """
   hardwareType: HardwareType!
+}
+
+input UpdateSystemModelInput {
+  """
+  An optional localized description. This description can only use the default tenant locale.
+  """
+  description: LocalizedTextInput
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  """
+  The display name of the system model.
+  """
+  name: String
+
+  """
+  The list of part numbers associated with the system model.
+  """
+  partNumbers: [String!]
+
+  """
+  The file blob of a related picture.
+
+  When this field is specified, the pictureUrl field is ignored.
+  """
+  pictureFile: Upload
+
+  """
+  The file URL of a related picture.
+
+  Specifying a null value will remove the existing picture.
+  When the pictureFile field is specified, this field is ignored.
+  """
+  pictureUrl: String
+
+  """
+  The ID of the system model to be updated.
+  """
+  systemModelId: ID!
+}
+
+type UpdateSystemModelPayload {
+  """
+  The updated system model.
+  """
+  systemModel: SystemModel!
 }
 
 """

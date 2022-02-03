@@ -19,8 +19,8 @@
 defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
   use EdgehogWeb.ConnCase
 
-  alias Edgehog.Appliances
-  alias Edgehog.Appliances.HardwareType
+  alias Edgehog.Devices
+  alias Edgehog.Devices.HardwareType
 
   describe "createHardwareType field" do
     @query """
@@ -67,7 +67,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
         Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
 
       assert {:ok, %HardwareType{name: ^name, handle: ^handle}} =
-               Appliances.fetch_hardware_type(db_id)
+               Devices.fetch_hardware_type(db_id)
     end
 
     test "fails with invalid data", %{conn: conn} do

@@ -21,7 +21,7 @@ import { MockPayloadGenerator } from "relay-test-utils";
 import assets from "assets";
 
 const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
-  ApplianceModel() {
+  SystemModel() {
     return {
       handle: "esp32-dev-kit-c",
       name: "ESP32-DevKitC",

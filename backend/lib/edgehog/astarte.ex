@@ -39,7 +39,7 @@ defmodule Edgehog.Astarte do
     WiFiScanResult
   }
 
-  @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
+  @system_info_interface "io.edgehog.devicemanager.SystemInfo"
 
   @device_status_module Application.compile_env(
                           :edgehog,
@@ -307,17 +307,17 @@ defmodule Edgehog.Astarte do
         from q in query,
           where: ilike(q.device_id, ^"%#{device_id}%")
 
-      {:appliance_model_part_number, part_number} ->
-        from [appliance_model_part_number: ampn] in ensure_appliance_model_part_number(query),
-          where: ilike(ampn.part_number, ^"%#{part_number}%")
+      {:system_model_part_number, part_number} ->
+        from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
+          where: ilike(smpn.part_number, ^"%#{part_number}%")
 
-      {:appliance_model_handle, handle} ->
-        from [appliance_model: am] in ensure_appliance_model(query),
-          where: ilike(am.handle, ^"%#{handle}%")
+      {:system_model_handle, handle} ->
+        from [system_model: sm] in ensure_system_model(query),
+          where: ilike(sm.handle, ^"%#{handle}%")
 
-      {:appliance_model_name, name} ->
-        from [appliance_model: am] in ensure_appliance_model(query),
-          where: ilike(am.name, ^"%#{name}%")
+      {:system_model_name, name} ->
+        from [system_model: sm] in ensure_system_model(query),
+          where: ilike(sm.name, ^"%#{name}%")
 
       {:hardware_type_part_number, part_number} ->
         from [hardware_type_part_number: htpn] in ensure_hardware_type_part_number(query),
@@ -337,8 +337,8 @@ defmodule Edgehog.Astarte do
     if has_named_binding?(query, :hardware_type) do
       query
     else
-      from [appliance_model: am] in ensure_appliance_model(query),
-        join: ht in assoc(am, :hardware_type),
+      from [system_model: sm] in ensure_system_model(query),
+        join: ht in assoc(sm, :hardware_type),
         as: :hardware_type
     end
   end
@@ -353,23 +353,23 @@ defmodule Edgehog.Astarte do
     end
   end
 
-  defp ensure_appliance_model(query) do
-    if has_named_binding?(query, :appliance_model) do
+  defp ensure_system_model(query) do
+    if has_named_binding?(query, :system_model) do
       query
     else
-      from [appliance_model_part_number: ampn] in ensure_appliance_model_part_number(query),
-        join: am in assoc(ampn, :appliance_model),
-        as: :appliance_model
+      from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
+        join: sm in assoc(smpn, :system_model),
+        as: :system_model
     end
   end
 
-  defp ensure_appliance_model_part_number(query) do
-    if has_named_binding?(query, :appliance_model_part_number) do
+  defp ensure_system_model_part_number(query) do
+    if has_named_binding?(query, :system_model_part_number) do
       query
     else
       from q in query,
-        join: ampn in assoc(q, :appliance_model_part_number),
-        as: :appliance_model_part_number
+        join: smpn in assoc(q, :system_model_part_number),
+        as: :system_model_part_number
     end
   end
 
@@ -410,18 +410,18 @@ defmodule Edgehog.Astarte do
   end
 
   @doc """
-  Preloads an appliance model for a device (or a list of devices)
+  Preloads a system model for a device (or a list of devices)
 
   Supported options:
   - `:force` a boolean indicating if the preload has to be read from the database also if it's
   already populated. Defaults to `false`.
   - `:preload` the option passed to the preload, can be a query or a list of atoms. Defaults to `[]`.
   """
-  def preload_appliance_model_for_device(device_or_devices, opts \\ []) do
+  def preload_system_model_for_device(device_or_devices, opts \\ []) do
     force = Keyword.get(opts, :force, false)
     preload = Keyword.get(opts, :preload, [])
 
-    Repo.preload(device_or_devices, [appliance_model: preload], force: force)
+    Repo.preload(device_or_devices, [system_model: preload], force: force)
   end
 
   @doc """
@@ -540,7 +540,7 @@ defmodule Edgehog.Astarte do
          %Device{} = device,
          %{
            "type" => "incoming_data",
-           "interface" => @appliance_info_interface,
+           "interface" => @system_info_interface,
            "path" => "/serialNumber",
            "value" => serial_number
          },
@@ -554,7 +554,7 @@ defmodule Edgehog.Astarte do
          %Device{} = device,
          %{
            "type" => "incoming_data",
-           "interface" => @appliance_info_interface,
+           "interface" => @system_info_interface,
            "path" => "/partNumber",
            "value" => part_number
          },

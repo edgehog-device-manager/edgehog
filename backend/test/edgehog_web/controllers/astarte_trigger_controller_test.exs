@@ -26,10 +26,10 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   alias Edgehog.OSManagement
 
   import Edgehog.AstarteFixtures
-  import Edgehog.AppliancesFixtures
+  import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
-  @appliance_info_interface "io.edgehog.devicemanager.ApplianceInfo"
+  @system_info_interface "io.edgehog.devicemanager.SystemInfo"
 
   describe "process_event" do
     setup do
@@ -138,7 +138,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_id: device_id,
         event: %{
           type: "incoming_data",
-          interface: @appliance_info_interface,
+          interface: @system_info_interface,
           path: "/serialNumber",
           value: "12345"
         },
@@ -155,15 +155,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert {:ok, %Device{serial_number: "12345"}} = Astarte.fetch_realm_device(realm, device_id)
     end
 
-    test "associates a device with an appliance model when receiving part number", %{
+    test "associates a device with a system model when receiving part number", %{
       conn: conn,
       realm: realm,
       device: %{device_id: device_id},
       tenant: %{slug: tenant_slug}
     } do
       hardware_type = hardware_type_fixture()
-      appliance_model = appliance_model_fixture(hardware_type)
-      [%{part_number: part_number}] = appliance_model.part_numbers
+      system_model = system_model_fixture(hardware_type)
+      [%{part_number: part_number}] = system_model.part_numbers
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
 
@@ -171,7 +171,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_id: device_id,
         event: %{
           type: "incoming_data",
-          interface: @appliance_info_interface,
+          interface: @system_info_interface,
           path: "/partNumber",
           value: part_number
         },
@@ -186,10 +186,10 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert response(conn, 200)
 
       assert {:ok, %Device{} = device} = Astarte.fetch_realm_device(realm, device_id)
-      device = Astarte.preload_appliance_model_for_device(device)
-      assert device.appliance_model.id == appliance_model.id
-      assert device.appliance_model.name == appliance_model.name
-      assert device.appliance_model.handle == appliance_model.handle
+      device = Astarte.preload_system_model_for_device(device)
+      assert device.system_model.id == system_model.id
+      assert device.system_model.name == system_model.name
+      assert device.system_model.handle == system_model.handle
     end
 
     test "updates the OTA operation when receiving an event on the OTAResponse interface", %{

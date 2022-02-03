@@ -41,7 +41,7 @@ const GET_DEVICES_QUERY = graphql`
       lastDisconnection
       name
       online
-      applianceModel {
+      systemModel {
         name
         hardwareType {
           name
