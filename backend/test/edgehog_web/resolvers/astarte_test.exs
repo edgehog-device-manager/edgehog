@@ -23,7 +23,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
 
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-  alias Edgehog.Astarte.Device.{OSBundle, OSInfo, SystemStatus, WiFiScanResult}
+  alias Edgehog.Astarte.Device.{BaseImage, OSInfo, SystemStatus, WiFiScanResult}
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
@@ -113,15 +113,15 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
              } == os_info
     end
 
-    test "fetch_os_bundle/3 returns the OS bundle for a device", %{device: device} do
-      assert {:ok, os_bundle} = Astarte.fetch_os_bundle(device, %{}, %{})
+    test "fetch_base_image/3 returns the Base Image for a device", %{device: device} do
+      assert {:ok, base_image} = Astarte.fetch_base_image(device, %{}, %{})
 
-      assert %OSBundle{
+      assert %BaseImage{
                name: "esp-idf",
                version: "4.3.1",
                build_id: "2022-01-01 12:00:00",
                fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
-             } == os_bundle
+             } == base_image
     end
   end
 end

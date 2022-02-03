@@ -4,6 +4,31 @@ schema {
 }
 
 """
+Describes an operating system's base image for a device.
+"""
+type BaseImage {
+  """
+  Human readable build identifier of the image.
+  """
+  buildId: String
+
+  """
+  A unique string that identifies the release, usually the image hash.
+  """
+  fingerprint: String
+
+  """
+  The name of the image.
+  """
+  name: String
+
+  """
+  The version of the image.
+  """
+  version: String
+}
+
+"""
 Describes a battery slot of a device.
 """
 type BatterySlot {
@@ -180,6 +205,11 @@ A Device also exposes info about its connection status and some sets of data rea
 """
 type Device implements Node {
   """
+  Information about the operating system's base image for the device.
+  """
+  baseImage: BaseImage
+
+  """
   The status of the battery slots of the device.
   """
   batteryStatus: [BatterySlot!]
@@ -223,11 +253,6 @@ type Device implements Node {
   Tells whether the device is connected or not to Astarte.
   """
   online: Boolean!
-
-  """
-  Information about the operating system bundle of the device.
-  """
-  osBundle: OsBundle
 
   """
   Information about the operating system of the device.
@@ -442,31 +467,6 @@ interface Node {
   The ID of the object.
   """
   id: ID!
-}
-
-"""
-Describes an operating system bundle of a device.
-"""
-type OsBundle {
-  """
-  Human readable build identifier of the bundle.
-  """
-  buildId: String
-
-  """
-  A unique string that identifies the release, usually the bundle hash.
-  """
-  fingerprint: String
-
-  """
-  The name of the bundle.
-  """
-  name: String
-
-  """
-  The version of the bundle.
-  """
-  version: String
 }
 
 """

@@ -5,19 +5,19 @@
 import { ReaderFragment } from "relay-runtime";
 
 import { FragmentRefs } from "relay-runtime";
-export type Device_osBundle = {
-    readonly osBundle: {
+export type Device_baseImage = {
+    readonly baseImage: {
         readonly name: string | null;
         readonly version: string | null;
         readonly buildId: string | null;
         readonly fingerprint: string | null;
     } | null;
-    readonly " $refType": "Device_osBundle";
+    readonly " $refType": "Device_baseImage";
 };
-export type Device_osBundle$data = Device_osBundle;
-export type Device_osBundle$key = {
-    readonly " $data"?: Device_osBundle$data | undefined;
-    readonly " $fragmentRefs": FragmentRefs<"Device_osBundle">;
+export type Device_baseImage$data = Device_baseImage;
+export type Device_baseImage$key = {
+    readonly " $data"?: Device_baseImage$data | undefined;
+    readonly " $fragmentRefs": FragmentRefs<"Device_baseImage">;
 };
 
 
@@ -26,14 +26,14 @@ const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "Device_osBundle",
+  "name": "Device_baseImage",
   "selections": [
     {
       "alias": null,
       "args": null,
-      "concreteType": "OsBundle",
+      "concreteType": "BaseImage",
       "kind": "LinkedField",
-      "name": "osBundle",
+      "name": "baseImage",
       "plural": false,
       "selections": [
         {
@@ -71,5 +71,5 @@ const node: ReaderFragment = {
   "type": "Device",
   "abstractKey": null
 };
-(node as any).hash = '5b8800b5c08c1b6281c3ec90f1ae492e';
+(node as any).hash = 'c822701364fbd0df6ce87fc48896204b';
 export default node;

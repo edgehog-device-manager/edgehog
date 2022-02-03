@@ -1,4 +1,16 @@
 {
+  "Device.baseImage.buildId": {
+    "defaultMessage": "Build identifier"
+  },
+  "Device.baseImage.fingerprint": {
+    "defaultMessage": "Fingerprint"
+  },
+  "Device.baseImage.name": {
+    "defaultMessage": "Name"
+  },
+  "Device.baseImage.version": {
+    "defaultMessage": "Version"
+  },
   "Device.connectionStatus": {
     "defaultMessage": "Connection"
   },
@@ -28,18 +40,6 @@
   },
   "Device.name": {
     "defaultMessage": "Name"
-  },
-  "Device.osBundle.buildId": {
-    "defaultMessage": "Build identifier"
-  },
-  "Device.osBundle.fingerprint": {
-    "defaultMessage": "Fingerprint"
-  },
-  "Device.osBundle.name": {
-    "defaultMessage": "Name"
-  },
-  "Device.osBundle.version": {
-    "defaultMessage": "Version"
   },
   "Device.osInfo.name": {
     "defaultMessage": "OS name"
@@ -322,6 +322,9 @@
   "pages.Device.SoftwareUpdateTab.updatingTo": {
     "defaultMessage": "Updating to image <a>{baseImageUrl}</a>"
   },
+  "pages.Device.baseImageTab": {
+    "defaultMessage": "Base Image"
+  },
   "pages.Device.deviceNotFound.message": {
     "defaultMessage": "Return to the device list."
   },
@@ -336,9 +339,6 @@
   },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
-  },
-  "pages.Device.osBundleTab": {
-    "defaultMessage": "OS Bundle"
   },
   "pages.Device.osInfoTab": {
     "defaultMessage": "Operating System"

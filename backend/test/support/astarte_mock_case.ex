@@ -52,8 +52,8 @@ defmodule Edgehog.AstarteMockCase do
     )
 
     Mox.stub_with(
-      Edgehog.Astarte.Device.OSBundleMock,
-      Edgehog.Mocks.Astarte.Device.OSBundle
+      Edgehog.Astarte.Device.BaseImageMock,
+      Edgehog.Mocks.Astarte.Device.BaseImage
     )
 
     Mox.stub_with(

@@ -140,19 +140,19 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :timestamp, non_null(:datetime)
   end
 
-  @desc "Describes an operating system bundle of a device."
-  object :os_bundle do
-    @desc "The name of the bundle."
+  @desc "Describes an operating system's base image for a device."
+  object :base_image do
+    @desc "The name of the image."
     field :name, :string
 
-    @desc "The version of the bundle."
+    @desc "The version of the image."
     field :version, :string
 
-    @desc "Human readable build identifier of the bundle."
+    @desc "Human readable build identifier of the image."
     field :build_id, :string
 
     @desc """
-    A unique string that identifies the release, usually the bundle hash.
+    A unique string that identifies the release, usually the image hash.
     """
     field :fingerprint, :string
   end
@@ -311,9 +311,9 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
       middleware Middleware.ErrorHandler
     end
 
-    @desc "Information about the operating system bundle of the device."
-    field :os_bundle, :os_bundle do
-      resolve &Resolvers.Astarte.fetch_os_bundle/3
+    @desc "Information about the operating system's base image for the device."
+    field :base_image, :base_image do
+      resolve &Resolvers.Astarte.fetch_base_image/3
       middleware Middleware.ErrorHandler
     end
 
