@@ -56,6 +56,27 @@ defmodule Edgehog.Tenants do
   def get_tenant!(id), do: Repo.get!(Tenant, id, skip_tenant_id: true)
 
   @doc """
+  Fetches a single tenant by its slug.
+
+  Returns `{:ok, tenant}` or `{:error, :not_found}`.
+
+  ## Examples
+
+  iex> fetch_tenant_by_slug("test")
+  {:ok, %Tenant{}}
+
+  iex> fetch_tenant_by_slug("unknown")
+  {:error, :not_found}
+
+  """
+  def fetch_tenant_by_slug(slug) do
+    case Repo.get_by(Tenant, [slug: slug], skip_tenant_id: true) do
+      %Tenant{} = tenant -> {:ok, tenant}
+      nil -> {:error, :not_found}
+    end
+  end
+
+  @doc """
   Creates a tenant.
 
   ## Examples

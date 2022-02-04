@@ -48,7 +48,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
       }
     }
     """
-    test "creates system model with valid data", %{conn: conn, hardware_type: hardware_type} do
+    test "creates system model with valid data", %{
+      conn: conn,
+      api_path: api_path,
+      hardware_type: hardware_type
+    } do
       name = "Foobar"
       handle = "foobar"
       part_number = "12345/X"
@@ -67,7 +71,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -92,7 +96,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
       assert {:ok, %SystemModel{name: ^name, handle: ^handle}} = Devices.fetch_system_model(db_id)
     end
 
-    test "fails with invalid data", %{conn: conn} do
+    test "fails with invalid data", %{conn: conn, api_path: api_path} do
       variables = %{
         input: %{
           system_model: %{
@@ -103,13 +107,14 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => _} = assert(json_response(conn, 200))
     end
 
     test "allows settings a description for the default locale", %{
       conn: conn,
+      api_path: api_path,
       hardware_type: hardware_type,
       tenant: tenant
     } do
@@ -137,7 +142,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -167,6 +172,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
 
     test "fails when trying to set a description for non default locale", %{
       conn: conn,
+      api_path: api_path,
       hardware_type: hardware_type
     } do
       name = "Foobar"
@@ -189,7 +195,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => [%{"code" => "not_default_locale"}]} = assert(json_response(conn, 200))
     end

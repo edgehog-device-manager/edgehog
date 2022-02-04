@@ -32,8 +32,8 @@ defmodule EdgehogWeb.Schema.Query.TenantInfoTest do
     }
     """
 
-    test "returns the tenant info", %{conn: conn, tenant: tenant} do
-      conn = get(conn, "/api", query: @query)
+    test "returns the tenant info", %{conn: conn, api_path: api_path, tenant: tenant} do
+      conn = get(conn, api_path, query: @query)
 
       %Tenant{name: name, slug: slug, default_locale: default_locale} = tenant
 

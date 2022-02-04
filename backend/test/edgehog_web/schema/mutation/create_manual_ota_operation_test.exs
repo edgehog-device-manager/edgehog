@@ -52,7 +52,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       }
     }
     """
-    test "creates OTA operation with valid data", %{conn: conn, device: device} do
+    test "creates OTA operation with valid data", %{
+      conn: conn,
+      api_path: api_path,
+      device: device
+    } do
       fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
 
       variables = %{
@@ -62,7 +66,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables, fake_image: fake_image)
+      conn = post(conn, api_path, query: @query, variables: variables, fake_image: fake_image)
 
       assert %{
                "data" => %{
@@ -90,7 +94,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       assert device.device_id == device_id
     end
 
-    test "fails with invalid data", %{conn: conn} do
+    test "fails with invalid data", %{conn: conn, api_path: api_path} do
       variables = %{
         input: %{
           device_id: nil,
@@ -98,7 +102,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => _} = assert(json_response(conn, 200))
     end

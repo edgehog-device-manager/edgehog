@@ -36,8 +36,8 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
       }
     }
     """
-    test "returns empty hardware types", %{conn: conn} do
-      conn = get(conn, "/api", query: @query)
+    test "returns empty hardware types", %{conn: conn, api_path: api_path} do
+      conn = get(conn, api_path, query: @query)
 
       assert json_response(conn, 200) == %{
                "data" => %{
@@ -46,14 +46,14 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
              }
     end
 
-    test "returns hardware types if they're present", %{conn: conn} do
+    test "returns hardware types if they're present", %{conn: conn, api_path: api_path} do
       %HardwareType{
         name: name,
         handle: handle,
         part_numbers: [%HardwareTypePartNumber{part_number: part_number}]
       } = hardware_type_fixture()
 
-      conn = get(conn, "/api", query: @query)
+      conn = get(conn, api_path, query: @query)
 
       assert %{
                "data" => %{

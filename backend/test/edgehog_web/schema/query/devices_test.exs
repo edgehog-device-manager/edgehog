@@ -48,8 +48,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       }
     }
     """
-    test "returns empty devices", %{conn: conn} do
-      conn = get(conn, "/api", query: @query)
+    test "returns empty devices", %{conn: conn, api_path: api_path} do
+      conn = get(conn, api_path, query: @query)
 
       assert json_response(conn, 200) == %{
                "data" => %{
@@ -58,14 +58,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              }
     end
 
-    test "returns devices if they're present", %{conn: conn, realm: realm} do
+    test "returns devices if they're present", %{conn: conn, api_path: api_path, realm: realm} do
       %Device{
         name: name,
         device_id: device_id,
         online: online
       } = device_fixture(realm)
 
-      conn = get(conn, "/api", query: @query)
+      conn = get(conn, api_path, query: @query)
 
       assert %{
                "data" => %{
@@ -78,7 +78,11 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert device["online"] == online
     end
 
-    test "filters devices when a filter is provided", %{conn: conn, realm: realm} do
+    test "filters devices when a filter is provided", %{
+      conn: conn,
+      api_path: api_path,
+      realm: realm
+    } do
       %Device{
         name: name,
         device_id: device_id,
@@ -89,7 +93,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
       variables = %{filter: %{online: true}}
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -104,6 +108,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
     test "returns system model description with default locale", %{
       conn: conn,
+      api_path: api_path,
       realm: realm,
       tenant: tenant
     } do
@@ -124,7 +129,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       part_number = pn.part_number
       _device = device_fixture(realm, part_number: part_number)
 
-      conn = get(conn, "/api", query: @query)
+      conn = get(conn, api_path, query: @query)
 
       assert %{
                "data" => %{
@@ -139,6 +144,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
     test "returns system model description with explicit locale", %{
       conn: conn,
+      api_path: api_path,
       realm: realm,
       tenant: tenant
     } do
@@ -163,7 +169,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       conn =
         conn
         |> put_req_header("accept-language", "it-IT")
-        |> get("/api", query: @query)
+        |> get(api_path, query: @query)
 
       assert %{
                "data" => %{
@@ -197,14 +203,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     }
     """
 
-    test "returns battery status if available", %{conn: conn, realm: realm} do
+    test "returns battery status if available", %{conn: conn, api_path: api_path, realm: realm} do
       %Device{
         id: id
       } = device_fixture(realm)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @battery_status_query, variables: variables)
+      conn = get(conn, api_path, query: @battery_status_query, variables: variables)
 
       assert %{
                "data" => %{
@@ -239,14 +245,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     }
     """
 
-    test "returns OS info if available", %{conn: conn, realm: realm} do
+    test "returns OS info if available", %{conn: conn, api_path: api_path, realm: realm} do
       %Device{
         id: id
       } = device_fixture(realm)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @os_info_query, variables: variables)
+      conn = get(conn, api_path, query: @os_info_query, variables: variables)
 
       assert %{
                "data" => %{
@@ -281,14 +287,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     }
     """
 
-    test "returns OS info if available", %{conn: conn, realm: realm} do
+    test "returns OS info if available", %{conn: conn, api_path: api_path, realm: realm} do
       %Device{
         id: id
       } = device_fixture(realm)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @base_image_query, variables: variables)
+      conn = get(conn, api_path, query: @base_image_query, variables: variables)
 
       assert %{
                "data" => %{
@@ -335,14 +341,18 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     }
     """
 
-    test "returns cellular connection if available", %{conn: conn, realm: realm} do
+    test "returns cellular connection if available", %{
+      conn: conn,
+      api_path: api_path,
+      realm: realm
+    } do
       %Device{
         id: id
       } = device_fixture(realm)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @cellular_connection_query, variables: variables)
+      conn = get(conn, api_path, query: @cellular_connection_query, variables: variables)
 
       assert %{
                "data" => %{

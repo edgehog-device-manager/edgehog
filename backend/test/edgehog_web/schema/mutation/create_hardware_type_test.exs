@@ -35,7 +35,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
       }
     }
     """
-    test "creates hardware type with valid data", %{conn: conn} do
+    test "creates hardware type with valid data", %{conn: conn, api_path: api_path} do
       name = "Foobar"
       handle = "foobar"
       part_number = "12345/X"
@@ -48,7 +48,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -70,7 +70,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
                Devices.fetch_hardware_type(db_id)
     end
 
-    test "fails with invalid data", %{conn: conn} do
+    test "fails with invalid data", %{conn: conn, api_path: api_path} do
       variables = %{
         input: %{
           name: nil,
@@ -79,7 +79,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => _} = assert(json_response(conn, 200))
     end
