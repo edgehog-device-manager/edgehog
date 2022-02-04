@@ -41,6 +41,10 @@ config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMoc
 config :edgehog, :astarte_os_info_module, Edgehog.Astarte.Device.OSInfoMock
 config :edgehog, :astarte_ota_request_module, Edgehog.Astarte.Device.OTARequestMock
 
+config :edgehog,
+       :astarte_cellular_connection_module,
+       Edgehog.Astarte.Device.CellularConnectionMock
+
 # Storage mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
 config :edgehog, :os_management_ephemeral_image_module, Edgehog.OSManagement.EphemeralImageMock

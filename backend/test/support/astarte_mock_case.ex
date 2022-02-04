@@ -86,6 +86,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Device.BatteryStatus
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Device.CellularConnectionMock,
+      Edgehog.Mocks.Astarte.Device.CellularConnection
+    )
+
     :ok
   end
 end

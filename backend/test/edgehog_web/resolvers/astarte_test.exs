@@ -123,5 +123,56 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
              } == base_image
     end
+
+    test "fetch_cellular_connection/3 returns the cellular_connection for a device", %{
+      device: device
+    } do
+      assert {:ok, cellular_connection} = Astarte.fetch_cellular_connection(device, %{}, %{})
+
+      assert [
+               %{
+                 slot: "modem_1",
+                 apn: "company.com",
+                 imei: "509504877678976",
+                 imsi: "313460000000001",
+                 carrier: "Carrier",
+                 cell_id: 170_402_199,
+                 mobile_country_code: 310,
+                 mobile_network_code: 410,
+                 local_area_code: 35632,
+                 registration_status: "Registered",
+                 rssi: -60,
+                 technology: "GSM"
+               },
+               %{
+                 slot: "modem_2",
+                 apn: "internet",
+                 imei: "338897112874161",
+                 imsi: nil,
+                 carrier: nil,
+                 cell_id: nil,
+                 mobile_country_code: nil,
+                 mobile_network_code: nil,
+                 local_area_code: nil,
+                 registration_status: "NotRegistered",
+                 rssi: nil,
+                 technology: nil
+               },
+               %{
+                 slot: "modem_3",
+                 apn: "internet",
+                 imei: "338897112874162",
+                 imsi: nil,
+                 carrier: nil,
+                 cell_id: nil,
+                 mobile_country_code: nil,
+                 mobile_network_code: nil,
+                 local_area_code: nil,
+                 registration_status: nil,
+                 rssi: nil,
+                 technology: nil
+               }
+             ] == cellular_connection
+    end
   end
 end

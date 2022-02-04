@@ -117,6 +117,79 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
+  def fetch_cellular_connection(%Device{} = device, _args, _context) do
+    with {:ok, modem_properties_list} <- Astarte.fetch_cellular_connection_properties(device) do
+      modem_status_map =
+        case Astarte.fetch_cellular_connection_status(device) do
+          {:ok, modem_status_list} ->
+            Map.new(modem_status_list, &{&1.slot, &1})
+
+          _ ->
+            %{}
+        end
+
+      cellular_connection =
+        Enum.map(modem_properties_list, fn modem_properties ->
+          modem_status = Map.get(modem_status_map, modem_properties.slot, %{})
+
+          %{
+            slot: modem_properties.slot,
+            apn: modem_properties.apn,
+            imei: modem_properties.imei,
+            imsi: modem_properties.imsi,
+            carrier: Map.get(modem_status, :carrier),
+            cell_id: Map.get(modem_status, :cell_id),
+            mobile_country_code: Map.get(modem_status, :mobile_country_code),
+            mobile_network_code: Map.get(modem_status, :mobile_network_code),
+            local_area_code: Map.get(modem_status, :local_area_code),
+            registration_status: Map.get(modem_status, :registration_status),
+            rssi: Map.get(modem_status, :rssi),
+            technology: Map.get(modem_status, :technology)
+          }
+        end)
+
+      {:ok, cellular_connection}
+    else
+      _ -> {:ok, nil}
+    end
+  end
+
+  def modem_registration_status_to_enum(
+        %{registration_status: registration_status},
+        _args,
+        _context
+      ) do
+    case registration_status do
+      "NotRegistered" -> {:ok, :not_registered}
+      "Registered" -> {:ok, :registered}
+      "SearchingOperator" -> {:ok, :searching_operator}
+      "RegistrationDenied" -> {:ok, :registration_denied}
+      "Unknown" -> {:ok, :unknown}
+      "RegisteredRoaming" -> {:ok, :registrered_roaming}
+      nil -> {:ok, nil}
+      _other -> {:error, :invalid_modem_registration_status}
+    end
+  end
+
+  def modem_technology_to_enum(
+        %{technology: technology},
+        _args,
+        _context
+      ) do
+    case technology do
+      "GSM" -> {:ok, :gsm}
+      "GSMCompact" -> {:ok, :gsm_compact}
+      "UTRAN" -> {:ok, :utran}
+      "GSMwEGPRS" -> {:ok, :gsm_egprs}
+      "UTRANwHSDPA" -> {:ok, :utran_hsdpa}
+      "UTRANwHSUPA" -> {:ok, :utran_hsupa}
+      "UTRANwHSDPAandHSUPA" -> {:ok, :utran_hsdpa_hsupa}
+      "EUTRAN" -> {:ok, :eutran}
+      nil -> {:ok, nil}
+      _other -> {:error, :invalid_modem_technology}
+    end
+  end
+
   def battery_status_to_enum(%BatterySlot{status: status}, _args, _context) do
     case status do
       "Charging" -> {:ok, :charging}
