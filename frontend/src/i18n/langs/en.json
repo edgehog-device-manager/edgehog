@@ -400,8 +400,26 @@
   "pages.HardwareTypes.title": {
     "defaultMessage": "Hardware Types"
   },
-  "pages.Login.title": {
+  "pages.Login.authTokenPlaceholder": {
+    "defaultMessage": "Auth Token"
+  },
+  "pages.Login.invalidAuthTokenFeedback": {
+    "defaultMessage": "Please provide a valid auth token."
+  },
+  "pages.Login.invalidTenantSlugFeedback": {
+    "defaultMessage": "Please provide a valid tenant slug."
+  },
+  "pages.Login.keepMeLoggedInLabel": {
+    "defaultMessage": "Keep me logged in"
+  },
+  "pages.Login.loginButton": {
     "defaultMessage": "Login"
+  },
+  "pages.Login.loginErrorFeedback": {
+    "defaultMessage": "Could not login, please make sure the credentials are valid."
+  },
+  "pages.Login.tenantSlugPlaceholder": {
+    "defaultMessage": "Tenant Slug"
   },
   "pages.Logout.title": {
     "defaultMessage": "Logout"

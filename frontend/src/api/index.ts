@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,23 +25,24 @@ import {
   UploadableMap,
 } from "relay-runtime";
 
+import { AuthConfig, loadAuthConfig } from "contexts/Auth";
+
 const applicationMetatag: HTMLElement = document.head.querySelector(
   "[name=application-name]"
 )!;
 const backendUrl = applicationMetatag.dataset?.backendUrl || "";
 
-const loadAuthToken = () => null; // TODO: implement authentication
-
 const fetchGraphQL = async (
   query: string | null | undefined,
-  variables: Record<string, unknown>
+  variables: Record<string, unknown>,
+  authConfig: AuthConfig
 ) => {
   const userLanguage = navigator.language; // TODO allow users to overwrite this
-  const authToken = loadAuthToken();
-  const response = await fetch(backendUrl, {
+  const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
+  const response = await fetch(apiUrl.toString(), {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${authToken}`,
+      Authorization: `Bearer ${authConfig.authToken}`,
       "Content-Type": "application/json",
       "Accept-Language": userLanguage,
     },
@@ -53,13 +54,14 @@ const fetchGraphQL = async (
 const uploadGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,
-  uploadables: UploadableMap
+  uploadables: UploadableMap,
+  authConfig: AuthConfig
 ) => {
-  const authToken = loadAuthToken();
+  const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
   const request: RequestInit = {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${authToken}`,
+      Authorization: `Bearer ${authConfig.authToken}`,
     },
   };
   const formData = new FormData();
@@ -69,7 +71,7 @@ const uploadGraphQL = async (
   formData.append("query", query!);
   formData.append("variables", JSON.stringify(variables));
   request.body = formData;
-  const response = await fetch(backendUrl, request);
+  const response = await fetch(apiUrl.toString(), request);
   return await response.json();
 };
 
@@ -111,10 +113,21 @@ const fetchRelay: FetchFunction = async (
   cacheConfig,
   uploadables
 ) => {
+  const authConfig = loadAuthConfig();
+  if (!authConfig) {
+    throw new Error(
+      "Auth configuration not found, a tenant need to be selected."
+    );
+  }
   const extracted = extractUploadables(variables);
   return extracted.uploadables
-    ? uploadGraphQL(operation.text, extracted.variables, extracted.uploadables)
-    : fetchGraphQL(operation.text, variables);
+    ? uploadGraphQL(
+        operation.text,
+        extracted.variables,
+        extracted.uploadables,
+        authConfig
+      )
+    : fetchGraphQL(operation.text, variables, authConfig);
 };
 
 const relayEnvironment = new Environment({

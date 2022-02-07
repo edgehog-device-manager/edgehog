@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -16,11 +16,23 @@
   limitations under the License.
 */
 
+import { useEffect } from "react";
 import { FormattedMessage } from "react-intl";
+import { commitLocalUpdate, useRelayEnvironment } from "react-relay";
 
 import Page from "components/Page";
+import { useAuth } from "contexts/Auth";
 
 const LogoutPage = () => {
+  const auth = useAuth();
+  const relayEnvironment = useRelayEnvironment();
+
+  useEffect(() => {
+    // @ts-expect-error wrong Relay types, store should be a RecordSourceSelectorProxy
+    commitLocalUpdate(relayEnvironment, (store) => store.invalidateStore());
+    auth.logout();
+  }, [relayEnvironment, auth]);
+
   return (
     <Page>
       <Page.Header

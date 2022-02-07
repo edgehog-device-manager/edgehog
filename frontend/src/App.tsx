@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import { Navigate, useRoutes } from "react-router-dom";
 
 import Sidebar from "components/Sidebar";
 import Topbar from "components/Topbar";
+import { useAuth } from "contexts/Auth";
 import { Route } from "Navigation";
 import Device from "pages/Device";
 import Devices from "pages/Devices";
@@ -56,19 +57,19 @@ const authenticatedRoutes: RouterRule[] = [
 ];
 
 function App() {
-  const isAuthenticated = true; // TODO: Implement authentication
-  const routes = isAuthenticated ? authenticatedRoutes : publicRoutes;
+  const auth = useAuth();
+  const routes = auth.isAuthenticated ? authenticatedRoutes : publicRoutes;
   const RouterElement = useRoutes(routes);
 
   return (
     <div data-testid="app" className="d-flex vh-100 flex-column">
-      {isAuthenticated && (
+      {auth.isAuthenticated && (
         <header className="flex-grow-0">
           <Topbar />
         </header>
       )}
       <main className="vh-100 flex-grow-1 d-flex  overflow-hidden">
-        {isAuthenticated && (
+        {auth.isAuthenticated && (
           <aside className="flex-grow-0 flex-shrink-0 overflow-auto">
             <Sidebar />
           </aside>
