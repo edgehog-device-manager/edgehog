@@ -16,71 +16,88 @@
   limitations under the License.
 */
 
-import React from "react";
 import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
+import type { MessageDescriptor } from "react-intl";
+import { graphql, useFragment } from "react-relay";
+
+import type {
+  OtaOperationStatus,
+  OperationTable_otaOperations,
+  OperationTable_otaOperations$key,
+} from "api/__generated__/OperationTable_otaOperations.graphql";
 
 import Icon from "components/Icon";
 import Table from "components/Table";
 import type { Column } from "components/Table";
-import type { OTAOperation, OTAOperationStatus } from "types/OTAUpdate";
 
-type OperationStatusProps = {
-  status: OTAOperationStatus | null;
-};
+const OPERATION_TABLE_FRAGMENT = graphql`
+  fragment OperationTable_otaOperations on Device {
+    otaOperations {
+      baseImageUrl
+      createdAt
+      status
+      updatedAt
+    }
+  }
+`;
 
-const getStatusColor = (status: OTAOperationStatus | null) => {
+const getStatusColor = (status: OtaOperationStatus) => {
   switch (status) {
-    case "Pending":
-    case "InProgress":
+    case "PENDING":
+    case "IN_PROGRESS":
       return "text-warning";
 
-    case "Error":
+    case "ERROR":
       return "text-danger";
 
-    case "Done":
+    case "DONE":
       return "text-success";
 
-    case null:
+    default:
       return "text-muted";
   }
 };
 
-defineMessages({
-  started: {
+const messages: Record<string, MessageDescriptor> = defineMessages({
+  PENDING: {
     id: "device.otaOperationStatus.Pending",
     defaultMessage: "Pending",
   },
-  inProgress: {
+  IN_PROGRESS: {
     id: "device.otaOperationStatus.InProgress",
     defaultMessage: "In progress",
   },
-  error: {
+  ERROR: {
     id: "device.otaOperationStatus.Error",
     defaultMessage: "Error",
   },
-  done: {
+  DONE: {
     id: "device.otaOperationStatus.Done",
     defaultMessage: "Done",
   },
-  unknown: {
+  UnknownStatus: {
     id: "device.otaOperationStatus.Unknown",
     defaultMessage: "Unknown",
   },
 });
 
-const OperationStatus = ({ status }: OperationStatusProps) => {
+const OperationStatus = ({ status }: { status: OtaOperationStatus }) => {
   const color = getStatusColor(status);
   return (
     <div className="d-flex align-items-center">
       <Icon icon="circle" className={`me-2 ${color}`} />
       <span>
-        <FormattedMessage id={`device.otaOperationStatus.${status}`} />
+        <FormattedMessage
+          id={messages[status]?.id || messages.UnknownStatus.id}
+        />
       </span>
     </div>
   );
 };
 
-const columns: Column<OTAOperation>[] = [
+type TableRecord = OperationTable_otaOperations["otaOperations"][0];
+
+const columns: Column<TableRecord>[] = [
   {
     accessor: "status",
     Header: (
@@ -145,17 +162,41 @@ const columns: Column<OTAOperation>[] = [
 
 type OperationTableProps = {
   className?: string;
-  data: OTAOperation[];
+  deviceRef: OperationTable_otaOperations$key;
 };
 
 const initialSortedColumns = [{ id: "updatedAt", desc: true }];
 
-const OperationTable = ({ className, data }: OperationTableProps) => {
+const OperationTable = ({ className, deviceRef }: OperationTableProps) => {
+  const data = useFragment(OPERATION_TABLE_FRAGMENT, deviceRef);
+
+  // react table requires mutable data
+  // TODO change this once a solution has been found
+  // see also https://github.com/TanStack/react-table/discussions/3648
+  const otaOperations = data.otaOperations
+    .filter(
+      (operation) => operation.status === "DONE" || operation.status === "ERROR"
+    )
+    .map((operation) => ({
+      ...operation,
+    }));
+
+  if (!otaOperations) {
+    return (
+      <div>
+        <FormattedMessage
+          id="pages.Device.SoftwareUpdateTab.noPreviousUpdates"
+          defaultMessage="No previous updates"
+        />
+      </div>
+    );
+  }
+
   return (
     <Table
       className={className}
       columns={columns}
-      data={data}
+      data={otaOperations}
       sortBy={initialSortedColumns}
     />
   );

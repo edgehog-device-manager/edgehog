@@ -39,11 +39,7 @@ import type { Device_osInfo$key } from "api/__generated__/Device_osInfo.graphql"
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
-import type {
-  OtaOperationStatus,
-  OtaOperationStatusCode,
-  Device_otaOperations$key,
-} from "api/__generated__/Device_otaOperations.graphql";
+import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import { Link, Route } from "Navigation";
@@ -66,11 +62,6 @@ import Tabs, { Tab } from "components/Tabs";
 import WiFiScanResultsTable from "components/WiFiScanResultsTable";
 import BatteryTable from "components/BatteryTable";
 import BaseImageForm from "forms/BaseImageForm";
-import type {
-  OTAOperation,
-  OTAOperationStatus,
-  OTAOperationStatusCode,
-} from "types/OTAUpdate";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
@@ -166,11 +157,10 @@ const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
     otaOperations {
       id
       baseImageUrl
-      createdAt
       status
-      statusCode
-      updatedAt
     }
+
+    ...OperationTable_otaOperations
   }
 `;
 
@@ -799,54 +789,6 @@ const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
   );
 };
 
-const parseStatus = (
-  s: OtaOperationStatus | null
-): OTAOperationStatus | null => {
-  switch (s) {
-    case "PENDING":
-      return "Pending";
-
-    case "IN_PROGRESS":
-      return "InProgress";
-
-    case "ERROR":
-      return "Error";
-
-    case "DONE":
-      return "Done";
-
-    default:
-      return null;
-  }
-};
-
-const parseStatusCode = (
-  s: OtaOperationStatusCode | null
-): OTAOperationStatusCode | null => {
-  switch (s) {
-    case "NETWORK_ERROR":
-      return "NetworkError";
-
-    case "NVS_ERROR":
-      return "NVSError";
-
-    case "ALREADY_IN_PROGRESS":
-      return "AlreadyInProgress";
-
-    case "FAILED":
-      return "Failed";
-
-    case "DEPLOY_ERROR":
-      return "DeployError";
-
-    case "WRONG_PARTITION":
-      return "WrongPartition";
-
-    default:
-      return null;
-  }
-};
-
 type SoftwareUpdateTabProps = {
   deviceRef: Device_otaOperations$key;
 };
@@ -858,30 +800,18 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
   //       - device never updated because it doesn't have this capability
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const intl = useIntl();
-  const { id: deviceId, otaOperations } = useFragment(
-    DEVICE_OTA_OPERATIONS_FRAGMENT,
-    deviceRef
-  );
+  const device = useFragment(DEVICE_OTA_OPERATIONS_FRAGMENT, deviceRef);
   const [createOtaOperation, isCreatingOtaOperation] =
     useMutation<Device_createManualOtaOperation_Mutation>(
       DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION
     );
 
-  const operations: OTAOperation[] = (otaOperations || []).map((o) => ({
-    status: parseStatus(o.status),
-    statusCode: parseStatusCode(o.statusCode),
-    baseImageUrl: o.baseImageUrl,
-    createdAt: new Date(o.createdAt),
-    updatedAt: new Date(o.updatedAt),
-  }));
-
-  const { currentOperations, pastOperations } = _.groupBy(
-    operations,
-    (operation) =>
-      operation.status === "Pending" || operation.status === "InProgress"
-        ? "currentOperations"
-        : "pastOperations"
-  );
+  const currentOperations = device.otaOperations
+    .filter(
+      (operation) =>
+        operation.status === "PENDING" || operation.status === "IN_PROGRESS"
+    )
+    .map((operation) => ({ ...operation }));
 
   // For now devices only support 1 update operation at a time
   const currentOperation = currentOperations?.[0] || null;
@@ -890,7 +820,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
     createOtaOperation({
       variables: {
         input: {
-          deviceId,
+          deviceId: device.id,
           baseImageFile: file,
         },
       },
@@ -914,10 +844,10 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
         const otaOperationId = data.createManualOtaOperation?.otaOperation?.id;
         if (otaOperationId) {
           const otaOperation = store.get(otaOperationId);
-          const device = store.get(deviceId);
-          const otaOperations = device?.getLinkedRecords("otaOperations");
-          if (device && otaOperation && otaOperations) {
-            device.setLinkedRecords(
+          const storedDevice = store.get(device.id);
+          const otaOperations = storedDevice?.getLinkedRecords("otaOperations");
+          if (storedDevice && otaOperation && otaOperations) {
+            storedDevice.setLinkedRecords(
               [otaOperation, ...otaOperations],
               "otaOperations"
             );
@@ -982,16 +912,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
             defaultMessage="History"
           />
         </h5>
-        {!pastOperations || pastOperations.length === 0 ? (
-          <div>
-            <FormattedMessage
-              id="pages.Device.SoftwareUpdateTab.noPreviousUpdates"
-              defaultMessage="No previous updates"
-            />
-          </div>
-        ) : (
-          <OperationTable data={pastOperations} />
-        )}
+        <OperationTable deviceRef={device} />
       </div>
     </Tab>
   );
