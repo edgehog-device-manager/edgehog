@@ -60,7 +60,7 @@
     "prestart": "npm run init",
     "build": "craco build",
     "prebuild": "npm run init",
-    "relay:download-schema": "npx get-graphql-schema http://localhost:4000/api > src/api/schema.graphql",
+    "relay:download-schema": "npx get-graphql-schema http://localhost:4000/tenants/acme-inc/api > src/api/schema.graphql",
     "relay:compile": "relay-compiler --schema ./src/api/schema.graphql --customScalars.DateTime=String --customScalars.Upload=File --src ./src/ --artifactDirectory ./src/api/__generated__ --language typescript --watchman false $@",
     "format": "prettier --write src",
     "check-format": "prettier --check src",
