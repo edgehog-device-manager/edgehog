@@ -78,6 +78,22 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
         "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3",
     };
   },
+  Modem() {
+    return {
+      apn: "company.com",
+      carrier: "Carrier",
+      cellId: 170402199,
+      imei: "509504877678976",
+      imsi: "313460000000001",
+      localAreaCode: 35632,
+      mobileCountryCode: 310,
+      mobileNetworkCode: 410,
+      registrationStatus: "REGISTERED",
+      rssi: -60,
+      slot: "modem_1",
+      technology: "GSM",
+    };
+  },
   OsInfo() {
     return {
       name: "FreeRTOS",
