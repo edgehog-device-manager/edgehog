@@ -28,7 +28,21 @@ alias Edgehog.{
     base_api_url: "https://api.astarte.example.com"
   })
 
-{:ok, tenant} = Tenants.create_tenant(%{name: "ACME Inc", slug: "acme-inc"})
+private_key = """
+-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEICx5W2odFd5CyMTv5VlLW96fgvWtcJ3bIJVVc3GWhMHBoAoGCCqGSM49
+AwEHoUQDQgAEhV0KI4hByk0uDkCg4yZImMTiAtz2azmpbh0sLAKOESdlRYOFw90U
+p4F9fRRV5Li6Pn5XZiMCZhVkS/PoUbIKpA==
+-----END EC PRIVATE KEY-----
+"""
+
+public_key =
+  X509.PrivateKey.from_pem!(private_key)
+  |> X509.PublicKey.derive()
+  |> X509.PublicKey.to_pem()
+
+{:ok, tenant} =
+  Tenants.create_tenant(%{name: "ACME Inc", slug: "acme-inc", public_key: public_key})
 
 _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 

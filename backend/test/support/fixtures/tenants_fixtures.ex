@@ -26,11 +26,17 @@ defmodule Edgehog.TenantsFixtures do
   Generate a tenant.
   """
   def tenant_fixture(attrs \\ %{}) do
+    public_key =
+      X509.PrivateKey.new_ec(:secp256r1)
+      |> X509.PublicKey.derive()
+      |> X509.PublicKey.to_pem()
+
     {:ok, tenant} =
       attrs
       |> Enum.into(%{
         name: "some name",
-        slug: "some-name"
+        slug: "some-name",
+        public_key: public_key
       })
       |> Edgehog.Tenants.create_tenant()
 
