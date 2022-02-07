@@ -21,6 +21,8 @@ defmodule EdgehogWeb.PopulateTenant do
 
   alias Edgehog.Tenants
 
+  import Plug.Conn
+
   def init(opts), do: opts
 
   def call(conn, _opts) do
@@ -32,8 +34,11 @@ defmodule EdgehogWeb.PopulateTenant do
         Plug.Conn.assign(conn, :current_tenant, tenant)
 
       {:error, :not_found} ->
-        # TODO: render a JSON error
-        Plug.Conn.send_resp(conn, :forbidden, "")
+        conn
+        |> put_status(:forbidden)
+        |> Phoenix.Controller.put_view(EdgehogWeb.ErrorView)
+        |> Phoenix.Controller.render(:"403")
+        |> halt()
     end
   end
 end

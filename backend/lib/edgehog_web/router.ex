@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
+    plug EdgehogWeb.Auth
     plug EdgehogWeb.Context
   end
 
