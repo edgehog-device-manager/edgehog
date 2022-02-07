@@ -54,6 +54,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
     """
     test "updates system model with valid data", %{
       conn: conn,
+      api_path: api_path,
       system_model: system_model
     } do
       name = "Foobaz"
@@ -71,7 +72,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -90,7 +91,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
                Devices.fetch_system_model(system_model.id)
     end
 
-    test "fails with invalid data", %{conn: conn, system_model: system_model} do
+    test "fails with invalid data", %{
+      conn: conn,
+      api_path: api_path,
+      system_model: system_model
+    } do
       id = Absinthe.Relay.Node.to_global_id(:system_model, system_model.id, EdgehogWeb.Schema)
 
       variables = %{
@@ -102,13 +107,14 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => _} = assert(json_response(conn, 200))
     end
 
     test "updates system model with partial data", %{
       conn: conn,
+      api_path: api_path,
       system_model: system_model
     } do
       name = "Foobarbaz"
@@ -122,7 +128,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -137,7 +143,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       assert {:ok, %SystemModel{name: ^name}} = Devices.fetch_system_model(system_model.id)
     end
 
-    test "fails with non-existing id", %{conn: conn} do
+    test "fails with non-existing id", %{conn: conn, api_path: api_path} do
       name = "Foobaz"
       handle = "foobaz"
       part_number = "12345/Z"
@@ -153,7 +159,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
                assert(json_response(conn, 200))
@@ -161,6 +167,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     test "updates default locale description, without touching the others", %{
       conn: conn,
+      api_path: api_path,
       system_model: system_model,
       tenant: tenant
     } do
@@ -180,7 +187,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -212,6 +219,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     test "fails when trying to update a non default locale", %{
       conn: conn,
+      api_path: api_path,
       system_model: system_model
     } do
       description = %{
@@ -228,7 +236,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => [%{"code" => "not_default_locale"}]} = assert(json_response(conn, 200))
     end

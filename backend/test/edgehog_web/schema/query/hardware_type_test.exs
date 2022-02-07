@@ -36,7 +36,7 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
       }
     }
     """
-    test "returns hardware type if present", %{conn: conn} do
+    test "returns hardware type if present", %{conn: conn, api_path: api_path} do
       %HardwareType{
         id: id,
         name: name,
@@ -46,7 +46,7 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:hardware_type, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @query, variables: variables)
+      conn = get(conn, api_path, query: @query, variables: variables)
 
       assert json_response(conn, 200) == %{
                "data" => %{
@@ -59,10 +59,10 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
              }
     end
 
-    test "raises if non existing", %{conn: conn} do
+    test "raises if non existing", %{conn: conn, api_path: api_path} do
       variables = %{id: Absinthe.Relay.Node.to_global_id(:hardware_type, 1, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @query, variables: variables)
+      conn = get(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{"hardwareType" => nil},

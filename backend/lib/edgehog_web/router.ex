@@ -30,18 +30,20 @@ defmodule EdgehogWeb.Router do
     plug EdgehogWeb.PopulateTenant
   end
 
-  scope "/api" do
-    pipe_through :api
+  scope "/tenants/:tenant_slug" do
+    scope "/api" do
+      pipe_through :api
 
-    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema
+      forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema
 
-    forward "/", Absinthe.Plug, schema: EdgehogWeb.Schema
-  end
+      forward "/", Absinthe.Plug, schema: EdgehogWeb.Schema
+    end
 
-  scope "/tenants/:tenant_slug/triggers", EdgehogWeb do
-    pipe_through :triggers
+    scope "/triggers", EdgehogWeb do
+      pipe_through :triggers
 
-    post "/", AstarteTriggerController, :process_event
+      post "/", AstarteTriggerController, :process_event
+    end
   end
 
   # Enables the Swoosh mailbox preview in development.

@@ -43,7 +43,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       }
     }
     """
-    test "returns system model if present", %{conn: conn} do
+    test "returns system model if present", %{conn: conn, api_path: api_path} do
       hardware_type = hardware_type_fixture()
 
       %SystemModel{
@@ -55,7 +55,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @query, variables: variables)
+      conn = get(conn, api_path, query: @query, variables: variables)
 
       assert json_response(conn, 200) == %{
                "data" => %{
@@ -72,10 +72,10 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
              }
     end
 
-    test "returns not found if non existing", %{conn: conn} do
+    test "returns not found if non existing", %{conn: conn, api_path: api_path} do
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, 1, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @query, variables: variables)
+      conn = get(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{"systemModel" => nil},
@@ -83,7 +83,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
              } = json_response(conn, 200)
     end
 
-    test "returns the default locale description", %{conn: conn, tenant: tenant} do
+    test "returns the default locale description", %{
+      conn: conn,
+      api_path: api_path,
+      tenant: tenant
+    } do
       hardware_type = hardware_type_fixture()
 
       default_locale = tenant.default_locale
@@ -97,7 +101,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @query, variables: variables)
+      conn = get(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -111,7 +115,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
              } = json_response(conn, 200)
     end
 
-    test "returns the explicit locale description", %{conn: conn, tenant: tenant} do
+    test "returns the explicit locale description", %{
+      conn: conn,
+      api_path: api_path,
+      tenant: tenant
+    } do
       hardware_type = hardware_type_fixture()
 
       default_locale = tenant.default_locale
@@ -128,7 +136,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       conn =
         conn
         |> put_req_header("accept-language", "it-IT")
-        |> get("/api", query: @query, variables: variables)
+        |> get(api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -142,7 +150,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
              } = json_response(conn, 200)
     end
 
-    test "returns empty description for not existing locale", %{conn: conn, tenant: tenant} do
+    test "returns empty description for not existing locale", %{
+      conn: conn,
+      api_path: api_path,
+      tenant: tenant
+    } do
       hardware_type = hardware_type_fixture()
 
       default_locale = tenant.default_locale
@@ -159,7 +171,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       conn =
         conn
         |> put_req_header("accept-language", "fr-FR")
-        |> get("/api", query: @query, variables: variables)
+        |> get(api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{

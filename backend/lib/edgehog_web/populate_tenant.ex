@@ -24,11 +24,16 @@ defmodule EdgehogWeb.PopulateTenant do
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    # TODO: extract tenant from authentication context
-    [tenant | _] = Tenants.list_tenants()
+    tenant_slug = conn.path_params["tenant_slug"]
 
-    _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+    case Tenants.fetch_tenant_by_slug(tenant_slug) do
+      {:ok, tenant} ->
+        _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+        Plug.Conn.assign(conn, :current_tenant, tenant)
 
-    Plug.Conn.assign(conn, :current_tenant, tenant)
+      {:error, :not_found} ->
+        # TODO: render a JSON error
+        Plug.Conn.send_resp(conn, :forbidden, "")
+    end
   end
 end

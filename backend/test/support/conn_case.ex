@@ -63,7 +63,10 @@ defmodule EdgehogWeb.ConnCase do
       tenant = Edgehog.TenantsFixtures.tenant_fixture()
       _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 
-      {:ok, conn: conn, tenant: tenant}
+      # Populate the API path since it's tenant-specific
+      api_path = "/tenants/#{tenant.slug}/api"
+
+      {:ok, conn: conn, tenant: tenant, api_path: api_path}
     end
   end
 end

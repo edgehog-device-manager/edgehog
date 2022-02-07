@@ -41,7 +41,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
       }
     }
     """
-    test "updates hardware type with valid data", %{conn: conn, hardware_type: hardware_type} do
+    test "updates hardware type with valid data", %{
+      conn: conn,
+      api_path: api_path,
+      hardware_type: hardware_type
+    } do
       name = "Foobaz"
       handle = "foobaz"
       part_number = "12345/Z"
@@ -57,7 +61,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -76,7 +80,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
                Devices.fetch_hardware_type(hardware_type.id)
     end
 
-    test "updates hardware type with partial data", %{conn: conn, hardware_type: hardware_type} do
+    test "updates hardware type with partial data", %{
+      conn: conn,
+      api_path: api_path,
+      hardware_type: hardware_type
+    } do
       %HardwareType{name: initial_name, handle: initial_handle} = hardware_type
 
       name = "Foobaz"
@@ -91,7 +99,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -116,7 +124,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -135,7 +143,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
                Devices.fetch_hardware_type(hardware_type.id)
     end
 
-    test "fails with invalid data", %{conn: conn, hardware_type: hardware_type} do
+    test "fails with invalid data", %{
+      conn: conn,
+      api_path: api_path,
+      hardware_type: hardware_type
+    } do
       id = Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
 
       variables = %{
@@ -147,12 +159,12 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => _} = assert(json_response(conn, 200))
     end
 
-    test "fails with non-existing id", %{conn: conn} do
+    test "fails with non-existing id", %{conn: conn, api_path: api_path} do
       name = "Foobaz"
       handle = "foobaz"
       part_number = "12345/Z"
@@ -168,7 +180,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
         }
       }
 
-      conn = post(conn, "/api", query: @query, variables: variables)
+      conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
                assert(json_response(conn, 200))

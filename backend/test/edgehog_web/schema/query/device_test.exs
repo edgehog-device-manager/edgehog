@@ -43,7 +43,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     }
     """
 
-    test "returns the device if it's present", %{conn: conn, realm: realm} do
+    test "returns the device if it's present", %{conn: conn, api_path: api_path, realm: realm} do
       %Device{
         id: id,
         name: name,
@@ -53,7 +53,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @query, variables: variables)
+      conn = get(conn, api_path, query: @query, variables: variables)
 
       assert %{
                "data" => %{
@@ -78,14 +78,14 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     }
     """
 
-    test "returns the storage usage if available", %{conn: conn, realm: realm} do
+    test "returns the storage usage if available", %{conn: conn, api_path: api_path, realm: realm} do
       %Device{
         id: id
       } = device_fixture(realm)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @storage_usage_query, variables: variables)
+      conn = get(conn, api_path, query: @storage_usage_query, variables: variables)
 
       assert %{
                "data" => %{
@@ -111,7 +111,11 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     }
     """
 
-    test "returns the OTA operations if available", %{conn: conn, realm: realm} do
+    test "returns the OTA operations if available", %{
+      conn: conn,
+      api_path: api_path,
+      realm: realm
+    } do
       device = device_fixture(realm)
 
       %Device{
@@ -122,7 +126,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
-      conn = get(conn, "/api", query: @ota_operations_query, variables: variables)
+      conn = get(conn, api_path, query: @ota_operations_query, variables: variables)
 
       assert %{
                "data" => %{
