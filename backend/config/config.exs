@@ -42,6 +42,19 @@ config :tesla, :adapter, {Tesla.Adapter.Finch, name: EdgehogFinch}
 config :ex_aws,
   json_codec: Jason
 
+config :edgehog, EdgehogWeb.Auth.Token,
+  allowed_algos: [
+    "ES256",
+    "ES384",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512",
+    "RS256",
+    "RS384",
+    "RS512"
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

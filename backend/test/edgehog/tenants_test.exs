@@ -40,7 +40,12 @@ defmodule Edgehog.TenantsTest do
     end
 
     test "create_tenant/1 with valid data creates a tenant" do
-      valid_attrs = %{name: "some name", slug: "some-name"}
+      public_key =
+        X509.PrivateKey.new_ec(:secp256r1)
+        |> X509.PublicKey.derive()
+        |> X509.PublicKey.to_pem()
+
+      valid_attrs = %{name: "some name", slug: "some-name", public_key: public_key}
 
       assert {:ok, %Tenant{} = tenant} = Tenants.create_tenant(valid_attrs)
       assert tenant.name == "some name"

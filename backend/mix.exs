@@ -78,7 +78,9 @@ defmodule Edgehog.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6"},
-      {:waffle_gcs, "~> 0.2"}
+      {:waffle_gcs, "~> 0.2"},
+      {:guardian, "~> 2.0"},
+      {:jose, "~> 1.8"}
     ]
   end
 

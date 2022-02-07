@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,30 +16,22 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.TenantsFixtures do
-  @moduledoc """
-  This module defines test helpers for creating
-  entities via the `Edgehog.Tenants` context.
-  """
+defmodule EdgehogWeb.Auth do
+  alias EdgehogWeb.Auth.Pipeline
 
-  @doc """
-  Generate a tenant.
-  """
-  def tenant_fixture(attrs \\ %{}) do
-    public_key =
-      X509.PrivateKey.new_ec(:secp256r1)
-      |> X509.PublicKey.derive()
-      |> X509.PublicKey.to_pem()
+  def init(opts) do
+    Pipeline.init(opts)
+  end
 
-    {:ok, tenant} =
-      attrs
-      |> Enum.into(%{
-        name: "some name",
-        slug: "some-name",
-        public_key: public_key
-      })
-      |> Edgehog.Tenants.create_tenant()
+  def call(conn, opts) do
+    auth_disabled? = Application.get_env(:edgehog, :disable_authentication)
 
-    tenant
+    unless auth_disabled? do
+      Pipeline.call(conn, opts)
+    else
+      # TODO: when we add Authz this path will probably have to
+      # put some type of all-access Authz in the GraphQL context
+      conn
+    end
   end
 end

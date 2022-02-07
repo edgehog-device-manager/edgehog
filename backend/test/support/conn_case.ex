@@ -55,18 +55,52 @@ defmodule EdgehogWeb.ConnCase do
 
     conn = Phoenix.ConnTest.build_conn()
 
-    if tags[:no_tenant_fixtures] do
-      {:ok, conn: conn}
-    else
-      # Create a tenant fixture and populate the tenant id, so that fixtures that run
-      # before the web part use the same tenant
-      tenant = Edgehog.TenantsFixtures.tenant_fixture()
-      _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+    # We manually generate the keypair so we can sign a JWT with it below
+    tenant_private_key = X509.PrivateKey.new_ec(:secp256r1)
 
-      # Populate the API path since it's tenant-specific
-      api_path = "/tenants/#{tenant.slug}/api"
+    tenant_public_key =
+      tenant_private_key
+      |> X509.PublicKey.derive()
+      |> X509.PublicKey.to_pem()
 
-      {:ok, conn: conn, tenant: tenant, api_path: api_path}
-    end
+    # Create a tenant fixture and populate the tenant id, so that fixtures that run
+    # before the web part use the same tenant
+    tenant = Edgehog.TenantsFixtures.tenant_fixture(public_key: tenant_public_key)
+    _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+
+    conn =
+      if tags[:unauthenticated] do
+        # Just return the conn
+        conn
+      else
+        authenticate_connection(conn, tenant_private_key)
+      end
+
+    # Populate the API path since it's tenant-specific
+    api_path = "/tenants/#{tenant.slug}/api"
+
+    {:ok, conn: conn, tenant: tenant, api_path: api_path, tenant_private_key: tenant_private_key}
+  end
+
+  @doc """
+  Authenticates the conn with Edgehog claims
+  """
+  def authenticate_connection(conn, tenant_private_key, claims \\ nil) do
+    jwk =
+      tenant_private_key
+      |> X509.PrivateKey.to_pem()
+      |> JOSE.JWK.from_pem()
+
+    # The value of e_tga claims is ignored for now
+    claims = claims || %{e_tga: true}
+
+    # Generate the JWT
+    {:ok, jwt, _claims} =
+      EdgehogWeb.Auth.Token.encode_and_sign("dontcare", claims,
+        secret: jwk,
+        allowed_algos: ["ES256"]
+      )
+
+    Plug.Conn.put_req_header(conn, "authorization", "bearer #{jwt}")
   end
 end

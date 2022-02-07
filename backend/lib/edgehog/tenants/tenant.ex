@@ -27,6 +27,7 @@ defmodule Edgehog.Tenants.Tenant do
     field :name, :string
     field :slug, :string
     field :default_locale, :string, default: "en-US"
+    field :public_key, :string
     has_one :realm, Realm, foreign_key: :tenant_id
 
     timestamps()
@@ -35,8 +36,8 @@ defmodule Edgehog.Tenants.Tenant do
   @doc false
   def changeset(tenant, attrs) do
     tenant
-    |> cast(attrs, [:name, :slug, :default_locale])
-    |> validate_required([:name, :slug])
+    |> cast(attrs, [:name, :slug, :default_locale, :public_key])
+    |> validate_required([:name, :slug, :public_key])
     |> unique_constraint(:name)
     |> unique_constraint(:slug)
     |> validate_format(:slug, ~r/^[a-z\d\-]+$/,
@@ -45,5 +46,13 @@ defmodule Edgehog.Tenants.Tenant do
     |> validate_format(:default_locale, ~r/^[a-z]{2,3}-[A-Z]{2}$/,
       message: "is not a valid locale"
     )
+    |> validate_change(:public_key, &validate_pem_public_key/2)
+  end
+
+  defp validate_pem_public_key(field, pem_public_key) do
+    case X509.PublicKey.from_pem(pem_public_key) do
+      {:ok, _} -> []
+      {:error, _reason} -> [{field, "is not a valid PEM public key"}]
+    end
   end
 end
