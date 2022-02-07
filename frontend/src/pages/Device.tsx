@@ -954,7 +954,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
           <div className="mt-3">
             <FormattedMessage
               id="pages.Device.SoftwareUpdateTab.updatingTo"
-              defaultMessage="Updating to image <a>{baseImageUrl}</a>"
+              defaultMessage="Updating to image <a>{baseImageName}</a>"
               values={{
                 a: (chunks: React.ReactNode) => (
                   <a
@@ -965,7 +965,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
                     {chunks}
                   </a>
                 ),
-                baseImageUrl: currentOperation.baseImageUrl,
+                baseImageName: currentOperation.baseImageUrl.split("/").pop(),
               }}
             />
           </div>

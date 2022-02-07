@@ -174,8 +174,8 @@
   "components.LastSeen.now": {
     "defaultMessage": "Now"
   },
-  "components.OperationTable.baseImageUrl": {
-    "defaultMessage": "Base Image URL"
+  "components.OperationTable.baseImage": {
+    "defaultMessage": "Base Image"
   },
   "components.OperationTable.operationStatus": {
     "defaultMessage": "Status"
@@ -320,7 +320,7 @@
     "defaultMessage": "History"
   },
   "pages.Device.SoftwareUpdateTab.updatingTo": {
-    "defaultMessage": "Updating to image <a>{baseImageUrl}</a>"
+    "defaultMessage": "Updating to image <a>{baseImageName}</a>"
   },
   "pages.Device.baseImageTab": {
     "defaultMessage": "Base Image"

@@ -95,11 +95,13 @@ const columns: Column<OTAOperation>[] = [
     accessor: "baseImageUrl",
     Header: (
       <FormattedMessage
-        id="components.OperationTable.baseImageUrl"
-        defaultMessage="Base Image URL"
+        id="components.OperationTable.baseImage"
+        defaultMessage="Base Image"
       />
     ),
-    Cell: ({ value }) => <span className="text-nowrap">{value}</span>,
+    Cell: ({ value }) => (
+      <span className="text-nowrap">{value.split("/").pop()}</span>
+    ),
   },
   {
     accessor: "createdAt",
