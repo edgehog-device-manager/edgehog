@@ -23,7 +23,10 @@ export type Device_getDevice_QueryResponse = {
                 readonly name: string;
             };
         } | null;
-        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_baseImage" | "Device_osInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations">;
+        readonly cellularConnection: ReadonlyArray<{
+            readonly __typename: string;
+        }> | null;
+        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_baseImage" | "Device_osInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations" | "CellularConnectionTabs_cellularConnection">;
     } | null;
 };
 export type Device_getDevice_Query = {
@@ -53,6 +56,9 @@ query Device_getDevice_Query(
       }
       id
     }
+    cellularConnection {
+      __typename
+    }
     ...Device_hardwareInfo
     ...Device_baseImage
     ...Device_osInfo
@@ -62,6 +68,24 @@ query Device_getDevice_Query(
     ...Device_wifiScanResults
     ...Device_batteryStatus
     ...Device_otaOperations
+    ...CellularConnectionTabs_cellularConnection
+  }
+}
+
+fragment CellularConnectionTabs_cellularConnection on Device {
+  cellularConnection {
+    apn
+    carrier
+    cellId
+    imei
+    imsi
+    localAreaCode
+    mobileCountryCode
+    mobileNetworkCode
+    registrationStatus
+    rssi
+    slot
+    technology
   }
 }
 
@@ -226,17 +250,38 @@ v9 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "version",
+  "name": "__typename",
   "storageKey": null
 },
 v10 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "timestamp",
+  "name": "rssi",
   "storageKey": null
 },
 v11 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "slot",
+  "storageKey": null
+},
+v12 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "version",
+  "storageKey": null
+},
+v13 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "timestamp",
+  "storageKey": null
+},
+v14 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
@@ -290,6 +335,18 @@ return {
             "storageKey": null
           },
           {
+            "alias": null,
+            "args": null,
+            "concreteType": "Modem",
+            "kind": "LinkedField",
+            "name": "cellularConnection",
+            "plural": true,
+            "selections": [
+              (v9/*: any*/)
+            ],
+            "storageKey": null
+          },
+          {
             "args": null,
             "kind": "FragmentSpread",
             "name": "Device_hardwareInfo"
@@ -333,6 +390,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "Device_otaOperations"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "CellularConnectionTabs_cellularConnection"
           }
         ],
         "storageKey": null
@@ -391,6 +453,90 @@ return {
           {
             "alias": null,
             "args": null,
+            "concreteType": "Modem",
+            "kind": "LinkedField",
+            "name": "cellularConnection",
+            "plural": true,
+            "selections": [
+              (v9/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "apn",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "carrier",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "cellId",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "imei",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "imsi",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "localAreaCode",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "mobileCountryCode",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "mobileNetworkCode",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "registrationStatus",
+                "storageKey": null
+              },
+              (v10/*: any*/),
+              (v11/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "technology",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "HardwareInfo",
             "kind": "LinkedField",
             "name": "hardwareInfo",
@@ -443,7 +589,7 @@ return {
             "plural": false,
             "selections": [
               (v6/*: any*/),
-              (v9/*: any*/),
+              (v12/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -470,7 +616,7 @@ return {
             "plural": false,
             "selections": [
               (v6/*: any*/),
-              (v9/*: any*/)
+              (v12/*: any*/)
             ],
             "storageKey": null
           },
@@ -510,7 +656,7 @@ return {
                 "name": "address",
                 "storageKey": null
               },
-              (v10/*: any*/)
+              (v13/*: any*/)
             ],
             "storageKey": null
           },
@@ -575,7 +721,7 @@ return {
                 "name": "uptimeMilliseconds",
                 "storageKey": null
               },
-              (v10/*: any*/)
+              (v13/*: any*/)
             ],
             "storageKey": null
           },
@@ -608,14 +754,8 @@ return {
                 "name": "macAddress",
                 "storageKey": null
               },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "rssi",
-                "storageKey": null
-              },
-              (v10/*: any*/)
+              (v10/*: any*/),
+              (v13/*: any*/)
             ],
             "storageKey": null
           },
@@ -627,14 +767,8 @@ return {
             "name": "batteryStatus",
             "plural": true,
             "selections": [
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "slot",
-                "storageKey": null
-              },
               (v11/*: any*/),
+              (v14/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -668,7 +802,7 @@ return {
                 "name": "baseImageUrl",
                 "storageKey": null
               },
-              (v11/*: any*/),
+              (v14/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -692,14 +826,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "60315462fc89c3564587e46f1cc96efa",
+    "cacheID": "955796d08044f775d2aaae93cf85a72d",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    ...Device_hardwareInfo\n    ...Device_baseImage\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n  }\n}\n\nfragment Device_baseImage on Device {\n  baseImage {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    status\n  }\n  ...OperationTable_otaOperations\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n\nfragment OperationTable_otaOperations on Device {\n  otaOperations {\n    baseImageUrl\n    createdAt\n    status\n    updatedAt\n    id\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    cellularConnection {\n      __typename\n    }\n    ...Device_hardwareInfo\n    ...Device_baseImage\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n    ...CellularConnectionTabs_cellularConnection\n  }\n}\n\nfragment CellularConnectionTabs_cellularConnection on Device {\n  cellularConnection {\n    apn\n    carrier\n    cellId\n    imei\n    imsi\n    localAreaCode\n    mobileCountryCode\n    mobileNetworkCode\n    registrationStatus\n    rssi\n    slot\n    technology\n  }\n}\n\nfragment Device_baseImage on Device {\n  baseImage {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    status\n  }\n  ...OperationTable_otaOperations\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n\nfragment OperationTable_otaOperations on Device {\n  otaOperations {\n    baseImageUrl\n    createdAt\n    status\n    updatedAt\n    id\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = 'e5212b56a3f24eb4ea15c67fa852152a';
+(node as any).hash = '69c65adf3a80eee6245fe1c09d5168e8';
 export default node;
