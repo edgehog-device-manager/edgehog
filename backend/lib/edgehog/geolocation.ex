@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ defmodule Edgehog.Geolocation do
   @enforce_keys [:latitude, :longitude, :timestamp]
   defstruct [:latitude, :longitude, :accuracy, :timestamp, :address]
 
-  alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
   alias Edgehog.Geolocation
-  alias Edgehog.Repo
+  alias Edgehog.Geolocation.Coordinates
 
   @type t() :: %__MODULE__{
           latitude: float,
@@ -38,14 +37,26 @@ defmodule Edgehog.Geolocation do
         }
 
   def fetch_location(%Device{} = device) do
-    with {:ok, coordinates} <- fetch_device_coordinates(device) do
-      address = get_address(coordinates)
+    geolocation_providers = Application.get_env(:edgehog, :geolocation_providers, [])
+    geocoding_providers = Application.get_env(:edgehog, :geocoding_providers, [])
+
+    with {:ok, position} <- geolocate_with(geolocation_providers, device) do
+      coordinates = %Coordinates{
+        latitude: position.latitude,
+        longitude: position.longitude
+      }
+
+      address =
+        case reverse_geocode_with(geocoding_providers, coordinates) do
+          {:ok, address} -> address
+          _ -> nil
+        end
 
       location = %Geolocation{
-        latitude: coordinates.latitude,
-        longitude: coordinates.longitude,
-        accuracy: coordinates.accuracy,
-        timestamp: coordinates.timestamp,
+        latitude: position.latitude,
+        longitude: position.longitude,
+        accuracy: position.accuracy,
+        timestamp: position.timestamp,
         address: address
       }
 
@@ -53,91 +64,23 @@ defmodule Edgehog.Geolocation do
     end
   end
 
-  defp fetch_device_coordinates(device) do
-    with {:error, _reason} <- fetch_device_wifi_coordinates(device),
-         {:error, _reason} <- fetch_device_ip_coordinates(device) do
-      {:error, :device_coordinates_not_found}
+  defp geolocate_with([], %Device{} = _device) do
+    {:error, :device_position_not_found}
+  end
+
+  defp geolocate_with([provider | other_providers], %Device{} = device) do
+    with {:error, _reason} <- provider.geolocate(device) do
+      geolocate_with(other_providers, device)
     end
   end
 
-  defp fetch_device_wifi_coordinates(device) do
-    with {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(device),
-         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(wifi_scan_results),
-         {:ok, coordinates} <- geolocate_wifi(wifi_scan_results) do
-      timestamp =
-        case Enum.empty?(wifi_scan_results) do
-          false -> List.first(wifi_scan_results).timestamp
-          true -> DateTime.utc_now()
-        end
-
-      coordinates = Enum.into(%{timestamp: timestamp}, coordinates)
-
-      {:ok, coordinates}
-    end
+  defp reverse_geocode_with([], _coordinates) do
+    {:error, :device_address_not_found}
   end
 
-  defp filter_latest_wifi_scan_results([_scan | _] = wifi_scan_results) do
-    latest_scan = Enum.max_by(wifi_scan_results, & &1.timestamp, DateTime)
-
-    latest_wifi_scan_results =
-      Enum.filter(wifi_scan_results, &(&1.timestamp == latest_scan.timestamp))
-
-    {:ok, latest_wifi_scan_results}
-  end
-
-  defp filter_latest_wifi_scan_results(_wifi_scan_results) do
-    {:error, :wifi_scan_results_not_found}
-  end
-
-  defp fetch_device_ip_coordinates(device) do
-    device = Repo.preload(device, :realm)
-
-    with {:ok, device_status} <- Astarte.get_device_status(device.realm, device.device_id),
-         {:ok, coordinates} <- geolocate_ip(device_status.last_seen_ip) do
-      device_last_seen =
-        [device_status.last_connection, device_status.last_disconnection]
-        |> Enum.reject(&is_nil/1)
-        |> Enum.sort({:desc, DateTime})
-        |> List.first()
-
-      timestamp = device_last_seen || DateTime.utc_now()
-      coordinates = Enum.into(%{timestamp: timestamp}, coordinates)
-
-      {:ok, coordinates}
-    end
-  end
-
-  defp get_address(coordinates) do
-    case reverse_geocode(coordinates) do
-      {:ok, address} -> address
-      _ -> nil
-    end
-  end
-
-  defp geolocate_ip(ip_address) do
-    ip_geolocation_provider = Application.get_env(:edgehog, :ip_geolocation_provider)
-
-    case ip_geolocation_provider do
-      nil -> {:error, :ip_geolocation_provider_not_found}
-      _ -> ip_geolocation_provider.geolocate(ip_address)
-    end
-  end
-
-  defp geolocate_wifi(wifi_scan_results) do
-    wifi_geolocation_provider = Application.get_env(:edgehog, :wifi_geolocation_provider)
-
-    case wifi_geolocation_provider do
-      nil -> {:error, :wifi_geolocation_provider_not_found}
-      _ -> wifi_geolocation_provider.geolocate(wifi_scan_results)
-    end
-  end
-
-  defp reverse_geocode(coordinates) do
-    geocoding_provider = Application.get_env(:edgehog, :geocoding_provider)
-
-    case geocoding_provider do
-      nil -> {:error, :geocoding_provider_not_found}
-      _ -> geocoding_provider.reverse_geocode(coordinates)
+  defp reverse_geocode_with([provider | other_providers], coordinates) do
+    with {:error, _reason} <- provider.reverse_geocode(coordinates) do
+      reverse_geocode_with(other_providers, coordinates)
     end
   end
 end

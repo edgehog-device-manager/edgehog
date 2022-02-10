@@ -16,16 +16,18 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Geolocation.WiFiGeolocationProvider do
-  alias Edgehog.Astarte.Device.WiFiScanResult
+defmodule Edgehog.Mocks.Geolocation.GeolocationProvider do
+  @behaviour Edgehog.Geolocation.GeolocationProvider
 
-  @type wifi_scan_results :: list(WiFiScanResult.t())
+  @impl true
+  def geolocate(_device) do
+    coordinates = %{
+      accuracy: 12,
+      latitude: 45.4095285,
+      longitude: 11.8788231,
+      timestamp: ~U[2021-11-15 11:44:57.432516Z]
+    }
 
-  @type coordinates :: %{
-          latitude: float,
-          longitude: float,
-          accuracy: number | nil
-        }
-
-  @callback geolocate(wifi_scan_results) :: {:ok, coordinates} | {:error, term}
+    {:ok, coordinates}
+  end
 end

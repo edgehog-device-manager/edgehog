@@ -52,12 +52,8 @@ Mox.defmock(Edgehog.Astarte.Device.CellularConnectionMock,
   for: Edgehog.Astarte.Device.CellularConnection.Behaviour
 )
 
-Mox.defmock(Edgehog.Geolocation.IPGeolocationProviderMock,
-  for: Edgehog.Geolocation.IPGeolocationProvider
-)
-
-Mox.defmock(Edgehog.Geolocation.WiFiGeolocationProviderMock,
-  for: Edgehog.Geolocation.WiFiGeolocationProvider
+Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
+  for: Edgehog.Geolocation.GeolocationProvider
 )
 
 Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)

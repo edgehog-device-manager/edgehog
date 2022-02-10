@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,48 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
-  @behaviour Edgehog.Geolocation.IPGeolocationProvider
+  @behaviour Edgehog.Geolocation.GeolocationProvider
+
+  alias Edgehog.Astarte
+  alias Edgehog.Astarte.Device
+  alias Edgehog.Geolocation.Position
+  alias Edgehog.Repo
 
   use Tesla
 
   plug Tesla.Middleware.BaseUrl, "https://freegeoip.app/json"
   plug Tesla.Middleware.JSON
 
-  @impl Edgehog.Geolocation.IPGeolocationProvider
-  def geolocate(nil = _ip_address) do
-    {:error, :coordinates_not_found}
+  @impl Edgehog.Geolocation.GeolocationProvider
+  def geolocate(%Device{} = device) do
+    device = Repo.preload(device, :realm)
+
+    with {:ok, device_status} <- Astarte.get_device_status(device.realm, device.device_id),
+         {:ok, coordinates} <- geolocate_ip(device_status.last_seen_ip) do
+      device_last_seen =
+        [device_status.last_connection, device_status.last_disconnection]
+        |> Enum.reject(&is_nil/1)
+        |> Enum.sort({:desc, DateTime})
+        |> List.first()
+
+      timestamp = device_last_seen || DateTime.utc_now()
+
+      position = %Position{
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        accuracy: coordinates.accuracy,
+        timestamp: timestamp
+      }
+
+      {:ok, position}
+    end
   end
 
-  @impl Edgehog.Geolocation.IPGeolocationProvider
-  def geolocate(ip_address) do
+  defp geolocate_ip(nil) do
+    {:error, :position_not_found}
+  end
+
+  defp geolocate_ip(ip_address) do
     config = Application.fetch_env!(:edgehog, Edgehog.Geolocation.Providers.FreeGeoIp)
     api_key = Keyword.fetch!(config, :api_key)
 
@@ -60,7 +88,7 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
       {:ok, location}
     else
       {:coords, _} ->
-        {:error, :coordinates_not_found}
+        {:error, :position_not_found}
     end
   end
 end

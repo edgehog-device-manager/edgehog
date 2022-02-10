@@ -54,9 +54,8 @@ config :edgehog, enable_s3_storage?: true
 
 # Geolocation mocks for tests
 config :edgehog,
-  ip_geolocation_provider: Edgehog.Geolocation.IPGeolocationProviderMock,
-  wifi_geolocation_provider: Edgehog.Geolocation.WiFiGeolocationProviderMock,
-  geocoding_provider: Edgehog.Geolocation.GeocodingProviderMock
+  geolocation_providers: [Edgehog.Geolocation.GeolocationProviderMock],
+  geocoding_providers: [Edgehog.Geolocation.GeocodingProviderMock]
 
 config :edgehog, Edgehog.Geolocation.Providers.FreeGeoIp, api_key: "test_api_key"
 

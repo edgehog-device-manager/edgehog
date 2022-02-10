@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,18 +16,14 @@
 # limitations under the License.
 #
 
-defmodule Edgehog.Mocks.Geolocation.WiFiGeolocationProvider do
-  @behaviour Edgehog.Geolocation.WiFiGeolocationProvider
+defmodule Edgehog.Geolocation.Position do
+  @type t :: %__MODULE__{
+          latitude: float,
+          longitude: float,
+          accuracy: number | nil,
+          timestamp: DateTime.t()
+        }
 
-  @impl true
-  def geolocate([_wifi_scan_result | _] = _wifi_scan_results) do
-    coordinates = %{accuracy: 12, latitude: 45.4095285, longitude: 11.8788231}
-
-    {:ok, coordinates}
-  end
-
-  @impl true
-  def geolocate(_empty_scan_results) do
-    {:error, :coordinates_not_found}
-  end
+  @enforce_keys [:latitude, :longitude, :accuracy, :timestamp]
+  defstruct @enforce_keys
 end
