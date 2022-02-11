@@ -165,7 +165,7 @@ defmodule EdgehogWeb.Resolvers.Astarte do
       "SearchingOperator" -> {:ok, :searching_operator}
       "RegistrationDenied" -> {:ok, :registration_denied}
       "Unknown" -> {:ok, :unknown}
-      "RegisteredRoaming" -> {:ok, :registrered_roaming}
+      "RegisteredRoaming" -> {:ok, :registered_roaming}
       nil -> {:ok, nil}
       _other -> {:error, :invalid_modem_registration_status}
     end

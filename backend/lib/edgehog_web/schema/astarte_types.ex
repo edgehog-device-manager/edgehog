@@ -263,7 +263,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
     value :unknown
     @desc "Registered, roaming."
-    value :registrered_roaming
+    value :registered_roaming
   end
 
   @desc """
