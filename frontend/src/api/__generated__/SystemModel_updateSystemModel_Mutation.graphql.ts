@@ -5,13 +5,13 @@
 import { ConcreteRequest } from "relay-runtime";
 
 export type UpdateSystemModelInput = {
-    description?: LocalizedTextInput | null | undefined;
-    handle?: string | null | undefined;
+    systemModelId: string;
     name?: string | null | undefined;
-    partNumbers?: Array<string> | null | undefined;
+    handle?: string | null | undefined;
     pictureFile?: File | null | undefined;
     pictureUrl?: string | null | undefined;
-    systemModelId: string;
+    partNumbers?: Array<string> | null | undefined;
+    description?: LocalizedTextInput | null | undefined;
 };
 export type LocalizedTextInput = {
     locale: string;

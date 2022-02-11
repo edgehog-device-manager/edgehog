@@ -5,8 +5,8 @@
 import { ConcreteRequest } from "relay-runtime";
 
 export type CreateHardwareTypeInput = {
-    handle: string;
     name: string;
+    handle: string;
     partNumbers: Array<string>;
 };
 export type HardwareTypeCreate_createHardwareType_MutationVariables = {
