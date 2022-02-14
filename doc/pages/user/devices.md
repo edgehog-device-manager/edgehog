@@ -83,6 +83,12 @@ This section reports an overview on the current status of the battery slots of t
 
 ![Device Battery Screenshot](assets/device_battery.png)
 
+### Cellular Connection
+
+This section reports an overview of the cellular connection of the Device.
+
+![Device Cellular Connection Screenshot](assets/device_cellular_connection.png)
+
 ### Nearby WiFi APs
 
 This section reports the list of nearby Access Points that the Device found while scanning for WiFi

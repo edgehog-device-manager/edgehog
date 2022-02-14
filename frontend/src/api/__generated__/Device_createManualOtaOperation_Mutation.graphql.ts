@@ -7,8 +7,8 @@ import { ConcreteRequest } from "relay-runtime";
 export type OtaOperationStatus = "DONE" | "ERROR" | "IN_PROGRESS" | "PENDING" | "%future added value";
 export type OtaOperationStatusCode = "ALREADY_IN_PROGRESS" | "DEPLOY_ERROR" | "FAILED" | "NETWORK_ERROR" | "NVS_ERROR" | "WRONG_PARTITION" | "%future added value";
 export type CreateManualOtaOperationInput = {
-    baseImageFile?: File | null | undefined;
     deviceId: string;
+    baseImageFile?: File | null | undefined;
 };
 export type Device_createManualOtaOperation_MutationVariables = {
     input: CreateManualOtaOperationInput;

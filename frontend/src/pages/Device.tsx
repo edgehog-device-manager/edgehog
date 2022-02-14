@@ -29,7 +29,6 @@ import {
 } from "react-relay/hooks";
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
-import _ from "lodash";
 
 import type { Device_batteryStatus$key } from "api/__generated__/Device_batteryStatus.graphql";
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
@@ -40,10 +39,14 @@ import type { Device_storageUsage$key } from "api/__generated__/Device_storageUs
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
 import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
-import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
+import type {
+  Device_getDevice_Query,
+  Device_getDevice_QueryResponse,
+} from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import { Link, Route } from "Navigation";
 import Alert from "components/Alert";
+import CellularConnectionTabs from "components/CellularConnectionTabs";
 import Center from "components/Center";
 import ConnectionStatus from "components/ConnectionStatus";
 import Col from "components/Col";
@@ -180,6 +183,9 @@ const GET_DEVICE_QUERY = graphql`
           name
         }
       }
+      cellularConnection {
+        __typename
+      }
       ...Device_hardwareInfo
       ...Device_baseImage
       ...Device_osInfo
@@ -189,6 +195,7 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_wifiScanResults
       ...Device_batteryStatus
       ...Device_otaOperations
+      ...CellularConnectionTabs_cellularConnection
     }
   }
 `;
@@ -918,6 +925,51 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
   );
 };
 
+interface DeviceCellularConnectionTabProps {
+  deviceRef: NonNullable<Device_getDevice_QueryResponse["device"]>;
+}
+
+const DeviceCellularConnectionTab = ({
+  deviceRef,
+}: DeviceCellularConnectionTabProps) => {
+  const intl = useIntl();
+
+  const { cellularConnection } = deviceRef;
+  if (!cellularConnection) {
+    return null;
+  }
+
+  return (
+    <Tab
+      eventKey="device-cellular-connection-tab"
+      title={intl.formatMessage({
+        id: "pages.Device.CellularConnectionTab",
+        defaultMessage: "Cellular Connection",
+      })}
+    >
+      <div className="mt-3">
+        {cellularConnection.length === 0 ? (
+          <Result.EmptyList
+            title={
+              <FormattedMessage
+                id="pages.Device.DeviceCellularConnectionTab.noModems.title"
+                defaultMessage="No modem"
+              />
+            }
+          >
+            <FormattedMessage
+              id="pages.Device.DeviceCellularConnectionTab.noModems.message"
+              defaultMessage="The device has not detected any modems yet."
+            />
+          </Result.EmptyList>
+        ) : (
+          <CellularConnectionTabs deviceRef={deviceRef} />
+        )}
+      </div>
+    </Tab>
+  );
+};
+
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
 }
@@ -1071,6 +1123,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
               "device-storage-usage-tab",
               "device-battery-tab",
               "device-location-tab",
+              "device-cellular-connection-tab",
               "device-wifi-scan-results-tab",
               "device-software-update-tab",
             ]}
@@ -1081,6 +1134,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
             <DeviceBatteryTab deviceRef={device} />
+            <DeviceCellularConnectionTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
             <SoftwareUpdateTab deviceRef={device} />

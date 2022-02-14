@@ -95,6 +95,39 @@
   "components.BatteryTable.statusTitle": {
     "defaultMessage": "Status"
   },
+  "components.CellularConnectionTabs.Modem.APN": {
+    "defaultMessage": "APN"
+  },
+  "components.CellularConnectionTabs.Modem.Carrier": {
+    "defaultMessage": "Carrier"
+  },
+  "components.CellularConnectionTabs.Modem.CellID": {
+    "defaultMessage": "Cell ID"
+  },
+  "components.CellularConnectionTabs.Modem.IMEI": {
+    "defaultMessage": "IMEI"
+  },
+  "components.CellularConnectionTabs.Modem.IMSI": {
+    "defaultMessage": "IMSI"
+  },
+  "components.CellularConnectionTabs.Modem.LocalAreaCode": {
+    "defaultMessage": "Local Area Code"
+  },
+  "components.CellularConnectionTabs.Modem.MobileCountryCode": {
+    "defaultMessage": "Mobile Country Code"
+  },
+  "components.CellularConnectionTabs.Modem.MobileNetworkCode": {
+    "defaultMessage": "Mobile Network Code"
+  },
+  "components.CellularConnectionTabs.Modem.RSSI": {
+    "defaultMessage": "RSSI"
+  },
+  "components.CellularConnectionTabs.Modem.RegistrationStatus": {
+    "defaultMessage": "Registration Status"
+  },
+  "components.CellularConnectionTabs.Modem.technology": {
+    "defaultMessage": "Technology"
+  },
   "components.ConnectionStatus.statusConnected": {
     "defaultMessage": "Connected"
   },
@@ -298,6 +331,51 @@
   "device.otaOperationStatus.Unknown": {
     "defaultMessage": "Unknown"
   },
+  "modem.RegistrationStatus.NotRegistered": {
+    "defaultMessage": "Not Registered"
+  },
+  "modem.RegistrationStatus.Registered": {
+    "defaultMessage": "Registered"
+  },
+  "modem.RegistrationStatus.RegisteredRoaming": {
+    "defaultMessage": "Registered, roaming"
+  },
+  "modem.RegistrationStatus.RegistrationDenied": {
+    "defaultMessage": "Registration denied"
+  },
+  "modem.RegistrationStatus.SearchingOperator": {
+    "defaultMessage": "Searching an operator to register to"
+  },
+  "modem.RegistrationStatus.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "modem.technology.EUTRAN": {
+    "defaultMessage": "E-UTRAN"
+  },
+  "modem.technology.GSM": {
+    "defaultMessage": "GSM"
+  },
+  "modem.technology.GSM_COMPACT": {
+    "defaultMessage": "GSM Compact"
+  },
+  "modem.technology.GSM_EGPRS": {
+    "defaultMessage": "GSM with EGPRS"
+  },
+  "modem.technology.UTRAN": {
+    "defaultMessage": "UTRAN"
+  },
+  "modem.technology.UTRAN_HSDPA": {
+    "defaultMessage": "UTRAN with HSDPA"
+  },
+  "modem.technology.UTRAN_HSDPA_HSUPA": {
+    "defaultMessage": "UTRAN with HSDPA and HSUPA"
+  },
+  "modem.technology.UTRAN_HSUPA": {
+    "defaultMessage": "UTRAN with HSUPA"
+  },
+  "modem.technology.Unknown": {
+    "defaultMessage": "Unknown"
+  },
   "pages.Device.BatteryStatusTab": {
     "defaultMessage": "Battery"
   },
@@ -306,6 +384,15 @@
   },
   "pages.Device.BatteryStatusTab.noBattery.title": {
     "defaultMessage": "No battery"
+  },
+  "pages.Device.CellularConnectionTab": {
+    "defaultMessage": "Cellular Connection"
+  },
+  "pages.Device.DeviceCellularConnectionTab.noModems.message": {
+    "defaultMessage": "The device has not detected any modems yet."
+  },
+  "pages.Device.DeviceCellularConnectionTab.noModems.title": {
+    "defaultMessage": "No modem"
   },
   "pages.Device.SoftwareUpdateTab": {
     "defaultMessage": "Software Updates"

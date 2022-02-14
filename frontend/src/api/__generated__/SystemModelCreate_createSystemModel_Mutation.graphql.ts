@@ -5,13 +5,13 @@
 import { ConcreteRequest } from "relay-runtime";
 
 export type CreateSystemModelInput = {
-    description?: LocalizedTextInput | null | undefined;
-    handle: string;
-    hardwareTypeId: string;
     name: string;
-    partNumbers: Array<string>;
+    handle: string;
     pictureFile?: File | null | undefined;
     pictureUrl?: string | null | undefined;
+    partNumbers: Array<string>;
+    hardwareTypeId: string;
+    description?: LocalizedTextInput | null | undefined;
 };
 export type LocalizedTextInput = {
     locale: string;
