@@ -35,6 +35,7 @@ defmodule Edgehog.Astarte do
     HardwareInfo,
     OSInfo,
     OTARequest,
+    RuntimeInfo,
     StorageUsage,
     SystemStatus,
     WiFiScanResult
@@ -70,6 +71,11 @@ defmodule Edgehog.Astarte do
   @base_image_module Application.compile_env(:edgehog, :astarte_base_image_module, BaseImage)
   @os_info_module Application.compile_env(:edgehog, :astarte_os_info_module, OSInfo)
   @ota_request_module Application.compile_env(:edgehog, :astarte_ota_request_module, OTARequest)
+  @runtime_info_module Application.compile_env(
+                         :edgehog,
+                         :astarte_runtime_info_module,
+                         RuntimeInfo
+                       )
   @cellular_connection_module Application.compile_env(
                                 :edgehog,
                                 :astarte_cellular_connection_module,
@@ -637,6 +643,12 @@ defmodule Edgehog.Astarte do
   def fetch_cellular_connection_status(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       @cellular_connection_module.get_modem_status(client, device.device_id)
+    end
+  end
+
+  def fetch_runtime_info(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @runtime_info_module.get(client, device.device_id)
     end
   end
 

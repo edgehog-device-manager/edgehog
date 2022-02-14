@@ -91,6 +91,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Device.CellularConnection
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Device.RuntimeInfoMock,
+      Edgehog.Mocks.Astarte.Device.RuntimeInfo
+    )
+
     :ok
   end
 end

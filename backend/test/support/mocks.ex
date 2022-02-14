@@ -52,6 +52,10 @@ Mox.defmock(Edgehog.Astarte.Device.CellularConnectionMock,
   for: Edgehog.Astarte.Device.CellularConnection.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.RuntimeInfoMock,
+  for: Edgehog.Astarte.Device.RuntimeInfo.Behaviour
+)
+
 Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
   for: Edgehog.Geolocation.GeolocationProvider
 )

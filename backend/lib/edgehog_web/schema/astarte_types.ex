@@ -324,6 +324,21 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     end
   end
 
+  @desc "Describes an Edgehog runtime."
+  object :runtime_info do
+    @desc "The name of the Edgehog runtime."
+    field :name, :string
+
+    @desc "The version of the Edgehog runtime."
+    field :version, :string
+
+    @desc "The environment of the Edgehog runtime."
+    field :environment, :string
+
+    @desc "The URL that uniquely identifies the Edgehog runtime implementation."
+    field :url, :string
+  end
+
   @desc """
   Denotes a device instance that connects and exchanges data.
 
@@ -408,6 +423,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The status of cellular connection of the device."
     field :cellular_connection, list_of(non_null(:modem)) do
       resolve &Resolvers.Astarte.fetch_cellular_connection/3
+      middleware Middleware.ErrorHandler
+    end
+
+    @desc "Information about the Edgehog runtime running on the device."
+    field :runtime_info, :runtime_info do
+      resolve &Resolvers.Astarte.fetch_runtime_info/3
       middleware Middleware.ErrorHandler
     end
   end

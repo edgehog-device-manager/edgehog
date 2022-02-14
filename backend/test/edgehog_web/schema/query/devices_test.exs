@@ -386,4 +386,50 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert modem3["registrationStatus"] == nil
     end
   end
+
+  describe "device runtime info query" do
+    setup do
+      cluster = cluster_fixture()
+
+      {:ok, realm: realm_fixture(cluster)}
+    end
+
+    @runtime_info_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        runtimeInfo {
+          name
+          version
+          environment
+          url
+        }
+      }
+    }
+    """
+
+    test "returns runtime info if available", %{conn: conn, api_path: api_path, realm: realm} do
+      %Device{
+        id: id
+      } = device_fixture(realm)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, api_path, query: @runtime_info_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "runtimeInfo" => runtime_info
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert runtime_info["name"] == "edgehog-esp32-device"
+      assert runtime_info["version"] == "0.1.0"
+      assert runtime_info["environment"] == "esp-idf v4.3"
+
+      assert runtime_info["url"] ==
+               "https://github.com/edgehog-device-manager/edgehog-esp32-device"
+    end
+  end
 end

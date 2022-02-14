@@ -40,6 +40,7 @@ config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryS
 config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMock
 config :edgehog, :astarte_os_info_module, Edgehog.Astarte.Device.OSInfoMock
 config :edgehog, :astarte_ota_request_module, Edgehog.Astarte.Device.OTARequestMock
+config :edgehog, :astarte_runtime_info_module, Edgehog.Astarte.Device.RuntimeInfoMock
 
 config :edgehog,
        :astarte_cellular_connection_module,
