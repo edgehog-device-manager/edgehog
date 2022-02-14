@@ -117,6 +117,13 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
+  def fetch_runtime_info(%Device{} = device, _args, _context) do
+    case Astarte.fetch_runtime_info(device) do
+      {:ok, runtime_info} -> {:ok, runtime_info}
+      _ -> {:ok, nil}
+    end
+  end
+
   def fetch_cellular_connection(%Device{} = device, _args, _context) do
     with {:ok, modem_properties_list} <- Astarte.fetch_cellular_connection_properties(device) do
       modem_status_map =

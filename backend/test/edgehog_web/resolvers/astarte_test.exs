@@ -23,7 +23,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
 
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-  alias Edgehog.Astarte.Device.{BaseImage, OSInfo, SystemStatus, WiFiScanResult}
+  alias Edgehog.Astarte.Device.{BaseImage, OSInfo, RuntimeInfo, SystemStatus, WiFiScanResult}
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
@@ -173,6 +173,17 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                  technology: nil
                }
              ] == cellular_connection
+    end
+
+    test "fetch_runtime_info/3 returns the runtime info for a device", %{device: device} do
+      assert {:ok, runtime_info} = Astarte.fetch_runtime_info(device, %{}, %{})
+
+      assert %RuntimeInfo{
+               name: "edgehog-esp32-device",
+               version: "0.1.0",
+               environment: "esp-idf v4.3",
+               url: "https://github.com/edgehog-device-manager/edgehog-esp32-device"
+             } == runtime_info
     end
   end
 end
