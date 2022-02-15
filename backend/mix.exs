@@ -80,7 +80,8 @@ defmodule Edgehog.MixProject do
       {:sweet_xml, "~> 0.6"},
       {:waffle_gcs, "~> 0.2"},
       {:guardian, "~> 2.0"},
-      {:jose, "~> 1.8"}
+      {:jose, "~> 1.8"},
+      {:skogsra, "~> 2.3"}
     ]
   end
 
