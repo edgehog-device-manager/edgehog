@@ -59,6 +59,12 @@ This section reports an overview of the operating system of the Device.
 
 ![Device Operating System Screenshot](assets/device_operating_system.png)
 
+### Runtime
+
+This section reports an overview about the Edgehog runtime running on the Device.
+
+![Device Runtime Screenshot](assets/device_runtime.png)
+
 ### Base Image
 
 This section reports an overview of the Base Image of the Device.
