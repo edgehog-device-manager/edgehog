@@ -22,6 +22,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.WiFiScanResult
+  alias Edgehog.Config
   alias Edgehog.Geolocation.Position
 
   use Tesla
@@ -55,9 +56,6 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   end
 
   defp geolocate_wifi([%WiFiScanResult{} | _] = wifi_scan_results) do
-    config = Application.fetch_env!(:edgehog, Edgehog.Geolocation.Providers.GoogleGeolocation)
-    api_key = Keyword.fetch!(config, :api_key)
-
     wifi_access_points =
       Enum.map(wifi_scan_results, fn wifi ->
         %{
@@ -67,14 +65,13 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
         }
       end)
 
-    query_params = [key: api_key]
-
     body_params = %{
       considerIp: false,
       wifiAccessPoints: wifi_access_points
     }
 
-    with {:ok, %{body: body}} <- post("", body_params, query: query_params),
+    with {:ok, api_key} <- Config.google_geolocation_api_key(),
+         {:ok, %{body: body}} <- post("", body_params, query: [key: api_key]),
          {:coords, %{"location" => %{"lat" => latitude, "lng" => longitude}}}
          when is_number(latitude) and is_number(longitude) <- {:coords, body} do
       timestamp = List.first(wifi_scan_results).timestamp
@@ -89,6 +86,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
       {:ok, position}
     else
       {:coords, _} -> {:error, :position_not_found}
+      {:error, reason} -> {:error, reason}
     end
   end
 

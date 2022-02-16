@@ -25,6 +25,7 @@ defmodule Edgehog.Geolocation do
   defstruct [:latitude, :longitude, :accuracy, :timestamp, :address]
 
   alias Edgehog.Astarte.Device
+  alias Edgehog.Config
   alias Edgehog.Geolocation
   alias Edgehog.Geolocation.Coordinates
 
@@ -37,8 +38,8 @@ defmodule Edgehog.Geolocation do
         }
 
   def fetch_location(%Device{} = device) do
-    geolocation_providers = Application.get_env(:edgehog, :geolocation_providers, [])
-    geocoding_providers = Application.get_env(:edgehog, :geocoding_providers, [])
+    geolocation_providers = Config.geolocation_providers!()
+    geocoding_providers = Config.geocoding_providers!()
 
     with {:ok, position} <- geolocate_with(geolocation_providers, device) do
       coordinates = %Coordinates{

@@ -21,6 +21,7 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
 
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
+  alias Edgehog.Config
   alias Edgehog.Geolocation.Position
   alias Edgehog.Repo
 
@@ -59,12 +60,8 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
   end
 
   defp geolocate_ip(ip_address) do
-    config = Application.fetch_env!(:edgehog, Edgehog.Geolocation.Providers.FreeGeoIp)
-    api_key = Keyword.fetch!(config, :api_key)
-
-    query_params = [apikey: api_key]
-
-    with {:ok, %{body: body}} <- get("/#{ip_address}", query: query_params),
+    with {:ok, api_key} <- Config.freegeoip_api_key(),
+         {:ok, %{body: body}} <- get("/#{ip_address}", query: [apikey: api_key]),
          {:coords, %{"latitude" => latitude, "longitude" => longitude}}
          when is_number(latitude) and is_number(longitude) <- {:coords, body} do
       address =
@@ -89,6 +86,9 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
     else
       {:coords, _} ->
         {:error, :position_not_found}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end

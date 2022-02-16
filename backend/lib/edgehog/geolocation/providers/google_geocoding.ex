@@ -19,6 +19,7 @@
 defmodule Edgehog.Geolocation.Providers.GoogleGeocoding do
   @behaviour Edgehog.Geolocation.GeocodingProvider
 
+  alias Edgehog.Config
   alias Edgehog.Geolocation.Coordinates
   use Tesla
 
@@ -27,15 +28,9 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocoding do
 
   @impl Edgehog.Geolocation.GeocodingProvider
   def reverse_geocode(%Coordinates{latitude: latitude, longitude: longitude}) do
-    config = Application.fetch_env!(:edgehog, Edgehog.Geolocation.Providers.GoogleGeocoding)
-    api_key = Keyword.fetch!(config, :api_key)
-
-    query_params = [
-      key: api_key,
-      latlng: "#{latitude},#{longitude}"
-    ]
-
-    with {:ok, response} <- get("", query: query_params) do
+    with {:ok, api_key} <- Config.google_geocoding_api_key(),
+         query_params = [key: api_key, latlng: "#{latitude},#{longitude}"],
+         {:ok, response} <- get("", query: query_params) do
       results = Map.get(response.body, "results", [])
 
       if Enum.empty?(results) do
