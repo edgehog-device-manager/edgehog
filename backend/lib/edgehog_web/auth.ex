@@ -17,6 +17,7 @@
 #
 
 defmodule EdgehogWeb.Auth do
+  alias Edgehog.Config
   alias EdgehogWeb.Auth.Pipeline
 
   def init(opts) do
@@ -24,9 +25,7 @@ defmodule EdgehogWeb.Auth do
   end
 
   def call(conn, opts) do
-    auth_disabled? = Application.get_env(:edgehog, :disable_authentication)
-
-    unless auth_disabled? do
+    unless Config.authentication_disabled?() do
       Pipeline.call(conn, opts)
     else
       # TODO: when we add Authz this path will probably have to

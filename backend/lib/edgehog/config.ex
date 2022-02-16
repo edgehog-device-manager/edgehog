@@ -24,6 +24,14 @@ defmodule Edgehog.Config do
   alias Edgehog.Config.{GeocodingProviders, GeolocationProviders}
   alias Edgehog.Geolocation
 
+  @envdoc """
+  Disables the authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
+  """
+  app_env :disable_authentication, :edgehog, :disable_authentication,
+    os_env: "DISABLE_AUTHENTICATION",
+    type: :boolean,
+    default: false
+
   @envdoc "The API key for the freegeoip.app geolocation provider."
   app_env :freegeoip_api_key, :edgehog, :freegeoip_api_key,
     os_env: "FREEGEOIP_API_KEY",
@@ -56,6 +64,12 @@ defmodule Edgehog.Config do
     os_env: "PREFERRED_GEOCODING_PROVIDERS",
     type: GeocodingProviders,
     default: [Geolocation.Providers.GoogleGeocoding]
+
+  @doc """
+  Returns true if the authentication is disabled.
+  """
+  @spec authentication_disabled?() :: boolean()
+  def authentication_disabled?, do: disable_authentication!()
 
   @doc """
   Returns the list of geolocation modules to use.

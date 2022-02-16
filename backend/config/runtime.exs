@@ -78,9 +78,6 @@ if config_env() == :prod do
       Waffle.Storage.S3
     end
 
-  disable_authentication = System.get_env("DISABLE_AUTHENTICATION") || false
-  config :edgehog, :disable_authentication, disable_authentication
-
   config :waffle,
     storage: s3_storage_module,
     bucket: s3.bucket,
