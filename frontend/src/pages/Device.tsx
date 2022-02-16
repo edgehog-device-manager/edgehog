@@ -35,6 +35,7 @@ import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareI
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
 import type { Device_baseImage$key } from "api/__generated__/Device_baseImage.graphql";
 import type { Device_osInfo$key } from "api/__generated__/Device_osInfo.graphql";
+import type { Device_runtimeInfo$key } from "api/__generated__/Device_runtimeInfo.graphql";
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
@@ -167,6 +168,17 @@ const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_RUNTIME_INFO_FRAGMENT = graphql`
+  fragment Device_runtimeInfo on Device {
+    runtimeInfo {
+      name
+      version
+      environment
+      url
+    }
+  }
+`;
+
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!) {
     device(id: $id) {
@@ -189,6 +201,7 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_hardwareInfo
       ...Device_baseImage
       ...Device_osInfo
+      ...Device_runtimeInfo
       ...Device_location
       ...Device_storageUsage
       ...Device_systemStatus
@@ -486,6 +499,91 @@ const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
               }
             >
               <Form.Control type="text" value={osInfo.version} readOnly />
+            </FormRow>
+          )}
+        </Stack>
+      </div>
+    </Tab>
+  );
+};
+
+interface DeviceRuntimeInfoTabProps {
+  deviceRef: Device_runtimeInfo$key;
+}
+
+const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
+  const intl = useIntl();
+  const { runtimeInfo } = useFragment(DEVICE_RUNTIME_INFO_FRAGMENT, deviceRef);
+  if (
+    !runtimeInfo ||
+    Object.values(runtimeInfo).every((value) => value === null)
+  ) {
+    return null;
+  }
+  return (
+    <Tab
+      eventKey="device-runtime-info-tab"
+      title={intl.formatMessage({
+        id: "pages.Device.runtimeInfoTab",
+        defaultMessage: "Runtime",
+      })}
+    >
+      <div className="mt-3">
+        <Stack gap={3}>
+          {runtimeInfo.name !== null && (
+            <FormRow
+              id="device-runtime-info-name"
+              label={
+                <FormattedMessage
+                  id="Device.runtimeInfo.name"
+                  defaultMessage="Name"
+                />
+              }
+            >
+              <Form.Control type="text" value={runtimeInfo.name} readOnly />
+            </FormRow>
+          )}
+          {runtimeInfo.version !== null && (
+            <FormRow
+              id="device-runtime-info-version"
+              label={
+                <FormattedMessage
+                  id="Device.runtimeInfo.version"
+                  defaultMessage="Version"
+                />
+              }
+            >
+              <Form.Control type="text" value={runtimeInfo.version} readOnly />
+            </FormRow>
+          )}
+          {runtimeInfo.environment !== null && (
+            <FormRow
+              id="device-runtime-info-environment"
+              label={
+                <FormattedMessage
+                  id="Device.runtimeInfo.environment"
+                  defaultMessage="Environment"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                value={runtimeInfo.environment}
+                readOnly
+              />
+            </FormRow>
+          )}
+          {runtimeInfo.url !== null && (
+            <FormRow
+              id="device-runtime-info-url"
+              label={
+                <FormattedMessage
+                  id="Device.runtimeInfo.url"
+                  defaultMessage="URL"
+                />
+              }
+            >
+              <Form.Control type="text" value={runtimeInfo.url} readOnly />
             </FormRow>
           )}
         </Stack>
@@ -1118,6 +1216,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             tabsOrder={[
               "device-hardware-info-tab",
               "device-os-info-tab",
+              "device-runtime-info-tab",
               "device-base-image-tab",
               "device-system-status-tab",
               "device-storage-usage-tab",
@@ -1130,6 +1229,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
           >
             <DeviceHardwareInfoTab deviceRef={device} />
             <DeviceOSInfoTab deviceRef={device} />
+            <DeviceRuntimeInfoTab deviceRef={device} />
             <DeviceBaseImageTab deviceRef={device} />
             <DeviceSystemStatusTab deviceRef={device} />
             <DeviceStorageUsageTab deviceRef={device} />
