@@ -33,6 +33,7 @@ defmodule Edgehog.Astarte do
     CellularConnection,
     DeviceStatus,
     HardwareInfo,
+    LedBehavior,
     OSInfo,
     OTARequest,
     RuntimeInfo,
@@ -81,6 +82,11 @@ defmodule Edgehog.Astarte do
                                 :astarte_cellular_connection_module,
                                 CellularConnection
                               )
+  @led_behavior_module Application.compile_env(
+                         :edgehog,
+                         :astarte_led_behavior_module,
+                         LedBehavior
+                       )
 
   @doc """
   Returns the list of clusters.
@@ -649,6 +655,12 @@ defmodule Edgehog.Astarte do
   def fetch_runtime_info(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       @runtime_info_module.get(client, device.device_id)
+    end
+  end
+
+  def send_led_behavior(%Device{} = device, behavior) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @led_behavior_module.post(client, device.device_id, behavior)
     end
   end
 
