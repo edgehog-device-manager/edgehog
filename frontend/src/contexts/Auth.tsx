@@ -50,14 +50,15 @@ function saveAuthConfig(
   authConfig?: AuthConfig | null,
   persistConfig: boolean = false
 ): void {
+  // If expires is undefined, closing the browser/session will delete the cookie
+  const cookieOptions = {
+    secure: true,
+    expires: persistConfig ? 365 : undefined,
+  } as const;
+
   if (!authConfig) {
-    Cookies.remove("authConfig");
+    Cookies.remove("authConfig", cookieOptions);
   } else {
-    // If expires is undefined, closing the browser/session will delete the cookie
-    const cookieOptions = {
-      secure: true,
-      expires: persistConfig ? 365 : undefined,
-    };
     Cookies.set(
       "authConfig",
       JSON.stringify({ ...authConfig, _version: AUTH_CONFIG_VERSION }),
