@@ -100,6 +100,14 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       version: "v10.4.3",
     };
   },
+  RuntimeInfo() {
+    return {
+      name: "edgehog-esp32-device",
+      version: "0.1.0",
+      environment: "esp-idf v4.3",
+      url: "https://github.com/edgehog-device-manager/edgehog-esp32-device",
+    };
+  },
   StorageUnit() {
     return {
       label: "Disk 0",

@@ -47,6 +47,18 @@
   "Device.osInfo.version": {
     "defaultMessage": "OS version"
   },
+  "Device.runtimeInfo.environment": {
+    "defaultMessage": "Environment"
+  },
+  "Device.runtimeInfo.name": {
+    "defaultMessage": "Name"
+  },
+  "Device.runtimeInfo.url": {
+    "defaultMessage": "URL"
+  },
+  "Device.runtimeInfo.version": {
+    "defaultMessage": "Version"
+  },
   "Device.systemModel": {
     "defaultMessage": "System Model"
   },
@@ -432,6 +444,9 @@
   },
   "pages.Device.otaUpdateCreationErrorFeedback": {
     "defaultMessage": "Could not start the OTA update, please try again."
+  },
+  "pages.Device.runtimeInfoTab": {
+    "defaultMessage": "Runtime"
   },
   "pages.Device.storageTab": {
     "defaultMessage": "Storage"

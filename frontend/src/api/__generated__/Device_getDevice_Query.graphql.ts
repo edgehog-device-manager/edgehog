@@ -26,7 +26,7 @@ export type Device_getDevice_QueryResponse = {
         readonly cellularConnection: ReadonlyArray<{
             readonly __typename: string;
         }> | null;
-        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_baseImage" | "Device_osInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations" | "CellularConnectionTabs_cellularConnection">;
+        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_baseImage" | "Device_osInfo" | "Device_runtimeInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations" | "CellularConnectionTabs_cellularConnection">;
     } | null;
 };
 export type Device_getDevice_Query = {
@@ -62,6 +62,7 @@ query Device_getDevice_Query(
     ...Device_hardwareInfo
     ...Device_baseImage
     ...Device_osInfo
+    ...Device_runtimeInfo
     ...Device_location
     ...Device_storageUsage
     ...Device_systemStatus
@@ -142,6 +143,15 @@ fragment Device_otaOperations on Device {
     status
   }
   ...OperationTable_otaOperations
+}
+
+fragment Device_runtimeInfo on Device {
+  runtimeInfo {
+    name
+    version
+    environment
+    url
+  }
 }
 
 fragment Device_storageUsage on Device {
@@ -360,6 +370,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "Device_osInfo"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "Device_runtimeInfo"
           },
           {
             "args": null,
@@ -623,6 +638,33 @@ return {
           {
             "alias": null,
             "args": null,
+            "concreteType": "RuntimeInfo",
+            "kind": "LinkedField",
+            "name": "runtimeInfo",
+            "plural": false,
+            "selections": [
+              (v6/*: any*/),
+              (v12/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "environment",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "url",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "DeviceLocation",
             "kind": "LinkedField",
             "name": "location",
@@ -826,14 +868,14 @@ return {
     ]
   },
   "params": {
-    "cacheID": "955796d08044f775d2aaae93cf85a72d",
+    "cacheID": "88022510bc0dc22c358aa9b685d38a0e",
     "id": null,
     "metadata": {},
     "name": "Device_getDevice_Query",
     "operationKind": "query",
-    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    cellularConnection {\n      __typename\n    }\n    ...Device_hardwareInfo\n    ...Device_baseImage\n    ...Device_osInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n    ...CellularConnectionTabs_cellularConnection\n  }\n}\n\nfragment CellularConnectionTabs_cellularConnection on Device {\n  cellularConnection {\n    apn\n    carrier\n    cellId\n    imei\n    imsi\n    localAreaCode\n    mobileCountryCode\n    mobileNetworkCode\n    registrationStatus\n    rssi\n    slot\n    technology\n  }\n}\n\nfragment Device_baseImage on Device {\n  baseImage {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    status\n  }\n  ...OperationTable_otaOperations\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n\nfragment OperationTable_otaOperations on Device {\n  otaOperations {\n    baseImageUrl\n    createdAt\n    status\n    updatedAt\n    id\n  }\n}\n"
+    "text": "query Device_getDevice_Query(\n  $id: ID!\n) {\n  device(id: $id) {\n    id\n    deviceId\n    lastConnection\n    lastDisconnection\n    name\n    online\n    systemModel {\n      name\n      pictureUrl\n      hardwareType {\n        name\n        id\n      }\n      id\n    }\n    cellularConnection {\n      __typename\n    }\n    ...Device_hardwareInfo\n    ...Device_baseImage\n    ...Device_osInfo\n    ...Device_runtimeInfo\n    ...Device_location\n    ...Device_storageUsage\n    ...Device_systemStatus\n    ...Device_wifiScanResults\n    ...Device_batteryStatus\n    ...Device_otaOperations\n    ...CellularConnectionTabs_cellularConnection\n  }\n}\n\nfragment CellularConnectionTabs_cellularConnection on Device {\n  cellularConnection {\n    apn\n    carrier\n    cellId\n    imei\n    imsi\n    localAreaCode\n    mobileCountryCode\n    mobileNetworkCode\n    registrationStatus\n    rssi\n    slot\n    technology\n  }\n}\n\nfragment Device_baseImage on Device {\n  baseImage {\n    name\n    version\n    buildId\n    fingerprint\n  }\n}\n\nfragment Device_batteryStatus on Device {\n  batteryStatus {\n    slot\n    status\n    levelPercentage\n    levelAbsoluteError\n  }\n}\n\nfragment Device_hardwareInfo on Device {\n  hardwareInfo {\n    cpuArchitecture\n    cpuModel\n    cpuModelName\n    cpuVendor\n    memoryTotalBytes\n  }\n}\n\nfragment Device_location on Device {\n  location {\n    latitude\n    longitude\n    accuracy\n    address\n    timestamp\n  }\n}\n\nfragment Device_osInfo on Device {\n  osInfo {\n    name\n    version\n  }\n}\n\nfragment Device_otaOperations on Device {\n  id\n  otaOperations {\n    id\n    baseImageUrl\n    status\n  }\n  ...OperationTable_otaOperations\n}\n\nfragment Device_runtimeInfo on Device {\n  runtimeInfo {\n    name\n    version\n    environment\n    url\n  }\n}\n\nfragment Device_storageUsage on Device {\n  storageUsage {\n    label\n    totalBytes\n    freeBytes\n  }\n}\n\nfragment Device_systemStatus on Device {\n  systemStatus {\n    memoryFreeBytes\n    taskCount\n    uptimeMilliseconds\n    timestamp\n  }\n}\n\nfragment Device_wifiScanResults on Device {\n  wifiScanResults {\n    channel\n    essid\n    macAddress\n    rssi\n    timestamp\n  }\n}\n\nfragment OperationTable_otaOperations on Device {\n  otaOperations {\n    baseImageUrl\n    createdAt\n    status\n    updatedAt\n    id\n  }\n}\n"
   }
 };
 })();
-(node as any).hash = '69c65adf3a80eee6245fe1c09d5168e8';
+(node as any).hash = '90c7adb3db30b183536904549b5c7d04';
 export default node;

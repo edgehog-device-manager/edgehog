@@ -465,6 +465,9 @@ type Device implements Node {
 
   "The status of cellular connection of the device."
   cellularConnection: [Modem!]
+
+  "Information about the Edgehog runtime running on the device."
+  runtimeInfo: RuntimeInfo
 }
 
 input CreateHardwareTypeInput {
@@ -573,6 +576,21 @@ input DeviceFilter {
   The match is case-insensitive and tests whether the string is included in the name of the device's hardware type.
   """
   hardwareTypeName: String
+}
+
+"Describes an Edgehog runtime."
+type RuntimeInfo {
+  "The name of the Edgehog runtime."
+  name: String
+
+  "The version of the Edgehog runtime."
+  version: String
+
+  "The environment of the Edgehog runtime."
+  environment: String
+
+  "The URL that uniquely identifies the Edgehog runtime implementation."
+  url: String
 }
 
 "Represents information about a tenant"
