@@ -450,4 +450,35 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
       resolve &Resolvers.Astarte.find_device/2
     end
   end
+
+  @desc "Led behavior"
+  enum :led_behavior do
+    @desc "Blink for 60 seconds."
+    value :blink
+    @desc "Double blink for 60 seconds."
+    value :double_blink
+    @desc "Slow blink for 60 seconds."
+    value :slow_blink
+  end
+
+  object :astarte_mutations do
+    @desc "Sets led behavior."
+    payload field :set_led_behavior do
+      input do
+        @desc "The GraphQL ID (not the Astarte Device ID) of the target device"
+        field :device_id, non_null(:id)
+
+        @desc "The led behavior"
+        field :behavior, non_null(:led_behavior)
+      end
+
+      output do
+        @desc "The resulting led behavior."
+        field :behavior, non_null(:led_behavior)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, device_id: :device
+      resolve &Resolvers.Astarte.set_led_behavior/2
+    end
+  end
 end

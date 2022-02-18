@@ -81,6 +81,7 @@ defmodule EdgehogWeb.Schema do
   end
 
   mutation do
+    import_fields :astarte_mutations
     import_fields :devices_mutations
     import_fields :os_management_mutations
   end

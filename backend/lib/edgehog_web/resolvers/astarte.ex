@@ -209,4 +209,22 @@ defmodule EdgehogWeb.Resolvers.Astarte do
       _other -> {:error, :invalid_battery_status}
     end
   end
+
+  def set_led_behavior(%{device_id: device_id, behavior: behavior}, _resolution) do
+    device = Astarte.get_device!(device_id)
+
+    with {:ok, led_behavior} <- led_behavior_from_enum(behavior),
+         :ok <- Astarte.send_led_behavior(device, led_behavior) do
+      {:ok, %{behavior: behavior}}
+    end
+  end
+
+  defp led_behavior_from_enum(behavior) do
+    case behavior do
+      :blink -> {:ok, "Blink60Seconds"}
+      :double_blink -> {:ok, "DoubleBlink60Seconds"}
+      :slow_blink -> {:ok, "SlowBlink60Seconds"}
+      _ -> {:error, "Unknown led behavior"}
+    end
+  end
 end
