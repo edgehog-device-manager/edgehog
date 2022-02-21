@@ -16,7 +16,13 @@
   limitations under the License.
 */
 
-import React, { Suspense, useEffect, useState, useMemo } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import graphql from "babel-plugin-relay/macro";
@@ -29,6 +35,7 @@ import {
 } from "react-relay/hooks";
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
+import _ from "lodash";
 
 import type { Device_batteryStatus$key } from "api/__generated__/Device_batteryStatus.graphql";
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
@@ -45,6 +52,7 @@ import type {
   Device_getDevice_QueryResponse,
 } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
+import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
 import { Link, Route } from "Navigation";
 import Alert from "components/Alert";
 import CellularConnectionTabs from "components/CellularConnectionTabs";
@@ -225,6 +233,17 @@ const DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION = graphql`
         status
         statusCode
         updatedAt
+      }
+    }
+  }
+`;
+
+const UPDATE_DEVICE_MUTATION = graphql`
+  mutation Device_updateDevice_Mutation($input: UpdateDeviceInput!) {
+    updateDevice(input: $input) {
+      device {
+        id
+        name
       }
     }
   }
@@ -1073,12 +1092,66 @@ interface DeviceContentProps {
 }
 
 const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
+  const { deviceId = "" } = useParams();
   const deviceData = usePreloadedQuery(GET_DEVICE_QUERY, getDeviceQuery);
 
   // TODO: handle readonly type without mapping to mutable type
   const device = useMemo(
     () => deviceData.device && { ...deviceData.device },
     [deviceData.device]
+  );
+
+  const [deviceDraft, setDeviceDraft] = useState(_.pick(device, ["name"]));
+
+  const [updateErrorFeedback, setUpdateErrorFeedback] =
+    useState<React.ReactNode>(null);
+
+  const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
+    UPDATE_DEVICE_MUTATION
+  );
+
+  const handleUpdateDevice = useMemo(
+    () =>
+      _.debounce(
+        (
+          draft: typeof deviceDraft,
+          deviceChanges: Partial<typeof deviceDraft>
+        ) => {
+          updateDevice({
+            variables: { input: { deviceId, ...deviceChanges } },
+            onCompleted(data, errors) {
+              if (errors) {
+                setDeviceDraft(draft);
+                const updateErrorFeedback = errors
+                  .map((error) => error.message)
+                  .join(". \n");
+                return setUpdateErrorFeedback(updateErrorFeedback);
+              }
+            },
+            onError(error) {
+              setDeviceDraft(draft);
+              setUpdateErrorFeedback(
+                <FormattedMessage
+                  id="pages.Device.updateDeviceErrorFeedback"
+                  defaultMessage="Could not update the device, please try again."
+                  description="Feedback for unknown error while updating a device"
+                />
+              );
+            },
+          });
+        },
+        500,
+        { leading: true }
+      ),
+    [updateDevice, deviceId]
+  );
+
+  const handleDeviceChange = useCallback(
+    (deviceChanges: Partial<typeof deviceDraft>) => {
+      setDeviceDraft((draft) => ({ ...draft, ...deviceChanges }));
+      handleUpdateDevice(deviceDraft, deviceChanges);
+    },
+    [handleUpdateDevice, deviceDraft]
   );
 
   if (!device) {
@@ -1106,6 +1179,14 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
       <Page.Header title={device.name} />
       <Page.Main>
         <Stack gap={3}>
+          <Alert
+            show={!!updateErrorFeedback}
+            variant="danger"
+            onClose={() => setUpdateErrorFeedback(null)}
+            dismissible
+          >
+            {updateErrorFeedback}
+          </Alert>
           <Row>
             <Col md="5" lg="4" xl="3">
               <div>
@@ -1127,7 +1208,13 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       />
                     }
                   >
-                    <Form.Control type="text" value={device.name} readOnly />
+                    <Form.Control
+                      type="text"
+                      value={deviceDraft.name}
+                      onChange={(e) =>
+                        handleDeviceChange({ name: e.target.value })
+                      }
+                    />
                   </FormRow>
                   <FormRow
                     id="form-device-deviceId"
