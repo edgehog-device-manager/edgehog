@@ -463,6 +463,10 @@
   "pages.Device.systemStatusTab": {
     "defaultMessage": "System Status"
   },
+  "pages.Device.updateDeviceErrorFeedback": {
+    "defaultMessage": "Could not update the device, please try again.",
+    "description": "Feedback for unknown error while updating a device"
+  },
   "pages.Device.wifiScanResultsTab": {
     "defaultMessage": "WiFi APs"
   },
