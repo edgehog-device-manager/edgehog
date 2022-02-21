@@ -455,7 +455,7 @@ defmodule Edgehog.Astarte do
   """
   def update_device(%Device{} = device, attrs) do
     device
-    |> Device.changeset(attrs)
+    |> Device.update_changeset(attrs)
     |> Repo.update()
   end
 

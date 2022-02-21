@@ -457,11 +457,19 @@ defmodule Edgehog.AstarteTest do
 
     test "update_device/2 with valid data updates the device", %{realm: realm} do
       device = device_fixture(realm)
-      update_attrs = %{device_id: "some updated device_id", name: "some updated name"}
+      update_attrs = %{name: "some updated name"}
 
       assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
-      assert device.device_id == "some updated device_id"
       assert device.name == "some updated name"
+    end
+
+    test "update_device/2 does not update the device_id", %{realm: realm} do
+      device = device_fixture(realm)
+      initial_device_id = device.device_id
+      update_attrs = %{device_id: "some updated device_id"}
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert device.device_id == initial_device_id
     end
 
     test "update_device/2 with invalid data returns error changeset", %{realm: realm} do

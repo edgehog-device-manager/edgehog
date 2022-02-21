@@ -480,5 +480,24 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
       middleware Absinthe.Relay.Node.ParseIDs, device_id: :device
       resolve &Resolvers.Astarte.set_led_behavior/2
     end
+
+    @desc "Updates a device."
+    payload field :update_device do
+      input do
+        @desc "The GraphQL ID (not the Astarte Device ID) of the device to be updated."
+        field :device_id, non_null(:id)
+
+        @desc "The display name of the device."
+        field :name, :string
+      end
+
+      output do
+        @desc "The updated device."
+        field :device, non_null(:device)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, device_id: :device
+      resolve &Resolvers.Astarte.update_device/2
+    end
   end
 end

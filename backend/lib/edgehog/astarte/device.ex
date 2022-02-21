@@ -58,4 +58,18 @@ defmodule Edgehog.Astarte.Device do
     |> validate_required([:name, :device_id])
     |> unique_constraint([:device_id, :realm_id, :tenant_id])
   end
+
+  @doc false
+  def update_changeset(device, attrs) do
+    device
+    |> cast(attrs, [
+      :name,
+      :online,
+      :last_connection,
+      :last_disconnection,
+      :serial_number,
+      :part_number
+    ])
+    |> validate_required([:name])
+  end
 end
