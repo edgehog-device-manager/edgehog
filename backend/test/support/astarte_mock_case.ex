@@ -96,6 +96,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Device.RuntimeInfo
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Device.LedBehaviorMock,
+      Edgehog.Mocks.Astarte.Device.LedBehavior
+    )
+
     :ok
   end
 end
