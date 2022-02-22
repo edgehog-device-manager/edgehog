@@ -16,21 +16,34 @@
 # limitations under the License.
 #
 
-defmodule EdgehogWeb.Auth do
-  alias Edgehog.Config
-  alias EdgehogWeb.Auth.Pipeline
+defmodule Edgehog.Config.GeocodingProviders do
+  use Skogsra.Type
 
-  def init(opts) do
-    Pipeline.init(opts)
+  @providers %{
+    "google" => Edgehog.Geolocation.Providers.GoogleGeocoding
+  }
+
+  @impl Skogsra.Type
+  def cast(value)
+
+  def cast(value) when is_binary(value) do
+    list =
+      value
+      |> String.split(~r/,/)
+      |> Stream.map(&String.trim/1)
+      |> Stream.map(&String.downcase/1)
+      |> Stream.map(&@providers[&1])
+      |> Stream.reject(&is_nil/1)
+      |> Enum.to_list()
+
+    {:ok, list}
   end
 
-  def call(conn, opts) do
-    unless Config.authentication_disabled?() do
-      Pipeline.call(conn, opts)
-    else
-      # TODO: when we add Authz this path will probably have to
-      # put some type of all-access Authz in the GraphQL context
-      conn
-    end
+  def cast(value) when is_list(value) do
+    if Enum.all?(value, &is_atom/1), do: {:ok, value}, else: :error
+  end
+
+  def cast(_) do
+    :error
   end
 end

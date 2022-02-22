@@ -18,6 +18,7 @@
 
 defmodule EdgehogWeb.AuthTest do
   use EdgehogWeb.ConnCase
+  alias Edgehog.Config
 
   # Use an unauthenticated conn so we can control auth manually
   @moduletag :unauthenticated
@@ -40,11 +41,11 @@ defmodule EdgehogWeb.AuthTest do
     conn: conn,
     api_path: api_path
   } do
-    Application.put_env(:edgehog, :disable_authentication, true)
+    Config.put_disable_authentication(true)
 
     on_exit(fn ->
       # Cleanup at the end
-      Application.delete_env(:edgehog, :disable_authentication)
+      Config.reload_disable_authentication()
     end)
 
     conn = get(conn, api_path, query: @query)

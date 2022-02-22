@@ -45,43 +45,6 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  freegeoip_api_key = System.get_env("FREEGEOIP_API_KEY")
-
-  freegeoip_provider = %{
-    module: Edgehog.Geolocation.Providers.FreeGeoIp,
-    enabled?: !is_nil(freegeoip_api_key),
-    config: [api_key: freegeoip_api_key]
-  }
-
-  google_geolocation_api_key = System.get_env("GOOGLE_GEOLOCATION_API_KEY")
-
-  google_geolocation_provider = %{
-    module: Edgehog.Geolocation.Providers.GoogleGeolocation,
-    enabled?: !is_nil(google_geolocation_api_key),
-    config: [api_key: google_geolocation_api_key]
-  }
-
-  google_geocoding_api_key = System.get_env("GOOGLE_GEOCODING_API_KEY")
-
-  google_geocoding_provider = %{
-    module: Edgehog.Geolocation.Providers.GoogleGeocoding,
-    enabled?: !is_nil(google_geocoding_api_key),
-    config: [api_key: google_geocoding_api_key]
-  }
-
-  geolocation_providers = [google_geolocation_provider, freegeoip_provider]
-  geocoding_providers = [google_geocoding_provider]
-
-  config :edgehog,
-    geolocation_providers:
-      geolocation_providers |> Enum.filter(& &1.enabled?) |> Enum.map(& &1.module),
-    geocoding_providers:
-      geocoding_providers |> Enum.filter(& &1.enabled?) |> Enum.map(& &1.module)
-
-  Enum.each(geolocation_providers ++ geocoding_providers, fn provider ->
-    config :edgehog, provider.module, provider.config
-  end)
-
   # TODO: while you can use access key + secret key with S3-compatible storages,
   # Waffle's default S3 adapter doesn't work well with Google Cloud Storage.
   # To use GCP, you need to supply the JSON credentials of an authorized Service
@@ -114,9 +77,6 @@ if config_env() == :prod do
     else
       Waffle.Storage.S3
     end
-
-  disable_authentication = System.get_env("DISABLE_AUTHENTICATION") || false
-  config :edgehog, :disable_authentication, disable_authentication
 
   config :waffle,
     storage: s3_storage_module,

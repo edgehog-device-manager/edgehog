@@ -55,14 +55,14 @@ config :edgehog, enable_s3_storage?: true
 
 # Geolocation mocks for tests
 config :edgehog,
-  geolocation_providers: [Edgehog.Geolocation.GeolocationProviderMock],
-  geocoding_providers: [Edgehog.Geolocation.GeocodingProviderMock]
+  preferred_geolocation_providers: [Edgehog.Geolocation.GeolocationProviderMock],
+  preferred_geocoding_providers: [Edgehog.Geolocation.GeocodingProviderMock]
 
-config :edgehog, Edgehog.Geolocation.Providers.FreeGeoIp, api_key: "test_api_key"
+config :edgehog, freegeoip_api_key: "test_api_key"
 
-config :edgehog, Edgehog.Geolocation.Providers.GoogleGeolocation, api_key: "test_api_key"
+config :edgehog, google_geolocation_api_key: "test_api_key"
 
-config :edgehog, Edgehog.Geolocation.Providers.GoogleGeocoding, api_key: "test_api_key"
+config :edgehog, google_geocoding_api_key: "test_api_key"
 
 config :goth,
   disabled: true
