@@ -20,7 +20,7 @@ defmodule Edgehog.Config.GeolocationProviders do
   use Skogsra.Type
 
   @providers %{
-    "freegeoip" => Edgehog.Geolocation.Providers.FreeGeoIP,
+    "freegeoip" => Edgehog.Geolocation.Providers.FreeGeoIp,
     "google" => Edgehog.Geolocation.Providers.GoogleGeolocation
   }
 
