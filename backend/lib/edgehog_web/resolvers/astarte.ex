@@ -47,6 +47,15 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     {:ok, devices}
   end
 
+  def update_device(%{device_id: id} = attrs, %{context: context}) do
+    device = Astarte.get_device!(id)
+
+    with {:ok, device} <- Astarte.update_device(device, attrs) do
+      device = preload_system_model_for_device(device, context)
+      {:ok, %{device: device}}
+    end
+  end
+
   defp preload_system_model_for_device(target, %{locale: locale}) do
     # Explicit locale, use that one
     descriptions_query = Devices.localized_system_model_description_query(locale)
