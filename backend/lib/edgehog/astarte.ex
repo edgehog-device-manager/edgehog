@@ -32,6 +32,7 @@ defmodule Edgehog.Astarte do
     BatteryStatus,
     CellularConnection,
     DeviceStatus,
+    Geolocation,
     HardwareInfo,
     LedBehavior,
     OSInfo,
@@ -87,6 +88,7 @@ defmodule Edgehog.Astarte do
                          :astarte_led_behavior_module,
                          LedBehavior
                        )
+  @geolocation_module Application.compile_env(:edgehog, :astarte_geolocation_module, Geolocation)
 
   @doc """
   Returns the list of clusters.
@@ -607,6 +609,12 @@ defmodule Edgehog.Astarte do
   def fetch_system_status(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device) do
       @system_status_module.get(client, device.device_id)
+    end
+  end
+
+  def fetch_geolocation(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device) do
+      @geolocation_module.get(client, device.device_id)
     end
   end
 
