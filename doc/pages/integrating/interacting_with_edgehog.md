@@ -55,12 +55,12 @@ A Device can expose this set of data via the
 To expose info about its current status or measured data, some additional Astarte Interfaces are
 already defined for Edgehog. Their adoption is optional but recommended.
 
-This section reports an overview on the current system status of the Device.
-
 - [io.edgehog.devicemanager.SystemStatus](astarte_interfaces.html): reports the current OS status.
 - [io.edgehog.devicemanager.StorageUsage](astarte_interfaces.html): reports the capacity and usage
   of the storage units.
 - [io.edgehog.devicemanager.BatteryStatus](astarte_interfaces.html): reports the current status of
   the battery slots.
+- [io.edgehog.devicemanager.Geolocation](astarte_interfaces.html): reports the current position
+  computed by the GPS sensors of the device.
 - [io.edgehog.devicemanager.WiFiScanResults](astarte_interfaces.html): reports the list of nearby
   Access Points that the Device found while scanning for WiFi signals.

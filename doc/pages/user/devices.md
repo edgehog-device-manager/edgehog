@@ -111,7 +111,10 @@ estimate a set of GPS coordinates.
 
 Depending on the data exposed by the Device, the coordinates can be estimated from:
 
-- nearby WiFi APs that the Device detected recently
+- the GPS position published via the Astarte interface
+  [io.edgehog.devicemanager.Geolocation](astarte_interfaces.html).
+- nearby WiFi APs that the Device detected recently, published via the Astarte interface
+  [io.edgehog.devicemanager.WiFiScanResults](astarte_interfaces.html)
 - the IP address used by the Device to connect to Astarte
 
 Based on the available data, Edgehog's geolocation modules try to find to best estimate by relying
