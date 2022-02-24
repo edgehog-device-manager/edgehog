@@ -49,12 +49,16 @@ defmodule Edgehog.Config do
 
   @envdoc """
   A comma separated list of preferred geolocation providers.
-  Possible values are: freegeoip, google
+  Possible values are: device, google, freegeoip.
   """
   app_env :preferred_geolocation_providers, :edgehog, :preferred_geolocation_providers,
     os_env: "PREFERRED_GEOLOCATION_PROVIDERS",
     type: GeolocationProviders,
-    default: [Geolocation.Providers.GoogleGeolocation, Geolocation.Providers.FreeGeoIp]
+    default: [
+      Geolocation.Providers.DeviceGeolocation,
+      Geolocation.Providers.GoogleGeolocation,
+      Geolocation.Providers.FreeGeoIp
+    ]
 
   @envdoc """
   A comma separated list of preferred geocoding providers.
