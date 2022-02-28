@@ -1,29 +1,24 @@
+/**
+ * @generated SignedSource<<2b3c610f35af3f141b8534445b9abc12>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
-export type SystemModel_getDefaultTenantLocale_QueryVariables = {};
-export type SystemModel_getDefaultTenantLocale_QueryResponse = {
-    readonly tenantInfo: {
-        readonly defaultLocale: string;
-    };
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type SystemModel_getDefaultTenantLocale_Query$variables = {};
+export type SystemModel_getDefaultTenantLocale_Query$data = {
+  readonly tenantInfo: {
+    readonly defaultLocale: string;
+  };
 };
 export type SystemModel_getDefaultTenantLocale_Query = {
-    readonly response: SystemModel_getDefaultTenantLocale_QueryResponse;
-    readonly variables: SystemModel_getDefaultTenantLocale_QueryVariables;
+  variables: SystemModel_getDefaultTenantLocale_Query$variables;
+  response: SystemModel_getDefaultTenantLocale_Query$data;
 };
-
-
-
-/*
-query SystemModel_getDefaultTenantLocale_Query {
-  tenantInfo {
-    defaultLocale
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -73,5 +68,7 @@ return {
   }
 };
 })();
-(node as any).hash = '57cda6d9aaf7a1db73d427cfacff8ca6';
+
+(node as any).hash = "57cda6d9aaf7a1db73d427cfacff8ca6";
+
 export default node;

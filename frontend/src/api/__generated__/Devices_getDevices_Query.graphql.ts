@@ -1,53 +1,35 @@
+/**
+ * @generated SignedSource<<c8fa7aa7fb09c0b592d0a03aa8c044f6>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
-export type Devices_getDevices_QueryVariables = {};
-export type Devices_getDevices_QueryResponse = {
-    readonly devices: ReadonlyArray<{
-        readonly id: string;
-        readonly deviceId: string;
-        readonly lastConnection: string | null;
-        readonly lastDisconnection: string | null;
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type Devices_getDevices_Query$variables = {};
+export type Devices_getDevices_Query$data = {
+  readonly devices: ReadonlyArray<{
+    readonly id: string;
+    readonly deviceId: string;
+    readonly lastConnection: string | null;
+    readonly lastDisconnection: string | null;
+    readonly name: string;
+    readonly online: boolean;
+    readonly systemModel: {
+      readonly name: string;
+      readonly hardwareType: {
         readonly name: string;
-        readonly online: boolean;
-        readonly systemModel: {
-            readonly name: string;
-            readonly hardwareType: {
-                readonly name: string;
-            };
-        } | null;
-    }>;
+      };
+    } | null;
+  }>;
 };
 export type Devices_getDevices_Query = {
-    readonly response: Devices_getDevices_QueryResponse;
-    readonly variables: Devices_getDevices_QueryVariables;
+  variables: Devices_getDevices_Query$variables;
+  response: Devices_getDevices_Query$data;
 };
-
-
-
-/*
-query Devices_getDevices_Query {
-  devices {
-    id
-    deviceId
-    lastConnection
-    lastDisconnection
-    name
-    online
-    systemModel {
-      name
-      hardwareType {
-        name
-        id
-      }
-      id
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = {
@@ -205,5 +187,7 @@ return {
   }
 };
 })();
-(node as any).hash = '290893818640c25c5a3299d46589159d';
+
+(node as any).hash = "290893818640c25c5a3299d46589159d";
+
 export default node;

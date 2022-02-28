@@ -1,48 +1,36 @@
+/**
+ * @generated SignedSource<<c6df4056bdf1ed994b4ffa245f325294>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
+import { ConcreteRequest, Mutation } from 'relay-runtime';
 export type CreateHardwareTypeInput = {
-    name: string;
-    handle: string;
-    partNumbers: Array<string>;
+  name: string;
+  handle: string;
+  partNumbers: ReadonlyArray<string>;
 };
-export type HardwareTypeCreate_createHardwareType_MutationVariables = {
-    input: CreateHardwareTypeInput;
+export type HardwareTypeCreate_createHardwareType_Mutation$variables = {
+  input: CreateHardwareTypeInput;
 };
-export type HardwareTypeCreate_createHardwareType_MutationResponse = {
-    readonly createHardwareType: {
-        readonly hardwareType: {
-            readonly id: string;
-            readonly name: string;
-            readonly handle: string;
-            readonly partNumbers: ReadonlyArray<string>;
-        };
-    } | null;
+export type HardwareTypeCreate_createHardwareType_Mutation$data = {
+  readonly createHardwareType: {
+    readonly hardwareType: {
+      readonly id: string;
+      readonly name: string;
+      readonly handle: string;
+      readonly partNumbers: ReadonlyArray<string>;
+    };
+  } | null;
 };
 export type HardwareTypeCreate_createHardwareType_Mutation = {
-    readonly response: HardwareTypeCreate_createHardwareType_MutationResponse;
-    readonly variables: HardwareTypeCreate_createHardwareType_MutationVariables;
+  variables: HardwareTypeCreate_createHardwareType_Mutation$variables;
+  response: HardwareTypeCreate_createHardwareType_Mutation$data;
 };
-
-
-
-/*
-mutation HardwareTypeCreate_createHardwareType_Mutation(
-  $input: CreateHardwareTypeInput!
-) {
-  createHardwareType(input: $input) {
-    hardwareType {
-      id
-      name
-      handle
-      partNumbers
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -137,5 +125,7 @@ return {
   }
 };
 })();
-(node as any).hash = '4414cd1057105410443d05c2b7084936';
+
+(node as any).hash = "4414cd1057105410443d05c2b7084936";
+
 export default node;

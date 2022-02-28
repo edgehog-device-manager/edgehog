@@ -1,49 +1,37 @@
+/**
+ * @generated SignedSource<<e6350e81e18cdec83d50f28615e759f0>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
+import { ConcreteRequest, Mutation } from 'relay-runtime';
 export type UpdateHardwareTypeInput = {
-    hardwareTypeId: string;
-    name?: string | null | undefined;
-    handle?: string | null | undefined;
-    partNumbers?: Array<string> | null | undefined;
+  hardwareTypeId: string;
+  name?: string | null;
+  handle?: string | null;
+  partNumbers?: ReadonlyArray<string> | null;
 };
-export type HardwareType_updateHardwareType_MutationVariables = {
-    input: UpdateHardwareTypeInput;
+export type HardwareType_updateHardwareType_Mutation$variables = {
+  input: UpdateHardwareTypeInput;
 };
-export type HardwareType_updateHardwareType_MutationResponse = {
-    readonly updateHardwareType: {
-        readonly hardwareType: {
-            readonly id: string;
-            readonly name: string;
-            readonly handle: string;
-            readonly partNumbers: ReadonlyArray<string>;
-        };
-    } | null;
+export type HardwareType_updateHardwareType_Mutation$data = {
+  readonly updateHardwareType: {
+    readonly hardwareType: {
+      readonly id: string;
+      readonly name: string;
+      readonly handle: string;
+      readonly partNumbers: ReadonlyArray<string>;
+    };
+  } | null;
 };
 export type HardwareType_updateHardwareType_Mutation = {
-    readonly response: HardwareType_updateHardwareType_MutationResponse;
-    readonly variables: HardwareType_updateHardwareType_MutationVariables;
+  variables: HardwareType_updateHardwareType_Mutation$variables;
+  response: HardwareType_updateHardwareType_Mutation$data;
 };
-
-
-
-/*
-mutation HardwareType_updateHardwareType_Mutation(
-  $input: UpdateHardwareTypeInput!
-) {
-  updateHardwareType(input: $input) {
-    hardwareType {
-      id
-      name
-      handle
-      partNumbers
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -138,5 +126,7 @@ return {
   }
 };
 })();
-(node as any).hash = 'eb28ffad976ac36ef8bb572ba782f70c';
+
+(node as any).hash = "eb28ffad976ac36ef8bb572ba782f70c";
+
 export default node;

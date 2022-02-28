@@ -1,36 +1,38 @@
+/**
+ * @generated SignedSource<<4f77d49f9520b27afceccd91be5e0013>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
-
+import { Fragment, ReaderFragment } from 'relay-runtime';
+export type ModemRegistrationStatus = "NOT_REGISTERED" | "REGISTERED" | "SEARCHING_OPERATOR" | "REGISTRATION_DENIED" | "UNKNOWN" | "REGISTERED_ROAMING" | "%future added value";
+export type ModemTechnology = "GSM" | "GSM_COMPACT" | "UTRAN" | "GSM_EGPRS" | "UTRAN_HSDPA" | "UTRAN_HSUPA" | "UTRAN_HSDPA_HSUPA" | "EUTRAN" | "%future added value";
 import { FragmentRefs } from "relay-runtime";
-export type ModemRegistrationStatus = "NOT_REGISTERED" | "REGISTERED" | "REGISTERED_ROAMING" | "REGISTRATION_DENIED" | "SEARCHING_OPERATOR" | "UNKNOWN" | "%future added value";
-export type ModemTechnology = "EUTRAN" | "GSM" | "GSM_COMPACT" | "GSM_EGPRS" | "UTRAN" | "UTRAN_HSDPA" | "UTRAN_HSDPA_HSUPA" | "UTRAN_HSUPA" | "%future added value";
-export type CellularConnectionTabs_cellularConnection = {
-    readonly cellularConnection: ReadonlyArray<{
-        readonly apn: string | null;
-        readonly carrier: string | null;
-        readonly cellId: number | null;
-        readonly imei: string | null;
-        readonly imsi: string | null;
-        readonly localAreaCode: number | null;
-        readonly mobileCountryCode: number | null;
-        readonly mobileNetworkCode: number | null;
-        readonly registrationStatus: ModemRegistrationStatus | null;
-        readonly rssi: number | null;
-        readonly slot: string;
-        readonly technology: ModemTechnology | null;
-    }> | null;
-    readonly " $refType": "CellularConnectionTabs_cellularConnection";
+export type CellularConnectionTabs_cellularConnection$data = {
+  readonly cellularConnection: ReadonlyArray<{
+    readonly apn: string | null;
+    readonly carrier: string | null;
+    readonly cellId: number | null;
+    readonly imei: string | null;
+    readonly imsi: string | null;
+    readonly localAreaCode: number | null;
+    readonly mobileCountryCode: number | null;
+    readonly mobileNetworkCode: number | null;
+    readonly registrationStatus: ModemRegistrationStatus | null;
+    readonly rssi: number | null;
+    readonly slot: string;
+    readonly technology: ModemTechnology | null;
+  }> | null;
+  readonly " $fragmentType": "CellularConnectionTabs_cellularConnection";
 };
-export type CellularConnectionTabs_cellularConnection$data = CellularConnectionTabs_cellularConnection;
 export type CellularConnectionTabs_cellularConnection$key = {
-    readonly " $data"?: CellularConnectionTabs_cellularConnection$data | undefined;
-    readonly " $fragmentRefs": FragmentRefs<"CellularConnectionTabs_cellularConnection">;
+  readonly " $data"?: CellularConnectionTabs_cellularConnection$data;
+  readonly " $fragmentSpreads": FragmentRefs<"CellularConnectionTabs_cellularConnection">;
 };
-
-
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
@@ -137,5 +139,7 @@ const node: ReaderFragment = {
   "type": "Device",
   "abstractKey": null
 };
-(node as any).hash = '792bcfb753ce4dbf1fd83ec96a9facdf';
+
+(node as any).hash = "792bcfb753ce4dbf1fd83ec96a9facdf";
+
 export default node;

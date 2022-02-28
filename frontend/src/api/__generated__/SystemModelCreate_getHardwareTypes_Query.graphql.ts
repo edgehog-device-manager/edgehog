@@ -1,31 +1,25 @@
+/**
+ * @generated SignedSource<<695f2c7b071343922bf0757cc243192f>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
-export type SystemModelCreate_getHardwareTypes_QueryVariables = {};
-export type SystemModelCreate_getHardwareTypes_QueryResponse = {
-    readonly hardwareTypes: ReadonlyArray<{
-        readonly id: string;
-        readonly name: string;
-    }>;
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type SystemModelCreate_getHardwareTypes_Query$variables = {};
+export type SystemModelCreate_getHardwareTypes_Query$data = {
+  readonly hardwareTypes: ReadonlyArray<{
+    readonly id: string;
+    readonly name: string;
+  }>;
 };
 export type SystemModelCreate_getHardwareTypes_Query = {
-    readonly response: SystemModelCreate_getHardwareTypes_QueryResponse;
-    readonly variables: SystemModelCreate_getHardwareTypes_QueryVariables;
+  variables: SystemModelCreate_getHardwareTypes_Query$variables;
+  response: SystemModelCreate_getHardwareTypes_Query$data;
 };
-
-
-
-/*
-query SystemModelCreate_getHardwareTypes_Query {
-  hardwareTypes {
-    id
-    name
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -82,5 +76,7 @@ return {
   }
 };
 })();
-(node as any).hash = '4774a09b2bd80451f008336047267152';
+
+(node as any).hash = "4774a09b2bd80451f008336047267152";
+
 export default node;

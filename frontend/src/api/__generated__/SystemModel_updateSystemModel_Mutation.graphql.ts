@@ -1,74 +1,53 @@
+/**
+ * @generated SignedSource<<0ed8189605940dd9d80f6f5a93103680>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
+import { ConcreteRequest, Mutation } from 'relay-runtime';
 export type UpdateSystemModelInput = {
-    systemModelId: string;
-    name?: string | null | undefined;
-    handle?: string | null | undefined;
-    pictureFile?: File | null | undefined;
-    pictureUrl?: string | null | undefined;
-    partNumbers?: Array<string> | null | undefined;
-    description?: LocalizedTextInput | null | undefined;
+  systemModelId: string;
+  name?: string | null;
+  handle?: string | null;
+  pictureFile?: File | null;
+  pictureUrl?: string | null;
+  partNumbers?: ReadonlyArray<string> | null;
+  description?: LocalizedTextInput | null;
 };
 export type LocalizedTextInput = {
-    locale: string;
-    text: string;
+  locale: string;
+  text: string;
 };
-export type SystemModel_updateSystemModel_MutationVariables = {
-    input: UpdateSystemModelInput;
+export type SystemModel_updateSystemModel_Mutation$variables = {
+  input: UpdateSystemModelInput;
 };
-export type SystemModel_updateSystemModel_MutationResponse = {
-    readonly updateSystemModel: {
-        readonly systemModel: {
-            readonly id: string;
-            readonly name: string;
-            readonly handle: string;
-            readonly description: {
-                readonly locale: string;
-                readonly text: string;
-            } | null;
-            readonly hardwareType: {
-                readonly id: string;
-                readonly name: string;
-            };
-            readonly partNumbers: ReadonlyArray<string>;
-            readonly pictureUrl: string | null;
-        };
-    } | null;
+export type SystemModel_updateSystemModel_Mutation$data = {
+  readonly updateSystemModel: {
+    readonly systemModel: {
+      readonly id: string;
+      readonly name: string;
+      readonly handle: string;
+      readonly description: {
+        readonly locale: string;
+        readonly text: string;
+      } | null;
+      readonly hardwareType: {
+        readonly id: string;
+        readonly name: string;
+      };
+      readonly partNumbers: ReadonlyArray<string>;
+      readonly pictureUrl: string | null;
+    };
+  } | null;
 };
 export type SystemModel_updateSystemModel_Mutation = {
-    readonly response: SystemModel_updateSystemModel_MutationResponse;
-    readonly variables: SystemModel_updateSystemModel_MutationVariables;
+  variables: SystemModel_updateSystemModel_Mutation$variables;
+  response: SystemModel_updateSystemModel_Mutation$data;
 };
-
-
-
-/*
-mutation SystemModel_updateSystemModel_Mutation(
-  $input: UpdateSystemModelInput!
-) {
-  updateSystemModel(input: $input) {
-    systemModel {
-      id
-      name
-      handle
-      description {
-        locale
-        text
-      }
-      hardwareType {
-        id
-        name
-      }
-      partNumbers
-      pictureUrl
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -210,5 +189,7 @@ return {
   }
 };
 })();
-(node as any).hash = '137b5cd9bc35b763b5de5338e64b8e96';
+
+(node as any).hash = "137b5cd9bc35b763b5de5338e64b8e96";
+
 export default node;

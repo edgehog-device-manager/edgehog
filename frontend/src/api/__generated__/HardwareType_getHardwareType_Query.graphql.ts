@@ -1,39 +1,29 @@
+/**
+ * @generated SignedSource<<eca8d17af21cc9607d103c89286c58a8>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
-export type HardwareType_getHardwareType_QueryVariables = {
-    id: string;
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type HardwareType_getHardwareType_Query$variables = {
+  id: string;
 };
-export type HardwareType_getHardwareType_QueryResponse = {
-    readonly hardwareType: {
-        readonly id: string;
-        readonly name: string;
-        readonly handle: string;
-        readonly partNumbers: ReadonlyArray<string>;
-    } | null;
+export type HardwareType_getHardwareType_Query$data = {
+  readonly hardwareType: {
+    readonly id: string;
+    readonly name: string;
+    readonly handle: string;
+    readonly partNumbers: ReadonlyArray<string>;
+  } | null;
 };
 export type HardwareType_getHardwareType_Query = {
-    readonly response: HardwareType_getHardwareType_QueryResponse;
-    readonly variables: HardwareType_getHardwareType_QueryVariables;
+  variables: HardwareType_getHardwareType_Query$variables;
+  response: HardwareType_getHardwareType_Query$data;
 };
-
-
-
-/*
-query HardwareType_getHardwareType_Query(
-  $id: ID!
-) {
-  hardwareType(id: $id) {
-    id
-    name
-    handle
-    partNumbers
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -117,5 +107,7 @@ return {
   }
 };
 })();
-(node as any).hash = '0c819c24c6c6095f8bbafbcfec7f0920';
+
+(node as any).hash = "0c819c24c6c6095f8bbafbcfec7f0920";
+
 export default node;

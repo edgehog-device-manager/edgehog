@@ -1,24 +1,26 @@
+/**
+ * @generated SignedSource<<0db6dd28725066a97cdc0d023ea9577a>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
-
+import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type Device_osInfo = {
-    readonly osInfo: {
-        readonly name: string | null;
-        readonly version: string | null;
-    } | null;
-    readonly " $refType": "Device_osInfo";
+export type Device_osInfo$data = {
+  readonly osInfo: {
+    readonly name: string | null;
+    readonly version: string | null;
+  } | null;
+  readonly " $fragmentType": "Device_osInfo";
 };
-export type Device_osInfo$data = Device_osInfo;
 export type Device_osInfo$key = {
-    readonly " $data"?: Device_osInfo$data | undefined;
-    readonly " $fragmentRefs": FragmentRefs<"Device_osInfo">;
+  readonly " $data"?: Device_osInfo$data;
+  readonly " $fragmentSpreads": FragmentRefs<"Device_osInfo">;
 };
-
-
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
@@ -55,5 +57,7 @@ const node: ReaderFragment = {
   "type": "Device",
   "abstractKey": null
 };
-(node as any).hash = 'e6ebd58bb4a895bdb6a29c499c830024';
+
+(node as any).hash = "e6ebd58bb4a895bdb6a29c499c830024";
+
 export default node;

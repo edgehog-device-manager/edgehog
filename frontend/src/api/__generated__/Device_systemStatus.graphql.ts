@@ -1,26 +1,28 @@
+/**
+ * @generated SignedSource<<934d984bdab8018afcf2a80f940490b8>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
-
+import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type Device_systemStatus = {
-    readonly systemStatus: {
-        readonly memoryFreeBytes: number | null;
-        readonly taskCount: number | null;
-        readonly uptimeMilliseconds: number | null;
-        readonly timestamp: string;
-    } | null;
-    readonly " $refType": "Device_systemStatus";
+export type Device_systemStatus$data = {
+  readonly systemStatus: {
+    readonly memoryFreeBytes: number | null;
+    readonly taskCount: number | null;
+    readonly uptimeMilliseconds: number | null;
+    readonly timestamp: string;
+  } | null;
+  readonly " $fragmentType": "Device_systemStatus";
 };
-export type Device_systemStatus$data = Device_systemStatus;
 export type Device_systemStatus$key = {
-    readonly " $data"?: Device_systemStatus$data | undefined;
-    readonly " $fragmentRefs": FragmentRefs<"Device_systemStatus">;
+  readonly " $data"?: Device_systemStatus$data;
+  readonly " $fragmentSpreads": FragmentRefs<"Device_systemStatus">;
 };
-
-
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
@@ -71,5 +73,7 @@ const node: ReaderFragment = {
   "type": "Device",
   "abstractKey": null
 };
-(node as any).hash = 'ab9e157d7347e816501bd102a081ae62';
+
+(node as any).hash = "ab9e157d7347e816501bd102a081ae62";
+
 export default node;

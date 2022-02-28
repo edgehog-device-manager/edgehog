@@ -1,43 +1,33 @@
+/**
+ * @generated SignedSource<<512afcc50b3c9fa98667fd1d97452637>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
+import { ConcreteRequest, Mutation } from 'relay-runtime';
 export type UpdateDeviceInput = {
-    deviceId: string;
-    name?: string | null | undefined;
+  deviceId: string;
+  name?: string | null;
 };
-export type Device_updateDevice_MutationVariables = {
-    input: UpdateDeviceInput;
+export type Device_updateDevice_Mutation$variables = {
+  input: UpdateDeviceInput;
 };
-export type Device_updateDevice_MutationResponse = {
-    readonly updateDevice: {
-        readonly device: {
-            readonly id: string;
-            readonly name: string;
-        };
-    } | null;
+export type Device_updateDevice_Mutation$data = {
+  readonly updateDevice: {
+    readonly device: {
+      readonly id: string;
+      readonly name: string;
+    };
+  } | null;
 };
 export type Device_updateDevice_Mutation = {
-    readonly response: Device_updateDevice_MutationResponse;
-    readonly variables: Device_updateDevice_MutationVariables;
+  variables: Device_updateDevice_Mutation$variables;
+  response: Device_updateDevice_Mutation$data;
 };
-
-
-
-/*
-mutation Device_updateDevice_Mutation(
-  $input: UpdateDeviceInput!
-) {
-  updateDevice(input: $input) {
-    device {
-      id
-      name
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -118,5 +108,7 @@ return {
   }
 };
 })();
-(node as any).hash = '2ea79c86352e1abc0cccd50440cc67ea';
+
+(node as any).hash = "2ea79c86352e1abc0cccd50440cc67ea";
+
 export default node;
