@@ -42,6 +42,7 @@ defmodule Doc.MixProject do
       "pages/user/hardware_types.md",
       "pages/user/system_models.md",
       "pages/user/devices.md",
+      "pages/user/device_sdks_runtime.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
       "pages/integrating/astarte_interfaces.md"
