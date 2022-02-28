@@ -49,7 +49,7 @@ import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiSc
 import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
 import type {
   Device_getDevice_Query,
-  Device_getDevice_QueryResponse,
+  Device_getDevice_Query$data,
 } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
@@ -1043,7 +1043,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
 };
 
 interface DeviceCellularConnectionTabProps {
-  deviceRef: NonNullable<Device_getDevice_QueryResponse["device"]>;
+  deviceRef: NonNullable<Device_getDevice_Query$data["device"]>;
 }
 
 const DeviceCellularConnectionTab = ({

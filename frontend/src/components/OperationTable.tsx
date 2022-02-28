@@ -22,7 +22,7 @@ import { graphql, useFragment } from "react-relay";
 
 import type {
   OtaOperationStatus,
-  OperationTable_otaOperations,
+  OperationTable_otaOperations$data,
   OperationTable_otaOperations$key,
 } from "api/__generated__/OperationTable_otaOperations.graphql";
 
@@ -95,7 +95,7 @@ const OperationStatus = ({ status }: { status: OtaOperationStatus }) => {
   );
 };
 
-type TableRecord = OperationTable_otaOperations["otaOperations"][0];
+type TableRecord = OperationTable_otaOperations$data["otaOperations"][0];
 
 const columns: Column<TableRecord>[] = [
   {
