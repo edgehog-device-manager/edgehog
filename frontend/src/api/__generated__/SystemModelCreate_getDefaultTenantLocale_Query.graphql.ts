@@ -1,29 +1,24 @@
+/**
+ * @generated SignedSource<<673e28d0e8c992b2e5643d5d16b19cc1>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
-export type SystemModelCreate_getDefaultTenantLocale_QueryVariables = {};
-export type SystemModelCreate_getDefaultTenantLocale_QueryResponse = {
-    readonly tenantInfo: {
-        readonly defaultLocale: string;
-    };
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type SystemModelCreate_getDefaultTenantLocale_Query$variables = {};
+export type SystemModelCreate_getDefaultTenantLocale_Query$data = {
+  readonly tenantInfo: {
+    readonly defaultLocale: string;
+  };
 };
 export type SystemModelCreate_getDefaultTenantLocale_Query = {
-    readonly response: SystemModelCreate_getDefaultTenantLocale_QueryResponse;
-    readonly variables: SystemModelCreate_getDefaultTenantLocale_QueryVariables;
+  variables: SystemModelCreate_getDefaultTenantLocale_Query$variables;
+  response: SystemModelCreate_getDefaultTenantLocale_Query$data;
 };
-
-
-
-/*
-query SystemModelCreate_getDefaultTenantLocale_Query {
-  tenantInfo {
-    defaultLocale
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -73,5 +68,7 @@ return {
   }
 };
 })();
-(node as any).hash = '3744e831f6fc97c695deab11c612030f';
+
+(node as any).hash = "3744e831f6fc97c695deab11c612030f";
+
 export default node;

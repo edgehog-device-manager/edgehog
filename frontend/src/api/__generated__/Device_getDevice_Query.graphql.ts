@@ -1,196 +1,43 @@
+/**
+ * @generated SignedSource<<ee9c3cb005f8a2ee83ec575ce3ede2a0>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
+import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type Device_getDevice_QueryVariables = {
-    id: string;
+export type Device_getDevice_Query$variables = {
+  id: string;
 };
-export type Device_getDevice_QueryResponse = {
-    readonly device: {
-        readonly id: string;
-        readonly deviceId: string;
-        readonly lastConnection: string | null;
-        readonly lastDisconnection: string | null;
+export type Device_getDevice_Query$data = {
+  readonly device: {
+    readonly id: string;
+    readonly deviceId: string;
+    readonly lastConnection: string | null;
+    readonly lastDisconnection: string | null;
+    readonly name: string;
+    readonly online: boolean;
+    readonly systemModel: {
+      readonly name: string;
+      readonly pictureUrl: string | null;
+      readonly hardwareType: {
         readonly name: string;
-        readonly online: boolean;
-        readonly systemModel: {
-            readonly name: string;
-            readonly pictureUrl: string | null;
-            readonly hardwareType: {
-                readonly name: string;
-            };
-        } | null;
-        readonly cellularConnection: ReadonlyArray<{
-            readonly __typename: string;
-        }> | null;
-        readonly " $fragmentRefs": FragmentRefs<"Device_hardwareInfo" | "Device_baseImage" | "Device_osInfo" | "Device_runtimeInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations" | "CellularConnectionTabs_cellularConnection">;
+      };
     } | null;
+    readonly cellularConnection: ReadonlyArray<{
+      readonly __typename: string;
+    }> | null;
+    readonly " $fragmentSpreads": FragmentRefs<"Device_hardwareInfo" | "Device_baseImage" | "Device_osInfo" | "Device_runtimeInfo" | "Device_location" | "Device_storageUsage" | "Device_systemStatus" | "Device_wifiScanResults" | "Device_batteryStatus" | "Device_otaOperations" | "CellularConnectionTabs_cellularConnection">;
+  } | null;
 };
 export type Device_getDevice_Query = {
-    readonly response: Device_getDevice_QueryResponse;
-    readonly variables: Device_getDevice_QueryVariables;
+  variables: Device_getDevice_Query$variables;
+  response: Device_getDevice_Query$data;
 };
-
-
-
-/*
-query Device_getDevice_Query(
-  $id: ID!
-) {
-  device(id: $id) {
-    id
-    deviceId
-    lastConnection
-    lastDisconnection
-    name
-    online
-    systemModel {
-      name
-      pictureUrl
-      hardwareType {
-        name
-        id
-      }
-      id
-    }
-    cellularConnection {
-      __typename
-    }
-    ...Device_hardwareInfo
-    ...Device_baseImage
-    ...Device_osInfo
-    ...Device_runtimeInfo
-    ...Device_location
-    ...Device_storageUsage
-    ...Device_systemStatus
-    ...Device_wifiScanResults
-    ...Device_batteryStatus
-    ...Device_otaOperations
-    ...CellularConnectionTabs_cellularConnection
-  }
-}
-
-fragment CellularConnectionTabs_cellularConnection on Device {
-  cellularConnection {
-    apn
-    carrier
-    cellId
-    imei
-    imsi
-    localAreaCode
-    mobileCountryCode
-    mobileNetworkCode
-    registrationStatus
-    rssi
-    slot
-    technology
-  }
-}
-
-fragment Device_baseImage on Device {
-  baseImage {
-    name
-    version
-    buildId
-    fingerprint
-  }
-}
-
-fragment Device_batteryStatus on Device {
-  batteryStatus {
-    slot
-    status
-    levelPercentage
-    levelAbsoluteError
-  }
-}
-
-fragment Device_hardwareInfo on Device {
-  hardwareInfo {
-    cpuArchitecture
-    cpuModel
-    cpuModelName
-    cpuVendor
-    memoryTotalBytes
-  }
-}
-
-fragment Device_location on Device {
-  location {
-    latitude
-    longitude
-    accuracy
-    address
-    timestamp
-  }
-}
-
-fragment Device_osInfo on Device {
-  osInfo {
-    name
-    version
-  }
-}
-
-fragment Device_otaOperations on Device {
-  id
-  otaOperations {
-    id
-    baseImageUrl
-    status
-  }
-  ...OperationTable_otaOperations
-}
-
-fragment Device_runtimeInfo on Device {
-  runtimeInfo {
-    name
-    version
-    environment
-    url
-  }
-}
-
-fragment Device_storageUsage on Device {
-  storageUsage {
-    label
-    totalBytes
-    freeBytes
-  }
-}
-
-fragment Device_systemStatus on Device {
-  systemStatus {
-    memoryFreeBytes
-    taskCount
-    uptimeMilliseconds
-    timestamp
-  }
-}
-
-fragment Device_wifiScanResults on Device {
-  wifiScanResults {
-    channel
-    essid
-    macAddress
-    rssi
-    timestamp
-  }
-}
-
-fragment OperationTable_otaOperations on Device {
-  otaOperations {
-    baseImageUrl
-    createdAt
-    status
-    updatedAt
-    id
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -877,5 +724,7 @@ return {
   }
 };
 })();
-(node as any).hash = '90c7adb3db30b183536904549b5c7d04';
+
+(node as any).hash = "90c7adb3db30b183536904549b5c7d04";
+
 export default node;

@@ -1,27 +1,29 @@
+/**
+ * @generated SignedSource<<d5914ae09c006814f27515bacbc0c137>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
-
+import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type Device_location = {
-    readonly location: {
-        readonly latitude: number;
-        readonly longitude: number;
-        readonly accuracy: number | null;
-        readonly address: string | null;
-        readonly timestamp: string;
-    } | null;
-    readonly " $refType": "Device_location";
+export type Device_location$data = {
+  readonly location: {
+    readonly latitude: number;
+    readonly longitude: number;
+    readonly accuracy: number | null;
+    readonly address: string | null;
+    readonly timestamp: string;
+  } | null;
+  readonly " $fragmentType": "Device_location";
 };
-export type Device_location$data = Device_location;
 export type Device_location$key = {
-    readonly " $data"?: Device_location$data | undefined;
-    readonly " $fragmentRefs": FragmentRefs<"Device_location">;
+  readonly " $data"?: Device_location$data;
+  readonly " $fragmentSpreads": FragmentRefs<"Device_location">;
 };
-
-
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
@@ -79,5 +81,7 @@ const node: ReaderFragment = {
   "type": "Device",
   "abstractKey": null
 };
-(node as any).hash = '9c66b54eaa55ef5e02d1bfc5eb43707e';
+
+(node as any).hash = "9c66b54eaa55ef5e02d1bfc5eb43707e";
+
 export default node;

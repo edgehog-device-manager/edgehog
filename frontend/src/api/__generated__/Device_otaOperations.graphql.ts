@@ -1,28 +1,30 @@
+/**
+ * @generated SignedSource<<2463a00d6c872a82cb91dac3d5d6214d>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
-
+import { Fragment, ReaderFragment } from 'relay-runtime';
+export type OtaOperationStatus = "PENDING" | "IN_PROGRESS" | "ERROR" | "DONE" | "%future added value";
 import { FragmentRefs } from "relay-runtime";
-export type OtaOperationStatus = "DONE" | "ERROR" | "IN_PROGRESS" | "PENDING" | "%future added value";
-export type Device_otaOperations = {
+export type Device_otaOperations$data = {
+  readonly id: string;
+  readonly otaOperations: ReadonlyArray<{
     readonly id: string;
-    readonly otaOperations: ReadonlyArray<{
-        readonly id: string;
-        readonly baseImageUrl: string;
-        readonly status: OtaOperationStatus;
-    }>;
-    readonly " $fragmentRefs": FragmentRefs<"OperationTable_otaOperations">;
-    readonly " $refType": "Device_otaOperations";
+    readonly baseImageUrl: string;
+    readonly status: OtaOperationStatus;
+  }>;
+  readonly " $fragmentSpreads": FragmentRefs<"OperationTable_otaOperations">;
+  readonly " $fragmentType": "Device_otaOperations";
 };
-export type Device_otaOperations$data = Device_otaOperations;
 export type Device_otaOperations$key = {
-    readonly " $data"?: Device_otaOperations$data | undefined;
-    readonly " $fragmentRefs": FragmentRefs<"Device_otaOperations">;
+  readonly " $data"?: Device_otaOperations$data;
+  readonly " $fragmentSpreads": FragmentRefs<"Device_otaOperations">;
 };
-
-
 
 const node: ReaderFragment = (function(){
 var v0 = {
@@ -75,5 +77,7 @@ return {
   "abstractKey": null
 };
 })();
-(node as any).hash = '2f353b925a526bae9772035ab80c4cb1';
+
+(node as any).hash = "2f353b925a526bae9772035ab80c4cb1";
+
 export default node;

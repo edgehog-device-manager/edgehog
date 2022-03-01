@@ -1,53 +1,39 @@
+/**
+ * @generated SignedSource<<926121f192503c9e2c6fdab2b37ae75f>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
-export type OtaOperationStatus = "DONE" | "ERROR" | "IN_PROGRESS" | "PENDING" | "%future added value";
-export type OtaOperationStatusCode = "ALREADY_IN_PROGRESS" | "DEPLOY_ERROR" | "FAILED" | "NETWORK_ERROR" | "NVS_ERROR" | "WRONG_PARTITION" | "%future added value";
+import { ConcreteRequest, Mutation } from 'relay-runtime';
+export type OtaOperationStatus = "PENDING" | "IN_PROGRESS" | "ERROR" | "DONE" | "%future added value";
+export type OtaOperationStatusCode = "NETWORK_ERROR" | "NVS_ERROR" | "ALREADY_IN_PROGRESS" | "FAILED" | "DEPLOY_ERROR" | "WRONG_PARTITION" | "%future added value";
 export type CreateManualOtaOperationInput = {
-    deviceId: string;
-    baseImageFile?: File | null | undefined;
+  deviceId: string;
+  baseImageFile?: File | null;
 };
-export type Device_createManualOtaOperation_MutationVariables = {
-    input: CreateManualOtaOperationInput;
+export type Device_createManualOtaOperation_Mutation$variables = {
+  input: CreateManualOtaOperationInput;
 };
-export type Device_createManualOtaOperation_MutationResponse = {
-    readonly createManualOtaOperation: {
-        readonly otaOperation: {
-            readonly id: string;
-            readonly baseImageUrl: string;
-            readonly createdAt: string;
-            readonly status: OtaOperationStatus;
-            readonly statusCode: OtaOperationStatusCode | null;
-            readonly updatedAt: string;
-        };
-    } | null;
+export type Device_createManualOtaOperation_Mutation$data = {
+  readonly createManualOtaOperation: {
+    readonly otaOperation: {
+      readonly id: string;
+      readonly baseImageUrl: string;
+      readonly createdAt: string;
+      readonly status: OtaOperationStatus;
+      readonly statusCode: OtaOperationStatusCode | null;
+      readonly updatedAt: string;
+    };
+  } | null;
 };
 export type Device_createManualOtaOperation_Mutation = {
-    readonly response: Device_createManualOtaOperation_MutationResponse;
-    readonly variables: Device_createManualOtaOperation_MutationVariables;
+  variables: Device_createManualOtaOperation_Mutation$variables;
+  response: Device_createManualOtaOperation_Mutation$data;
 };
-
-
-
-/*
-mutation Device_createManualOtaOperation_Mutation(
-  $input: CreateManualOtaOperationInput!
-) {
-  createManualOtaOperation(input: $input) {
-    otaOperation {
-      id
-      baseImageUrl
-      createdAt
-      status
-      statusCode
-      updatedAt
-    }
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -156,5 +142,7 @@ return {
   }
 };
 })();
-(node as any).hash = 'fe865fe5aac4b7a1f45a5e91229586b8';
+
+(node as any).hash = "fe865fe5aac4b7a1f45a5e91229586b8";
+
 export default node;

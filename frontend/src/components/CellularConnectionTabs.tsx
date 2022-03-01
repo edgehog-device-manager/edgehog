@@ -29,7 +29,7 @@ import Form from "components/Form";
 import Stack from "components/Stack";
 
 import type {
-  CellularConnectionTabs_cellularConnection,
+  CellularConnectionTabs_cellularConnection$data,
   CellularConnectionTabs_cellularConnection$key,
 } from "api/__generated__/CellularConnectionTabs_cellularConnection.graphql";
 
@@ -120,7 +120,7 @@ const CELLULAR_CONNECTION_TABS_FRAGMENT = graphql`
 `;
 
 type Modems = NonNullable<
-  CellularConnectionTabs_cellularConnection["cellularConnection"]
+  CellularConnectionTabs_cellularConnection$data["cellularConnection"]
 >;
 type Modem = Modems[number];
 

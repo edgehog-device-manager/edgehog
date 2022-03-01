@@ -1,26 +1,28 @@
+/**
+ * @generated SignedSource<<dcf769e0ce1befefff8a2dc793463925>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ReaderFragment } from "relay-runtime";
-
+import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type Device_baseImage = {
-    readonly baseImage: {
-        readonly name: string | null;
-        readonly version: string | null;
-        readonly buildId: string | null;
-        readonly fingerprint: string | null;
-    } | null;
-    readonly " $refType": "Device_baseImage";
+export type Device_baseImage$data = {
+  readonly baseImage: {
+    readonly name: string | null;
+    readonly version: string | null;
+    readonly buildId: string | null;
+    readonly fingerprint: string | null;
+  } | null;
+  readonly " $fragmentType": "Device_baseImage";
 };
-export type Device_baseImage$data = Device_baseImage;
 export type Device_baseImage$key = {
-    readonly " $data"?: Device_baseImage$data | undefined;
-    readonly " $fragmentRefs": FragmentRefs<"Device_baseImage">;
+  readonly " $data"?: Device_baseImage$data;
+  readonly " $fragmentSpreads": FragmentRefs<"Device_baseImage">;
 };
-
-
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
@@ -71,5 +73,7 @@ const node: ReaderFragment = {
   "type": "Device",
   "abstractKey": null
 };
-(node as any).hash = 'c822701364fbd0df6ce87fc48896204b';
+
+(node as any).hash = "c822701364fbd0df6ce87fc48896204b";
+
 export default node;

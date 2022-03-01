@@ -1,57 +1,38 @@
+/**
+ * @generated SignedSource<<c9f7dee516cd8b7cad52519c97cbda99>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
 
-import { ConcreteRequest } from "relay-runtime";
-
-export type SystemModel_getSystemModel_QueryVariables = {
-    id: string;
+import { ConcreteRequest, Query } from 'relay-runtime';
+export type SystemModel_getSystemModel_Query$variables = {
+  id: string;
 };
-export type SystemModel_getSystemModel_QueryResponse = {
-    readonly systemModel: {
-        readonly id: string;
-        readonly name: string;
-        readonly handle: string;
-        readonly description: {
-            readonly locale: string;
-            readonly text: string;
-        } | null;
-        readonly hardwareType: {
-            readonly id: string;
-            readonly name: string;
-        };
-        readonly partNumbers: ReadonlyArray<string>;
-        readonly pictureUrl: string | null;
+export type SystemModel_getSystemModel_Query$data = {
+  readonly systemModel: {
+    readonly id: string;
+    readonly name: string;
+    readonly handle: string;
+    readonly description: {
+      readonly locale: string;
+      readonly text: string;
     } | null;
+    readonly hardwareType: {
+      readonly id: string;
+      readonly name: string;
+    };
+    readonly partNumbers: ReadonlyArray<string>;
+    readonly pictureUrl: string | null;
+  } | null;
 };
 export type SystemModel_getSystemModel_Query = {
-    readonly response: SystemModel_getSystemModel_QueryResponse;
-    readonly variables: SystemModel_getSystemModel_QueryVariables;
+  variables: SystemModel_getSystemModel_Query$variables;
+  response: SystemModel_getSystemModel_Query$data;
 };
-
-
-
-/*
-query SystemModel_getSystemModel_Query(
-  $id: ID!
-) {
-  systemModel(id: $id) {
-    id
-    name
-    handle
-    description {
-      locale
-      text
-    }
-    hardwareType {
-      id
-      name
-    }
-    partNumbers
-    pictureUrl
-  }
-}
-*/
 
 const node: ConcreteRequest = (function(){
 var v0 = [
@@ -182,5 +163,7 @@ return {
   }
 };
 })();
-(node as any).hash = '9df2d20636e4b5e30ebab4c70300f4af';
+
+(node as any).hash = "9df2d20636e4b5e30ebab4c70300f4af";
+
 export default node;
