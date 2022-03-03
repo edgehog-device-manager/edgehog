@@ -77,6 +77,11 @@ defmodule Edgehog.AstarteMockCase do
     )
 
     Mox.stub_with(
+      Edgehog.Astarte.Device.GeolocationMock,
+      Edgehog.Mocks.Astarte.Device.Geolocation
+    )
+
+    Mox.stub_with(
       Edgehog.Astarte.Device.WiFiScanResultMock,
       Edgehog.Mocks.Astarte.Device.WiFiScanResult
     )
