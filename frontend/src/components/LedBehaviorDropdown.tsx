@@ -74,9 +74,10 @@ function isSupportedLedBehavior(value: unknown): value is SupportedLedBehavior {
 interface Props {
   deviceId: string;
   disabled: boolean;
+  onError: (error: React.ReactNode) => void;
 }
 
-const LedBehaviorDropdown = ({ deviceId, disabled }: Props) => {
+const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
   const intl = useIntl();
 
   const [setLedBehavior, isSettingLedBehavior] =
@@ -97,9 +98,25 @@ const LedBehaviorDropdown = ({ deviceId, disabled }: Props) => {
             behavior: ledBehavior,
           },
         },
+        onCompleted(data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map((error) => error.message)
+              .join(". \n");
+            return onError(errorFeedback);
+          }
+        },
+        onError(error) {
+          onError(
+            <FormattedMessage
+              id="components.LedBehaviorDropdown.genericErrorFeedback"
+              defaultMessage="The request could not reach the server, please try again."
+            />
+          );
+        },
       });
     },
-    [setLedBehavior, deviceId]
+    [setLedBehavior, deviceId, onError]
   );
 
   return (

@@ -1104,8 +1104,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
 
   const [deviceDraft, setDeviceDraft] = useState(_.pick(device, ["name"]));
 
-  const [updateErrorFeedback, setUpdateErrorFeedback] =
-    useState<React.ReactNode>(null);
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
     UPDATE_DEVICE_MUTATION
@@ -1123,15 +1122,15 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
             onCompleted(data, errors) {
               if (errors) {
                 setDeviceDraft(draft);
-                const updateErrorFeedback = errors
+                const errorFeedback = errors
                   .map((error) => error.message)
                   .join(". \n");
-                return setUpdateErrorFeedback(updateErrorFeedback);
+                return setErrorFeedback(errorFeedback);
               }
             },
             onError(error) {
               setDeviceDraft(draft);
-              setUpdateErrorFeedback(
+              setErrorFeedback(
                 <FormattedMessage
                   id="pages.Device.updateDeviceErrorFeedback"
                   defaultMessage="Could not update the device, please try again."
@@ -1181,12 +1180,12 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
       <Page.Main>
         <Stack gap={3}>
           <Alert
-            show={!!updateErrorFeedback}
+            show={!!errorFeedback}
             variant="danger"
-            onClose={() => setUpdateErrorFeedback(null)}
+            onClose={() => setErrorFeedback(null)}
             dismissible
           >
-            {updateErrorFeedback}
+            {errorFeedback}
           </Alert>
           <Row>
             <Col md="5" lg="4" xl="3">
@@ -1308,6 +1307,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                     <LedBehaviorDropdown
                       deviceId={device.id}
                       disabled={!device.online}
+                      onError={setErrorFeedback}
                     />
                   </FormRow>
                 </Stack>
