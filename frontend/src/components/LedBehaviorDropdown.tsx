@@ -16,7 +16,7 @@
   limitations under the License.
 */
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import graphql from "babel-plugin-relay/macro";
 import { useMutation } from "react-relay/hooks";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
@@ -25,6 +25,8 @@ import type { MessageDescriptor } from "react-intl";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Dropdown from "react-bootstrap/Dropdown";
 
+import Button from "components/Button";
+import Icon from "components/Icon";
 import Spinner from "components/Spinner";
 
 import type { LedBehaviorDropdown_setLedBehavior_Mutation } from "api/__generated__/LedBehaviorDropdown_setLedBehavior_Mutation.graphql";
@@ -85,11 +87,26 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
       SET_LED_BEHAVIOR_MUTATION
     );
 
+  const [currentBehavior, setCurrentBehavior] =
+    useState<SupportedLedBehavior | null>(null);
+
+  useEffect(() => {
+    if (!currentBehavior) {
+      return;
+    }
+    const timeout = setTimeout(() => {
+      setCurrentBehavior(null);
+    }, 10000);
+
+    return () => clearTimeout(timeout);
+  }, [currentBehavior, setCurrentBehavior]);
+
   const handleSetLedBehavior = useCallback(
     (ledBehavior: unknown) => {
       if (!isSupportedLedBehavior(ledBehavior)) {
         return;
       }
+      setCurrentBehavior(null);
 
       setLedBehavior({
         variables: {
@@ -105,6 +122,10 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
               .join(". \n");
             return onError(errorFeedback);
           }
+          const maybeBehavior = data.setLedBehavior?.behavior;
+          if (isSupportedLedBehavior(maybeBehavior)) {
+            setCurrentBehavior(maybeBehavior);
+          }
         },
         onError(error) {
           onError(
@@ -116,8 +137,17 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
         },
       });
     },
-    [setLedBehavior, deviceId, onError]
+    [setLedBehavior, deviceId, onError, setCurrentBehavior]
   );
+
+  if (currentBehavior) {
+    return (
+      <Button variant="success" active>
+        <Icon icon="check" className="me-2" />
+        {intl.formatMessage(supportedBehaviorMessages[currentBehavior])}
+      </Button>
+    );
+  }
 
   return (
     <Dropdown as={ButtonGroup} onSelect={handleSetLedBehavior}>
