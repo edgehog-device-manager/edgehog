@@ -11,6 +11,9 @@
   "Device.baseImage.version": {
     "defaultMessage": "Version"
   },
+  "Device.checkMyDevice": {
+    "defaultMessage": "Check my Device"
+  },
   "Device.connectionStatus": {
     "defaultMessage": "Connection"
   },
@@ -218,6 +221,24 @@
   },
   "components.LastSeen.now": {
     "defaultMessage": "Now"
+  },
+  "components.LedBehaviorDropdown.behavior.blinkLED": {
+    "defaultMessage": "Blink LED"
+  },
+  "components.LedBehaviorDropdown.behavior.doubleBlinkLED": {
+    "defaultMessage": "Double blink LED"
+  },
+  "components.LedBehaviorDropdown.behavior.slowBlinkLED": {
+    "defaultMessage": "Slow blink LED"
+  },
+  "components.LedBehaviorDropdown.genericErrorFeedback": {
+    "defaultMessage": "The request could not reach the server, please try again."
+  },
+  "components.LedBehaviorDropdown.identify": {
+    "defaultMessage": "Identify"
+  },
+  "components.LedBehaviorDropdown.tooltip": {
+    "defaultMessage": "The device LED will blink for 60s."
   },
   "components.OperationTable.baseImage": {
     "defaultMessage": "Base Image"
