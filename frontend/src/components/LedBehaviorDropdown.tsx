@@ -24,6 +24,8 @@ import type { MessageDescriptor } from "react-intl";
 
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Dropdown from "react-bootstrap/Dropdown";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
 
 import Button from "components/Button";
 import Icon from "components/Icon";
@@ -150,27 +152,38 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
   }
 
   return (
-    <Dropdown as={ButtonGroup} onSelect={handleSetLedBehavior}>
-      <Dropdown.Toggle
-        variant="secondary"
-        disabled={disabled || isSettingLedBehavior}
-      >
-        {isSettingLedBehavior && (
-          <Spinner as="span" size="sm" className="me-2" aria-hidden="true" />
-        )}
-        <FormattedMessage
-          id="components.LedBehaviorDropdown.identify"
-          defaultMessage="Identify"
-        />
-      </Dropdown.Toggle>
-      <Dropdown.Menu>
-        {SUPPORTED_LED_BEHAVIORS.map((behavior) => (
-          <Dropdown.Item eventKey={behavior} key={behavior}>
-            {intl.formatMessage(supportedBehaviorMessages[behavior])}
-          </Dropdown.Item>
-        ))}
-      </Dropdown.Menu>
-    </Dropdown>
+    <OverlayTrigger
+      overlay={
+        <Tooltip>
+          <FormattedMessage
+            id="components.LedBehaviorDropdown.tooltip"
+            defaultMessage="The device LED will blink for 60s."
+          />
+        </Tooltip>
+      }
+    >
+      <Dropdown as={ButtonGroup} onSelect={handleSetLedBehavior}>
+        <Dropdown.Toggle
+          variant="secondary"
+          disabled={disabled || isSettingLedBehavior}
+        >
+          {isSettingLedBehavior && (
+            <Spinner as="span" size="sm" className="me-2" aria-hidden="true" />
+          )}
+          <FormattedMessage
+            id="components.LedBehaviorDropdown.identify"
+            defaultMessage="Identify"
+          />
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          {SUPPORTED_LED_BEHAVIORS.map((behavior) => (
+            <Dropdown.Item eventKey={behavior} key={behavior}>
+              {intl.formatMessage(supportedBehaviorMessages[behavior])}
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>
+      </Dropdown>
+    </OverlayTrigger>
   );
 };
 
