@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ import BoostrapSpinner from "react-bootstrap/Spinner";
 
 type BoostrapSpinnerProps = React.ComponentProps<typeof BoostrapSpinner>;
 
-type Props = Pick<BoostrapSpinnerProps, "className" | "size" | "variant">;
+type Props = Pick<
+  BoostrapSpinnerProps,
+  "className" | "size" | "variant" | "as" | "aria-hidden"
+>;
 
 const Spinner = (props: Props) => {
   return <BoostrapSpinner animation="border" role="status" {...props} />;

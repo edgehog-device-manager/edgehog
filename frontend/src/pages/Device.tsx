@@ -62,6 +62,7 @@ import Col from "components/Col";
 import Figure from "components/Figure";
 import Form from "components/Form";
 import LastSeen from "components/LastSeen";
+import LedBehaviorDropdown from "components/LedBehaviorDropdown";
 import Map from "components/Map";
 import OperationTable from "components/OperationTable";
 import Page from "components/Page";
@@ -1294,6 +1295,20 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                         online={device.online}
                       />
                     </FormValue>
+                  </FormRow>
+                  <FormRow
+                    id="form-device-check-my-device"
+                    label={
+                      <FormattedMessage
+                        id="Device.checkMyDevice"
+                        defaultMessage="Check my Device"
+                      />
+                    }
+                  >
+                    <LedBehaviorDropdown
+                      deviceId={device.id}
+                      disabled={!device.online}
+                    />
                   </FormRow>
                 </Stack>
               </Form>
