@@ -49,10 +49,8 @@ import type { Device_storageUsage$key } from "api/__generated__/Device_storageUs
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
 import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
-import type {
-  Device_getDevice_Query,
-  Device_getDevice_Query$data,
-} from "api/__generated__/Device_getDevice_Query.graphql";
+import type { Device_cellularConnection$key } from "api/__generated__/Device_cellularConnection.graphql";
+import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
 import { Link, Route } from "Navigation";
@@ -80,6 +78,7 @@ import BaseImageForm from "forms/BaseImageForm";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
+    capabilities
     hardwareInfo {
       cpuArchitecture
       cpuModel
@@ -92,6 +91,7 @@ const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
 
 const DEVICE_BASE_IMAGE_FRAGMENT = graphql`
   fragment Device_baseImage on Device {
+    capabilities
     baseImage {
       name
       version
@@ -103,6 +103,7 @@ const DEVICE_BASE_IMAGE_FRAGMENT = graphql`
 
 const DEVICE_OS_INFO_FRAGMENT = graphql`
   fragment Device_osInfo on Device {
+    capabilities
     osInfo {
       name
       version
@@ -112,6 +113,7 @@ const DEVICE_OS_INFO_FRAGMENT = graphql`
 
 const DEVICE_LOCATION_FRAGMENT = graphql`
   fragment Device_location on Device {
+    capabilities
     location {
       latitude
       longitude
@@ -124,6 +126,7 @@ const DEVICE_LOCATION_FRAGMENT = graphql`
 
 const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
   fragment Device_storageUsage on Device {
+    capabilities
     storageUsage {
       label
       totalBytes
@@ -134,6 +137,7 @@ const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
 
 const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`
   fragment Device_systemStatus on Device {
+    capabilities
     systemStatus {
       memoryFreeBytes
       taskCount
@@ -145,6 +149,7 @@ const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`
 
 const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
   fragment Device_wifiScanResults on Device {
+    capabilities
     wifiScanResults {
       channel
       essid
@@ -157,6 +162,7 @@ const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
 
 const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
   fragment Device_batteryStatus on Device {
+    capabilities
     batteryStatus {
       slot
       status
@@ -169,6 +175,7 @@ const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
 const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
   fragment Device_otaOperations on Device {
     id
+    capabilities
     otaOperations {
       id
       baseImageUrl
@@ -181,12 +188,20 @@ const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
 
 const DEVICE_RUNTIME_INFO_FRAGMENT = graphql`
   fragment Device_runtimeInfo on Device {
+    capabilities
     runtimeInfo {
       name
       version
       environment
       url
     }
+  }
+`;
+
+const DEVICE_CELLULAR_CONNECTION_FRAGMENT = graphql`
+  fragment Device_cellularConnection on Device {
+    capabilities
+    ...CellularConnectionTabs_cellularConnection
   }
 `;
 
@@ -199,6 +214,7 @@ const GET_DEVICE_QUERY = graphql`
       lastDisconnection
       name
       online
+      capabilities
       systemModel {
         name
         pictureUrl
@@ -219,7 +235,7 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_wifiScanResults
       ...Device_batteryStatus
       ...Device_otaOperations
-      ...CellularConnectionTabs_cellularConnection
+      ...Device_cellularConnection
     }
   }
 `;
@@ -287,11 +303,11 @@ interface DeviceHardwareInfoTabProps {
 
 const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
   const intl = useIntl();
-  const { hardwareInfo } = useFragment(
+  const { hardwareInfo, capabilities } = useFragment(
     DEVICE_HARDWARE_INFO_FRAGMENT,
     deviceRef
   );
-  if (!hardwareInfo) {
+  if (!hardwareInfo || !capabilities.includes("HARDWARE_INFO")) {
     return null;
   }
   return (
@@ -401,8 +417,15 @@ interface DeviceBaseImageTabProps {
 
 const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
   const intl = useIntl();
-  const { baseImage } = useFragment(DEVICE_BASE_IMAGE_FRAGMENT, deviceRef);
-  if (!baseImage || Object.values(baseImage).every((value) => value === null)) {
+  const { baseImage, capabilities } = useFragment(
+    DEVICE_BASE_IMAGE_FRAGMENT,
+    deviceRef
+  );
+  if (
+    !baseImage ||
+    Object.values(baseImage).every((value) => value === null) ||
+    !capabilities.includes("BASE_IMAGE")
+  ) {
     return null;
   }
   return (
@@ -483,8 +506,15 @@ interface DeviceOSInfoTabProps {
 
 const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
   const intl = useIntl();
-  const { osInfo } = useFragment(DEVICE_OS_INFO_FRAGMENT, deviceRef);
-  if (!osInfo || Object.values(osInfo).every((value) => value === null)) {
+  const { osInfo, capabilities } = useFragment(
+    DEVICE_OS_INFO_FRAGMENT,
+    deviceRef
+  );
+  if (
+    !osInfo ||
+    Object.values(osInfo).every((value) => value === null) ||
+    !capabilities.includes("OPERATING_SYSTEM")
+  ) {
     return null;
   }
   return (
@@ -535,10 +565,14 @@ interface DeviceRuntimeInfoTabProps {
 
 const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
   const intl = useIntl();
-  const { runtimeInfo } = useFragment(DEVICE_RUNTIME_INFO_FRAGMENT, deviceRef);
+  const { runtimeInfo, capabilities } = useFragment(
+    DEVICE_RUNTIME_INFO_FRAGMENT,
+    deviceRef
+  );
   if (
     !runtimeInfo ||
-    Object.values(runtimeInfo).every((value) => value === null)
+    Object.values(runtimeInfo).every((value) => value === null) ||
+    !capabilities.includes("RUNTIME_INFO")
   ) {
     return null;
   }
@@ -620,11 +654,11 @@ interface DeviceStorageUsageTabProps {
 
 const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
   const intl = useIntl();
-  const { storageUsage } = useFragment(
+  const { storageUsage, capabilities } = useFragment(
     DEVICE_STORAGE_USAGE_FRAGMENT,
     deviceRef
   );
-  if (!storageUsage) {
+  if (!storageUsage || !capabilities.includes("STORAGE")) {
     return null;
   }
   const storageUnits = storageUsage.map((storageUnit) => ({ ...storageUnit }));
@@ -665,8 +699,11 @@ interface DeviceLocationTabProps {
 
 const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
   const intl = useIntl();
-  const { location } = useFragment(DEVICE_LOCATION_FRAGMENT, deviceRef);
-  if (!location) {
+  const { location, capabilities } = useFragment(
+    DEVICE_LOCATION_FRAGMENT,
+    deviceRef
+  );
+  if (!location || !capabilities.includes("GEOLOCATION")) {
     return null;
   }
   return (
@@ -719,11 +756,11 @@ interface DeviceSystemStatusTabProps {
 
 const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
   const intl = useIntl();
-  const { systemStatus } = useFragment(
+  const { systemStatus, capabilities } = useFragment(
     DEVICE_SYSTEM_STATUS_FRAGMENT,
     deviceRef
   );
-  if (!systemStatus) {
+  if (!systemStatus || !capabilities.includes("SYSTEM_STATUS")) {
     return null;
   }
   return (
@@ -826,11 +863,11 @@ const DeviceWiFiScanResultsTab = ({
   deviceRef,
 }: DeviceWiFiScanResultsTabProps) => {
   const intl = useIntl();
-  const { wifiScanResults } = useFragment(
+  const { wifiScanResults, capabilities } = useFragment(
     DEVICE_WIFI_SCAN_RESULTS_FRAGMENT,
     deviceRef
   );
-  if (!wifiScanResults) {
+  if (!wifiScanResults || !capabilities.includes("WIFI")) {
     return null;
   }
   // TODO: handle readonly type without mapping to mutable type
@@ -874,11 +911,11 @@ interface DeviceBatteryTabProps {
 
 const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
   const intl = useIntl();
-  const { batteryStatus } = useFragment(
+  const { batteryStatus, capabilities } = useFragment(
     DEVICE_BATTERY_STATUS_FRAGMENT,
     deviceRef
   );
-  if (!batteryStatus) {
+  if (!batteryStatus || !capabilities.includes("BATTERY_STATUS")) {
     return null;
   }
   // TODO: handle readonly type without mapping to mutable type
@@ -921,10 +958,6 @@ type SoftwareUpdateTabProps = {
 };
 
 const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
-  // this assumes all devices can be updated
-  // TODO: edgehog should represent the 2 different states:
-  //       - device can be updated but never did
-  //       - device never updated because it doesn't have this capability
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const intl = useIntl();
   const device = useFragment(DEVICE_OTA_OPERATIONS_FRAGMENT, deviceRef);
@@ -932,6 +965,10 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
     useMutation<Device_createManualOtaOperation_Mutation>(
       DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION
     );
+
+  if (!device.capabilities.includes("SOFTWARE_UPDATES")) {
+    return null;
+  }
 
   const currentOperations = device.otaOperations
     .filter(
@@ -1046,16 +1083,16 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
 };
 
 interface DeviceCellularConnectionTabProps {
-  deviceRef: NonNullable<Device_getDevice_Query$data["device"]>;
+  deviceRef: Device_cellularConnection$key;
 }
 
 const DeviceCellularConnectionTab = ({
   deviceRef,
 }: DeviceCellularConnectionTabProps) => {
   const intl = useIntl();
+  const device = useFragment(DEVICE_CELLULAR_CONNECTION_FRAGMENT, deviceRef);
 
-  const { cellularConnection } = deviceRef;
-  if (!cellularConnection) {
+  if (!device.capabilities.includes("CELLULAR_CONNECTION")) {
     return null;
   }
 
@@ -1068,23 +1105,7 @@ const DeviceCellularConnectionTab = ({
       })}
     >
       <div className="mt-3">
-        {cellularConnection.length === 0 ? (
-          <Result.EmptyList
-            title={
-              <FormattedMessage
-                id="pages.Device.DeviceCellularConnectionTab.noModems.title"
-                defaultMessage="No modem"
-              />
-            }
-          >
-            <FormattedMessage
-              id="pages.Device.DeviceCellularConnectionTab.noModems.message"
-              defaultMessage="The device has not detected any modems yet."
-            />
-          </Result.EmptyList>
-        ) : (
-          <CellularConnectionTabs deviceRef={deviceRef} />
-        )}
+        <CellularConnectionTabs deviceRef={device} />
       </div>
     </Tab>
   );
@@ -1297,21 +1318,23 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       />
                     </FormValue>
                   </FormRow>
-                  <FormRow
-                    id="form-device-check-my-device"
-                    label={
-                      <FormattedMessage
-                        id="Device.checkMyDevice"
-                        defaultMessage="Check my Device"
+                  {device.capabilities.includes("LED_BEHAVIORS") && (
+                    <FormRow
+                      id="form-device-check-my-device"
+                      label={
+                        <FormattedMessage
+                          id="Device.checkMyDevice"
+                          defaultMessage="Check my Device"
+                        />
+                      }
+                    >
+                      <LedBehaviorDropdown
+                        deviceId={device.id}
+                        disabled={!device.online}
+                        onError={setErrorFeedback}
                       />
-                    }
-                  >
-                    <LedBehaviorDropdown
-                      deviceId={device.id}
-                      disabled={!device.online}
-                      onError={setErrorFeedback}
-                    />
-                  </FormRow>
+                    </FormRow>
+                  )}
                 </Stack>
               </Form>
             </Col>
