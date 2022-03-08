@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import {
   faTabletAlt,
   faTrash,
   faUser,
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 
 const icons = {
@@ -45,6 +46,7 @@ const icons = {
   plus: faPlus,
   profile: faUser,
   search: faSearch,
+  check: faCheck,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;
