@@ -20,9 +20,10 @@ defmodule EdgehogWeb.Auth.Token do
   use Guardian, otp_app: :edgehog
 
   # This is used only when signing tokens, and we just want to verify them
-  # However, we want to be able to generate tokens in tests, so we provide
-  # an implementation only for the test env
-  if Mix.env() == :test do
+  # However, we want to be able to generate tokens for testing purposes or
+  # allow developers to generate tokens for their local dev enviorments.
+  # For this reason we provide an implementation only for these envs
+  if Mix.env() in [:test, :dev] do
     def subject_for_token(_resource, _claims) do
       {:ok, "test"}
     end

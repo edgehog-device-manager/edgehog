@@ -31,11 +31,11 @@ defmodule EdgehogWeb.Router do
     plug EdgehogWeb.PopulateTenant
   end
 
+  forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema
+
   scope "/tenants/:tenant_slug" do
     scope "/api" do
       pipe_through :api
-
-      forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema
 
       forward "/", Absinthe.Plug, schema: EdgehogWeb.Schema
     end
