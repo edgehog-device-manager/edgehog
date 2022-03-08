@@ -214,6 +214,57 @@ type DeviceLocation {
   timestamp: DateTime!
 }
 
+"The capabilities that devices can support"
+enum DeviceCapability {
+  "The device provides information about its base image."
+  BASE_IMAGE
+
+  "The device provides information about its battery status."
+  BATTERY_STATUS
+
+  "The device provides information about its cellular connection."
+  CELLULAR_CONNECTION
+
+  "The device supports commands, for example the rebooting command."
+  COMMANDS
+
+  "The device can be geolocated."
+  GEOLOCATION
+
+  "The device provides information about its hardware."
+  HARDWARE_INFO
+
+  "The device can be asked to blink its LED in a specific pattern."
+  LED_BEHAVIORS
+
+  "The device can provide information about its network interfaces."
+  NETWORK_INTERFACE_INFO
+
+  "The device provides information about its operating system."
+  OPERATING_SYSTEM
+
+  "The device provides information about its runtime."
+  RUNTIME_INFO
+
+  "The device can be updated remotely."
+  SOFTWARE_UPDATES
+
+  "The device provides information about its storage units."
+  STORAGE
+
+  "The device provides information about its system."
+  SYSTEM_INFO
+
+  "The device provides information about its system status."
+  SYSTEM_STATUS
+
+  "The device telemetry can be configured."
+  TELEMETRY_CONFIG
+
+  "The device provides information about surrounding WiFi APs."
+  WIFI
+}
+
 interface Node {
   "The ID of the object."
   id: ID!
@@ -461,6 +512,9 @@ type Device implements Node {
 
   "The system model of the device."
   systemModel: SystemModel
+
+  "List of capabilities supported by the device."
+  capabilities: [DeviceCapability!]!
 
   "Info read from the device's hardware."
   hardwareInfo: HardwareInfo
