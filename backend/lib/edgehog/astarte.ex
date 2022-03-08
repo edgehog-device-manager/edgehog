@@ -26,6 +26,7 @@ defmodule Edgehog.Astarte do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
+  alias Edgehog.Astarte.InterfaceID
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
@@ -89,6 +90,64 @@ defmodule Edgehog.Astarte do
                          LedBehavior
                        )
   @geolocation_module Application.compile_env(:edgehog, :astarte_geolocation_module, Geolocation)
+
+  @introspection_capability_map %{
+    base_image: [
+      %InterfaceID{name: "io.edgehog.devicemanager.BaseImage", major: 0, minor: 1}
+    ],
+    battery_status: [
+      %InterfaceID{name: "io.edgehog.devicemanager.BatteryStatus", major: 0, minor: 1}
+    ],
+    cellular_connection: [
+      %InterfaceID{
+        name: "io.edgehog.devicemanager.CellularConnectionProperties",
+        major: 0,
+        minor: 1
+      },
+      %InterfaceID{name: "io.edgehog.devicemanager.CellularConnectionStatus", major: 0, minor: 1}
+    ],
+    commands: [
+      %InterfaceID{name: "io.edgehog.devicemanager.Commands", major: 0, minor: 1}
+    ],
+    hardware_info: [
+      %InterfaceID{name: "io.edgehog.devicemanager.HardwareInfo", major: 0, minor: 1}
+    ],
+    led_behaviors: [
+      %InterfaceID{name: "io.edgehog.devicemanager.LedBehavior", major: 0, minor: 1}
+    ],
+    network_interface_info: [
+      %InterfaceID{
+        name: "io.edgehog.devicemanager.NetworkInterfaceProperties",
+        major: 0,
+        minor: 1
+      }
+    ],
+    operating_system: [
+      %InterfaceID{name: "io.edgehog.devicemanager.OSInfo", major: 0, minor: 1}
+    ],
+    runtime_info: [
+      %InterfaceID{name: "io.edgehog.devicemanager.RuntimeInfo", major: 0, minor: 1}
+    ],
+    software_updates: [
+      %InterfaceID{name: "io.edgehog.devicemanager.OTARequest", major: 0, minor: 1},
+      %InterfaceID{name: "io.edgehog.devicemanager.OTAResponse", major: 0, minor: 1}
+    ],
+    storage: [
+      %InterfaceID{name: "io.edgehog.devicemanager.StorageUsage", major: 0, minor: 1}
+    ],
+    system_info: [
+      %InterfaceID{name: "io.edgehog.devicemanager.SystemInfo", major: 0, minor: 1}
+    ],
+    system_status: [
+      %InterfaceID{name: "io.edgehog.devicemanager.SystemStatus", major: 0, minor: 1}
+    ],
+    telemetry_config: [
+      %InterfaceID{name: "io.edgehog.devicemanager.config.Telemetry", major: 0, minor: 1}
+    ],
+    wifi: [
+      %InterfaceID{name: "io.edgehog.devicemanager.WiFiScanResults", major: 0, minor: 1}
+    ]
+  }
 
   @doc """
   Returns the list of clusters.
@@ -672,6 +731,17 @@ defmodule Edgehog.Astarte do
     end
   end
 
+  # get_device_status is already called to fetch other info from the device
+  # TODO implement some prefetch function so that only the first call queries AppEngine
+  #      and following functions can use preloaded data
+  def fetch_device_introspection(%Device{} = device) do
+    with {:ok, client} <- appengine_client_from_device(device),
+         {:ok, %{"data" => %{"introspection" => introspection}}} <-
+           Astarte.Client.AppEngine.Devices.get_device_status(client, device.device_id) do
+      {:ok, introspection}
+    end
+  end
+
   defp appengine_client_from_device(%Device{} = device) do
     %Device{realm: realm} = Repo.preload(device, [realm: [:cluster]], skip_tenant_id: true)
 
@@ -682,5 +752,33 @@ defmodule Edgehog.Astarte do
     realm = Repo.preload(realm, [:cluster], skip_tenant_id: true)
 
     AppEngine.new(realm.cluster.base_api_url, realm.name, private_key: realm.private_key)
+  end
+
+  def get_device_capabilities(introspection) do
+    capabilities =
+      Enum.reduce(@introspection_capability_map, [], fn {capability, interface_list}, acc ->
+        if interfaces_supported?(introspection, interface_list) do
+          [capability | acc]
+        else
+          acc
+        end
+      end)
+
+    # TODO add checks on device privacy settings and geolocation providers
+    [:geolocation | capabilities]
+  end
+
+  defp interfaces_supported?(introspection, interfaces) do
+    Enum.all?(interfaces, &interface_supported?(introspection, &1))
+  end
+
+  defp interface_supported?(introspection, %InterfaceID{} = interface) do
+    case Map.fetch(introspection, interface.name) do
+      {:ok, %{"major" => major, "minor" => minor}} ->
+        major == interface.major && minor >= interface.minor
+
+      _ ->
+        false
+    end
   end
 end
