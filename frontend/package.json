@@ -61,7 +61,7 @@
     "build": "craco build",
     "prebuild": "npm run init",
     "relay:generate-schema": "cd ../backend && mix absinthe.schema.sdl --schema EdgehogWeb.Schema ../frontend/src/api/schema.graphql",
-    "relay:compile": "relay-compiler",
+    "relay:compile": "mkdir -p src/api/__generated__ && relay-compiler",
     "format": "prettier --write src",
     "check-format": "prettier --check src",
     "lint": "eslint --fix src",
