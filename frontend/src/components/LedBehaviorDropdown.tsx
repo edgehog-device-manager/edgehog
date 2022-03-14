@@ -146,7 +146,7 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
 
   if (currentBehavior) {
     return (
-      <Button variant="success" active>
+      <Button variant="success" disabled>
         <Icon icon="check" className="me-2" />
         {intl.formatMessage(supportedBehaviorMessages[currentBehavior])}
       </Button>
