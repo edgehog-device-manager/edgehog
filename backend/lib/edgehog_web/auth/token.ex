@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 
 defmodule EdgehogWeb.Auth.Token do
   use Guardian, otp_app: :edgehog

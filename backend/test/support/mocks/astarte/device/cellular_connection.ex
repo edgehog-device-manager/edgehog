@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 
 defmodule Edgehog.Mocks.Astarte.Device.CellularConnection do
   @behaviour Edgehog.Astarte.Device.CellularConnection.Behaviour

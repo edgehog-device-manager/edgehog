@@ -1,3 +1,9 @@
+<!---
+  Copyright 2021,2022 SECO Mind Srl
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # Edgehog
 
 Edgehog is an Open Source software focused on the management of the whole life-cycle of IoT devices,

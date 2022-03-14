@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# SPDX-License-Identifier: Apache-2.0
+#
 
 defmodule Edgehog.Mocks.Astarte.Device.RuntimeInfo do
   @behaviour Edgehog.Astarte.Device.RuntimeInfo.Behaviour

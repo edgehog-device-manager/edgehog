@@ -1,3 +1,9 @@
+<!---
+  Copyright 2021,2022 SECO Mind Srl
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # Interacting with Edgehog
 
 Edgehog's interaction is logically divided amongst two main entities: devices and users.

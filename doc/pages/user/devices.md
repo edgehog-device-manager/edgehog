@@ -1,3 +1,9 @@
+<!---
+  Copyright 2021,2022 SECO Mind Srl
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # Devices
 
 As mentioned in the [core concepts](core_concepts.html), a Device is an entity connected to Astarte.
