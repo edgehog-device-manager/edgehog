@@ -73,6 +73,13 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     Astarte.preload_system_model_for_device(target, preload: preload)
   end
 
+  def list_device_capabilities(%Device{} = device, _args, _context) do
+    case Astarte.fetch_device_introspection(device) do
+      {:ok, introspection} -> Astarte.get_device_capabilities(introspection)
+      _ -> []
+    end
+  end
+
   def get_hardware_info(%Device{} = device, _args, _context) do
     Astarte.get_hardware_info(device)
   end

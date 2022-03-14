@@ -340,6 +340,44 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   end
 
   @desc """
+  The capabilities that devices can support
+  """
+  enum :device_capability do
+    @desc "The device provides information about its base image."
+    value :base_image
+    @desc "The device provides information about its battery status."
+    value :battery_status
+    @desc "The device provides information about its cellular connection."
+    value :cellular_connection
+    @desc "The device supports commands, for example the rebooting command."
+    value :commands
+    @desc "The device can be geolocated."
+    value :geolocation
+    @desc "The device provides information about its hardware."
+    value :hardware_info
+    @desc "The device can be asked to blink its LED in a specific pattern."
+    value :led_behaviors
+    @desc "The device can provide information about its network interfaces."
+    value :network_interface_info
+    @desc "The device provides information about its operating system."
+    value :operating_system
+    @desc "The device provides information about its runtime."
+    value :runtime_info
+    @desc "The device can be updated remotely."
+    value :software_updates
+    @desc "The device provides information about its storage units."
+    value :storage
+    @desc "The device provides information about its system."
+    value :system_info
+    @desc "The device provides information about its system status."
+    value :system_status
+    @desc "The device telemetry can be configured."
+    value :telemetry_config
+    @desc "The device provides information about surrounding WiFi APs."
+    value :wifi
+  end
+
+  @desc """
   Denotes a device instance that connects and exchanges data.
 
   Each Device is associated to a specific SystemModel, which in turn is \
@@ -365,6 +403,12 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     @desc "The system model of the device."
     field :system_model, :system_model
+
+    @desc "List of capabilities supported by the device."
+    field :capabilities, non_null(list_of(non_null(:device_capability))) do
+      resolve &Resolvers.Astarte.list_device_capabilities/3
+      middleware Middleware.ErrorHandler
+    end
 
     @desc "Info read from the device's hardware."
     field :hardware_info, :hardware_info do

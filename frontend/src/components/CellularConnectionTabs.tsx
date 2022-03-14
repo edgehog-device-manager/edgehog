@@ -28,6 +28,7 @@ import Row from "react-bootstrap/Row";
 import Tab from "react-bootstrap/Tab";
 
 import Form from "components/Form";
+import Result from "components/Result";
 import Stack from "components/Stack";
 
 import type {
@@ -337,7 +338,21 @@ const CellularConnectionTabs = ({ deviceRef }: Props) => {
   );
 
   if (!cellularConnection || cellularConnection.length === 0) {
-    return null;
+    return (
+      <Result.EmptyList
+        title={
+          <FormattedMessage
+            id="pages.Device.DeviceCellularConnectionTab.noModems.title"
+            defaultMessage="No modem"
+          />
+        }
+      >
+        <FormattedMessage
+          id="pages.Device.DeviceCellularConnectionTab.noModems.message"
+          defaultMessage="The device has not detected any modems yet."
+        />
+      </Result.EmptyList>
+    );
   }
 
   return (
