@@ -1,6 +1,14 @@
 {
-  "name": "frontend",
+  "name": "edgehog-device-manager-frontend",
   "version": "0.1.0",
+  "homepage": "https://github.com/edgehog-device-manager/edgehog",
+  "bugs": {
+    "url": "https://github.com/edgehog-device-manager/edgehog/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edgehog-device-manager/edgehog"
+  },
   "license": "Apache-2.0",
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.0",
