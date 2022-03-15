@@ -1,3 +1,9 @@
+<!---
+  Copyright 2021,2022 SECO Mind Srl
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # System models
 
 As already mentioned in the [core concepts](core_concepts.html), System Models represent a group of

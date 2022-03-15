@@ -1,3 +1,9 @@
+<!---
+  Copyright 2021,2022 SECO Mind Srl
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # Introduction
 
 Edgehog is an Open Source IoT platform focused on device fleet management. It conveniently handles

@@ -1,3 +1,9 @@
+<!---
+  Copyright 2021,2022 SECO Mind Srl
+
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 # Edgehog
 
 Edgehog is an Open Source software focused on the management of the whole life-cycle of IoT devices,
@@ -13,6 +19,13 @@ Edgehog is designed from the ground up to be run in containers, with
 [Kubernetes](https://github.com/kubernetes/kubernetes) as a first-class citizen when it comes to
 deployment. Edgehog's images can be found at
 [Docker Hub](https://hub.docker.com/u/edgehogdevicemanager).
+
+## Contributing
+
+We are open to any contribution:
+[pull requests](https://github.com/edgehog-device-manager/edgehog/pulls),
+[bug reports and feature requests](https://github.com/edgehog-device-manager/edgehog/issues)
+are welcome.
 
 # License
 
