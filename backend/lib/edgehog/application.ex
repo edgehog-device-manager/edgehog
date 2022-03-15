@@ -21,10 +21,15 @@ defmodule Edgehog.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  @version Mix.Project.config()[:version]
+
   use Application
+  require Logger
 
   @impl true
   def start(_type, _args) do
+    Logger.info("Starting application version #{@version}.", tag: "edgehog_start")
+
     children = [
       # Start the Ecto repository
       Edgehog.Repo,
