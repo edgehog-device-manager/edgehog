@@ -24,6 +24,7 @@ import {
   faAngleUp,
   faArrowDown,
   faArrowUp,
+  faBug,
   faCircle,
   faCompactDisc,
   faPlus,
@@ -34,15 +35,18 @@ import {
   faUser,
   faCheck,
 } from "@fortawesome/free-solid-svg-icons";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
 const icons = {
   arrowDown: faArrowDown,
   arrowUp: faArrowUp,
+  bug: faBug,
   caretDown: faAngleDown,
   caretUp: faAngleUp,
   circle: faCircle,
   delete: faTrash,
   devices: faTabletAlt,
+  github: faGithub,
   models: faSwatchbook,
   os: faCompactDisc,
   plus: faPlus,

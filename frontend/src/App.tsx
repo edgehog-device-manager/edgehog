@@ -20,6 +20,7 @@
 
 import { Navigate, useRoutes } from "react-router-dom";
 
+import Footer from "components/Footer";
 import Sidebar from "components/Sidebar";
 import Topbar from "components/Topbar";
 import { useAuth } from "contexts/Auth";
@@ -34,6 +35,8 @@ import HardwareTypeCreate from "pages/HardwareTypeCreate";
 import HardwareTypes from "pages/HardwareTypes";
 import Login from "pages/Login";
 import Logout from "pages/Logout";
+
+import { version, homepage, repository, bugs } from "../package.json";
 
 type RouterRule = {
   path: string;
@@ -78,6 +81,15 @@ function App() {
         )}
         <section className="flex-grow-1 overflow-auto">{RouterElement}</section>
       </main>
+      {auth.isAuthenticated && (
+        <Footer
+          appName={"Edgehog Device Manager"}
+          appVersion={version}
+          homepageUrl={homepage}
+          repoUrl={repository.url}
+          issueTrackerUrl={bugs.url}
+        />
+      )}
     </div>
   );
 }
