@@ -20,6 +20,13 @@ Edgehog is designed from the ground up to be run in containers, with
 deployment. Edgehog's images can be found at
 [Docker Hub](https://hub.docker.com/u/edgehogdevicemanager).
 
+## Contributing
+
+We are open to any contribution:
+[pull requests](https://github.com/edgehog-device-manager/edgehog/pulls),
+[bug reports and feature requests](https://github.com/edgehog-device-manager/edgehog/issues)
+are welcome.
+
 # License
 
 Edgehog source code is released under the Apache 2.0 License.
