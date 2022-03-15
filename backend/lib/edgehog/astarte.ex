@@ -27,6 +27,7 @@ defmodule Edgehog.Astarte do
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.InterfaceID
+  alias Edgehog.Astarte.InterfaceVersion
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
@@ -736,8 +737,8 @@ defmodule Edgehog.Astarte do
   #      and following functions can use preloaded data
   def fetch_device_introspection(%Device{} = device) do
     with {:ok, client} <- appengine_client_from_device(device),
-         {:ok, %{"data" => %{"introspection" => introspection}}} <-
-           Astarte.Client.AppEngine.Devices.get_device_status(client, device.device_id) do
+         {:ok, %DeviceStatus{introspection: introspection}} <-
+           @device_status_module.get(client, device.device_id) do
       {:ok, introspection}
     end
   end
@@ -774,7 +775,7 @@ defmodule Edgehog.Astarte do
 
   defp interface_supported?(introspection, %InterfaceID{} = interface) do
     case Map.fetch(introspection, interface.name) do
-      {:ok, %{"major" => major, "minor" => minor}} ->
+      {:ok, %InterfaceVersion{major: major, minor: minor}} ->
         major == interface.major && minor >= interface.minor
 
       _ ->

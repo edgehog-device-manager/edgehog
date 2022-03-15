@@ -140,6 +140,7 @@ defmodule Edgehog.AstarteTest do
 
   describe "devices" do
     alias Edgehog.Astarte.Device
+    alias Edgehog.Astarte.InterfaceVersion
 
     import Edgehog.AstarteFixtures
     import Edgehog.DevicesFixtures
@@ -603,26 +604,34 @@ defmodule Edgehog.AstarteTest do
       assert device.system_model.id == system_model.id
     end
 
-    test "get_device_capabilities/1 returns all capabilities if interfaces are implemented by the device",
-         _ do
+    test "get_device_capabilities/1 returns all capabilities if interfaces are implemented by the device" do
       device_introspection = %{
-        "io.edgehog.devicemanager.BaseImage" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.BatteryStatus" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.CellularConnectionProperties" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.CellularConnectionStatus" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.Commands" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.HardwareInfo" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.LedBehavior" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.NetworkInterfaceProperties" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.OSInfo" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.RuntimeInfo" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.OTARequest" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.OTAResponse" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.StorageUsage" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.SystemInfo" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.SystemStatus" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.config.Telemetry" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.WiFiScanResults" => %{"major" => 0, "minor" => 1}
+        "io.edgehog.devicemanager.BaseImage" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.BatteryStatus" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.CellularConnectionProperties" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.CellularConnectionStatus" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.Commands" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.HardwareInfo" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.LedBehavior" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.NetworkInterfaceProperties" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.OSInfo" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.RuntimeInfo" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.OTARequest" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.OTAResponse" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.StorageUsage" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.SystemInfo" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.SystemStatus" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.config.Telemetry" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.WiFiScanResults" => %InterfaceVersion{major: 0, minor: 1}
       }
 
       expected_capabilities = [
@@ -648,31 +657,34 @@ defmodule Edgehog.AstarteTest do
                Enum.sort(Astarte.get_device_capabilities(device_introspection))
     end
 
-    test "get_device_capabilities/1 returns a capability only if all its interfaces are supported by the device",
-         _ do
+    test "get_device_capabilities/1 returns a capability only if all its interfaces are supported by the device" do
       partial_introspection_1 = %{
-        "io.edgehog.devicemanager.OTARequest" => %{"major" => 0, "minor" => 1}
+        "io.edgehog.devicemanager.OTARequest" => %InterfaceVersion{major: 0, minor: 1}
       }
 
       partial_introspection_2 = %{
-        "io.edgehog.devicemanager.OTAResponse" => %{"major" => 0, "minor" => 1}
+        "io.edgehog.devicemanager.OTAResponse" => %InterfaceVersion{major: 0, minor: 1}
       }
 
       assert :software_updates not in Astarte.get_device_capabilities(partial_introspection_1)
       assert :software_updates not in Astarte.get_device_capabilities(partial_introspection_2)
     end
 
-    test "get_device_capabilities/1 returns only geolocation if no interface is supported by the device",
-         _ do
+    test "get_device_capabilities/1 returns only geolocation if no interface is supported by the device" do
       assert [:geolocation] = Astarte.get_device_capabilities(%{})
     end
 
-    test "get_device_capabilities/1 should not fail when devices uses a minor greater than the one required",
-         _ do
+    test "get_device_capabilities/1 should not fail when devices uses a minor greater than the one required" do
       device_introspection = %{
-        "io.edgehog.devicemanager.BatteryStatus" => %{"major" => 0, "minor" => 2},
-        "io.edgehog.devicemanager.CellularConnectionProperties" => %{"major" => 0, "minor" => 1},
-        "io.edgehog.devicemanager.CellularConnectionStatus" => %{"major" => 0, "minor" => 3}
+        "io.edgehog.devicemanager.BatteryStatus" => %InterfaceVersion{major: 0, minor: 2},
+        "io.edgehog.devicemanager.CellularConnectionProperties" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.CellularConnectionStatus" => %InterfaceVersion{
+          major: 0,
+          minor: 3
+        }
       }
 
       expected_capabilities = [
@@ -685,12 +697,17 @@ defmodule Edgehog.AstarteTest do
                Enum.sort(Astarte.get_device_capabilities(device_introspection))
     end
 
-    test "get_device_capabilities/1 should not return a capability if major version mismatches",
-         _ do
+    test "get_device_capabilities/1 should not return a capability if major version mismatches" do
       device_introspection = %{
-        "io.edgehog.devicemanager.BatteryStatus" => %{"major" => 1, "minor" => 0},
-        "io.edgehog.devicemanager.CellularConnectionProperties" => %{"major" => 1, "minor" => 1},
-        "io.edgehog.devicemanager.CellularConnectionStatus" => %{"major" => 0, "minor" => 1}
+        "io.edgehog.devicemanager.BatteryStatus" => %InterfaceVersion{major: 1, minor: 0},
+        "io.edgehog.devicemanager.CellularConnectionProperties" => %InterfaceVersion{
+          major: 1,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.CellularConnectionStatus" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
       }
 
       assert [:geolocation] = Astarte.get_device_capabilities(device_introspection)
