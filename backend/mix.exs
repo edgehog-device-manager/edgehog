@@ -30,7 +30,14 @@ defmodule Edgehog.MixProject do
       compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -83,7 +90,8 @@ defmodule Edgehog.MixProject do
       {:waffle_gcs, "~> 0.2"},
       {:guardian, "~> 2.0"},
       {:jose, "~> 1.8"},
-      {:skogsra, "~> 2.3"}
+      {:skogsra, "~> 2.3"},
+      {:excoveralls, "~> 0.10", only: :test}
     ]
   end
 
