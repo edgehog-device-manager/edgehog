@@ -36,7 +36,7 @@ import HardwareTypes from "pages/HardwareTypes";
 import Login from "pages/Login";
 import Logout from "pages/Logout";
 
-import { version, homepage, repository, bugs } from "../package.json";
+import { version, repository, bugs } from "../package.json";
 
 type RouterRule = {
   path: string;
@@ -85,7 +85,7 @@ function App() {
         <Footer
           appName={"Edgehog Device Manager"}
           appVersion={version}
-          homepageUrl={homepage}
+          homepageUrl={repository.url}
           repoUrl={repository.url}
           issueTrackerUrl={bugs.url}
         />
