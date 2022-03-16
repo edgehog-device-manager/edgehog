@@ -20,30 +20,54 @@
 
 defmodule Edgehog.Astarte.Device.DeviceStatus do
   defstruct [
+    :attributes,
+    :groups,
+    :introspection,
     :last_connection,
     :last_disconnection,
+    :last_seen_ip,
     :online,
-    :last_seen_ip
+    :previous_interfaces
   ]
 
   @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.DeviceStatus
+  alias Edgehog.Astarte.InterfaceVersion
 
   @impl true
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_device_status(client, device_id) do
       device_status = %DeviceStatus{
+        attributes: data["attributes"],
+        groups: data["groups"],
+        introspection: build_introspection(data["introspection"]),
         last_connection: parse_datetime(data["last_connection"]),
         last_disconnection: parse_datetime(data["last_disconnection"]),
+        last_seen_ip: data["last_seen_ip"],
         online: data["connected"] || false,
-        last_seen_ip: data["last_seen_ip"]
+        previous_interfaces: data["previous_interfaces"]
       }
 
       {:ok, device_status}
     end
+  end
+
+  defp build_introspection(nil) do
+    %{}
+  end
+
+  defp build_introspection(interfaces_map) do
+    Enum.map(interfaces_map, fn {name, info} ->
+      {name,
+       %InterfaceVersion{
+         major: info["major"],
+         minor: info["minor"]
+       }}
+    end)
+    |> Map.new()
   end
 
   defp parse_datetime(nil) do

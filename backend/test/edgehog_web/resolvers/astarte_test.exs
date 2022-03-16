@@ -23,9 +23,19 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
   use Edgehog.AstarteMockCase
   use Edgehog.GeolocationMockCase
 
+  alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-  alias Edgehog.Astarte.Device.{BaseImage, OSInfo, RuntimeInfo, SystemStatus, WiFiScanResult}
+
+  alias Edgehog.Astarte.Device.{
+    BaseImage,
+    DeviceStatus,
+    OSInfo,
+    RuntimeInfo,
+    SystemStatus,
+    WiFiScanResult
+  }
+
   alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
@@ -186,6 +196,36 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                environment: "esp-idf v4.3",
                url: "https://github.com/edgehog-device-manager/edgehog-esp32-device"
              } == runtime_info
+    end
+
+    test "list_device_capabilities/3 returns the device capabilities info for a device", %{
+      device: device
+    } do
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _appengine_client, _device_id ->
+        {:ok,
+         %DeviceStatus{
+           introspection: %{}
+         }}
+      end)
+
+      assert {:ok, capabilities} = Astarte.list_device_capabilities(device, %{}, %{})
+      assert is_list(capabilities)
+    end
+
+    test "list_device_capabilities/3 without DeviceStatus returns empty list", %{
+      device: device
+    } do
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _appengine_client, _device_id ->
+        {:error,
+         %APIError{
+           status: 404,
+           response: %{"errors" => %{"detail" => "Device not found"}}
+         }}
+      end)
+
+      assert {:ok, []} = Astarte.list_device_capabilities(device, %{}, %{})
     end
   end
 end

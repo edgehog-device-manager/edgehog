@@ -23,14 +23,20 @@ defmodule Edgehog.Mocks.Astarte.Device.DeviceStatus do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.DeviceStatus
+  alias Edgehog.Astarte.InterfaceVersion
 
   @impl true
   def get(%AppEngine{} = _client, _device_id) do
     device_status = %DeviceStatus{
+      attributes: %{"attribute_key" => "attribute_value"},
+      groups: ["test-devices"],
+      introspection: %{
+        "com.example.ExampleInterface" => %InterfaceVersion{major: 1, minor: 0}
+      },
       last_connection: ~U[2021-11-15 10:44:57.432516Z],
       last_disconnection: ~U[2021-11-15 10:45:57.432516Z],
-      online: false,
-      last_seen_ip: "198.51.100.25"
+      last_seen_ip: "198.51.100.25",
+      online: false
     }
 
     {:ok, device_status}

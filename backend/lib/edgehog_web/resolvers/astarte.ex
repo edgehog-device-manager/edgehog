@@ -76,9 +76,11 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   end
 
   def list_device_capabilities(%Device{} = device, _args, _context) do
-    case Astarte.fetch_device_introspection(device) do
-      {:ok, introspection} -> Astarte.get_device_capabilities(introspection)
-      _ -> []
+    with {:ok, introspection} <- Astarte.fetch_device_introspection(device),
+         capabilities = Astarte.get_device_capabilities(introspection) do
+      {:ok, capabilities}
+    else
+      _ -> {:ok, []}
     end
   end
 
