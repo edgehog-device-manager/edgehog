@@ -55,6 +55,7 @@ jobs:
           --health-retries 5
     env:
       MIX_ENV: test
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - uses: actions/checkout@v2
     - uses: actions/cache@v1
@@ -80,4 +81,4 @@ jobs:
       run: mix do compile
     - name: Test
       working-directory: backend
-      run: mix test
+      run: mix coveralls.github --exclude wip -o coverage_results
