@@ -86,7 +86,7 @@ jobs:
     - name: Create PLTs
       working-directory: ./backend
       if: steps.plt_cache.outputs.cache-hit != 'true'
-      run: mix dialyzer --plt
+      run: mkdir -p priv/plts && mix dialyzer --plt
 
     - name: Run dialyzer
       working-directory: ./backend
