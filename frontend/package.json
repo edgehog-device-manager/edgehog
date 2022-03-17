@@ -77,6 +77,7 @@
     "check-types": "tsc --noEmit",
     "precheck-types": "npm run init",
     "jest:test": "TZ=UTC craco test",
+    "jest:coverage": "TZ=UTC craco test --coverage",
     "prejest:test": "npm run init",
     "i18n:extract": "formatjs extract 'src/**/*.ts*' --ignore '**/*.d.ts' --out-file translations.generated.json --id-interpolation-pattern '[sha512:contenthash:base64:6]'",
     "i18n:compile": "formatjs compile-folder src/i18n/langs --ast src/i18n/langs-compiled",
