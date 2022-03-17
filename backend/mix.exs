@@ -39,7 +39,7 @@ defmodule Edgehog.MixProject do
         "coveralls.html": :test
       ],
       dialyzer: [
-        plt_core_path: "priv/plts",
+        plt_core_path: dialyzer_cache_directory(Mix.env()),
         plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
       ]
     ]
@@ -96,7 +96,7 @@ defmodule Edgehog.MixProject do
       {:jose, "~> 1.8"},
       {:skogsra, "~> 2.3"},
       {:excoveralls, "~> 0.10", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev, :ci], runtime: false}
     ]
   end
 
@@ -113,5 +113,13 @@ defmodule Edgehog.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
+  end
+
+  defp dialyzer_cache_directory(:ci) do
+    "priv/plts"
+  end
+
+  defp dialyzer_cache_directory(_) do
+    nil
   end
 end
