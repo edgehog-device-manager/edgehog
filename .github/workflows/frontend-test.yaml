@@ -64,4 +64,9 @@ jobs:
         run: npm run check-types
       - name: Run tests
         working-directory: frontend
-        run: npm run jest:test
+        run: npm run jest:coverage
+      - name: Upload to Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: frontend/coverage/lcov.info
