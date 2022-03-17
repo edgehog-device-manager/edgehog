@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021,2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,62 @@ env:
   elixir_version: "1.12.3"
   otp_version: "24.1"
 jobs:
+  test-dialyzer:
+    name: Check Dialyzer
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    env:
+      MIX_ENV: ci
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: erlef/setup-beam@v1.7.0
+      with:
+        otp-version: ${{ env.otp_version }}
+        elixir-version: ${{ env.elixir_version }}
+
+    - uses: actions/cache@v2
+      with:
+        path: backend/deps
+        key: |
+          ${{ runner.os }}-dialyzer-mix-${{ env.otp_version }}-${{ env.elixir_version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/backend/mix.lock')) }}
+        restore-keys: |
+          ${{ runner.os }}-dialyzer-mix-${{ env.otp_version }}-${{ env.elixir_version }}-
+    - uses: actions/cache@v2
+      with:
+        path: backend/_build
+        key: |
+          ${{ runner.os }}-dialyzer-_build-${{ env.otp_version }}-${{ env.elixir_version }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-dialyzer-_build-${{ env.otp_version }}-${{ env.elixir_version }}-
+
+    - name: Install Dependencies
+      working-directory: ./backend
+      run: mix deps.get
+
+    # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
+    # Cache key based on Elixir & Erlang version (also useful when running in matrix)
+    - name: Restore PLT cache
+      uses: actions/cache@v2
+      id: plt_cache
+      with:
+        path: backend/priv/plts
+        key: |
+          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}-
+
+    # Create PLTs if no cache was found
+    - name: Create PLTs
+      working-directory: ./backend
+      if: steps.plt_cache.outputs.cache-hit != 'true'
+      run: mkdir -p priv/plts && mix dialyzer --plt
+
+    - name: Run dialyzer
+      working-directory: ./backend
+      run: mix dialyzer
+
   test-coverage:
     name: Build and Test
     runs-on: ubuntu-latest

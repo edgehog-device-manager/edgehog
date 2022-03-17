@@ -25,3 +25,6 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 edgehog-*.tar
 
+# Ignore dialyzer PLT files
+/priv/plts/*.plt
+/priv/plts/*.plt.hash
