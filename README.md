@@ -13,6 +13,9 @@ written in [Elixir](https://github.com/elixir-lang/elixir). It is based on
 It packs in convenient features such as OTA updates, device status information management,
 geolocation and everything you need for IoT fleet management.
 
+See also [Edgehog documentation](https://edgehog-device-manager.github.io/docs/snapshot/) for more
+information.
+
 # Where do I find binaries?
 
 Edgehog is designed from the ground up to be run in containers, with
@@ -22,7 +25,8 @@ deployment. Edgehog's images can be found at
 
 ## Contributing
 
-We are open to any contribution:
+Edgehog is open to any [contribution](CONTRIBUTING.md).
+
 [pull requests](https://github.com/edgehog-device-manager/edgehog/pulls),
 [bug reports and feature requests](https://github.com/edgehog-device-manager/edgehog/issues)
 are welcome.
@@ -31,4 +35,4 @@ are welcome.
 
 Edgehog source code is released under the Apache 2.0 License.
 
-Check the [LICENSE](LICENSE) file for more information.
+Read the [LICENSE](LICENSE) file for more information.
