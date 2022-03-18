@@ -27,7 +27,7 @@ deployment. Edgehog's images can be found at
 
 Edgehog is open to any [contribution](CONTRIBUTING.md).
 
-[pull requests](https://github.com/edgehog-device-manager/edgehog/pulls),
+[Pull requests](https://github.com/edgehog-device-manager/edgehog/pulls),
 [bug reports and feature requests](https://github.com/edgehog-device-manager/edgehog/issues)
 are welcome.
 
