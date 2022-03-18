@@ -49,6 +49,7 @@ defmodule Doc.MixProject do
       groups_for_extras: [
         "User Guide": ~r"/user/",
         Architecture: ~r"/architecture/",
+        "Admin Guide": ~r"/admin/",
         "Integrating with Edgehog": ~r"/integrating/"
       ],
       groups_for_modules: []
@@ -65,7 +66,8 @@ defmodule Doc.MixProject do
       "pages/user/device_sdks_runtime.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
-      "pages/integrating/astarte_interfaces.md"
+      "pages/integrating/astarte_interfaces.md",
+      "pages/admin/deploying_with_kubernetes.md"
     ]
   end
 end
