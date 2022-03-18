@@ -25,7 +25,8 @@ deployment. Edgehog's images can be found at
 
 ## Contributing
 
-We are open to any contribution:
+Edgehog is open to any [contribution](CONTRIBUTING.md).
+
 [pull requests](https://github.com/edgehog-device-manager/edgehog/pulls),
 [bug reports and feature requests](https://github.com/edgehog-device-manager/edgehog/issues)
 are welcome.
@@ -34,4 +35,4 @@ are welcome.
 
 Edgehog source code is released under the Apache 2.0 License.
 
-Check the [LICENSE](LICENSE) file for more information.
+Read the [LICENSE](LICENSE) file for more information.
