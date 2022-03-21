@@ -46,4 +46,11 @@ defmodule Edgehog.Devices.HardwareType do
       message: "should only contain lower case ASCII letters (from a to z), digits and -"
     )
   end
+
+  @doc false
+  def delete_changeset(hardware_type) do
+    hardware_type
+    |> change()
+    |> no_assoc_constraint(:system_models)
+  end
 end

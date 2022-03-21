@@ -190,7 +190,9 @@ defmodule Edgehog.Devices do
 
   """
   def delete_hardware_type(%HardwareType{} = hardware_type) do
-    Repo.delete(hardware_type)
+    hardware_type
+    |> HardwareType.delete_changeset()
+    |> Repo.delete()
   end
 
   @doc """
