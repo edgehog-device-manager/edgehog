@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -103,12 +103,14 @@ type Props = {
   initialData: HardwareTypeData;
   isLoading?: boolean;
   onSubmit: (data: HardwareTypeData) => void;
+  onDelete: () => void;
 };
 
 const UpdateHardwareTypeForm = ({
   initialData,
   isLoading = false,
   onSubmit,
+  onDelete,
 }: Props) => {
   const {
     control,
@@ -226,12 +228,18 @@ const UpdateHardwareTypeForm = ({
             </Button>
           </Stack>
         </FormRow>
-        <div className="d-flex justify-content-end align-items-center">
+        <div className="d-flex justify-content-end align-items-center gap-2">
           <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
               id="components.UpdateHardwareTypeForm.submitButton"
               defaultMessage="Update"
+            />
+          </Button>
+          <Button variant="danger" onClick={onDelete}>
+            <FormattedMessage
+              id="components.UpdateHardwareTypeForm.deleteButton"
+              defaultMessage="Delete"
             />
           </Button>
         </div>

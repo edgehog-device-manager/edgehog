@@ -86,6 +86,14 @@ defmodule Edgehog.DevicesTest do
       assert {:error, :not_found} == Devices.fetch_hardware_type(hardware_type.id)
     end
 
+    test "delete_hardware_type/1 returns error changeset for hardware_type in use" do
+      hardware_type = hardware_type_fixture()
+      _system_model = system_model_fixture(hardware_type)
+
+      assert {:error, %Ecto.Changeset{}} = Devices.delete_hardware_type(hardware_type)
+      assert {:ok, hardware_type} == Devices.fetch_hardware_type(hardware_type.id)
+    end
+
     test "change_hardware_type/1 returns a hardware_type changeset" do
       hardware_type = hardware_type_fixture()
       assert %Ecto.Changeset{} = Devices.change_hardware_type(hardware_type)

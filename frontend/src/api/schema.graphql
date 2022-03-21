@@ -410,6 +410,9 @@ type RootMutationType {
   "Updates a hardware type."
   updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
 
+  "Deletes a hardware type."
+  deleteHardwareType(input: DeleteHardwareTypeInput!): DeleteHardwareTypePayload
+
   "Creates a new system model."
   createSystemModel(input: CreateSystemModelInput!): CreateSystemModelPayload
 
@@ -563,6 +566,11 @@ input CreateHardwareTypeInput {
 
   "The list of part numbers associated with the hardware type."
   partNumbers: [String!]!
+}
+
+input DeleteHardwareTypeInput {
+  "The ID of the hardware type to be deleted."
+  hardwareTypeId: ID!
 }
 
 type SetLedBehaviorPayload {
@@ -809,4 +817,9 @@ input LocalizedTextInput {
 
   "The localized text"
   text: String!
+}
+
+type DeleteHardwareTypePayload {
+  "The deleted hardware type."
+  hardwareType: HardwareType!
 }

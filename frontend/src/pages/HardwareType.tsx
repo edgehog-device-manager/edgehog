@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,9 +33,11 @@ import _ from "lodash";
 
 import type { HardwareType_getHardwareType_Query } from "api/__generated__/HardwareType_getHardwareType_Query.graphql";
 import type { HardwareType_updateHardwareType_Mutation } from "api/__generated__/HardwareType_updateHardwareType_Mutation.graphql";
-import { Link, Route } from "Navigation";
+import type { HardwareType_deleteHardwareType_Mutation } from "api/__generated__/HardwareType_deleteHardwareType_Mutation.graphql";
+import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
+import DeleteModal from "components/DeleteModal";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
@@ -69,6 +71,18 @@ const UPDATE_HARDWARE_TYPE_MUTATION = graphql`
   }
 `;
 
+const DELETE_HARDWARE_TYPE_MUTATION = graphql`
+  mutation HardwareType_deleteHardwareType_Mutation(
+    $input: DeleteHardwareTypeInput!
+  ) {
+    deleteHardwareType(input: $input) {
+      hardwareType {
+        id
+      }
+    }
+  }
+`;
+
 interface HardwareTypeContentProps {
   getHardwareTypeQuery: PreloadedQuery<HardwareType_getHardwareType_Query>;
 }
@@ -77,12 +91,67 @@ const HardwareTypeContent = ({
   getHardwareTypeQuery,
 }: HardwareTypeContentProps) => {
   const { hardwareTypeId = "" } = useParams();
+  const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const hardwareTypeData = usePreloadedQuery(
     GET_HARDWARE_TYPE_QUERY,
     getHardwareTypeQuery
   );
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
+
+  const [deleteHardwareType, isDeletingHardwareType] =
+    useMutation<HardwareType_deleteHardwareType_Mutation>(
+      DELETE_HARDWARE_TYPE_MUTATION
+    );
+
+  const handleDeleteHardwareType = useCallback(() => {
+    const input = {
+      hardwareTypeId,
+    };
+    deleteHardwareType({
+      variables: { input },
+      onCompleted(data, errors) {
+        if (errors) {
+          const errorFeedback = errors
+            .map((error) => error.message)
+            .join(". \n");
+          setErrorFeedback(errorFeedback);
+          return setShowDeleteModal(false);
+        }
+        navigate({ route: Route.hardwareTypes });
+      },
+      onError(error) {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.HardwareTypeUpdate.deletionErrorFeedback"
+            defaultMessage="Could not delete the hardware type, please try again."
+          />
+        );
+        setShowDeleteModal(false);
+      },
+      updater(store, data) {
+        const hardwareTypeId = data.deleteHardwareType?.hardwareType.id;
+        if (hardwareTypeId) {
+          const root = store.getRoot();
+          const hardwareTypes = root.getLinkedRecords("hardwareTypes");
+          if (hardwareTypes) {
+            root.setLinkedRecords(
+              hardwareTypes.filter(
+                (hardwareType) => hardwareType.getDataID() !== hardwareTypeId
+              ),
+              "hardwareTypes"
+            );
+          }
+          store.delete(hardwareTypeId);
+        }
+      },
+    });
+  }, [deleteHardwareType, hardwareTypeId, navigate]);
 
   const [updateHardwareType, isUpdatingHardwareType] =
     useMutation<HardwareType_updateHardwareType_Mutation>(
@@ -163,8 +232,36 @@ const HardwareTypeContent = ({
         <UpdateHardwareTypeForm
           initialData={_.pick(hardwareType, ["name", "handle", "partNumbers"])}
           onSubmit={handleUpdateHardwareType}
+          onDelete={handleShowDeleteModal}
           isLoading={isUpdatingHardwareType}
         />
+        {showDeleteModal && (
+          <DeleteModal
+            confirmText={hardwareType.handle}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteHardwareType}
+            isDeleting={isDeletingHardwareType}
+            title={
+              <FormattedMessage
+                id="pages.HardwareType.deleteModal.title"
+                defaultMessage="Delete Hardware Type"
+                description="Title for the confirmation modal to delete a Hardware Type"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="pages.HardwareType.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the Hardware Type <bold>{hardwareType}</bold>."
+                description="Description for the confirmation modal to delete a Hardware Type"
+                values={{
+                  hardwareType: hardwareType.name,
+                  bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
+          </DeleteModal>
+        )}
       </Page.Main>
     </Page>
   );

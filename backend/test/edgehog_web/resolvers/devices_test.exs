@@ -26,6 +26,41 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
 
   import Edgehog.DevicesFixtures
 
+  describe "hardware_types" do
+    setup %{tenant: tenant} do
+      context = %{current_tenant: tenant}
+
+      {:ok, context: context}
+    end
+
+    test "find_hardware_type/2 returns existing hardware_type", %{context: context} do
+      hardware_type = hardware_type_fixture()
+
+      attrs = %{
+        id: hardware_type.id
+      }
+
+      assert {:ok, hardware_type} == Devices.find_hardware_type(attrs, %{context: context})
+    end
+
+    test "delete_hardware_type/2 deletes the hardware_type", %{context: context} do
+      hardware_type = hardware_type_fixture()
+
+      attrs = %{
+        hardware_type_id: hardware_type.id
+      }
+
+      assert {:ok, %{hardware_type: hardware_type_deleted}} =
+               Devices.delete_hardware_type(attrs, %{context: context})
+
+      assert hardware_type_deleted.id == hardware_type.id
+      assert hardware_type_deleted.part_numbers == hardware_type.part_numbers
+
+      assert {:error, :not_found} ==
+               Devices.find_hardware_type(%{id: hardware_type.id}, %{context: context})
+    end
+  end
+
   describe "system_models" do
     setup %{tenant: tenant} do
       context = %{current_tenant: tenant}
