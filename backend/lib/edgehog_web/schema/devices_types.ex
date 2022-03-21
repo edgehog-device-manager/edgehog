@@ -169,6 +169,22 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
       resolve &Resolvers.Devices.update_hardware_type/3
     end
 
+    @desc "Deletes a hardware type."
+    payload field :delete_hardware_type do
+      input do
+        @desc "The ID of the hardware type to be deleted."
+        field :hardware_type_id, non_null(:id)
+      end
+
+      output do
+        @desc "The deleted hardware type."
+        field :hardware_type, non_null(:hardware_type)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, hardware_type_id: :hardware_type
+      resolve &Resolvers.Devices.delete_hardware_type/2
+    end
+
     @desc "Creates a new system model."
     payload field :create_system_model do
       input do

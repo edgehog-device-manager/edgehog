@@ -55,6 +55,13 @@ defmodule EdgehogWeb.Resolvers.Devices do
     end
   end
 
+  def delete_hardware_type(%{hardware_type_id: id}, _context) do
+    with {:ok, %HardwareType{} = hardware_type} <- Devices.fetch_hardware_type(id),
+         {:ok, %HardwareType{} = hardware_type} <- Devices.delete_hardware_type(hardware_type) do
+      {:ok, %{hardware_type: hardware_type}}
+    end
+  end
+
   def find_system_model(%{id: id}, %{context: context}) do
     with {:ok, system_model} <- Devices.fetch_system_model(id) do
       system_model = localize_system_model_description(system_model, context)
