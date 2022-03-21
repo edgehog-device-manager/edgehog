@@ -143,6 +143,10 @@
   "components.CellularConnectionTabs.Modem.technology": {
     "defaultMessage": "Technology"
   },
+  "components.ConfirmModal.cancelButton": {
+    "defaultMessage": "Cancel",
+    "description": "Title for the button to cancel and dismiss a confirmation modal"
+  },
   "components.ConnectionStatus.statusConnected": {
     "defaultMessage": "Connected"
   },
@@ -190,6 +194,14 @@
   },
   "components.CreateSystemModelForm.submitButton": {
     "defaultMessage": "Create"
+  },
+  "components.DeleteModal.confirmButton": {
+    "defaultMessage": "Delete",
+    "description": "Title for the button to confirm a deletion modal"
+  },
+  "components.DeleteModal.confirmPrompt": {
+    "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
+    "description": "Description of the action to perform to confirm the deletion modal"
   },
   "components.DevicesTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
@@ -300,6 +312,9 @@
   },
   "components.UpdateHardwareTypeForm.addPartNumberButton": {
     "defaultMessage": "Add Part Number"
+  },
+  "components.UpdateHardwareTypeForm.deleteButton": {
+    "defaultMessage": "Delete"
   },
   "components.UpdateHardwareTypeForm.handleLabel": {
     "defaultMessage": "Handle"
@@ -500,6 +515,14 @@
   "pages.Devices.title": {
     "defaultMessage": "Devices"
   },
+  "pages.HardwareType.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Hardware Type <bold>{hardwareType}</bold>.",
+    "description": "Description for the confirmation modal to delete a Hardware Type"
+  },
+  "pages.HardwareType.deleteModal.title": {
+    "defaultMessage": "Delete Hardware Type",
+    "description": "Title for the confirmation modal to delete a Hardware Type"
+  },
   "pages.HardwareType.hardwareTypeNotFound.message": {
     "defaultMessage": "Return to the hardware type list."
   },
@@ -514,6 +537,9 @@
   },
   "pages.HardwareTypeUpdate.creationErrorFeedback": {
     "defaultMessage": "Could not update the hardware type, please try again."
+  },
+  "pages.HardwareTypeUpdate.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the hardware type, please try again."
   },
   "pages.HardwareTypes.createButton": {
     "defaultMessage": "Create Hardware Type"
