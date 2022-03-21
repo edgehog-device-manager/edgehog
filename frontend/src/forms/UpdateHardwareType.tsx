@@ -102,7 +102,6 @@ const transformOutputData = (data: FormData): HardwareTypeData => ({
 type Props = {
   initialData: HardwareTypeData;
   isLoading?: boolean;
-  isDeleting?: boolean;
   onSubmit: (data: HardwareTypeData) => void;
   onDelete: () => void;
 };
@@ -112,7 +111,6 @@ const UpdateHardwareTypeForm = ({
   isLoading = false,
   onSubmit,
   onDelete,
-  isDeleting = false,
 }: Props) => {
   const {
     control,
@@ -238,8 +236,7 @@ const UpdateHardwareTypeForm = ({
               defaultMessage="Update"
             />
           </Button>
-          <Button variant="danger" onClick={onDelete} disabled={isDeleting}>
-            {isDeleting && <Spinner size="sm" className="me-2" />}
+          <Button variant="danger" onClick={onDelete}>
             <FormattedMessage
               id="components.UpdateHardwareTypeForm.deleteButton"
               defaultMessage="Delete"

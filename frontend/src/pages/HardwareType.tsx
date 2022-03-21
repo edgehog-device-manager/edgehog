@@ -37,6 +37,7 @@ import type { HardwareType_deleteHardwareType_Mutation } from "api/__generated__
 import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
+import DeleteModal from "components/DeleteModal";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
@@ -91,12 +92,17 @@ const HardwareTypeContent = ({
 }: HardwareTypeContentProps) => {
   const { hardwareTypeId = "" } = useParams();
   const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const hardwareTypeData = usePreloadedQuery(
     GET_HARDWARE_TYPE_QUERY,
     getHardwareTypeQuery
   );
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
 
   const [deleteHardwareType, isDeletingHardwareType] =
     useMutation<HardwareType_deleteHardwareType_Mutation>(
@@ -114,7 +120,8 @@ const HardwareTypeContent = ({
           const errorFeedback = errors
             .map((error) => error.message)
             .join(". \n");
-          return setErrorFeedback(errorFeedback);
+          setErrorFeedback(errorFeedback);
+          return setShowDeleteModal(false);
         }
         navigate({ route: Route.hardwareTypes });
       },
@@ -125,6 +132,7 @@ const HardwareTypeContent = ({
             defaultMessage="Could not delete the hardware type, please try again."
           />
         );
+        setShowDeleteModal(false);
       },
       updater(store, data) {
         const hardwareTypeId = data.deleteHardwareType?.hardwareType.id;
@@ -224,10 +232,36 @@ const HardwareTypeContent = ({
         <UpdateHardwareTypeForm
           initialData={_.pick(hardwareType, ["name", "handle", "partNumbers"])}
           onSubmit={handleUpdateHardwareType}
-          onDelete={handleDeleteHardwareType}
+          onDelete={handleShowDeleteModal}
           isLoading={isUpdatingHardwareType}
-          isDeleting={isDeletingHardwareType}
         />
+        {showDeleteModal && (
+          <DeleteModal
+            confirmText={hardwareType.handle}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteHardwareType}
+            isDeleting={isDeletingHardwareType}
+            title={
+              <FormattedMessage
+                id="pages.HardwareType.deleteModal.title"
+                defaultMessage="Delete Hardware Type"
+                description="Title for the confirmation modal to delete a Hardware Type"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="pages.HardwareType.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the Hardware Type <bold>{hardwareType}</bold>."
+                description="Description for the confirmation modal to delete a Hardware Type"
+                values={{
+                  hardwareType: hardwareType.name,
+                  bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
+          </DeleteModal>
+        )}
       </Page.Main>
     </Page>
   );
