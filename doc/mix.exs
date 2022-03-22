@@ -44,7 +44,7 @@ defmodule Doc.MixProject do
       main: "intro_user",
       logo: "images/logo-favicon.png",
       extras: extras(),
-      assets: "images/*.png",
+      assets: "images/",
       api_reference: false,
       groups_for_extras: [
         "User Guide": ~r"/user/",

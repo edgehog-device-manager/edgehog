@@ -2,3 +2,7 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: edgehog
 Upstream-Contact: SECO Mind Srl
 Source: https://github.com/edgehog-device-manager/edgehog
+
+Files: doc/images/*
+Copyright: 2021-2022 SECO Mind Srl
+License: Apache-2.0
