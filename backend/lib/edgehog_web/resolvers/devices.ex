@@ -138,6 +138,14 @@ defmodule EdgehogWeb.Resolvers.Devices do
     end
   end
 
+  def delete_system_model(%{system_model_id: id}, %{context: context}) do
+    with {:ok, %SystemModel{} = system_model} <- Devices.fetch_system_model(id),
+         system_model = localize_system_model_description(system_model, context),
+         {:ok, %SystemModel{} = system_model} <- Devices.delete_system_model(system_model) do
+      {:ok, %{system_model: system_model}}
+    end
+  end
+
   # Only allow a description that uses the tenant default locale in {create,update}_system_model
   defp check_description_locale(nil, _default_locale), do: :ok
   defp check_description_locale(%{locale: default_locale}, default_locale), do: :ok

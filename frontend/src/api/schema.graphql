@@ -331,6 +331,11 @@ input UpdateSystemModelInput {
   description: LocalizedTextInput
 }
 
+type DeleteSystemModelPayload {
+  "The deleted system model."
+  systemModel: SystemModel!
+}
+
 "Describes the current status of the operating system of a device."
 type SystemStatus {
   "The identifier of the performed boot sequence."
@@ -418,6 +423,9 @@ type RootMutationType {
 
   "Updates a system model."
   updateSystemModel(input: UpdateSystemModelInput!): UpdateSystemModelPayload
+
+  "Deletes a system model."
+  deleteSystemModel(input: DeleteSystemModelInput!): DeleteSystemModelPayload
 
   "Initiates an OTA update with a user provided OS image"
   createManualOtaOperation(
@@ -625,6 +633,11 @@ input CreateSystemModelInput {
 
   "An optional localized description. This description can only use the default tenant locale."
   description: LocalizedTextInput
+}
+
+input DeleteSystemModelInput {
+  "The ID of the system model to be deleted."
+  systemModelId: ID!
 }
 
 """

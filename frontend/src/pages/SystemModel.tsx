@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,10 +33,12 @@ import _ from "lodash";
 
 import type { SystemModel_getSystemModel_Query } from "api/__generated__/SystemModel_getSystemModel_Query.graphql";
 import type { SystemModel_updateSystemModel_Mutation } from "api/__generated__/SystemModel_updateSystemModel_Mutation.graphql";
+import type { SystemModel_deleteSystemModel_Mutation } from "api/__generated__/SystemModel_deleteSystemModel_Mutation.graphql";
 import type { SystemModel_getDefaultTenantLocale_Query } from "api/__generated__/SystemModel_getDefaultTenantLocale_Query.graphql";
-import { Link, Route } from "Navigation";
+import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
+import DeleteModal from "components/DeleteModal";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
@@ -98,6 +100,18 @@ const UPDATE_SYSTEM_MODEL_MUTATION = graphql`
   }
 `;
 
+const DELETE_SYSTEM_MODEL_MUTATION = graphql`
+  mutation SystemModel_deleteSystemModel_Mutation(
+    $input: DeleteSystemModelInput!
+  ) {
+    deleteSystemModel(input: $input) {
+      systemModel {
+        id
+      }
+    }
+  }
+`;
+
 const systemModelDiff = (a1: SystemModelData, a2: SystemModelChanges) => {
   let diff: Partial<SystemModelChanges> = {};
   if (a1.name !== a2.name) {
@@ -129,6 +143,7 @@ const SystemModelContent = ({
   getSystemModelQuery,
   getDefaultTenantLocaleQuery,
 }: SystemModelContentProps) => {
+  const navigate = useNavigate();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const systemModelData = usePreloadedQuery(
@@ -215,6 +230,62 @@ const SystemModelContent = ({
     [updateSystemModel, systemModel]
   );
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
+
+  const [deleteSystemModel, isDeletingSystemModel] =
+    useMutation<SystemModel_deleteSystemModel_Mutation>(
+      DELETE_SYSTEM_MODEL_MUTATION
+    );
+
+  const handleDeleteSystemModel = useCallback(() => {
+    if (!systemModel) {
+      return null;
+    }
+    const input = {
+      systemModelId: systemModel.id,
+    };
+    deleteSystemModel({
+      variables: { input },
+      onCompleted(data, errors) {
+        if (errors) {
+          const errorFeedback = errors
+            .map((error) => error.message)
+            .join(". \n");
+          setErrorFeedback(errorFeedback);
+          return setShowDeleteModal(false);
+        }
+        navigate({ route: Route.systemModels });
+      },
+      onError(error) {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.SystemModel.deletionErrorFeedback"
+            defaultMessage="Could not delete the system model, please try again."
+          />
+        );
+      },
+      updater(store, data) {
+        const systemModelId = data.deleteSystemModel?.systemModel.id;
+        if (systemModelId) {
+          const root = store.getRoot();
+          const systemModels = root.getLinkedRecords("systemModels");
+          if (systemModels) {
+            root.setLinkedRecords(
+              systemModels.filter(
+                (systemModel) => systemModel.getDataID() !== systemModelId
+              ),
+              "systemModels"
+            );
+          }
+          store.delete(systemModelId);
+        }
+      },
+    });
+  }, [deleteSystemModel, systemModel, navigate]);
+
   if (!systemModel) {
     return (
       <Result.NotFound
@@ -251,8 +322,36 @@ const SystemModelContent = ({
           initialData={systemModel}
           locale={systemModel.description?.locale || locale}
           onSubmit={handleUpdateSystemModel}
+          onDelete={handleShowDeleteModal}
           isLoading={isUpdatingSystemModel}
         />
+        {showDeleteModal && (
+          <DeleteModal
+            confirmText={systemModel.handle}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteSystemModel}
+            isDeleting={isDeletingSystemModel}
+            title={
+              <FormattedMessage
+                id="pages.SystemModel.deleteModal.title"
+                defaultMessage="Delete System Model"
+                description="Title for the confirmation modal to delete a System Model"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="pages.SystemModel.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>."
+                description="Description for the confirmation modal to delete a System Model"
+                values={{
+                  systemModel: systemModel.name,
+                  bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
+          </DeleteModal>
+        )}
       </Page.Main>
     </Page>
   );
