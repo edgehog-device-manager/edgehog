@@ -331,6 +331,9 @@
   "components.UpdateSystemModelForm.addPartNumberButton": {
     "defaultMessage": "Add part number"
   },
+  "components.UpdateSystemModelForm.deleteButton": {
+    "defaultMessage": "Delete"
+  },
   "components.UpdateSystemModelForm.handleLabel": {
     "defaultMessage": "Handle"
   },
@@ -576,6 +579,17 @@
   },
   "pages.Logout.title": {
     "defaultMessage": "Logout"
+  },
+  "pages.SystemModel.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>.",
+    "description": "Description for the confirmation modal to delete a System Model"
+  },
+  "pages.SystemModel.deleteModal.title": {
+    "defaultMessage": "Delete System Model",
+    "description": "Title for the confirmation modal to delete a System Model"
+  },
+  "pages.SystemModel.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the system model, please try again."
   },
   "pages.SystemModel.systemModelNotFound.message": {
     "defaultMessage": "Return to the system model list."
