@@ -22,12 +22,14 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Astarte.Device
   alias Edgehog.Devices.SystemModel
 
   schema "system_model_part_numbers" do
     field :part_number, :string
     field :tenant_id, :id
     belongs_to :system_model, SystemModel
+    has_many :devices, Device, foreign_key: :part_number, references: :part_number
 
     timestamps()
   end

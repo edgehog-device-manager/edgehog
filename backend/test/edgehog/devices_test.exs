@@ -111,6 +111,7 @@ defmodule Edgehog.DevicesTest do
     alias Edgehog.Devices.SystemModelPartNumber
     alias Edgehog.Devices.SystemModelDescription
 
+    import Edgehog.AstarteFixtures
     import Edgehog.DevicesFixtures
 
     setup do
@@ -251,6 +252,24 @@ defmodule Edgehog.DevicesTest do
       assert {:ok, %SystemModel{}} = Devices.delete_system_model(system_model)
 
       assert Devices.fetch_system_model(system_model.id) == {:error, :not_found}
+    end
+
+    test "delete_system_model/1 returns error changeset for system_model in use", %{
+      hardware_type: hardware_type
+    } do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+      part_number = "1234-rev4"
+      system_model = system_model_fixture(hardware_type, %{part_numbers: [part_number]})
+
+      _device =
+        device_fixture(realm,
+          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
+          part_number: part_number
+        )
+
+      assert {:error, %Ecto.Changeset{}} = Devices.delete_system_model(system_model)
+      assert {:ok, system_model} == Devices.fetch_system_model(system_model.id)
     end
 
     test "change_system_model/1 returns a system_model changeset", %{

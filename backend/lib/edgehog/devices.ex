@@ -397,12 +397,15 @@ defmodule Edgehog.Devices do
 
   """
   def delete_system_model(%SystemModel{} = system_model) do
-    # Delete the picture as well, if any.
-    # Ignore the result, a failure to delete the picture shouldn't compromise the success of
-    # the operation (we would leave another orphan image anyway)
-    _ = Assets.delete_system_model_picture(system_model, system_model.picture_url)
+    changeset = SystemModel.delete_changeset(system_model)
 
-    Repo.delete(system_model)
+    with {:ok, system_model} <- Repo.delete(changeset) do
+      # Delete the picture as well, if any.
+      # Ignore the result, a failure to delete the picture shouldn't compromise the success of
+      # the operation (we would leave another orphan image anyway)
+      _ = Assets.delete_system_model_picture(system_model, system_model.picture_url)
+      {:ok, system_model}
+    end
   end
 
   @doc """

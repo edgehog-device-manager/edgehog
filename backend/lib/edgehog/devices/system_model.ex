@@ -34,6 +34,7 @@ defmodule Edgehog.Devices.SystemModel do
     belongs_to :hardware_type, HardwareType
     has_many :part_numbers, SystemModelPartNumber, on_replace: :delete
     has_many :descriptions, SystemModelDescription, on_replace: :delete
+    has_many :devices, through: [:part_numbers, :devices]
 
     timestamps()
   end
@@ -50,5 +51,15 @@ defmodule Edgehog.Devices.SystemModel do
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
     |> cast_assoc(:descriptions)
+  end
+
+  @doc false
+  def delete_changeset(system_model) do
+    system_model
+    |> change()
+    |> foreign_key_constraint(:devices,
+      name: :devices_part_number_fkey,
+      message: "are still associated with System Model"
+    )
   end
 end
