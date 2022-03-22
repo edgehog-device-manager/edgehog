@@ -261,5 +261,23 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
 
       Devices.update_system_model(%{}, attrs, %{context: context})
     end
+
+    test "delete_system_model/2 deletes the system model", %{context: context} do
+      hardware_type = hardware_type_fixture()
+      system_model = system_model_fixture(hardware_type)
+
+      attrs = %{
+        system_model_id: system_model.id
+      }
+
+      assert {:ok, %{system_model: system_model_deleted}} =
+               Devices.delete_system_model(attrs, %{context: context})
+
+      assert system_model_deleted.id == system_model.id
+      assert system_model_deleted.part_numbers == system_model.part_numbers
+
+      assert {:error, :not_found} ==
+               Devices.find_system_model(%{id: system_model.id}, %{context: context})
+    end
   end
 end

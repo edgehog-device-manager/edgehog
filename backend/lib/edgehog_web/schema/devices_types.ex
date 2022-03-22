@@ -292,5 +292,21 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
 
       resolve &Resolvers.Devices.update_system_model/3
     end
+
+    @desc "Deletes a system model."
+    payload field :delete_system_model do
+      input do
+        @desc "The ID of the system model to be deleted."
+        field :system_model_id, non_null(:id)
+      end
+
+      output do
+        @desc "The deleted system model."
+        field :system_model, non_null(:system_model)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, system_model_id: :system_model
+      resolve &Resolvers.Devices.delete_system_model/2
+    end
   end
 end
