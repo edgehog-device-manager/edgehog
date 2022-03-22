@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -160,6 +160,7 @@ type Props = {
   locale: string;
   isLoading?: boolean;
   onSubmit: (data: SystemModelChanges) => void;
+  onDelete: () => void;
 };
 
 const UpdateSystemModelForm = ({
@@ -167,6 +168,7 @@ const UpdateSystemModelForm = ({
   locale,
   isLoading = false,
   onSubmit,
+  onDelete,
 }: Props) => {
   const {
     control,
@@ -373,6 +375,12 @@ const UpdateSystemModelForm = ({
               <FormattedMessage
                 id="components.UpdateSystemModelForm.submitButton"
                 defaultMessage="Update"
+              />
+            </Button>
+            <Button variant="danger" onClick={onDelete}>
+              <FormattedMessage
+                id="components.UpdateSystemModelForm.deleteButton"
+                defaultMessage="Delete"
               />
             </Button>
           </Stack>
