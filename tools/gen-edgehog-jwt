@@ -29,8 +29,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a valid JWT for Edgehog")
     parser.add_argument("-k", "--private-key", type=str, required=True, help="Path to the private key file for signing "\
         "the Authorization token.")
-    parser.add_argument("-e", "--expiry", type=int, required=False, default=300, help="Expiry of the token in seconds. "\
-        "If 0, the token never expires. Defaults to 5 minutes.")
+    parser.add_argument("-e", "--expiry", type=int, required=False, default=86400, help="Expiry of the token in seconds. "\
+        "If 0, the token never expires. Defaults to 24 hours.")
     parser.add_argument("-a", "--auth-paths", type=str, required=False, nargs='+', default=default_auth_paths,
         help="Defines a series of regular expressions for path-based authorization.")
     args = parser.parse_args()
