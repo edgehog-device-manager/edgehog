@@ -758,6 +758,9 @@ Values to be replaced
 - `PATH-TO-TENANT-PRIVATE-KEY`: path to the `private_key.pem` file created in the [previous
   step](#creating-a-keypair).
 
+Note that the token expires after 24 hours by default. If you want to have a token with a different
+expiry time, you can pass `-e <EXPIRY-SECONDS>` to the `gen-edgehog-jwt` command.
+
 After that, you can open your frontend URL in your browser and insert your tenant slug and token to
 log into your Edgehog instance, and use to the [user guide](#intro_user) to discover all Edgehog
 features.
