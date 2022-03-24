@@ -41,8 +41,6 @@ jobs:
   test-dialyzer:
     name: Check Dialyzer
     runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
     env:
       MIX_ENV: ci
     steps:
