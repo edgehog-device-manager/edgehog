@@ -27,7 +27,7 @@ on:
     - 'backend/**'
     - '.github/workflows/backend-test.yaml'
     branches:
-    - 'master'
+    - 'main'
   # Run on pull requests matching apps
   pull_request:
     paths:
