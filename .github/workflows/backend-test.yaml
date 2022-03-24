@@ -78,9 +78,9 @@ jobs:
       with:
         path: backend/priv/plts
         key: |
-          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}-${{ github.sha }}
+          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}
         restore-keys: |
-          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}-
+          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}
 
     # Create PLTs if no cache was found
     - name: Create PLTs
