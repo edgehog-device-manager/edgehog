@@ -39,8 +39,7 @@ defmodule Edgehog.MixProject do
         "coveralls.html": :test
       ],
       dialyzer: [
-        plt_core_path: dialyzer_cache_directory(Mix.env()),
-        plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+        plt_core_path: dialyzer_cache_directory(Mix.env())
       ]
     ]
   end

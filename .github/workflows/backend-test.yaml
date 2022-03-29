@@ -27,7 +27,7 @@ on:
     - 'backend/**'
     - '.github/workflows/backend-test.yaml'
     branches:
-    - 'master'
+    - 'main'
   # Run on pull requests matching apps
   pull_request:
     paths:
@@ -41,8 +41,6 @@ jobs:
   test-dialyzer:
     name: Check Dialyzer
     runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
     env:
       MIX_ENV: ci
     steps:
@@ -80,9 +78,9 @@ jobs:
       with:
         path: backend/priv/plts
         key: |
-          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}-${{ github.sha }}
+          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}
         restore-keys: |
-          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}-
+          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}
 
     # Create PLTs if no cache was found
     - name: Create PLTs
