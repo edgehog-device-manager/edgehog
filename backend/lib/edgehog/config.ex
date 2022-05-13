@@ -34,9 +34,9 @@ defmodule Edgehog.Config do
     type: :boolean,
     default: false
 
-  @envdoc "The API key for the freegeoip.app geolocation provider."
-  app_env :freegeoip_api_key, :edgehog, :freegeoip_api_key,
-    os_env: "FREEGEOIP_API_KEY",
+  @envdoc "The API key for the ipbase.com geolocation provider."
+  app_env :ipbase_api_key, :edgehog, :ipbase_api_key,
+    os_env: "IPBASE_API_KEY",
     type: :binary
 
   @envdoc "The API key for the Google geolocation provider."
@@ -51,7 +51,7 @@ defmodule Edgehog.Config do
 
   @envdoc """
   A comma separated list of preferred geolocation providers.
-  Possible values are: device, google, freegeoip.
+  Possible values are: device, google, ipbase.
   """
   app_env :preferred_geolocation_providers, :edgehog, :preferred_geolocation_providers,
     os_env: "PREFERRED_GEOLOCATION_PROVIDERS",
@@ -59,7 +59,7 @@ defmodule Edgehog.Config do
     default: [
       Geolocation.Providers.DeviceGeolocation,
       Geolocation.Providers.GoogleGeolocation,
-      Geolocation.Providers.FreeGeoIp
+      Geolocation.Providers.IPBase
     ]
 
   @envdoc """
@@ -83,7 +83,7 @@ defmodule Edgehog.Config do
   @spec geolocation_providers!() :: list(atom())
   def geolocation_providers! do
     disabled_providers = %{
-      Edgehog.Geolocation.Providers.FreeGeoIp => is_nil(freegeoip_api_key!()),
+      Edgehog.Geolocation.Providers.IPBase => is_nil(ipbase_api_key!()),
       Edgehog.Geolocation.Providers.GoogleGeolocation => is_nil(google_geolocation_api_key!())
     }
 

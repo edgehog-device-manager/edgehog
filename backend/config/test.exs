@@ -80,7 +80,7 @@ config :edgehog,
   preferred_geolocation_providers: [Edgehog.Geolocation.GeolocationProviderMock],
   preferred_geocoding_providers: [Edgehog.Geolocation.GeocodingProviderMock]
 
-config :edgehog, freegeoip_api_key: "test_api_key"
+config :edgehog, ipbase_api_key: "test_api_key"
 
 config :edgehog, google_geolocation_api_key: "test_api_key"
 

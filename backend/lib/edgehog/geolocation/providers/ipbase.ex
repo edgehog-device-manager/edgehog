@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
+defmodule Edgehog.Geolocation.Providers.IPBase do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
   alias Edgehog.Astarte
@@ -62,7 +62,7 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
   end
 
   defp geolocate_ip(ip_address) do
-    with {:ok, api_key} <- Config.freegeoip_api_key(),
+    with {:ok, api_key} <- Config.ipbase_api_key(),
          {:ok, %{body: body}} <- get("/#{ip_address}", query: [apikey: api_key]),
          {:coords, %{"latitude" => latitude, "longitude" => longitude}}
          when is_number(latitude) and is_number(longitude) <- {:coords, body} do

@@ -23,7 +23,7 @@ defmodule Edgehog.Config.GeolocationProviders do
 
   @providers %{
     "device" => Edgehog.Geolocation.Providers.DeviceGeolocation,
-    "freegeoip" => Edgehog.Geolocation.Providers.FreeGeoIp,
+    "ipbase" => Edgehog.Geolocation.Providers.IPBase,
     "google" => Edgehog.Geolocation.Providers.GoogleGeolocation
   }
 
