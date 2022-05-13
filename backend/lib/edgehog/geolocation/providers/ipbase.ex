@@ -29,7 +29,7 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
 
   use Tesla
 
-  plug Tesla.Middleware.BaseUrl, "https://api.ipbase.com/v1/json"
+  plug Tesla.Middleware.BaseUrl, "https://api.ipbase.com/v2/info"
   plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
@@ -63,16 +63,24 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
 
   defp geolocate_ip(ip_address) do
     with {:ok, api_key} <- Config.ipbase_api_key(),
-         {:ok, %{body: body}} <- get("/#{ip_address}", query: [apikey: api_key]),
-         {:coords, %{"latitude" => latitude, "longitude" => longitude}}
-         when is_number(latitude) and is_number(longitude) <- {:coords, body} do
+         {:ok, %{body: body}} <- get("", query: [apikey: api_key, ip: ip_address]),
+         {:ok, location} <- parse_response_body(body) do
+      {:ok, location}
+    end
+  end
+
+  defp parse_response_body(body) do
+    with %{"data" => data} <- body,
+         %{"location" => location} <- data,
+         %{"latitude" => latitude, "longitude" => longitude}
+         when is_number(latitude) and is_number(longitude) <- location do
+      zip = Map.get(location, "zip")
+      city = location |> Map.get("city", %{}) |> Map.get("name")
+      region = location |> Map.get("region", %{}) |> Map.get("name")
+      country = location |> Map.get("country", %{}) |> Map.get("name")
+
       address =
-        [
-          body["city"],
-          body["zip_code"],
-          body["region_name"],
-          body["country_name"]
-        ]
+        [city, zip, region, country]
         |> Enum.reject(&is_nil/1)
         |> Enum.reject(&(&1 == ""))
         |> Enum.join(", ")
@@ -86,11 +94,7 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
 
       {:ok, location}
     else
-      {:coords, _} ->
-        {:error, :position_not_found}
-
-      {:error, reason} ->
-        {:error, reason}
+      _ -> {:error, :position_not_found}
     end
   end
 end

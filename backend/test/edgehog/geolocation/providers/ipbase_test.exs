@@ -54,8 +54,12 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
 
     test "geolocate/1 returns position from IP address", %{device: device} do
       response = %{
-        "latitude" => 45.4019498,
-        "longitude" => 11.8706081
+        "data" => %{
+          "location" => %{
+            "latitude" => 45.4019498,
+            "longitude" => 11.8706081
+          }
+        }
       }
 
       mock(fn
