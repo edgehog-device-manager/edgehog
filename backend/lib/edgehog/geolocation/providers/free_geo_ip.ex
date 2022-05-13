@@ -29,7 +29,7 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIp do
 
   use Tesla
 
-  plug Tesla.Middleware.BaseUrl, "https://freegeoip.app/json"
+  plug Tesla.Middleware.BaseUrl, "https://api.ipbase.com/v1/json"
   plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
