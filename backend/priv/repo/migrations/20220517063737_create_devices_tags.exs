@@ -22,16 +22,23 @@ defmodule Edgehog.Repo.Migrations.CreateDevicesTags do
   use Ecto.Migration
 
   def change do
-    create table(:devices_tags) do
-      add :tenant_id, references(:tenants, on_delete: :nothing)
-      add :tag_id, references(:tags, on_delete: :nothing)
-      add :device_id, references(:devices, on_delete: :nothing)
+    create table(:devices_tags, primary_key: false) do
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false,
+        primary_key: true
 
-      timestamps()
+      add :tag_id,
+          references(:tags, with: [tenant_id: :tenant_id], match: :full, on_delete: :restrict),
+          null: false,
+          primary_key: true
+
+      add :device_id,
+          references(:devices, with: [tenant_id: :tenant_id], match: :full, on_delete: :delete_all),
+          null: false,
+          primary_key: true
     end
 
-    create index(:devices_tags, [:tenant_id])
-    create index(:devices_tags, [:tag_id])
-    create index(:devices_tags, [:device_id])
+    create index(:devices_tags, [:tag_id, :tenant_id])
+    create index(:devices_tags, [:device_id, :tenant_id])
   end
 end

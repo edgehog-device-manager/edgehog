@@ -23,8 +23,8 @@ defmodule Edgehog.Devices.Tag do
   import Ecto.Changeset
 
   schema "tags" do
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :name, :string
-    field :tenant_id, :id
 
     timestamps()
   end

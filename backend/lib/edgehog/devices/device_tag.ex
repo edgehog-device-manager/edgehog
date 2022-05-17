@@ -20,20 +20,11 @@
 
 defmodule Edgehog.Devices.DeviceTag do
   use Ecto.Schema
-  import Ecto.Changeset
 
+  @primary_key false
   schema "devices_tags" do
-    field :tenant_id, :id
-    field :tag_id, :id
-    field :device_id, :id
-
-    timestamps()
-  end
-
-  @doc false
-  def changeset(device_tag, attrs) do
-    device_tag
-    |> cast(attrs, [])
-    |> validate_required([])
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
+    field :tag_id, :id, primary_key: true
+    field :device_id, :id, primary_key: true
   end
 end
