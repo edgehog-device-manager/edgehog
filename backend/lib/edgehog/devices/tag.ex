@@ -34,6 +34,6 @@ defmodule Edgehog.Devices.Tag do
     tag
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> unique_constraint(:name)
+    |> unique_constraint([:name, :tenant_id])
   end
 end

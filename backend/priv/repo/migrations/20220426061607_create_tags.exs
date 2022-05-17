@@ -23,13 +23,16 @@ defmodule Edgehog.Repo.Migrations.CreateTags do
 
   def change do
     create table(:tags) do
-      add :name, :string
-      add :tenant_id, references(:tenants, on_delete: :nothing)
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :name, :string, null: false
 
       timestamps()
     end
 
-    create unique_index(:tags, [:name])
     create index(:tags, [:tenant_id])
+    create unique_index(:tags, [:id, :tenant_id])
+    create unique_index(:tags, [:name, :tenant_id])
   end
 end
