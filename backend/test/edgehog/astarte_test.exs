@@ -460,10 +460,49 @@ defmodule Edgehog.AstarteTest do
 
     test "update_device/2 with valid data updates the device", %{realm: realm} do
       device = device_fixture(realm)
-      update_attrs = %{name: "some updated name"}
+      update_attrs = %{name: "some updated name", tags: ["some", "tags"]}
 
       assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
       assert device.name == "some updated name"
+      assert ["some", "tags"] == Enum.map(device.tags, & &1.name)
+    end
+
+    test "update_device/2 normalizes and deduplicates tags", %{realm: realm} do
+      device = device_fixture(realm)
+      update_attrs = %{tags: ["sTRANGE", "taGs   ", "  DUPlicate", "DUPLICATE"]}
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+
+      assert ["strange", "tags", "duplicate"] == Enum.map(device.tags, & &1.name)
+    end
+
+    test "update_device/2 removes tags", %{realm: realm} do
+      device = device_fixture(realm)
+      update_attrs = %{tags: ["some", "tags"]}
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert ["some", "tags"] == Enum.map(device.tags, & &1.name)
+
+      update_attrs = %{tags: ["new"]}
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert ["new"] == Enum.map(device.tags, & &1.name)
+    end
+
+    test "update_device/2 adds tags", %{realm: realm} do
+      device = device_fixture(realm)
+      update_attrs = %{tags: ["some", "tags"]}
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert ["some", "tags"] == Enum.map(device.tags, & &1.name)
+
+      update_attrs = %{tags: ["some", "tags", "new"]}
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert ["some", "tags", "new"] == Enum.map(device.tags, & &1.name)
+    end
+
+    test "update_device/2 returns an error for invalid tags", %{realm: realm} do
+      device = device_fixture(realm)
+      update_attrs = %{tags: "not a list"}
+      assert {:error, %Ecto.Changeset{}} = Astarte.update_device(device, update_attrs)
     end
 
     test "update_device/2 does not update the device_id", %{realm: realm} do

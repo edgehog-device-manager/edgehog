@@ -27,9 +27,11 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Repo
 
   alias Astarte.Client.AppEngine
+  alias Ecto.Multi
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.InterfaceID
   alias Edgehog.Astarte.InterfaceVersion
+  alias Edgehog.Devices
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
@@ -518,9 +520,26 @@ defmodule Edgehog.Astarte do
 
   """
   def update_device(%Device{} = device, attrs) do
-    device
-    |> Device.update_changeset(attrs)
-    |> Repo.update()
+    Multi.new()
+    |> Devices.ensure_tags_exist_multi(attrs)
+    |> Multi.update(:update_device, fn
+      %{ensure_tags_exist: nil} ->
+        device
+        |> Device.update_changeset(attrs)
+
+      %{ensure_tags_exist: tags} when is_list(tags) ->
+        device
+        |> Device.update_changeset(attrs)
+        |> Ecto.Changeset.put_assoc(:tags, tags)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{update_device: device}} ->
+        {:ok, Repo.preload(device, :tags)}
+
+      {:error, _failed_operation, failed_value, _progress_so_far} ->
+        {:error, failed_value}
+    end
   end
 
   @doc """
