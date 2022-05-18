@@ -414,6 +414,20 @@ defmodule Edgehog.Astarte do
       {:hardware_type_name, name} ->
         from [hardware_type: ht] in ensure_hardware_type(query),
           where: ilike(ht.name, ^"%#{name}%")
+
+      {:tag, tag} ->
+        # Need to filter tenant explicitly since prepare_query is not executed for subqueries
+        tenant_id = Repo.get_tenant_id()
+
+        device_ids_matching_tag =
+          from t in Devices.Tag,
+            where: ilike(t.name, ^"%#{tag}%") and t.tenant_id == ^tenant_id,
+            join: dt in Devices.DeviceTag,
+            on: t.id == dt.tag_id,
+            select: dt.device_id
+
+        from q in query,
+          where: q.id in subquery(device_ids_matching_tag)
     end
   end
 
