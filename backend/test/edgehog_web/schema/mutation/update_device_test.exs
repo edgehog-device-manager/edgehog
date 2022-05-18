@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
+  alias Edgehog.Astarte
 
   describe "updateDevice field" do
     setup do
@@ -40,6 +41,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
         device {
           id
           name
+          tags
         }
       }
     }
@@ -52,7 +54,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
       variables = %{
         input: %{
           device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-          name: "Some new name"
+          name: "Some new name",
+          tags: ["foo", "bar", "baz"]
         }
       }
 
@@ -62,7 +65,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
                "data" => %{
                  "updateDevice" => %{
                    "device" => %{
-                     "name" => "Some new name"
+                     "name" => "Some new name",
+                     "tags" => ["foo", "bar", "baz"]
                    }
                  }
                }
@@ -81,6 +85,34 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
       conn = post(conn, api_path, query: @query, variables: variables)
 
       assert %{"errors" => _} = assert(json_response(conn, 200))
+    end
+
+    test "handles partial updates", %{
+      conn: conn,
+      api_path: api_path,
+      device: device
+    } do
+      {:ok, _} = Astarte.update_device(device, %{tags: ["not", "touched"]})
+
+      variables = %{
+        input: %{
+          device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
+          name: "Some new name"
+        }
+      }
+
+      conn = post(conn, api_path, query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "updateDevice" => %{
+                   "device" => %{
+                     "name" => "Some new name",
+                     "tags" => ["not", "touched"]
+                   }
+                 }
+               }
+             } = json_response(conn, 200)
     end
   end
 end

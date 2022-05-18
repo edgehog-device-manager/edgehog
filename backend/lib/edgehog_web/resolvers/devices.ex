@@ -19,6 +19,7 @@
 #
 
 defmodule EdgehogWeb.Resolvers.Devices do
+  alias Edgehog.Astarte
   alias Edgehog.Devices
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
@@ -167,5 +168,10 @@ defmodule EdgehogWeb.Resolvers.Devices do
       [description] -> {:ok, description}
       _ -> {:ok, nil}
     end
+  end
+
+  def extract_device_tags(%Astarte.Device{tags: tags}, _args, _context) do
+    tag_names = for t <- tags, do: t.name
+    {:ok, tag_names}
   end
 end
