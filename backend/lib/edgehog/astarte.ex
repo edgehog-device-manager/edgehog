@@ -378,6 +378,7 @@ defmodule Edgehog.Astarte do
     filters
     |> Enum.reduce(Device, &filter_with/2)
     |> Repo.all()
+    |> Repo.preload(:tags)
   end
 
   defp filter_with(filter, query) do
@@ -472,6 +473,7 @@ defmodule Edgehog.Astarte do
   """
   def get_device!(id) do
     Repo.get!(Device, id)
+    |> Repo.preload(:tags)
   end
 
   @doc """
@@ -487,9 +489,13 @@ defmodule Edgehog.Astarte do
 
   """
   def create_device(%Realm{} = realm, attrs \\ %{}) do
-    %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
-    |> Device.changeset(attrs)
-    |> Repo.insert()
+    changeset =
+      %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
+      |> Device.changeset(attrs)
+
+    with {:ok, device} <- Repo.insert(changeset) do
+      {:ok, Repo.preload(device, :tags)}
+    end
   end
 
   @doc """
@@ -585,7 +591,7 @@ defmodule Edgehog.Astarte do
   """
   def fetch_realm_device(%Realm{id: realm_id}, device_id) do
     case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
-      %Device{} = device -> {:ok, device}
+      %Device{} = device -> {:ok, Repo.preload(device, :tags)}
       nil -> {:error, :device_not_found}
     end
   end
