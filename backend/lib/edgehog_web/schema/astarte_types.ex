@@ -195,6 +195,9 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The channel used by the Access Point."
     field :channel, :integer
 
+    @desc "Indicates whether the device is connected to the Access Point."
+    field :connected, :boolean
+
     @desc "The ESSID advertised by the Access Point."
     field :essid, :string
 
