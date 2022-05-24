@@ -133,6 +133,9 @@ type WifiScanResult {
   "The channel used by the Access Point."
   channel: Int
 
+  "Indicates whether the device is connected to the Access Point."
+  connected: Boolean
+
   "The ESSID advertised by the Access Point."
   essid: String
 
