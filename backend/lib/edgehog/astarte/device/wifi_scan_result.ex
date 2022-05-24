@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021,2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
   @enforce_keys [:timestamp]
   defstruct [
     :channel,
+    :connected,
     :essid,
     :mac_address,
     :rssi,
@@ -30,6 +31,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
 
   @type t() :: %__MODULE__{
           channel: integer() | nil,
+          connected: boolean() | nil,
           essid: String.t() | nil,
           mac_address: String.t() | nil,
           rssi: integer() | nil,
@@ -51,6 +53,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
         |> Enum.map(fn ap ->
           %WiFiScanResult{
             channel: ap["channel"],
+            connected: ap["connected"],
             essid: ap["essid"],
             mac_address: ap["macAddress"],
             rssi: ap["rssi"],
