@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -111,6 +111,7 @@ type TableProps<T extends Object> = {
     globalFilterValue: any
   ) => Row<T>[];
   hideSearch?: boolean;
+  getRowProps?: (row: Row<T>) => Object;
 };
 
 const Table = <T extends Object>({
@@ -122,6 +123,7 @@ const Table = <T extends Object>({
   maxPageRows = 10,
   searchFunction,
   hideSearch = false,
+  getRowProps = () => ({}),
 }: TableProps<T>) => {
   const tableParams = {
     columns,
@@ -196,7 +198,7 @@ const Table = <T extends Object>({
             prepareRow(row);
 
             return (
-              <tr {...row.getRowProps()}>
+              <tr {...row.getRowProps(getRowProps(row))}>
                 {row.cells.map((cell) => {
                   return (
                     <td {...cell.getCellProps()}>{cell.render("Cell")}</td>

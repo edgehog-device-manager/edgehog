@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import userEvent from "@testing-library/user-event";
 import _ from "lodash";
 
 import { renderWithProviders } from "setupTests";
-import Table, { Column } from "./Table";
+import Table, { Column, Row } from "./Table";
 
 type Data = { id: string; name: string };
 
@@ -100,4 +100,21 @@ it("correctly paginates a long list", () => {
   expect(screen.queryByTestId(`pagination-first`)).toBeInTheDocument();
   const lastRow = container.querySelector("tbody tr:last-child");
   expect(lastRow).toHaveTextContent("Name 99");
+});
+
+it("correctly passes props with getRowProps", () => {
+  const getRowProps = (row: Row<Data>) => {
+    return { className: "custom-class-" + row.values.id };
+  };
+  const { container } = renderWithProviders(
+    <Table
+      data={data.slice(0, 2)}
+      columns={columns}
+      getRowProps={getRowProps}
+    />
+  );
+  const firstRow = container.querySelector("tbody tr:nth-child(1)");
+  expect(firstRow).toHaveClass("custom-class-0");
+  const secondRow = container.querySelector("tbody tr:nth-child(2)");
+  expect(secondRow).toHaveClass("custom-class-1");
 });
