@@ -28,7 +28,7 @@ import type {
 
 import Result from "components/Result";
 import Table from "components/Table";
-import type { Column } from "components/Table";
+import type { Column, Row } from "components/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -36,6 +36,7 @@ const WIFI_SCAN_RESULTS_TABLE_FRAGMENT = graphql`
   fragment WiFiScanResultsTable_wifiScanResults on Device {
     wifiScanResults {
       channel
+      connected
       essid
       macAddress
       rssi
@@ -44,9 +45,10 @@ const WIFI_SCAN_RESULTS_TABLE_FRAGMENT = graphql`
   }
 `;
 
-type TableRecord = NonNullable<
-  WiFiScanResultsTable_wifiScanResults$data["wifiScanResults"]
->[0];
+type TableRecord = Omit<
+  NonNullable<WiFiScanResultsTable_wifiScanResults$data["wifiScanResults"]>[0],
+  "timestamp"
+> & { readonly seenAt: Date };
 
 const columns: Column<TableRecord>[] = [
   {
@@ -87,7 +89,7 @@ const columns: Column<TableRecord>[] = [
     Cell: ({ value }) => (value ? `${value} dBm` : ""),
   },
   {
-    accessor: "timestamp",
+    accessor: "seenAt",
     Header: (
       <FormattedMessage
         id="components.WiFiScanResultsTable.seenAtTitle"
@@ -96,7 +98,7 @@ const columns: Column<TableRecord>[] = [
     ),
     Cell: ({ value }) => (
       <FormattedDate
-        value={new Date(value)}
+        value={value}
         year="numeric"
         month="long"
         day="numeric"
@@ -106,6 +108,10 @@ const columns: Column<TableRecord>[] = [
     ),
   },
 ];
+
+const getRowProps = (row: Row<TableRecord>) => {
+  return row.original.connected ? { className: "fw-bold" } : {};
+};
 
 interface Props {
   className?: string;
@@ -133,12 +139,34 @@ const WiFiScanResultsTable = ({ className, deviceRef }: Props) => {
     );
   }
 
-  const wifiScanResults = data.wifiScanResults.map((scanResult) => ({
-    ...scanResult,
-  }));
+  let connectedFound = false;
+  const wifiScanResults = data.wifiScanResults
+    .map((scanResult) => {
+      const { timestamp, ...rest } = scanResult;
+      return {
+        ...rest,
+        seenAt: new Date(timestamp),
+      };
+    })
+    .sort((scan1, scan2) => scan2.seenAt.getDate() - scan1.seenAt.getDate())
+    .map((scanResult) => {
+      if (!connectedFound && scanResult.connected) {
+        connectedFound = true;
+        return scanResult;
+      }
+      return {
+        ...scanResult,
+        connected: false,
+      };
+    });
 
   return (
-    <Table className={className} columns={columns} data={wifiScanResults} />
+    <Table
+      className={className}
+      columns={columns}
+      data={wifiScanResults}
+      getRowProps={getRowProps}
+    />
   );
 };
 
