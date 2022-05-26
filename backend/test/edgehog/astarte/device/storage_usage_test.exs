@@ -40,7 +40,7 @@ defmodule Edgehog.Astarte.Device.StorageUsageTest do
       {:ok, cluster: cluster, realm: realm, device: device, appengine_client: appengine_client}
     end
 
-    test "get/2 correctly parses storage usage data", %{
+    test "get/2 correctly parses storage usage data with a single path", %{
       device: device,
       appengine_client: appengine_client
     } do
@@ -52,14 +52,38 @@ defmodule Edgehog.Astarte.Device.StorageUsageTest do
               "timestamp" => "2021-11-30T10:45:00.575Z",
               "totalBytes" => "16128"
             }
-          ],
-          "nvs2" => [
-            %{
-              "freeBytes" => "5000",
-              "timestamp" => "2021-11-30T10:41:48.575Z",
-              "totalBytes" => "8064"
-            }
           ]
+        }
+      }
+
+      mock(fn
+        %{method: :get, url: _api_url} ->
+          json(response)
+      end)
+
+      assert {:ok, storage_units} = StorageUsage.get(appengine_client, device.device_id)
+
+      assert storage_units == [
+               %StorageUnit{free_bytes: 7000, label: "nvs1", total_bytes: 16128}
+             ]
+    end
+
+    test "get/2 correctly parses storage usage data with multiple paths", %{
+      device: device,
+      appengine_client: appengine_client
+    } do
+      response = %{
+        "data" => %{
+          "nvs1" => %{
+            "freeBytes" => "7000",
+            "timestamp" => "2021-11-30T10:45:00.575Z",
+            "totalBytes" => "16128"
+          },
+          "nvs2" => %{
+            "freeBytes" => "5000",
+            "timestamp" => "2021-11-30T10:41:48.575Z",
+            "totalBytes" => "8064"
+          }
         }
       }
 

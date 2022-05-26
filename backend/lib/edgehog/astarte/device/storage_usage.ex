@@ -35,18 +35,23 @@ defmodule Edgehog.Astarte.Device.StorageUsage do
            AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1) do
       storage_units =
         data
-        |> Enum.map(fn {label, [storage_unit_info]} ->
-          %{"totalBytes" => total_bytes, "freeBytes" => free_bytes} = storage_unit_info
-
-          %StorageUnit{
-            label: label,
-            total_bytes: parse_longinteger(total_bytes),
-            free_bytes: parse_longinteger(free_bytes)
-          }
+        |> Enum.map(fn
+          {label, [storage_unit]} -> parse_storage_unit(label, storage_unit)
+          # TODO: handle value as single object too, as a workaround for the issue:
+          # https://github.com/astarte-platform/astarte/issues/707
+          {label, storage_unit} -> parse_storage_unit(label, storage_unit)
         end)
 
       {:ok, storage_units}
     end
+  end
+
+  defp parse_storage_unit(unit_label, storage_unit) when is_binary(unit_label) do
+    %StorageUnit{
+      label: unit_label,
+      total_bytes: parse_longinteger(storage_unit["totalBytes"]),
+      free_bytes: parse_longinteger(storage_unit["freeBytes"])
+    }
   end
 
   defp parse_longinteger(string) when is_binary(string) do

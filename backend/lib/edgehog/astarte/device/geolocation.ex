@@ -37,21 +37,28 @@ defmodule Edgehog.Astarte.Device.Geolocation do
   def parse_data(data) do
     sensors_positions =
       data
-      |> Enum.map(fn {sensor_id, [sensor_data]} ->
-        %SensorPosition{
-          sensor_id: sensor_id,
-          latitude: sensor_data["latitude"],
-          longitude: sensor_data["longitude"],
-          altitude: sensor_data["altitude"],
-          accuracy: sensor_data["accuracy"],
-          altitude_accuracy: sensor_data["altitudeAccuracy"],
-          heading: sensor_data["heading"],
-          speed: sensor_data["speed"],
-          timestamp: parse_datetime(sensor_data["timestamp"])
-        }
+      |> Enum.map(fn
+        {sensor_id, [sensor_data]} -> parse_sensor_data(sensor_id, sensor_data)
+        # TODO: handle value as single object too, as a workaround for the issue:
+        # https://github.com/astarte-platform/astarte/issues/707
+        {sensor_id, sensor_data} -> parse_sensor_data(sensor_id, sensor_data)
       end)
 
     {:ok, sensors_positions}
+  end
+
+  def parse_sensor_data(sensor_id, sensor_data) when is_binary(sensor_id) do
+    %SensorPosition{
+      sensor_id: sensor_id,
+      latitude: sensor_data["latitude"],
+      longitude: sensor_data["longitude"],
+      altitude: sensor_data["altitude"],
+      accuracy: sensor_data["accuracy"],
+      altitude_accuracy: sensor_data["altitudeAccuracy"],
+      heading: sensor_data["heading"],
+      speed: sensor_data["speed"],
+      timestamp: parse_datetime(sensor_data["timestamp"])
+    }
   end
 
   defp parse_datetime(nil) do

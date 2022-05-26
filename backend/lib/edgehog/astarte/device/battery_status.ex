@@ -31,22 +31,23 @@ defmodule Edgehog.Astarte.Device.BatteryStatus do
            AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1) do
       battery_slots =
         data
-        |> Enum.map(fn {battery_slot, [battery_slot_info]} ->
-          %{
-            "levelPercentage" => level_percentage,
-            "levelAbsoluteError" => level_absolute_error,
-            "status" => status
-          } = battery_slot_info
-
-          %BatterySlot{
-            slot: battery_slot,
-            level_percentage: level_percentage,
-            level_absolute_error: level_absolute_error,
-            status: status
-          }
+        |> Enum.map(fn
+          {label, [battery_slot]} -> parse_battery_slot(label, battery_slot)
+          # TODO: handle value as single object too, as a workaround for the issue:
+          # https://github.com/astarte-platform/astarte/issues/707
+          {label, battery_slot} -> parse_battery_slot(label, battery_slot)
         end)
 
       {:ok, battery_slots}
     end
+  end
+
+  defp parse_battery_slot(slot_label, battery_slot) when is_binary(slot_label) do
+    %BatterySlot{
+      slot: slot_label,
+      level_percentage: battery_slot["levelPercentage"],
+      level_absolute_error: battery_slot["levelAbsoluteError"],
+      status: battery_slot["status"]
+    }
   end
 end

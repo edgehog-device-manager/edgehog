@@ -40,7 +40,7 @@ defmodule Edgehog.Astarte.Device.BatteryStatusTest do
       {:ok, cluster: cluster, realm: realm, device: device, appengine_client: appengine_client}
     end
 
-    test "get/2 correctly parses battery status data", %{
+    test "get/2 correctly parses battery status data with a single path", %{
       device: device,
       appengine_client: appengine_client
     } do
@@ -53,15 +53,45 @@ defmodule Edgehog.Astarte.Device.BatteryStatusTest do
               "status" => "Charging",
               "timestamp" => "2021-11-30T12:08:57.827Z"
             }
-          ],
-          "slot2" => [
-            %{
-              "levelAbsoluteError" => 100.0,
-              "levelPercentage" => 70.0,
-              "status" => "EitherIdleOrCharging",
-              "timestamp" => "2021-11-30T12:08:57.827Z"
-            }
           ]
+        }
+      }
+
+      mock(fn
+        %{method: :get, url: _api_url} ->
+          json(response)
+      end)
+
+      assert {:ok, battery_slots} = BatteryStatus.get(appengine_client, device.device_id)
+
+      assert battery_slots == [
+               %BatterySlot{
+                 slot: "slot1",
+                 level_percentage: 80.1,
+                 level_absolute_error: 0.1,
+                 status: "Charging"
+               }
+             ]
+    end
+
+    test "get/2 correctly parses battery status data with multiple paths", %{
+      device: device,
+      appengine_client: appengine_client
+    } do
+      response = %{
+        "data" => %{
+          "slot1" => %{
+            "levelAbsoluteError" => 0.1,
+            "levelPercentage" => 80.1,
+            "status" => "Charging",
+            "timestamp" => "2021-11-30T12:08:57.827Z"
+          },
+          "slot2" => %{
+            "levelAbsoluteError" => 100.0,
+            "levelPercentage" => 70.0,
+            "status" => "EitherIdleOrCharging",
+            "timestamp" => "2021-11-30T12:08:57.827Z"
+          }
         }
       }
 
