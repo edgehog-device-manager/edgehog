@@ -25,7 +25,7 @@ below in the guide.*
 - The `jq` utility installed in the system
 - (Optional) A Google Geolocation API Key
 - (Optional) A Google Geocoding API Key
-- (Optional) A FreeGeoIP API Key
+- (Optional) An ipbase.com API Key
 
 The guide does not cover in detail how Edgehog is exposed to the internet, since administrators are
 free to use their favorite Ingress Controller to achieve that. An example Ingress using the NGINX
@@ -206,19 +206,19 @@ $ kubectl create secret generic -n edgehog edgehog-google-geocoding-credentials 
 Values to be replaced
 - `API-KEY`: the Google Geocoding API Key obtained from GCP.
 
-#### FreeGeoIP API Key (optional)
+#### ipbase.com API Key (optional)
 
-Register an account at [FreeGeoIP](https://freegeoip.app/) to obtain an API key.
+Register an account at [ipbase.com](https://ipbase.com/) to obtain an API key.
 
 After that, create the secret containing the API key with:
 
 ```bash
-$ kubectl create secret generic -n edgehog edgehog-freegeoip-credentials \
+$ kubectl create secret generic -n edgehog edgehog-ipbase-credentials \
   --from-literal="api-key=<API-KEY>"
 ```
 
 Values to be replaced
-- `API-KEY`: the API Key obtained from FreeGeoIP.
+- `API-KEY`: the API Key obtained from ipbase.com.
 
 ### Deployments
 
@@ -280,13 +280,13 @@ spec:
               key: secret-key-base
               name: edgehog-secret-key-base
 
-        # Uncomment this env if you have installed an optional FreeGeoIP API Key in the secrets
+        # Uncomment this env if you have installed an optional ipbase.com API Key in the secrets
         #
-        #- name: FREEGEOIP_API_KEY
+        #- name: IPBASE_API_KEY
         #  valueFrom:
         #    secretKeyRef:
         #      key: api-key
-        #      name: edgehog-freegeoip-credential
+        #      name: edgehog-ipbase-credential
 
         # Uncomment this env if you have installed an optional Google Geolocation API Key in the
         # secrets

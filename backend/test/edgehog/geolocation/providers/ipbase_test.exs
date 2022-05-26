@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Geolocation.Providers.FreeGeoIpTest do
+defmodule Edgehog.Geolocation.Providers.IPBaseTest do
   use Edgehog.DataCase
   use Edgehog.AstarteMockCase
 
@@ -26,7 +26,7 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIpTest do
   import Tesla.Mock
   alias Edgehog.Astarte.Device.DeviceStatus
   alias Edgehog.Geolocation.Position
-  alias Edgehog.Geolocation.Providers.FreeGeoIp
+  alias Edgehog.Geolocation.Providers.IPBase
 
   describe "ip_geolocation" do
     setup do
@@ -49,13 +49,17 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIpTest do
          }}
       end)
 
-      assert FreeGeoIp.geolocate(device) == {:error, :position_not_found}
+      assert IPBase.geolocate(device) == {:error, :position_not_found}
     end
 
     test "geolocate/1 returns position from IP address", %{device: device} do
       response = %{
-        "latitude" => 45.4019498,
-        "longitude" => 11.8706081
+        "data" => %{
+          "location" => %{
+            "latitude" => 45.4019498,
+            "longitude" => 11.8706081
+          }
+        }
       }
 
       mock(fn
@@ -63,11 +67,11 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIpTest do
           json(response)
       end)
 
-      assert {:ok, position} = FreeGeoIp.geolocate(device)
+      assert {:ok, position} = IPBase.geolocate(device)
       assert %Position{accuracy: nil, latitude: 45.4019498, longitude: 11.8706081} = position
     end
 
-    test "geolocate/1 returns error without results from FreeGeoIp", %{device: device} do
+    test "geolocate/1 returns error without results from IPBase", %{device: device} do
       response = %{
         "garbage" => "error"
       }
@@ -77,7 +81,7 @@ defmodule Edgehog.Geolocation.Providers.FreeGeoIpTest do
           json(response)
       end)
 
-      assert FreeGeoIp.geolocate(device) == {:error, :position_not_found}
+      assert IPBase.geolocate(device) == {:error, :position_not_found}
     end
   end
 end
