@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021,2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
           "ap" => [
             %{
               "channel" => 11,
+              "connected" => false,
               "essid" => nil,
               "macAddress" => "01:23:45:67:89:ab",
               "rssi" => -43,
@@ -55,6 +56,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
             },
             %{
               "channel" => 12,
+              "connected" => true,
               "essid" => "My WiFi",
               "macAddress" => "11:22:33:44:55:66",
               "rssi" => -32,
@@ -65,7 +67,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
               "essid" => "Old WiFi",
               "macAddress" => "aa:bb:cc:ee:dd:ff",
               "rssi" => -40,
-              "timestamp" => "2021-11-14 11:44:57.432516Z"
+              "timestamp" => "2021-11-14 10:44:57.432516Z"
             }
           ]
         }
@@ -81,6 +83,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
       assert wifi_scan_results == [
                %WiFiScanResult{
                  channel: 11,
+                 connected: false,
                  essid: nil,
                  mac_address: "01:23:45:67:89:ab",
                  rssi: -43,
@@ -88,6 +91,7 @@ defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
                },
                %WiFiScanResult{
                  channel: 12,
+                 connected: true,
                  essid: "My WiFi",
                  mac_address: "11:22:33:44:55:66",
                  rssi: -32,
@@ -95,10 +99,11 @@ defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
                },
                %WiFiScanResult{
                  channel: 4,
+                 connected: nil,
                  essid: "Old WiFi",
                  mac_address: "aa:bb:cc:ee:dd:ff",
                  rssi: -40,
-                 timestamp: ~U[2021-11-14 11:44:57.432516Z]
+                 timestamp: ~U[2021-11-14 10:44:57.432516Z]
                }
              ]
     end

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,19 +19,38 @@
 */
 
 import { FormattedDate, FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay";
 
+import type {
+  WiFiScanResultsTable_wifiScanResults$data,
+  WiFiScanResultsTable_wifiScanResults$key,
+} from "api/__generated__/WiFiScanResultsTable_wifiScanResults.graphql";
+
+import Result from "components/Result";
 import Table from "components/Table";
-import type { Column } from "components/Table";
+import type { Column, Row } from "components/Table";
 
-type WiFiScanResultProps = {
-  channel: number | null;
-  essid: string | null;
-  macAddress: string | null;
-  rssi: number | null;
-  timestamp: string;
-};
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const WIFI_SCAN_RESULTS_TABLE_FRAGMENT = graphql`
+  fragment WiFiScanResultsTable_wifiScanResults on Device {
+    wifiScanResults {
+      channel
+      connected
+      essid
+      macAddress
+      rssi
+      timestamp
+    }
+  }
+`;
 
-const columns: Column<WiFiScanResultProps>[] = [
+type TableRecord = Omit<
+  NonNullable<WiFiScanResultsTable_wifiScanResults$data["wifiScanResults"]>[0],
+  "timestamp"
+> & { readonly seenAt: Date };
+
+const columns: Column<TableRecord>[] = [
   {
     accessor: "essid",
     Header: (
@@ -70,7 +89,7 @@ const columns: Column<WiFiScanResultProps>[] = [
     Cell: ({ value }) => (value ? `${value} dBm` : ""),
   },
   {
-    accessor: "timestamp",
+    accessor: "seenAt",
     Header: (
       <FormattedMessage
         id="components.WiFiScanResultsTable.seenAtTitle"
@@ -79,7 +98,7 @@ const columns: Column<WiFiScanResultProps>[] = [
     ),
     Cell: ({ value }) => (
       <FormattedDate
-        value={new Date(value)}
+        value={value}
         year="numeric"
         month="long"
         day="numeric"
@@ -90,15 +109,65 @@ const columns: Column<WiFiScanResultProps>[] = [
   },
 ];
 
-interface Props {
-  className?: string;
-  data: WiFiScanResultProps[];
-}
-
-const WiFiScanResultsTable = ({ className, data }: Props) => {
-  return <Table className={className} columns={columns} data={data} />;
+const getRowProps = (row: Row<TableRecord>) => {
+  return row.original.connected ? { className: "fw-bold" } : {};
 };
 
-export type { WiFiScanResultProps };
+interface Props {
+  className?: string;
+  deviceRef: WiFiScanResultsTable_wifiScanResults$key;
+}
+
+const WiFiScanResultsTable = ({ className, deviceRef }: Props) => {
+  const data = useFragment(WIFI_SCAN_RESULTS_TABLE_FRAGMENT, deviceRef);
+
+  if (!data.wifiScanResults || !data.wifiScanResults.length) {
+    return (
+      <Result.EmptyList
+        title={
+          <FormattedMessage
+            id="pages.Device.wifiScanResultsTab.noResults.title"
+            defaultMessage="No results"
+          />
+        }
+      >
+        <FormattedMessage
+          id="pages.Device.wifiScanResultsTab.noResults.message"
+          defaultMessage="The device has not detected any WiFi AP yet."
+        />
+      </Result.EmptyList>
+    );
+  }
+
+  let connectedFound = false;
+  const wifiScanResults = data.wifiScanResults
+    .map((scanResult) => {
+      const { timestamp, ...rest } = scanResult;
+      return {
+        ...rest,
+        seenAt: new Date(timestamp),
+      };
+    })
+    .sort((scan1, scan2) => scan2.seenAt.getDate() - scan1.seenAt.getDate())
+    .map((scanResult) => {
+      if (!connectedFound && scanResult.connected) {
+        connectedFound = true;
+        return scanResult;
+      }
+      return {
+        ...scanResult,
+        connected: false,
+      };
+    });
+
+  return (
+    <Table
+      className={className}
+      columns={columns}
+      data={wifiScanResults}
+      getRowProps={getRowProps}
+    />
+  );
+};
 
 export default WiFiScanResultsTable;

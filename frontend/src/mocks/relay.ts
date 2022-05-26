@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021,2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -44,6 +44,20 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       deviceId: "DqL4H107S42WBEHmDrvPLQ",
       id: "1",
       name: "Thingie",
+      capabilities: [
+        "HARDWARE_INFO",
+        "BASE_IMAGE",
+        "OPERATING_SYSTEM",
+        "RUNTIME_INFO",
+        "STORAGE",
+        "GEOLOCATION",
+        "SYSTEM_STATUS",
+        "WIFI",
+        "BATTERY_STATUS",
+        "SOFTWARE_UPDATES",
+        "CELLULAR_CONNECTION",
+        "LED_BEHAVIORS",
+      ],
     };
   },
   HardwareInfo() {
@@ -129,6 +143,7 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
   WifiScanResult() {
     return {
       channel: 1,
+      connected: true,
       essid: "MyWifi",
       macAddress: "00:11:22:33:44:55",
       rssi: -50,

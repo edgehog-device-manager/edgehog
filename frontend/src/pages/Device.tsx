@@ -150,13 +150,7 @@ const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`
 const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
   fragment Device_wifiScanResults on Device {
     capabilities
-    wifiScanResults {
-      channel
-      essid
-      macAddress
-      rssi
-      timestamp
-    }
+    ...WiFiScanResultsTable_wifiScanResults
   }
 `;
 
@@ -863,17 +857,11 @@ const DeviceWiFiScanResultsTab = ({
   deviceRef,
 }: DeviceWiFiScanResultsTabProps) => {
   const intl = useIntl();
-  const { wifiScanResults, capabilities } = useFragment(
-    DEVICE_WIFI_SCAN_RESULTS_FRAGMENT,
-    deviceRef
-  );
-  if (!wifiScanResults || !capabilities.includes("WIFI")) {
+  const device = useFragment(DEVICE_WIFI_SCAN_RESULTS_FRAGMENT, deviceRef);
+  if (!device.capabilities.includes("WIFI")) {
     return null;
   }
-  // TODO: handle readonly type without mapping to mutable type
-  const scanResults = wifiScanResults.map((wifiScanResult) => ({
-    ...wifiScanResult,
-  }));
+
   return (
     <Tab
       eventKey="device-wifi-scan-results-tab"
@@ -883,23 +871,7 @@ const DeviceWiFiScanResultsTab = ({
       })}
     >
       <div className="mt-3">
-        {scanResults.length === 0 ? (
-          <Result.EmptyList
-            title={
-              <FormattedMessage
-                id="pages.Device.wifiScanResultsTab.noResults.title"
-                defaultMessage="No results"
-              />
-            }
-          >
-            <FormattedMessage
-              id="pages.Device.wifiScanResultsTab.noResults.message"
-              defaultMessage="The device has not detected any WiFi AP yet."
-            />
-          </Result.EmptyList>
-        ) : (
-          <WiFiScanResultsTable data={scanResults} />
-        )}
+        <WiFiScanResultsTable deviceRef={device} />
       </div>
     </Tab>
   );
