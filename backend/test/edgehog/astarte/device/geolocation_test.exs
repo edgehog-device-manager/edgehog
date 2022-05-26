@@ -40,7 +40,7 @@ defmodule Edgehog.Astarte.Device.GeolocationTest do
       {:ok, cluster: cluster, realm: realm, device: device, appengine_client: appengine_client}
     end
 
-    test "get/2 correctly parses geolocation data", %{
+    test "get/2 correctly parses geolocation data with a single path", %{
       device: device,
       appengine_client: appengine_client
     } do
@@ -57,19 +57,58 @@ defmodule Edgehog.Astarte.Device.GeolocationTest do
               "speed" => nil,
               "timestamp" => "2021-11-30T10:45:00.575Z"
             }
-          ],
-          "gps2" => [
-            %{
-              "latitude" => 45.4,
-              "longitude" => 11.9,
-              "altitude" => nil,
-              "accuracy" => 50,
-              "altitudeAccuracy" => nil,
-              "heading" => nil,
-              "speed" => nil,
-              "timestamp" => "2021-11-30T10:45:00.575Z"
-            }
           ]
+        }
+      }
+
+      mock(fn
+        %{method: :get, url: _api_url} ->
+          json(response)
+      end)
+
+      assert {:ok, sensors_positions} = Geolocation.get(appengine_client, device.device_id)
+
+      assert sensors_positions == [
+               %SensorPosition{
+                 sensor_id: "gps1",
+                 latitude: 45.4095285,
+                 longitude: 11.8788231,
+                 altitude: nil,
+                 accuracy: 0,
+                 altitude_accuracy: nil,
+                 heading: nil,
+                 speed: nil,
+                 timestamp: ~U[2021-11-30 10:45:00.575Z]
+               }
+             ]
+    end
+
+    test "get/2 correctly parses geolocation data with multiple paths", %{
+      device: device,
+      appengine_client: appengine_client
+    } do
+      response = %{
+        "data" => %{
+          "gps1" => %{
+            "latitude" => 45.4095285,
+            "longitude" => 11.8788231,
+            "altitude" => nil,
+            "accuracy" => 0,
+            "altitudeAccuracy" => nil,
+            "heading" => nil,
+            "speed" => nil,
+            "timestamp" => "2021-11-30T10:45:00.575Z"
+          },
+          "gps2" => %{
+            "latitude" => 45.4,
+            "longitude" => 11.9,
+            "altitude" => nil,
+            "accuracy" => 50,
+            "altitudeAccuracy" => nil,
+            "heading" => nil,
+            "speed" => nil,
+            "timestamp" => "2021-11-30T10:45:00.575Z"
+          }
         }
       }
 
