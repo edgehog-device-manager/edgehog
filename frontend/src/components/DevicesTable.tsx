@@ -31,6 +31,7 @@ import LastSeen from "components/LastSeen";
 import Table from "components/Table";
 import type { Column, Row } from "components/Table";
 import ConnectionStatus from "components/ConnectionStatus";
+import Tag from "components/Tag";
 import { Link, Route } from "Navigation";
 
 const DEVICES_TABLE_FRAGMENT = graphql`
@@ -47,6 +48,7 @@ const DEVICES_TABLE_FRAGMENT = graphql`
         name
       }
     }
+    tags
   }
 `;
 
@@ -136,6 +138,26 @@ const columns: Column<TableRecord>[] = [
       />
     ),
   },
+  {
+    accessor: "tags",
+    disableSortBy: true,
+    Header: (
+      <FormattedMessage
+        id="components.DevicesTable.tagsTitle"
+        defaultMessage="Tags"
+        description="Title for the Tags column of the devices table"
+      />
+    ),
+    Cell: ({ value }) => (
+      <>
+        {value.map((tag) => (
+          <Tag key={tag} className="me-2">
+            {tag}
+          </Tag>
+        ))}
+      </>
+    ),
+  },
 ];
 
 interface Props {
@@ -148,7 +170,7 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
 
   // TODO: handle readonly type without mapping to mutable type
   const devices = useMemo(
-    () => devicesData.map((device) => ({ ...device })),
+    () => devicesData.map((device) => ({ ...device, tags: [...device.tags] })),
     [devicesData]
   );
 
