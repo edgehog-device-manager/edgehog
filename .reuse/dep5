@@ -6,3 +6,7 @@ Source: https://github.com/edgehog-device-manager/edgehog
 Files: doc/images/*
 Copyright: 2021-2022 SECO Mind Srl
 License: Apache-2.0
+
+Files: CHANGELOG.md
+Copyright: 2021-2022 SECO Mind Srl
+License: CC0-1.0
