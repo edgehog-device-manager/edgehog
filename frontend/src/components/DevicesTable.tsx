@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,8 +18,14 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay";
+
+import type {
+  DevicesTable_DeviceFragment$data,
+  DevicesTable_DeviceFragment$key,
+} from "api/__generated__/DevicesTable_DeviceFragment.graphql";
 
 import LastSeen from "components/LastSeen";
 import Table from "components/Table";
@@ -27,22 +33,26 @@ import type { Column, Row } from "components/Table";
 import ConnectionStatus from "components/ConnectionStatus";
 import { Link, Route } from "Navigation";
 
-type DeviceProps = {
-  deviceId: string;
-  id: string;
-  lastConnection: string | null;
-  lastDisconnection: string | null;
-  name: string;
-  online: boolean;
-  systemModel: {
-    name: string;
-    hardwareType: {
-      name: string;
-    };
-  } | null;
-};
+const DEVICES_TABLE_FRAGMENT = graphql`
+  fragment DevicesTable_DeviceFragment on Device @relay(plural: true) {
+    id
+    deviceId
+    lastConnection
+    lastDisconnection
+    name
+    online
+    systemModel {
+      name
+      hardwareType {
+        name
+      }
+    }
+  }
+`;
 
-const columns: Column<DeviceProps>[] = [
+type TableRecord = DevicesTable_DeviceFragment$data[0];
+
+const columns: Column<TableRecord>[] = [
   {
     id: "status",
     accessor: (device) => Boolean(device.online),
@@ -118,7 +128,7 @@ const columns: Column<DeviceProps>[] = [
         description="Title for the Last Seen column of the devices table"
       />
     ),
-    Cell: ({ row }: { row: Row<DeviceProps> }) => (
+    Cell: ({ row }: { row: Row<TableRecord> }) => (
       <LastSeen
         lastConnection={row.original.lastConnection}
         lastDisconnection={row.original.lastDisconnection}
@@ -130,13 +140,19 @@ const columns: Column<DeviceProps>[] = [
 
 interface Props {
   className?: string;
-  data: DeviceProps[];
+  devicesRef: DevicesTable_DeviceFragment$key;
 }
 
-const DevicesTable = ({ className, data }: Props) => {
-  return <Table className={className} columns={columns} data={data} />;
-};
+const DevicesTable = ({ className, devicesRef }: Props) => {
+  const devicesData = useFragment(DEVICES_TABLE_FRAGMENT, devicesRef);
 
-export type { DeviceProps };
+  // TODO: handle readonly type without mapping to mutable type
+  const devices = useMemo(
+    () => devicesData.map((device) => ({ ...device })),
+    [devicesData]
+  );
+
+  return <Table className={className} columns={columns} data={devices} />;
+};
 
 export default DevicesTable;
