@@ -488,6 +488,9 @@ type RootQueryType {
   "Fetches a single system model."
   systemModel("The ID of the system model." id: ID!): SystemModel
 
+  "Fetches the list of all device tags."
+  existingDeviceTags: [String!]!
+
   "Retrieves information about the current tenant"
   tenantInfo: TenantInfo!
 
