@@ -41,6 +41,7 @@ on:
 
 jobs:
   docs:
+    if: github.repository_owner == 'edgehog-device-manager'
     runs-on: ubuntu-20.04
     steps:
     # Checkout the source
