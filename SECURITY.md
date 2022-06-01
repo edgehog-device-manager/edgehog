@@ -10,8 +10,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| < 0.6   | :x:                |
-<!-- TODO: add first supported version: | 0.6.x   | :white_check_mark: | -->
+| < 0.5   | :x:                |
+| 0.5.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
