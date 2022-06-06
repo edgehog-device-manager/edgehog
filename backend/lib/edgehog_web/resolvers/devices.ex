@@ -79,14 +79,14 @@ defmodule EdgehogWeb.Resolvers.Devices do
 
   defp localize_system_model_description(target, %{locale: locale}) do
     # Explicit locale, use that one
-    Devices.preload_localized_descriptions_for_system_model(target, locale)
+    Devices.preload_localized_descriptions_for_system_model(target, [locale])
   end
 
   defp localize_system_model_description(target, %{current_tenant: tenant}) do
     # Fallback
     %{default_locale: default_locale} = tenant
 
-    Devices.preload_localized_descriptions_for_system_model(target, default_locale)
+    Devices.preload_localized_descriptions_for_system_model(target, [default_locale])
   end
 
   def extract_system_model_part_numbers(
@@ -111,7 +111,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
            Devices.create_system_model(hardware_type, attrs) do
       system_model =
         system_model
-        |> Devices.preload_localized_descriptions_for_system_model(default_locale)
+        |> Devices.preload_localized_descriptions_for_system_model([default_locale])
 
       {:ok, %{system_model: system_model}}
     end
@@ -127,12 +127,12 @@ defmodule EdgehogWeb.Resolvers.Devices do
          attrs = wrap_description(attrs),
          system_model =
            system_model
-           |> Devices.preload_localized_descriptions_for_system_model(default_locale),
+           |> Devices.preload_localized_descriptions_for_system_model([default_locale]),
          {:ok, %SystemModel{} = system_model} <-
            Devices.update_system_model(system_model, attrs) do
       system_model =
         system_model
-        |> Devices.preload_localized_descriptions_for_system_model(default_locale)
+        |> Devices.preload_localized_descriptions_for_system_model([default_locale])
 
       {:ok, %{system_model: system_model}}
     end
