@@ -140,9 +140,11 @@ defmodule EdgehogWeb.Resolvers.Devices do
 
   # If it's there, wraps description to descriptions, as {create,update}_system_model expects a list
   defp wrap_description(%{description: description} = attrs) do
+    descriptions = Enum.reject([description], &(is_nil(&1) || String.trim(&1.text) == ""))
+
     attrs
     |> Map.delete(:description)
-    |> Map.put(:descriptions, [description])
+    |> Map.put(:descriptions, descriptions)
   end
 
   defp wrap_description(attrs), do: attrs
