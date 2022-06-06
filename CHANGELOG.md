@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Start using logfmt as logging format.
 
+### Fixed
+- Use the tenant's default locale when managing translated descriptions if the user's locale is not
+available.
+
 ## [0.5.1] - 2022-06-01
 ### Added
 - Add `connected` field to wifi scan result and highlight the latest connected network

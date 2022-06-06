@@ -77,16 +77,9 @@ defmodule EdgehogWeb.Resolvers.Devices do
     {:ok, system_models}
   end
 
-  defp localize_system_model_description(target, %{locale: locale}) do
-    # Explicit locale, use that one
-    Devices.preload_localized_descriptions_for_system_model(target, [locale])
-  end
-
-  defp localize_system_model_description(target, %{current_tenant: tenant}) do
-    # Fallback
-    %{default_locale: default_locale} = tenant
-
-    Devices.preload_localized_descriptions_for_system_model(target, [default_locale])
+  defp localize_system_model_description(target, context) do
+    %{preferred_locales: preferred_locales} = context
+    Devices.preload_localized_descriptions_for_system_model(target, preferred_locales)
   end
 
   def extract_system_model_part_numbers(
@@ -100,7 +93,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
   end
 
   def create_system_model(_parent, %{hardware_type_id: hw_type_id} = attrs, %{
-        context: %{current_tenant: current_tenant}
+        context: %{current_tenant: current_tenant} = context
       }) do
     default_locale = current_tenant.default_locale
 
@@ -109,30 +102,24 @@ defmodule EdgehogWeb.Resolvers.Devices do
          attrs = wrap_description(attrs),
          {:ok, system_model} <-
            Devices.create_system_model(hardware_type, attrs) do
-      system_model =
-        system_model
-        |> Devices.preload_localized_descriptions_for_system_model([default_locale])
+      system_model = localize_system_model_description(system_model, context)
 
       {:ok, %{system_model: system_model}}
     end
   end
 
   def update_system_model(_parent, %{system_model_id: id} = attrs, %{
-        context: %{current_tenant: current_tenant}
+        context: %{current_tenant: current_tenant} = context
       }) do
     default_locale = current_tenant.default_locale
 
     with {:ok, %SystemModel{} = system_model} <- Devices.fetch_system_model(id),
          :ok <- check_description_locale(attrs[:description], default_locale),
          attrs = wrap_description(attrs),
-         system_model =
-           system_model
-           |> Devices.preload_localized_descriptions_for_system_model([default_locale]),
+         system_model = localize_system_model_description(system_model, context),
          {:ok, %SystemModel{} = system_model} <-
            Devices.update_system_model(system_model, attrs) do
-      system_model =
-        system_model
-        |> Devices.preload_localized_descriptions_for_system_model([default_locale])
+      system_model = localize_system_model_description(system_model, context)
 
       {:ok, %{system_model: system_model}}
     end
@@ -160,12 +147,20 @@ defmodule EdgehogWeb.Resolvers.Devices do
 
   defp wrap_description(attrs), do: attrs
 
-  def extract_localized_description(%SystemModel{descriptions: descriptions}, %{}, _context) do
-    # We should always either 0 or 1 description here since the upper layer should take care
-    # of only preloading the localized description.
-    case descriptions do
-      [description] -> {:ok, description}
-      _ -> {:ok, nil}
-    end
+  def extract_localized_description(%SystemModel{descriptions: descriptions}, _args, %{
+        context: %{preferred_locales: preferred_locales}
+      })
+      when is_list(descriptions) do
+    locale_to_index_map =
+      preferred_locales
+      |> Enum.with_index()
+      |> Enum.into(%{})
+
+    description =
+      descriptions
+      |> Enum.sort_by(&Map.get(locale_to_index_map, &1.locale))
+      |> List.first()
+
+    {:ok, description}
   end
 end

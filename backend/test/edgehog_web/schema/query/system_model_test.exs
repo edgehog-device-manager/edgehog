@@ -152,7 +152,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
              } = json_response(conn, 200)
     end
 
-    test "returns empty description for not existing locale", %{
+    test "returns description in the tenant's default locale for non existing locale", %{
       conn: conn,
       api_path: api_path,
       tenant: tenant
@@ -163,6 +163,36 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
       descriptions = [
         %{locale: default_locale, text: "A system model"},
+        %{locale: "it-IT", text: "Un modello di sistema"}
+      ]
+
+      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
+
+      conn =
+        conn
+        |> put_req_header("accept-language", "fr-FR")
+        |> get(api_path, query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "systemModel" => %{
+                   "description" => description
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert %{"locale" => ^default_locale, "text" => "A system model"} = description
+    end
+
+    test "returns no description when both user and tenant's locale are missing", %{
+      conn: conn,
+      api_path: api_path
+    } do
+      hardware_type = hardware_type_fixture()
+
+      descriptions = [
         %{locale: "it-IT", text: "Un modello di sistema"}
       ]
 

@@ -137,7 +137,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       assert system_model["description"]["text"] == "Un modello di sistema"
     end
 
-    test "returns empty description for non existing locale", %{
+    test "returns description in the tenant's default locale for non existing locale", %{
       conn: conn,
       api_path: api_path,
       tenant: tenant
@@ -164,7 +164,36 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
                }
              } = json_response(conn, 200)
 
-      assert system_model["description"] == nil
+      assert %{"locale" => ^default_locale, "text" => "A system model"} =
+               system_model["description"]
+    end
+
+    test "returns no description when both user and tenant's locale are missing", %{
+      conn: conn,
+      api_path: api_path
+    } do
+      hardware_type = hardware_type_fixture()
+
+      descriptions = [
+        %{locale: "it-IT", text: "Un modello di sistema"}
+      ]
+
+      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+
+      conn =
+        conn
+        |> put_req_header("accept-language", "fr-FR")
+        |> get(api_path, query: @query)
+
+      assert %{
+               "data" => %{
+                 "systemModels" => [
+                   %{
+                     "description" => nil
+                   }
+                 ]
+               }
+             } = json_response(conn, 200)
     end
   end
 end
