@@ -30,6 +30,7 @@ defmodule EdgehogWeb.Endpoint do
     signing_salt: "AfvaMYQN"
   ]
 
+  plug PlugHeartbeat, path: "/health"
   plug PromEx.Plug, prom_ex_module: Edgehog.PromEx
 
   # socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
