@@ -97,7 +97,8 @@ defmodule Edgehog.MixProject do
       {:excoveralls, "~> 0.10", only: :test},
       {:dialyxir, "~> 1.0", only: [:dev, :ci], runtime: false},
       {:pretty_log, "~> 0.1"},
-      {:prom_ex, "~> 1.7.1"}
+      {:prom_ex, "~> 1.7.1"},
+      {:plug_heartbeat, "~> 1.0"}
     ]
   end
 
