@@ -52,7 +52,7 @@ config :swoosh, :api_client, false
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:module, :function, :request_id, :tag, :tenant, :realm]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
