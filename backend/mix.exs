@@ -24,7 +24,7 @@ defmodule Edgehog.MixProject do
   def project do
     [
       app: :edgehog,
-      version: "0.5.1",
+      version: "0.5.2",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:gettext] ++ Mix.compilers(),
@@ -95,7 +95,8 @@ defmodule Edgehog.MixProject do
       {:jose, "~> 1.8"},
       {:skogsra, "~> 2.3"},
       {:excoveralls, "~> 0.10", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev, :ci], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev, :ci], runtime: false},
+      {:pretty_log, "~> 0.1"}
     ]
   end
 
