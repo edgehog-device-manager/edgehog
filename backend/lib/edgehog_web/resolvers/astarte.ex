@@ -146,39 +146,41 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   end
 
   def fetch_cellular_connection(%Device{} = device, _args, _context) do
-    with {:ok, modem_properties_list} <- Astarte.fetch_cellular_connection_properties(device) do
-      modem_status_map =
-        case Astarte.fetch_cellular_connection_status(device) do
-          {:ok, modem_status_list} ->
-            Map.new(modem_status_list, &{&1.slot, &1})
+    case Astarte.fetch_cellular_connection_properties(device) do
+      {:ok, modem_properties_list} ->
+        modem_status_map =
+          case Astarte.fetch_cellular_connection_status(device) do
+            {:ok, modem_status_list} ->
+              Map.new(modem_status_list, &{&1.slot, &1})
 
-          _ ->
-            %{}
-        end
+            _ ->
+              %{}
+          end
 
-      cellular_connection =
-        Enum.map(modem_properties_list, fn modem_properties ->
-          modem_status = Map.get(modem_status_map, modem_properties.slot, %{})
+        cellular_connection =
+          Enum.map(modem_properties_list, fn modem_properties ->
+            modem_status = Map.get(modem_status_map, modem_properties.slot, %{})
 
-          %{
-            slot: modem_properties.slot,
-            apn: modem_properties.apn,
-            imei: modem_properties.imei,
-            imsi: modem_properties.imsi,
-            carrier: Map.get(modem_status, :carrier),
-            cell_id: Map.get(modem_status, :cell_id),
-            mobile_country_code: Map.get(modem_status, :mobile_country_code),
-            mobile_network_code: Map.get(modem_status, :mobile_network_code),
-            local_area_code: Map.get(modem_status, :local_area_code),
-            registration_status: Map.get(modem_status, :registration_status),
-            rssi: Map.get(modem_status, :rssi),
-            technology: Map.get(modem_status, :technology)
-          }
-        end)
+            %{
+              slot: modem_properties.slot,
+              apn: modem_properties.apn,
+              imei: modem_properties.imei,
+              imsi: modem_properties.imsi,
+              carrier: Map.get(modem_status, :carrier),
+              cell_id: Map.get(modem_status, :cell_id),
+              mobile_country_code: Map.get(modem_status, :mobile_country_code),
+              mobile_network_code: Map.get(modem_status, :mobile_network_code),
+              local_area_code: Map.get(modem_status, :local_area_code),
+              registration_status: Map.get(modem_status, :registration_status),
+              rssi: Map.get(modem_status, :rssi),
+              technology: Map.get(modem_status, :technology)
+            }
+          end)
 
-      {:ok, cellular_connection}
-    else
-      _ -> {:ok, nil}
+        {:ok, cellular_connection}
+
+      _ ->
+        {:ok, nil}
     end
   end
 
