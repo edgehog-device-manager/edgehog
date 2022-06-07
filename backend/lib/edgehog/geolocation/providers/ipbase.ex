@@ -81,8 +81,7 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
 
       address =
         [city, zip, region, country]
-        |> Enum.reject(&is_nil/1)
-        |> Enum.reject(&(&1 == ""))
+        |> Enum.reject(&(is_nil(&1) or &1 == ""))
         |> Enum.join(", ")
 
       location = %{
