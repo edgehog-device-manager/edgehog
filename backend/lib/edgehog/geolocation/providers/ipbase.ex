@@ -63,9 +63,8 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
 
   defp geolocate_ip(ip_address) do
     with {:ok, api_key} <- Config.ipbase_api_key(),
-         {:ok, %{body: body}} <- get("", query: [apikey: api_key, ip: ip_address]),
-         {:ok, location} <- parse_response_body(body) do
-      {:ok, location}
+         {:ok, %{body: body}} <- get("", query: [apikey: api_key, ip: ip_address]) do
+      parse_response_body(body)
     end
   end
 
