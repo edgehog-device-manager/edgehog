@@ -248,7 +248,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     @desc "The current status of the battery."
     field :status, :battery_status do
-      resolve &Resolvers.Astarte.battery_status_to_enum/3
+      resolve &Resolvers.Astarte.resolve_battery_status/3
       middleware Middleware.ErrorHandler
     end
   end
@@ -315,7 +315,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :local_area_code, :integer
     @desc "The current registration status of the modem."
     field :registration_status, :modem_registration_status do
-      resolve &Resolvers.Astarte.modem_registration_status_to_enum/3
+      resolve &Resolvers.Astarte.resolve_modem_registration_status/3
       middleware Middleware.ErrorHandler
     end
 
@@ -324,7 +324,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     @desc "Access Technology"
     field :technology, :modem_technology do
-      resolve &Resolvers.Astarte.modem_technology_to_enum/3
+      resolve &Resolvers.Astarte.resolve_modem_technology/3
       middleware Middleware.ErrorHandler
     end
   end
