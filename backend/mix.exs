@@ -84,7 +84,7 @@ defmodule Edgehog.MixProject do
       {:x509, "~> 0.8"},
       {:mox, "~> 1.0"},
       {:tesla, "~> 1.4"},
-      {:finch, "~> 0.9"},
+      {:finch, "~> 0.12", override: true},
       {:waffle, "~> 1.1"},
       {:ex_aws, "~> 2.2"},
       {:ex_aws_s3, "~> 2.0"},
@@ -96,7 +96,8 @@ defmodule Edgehog.MixProject do
       {:skogsra, "~> 2.3"},
       {:excoveralls, "~> 0.10", only: :test},
       {:dialyxir, "~> 1.0", only: [:dev, :ci], runtime: false},
-      {:pretty_log, "~> 0.1"}
+      {:pretty_log, "~> 0.1"},
+      {:prom_ex, "~> 1.7.1"}
     ]
   end
 
