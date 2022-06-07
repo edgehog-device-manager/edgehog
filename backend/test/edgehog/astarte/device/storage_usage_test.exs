@@ -64,7 +64,7 @@ defmodule Edgehog.Astarte.Device.StorageUsageTest do
       assert {:ok, storage_units} = StorageUsage.get(appengine_client, device.device_id)
 
       assert storage_units == [
-               %StorageUnit{free_bytes: 7000, label: "nvs1", total_bytes: 16128}
+               %StorageUnit{free_bytes: 7000, label: "nvs1", total_bytes: 16_128}
              ]
     end
 
@@ -95,7 +95,7 @@ defmodule Edgehog.Astarte.Device.StorageUsageTest do
       assert {:ok, storage_units} = StorageUsage.get(appengine_client, device.device_id)
 
       assert storage_units == [
-               %StorageUnit{free_bytes: 7000, label: "nvs1", total_bytes: 16128},
+               %StorageUnit{free_bytes: 7000, label: "nvs1", total_bytes: 16_128},
                %StorageUnit{free_bytes: 5000, label: "nvs2", total_bytes: 8064}
              ]
     end

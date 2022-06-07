@@ -151,7 +151,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                  cell_id: 170_402_199,
                  mobile_country_code: 310,
                  mobile_network_code: 410,
-                 local_area_code: 35632,
+                 local_area_code: 35_632,
                  registration_status: "Registered",
                  rssi: -60,
                  technology: "GSM"
