@@ -25,14 +25,13 @@ defmodule Edgehog.Devices do
 
   import Ecto.Query, warn: false
   alias Ecto.Multi
-  alias Edgehog.Repo
-
+  alias Edgehog.Assets
+  alias Edgehog.Devices.HardwareType
+  alias Edgehog.Devices.HardwareTypePartNumber
   alias Edgehog.Devices.SystemModel
   alias Edgehog.Devices.SystemModelDescription
   alias Edgehog.Devices.SystemModelPartNumber
-  alias Edgehog.Devices.HardwareType
-  alias Edgehog.Devices.HardwareTypePartNumber
-  alias Edgehog.Assets
+  alias Edgehog.Repo
 
   @doc """
   Returns the list of hardware_types.

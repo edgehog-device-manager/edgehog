@@ -21,9 +21,9 @@
 defmodule Edgehog.Astarte.Device.GeolocationTest do
   use Edgehog.DataCase
 
+  alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.Geolocation
   alias Edgehog.Astarte.Device.Geolocation.SensorPosition
-  alias Astarte.Client.AppEngine
 
   describe "geolocation" do
     import Edgehog.AstarteFixtures

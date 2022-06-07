@@ -21,9 +21,9 @@
 defmodule Edgehog.Astarte.Device.StorageUsageTest do
   use Edgehog.DataCase
 
+  alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.StorageUsage
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-  alias Astarte.Client.AppEngine
 
   describe "storage_usage" do
     import Edgehog.AstarteFixtures

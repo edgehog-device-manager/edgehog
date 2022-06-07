@@ -19,10 +19,10 @@
 #
 
 defmodule EdgehogWeb.Resolvers.Astarte do
-  alias Edgehog.Devices
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
+  alias Edgehog.Devices
   alias Edgehog.Geolocation
 
   def find_device(%{id: id}, %{context: context}) do
