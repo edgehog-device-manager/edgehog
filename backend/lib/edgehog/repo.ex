@@ -31,7 +31,7 @@ defmodule Edgehog.Repo do
     Process.put(@tenant_key, tenant_id)
   end
 
-  def get_tenant_id() do
+  def get_tenant_id do
     Process.get(@tenant_key)
   end
 

@@ -28,9 +28,8 @@ defmodule Edgehog.Astarte.Device.Geolocation do
 
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1),
-         {:ok, sensors_positions} <- parse_data(data) do
-      {:ok, sensors_positions}
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1) do
+      parse_data(data)
     end
   end
 

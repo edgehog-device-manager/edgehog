@@ -21,9 +21,9 @@
 defmodule Edgehog.Astarte.Device.BatteryStatusTest do
   use Edgehog.DataCase
 
+  alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.BatteryStatus
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
-  alias Astarte.Client.AppEngine
 
   describe "battery_status" do
     import Edgehog.AstarteFixtures

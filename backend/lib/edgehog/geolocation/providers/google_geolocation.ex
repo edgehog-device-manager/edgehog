@@ -35,9 +35,8 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   @impl Edgehog.Geolocation.GeolocationProvider
   def geolocate(%Device{} = device) do
     with {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(device),
-         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(wifi_scan_results),
-         {:ok, position} <- geolocate_wifi(wifi_scan_results) do
-      {:ok, position}
+         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(wifi_scan_results) do
+      geolocate_wifi(wifi_scan_results)
     end
   end
 

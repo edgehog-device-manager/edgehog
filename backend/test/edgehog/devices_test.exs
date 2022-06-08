@@ -108,8 +108,8 @@ defmodule Edgehog.DevicesTest do
 
   describe "system_models" do
     alias Edgehog.Devices.SystemModel
-    alias Edgehog.Devices.SystemModelPartNumber
     alias Edgehog.Devices.SystemModelDescription
+    alias Edgehog.Devices.SystemModelPartNumber
 
     import Edgehog.AstarteFixtures
     import Edgehog.DevicesFixtures

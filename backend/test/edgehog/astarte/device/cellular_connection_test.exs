@@ -70,7 +70,7 @@ defmodule Edgehog.Astarte.Device.CellularConnectionTest do
     "cellId" => "170402199",
     "mobileCountryCode" => 310,
     "mobileNetworkCode" => 410,
-    "localAreaCode" => 35632,
+    "localAreaCode" => 35_632,
     "registrationStatus" => "Registered",
     "rssi" => -60,
     "technology" => "GSM",
@@ -82,7 +82,7 @@ defmodule Edgehog.Astarte.Device.CellularConnectionTest do
     cell_id: 170_402_199,
     mobile_country_code: 310,
     mobile_network_code: 410,
-    local_area_code: 35632,
+    local_area_code: 35_632,
     registration_status: "Registered",
     rssi: -60,
     technology: "GSM"

@@ -29,9 +29,8 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocation do
   @impl Edgehog.Geolocation.GeolocationProvider
   def geolocate(%Device{} = device) do
     with {:ok, sensors_positions} <- Astarte.fetch_geolocation(device),
-         {:ok, sensors_positions} <- filter_latest_sensors_positions(sensors_positions),
-         {:ok, position} <- geolocate_sensors(sensors_positions) do
-      {:ok, position}
+         {:ok, sensors_positions} <- filter_latest_sensors_positions(sensors_positions) do
+      geolocate_sensors(sensors_positions)
     end
   end
 
