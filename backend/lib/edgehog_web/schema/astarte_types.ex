@@ -82,6 +82,13 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     the name of the device's hardware type.
     """
     field :hardware_type_name, :string
+
+    @desc """
+    A string to match against the tags of the device.
+    The match is case-insensitive and tests whether the string is included in \
+    one of the tags of the device.
+    """
+    field :tag, :string
   end
 
   @desc """
@@ -409,6 +416,11 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The system model of the device."
     field :system_model, :system_model
 
+    @desc "The tags of the device"
+    field :tags, non_null(list_of(non_null(:string))) do
+      resolve &Resolvers.Devices.extract_device_tags/3
+    end
+
     @desc "List of capabilities supported by the device."
     field :capabilities, non_null(list_of(non_null(:device_capability))) do
       resolve &Resolvers.Astarte.list_device_capabilities/3
@@ -538,6 +550,9 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
         @desc "The display name of the device."
         field :name, :string
+
+        @desc "The tags of the device. These replace all the current tags."
+        field :tags, list_of(non_null(:string))
       end
 
       output do

@@ -26,6 +26,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
   import Edgehog.AstarteFixtures
   import Edgehog.OSManagementFixtures
 
+  alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
 
   describe "device query" do
@@ -143,6 +144,32 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert decoded_id == ota_operation.id
       assert operation["status"] == "PENDING"
+    end
+
+    @query """
+    query ($id: ID!) {
+      device(id: $id) {
+        tags
+      }
+    }
+    """
+
+    test "returns the tags", %{conn: conn, api_path: api_path, realm: realm} do
+      {:ok, %Device{id: id}} =
+        device_fixture(realm)
+        |> Astarte.update_device(%{tags: ["foo", "bar"]})
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, api_path, query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => device
+               }
+             } = json_response(conn, 200)
+
+      assert device["tags"] == ["foo", "bar"]
     end
   end
 end

@@ -32,6 +32,7 @@ defmodule Edgehog.Devices do
   alias Edgehog.Devices.SystemModelPartNumber
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.HardwareTypePartNumber
+  alias Edgehog.Devices.Tag
   alias Edgehog.Assets
 
   @doc """
@@ -419,5 +420,57 @@ defmodule Edgehog.Devices do
   """
   def change_system_model(%SystemModel{} = system_model, attrs \\ %{}) do
     SystemModel.changeset(system_model, attrs)
+  end
+
+  @doc """
+  Inserts the tags passed in attrs within a multi transaction, normalizing them.
+
+  Returns the updated `%Ecto.Multi{}`.
+  """
+  def ensure_tags_exist_multi(multi, %{tags: _tags} = attrs) do
+    multi
+    |> Multi.run(:cast_tags, fn _repo, _changes ->
+      data = %{}
+      types = %{tags: {:array, :string}}
+
+      changeset =
+        {data, types}
+        |> Ecto.Changeset.cast(attrs, Map.keys(types))
+
+      with {:ok, %{tags: tags}} <- Ecto.Changeset.apply_action(changeset, :insert) do
+        tenant_id = Repo.get_tenant_id()
+
+        now =
+          NaiveDateTime.utc_now()
+          |> NaiveDateTime.truncate(:second)
+
+        tag_maps =
+          for tag <- tags,
+              tag = normalize_tag(tag),
+              tag != "" do
+            %{name: tag, inserted_at: now, updated_at: now, tenant_id: tenant_id}
+          end
+
+        {:ok, tag_maps}
+      end
+    end)
+    |> Multi.insert_all(:insert_tags, Tag, & &1.cast_tags, on_conflict: :nothing)
+    |> Multi.run(:ensure_tags_exist, fn repo, %{cast_tags: tag_maps} ->
+      tag_names = for t <- tag_maps, do: t.name
+      {:ok, repo.all(from t in Tag, where: t.name in ^tag_names)}
+    end)
+  end
+
+  def ensure_tags_exist_multi(multi, _attrs) do
+    # No tags in the update, so we return nil for tags
+    Multi.run(multi, :ensure_tags_exist, fn _repo, _previous ->
+      {:ok, nil}
+    end)
+  end
+
+  defp normalize_tag(tag) do
+    tag
+    |> String.trim()
+    |> String.downcase()
   end
 end

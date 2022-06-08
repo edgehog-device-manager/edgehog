@@ -41,6 +41,7 @@ defmodule Edgehog.Astarte.Device do
       type: :string
 
     has_one :system_model, through: [:system_model_part_number, :system_model]
+    many_to_many :tags, Devices.Tag, join_through: Devices.DeviceTag, on_replace: :delete
 
     timestamps()
   end

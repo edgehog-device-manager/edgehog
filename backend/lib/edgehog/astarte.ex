@@ -27,9 +27,11 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Repo
 
   alias Astarte.Client.AppEngine
+  alias Ecto.Multi
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.InterfaceID
   alias Edgehog.Astarte.InterfaceVersion
+  alias Edgehog.Devices
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
@@ -376,6 +378,7 @@ defmodule Edgehog.Astarte do
     filters
     |> Enum.reduce(Device, &filter_with/2)
     |> Repo.all()
+    |> Repo.preload(:tags)
   end
 
   defp filter_with(filter, query) do
@@ -411,6 +414,20 @@ defmodule Edgehog.Astarte do
       {:hardware_type_name, name} ->
         from [hardware_type: ht] in ensure_hardware_type(query),
           where: ilike(ht.name, ^"%#{name}%")
+
+      {:tag, tag} ->
+        # Need to filter tenant explicitly since prepare_query is not executed for subqueries
+        tenant_id = Repo.get_tenant_id()
+
+        device_ids_matching_tag =
+          from t in Devices.Tag,
+            where: ilike(t.name, ^"%#{tag}%") and t.tenant_id == ^tenant_id,
+            join: dt in Devices.DeviceTag,
+            on: t.id == dt.tag_id,
+            select: dt.device_id
+
+        from q in query,
+          where: q.id in subquery(device_ids_matching_tag)
     end
   end
 
@@ -470,6 +487,7 @@ defmodule Edgehog.Astarte do
   """
   def get_device!(id) do
     Repo.get!(Device, id)
+    |> Repo.preload(:tags)
   end
 
   @doc """
@@ -485,9 +503,13 @@ defmodule Edgehog.Astarte do
 
   """
   def create_device(%Realm{} = realm, attrs \\ %{}) do
-    %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
-    |> Device.changeset(attrs)
-    |> Repo.insert()
+    changeset =
+      %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
+      |> Device.changeset(attrs)
+
+    with {:ok, device} <- Repo.insert(changeset) do
+      {:ok, Repo.preload(device, :tags)}
+    end
   end
 
   @doc """
@@ -518,9 +540,26 @@ defmodule Edgehog.Astarte do
 
   """
   def update_device(%Device{} = device, attrs) do
-    device
-    |> Device.update_changeset(attrs)
-    |> Repo.update()
+    Multi.new()
+    |> Devices.ensure_tags_exist_multi(attrs)
+    |> Multi.update(:update_device, fn
+      %{ensure_tags_exist: nil} ->
+        device
+        |> Device.update_changeset(attrs)
+
+      %{ensure_tags_exist: tags} when is_list(tags) ->
+        device
+        |> Device.update_changeset(attrs)
+        |> Ecto.Changeset.put_assoc(:tags, tags)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{update_device: device}} ->
+        {:ok, Repo.preload(device, :tags)}
+
+      {:error, _failed_operation, failed_value, _progress_so_far} ->
+        {:error, failed_value}
+    end
   end
 
   @doc """
@@ -566,7 +605,7 @@ defmodule Edgehog.Astarte do
   """
   def fetch_realm_device(%Realm{id: realm_id}, device_id) do
     case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
-      %Device{} = device -> {:ok, device}
+      %Device{} = device -> {:ok, Repo.preload(device, :tags)}
       nil -> {:error, :device_not_found}
     end
   end

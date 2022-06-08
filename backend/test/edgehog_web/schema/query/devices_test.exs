@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
   import Edgehog.DevicesFixtures
   import Edgehog.AstarteFixtures
 
+  alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
 
   describe "systemModels field" do
@@ -94,6 +95,37 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       _device_2 = device_fixture(realm, device_id: "1YmkqsFfSuWDZcYV3ceoBQ", online: false)
 
       variables = %{filter: %{online: true}}
+
+      conn = post(conn, api_path, query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "devices" => [device]
+               }
+             } = json_response(conn, 200)
+
+      assert device["name"] == name
+      assert device["deviceId"] == device_id
+      assert device["online"] == online
+    end
+
+    test "filters devices with tag", %{
+      conn: conn,
+      api_path: api_path,
+      realm: realm
+    } do
+      {:ok,
+       %Device{
+         name: name,
+         device_id: device_id,
+         online: online
+       }} =
+        device_fixture(realm, device_id: "INyxlnmUT3CEJHPAwWMi0A")
+        |> Astarte.update_device(%{tags: ["foobar"]})
+
+      _device_2 = device_fixture(realm, device_id: "1YmkqsFfSuWDZcYV3ceoBQ")
+
+      variables = %{filter: %{tag: "foo"}}
 
       conn = post(conn, api_path, query: @query, variables: variables)
 
