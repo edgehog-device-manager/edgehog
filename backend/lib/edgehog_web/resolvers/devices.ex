@@ -21,8 +21,10 @@
 defmodule EdgehogWeb.Resolvers.Devices do
   alias Edgehog.Astarte
   alias Edgehog.Devices
+  alias Edgehog.Devices.Attribute
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
+  alias EdgehogWeb.Schema.VariantTypes
 
   def find_hardware_type(%{id: id}, _resolution) do
     Devices.fetch_hardware_type(id)
@@ -173,5 +175,14 @@ defmodule EdgehogWeb.Resolvers.Devices do
   def extract_device_tags(%Astarte.Device{tags: tags}, _args, _context) do
     tag_names = for t <- tags, do: t.name
     {:ok, tag_names}
+  end
+
+  def extract_attribute_type(%Attribute{typed_value: typed_value}, _args, _context) do
+    {:ok, typed_value.type}
+  end
+
+  def extract_attribute_value(%Attribute{typed_value: typed_value}, _args, _context) do
+    %Ecto.JSONVariant{type: type, value: value} = typed_value
+    VariantTypes.encode_variant_value(type, value)
   end
 end

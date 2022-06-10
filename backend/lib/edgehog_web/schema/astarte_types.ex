@@ -389,6 +389,29 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     value :wifi
   end
 
+  enum :device_attribute_namespace do
+    @desc "Custom attributes, user defined"
+    value :custom
+  end
+
+  object :device_attribute do
+    @desc "The namespace of the device attribute."
+    field :namespace, non_null(:device_attribute_namespace)
+
+    @desc "The key of the device attribute."
+    field :key, non_null(:string)
+
+    @desc "The type of the device attribute."
+    field :type, non_null(:variant_type) do
+      resolve &Resolvers.Devices.extract_attribute_type/3
+    end
+
+    @desc "The value of the device attribute."
+    field :value, non_null(:variant_value) do
+      resolve &Resolvers.Devices.extract_attribute_value/3
+    end
+  end
+
   @desc """
   Denotes a device instance that connects and exchanges data.
 
@@ -420,6 +443,9 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :tags, non_null(list_of(non_null(:string))) do
       resolve &Resolvers.Devices.extract_device_tags/3
     end
+
+    @desc "The custom attributes of the device. These attributes are user editable."
+    field :custom_attributes, non_null(list_of(non_null(:device_attribute)))
 
     @desc "List of capabilities supported by the device."
     field :capabilities, non_null(list_of(non_null(:device_capability))) do
