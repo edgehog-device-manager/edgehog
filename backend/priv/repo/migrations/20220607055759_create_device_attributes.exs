@@ -22,17 +22,24 @@ defmodule Edgehog.Repo.Migrations.CreateDeviceAttributes do
   use Ecto.Migration
 
   def change do
-    create table(:device_attributes) do
-      add :namespace, :string
-      add :key, :string
-      add :typed_value, :map
-      add :tenant_id, references(:tenants, on_delete: :nothing)
-      add :device_id, references(:devices, on_delete: :nothing)
+    create table(:device_attributes, primary_key: false) do
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false,
+        primary_key: true
+
+      add :device_id,
+          references(:devices, with: [tenant_id: :tenant_id], match: :full, on_delete: :delete_all),
+          null: false,
+          primary_key: true
+
+      add :namespace, :string, null: false, primary_key: true
+      add :key, :string, null: false, primary_key: true
+      add :typed_value, :map, null: false
 
       timestamps()
     end
 
     create index(:device_attributes, [:tenant_id])
-    create index(:device_attributes, [:device_id])
+    create index(:device_attributes, [:device_id, :tenant_id])
   end
 end

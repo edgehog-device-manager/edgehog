@@ -22,12 +22,16 @@ defmodule Edgehog.Devices.Attribute do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key false
   schema "device_attributes" do
-    field :key, :string
-    field :namespace, Ecto.Enum, values: [:custom]
-    field :typed_value, :map
-    field :tenant_id, :id
-    field :device_id, :id
+    field :tenant_id, :integer,
+      autogenerate: {Edgehog.Repo, :get_tenant_id, []},
+      primary_key: true
+
+    field :device_id, :id, primary_key: true
+    field :namespace, Ecto.Enum, values: [:custom], primary_key: true
+    field :key, :string, primary_key: true
+    field :typed_value, Ecto.JSONVariant
 
     timestamps()
   end
@@ -37,5 +41,12 @@ defmodule Edgehog.Devices.Attribute do
     attributes
     |> cast(attrs, [:namespace, :key, :typed_value])
     |> validate_required([:namespace, :key, :typed_value])
+    |> validate_format(:key, ~r/[a-z0-9-_]+/)
+  end
+
+  @doc false
+  def custom_attribute_changeset(attributes, attrs) do
+    changeset(attributes, attrs)
+    |> validate_inclusion(:namespace, [:custom])
   end
 end
