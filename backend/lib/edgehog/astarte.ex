@@ -378,7 +378,7 @@ defmodule Edgehog.Astarte do
     filters
     |> Enum.reduce(Device, &filter_with/2)
     |> Repo.all()
-    |> Repo.preload(:tags)
+    |> Repo.preload([:tags, :custom_attributes])
   end
 
   defp filter_with(filter, query) do
@@ -487,7 +487,7 @@ defmodule Edgehog.Astarte do
   """
   def get_device!(id) do
     Repo.get!(Device, id)
-    |> Repo.preload(:tags)
+    |> Repo.preload([:tags, :custom_attributes])
   end
 
   @doc """
@@ -508,7 +508,7 @@ defmodule Edgehog.Astarte do
       |> Device.changeset(attrs)
 
     with {:ok, device} <- Repo.insert(changeset) do
-      {:ok, Repo.preload(device, :tags)}
+      {:ok, Repo.preload(device, [:tags, :custom_attributes])}
     end
   end
 
@@ -555,7 +555,7 @@ defmodule Edgehog.Astarte do
     |> Repo.transaction()
     |> case do
       {:ok, %{update_device: device}} ->
-        {:ok, Repo.preload(device, :tags)}
+        {:ok, Repo.preload(device, [:tags, :custom_attributes])}
 
       {:error, _failed_operation, failed_value, _progress_so_far} ->
         {:error, failed_value}
@@ -605,7 +605,7 @@ defmodule Edgehog.Astarte do
   """
   def fetch_realm_device(%Realm{id: realm_id}, device_id) do
     case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
-      %Device{} = device -> {:ok, Repo.preload(device, :tags)}
+      %Device{} = device -> {:ok, Repo.preload(device, [:tags, :custom_attributes])}
       nil -> {:error, :device_not_found}
     end
   end

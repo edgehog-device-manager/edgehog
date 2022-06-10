@@ -78,5 +78,6 @@ defmodule Edgehog.Astarte.Device do
       :part_number
     ])
     |> validate_required([:name])
+    |> cast_assoc(:custom_attributes, with: &Devices.Attribute.custom_attribute_changeset/2)
   end
 end
