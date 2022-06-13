@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Add support for device tags ([#191](https://github.com/edgehog-device-manager/edgehog/pull/191))
+- Add support for device custom attributes
+  ([#205](https://github.com/edgehog-device-manager/edgehog/pull/205))
 
 ## [0.5.1] - 2022-06-01
 ### Added
