@@ -92,6 +92,23 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   end
 
   @desc """
+  An input object for a device attribute.
+  """
+  input_object :device_attribute_input do
+    @desc "The namespace of the device attribute."
+    field :namespace, non_null(:device_attribute_namespace)
+
+    @desc "The key of the device attribute."
+    field :key, non_null(:string)
+
+    @desc "The type of the device attribute."
+    field :type, non_null(:variant_type)
+
+    @desc "The value of the device attribute."
+    field :value, non_null(:variant_value)
+  end
+
+  @desc """
   Describes hardware-related info of a device.
 
   It exposes data read by a device's operating system about the underlying \
@@ -579,6 +596,9 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
         @desc "The tags of the device. These replace all the current tags."
         field :tags, list_of(non_null(:string))
+
+        @desc "The custom attributes of the device. These replace all the current custom attributes."
+        field :custom_attributes, list_of(non_null(:device_attribute_input))
       end
 
       output do

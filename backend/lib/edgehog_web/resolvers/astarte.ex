@@ -51,6 +51,7 @@ defmodule EdgehogWeb.Resolvers.Astarte do
 
   def update_device(%{device_id: id} = attrs, %{context: context}) do
     device = Astarte.get_device!(id)
+    attrs = maybe_wrap_typed_values(attrs)
 
     with {:ok, device} <- Astarte.update_device(device, attrs) do
       device = preload_system_model_for_device(device, context)
@@ -247,4 +248,28 @@ defmodule EdgehogWeb.Resolvers.Astarte do
       _ -> {:error, "Unknown led behavior"}
     end
   end
+
+  defp maybe_wrap_typed_values(%{custom_attributes: custom_attributes} = attrs)
+       when is_list(custom_attributes) do
+    wrapped_attributes =
+      Enum.map(custom_attributes, fn attr ->
+        %{
+          namespace: namespace,
+          key: key,
+          type: type,
+          value: value
+        } = attr
+
+        # Wrap type and value under the :typed_value key, as expected by the Ecto schema
+        %{
+          namespace: namespace,
+          key: key,
+          typed_value: %{type: type, value: value}
+        }
+      end)
+
+    %{attrs | custom_attributes: wrapped_attributes}
+  end
+
+  defp maybe_wrap_typed_values(attrs), do: attrs
 end
