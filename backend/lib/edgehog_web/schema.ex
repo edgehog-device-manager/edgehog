@@ -26,6 +26,7 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
   import_types EdgehogWeb.Schema.TenantsTypes
+  import_types EdgehogWeb.Schema.VariantTypes
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 

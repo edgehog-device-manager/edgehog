@@ -171,5 +171,144 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert device["tags"] == ["foo", "bar"]
     end
+
+    @custom_attributes_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        customAttributes {
+          namespace
+          key
+          type
+          value
+        }
+      }
+    }
+    """
+
+    test "returns custom attributes for all types", %{
+      conn: conn,
+      api_path: api_path,
+      realm: realm
+    } do
+      custom_attributes = [
+        %{
+          namespace: :custom,
+          key: "double",
+          typed_value: %{
+            type: :double,
+            value: 42.0
+          }
+        },
+        %{
+          namespace: :custom,
+          key: "integer",
+          typed_value: %{
+            type: :integer,
+            value: 300
+          }
+        },
+        %{
+          namespace: :custom,
+          key: "boolean",
+          typed_value: %{
+            type: :boolean,
+            value: true
+          }
+        },
+        %{
+          namespace: :custom,
+          key: "longinteger",
+          typed_value: %{
+            type: :longinteger,
+            value: "1234567890"
+          }
+        },
+        %{
+          namespace: :custom,
+          key: "string",
+          typed_value: %{
+            type: :string,
+            value: "foobar"
+          }
+        },
+        %{
+          namespace: :custom,
+          key: "binaryblob",
+          typed_value: %{
+            type: :binaryblob,
+            value: "ZWRnZWhvZw=="
+          }
+        },
+        %{
+          namespace: :custom,
+          key: "datetime",
+          typed_value: %{
+            type: :datetime,
+            value: "2022-06-10T16:27:41.235243Z"
+          }
+        }
+      ]
+
+      {:ok, %Device{id: id}} =
+        device_fixture(realm)
+        |> Astarte.update_device(%{custom_attributes: custom_attributes})
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, api_path, query: @custom_attributes_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "customAttributes" => custom_attributes
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert custom_attributes == [
+               %{
+                 "key" => "double",
+                 "namespace" => "CUSTOM",
+                 "type" => "DOUBLE",
+                 "value" => 42.0
+               },
+               %{
+                 "key" => "integer",
+                 "namespace" => "CUSTOM",
+                 "type" => "INTEGER",
+                 "value" => 300
+               },
+               %{
+                 "key" => "boolean",
+                 "namespace" => "CUSTOM",
+                 "type" => "BOOLEAN",
+                 "value" => true
+               },
+               %{
+                 "key" => "longinteger",
+                 "namespace" => "CUSTOM",
+                 "type" => "LONGINTEGER",
+                 "value" => "1234567890"
+               },
+               %{
+                 "key" => "string",
+                 "namespace" => "CUSTOM",
+                 "type" => "STRING",
+                 "value" => "foobar"
+               },
+               %{
+                 "key" => "binaryblob",
+                 "namespace" => "CUSTOM",
+                 "type" => "BINARYBLOB",
+                 "value" => "ZWRnZWhvZw=="
+               },
+               %{
+                 "key" => "datetime",
+                 "namespace" => "CUSTOM",
+                 "type" => "DATETIME",
+                 "value" => "2022-06-10T16:27:41.235243Z"
+               }
+             ]
+    end
   end
 end

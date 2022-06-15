@@ -43,6 +43,10 @@ defmodule Edgehog.Astarte.Device do
     has_one :system_model, through: [:system_model_part_number, :system_model]
     many_to_many :tags, Devices.Tag, join_through: Devices.DeviceTag, on_replace: :delete
 
+    has_many :custom_attributes, Devices.Attribute,
+      where: [namespace: "custom"],
+      on_replace: :delete
+
     timestamps()
   end
 
@@ -74,5 +78,6 @@ defmodule Edgehog.Astarte.Device do
       :part_number
     ])
     |> validate_required([:name])
+    |> cast_assoc(:custom_attributes, with: &Devices.Attribute.custom_attribute_changeset/2)
   end
 end

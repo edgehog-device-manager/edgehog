@@ -42,6 +42,12 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
           id
           name
           tags
+          customAttributes {
+            namespace
+            key
+            type
+            value
+          }
         }
       }
     }
@@ -55,7 +61,13 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
         input: %{
           device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
           name: "Some new name",
-          tags: ["foo", "bar", "baz"]
+          tags: ["foo", "bar", "baz"],
+          custom_attributes: %{
+            namespace: "CUSTOM",
+            key: "foo",
+            type: "STRING",
+            value: "bar"
+          }
         }
       }
 
@@ -66,7 +78,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
                  "updateDevice" => %{
                    "device" => %{
                      "name" => "Some new name",
-                     "tags" => ["foo", "bar", "baz"]
+                     "tags" => ["foo", "bar", "baz"],
+                     "customAttributes" => [
+                       %{
+                         "namespace" => "CUSTOM",
+                         "key" => "foo",
+                         "type" => "STRING",
+                         "value" => "bar"
+                       }
+                     ]
                    }
                  }
                }
@@ -92,7 +112,20 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
       api_path: api_path,
       device: device
     } do
-      {:ok, _} = Astarte.update_device(device, %{tags: ["not", "touched"]})
+      {:ok, _} =
+        Astarte.update_device(device, %{
+          tags: ["not", "touched"],
+          custom_attributes: [
+            %{
+              namespace: :custom,
+              key: "string",
+              typed_value: %{
+                type: :string,
+                value: "not touched"
+              }
+            }
+          ]
+        })
 
       variables = %{
         input: %{
@@ -108,7 +141,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
                  "updateDevice" => %{
                    "device" => %{
                      "name" => "Some new name",
-                     "tags" => ["not", "touched"]
+                     "tags" => ["not", "touched"],
+                     "customAttributes" => [
+                       %{
+                         "namespace" => "CUSTOM",
+                         "key" => "string",
+                         "type" => "STRING",
+                         "value" => "not touched"
+                       }
+                     ]
                    }
                  }
                }

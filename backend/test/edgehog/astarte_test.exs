@@ -23,6 +23,7 @@ defmodule Edgehog.AstarteTest do
   use Edgehog.AstarteMockCase
 
   alias Edgehog.Astarte
+  alias Edgehog.Devices
 
   describe "clusters" do
     alias Edgehog.Astarte.Cluster
@@ -473,11 +474,29 @@ defmodule Edgehog.AstarteTest do
 
     test "update_device/2 with valid data updates the device", %{realm: realm} do
       device = device_fixture(realm)
-      update_attrs = %{name: "some updated name", tags: ["some", "tags"]}
+
+      update_attrs = %{
+        name: "some updated name",
+        tags: ["some", "tags"],
+        custom_attributes: [
+          %{
+            "namespace" => "custom",
+            "key" => "some-attribute",
+            "typed_value" => %{"type" => "double", "value" => 42}
+          }
+        ]
+      }
 
       assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
       assert device.name == "some updated name"
       assert ["some", "tags"] == Enum.map(device.tags, & &1.name)
+      assert [custom_attribute] = device.custom_attributes
+
+      assert %Devices.Attribute{
+               namespace: :custom,
+               key: "some-attribute",
+               typed_value: %Ecto.JSONVariant{type: :double, value: 42.0}
+             } = custom_attribute
     end
 
     test "update_device/2 normalizes and deduplicates tags", %{realm: realm} do
@@ -525,6 +544,131 @@ defmodule Edgehog.AstarteTest do
 
       assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
       assert device.device_id == initial_device_id
+    end
+
+    test "update_device/2 adds custom attributes", %{realm: realm} do
+      device = device_fixture(realm)
+
+      update_attrs = %{
+        custom_attributes: [
+          %{
+            "namespace" => "custom",
+            "key" => "some-attribute",
+            "typed_value" => %{"type" => "double", "value" => 42}
+          }
+        ]
+      }
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert [custom_attribute] = device.custom_attributes
+
+      assert %Devices.Attribute{
+               namespace: :custom,
+               key: "some-attribute",
+               typed_value: %Ecto.JSONVariant{type: :double, value: 42.0}
+             } = custom_attribute
+
+      update_attrs = %{
+        custom_attributes: [
+          %{
+            "namespace" => "custom",
+            "key" => "some-attribute",
+            "typed_value" => %{"type" => "double", "value" => 42}
+          },
+          %{
+            "namespace" => "custom",
+            "key" => "some-other-attribute",
+            "typed_value" => %{"type" => "string", "value" => "hello"}
+          }
+        ]
+      }
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert [^custom_attribute, new_attribute] = device.custom_attributes
+
+      assert %Devices.Attribute{
+               namespace: :custom,
+               key: "some-other-attribute",
+               typed_value: %Ecto.JSONVariant{type: :string, value: "hello"}
+             } = new_attribute
+    end
+
+    test "update_device/2 removes custom attributes", %{realm: realm} do
+      device = device_fixture(realm)
+
+      update_attrs = %{
+        custom_attributes: [
+          %{
+            "namespace" => "custom",
+            "key" => "some-attribute",
+            "typed_value" => %{"type" => "double", "value" => 42}
+          },
+          %{
+            "namespace" => "custom",
+            "key" => "some-other-attribute",
+            "typed_value" => %{"type" => "string", "value" => "hello"}
+          }
+        ]
+      }
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert [attribute_1, _attribute_2] = device.custom_attributes
+
+      update_attrs = %{
+        custom_attributes: [
+          %{
+            "namespace" => "custom",
+            "key" => "some-attribute",
+            "typed_value" => %{"type" => "double", "value" => 42}
+          }
+        ]
+      }
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert [^attribute_1] = device.custom_attributes
+    end
+
+    test "update_device/2 updates custom attributes", %{realm: realm} do
+      device = device_fixture(realm)
+
+      update_attrs = %{
+        custom_attributes: [
+          %{
+            "namespace" => "custom",
+            "key" => "some-attribute",
+            "typed_value" => %{"type" => "double", "value" => 42}
+          }
+        ]
+      }
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+      assert [custom_attribute] = device.custom_attributes
+
+      assert %Devices.Attribute{
+               namespace: :custom,
+               key: "some-attribute",
+               typed_value: %Ecto.JSONVariant{type: :double, value: 42.0}
+             } = custom_attribute
+
+      update_attrs = %{
+        custom_attributes: [
+          %{
+            "namespace" => "custom",
+            "key" => "some-attribute",
+            "typed_value" => %{"type" => "string", "value" => "new value"}
+          }
+        ]
+      }
+
+      assert {:ok, %Device{} = device} = Astarte.update_device(device, update_attrs)
+
+      assert [updated_attribute] = device.custom_attributes
+
+      assert %Devices.Attribute{
+               namespace: :custom,
+               key: "some-attribute",
+               typed_value: %Ecto.JSONVariant{type: :string, value: "new value"}
+             } = updated_attribute
     end
 
     test "update_device/2 with invalid data returns error changeset", %{realm: realm} do
