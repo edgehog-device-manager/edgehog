@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for device tags ([#191](https://github.com/edgehog-device-manager/edgehog/pull/191))
 - Add support for device custom attributes
   ([#205](https://github.com/edgehog-device-manager/edgehog/pull/205))
+- Add `MAX_UPLOAD_SIZE_BYTES` env variable to define the maximum dimension for uploads (particularly
+  relevant for OTA updates). Defaults to 4 GB.
 
 ## [0.5.1] - 2022-06-01
 ### Added

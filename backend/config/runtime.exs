@@ -81,9 +81,13 @@ if config_env() == :prod do
     port: System.get_env("S3_PORT")
   }
 
+  # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
+  max_upload_size_bytes = System.get_env("MAX_UPLOAD_SIZE_BYTES", 4_000_000_000)
+
   # Enable uploaders only when the S3 storage has been configured
   config :edgehog,
-    enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end)
+    enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end),
+    max_upload_size_bytes: max_upload_size_bytes
 
   use_google_cloud_storage =
     case s3.host do
