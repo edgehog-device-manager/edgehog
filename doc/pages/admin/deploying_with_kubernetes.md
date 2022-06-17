@@ -280,7 +280,7 @@ spec:
               key: secret-key-base
               name: edgehog-secret-key-base
         - name: MAX_UPLOAD_SIZE_BYTES
-         value: "<MAX-UPLOAD-SIZE-BYTES>"
+          value: "<MAX-UPLOAD-SIZE-BYTES>"
 
         # Uncomment this env if you have installed an optional ipbase.com API Key in the secrets
         #
