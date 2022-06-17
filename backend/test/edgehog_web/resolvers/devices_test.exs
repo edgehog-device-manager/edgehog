@@ -28,7 +28,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
 
   describe "hardware_types" do
     setup %{tenant: tenant} do
-      context = %{current_tenant: tenant}
+      context = %{current_tenant: tenant, preferred_locales: [tenant.default_locale]}
 
       {:ok, context: context}
     end
@@ -63,7 +63,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
 
   describe "system_models" do
     setup %{tenant: tenant} do
-      context = %{current_tenant: tenant}
+      context = %{current_tenant: tenant, preferred_locales: [tenant.default_locale]}
 
       {:ok, context: context}
     end

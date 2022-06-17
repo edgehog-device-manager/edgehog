@@ -21,6 +21,8 @@
 defmodule EdgehogWeb.Context do
   @behaviour Plug
 
+  alias Edgehog.Tenants.Tenant
+
   def init(opts), do: opts
 
   def call(conn, _opts) do
@@ -28,31 +30,31 @@ defmodule EdgehogWeb.Context do
     Absinthe.Plug.put_options(conn, context: context)
   end
 
-  defp build_context(conn) do
+  def build_context(conn) do
     current_tenant = get_current_tenant(conn)
+    preferred_locales = get_preferred_locales(conn, current_tenant)
 
-    %{current_tenant: current_tenant}
-    |> maybe_put_locale(conn)
+    %{current_tenant: current_tenant, preferred_locales: preferred_locales}
   end
 
   defp get_current_tenant(conn) do
     conn.assigns[:current_tenant]
   end
 
-  defp maybe_put_locale(context, conn) do
-    case Plug.Conn.get_req_header(conn, "accept-language") do
-      # If no header or *, we don't add an explicit locale
-      [] ->
-        context
+  defp get_preferred_locales(conn, %Tenant{} = tenant) do
+    default_locale = tenant.default_locale
 
-      ["*" | _] ->
-        context
+    # If there are some locales in accept-language, list them before the default locale
+    conn
+    |> Plug.Conn.get_req_header("accept-language")
+    |> Enum.flat_map(&get_locales/1)
+    |> Enum.concat([default_locale])
+    |> Enum.uniq()
+  end
 
-      # If there's one (or more) accept-language, we use the first one
-      [language | _] ->
-        [locale | _] = String.split(language, ",", parts: 2)
-
-        Map.put(context, :locale, locale)
-    end
+  defp get_locales(string) when is_binary(string) do
+    ~r/[a-z]{2,3}-[A-Z]{2}/
+    |> Regex.scan(string)
+    |> List.flatten()
   end
 end

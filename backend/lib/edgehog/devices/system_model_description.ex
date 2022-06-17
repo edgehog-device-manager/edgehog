@@ -44,8 +44,8 @@ defmodule Edgehog.Devices.SystemModelDescription do
     |> unique_constraint([:locale, :system_model_id, :tenant_id])
   end
 
-  def localized(locale) do
+  def localized(locales) when is_list(locales) do
     from d in SystemModelDescription,
-      where: d.locale == ^locale
+      where: d.locale in ^locales
   end
 end

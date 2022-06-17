@@ -58,18 +58,12 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
-  defp preload_system_model_for_device(target, %{locale: locale}) do
-    # Explicit locale, use that one
-    descriptions_query = Devices.localized_system_model_description_query(locale)
-    preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
+  defp preload_system_model_for_device(target, context) do
+    descriptions_query =
+      context
+      |> Map.fetch!(:preferred_locales)
+      |> Devices.localized_system_model_description_query()
 
-    Astarte.preload_system_model_for_device(target, preload: preload)
-  end
-
-  defp preload_system_model_for_device(target, %{current_tenant: tenant}) do
-    # Fallback
-    %{default_locale: default_locale} = tenant
-    descriptions_query = Devices.localized_system_model_description_query(default_locale)
     preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
 
     Astarte.preload_system_model_for_device(target, preload: preload)

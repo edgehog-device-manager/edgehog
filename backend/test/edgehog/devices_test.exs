@@ -308,7 +308,7 @@ defmodule Edgehog.DevicesTest do
 
       assert [system_model_1, system_model_2] =
                Devices.list_system_models()
-               |> Devices.preload_localized_descriptions_for_system_model("it-IT")
+               |> Devices.preload_localized_descriptions_for_system_model(["it-IT"])
 
       assert [%{locale: "it-IT"}] = system_model_1.descriptions
       assert [] = system_model_2.descriptions
@@ -328,9 +328,12 @@ defmodule Edgehog.DevicesTest do
       assert {:ok, system_model} = Devices.fetch_system_model(system_model.id)
 
       system_model =
-        Devices.preload_localized_descriptions_for_system_model(system_model, "it-IT")
+        Devices.preload_localized_descriptions_for_system_model(system_model, ["it-IT", "en-US"])
 
-      assert Enum.map(system_model.descriptions, & &1.locale) == ["it-IT"]
+      assert [
+               %{locale: "en-US", text: "A system model"},
+               %{locale: "it-IT", text: "Un modello di sistema"}
+             ] = system_model.descriptions
     end
   end
 end

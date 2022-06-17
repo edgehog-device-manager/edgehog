@@ -246,19 +246,20 @@ defmodule Edgehog.Devices do
   end
 
   @doc """
-  Preloads only descriptions with a specific locale for an `SystemModel` (or a list of them).
+  Preloads only descriptions with specific locales for a `SystemModel` (or a list of them).
   """
-  def preload_localized_descriptions_for_system_model(model_or_models, locale) do
-    descriptions_preload = SystemModelDescription.localized(locale)
+  def preload_localized_descriptions_for_system_model(model_or_models, locales)
+      when is_list(locales) do
+    descriptions_preload = SystemModelDescription.localized(locales)
 
     Repo.preload(model_or_models, descriptions: descriptions_preload)
   end
 
   @doc """
-  Returns a query that selects only `SystemModelDescription` with a specific locale.
+  Returns a query that selects only `SystemModelDescription` with specific locales.
   """
-  def localized_system_model_description_query(locale) do
-    SystemModelDescription.localized(locale)
+  def localized_system_model_description_query(locales) when is_list(locales) do
+    SystemModelDescription.localized(locales)
   end
 
   @doc """
