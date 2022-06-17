@@ -279,6 +279,8 @@ spec:
             secretKeyRef:
               key: secret-key-base
               name: edgehog-secret-key-base
+        - name: MAX_UPLOAD_SIZE_BYTES
+         value: "<MAX-UPLOAD-SIZE-BYTES>"
 
         # Uncomment this env if you have installed an optional ipbase.com API Key in the secrets
         #
@@ -348,6 +350,8 @@ spec:
 
 Values to be replaced
 - `DATABASE-HOSTNAME`: the hostname of the PostgreSQL database.
+- `MAX-UPLOAD-SIZE-BYTES`: the maximum dimension for uploads, particularly relevant for OTA updates.
+  If omitted, it defaults to 4 Gigabytes.
 - `S3-SCHEME`: the scheme (`http` or `https`) for the S3 storage.
 - `S3-HOST`: the host for the S3 storage.
 - `S3-PORT`: the port for the S3 storage. This has to be put in double quotes to force it to be
@@ -544,6 +548,7 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: <MAX-UPLOAD-SIZE>
   name: edgehog-ingress
   namespace: edgehog
 spec:
@@ -578,6 +583,11 @@ spec:
 Values to be replaced
 - `FRONTEND-HOST`: the frontend host.
 - `BACKEND-HOST`: the backend host.
+- `MAX-UPLOAD-SIZE`: the maximum upload size that you defined in the [Edgehog backend
+  deployment](https://edgehog-device-manager.github.io/docs/snapshot/deploying_with_kubernetes.html#deployments).
+  Note that NGINX accepts also size suffixes, so you can put, e.g., `4G` for 4 gigabytes. Also note
+  that, differently from the value in the Deployment, this is required because NGINX default is 1
+  megabyte.
 
 ## Edgehog Initialization
 
