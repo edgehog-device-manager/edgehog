@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.CapabilitiesTypes
   import_types EdgehogWeb.Schema.DevicesTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
+  import_types EdgehogWeb.Schema.LabelingTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
   import_types EdgehogWeb.Schema.TenantsTypes
@@ -81,6 +82,7 @@ defmodule EdgehogWeb.Schema do
     end
 
     import_fields :devices_queries
+    import_fields :labeling_queries
     import_fields :tenants_queries
   end
 
