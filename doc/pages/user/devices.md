@@ -44,6 +44,20 @@ Model it refers to, exposing its Part Number. Astarte then informs Edgehog via A
 that Edgehog can associate the Device to the correct System Model by matching the Device's Part
 Number with the ones of the System Model.
 
+## Tags and Attributes
+
+A Device can have some [Tags and Attributes](core_concepts.html#tags-attributes-and-groups)
+associated with it.
+
+Tags are purely user-defined and can be added and removed from the Device page.
+
+Attributes are mostly automatically populated but the `custom` namespace attributes can be assigned
+freely from the Device page.
+
+Tags and attributes can be used to determine the membership of a Device to a specific
+[group](groups.html), which in turn can be used to assign a Device to a specific Update Channel when
+receiving [OTA Updates](ota_updates.html).
+
 ## Device info
 
 On the page of each Device different sets of data are shown. On top of the basic info already
