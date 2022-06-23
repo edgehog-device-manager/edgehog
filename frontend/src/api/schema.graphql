@@ -111,6 +111,9 @@ input UpdateDeviceInput {
 
   "The display name of the device."
   name: String
+
+  "The tags of the device. These replace all the current tags."
+  tags: [String!]
 }
 
 "Represents an uploaded file."
@@ -527,6 +530,9 @@ type Device implements Node {
   "The system model of the device."
   systemModel: SystemModel
 
+  "The tags of the device"
+  tags: [String!]!
+
   "List of capabilities supported by the device."
   capabilities: [DeviceCapability!]!
 
@@ -690,6 +696,12 @@ input DeviceFilter {
   The match is case-insensitive and tests whether the string is included in the name of the device's hardware type.
   """
   hardwareTypeName: String
+
+  """
+  A string to match against the tags of the device.
+  The match is case-insensitive and tests whether the string is included in one of the tags of the device.
+  """
+  tag: String
 }
 
 "Describes an Edgehog runtime."
