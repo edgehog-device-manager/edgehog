@@ -20,4 +20,35 @@
 
 defmodule Edgehog.Devices.Selector.AST.TagFilter do
   defstruct [:tag, :operator]
+
+  @type t :: %__MODULE__{
+          tag: String.t(),
+          operator: :in | :not_in
+        }
+
+  import Ecto.Query
+  alias Edgehog.Devices.Selector.AST.TagFilter
+  alias Edgehog.Devices.DeviceTag
+
+  @doc """
+  Converts a `%TagFilter{}` to a dynamic where clause filtering `Astarte.Device`s that match the
+  given `%TagFilter{}`.
+
+  Returns `{:ok, dynamic_query}` or `{:error, %Parser.Error{}}`
+  """
+  def to_ecto_dynamic_query(%TagFilter{tag: tag, operator: operator})
+      when operator in [:in, :not_in] and is_binary(tag) do
+    query = DeviceTag.device_ids_matching_tag(tag)
+
+    dynamic =
+      case operator do
+        :in ->
+          dynamic([d], d.id in subquery(query))
+
+        :not_in ->
+          dynamic([d], d.id not in subquery(query))
+      end
+
+    {:ok, dynamic}
+  end
 end
