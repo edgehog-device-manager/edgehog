@@ -167,6 +167,12 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilter do
   defp correct_types_for_type(:binaryblob), do: ["binaryblob"]
   defp correct_types_for_type(:number), do: ["integer", "longinteger", "double"]
 
+  # Utility macro to generate the AST for comparisons with a dynamic (compile-time known) operator
+  # This basically translates `comparison(foo, :>, bar)` in the AST equivalent of `foo > bar`
+  defmacrop compare(lhs, operator, rhs) do
+    {operator, [context: Elixir, import: Kernel], [lhs, rhs]}
+  end
+
   # Utility macro to cast a JSON Variant field to the appropriate type
   # We are sure the cast will succeed since we're already filtering for the correct type
   # This has to be a macro because it's passed inside an Ecto.Query
@@ -202,48 +208,18 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilter do
   end
 
   # Generate satisfying_filter/4 for :datetime and :number, supporting all operators
-  for type <- [:datetime, :number] do
-    defp satisfying_filter(query, operator, unquote(type), value) do
-      case operator do
-        :== ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) == ^value
-
-        :!= ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) != ^value
-
-        :> ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) > ^value
-
-        :>= ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) >= ^value
-
-        :< ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) < ^value
-
-        :<= ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) <= ^value
-      end
+  for type <- [:datetime, :number], operator <- [:==, :!=, :>, :>=, :<, :<=] do
+    defp satisfying_filter(query, unquote(operator), unquote(type), value) do
+      from a in query,
+        where: compare(cast_json_variant(a.typed_value, unquote(type)), unquote(operator), ^value)
     end
   end
 
   # Generate satisfying_filter/4 for :boolean, :string and :binaryblob, supporting only ==/!=
-  for type <- [:boolean, :string, :binaryblob] do
-    defp satisfying_filter(query, operator, unquote(type), value) do
-      case operator do
-        :== ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) == ^value
-
-        :!= ->
-          from a in query,
-            where: cast_json_variant(a.typed_value, unquote(type)) != ^value
-      end
+  for type <- [:boolean, :string, :binaryblob], operator <- [:==, :!=] do
+    defp satisfying_filter(query, unquote(operator), unquote(type), value) do
+      from a in query,
+        where: compare(cast_json_variant(a.typed_value, unquote(type)), unquote(operator), ^value)
     end
   end
 end
