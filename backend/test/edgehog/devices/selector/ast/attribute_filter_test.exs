@@ -347,6 +347,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
         |> Repo.preload([:tags, :custom_attributes])
 
       assert is_list(result)
+      assert length(result) == 2
       assert device_41 in result
       assert device_43 in result
     end
@@ -393,6 +394,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
         |> Repo.preload([:tags, :custom_attributes])
 
       assert is_list(result)
+      assert length(result) == 2
       assert device_42 in result
       assert device_43 in result
     end
@@ -439,6 +441,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
         |> Repo.preload([:tags, :custom_attributes])
 
       assert is_list(result)
+      assert length(result) == 2
       assert device_41 in result
       assert device_42 in result
     end
@@ -516,6 +519,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
         |> Repo.preload([:tags, :custom_attributes])
 
       assert is_list(result)
+      assert length(result) == 2
       assert device_past in result
       assert device_future in result
     end
@@ -562,6 +566,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
         |> Repo.preload([:tags, :custom_attributes])
 
       assert is_list(result)
+      assert length(result) == 2
       assert device_present in result
       assert device_future in result
     end
@@ -608,6 +613,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
         |> Repo.preload([:tags, :custom_attributes])
 
       assert is_list(result)
+      assert length(result) == 2
       assert device_past in result
       assert device_present in result
     end
@@ -638,6 +644,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
         |> Repo.preload([:tags, :custom_attributes])
 
       assert is_list(result)
+      assert length(result) == 2
       assert device_past in result
       assert device_present in result
     end
