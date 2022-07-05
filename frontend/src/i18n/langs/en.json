@@ -74,6 +74,9 @@
   "Device.systemStatus.uptimeMilliseconds": {
     "defaultMessage": "Last boot at"
   },
+  "Device.tags": {
+    "defaultMessage": "Tags"
+  },
   "components.BaseImageForm.baseImageLabel": {
     "defaultMessage": "Base image file"
   },
@@ -218,6 +221,10 @@
   "components.DevicesTable.statusTitle": {
     "defaultMessage": "Status",
     "description": "Title for the Status column of the devices table"
+  },
+  "components.DevicesTable.tagsTitle": {
+    "defaultMessage": "Tags",
+    "description": "Title for the Tags column of the devices table"
   },
   "components.HardwareTypesTable.handleTitle": {
     "defaultMessage": "Handle"
