@@ -18,17 +18,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.SelectorTest do
+defmodule Edgehog.SelectorTest do
   use Edgehog.DataCase
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   alias Edgehog.Devices
-  alias Edgehog.Devices.Selector
-  alias Edgehog.Devices.Selector.AST.AttributeFilter
-  alias Edgehog.Devices.Selector.AST.BinaryOp
-  alias Edgehog.Devices.Selector.AST.TagFilter
-  alias Edgehog.Devices.Selector.Parser.Error
+  alias Edgehog.Selector
+  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.Parser.Error
 
   describe "parse/1" do
     test "correctly parses tag filters" do

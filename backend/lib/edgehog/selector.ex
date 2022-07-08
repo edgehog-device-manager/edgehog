@@ -18,13 +18,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Selector do
+defmodule Edgehog.Selector do
   alias Edgehog.Devices
-  alias Edgehog.Devices.Selector.AST.AttributeFilter
-  alias Edgehog.Devices.Selector.AST.BinaryOp
-  alias Edgehog.Devices.Selector.AST.TagFilter
-  alias Edgehog.Devices.Selector.Parser
-  alias Edgehog.Devices.Selector.Parser.Error
+  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.Parser
+  alias Edgehog.Selector.Parser.Error
 
   import Ecto.Query
 
@@ -54,7 +52,7 @@ defmodule Edgehog.Devices.Selector do
 
   @doc """
   Parses a selector, returning an AST (or an error). The root node can be one of the structs contained in
-  the `Edgehog.Devices.Selector.AST` namespace.
+  the `Edgehog.Selector.AST` namespace.
 
   This phase of parsing only checks syntax, semantic analysis takes place when converting the AST to an
   `%Ecto.Query{}`.

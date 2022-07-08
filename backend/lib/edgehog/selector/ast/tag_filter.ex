@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Selector.AST.TagFilter do
+defmodule Edgehog.Selector.AST.TagFilter do
   defstruct [:tag, :operator]
 
   @type t :: %__MODULE__{
@@ -27,8 +27,8 @@ defmodule Edgehog.Devices.Selector.AST.TagFilter do
         }
 
   import Ecto.Query
-  alias Edgehog.Devices.Selector.AST.TagFilter
-  alias Edgehog.Devices.DeviceTag
+  alias Edgehog.Labeling
+  alias Edgehog.Selector.AST.TagFilter
 
   @doc """
   Converts a `%TagFilter{}` to a dynamic where clause filtering `Astarte.Device`s that match the
@@ -38,7 +38,7 @@ defmodule Edgehog.Devices.Selector.AST.TagFilter do
   """
   def to_ecto_dynamic_query(%TagFilter{tag: tag, operator: operator})
       when operator in [:in, :not_in] and is_binary(tag) do
-    query = DeviceTag.device_ids_matching_tag(tag)
+    query = Labeling.DeviceTag.device_ids_matching_tag(tag)
 
     dynamic =
       case operator do

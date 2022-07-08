@@ -18,22 +18,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Tag do
-  use Ecto.Schema
-  import Ecto.Changeset
-
-  schema "tags" do
-    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
-    field :name, :string
-
-    timestamps()
-  end
-
-  @doc false
-  def changeset(tag, attrs) do
-    tag
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
-    |> unique_constraint([:name, :tenant_id])
-  end
+defmodule Edgehog.Selector.Parser.Error do
+  defstruct [:message, :line, :column]
 end

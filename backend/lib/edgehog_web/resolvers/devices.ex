@@ -20,10 +20,10 @@
 
 defmodule EdgehogWeb.Resolvers.Devices do
   alias Edgehog.Devices
-  alias Edgehog.Devices.Attribute
   alias Edgehog.Devices.Device
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
+  alias Edgehog.Labeling.DeviceAttribute
   alias EdgehogWeb.Schema.VariantTypes
 
   def find_device(%{id: id}, %{context: context}) do
@@ -228,11 +228,11 @@ defmodule EdgehogWeb.Resolvers.Devices do
     {:ok, tag_names}
   end
 
-  def extract_attribute_type(%Attribute{typed_value: typed_value}, _args, _context) do
+  def extract_attribute_type(%DeviceAttribute{typed_value: typed_value}, _args, _context) do
     {:ok, typed_value.type}
   end
 
-  def extract_attribute_value(%Attribute{typed_value: typed_value}, _args, _context) do
+  def extract_attribute_value(%DeviceAttribute{typed_value: typed_value}, _args, _context) do
     %Ecto.JSONVariant{type: type, value: value} = typed_value
     VariantTypes.encode_variant_value(type, value)
   end

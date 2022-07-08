@@ -25,6 +25,7 @@ defmodule Edgehog.DevicesTest do
 
   describe "devices" do
     alias Edgehog.Devices.Device
+    alias Edgehog.Labeling
 
     import Edgehog.AstarteFixtures
     import Edgehog.DevicesFixtures
@@ -361,7 +362,7 @@ defmodule Edgehog.DevicesTest do
       assert ["some", "tags"] == Enum.map(device.tags, & &1.name)
       assert [custom_attribute] = device.custom_attributes
 
-      assert %Devices.Attribute{
+      assert %Labeling.DeviceAttribute{
                namespace: :custom,
                key: "some-attribute",
                typed_value: %Ecto.JSONVariant{type: :double, value: 42.0}
@@ -431,7 +432,7 @@ defmodule Edgehog.DevicesTest do
       assert {:ok, %Device{} = device} = Devices.update_device(device, update_attrs)
       assert [custom_attribute] = device.custom_attributes
 
-      assert %Devices.Attribute{
+      assert %Labeling.DeviceAttribute{
                namespace: :custom,
                key: "some-attribute",
                typed_value: %Ecto.JSONVariant{type: :double, value: 42.0}
@@ -455,7 +456,7 @@ defmodule Edgehog.DevicesTest do
       assert {:ok, %Device{} = device} = Devices.update_device(device, update_attrs)
       assert [^custom_attribute, new_attribute] = device.custom_attributes
 
-      assert %Devices.Attribute{
+      assert %Labeling.DeviceAttribute{
                namespace: :custom,
                key: "some-other-attribute",
                typed_value: %Ecto.JSONVariant{type: :string, value: "hello"}
@@ -513,7 +514,7 @@ defmodule Edgehog.DevicesTest do
       assert {:ok, %Device{} = device} = Devices.update_device(device, update_attrs)
       assert [custom_attribute] = device.custom_attributes
 
-      assert %Devices.Attribute{
+      assert %Labeling.DeviceAttribute{
                namespace: :custom,
                key: "some-attribute",
                typed_value: %Ecto.JSONVariant{type: :double, value: 42.0}
@@ -533,7 +534,7 @@ defmodule Edgehog.DevicesTest do
 
       assert [updated_attribute] = device.custom_attributes
 
-      assert %Devices.Attribute{
+      assert %Labeling.DeviceAttribute{
                namespace: :custom,
                key: "some-attribute",
                typed_value: %Ecto.JSONVariant{type: :string, value: "new value"}

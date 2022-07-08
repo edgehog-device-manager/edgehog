@@ -18,12 +18,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Selector.Parser do
+defmodule Edgehog.Selector.Parser do
   import NimbleParsec
 
-  alias Edgehog.Devices.Selector.AST.AttributeFilter
-  alias Edgehog.Devices.Selector.AST.BinaryOp
-  alias Edgehog.Devices.Selector.AST.TagFilter
+  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
 
   # Semi formal definition of the selector grammar
   # Literals are wrapped in single quotes

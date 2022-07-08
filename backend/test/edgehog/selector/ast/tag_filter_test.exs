@@ -18,14 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Selector.AST.TagFilterTest do
+defmodule Edgehog.Selector.AST.TagFilterTest do
   use Edgehog.DataCase
 
   import Ecto.Query
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   alias Edgehog.Devices
-  alias Edgehog.Devices.Selector.AST.TagFilter
+  alias Edgehog.Selector.AST.TagFilter
   alias Edgehog.Repo
 
   describe "to_ecto_dynamic_query/1" do
