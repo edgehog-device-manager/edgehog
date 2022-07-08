@@ -22,8 +22,8 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
   alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device
   alias Edgehog.Config
+  alias Edgehog.Devices.Device
   alias Edgehog.Geolocation.Position
   alias Edgehog.Repo
 

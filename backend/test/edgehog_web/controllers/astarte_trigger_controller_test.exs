@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device
+  alias Edgehog.Devices
   alias Edgehog.OSManagement
 
   import Edgehog.AstarteFixtures
@@ -160,7 +161,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
     test "associates a device with a system model when receiving part number", %{
       conn: conn,
       realm: realm,
-      device: %{device_id: device_id},
+      device: %{id: id, device_id: device_id},
       tenant: %{slug: tenant_slug}
     } do
       hardware_type = hardware_type_fixture()
@@ -187,8 +188,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       assert response(conn, 200)
 
-      assert {:ok, %Device{} = device} = Astarte.fetch_realm_device(realm, device_id)
-      device = Astarte.preload_system_model_for_device(device)
+      assert device = Devices.get_device!(id)
+      device = Devices.preload_system_model_for_device(device)
       assert device.system_model.id == system_model.id
       assert device.system_model.name == system_model.name
       assert device.system_model.handle == system_model.handle

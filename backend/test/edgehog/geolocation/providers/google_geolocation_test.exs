@@ -23,6 +23,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
   import Tesla.Mock
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeolocation

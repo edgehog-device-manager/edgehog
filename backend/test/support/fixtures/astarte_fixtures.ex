@@ -57,7 +57,10 @@ defmodule Edgehog.AstarteFixtures do
     realm
   end
 
-  defp random_device_id do
+  @doc """
+  Generate a random device id
+  """
+  def random_device_id do
     <<u0::48, _::4, u1::12, _::2, u2::62>> = :crypto.strong_rand_bytes(16)
 
     <<u0::48, 4::4, u1::12, 2::2, u2::62>>
@@ -65,9 +68,9 @@ defmodule Edgehog.AstarteFixtures do
   end
 
   @doc """
-  Generate a device.
+  Generate an %Astarte.Device{}.
   """
-  def device_fixture(realm, attrs \\ %{}) do
+  def astarte_device_fixture(realm, attrs \\ %{}) do
     attrs =
       attrs
       |> Enum.into(%{

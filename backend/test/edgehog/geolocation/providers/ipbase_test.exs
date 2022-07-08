@@ -23,6 +23,7 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
   import Tesla.Mock
   alias Edgehog.Astarte.Device.DeviceStatus
   alias Edgehog.Geolocation.Position

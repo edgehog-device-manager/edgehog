@@ -22,7 +22,9 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
+  import_types EdgehogWeb.Schema.CapabilitiesTypes
   import_types EdgehogWeb.Schema.DevicesTypes
+  import_types EdgehogWeb.Schema.GeolocationTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
   import_types EdgehogWeb.Schema.TenantsTypes
@@ -65,7 +67,7 @@ defmodule EdgehogWeb.Schema do
     node field do
       resolve fn
         %{type: :device, id: id}, context ->
-          Resolvers.Astarte.find_device(%{id: id}, context)
+          Resolvers.Devices.find_device(%{id: id}, context)
 
         %{type: :hardware_type, id: id}, context ->
           Resolvers.Devices.find_hardware_type(%{id: id}, context)
@@ -78,7 +80,6 @@ defmodule EdgehogWeb.Schema do
       end
     end
 
-    import_fields :astarte_queries
     import_fields :devices_queries
     import_fields :tenants_queries
   end

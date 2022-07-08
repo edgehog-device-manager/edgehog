@@ -25,8 +25,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
   import Edgehog.DevicesFixtures
   import Edgehog.AstarteFixtures
 
-  alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device
+  alias Edgehog.Devices
+  alias Edgehog.Devices.Device
 
   describe "systemModels field" do
     setup do
@@ -121,7 +121,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
          online: online
        }} =
         device_fixture(realm, device_id: "INyxlnmUT3CEJHPAwWMi0A")
-        |> Astarte.update_device(%{tags: ["foobar"]})
+        |> Devices.update_device(%{tags: ["foobar"]})
 
       _device_2 = device_fixture(realm, device_id: "1YmkqsFfSuWDZcYV3ceoBQ")
 

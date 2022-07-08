@@ -26,8 +26,8 @@ defmodule Edgehog.Geolocation do
   @enforce_keys [:latitude, :longitude, :timestamp]
   defstruct [:latitude, :longitude, :accuracy, :timestamp, :address]
 
-  alias Edgehog.Astarte.Device
   alias Edgehog.Config
+  alias Edgehog.Devices.Device
   alias Edgehog.Geolocation
   alias Edgehog.Geolocation.Coordinates
 

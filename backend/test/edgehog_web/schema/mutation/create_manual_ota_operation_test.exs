@@ -24,6 +24,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
   use Edgehog.EphemeralImageMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
 
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation

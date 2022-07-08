@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Selector do
-  alias Edgehog.Astarte.Device
+  alias Edgehog.Devices
   alias Edgehog.Devices.Selector.AST.AttributeFilter
   alias Edgehog.Devices.Selector.AST.BinaryOp
   alias Edgehog.Devices.Selector.AST.TagFilter
@@ -45,7 +45,7 @@ defmodule Edgehog.Devices.Selector do
       when node in [AttributeFilter, BinaryOp, TagFilter] do
     with {:ok, where_condition} <- traverse(ast_root) do
       query =
-        from d in Device,
+        from d in Devices.Device,
           where: ^where_condition
 
       {:ok, query}

@@ -23,6 +23,7 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.DeviceGeolocation
 

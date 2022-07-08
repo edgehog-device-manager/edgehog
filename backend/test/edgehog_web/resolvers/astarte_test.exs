@@ -21,25 +21,22 @@
 defmodule EdgehogWeb.Resolvers.AstarteTest do
   use EdgehogWeb.ConnCase
   use Edgehog.AstarteMockCase
-  use Edgehog.GeolocationMockCase
 
-  alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
   alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
-    DeviceStatus,
     OSInfo,
     RuntimeInfo,
     SystemStatus,
     WiFiScanResult
   }
 
-  alias Edgehog.Geolocation
   alias EdgehogWeb.Resolvers.Astarte
 
   import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
 
   describe "devices" do
     setup do
@@ -48,20 +45,6 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
       device = device_fixture(realm)
 
       {:ok, cluster: cluster, realm: realm, device: device}
-    end
-
-    test "fetch_device_location/3 returns the location for a device", %{
-      device: device
-    } do
-      assert {:ok, location} = Astarte.fetch_device_location(device, %{}, %{})
-
-      assert %Geolocation{
-               accuracy: 12,
-               address: "4 Privet Drive, Little Whinging, Surrey, UK",
-               latitude: 45.4095285,
-               longitude: 11.8788231,
-               timestamp: ~U[2021-11-15 11:44:57.432516Z]
-             } == location
     end
 
     test "fetch_storage_usage/3 returns the storage usage for a device", %{
@@ -196,36 +179,6 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                environment: "esp-idf v4.3",
                url: "https://github.com/edgehog-device-manager/edgehog-esp32-device"
              } == runtime_info
-    end
-
-    test "list_device_capabilities/3 returns the device capabilities info for a device", %{
-      device: device
-    } do
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _appengine_client, _device_id ->
-        {:ok,
-         %DeviceStatus{
-           introspection: %{}
-         }}
-      end)
-
-      assert {:ok, capabilities} = Astarte.list_device_capabilities(device, %{}, %{})
-      assert is_list(capabilities)
-    end
-
-    test "list_device_capabilities/3 without DeviceStatus returns empty list", %{
-      device: device
-    } do
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _appengine_client, _device_id ->
-        {:error,
-         %APIError{
-           status: 404,
-           response: %{"errors" => %{"detail" => "Device not found"}}
-         }}
-      end)
-
-      assert {:ok, []} = Astarte.list_device_capabilities(device, %{}, %{})
     end
   end
 end

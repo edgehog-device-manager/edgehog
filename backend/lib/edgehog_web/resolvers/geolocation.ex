@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Geolocation.GeolocationProvider do
+defmodule EdgehogWeb.Resolvers.Geolocation do
   alias Edgehog.Devices.Device
-  alias Edgehog.Geolocation.Position
+  alias Edgehog.Geolocation
 
-  @callback geolocate(%Device{}) :: {:ok, Position.t()} | {:error, term}
+  @doc """
+  Returns the location of the device if available
+  """
+  def fetch_device_location(%Device{} = device, _args, _context) do
+    case Geolocation.fetch_location(device) do
+      {:ok, location} -> {:ok, location}
+      _ -> {:ok, nil}
+    end
+  end
 end

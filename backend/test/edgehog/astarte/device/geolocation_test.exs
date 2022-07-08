@@ -32,7 +32,7 @@ defmodule Edgehog.Astarte.Device.GeolocationTest do
     setup do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster)
-      device = device_fixture(realm)
+      device = astarte_device_fixture(realm)
 
       {:ok, appengine_client} =
         AppEngine.new(cluster.base_api_url, realm.name, private_key: realm.private_key)

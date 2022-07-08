@@ -23,7 +23,8 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
 
   import Ecto.Query
   import Edgehog.AstarteFixtures
-  alias Edgehog.Astarte
+  import Edgehog.DevicesFixtures
+  alias Edgehog.Devices
   alias Edgehog.Devices.Selector.AST.AttributeFilter
   alias Edgehog.Devices.Selector.Parser.Error
   alias Edgehog.Repo
@@ -136,7 +137,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_true] ==
@@ -157,7 +158,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_false] ==
@@ -195,7 +196,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_bar] ==
@@ -216,7 +217,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_baz] ==
@@ -254,7 +255,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_bar] ==
@@ -275,7 +276,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_baz] ==
@@ -317,7 +318,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_42] ==
@@ -338,7 +339,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -364,7 +365,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_43] ==
@@ -385,7 +386,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -411,7 +412,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_41] ==
@@ -432,7 +433,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -486,7 +487,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_present] ==
@@ -510,7 +511,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -536,7 +537,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_future] ==
@@ -557,7 +558,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -583,7 +584,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_past] ==
@@ -604,7 +605,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -635,7 +636,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -680,7 +681,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_baz] ==
@@ -709,7 +710,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
                |> AttributeFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_string_foob] ==
@@ -719,13 +720,13 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilterTest do
     end
   end
 
-  defp add_custom_attributes(%Astarte.Device{} = device, kv_map) do
+  defp add_custom_attributes(%Devices.Device{} = device, kv_map) do
     custom_attributes =
       for {k, v} <- kv_map, k = to_string(k) do
         %{namespace: :custom, key: k, typed_value: v}
       end
 
-    {:ok, device} = Astarte.update_device(device, %{custom_attributes: custom_attributes})
+    {:ok, device} = Devices.update_device(device, %{custom_attributes: custom_attributes})
     device
   end
 end

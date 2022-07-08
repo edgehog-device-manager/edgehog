@@ -43,7 +43,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilter do
 
   @doc """
   Validates an `%AttributeFilter{}` and converts it to a dynamic where clause filtering
-  `Astarte.Device`s that match the given `%AttributeFilter{}`.
+  `Devices.Device`s that match the given `%AttributeFilter{}`.
 
   Returns `{:ok, dynamic_query}` or `{:error, %Parser.Error{}}`
   """

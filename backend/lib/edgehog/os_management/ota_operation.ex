@@ -22,7 +22,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Edgehog.Astarte
+  alias Edgehog.Devices
 
   @statuses [
     pending: "Pending",
@@ -47,7 +47,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
     field :status_code, Ecto.Enum, values: @status_codes
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :manual?, :boolean, source: :is_manual
-    belongs_to :device, Astarte.Device
+    belongs_to :device, Devices.Device
 
     timestamps(type: :utc_datetime)
   end

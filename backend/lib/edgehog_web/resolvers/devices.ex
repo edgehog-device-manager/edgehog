@@ -19,12 +19,20 @@
 #
 
 defmodule EdgehogWeb.Resolvers.Devices do
-  alias Edgehog.Astarte
   alias Edgehog.Devices
   alias Edgehog.Devices.Attribute
+  alias Edgehog.Devices.Device
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
   alias EdgehogWeb.Schema.VariantTypes
+
+  def find_device(%{id: id}, %{context: context}) do
+    device =
+      Devices.get_device!(id)
+      |> preload_system_model_for_device(context)
+
+    {:ok, device}
+  end
 
   def find_hardware_type(%{id: id}, _resolution) do
     Devices.fetch_hardware_type(id)
@@ -42,6 +50,49 @@ defmodule EdgehogWeb.Resolvers.Devices do
     part_numbers = Enum.map(part_numbers, &Map.get(&1, :part_number))
 
     {:ok, part_numbers}
+  end
+
+  def list_devices(_parent, %{filter: filter}, %{context: context}) do
+    devices =
+      Devices.list_devices(filter)
+      |> preload_system_model_for_device(context)
+
+    {:ok, devices}
+  end
+
+  def list_devices(_parent, _args, %{context: context}) do
+    devices =
+      Devices.list_devices()
+      |> preload_system_model_for_device(context)
+
+    {:ok, devices}
+  end
+
+  def update_device(%{device_id: id} = attrs, %{context: context}) do
+    device = Devices.get_device!(id)
+    attrs = maybe_wrap_typed_values(attrs)
+
+    with {:ok, device} <- Devices.update_device(device, attrs) do
+      device = preload_system_model_for_device(device, context)
+      {:ok, %{device: device}}
+    end
+  end
+
+  defp preload_system_model_for_device(target, %{locale: locale}) do
+    # Explicit locale, use that one
+    descriptions_query = Devices.localized_system_model_description_query(locale)
+    preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
+
+    Devices.preload_system_model_for_device(target, preload: preload)
+  end
+
+  defp preload_system_model_for_device(target, %{current_tenant: tenant}) do
+    # Fallback
+    %{default_locale: default_locale} = tenant
+    descriptions_query = Devices.localized_system_model_description_query(default_locale)
+    preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
+
+    Devices.preload_system_model_for_device(target, preload: preload)
   end
 
   def create_hardware_type(_parent, attrs, _context) do
@@ -172,7 +223,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
     end
   end
 
-  def extract_device_tags(%Astarte.Device{tags: tags}, _args, _context) do
+  def extract_device_tags(%Device{tags: tags}, _args, _context) do
     tag_names = for t <- tags, do: t.name
     {:ok, tag_names}
   end
@@ -185,4 +236,28 @@ defmodule EdgehogWeb.Resolvers.Devices do
     %Ecto.JSONVariant{type: type, value: value} = typed_value
     VariantTypes.encode_variant_value(type, value)
   end
+
+  defp maybe_wrap_typed_values(%{custom_attributes: custom_attributes} = attrs)
+       when is_list(custom_attributes) do
+    wrapped_attributes =
+      Enum.map(custom_attributes, fn attr ->
+        %{
+          namespace: namespace,
+          key: key,
+          type: type,
+          value: value
+        } = attr
+
+        # Wrap type and value under the :typed_value key, as expected by the Ecto schema
+        %{
+          namespace: namespace,
+          key: key,
+          typed_value: %{type: type, value: value}
+        }
+      end)
+
+    %{attrs | custom_attributes: wrapped_attributes}
+  end
+
+  defp maybe_wrap_typed_values(attrs), do: attrs
 end

@@ -29,6 +29,7 @@ defmodule Edgehog.OSManagementTest do
     alias Edgehog.OSManagement.OTAOperation
 
     import Edgehog.AstarteFixtures
+    import Edgehog.DevicesFixtures
     import Edgehog.OSManagementFixtures
 
     setup do

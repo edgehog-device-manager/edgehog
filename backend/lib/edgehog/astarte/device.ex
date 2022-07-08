@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,30 +23,17 @@ defmodule Edgehog.Astarte.Device do
   import Ecto.Changeset
 
   alias Edgehog.Astarte.Realm
-  alias Edgehog.Devices
 
   schema "devices" do
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :device_id, :string
     field :name, :string
-    field :tenant_id, :id
     field :last_connection, :utc_datetime
     field :last_disconnection, :utc_datetime
     field :online, :boolean, default: false
     field :serial_number, :string
+    field :part_number, :string
     belongs_to :realm, Realm
-
-    belongs_to :system_model_part_number, Devices.SystemModelPartNumber,
-      foreign_key: :part_number,
-      references: :part_number,
-      type: :string
-
-    has_one :system_model, through: [:system_model_part_number, :system_model]
-    many_to_many :tags, Devices.Tag, join_through: Devices.DeviceTag, on_replace: :delete
-
-    has_many :custom_attributes, Devices.Attribute,
-      where: [namespace: "custom"],
-      on_replace: :delete
-
     timestamps()
   end
 
@@ -70,14 +57,11 @@ defmodule Edgehog.Astarte.Device do
   def update_changeset(device, attrs) do
     device
     |> cast(attrs, [
-      :name,
       :online,
       :last_connection,
       :last_disconnection,
       :serial_number,
       :part_number
     ])
-    |> validate_required([:name])
-    |> cast_assoc(:custom_attributes, with: &Devices.Attribute.custom_attribute_changeset/2)
   end
 end

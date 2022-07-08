@@ -24,6 +24,29 @@ defmodule Edgehog.DevicesFixtures do
   entities via the `Edgehog.Devices` context.
   """
 
+  alias Edgehog.AstarteFixtures
+  alias Edgehog.Devices.Device
+  alias Edgehog.Repo
+
+  @doc """
+  Generate a %Devices.Device{}.
+  """
+  def device_fixture(realm, attrs \\ %{}) do
+    # The Devices context does not (currently) have a create functions since devices are always
+    # created by Astarte, so we directly call Repo functions passing attrs as-is and preloading
+    # what gets usually preloaded in %Devices.Device{}
+    attrs = Enum.into(attrs, %{})
+
+    %Device{
+      realm_id: realm.id,
+      device_id: AstarteFixtures.random_device_id(),
+      name: "some name"
+    }
+    |> Map.merge(attrs)
+    |> Repo.insert!()
+    |> Repo.preload([:tags, :custom_attributes])
+  end
+
   @doc """
   Generate a hardware_type.
   """

@@ -18,26 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Resolvers.OSManagement do
+defmodule EdgehogWeb.Resolvers.Capabilities do
+  alias Edgehog.Astarte
+  alias Edgehog.Capabilities
   alias Edgehog.Devices
-  alias Edgehog.OSManagement
+  alias Edgehog.Devices.Device
 
-  def find_ota_operation(%{id: id}, _resolution) do
-    {:ok, OSManagement.get_ota_operation!(id)}
-  end
-
-  def ota_operations_for_device(%Devices.Device{} = device, _args, _resolution) do
-    {:ok, OSManagement.list_device_ota_operations(device)}
-  end
-
-  def create_manual_ota_operation(
-        %{device_id: device_id, base_image_file: base_image_file},
-        _resolution
-      ) do
-    device = Devices.get_device!(device_id)
-
-    with {:ok, ota_operation} <- OSManagement.create_manual_ota_operation(device, base_image_file) do
-      {:ok, %{ota_operation: ota_operation}}
+  def list_device_capabilities(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, introspection} <- Astarte.fetch_device_introspection(client, device_id),
+         capabilities = Capabilities.from_introspection(introspection) do
+      {:ok, capabilities}
+    else
+      _ -> {:ok, []}
     end
   end
 end

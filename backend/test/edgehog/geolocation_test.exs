@@ -27,6 +27,7 @@ defmodule Edgehog.GeolocationTest do
 
   describe "device_location" do
     import Edgehog.AstarteFixtures
+    import Edgehog.DevicesFixtures
 
     setup do
       cluster = cluster_fixture()

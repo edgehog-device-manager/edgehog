@@ -23,7 +23,8 @@ defmodule Edgehog.Devices.Selector.AST.TagFilterTest do
 
   import Ecto.Query
   import Edgehog.AstarteFixtures
-  alias Edgehog.Astarte
+  import Edgehog.DevicesFixtures
+  alias Edgehog.Devices
   alias Edgehog.Devices.Selector.AST.TagFilter
   alias Edgehog.Repo
 
@@ -51,7 +52,7 @@ defmodule Edgehog.Devices.Selector.AST.TagFilterTest do
                |> TagFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       assert [device_foo] ==
@@ -69,7 +70,7 @@ defmodule Edgehog.Devices.Selector.AST.TagFilterTest do
                |> TagFilter.to_ecto_dynamic_query()
 
       query =
-        from d in Astarte.Device,
+        from d in Devices.Device,
           where: ^dynamic
 
       result =
@@ -84,8 +85,8 @@ defmodule Edgehog.Devices.Selector.AST.TagFilterTest do
     end
   end
 
-  defp add_tags(%Astarte.Device{} = device, tags) do
-    {:ok, device} = Astarte.update_device(device, %{tags: tags})
+  defp add_tags(%Devices.Device{} = device, tags) do
+    {:ok, device} = Devices.update_device(device, %{tags: tags})
     device
   end
 end
