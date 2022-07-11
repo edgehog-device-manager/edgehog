@@ -18,24 +18,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.DeviceTag do
-  use Ecto.Schema
-  import Ecto.Query
-  alias Edgehog.Devices.DeviceTag
-  alias Edgehog.Devices.Tag
+defmodule Edgehog.Repo.Migrations.CreateDeviceAttributesNamespaceKeyIndex do
+  use Ecto.Migration
 
-  @primary_key false
-  schema "devices_tags" do
-    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
-    field :tag_id, :id, primary_key: true
-    field :device_id, :id, primary_key: true
-  end
-
-  def device_ids_matching_tag(tag) when is_binary(tag) do
-    from dt in DeviceTag,
-      join: t in Tag,
-      on: dt.tag_id == t.id,
-      where: t.name == ^tag,
-      select: dt.device_id
+  def change do
+    create index(:device_attributes, [:namespace, :key])
   end
 end

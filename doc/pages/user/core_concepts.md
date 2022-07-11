@@ -103,40 +103,78 @@ Device attributes using a value from an Astarte interface.
 
 ### Selector
 
-A Selector allows selecting a subset of devices based on their tags and attributes. The Selector
-can be evaluated for a Device and return `true` if the device matches the Selector and `false`
+A Selector allows selecting a subset of Devices based on their tags and attributes. The Selector
+can be evaluated for a Device and return `true` if the Device matches the Selector and `false`
 otherwise.
 
-Each Selector can be made of one or more expressions, combined using `and` and `or`.
+Each Selector can be made of one or more filters, combined using `and` and `or` and (possibly)
+parenthesized. When no parenthesis are present, `and` has a higher priority than `or` in
+expressions.
 
-These are the supported expressions:
+#### Supported filters
 
-- `"<value>" in tags`: returns `true` if `value` is included in the Device tags
+##### Tag filter
+
+Created with the syntax `"<value>" in tags`, it returns `true` if `value` is included in the Device
+tags. It's also possible to use a negative filter with `"value" not in tags`, in this case the
+filter will match all Devices which _don't_ have the tag.
+
+##### Attribute filter
+
+Created with the syntax `attributes["<namespace>:<key>"] <operator> <value>`, it returns `true` if
+the value of the chosen attribute satisfies the expression.
+
+The supported operators are:
+- `==` and `!=` for all value types
+- `>`, `>=`, `<`, `<=` for numeric or `datetime` values
+
+`<value>` can be a boolean (`true` or `false`), a string, a number (either integer or float), or one
+of the values supported using special syntax:
+
+- `now()` indicates the current datetime at the time the Selector is evaluated. This can be used to
+  do comparisons with other `datetime` attributes.
+- `datetime("<ISO8601 string>")` is used to pass `datetime` values in expressions. The string
+  contained in double quotes must be a valid UTC ISO8601 timestamp. Example:
+  `datetime("2022-06-27T16:27:40.254795Z")`.
+- `binaryblob("<base64 encoded value>")` is used to pass `binaryblob` values in expressions. The
+  string contained in double quotes must be a valid Base64 encoding of the binary value. Example:
+  `binaryblob("Zm9vYmFy")` to encode the string `"foobar"`.
+
+##### Attribute inclusion filter (Not supported yet)
+
 - `"<value>" in attributes["<namespace>:<key>"]`: returns `true` if `value` is included in the
   chosen attribute. Note that the attribute must be an array for the expression to be valid.
-- `attributes["<namespace>:<key>"] <operator> <value>`: returns `true` if the value of the chosen
-  attribute satisfies the expression. The available operators are `==`, `!=`, `>`, `>=`, `<`, `<=`.
-  Note that numeric comparison operators are valid only when used with an attribute with a numeric
-  value or a datetime value.
   
-Selector expressions also provide some builtin functions:
-
-- `now()` this indicates the current datetime (when the Selector is evaluated). This can be used to
-  do comparisons with other `datetime` attributes.
+#### Examples
   
-To provide some examples, here is a Selector to target all out of order devices in Milan:
+To provide some examples, here is a Selector to target all out of order Devices in Milan:
 
 ```
 "out-of-order" in tags and attributes["edgehog-synthetic:city"] == "Milan"
 ```
 
-Here is a selector to target all devices that have their service timestamp in the past so they have
+Here is a selector to target all Devices that have their service timestamp in the past so they have
 to be serviced, imagining this information is contained in the `com.foo.ServiceInfo` Astarte
 interface in the `/nextServiceTimestamp`:
 
 ```
 attributes["astarte-values:com.foo.ServiceInfo/serviceTimestamp"] <= now()
 ```
+
+#### Caveats
+
+Note that numeric values are conflated in a single numeric type, i.e. a selector with
+`attributes["custom:foo"] == 42` will match either if `foo` is `integer`, `longinteger` or `double`
+(e.g it will also match `42.0`).
+
+Another important thing to notice is that using an Attribute Filter will implicitly match only
+Devices that have that attribute. As an example, if there are 3 devices, one with attribute `foo:bar
+== 42`, the other with attribute `foo:bar == 3` and the third one with no `foo:bar` attribute, the
+Attribute Filter `attributes["foo:bar"] != 42` will match the second Device but _not_ the third one,
+since it doesn't have the target attribute.
+
+In the future, additional syntax could be added to Selectors to allow filtering based just on the
+presence or absence of an attribute.
 
 ### Group
 

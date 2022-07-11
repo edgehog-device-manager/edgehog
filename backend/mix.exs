@@ -94,6 +94,7 @@ defmodule Edgehog.MixProject do
       {:guardian, "~> 2.0"},
       {:jose, "~> 1.8"},
       {:skogsra, "~> 2.3"},
+      {:nimble_parsec, "~> 1.2"},
       {:excoveralls, "~> 0.10", only: :test},
       {:dialyxir, "~> 1.0", only: [:dev, :ci], runtime: false}
     ]

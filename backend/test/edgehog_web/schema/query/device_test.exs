@@ -265,50 +265,49 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
                }
              } = json_response(conn, 200)
 
-      assert custom_attributes == [
-               %{
-                 "key" => "double",
-                 "namespace" => "CUSTOM",
-                 "type" => "DOUBLE",
-                 "value" => 42.0
-               },
-               %{
-                 "key" => "integer",
-                 "namespace" => "CUSTOM",
-                 "type" => "INTEGER",
-                 "value" => 300
-               },
-               %{
-                 "key" => "boolean",
-                 "namespace" => "CUSTOM",
-                 "type" => "BOOLEAN",
-                 "value" => true
-               },
-               %{
-                 "key" => "longinteger",
-                 "namespace" => "CUSTOM",
-                 "type" => "LONGINTEGER",
-                 "value" => "1234567890"
-               },
-               %{
-                 "key" => "string",
-                 "namespace" => "CUSTOM",
-                 "type" => "STRING",
-                 "value" => "foobar"
-               },
-               %{
-                 "key" => "binaryblob",
-                 "namespace" => "CUSTOM",
-                 "type" => "BINARYBLOB",
-                 "value" => "ZWRnZWhvZw=="
-               },
-               %{
-                 "key" => "datetime",
-                 "namespace" => "CUSTOM",
-                 "type" => "DATETIME",
-                 "value" => "2022-06-10T16:27:41.235243Z"
-               }
-             ]
+      assert %{"key" => "double", "namespace" => "CUSTOM", "type" => "DOUBLE", "value" => 42.0} in custom_attributes
+
+      assert %{
+               "key" => "integer",
+               "namespace" => "CUSTOM",
+               "type" => "INTEGER",
+               "value" => 300
+             } in custom_attributes
+
+      assert %{
+               "key" => "boolean",
+               "namespace" => "CUSTOM",
+               "type" => "BOOLEAN",
+               "value" => true
+             } in custom_attributes
+
+      assert %{
+               "key" => "longinteger",
+               "namespace" => "CUSTOM",
+               "type" => "LONGINTEGER",
+               "value" => "1234567890"
+             } in custom_attributes
+
+      assert %{
+               "key" => "string",
+               "namespace" => "CUSTOM",
+               "type" => "STRING",
+               "value" => "foobar"
+             } in custom_attributes
+
+      assert %{
+               "key" => "binaryblob",
+               "namespace" => "CUSTOM",
+               "type" => "BINARYBLOB",
+               "value" => "ZWRnZWhvZw=="
+             } in custom_attributes
+
+      assert %{
+               "key" => "datetime",
+               "namespace" => "CUSTOM",
+               "type" => "DATETIME",
+               "value" => "2022-06-10T16:27:41.235243Z"
+             } in custom_attributes
     end
   end
 end
