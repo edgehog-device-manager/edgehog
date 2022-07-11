@@ -82,7 +82,9 @@ if config_env() == :prod do
   }
 
   # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
-  max_upload_size_bytes = System.get_env("MAX_UPLOAD_SIZE_BYTES", 4_000_000_000)
+  max_upload_size_bytes =
+    System.get_env("MAX_UPLOAD_SIZE_BYTES", to_string(4_000_000_000))
+    |> String.to_integer()
 
   # Enable uploaders only when the S3 storage has been configured
   config :edgehog,
