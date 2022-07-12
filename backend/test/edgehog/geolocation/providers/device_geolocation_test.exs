@@ -24,6 +24,7 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  alias Edgehog.Devices
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.DeviceGeolocation
 
@@ -33,7 +34,10 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
     setup do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster)
-      device = device_fixture(realm)
+
+      device =
+        device_fixture(realm)
+        |> Devices.preload_astarte_resources_for_device()
 
       {:ok, cluster: cluster, realm: realm, device: device}
     end

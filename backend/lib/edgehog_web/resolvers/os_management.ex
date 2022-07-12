@@ -34,7 +34,10 @@ defmodule EdgehogWeb.Resolvers.OSManagement do
         %{device_id: device_id, base_image_file: base_image_file},
         _resolution
       ) do
-    device = Devices.get_device!(device_id)
+    device =
+      device_id
+      |> Devices.get_device!()
+      |> Devices.preload_astarte_resources_for_device()
 
     with {:ok, ota_operation} <- OSManagement.create_manual_ota_operation(device, base_image_file) do
       {:ok, %{ota_operation: ota_operation}}

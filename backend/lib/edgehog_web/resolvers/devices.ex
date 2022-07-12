@@ -26,10 +26,25 @@ defmodule EdgehogWeb.Resolvers.Devices do
   alias Edgehog.Labeling.DeviceAttribute
   alias EdgehogWeb.Schema.VariantTypes
 
-  def find_device(%{id: id}, %{context: context}) do
+  @device_fields_querying_astarte [
+    :capabilities,
+    :hardware_info,
+    :location,
+    :storage_usage,
+    :system_status,
+    :wifi_scan_results,
+    :battery_status,
+    :base_image,
+    :os_info,
+    :cellular_connection,
+    :runtime_info
+  ]
+
+  def find_device(%{id: id}, %{context: context} = resolution) do
     device =
       Devices.get_device!(id)
       |> preload_system_model_for_device(context)
+      |> maybe_preload_astarte_resources_for_device(resolution)
 
     {:ok, device}
   end
@@ -52,28 +67,34 @@ defmodule EdgehogWeb.Resolvers.Devices do
     {:ok, part_numbers}
   end
 
-  def list_devices(_parent, %{filter: filter}, %{context: context}) do
+  def list_devices(_parent, %{filter: filter}, %{context: context} = resolution) do
     devices =
       Devices.list_devices(filter)
       |> preload_system_model_for_device(context)
+      |> maybe_preload_astarte_resources_for_device(resolution)
 
     {:ok, devices}
   end
 
-  def list_devices(_parent, _args, %{context: context}) do
+  def list_devices(_parent, _args, %{context: context} = resolution) do
     devices =
       Devices.list_devices()
       |> preload_system_model_for_device(context)
+      |> maybe_preload_astarte_resources_for_device(resolution)
 
     {:ok, devices}
   end
 
-  def update_device(%{device_id: id} = attrs, %{context: context}) do
+  def update_device(%{device_id: id} = attrs, %{context: context} = resolution) do
     device = Devices.get_device!(id)
     attrs = maybe_wrap_typed_values(attrs)
 
     with {:ok, device} <- Devices.update_device(device, attrs) do
-      device = preload_system_model_for_device(device, context)
+      device =
+        device
+        |> preload_system_model_for_device(context)
+        |> maybe_preload_astarte_resources_for_device(resolution)
+
       {:ok, %{device: device}}
     end
   end
@@ -93,6 +114,26 @@ defmodule EdgehogWeb.Resolvers.Devices do
     preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
 
     Devices.preload_system_model_for_device(target, preload: preload)
+  end
+
+  defp maybe_preload_astarte_resources_for_device(device, resolution) do
+    # We project the resolution, i.e. we obtain all requested child fields
+    selections = Absinthe.Resolution.project(resolution)
+
+    # We have to create the MapSet at runtime, otherwise Dialyzer complains about missing opaqueness
+    astarte_fields = MapSet.new(@device_fields_querying_astarte)
+
+    # We preload Astarte resources only if we need one of the fields that require querying Astarte
+    should_preload? =
+      selections
+      |> Enum.any?(&MapSet.member?(astarte_fields, &1.schema_node.identifier))
+
+    if should_preload? do
+      device
+      |> Devices.preload_astarte_resources_for_device()
+    else
+      device
+    end
   end
 
   def create_hardware_type(_parent, attrs, _context) do

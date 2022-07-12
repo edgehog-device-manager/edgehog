@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Resolvers.CapabilitiesTest do
 
   alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.DeviceStatus
+  alias Edgehog.Devices
   alias EdgehogWeb.Resolvers.Capabilities
 
   import Edgehog.AstarteFixtures
@@ -33,7 +34,10 @@ defmodule EdgehogWeb.Resolvers.CapabilitiesTest do
   setup do
     cluster = cluster_fixture()
     realm = realm_fixture(cluster)
-    device = device_fixture(realm)
+
+    device =
+      device_fixture(realm)
+      |> Devices.preload_astarte_resources_for_device()
 
     {:ok, cluster: cluster, realm: realm, device: device}
   end

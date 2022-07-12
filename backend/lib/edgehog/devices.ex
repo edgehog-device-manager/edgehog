@@ -233,7 +233,17 @@ defmodule Edgehog.Devices do
   end
 
   @doc """
-  Returns an `%Astarte.Client.AppEngine{}` for the given device
+  Preloads the Astarte realm and its cluster for an Edgehog Device.
+  """
+  def preload_astarte_resources_for_device(device_or_devices) do
+    Repo.preload(device_or_devices, [realm: [:cluster]], skip_tenant_id: true)
+  end
+
+  @doc """
+  Returns an `%Astarte.Client.AppEngine{}` for the given device.
+
+  The device must have the Astarte realm and cluster preloaded, call preload_astarte_resources/1
+  before calling this function to make sure of this.
 
   ## Examples
 
@@ -244,17 +254,14 @@ defmodule Edgehog.Devices do
   {:error, :invalid_private_key}
 
   """
-  def appengine_client_from_device(%Device{} = device) do
-    # TODO: preload outside
-    device = Repo.preload(device, [realm: [:cluster]], skip_tenant_id: true)
+  def appengine_client_from_device(%Device{realm: %{cluster: cluster} = realm})
+      when is_struct(realm, Edgehog.Astarte.Realm) and is_struct(cluster, Edgehog.Astarte.Cluster) do
+    %{
+      name: realm_name,
+      private_key: private_key
+    } = realm
 
-    %Device{
-      realm: %{
-        name: realm_name,
-        private_key: private_key,
-        cluster: %{base_api_url: base_api_url}
-      }
-    } = device
+    %{base_api_url: base_api_url} = cluster
 
     # TODO: this should create the client with a scoped JWT
     Astarte.Client.AppEngine.new(base_api_url, realm_name, private_key: private_key)

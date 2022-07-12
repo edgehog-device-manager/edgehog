@@ -25,7 +25,6 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
   alias Edgehog.Config
   alias Edgehog.Devices.Device
   alias Edgehog.Geolocation.Position
-  alias Edgehog.Repo
 
   use Tesla
 
@@ -33,10 +32,8 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
   plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
-  def geolocate(%Device{} = device) do
-    device = Repo.preload(device, :realm)
-
-    with {:ok, device_status} <- Astarte.get_device_status(device.realm, device.device_id),
+  def geolocate(%Device{realm: realm} = device) when is_struct(realm, Astarte.Realm) do
+    with {:ok, device_status} <- Astarte.get_device_status(realm, device.device_id),
          {:ok, coordinates} <- geolocate_ip(device_status.last_seen_ip) do
       device_last_seen =
         [device_status.last_connection, device_status.last_disconnection]

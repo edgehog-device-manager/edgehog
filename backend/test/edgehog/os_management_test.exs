@@ -23,6 +23,7 @@ defmodule Edgehog.OSManagementTest do
   use Edgehog.DataCase
   use Edgehog.EphemeralImageMockCase
 
+  alias Edgehog.Devices
   alias Edgehog.OSManagement
 
   describe "ota_operations" do
@@ -35,7 +36,10 @@ defmodule Edgehog.OSManagementTest do
     setup do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster)
-      device = device_fixture(realm)
+
+      device =
+        device_fixture(realm)
+        |> Devices.preload_astarte_resources_for_device()
 
       %{cluster: cluster, realm: realm, device: device}
     end
@@ -53,6 +57,7 @@ defmodule Edgehog.OSManagementTest do
     } do
       ota_operation = manual_ota_operation_fixture(device)
       other_device = device_fixture(realm)
+
       other_ota_operation = manual_ota_operation_fixture(other_device)
       assert OSManagement.list_ota_operations() == [ota_operation, other_ota_operation]
       assert OSManagement.list_device_ota_operations(device) == [ota_operation]

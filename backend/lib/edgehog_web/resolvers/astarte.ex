@@ -185,7 +185,10 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   end
 
   def set_led_behavior(%{device_id: device_id, behavior: behavior}, _resolution) do
-    device = Devices.get_device!(device_id)
+    device =
+      device_id
+      |> Devices.get_device!()
+      |> Devices.preload_astarte_resources_for_device()
 
     with {:ok, client} <- Devices.appengine_client_from_device(device),
          {:ok, led_behavior} <- led_behavior_from_enum(behavior),
