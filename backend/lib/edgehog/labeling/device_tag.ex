@@ -18,35 +18,32 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Attribute do
+defmodule Edgehog.Labeling.DeviceTag do
   use Ecto.Schema
-  import Ecto.Changeset
+  import Ecto.Query
+  alias Edgehog.Labeling.DeviceTag
+  alias Edgehog.Labeling.Tag
 
   @primary_key false
-  schema "device_attributes" do
-    field :tenant_id, :integer,
-      autogenerate: {Edgehog.Repo, :get_tenant_id, []},
-      primary_key: true
-
+  schema "devices_tags" do
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
+    field :tag_id, :id, primary_key: true
     field :device_id, :id, primary_key: true
-    field :namespace, Ecto.Enum, values: [:custom], primary_key: true
-    field :key, :string, primary_key: true
-    field :typed_value, Ecto.JSONVariant
-
-    timestamps()
   end
 
-  @doc false
-  def changeset(attributes, attrs) do
-    attributes
-    |> cast(attrs, [:namespace, :key, :typed_value])
-    |> validate_required([:namespace, :key, :typed_value])
-    |> validate_format(:key, ~r/[a-z0-9-_]+/)
+  def device_ids_matching_tag(tag) when is_binary(tag) do
+    from dt in DeviceTag,
+      join: t in Tag,
+      on: dt.tag_id == t.id,
+      where: t.name == ^tag,
+      select: dt.device_id
   end
 
-  @doc false
-  def custom_attribute_changeset(attributes, attrs) do
-    changeset(attributes, attrs)
-    |> validate_inclusion(:namespace, [:custom])
+  def device_ids_ilike_tag(tag) when is_binary(tag) do
+    from dt in DeviceTag,
+      join: t in Tag,
+      on: dt.tag_id == t.id,
+      where: ilike(t.name, ^"%#{tag}%"),
+      select: dt.device_id
   end
 end

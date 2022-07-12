@@ -18,16 +18,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.SelectorTest do
+defmodule Edgehog.SelectorTest do
   use Edgehog.DataCase
 
   import Edgehog.AstarteFixtures
-  alias Edgehog.Astarte
-  alias Edgehog.Devices.Selector
-  alias Edgehog.Devices.Selector.AST.AttributeFilter
-  alias Edgehog.Devices.Selector.AST.BinaryOp
-  alias Edgehog.Devices.Selector.AST.TagFilter
-  alias Edgehog.Devices.Selector.Parser.Error
+  import Edgehog.DevicesFixtures
+  alias Edgehog.Devices
+  alias Edgehog.Selector
+  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.Parser.Error
 
   describe "parse/1" do
     test "correctly parses tag filters" do
@@ -337,18 +336,18 @@ defmodule Edgehog.Devices.SelectorTest do
     end
   end
 
-  defp add_tags(%Astarte.Device{} = device, tags) do
-    {:ok, device} = Astarte.update_device(device, %{tags: tags})
+  defp add_tags(%Devices.Device{} = device, tags) do
+    {:ok, device} = Devices.update_device(device, %{tags: tags})
     device
   end
 
-  defp add_custom_attributes(%Astarte.Device{} = device, kv_map) do
+  defp add_custom_attributes(%Devices.Device{} = device, kv_map) do
     custom_attributes =
       for {k, v} <- kv_map, k = to_string(k) do
         %{namespace: :custom, key: k, typed_value: v}
       end
 
-    {:ok, device} = Astarte.update_device(device, %{custom_attributes: custom_attributes})
+    {:ok, device} = Devices.update_device(device, %{custom_attributes: custom_attributes})
     device
   end
 end

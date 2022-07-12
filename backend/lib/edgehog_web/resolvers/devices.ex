@@ -19,12 +19,35 @@
 #
 
 defmodule EdgehogWeb.Resolvers.Devices do
-  alias Edgehog.Astarte
   alias Edgehog.Devices
-  alias Edgehog.Devices.Attribute
+  alias Edgehog.Devices.Device
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
+  alias Edgehog.Labeling.DeviceAttribute
   alias EdgehogWeb.Schema.VariantTypes
+
+  @device_fields_querying_astarte [
+    :capabilities,
+    :hardware_info,
+    :location,
+    :storage_usage,
+    :system_status,
+    :wifi_scan_results,
+    :battery_status,
+    :base_image,
+    :os_info,
+    :cellular_connection,
+    :runtime_info
+  ]
+
+  def find_device(%{id: id}, %{context: context} = resolution) do
+    device =
+      Devices.get_device!(id)
+      |> preload_system_model_for_device(context)
+      |> maybe_preload_astarte_resources_for_device(resolution)
+
+    {:ok, device}
+  end
 
   def find_hardware_type(%{id: id}, _resolution) do
     Devices.fetch_hardware_type(id)
@@ -42,6 +65,75 @@ defmodule EdgehogWeb.Resolvers.Devices do
     part_numbers = Enum.map(part_numbers, &Map.get(&1, :part_number))
 
     {:ok, part_numbers}
+  end
+
+  def list_devices(_parent, %{filter: filter}, %{context: context} = resolution) do
+    devices =
+      Devices.list_devices(filter)
+      |> preload_system_model_for_device(context)
+      |> maybe_preload_astarte_resources_for_device(resolution)
+
+    {:ok, devices}
+  end
+
+  def list_devices(_parent, _args, %{context: context} = resolution) do
+    devices =
+      Devices.list_devices()
+      |> preload_system_model_for_device(context)
+      |> maybe_preload_astarte_resources_for_device(resolution)
+
+    {:ok, devices}
+  end
+
+  def update_device(%{device_id: id} = attrs, %{context: context} = resolution) do
+    device = Devices.get_device!(id)
+    attrs = maybe_wrap_typed_values(attrs)
+
+    with {:ok, device} <- Devices.update_device(device, attrs) do
+      device =
+        device
+        |> preload_system_model_for_device(context)
+        |> maybe_preload_astarte_resources_for_device(resolution)
+
+      {:ok, %{device: device}}
+    end
+  end
+
+  defp preload_system_model_for_device(target, %{locale: locale}) do
+    # Explicit locale, use that one
+    descriptions_query = Devices.localized_system_model_description_query(locale)
+    preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
+
+    Devices.preload_system_model_for_device(target, preload: preload)
+  end
+
+  defp preload_system_model_for_device(target, %{current_tenant: tenant}) do
+    # Fallback
+    %{default_locale: default_locale} = tenant
+    descriptions_query = Devices.localized_system_model_description_query(default_locale)
+    preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
+
+    Devices.preload_system_model_for_device(target, preload: preload)
+  end
+
+  defp maybe_preload_astarte_resources_for_device(device, resolution) do
+    # We project the resolution, i.e. we obtain all requested child fields
+    selections = Absinthe.Resolution.project(resolution)
+
+    # We have to create the MapSet at runtime, otherwise Dialyzer complains about missing opaqueness
+    astarte_fields = MapSet.new(@device_fields_querying_astarte)
+
+    # We preload Astarte resources only if we need one of the fields that require querying Astarte
+    should_preload? =
+      selections
+      |> Enum.any?(&MapSet.member?(astarte_fields, &1.schema_node.identifier))
+
+    if should_preload? do
+      device
+      |> Devices.preload_astarte_resources_for_device()
+    else
+      device
+    end
   end
 
   def create_hardware_type(_parent, attrs, _context) do
@@ -172,17 +264,41 @@ defmodule EdgehogWeb.Resolvers.Devices do
     end
   end
 
-  def extract_device_tags(%Astarte.Device{tags: tags}, _args, _context) do
+  def extract_device_tags(%Device{tags: tags}, _args, _context) do
     tag_names = for t <- tags, do: t.name
     {:ok, tag_names}
   end
 
-  def extract_attribute_type(%Attribute{typed_value: typed_value}, _args, _context) do
+  def extract_attribute_type(%DeviceAttribute{typed_value: typed_value}, _args, _context) do
     {:ok, typed_value.type}
   end
 
-  def extract_attribute_value(%Attribute{typed_value: typed_value}, _args, _context) do
+  def extract_attribute_value(%DeviceAttribute{typed_value: typed_value}, _args, _context) do
     %Ecto.JSONVariant{type: type, value: value} = typed_value
     VariantTypes.encode_variant_value(type, value)
   end
+
+  defp maybe_wrap_typed_values(%{custom_attributes: custom_attributes} = attrs)
+       when is_list(custom_attributes) do
+    wrapped_attributes =
+      Enum.map(custom_attributes, fn attr ->
+        %{
+          namespace: namespace,
+          key: key,
+          type: type,
+          value: value
+        } = attr
+
+        # Wrap type and value under the :typed_value key, as expected by the Ecto schema
+        %{
+          namespace: namespace,
+          key: key,
+          typed_value: %{type: type, value: value}
+        }
+      end)
+
+    %{attrs | custom_attributes: wrapped_attributes}
+  end
+
+  defp maybe_wrap_typed_values(attrs), do: attrs
 end

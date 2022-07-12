@@ -24,10 +24,11 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
   use Edgehog.EphemeralImageMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
-  alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device
+  alias Edgehog.Devices
+  alias Edgehog.Devices.Device
 
   describe "device query" do
     setup do
@@ -157,7 +158,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "returns the tags", %{conn: conn, api_path: api_path, realm: realm} do
       {:ok, %Device{id: id}} =
         device_fixture(realm)
-        |> Astarte.update_device(%{tags: ["foo", "bar"]})
+        |> Devices.update_device(%{tags: ["foo", "bar"]})
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 
@@ -251,7 +252,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       {:ok, %Device{id: id}} =
         device_fixture(realm)
-        |> Astarte.update_device(%{custom_attributes: custom_attributes})
+        |> Devices.update_device(%{custom_attributes: custom_attributes})
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
 

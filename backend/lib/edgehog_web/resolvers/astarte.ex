@@ -19,136 +19,89 @@
 #
 
 defmodule EdgehogWeb.Resolvers.Astarte do
-  alias Edgehog.Devices
   alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
-  alias Edgehog.Geolocation
+  alias Edgehog.Devices
+  alias Edgehog.Devices.Device
 
-  def find_device(%{id: id}, %{context: context}) do
-    device =
-      Astarte.get_device!(id)
-      |> preload_system_model_for_device(context)
-
-    {:ok, device}
-  end
-
-  def list_devices(_parent, %{filter: filter}, %{context: context}) do
-    devices =
-      Astarte.list_devices(filter)
-      |> preload_system_model_for_device(context)
-
-    {:ok, devices}
-  end
-
-  def list_devices(_parent, _args, %{context: context}) do
-    devices =
-      Astarte.list_devices()
-      |> preload_system_model_for_device(context)
-
-    {:ok, devices}
-  end
-
-  def update_device(%{device_id: id} = attrs, %{context: context}) do
-    device = Astarte.get_device!(id)
-    attrs = maybe_wrap_typed_values(attrs)
-
-    with {:ok, device} <- Astarte.update_device(device, attrs) do
-      device = preload_system_model_for_device(device, context)
-      {:ok, %{device: device}}
-    end
-  end
-
-  defp preload_system_model_for_device(target, %{locale: locale}) do
-    # Explicit locale, use that one
-    descriptions_query = Devices.localized_system_model_description_query(locale)
-    preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
-
-    Astarte.preload_system_model_for_device(target, preload: preload)
-  end
-
-  defp preload_system_model_for_device(target, %{current_tenant: tenant}) do
-    # Fallback
-    %{default_locale: default_locale} = tenant
-    descriptions_query = Devices.localized_system_model_description_query(default_locale)
-    preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
-
-    Astarte.preload_system_model_for_device(target, preload: preload)
-  end
-
-  def list_device_capabilities(%Device{} = device, _args, _context) do
-    with {:ok, introspection} <- Astarte.fetch_device_introspection(device),
-         capabilities = Astarte.get_device_capabilities(introspection) do
-      {:ok, capabilities}
+  def fetch_hardware_info(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, hardware_info} <- Astarte.fetch_hardware_info(client, device_id) do
+      {:ok, hardware_info}
     else
-      _ -> {:ok, []}
-    end
-  end
-
-  def get_hardware_info(%Device{} = device, _args, _context) do
-    Astarte.get_hardware_info(device)
-  end
-
-  def fetch_storage_usage(%Device{} = device, _args, _context) do
-    case Astarte.fetch_storage_usage(device) do
-      {:ok, storage_units} -> {:ok, storage_units}
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_system_status(%Device{} = device, _args, _context) do
-    case Astarte.fetch_system_status(device) do
-      {:ok, system_status} -> {:ok, system_status}
+  def fetch_storage_usage(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, storage_units} <- Astarte.fetch_storage_usage(client, device_id) do
+      {:ok, storage_units}
+    else
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_wifi_scan_results(%Device{} = device, _args, _context) do
-    case Astarte.fetch_wifi_scan_results(device) do
-      {:ok, wifi_scan_results} -> {:ok, wifi_scan_results}
+  def fetch_system_status(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, system_status} <- Astarte.fetch_system_status(client, device_id) do
+      {:ok, system_status}
+    else
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_device_location(%Device{} = device, _args, _context) do
-    case Geolocation.fetch_location(device) do
-      {:ok, location} -> {:ok, location}
+  def fetch_wifi_scan_results(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(client, device_id) do
+      {:ok, wifi_scan_results}
+    else
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_battery_status(%Device{} = device, _args, _context) do
-    case Astarte.fetch_battery_status(device) do
-      {:ok, battery_status} -> {:ok, battery_status}
+  def fetch_battery_status(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, battery_status} <- Astarte.fetch_battery_status(client, device_id) do
+      {:ok, battery_status}
+    else
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_base_image(%Device{} = device, _args, _context) do
-    case Astarte.fetch_base_image(device) do
-      {:ok, base_image} -> {:ok, base_image}
+  def fetch_base_image(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, base_image} <- Astarte.fetch_base_image(client, device_id) do
+      {:ok, base_image}
+    else
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_os_info(%Device{} = device, _args, _context) do
-    case Astarte.fetch_os_info(device) do
-      {:ok, os_info} -> {:ok, os_info}
+  def fetch_os_info(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, os_info} <- Astarte.fetch_os_info(client, device_id) do
+      {:ok, os_info}
+    else
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_runtime_info(%Device{} = device, _args, _context) do
-    case Astarte.fetch_runtime_info(device) do
-      {:ok, runtime_info} -> {:ok, runtime_info}
+  def fetch_runtime_info(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, runtime_info} <- Astarte.fetch_runtime_info(client, device_id) do
+      {:ok, runtime_info}
+    else
       _ -> {:ok, nil}
     end
   end
 
-  def fetch_cellular_connection(%Device{} = device, _args, _context) do
-    with {:ok, modem_properties_list} <- Astarte.fetch_cellular_connection_properties(device) do
+  def fetch_cellular_connection(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, modem_properties_list} <-
+           Astarte.fetch_cellular_connection_properties(client, device_id) do
       modem_status_map =
-        case Astarte.fetch_cellular_connection_status(device) do
+        case Astarte.fetch_cellular_connection_status(client, device_id) do
           {:ok, modem_status_list} ->
             Map.new(modem_status_list, &{&1.slot, &1})
 
@@ -232,10 +185,14 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   end
 
   def set_led_behavior(%{device_id: device_id, behavior: behavior}, _resolution) do
-    device = Astarte.get_device!(device_id)
+    device =
+      device_id
+      |> Devices.get_device!()
+      |> Devices.preload_astarte_resources_for_device()
 
-    with {:ok, led_behavior} <- led_behavior_from_enum(behavior),
-         :ok <- Astarte.send_led_behavior(device, led_behavior) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, led_behavior} <- led_behavior_from_enum(behavior),
+         :ok <- Astarte.send_led_behavior(client, device_id, led_behavior) do
       {:ok, %{behavior: behavior}}
     end
   end
@@ -248,28 +205,4 @@ defmodule EdgehogWeb.Resolvers.Astarte do
       _ -> {:error, "Unknown led behavior"}
     end
   end
-
-  defp maybe_wrap_typed_values(%{custom_attributes: custom_attributes} = attrs)
-       when is_list(custom_attributes) do
-    wrapped_attributes =
-      Enum.map(custom_attributes, fn attr ->
-        %{
-          namespace: namespace,
-          key: key,
-          type: type,
-          value: value
-        } = attr
-
-        # Wrap type and value under the :typed_value key, as expected by the Ecto schema
-        %{
-          namespace: namespace,
-          key: key,
-          typed_value: %{type: type, value: value}
-        }
-      end)
-
-    %{attrs | custom_attributes: wrapped_attributes}
-  end
-
-  defp maybe_wrap_typed_values(attrs), do: attrs
 end

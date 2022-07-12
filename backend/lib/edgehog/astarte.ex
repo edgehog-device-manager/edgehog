@@ -27,11 +27,8 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Repo
 
   alias Astarte.Client.AppEngine
-  alias Ecto.Multi
   alias Edgehog.Astarte.Cluster
-  alias Edgehog.Astarte.InterfaceID
-  alias Edgehog.Astarte.InterfaceVersion
-  alias Edgehog.Devices
+  alias Edgehog.Astarte.Device
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
@@ -95,64 +92,6 @@ defmodule Edgehog.Astarte do
                          LedBehavior
                        )
   @geolocation_module Application.compile_env(:edgehog, :astarte_geolocation_module, Geolocation)
-
-  @introspection_capability_map %{
-    base_image: [
-      %InterfaceID{name: "io.edgehog.devicemanager.BaseImage", major: 0, minor: 1}
-    ],
-    battery_status: [
-      %InterfaceID{name: "io.edgehog.devicemanager.BatteryStatus", major: 0, minor: 1}
-    ],
-    cellular_connection: [
-      %InterfaceID{
-        name: "io.edgehog.devicemanager.CellularConnectionProperties",
-        major: 0,
-        minor: 1
-      },
-      %InterfaceID{name: "io.edgehog.devicemanager.CellularConnectionStatus", major: 0, minor: 1}
-    ],
-    commands: [
-      %InterfaceID{name: "io.edgehog.devicemanager.Commands", major: 0, minor: 1}
-    ],
-    hardware_info: [
-      %InterfaceID{name: "io.edgehog.devicemanager.HardwareInfo", major: 0, minor: 1}
-    ],
-    led_behaviors: [
-      %InterfaceID{name: "io.edgehog.devicemanager.LedBehavior", major: 0, minor: 1}
-    ],
-    network_interface_info: [
-      %InterfaceID{
-        name: "io.edgehog.devicemanager.NetworkInterfaceProperties",
-        major: 0,
-        minor: 1
-      }
-    ],
-    operating_system: [
-      %InterfaceID{name: "io.edgehog.devicemanager.OSInfo", major: 0, minor: 1}
-    ],
-    runtime_info: [
-      %InterfaceID{name: "io.edgehog.devicemanager.RuntimeInfo", major: 0, minor: 1}
-    ],
-    software_updates: [
-      %InterfaceID{name: "io.edgehog.devicemanager.OTARequest", major: 0, minor: 1},
-      %InterfaceID{name: "io.edgehog.devicemanager.OTAResponse", major: 0, minor: 1}
-    ],
-    storage: [
-      %InterfaceID{name: "io.edgehog.devicemanager.StorageUsage", major: 0, minor: 1}
-    ],
-    system_info: [
-      %InterfaceID{name: "io.edgehog.devicemanager.SystemInfo", major: 0, minor: 1}
-    ],
-    system_status: [
-      %InterfaceID{name: "io.edgehog.devicemanager.SystemStatus", major: 0, minor: 1}
-    ],
-    telemetry_config: [
-      %InterfaceID{name: "io.edgehog.devicemanager.config.Telemetry", major: 0, minor: 1}
-    ],
-    wifi: [
-      %InterfaceID{name: "io.edgehog.devicemanager.WiFiScanResults", major: 0, minor: 1}
-    ]
-  }
 
   @doc """
   Returns the list of clusters.
@@ -363,114 +302,6 @@ defmodule Edgehog.Astarte do
     Realm.changeset(realm, attrs)
   end
 
-  alias Edgehog.Astarte.Device
-
-  @doc """
-  Returns the list of devices.
-
-  ## Examples
-
-      iex> list_devices()
-      [%Device{}, ...]
-
-  """
-  def list_devices(filters \\ %{}) do
-    filters
-    |> Enum.reduce(Device, &filter_with/2)
-    |> Repo.all()
-    |> Repo.preload([:tags, :custom_attributes])
-  end
-
-  defp filter_with(filter, query) do
-    case filter do
-      {:online, online} ->
-        from q in query,
-          where: q.online == ^online
-
-      {:device_id, device_id} ->
-        from q in query,
-          where: ilike(q.device_id, ^"%#{device_id}%")
-
-      {:system_model_part_number, part_number} ->
-        from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
-          where: ilike(smpn.part_number, ^"%#{part_number}%")
-
-      {:system_model_handle, handle} ->
-        from [system_model: sm] in ensure_system_model(query),
-          where: ilike(sm.handle, ^"%#{handle}%")
-
-      {:system_model_name, name} ->
-        from [system_model: sm] in ensure_system_model(query),
-          where: ilike(sm.name, ^"%#{name}%")
-
-      {:hardware_type_part_number, part_number} ->
-        from [hardware_type_part_number: htpn] in ensure_hardware_type_part_number(query),
-          where: ilike(htpn.part_number, ^"%#{part_number}%")
-
-      {:hardware_type_handle, handle} ->
-        from [hardware_type: ht] in ensure_hardware_type(query),
-          where: ilike(ht.handle, ^"%#{handle}%")
-
-      {:hardware_type_name, name} ->
-        from [hardware_type: ht] in ensure_hardware_type(query),
-          where: ilike(ht.name, ^"%#{name}%")
-
-      {:tag, tag} ->
-        # Need to filter tenant explicitly since prepare_query is not executed for subqueries
-        tenant_id = Repo.get_tenant_id()
-
-        device_ids_matching_tag =
-          from t in Devices.Tag,
-            where: ilike(t.name, ^"%#{tag}%") and t.tenant_id == ^tenant_id,
-            join: dt in Devices.DeviceTag,
-            on: t.id == dt.tag_id,
-            select: dt.device_id
-
-        from q in query,
-          where: q.id in subquery(device_ids_matching_tag)
-    end
-  end
-
-  defp ensure_hardware_type(query) do
-    if has_named_binding?(query, :hardware_type) do
-      query
-    else
-      from [system_model: sm] in ensure_system_model(query),
-        join: ht in assoc(sm, :hardware_type),
-        as: :hardware_type
-    end
-  end
-
-  defp ensure_hardware_type_part_number(query) do
-    if has_named_binding?(query, :hardware_type_part_number) do
-      query
-    else
-      from [hardware_type: ht] in ensure_hardware_type(query),
-        join: htpn in assoc(ht, :part_numbers),
-        as: :hardware_type_part_number
-    end
-  end
-
-  defp ensure_system_model(query) do
-    if has_named_binding?(query, :system_model) do
-      query
-    else
-      from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
-        join: sm in assoc(smpn, :system_model),
-        as: :system_model
-    end
-  end
-
-  defp ensure_system_model_part_number(query) do
-    if has_named_binding?(query, :system_model_part_number) do
-      query
-    else
-      from q in query,
-        join: smpn in assoc(q, :system_model_part_number),
-        as: :system_model_part_number
-    end
-  end
-
   @doc """
   Gets a single device.
 
@@ -487,7 +318,6 @@ defmodule Edgehog.Astarte do
   """
   def get_device!(id) do
     Repo.get!(Device, id)
-    |> Repo.preload([:tags, :custom_attributes])
   end
 
   @doc """
@@ -504,27 +334,12 @@ defmodule Edgehog.Astarte do
   """
   def create_device(%Realm{} = realm, attrs \\ %{}) do
     changeset =
-      %Device{realm_id: realm.id, tenant_id: Repo.get_tenant_id()}
+      %Device{realm_id: realm.id}
       |> Device.changeset(attrs)
 
     with {:ok, device} <- Repo.insert(changeset) do
-      {:ok, Repo.preload(device, [:tags, :custom_attributes])}
+      {:ok, device}
     end
-  end
-
-  @doc """
-  Preloads a system model for a device (or a list of devices)
-
-  Supported options:
-  - `:force` a boolean indicating if the preload has to be read from the database also if it's
-  already populated. Defaults to `false`.
-  - `:preload` the option passed to the preload, can be a query or a list of atoms. Defaults to `[]`.
-  """
-  def preload_system_model_for_device(device_or_devices, opts \\ []) do
-    force = Keyword.get(opts, :force, false)
-    preload = Keyword.get(opts, :preload, [])
-
-    Repo.preload(device_or_devices, [system_model: preload], force: force)
   end
 
   @doc """
@@ -540,42 +355,9 @@ defmodule Edgehog.Astarte do
 
   """
   def update_device(%Device{} = device, attrs) do
-    Multi.new()
-    |> Devices.ensure_tags_exist_multi(attrs)
-    |> Multi.update(:update_device, fn
-      %{ensure_tags_exist: nil} ->
-        device
-        |> Device.update_changeset(attrs)
-
-      %{ensure_tags_exist: tags} when is_list(tags) ->
-        device
-        |> Device.update_changeset(attrs)
-        |> Ecto.Changeset.put_assoc(:tags, tags)
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{update_device: device}} ->
-        {:ok, Repo.preload(device, [:tags, :custom_attributes])}
-
-      {:error, _failed_operation, failed_value, _progress_so_far} ->
-        {:error, failed_value}
-    end
-  end
-
-  @doc """
-  Deletes a device.
-
-  ## Examples
-
-      iex> delete_device(device)
-      {:ok, %Device{}}
-
-      iex> delete_device(device)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_device(%Device{} = device) do
-    Repo.delete(device)
+    device
+    |> Device.update_changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -605,7 +387,7 @@ defmodule Edgehog.Astarte do
   """
   def fetch_realm_device(%Realm{id: realm_id}, device_id) do
     case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
-      %Device{} = device -> {:ok, Repo.preload(device, [:tags, :custom_attributes])}
+      %Device{} = device -> {:ok, device}
       nil -> {:error, :device_not_found}
     end
   end
@@ -695,132 +477,71 @@ defmodule Edgehog.Astarte do
     end
   end
 
-  def get_hardware_info(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      HardwareInfo.get(client, device.device_id)
-    end
+  def fetch_hardware_info(%AppEngine{} = client, device_id) do
+    HardwareInfo.get(client, device_id)
   end
 
-  def fetch_storage_usage(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @storage_usage_module.get(client, device.device_id)
-    end
+  def fetch_storage_usage(%AppEngine{} = client, device_id) do
+    @storage_usage_module.get(client, device_id)
   end
 
-  def fetch_system_status(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @system_status_module.get(client, device.device_id)
-    end
+  def fetch_system_status(%AppEngine{} = client, device_id) do
+    @system_status_module.get(client, device_id)
   end
 
-  def fetch_geolocation(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @geolocation_module.get(client, device.device_id)
-    end
+  def fetch_geolocation(%AppEngine{} = client, device_id) do
+    @geolocation_module.get(client, device_id)
   end
 
-  def fetch_wifi_scan_results(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @wifi_scan_result_module.get(client, device.device_id)
-    end
+  def fetch_wifi_scan_results(%AppEngine{} = client, device_id) do
+    @wifi_scan_result_module.get(client, device_id)
   end
 
-  def fetch_battery_status(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @battery_status_module.get(client, device.device_id)
-    end
+  def fetch_battery_status(%AppEngine{} = client, device_id) do
+    @battery_status_module.get(client, device_id)
   end
 
-  def fetch_base_image(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @base_image_module.get(client, device.device_id)
-    end
+  def fetch_base_image(%AppEngine{} = client, device_id) do
+    @base_image_module.get(client, device_id)
   end
 
-  def fetch_os_info(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @os_info_module.get(client, device.device_id)
-    end
+  def fetch_os_info(%AppEngine{} = client, device_id) do
+    @os_info_module.get(client, device_id)
   end
 
-  def send_ota_request(%Device{} = device, uuid, url) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @ota_request_module.post(client, device.device_id, uuid, url)
-    end
+  def send_ota_request(%AppEngine{} = client, device_id, uuid, url) do
+    @ota_request_module.post(client, device_id, uuid, url)
   end
 
-  def fetch_cellular_connection_properties(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @cellular_connection_module.get_modem_properties(client, device.device_id)
-    end
+  def fetch_cellular_connection_properties(%AppEngine{} = client, device_id) do
+    @cellular_connection_module.get_modem_properties(client, device_id)
   end
 
-  def fetch_cellular_connection_status(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @cellular_connection_module.get_modem_status(client, device.device_id)
-    end
+  def fetch_cellular_connection_status(%AppEngine{} = client, device_id) do
+    @cellular_connection_module.get_modem_status(client, device_id)
   end
 
-  def fetch_runtime_info(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @runtime_info_module.get(client, device.device_id)
-    end
+  def fetch_runtime_info(%AppEngine{} = client, device_id) do
+    @runtime_info_module.get(client, device_id)
   end
 
-  def send_led_behavior(%Device{} = device, behavior) do
-    with {:ok, client} <- appengine_client_from_device(device) do
-      @led_behavior_module.post(client, device.device_id, behavior)
-    end
+  def send_led_behavior(%AppEngine{} = client, device_id, behavior) do
+    @led_behavior_module.post(client, device_id, behavior)
   end
 
   # get_device_status is already called to fetch other info from the device
   # TODO implement some prefetch function so that only the first call queries AppEngine
   #      and following functions can use preloaded data
-  def fetch_device_introspection(%Device{} = device) do
-    with {:ok, client} <- appengine_client_from_device(device),
-         {:ok, %DeviceStatus{introspection: introspection}} <-
-           @device_status_module.get(client, device.device_id) do
+  def fetch_device_introspection(%AppEngine{} = client, device_id) do
+    with {:ok, %DeviceStatus{introspection: introspection}} <-
+           @device_status_module.get(client, device_id) do
       {:ok, introspection}
     end
-  end
-
-  defp appengine_client_from_device(%Device{} = device) do
-    %Device{realm: realm} = Repo.preload(device, [realm: [:cluster]], skip_tenant_id: true)
-
-    appengine_client_from_realm(realm)
   end
 
   defp appengine_client_from_realm(%Realm{} = realm) do
     realm = Repo.preload(realm, [:cluster], skip_tenant_id: true)
 
     AppEngine.new(realm.cluster.base_api_url, realm.name, private_key: realm.private_key)
-  end
-
-  def get_device_capabilities(introspection) do
-    capabilities =
-      Enum.reduce(@introspection_capability_map, [], fn {capability, interface_list}, acc ->
-        if interfaces_supported?(introspection, interface_list) do
-          [capability | acc]
-        else
-          acc
-        end
-      end)
-
-    # TODO add checks on device privacy settings and geolocation providers
-    [:geolocation | capabilities]
-  end
-
-  defp interfaces_supported?(introspection, interfaces) do
-    Enum.all?(interfaces, &interface_supported?(introspection, &1))
-  end
-
-  defp interface_supported?(introspection, %InterfaceID{} = interface) do
-    case Map.fetch(introspection, interface.name) do
-      {:ok, %InterfaceVersion{major: major, minor: minor}} ->
-        major == interface.major && minor >= interface.minor
-
-      _ ->
-        false
-    end
   end
 end

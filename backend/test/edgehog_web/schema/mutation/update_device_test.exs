@@ -23,7 +23,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
-  alias Edgehog.Astarte
+  import Edgehog.DevicesFixtures
+  alias Edgehog.Devices
 
   describe "updateDevice field" do
     setup do
@@ -113,7 +114,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
       device: device
     } do
       {:ok, _} =
-        Astarte.update_device(device, %{
+        Devices.update_device(device, %{
           tags: ["not", "touched"],
           custom_attributes: [
             %{

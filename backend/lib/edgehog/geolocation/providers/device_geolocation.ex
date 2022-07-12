@@ -22,13 +22,15 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocation do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
   alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.Geolocation.SensorPosition
+  alias Edgehog.Devices
+  alias Edgehog.Devices.Device
   alias Edgehog.Geolocation.Position
 
   @impl Edgehog.Geolocation.GeolocationProvider
-  def geolocate(%Device{} = device) do
-    with {:ok, sensors_positions} <- Astarte.fetch_geolocation(device),
+  def geolocate(%Device{device_id: device_id} = device) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, sensors_positions} <- Astarte.fetch_geolocation(client, device_id),
          {:ok, sensors_positions} <- filter_latest_sensors_positions(sensors_positions),
          {:ok, position} <- geolocate_sensors(sensors_positions) do
       {:ok, position}

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device do
+defmodule Edgehog.Devices.Device do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Edgehog.Astarte.Realm
+  alias Edgehog.Astarte
+  alias Edgehog.Devices.SystemModelPartNumber
+  alias Edgehog.Labeling
 
   schema "devices" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
@@ -32,36 +34,28 @@ defmodule Edgehog.Astarte.Device do
     field :last_disconnection, :utc_datetime
     field :online, :boolean, default: false
     field :serial_number, :string
-    field :part_number, :string
-    belongs_to :realm, Realm
-    timestamps()
-  end
+    belongs_to :realm, Astarte.Realm
 
-  @doc false
-  def changeset(device, attrs) do
-    device
-    |> cast(attrs, [
-      :name,
-      :device_id,
-      :online,
-      :last_connection,
-      :last_disconnection,
-      :serial_number,
-      :part_number
-    ])
-    |> validate_required([:name, :device_id])
-    |> unique_constraint([:device_id, :realm_id, :tenant_id])
+    belongs_to :system_model_part_number, SystemModelPartNumber,
+      foreign_key: :part_number,
+      references: :part_number,
+      type: :string
+
+    has_one :system_model, through: [:system_model_part_number, :system_model]
+    many_to_many :tags, Labeling.Tag, join_through: Labeling.DeviceTag, on_replace: :delete
+
+    has_many :custom_attributes, Labeling.DeviceAttribute,
+      where: [namespace: "custom"],
+      on_replace: :delete
+
+    timestamps()
   end
 
   @doc false
   def update_changeset(device, attrs) do
     device
-    |> cast(attrs, [
-      :online,
-      :last_connection,
-      :last_disconnection,
-      :serial_number,
-      :part_number
-    ])
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+    |> cast_assoc(:custom_attributes, with: &Labeling.DeviceAttribute.custom_attribute_changeset/2)
   end
 end

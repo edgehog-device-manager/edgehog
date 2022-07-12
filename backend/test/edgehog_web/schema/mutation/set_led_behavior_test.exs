@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
 
   describe "SetLedBehavior field" do
     setup do

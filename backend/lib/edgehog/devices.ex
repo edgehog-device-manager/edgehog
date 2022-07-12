@@ -27,13 +27,245 @@ defmodule Edgehog.Devices do
   alias Ecto.Multi
   alias Edgehog.Repo
 
+  alias Edgehog.Assets
+  alias Edgehog.Devices.Device
   alias Edgehog.Devices.SystemModel
   alias Edgehog.Devices.SystemModelDescription
   alias Edgehog.Devices.SystemModelPartNumber
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.HardwareTypePartNumber
-  alias Edgehog.Devices.Tag
-  alias Edgehog.Assets
+  alias Edgehog.Labeling
+
+  @doc """
+  Gets a single device.
+
+  Raises `Ecto.NoResultsError` if the Device does not exist.
+
+  ## Examples
+
+  iex> get_device!(123)
+  %Device{}
+
+  iex> get_device!(456)
+  ** (Ecto.NoResultsError)
+
+  """
+  def get_device!(id) do
+    Repo.get!(Device, id)
+    |> Repo.preload([:tags, :custom_attributes])
+  end
+
+  @doc """
+  Returns the list of devices.
+
+  ## Examples
+
+      iex> list_devices()
+      [%Device{}, ...]
+
+  """
+  def list_devices(filters \\ %{}) do
+    filters
+    |> Enum.reduce(Device, &filter_with/2)
+    |> Repo.all()
+    |> Repo.preload([:tags, :custom_attributes])
+  end
+
+  defp filter_with(filter, query) do
+    case filter do
+      {:online, online} ->
+        from q in query,
+          where: q.online == ^online
+
+      {:device_id, device_id} ->
+        from q in query,
+          where: ilike(q.device_id, ^"%#{device_id}%")
+
+      {:system_model_part_number, part_number} ->
+        from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
+          where: ilike(smpn.part_number, ^"%#{part_number}%")
+
+      {:system_model_handle, handle} ->
+        from [system_model: sm] in ensure_system_model(query),
+          where: ilike(sm.handle, ^"%#{handle}%")
+
+      {:system_model_name, name} ->
+        from [system_model: sm] in ensure_system_model(query),
+          where: ilike(sm.name, ^"%#{name}%")
+
+      {:hardware_type_part_number, part_number} ->
+        from [hardware_type_part_number: htpn] in ensure_hardware_type_part_number(query),
+          where: ilike(htpn.part_number, ^"%#{part_number}%")
+
+      {:hardware_type_handle, handle} ->
+        from [hardware_type: ht] in ensure_hardware_type(query),
+          where: ilike(ht.handle, ^"%#{handle}%")
+
+      {:hardware_type_name, name} ->
+        from [hardware_type: ht] in ensure_hardware_type(query),
+          where: ilike(ht.name, ^"%#{name}%")
+
+      {:tag, tag} ->
+        device_ids_ilike_tag = Labeling.DeviceTag.device_ids_ilike_tag(tag)
+
+        from q in query,
+          where: q.id in subquery(device_ids_ilike_tag)
+    end
+  end
+
+  defp ensure_hardware_type(query) do
+    if has_named_binding?(query, :hardware_type) do
+      query
+    else
+      from [system_model: sm] in ensure_system_model(query),
+        join: ht in assoc(sm, :hardware_type),
+        as: :hardware_type
+    end
+  end
+
+  defp ensure_hardware_type_part_number(query) do
+    if has_named_binding?(query, :hardware_type_part_number) do
+      query
+    else
+      from [hardware_type: ht] in ensure_hardware_type(query),
+        join: htpn in assoc(ht, :part_numbers),
+        as: :hardware_type_part_number
+    end
+  end
+
+  defp ensure_system_model(query) do
+    if has_named_binding?(query, :system_model) do
+      query
+    else
+      from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
+        join: sm in assoc(smpn, :system_model),
+        as: :system_model
+    end
+  end
+
+  defp ensure_system_model_part_number(query) do
+    if has_named_binding?(query, :system_model_part_number) do
+      query
+    else
+      from q in query,
+        join: smpn in assoc(q, :system_model_part_number),
+        as: :system_model_part_number
+    end
+  end
+
+  @doc """
+  Preloads a system model for a device (or a list of devices)
+
+  Supported options:
+  - `:force` a boolean indicating if the preload has to be read from the database also if it's
+  already populated. Defaults to `false`.
+  - `:preload` the option passed to the preload, can be a query or a list of atoms. Defaults to `[]`.
+  """
+  def preload_system_model_for_device(device_or_devices, opts \\ []) do
+    force = Keyword.get(opts, :force, false)
+    preload = Keyword.get(opts, :preload, [])
+
+    Repo.preload(device_or_devices, [system_model: preload], force: force)
+  end
+
+  @doc """
+  Updates a device.
+
+  ## Examples
+
+  iex> update_device(device, %{field: new_value})
+  {:ok, %Device{}}
+
+  iex> update_device(device, %{field: bad_value})
+  {:error, %Ecto.Changeset{}}
+
+  """
+  def update_device(%Device{} = device, attrs) do
+    Multi.new()
+    |> Labeling.ensure_tags_exist_multi(attrs)
+    |> Multi.update(:update_device, fn
+      %{ensure_tags_exist: nil} ->
+        device
+        |> Device.update_changeset(attrs)
+
+      %{ensure_tags_exist: tags} when is_list(tags) ->
+        device
+        |> Device.update_changeset(attrs)
+        |> Ecto.Changeset.put_assoc(:tags, tags)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{update_device: device}} ->
+        {:ok, Repo.preload(device, [:tags, :custom_attributes])}
+
+      {:error, _failed_operation, failed_value, _progress_so_far} ->
+        {:error, failed_value}
+    end
+  end
+
+  @doc """
+  Deletes a device.
+
+  ## Examples
+
+  iex> delete_device(device)
+  {:ok, %Device{}}
+
+  iex> delete_device(device)
+  {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_device(%Device{} = device) do
+    Repo.delete(device)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking device changes.
+
+  ## Examples
+
+  iex> change_device(device)
+  %Ecto.Changeset{data: %Device{}}
+
+  """
+  def change_device(%Device{} = device, attrs \\ %{}) do
+    Device.update_changeset(device, attrs)
+  end
+
+  @doc """
+  Preloads the Astarte realm and its cluster for an Edgehog Device.
+  """
+  def preload_astarte_resources_for_device(device_or_devices) do
+    Repo.preload(device_or_devices, [realm: [:cluster]], skip_tenant_id: true)
+  end
+
+  @doc """
+  Returns an `%Astarte.Client.AppEngine{}` for the given device.
+
+  The device must have the Astarte realm and cluster preloaded, call preload_astarte_resources/1
+  before calling this function to make sure of this.
+
+  ## Examples
+
+  iex> appengine_client_from_device(device)
+  {:ok, %Astarte.Client.AppEngine{}}
+
+  iex> appengine_client_from_device(device)
+  {:error, :invalid_private_key}
+
+  """
+  def appengine_client_from_device(%Device{realm: %{cluster: cluster} = realm})
+      when is_struct(realm, Edgehog.Astarte.Realm) and is_struct(cluster, Edgehog.Astarte.Cluster) do
+    %{
+      name: realm_name,
+      private_key: private_key
+    } = realm
+
+    %{base_api_url: base_api_url} = cluster
+
+    # TODO: this should create the client with a scoped JWT
+    Astarte.Client.AppEngine.new(base_api_url, realm_name, private_key: private_key)
+  end
 
   @doc """
   Returns the list of hardware_types.
@@ -420,57 +652,5 @@ defmodule Edgehog.Devices do
   """
   def change_system_model(%SystemModel{} = system_model, attrs \\ %{}) do
     SystemModel.changeset(system_model, attrs)
-  end
-
-  @doc """
-  Inserts the tags passed in attrs within a multi transaction, normalizing them.
-
-  Returns the updated `%Ecto.Multi{}`.
-  """
-  def ensure_tags_exist_multi(multi, %{tags: _tags} = attrs) do
-    multi
-    |> Multi.run(:cast_tags, fn _repo, _changes ->
-      data = %{}
-      types = %{tags: {:array, :string}}
-
-      changeset =
-        {data, types}
-        |> Ecto.Changeset.cast(attrs, Map.keys(types))
-
-      with {:ok, %{tags: tags}} <- Ecto.Changeset.apply_action(changeset, :insert) do
-        tenant_id = Repo.get_tenant_id()
-
-        now =
-          NaiveDateTime.utc_now()
-          |> NaiveDateTime.truncate(:second)
-
-        tag_maps =
-          for tag <- tags,
-              tag = normalize_tag(tag),
-              tag != "" do
-            %{name: tag, inserted_at: now, updated_at: now, tenant_id: tenant_id}
-          end
-
-        {:ok, tag_maps}
-      end
-    end)
-    |> Multi.insert_all(:insert_tags, Tag, & &1.cast_tags, on_conflict: :nothing)
-    |> Multi.run(:ensure_tags_exist, fn repo, %{cast_tags: tag_maps} ->
-      tag_names = for t <- tag_maps, do: t.name
-      {:ok, repo.all(from t in Tag, where: t.name in ^tag_names)}
-    end)
-  end
-
-  def ensure_tags_exist_multi(multi, _attrs) do
-    # No tags in the update, so we return nil for tags
-    Multi.run(multi, :ensure_tags_exist, fn _repo, _previous ->
-      {:ok, nil}
-    end)
-  end
-
-  defp normalize_tag(tag) do
-    tag
-    |> String.trim()
-    |> String.downcase()
   end
 end

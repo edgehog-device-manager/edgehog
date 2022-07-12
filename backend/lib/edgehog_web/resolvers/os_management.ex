@@ -19,14 +19,14 @@
 #
 
 defmodule EdgehogWeb.Resolvers.OSManagement do
-  alias Edgehog.Astarte
+  alias Edgehog.Devices
   alias Edgehog.OSManagement
 
   def find_ota_operation(%{id: id}, _resolution) do
     {:ok, OSManagement.get_ota_operation!(id)}
   end
 
-  def ota_operations_for_device(%Astarte.Device{} = device, _args, _resolution) do
+  def ota_operations_for_device(%Devices.Device{} = device, _args, _resolution) do
     {:ok, OSManagement.list_device_ota_operations(device)}
   end
 
@@ -34,7 +34,10 @@ defmodule EdgehogWeb.Resolvers.OSManagement do
         %{device_id: device_id, base_image_file: base_image_file},
         _resolution
       ) do
-    device = Astarte.get_device!(device_id)
+    device =
+      device_id
+      |> Devices.get_device!()
+      |> Devices.preload_astarte_resources_for_device()
 
     with {:ok, ota_operation} <- OSManagement.create_manual_ota_operation(device, base_image_file) do
       {:ok, %{ota_operation: ota_operation}}

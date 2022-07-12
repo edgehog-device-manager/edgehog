@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Selector.AST.AttributeFilter do
+defmodule Edgehog.Selector.AST.AttributeFilter do
   defstruct [:namespace, :key, :operator, :type, :value]
 
   @type t :: %__MODULE__{
@@ -34,16 +34,16 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilter do
   @type value :: atom | DateTime.t() | binary | String.t() | number
 
   import Ecto.Query
-  alias Edgehog.Devices.Attribute
-  alias Edgehog.Devices.Selector.AST.AttributeFilter
-  alias Edgehog.Devices.Selector.Parser.Error
+  alias Edgehog.Labeling
+  alias Edgehog.Selector.AST.AttributeFilter
+  alias Edgehog.Selector.Parser.Error
 
-  @available_namespaces Ecto.Enum.values(Edgehog.Devices.Attribute, :namespace)
+  @available_namespaces Ecto.Enum.values(Labeling.DeviceAttribute, :namespace)
                         |> Enum.map(&to_string/1)
 
   @doc """
   Validates an `%AttributeFilter{}` and converts it to a dynamic where clause filtering
-  `Astarte.Device`s that match the given `%AttributeFilter{}`.
+  `Devices.Device`s that match the given `%AttributeFilter{}`.
 
   Returns `{:ok, dynamic_query}` or `{:error, %Parser.Error{}}`
   """
@@ -145,7 +145,7 @@ defmodule Edgehog.Devices.Selector.AST.AttributeFilter do
     } = attribute_filter
 
     base_query =
-      from a in Attribute,
+      from a in Labeling.DeviceAttribute,
         where: a.namespace == ^namespace and a.key == ^key,
         select: a.device_id
 

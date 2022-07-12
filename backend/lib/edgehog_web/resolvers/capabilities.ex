@@ -18,6 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Selector.AST.BinaryOp do
-  defstruct [:operator, :lhs, :rhs]
+defmodule EdgehogWeb.Resolvers.Capabilities do
+  alias Edgehog.Astarte
+  alias Edgehog.Capabilities
+  alias Edgehog.Devices
+  alias Edgehog.Devices.Device
+
+  def list_device_capabilities(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, introspection} <- Astarte.fetch_device_introspection(client, device_id),
+         capabilities = Capabilities.from_introspection(introspection) do
+      {:ok, capabilities}
+    else
+      _ -> {:ok, []}
+    end
+  end
 end

@@ -22,8 +22,9 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
   alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.WiFiScanResult
+  alias Edgehog.Devices
+  alias Edgehog.Devices.Device
   alias Edgehog.Config
   alias Edgehog.Geolocation.Position
 
@@ -33,8 +34,9 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
-  def geolocate(%Device{} = device) do
-    with {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(device),
+  def geolocate(%Device{device_id: device_id} = device) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(client, device_id),
          {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(wifi_scan_results),
          {:ok, position} <- geolocate_wifi(wifi_scan_results) do
       {:ok, position}

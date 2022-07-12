@@ -30,7 +30,10 @@ defmodule Edgehog.OSManagementFixtures do
   def manual_ota_operation_fixture(device) do
     fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
 
-    {:ok, ota_operation} = Edgehog.OSManagement.create_manual_ota_operation(device, fake_image)
+    {:ok, ota_operation} =
+      device
+      |> Edgehog.Devices.preload_astarte_resources_for_device()
+      |> Edgehog.OSManagement.create_manual_ota_operation(fake_image)
 
     ota_operation
   end

@@ -28,6 +28,7 @@ defmodule Edgehog.OSManagement do
 
   alias Ecto.Multi
   alias Edgehog.Astarte
+  alias Edgehog.Devices
   alias Edgehog.OSManagement.EphemeralImage
   alias Edgehog.OSManagement.OTAOperation
 
@@ -62,7 +63,7 @@ defmodule Edgehog.OSManagement do
   [%OTAOperation{}, ...]
 
   """
-  def list_device_ota_operations(%Astarte.Device{id: device_id}) do
+  def list_device_ota_operations(%Devices.Device{id: device_id}) do
     query =
       from o in OTAOperation,
         where: o.device_id == ^device_id
@@ -98,7 +99,7 @@ defmodule Edgehog.OSManagement do
       iex> create_manual_ota_operation(%Astarte.Device{} = device, %Plug.Upload{})
       {:ok, %OTAOperation{}}
   """
-  def create_manual_ota_operation(%Astarte.Device{} = device, %Plug.Upload{} = base_image_file) do
+  def create_manual_ota_operation(%Devices.Device{} = device, %Plug.Upload{} = base_image_file) do
     ota_operation_id = Ecto.UUID.generate()
     tenant_id = Repo.get_tenant_id()
 
@@ -117,7 +118,10 @@ defmodule Edgehog.OSManagement do
       Repo.insert(ota_operation)
     end)
     |> Multi.run(:send_ota_request, fn _repo, %{image_upload: base_image_url} ->
-      with :ok <- Astarte.send_ota_request(device, ota_operation_id, base_image_url) do
+      device_id = device.device_id
+
+      with {:ok, client} <- Devices.appengine_client_from_device(device),
+           :ok <- Astarte.send_ota_request(client, device_id, ota_operation_id, base_image_url) do
         {:ok, nil}
       end
     end)

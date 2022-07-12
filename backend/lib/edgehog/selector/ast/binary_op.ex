@@ -18,6 +18,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Selector.Parser.Error do
-  defstruct [:message, :line, :column]
+defmodule Edgehog.Selector.AST.BinaryOp do
+  defstruct [:operator, :lhs, :rhs]
 end
