@@ -58,6 +58,7 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
         "CELLULAR_CONNECTION",
         "LED_BEHAVIORS",
       ],
+      tags: ["foo", "bar"],
     };
   },
   HardwareInfo() {

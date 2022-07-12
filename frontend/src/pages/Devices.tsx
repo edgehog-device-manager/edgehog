@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import graphql from "babel-plugin-relay/macro";
@@ -37,18 +37,7 @@ import Spinner from "components/Spinner";
 const GET_DEVICES_QUERY = graphql`
   query Devices_getDevices_Query {
     devices {
-      id
-      deviceId
-      lastConnection
-      lastDisconnection
-      name
-      online
-      systemModel {
-        name
-        hardwareType {
-          name
-        }
-      }
+      ...DevicesTable_DeviceFragment
     }
   }
 `;
@@ -58,13 +47,7 @@ interface DevicesContentProps {
 }
 
 const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
-  const devicesData = usePreloadedQuery(GET_DEVICES_QUERY, getDevicesQuery);
-
-  // TODO: handle readonly type without mapping to mutable type
-  const devices = useMemo(
-    () => devicesData.devices.map((device) => ({ ...device })),
-    [devicesData]
-  );
+  const { devices } = usePreloadedQuery(GET_DEVICES_QUERY, getDevicesQuery);
 
   return (
     <Page>
@@ -74,7 +57,7 @@ const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
         }
       />
       <Page.Main>
-        <DevicesTable data={devices} />
+        <DevicesTable devicesRef={devices} />
       </Page.Main>
     </Page>
   );

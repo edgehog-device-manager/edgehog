@@ -26,7 +26,7 @@ defmodule Edgehog.Labeling do
   import Ecto.Query
 
   alias Ecto.Multi
-  alias Edgehog.Labeling.Tag
+  alias Edgehog.Labeling.{DeviceTag, Tag}
   alias Edgehog.Repo
 
   @doc """
@@ -73,6 +73,24 @@ defmodule Edgehog.Labeling do
     Multi.run(multi, :ensure_tags_exist, fn _repo, _previous ->
       {:ok, nil}
     end)
+  end
+
+  @doc """
+  Returns the list of device tags.
+
+  ## Examples
+
+      iex> list_device_tags()
+      [%Tag{}, ...]
+
+  """
+  def list_device_tags do
+    query =
+      from t in Tag,
+        join: dt in DeviceTag,
+        on: t.id == dt.tag_id
+
+    Repo.all(query)
   end
 
   defp normalize_tag(tag) do

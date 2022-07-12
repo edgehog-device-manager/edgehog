@@ -53,6 +53,7 @@ import type { Device_cellularConnection$key } from "api/__generated__/Device_cel
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
+import type { Device_getExistingDeviceTags_Query } from "api/__generated__/Device_getExistingDeviceTags_Query.graphql";
 import { Link, Route } from "Navigation";
 import Alert from "components/Alert";
 import CellularConnectionTabs from "components/CellularConnectionTabs";
@@ -75,6 +76,7 @@ import Tabs, { Tab } from "components/Tabs";
 import WiFiScanResultsTable from "components/WiFiScanResultsTable";
 import BatteryTable from "components/BatteryTable";
 import BaseImageForm from "forms/BaseImageForm";
+import MultiSelect from "components/MultiSelect";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
@@ -216,9 +218,7 @@ const GET_DEVICE_QUERY = graphql`
           name
         }
       }
-      cellularConnection {
-        __typename
-      }
+      tags
       ...Device_hardwareInfo
       ...Device_baseImage
       ...Device_osInfo
@@ -257,8 +257,15 @@ const UPDATE_DEVICE_MUTATION = graphql`
       device {
         id
         name
+        tags
       }
     }
+  }
+`;
+
+const GET_TAGS_QUERY = graphql`
+  query Device_getExistingDeviceTags_Query {
+    existingDeviceTags
   }
 `;
 
@@ -1085,19 +1092,50 @@ const DeviceCellularConnectionTab = ({
 
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
+  getTagsQuery: PreloadedQuery<Device_getExistingDeviceTags_Query>;
+  refreshTags: () => void;
 }
 
-const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
+const DeviceContent = ({
+  getDeviceQuery,
+  getTagsQuery,
+  refreshTags,
+}: DeviceContentProps) => {
   const { deviceId = "" } = useParams();
   const deviceData = usePreloadedQuery(GET_DEVICE_QUERY, getDeviceQuery);
+  const tagsData = usePreloadedQuery(GET_TAGS_QUERY, getTagsQuery);
 
   // TODO: handle readonly type without mapping to mutable type
   const device = useMemo(
-    () => deviceData.device && { ...deviceData.device },
+    () =>
+      deviceData.device && {
+        ...deviceData.device,
+        tags: deviceData.device.tags.slice(),
+      },
     [deviceData.device]
   );
 
-  const [deviceDraft, setDeviceDraft] = useState(_.pick(device, ["name"]));
+  const [deviceDraft, setDeviceDraft] = useState(
+    _.pick(device, ["name", "tags"])
+  );
+
+  const deviceTags = useMemo(
+    () =>
+      deviceDraft.tags?.map((tag) => ({
+        label: tag,
+        value: tag,
+      })) || [],
+    [deviceDraft.tags]
+  );
+
+  const tags = useMemo(
+    () =>
+      tagsData.existingDeviceTags.map((tag) => ({
+        label: tag,
+        value: tag,
+      })),
+    [tagsData.existingDeviceTags]
+  );
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
@@ -1122,6 +1160,9 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                   .join(". \n");
                 return setErrorFeedback(errorFeedback);
               }
+              if (deviceChanges.tags != null) {
+                refreshTags();
+              }
             },
             onError(error) {
               setDeviceDraft(draft);
@@ -1138,7 +1179,7 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
         500,
         { leading: true }
       ),
-    [updateDevice, deviceId]
+    [updateDevice, deviceId, refreshTags]
   );
 
   const handleDeviceChange = useCallback(
@@ -1147,6 +1188,22 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
       handleUpdateDevice(deviceDraft, deviceChanges);
     },
     [handleUpdateDevice, deviceDraft]
+  );
+  const isValidNewTag = useCallback(
+    (inputValue: string) => {
+      const newTag = inputValue.trim().toLowerCase();
+      return newTag !== "" && !deviceTags.some((tag) => tag.value === newTag);
+    },
+    [deviceTags]
+  );
+  const handleTagCreate = useCallback(
+    (inputValue: string) => {
+      const newTag = inputValue.trim().toLowerCase();
+      handleDeviceChange({
+        tags: deviceTags.map((tag) => tag.value).concat([newTag]),
+      });
+    },
+    [handleDeviceChange, deviceTags]
   );
 
   if (!device) {
@@ -1209,6 +1266,27 @@ const DeviceContent = ({ getDeviceQuery }: DeviceContentProps) => {
                       onChange={(e) =>
                         handleDeviceChange({ name: e.target.value })
                       }
+                    />
+                  </FormRow>
+                  <FormRow
+                    id="form-device-tags"
+                    label={
+                      <FormattedMessage
+                        id="Device.tags"
+                        defaultMessage="Tags"
+                      />
+                    }
+                  >
+                    <MultiSelect
+                      value={deviceTags}
+                      options={tags}
+                      onChange={(value) =>
+                        handleDeviceChange({
+                          tags: value.map((tag) => tag.value),
+                        })
+                      }
+                      isValidNewOption={isValidNewTag}
+                      onCreateOption={handleTagCreate}
                     />
                   </FormRow>
                   <FormRow
@@ -1350,9 +1428,18 @@ const DevicePage = () => {
   const [getDeviceQuery, getDevice] =
     useQueryLoader<Device_getDevice_Query>(GET_DEVICE_QUERY);
 
+  const [getTagsQuery, getTags] =
+    useQueryLoader<Device_getExistingDeviceTags_Query>(GET_TAGS_QUERY);
+
+  const refreshTags = useCallback(
+    () => getTags({}, { fetchPolicy: "store-and-network" }),
+    [getTags]
+  );
+
   useEffect(() => {
     getDevice({ id: deviceId });
-  }, [getDevice, deviceId]);
+    refreshTags();
+  }, [getDevice, deviceId, refreshTags]);
 
   return (
     <Suspense
@@ -1370,9 +1457,16 @@ const DevicePage = () => {
         )}
         onReset={() => {
           getDevice({ id: deviceId });
+          refreshTags();
         }}
       >
-        {getDeviceQuery && <DeviceContent getDeviceQuery={getDeviceQuery} />}
+        {getDeviceQuery && getTagsQuery && (
+          <DeviceContent
+            getDeviceQuery={getDeviceQuery}
+            getTagsQuery={getTagsQuery}
+            refreshTags={refreshTags}
+          />
+        )}
       </ErrorBoundary>
     </Suspense>
   );
