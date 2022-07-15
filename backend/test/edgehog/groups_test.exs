@@ -41,40 +41,74 @@ defmodule Edgehog.GroupsTest do
     end
 
     test "create_device_group/1 with valid data creates a device_group" do
-      valid_attrs = %{handle: "some handle", name: "some name", selector: "some selector"}
+      valid_attrs = %{handle: "test-devices", name: "Test Devices", selector: ~s<"test" in tags>}
 
       assert {:ok, %DeviceGroup{} = device_group} = Groups.create_device_group(valid_attrs)
-      assert device_group.handle == "some handle"
-      assert device_group.name == "some name"
-      assert device_group.selector == "some selector"
+      assert device_group.handle == "test-devices"
+      assert device_group.name == "Test Devices"
+      assert device_group.selector == ~s<"test" in tags>
     end
 
-    test "create_device_group/1 with invalid data returns error changeset" do
+    test "create_device_group/1 with empty data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Groups.create_device_group(@invalid_attrs)
+    end
+
+    test "create_device_group/1 with invalid handle returns error changeset" do
+      attrs = %{handle: "invalid handle", name: "Test Devices", selector: ~s<"test" in tags>}
+
+      assert {:error, %Ecto.Changeset{}} = Groups.create_device_group(attrs)
+    end
+
+    test "create_device_group/1 with invalid selector returns error changeset" do
+      attrs = %{handle: "test-devices", name: "Test Devices", selector: "invalid selector"}
+
+      assert {:error, %Ecto.Changeset{}} = Groups.create_device_group(attrs)
     end
 
     test "update_device_group/2 with valid data updates the device_group" do
       device_group = device_group_fixture()
 
       update_attrs = %{
-        handle: "some updated handle",
-        name: "some updated name",
-        selector: "some updated selector"
+        handle: "updated-test-devices",
+        name: "Updated Test Devices",
+        selector: ~s<"test" in tags and attributes["custom:is_updated"] == true>
       }
 
       assert {:ok, %DeviceGroup{} = device_group} =
                Groups.update_device_group(device_group, update_attrs)
 
-      assert device_group.handle == "some updated handle"
-      assert device_group.name == "some updated name"
-      assert device_group.selector == "some updated selector"
+      assert device_group.handle == "updated-test-devices"
+      assert device_group.name == "Updated Test Devices"
+
+      assert device_group.selector ==
+               ~s<"test" in tags and attributes["custom:is_updated"] == true>
     end
 
-    test "update_device_group/2 with invalid data returns error changeset" do
+    test "update_device_group/2 with empty data returns error changeset" do
       device_group = device_group_fixture()
 
       assert {:error, %Ecto.Changeset{}} =
                Groups.update_device_group(device_group, @invalid_attrs)
+
+      assert device_group == Groups.get_device_group!(device_group.id)
+    end
+
+    test "update_device_group/1 with invalid handle returns error changeset" do
+      device_group = device_group_fixture()
+
+      attrs = %{handle: "invalid updated handle"}
+
+      assert {:error, %Ecto.Changeset{}} = Groups.update_device_group(device_group, attrs)
+
+      assert device_group == Groups.get_device_group!(device_group.id)
+    end
+
+    test "update_device_group/1 with invalid selector returns error changeset" do
+      device_group = device_group_fixture()
+
+      attrs = %{selector: "invalid updated selector"}
+
+      assert {:error, %Ecto.Changeset{}} = Groups.update_device_group(device_group, attrs)
 
       assert device_group == Groups.get_device_group!(device_group.id)
     end

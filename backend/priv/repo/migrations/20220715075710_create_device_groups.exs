@@ -23,14 +23,18 @@ defmodule Edgehog.Repo.Migrations.CreateDeviceGroups do
 
   def change do
     create table(:device_groups) do
-      add :name, :string
-      add :handle, :string
-      add :selector, :text
-      add :tenant_id, references(:tenants, on_delete: :nothing)
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :name, :string, null: false
+      add :handle, :string, null: false
+      add :selector, :text, null: false
 
       timestamps()
     end
 
     create index(:device_groups, [:tenant_id])
+    create unique_index(:device_groups, [:name, :tenant_id])
+    create unique_index(:device_groups, [:handle, :tenant_id])
   end
 end

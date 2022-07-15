@@ -31,9 +31,9 @@ defmodule Edgehog.GroupsFixtures do
     {:ok, device_group} =
       attrs
       |> Enum.into(%{
-        handle: "some handle",
-        name: "some name",
-        selector: "some selector"
+        handle: "test-devices",
+        name: "Test Devices",
+        selector: ~s<"test" in tags>
       })
       |> Edgehog.Groups.create_device_group()
 
