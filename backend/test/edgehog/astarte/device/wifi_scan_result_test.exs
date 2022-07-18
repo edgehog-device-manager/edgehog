@@ -21,8 +21,8 @@
 defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
   use Edgehog.DataCase
 
-  alias Edgehog.Astarte.Device.WiFiScanResult
   alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.WiFiScanResult
 
   describe "system_status" do
     import Edgehog.AstarteFixtures

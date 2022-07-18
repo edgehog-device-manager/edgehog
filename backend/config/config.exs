@@ -52,7 +52,7 @@ config :swoosh, :api_client, false
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:module, :function, :request_id, :tag, :tenant, :realm]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
@@ -74,6 +74,14 @@ config :edgehog, EdgehogWeb.Auth.Token,
     "RS384",
     "RS512"
   ]
+
+# Prometheus metrics
+config :edgehog, Edgehog.PromEx,
+  disabled: false,
+  manual_metrics_start_delay: :no_delay,
+  drop_metrics_groups: [],
+  grafana: :disabled,
+  metrics_server: :disabled
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

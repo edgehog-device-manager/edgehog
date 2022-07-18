@@ -746,6 +746,31 @@ OTA trigger:
 }
 ```
 
+System Info trigger:
+
+```json
+{
+    "name": "edgehog-system-info",
+    "action": {
+        "http_url": "<BACKEND-TRIGGER-URL>",
+        "ignore_ssl_errors": false,
+        "http_method": "post",
+        "http_static_headers": {}
+    },
+    "simple_triggers": [
+        {
+            "type": "data_trigger",
+            "on": "incoming_data",
+            "interface_name": "io.edgehog.devicemanager.SystemInfo",
+            "interface_major": 0,
+            "match_path": "/*",
+            "value_match_operator": "*"
+        }
+    ]
+}
+
+```
+
 Values to be replaced
 - `BACKEND-TRIGGER-URL`: the URL where the backend receives triggers. This is
   `<BASE-BACKEND-URL>/tenants/<TENANT-NAME>/triggers`, where `BASE-BACKEND-URL` is the URL to your

@@ -21,8 +21,8 @@
 defmodule Edgehog.Astarte.Device.SystemStatusTest do
   use Edgehog.DataCase
 
-  alias Edgehog.Astarte.Device.SystemStatus
   alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.SystemStatus
 
   describe "system_status" do
     import Edgehog.AstarteFixtures

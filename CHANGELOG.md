@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `MAX_UPLOAD_SIZE_BYTES` env variable to define the maximum dimension for uploads (particularly
   relevant for OTA updates). Defaults to 4 GB.
 
+## [0.5.2] - 2022-06-22
+### Added
+- Expose Prometheus metrics and a /health API endpoint.
+
+### Changed
+- Start using logfmt as logging format.
+
+### Fixed
+- Use the tenant's default locale when managing translated descriptions if the user's locale is not
+available.
+
 ## [0.5.1] - 2022-06-01
 ### Added
 - Add `connected` field to wifi scan result and highlight the latest connected network

@@ -27,12 +27,12 @@ defmodule EdgehogWeb.Auth do
   end
 
   def call(conn, opts) do
-    unless Config.authentication_disabled?() do
-      Pipeline.call(conn, opts)
-    else
+    if Config.authentication_disabled?() do
       # TODO: when we add Authz this path will probably have to
       # put some type of all-access Authz in the GraphQL context
       conn
+    else
+      Pipeline.call(conn, opts)
     end
   end
 end

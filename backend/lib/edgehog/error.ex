@@ -77,8 +77,7 @@ defmodule Edgehog.Error do
   end
 
   defp handle(%{status: status, response: response} = error)
-       when is_struct(error, Astarte.Client.APIError) or
-              is_struct(error, Astarte.Client.APIError) do
+       when is_struct(error, Astarte.Client.APIError) do
     case response do
       # detail already includes an error message
       %{"errors" => %{"detail" => error_message}} ->

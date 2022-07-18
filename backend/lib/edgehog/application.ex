@@ -33,6 +33,8 @@ defmodule Edgehog.Application do
     Logger.info("Starting application version #{@version}.", tag: "edgehog_start")
 
     children = [
+      # Prometheus metrics
+      Edgehog.PromEx,
       # Start the Ecto repository
       Edgehog.Repo,
       # Start the Telemetry supervisor
