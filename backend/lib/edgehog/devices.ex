@@ -71,46 +71,49 @@ defmodule Edgehog.Devices do
     |> Repo.preload([:tags, :custom_attributes])
   end
 
-  defp filter_with(filter, query) do
-    case filter do
-      {:online, online} ->
-        from q in query,
-          where: q.online == ^online
+  defp filter_with({:online, online}, query) do
+    from q in query, where: q.online == ^online
+  end
 
-      {:device_id, device_id} ->
-        from q in query,
-          where: ilike(q.device_id, ^"%#{device_id}%")
+  defp filter_with({:device_id, device_id}, query) do
+    from q in query, where: ilike(q.device_id, ^"%#{device_id}%")
+  end
 
-      {:system_model_part_number, part_number} ->
-        from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
-          where: ilike(smpn.part_number, ^"%#{part_number}%")
+  defp filter_with({:system_model_part_number, part_number}, query) do
+    from [system_model_part_number: smpn] in ensure_system_model_part_number(query),
+      where: ilike(smpn.part_number, ^"%#{part_number}%")
+  end
 
-      {:system_model_handle, handle} ->
-        from [system_model: sm] in ensure_system_model(query),
-          where: ilike(sm.handle, ^"%#{handle}%")
+  defp filter_with({:system_model_handle, handle}, query) do
+    from [system_model: sm] in ensure_system_model(query),
+      where: ilike(sm.handle, ^"%#{handle}%")
+  end
 
-      {:system_model_name, name} ->
-        from [system_model: sm] in ensure_system_model(query),
-          where: ilike(sm.name, ^"%#{name}%")
+  defp filter_with({:system_model_name, name}, query) do
+    from [system_model: sm] in ensure_system_model(query),
+      where: ilike(sm.name, ^"%#{name}%")
+  end
 
-      {:hardware_type_part_number, part_number} ->
-        from [hardware_type_part_number: htpn] in ensure_hardware_type_part_number(query),
-          where: ilike(htpn.part_number, ^"%#{part_number}%")
+  defp filter_with({:hardware_type_part_number, part_number}, query) do
+    from [hardware_type_part_number: htpn] in ensure_hardware_type_part_number(query),
+      where: ilike(htpn.part_number, ^"%#{part_number}%")
+  end
 
-      {:hardware_type_handle, handle} ->
-        from [hardware_type: ht] in ensure_hardware_type(query),
-          where: ilike(ht.handle, ^"%#{handle}%")
+  defp filter_with({:hardware_type_handle, handle}, query) do
+    from [hardware_type: ht] in ensure_hardware_type(query),
+      where: ilike(ht.handle, ^"%#{handle}%")
+  end
 
-      {:hardware_type_name, name} ->
-        from [hardware_type: ht] in ensure_hardware_type(query),
-          where: ilike(ht.name, ^"%#{name}%")
+  defp filter_with({:hardware_type_name, name}, query) do
+    from [hardware_type: ht] in ensure_hardware_type(query),
+      where: ilike(ht.name, ^"%#{name}%")
+  end
 
-      {:tag, tag} ->
-        device_ids_ilike_tag = Labeling.DeviceTag.device_ids_ilike_tag(tag)
+  defp filter_with({:tag, tag}, query) do
+    device_ids_ilike_tag = Labeling.DeviceTag.device_ids_ilike_tag(tag)
 
-        from q in query,
-          where: q.id in subquery(device_ids_ilike_tag)
-    end
+    from q in query,
+      where: q.id in subquery(device_ids_ilike_tag)
   end
 
   defp ensure_hardware_type(query) do
@@ -480,19 +483,20 @@ defmodule Edgehog.Devices do
   end
 
   @doc """
-  Preloads only descriptions with a specific locale for an `SystemModel` (or a list of them).
+  Preloads only descriptions with specific locales for a `SystemModel` (or a list of them).
   """
-  def preload_localized_descriptions_for_system_model(model_or_models, locale) do
-    descriptions_preload = SystemModelDescription.localized(locale)
+  def preload_localized_descriptions_for_system_model(model_or_models, locales)
+      when is_list(locales) do
+    descriptions_preload = SystemModelDescription.localized(locales)
 
     Repo.preload(model_or_models, descriptions: descriptions_preload)
   end
 
   @doc """
-  Returns a query that selects only `SystemModelDescription` with a specific locale.
+  Returns a query that selects only `SystemModelDescription` with specific locales.
   """
-  def localized_system_model_description_query(locale) do
-    SystemModelDescription.localized(locale)
+  def localized_system_model_description_query(locales) when is_list(locales) do
+    SystemModelDescription.localized(locales)
   end
 
   @doc """

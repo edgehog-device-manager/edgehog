@@ -22,8 +22,8 @@ defmodule Edgehog.Devices.HardwareType do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Edgehog.Devices.SystemModel
   alias Edgehog.Devices.HardwareTypePartNumber
+  alias Edgehog.Devices.SystemModel
 
   schema "hardware_types" do
     field :handle, :string

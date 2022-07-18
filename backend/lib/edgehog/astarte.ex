@@ -333,13 +333,9 @@ defmodule Edgehog.Astarte do
 
   """
   def create_device(%Realm{} = realm, attrs \\ %{}) do
-    changeset =
-      %Device{realm_id: realm.id}
-      |> Device.changeset(attrs)
-
-    with {:ok, device} <- Repo.insert(changeset) do
-      {:ok, device}
-    end
+    %Device{realm_id: realm.id}
+    |> Device.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """

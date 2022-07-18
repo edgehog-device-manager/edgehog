@@ -68,10 +68,10 @@ type SystemModelData = {
 type SystemModelChanges = {
   name: string;
   handle: string;
-  description?: {
+  description: {
     locale: string;
     text: string;
-  };
+  } | null;
   hardwareType: {
     name: string;
   };
@@ -137,19 +137,18 @@ const transformOutputData = (
       name: data.hardwareType,
     },
     partNumbers: data.partNumbers.map((pn) => pn.value),
+    description: data.description
+      ? {
+          locale,
+          text: data.description,
+        }
+      : null,
   };
 
   if (data.pictureFile) {
     systemModel.pictureFile = data.pictureFile[0];
   } else if (data.pictureFile === null) {
     systemModel.pictureUrl = null;
-  }
-
-  if (data.description) {
-    systemModel.description = {
-      locale,
-      text: data.description,
-    };
   }
 
   return systemModel;

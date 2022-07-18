@@ -34,6 +34,9 @@ config :edgehog, EdgehogWeb.Endpoint, url: [host: "example.com", port: 80]
 # Do not print debug messages in production
 config :logger, level: :info
 
+# Configure Logfmt
+config :logger, :console, format: {PrettyLog.LogfmtFormatter, :format}
+
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

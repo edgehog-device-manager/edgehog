@@ -135,54 +135,56 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
-  def modem_registration_status_to_enum(
-        %{registration_status: registration_status},
-        _args,
-        _context
-      ) do
-    case registration_status do
-      "NotRegistered" -> {:ok, :not_registered}
-      "Registered" -> {:ok, :registered}
-      "SearchingOperator" -> {:ok, :searching_operator}
-      "RegistrationDenied" -> {:ok, :registration_denied}
-      "Unknown" -> {:ok, :unknown}
-      "RegisteredRoaming" -> {:ok, :registered_roaming}
-      nil -> {:ok, nil}
-      _other -> {:error, :invalid_modem_registration_status}
-    end
+  def resolve_modem_registration_status(%{registration_status: nil}, _args, _res) do
+    {:ok, nil}
   end
 
-  def modem_technology_to_enum(
-        %{technology: technology},
-        _args,
-        _context
-      ) do
-    case technology do
-      "GSM" -> {:ok, :gsm}
-      "GSMCompact" -> {:ok, :gsm_compact}
-      "UTRAN" -> {:ok, :utran}
-      "GSMwEGPRS" -> {:ok, :gsm_egprs}
-      "UTRANwHSDPA" -> {:ok, :utran_hsdpa}
-      "UTRANwHSUPA" -> {:ok, :utran_hsupa}
-      "UTRANwHSDPAandHSUPA" -> {:ok, :utran_hsdpa_hsupa}
-      "EUTRAN" -> {:ok, :eutran}
-      nil -> {:ok, nil}
-      _other -> {:error, :invalid_modem_technology}
-    end
+  def resolve_modem_registration_status(%{registration_status: registration_status}, _args, _res) do
+    modem_registration_status_to_enum(registration_status)
   end
 
-  def battery_status_to_enum(%BatterySlot{status: status}, _args, _context) do
-    case status do
-      "Charging" -> {:ok, :charging}
-      "Discharging" -> {:ok, :discharging}
-      "Idle" -> {:ok, :idle}
-      "EitherIdleOrCharging" -> {:ok, :either_idle_or_charging}
-      "Failure" -> {:ok, :failure}
-      "Removed" -> {:ok, :removed}
-      "Unknown" -> {:ok, :unknown}
-      _other -> {:error, :invalid_battery_status}
-    end
+  defp modem_registration_status_to_enum("NotRegistered"), do: {:ok, :not_registered}
+  defp modem_registration_status_to_enum("Registered"), do: {:ok, :registered}
+  defp modem_registration_status_to_enum("SearchingOperator"), do: {:ok, :searching_operator}
+  defp modem_registration_status_to_enum("RegistrationDenied"), do: {:ok, :registration_denied}
+  defp modem_registration_status_to_enum("Unknown"), do: {:ok, :unknown}
+  defp modem_registration_status_to_enum("RegisteredRoaming"), do: {:ok, :registered_roaming}
+  defp modem_registration_status_to_enum(_), do: {:error, :invalid_modem_registration_status}
+
+  def resolve_modem_technology(%{technology: nil}, _args, _res) do
+    {:ok, nil}
   end
+
+  def resolve_modem_technology(%{technology: technology}, _args, _res) do
+    modem_technology_to_enum(technology)
+  end
+
+  defp modem_technology_to_enum("GSM"), do: {:ok, :gsm}
+  defp modem_technology_to_enum("GSMCompact"), do: {:ok, :gsm_compact}
+  defp modem_technology_to_enum("UTRAN"), do: {:ok, :utran}
+  defp modem_technology_to_enum("GSMwEGPRS"), do: {:ok, :gsm_egprs}
+  defp modem_technology_to_enum("UTRANwHSDPA"), do: {:ok, :utran_hsdpa}
+  defp modem_technology_to_enum("UTRANwHSUPA"), do: {:ok, :utran_hsupa}
+  defp modem_technology_to_enum("UTRANwHSDPAandHSUPA"), do: {:ok, :utran_hsdpa_hsupa}
+  defp modem_technology_to_enum("EUTRAN"), do: {:ok, :eutran}
+  defp modem_technology_to_enum(_), do: {:error, :invalid_modem_technology}
+
+  def resolve_battery_status(%BatterySlot{status: nil}, _args, _res) do
+    {:ok, nil}
+  end
+
+  def resolve_battery_status(%BatterySlot{status: status}, _args, _res) do
+    battery_status_to_enum(status)
+  end
+
+  defp battery_status_to_enum("Charging"), do: {:ok, :charging}
+  defp battery_status_to_enum("Discharging"), do: {:ok, :discharging}
+  defp battery_status_to_enum("Idle"), do: {:ok, :idle}
+  defp battery_status_to_enum("EitherIdleOrCharging"), do: {:ok, :either_idle_or_charging}
+  defp battery_status_to_enum("Failure"), do: {:ok, :failure}
+  defp battery_status_to_enum("Removed"), do: {:ok, :removed}
+  defp battery_status_to_enum("Unknown"), do: {:ok, :unknown}
+  defp battery_status_to_enum(_), do: {:error, :invalid_battery_status}
 
   def set_led_behavior(%{device_id: device_id, behavior: behavior}, _resolution) do
     device =
@@ -197,12 +199,8 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
-  defp led_behavior_from_enum(behavior) do
-    case behavior do
-      :blink -> {:ok, "Blink60Seconds"}
-      :double_blink -> {:ok, "DoubleBlink60Seconds"}
-      :slow_blink -> {:ok, "SlowBlink60Seconds"}
-      _ -> {:error, "Unknown led behavior"}
-    end
-  end
+  defp led_behavior_from_enum(:blink), do: {:ok, "Blink60Seconds"}
+  defp led_behavior_from_enum(:double_blink), do: {:ok, "DoubleBlink60Seconds"}
+  defp led_behavior_from_enum(:slow_blink), do: {:ok, "SlowBlink60Seconds"}
+  defp led_behavior_from_enum(_), do: {:error, "Unknown led behavior"}
 end

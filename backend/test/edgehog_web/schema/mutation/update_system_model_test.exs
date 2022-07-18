@@ -206,16 +206,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
       assert {:ok, system_model} = Devices.fetch_system_model(system_model.id)
 
-      assert %SystemModel{descriptions: [%{locale: "en-US", text: "Another system model"}]} =
+      assert %SystemModel{
+               descriptions: [
+                 %{locale: "it-IT", text: "Un modello di sistema"},
+                 %{locale: "en-US", text: "Another system model"}
+               ]
+             } =
                Devices.preload_localized_descriptions_for_system_model(
                  system_model,
-                 default_locale
-               )
-
-      assert %SystemModel{descriptions: [%{locale: "it-IT", text: "Un modello di sistema"}]} =
-               Devices.preload_localized_descriptions_for_system_model(
-                 system_model,
-                 "it-IT"
+                 ["it-IT", default_locale]
                )
     end
 

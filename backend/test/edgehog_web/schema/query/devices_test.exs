@@ -404,7 +404,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert modem1["cellId"] == 170_402_199
       assert modem1["mobileCountryCode"] == 310
       assert modem1["mobileNetworkCode"] == 410
-      assert modem1["localAreaCode"] == 35632
+      assert modem1["localAreaCode"] == 35_632
       assert modem1["registrationStatus"] == "REGISTERED"
       assert modem1["rssi"] == -60
       assert modem1["technology"] == "GSM"

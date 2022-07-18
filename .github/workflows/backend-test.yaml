@@ -130,6 +130,9 @@ jobs:
     - name: Check formatting
       working-directory: backend
       run: mix format --check-formatted
+    - name: Run Credo code analysis
+      working-directory: backend
+      run: mix credo --ignore moduledoc,todo
     - name: Compile
       working-directory: backend
       run: mix do compile
