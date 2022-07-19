@@ -25,7 +25,10 @@ defmodule Edgehog.GroupsTest do
 
   describe "device_groups" do
     alias Edgehog.Groups.DeviceGroup
+    alias Edgehog.Devices
 
+    import Edgehog.AstarteFixtures
+    import Edgehog.DevicesFixtures
     import Edgehog.GroupsFixtures
 
     @invalid_attrs %{handle: nil, name: nil, selector: nil}
@@ -33,6 +36,29 @@ defmodule Edgehog.GroupsTest do
     test "list_device_groups/0 returns all device_groups" do
       device_group = device_group_fixture()
       assert Groups.list_device_groups() == [device_group]
+    end
+
+    test "list_devices_in_group/0 returns empty list with no devices" do
+      device_group = device_group_fixture()
+      assert Groups.list_devices_in_group(device_group) == []
+    end
+
+    test "list_devices_in_group/0 returns devices matching the group selector" do
+      device_group = device_group_fixture(selector: ~s<"foo" in tags>)
+
+      realm =
+        cluster_fixture()
+        |> realm_fixture()
+
+      {:ok, device_1} =
+        device_fixture(realm)
+        |> Devices.update_device(%{tags: ["foo", "baz"]})
+
+      {:ok, _device_2} =
+        device_fixture(realm, name: "Device 2", device_id: "9FXwmtRtRuqC48DEOjOj7Q")
+        |> Devices.update_device(%{tags: ["bar"]})
+
+      assert Groups.list_devices_in_group(device_group) == [device_1]
     end
 
     test "get_device_group!/1 returns the device_group with given id" do

@@ -24,9 +24,10 @@ defmodule Edgehog.Groups do
   """
 
   import Ecto.Query, warn: false
-  alias Edgehog.Repo
-
+  alias Edgehog.Devices
   alias Edgehog.Groups.DeviceGroup
+  alias Edgehog.Repo
+  alias Edgehog.Selector
 
   @doc """
   Returns the list of device_groups.
@@ -39,6 +40,24 @@ defmodule Edgehog.Groups do
   """
   def list_device_groups do
     Repo.all(DeviceGroup)
+  end
+
+  @doc """
+  Returns the list of devices belonging to `device_group`.
+
+  ## Examples
+
+  iex> list_devices_in_group(device_group)
+  [%Devices.Device{}, ...]
+
+  """
+  def list_devices_in_group(%DeviceGroup{} = device_group) do
+    # This gets validated when the DeviceGroup is created, if it fails here then there's a bug
+    # and it's legitimate we crash
+    {:ok, device_query} = Selector.to_ecto_query(device_group.selector)
+
+    Repo.all(device_query)
+    |> Devices.preload_defaults_for_device()
   end
 
   @doc """
