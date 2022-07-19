@@ -58,7 +58,7 @@ defmodule Edgehog.Selector.AST.TagFilterTest do
       assert [device_foo] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "returns dynamic query that matches devices without the tag", %{
@@ -76,7 +76,7 @@ defmodule Edgehog.Selector.AST.TagFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
