@@ -61,20 +61,25 @@ defmodule Edgehog.Groups do
   end
 
   @doc """
-  Gets a single device_group.
+  Fetches a single device_group.
 
-  Raises `Ecto.NoResultsError` if the Device group does not exist.
+  Returns `{:ok, device_group}` or `{:error, :not_found}` if the Device group does not exist.
 
   ## Examples
 
-      iex> get_device_group!(123)
-      %DeviceGroup{}
+      iex> fetch_device_group(123)
+      {:ok, %DeviceGroup{}}
 
-      iex> get_device_group!(456)
-      ** (Ecto.NoResultsError)
+      iex> fetch_device_group(456)
+      {:error, :not_found}
 
   """
-  def get_device_group!(id), do: Repo.get!(DeviceGroup, id)
+  def fetch_device_group(id) do
+    case Repo.get(DeviceGroup, id) do
+      %DeviceGroup{} = device_group -> {:ok, device_group}
+      nil -> {:error, :not_found}
+    end
+  end
 
   @doc """
   Creates a device_group.

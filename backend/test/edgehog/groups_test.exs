@@ -61,9 +61,13 @@ defmodule Edgehog.GroupsTest do
       assert Groups.list_devices_in_group(device_group) == [device_1]
     end
 
-    test "get_device_group!/1 returns the device_group with given id" do
+    test "fetch_device_group/1 returns the device_group with given id" do
       device_group = device_group_fixture()
-      assert Groups.get_device_group!(device_group.id) == device_group
+      assert Groups.fetch_device_group(device_group.id) == {:ok, device_group}
+    end
+
+    test "fetch_device_group/1 returns {:error, :not_found} for unexisting device group" do
+      assert Groups.fetch_device_group(12_421) == {:error, :not_found}
     end
 
     test "create_device_group/1 with valid data creates a device_group" do
@@ -116,7 +120,7 @@ defmodule Edgehog.GroupsTest do
       assert {:error, %Ecto.Changeset{}} =
                Groups.update_device_group(device_group, @invalid_attrs)
 
-      assert device_group == Groups.get_device_group!(device_group.id)
+      assert {:ok, device_group} == Groups.fetch_device_group(device_group.id)
     end
 
     test "update_device_group/1 with invalid handle returns error changeset" do
@@ -126,7 +130,7 @@ defmodule Edgehog.GroupsTest do
 
       assert {:error, %Ecto.Changeset{}} = Groups.update_device_group(device_group, attrs)
 
-      assert device_group == Groups.get_device_group!(device_group.id)
+      assert {:ok, device_group} == Groups.fetch_device_group(device_group.id)
     end
 
     test "update_device_group/1 with invalid selector returns error changeset" do
@@ -136,13 +140,13 @@ defmodule Edgehog.GroupsTest do
 
       assert {:error, %Ecto.Changeset{}} = Groups.update_device_group(device_group, attrs)
 
-      assert device_group == Groups.get_device_group!(device_group.id)
+      assert {:ok, device_group} == Groups.fetch_device_group(device_group.id)
     end
 
     test "delete_device_group/1 deletes the device_group" do
       device_group = device_group_fixture()
       assert {:ok, %DeviceGroup{}} = Groups.delete_device_group(device_group)
-      assert_raise Ecto.NoResultsError, fn -> Groups.get_device_group!(device_group.id) end
+      assert {:error, :not_found} == Groups.fetch_device_group(device_group.id)
     end
 
     test "change_device_group/1 returns a device_group changeset" do
