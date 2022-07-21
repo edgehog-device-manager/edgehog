@@ -44,7 +44,7 @@ defmodule Edgehog.DevicesFixtures do
     }
     |> Map.merge(attrs)
     |> Repo.insert!()
-    |> Repo.preload([:tags, :custom_attributes])
+    |> Edgehog.Devices.preload_defaults_for_device()
   end
 
   @doc """

@@ -52,7 +52,7 @@ defmodule Edgehog.Devices do
   """
   def get_device!(id) do
     Repo.get!(Device, id)
-    |> Repo.preload([:tags, :custom_attributes])
+    |> preload_defaults_for_device()
   end
 
   @doc """
@@ -68,7 +68,14 @@ defmodule Edgehog.Devices do
     filters
     |> Enum.reduce(Device, &filter_with/2)
     |> Repo.all()
-    |> Repo.preload([:tags, :custom_attributes])
+    |> preload_defaults_for_device()
+  end
+
+  @doc """
+  Preloads the default associations for an Edgehog Device (or a list of devices)
+  """
+  def preload_defaults_for_device(device_or_devices) do
+    Repo.preload(device_or_devices, [:tags, :custom_attributes])
   end
 
   defp filter_with({:online, online}, query) do
@@ -199,7 +206,7 @@ defmodule Edgehog.Devices do
     |> Repo.transaction()
     |> case do
       {:ok, %{update_device: device}} ->
-        {:ok, Repo.preload(device, [:tags, :custom_attributes])}
+        {:ok, preload_defaults_for_device(device)}
 
       {:error, _failed_operation, failed_value, _progress_so_far} ->
         {:error, failed_value}

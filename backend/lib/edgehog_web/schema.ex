@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.CapabilitiesTypes
   import_types EdgehogWeb.Schema.DevicesTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
+  import_types EdgehogWeb.Schema.GroupsTypes
   import_types EdgehogWeb.Schema.LabelingTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
@@ -56,6 +57,9 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.Devices.SystemModel{}, _ ->
         :system_model
 
+      %Edgehog.Groups.DeviceGroup{}, _ ->
+        :device_group
+
       %Edgehog.OSManagement.OTAOperation{}, _ ->
         :ota_operation
 
@@ -76,12 +80,16 @@ defmodule EdgehogWeb.Schema do
         %{type: :system_model, id: id}, context ->
           Resolvers.Devices.find_system_model(%{id: id}, context)
 
+        %{type: :device_group, id: id}, context ->
+          Resolvers.Groups.find_device_group(%{id: id}, context)
+
         %{type: :ota_operation, id: id}, context ->
           Resolvers.OSManagement.find_ota_operation(%{id: id}, context)
       end
     end
 
     import_fields :devices_queries
+    import_fields :groups_queries
     import_fields :labeling_queries
     import_fields :tenants_queries
   end
@@ -89,6 +97,7 @@ defmodule EdgehogWeb.Schema do
   mutation do
     import_fields :astarte_mutations
     import_fields :devices_mutations
+    import_fields :groups_mutations
     import_fields :os_management_mutations
   end
 end

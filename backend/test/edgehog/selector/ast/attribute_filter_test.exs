@@ -143,7 +143,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_true] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with != operator", %{device_false: device_false} do
@@ -164,7 +164,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_false] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
   end
 
@@ -202,7 +202,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_bar] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with != operator", %{device_baz: device_baz} do
@@ -223,7 +223,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_baz] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
   end
 
@@ -261,7 +261,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_bar] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with != operator", %{device_baz: device_baz} do
@@ -282,7 +282,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_baz] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
   end
 
@@ -324,7 +324,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_42] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with != operator", %{device_41: device_41, device_43: device_43} do
@@ -345,7 +345,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
@@ -371,7 +371,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_43] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with >= operator", %{device_42: device_42, device_43: device_43} do
@@ -392,7 +392,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
@@ -418,7 +418,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_41] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with <= operator", %{device_41: device_41, device_42: device_42} do
@@ -439,7 +439,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
@@ -493,7 +493,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_present] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with != operator", %{
@@ -517,7 +517,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
@@ -543,7 +543,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_future] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with >= operator", %{device_present: device_present, device_future: device_future} do
@@ -564,7 +564,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
@@ -590,7 +590,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_past] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "with <= operator", %{device_past: device_past, device_present: device_present} do
@@ -611,7 +611,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
@@ -642,7 +642,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Repo.preload([:tags, :custom_attributes])
+        |> Devices.preload_defaults_for_device()
 
       assert is_list(result)
       assert length(result) == 2
@@ -687,7 +687,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_baz] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
 
     test "devices with the indicated attribute with a different type", %{realm: realm} do
@@ -716,7 +716,7 @@ defmodule Edgehog.Selector.AST.AttributeFilterTest do
       assert [device_string_foob] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Repo.preload([:tags, :custom_attributes])
+               |> Devices.preload_defaults_for_device()
     end
   end
 
