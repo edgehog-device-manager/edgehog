@@ -82,6 +82,26 @@ type SystemModel implements Node {
   description: LocalizedText
 }
 
+"The possible namespace values for device attributes"
+enum DeviceAttributeNamespace {
+  "Custom attributes, user defined"
+  CUSTOM
+}
+
+input UpdateDeviceInput {
+  "The GraphQL ID (not the Astarte Device ID) of the device to be updated."
+  deviceId: ID!
+
+  "The display name of the device."
+  name: String
+
+  "The tags of the device. These replace all the current tags."
+  tags: [String!]
+
+  "The custom attributes of the device. These replace all the current custom attributes."
+  customAttributes: [DeviceAttributeInput!]
+}
+
 type CreateHardwareTypePayload {
   "The created hardware type."
   hardwareType: HardwareType!
@@ -105,19 +125,30 @@ input UpdateHardwareTypeInput {
   partNumbers: [String!]
 }
 
-input UpdateDeviceInput {
-  "The GraphQL ID (not the Astarte Device ID) of the device to be updated."
-  deviceId: ID!
-
-  "The display name of the device."
-  name: String
-
-  "The tags of the device. These replace all the current tags."
-  tags: [String!]
-}
-
 "Represents an uploaded file."
 scalar Upload
+
+input UpdateDeviceGroupInput {
+  "The ID of the device group to be updated."
+  deviceGroupId: ID!
+
+  "The display name of the device group."
+  name: String
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String
+}
 
 "Describes the current usage of a storage unit on a device."
 type StorageUnit {
@@ -271,6 +302,32 @@ enum DeviceCapability {
   WIFI
 }
 
+enum VariantType {
+  "Double type"
+  DOUBLE
+
+  "32 bit integer type"
+  INTEGER
+
+  "Boolean type"
+  BOOLEAN
+
+  """
+  64 bit integer type. When this is the type, the value will be a string representing the number.
+  This is done to avoid representation errors when using JSON Numbers.
+  """
+  LONGINTEGER
+
+  "String type"
+  STRING
+
+  "Binary blob type. When this is the type, the value will be Base64 encoded."
+  BINARYBLOB
+
+  "Datetime type. When this is the type, the value will be an ISO8601 timestamp."
+  DATETIME
+}
+
 interface Node {
   "The ID of the object."
   id: ID!
@@ -296,9 +353,19 @@ type BatterySlot {
   status: BatteryStatus
 }
 
+type CreateDeviceGroupPayload {
+  "The created device group."
+  deviceGroup: DeviceGroup!
+}
+
 type CreateSystemModelPayload {
   "The created system model."
   systemModel: SystemModel!
+}
+
+type DeleteDeviceGroupPayload {
+  "The deleted device group."
+  deviceGroup: DeviceGroup!
 }
 
 input UpdateSystemModelInput {
@@ -433,6 +500,15 @@ type RootMutationType {
   "Deletes a system model."
   deleteSystemModel(input: DeleteSystemModelInput!): DeleteSystemModelPayload
 
+  "Creates a new device group."
+  createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupPayload
+
+  "Updates a device group."
+  updateDeviceGroup(input: UpdateDeviceGroupInput!): UpdateDeviceGroupPayload
+
+  "Deletes a device group."
+  deleteDeviceGroup(input: DeleteDeviceGroupInput!): DeleteDeviceGroupPayload
+
   "Initiates an OTA update with a user provided OS image"
   createManualOtaOperation(
     input: CreateManualOtaOperationInput!
@@ -488,6 +564,12 @@ type RootQueryType {
   "Fetches a single system model."
   systemModel("The ID of the system model." id: ID!): SystemModel
 
+  "Fetches the list of all device groups."
+  deviceGroups: [DeviceGroup!]!
+
+  "Fetches a single device group."
+  deviceGroup("The ID of the device group." id: ID!): DeviceGroup
+
   "Fetches the list of all device tags."
   existingDeviceTags: [String!]!
 
@@ -497,6 +579,20 @@ type RootQueryType {
   node("The ID of an object." id: ID!): Node
 }
 
+type DeviceAttribute {
+  "The namespace of the device attribute."
+  namespace: DeviceAttributeNamespace!
+
+  "The key of the device attribute."
+  key: String!
+
+  "The type of the device attribute."
+  type: VariantType!
+
+  "The value of the device attribute."
+  value: VariantValue!
+}
+
 """
 The `DateTime` scalar type represents a date and time in the UTC
 timezone. The DateTime appears in a JSON response as an ISO8601 formatted
@@ -504,6 +600,12 @@ string, including UTC timezone ("Z"). The parsed date and time string will
 be converted to UTC if there is an offset.
 """
 scalar DateTime
+
+"""
+A variant value. It can contain any JSON value. The value will be checked together with the
+type to verify whether it's valid.
+"""
+scalar VariantValue
 
 """
 Denotes a device instance that connects and exchanges data.
@@ -533,8 +635,14 @@ type Device implements Node {
   "The system model of the device."
   systemModel: SystemModel
 
+  "The device groups the device belongs to."
+  deviceGroups: [DeviceGroup!]!
+
   "The tags of the device"
   tags: [String!]!
+
+  "The custom attributes of the device. These attributes are user editable."
+  customAttributes: [DeviceAttribute!]!
 
   "List of capabilities supported by the device."
   capabilities: [DeviceCapability!]!
@@ -573,6 +681,11 @@ type Device implements Node {
   runtimeInfo: RuntimeInfo
 }
 
+type UpdateDevicePayload {
+  "The updated device."
+  device: Device!
+}
+
 input CreateHardwareTypeInput {
   "The display name of the hardware type."
   name: String!
@@ -598,17 +711,27 @@ type SetLedBehaviorPayload {
   behavior: LedBehavior!
 }
 
-type UpdateDevicePayload {
-  "The updated device."
-  device: Device!
-}
-
 input CreateManualOtaOperationInput {
   "The GraphQL ID (not the Astarte Device ID) of the target device"
   deviceId: ID!
 
   "An uploaded file of the base image."
   baseImageFile: Upload
+}
+
+"An input object for a device attribute."
+input DeviceAttributeInput {
+  "The namespace of the device attribute."
+  namespace: DeviceAttributeNamespace!
+
+  "The key of the device attribute."
+  key: String!
+
+  "The type of the device attribute."
+  type: VariantType!
+
+  "The value of the device attribute."
+  value: VariantValue!
 }
 
 input CreateSystemModelInput {
@@ -705,6 +828,23 @@ input DeviceFilter {
   The match is case-insensitive and tests whether the string is included in one of the tags of the device.
   """
   tag: String
+}
+
+type DeviceGroup implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the device group."
+  name: String!
+
+  "The handle of the device group."
+  handle: String!
+
+  "The selector of the device group."
+  selector: String!
+
+  "The devices belonging to the group."
+  devices: [Device!]!
 }
 
 "Describes an Edgehog runtime."
@@ -823,6 +963,11 @@ type LocalizedText {
   text: String!
 }
 
+type UpdateDeviceGroupPayload {
+  "The updated device group."
+  deviceGroup: DeviceGroup!
+}
+
 type UpdateHardwareTypePayload {
   "The updated hardware type."
   hardwareType: HardwareType!
@@ -839,6 +984,30 @@ input SetLedBehaviorInput {
 
   "The led behavior"
   behavior: LedBehavior!
+}
+
+input CreateDeviceGroupInput {
+  "The display name of the device group."
+  name: String!
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String!
+}
+
+input DeleteDeviceGroupInput {
+  "The ID of the device group to be deleted."
+  deviceGroupId: ID!
 }
 
 "Input object used to provide a localizedText as an input."
