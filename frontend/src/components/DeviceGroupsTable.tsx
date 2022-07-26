@@ -30,6 +30,8 @@ import type {
 import Table from "components/Table";
 import type { Column } from "components/Table";
 
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
 const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
   fragment DeviceGroupsTable_DeviceGroupFragment on DeviceGroup
   @relay(plural: true) {

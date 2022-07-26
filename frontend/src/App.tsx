@@ -27,6 +27,7 @@ import { useAuth } from "contexts/Auth";
 import { Route } from "Navigation";
 import Device from "pages/Device";
 import Devices from "pages/Devices";
+import DeviceGroups from "pages/DeviceGroups";
 import SystemModel from "pages/SystemModel";
 import SystemModelCreate from "pages/SystemModelCreate";
 import SystemModels from "pages/SystemModels";
@@ -51,6 +52,7 @@ const publicRoutes: RouterRule[] = [
 const authenticatedRoutes: RouterRule[] = [
   { path: Route.devices, element: <Devices /> },
   { path: Route.devicesEdit, element: <Device /> },
+  { path: Route.deviceGroups, element: <DeviceGroups /> },
   { path: Route.systemModels, element: <SystemModels /> },
   { path: Route.systemModelsEdit, element: <SystemModel /> },
   { path: Route.systemModelsNew, element: <SystemModelCreate /> },

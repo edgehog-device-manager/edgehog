@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2022 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import type { LinkProps as RouterLinkProps } from "react-router-dom";
 enum Route {
   devices = "/devices",
   devicesEdit = "/devices/:deviceId/edit",
+  deviceGroups = "/device-groups",
   systemModels = "/system-models",
   systemModelsNew = "/system-models/new",
   systemModelsEdit = "/system-models/:systemModelId/edit",
@@ -45,6 +46,7 @@ const matchPaths = (routes: Route | Route[], path: string) => {
 type ParametricRoute =
   | { route: Route.devices }
   | { route: Route.devicesEdit; params: { deviceId: string } }
+  | { route: Route.deviceGroups }
   | { route: Route.systemModels }
   | { route: Route.systemModelsNew }
   | { route: Route.systemModelsEdit; params: { systemModelId: string } }
