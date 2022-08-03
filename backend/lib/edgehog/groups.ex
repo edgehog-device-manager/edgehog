@@ -61,6 +61,40 @@ defmodule Edgehog.Groups do
   end
 
   @doc """
+  Returns a `device_id -> list_of_groups` map for the passed Device (database) ids.
+
+  This allows retrieving the list for all devices by doing one query for the group list and one
+  query for each of the groups (so it's independent from the number of devices).
+
+  ## Examples
+
+  iex> get_groups_for_device_ids(device_ids)
+  %{1 => [%DeviceGroup{}, ...], 2 => []}
+  """
+  def get_groups_for_device_ids(device_ids) when is_list(device_ids) do
+    initial_acc = Map.new(device_ids, fn id -> {id, []} end)
+
+    list_device_groups()
+    |> Enum.reduce(initial_acc, fn device_group, acc ->
+      # This gets validated when the DeviceGroup is created, if it fails here then there's a bug
+      # and it's legitimate we crash
+      {:ok, device_query} = Selector.to_ecto_query(device_group.selector)
+
+      # We just need the ids, no need to load the whole device from the DB
+      # We also additionally filter device ids to the ones provided as arguments
+      query =
+        from d in device_query,
+          where: d.id in ^device_ids,
+          select: d.id
+
+      Repo.all(query)
+      |> Enum.reduce(acc, fn device_id, acc ->
+        Map.update!(acc, device_id, &[device_group | &1])
+      end)
+    end)
+  end
+
+  @doc """
   Fetches a single device_group.
 
   Returns `{:ok, device_group}` or `{:error, :not_found}` if the Device group does not exist.

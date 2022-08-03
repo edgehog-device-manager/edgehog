@@ -61,6 +61,110 @@ defmodule Edgehog.GroupsTest do
       assert Groups.list_devices_in_group(device_group) == [device_1]
     end
 
+    test "get_groups_for_device_ids/0 returns a device id -> groups map" do
+      device_group_foo =
+        device_group_fixture(name: "Foo", handle: "foo", selector: ~s<"foo" in tags>)
+
+      device_group_baz =
+        device_group_fixture(name: "Baz", handle: "baz", selector: ~s<"baz" in tags>)
+
+      device_group_bar =
+        device_group_fixture(name: "Bar", handle: "bar", selector: ~s<"bar" in tags>)
+
+      realm =
+        cluster_fixture()
+        |> realm_fixture()
+
+      {:ok, device_1} =
+        device_fixture(realm)
+        |> Devices.update_device(%{tags: ["foo", "baz"]})
+
+      {:ok, device_2} =
+        device_fixture(realm, name: "Device 2", device_id: "9FXwmtRtRuqC48DEOjOj7Q")
+        |> Devices.update_device(%{tags: ["baz"]})
+
+      {:ok, device_3} =
+        device_fixture(realm, name: "Device 3", device_id: "FMFTT25iQ7eod3KlojoFMg")
+        |> Devices.update_device(%{tags: ["bar"]})
+
+      {:ok, device_4} =
+        device_fixture(realm, name: "Device 4", device_id: "SSshD9aaQWa2ce0Ic327qw")
+        |> Devices.update_device(%{tags: ["fizz"]})
+
+      device_ids = [
+        device_1.id,
+        device_2.id,
+        device_3.id,
+        device_4.id
+      ]
+
+      result = Groups.get_groups_for_device_ids(device_ids)
+
+      assert Map.get(result, device_1.id) |> length() == 2
+
+      device_1_groups = Map.get(result, device_1.id)
+
+      assert device_group_foo in device_1_groups
+      assert device_group_baz in device_1_groups
+
+      assert [device_group_baz] == Map.get(result, device_2.id)
+      assert [device_group_bar] == Map.get(result, device_3.id)
+      assert [] == Map.get(result, device_4.id)
+    end
+
+    test "get_groups_for_device_ids/1 ignores devices that are not requested" do
+      device_group_foo =
+        device_group_fixture(name: "Foo", handle: "foo", selector: ~s<"foo" in tags>)
+
+      realm =
+        cluster_fixture()
+        |> realm_fixture()
+
+      {:ok, device_1} =
+        device_fixture(realm)
+        |> Devices.update_device(%{tags: ["foo", "baz"]})
+
+      {:ok, device_2} =
+        device_fixture(realm, name: "Device 2", device_id: "9FXwmtRtRuqC48DEOjOj7Q")
+        |> Devices.update_device(%{tags: ["foo", "baz"]})
+
+      device_ids = [device_1.id]
+
+      result = Groups.get_groups_for_device_ids(device_ids)
+
+      assert [device_group_foo] == Map.get(result, device_1.id)
+      refute Map.has_key?(result, device_2.id)
+    end
+
+    test "get_groups_for_device_ids/0 reuses the same groups in the result map, without copying them" do
+      _device_group_foo =
+        device_group_fixture(name: "Foo", handle: "foo", selector: ~s<"foo" in tags>)
+
+      realm =
+        cluster_fixture()
+        |> realm_fixture()
+
+      {:ok, device_1} =
+        device_fixture(realm)
+        |> Devices.update_device(%{tags: ["foo"]})
+
+      {:ok, device_2} =
+        device_fixture(realm, name: "Device 2", device_id: "9FXwmtRtRuqC48DEOjOj7Q")
+        |> Devices.update_device(%{tags: ["foo"]})
+
+      device_ids = [
+        device_1.id,
+        device_2.id
+      ]
+
+      result = Groups.get_groups_for_device_ids(device_ids)
+
+      [device_group_foo_d1] = Map.get(result, device_1.id)
+      [device_group_foo_d2] = Map.get(result, device_2.id)
+
+      assert :erts_debug.same(device_group_foo_d1, device_group_foo_d2)
+    end
+
     test "fetch_device_group/1 returns the device_group with given id" do
       device_group = device_group_fixture()
       assert Groups.fetch_device_group(device_group.id) == {:ok, device_group}
