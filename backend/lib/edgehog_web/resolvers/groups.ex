@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Resolvers.Groups do
   alias Edgehog.Groups
   alias Edgehog.Groups.DeviceGroup
   alias EdgehogWeb.Resolvers
+  import Absinthe.Resolution.Helpers
 
   @doc """
   Finds the device group by id
@@ -75,5 +76,27 @@ defmodule EdgehogWeb.Resolvers.Groups do
          {:ok, device_group} <- Groups.delete_device_group(device_group) do
       {:ok, %{device_group: device_group}}
     end
+  end
+
+  @doc """
+  Resolve the list of groups for a device, batching it for all devices.
+
+  This allows retrieving the list for all devices by doing one query for the device list and one
+  query for each of the groups (so it's independent from the number of devices).
+  """
+  def batched_groups_for_device(device, _args, %{context: context}) do
+    # We have to pass the tenant_id to the batch function since it gets executed in a separate process
+    tenant_id = context.current_tenant.tenant_id
+
+    batch({__MODULE__, :device_groups_by_device_id, tenant_id}, device.id, fn batch_results ->
+      {:ok, Map.get(batch_results, device.id)}
+    end)
+  end
+
+  def device_groups_by_device_id(tenant_id, device_ids) do
+    # Use the correct tenant_id in the batching process
+    Edgehog.Repo.put_tenant_id(tenant_id)
+
+    Groups.get_groups_for_device_ids(device_ids)
   end
 end
