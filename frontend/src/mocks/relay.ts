@@ -61,6 +61,14 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       tags: ["foo", "bar"],
     };
   },
+  DeviceGroup(_, generateId) {
+    return {
+      id: `device-group-id-${generateId()}`,
+      name: "Tags: foo",
+      handle: "tags-foo",
+      selector: '"foo" in tags',
+    };
+  },
   HardwareInfo() {
     return {
       cpuArchitecture: "Xtensa 32-bit",
