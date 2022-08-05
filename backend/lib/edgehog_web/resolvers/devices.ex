@@ -99,7 +99,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
     end
   end
 
-  defp preload_system_model_for_device(target, context) do
+  def preload_system_model_for_device(target, context) do
     descriptions_query =
       context
       |> Map.fetch!(:preferred_locales)
