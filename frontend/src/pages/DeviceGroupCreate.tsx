@@ -40,6 +40,9 @@ const CREATE_DEVICE_GROUP_MUTATION = graphql`
         name
         handle
         selector
+        devices {
+          id
+        }
       }
     }
   }
@@ -96,6 +99,17 @@ const DeviceGroupCreatePage = () => {
               "deviceGroups"
             );
           }
+
+          const devices = deviceGroup?.getLinkedRecords("devices");
+          devices?.forEach((device) => {
+            const deviceGroups = device.getLinkedRecords("deviceGroups");
+            if (deviceGroups) {
+              device.setLinkedRecords(
+                [...deviceGroups, deviceGroup],
+                "deviceGroups"
+              );
+            }
+          });
         },
       });
     },

@@ -157,6 +157,19 @@ const DeviceGroupContent = ({
           );
         }
 
+        const devices = deviceGroup.getLinkedRecords("devices");
+        devices?.forEach((device) => {
+          const deviceGroups = device.getLinkedRecords("deviceGroups");
+          if (deviceGroups) {
+            device.setLinkedRecords(
+              deviceGroups.filter(
+                (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId
+              ),
+              "deviceGroups"
+            );
+          }
+        });
+
         store.delete(deviceGroupId);
       },
     });
@@ -197,6 +210,51 @@ const DeviceGroupContent = ({
               defaultMessage="Could not update the group, please try again."
             />
           );
+        },
+        updater(store) {
+          const root = store.getRoot();
+          const devices = root.getLinkedRecords("devices");
+          if (!devices) {
+            return;
+          }
+
+          const deviceGroup = store
+            .getRootField("updateDeviceGroup")
+            .getLinkedRecord("deviceGroup");
+          const deviceGroupId = deviceGroup.getDataID();
+
+          const linkedDevices = new Set(
+            deviceGroup
+              .getLinkedRecords("devices")
+              ?.map((device) => device.getDataID())
+          );
+
+          devices.forEach((device) => {
+            const deviceGroups = device.getLinkedRecords("deviceGroups");
+            if (!deviceGroups) {
+              return;
+            }
+
+            if (!linkedDevices.has(device.getDataID())) {
+              return device.setLinkedRecords(
+                deviceGroups.filter(
+                  (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId
+                ),
+                "deviceGroups"
+              );
+            }
+
+            if (
+              !deviceGroups.some(
+                (deviceGroup) => deviceGroup.getDataID() === deviceGroupId
+              )
+            ) {
+              device.setLinkedRecords(
+                [...deviceGroups, deviceGroup],
+                "deviceGroups"
+              );
+            }
+          });
         },
       });
     },
