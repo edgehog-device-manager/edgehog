@@ -23,10 +23,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
   use Edgehog.AstarteMockCase
 
   import Edgehog.DevicesFixtures
+  import Edgehog.GroupsFixtures
   import Edgehog.AstarteFixtures
 
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
+  alias Edgehog.Groups.DeviceGroup
 
   describe "systemModels field" do
     setup do
@@ -464,6 +466,78 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
       assert runtime_info["url"] ==
                "https://github.com/edgehog-device-manager/edgehog-esp32-device"
+    end
+  end
+
+  describe "devices device_groups query" do
+    setup do
+      cluster = cluster_fixture()
+
+      {:ok, realm: realm_fixture(cluster)}
+    end
+
+    @groups_query """
+    query {
+      devices {
+        id
+        deviceGroups {
+          id
+          handle
+        }
+      }
+    }
+    """
+
+    test "returns the device groups", %{conn: conn, api_path: api_path, realm: realm} do
+      %DeviceGroup{id: foos_id} =
+        device_group_fixture(name: "Foos", handle: "foos", selector: ~s<"foo" in tags>)
+
+      foos_global_id = Absinthe.Relay.Node.to_global_id(:device_group, foos_id, EdgehogWeb.Schema)
+
+      %DeviceGroup{id: bars_id} =
+        device_group_fixture(name: "Bars", handle: "bars", selector: ~s<"bar" in tags>)
+
+      bars_global_id = Absinthe.Relay.Node.to_global_id(:device_group, bars_id, EdgehogWeb.Schema)
+
+      {:ok, %Device{id: device_1_id}} =
+        device_fixture(realm)
+        |> Devices.update_device(%{tags: ["foo", "bar"]})
+
+      device_1_global_id =
+        Absinthe.Relay.Node.to_global_id(:device, device_1_id, EdgehogWeb.Schema)
+
+      {:ok, %Device{id: device_2_id}} =
+        device_fixture(realm, name: "Device 2", device_id: "b6jrAd4QReC9PTolINIbIQ")
+        |> Devices.update_device(%{tags: ["foo"]})
+
+      device_2_global_id =
+        Absinthe.Relay.Node.to_global_id(:device, device_2_id, EdgehogWeb.Schema)
+
+      %Device{id: device_3_id} =
+        device_fixture(realm, name: "Device 3", device_id: "nBfAIS4bTa2D4siBfedeHA")
+
+      device_3_global_id =
+        Absinthe.Relay.Node.to_global_id(:device, device_3_id, EdgehogWeb.Schema)
+
+      conn = get(conn, api_path, query: @groups_query)
+
+      assert %{
+               "data" => %{
+                 "devices" => devices
+               }
+             } = json_response(conn, 200)
+
+      assert length(devices) == 3
+      device_1 = Enum.find(devices, &(&1["id"] == device_1_global_id))
+      assert length(device_1["deviceGroups"]) == 2
+      assert %{"handle" => "foos", "id" => foos_global_id} in device_1["deviceGroups"]
+      assert %{"handle" => "bars", "id" => bars_global_id} in device_1["deviceGroups"]
+
+      device_2 = Enum.find(devices, &(&1["id"] == device_2_global_id))
+      assert [%{"handle" => "foos", "id" => foos_global_id}] == device_2["deviceGroups"]
+
+      device_3 = Enum.find(devices, &(&1["id"] == device_3_global_id))
+      assert [] == device_3["deviceGroups"]
     end
   end
 end

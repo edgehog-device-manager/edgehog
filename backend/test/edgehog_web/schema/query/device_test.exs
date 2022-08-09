@@ -25,10 +25,12 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.GroupsFixtures
   import Edgehog.OSManagementFixtures
 
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
+  alias Edgehog.Groups.DeviceGroup
 
   describe "device query" do
     setup do
@@ -309,6 +311,49 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
                "type" => "DATETIME",
                "value" => "2022-06-10T16:27:41.235243Z"
              } in custom_attributes
+    end
+
+    @groups_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        deviceGroups {
+          id
+          handle
+        }
+      }
+    }
+    """
+
+    test "returns the device groups", %{conn: conn, api_path: api_path, realm: realm} do
+      %DeviceGroup{id: foos_id} =
+        device_group_fixture(name: "Foos", handle: "foos", selector: ~s<"foo" in tags>)
+
+      foos_global_id = Absinthe.Relay.Node.to_global_id(:device_group, foos_id, EdgehogWeb.Schema)
+
+      %DeviceGroup{id: bars_id} =
+        device_group_fixture(name: "Bars", handle: "bars", selector: ~s<"bar" in tags>)
+
+      bars_global_id = Absinthe.Relay.Node.to_global_id(:device_group, bars_id, EdgehogWeb.Schema)
+
+      {:ok, %Device{id: id}} =
+        device_fixture(realm)
+        |> Devices.update_device(%{tags: ["foo", "bar"]})
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, api_path, query: @groups_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "deviceGroups" => device_groups
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert length(device_groups) == 2
+      assert %{"handle" => "foos", "id" => foos_global_id} in device_groups
+      assert %{"handle" => "bars", "id" => bars_global_id} in device_groups
     end
   end
 end

@@ -159,6 +159,11 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
     @desc "The system model of the device."
     field :system_model, :system_model
 
+    @desc "The device groups the device belongs to."
+    field :device_groups, non_null(list_of(non_null(:device_group))) do
+      resolve &Resolvers.Groups.batched_groups_for_device/3
+    end
+
     @desc "The tags of the device"
     field :tags, non_null(list_of(non_null(:string))) do
       resolve &Resolvers.Devices.extract_device_tags/3
