@@ -29,12 +29,14 @@ import type {
 
 import Table from "components/Table";
 import type { Column } from "components/Table";
+import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
   fragment DeviceGroupsTable_DeviceGroupFragment on DeviceGroup
   @relay(plural: true) {
+    id
     name
     handle
     selector
@@ -52,6 +54,14 @@ const columns: Column<TableRecord>[] = [
         defaultMessage="Group Name"
         description="Title for the Name column of the device groups table"
       />
+    ),
+    Cell: ({ row, value }) => (
+      <Link
+        route={Route.deviceGroupsEdit}
+        params={{ deviceGroupId: row.original.id }}
+      >
+        {value}
+      </Link>
     ),
   },
   {

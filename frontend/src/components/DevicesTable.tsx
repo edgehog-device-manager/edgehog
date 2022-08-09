@@ -163,9 +163,10 @@ const columns: Column<TableRecord>[] = [
 interface Props {
   className?: string;
   devicesRef: DevicesTable_DeviceFragment$key;
+  hideSearch?: boolean;
 }
 
-const DevicesTable = ({ className, devicesRef }: Props) => {
+const DevicesTable = ({ className, devicesRef, hideSearch = false }: Props) => {
   const devicesData = useFragment(DEVICES_TABLE_FRAGMENT, devicesRef);
 
   // TODO: handle readonly type without mapping to mutable type
@@ -174,7 +175,14 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
     [devicesData]
   );
 
-  return <Table className={className} columns={columns} data={devices} />;
+  return (
+    <Table
+      className={className}
+      columns={columns}
+      data={devices}
+      hideSearch={hideSearch}
+    />
+  );
 };
 
 export default DevicesTable;
