@@ -111,7 +111,11 @@ const Sidebar = () => (
       }
       icon="deviceGroups"
       route={Route.deviceGroups}
-      activeRoutes={[Route.deviceGroups, Route.deviceGroupsEdit]}
+      activeRoutes={[
+        Route.deviceGroups,
+        Route.deviceGroupsEdit,
+        Route.deviceGroupsNew,
+      ]}
     />
     <SidebarItemGroup
       label={

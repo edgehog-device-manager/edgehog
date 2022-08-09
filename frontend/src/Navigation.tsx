@@ -29,6 +29,7 @@ enum Route {
   devicesEdit = "/devices/:deviceId/edit",
   deviceGroups = "/device-groups",
   deviceGroupsEdit = "/device-groups/:deviceGroupId/edit",
+  deviceGroupsNew = "/device-groups/new",
   systemModels = "/system-models",
   systemModelsNew = "/system-models/new",
   systemModelsEdit = "/system-models/:systemModelId/edit",
@@ -49,6 +50,7 @@ type ParametricRoute =
   | { route: Route.devicesEdit; params: { deviceId: string } }
   | { route: Route.deviceGroups }
   | { route: Route.deviceGroupsEdit; params: { deviceGroupId: string } }
+  | { route: Route.deviceGroupsNew }
   | { route: Route.systemModels }
   | { route: Route.systemModelsNew }
   | { route: Route.systemModelsEdit; params: { systemModelId: string } }

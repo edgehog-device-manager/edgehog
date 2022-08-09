@@ -29,6 +29,7 @@ import Device from "pages/Device";
 import Devices from "pages/Devices";
 import DeviceGroup from "pages/DeviceGroup";
 import DeviceGroups from "pages/DeviceGroups";
+import DeviceGroupsNew from "pages/DeviceGroupCreate";
 import SystemModel from "pages/SystemModel";
 import SystemModelCreate from "pages/SystemModelCreate";
 import SystemModels from "pages/SystemModels";
@@ -55,6 +56,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.devicesEdit, element: <Device /> },
   { path: Route.deviceGroups, element: <DeviceGroups /> },
   { path: Route.deviceGroupsEdit, element: <DeviceGroup /> },
+  { path: Route.deviceGroupsNew, element: <DeviceGroupsNew /> },
   { path: Route.systemModels, element: <SystemModels /> },
   { path: Route.systemModelsEdit, element: <SystemModel /> },
   { path: Route.systemModelsNew, element: <SystemModelCreate /> },
