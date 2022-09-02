@@ -20,6 +20,9 @@
   "Device.deviceId": {
     "defaultMessage": "Device ID"
   },
+  "Device.groups": {
+    "defaultMessage": "Groups"
+  },
   "Device.hardwareInfo.cpuArchitecture": {
     "defaultMessage": "CPU architecture"
   },
@@ -156,6 +159,18 @@
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
   },
+  "components.CreateDeviceGroup.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.CreateDeviceGroup.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.CreateDeviceGroup.selectorLabel": {
+    "defaultMessage": "Selector"
+  },
+  "components.CreateDeviceGroup.submitButton": {
+    "defaultMessage": "Create"
+  },
   "components.CreateHardwareTypeForm.addPartNumberButton": {
     "defaultMessage": "Add Part Number"
   },
@@ -205,6 +220,18 @@
   "components.DeleteModal.confirmPrompt": {
     "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
     "description": "Description of the action to perform to confirm the deletion modal"
+  },
+  "components.DeviceGroupsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the device groups table"
+  },
+  "components.DeviceGroupsTable.nameTitle": {
+    "defaultMessage": "Group Name",
+    "description": "Title for the Name column of the device groups table"
+  },
+  "components.DeviceGroupsTable.selectorTitle": {
+    "defaultMessage": "Selector",
+    "description": "Title for the Selector column of the device groups table"
   },
   "components.DevicesTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
@@ -281,6 +308,9 @@
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
   },
+  "components.Sidebar.deviceGroupsLabel": {
+    "defaultMessage": "Groups"
+  },
   "components.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"
   },
@@ -316,6 +346,21 @@
   },
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
+  },
+  "components.UpdateDeviceGroupForm.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "components.UpdateDeviceGroupForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.UpdateDeviceGroupForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.UpdateDeviceGroupForm.selectorLabel": {
+    "defaultMessage": "Selector"
+  },
+  "components.UpdateDeviceGroupForm.submitButton": {
+    "defaultMessage": "Update"
   },
   "components.UpdateHardwareTypeForm.addPartNumberButton": {
     "defaultMessage": "Add Part Number"
@@ -521,6 +566,38 @@
   },
   "pages.Device.wifiScanResultsTab.noResults.title": {
     "defaultMessage": "No results"
+  },
+  "pages.DeviceGroup.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Group <bold>{deviceGroup}</bold>.",
+    "description": "Description for the confirmation modal to delete a device group"
+  },
+  "pages.DeviceGroup.deleteModal.title": {
+    "defaultMessage": "Delete Group",
+    "description": "Title for the confirmation modal to delete a device group"
+  },
+  "pages.DeviceGroup.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the group, please try again."
+  },
+  "pages.DeviceGroup.deviceGroupNotFound.message": {
+    "defaultMessage": "Return to the group list."
+  },
+  "pages.DeviceGroup.deviceGroupNotFound.title": {
+    "defaultMessage": "Group not found."
+  },
+  "pages.DeviceGroup.updateErrorFeedback": {
+    "defaultMessage": "Could not update the group, please try again."
+  },
+  "pages.DeviceGroupCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the group, please try again."
+  },
+  "pages.DeviceGroupCreate.title": {
+    "defaultMessage": "Create Group"
+  },
+  "pages.DeviceGroups.createButton": {
+    "defaultMessage": "Create Group"
+  },
+  "pages.DeviceGroups.title": {
+    "defaultMessage": "Groups"
   },
   "pages.Devices.title": {
     "defaultMessage": "Devices"

@@ -102,6 +102,21 @@ const Sidebar = () => (
       route={Route.devices}
       activeRoutes={[Route.devices, Route.devicesEdit]}
     />
+    <SidebarItem
+      label={
+        <FormattedMessage
+          id="components.Sidebar.deviceGroupsLabel"
+          defaultMessage="Groups"
+        />
+      }
+      icon="deviceGroups"
+      route={Route.deviceGroups}
+      activeRoutes={[
+        Route.deviceGroups,
+        Route.deviceGroupsEdit,
+        Route.deviceGroupsNew,
+      ]}
+    />
     <SidebarItemGroup
       label={
         <FormattedMessage

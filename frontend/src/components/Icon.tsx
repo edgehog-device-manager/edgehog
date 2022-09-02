@@ -35,6 +35,7 @@ import {
   faUser,
   faCheck,
   faTimes,
+  faDatabase,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -47,6 +48,7 @@ const icons = {
   circle: faCircle,
   delete: faTrash,
   devices: faTabletAlt,
+  deviceGroups: faDatabase,
   github: faGithub,
   models: faSwatchbook,
   os: faCompactDisc,

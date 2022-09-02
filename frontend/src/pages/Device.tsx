@@ -219,6 +219,10 @@ const GET_DEVICE_QUERY = graphql`
         }
       }
       tags
+      deviceGroups {
+        id
+        name
+      }
       ...Device_hardwareInfo
       ...Device_baseImage
       ...Device_osInfo
@@ -258,6 +262,10 @@ const UPDATE_DEVICE_MUTATION = graphql`
         id
         name
         tags
+        deviceGroups {
+          id
+          name
+        }
       }
     }
   }
@@ -1174,6 +1182,44 @@ const DeviceContent = ({
                 />
               );
             },
+            updater(store) {
+              const root = store.getRoot();
+              const deviceGroups = root.getLinkedRecords("deviceGroups");
+              if (!deviceGroups) {
+                return;
+              }
+
+              const device = store
+                .getRootField("updateDevice")
+                .getLinkedRecord("device");
+              const deviceId = device.getDataID();
+
+              const linkedGroups = new Set(
+                device
+                  .getLinkedRecords("deviceGroups")
+                  ?.map((deviceGroup) => deviceGroup.getDataID())
+              );
+
+              deviceGroups.forEach((deviceGroup) => {
+                const devices = deviceGroup.getLinkedRecords("devices");
+                if (!devices) {
+                  return;
+                }
+
+                if (!linkedGroups.has(deviceGroup.getDataID())) {
+                  return deviceGroup.setLinkedRecords(
+                    devices.filter((device) => device.getDataID() !== deviceId),
+                    "devices"
+                  );
+                }
+
+                if (
+                  !devices.some((device) => device.getDataID() === deviceId)
+                ) {
+                  deviceGroup.setLinkedRecords([...devices, device], "devices");
+                }
+              });
+            },
           });
         },
         500,
@@ -1338,6 +1384,27 @@ const DeviceContent = ({
                       </FormRow>
                     </>
                   )}
+                  <FormRow
+                    id="form-device-deviceGroups"
+                    label={
+                      <FormattedMessage
+                        id="Device.groups"
+                        defaultMessage="Groups"
+                      />
+                    }
+                  >
+                    <Stack direction="horizontal" gap={3}>
+                      {device.deviceGroups.map((deviceGroup) => (
+                        <Link
+                          key={`device-group-link-${deviceGroup.id}`}
+                          route={Route.deviceGroupsEdit}
+                          params={{ deviceGroupId: deviceGroup.id }}
+                        >
+                          {deviceGroup.name}
+                        </Link>
+                      ))}
+                    </Stack>
+                  </FormRow>
                   <FormRow
                     id="form-device-connection-status"
                     label={
