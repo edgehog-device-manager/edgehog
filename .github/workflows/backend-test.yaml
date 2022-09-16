@@ -132,7 +132,7 @@ jobs:
       run: mix format --check-formatted
     - name: Run Credo code analysis
       working-directory: backend
-      run: mix credo --ignore moduledoc,todo
+      run: mix credo
     - name: Compile
       working-directory: backend
       run: mix do compile
