@@ -60,10 +60,10 @@ jobs:
       run: npm install -g @astarte-platform/astarte-docs-cli@0.0.7
     - name: Generate Interfaces Docs
       run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/doc/pages/integrating/astarte_interfaces.md
-    - uses: erlef/setup-beam@v1.7.0
+    - uses: erlef/setup-beam@v1.13
       with:
-        otp-version: "23.2"
-        elixir-version: "1.11.4"
+        otp-version: "25.1"
+        elixir-version: "1.14"
     - name: Install Dependencies
       working-directory: ./edgehog/doc
       run: mix deps.get
