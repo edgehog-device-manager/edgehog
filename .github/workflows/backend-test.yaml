@@ -35,8 +35,8 @@ on:
     - '.github/workflows/backend-test.yaml'
 
 env:
-  elixir_version: "1.12.3"
-  otp_version: "24.1"
+  elixir_version: "1.14"
+  otp_version: "25.1"
 jobs:
   test-dialyzer:
     name: Check Dialyzer
@@ -46,7 +46,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - uses: erlef/setup-beam@v1.7.0
+    - uses: erlef/setup-beam@v1.13
       with:
         otp-version: ${{ env.otp_version }}
         elixir-version: ${{ env.elixir_version }}
@@ -120,7 +120,7 @@ jobs:
       with:
         path: backend/_build
         key: ${{ runner.os }}-_build-${{ env.otp_version }}-${{ env.elixir_version }}
-    - uses: erlef/setup-elixir@v1.6.0
+    - uses: erlef/setup-beam@v1.13
       with:
         otp-version: ${{ env.otp_version }}
         elixir-version: ${{ env.elixir_version }}

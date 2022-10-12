@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-FROM elixir:1.12.3 as builder
+FROM elixir:1.14.0 as builder
 
 WORKDIR /app
 
