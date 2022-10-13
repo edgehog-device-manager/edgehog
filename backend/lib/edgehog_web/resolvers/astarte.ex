@@ -186,15 +186,15 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   defp battery_status_to_enum("Unknown"), do: {:ok, :unknown}
   defp battery_status_to_enum(_), do: {:error, :invalid_battery_status}
 
-  def set_led_behavior(%{device_id: device_id, behavior: behavior}, _resolution) do
+  def set_led_behavior(%{device_id: id, behavior: behavior}, _resolution) do
     device =
-      device_id
+      id
       |> Devices.get_device!()
       |> Devices.preload_astarte_resources_for_device()
 
     with {:ok, client} <- Devices.appengine_client_from_device(device),
          {:ok, led_behavior} <- led_behavior_from_enum(behavior),
-         :ok <- Astarte.send_led_behavior(client, device_id, led_behavior) do
+         :ok <- Astarte.send_led_behavior(client, device.device_id, led_behavior) do
       {:ok, %{behavior: behavior}}
     end
   end
