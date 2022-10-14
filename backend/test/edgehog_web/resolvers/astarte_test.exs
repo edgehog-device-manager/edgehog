@@ -185,5 +185,28 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                url: "https://github.com/edgehog-device-manager/edgehog-esp32-device"
              } == runtime_info
     end
+
+    test "set_led_behavior/2 validates requested behavior", %{device: device} do
+      valid_behaviors = [:blink, :double_blink, :slow_blink]
+
+      for behavior <- valid_behaviors do
+        assert {:ok, %{behavior: behavior}} ==
+                 Astarte.set_led_behavior(%{device_id: device.id, behavior: behavior}, %{})
+      end
+
+      assert {:error, "Unknown led behavior"} ==
+               Astarte.set_led_behavior(%{device_id: device.id, behavior: :invalid_behavior}, %{})
+    end
+
+    test "set_led_behavior/2 calls astarte_led_behavior_module with valid device_id", %{
+      device: device
+    } do
+      astarte_device_id = device.device_id
+
+      Edgehog.Astarte.Device.LedBehaviorMock
+      |> expect(:post, 1, fn _client, ^astarte_device_id, _behavior -> :ok end)
+
+      assert {:ok, _} = Astarte.set_led_behavior(%{device_id: device.id, behavior: :blink}, %{})
+    end
   end
 end
