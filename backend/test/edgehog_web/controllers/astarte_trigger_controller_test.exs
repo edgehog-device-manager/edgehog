@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -193,6 +193,44 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert device.system_model.id == system_model.id
       assert device.system_model.name == system_model.name
       assert device.system_model.handle == system_model.handle
+    end
+
+    test "saves a device's part number when SystemModelPartNumber does not exist", %{
+      conn: conn,
+      realm: realm,
+      device: %{id: id, device_id: device_id},
+      tenant: %{slug: tenant_slug}
+    } do
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      part_number = "PN12345"
+
+      connection_event = %{
+        device_id: device_id,
+        event: %{
+          type: "incoming_data",
+          interface: @system_info_interface,
+          path: "/partNumber",
+          value: part_number
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, connection_event)
+
+      assert response(conn, 200)
+
+      device =
+        id
+        |> Devices.get_device!()
+        |> Devices.preload_system_model_for_device()
+
+      assert device.part_number == part_number
+      assert device.system_model_part_number == nil
+      assert device.system_model == nil
     end
 
     test "updates the OTA operation when receiving an event on the OTAResponse interface", %{

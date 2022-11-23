@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,15 +51,5 @@ defmodule Edgehog.Devices.SystemModel do
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
     |> cast_assoc(:descriptions)
-  end
-
-  @doc false
-  def delete_changeset(system_model) do
-    system_model
-    |> change()
-    |> foreign_key_constraint(:devices,
-      name: :devices_part_number_fkey,
-      message: "are still associated with System Model"
-    )
   end
 end

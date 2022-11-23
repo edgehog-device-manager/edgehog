@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -279,6 +279,33 @@ defmodule Edgehog.AstarteTest do
 
       timestamp = DateTime.utc_now()
       timestamp_string = DateTime.to_iso8601(timestamp)
+      assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp_string)
+
+      device = Astarte.get_device!(device.id)
+
+      assert device.part_number == part_number
+    end
+
+    test "process_device_event/4 updates part number on incoming_data event when SystemModelPartNumber does not exist",
+         %{realm: realm} do
+      device = astarte_device_fixture(realm)
+      assert device.part_number == nil
+
+      device_id = device.device_id
+
+      part_number = "PN1234567890"
+
+      event = %{
+        "type" => "incoming_data",
+        "interface" => @system_info_interface,
+        "path" => "/partNumber",
+        "value" => part_number
+      }
+
+      timestamp_string =
+        DateTime.utc_now()
+        |> DateTime.to_iso8601()
+
       assert :ok = Astarte.process_device_event(realm, device_id, event, timestamp_string)
 
       device = Astarte.get_device!(device.id)

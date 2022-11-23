@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -641,9 +641,7 @@ defmodule Edgehog.Devices do
 
   """
   def delete_system_model(%SystemModel{} = system_model) do
-    changeset = SystemModel.delete_changeset(system_model)
-
-    with {:ok, system_model} <- Repo.delete(changeset) do
+    with {:ok, system_model} <- Repo.delete(system_model) do
       # Delete the picture as well, if any.
       # Ignore the result, a failure to delete the picture shouldn't compromise the success of
       # the operation (we would leave another orphan image anyway)
