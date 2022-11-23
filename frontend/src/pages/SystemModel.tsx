@@ -225,6 +225,25 @@ const SystemModelContent = ({
             },
           },
         },
+        updater(store) {
+          if (!input.partNumbers) {
+            return;
+          }
+          const systemModelId = store
+            .getRootField("updateSystemModel")
+            .getLinkedRecord("systemModel")
+            .getDataID();
+
+          store
+            .getRoot()
+            .getLinkedRecords("devices")
+            ?.forEach((device) => {
+              const systemModel = device.getLinkedRecord("systemModel");
+              if (!systemModel || systemModel.getDataID() === systemModelId) {
+                device.invalidateRecord();
+              }
+            });
+        },
       });
     },
     [updateSystemModel, systemModel]
@@ -267,21 +286,31 @@ const SystemModelContent = ({
           />
         );
       },
-      updater(store, data) {
-        const systemModelId = data.deleteSystemModel?.systemModel.id;
-        if (systemModelId) {
-          const root = store.getRoot();
-          const systemModels = root.getLinkedRecords("systemModels");
-          if (systemModels) {
-            root.setLinkedRecords(
-              systemModels.filter(
-                (systemModel) => systemModel.getDataID() !== systemModelId
-              ),
-              "systemModels"
-            );
-          }
-          store.delete(systemModelId);
+      updater(store) {
+        const systemModel = store
+          .getRootField("deleteSystemModel")
+          .getLinkedRecord("systemModel");
+        const systemModelId = systemModel.getDataID();
+        const root = store.getRoot();
+
+        const systemModels = root.getLinkedRecords("systemModels");
+        if (systemModels) {
+          root.setLinkedRecords(
+            systemModels.filter(
+              (systemModel) => systemModel.getDataID() !== systemModelId
+            ),
+            "systemModels"
+          );
         }
+
+        root.getLinkedRecords("devices")?.forEach((device) => {
+          const systemModel = device.getLinkedRecord("systemModel");
+          if (systemModel?.getDataID() === systemModelId) {
+            device.invalidateRecord();
+          }
+        });
+
+        store.delete(systemModelId);
       },
     });
   }, [deleteSystemModel, systemModel, navigate]);
