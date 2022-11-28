@@ -44,13 +44,13 @@ defmodule Edgehog.BaseImagesTest do
       assert BaseImages.list_base_image_collections() == [base_image_collection]
     end
 
-    test "get_base_image_collection!/1 returns the base_image_collection with given id", %{
+    test "fetch_base_image_collection/1 returns the base_image_collection with given id", %{
       system_model: system_model
     } do
       base_image_collection = base_image_collection_fixture(system_model)
 
-      assert BaseImages.get_base_image_collection!(base_image_collection.id) ==
-               base_image_collection
+      assert BaseImages.fetch_base_image_collection(base_image_collection.id) ==
+               {:ok, base_image_collection}
     end
 
     test "create_base_image_collection/2 with valid data creates a base_image_collection", %{
@@ -93,8 +93,8 @@ defmodule Edgehog.BaseImagesTest do
       assert {:error, %Ecto.Changeset{}} =
                BaseImages.update_base_image_collection(base_image_collection, @invalid_attrs)
 
-      assert base_image_collection ==
-               BaseImages.get_base_image_collection!(base_image_collection.id)
+      assert {:ok, base_image_collection} ==
+               BaseImages.fetch_base_image_collection(base_image_collection.id)
     end
 
     test "delete_base_image_collection/1 deletes the base_image_collection", %{
@@ -105,9 +105,8 @@ defmodule Edgehog.BaseImagesTest do
       assert {:ok, %BaseImageCollection{}} =
                BaseImages.delete_base_image_collection(base_image_collection)
 
-      assert_raise Ecto.NoResultsError, fn ->
-        BaseImages.get_base_image_collection!(base_image_collection.id)
-      end
+      assert {:error, :not_found} ==
+               BaseImages.fetch_base_image_collection(base_image_collection.id)
     end
 
     test "change_base_image_collection/1 returns a base_image_collection changeset", %{

@@ -43,20 +43,28 @@ defmodule Edgehog.BaseImages do
   end
 
   @doc """
-  Gets a single base_image_collection.
+  Fetches a single base_image_collection.
 
-  Raises `Ecto.NoResultsError` if the Base image collection does not exist.
+  Returns `{:ok, base_image_collection}` or `{:error, :not_found}` if the Base image collection does not exist.
 
   ## Examples
 
-      iex> get_base_image_collection!(123)
-      %BaseImageCollection{}
+      iex> fetch_base_image_collection(123)
+      {:ok, %BaseImageCollection{}}
 
-      iex> get_base_image_collection!(456)
-      ** (Ecto.NoResultsError)
+      iex> fetch_base_image_collection(456)
+      {:error, :not_found}
 
   """
-  def get_base_image_collection!(id), do: Repo.get!(BaseImageCollection, id)
+  def fetch_base_image_collection(id) do
+    case Repo.get(BaseImageCollection, id) do
+      %BaseImageCollection{} = base_image_collection ->
+        {:ok, base_image_collection}
+
+      nil ->
+        {:error, :not_found}
+    end
+  end
 
   @doc """
   Creates a base_image_collection.
