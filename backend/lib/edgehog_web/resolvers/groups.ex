@@ -44,7 +44,7 @@ defmodule EdgehogWeb.Resolvers.Groups do
   def devices_for_group(%DeviceGroup{} = device_group, _args, %{context: context} = _resolution) do
     devices =
       Groups.list_devices_in_group(device_group)
-      |> Resolvers.Devices.preload_system_model_for_device(context)
+      |> Resolvers.Devices.preload_localized_system_model(context)
 
     {:ok, devices}
   end

@@ -44,7 +44,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
   def find_device(%{id: id}, %{context: context} = resolution) do
     device =
       Devices.get_device!(id)
-      |> preload_system_model_for_device(context)
+      |> preload_localized_system_model(context)
       |> maybe_preload_astarte_resources_for_device(resolution)
 
     {:ok, device}
@@ -71,7 +71,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
   def list_devices(_parent, %{filter: filter}, %{context: context} = resolution) do
     devices =
       Devices.list_devices(filter)
-      |> preload_system_model_for_device(context)
+      |> preload_localized_system_model(context)
       |> maybe_preload_astarte_resources_for_device(resolution)
 
     {:ok, devices}
@@ -80,7 +80,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
   def list_devices(_parent, _args, %{context: context} = resolution) do
     devices =
       Devices.list_devices()
-      |> preload_system_model_for_device(context)
+      |> preload_localized_system_model(context)
       |> maybe_preload_astarte_resources_for_device(resolution)
 
     {:ok, devices}
@@ -93,14 +93,14 @@ defmodule EdgehogWeb.Resolvers.Devices do
     with {:ok, device} <- Devices.update_device(device, attrs) do
       device =
         device
-        |> preload_system_model_for_device(context)
+        |> preload_localized_system_model(context)
         |> maybe_preload_astarte_resources_for_device(resolution)
 
       {:ok, %{device: device}}
     end
   end
 
-  def preload_system_model_for_device(target, context) do
+  def preload_localized_system_model(target, context) do
     descriptions_query =
       context
       |> Map.fetch!(:preferred_locales)
@@ -108,7 +108,7 @@ defmodule EdgehogWeb.Resolvers.Devices do
 
     preload = [descriptions: descriptions_query, hardware_type: [], part_numbers: []]
 
-    Devices.preload_system_model_for_device(target, preload: preload)
+    Devices.preload_system_model(target, preload: preload)
   end
 
   defp maybe_preload_astarte_resources_for_device(device, resolution) do
