@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   relevant for OTA updates). Defaults to 4 GB.
 - Allow creating and managing groups based on selectors.
 
+### Changed
+- Handle Device part numbers for nonexistent system models
+
 ## [0.5.2] - 2022-06-22
 ### Added
 - Expose Prometheus metrics and a /health API endpoint.

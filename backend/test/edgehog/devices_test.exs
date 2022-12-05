@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2022 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -687,6 +687,50 @@ defmodule Edgehog.DevicesTest do
       assert [%SystemModelPartNumber{part_number: "1234-rev4"}] = system_model.part_numbers
     end
 
+    test "create_system_model/1 associates system_model with devices having same part_number", %{
+      hardware_type: hardware_type
+    } do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      part_number_1 = "1234-rev5"
+      part_number_2 = "1234-rev6"
+
+      device_1 =
+        device_fixture(realm, part_number: part_number_1)
+        |> Devices.preload_system_model_for_device()
+
+      device_2 =
+        device_fixture(realm, part_number: part_number_2)
+        |> Devices.preload_system_model_for_device()
+
+      device_3 =
+        device_fixture(realm, part_number: "4321-rev1")
+        |> Devices.preload_system_model_for_device()
+
+      assert device_1.system_model == nil
+      assert device_2.system_model == nil
+      assert device_3.system_model == nil
+
+      attrs = %{
+        handle: "some-handle",
+        name: "some name",
+        part_numbers: [part_number_1, part_number_2]
+      }
+
+      assert {:ok, %SystemModel{} = system_model} =
+               Devices.create_system_model(hardware_type, attrs)
+
+      preload = [hardware_type: [], part_numbers: []]
+      device_1 = Devices.preload_system_model_for_device(device_1, force: true, preload: preload)
+      device_2 = Devices.preload_system_model_for_device(device_2, force: true, preload: preload)
+      device_3 = Devices.preload_system_model_for_device(device_3, force: true, preload: preload)
+
+      assert device_1.system_model == system_model
+      assert device_2.system_model == system_model
+      assert device_3.system_model == nil
+    end
+
     test "create_system_model/1 saves descriptions", %{hardware_type: hardware_type} do
       valid_attrs = %{
         handle: "some-handle",
@@ -790,22 +834,29 @@ defmodule Edgehog.DevicesTest do
       assert Devices.fetch_system_model(system_model.id) == {:error, :not_found}
     end
 
-    test "delete_system_model/1 returns error changeset for system_model in use", %{
-      hardware_type: hardware_type
-    } do
+    test "delete_system_model/1 deletes the system_model in use", %{hardware_type: hardware_type} do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster)
       part_number = "1234-rev4"
-      system_model = system_model_fixture(hardware_type, %{part_numbers: [part_number]})
 
-      _device =
-        device_fixture(realm,
-          device_id: "7mcE8JeZQkSzjLyYuh5N9A",
-          part_number: part_number
+      system_model = system_model_fixture(hardware_type, part_numbers: [part_number])
+
+      device =
+        realm
+        |> device_fixture(part_number: part_number)
+        |> Devices.preload_system_model_for_device(
+          force: true,
+          preload: [hardware_type: [], part_numbers: []]
         )
 
-      assert {:error, %Ecto.Changeset{}} = Devices.delete_system_model(system_model)
-      assert {:ok, system_model} == Devices.fetch_system_model(system_model.id)
+      assert device.system_model == system_model
+
+      assert {:ok, %SystemModel{}} = Devices.delete_system_model(system_model)
+      assert Devices.fetch_system_model(system_model.id) == {:error, :not_found}
+
+      device = Devices.preload_system_model_for_device(device, force: true)
+      assert device.system_model == nil
+      assert device.part_number == part_number
     end
 
     test "change_system_model/1 returns a system_model changeset", %{

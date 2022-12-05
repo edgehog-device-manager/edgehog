@@ -680,7 +680,7 @@ Values to be replaced
 
 ### Installing triggers
 
-In your Astarte instance, install these 3 triggers.
+In your Astarte instance, install these 4 triggers.
 
 Connection trigger:
 
