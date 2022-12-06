@@ -29,12 +29,14 @@ import type {
 
 import Table from "components/Table";
 import type { Column } from "components/Table";
+import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT = graphql`
   fragment BaseImageCollectionsTable_BaseImageCollectionFragment on BaseImageCollection
   @relay(plural: true) {
+    id
     name
     handle
     systemModel {
@@ -55,6 +57,14 @@ const columns: Column<TableRecord>[] = [
         defaultMessage="Base Image Collection Name"
         description="Title for the Name column of the base image collections table"
       />
+    ),
+    Cell: ({ row, value }) => (
+      <Link
+        route={Route.baseImageCollectionsEdit}
+        params={{ baseImageCollectionId: row.original.id }}
+      >
+        {value}
+      </Link>
     ),
   },
   {

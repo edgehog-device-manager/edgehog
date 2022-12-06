@@ -162,6 +162,10 @@ const Sidebar = () => (
           />
         }
         route={Route.baseImageCollections}
+        activeRoutes={[
+          Route.baseImageCollections,
+          Route.baseImageCollectionsEdit,
+        ]}
       />
     </SidebarItemGroup>
   </Navbar>
