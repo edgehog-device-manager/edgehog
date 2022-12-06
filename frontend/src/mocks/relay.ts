@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,6 +29,15 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       name: "ESP32-DevKitC",
       partNumbers: ["AM_0000001"],
       pictureUrl: assets.images.brand,
+    };
+  },
+  BaseImageCollection(_, generateId) {
+    const id = generateId();
+    const handle = `base-image-collection-id-${id}`;
+    return {
+      id: handle,
+      handle,
+      name: `Base Image Collection ${id}`,
     };
   },
   BatterySlot() {
