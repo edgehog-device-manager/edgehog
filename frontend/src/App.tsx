@@ -37,6 +37,7 @@ import HardwareType from "pages/HardwareType";
 import HardwareTypeCreate from "pages/HardwareTypeCreate";
 import HardwareTypes from "pages/HardwareTypes";
 import BaseImageCollection from "pages/BaseImageCollection";
+import BaseImageCollectionCreate from "pages/BaseImageCollectionCreate";
 import BaseImageCollections from "pages/BaseImageCollections";
 import Login from "pages/Login";
 import Logout from "pages/Logout";
@@ -67,6 +68,10 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.hardwareTypesNew, element: <HardwareTypeCreate /> },
   { path: Route.baseImageCollections, element: <BaseImageCollections /> },
   { path: Route.baseImageCollectionsEdit, element: <BaseImageCollection /> },
+  {
+    path: Route.baseImageCollectionsNew,
+    element: <BaseImageCollectionCreate />,
+  },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} /> },
 ];

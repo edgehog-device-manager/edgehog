@@ -37,6 +37,7 @@ enum Route {
   hardwareTypesNew = "/hardware-types/new",
   hardwareTypesEdit = "/hardware-types/:hardwareTypeId/edit",
   baseImageCollections = "/base-image-collections",
+  baseImageCollectionsNew = "/base-image-collections/new",
   baseImageCollectionsEdit = "/base-image-collections/:baseImageCollectionId/edit",
   login = "/login",
   logout = "/logout",
@@ -60,6 +61,7 @@ type ParametricRoute =
   | { route: Route.hardwareTypesNew }
   | { route: Route.hardwareTypesEdit; params: { hardwareTypeId: string } }
   | { route: Route.baseImageCollections }
+  | { route: Route.baseImageCollectionsNew }
   | {
       route: Route.baseImageCollectionsEdit;
       params: { baseImageCollectionId: string };

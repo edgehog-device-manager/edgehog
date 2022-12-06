@@ -29,10 +29,12 @@ import {
 } from "react-relay/hooks";
 
 import type { BaseImageCollections_getBaseImageCollections_Query } from "api/__generated__/BaseImageCollections_getBaseImageCollections_Query.graphql";
+import Button from "components/Button";
 import Center from "components/Center";
 import BaseImageCollectionsTable from "components/BaseImageCollectionsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
+import { Link, Route } from "Navigation";
 
 const GET_BASE_IMAGE_COLLECTIONS_QUERY = graphql`
   query BaseImageCollections_getBaseImageCollections_Query {
@@ -63,7 +65,14 @@ const BaseImageCollectionsContent = ({
             defaultMessage="Base Image Collections"
           />
         }
-      />
+      >
+        <Button as={Link} route={Route.baseImageCollectionsNew}>
+          <FormattedMessage
+            id="pages.BaseImageCollections.createButton"
+            defaultMessage="Create Base Image Collection"
+          />
+        </Button>
+      </Page.Header>
       <Page.Main>
         <BaseImageCollectionsTable
           baseImageCollectionsRef={baseImageCollections}

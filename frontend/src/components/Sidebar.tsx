@@ -164,6 +164,7 @@ const Sidebar = () => (
         route={Route.baseImageCollections}
         activeRoutes={[
           Route.baseImageCollections,
+          Route.baseImageCollectionsNew,
           Route.baseImageCollectionsEdit,
         ]}
       />
