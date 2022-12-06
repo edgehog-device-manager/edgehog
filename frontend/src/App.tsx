@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import SystemModels from "pages/SystemModels";
 import HardwareType from "pages/HardwareType";
 import HardwareTypeCreate from "pages/HardwareTypeCreate";
 import HardwareTypes from "pages/HardwareTypes";
+import BaseImageCollections from "pages/BaseImageCollections";
 import Login from "pages/Login";
 import Logout from "pages/Logout";
 
@@ -63,6 +64,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.hardwareTypes, element: <HardwareTypes /> },
   { path: Route.hardwareTypesEdit, element: <HardwareType /> },
   { path: Route.hardwareTypesNew, element: <HardwareTypeCreate /> },
+  { path: Route.baseImageCollections, element: <BaseImageCollections /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} /> },
 ];

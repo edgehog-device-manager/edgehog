@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -153,6 +153,15 @@ const Sidebar = () => (
           Route.hardwareTypesNew,
           Route.hardwareTypesEdit,
         ]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.baseImageCollectionsLabel"
+            defaultMessage="Base Image Collections"
+          />
+        }
+        route={Route.baseImageCollections}
       />
     </SidebarItemGroup>
   </Navbar>
