@@ -313,6 +313,33 @@
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
   },
+  "components.NetworkInterfacesTable.macAddressTitle": {
+    "defaultMessage": "MAC Address"
+  },
+  "components.NetworkInterfacesTable.nameTitle": {
+    "defaultMessage": "Name"
+  },
+  "components.NetworkInterfacesTable.noResults.message": {
+    "defaultMessage": "The device has not detected any network interface yet."
+  },
+  "components.NetworkInterfacesTable.noResults.title": {
+    "defaultMessage": "No results"
+  },
+  "components.NetworkInterfacesTable.technology.Bluetooth": {
+    "defaultMessage": "Bluetooth"
+  },
+  "components.NetworkInterfacesTable.technology.Cellular": {
+    "defaultMessage": "Cellular"
+  },
+  "components.NetworkInterfacesTable.technology.Ethernet": {
+    "defaultMessage": "Ethernet"
+  },
+  "components.NetworkInterfacesTable.technology.WiFi": {
+    "defaultMessage": "WiFi"
+  },
+  "components.NetworkInterfacesTable.technologyTitle": {
+    "defaultMessage": "Technology"
+  },
   "components.OperationTable.baseImage": {
     "defaultMessage": "Base Image"
   },
@@ -582,6 +609,9 @@
   },
   "pages.Device.DeviceCellularConnectionTab.noModems.title": {
     "defaultMessage": "No modem"
+  },
+  "pages.Device.NetworkInterfacesTab": {
+    "defaultMessage": "Network Interfaces"
   },
   "pages.Device.SoftwareUpdateTab": {
     "defaultMessage": "Software Updates"
