@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import type { Device_runtimeInfo$key } from "api/__generated__/Device_runtimeInf
 import type { Device_storageUsage$key } from "api/__generated__/Device_storageUsage.graphql";
 import type { Device_systemStatus$key } from "api/__generated__/Device_systemStatus.graphql";
 import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiScanResults.graphql";
+import type { Device_networkInterfaces$key } from "api/__generated__/Device_networkInterfaces.graphql";
 import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
 import type { Device_cellularConnection$key } from "api/__generated__/Device_cellularConnection.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
@@ -75,6 +76,7 @@ import StorageTable from "components/StorageTable";
 import Tabs, { Tab } from "components/Tabs";
 import WiFiScanResultsTable from "components/WiFiScanResultsTable";
 import BatteryTable from "components/BatteryTable";
+import NetworkInterfacesTable from "components/NetworkInterfacesTable";
 import BaseImageForm from "forms/BaseImageForm";
 import MultiSelect from "components/MultiSelect";
 
@@ -201,6 +203,13 @@ const DEVICE_CELLULAR_CONNECTION_FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_NETWORK_INTERFACES__FRAGMENT = graphql`
+  fragment Device_networkInterfaces on Device {
+    capabilities
+    ...NetworkInterfacesTable_networkInterfaces
+  }
+`;
+
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!) {
     device(id: $id) {
@@ -234,6 +243,7 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_batteryStatus
       ...Device_otaOperations
       ...Device_cellularConnection
+      ...Device_networkInterfaces
     }
   }
 `;
@@ -1098,6 +1108,35 @@ const DeviceCellularConnectionTab = ({
   );
 };
 
+interface DeviceNetworkInterfacesTabProps {
+  deviceRef: Device_networkInterfaces$key;
+}
+
+const DeviceNetworkInterfacesTab = ({
+  deviceRef,
+}: DeviceNetworkInterfacesTabProps) => {
+  const intl = useIntl();
+  const device = useFragment(DEVICE_NETWORK_INTERFACES__FRAGMENT, deviceRef);
+
+  if (!device.capabilities.includes("NETWORK_INTERFACE_INFO")) {
+    return null;
+  }
+
+  return (
+    <Tab
+      eventKey="device-network-interfaces-tab"
+      title={intl.formatMessage({
+        id: "pages.Device.NetworkInterfacesTab",
+        defaultMessage: "Network Interfaces",
+      })}
+    >
+      <div className="mt-3">
+        <NetworkInterfacesTable deviceRef={device} />
+      </div>
+    </Tab>
+  );
+};
+
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
   getTagsQuery: PreloadedQuery<Device_getExistingDeviceTags_Query>;
@@ -1467,6 +1506,7 @@ const DeviceContent = ({
               "device-battery-tab",
               "device-location-tab",
               "device-cellular-connection-tab",
+              "device-network-interfaces-tab",
               "device-wifi-scan-results-tab",
               "device-software-update-tab",
             ]}
@@ -1479,6 +1519,7 @@ const DeviceContent = ({
             <DeviceStorageUsageTab deviceRef={device} />
             <DeviceBatteryTab deviceRef={device} />
             <DeviceCellularConnectionTab deviceRef={device} />
+            <DeviceNetworkInterfacesTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
             <SoftwareUpdateTab deviceRef={device} />
