@@ -104,6 +104,11 @@ defmodule Edgehog.AstarteMockCase do
     )
 
     Mox.stub_with(
+      Edgehog.Astarte.Device.NetworkInterfaceMock,
+      Edgehog.Mocks.Astarte.Device.NetworkInterface
+    )
+
+    Mox.stub_with(
       Edgehog.Astarte.Device.LedBehaviorMock,
       Edgehog.Mocks.Astarte.Device.LedBehavior
     )

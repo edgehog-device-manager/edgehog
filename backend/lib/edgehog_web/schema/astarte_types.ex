@@ -247,6 +247,33 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     end
   end
 
+  @desc """
+  The connection technology of the network interface.
+  """
+  enum :network_interface_technology do
+    @desc "Ethernet."
+    value :ethernet
+    @desc "Bluetooth."
+    value :bluetooth
+    @desc "Cellular."
+    value :cellular
+    @desc "WiFi."
+    value :wifi
+  end
+
+  @desc "Describes a network interface of a device."
+  object :network_interface do
+    @desc "The identifier of the network interface."
+    field :name, non_null(:string)
+    @desc "The normalized physical address."
+    field :mac_address, :string
+    @desc "Connection Technology"
+    field :technology, :network_interface_technology do
+      resolve &Resolvers.Astarte.resolve_network_interface_technology/3
+      middleware Middleware.ErrorHandler
+    end
+  end
+
   @desc "Describes an Edgehog runtime."
   object :runtime_info do
     @desc "The name of the Edgehog runtime."

@@ -63,6 +63,7 @@ config :edgehog, :astarte_ota_request_module, Edgehog.Astarte.Device.OTARequestM
 config :edgehog, :astarte_runtime_info_module, Edgehog.Astarte.Device.RuntimeInfoMock
 config :edgehog, :astarte_led_behavior_module, Edgehog.Astarte.Device.LedBehaviorMock
 config :edgehog, :astarte_geolocation_module, Edgehog.Astarte.Device.GeolocationMock
+config :edgehog, :astarte_network_interface_module, Edgehog.Astarte.Device.NetworkInterfaceMock
 
 config :edgehog,
        :astarte_cellular_connection_module,

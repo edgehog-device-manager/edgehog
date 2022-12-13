@@ -62,6 +62,10 @@ Mox.defmock(Edgehog.Astarte.Device.RuntimeInfoMock,
   for: Edgehog.Astarte.Device.RuntimeInfo.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.NetworkInterfaceMock,
+  for: Edgehog.Astarte.Device.NetworkInterface.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.LedBehaviorMock,
   for: Edgehog.Astarte.Device.LedBehavior.Behaviour
 )
