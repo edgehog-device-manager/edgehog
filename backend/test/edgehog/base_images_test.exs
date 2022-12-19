@@ -27,48 +27,68 @@ defmodule Edgehog.BaseImagesTest do
     alias Edgehog.BaseImages.BaseImageCollection
 
     import Edgehog.BaseImagesFixtures
+    import Edgehog.DevicesFixtures
 
-    @invalid_attrs %{handle: nil, name: nil}
+    setup do
+      hardware_type = hardware_type_fixture()
 
-    test "list_base_image_collections/0 returns all base_image_collections" do
-      base_image_collection = base_image_collection_fixture()
+      {:ok, system_model: system_model_fixture(hardware_type)}
+    end
+
+    @invalid_attrs %{handle: "3 invalid handle", name: ""}
+
+    test "list_base_image_collections/0 returns all base_image_collections", %{
+      system_model: system_model
+    } do
+      base_image_collection = base_image_collection_fixture(system_model)
       assert BaseImages.list_base_image_collections() == [base_image_collection]
     end
 
-    test "get_base_image_collection!/1 returns the base_image_collection with given id" do
-      base_image_collection = base_image_collection_fixture()
+    test "get_base_image_collection!/1 returns the base_image_collection with given id", %{
+      system_model: system_model
+    } do
+      base_image_collection = base_image_collection_fixture(system_model)
 
       assert BaseImages.get_base_image_collection!(base_image_collection.id) ==
                base_image_collection
     end
 
-    test "create_base_image_collection/1 with valid data creates a base_image_collection" do
-      valid_attrs = %{handle: "some handle", name: "some name"}
+    test "create_base_image_collection/2 with valid data creates a base_image_collection", %{
+      system_model: system_model
+    } do
+      valid_attrs = %{handle: "some-handle", name: "some name"}
 
       assert {:ok, %BaseImageCollection{} = base_image_collection} =
-               BaseImages.create_base_image_collection(valid_attrs)
+               BaseImages.create_base_image_collection(system_model, valid_attrs)
 
-      assert base_image_collection.handle == "some handle"
+      assert base_image_collection.handle == "some-handle"
       assert base_image_collection.name == "some name"
     end
 
-    test "create_base_image_collection/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = BaseImages.create_base_image_collection(@invalid_attrs)
+    test "create_base_image_collection/2 with invalid data returns error changeset", %{
+      system_model: system_model
+    } do
+      assert {:error, %Ecto.Changeset{}} =
+               BaseImages.create_base_image_collection(system_model, @invalid_attrs)
     end
 
-    test "update_base_image_collection/2 with valid data updates the base_image_collection" do
-      base_image_collection = base_image_collection_fixture()
-      update_attrs = %{handle: "some updated handle", name: "some updated name"}
+    test "update_base_image_collection/2 with valid data updates the base_image_collection", %{
+      system_model: system_model
+    } do
+      base_image_collection = base_image_collection_fixture(system_model)
+      update_attrs = %{handle: "some-updated-handle", name: "some updated name"}
 
       assert {:ok, %BaseImageCollection{} = base_image_collection} =
                BaseImages.update_base_image_collection(base_image_collection, update_attrs)
 
-      assert base_image_collection.handle == "some updated handle"
+      assert base_image_collection.handle == "some-updated-handle"
       assert base_image_collection.name == "some updated name"
     end
 
-    test "update_base_image_collection/2 with invalid data returns error changeset" do
-      base_image_collection = base_image_collection_fixture()
+    test "update_base_image_collection/2 with invalid data returns error changeset", %{
+      system_model: system_model
+    } do
+      base_image_collection = base_image_collection_fixture(system_model)
 
       assert {:error, %Ecto.Changeset{}} =
                BaseImages.update_base_image_collection(base_image_collection, @invalid_attrs)
@@ -77,8 +97,10 @@ defmodule Edgehog.BaseImagesTest do
                BaseImages.get_base_image_collection!(base_image_collection.id)
     end
 
-    test "delete_base_image_collection/1 deletes the base_image_collection" do
-      base_image_collection = base_image_collection_fixture()
+    test "delete_base_image_collection/1 deletes the base_image_collection", %{
+      system_model: system_model
+    } do
+      base_image_collection = base_image_collection_fixture(system_model)
 
       assert {:ok, %BaseImageCollection{}} =
                BaseImages.delete_base_image_collection(base_image_collection)
@@ -88,8 +110,10 @@ defmodule Edgehog.BaseImagesTest do
       end
     end
 
-    test "change_base_image_collection/1 returns a base_image_collection changeset" do
-      base_image_collection = base_image_collection_fixture()
+    test "change_base_image_collection/1 returns a base_image_collection changeset", %{
+      system_model: system_model
+    } do
+      base_image_collection = base_image_collection_fixture(system_model)
       assert %Ecto.Changeset{} = BaseImages.change_base_image_collection(base_image_collection)
     end
   end

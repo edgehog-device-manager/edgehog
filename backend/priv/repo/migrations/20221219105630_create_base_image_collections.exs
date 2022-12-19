@@ -23,15 +23,25 @@ defmodule Edgehog.Repo.Migrations.CreateBaseImageCollections do
 
   def change do
     create table(:base_image_collections) do
-      add :name, :string
-      add :handle, :string
-      add :system_model_id, references(:system_models, on_delete: :nothing)
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :name, :string, null: false
+      add :handle, :string, null: false
+
+      add :system_model_id,
+          references(:system_models,
+            with: [tenant_id: :tenant_id],
+            match: :full,
+            on_delete: :nothing
+          ),
+          null: false
 
       timestamps()
     end
 
-    create unique_index(:base_image_collections, [:system_model_id])
-    create unique_index(:base_image_collections, [:handle])
-    create unique_index(:base_image_collections, [:name])
+    create unique_index(:base_image_collections, [:system_model_id, :tenant_id])
+    create unique_index(:base_image_collections, [:handle, :tenant_id])
+    create unique_index(:base_image_collections, [:name, :tenant_id])
   end
 end

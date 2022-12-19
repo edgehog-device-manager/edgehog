@@ -27,7 +27,7 @@ defmodule Edgehog.BaseImagesFixtures do
   @doc """
   Generate a unique base_image_collection handle.
   """
-  def unique_base_image_collection_handle, do: "some handle#{System.unique_integer([:positive])}"
+  def unique_base_image_collection_handle, do: "some-handle#{System.unique_integer([:positive])}"
 
   @doc """
   Generate a unique base_image_collection name.
@@ -37,14 +37,16 @@ defmodule Edgehog.BaseImagesFixtures do
   @doc """
   Generate a base_image_collection.
   """
-  def base_image_collection_fixture(attrs \\ %{}) do
-    {:ok, base_image_collection} =
+  def base_image_collection_fixture(system_model, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         handle: unique_base_image_collection_handle(),
         name: unique_base_image_collection_name()
       })
-      |> Edgehog.BaseImages.create_base_image_collection()
+
+    {:ok, base_image_collection} =
+      Edgehog.BaseImages.create_base_image_collection(system_model, attrs)
 
     base_image_collection
   end

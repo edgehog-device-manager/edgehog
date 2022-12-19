@@ -22,10 +22,13 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Devices
+
   schema "base_image_collections" do
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :handle, :string
     field :name, :string
-    field :system_model_id, :id
+    belongs_to :system_model, Devices.SystemModel
 
     timestamps()
   end
@@ -35,8 +38,12 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     base_image_collection
     |> cast(attrs, [:name, :handle])
     |> validate_required([:name, :handle])
-    |> unique_constraint(:system_model_id)
-    |> unique_constraint(:handle)
-    |> unique_constraint(:name)
+    |> unique_constraint([:system_model_id, :tenant_id])
+    |> unique_constraint([:name, :tenant_id])
+    |> unique_constraint([:handle, :tenant_id])
+    |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
+      message:
+        "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
+    )
   end
 end

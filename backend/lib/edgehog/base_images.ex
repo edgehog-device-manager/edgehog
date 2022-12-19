@@ -26,6 +26,7 @@ defmodule Edgehog.BaseImages do
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 
+  alias Edgehog.Devices
   alias Edgehog.BaseImages.BaseImageCollection
 
   @doc """
@@ -62,15 +63,15 @@ defmodule Edgehog.BaseImages do
 
   ## Examples
 
-      iex> create_base_image_collection(%{field: value})
+      iex> create_base_image_collection(%Devices.SystemModel{}, %{field: value})
       {:ok, %BaseImageCollection{}}
 
-      iex> create_base_image_collection(%{field: bad_value})
+      iex> create_base_image_collection(%Devices.SystemModel{}, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_base_image_collection(attrs \\ %{}) do
-    %BaseImageCollection{}
+  def create_base_image_collection(%Devices.SystemModel{} = system_model, attrs \\ %{}) do
+    %BaseImageCollection{system_model_id: system_model.id}
     |> BaseImageCollection.changeset(attrs)
     |> Repo.insert()
   end
