@@ -469,6 +469,56 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     end
   end
 
+  describe "device network interfaces query" do
+    setup do
+      cluster = cluster_fixture()
+
+      {:ok, realm: realm_fixture(cluster)}
+    end
+
+    @network_interfaces_query """
+    query ($id: ID!) {
+      device(id: $id) {
+        networkInterfaces {
+          name
+          macAddress
+          technology
+        }
+      }
+    }
+    """
+
+    test "returns network interfaces if available", %{
+      conn: conn,
+      api_path: api_path,
+      realm: realm
+    } do
+      %Device{
+        id: id
+      } = device_fixture(realm)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device, id, EdgehogWeb.Schema)}
+
+      conn = get(conn, api_path, query: @network_interfaces_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "device" => %{
+                   "networkInterfaces" => [interface1, interface2]
+                 }
+               }
+             } = json_response(conn, 200)
+
+      assert interface1["name"] == "enp2s0"
+      assert interface1["macAddress"] == "00:aa:bb:cc:dd:ee"
+      assert interface1["technology"] == "ETHERNET"
+
+      assert interface2["name"] == "wlp3s0"
+      assert interface2["macAddress"] == "00:aa:bb:cc:dd:ff"
+      assert interface2["technology"] == "WIFI"
+    end
+  end
+
   describe "devices device_groups query" do
     setup do
       cluster = cluster_fixture()

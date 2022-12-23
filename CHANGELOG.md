@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `MAX_UPLOAD_SIZE_BYTES` env variable to define the maximum dimension for uploads (particularly
   relevant for OTA updates). Defaults to 4 GB.
 - Allow creating and managing groups based on selectors.
+- Add support for device's `network_interfaces` ([#231](https://github.com/edgehog-device-manager/edgehog/pull/231))
 
 ### Changed
 - Handle Device part numbers for nonexistent system models

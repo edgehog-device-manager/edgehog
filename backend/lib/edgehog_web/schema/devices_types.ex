@@ -243,6 +243,12 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
       resolve &Resolvers.Astarte.fetch_runtime_info/3
       middleware Middleware.ErrorHandler
     end
+
+    @desc "The list of Network Interfaces of the device."
+    field :network_interfaces, list_of(non_null(:network_interface)) do
+      resolve &Resolvers.Astarte.fetch_network_interfaces/3
+      middleware Middleware.ErrorHandler
+    end
   end
 
   @desc """

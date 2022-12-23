@@ -37,7 +37,8 @@ defmodule EdgehogWeb.Resolvers.Devices do
     :base_image,
     :os_info,
     :cellular_connection,
-    :runtime_info
+    :runtime_info,
+    :network_interfaces
   ]
 
   def find_device(%{id: id}, %{context: context} = resolution) do

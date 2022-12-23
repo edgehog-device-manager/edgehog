@@ -38,6 +38,7 @@ defmodule Edgehog.Astarte do
     Geolocation,
     HardwareInfo,
     LedBehavior,
+    NetworkInterface,
     OSInfo,
     OTARequest,
     RuntimeInfo,
@@ -92,6 +93,11 @@ defmodule Edgehog.Astarte do
                          LedBehavior
                        )
   @geolocation_module Application.compile_env(:edgehog, :astarte_geolocation_module, Geolocation)
+  @network_interface_module Application.compile_env(
+                              :edgehog,
+                              :astarte_network_interface_module,
+                              NetworkInterface
+                            )
 
   @doc """
   Returns the list of clusters.
@@ -519,6 +525,10 @@ defmodule Edgehog.Astarte do
 
   def fetch_runtime_info(%AppEngine{} = client, device_id) do
     @runtime_info_module.get(client, device_id)
+  end
+
+  def fetch_network_interfaces(%AppEngine{} = client, device_id) do
+    @network_interface_module.get(client, device_id)
   end
 
   def send_led_behavior(%AppEngine{} = client, device_id, behavior) do

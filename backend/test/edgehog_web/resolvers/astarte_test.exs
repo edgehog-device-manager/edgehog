@@ -27,6 +27,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
+    NetworkInterface,
     OSInfo,
     RuntimeInfo,
     SystemStatus,
@@ -184,6 +185,25 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                environment: "esp-idf v4.3",
                url: "https://github.com/edgehog-device-manager/edgehog-esp32-device"
              } == runtime_info
+    end
+
+    test "fetch_network_interfaces/3 returns the network interfaces for a device", %{
+      device: device
+    } do
+      assert {:ok, network_interfaces} = Astarte.fetch_network_interfaces(device, %{}, %{})
+
+      assert [
+               %NetworkInterface{
+                 name: "enp2s0",
+                 mac_address: "00:aa:bb:cc:dd:ee",
+                 technology: "Ethernet"
+               },
+               %NetworkInterface{
+                 name: "wlp3s0",
+                 mac_address: "00:aa:bb:cc:dd:ff",
+                 technology: "WiFi"
+               }
+             ] == network_interfaces
     end
 
     test "set_led_behavior/2 validates requested behavior", %{device: device} do

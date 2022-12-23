@@ -21,6 +21,7 @@
 defmodule EdgehogWeb.Resolvers.Astarte do
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
+  alias Edgehog.Astarte.Device.NetworkInterface
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
 
@@ -95,6 +96,31 @@ defmodule EdgehogWeb.Resolvers.Astarte do
       _ -> {:ok, nil}
     end
   end
+
+  def fetch_network_interfaces(%Device{device_id: device_id} = device, _args, _context) do
+    with {:ok, client} <- Devices.appengine_client_from_device(device),
+         {:ok, network_interfaces} <- Astarte.fetch_network_interfaces(client, device_id) do
+      {:ok, network_interfaces}
+    else
+      _ -> {:ok, nil}
+    end
+  end
+
+  def resolve_network_interface_technology(%NetworkInterface{technology: nil}, _args, _res) do
+    {:ok, nil}
+  end
+
+  def resolve_network_interface_technology(%NetworkInterface{technology: technology}, _args, _res) do
+    network_interface_technology_to_enum(technology)
+  end
+
+  defp network_interface_technology_to_enum("Ethernet"), do: {:ok, :ethernet}
+  defp network_interface_technology_to_enum("Bluetooth"), do: {:ok, :bluetooth}
+  defp network_interface_technology_to_enum("Cellular"), do: {:ok, :cellular}
+  defp network_interface_technology_to_enum("WiFi"), do: {:ok, :wifi}
+
+  defp network_interface_technology_to_enum(_),
+    do: {:error, :invalid_network_interface_technology}
 
   def fetch_cellular_connection(%Device{device_id: device_id} = device, _args, _context) do
     with {:ok, client} <- Devices.appengine_client_from_device(device),
