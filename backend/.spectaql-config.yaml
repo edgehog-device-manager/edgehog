@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2022 SECO Mind Srl
 # SPDX-License-Identifier: Apache-2.0
 
 # This config will not run "as-is" and will need to be modified. You can see a minimal working
@@ -202,7 +202,7 @@ info:
   x-hideWelcome: false
   # Set to true to not render your intro items
   # Default: false
-  x-hideIntroItems: false
+  x-hideIntroItems: true
 
   # Set to true to not render the deprecated label
   # Default: false
@@ -232,7 +232,7 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
   # A non-standard array of items to display in your Introduction Area
-  x-introItems:
+  # x-introItems:
     # Can be a Title (for the Nav panel) + URL to simply add a link to somewhere
     # - title: A silly link to our website!
     #   url: http://yoursite.com
