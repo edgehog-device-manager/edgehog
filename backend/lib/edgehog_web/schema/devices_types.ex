@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -304,7 +304,7 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
     Accept-Language header in the request. If no such header is present, the \
     default tenant language is returned.
     """
-    field :description, :localized_text do
+    field :description, :string do
       resolve &Resolvers.Devices.extract_localized_description/3
     end
   end

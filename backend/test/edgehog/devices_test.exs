@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -644,7 +644,6 @@ defmodule Edgehog.DevicesTest do
 
   describe "system_models" do
     alias Edgehog.Devices.SystemModel
-    alias Edgehog.Devices.SystemModelDescription
     alias Edgehog.Devices.SystemModelPartNumber
 
     import Edgehog.AstarteFixtures, except: [device_fixture: 1, device_fixture: 2]
@@ -736,13 +735,13 @@ defmodule Edgehog.DevicesTest do
         handle: "some-handle",
         name: "some name",
         part_numbers: ["1234-rev4"],
-        descriptions: [%{locale: "en-US", text: "Yadda"}]
+        description: %{"en-US" => "Yadda"}
       }
 
       assert {:ok, %SystemModel{} = system_model} =
                Devices.create_system_model(hardware_type, valid_attrs)
 
-      assert [%SystemModelDescription{text: "Yadda", locale: "en-US"}] = system_model.descriptions
+      assert %{"en-US" => "Yadda"} = system_model.description
     end
 
     test "create_system_model/1 with invalid data returns error changeset", %{
@@ -759,7 +758,7 @@ defmodule Edgehog.DevicesTest do
         handle: "some-handle",
         name: "some name",
         part_numbers: ["1234-rev4"],
-        descriptions: [%{locale: "INVALID_loc4le", text: "Yadda"}]
+        description: %{"INVALID_loc4le" => "Yadda"}
       }
 
       assert {:error, %Ecto.Changeset{}} = Devices.create_system_model(hardware_type, attrs)
@@ -796,14 +795,14 @@ defmodule Edgehog.DevicesTest do
     } do
       system_model =
         system_model_fixture(hardware_type,
-          descriptions: [%{locale: "en-US", text: "Yadda"}]
+          description: %{"en-US" => "Yadda"}
         )
 
       update_attrs = %{
         handle: "some-updated-handle",
         name: "some updated name",
         part_numbers: ["1234-rev5"],
-        descriptions: [%{locale: "en-US", text: "Yadda yadda"}]
+        description: %{"en-US" => "Yadda yadda"}
       }
 
       assert {:ok, %SystemModel{} = system_model} =
@@ -813,7 +812,7 @@ defmodule Edgehog.DevicesTest do
       assert system_model.name == "some updated name"
       assert [%SystemModelPartNumber{part_number: "1234-rev5"}] = system_model.part_numbers
 
-      assert [%SystemModelDescription{text: "Yadda yadda"}] = system_model.descriptions
+      assert %{"en-US" => "Yadda yadda"} = system_model.description
     end
 
     test "update_system_model/2 with invalid data returns error changeset", %{
@@ -864,63 +863,6 @@ defmodule Edgehog.DevicesTest do
     } do
       system_model = system_model_fixture(hardware_type)
       assert %Ecto.Changeset{} = Devices.change_system_model(system_model)
-    end
-
-    test "preload_localized_descriptions_for_system_model/0 returns a localized description for a list",
-         %{
-           hardware_type: hardware_type
-         } do
-      descriptions_1 = [
-        %{locale: "en-US", text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
-
-      descriptions_2 = [
-        %{locale: "en-US", text: "Another system model"}
-      ]
-
-      _system_model_1 =
-        system_model_fixture(hardware_type,
-          name: "SystemModel1",
-          handle: "sm1",
-          descriptions: descriptions_1
-        )
-
-      _system_model_2 =
-        system_model_fixture(hardware_type,
-          name: "SystemModel2",
-          handle: "sm2",
-          descriptions: descriptions_2
-        )
-
-      assert [system_model_1, system_model_2] =
-               Devices.list_system_models()
-               |> Devices.preload_localized_descriptions_for_system_model(["it-IT"])
-
-      assert [%{locale: "it-IT"}] = system_model_1.descriptions
-      assert [] = system_model_2.descriptions
-    end
-
-    test "preload_localized_descriptions_for_system_model/0 returns a localized description for a single struct",
-         %{
-           hardware_type: hardware_type
-         } do
-      descriptions = [
-        %{locale: "en-US", text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
-
-      system_model = system_model_fixture(hardware_type, descriptions: descriptions)
-
-      assert {:ok, system_model} = Devices.fetch_system_model(system_model.id)
-
-      system_model =
-        Devices.preload_localized_descriptions_for_system_model(system_model, ["it-IT", "en-US"])
-
-      assert [
-               %{locale: "en-US", text: "A system model"},
-               %{locale: "it-IT", text: "Un modello di sistema"}
-             ] = system_model.descriptions
     end
   end
 end

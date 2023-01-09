@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,69 +23,40 @@ defmodule EdgehogWeb.Resolvers.BaseImages do
   alias Edgehog.BaseImages.BaseImageCollection
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
-  alias EdgehogWeb.Resolvers
 
-  def find_base_image_collection(args, resolution) do
-    with {:ok, base_image_collection} <- BaseImages.fetch_base_image_collection(args.id) do
-      base_image_collection =
-        Resolvers.Devices.preload_localized_system_model(
-          base_image_collection,
-          resolution.context
-        )
-
-      {:ok, base_image_collection}
-    end
+  def find_base_image_collection(args, _resolution) do
+    BaseImages.fetch_base_image_collection(args.id)
   end
 
-  def list_base_image_collections(_args, resolution) do
-    base_image_collections =
-      BaseImages.list_base_image_collections()
-      |> Resolvers.Devices.preload_localized_system_model(resolution.context)
+  def list_base_image_collections(_args, _resolution) do
+    base_image_collections = BaseImages.list_base_image_collections()
 
     {:ok, base_image_collections}
   end
 
-  def create_base_image_collection(attrs, resolution) do
+  def create_base_image_collection(attrs, _resolution) do
     with {:ok, %SystemModel{} = system_model} <-
            Devices.fetch_system_model(attrs.system_model_id),
          {:ok, base_image_collection} <-
            BaseImages.create_base_image_collection(system_model, attrs) do
-      base_image_collection =
-        Resolvers.Devices.preload_localized_system_model(
-          base_image_collection,
-          resolution.context
-        )
-
       {:ok, %{base_image_collection: base_image_collection}}
     end
   end
 
-  def update_base_image_collection(attrs, resolution) do
+  def update_base_image_collection(attrs, _resolution) do
     with {:ok, %BaseImageCollection{} = base_image_collection} <-
            BaseImages.fetch_base_image_collection(attrs.base_image_collection_id),
          {:ok, %BaseImageCollection{} = base_image_collection} <-
            BaseImages.update_base_image_collection(base_image_collection, attrs) do
-      base_image_collection =
-        Resolvers.Devices.preload_localized_system_model(
-          base_image_collection,
-          resolution.context
-        )
-
       {:ok, %{base_image_collection: base_image_collection}}
     end
   end
 
-  def delete_base_image_collection(args, resolution) do
+  def delete_base_image_collection(args, _resolution) do
     with {:ok, %BaseImageCollection{} = base_image_collection} <-
            BaseImages.fetch_base_image_collection(args.base_image_collection_id),
          {:ok, %BaseImageCollection{} = base_image_collection} <-
            BaseImages.delete_base_image_collection(base_image_collection) do
-      base_image_collection =
-        Resolvers.Devices.preload_localized_system_model(
-          base_image_collection,
-          resolution.context
-        )
-
       {:ok, %{base_image_collection: base_image_collection}}
     end
   end

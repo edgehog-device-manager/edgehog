@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,10 +45,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         online
         systemModel {
           name
-          description {
-            locale
-            text
-          }
+          description
         }
       }
     }
@@ -154,13 +151,10 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
       %SystemModel{name: system_model_name, part_numbers: [pn]} =
-        system_model_fixture(hardware_type, descriptions: descriptions)
+        system_model_fixture(hardware_type, description: description)
 
       part_number = pn.part_number
       _device = device_fixture(realm, part_number: part_number)
@@ -174,8 +168,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } = json_response(conn, 200)
 
       assert device["systemModel"]["name"] == system_model_name
-      assert device["systemModel"]["description"]["locale"] == default_locale
-      assert device["systemModel"]["description"]["text"] == "A system model"
+      assert device["systemModel"]["description"] == "A system model"
     end
 
     test "returns system model description with explicit locale", %{
@@ -190,13 +183,10 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
       %SystemModel{name: system_model_name, part_numbers: [pn]} =
-        system_model_fixture(hardware_type, descriptions: descriptions)
+        system_model_fixture(hardware_type, description: description)
 
       part_number = pn.part_number
 
@@ -214,8 +204,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } = json_response(conn, 200)
 
       assert device["systemModel"]["name"] == system_model_name
-      assert device["systemModel"]["description"]["locale"] == "it-IT"
-      assert device["systemModel"]["description"]["text"] == "Un modello di sistema"
+      assert device["systemModel"]["description"] == "Un modello di sistema"
     end
   end
 

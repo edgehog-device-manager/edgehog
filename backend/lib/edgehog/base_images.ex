@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,15 @@ defmodule Edgehog.BaseImages do
   alias Edgehog.BaseImages.BaseImageCollection
 
   @doc """
+  Preloads the default associations for a Base Image Collection (or a list of base image collections)
+  """
+  def preload_defaults_for_base_image_collection(collection_or_collections) do
+    Repo.preload(collection_or_collections,
+      system_model: [:hardware_type, :part_numbers]
+    )
+  end
+
+  @doc """
   Returns the list of base_image_collections.
 
   ## Examples
@@ -40,6 +49,7 @@ defmodule Edgehog.BaseImages do
   """
   def list_base_image_collections do
     Repo.all(BaseImageCollection)
+    |> preload_defaults_for_base_image_collection()
   end
 
   @doc """
@@ -59,7 +69,7 @@ defmodule Edgehog.BaseImages do
   def fetch_base_image_collection(id) do
     case Repo.get(BaseImageCollection, id) do
       %BaseImageCollection{} = base_image_collection ->
-        {:ok, base_image_collection}
+        {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
 
       nil ->
         {:error, :not_found}
@@ -79,9 +89,13 @@ defmodule Edgehog.BaseImages do
 
   """
   def create_base_image_collection(%Devices.SystemModel{} = system_model, attrs \\ %{}) do
-    %BaseImageCollection{system_model_id: system_model.id}
-    |> BaseImageCollection.changeset(attrs)
-    |> Repo.insert()
+    changeset =
+      %BaseImageCollection{system_model_id: system_model.id}
+      |> BaseImageCollection.changeset(attrs)
+
+    with {:ok, base_image_collection} <- Repo.insert(changeset) do
+      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
+    end
   end
 
   @doc """
@@ -97,9 +111,11 @@ defmodule Edgehog.BaseImages do
 
   """
   def update_base_image_collection(%BaseImageCollection{} = base_image_collection, attrs) do
-    base_image_collection
-    |> BaseImageCollection.changeset(attrs)
-    |> Repo.update()
+    changeset = BaseImageCollection.changeset(base_image_collection, attrs)
+
+    with {:ok, base_image_collection} <- Repo.update(changeset) do
+      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
+    end
   end
 
   @doc """
@@ -115,7 +131,9 @@ defmodule Edgehog.BaseImages do
 
   """
   def delete_base_image_collection(%BaseImageCollection{} = base_image_collection) do
-    Repo.delete(base_image_collection)
+    with {:ok, base_image_collection} <- Repo.delete(base_image_collection) do
+      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
+    end
   end
 
   @doc """

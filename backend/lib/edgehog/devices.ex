@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ defmodule Edgehog.Devices do
   alias Edgehog.Assets
   alias Edgehog.Devices.Device
   alias Edgehog.Devices.SystemModel
-  alias Edgehog.Devices.SystemModelDescription
   alias Edgehog.Devices.SystemModelPartNumber
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.HardwareTypePartNumber
@@ -75,7 +74,11 @@ defmodule Edgehog.Devices do
   Preloads the default associations for an Edgehog Device (or a list of devices)
   """
   def preload_defaults_for_device(device_or_devices) do
-    Repo.preload(device_or_devices, [:tags, :custom_attributes])
+    Repo.preload(device_or_devices,
+      tags: [],
+      custom_attributes: [],
+      system_model: [:hardware_type, :part_numbers]
+    )
   end
 
   defp filter_with({:online, online}, query) do
@@ -490,23 +493,6 @@ defmodule Edgehog.Devices do
   end
 
   @doc """
-  Preloads only descriptions with specific locales for a `SystemModel` (or a list of them).
-  """
-  def preload_localized_descriptions_for_system_model(model_or_models, locales)
-      when is_list(locales) do
-    descriptions_preload = SystemModelDescription.localized(locales)
-
-    Repo.preload(model_or_models, descriptions: descriptions_preload)
-  end
-
-  @doc """
-  Returns a query that selects only `SystemModelDescription` with specific locales.
-  """
-  def localized_system_model_description_query(locales) when is_list(locales) do
-    SystemModelDescription.localized(locales)
-  end
-
-  @doc """
   Creates a system_model.
 
   ## Examples
@@ -595,7 +581,12 @@ defmodule Edgehog.Devices do
       {:ok, insert_or_get_part_numbers(SystemModelPartNumber, changeset, part_numbers)}
     end)
     |> Multi.update(:system_model, fn %{assoc_part_numbers: changeset} ->
-      changeset
+      # TODO: this merges the updated descriptions with the existing ones to maintain the existing
+      # behavior. Re-evaluate this when we support a proper description update API, considering
+      # that, as it is, this doesn't allow to delete descriptions
+      Ecto.Changeset.update_change(changeset, :description, fn updated_locales ->
+        Map.merge(system_model.description || %{}, updated_locales)
+      end)
     end)
     |> Multi.run(:upload_system_model_picture, fn repo, %{system_model: system_model} ->
       # This handles the case of picture update

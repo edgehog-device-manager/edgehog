@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Handle Device part numbers for nonexistent system models
+- BREAKING: The `Description` field in the `SystemModel` object is now a `String` instead of a
+  `LocalizedText`.
 
 ## [0.5.2] - 2022-06-22
 ### Added

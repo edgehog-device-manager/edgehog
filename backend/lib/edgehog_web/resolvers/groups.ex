@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 defmodule EdgehogWeb.Resolvers.Groups do
   alias Edgehog.Groups
   alias Edgehog.Groups.DeviceGroup
-  alias EdgehogWeb.Resolvers
   import Absinthe.Resolution.Helpers
 
   @doc """
@@ -41,10 +40,8 @@ defmodule EdgehogWeb.Resolvers.Groups do
   @doc """
   Lists all devices in a device group
   """
-  def devices_for_group(%DeviceGroup{} = device_group, _args, %{context: context} = _resolution) do
-    devices =
-      Groups.list_devices_in_group(device_group)
-      |> Resolvers.Devices.preload_localized_system_model(context)
+  def devices_for_group(%DeviceGroup{} = device_group, _args, _resolution) do
+    devices = Groups.list_devices_in_group(device_group)
 
     {:ok, devices}
   end

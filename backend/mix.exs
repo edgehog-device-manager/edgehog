@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -100,6 +100,8 @@ defmodule Edgehog.MixProject do
       {:pretty_log, "~> 0.1"},
       {:prom_ex, "~> 1.7.1"},
       {:plug_heartbeat, "~> 1.0"},
+      # TODO: point to upstream once all relevant PRs are merged
+      {:i18n_helpers, github: "secomind/i18n_helpers"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]
   end

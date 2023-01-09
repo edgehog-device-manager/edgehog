@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,10 +44,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
         name
         handle
         systemModel {
-          description {
-            locale
-            text
-          }
+          description
         }
       }
     }
@@ -103,12 +100,12 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
     } do
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A base image collection"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{
+        default_locale => "A base image collection",
+        "it-IT" => "Un modello di sistema"
+      }
 
-      system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      system_model = system_model_fixture(hardware_type, description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 
@@ -127,10 +124,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
                "data" => %{
                  "baseImageCollection" => %{
                    "systemModel" => %{
-                     "description" => %{
-                       "locale" => ^default_locale,
-                       "text" => "A base image collection"
-                     }
+                     "description" => "A base image collection"
                    }
                  }
                }
@@ -145,12 +139,12 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
     } do
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A base image collection"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{
+        default_locale => "A base image collection",
+        "it-IT" => "Un modello di sistema"
+      }
 
-      system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      system_model = system_model_fixture(hardware_type, description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 
@@ -172,10 +166,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
                "data" => %{
                  "baseImageCollection" => %{
                    "systemModel" => %{
-                     "description" => %{
-                       "locale" => "it-IT",
-                       "text" => "Un modello di sistema"
-                     }
+                     "description" => "Un modello di sistema"
                    }
                  }
                }
@@ -190,12 +181,12 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
     } do
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A base image collection"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{
+        default_locale => "A base image collection",
+        "it-IT" => "Un modello di sistema"
+      }
 
-      system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      system_model = system_model_fixture(hardware_type, description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 
@@ -217,10 +208,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
                "data" => %{
                  "baseImageCollection" => %{
                    "systemModel" => %{
-                     "description" => %{
-                       "locale" => ^default_locale,
-                       "text" => "A base image collection"
-                     }
+                     "description" => "A base image collection"
                    }
                  }
                }
@@ -233,11 +221,11 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
            api_path: api_path,
            hardware_type: hardware_type
          } do
-      descriptions = [
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{
+        "it-IT" => "Un modello di sistema"
+      }
 
-      system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      system_model = system_model_fixture(hardware_type, description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 

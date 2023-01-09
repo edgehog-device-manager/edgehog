@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 defmodule Edgehog.Devices.Device do
   use Ecto.Schema
+  use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
 
   alias Edgehog.Astarte
@@ -41,7 +42,7 @@ defmodule Edgehog.Devices.Device do
       references: :part_number,
       type: :string
 
-    has_one :system_model, through: [:system_model_part_number, :system_model]
+    translatable_has_one :system_model, through: [:system_model_part_number, :system_model]
     many_to_many :tags, Labeling.Tag, join_through: Labeling.DeviceTag, on_replace: :delete
 
     has_many :custom_attributes, Labeling.DeviceAttribute,

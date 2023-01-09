@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 defmodule Edgehog.Devices.HardwareType do
   use Ecto.Schema
+  use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
 
   alias Edgehog.Devices.HardwareTypePartNumber
@@ -30,7 +31,7 @@ defmodule Edgehog.Devices.HardwareType do
     field :name, :string
     field :tenant_id, :id
     has_many :part_numbers, HardwareTypePartNumber, on_replace: :delete
-    has_many :system_models, SystemModel
+    translatable_has_many :system_models, SystemModel
 
     timestamps()
   end
