@@ -698,15 +698,15 @@ defmodule Edgehog.DevicesTest do
 
       device_1 =
         device_fixture(realm, part_number: part_number_1)
-        |> Devices.preload_system_model_for_device()
+        |> Devices.preload_system_model()
 
       device_2 =
         device_fixture(realm, part_number: part_number_2)
-        |> Devices.preload_system_model_for_device()
+        |> Devices.preload_system_model()
 
       device_3 =
         device_fixture(realm, part_number: "4321-rev1")
-        |> Devices.preload_system_model_for_device()
+        |> Devices.preload_system_model()
 
       assert device_1.system_model == nil
       assert device_2.system_model == nil
@@ -722,9 +722,9 @@ defmodule Edgehog.DevicesTest do
                Devices.create_system_model(hardware_type, attrs)
 
       preload = [hardware_type: [], part_numbers: []]
-      device_1 = Devices.preload_system_model_for_device(device_1, force: true, preload: preload)
-      device_2 = Devices.preload_system_model_for_device(device_2, force: true, preload: preload)
-      device_3 = Devices.preload_system_model_for_device(device_3, force: true, preload: preload)
+      device_1 = Devices.preload_system_model(device_1, force: true, preload: preload)
+      device_2 = Devices.preload_system_model(device_2, force: true, preload: preload)
+      device_3 = Devices.preload_system_model(device_3, force: true, preload: preload)
 
       assert device_1.system_model == system_model
       assert device_2.system_model == system_model
@@ -844,7 +844,7 @@ defmodule Edgehog.DevicesTest do
       device =
         realm
         |> device_fixture(part_number: part_number)
-        |> Devices.preload_system_model_for_device(
+        |> Devices.preload_system_model(
           force: true,
           preload: [hardware_type: [], part_numbers: []]
         )
@@ -854,7 +854,7 @@ defmodule Edgehog.DevicesTest do
       assert {:ok, %SystemModel{}} = Devices.delete_system_model(system_model)
       assert Devices.fetch_system_model(system_model.id) == {:error, :not_found}
 
-      device = Devices.preload_system_model_for_device(device, force: true)
+      device = Devices.preload_system_model(device, force: true)
       assert device.system_model == nil
       assert device.part_number == part_number
     end

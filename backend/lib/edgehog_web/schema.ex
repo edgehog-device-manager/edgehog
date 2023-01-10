@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
+  import_types EdgehogWeb.Schema.BaseImagesTypes
   import_types EdgehogWeb.Schema.CapabilitiesTypes
   import_types EdgehogWeb.Schema.DevicesTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
@@ -51,6 +52,9 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.Astarte.Device{}, _ ->
         :device
 
+      %Edgehog.BaseImages.BaseImageCollection{}, _ ->
+        :base_image_collection
+
       %Edgehog.Devices.HardwareType{}, _ ->
         :hardware_type
 
@@ -71,6 +75,9 @@ defmodule EdgehogWeb.Schema do
   query do
     node field do
       resolve fn
+        %{type: :base_image_collection, id: id}, context ->
+          Resolvers.BaseImages.find_base_image_collection(%{id: id}, context)
+
         %{type: :device, id: id}, context ->
           Resolvers.Devices.find_device(%{id: id}, context)
 
@@ -88,6 +95,7 @@ defmodule EdgehogWeb.Schema do
       end
     end
 
+    import_fields :base_images_queries
     import_fields :devices_queries
     import_fields :groups_queries
     import_fields :labeling_queries
@@ -96,6 +104,7 @@ defmodule EdgehogWeb.Schema do
 
   mutation do
     import_fields :astarte_mutations
+    import_fields :base_images_mutations
     import_fields :devices_mutations
     import_fields :groups_mutations
     import_fields :os_management_mutations

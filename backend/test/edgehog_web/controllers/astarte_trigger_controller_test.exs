@@ -189,7 +189,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert response(conn, 200)
 
       assert device = Devices.get_device!(id)
-      device = Devices.preload_system_model_for_device(device)
+      device = Devices.preload_system_model(device)
       assert device.system_model.id == system_model.id
       assert device.system_model.name == system_model.name
       assert device.system_model.handle == system_model.handle
@@ -226,7 +226,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       device =
         id
         |> Devices.get_device!()
-        |> Devices.preload_system_model_for_device()
+        |> Devices.preload_system_model()
 
       assert device.part_number == part_number
       assert device.system_model_part_number == nil

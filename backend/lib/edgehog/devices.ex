@@ -164,18 +164,18 @@ defmodule Edgehog.Devices do
   end
 
   @doc """
-  Preloads a system model for a device (or a list of devices)
+  Preloads a system model for a resource (or a list of resources) associated with it.
 
   Supported options:
   - `:force` a boolean indicating if the preload has to be read from the database also if it's
   already populated. Defaults to `false`.
   - `:preload` the option passed to the preload, can be a query or a list of atoms. Defaults to `[]`.
   """
-  def preload_system_model_for_device(device_or_devices, opts \\ []) do
+  def preload_system_model(target_resource, opts \\ []) do
     force = Keyword.get(opts, :force, false)
     preload = Keyword.get(opts, :preload, [])
 
-    Repo.preload(device_or_devices, [system_model: preload], force: force)
+    Repo.preload(target_resource, [system_model: preload], force: force)
   end
 
   @doc """

@@ -19,8 +19,9 @@
 #
 
 alias Edgehog.{
-  Devices,
   Astarte,
+  BaseImages,
+  Devices,
   Tenants
 }
 
@@ -69,4 +70,10 @@ _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
     name: "Thingie",
     device_id: "DqL4H107S42WBEHmDrvPLQ",
     part_number: "AM-1234"
+  })
+
+{:ok, _base_image_collection} =
+  BaseImages.create_base_image_collection(system_model, %{
+    handle: "ultra-firmware",
+    name: "Ultra Firmware"
   })
