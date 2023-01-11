@@ -52,5 +52,4 @@ if __name__ == "__main__":
         elif "-----BEGIN EC PRIVATE KEY-----" in private_key_pem:
             algo = "ES256"
 
-        encoded = jwt.encode(claims, private_key_pem, algorithm=algo)
-        print("{0}".format(encoded.decode()))
+        print(jwt.encode(claims, private_key_pem, algorithm=algo))
