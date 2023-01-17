@@ -148,4 +148,100 @@ defmodule Edgehog.BaseImages do
   def change_base_image_collection(%BaseImageCollection{} = base_image_collection, attrs \\ %{}) do
     BaseImageCollection.changeset(base_image_collection, attrs)
   end
+
+  alias Edgehog.BaseImages.BaseImage
+
+  @doc """
+  Returns the list of base_images.
+
+  ## Examples
+
+      iex> list_base_images()
+      [%BaseImage{}, ...]
+
+  """
+  def list_base_images do
+    Repo.all(BaseImage)
+  end
+
+  @doc """
+  Gets a single base_image.
+
+  Raises `Ecto.NoResultsError` if the Base image does not exist.
+
+  ## Examples
+
+      iex> get_base_image!(123)
+      %BaseImage{}
+
+      iex> get_base_image!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_base_image!(id), do: Repo.get!(BaseImage, id)
+
+  @doc """
+  Creates a base_image.
+
+  ## Examples
+
+      iex> create_base_image(%{field: value})
+      {:ok, %BaseImage{}}
+
+      iex> create_base_image(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_base_image(attrs \\ %{}) do
+    %BaseImage{}
+    |> BaseImage.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a base_image.
+
+  ## Examples
+
+      iex> update_base_image(base_image, %{field: new_value})
+      {:ok, %BaseImage{}}
+
+      iex> update_base_image(base_image, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_base_image(%BaseImage{} = base_image, attrs) do
+    base_image
+    |> BaseImage.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a base_image.
+
+  ## Examples
+
+      iex> delete_base_image(base_image)
+      {:ok, %BaseImage{}}
+
+      iex> delete_base_image(base_image)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_base_image(%BaseImage{} = base_image) do
+    Repo.delete(base_image)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking base_image changes.
+
+  ## Examples
+
+      iex> change_base_image(base_image)
+      %Ecto.Changeset{data: %BaseImage{}}
+
+  """
+  def change_base_image(%BaseImage{} = base_image, attrs \\ %{}) do
+    BaseImage.changeset(base_image, attrs)
+  end
 end

@@ -50,4 +50,26 @@ defmodule Edgehog.BaseImagesFixtures do
 
     base_image_collection
   end
+
+  @doc """
+  Generate a unique base_image version.
+  """
+  def unique_base_image_version, do: "some version#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a base_image.
+  """
+  def base_image_fixture(attrs \\ %{}) do
+    {:ok, base_image} =
+      attrs
+      |> Enum.into(%{
+        description: %{},
+        release_display_name: %{},
+        starting_version_requirement: "some starting_version_requirement",
+        version: unique_base_image_version()
+      })
+      |> Edgehog.BaseImages.create_base_image()
+
+    base_image
+  end
 end
