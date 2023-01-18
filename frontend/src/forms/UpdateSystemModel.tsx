@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -54,10 +54,7 @@ const FormRow = ({
 type SystemModelData = {
   name: string;
   handle: string;
-  description: {
-    locale: string;
-    text: string;
-  } | null;
+  description: string | null;
   hardwareType: {
     name: string;
   };
@@ -71,7 +68,7 @@ type SystemModelChanges = {
   description: {
     locale: string;
     text: string;
-  } | null;
+  };
   hardwareType: {
     name: string;
   };
@@ -118,7 +115,7 @@ const systemModelSchema = yup
 
 const transformInputData = (data: SystemModelData): FormData => ({
   ...data,
-  description: data.description?.text || "",
+  description: data.description || "",
   hardwareType: data.hardwareType.name,
   partNumbers:
     data.partNumbers.length > 0
@@ -137,12 +134,10 @@ const transformOutputData = (
       name: data.hardwareType,
     },
     partNumbers: data.partNumbers.map((pn) => pn.value),
-    description: data.description
-      ? {
-          locale,
-          text: data.description,
-        }
-      : null,
+    description: {
+      locale,
+      text: data.description,
+    },
   };
 
   if (data.pictureFile) {

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -54,10 +54,7 @@ const GET_SYSTEM_MODEL_QUERY = graphql`
       id
       name
       handle
-      description {
-        locale
-        text
-      }
+      description
       hardwareType {
         id
         name
@@ -85,10 +82,7 @@ const UPDATE_SYSTEM_MODEL_MUTATION = graphql`
         id
         name
         handle
-        description {
-          locale
-          text
-        }
+        description
         hardwareType {
           id
           name
@@ -123,7 +117,8 @@ const systemModelDiff = (a1: SystemModelData, a2: SystemModelChanges) => {
   if (!_.isEqual(a1.partNumbers, a2.partNumbers)) {
     diff.partNumbers = a2.partNumbers;
   }
-  if (!_.isEqual(a1.description, a2.description)) {
+  // TODO: update when backend implement support for updates with empty text value
+  if (a1.description !== null || a2.description.text !== "") {
     diff.description = a2.description;
   }
   if ("pictureFile" in a2 && a2.pictureFile) {
@@ -208,19 +203,14 @@ const SystemModelContent = ({
         optimisticResponse: {
           updateSystemModel: {
             systemModel: {
-              ...systemModel!,
-              ..._.pick(systemModelChanges, [
-                "name",
-                "handle",
-                "partNumbers",
-                "description",
-              ]),
+              ...systemModel,
+              ..._.pick(input, ["name", "handle", "partNumbers"]),
+              description: input.description?.text ?? systemModel.description,
               pictureUrl:
-                systemModelChanges.pictureFile instanceof File
-                  ? URL.createObjectURL(systemModelChanges.pictureFile)
-                  : _.isString(systemModelChanges.pictureUrl) ||
-                    _.isNull(systemModelChanges.pictureUrl)
-                  ? systemModelChanges.pictureUrl
+                input.pictureFile instanceof File
+                  ? URL.createObjectURL(input.pictureFile)
+                  : _.isString(input.pictureUrl) || _.isNull(input.pictureUrl)
+                  ? input.pictureUrl
                   : systemModel.pictureUrl,
             },
           },
@@ -349,7 +339,7 @@ const SystemModelContent = ({
         </Alert>
         <UpdateSystemModelForm
           initialData={systemModel}
-          locale={systemModel.description?.locale || locale}
+          locale={locale}
           onSubmit={handleUpdateSystemModel}
           onDelete={handleShowDeleteModal}
           isLoading={isUpdatingSystemModel}
