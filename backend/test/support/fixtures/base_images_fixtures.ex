@@ -79,7 +79,8 @@ defmodule Edgehog.BaseImagesFixtures do
 
     attrs =
       Enum.into(attrs, %{
-        version: unique_base_image_version()
+        version: unique_base_image_version(),
+        file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
       })
 
     {:ok, base_image} = Edgehog.BaseImages.create_base_image(base_image_collection, attrs)

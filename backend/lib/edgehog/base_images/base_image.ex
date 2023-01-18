@@ -33,6 +33,7 @@ defmodule Edgehog.BaseImages.BaseImage do
     translatable_field :description
     translatable_field :release_display_name
     field :starting_version_requirement, :string
+    field :url, :string
     field :version, :string
     translatable_belongs_to :base_image_collection, BaseImageCollection
 

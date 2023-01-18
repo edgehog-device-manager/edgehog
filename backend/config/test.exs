@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ config :edgehog,
 
 # Storage mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
+config :edgehog, :base_images_storage_module, Edgehog.BaseImages.StorageMock
 config :edgehog, :os_management_ephemeral_image_module, Edgehog.OSManagement.EphemeralImageMock
 
 # Enable s3 storage since we're using mocks for it

@@ -20,8 +20,11 @@
 
 defmodule Edgehog.BaseImagesTest do
   use Edgehog.DataCase
+  use Edgehog.BaseImagesStorageMockCase
 
   alias Edgehog.BaseImages
+  alias Edgehog.BaseImages.StorageMock
+  alias Edgehog.Mocks
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures
 
@@ -136,7 +139,8 @@ defmodule Edgehog.BaseImagesTest do
         description: %{"en-US" => "A feature packed release"},
         release_display_name: %{"en-US" => "Happy Hyena"},
         starting_version_requirement: "~> 1.0",
-        version: "1.4.0"
+        version: "1.4.0",
+        file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
       }
 
       assert {:ok, %BaseImage{} = base_image} =
@@ -146,6 +150,16 @@ defmodule Edgehog.BaseImagesTest do
       assert base_image.release_display_name == %{"en-US" => "Happy Hyena"}
       assert base_image.starting_version_requirement == "~> 1.0"
       assert base_image.version == "1.4.0"
+    end
+
+    test "create_base_image/1 with valid data uploads the base image to the storage" do
+      expect(StorageMock, :store, &Mocks.BaseImages.Storage.store/2)
+      assert {:ok, _} = create_base_image()
+    end
+
+    test "create_base_image/1 fails if the upload to the storage fails" do
+      expect(StorageMock, :store, fn _, _ -> {:error, :bucket_is_full} end)
+      assert {:error, :bucket_is_full} = create_base_image()
     end
 
     test "create_base_image/1 with same version for the different base image collections succeeds" do
@@ -195,6 +209,11 @@ defmodule Edgehog.BaseImagesTest do
       assert "has already been taken" in errors_on(changeset).version
     end
 
+    test "create_base_image/1 with invalid parameters does not upload the image to the storage" do
+      expect(StorageMock, :store, 0, &Mocks.BaseImages.Storage.store/2)
+      assert {:error, _} = create_base_image(version: "invalid")
+    end
+
     test "update_base_image/2 with valid data updates the base_image" do
       base_image = base_image_fixture()
 
@@ -238,6 +257,19 @@ defmodule Edgehog.BaseImagesTest do
       assert {:error, :not_found} = BaseImages.fetch_base_image(base_image.id)
     end
 
+    test "delete_base_image/1 deletes the base image from the storage" do
+      base_image = base_image_fixture()
+      expect(StorageMock, :delete, &Mocks.BaseImages.Storage.delete/1)
+      assert {:ok, _} = BaseImages.delete_base_image(base_image)
+    end
+
+    test "delete_base_image/1 fails if the deletion from the storage fails" do
+      base_image = base_image_fixture()
+      expect(StorageMock, :delete, fn _ -> {:error, :network_error} end)
+      assert {:error, :network_error} = BaseImages.delete_base_image(base_image)
+      assert BaseImages.fetch_base_image(base_image.id) == {:ok, base_image}
+    end
+
     test "change_base_image/1 returns a base_image changeset" do
       base_image = base_image_fixture()
       assert %Ecto.Changeset{} = BaseImages.change_base_image(base_image)
@@ -255,7 +287,7 @@ defmodule Edgehog.BaseImagesTest do
     base_image_collection_fixture(system_model, opts)
   end
 
-  defp create_base_image(opts) do
+  defp create_base_image(opts \\ []) do
     base_image_collection =
       Keyword.get_lazy(opts, :base_image_collection, fn ->
         create_base_image_collection!()
@@ -263,7 +295,8 @@ defmodule Edgehog.BaseImagesTest do
 
     attrs =
       Enum.into(opts, %{
-        version: unique_base_image_version()
+        version: unique_base_image_version(),
+        file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
       })
 
     BaseImages.create_base_image(base_image_collection, attrs)

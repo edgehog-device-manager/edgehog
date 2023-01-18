@@ -26,9 +26,17 @@ defmodule Edgehog.BaseImages do
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 
+  alias Ecto.Multi
   alias Edgehog.Devices
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.BaseImageCollection
+  alias Edgehog.BaseImages.BucketStorage
+
+  @storage_module Application.compile_env(
+                    :edgehog,
+                    :base_images_storage_module,
+                    BucketStorage
+                  )
 
   @doc """
   Preloads the default associations for a Base Image Collection (or a list of base image collections)
@@ -209,12 +217,27 @@ defmodule Edgehog.BaseImages do
 
   """
   def create_base_image(%BaseImageCollection{} = base_image_collection, attrs \\ %{}) do
-    changeset =
+    Multi.new()
+    |> Multi.insert(:no_file_base_image, fn _changes ->
       %BaseImage{base_image_collection_id: base_image_collection.id}
       |> BaseImage.create_changeset(attrs)
+    end)
+    |> Multi.run(:image_upload, fn _repo, %{no_file_base_image: base_image} ->
+      file = %Plug.Upload{} = attrs.file
+      # If version is nil, the changeset will fail below
+      @storage_module.store(base_image, file)
+    end)
+    |> Multi.update(:base_image, fn changes ->
+      %{no_file_base_image: base_image, image_upload: url} = changes
+      Ecto.Changeset.change(base_image, url: url)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{base_image: base_image}} ->
+        {:ok, preload_defaults_for_base_image(base_image)}
 
-    with {:ok, base_image} <- Repo.insert(changeset) do
-      {:ok, preload_defaults_for_base_image(base_image)}
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
     end
   end
 
@@ -251,8 +274,21 @@ defmodule Edgehog.BaseImages do
 
   """
   def delete_base_image(%BaseImage{} = base_image) do
-    with {:ok, base_image} <- Repo.delete(base_image) do
-      {:ok, preload_defaults_for_base_image(base_image)}
+    Multi.new()
+    |> Multi.delete(:base_image, base_image)
+    |> Multi.run(:image_deletion, fn _repo, %{base_image: base_image} ->
+      # If version is nil, the changeset will fail below
+      with :ok <- @storage_module.delete(base_image) do
+        {:ok, nil}
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{base_image: base_image}} ->
+        {:ok, preload_defaults_for_base_image(base_image)}
+
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
     end
   end
 

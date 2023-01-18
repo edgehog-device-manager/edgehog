@@ -29,6 +29,7 @@ defmodule Edgehog.Repo.Migrations.CreateBaseImages do
         null: false
 
       add :version, :string, null: false
+      add :url, :string
       add :release_display_name, :map
       add :description, :map
       add :starting_version_requirement, :string
