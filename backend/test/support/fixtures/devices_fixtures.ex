@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,36 @@ defmodule Edgehog.DevicesFixtures do
   alias Edgehog.Repo
 
   @doc """
+  Generate a unique hardware_type handle.
+  """
+  def unique_hardware_type_handle, do: "some-handle#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique hardware_type name.
+  """
+  def unique_hardware_type_name, do: "some name#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique hardware_type part_number.
+  """
+  def unique_hardware_type_part_number, do: "1234-rev#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique system_model handle.
+  """
+  def unique_system_model_handle, do: "some-handle#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique system_model name.
+  """
+  def unique_system_model_name, do: "some name#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique system_model part_number.
+  """
+  def unique_system_model_part_number, do: "1234-rev#{System.unique_integer([:positive])}"
+
+  @doc """
   Generate a %Devices.Device{}.
   """
   def device_fixture(realm, attrs \\ %{}) do
@@ -54,9 +84,9 @@ defmodule Edgehog.DevicesFixtures do
     {:ok, hardware_type} =
       attrs
       |> Enum.into(%{
-        handle: "some-handle",
-        name: "some name",
-        part_numbers: ["ABC123"]
+        handle: unique_hardware_type_handle(),
+        name: unique_hardware_type_name(),
+        part_numbers: [unique_hardware_type_part_number()]
       })
       |> Edgehog.Devices.create_hardware_type()
 
@@ -70,9 +100,9 @@ defmodule Edgehog.DevicesFixtures do
     attrs =
       attrs
       |> Enum.into(%{
-        handle: "some-handle",
-        name: "some name",
-        part_numbers: ["1234-rev4"]
+        handle: unique_system_model_handle(),
+        name: unique_system_model_name(),
+        part_numbers: [unique_system_model_part_number()]
       })
 
     {:ok, system_model} = Edgehog.Devices.create_system_model(hardware_type, attrs)
