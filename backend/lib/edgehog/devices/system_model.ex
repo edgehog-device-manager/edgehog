@@ -22,6 +22,7 @@ defmodule Edgehog.Devices.SystemModel do
   use Ecto.Schema
   use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
+  import Edgehog.Localization.Validation
 
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModelPartNumber
@@ -52,15 +53,5 @@ defmodule Edgehog.Devices.SystemModel do
     |> validate_change(:description, &validate_locale/2)
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
-  end
-
-  defp validate_locale(field, locale_map) do
-    Enum.reduce(locale_map, [], fn {locale, _text}, acc ->
-      if Regex.match?(~r/^[a-z]{2,3}-[A-Z]{2}$/, locale) do
-        acc
-      else
-        [{field, "#{locale} is not a valid locale"} | acc]
-      end
-    end)
   end
 end
