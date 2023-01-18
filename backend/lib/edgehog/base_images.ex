@@ -27,6 +27,7 @@ defmodule Edgehog.BaseImages do
   alias Edgehog.Repo
 
   alias Edgehog.Devices
+  alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.BaseImageCollection
 
   @doc """
@@ -149,7 +150,16 @@ defmodule Edgehog.BaseImages do
     BaseImageCollection.changeset(base_image_collection, attrs)
   end
 
-  alias Edgehog.BaseImages.BaseImage
+  @doc """
+  Preloads the default associations for a Base Image (or a list of base images)
+  """
+  def preload_defaults_for_base_image(image_or_images) do
+    Repo.preload(image_or_images,
+      base_image_collection: [
+        system_model: [:hardware_type, :part_numbers]
+      ]
+    )
+  end
 
   @doc """
   Returns the list of base_images.
@@ -162,40 +172,50 @@ defmodule Edgehog.BaseImages do
   """
   def list_base_images do
     Repo.all(BaseImage)
+    |> preload_defaults_for_base_image()
   end
 
   @doc """
-  Gets a single base_image.
+  Fetches a single base_image.
 
-  Raises `Ecto.NoResultsError` if the Base image does not exist.
+  Returns `{:error, :not_found}` if the Base image does not exist.
 
   ## Examples
 
-      iex> get_base_image!(123)
-      %BaseImage{}
+      iex> fetch_base_image(123)
+      {:ok, %BaseImage{}}
 
-      iex> get_base_image!(456)
-      ** (Ecto.NoResultsError)
+      iex> fetch_base_image(456)
+      {:error, :not_found}
 
   """
-  def get_base_image!(id), do: Repo.get!(BaseImage, id)
+  def fetch_base_image(id) do
+    case Repo.get(BaseImage, id) do
+      nil -> {:error, :not_found}
+      %BaseImage{} = base_image -> {:ok, preload_defaults_for_base_image(base_image)}
+    end
+  end
 
   @doc """
   Creates a base_image.
 
   ## Examples
 
-      iex> create_base_image(%{field: value})
+      iex> create_base_image(%BaseImageCollection{}, %{field: value})
       {:ok, %BaseImage{}}
 
-      iex> create_base_image(%{field: bad_value})
+      iex> create_base_image(%BaseImageCollection{}, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_base_image(attrs \\ %{}) do
-    %BaseImage{}
-    |> BaseImage.changeset(attrs)
-    |> Repo.insert()
+  def create_base_image(%BaseImageCollection{} = base_image_collection, attrs \\ %{}) do
+    changeset =
+      %BaseImage{base_image_collection_id: base_image_collection.id}
+      |> BaseImage.create_changeset(attrs)
+
+    with {:ok, base_image} <- Repo.insert(changeset) do
+      {:ok, preload_defaults_for_base_image(base_image)}
+    end
   end
 
   @doc """
@@ -211,9 +231,11 @@ defmodule Edgehog.BaseImages do
 
   """
   def update_base_image(%BaseImage{} = base_image, attrs) do
-    base_image
-    |> BaseImage.changeset(attrs)
-    |> Repo.update()
+    changeset = BaseImage.update_changeset(base_image, attrs)
+
+    with {:ok, base_image} <- Repo.update(changeset) do
+      {:ok, preload_defaults_for_base_image(base_image)}
+    end
   end
 
   @doc """
@@ -229,7 +251,9 @@ defmodule Edgehog.BaseImages do
 
   """
   def delete_base_image(%BaseImage{} = base_image) do
-    Repo.delete(base_image)
+    with {:ok, base_image} <- Repo.delete(base_image) do
+      {:ok, preload_defaults_for_base_image(base_image)}
+    end
   end
 
   @doc """
@@ -242,6 +266,6 @@ defmodule Edgehog.BaseImages do
 
   """
   def change_base_image(%BaseImage{} = base_image, attrs \\ %{}) do
-    BaseImage.changeset(base_image, attrs)
+    BaseImage.update_changeset(base_image, attrs)
   end
 end

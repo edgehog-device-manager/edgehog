@@ -22,19 +22,30 @@ defmodule Edgehog.Repo.Migrations.CreateBaseImages do
   use Ecto.Migration
 
   def change do
+    create unique_index(:base_image_collections, [:id, :tenant_id])
+
     create table(:base_images) do
-      add :version, :string
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :version, :string, null: false
       add :release_display_name, :map
       add :description, :map
       add :starting_version_requirement, :string
-      add :base_image_collection_id, references(:base_image_collections, on_delete: :nothing)
-      add :tenant_id, references(:tenants, on_delete: :nothing)
+
+      add :base_image_collection_id,
+          references(:base_image_collections,
+            with: [tenant_id: :tenant_id],
+            match: :full,
+            on_delete: :nothing
+          ),
+          null: false
 
       timestamps()
     end
 
-    create unique_index(:base_images, [:version])
-    create index(:base_images, [:base_image_collection_id])
+    create unique_index(:base_images, [:version, :base_image_collection_id, :tenant_id])
+    create index(:base_images, [:base_image_collection_id, :tenant_id])
     create index(:base_images, [:tenant_id])
   end
 end

@@ -20,29 +20,63 @@
 
 defmodule Edgehog.BaseImages.BaseImage do
   use Ecto.Schema
+  use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
+  import Edgehog.Localization.Validation
+
+  alias Edgehog.BaseImages.BaseImageCollection
+
+  @type t :: Ecto.Schema.t()
 
   schema "base_images" do
-    field :description, :map
-    field :release_display_name, :map
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
+    translatable_field :description
+    translatable_field :release_display_name
     field :starting_version_requirement, :string
     field :version, :string
-    field :base_image_collection_id, :id
-    field :tenant_id, :id
+    translatable_belongs_to :base_image_collection, BaseImageCollection
 
     timestamps()
   end
 
   @doc false
-  def changeset(base_image, attrs) do
+  def create_changeset(base_image, attrs) do
     base_image
     |> cast(attrs, [:version, :release_display_name, :description, :starting_version_requirement])
-    |> validate_required([
-      :version,
-      :release_display_name,
-      :description,
-      :starting_version_requirement
-    ])
-    |> unique_constraint(:version)
+    |> validate_required([:version])
+    |> unique_constraint([:version, :base_image_collection_id, :tenant_id])
+    |> validate_change(:version, &validate_version/2)
+    |> validate_change(:starting_version_requirement, &validate_version_requirement/2)
+    |> validate_change(:description, &validate_locale/2)
+    |> validate_change(:release_display_name, &validate_locale/2)
+  end
+
+  @doc false
+  def update_changeset(base_image, attrs) do
+    base_image
+    |> cast(attrs, [:release_display_name, :description, :starting_version_requirement])
+    |> validate_change(:starting_version_requirement, &validate_version_requirement/2)
+    |> validate_change(:description, &validate_locale/2)
+    |> validate_change(:release_display_name, &validate_locale/2)
+  end
+
+  defp validate_version(field, value) do
+    case Version.parse(value) do
+      {:ok, _version} ->
+        []
+
+      :error ->
+        [{field, "is not a valid version"}]
+    end
+  end
+
+  defp validate_version_requirement(field, value) do
+    case Version.parse_requirement(value) do
+      {:ok, _version} ->
+        []
+
+      :error ->
+        [{field, "is not a valid version requirement"}]
+    end
   end
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@ defmodule Edgehog.BaseImagesTest do
   use Edgehog.DataCase
 
   alias Edgehog.BaseImages
+  import Edgehog.BaseImagesFixtures
+  import Edgehog.DevicesFixtures
 
   describe "base_image_collections" do
     alias Edgehog.BaseImages.BaseImageCollection
-
-    import Edgehog.BaseImagesFixtures
-    import Edgehog.DevicesFixtures
 
     setup do
       hardware_type = hardware_type_fixture()
@@ -120,81 +119,161 @@ defmodule Edgehog.BaseImagesTest do
   describe "base_images" do
     alias Edgehog.BaseImages.BaseImage
 
-    import Edgehog.BaseImagesFixtures
-
-    @invalid_attrs %{
-      description: nil,
-      release_display_name: nil,
-      starting_version_requirement: nil,
-      version: nil
-    }
-
     test "list_base_images/0 returns all base_images" do
       base_image = base_image_fixture()
       assert BaseImages.list_base_images() == [base_image]
     end
 
-    test "get_base_image!/1 returns the base_image with given id" do
+    test "fetch_base_image/1 returns the base_image with given id" do
       base_image = base_image_fixture()
-      assert BaseImages.get_base_image!(base_image.id) == base_image
+      assert {:ok, base_image} == BaseImages.fetch_base_image(base_image.id)
     end
 
     test "create_base_image/1 with valid data creates a base_image" do
-      valid_attrs = %{
-        description: %{},
-        release_display_name: %{},
-        starting_version_requirement: "some starting_version_requirement",
-        version: "some version"
+      base_image_collection = create_base_image_collection!()
+
+      attrs = %{
+        description: %{"en-US" => "A feature packed release"},
+        release_display_name: %{"en-US" => "Happy Hyena"},
+        starting_version_requirement: "~> 1.0",
+        version: "1.4.0"
       }
 
-      assert {:ok, %BaseImage{} = base_image} = BaseImages.create_base_image(valid_attrs)
-      assert base_image.description == %{}
-      assert base_image.release_display_name == %{}
-      assert base_image.starting_version_requirement == "some starting_version_requirement"
-      assert base_image.version == "some version"
+      assert {:ok, %BaseImage{} = base_image} =
+               BaseImages.create_base_image(base_image_collection, attrs)
+
+      assert base_image.description == %{"en-US" => "A feature packed release"}
+      assert base_image.release_display_name == %{"en-US" => "Happy Hyena"}
+      assert base_image.starting_version_requirement == "~> 1.0"
+      assert base_image.version == "1.4.0"
     end
 
-    test "create_base_image/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = BaseImages.create_base_image(@invalid_attrs)
+    test "create_base_image/1 with same version for the different base image collections succeeds" do
+      collection_1 = create_base_image_collection!()
+      base_image_fixture(base_image_collection: collection_1, version: "1.3.0")
+
+      collection_2 = create_base_image_collection!()
+
+      assert {:ok, %BaseImage{}} =
+               create_base_image(base_image_collection: collection_2, version: "1.3.0")
+    end
+
+    test "create_base_image/1 with invalid version returns error changeset" do
+      assert {:error, %Ecto.Changeset{} = changeset} = create_base_image(version: "foobaz")
+
+      assert "is not a valid version" in errors_on(changeset).version
+    end
+
+    test "create_base_image/1 with invalid description locale returns error changeset" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_base_image(description: %{"notAlocale" => "baz"})
+
+      assert "notAlocale is not a valid locale" in errors_on(changeset).description
+    end
+
+    test "create_base_image/1 with invalid release display name locale returns error changeset" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_base_image(release_display_name: %{"notAlocale" => "baz"})
+
+      assert "notAlocale is not a valid locale" in errors_on(changeset).release_display_name
+    end
+
+    test "create_base_image/1 with invalid supported starting version returns error changeset" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_base_image(starting_version_requirement: "invalid")
+
+      assert "is not a valid version requirement" in errors_on(changeset).starting_version_requirement
+    end
+
+    test "create_base_image/1 with conflicting version for the same base image collection fails" do
+      collection = create_base_image_collection!()
+      base_image_fixture(base_image_collection: collection, version: "1.3.0")
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_base_image(base_image_collection: collection, version: "1.3.0")
+
+      assert "has already been taken" in errors_on(changeset).version
     end
 
     test "update_base_image/2 with valid data updates the base_image" do
       base_image = base_image_fixture()
 
-      update_attrs = %{
-        description: %{},
-        release_display_name: %{},
-        starting_version_requirement: "some updated starting_version_requirement",
-        version: "some updated version"
+      attrs = %{
+        description: %{"en-US" => "Updated description"},
+        release_display_name: %{"en-US" => "Updated display name"},
+        starting_version_requirement: "~> 1.2"
       }
 
-      assert {:ok, %BaseImage{} = base_image} =
-               BaseImages.update_base_image(base_image, update_attrs)
+      assert {:ok, %BaseImage{} = base_image} = BaseImages.update_base_image(base_image, attrs)
 
-      assert base_image.description == %{}
-      assert base_image.release_display_name == %{}
-      assert base_image.starting_version_requirement == "some updated starting_version_requirement"
-      assert base_image.version == "some updated version"
+      assert base_image.description == %{"en-US" => "Updated description"}
+      assert base_image.release_display_name == %{"en-US" => "Updated display name"}
+      assert base_image.starting_version_requirement == "~> 1.2"
     end
 
-    test "update_base_image/2 with invalid data returns error changeset" do
-      base_image = base_image_fixture()
+    test "update_base_image/1 with invalid description locale returns error changeset" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               update_base_image(description: %{"notAlocale" => "baz"})
 
-      assert {:error, %Ecto.Changeset{}} =
-               BaseImages.update_base_image(base_image, @invalid_attrs)
+      assert "notAlocale is not a valid locale" in errors_on(changeset).description
+    end
 
-      assert base_image == BaseImages.get_base_image!(base_image.id)
+    test "update_base_image/1 with invalid release display name locale returns error changeset" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               update_base_image(release_display_name: %{"notAlocale" => "baz"})
+
+      assert "notAlocale is not a valid locale" in errors_on(changeset).release_display_name
+    end
+
+    test "update_base_image/1 with invalid supported starting version returns error changeset" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               update_base_image(starting_version_requirement: "invalid")
+
+      assert "is not a valid version requirement" in errors_on(changeset).starting_version_requirement
     end
 
     test "delete_base_image/1 deletes the base_image" do
       base_image = base_image_fixture()
       assert {:ok, %BaseImage{}} = BaseImages.delete_base_image(base_image)
-      assert_raise Ecto.NoResultsError, fn -> BaseImages.get_base_image!(base_image.id) end
+      assert {:error, :not_found} = BaseImages.fetch_base_image(base_image.id)
     end
 
     test "change_base_image/1 returns a base_image changeset" do
       base_image = base_image_fixture()
       assert %Ecto.Changeset{} = BaseImages.change_base_image(base_image)
     end
+  end
+
+  defp create_base_image_collection!(opts \\ []) do
+    # TODO: we need this helper until the lazy creation of nested resources is pushed up to their
+    # relative fixtures
+    hardware_type = Keyword.get_lazy(opts, :hardware_type, fn -> hardware_type_fixture() end)
+
+    system_model =
+      Keyword.get_lazy(opts, :system_model, fn -> system_model_fixture(hardware_type) end)
+
+    base_image_collection_fixture(system_model, opts)
+  end
+
+  defp create_base_image(opts) do
+    base_image_collection =
+      Keyword.get_lazy(opts, :base_image_collection, fn ->
+        create_base_image_collection!()
+      end)
+
+    attrs =
+      Enum.into(opts, %{
+        version: unique_base_image_version()
+      })
+
+    BaseImages.create_base_image(base_image_collection, attrs)
+  end
+
+  defp update_base_image(opts) do
+    base_image = Keyword.get_lazy(opts, :base_image, fn -> base_image_fixture() end)
+
+    attrs = Enum.into(opts, %{})
+
+    BaseImages.update_base_image(base_image, attrs)
   end
 end
