@@ -3,6 +3,159 @@ schema {
   mutation: RootMutationType
 }
 
+input CreateBaseImageCollectionInput {
+  "The display name of the base image collection."
+  name: String!
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The ID of the system model that is targeted by this base image collection"
+  systemModelId: ID!
+}
+
+enum VariantType {
+  "Double type"
+  DOUBLE
+
+  "32 bit integer type"
+  INTEGER
+
+  "Boolean type"
+  BOOLEAN
+
+  """
+  64 bit integer type. When this is the type, the value will be a string representing the number.
+  This is done to avoid representation errors when using JSON Numbers.
+  """
+  LONGINTEGER
+
+  "String type"
+  STRING
+
+  "Binary blob type. When this is the type, the value will be Base64 encoded."
+  BINARYBLOB
+
+  "Datetime type. When this is the type, the value will be an ISO8601 timestamp."
+  DATETIME
+}
+
+type CreateManualOtaOperationPayload {
+  "The pending OTA operation"
+  otaOperation: OtaOperation!
+}
+
+"Led behavior"
+enum LedBehavior {
+  "Blink for 60 seconds."
+  BLINK
+
+  "Double blink for 60 seconds."
+  DOUBLE_BLINK
+
+  "Slow blink for 60 seconds."
+  SLOW_BLINK
+}
+
+"The current access technology of the serving cell."
+enum ModemTechnology {
+  "GSM."
+  GSM
+
+  "GSM Compact."
+  GSM_COMPACT
+
+  "UTRAN."
+  UTRAN
+
+  "GSM with EGPRS."
+  GSM_EGPRS
+
+  "UTRAN with HSDPA."
+  UTRAN_HSDPA
+
+  "UTRAN with HSUPA."
+  UTRAN_HSUPA
+
+  "UTRAN with HSDPA and HSUPA."
+  UTRAN_HSDPA_HSUPA
+
+  "E-UTRAN."
+  EUTRAN
+}
+
+type DeviceAttribute {
+  "The namespace of the device attribute."
+  namespace: DeviceAttributeNamespace!
+
+  "The key of the device attribute."
+  key: String!
+
+  "The type of the device attribute."
+  type: VariantType!
+
+  "The value of the device attribute."
+  value: VariantValue!
+}
+
+type UpdateDevicePayload {
+  "The updated device."
+  device: Device!
+}
+
+input CreateHardwareTypeInput {
+  "The display name of the hardware type."
+  name: String!
+
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers: [String!]!
+}
+
+input DeleteHardwareTypeInput {
+  "The ID of the hardware type to be deleted."
+  hardwareTypeId: ID!
+}
+
+type SetLedBehaviorPayload {
+  "The resulting led behavior."
+  behavior: LedBehavior!
+}
+
+"Describes an Edgehog runtime."
+type RuntimeInfo {
+  "The name of the Edgehog runtime."
+  name: String
+
+  "The version of the Edgehog runtime."
+  version: String
+
+  "The environment of the Edgehog runtime."
+  environment: String
+
+  "The URL that uniquely identifies the Edgehog runtime implementation."
+  url: String
+}
+
+"A text expressed in a specific locale."
+type LocalizedText {
+  "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
+  locale: String!
+
+  "The localized text"
+  text: String!
+}
+
 "Describes an operating system of a device."
 type OsInfo {
   "The name of the operating system."
@@ -10,6 +163,25 @@ type OsInfo {
 
   "The version of the operating system."
   version: String
+}
+
+"""
+Represents a collection of Base Images.
+
+A base image collection represents the collection of all Base Images that can run on a specific System Model.
+"""
+type BaseImageCollection implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the base image collection."
+  name: String!
+
+  "The identifier of the system model."
+  handle: String!
+
+  "The System Model associated with the Base Image Collection"
+  systemModel: SystemModel
 }
 
 "Describes a modem of a device."
@@ -49,37 +221,6 @@ type Modem {
 
   "Access Technology"
   technology: ModemTechnology
-}
-
-"""
-Represents a specific system model.
-
-A system model corresponds to what the users thinks as functionally equivalent devices (e.g. two revisions of a device containing two different embedded chips but having the same enclosure and the same functionality).Each SystemModel must be associated to a specific HardwareType.
-"""
-type SystemModel implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the system model."
-  name: String!
-
-  "The identifier of the system model."
-  handle: String!
-
-  "The URL of the related picture."
-  pictureUrl: String
-
-  "The type of hardware that can be plugged into the system model."
-  hardwareType: HardwareType!
-
-  "The list of part numbers associated with the system model."
-  partNumbers: [String!]!
-
-  """
-  A localized description of the system model.
-  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
-  """
-  description: LocalizedText
 }
 
 "The possible namespace values for device attributes"
@@ -125,64 +266,6 @@ input UpdateHardwareTypeInput {
   partNumbers: [String!]
 }
 
-"Represents an uploaded file."
-scalar Upload
-
-input UpdateDeviceGroupInput {
-  "The ID of the device group to be updated."
-  deviceGroupId: ID!
-
-  "The display name of the device group."
-  name: String
-
-  """
-  The identifier of the device group.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  """
-  The Selector that will determine which devices belong to the device group.
-
-  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
-  """
-  selector: String
-}
-
-"Describes the current usage of a storage unit on a device."
-type StorageUnit {
-  "The label of the storage unit."
-  label: String!
-
-  "The total number of bytes of the storage unit."
-  totalBytes: Int
-
-  "The number of free bytes of the storage unit."
-  freeBytes: Int
-}
-
-"Describes the list of WiFi Access Points found by the device."
-type WifiScanResult {
-  "The channel used by the Access Point."
-  channel: Int
-
-  "Indicates whether the device is connected to the Access Point."
-  connected: Boolean
-
-  "The ESSID advertised by the Access Point."
-  essid: String
-
-  "The MAC address advertised by the Access Point."
-  macAddress: String
-
-  "The power of the radio signal, measured in dBm."
-  rssi: Int
-
-  "The date at which the device found the Access Point."
-  timestamp: DateTime!
-}
-
 "The current status of the battery."
 enum BatteryStatus {
   "The battery is charging."
@@ -208,28 +291,6 @@ enum BatteryStatus {
 }
 
 """
-Describes hardware-related info of a device.
-
-It exposes data read by a device's operating system about the underlying hardware.
-"""
-type HardwareInfo {
-  "The architecture of the CPU."
-  cpuArchitecture: String
-
-  "The reference code of the CPU model."
-  cpuModel: String
-
-  "The display name of the CPU model."
-  cpuModelName: String
-
-  "The vendor's name."
-  cpuVendor: String
-
-  "The Bytes count of memory."
-  memoryTotalBytes: Int
-}
-
-"""
 Describes the position of a device.
 
 The position is estimated by means of Edgehog's Geolocation modules and the data published by the device.
@@ -251,91 +312,14 @@ type DeviceLocation {
   timestamp: DateTime!
 }
 
-"The capabilities that devices can support"
-enum DeviceCapability {
-  "The device provides information about its base image."
-  BASE_IMAGE
-
-  "The device provides information about its battery status."
-  BATTERY_STATUS
-
-  "The device provides information about its cellular connection."
-  CELLULAR_CONNECTION
-
-  "The device supports commands, for example the rebooting command."
-  COMMANDS
-
-  "The device can be geolocated."
-  GEOLOCATION
-
-  "The device provides information about its hardware."
-  HARDWARE_INFO
-
-  "The device can be asked to blink its LED in a specific pattern."
-  LED_BEHAVIORS
-
-  "The device can provide information about its network interfaces."
-  NETWORK_INTERFACE_INFO
-
-  "The device provides information about its operating system."
-  OPERATING_SYSTEM
-
-  "The device provides information about its runtime."
-  RUNTIME_INFO
-
-  "The device can be updated remotely."
-  SOFTWARE_UPDATES
-
-  "The device provides information about its storage units."
-  STORAGE
-
-  "The device provides information about its system."
-  SYSTEM_INFO
-
-  "The device provides information about its system status."
-  SYSTEM_STATUS
-
-  "The device telemetry can be configured."
-  TELEMETRY_CONFIG
-
-  "The device provides information about surrounding WiFi APs."
-  WIFI
-}
-
-enum VariantType {
-  "Double type"
-  DOUBLE
-
-  "32 bit integer type"
-  INTEGER
-
-  "Boolean type"
-  BOOLEAN
-
-  """
-  64 bit integer type. When this is the type, the value will be a string representing the number.
-  This is done to avoid representation errors when using JSON Numbers.
-  """
-  LONGINTEGER
-
-  "String type"
-  STRING
-
-  "Binary blob type. When this is the type, the value will be Base64 encoded."
-  BINARYBLOB
-
-  "Datetime type. When this is the type, the value will be an ISO8601 timestamp."
-  DATETIME
-}
-
 interface Node {
   "The ID of the object."
   id: ID!
 }
 
-type CreateManualOtaOperationPayload {
-  "The pending OTA operation"
-  otaOperation: OtaOperation!
+input DeleteBaseImageCollectionInput {
+  "The ID of the base image collection to be deleted."
+  baseImageCollectionId: ID!
 }
 
 "Describes a battery slot of a device."
@@ -351,62 +335,6 @@ type BatterySlot {
 
   "The current status of the battery."
   status: BatteryStatus
-}
-
-type CreateDeviceGroupPayload {
-  "The created device group."
-  deviceGroup: DeviceGroup!
-}
-
-type CreateSystemModelPayload {
-  "The created system model."
-  systemModel: SystemModel!
-}
-
-type DeleteDeviceGroupPayload {
-  "The deleted device group."
-  deviceGroup: DeviceGroup!
-}
-
-input UpdateSystemModelInput {
-  "The ID of the system model to be updated."
-  systemModelId: ID!
-
-  "The display name of the system model."
-  name: String
-
-  """
-  The identifier of the system model.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  """
-  The file blob of a related picture.
-
-  When this field is specified, the pictureUrl field is ignored.
-  """
-  pictureFile: Upload
-
-  """
-  The file URL of a related picture.
-
-  Specifying a null value will remove the existing picture.
-  When the pictureFile field is specified, this field is ignored.
-  """
-  pictureUrl: String
-
-  "The list of part numbers associated with the system model."
-  partNumbers: [String!]
-
-  "An optional localized description. This description can only use the default tenant locale."
-  description: LocalizedTextInput
-}
-
-type DeleteSystemModelPayload {
-  "The deleted system model."
-  systemModel: SystemModel!
 }
 
 "Describes the current status of the operating system of a device."
@@ -427,122 +355,16 @@ type SystemStatus {
   timestamp: DateTime!
 }
 
-"Status of the OTA operation."
-enum OtaOperationStatus {
-  "The OTA operation was created and is waiting an acknowledgment from the device"
-  PENDING
-
-  "The OTA operation was accepted from the device"
-  IN_PROGRESS
-
-  "The OTA operation ended with an error"
-  ERROR
-
-  "The OTA operation ended succesfully"
-  DONE
-}
-
-"The current GSM/LTE registration status of the modem."
-enum ModemRegistrationStatus {
-  "Not registered, modem is not currently searching a new operator to register to."
-  NOT_REGISTERED
-
-  "Registered, home network."
-  REGISTERED
-
-  "Not registered, but modem is currently searching a new operator to register to."
-  SEARCHING_OPERATOR
-
-  "Registration denied."
-  REGISTRATION_DENIED
-
-  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
-  UNKNOWN
-
-  "Registered, roaming."
-  REGISTERED_ROAMING
-}
-
-"Led behavior"
-enum LedBehavior {
-  "Blink for 60 seconds."
-  BLINK
-
-  "Double blink for 60 seconds."
-  DOUBLE_BLINK
-
-  "Slow blink for 60 seconds."
-  SLOW_BLINK
-}
-
-type RootMutationType {
-  "Sets led behavior."
-  setLedBehavior(input: SetLedBehaviorInput!): SetLedBehaviorPayload
-
-  "Updates a device."
-  updateDevice(input: UpdateDeviceInput!): UpdateDevicePayload
-
-  "Creates a new hardware type."
-  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
-
-  "Updates a hardware type."
-  updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
-
-  "Deletes a hardware type."
-  deleteHardwareType(input: DeleteHardwareTypeInput!): DeleteHardwareTypePayload
-
-  "Creates a new system model."
-  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelPayload
-
-  "Updates a system model."
-  updateSystemModel(input: UpdateSystemModelInput!): UpdateSystemModelPayload
-
-  "Deletes a system model."
-  deleteSystemModel(input: DeleteSystemModelInput!): DeleteSystemModelPayload
-
-  "Creates a new device group."
-  createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupPayload
-
-  "Updates a device group."
-  updateDeviceGroup(input: UpdateDeviceGroupInput!): UpdateDeviceGroupPayload
-
-  "Deletes a device group."
-  deleteDeviceGroup(input: DeleteDeviceGroupInput!): DeleteDeviceGroupPayload
-
-  "Initiates an OTA update with a user provided OS image"
-  createManualOtaOperation(
-    input: CreateManualOtaOperationInput!
-  ): CreateManualOtaOperationPayload
-}
-
-"The current access technology of the serving cell."
-enum ModemTechnology {
-  "GSM."
-  GSM
-
-  "GSM Compact."
-  GSM_COMPACT
-
-  "UTRAN."
-  UTRAN
-
-  "GSM with EGPRS."
-  GSM_EGPRS
-
-  "UTRAN with HSDPA."
-  UTRAN_HSDPA
-
-  "UTRAN with HSUPA."
-  UTRAN_HSUPA
-
-  "UTRAN with HSDPA and HSUPA."
-  UTRAN_HSDPA_HSUPA
-
-  "E-UTRAN."
-  EUTRAN
-}
-
 type RootQueryType {
+  "Fetches the list of all base image collections."
+  baseImageCollections: [BaseImageCollection!]!
+
+  "Fetches a single base image collection."
+  baseImageCollection(
+    "The ID of the base image collection."
+    id: ID!
+  ): BaseImageCollection
+
   "Fetches the list of all devices."
   devices(
     "An optional set of filters to apply when fetching the devices."
@@ -577,20 +399,6 @@ type RootQueryType {
   tenantInfo: TenantInfo!
 
   node("The ID of an object." id: ID!): Node
-}
-
-type DeviceAttribute {
-  "The namespace of the device attribute."
-  namespace: DeviceAttributeNamespace!
-
-  "The key of the device attribute."
-  key: String!
-
-  "The type of the device attribute."
-  type: VariantType!
-
-  "The value of the device attribute."
-  value: VariantValue!
 }
 
 """
@@ -681,34 +489,499 @@ type Device implements Node {
   runtimeInfo: RuntimeInfo
 }
 
-type UpdateDevicePayload {
-  "The updated device."
-  device: Device!
-}
+"""
+Denotes a type of hardware that devices can have.
 
-input CreateHardwareTypeInput {
+It refers to the physical components embedded in a device.
+This can represent, e.g., multiple revisions of a PCB (each with a different part number) which are functionally equivalent from the device point of view.
+"""
+type HardwareType implements Node {
+  "The ID of an object"
+  id: ID!
+
   "The display name of the hardware type."
   name: String!
 
-  """
-  The identifier of the hardware type.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
+  "The identifier of the hardware type."
   handle: String!
 
   "The list of part numbers associated with the hardware type."
   partNumbers: [String!]!
 }
 
-input DeleteHardwareTypeInput {
-  "The ID of the hardware type to be deleted."
-  hardwareTypeId: ID!
+type UpdateDeviceGroupPayload {
+  "The updated device group."
+  deviceGroup: DeviceGroup!
 }
 
-type SetLedBehaviorPayload {
-  "The resulting led behavior."
+type UpdateHardwareTypePayload {
+  "The updated hardware type."
+  hardwareType: HardwareType!
+}
+
+type UpdateSystemModelPayload {
+  "The updated system model."
+  systemModel: SystemModel!
+}
+
+input SetLedBehaviorInput {
+  "The GraphQL ID (not the Astarte Device ID) of the target device"
+  deviceId: ID!
+
+  "The led behavior"
   behavior: LedBehavior!
+}
+
+"""
+Represents a specific system model.
+
+A system model corresponds to what the users thinks as functionally equivalent devices (e.g. two revisions of a device containing two different embedded chips but having the same enclosure and the same functionality).Each SystemModel must be associated to a specific HardwareType.
+"""
+type SystemModel implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the system model."
+  name: String!
+
+  "The identifier of the system model."
+  handle: String!
+
+  "The URL of the related picture."
+  pictureUrl: String
+
+  "The type of hardware that can be plugged into the system model."
+  hardwareType: HardwareType!
+
+  "The list of part numbers associated with the system model."
+  partNumbers: [String!]!
+
+  """
+  A localized description of the system model.
+  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
+  """
+  description: LocalizedText
+}
+
+"Represents an uploaded file."
+scalar Upload
+
+input UpdateDeviceGroupInput {
+  "The ID of the device group to be updated."
+  deviceGroupId: ID!
+
+  "The display name of the device group."
+  name: String
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String
+}
+
+"Describes the current usage of a storage unit on a device."
+type StorageUnit {
+  "The label of the storage unit."
+  label: String!
+
+  "The total number of bytes of the storage unit."
+  totalBytes: Int
+
+  "The number of free bytes of the storage unit."
+  freeBytes: Int
+}
+
+type CreateDeviceGroupPayload {
+  "The created device group."
+  deviceGroup: DeviceGroup!
+}
+
+type CreateSystemModelPayload {
+  "The created system model."
+  systemModel: SystemModel!
+}
+
+type CreateBaseImageCollectionPayload {
+  "The created base image collection."
+  baseImageCollection: BaseImageCollection!
+}
+
+type UpdateBaseImageCollectionPayload {
+  "The updated base image collection."
+  baseImageCollection: BaseImageCollection!
+}
+
+type DeleteBaseImageCollectionPayload {
+  "The deleted base image collection."
+  baseImageCollection: BaseImageCollection!
+}
+
+"Status of the OTA operation."
+enum OtaOperationStatus {
+  "The OTA operation was created and is waiting an acknowledgment from the device"
+  PENDING
+
+  "The OTA operation was accepted from the device"
+  IN_PROGRESS
+
+  "The OTA operation ended with an error"
+  ERROR
+
+  "The OTA operation ended succesfully"
+  DONE
+}
+
+"The current GSM/LTE registration status of the modem."
+enum ModemRegistrationStatus {
+  "Not registered, modem is not currently searching a new operator to register to."
+  NOT_REGISTERED
+
+  "Registered, home network."
+  REGISTERED
+
+  "Not registered, but modem is currently searching a new operator to register to."
+  SEARCHING_OPERATOR
+
+  "Registration denied."
+  REGISTRATION_DENIED
+
+  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
+  UNKNOWN
+
+  "Registered, roaming."
+  REGISTERED_ROAMING
+}
+
+type DeviceGroup implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the device group."
+  name: String!
+
+  "The handle of the device group."
+  handle: String!
+
+  "The selector of the device group."
+  selector: String!
+
+  "The devices belonging to the group."
+  devices: [Device!]!
+}
+
+"Represents information about a tenant"
+type TenantInfo {
+  "The tenant name"
+  name: String!
+
+  "The tenant slug"
+  slug: String!
+
+  "The default locale supported by the tenant"
+  defaultLocale: String!
+}
+
+"An OTA update operation"
+type OtaOperation implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The URL of the base image being installed on the device"
+  baseImageUrl: String!
+
+  "The current status of the operation"
+  status: OtaOperationStatus!
+
+  "The current status code of the operation"
+  statusCode: OtaOperationStatusCode
+
+  "The device targeted from the operation"
+  device: Device!
+
+  "The creation timestamp of the operation"
+  createdAt: DateTime!
+
+  "The timestamp of the last update to the operation"
+  updatedAt: DateTime!
+}
+
+"Status code of the OTA operation."
+enum OtaOperationStatusCode {
+  "A network error was encountered"
+  NETWORK_ERROR
+
+  "An NVS error was encountered"
+  NVS_ERROR
+
+  "The OTA operation is already in progress"
+  ALREADY_IN_PROGRESS
+
+  "The OTA operation has failed"
+  FAILED
+
+  "A deploy error was encountered"
+  DEPLOY_ERROR
+
+  "A boot partition error was encountered"
+  WRONG_PARTITION
+}
+
+"Describes an operating system's base image for a device."
+type BaseImage {
+  "The name of the image."
+  name: String
+
+  "The version of the image."
+  version: String
+
+  "Human readable build identifier of the image."
+  buildId: String
+
+  "A unique string that identifies the release, usually the image hash."
+  fingerprint: String
+}
+
+input CreateDeviceGroupInput {
+  "The display name of the device group."
+  name: String!
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String!
+}
+
+input DeleteDeviceGroupInput {
+  "The ID of the device group to be deleted."
+  deviceGroupId: ID!
+}
+
+"Describes the list of WiFi Access Points found by the device."
+type WifiScanResult {
+  "The channel used by the Access Point."
+  channel: Int
+
+  "Indicates whether the device is connected to the Access Point."
+  connected: Boolean
+
+  "The ESSID advertised by the Access Point."
+  essid: String
+
+  "The MAC address advertised by the Access Point."
+  macAddress: String
+
+  "The power of the radio signal, measured in dBm."
+  rssi: Int
+
+  "The date at which the device found the Access Point."
+  timestamp: DateTime!
+}
+
+"""
+Describes hardware-related info of a device.
+
+It exposes data read by a device's operating system about the underlying hardware.
+"""
+type HardwareInfo {
+  "The architecture of the CPU."
+  cpuArchitecture: String
+
+  "The reference code of the CPU model."
+  cpuModel: String
+
+  "The display name of the CPU model."
+  cpuModelName: String
+
+  "The vendor's name."
+  cpuVendor: String
+
+  "The Bytes count of memory."
+  memoryTotalBytes: Int
+}
+
+"The capabilities that devices can support"
+enum DeviceCapability {
+  "The device provides information about its base image."
+  BASE_IMAGE
+
+  "The device provides information about its battery status."
+  BATTERY_STATUS
+
+  "The device provides information about its cellular connection."
+  CELLULAR_CONNECTION
+
+  "The device supports commands, for example the rebooting command."
+  COMMANDS
+
+  "The device can be geolocated."
+  GEOLOCATION
+
+  "The device provides information about its hardware."
+  HARDWARE_INFO
+
+  "The device can be asked to blink its LED in a specific pattern."
+  LED_BEHAVIORS
+
+  "The device can provide information about its network interfaces."
+  NETWORK_INTERFACE_INFO
+
+  "The device provides information about its operating system."
+  OPERATING_SYSTEM
+
+  "The device provides information about its runtime."
+  RUNTIME_INFO
+
+  "The device can be updated remotely."
+  SOFTWARE_UPDATES
+
+  "The device provides information about its storage units."
+  STORAGE
+
+  "The device provides information about its system."
+  SYSTEM_INFO
+
+  "The device provides information about its system status."
+  SYSTEM_STATUS
+
+  "The device telemetry can be configured."
+  TELEMETRY_CONFIG
+
+  "The device provides information about surrounding WiFi APs."
+  WIFI
+}
+
+type DeleteDeviceGroupPayload {
+  "The deleted device group."
+  deviceGroup: DeviceGroup!
+}
+
+input UpdateSystemModelInput {
+  "The ID of the system model to be updated."
+  systemModelId: ID!
+
+  "The display name of the system model."
+  name: String
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  """
+  The file blob of a related picture.
+
+  When this field is specified, the pictureUrl field is ignored.
+  """
+  pictureFile: Upload
+
+  """
+  The file URL of a related picture.
+
+  Specifying a null value will remove the existing picture.
+  When the pictureFile field is specified, this field is ignored.
+  """
+  pictureUrl: String
+
+  "The list of part numbers associated with the system model."
+  partNumbers: [String!]
+
+  "An optional localized description. This description can only use the default tenant locale."
+  description: LocalizedTextInput
+}
+
+type DeleteSystemModelPayload {
+  "The deleted system model."
+  systemModel: SystemModel!
+}
+
+input UpdateBaseImageCollectionInput {
+  "The ID of the base image collection to be updated."
+  baseImageCollectionId: ID!
+
+  "The display name of the base image collection."
+  name: String
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+}
+
+type RootMutationType {
+  "Sets led behavior."
+  setLedBehavior(input: SetLedBehaviorInput!): SetLedBehaviorPayload
+
+  "Creates a new base image collection."
+  createBaseImageCollection(
+    input: CreateBaseImageCollectionInput!
+  ): CreateBaseImageCollectionPayload
+
+  "Updates a base image collection."
+  updateBaseImageCollection(
+    input: UpdateBaseImageCollectionInput!
+  ): UpdateBaseImageCollectionPayload
+
+  "Deletes a base image collection."
+  deleteBaseImageCollection(
+    input: DeleteBaseImageCollectionInput!
+  ): DeleteBaseImageCollectionPayload
+
+  "Updates a device."
+  updateDevice(input: UpdateDeviceInput!): UpdateDevicePayload
+
+  "Creates a new hardware type."
+  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
+
+  "Updates a hardware type."
+  updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
+
+  "Deletes a hardware type."
+  deleteHardwareType(input: DeleteHardwareTypeInput!): DeleteHardwareTypePayload
+
+  "Creates a new system model."
+  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelPayload
+
+  "Updates a system model."
+  updateSystemModel(input: UpdateSystemModelInput!): UpdateSystemModelPayload
+
+  "Deletes a system model."
+  deleteSystemModel(input: DeleteSystemModelInput!): DeleteSystemModelPayload
+
+  "Creates a new device group."
+  createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupPayload
+
+  "Updates a device group."
+  updateDeviceGroup(input: UpdateDeviceGroupInput!): UpdateDeviceGroupPayload
+
+  "Deletes a device group."
+  deleteDeviceGroup(input: DeleteDeviceGroupInput!): DeleteDeviceGroupPayload
+
+  "Initiates an OTA update with a user provided OS image"
+  createManualOtaOperation(
+    input: CreateManualOtaOperationInput!
+  ): CreateManualOtaOperationPayload
 }
 
 input CreateManualOtaOperationInput {
@@ -828,186 +1101,6 @@ input DeviceFilter {
   The match is case-insensitive and tests whether the string is included in one of the tags of the device.
   """
   tag: String
-}
-
-type DeviceGroup implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the device group."
-  name: String!
-
-  "The handle of the device group."
-  handle: String!
-
-  "The selector of the device group."
-  selector: String!
-
-  "The devices belonging to the group."
-  devices: [Device!]!
-}
-
-"Describes an Edgehog runtime."
-type RuntimeInfo {
-  "The name of the Edgehog runtime."
-  name: String
-
-  "The version of the Edgehog runtime."
-  version: String
-
-  "The environment of the Edgehog runtime."
-  environment: String
-
-  "The URL that uniquely identifies the Edgehog runtime implementation."
-  url: String
-}
-
-"Represents information about a tenant"
-type TenantInfo {
-  "The tenant name"
-  name: String!
-
-  "The tenant slug"
-  slug: String!
-
-  "The default locale supported by the tenant"
-  defaultLocale: String!
-}
-
-"An OTA update operation"
-type OtaOperation implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The URL of the base image being installed on the device"
-  baseImageUrl: String!
-
-  "The current status of the operation"
-  status: OtaOperationStatus!
-
-  "The current status code of the operation"
-  statusCode: OtaOperationStatusCode
-
-  "The device targeted from the operation"
-  device: Device!
-
-  "The creation timestamp of the operation"
-  createdAt: DateTime!
-
-  "The timestamp of the last update to the operation"
-  updatedAt: DateTime!
-}
-
-"""
-Denotes a type of hardware that devices can have.
-
-It refers to the physical components embedded in a device.
-This can represent, e.g., multiple revisions of a PCB (each with a different part number) which are functionally equivalent from the device point of view.
-"""
-type HardwareType implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the hardware type."
-  name: String!
-
-  "The identifier of the hardware type."
-  handle: String!
-
-  "The list of part numbers associated with the hardware type."
-  partNumbers: [String!]!
-}
-
-"Status code of the OTA operation."
-enum OtaOperationStatusCode {
-  "A network error was encountered"
-  NETWORK_ERROR
-
-  "An NVS error was encountered"
-  NVS_ERROR
-
-  "The OTA operation is already in progress"
-  ALREADY_IN_PROGRESS
-
-  "The OTA operation has failed"
-  FAILED
-
-  "A deploy error was encountered"
-  DEPLOY_ERROR
-
-  "A boot partition error was encountered"
-  WRONG_PARTITION
-}
-
-"Describes an operating system's base image for a device."
-type BaseImage {
-  "The name of the image."
-  name: String
-
-  "The version of the image."
-  version: String
-
-  "Human readable build identifier of the image."
-  buildId: String
-
-  "A unique string that identifies the release, usually the image hash."
-  fingerprint: String
-}
-
-"A text expressed in a specific locale."
-type LocalizedText {
-  "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
-  locale: String!
-
-  "The localized text"
-  text: String!
-}
-
-type UpdateDeviceGroupPayload {
-  "The updated device group."
-  deviceGroup: DeviceGroup!
-}
-
-type UpdateHardwareTypePayload {
-  "The updated hardware type."
-  hardwareType: HardwareType!
-}
-
-type UpdateSystemModelPayload {
-  "The updated system model."
-  systemModel: SystemModel!
-}
-
-input SetLedBehaviorInput {
-  "The GraphQL ID (not the Astarte Device ID) of the target device"
-  deviceId: ID!
-
-  "The led behavior"
-  behavior: LedBehavior!
-}
-
-input CreateDeviceGroupInput {
-  "The display name of the device group."
-  name: String!
-
-  """
-  The identifier of the device group.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  """
-  The Selector that will determine which devices belong to the device group.
-
-  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
-  """
-  selector: String!
-}
-
-input DeleteDeviceGroupInput {
-  "The ID of the device group to be deleted."
-  deviceGroupId: ID!
 }
 
 "Input object used to provide a localizedText as an input."

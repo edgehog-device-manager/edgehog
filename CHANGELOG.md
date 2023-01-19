@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   relevant for OTA updates). Defaults to 4 GB.
 - Allow creating and managing groups based on selectors.
 - Add support for device's `network_interfaces` ([#231](https://github.com/edgehog-device-manager/edgehog/pull/231))
-- Add support for base image collections ([#229](https://github.com/edgehog-device-manager/edgehog/pull/229)).
+- Add support for base image collections ([#229](https://github.com/edgehog-device-manager/edgehog/pull/229), [#230](https://github.com/edgehog-device-manager/edgehog/pull/230)).
 
 ### Changed
 - Handle Device part numbers for nonexistent system models

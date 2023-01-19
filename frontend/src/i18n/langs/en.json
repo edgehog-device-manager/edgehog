@@ -80,6 +80,18 @@
   "Device.tags": {
     "defaultMessage": "Tags"
   },
+  "components.BaseImageCollectionsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the base image collections table"
+  },
+  "components.BaseImageCollectionsTable.nameTitle": {
+    "defaultMessage": "Base Image Collection Name",
+    "description": "Title for the Name column of the base image collections table"
+  },
+  "components.BaseImageCollectionsTable.systemModelTitle": {
+    "defaultMessage": "System Model",
+    "description": "Title for the System Model column of the base image collections table"
+  },
   "components.BaseImageForm.baseImageLabel": {
     "defaultMessage": "Base image file"
   },
@@ -158,6 +170,21 @@
   },
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
+  },
+  "components.CreateBaseImageCollectionForm.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.CreateBaseImageCollectionForm.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.CreateBaseImageCollectionForm.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "components.CreateBaseImageCollectionForm.systemModelLabel": {
+    "defaultMessage": "System Model"
+  },
+  "components.CreateBaseImageCollectionForm.systemModelOption": {
+    "defaultMessage": "Select a System Model"
   },
   "components.CreateDeviceGroup.handleLabel": {
     "defaultMessage": "Handle"
@@ -308,6 +335,9 @@
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
   },
+  "components.Sidebar.baseImageCollectionsLabel": {
+    "defaultMessage": "Base Image Collections"
+  },
   "components.Sidebar.deviceGroupsLabel": {
     "defaultMessage": "Groups"
   },
@@ -346,6 +376,21 @@
   },
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
+  },
+  "components.UpdateBaseImageCollection.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "components.UpdateBaseImageCollection.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "components.UpdateBaseImageCollection.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.UpdateBaseImageCollection.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "components.UpdateBaseImageCollection.systemModelLabel": {
+    "defaultMessage": "System Model"
   },
   "components.UpdateDeviceGroupForm.deleteButton": {
     "defaultMessage": "Delete"
@@ -478,6 +523,47 @@
   },
   "modem.technology.Unknown": {
     "defaultMessage": "Unknown"
+  },
+  "pages.BaseImageCollection.baseImageCollectionNotFound.message": {
+    "defaultMessage": "Return to the Base Image Collection list."
+  },
+  "pages.BaseImageCollection.baseImageCollectionNotFound.title": {
+    "defaultMessage": "Base Image Collection not found."
+  },
+  "pages.BaseImageCollection.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Base Image Collection <bold>{baseImageCollection}</bold>.",
+    "description": "Description for the confirmation modal to delete a Base Image Collection"
+  },
+  "pages.BaseImageCollection.deleteModal.title": {
+    "defaultMessage": "Delete Base Image Collection",
+    "description": "Title for the confirmation modal to delete a Base Image Collection"
+  },
+  "pages.BaseImageCollection.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Base Image Collection, please try again."
+  },
+  "pages.BaseImageCollection.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Base Image Collection, please try again."
+  },
+  "pages.BaseImageCollectionCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Base Image Collection, please try again."
+  },
+  "pages.BaseImageCollectionCreate.noSystemModels.createButton": {
+    "defaultMessage": "Create System Model"
+  },
+  "pages.BaseImageCollectionCreate.noSystemModels.message": {
+    "defaultMessage": "You need at least one System Model to create a Base Image Collection"
+  },
+  "pages.BaseImageCollectionCreate.noSystemModels.title": {
+    "defaultMessage": "You haven't created any System Model yet"
+  },
+  "pages.BaseImageCollectionCreate.title": {
+    "defaultMessage": "Create Base Image Collection"
+  },
+  "pages.BaseImageCollections.createButton": {
+    "defaultMessage": "Create Base Image Collection"
+  },
+  "pages.BaseImageCollections.title": {
+    "defaultMessage": "Base Image Collections"
   },
   "pages.Device.BatteryStatusTab": {
     "defaultMessage": "Battery"
