@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 defmodule Edgehog.BaseImages.BaseImageCollection do
   use Ecto.Schema
+  use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
 
   alias Edgehog.Devices
@@ -28,7 +29,7 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :handle, :string
     field :name, :string
-    belongs_to :system_model, Devices.SystemModel
+    translatable_belongs_to :system_model, Devices.SystemModel
 
     timestamps()
   end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@
 
 defmodule Edgehog.Devices.SystemModel do
   use Ecto.Schema
+  use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
 
   alias Edgehog.Devices.HardwareType
-  alias Edgehog.Devices.{SystemModelDescription, SystemModelPartNumber}
+  alias Edgehog.Devices.SystemModelPartNumber
 
   schema "system_models" do
     field :handle, :string
@@ -31,9 +32,9 @@ defmodule Edgehog.Devices.SystemModel do
     field :picture_url, :string
     field :picture_file, :any, virtual: true
     field :tenant_id, :id
+    translatable_field :description
     belongs_to :hardware_type, HardwareType
     has_many :part_numbers, SystemModelPartNumber, on_replace: :delete
-    has_many :descriptions, SystemModelDescription, on_replace: :delete
     has_many :devices, through: [:part_numbers, :devices]
 
     timestamps()
@@ -42,14 +43,24 @@ defmodule Edgehog.Devices.SystemModel do
   @doc false
   def changeset(system_model, attrs) do
     system_model
-    |> cast(attrs, [:name, :handle, :picture_url, :picture_file])
+    |> cast(attrs, [:name, :handle, :picture_url, :picture_file, :description])
     |> validate_required([:name, :handle])
     |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
       message:
         "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
     )
+    |> validate_change(:description, &validate_locale/2)
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:handle, :tenant_id])
-    |> cast_assoc(:descriptions)
+  end
+
+  defp validate_locale(field, locale_map) do
+    Enum.reduce(locale_map, [], fn {locale, _text}, acc ->
+      if Regex.match?(~r/^[a-z]{2,3}-[A-Z]{2}$/, locale) do
+        acc
+      else
+        [{field, "#{locale} is not a valid locale"} | acc]
+      end
+    end)
   end
 end

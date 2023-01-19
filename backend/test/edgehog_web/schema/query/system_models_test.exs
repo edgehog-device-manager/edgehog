@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,10 +38,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         hardwareType {
           name
         }
-        description {
-          locale
-          text
-        }
+        description
       }
     }
     """
@@ -87,12 +84,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      _system_model = system_model_fixture(hardware_type, description: description)
 
       conn = get(conn, api_path, query: @query)
 
@@ -102,8 +96,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
                }
              } = json_response(conn, 200)
 
-      assert system_model["description"]["locale"] == default_locale
-      assert system_model["description"]["text"] == "A system model"
+      assert system_model["description"] == "A system model"
     end
 
     test "returns an explicit locale description", %{
@@ -115,12 +108,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      _system_model = system_model_fixture(hardware_type, description: description)
 
       conn =
         conn
@@ -133,8 +123,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
                }
              } = json_response(conn, 200)
 
-      assert system_model["description"]["locale"] == "it-IT"
-      assert system_model["description"]["text"] == "Un modello di sistema"
+      assert system_model["description"] == "Un modello di sistema"
     end
 
     test "returns description in the tenant's default locale for non existing locale", %{
@@ -146,12 +135,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      _system_model = system_model_fixture(hardware_type, description: description)
 
       conn =
         conn
@@ -164,8 +150,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
                }
              } = json_response(conn, 200)
 
-      assert %{"locale" => ^default_locale, "text" => "A system model"} =
-               system_model["description"]
+      assert system_model["description"] == "A system model"
     end
 
     test "returns no description when both user and tenant's locale are missing", %{
@@ -174,11 +159,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
     } do
       hardware_type = hardware_type_fixture()
 
-      descriptions = [
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{"it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, descriptions: descriptions)
+      _system_model = system_model_fixture(hardware_type, description: description)
 
       conn =
         conn

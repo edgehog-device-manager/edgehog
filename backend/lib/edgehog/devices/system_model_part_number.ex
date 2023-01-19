@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 defmodule Edgehog.Devices.SystemModelPartNumber do
   use Ecto.Schema
+  use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
 
   alias Edgehog.Astarte.Device
@@ -28,8 +29,8 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
   schema "system_model_part_numbers" do
     field :part_number, :string
     field :tenant_id, :id
-    belongs_to :system_model, SystemModel
-    has_many :devices, Device, foreign_key: :part_number, references: :part_number
+    translatable_belongs_to :system_model, SystemModel
+    translatable_has_many :devices, Device, foreign_key: :part_number, references: :part_number
 
     timestamps()
   end

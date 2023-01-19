@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,10 +38,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
         hardwareType {
           name
         }
-        description {
-          locale
-          text
-        }
+        description
       }
     }
     """
@@ -94,12 +91,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -108,16 +102,13 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       assert %{
                "data" => %{
                  "systemModel" => %{
-                   "description" => %{
-                     "locale" => ^default_locale,
-                     "text" => "A system model"
-                   }
+                   "description" => "A system model"
                  }
                }
              } = json_response(conn, 200)
     end
 
-    test "returns the explicit locale description", %{
+    test "returns the explicit locale description with a single language in accept-language", %{
       conn: conn,
       api_path: api_path,
       tenant: tenant
@@ -126,12 +117,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -143,10 +131,36 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       assert %{
                "data" => %{
                  "systemModel" => %{
-                   "description" => %{
-                     "locale" => "it-IT",
-                     "text" => "Un modello di sistema"
-                   }
+                   "description" => "Un modello di sistema"
+                 }
+               }
+             } = json_response(conn, 200)
+    end
+
+    test "returns the explicit locale description with a complex accept-language header", %{
+      conn: conn,
+      api_path: api_path,
+      tenant: tenant
+    } do
+      hardware_type = hardware_type_fixture()
+
+      default_locale = tenant.default_locale
+
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
+
+      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
+
+      conn =
+        conn
+        |> put_req_header("accept-language", "fr-FR;q=0.9, it-IT;q=0.5")
+        |> get(api_path, query: @query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "systemModel" => %{
+                   "description" => "Un modello di sistema"
                  }
                }
              } = json_response(conn, 200)
@@ -161,12 +175,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -178,12 +189,10 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       assert %{
                "data" => %{
                  "systemModel" => %{
-                   "description" => description
+                   "description" => "A system model"
                  }
                }
              } = json_response(conn, 200)
-
-      assert %{"locale" => ^default_locale, "text" => "A system model"} = description
     end
 
     test "returns no description when both user and tenant's locale are missing", %{
@@ -192,11 +201,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
     } do
       hardware_type = hardware_type_fixture()
 
-      descriptions = [
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{"it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 

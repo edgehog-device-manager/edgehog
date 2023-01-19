@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,10 +39,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
           name
           handle
           partNumbers
-          description {
-            locale
-            text
-          }
+          description
         }
       }
     }
@@ -61,14 +58,14 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
       default_description_locale = tenant.default_locale
       default_description_text = "A system model"
 
-      descriptions = [
-        %{locale: default_description_locale, text: default_description_text},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{
+        default_description_locale => default_description_text,
+        "it-IT" => "Un modello di sistema"
+      }
 
       %SystemModel{id: id} =
         system_model_fixture(hardware_type,
-          descriptions: descriptions,
+          description: description,
           name: name,
           handle: handle,
           part_numbers: [part_number]
@@ -92,10 +89,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
                      "name" => ^name,
                      "handle" => ^handle,
                      "partNumbers" => [^part_number],
-                     "description" => %{
-                       "locale" => ^default_description_locale,
-                       "text" => ^default_description_text
-                     }
+                     "description" => ^default_description_text
                    }
                  }
                }
@@ -110,12 +104,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
     } do
       default_locale = tenant.default_locale
 
-      descriptions = [
-        %{locale: default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, descriptions: descriptions)
+      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
 
       variables = %{
         input: %{
@@ -132,10 +123,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
                "data" => %{
                  "deleteSystemModel" => %{
                    "systemModel" => %{
-                     "description" => %{
-                       "locale" => "it-IT",
-                       "text" => "Un modello di sistema"
-                     }
+                     "description" => "Un modello di sistema"
                    }
                  }
                }

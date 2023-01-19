@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
     setup %{tenant: tenant} do
       hardware_type = hardware_type_fixture()
 
-      descriptions = [
-        %{locale: tenant.default_locale, text: "A system model"},
-        %{locale: "it-IT", text: "Un modello di sistema"}
-      ]
+      description = %{
+        tenant.default_locale => "A system model",
+        "it-IT" => "Un modello di sistema"
+      }
 
-      {:ok, system_model: system_model_fixture(hardware_type, descriptions: descriptions)}
+      {:ok, system_model: system_model_fixture(hardware_type, description: description)}
     end
 
     @query """
@@ -46,10 +46,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
           name
           handle
           partNumbers
-          description {
-            locale
-            text
-          }
+          description
         }
       }
     }
@@ -195,10 +192,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
                "data" => %{
                  "updateSystemModel" => %{
                    "systemModel" => %{
-                     "description" => %{
-                       "locale" => ^default_locale,
-                       "text" => "Another system model"
-                     }
+                     "description" => "Another system model"
                    }
                  }
                }
@@ -207,15 +201,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       assert {:ok, system_model} = Devices.fetch_system_model(system_model.id)
 
       assert %SystemModel{
-               descriptions: [
-                 %{locale: "it-IT", text: "Un modello di sistema"},
-                 %{locale: "en-US", text: "Another system model"}
-               ]
-             } =
-               Devices.preload_localized_descriptions_for_system_model(
-                 system_model,
-                 ["it-IT", default_locale]
-               )
+               description: %{
+                 "it-IT" => "Un modello di sistema",
+                 "en-US" => "Another system model"
+               }
+             } = system_model
     end
 
     test "fails when trying to update a non default locale", %{

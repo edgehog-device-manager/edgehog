@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,16 +26,6 @@ defmodule EdgehogWeb.Schema.LocalizationTypes do
   Input object used to provide a localizedText as an input.
   """
   input_object :localized_text_input do
-    @desc "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
-    field :locale, non_null(:string)
-    @desc "The localized text"
-    field :text, non_null(:string)
-  end
-
-  @desc """
-  A text expressed in a specific locale.
-  """
-  object :localized_text do
     @desc "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
     field :locale, non_null(:string)
     @desc "The localized text"

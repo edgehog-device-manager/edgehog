@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,9 +38,11 @@ defmodule EdgehogWeb.ContextTest do
 
     conn = %{conn | req_headers: conn.req_headers ++ language_headers}
 
-    %{preferred_locales: preferred_locales} = Context.build_context(conn)
+    %{preferred_locales: preferred_locales, tenant_locale: tenant_locale} =
+      Context.build_context(conn)
 
     assert ["it-IT", "en-UK", ^default_locale, "fr-FR"] = preferred_locales
+    assert default_locale == tenant_locale
   end
 
   test "build_context/1 uses the tenant's default locale without accept-language headers", %{
@@ -50,8 +52,8 @@ defmodule EdgehogWeb.ContextTest do
     default_locale = tenant.default_locale
     conn = Plug.Conn.assign(conn, :current_tenant, tenant)
 
-    %{preferred_locales: preferred_locales} = Context.build_context(conn)
+    %{preferred_locales: [], tenant_locale: tenant_locale} = Context.build_context(conn)
 
-    assert [^default_locale] = preferred_locales
+    assert default_locale == tenant_locale
   end
 end
