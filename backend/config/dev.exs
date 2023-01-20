@@ -79,5 +79,20 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
+config :waffle,
+  storage: Waffle.Storage.S3,
+  bucket: "edgehog",
+  asset_host: "http://localhost:9000/edgehog",
+  virtual_host: true
+
+config :ex_aws,
+  access_key_id: "minioadmin",
+  secret_access_key: "minioadmin"
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: "9000"
+
 config :goth,
   disabled: true
