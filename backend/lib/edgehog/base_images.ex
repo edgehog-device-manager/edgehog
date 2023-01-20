@@ -43,6 +43,7 @@ defmodule Edgehog.BaseImages do
   """
   def preload_defaults_for_base_image_collection(collection_or_collections) do
     Repo.preload(collection_or_collections,
+      base_images: [],
       system_model: [:hardware_type, :part_numbers]
     )
   end
