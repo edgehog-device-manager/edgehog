@@ -185,6 +185,21 @@ defmodule Edgehog.BaseImages do
   end
 
   @doc """
+  Returns the list of base_images in a specific `%BaseImageCollection{}`.
+
+  ## Examples
+
+      iex> list_base_images_for_collection(base_image_collection)
+      [%BaseImage{}, ...]
+
+  """
+  def list_base_images_for_collection(%BaseImageCollection{} = base_image_collection) do
+    Ecto.assoc(base_image_collection, :base_images)
+    |> Repo.all()
+    |> preload_defaults_for_base_image()
+  end
+
+  @doc """
   Fetches a single base_image.
 
   Returns `{:error, :not_found}` if the Base image does not exist.

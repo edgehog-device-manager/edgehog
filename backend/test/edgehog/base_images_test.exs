@@ -127,6 +127,16 @@ defmodule Edgehog.BaseImagesTest do
       assert BaseImages.list_base_images() == [base_image]
     end
 
+    test "list_base_images_for_collection/0 returns only base_images that belong to the collection" do
+      base_image_collection_1 = create_base_image_collection!()
+      base_image_fixture(base_image_collection: base_image_collection_1)
+
+      base_image_collection_2 = create_base_image_collection!()
+      base_image_2 = base_image_fixture(base_image_collection: base_image_collection_2)
+
+      assert BaseImages.list_base_images_for_collection(base_image_collection_2) == [base_image_2]
+    end
+
     test "fetch_base_image/1 returns the base_image with given id" do
       base_image = base_image_fixture()
       assert {:ok, base_image} == BaseImages.fetch_base_image(base_image.id)
