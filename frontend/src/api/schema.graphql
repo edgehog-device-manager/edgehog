@@ -147,15 +147,6 @@ type RuntimeInfo {
   url: String
 }
 
-"A text expressed in a specific locale."
-type LocalizedText {
-  "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
-  locale: String!
-
-  "The localized text"
-  text: String!
-}
-
 "Describes an operating system of a device."
 type OsInfo {
   "The name of the operating system."
@@ -177,7 +168,7 @@ type BaseImageCollection implements Node {
   "The display name of the base image collection."
   name: String!
 
-  "The identifier of the system model."
+  "The identifier of the base image collection."
   handle: String!
 
   "The System Model associated with the Base Image Collection"
@@ -487,6 +478,9 @@ type Device implements Node {
 
   "Information about the Edgehog runtime running on the device."
   runtimeInfo: RuntimeInfo
+
+  "The list of Network Interfaces of the device."
+  networkInterfaces: [NetworkInterface!]
 }
 
 """
@@ -560,7 +554,7 @@ type SystemModel implements Node {
   A localized description of the system model.
   The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
   """
-  description: LocalizedText
+  description: String
 }
 
 "Represents an uploaded file."
@@ -659,6 +653,21 @@ enum ModemRegistrationStatus {
 
   "Registered, roaming."
   REGISTERED_ROAMING
+}
+
+"The connection technology of the network interface."
+enum NetworkInterfaceTechnology {
+  "Ethernet."
+  ETHERNET
+
+  "Bluetooth."
+  BLUETOOTH
+
+  "Cellular."
+  CELLULAR
+
+  "WiFi."
+  WIFI
 }
 
 type DeviceGroup implements Node {
@@ -866,6 +875,18 @@ enum DeviceCapability {
 
   "The device provides information about surrounding WiFi APs."
   WIFI
+}
+
+"Describes a network interface of a device."
+type NetworkInterface {
+  "The identifier of the network interface."
+  name: String!
+
+  "The normalized physical address."
+  macAddress: String
+
+  "Connection Technology"
+  technology: NetworkInterfaceTechnology
 }
 
 type DeleteDeviceGroupPayload {
