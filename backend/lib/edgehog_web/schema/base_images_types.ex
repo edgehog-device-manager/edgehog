@@ -184,5 +184,43 @@ defmodule EdgehogWeb.Schema.BaseImagesTypes do
       middleware Absinthe.Relay.Node.ParseIDs, base_image_collection_id: :base_image_collection
       resolve &Resolvers.BaseImages.delete_base_image_collection/2
     end
+
+    @desc "Create a new base image in a base image collection."
+    payload field :create_base_image do
+      input do
+        @desc "The ID of the Base Image Collection this Base Image will belong to"
+        field :base_image_collection_id, non_null(:id)
+
+        @desc "The base image version"
+        field :version, non_null(:string)
+
+        @desc "The base image file, which will be uploaded to the storage"
+        field :file, non_null(:upload)
+
+        @desc "An optional starting version requirement for the base image"
+        field :starting_version_requirement, :string
+
+        @desc """
+        An optional localized description. This description can currently only use the \
+        default tenant locale.
+        """
+        field :description, :localized_text_input
+
+        @desc """
+        An optional relase display name. This can currently only use the \
+        default tenant locale.
+        """
+        field :release_display_name, :localized_text_input
+      end
+
+      output do
+        @desc "The created base image."
+        field :base_image, non_null(:base_image)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, base_image_collection_id: :base_image_collection
+
+      resolve &Resolvers.BaseImages.create_base_image/2
+    end
   end
 end

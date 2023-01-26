@@ -73,6 +73,41 @@ defmodule EdgehogWeb.Resolvers.BaseImages do
     {:ok, base_images}
   end
 
+  def create_base_image(args, resolution) do
+    default_locale = resolution.context.current_tenant.default_locale
+
+    with {:ok, %BaseImageCollection{} = collection} <-
+           BaseImages.fetch_base_image_collection(args.base_image_collection_id),
+         :ok <- ensure_default_locale(args[:description], default_locale),
+         :ok <- ensure_default_locale(args[:release_display_name], default_locale),
+         args = wrap_localized_field(args, :description),
+         args = wrap_localized_field(args, :release_display_name),
+         {:ok, %BaseImage{} = base_image} <- BaseImages.create_base_image(collection, args) do
+      {:ok, %{base_image: base_image}}
+    end
+  end
+
+  # TODO: consider extracting all this functions dealing with locale wrapping/unwrapping
+  # in a dedicated resolver/helper module
+
+  # Only allow localized input text that uses the tenant default locale
+  defp ensure_default_locale(nil, _default_locale), do: :ok
+  defp ensure_default_locale(%{locale: default_locale}, default_locale), do: :ok
+  defp ensure_default_locale(%{locale: _other}, _default), do: {:error, :not_default_locale}
+
+  # If it's there, wraps a localized field in a map, as the context expects a map
+  defp wrap_localized_field(args, field) when is_map_key(args, field) do
+    case Map.fetch!(args, field) do
+      %{locale: locale, text: text} ->
+        Map.put(args, field, %{locale => text})
+
+      _ ->
+        args
+    end
+  end
+
+  defp wrap_localized_field(args, _field), do: args
+
   def extract_localized_description(%BaseImage{} = base_image, _args, resolution) do
     # TODO: move this in a middleware
     extract_localized_field(base_image, :translated_description, resolution.context)
