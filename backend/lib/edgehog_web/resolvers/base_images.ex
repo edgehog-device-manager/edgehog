@@ -67,6 +67,12 @@ defmodule EdgehogWeb.Resolvers.BaseImages do
     BaseImages.fetch_base_image(args.id)
   end
 
+  def list_base_images_for_collection(%BaseImageCollection{} = collection, _args, _resolution) do
+    base_images = BaseImages.list_base_images_for_collection(collection)
+
+    {:ok, base_images}
+  end
+
   def extract_localized_description(%BaseImage{} = base_image, _args, resolution) do
     # TODO: move this in a middleware
     extract_localized_field(base_image, :translated_description, resolution.context)

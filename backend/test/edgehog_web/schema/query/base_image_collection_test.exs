@@ -20,6 +20,7 @@
 
 defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
   use EdgehogWeb.ConnCase
+  use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.DevicesFixtures
   import Edgehog.BaseImagesFixtures
@@ -252,6 +253,48 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
                  }
                }
              } = json_response(conn, 200)
+    end
+
+    @query_with_base_images """
+    query ($id: ID!) {
+      baseImageCollection(id: $id) {
+        baseImages {
+          version
+          url
+        }
+      }
+    }
+    """
+    test "returns associated base images", %{
+      conn: conn,
+      api_path: api_path,
+      base_image_collection: base_image_collection
+    } do
+      base_image = base_image_fixture(base_image_collection: base_image_collection)
+
+      id =
+        Absinthe.Relay.Node.to_global_id(
+          :base_image_collection,
+          base_image_collection.id,
+          EdgehogWeb.Schema
+        )
+
+      variables = %{id: id}
+
+      conn = get(conn, api_path, query: @query_with_base_images, variables: variables)
+
+      assert json_response(conn, 200) == %{
+               "data" => %{
+                 "baseImageCollection" => %{
+                   "baseImages" => [
+                     %{
+                       "version" => base_image.version,
+                       "url" => base_image.url
+                     }
+                   ]
+                 }
+               }
+             }
     end
   end
 end

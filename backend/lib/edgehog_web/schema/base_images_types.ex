@@ -39,6 +39,11 @@ defmodule EdgehogWeb.Schema.BaseImagesTypes do
 
     @desc "The System Model associated with the Base Image Collection"
     field :system_model, :system_model
+
+    @desc "The Base Images associated with the Base Image Collection"
+    field :base_images, non_null(list_of(non_null(:base_image))) do
+      &Resolvers.BaseImages.list_base_images_for_collection/3
+    end
   end
 
   @desc """
