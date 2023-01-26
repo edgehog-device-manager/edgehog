@@ -41,6 +41,45 @@ defmodule EdgehogWeb.Schema.BaseImagesTypes do
     field :system_model, :system_model
   end
 
+  @desc """
+  Represents an uploaded Base Image.
+
+  A base image represents a downloadable base image that can be installed on a device
+  """
+  node object(:base_image) do
+    @desc "The base image version"
+    field :version, non_null(:string)
+
+    @desc "The url where the base image can be downloaded"
+    field :url, non_null(:string)
+
+    @desc "The starting version requirement for the base image"
+    field :starting_version_requirement, :string
+
+    @desc """
+    The localized description of the base image
+    The language of the description can be controlled passing an \
+    Accept-Language header in the request. If no such header is present, the \
+    default tenant language is returned.
+    """
+    field :description, :string do
+      resolve &Resolvers.BaseImages.extract_localized_description/3
+    end
+
+    @desc """
+    The localized release display name of the base image
+    The language of the description can be controlled passing an \
+    Accept-Language header in the request. If no such header is present, the \
+    default tenant language is returned.
+    """
+    field :release_display_name, :string do
+      resolve &Resolvers.BaseImages.extract_localized_release_display_name/3
+    end
+
+    @desc "The Base Image Collection the Base Image belongs to"
+    field :base_image_collection, non_null(:base_image_collection)
+  end
+
   object :base_images_queries do
     @desc "Fetches the list of all base image collections."
     field :base_image_collections, non_null(list_of(non_null(:base_image_collection))) do
@@ -54,6 +93,15 @@ defmodule EdgehogWeb.Schema.BaseImagesTypes do
 
       middleware Absinthe.Relay.Node.ParseIDs, id: :base_image_collection
       resolve &Resolvers.BaseImages.find_base_image_collection/2
+    end
+
+    @desc "Fetches a single base image."
+    field :base_image, :base_image do
+      @desc "The ID of the base image."
+      arg :id, non_null(:id)
+
+      middleware Absinthe.Relay.Node.ParseIDs, id: :base_image
+      resolve &Resolvers.BaseImages.find_base_image/2
     end
   end
 

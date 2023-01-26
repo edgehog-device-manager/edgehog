@@ -20,9 +20,11 @@
 
 defmodule EdgehogWeb.Resolvers.BaseImages do
   alias Edgehog.BaseImages
+  alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.BaseImageCollection
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
+  alias I18nHelpers.Ecto.Translator
 
   def find_base_image_collection(args, _resolution) do
     BaseImages.fetch_base_image_collection(args.id)
@@ -58,6 +60,38 @@ defmodule EdgehogWeb.Resolvers.BaseImages do
          {:ok, %BaseImageCollection{} = base_image_collection} <-
            BaseImages.delete_base_image_collection(base_image_collection) do
       {:ok, %{base_image_collection: base_image_collection}}
+    end
+  end
+
+  def find_base_image(args, _resolution) do
+    BaseImages.fetch_base_image(args.id)
+  end
+
+  def extract_localized_description(%BaseImage{} = base_image, _args, resolution) do
+    # TODO: move this in a middleware
+    extract_localized_field(base_image, :translated_description, resolution.context)
+  end
+
+  def extract_localized_release_display_name(%BaseImage{} = base_image, _args, resolution) do
+    # TODO: move this in a middleware
+    extract_localized_field(base_image, :translated_release_display_name, resolution.context)
+  end
+
+  defp extract_localized_field(%BaseImage{} = base_image, field, context) do
+    %{
+      preferred_locales: preferred_locales,
+      tenant_locale: tenant_locale
+    } = context
+
+    translated_field =
+      Translator.translate(base_image, preferred_locales, fallback_locale: tenant_locale)
+      |> Map.fetch!(field)
+
+    # TODO: fix the library to return nil on empty translations
+    if translated_field == "" do
+      {:ok, nil}
+    else
+      {:ok, translated_field}
     end
   end
 end
