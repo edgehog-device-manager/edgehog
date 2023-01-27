@@ -254,5 +254,22 @@ defmodule EdgehogWeb.Schema.BaseImagesTypes do
 
       resolve &Resolvers.BaseImages.update_base_image/2
     end
+
+    @desc "Deletes a base image."
+    payload field :delete_base_image do
+      input do
+        @desc "The ID of the base image to be deleted."
+        field :base_image_id, non_null(:id)
+      end
+
+      output do
+        @desc "The deleted base image."
+        field :base_image, non_null(:base_image)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, base_image_id: :base_image
+
+      resolve &Resolvers.BaseImages.delete_base_image/2
+    end
   end
 end

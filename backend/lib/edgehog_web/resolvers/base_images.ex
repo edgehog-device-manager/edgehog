@@ -100,6 +100,13 @@ defmodule EdgehogWeb.Resolvers.BaseImages do
     end
   end
 
+  def delete_base_image(args, _resolution) do
+    with {:ok, %BaseImage{} = base_image} <- BaseImages.fetch_base_image(args.base_image_id),
+         {:ok, %BaseImage{} = base_image} <- BaseImages.delete_base_image(base_image) do
+      {:ok, %{base_image: base_image}}
+    end
+  end
+
   # TODO: consider extracting all this functions dealing with locale wrapping/unwrapping
   # in a dedicated resolver/helper module
 
