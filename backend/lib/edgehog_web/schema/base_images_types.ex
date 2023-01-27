@@ -222,5 +222,37 @@ defmodule EdgehogWeb.Schema.BaseImagesTypes do
 
       resolve &Resolvers.BaseImages.create_base_image/2
     end
+
+    @desc "Updates a base image."
+    payload field :update_base_image do
+      input do
+        @desc "The ID of the base image to be updated."
+        field :base_image_id, non_null(:id)
+
+        @desc "The starting version requirement for the base image"
+        field :starting_version_requirement, :string
+
+        @desc """
+        The localized description. This description can currently only use the \
+        default tenant locale.
+        """
+        field :description, :localized_text_input
+
+        @desc """
+        The localized relase display name. This can currently only use the \
+        default tenant locale.
+        """
+        field :release_display_name, :localized_text_input
+      end
+
+      output do
+        @desc "The updated base image."
+        field :base_image, non_null(:base_image)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, base_image_id: :base_image
+
+      resolve &Resolvers.BaseImages.update_base_image/2
+    end
   end
 end

@@ -87,6 +87,19 @@ defmodule EdgehogWeb.Resolvers.BaseImages do
     end
   end
 
+  def update_base_image(args, resolution) do
+    default_locale = resolution.context.current_tenant.default_locale
+
+    with {:ok, %BaseImage{} = base_image} <- BaseImages.fetch_base_image(args.base_image_id),
+         :ok <- ensure_default_locale(args[:description], default_locale),
+         :ok <- ensure_default_locale(args[:release_display_name], default_locale),
+         args = wrap_localized_field(args, :description),
+         args = wrap_localized_field(args, :release_display_name),
+         {:ok, %BaseImage{} = base_image} <- BaseImages.update_base_image(base_image, args) do
+      {:ok, %{base_image: base_image}}
+    end
+  end
+
   # TODO: consider extracting all this functions dealing with locale wrapping/unwrapping
   # in a dedicated resolver/helper module
 
