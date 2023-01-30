@@ -42,20 +42,28 @@ defmodule Edgehog.UpdateCampaigns do
   end
 
   @doc """
-  Gets a single update_channel.
+  Fetches a single update_channel.
 
-  Raises `Ecto.NoResultsError` if the Update channel does not exist.
+  Returns `{:error, :not_found}` if the Update channel does not exist.
 
   ## Examples
 
-      iex> get_update_channel!(123)
-      %UpdateChannel{}
+      iex> fetch_update_channel(123)
+      {:ok, %UpdateChannel{}}
 
-      iex> get_update_channel!(456)
-      ** (Ecto.NoResultsError)
+      iex> fetch_update_channel(456)
+      {:error, :not_found}
 
   """
-  def get_update_channel!(id), do: Repo.get!(UpdateChannel, id)
+  def fetch_update_channel(id) do
+    case Repo.get(UpdateChannel, id) do
+      nil ->
+        {:error, :not_found}
+
+      %UpdateChannel{} = update_channel ->
+        {:ok, update_channel}
+    end
+  end
 
   @doc """
   Creates a update_channel.

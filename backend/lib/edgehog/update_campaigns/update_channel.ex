@@ -23,9 +23,9 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
   import Ecto.Changeset
 
   schema "update_channels" do
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :handle, :string
     field :name, :string
-    field :tenant_id, :id
 
     timestamps()
   end
@@ -35,7 +35,11 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     update_channel
     |> cast(attrs, [:name, :handle])
     |> validate_required([:name, :handle])
-    |> unique_constraint(:handle)
-    |> unique_constraint(:name)
+    |> unique_constraint([:handle, :tenant_id])
+    |> unique_constraint([:name, :tenant_id])
+    |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
+      message:
+        "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
+    )
   end
 end

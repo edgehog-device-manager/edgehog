@@ -27,7 +27,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   @doc """
   Generate a unique update_channel handle.
   """
-  def unique_update_channel_handle, do: "some handle#{System.unique_integer([:positive])}"
+  def unique_update_channel_handle, do: "some-handle#{System.unique_integer([:positive])}"
 
   @doc """
   Generate a unique update_channel name.
@@ -37,7 +37,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   @doc """
   Generate a update_channel.
   """
-  def update_channel_fixture(attrs \\ %{}) do
+  def update_channel_fixture(attrs \\ []) do
     {:ok, update_channel} =
       attrs
       |> Enum.into(%{

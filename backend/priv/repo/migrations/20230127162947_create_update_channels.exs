@@ -23,15 +23,18 @@ defmodule Edgehog.Repo.Migrations.CreateUpdateChannels do
 
   def change do
     create table(:update_channels) do
-      add :name, :string
-      add :handle, :string
-      add :tenant_id, references(:tenants, on_delete: :nothing)
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :name, :string, null: false
+      add :handle, :string, null: false
 
       timestamps()
     end
 
-    create unique_index(:update_channels, [:handle])
-    create unique_index(:update_channels, [:name])
+    create unique_index(:update_channels, [:handle, :tenant_id])
+    create unique_index(:update_channels, [:name, :tenant_id])
+    create unique_index(:update_channels, [:id, :tenant_id])
     create index(:update_channels, [:tenant_id])
   end
 end
