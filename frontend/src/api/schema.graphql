@@ -173,6 +173,9 @@ type BaseImageCollection implements Node {
 
   "The System Model associated with the Base Image Collection"
   systemModel: SystemModel
+
+  "The Base Images associated with the Base Image Collection"
+  baseImages: [BaseImage!]!
 }
 
 "Describes a modem of a device."
@@ -313,6 +316,11 @@ input DeleteBaseImageCollectionInput {
   baseImageCollectionId: ID!
 }
 
+type UpdateBaseImagePayload {
+  "The updated base image."
+  baseImage: BaseImage!
+}
+
 "Describes a battery slot of a device."
 type BatterySlot {
   "The identifier of the battery slot."
@@ -355,6 +363,9 @@ type RootQueryType {
     "The ID of the base image collection."
     id: ID!
   ): BaseImageCollection
+
+  "Fetches a single base image."
+  baseImage("The ID of the base image." id: ID!): BaseImage
 
   "Fetches the list of all devices."
   devices(
@@ -465,7 +476,7 @@ type Device implements Node {
   batteryStatus: [BatterySlot!]
 
   "Information about the operating system's base image for the device."
-  baseImage: BaseImage
+  baseImage: BaseImageInfo
 
   "Information about the operating system of the device."
   osInfo: OsInfo
@@ -481,6 +492,16 @@ type Device implements Node {
 
   "The list of Network Interfaces of the device."
   networkInterfaces: [NetworkInterface!]
+}
+
+type CreateBaseImagePayload {
+  "The created base image."
+  baseImage: BaseImage!
+}
+
+type DeleteBaseImagePayload {
+  "The deleted base image."
+  baseImage: BaseImage!
 }
 
 """
@@ -744,19 +765,38 @@ enum OtaOperationStatusCode {
   WRONG_PARTITION
 }
 
-"Describes an operating system's base image for a device."
-type BaseImage {
-  "The name of the image."
-  name: String
+"""
+Represents an uploaded Base Image.
 
-  "The version of the image."
-  version: String
+A base image represents a downloadable base image that can be installed on a device
+"""
+type BaseImage implements Node {
+  "The ID of an object"
+  id: ID!
 
-  "Human readable build identifier of the image."
-  buildId: String
+  "The base image version"
+  version: String!
 
-  "A unique string that identifies the release, usually the image hash."
-  fingerprint: String
+  "The url where the base image can be downloaded"
+  url: String!
+
+  "The starting version requirement for the base image"
+  startingVersionRequirement: String
+
+  """
+  The localized description of the base image
+  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
+  """
+  description: String
+
+  """
+  The localized release display name of the base image
+  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
+  """
+  releaseDisplayName: String
+
+  "The Base Image Collection the Base Image belongs to"
+  baseImageCollection: BaseImageCollection!
 }
 
 input CreateDeviceGroupInput {
@@ -781,6 +821,26 @@ input CreateDeviceGroupInput {
 input DeleteDeviceGroupInput {
   "The ID of the device group to be deleted."
   deviceGroupId: ID!
+}
+
+input DeleteBaseImageInput {
+  "The ID of the base image to be deleted."
+  baseImageId: ID!
+}
+
+"Describes the information on the system's base image for a device."
+type BaseImageInfo {
+  "The name of the image."
+  name: String
+
+  "The version of the image."
+  version: String
+
+  "Human readable build identifier of the image."
+  buildId: String
+
+  "A unique string that identifies the release, usually the image hash."
+  fingerprint: String
 }
 
 "Describes the list of WiFi Access Points found by the device."
@@ -969,6 +1029,15 @@ type RootMutationType {
     input: DeleteBaseImageCollectionInput!
   ): DeleteBaseImageCollectionPayload
 
+  "Create a new base image in a base image collection."
+  createBaseImage(input: CreateBaseImageInput!): CreateBaseImagePayload
+
+  "Updates a base image."
+  updateBaseImage(input: UpdateBaseImageInput!): UpdateBaseImagePayload
+
+  "Deletes a base image."
+  deleteBaseImage(input: DeleteBaseImageInput!): DeleteBaseImagePayload
+
   "Updates a device."
   updateDevice(input: UpdateDeviceInput!): UpdateDevicePayload
 
@@ -1136,4 +1205,38 @@ input LocalizedTextInput {
 type DeleteHardwareTypePayload {
   "The deleted hardware type."
   hardwareType: HardwareType!
+}
+
+input CreateBaseImageInput {
+  "The ID of the Base Image Collection this Base Image will belong to"
+  baseImageCollectionId: ID!
+
+  "The base image version"
+  version: String!
+
+  "The base image file, which will be uploaded to the storage"
+  file: Upload!
+
+  "An optional starting version requirement for the base image"
+  startingVersionRequirement: String
+
+  "An optional localized description. This description can currently only use the default tenant locale."
+  description: LocalizedTextInput
+
+  "An optional relase display name. This can currently only use the default tenant locale."
+  releaseDisplayName: LocalizedTextInput
+}
+
+input UpdateBaseImageInput {
+  "The ID of the base image to be updated."
+  baseImageId: ID!
+
+  "The starting version requirement for the base image"
+  startingVersionRequirement: String
+
+  "The localized description. This description can currently only use the default tenant locale."
+  description: LocalizedTextInput
+
+  "The localized relase display name. This can currently only use the default tenant locale."
+  releaseDisplayName: LocalizedTextInput
 }
