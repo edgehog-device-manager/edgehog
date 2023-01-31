@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -114,6 +114,11 @@ This section reports an overview on the current status of the battery slots of t
 This section reports an overview of the cellular connection of the Device.
 
 ![Device Cellular Connection Screenshot](assets/device_cellular_connection.png)
+
+### Network Interfaces
+
+This section reports the list of network interfaces of the Device.
+![Device Network Interfaces Screenshot](assets/device_network_interfaces.png)
 
 ### Nearby WiFi APs
 

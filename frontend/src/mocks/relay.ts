@@ -128,6 +128,13 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       technology: "GSM",
     };
   },
+  NetworkInterface() {
+    return {
+      name: "enp2s0",
+      macAddress: "00:aa:bb:cc:dd:ee",
+      technology: "ETHERNET",
+    };
+  },
   OsInfo() {
     return {
       name: "FreeRTOS",
