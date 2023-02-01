@@ -61,7 +61,15 @@ defmodule Edgehog.Error do
 
   defp handle(%Ecto.Changeset{} = changeset) do
     changeset
-    |> Ecto.Changeset.traverse_errors(fn {err, _opts} -> err end)
+    |> Ecto.Changeset.traverse_errors(fn
+      {message, opts} when is_binary(message) ->
+        Regex.replace(~r"%{(\w+)}", message, fn _, key ->
+          opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+        end)
+
+      {other, _opts} ->
+        other
+    end)
     |> Enum.map(fn
       {_k, v} when is_map(v) ->
         # Nested changeset, inner errors are already a rendered map
