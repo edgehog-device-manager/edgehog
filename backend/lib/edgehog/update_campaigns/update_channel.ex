@@ -30,14 +30,24 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     field :name, :string
     has_many :target_groups, Groups.DeviceGroup
 
+    field :target_group_ids, {:array, :id}, virtual: true
+
     timestamps()
+  end
+
+  @doc false
+  def create_changeset(update_channel, attrs) do
+    update_channel
+    |> changeset(attrs)
+    |> validate_required([:target_group_ids])
   end
 
   @doc false
   def changeset(update_channel, attrs) do
     update_channel
-    |> cast(attrs, [:name, :handle])
+    |> cast(attrs, [:name, :handle, :target_group_ids])
     |> validate_required([:name, :handle])
+    |> validate_length(:target_group_ids, min: 1)
     |> unique_constraint([:handle, :tenant_id])
     |> unique_constraint([:name, :tenant_id])
     |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,

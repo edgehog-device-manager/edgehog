@@ -38,11 +38,18 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   Generate a update_channel.
   """
   def update_channel_fixture(attrs \\ []) do
+    {target_group_ids, attrs} =
+      Keyword.pop_lazy(attrs, :target_group_ids, fn ->
+        target_group = Edgehog.GroupsFixtures.device_group_fixture()
+        [target_group.id]
+      end)
+
     {:ok, update_channel} =
       attrs
       |> Enum.into(%{
         handle: unique_update_channel_handle(),
-        name: unique_update_channel_name()
+        name: unique_update_channel_name(),
+        target_group_ids: target_group_ids
       })
       |> Edgehog.UpdateCampaigns.create_update_channel()
 
