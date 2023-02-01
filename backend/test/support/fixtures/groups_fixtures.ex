@@ -25,15 +25,30 @@ defmodule Edgehog.GroupsFixtures do
   """
 
   @doc """
+  Generate a unique device_group handle.
+  """
+  def unique_device_group_handle, do: "test-devices#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique device_group name.
+  """
+  def unique_device_group_name, do: "Test Devices#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique device_group selector.
+  """
+  def unique_device_group_selector, do: ~s<"test#{System.unique_integer([:positive])}" in tags>
+
+  @doc """
   Generate a device_group.
   """
   def device_group_fixture(attrs \\ %{}) do
     {:ok, device_group} =
       attrs
       |> Enum.into(%{
-        handle: "test-devices",
-        name: "Test Devices",
-        selector: ~s<"test" in tags>
+        handle: unique_device_group_handle(),
+        name: unique_device_group_name(),
+        selector: unique_device_group_selector()
       })
       |> Edgehog.Groups.create_device_group()
 
