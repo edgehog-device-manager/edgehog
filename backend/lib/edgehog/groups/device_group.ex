@@ -29,6 +29,7 @@ defmodule Edgehog.Groups.DeviceGroup do
     field :handle, :string
     field :name, :string
     field :selector, :string
+    field :update_channel_id, :id
 
     timestamps()
   end

@@ -22,10 +22,13 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Groups
+
   schema "update_channels" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :handle, :string
     field :name, :string
+    has_many :target_groups, Groups.DeviceGroup
 
     timestamps()
   end
