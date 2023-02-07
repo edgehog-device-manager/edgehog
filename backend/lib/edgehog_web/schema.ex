@@ -116,5 +116,6 @@ defmodule EdgehogWeb.Schema do
     import_fields :devices_mutations
     import_fields :groups_mutations
     import_fields :os_management_mutations
+    import_fields :update_campaigns_mutations
   end
 end

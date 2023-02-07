@@ -56,4 +56,36 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
       resolve &Resolvers.UpdateCampaigns.find_update_channel/2
     end
   end
+
+  object :update_campaigns_mutations do
+    @desc "Creates a new update channel."
+    payload field :create_update_channel do
+      input do
+        @desc "The display name of the update channel."
+        field :name, non_null(:string)
+
+        @desc """
+        The identifier of the update channel.
+
+        It should start with a lower case ASCII letter and only contain \
+        lower case ASCII letters, digits and the hyphen - symbol.
+        """
+        field :handle, non_null(:string)
+
+        @desc """
+        The IDs of the target groups that are targeted by this update channel
+        """
+        field :target_group_ids, non_null(list_of(non_null(:id)))
+      end
+
+      output do
+        @desc "The created update channel."
+        field :update_channel, non_null(:update_channel)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, target_group_ids: :device_group
+
+      resolve &Resolvers.UpdateCampaigns.create_update_channel/2
+    end
+  end
 end

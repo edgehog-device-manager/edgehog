@@ -20,6 +20,7 @@
 
 defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
   alias Edgehog.UpdateCampaigns
+  alias Edgehog.UpdateCampaigns.UpdateChannel
 
   def find_update_channel(args, _resolution) do
     UpdateCampaigns.fetch_update_channel(args.id)
@@ -29,5 +30,11 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
     update_channels = UpdateCampaigns.list_update_channels()
 
     {:ok, update_channels}
+  end
+
+  def create_update_channel(args, _resolution) do
+    with {:ok, %UpdateChannel{} = update_channel} <- UpdateCampaigns.create_update_channel(args) do
+      {:ok, %{update_channel: update_channel}}
+    end
   end
 end
