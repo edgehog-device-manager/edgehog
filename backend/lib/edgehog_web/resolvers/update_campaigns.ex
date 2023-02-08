@@ -37,4 +37,13 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
       {:ok, %{update_channel: update_channel}}
     end
   end
+
+  def update_update_channel(args, _resolution) do
+    with {:ok, %UpdateChannel{} = update_channel} <-
+           UpdateCampaigns.fetch_update_channel(args.update_channel_id),
+         {:ok, %UpdateChannel{} = update_channel} <-
+           UpdateCampaigns.update_update_channel(update_channel, args) do
+      {:ok, %{update_channel: update_channel}}
+    end
+  end
 end
