@@ -40,6 +40,7 @@ import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "api
 import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import BaseImagesTable from "components/BaseImagesTable";
+import Button from "components/Button";
 import Center from "components/Center";
 import DeleteModal from "components/DeleteModal";
 import Page from "components/Page";
@@ -219,6 +220,26 @@ const BaseImageCollectionContent = ({
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingBaseImageCollection}
           />
+        </div>
+        <hr className="bg-secondary border-2 border-top border-secondary" />
+        <div className="d-flex justify-content-between align-items-center gap-2">
+          <h3>
+            <FormattedMessage
+              id="pages.BaseImageCollection.baseImagesLabel"
+              defaultMessage="Base Images"
+            />
+          </h3>
+          <Button
+            variant="secondary"
+            as={Link}
+            route={Route.baseImagesNew}
+            params={{ baseImageCollectionId }}
+          >
+            <FormattedMessage
+              id="pages.BaseImageCollection.createBaseImageButton"
+              defaultMessage="Create Base Image"
+            />
+          </Button>
         </div>
         <BaseImagesTable
           baseImageCollectionRef={baseImageCollection}
