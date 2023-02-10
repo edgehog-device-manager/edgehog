@@ -18,6 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay";
 
@@ -28,12 +29,15 @@ import type {
 
 import Table from "components/Table";
 import type { Column } from "components/Table";
+import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const BASE_IMAGES_TABLE_FRAGMENT = graphql`
   fragment BaseImagesTable_BaseImagesFragment on BaseImageCollection {
+    id
     baseImages {
+      id
       version
       startingVersionRequirement
       releaseDisplayName
@@ -44,7 +48,9 @@ const BASE_IMAGES_TABLE_FRAGMENT = graphql`
 type TableRecord =
   BaseImagesTable_BaseImagesFragment$data["baseImages"][number];
 
-const columns: Column<TableRecord>[] = [
+const getColumnsDefinition = (
+  baseImageCollectionId: string
+): Column<TableRecord>[] => [
   {
     accessor: "version",
     Header: (
@@ -53,6 +59,14 @@ const columns: Column<TableRecord>[] = [
         defaultMessage="Base Image Version"
         description="Title for the Version column of the base images table"
       />
+    ),
+    Cell: ({ row, value }) => (
+      <Link
+        route={Route.baseImagesEdit}
+        params={{ baseImageCollectionId, baseImageId: row.original.id }}
+      >
+        {value}
+      </Link>
     ),
   },
   {
@@ -88,16 +102,21 @@ const BaseImagesTable = ({
   baseImageCollectionRef,
   hideSearch = false,
 }: Props) => {
-  const { baseImages } = useFragment(
+  const baseImageCollection = useFragment(
     BASE_IMAGES_TABLE_FRAGMENT,
     baseImageCollectionRef
+  );
+
+  const columns = useMemo(
+    () => getColumnsDefinition(baseImageCollection.id),
+    [baseImageCollection.id]
   );
 
   return (
     <Table
       className={className}
       columns={columns}
-      data={baseImages}
+      data={baseImageCollection.baseImages}
       hideSearch={hideSearch}
     />
   );

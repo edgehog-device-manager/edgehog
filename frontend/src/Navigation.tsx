@@ -40,6 +40,7 @@ enum Route {
   baseImageCollectionsNew = "/base-image-collections/new",
   baseImageCollectionsEdit = "/base-image-collections/:baseImageCollectionId/edit",
   baseImagesNew = "/base-image-collections/:baseImageCollectionId/base-images/new",
+  baseImagesEdit = "/base-image-collections/:baseImageCollectionId/base-images/:baseImageId/edit",
   login = "/login",
   logout = "/logout",
 }
@@ -66,6 +67,10 @@ type ParametricRoute =
   | {
       route: Route.baseImageCollectionsEdit;
       params: { baseImageCollectionId: string };
+    }
+  | {
+      route: Route.baseImagesEdit;
+      params: { baseImageCollectionId: string; baseImageId: string };
     }
   | {
       route: Route.baseImagesNew;

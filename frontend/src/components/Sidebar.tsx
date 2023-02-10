@@ -167,6 +167,7 @@ const Sidebar = () => (
           Route.baseImageCollectionsNew,
           Route.baseImageCollectionsEdit,
           Route.baseImagesNew,
+          Route.baseImagesEdit,
         ]}
       />
     </SidebarItemGroup>
