@@ -102,6 +102,16 @@ type DeviceAttribute {
   value: VariantValue!
 }
 
+type CreateUpdateChannelPayload {
+  "The created update channel."
+  updateChannel: UpdateChannel!
+}
+
+type UpdateUpdateChannelPayload {
+  "The updated update channel."
+  updateChannel: UpdateChannel!
+}
+
 type UpdateDevicePayload {
   "The updated device."
   device: Device!
@@ -400,6 +410,12 @@ type RootQueryType {
   "Retrieves information about the current tenant"
   tenantInfo: TenantInfo!
 
+  "Fetches the list of all update channels."
+  updateChannels: [UpdateChannel!]!
+
+  "Fetches a single update channel."
+  updateChannel("The ID of the update channel." id: ID!): UpdateChannel
+
   node("The ID of an object." id: ID!): Node
 }
 
@@ -494,6 +510,29 @@ type Device implements Node {
   networkInterfaces: [NetworkInterface!]
 }
 
+input UpdateUpdateChannelInput {
+  "The ID of the update channel to be updated"
+  updateChannelId: ID!
+
+  "The updated display name of the update channel."
+  name: String
+
+  """
+  The updated identifier of the update channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The updated IDs of the target groups that are targeted by this update channel"
+  targetGroupIds: [ID!]
+}
+
+type DeleteUpdateChannelPayload {
+  "The deleted update channel."
+  updateChannel: UpdateChannel!
+}
+
 type CreateBaseImagePayload {
   "The created base image."
   baseImage: BaseImage!
@@ -580,6 +619,21 @@ type SystemModel implements Node {
 
 "Represents an uploaded file."
 scalar Upload
+
+input CreateUpdateChannelInput {
+  "The display name of the update channel."
+  name: String!
+
+  """
+  The identifier of the update channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The IDs of the target groups that are targeted by this update channel"
+  targetGroupIds: [ID!]!
+}
 
 input UpdateDeviceGroupInput {
   "The ID of the device group to be updated."
@@ -706,6 +760,9 @@ type DeviceGroup implements Node {
 
   "The devices belonging to the group."
   devices: [Device!]!
+
+  "The UpdateChannel associated with this group, if present."
+  updateChannel: UpdateChannel
 }
 
 "Represents information about a tenant"
@@ -843,6 +900,11 @@ type BaseImageInfo {
   fingerprint: String
 }
 
+input DeleteUpdateChannelInput {
+  "The ID of the update channel to be deleted."
+  updateChannelId: ID!
+}
+
 "Describes the list of WiFi Access Points found by the device."
 type WifiScanResult {
   "The channel used by the Access Point."
@@ -884,6 +946,25 @@ type HardwareInfo {
 
   "The Bytes count of memory."
   memoryTotalBytes: Int
+}
+
+"""
+Represents an UpdateChannel.
+
+An UpdateChannel represents a set of TargetGroups that can be targeted in an UpdateCampaign
+"""
+type UpdateChannel implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the target group."
+  name: String!
+
+  "The identifier of the target group."
+  handle: String!
+
+  "The DeviceGroups associated with this UpdateChannel"
+  targetGroups: [DeviceGroup!]!
 }
 
 "The capabilities that devices can support"
@@ -1072,6 +1153,21 @@ type RootMutationType {
   createManualOtaOperation(
     input: CreateManualOtaOperationInput!
   ): CreateManualOtaOperationPayload
+
+  "Creates a new update channel."
+  createUpdateChannel(
+    input: CreateUpdateChannelInput!
+  ): CreateUpdateChannelPayload
+
+  "Updates an update channel."
+  updateUpdateChannel(
+    input: UpdateUpdateChannelInput!
+  ): UpdateUpdateChannelPayload
+
+  "Deletes an update channel."
+  deleteUpdateChannel(
+    input: DeleteUpdateChannelInput!
+  ): DeleteUpdateChannelPayload
 }
 
 input CreateManualOtaOperationInput {
