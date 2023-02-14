@@ -175,6 +175,13 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-15T11:44:57.432Z",
     };
   },
+  UpdateChannel() {
+    return {
+      id: btoa("UpdateChannel:1"),
+      name: "Foo devices",
+      handle: "update-channel-foo",
+    };
+  },
   WifiScanResult() {
     return {
       channel: 1,
