@@ -170,6 +170,15 @@ const Sidebar = () => (
           Route.baseImagesEdit,
         ]}
       />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.updateChannelsLabel"
+            defaultMessage="Update Channels"
+          />
+        }
+        route={Route.updateChannels}
+      />
     </SidebarItemGroup>
   </Navbar>
 );
