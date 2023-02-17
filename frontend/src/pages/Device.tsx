@@ -1484,6 +1484,7 @@ const DeviceContent = ({
                     }
                   >
                     <MultiSelect
+                      creatable
                       value={deviceTags}
                       options={tags}
                       onChange={(value) =>

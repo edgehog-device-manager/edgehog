@@ -19,6 +19,7 @@
 */
 
 import { render, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import selectEvent from "react-select-event";
 
 import MultiSelect from "./MultiSelect";
@@ -87,6 +88,7 @@ it("correctly clears selected options", async () => {
 it("correctly creates new option", async () => {
   const onChange = jest.fn();
   const props = {
+    creatable: true,
     options,
     onChange,
   };
@@ -102,6 +104,7 @@ it("correctly creates new option", async () => {
 it("correctly creates new option adding to selected", async () => {
   const onChange = jest.fn();
   const props = {
+    creatable: true,
     options,
     value: options,
     onChange,
@@ -116,4 +119,20 @@ it("correctly creates new option adding to selected", async () => {
     options.concat([customOption]),
     expect.anything()
   );
+});
+
+it("correctly call onBlur", async () => {
+  const onBlur = jest.fn();
+  const props = {
+    options,
+    onBlur,
+  };
+  const { getByRole } = render(<MultiSelect {...props} />);
+  const input = getByRole("combobox");
+  input.focus();
+  expect(input).toHaveFocus();
+
+  await userEvent.tab();
+  expect(input).not.toHaveFocus();
+  expect(onBlur).toHaveBeenCalledTimes(1);
 });
