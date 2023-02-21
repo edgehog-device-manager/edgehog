@@ -99,6 +99,10 @@ const baseImageStartingVersionRequirementSchema = yup.string().test({
   test: (value) => semverValidRange(value) !== null,
 });
 
+const updateChannelHandleSchema = yup
+  .string()
+  .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
+
 export {
   deviceGroupHandleSchema,
   systemModelHandleSchema,
@@ -107,6 +111,7 @@ export {
   baseImageFileSchema,
   baseImageVersionSchema,
   baseImageStartingVersionRequirementSchema,
+  updateChannelHandleSchema,
   messages,
   yup,
 };

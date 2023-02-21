@@ -29,12 +29,14 @@ import type {
 import Table from "components/Table";
 import type { Column } from "components/Table";
 import Tag from "components/Tag";
+import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
   fragment UpdateChannelsTable_UpdateChannelFragment on UpdateChannel
   @relay(plural: true) {
+    id
     name
     handle
     targetGroups {
@@ -54,6 +56,14 @@ const columns: Column<TableRecord>[] = [
         defaultMessage="Update Channel Name"
         description="Title for the Name column of the update channels table"
       />
+    ),
+    Cell: ({ row, value }) => (
+      <Link
+        route={Route.updateChannelsEdit}
+        params={{ updateChannelId: row.original.id }}
+      >
+        {value}
+      </Link>
     ),
   },
   {
