@@ -178,7 +178,11 @@ const Sidebar = () => (
           />
         }
         route={Route.updateChannels}
-        activeRoutes={[Route.updateChannels, Route.updateChannelsEdit]}
+        activeRoutes={[
+          Route.updateChannels,
+          Route.updateChannelsEdit,
+          Route.updateChannelsNew,
+        ]}
       />
     </SidebarItemGroup>
   </Navbar>

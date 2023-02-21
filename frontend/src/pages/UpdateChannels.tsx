@@ -29,10 +29,12 @@ import {
 } from "react-relay/hooks";
 
 import type { UpdateChannels_getUpdateChannels_Query } from "api/__generated__/UpdateChannels_getUpdateChannels_Query.graphql";
+import Button from "components/Button";
 import Center from "components/Center";
 import UpdateChannelsTable from "components/UpdateChannelsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
+import { Link, Route } from "Navigation";
 
 const GET_UPDATE_CHANNELS_QUERY = graphql`
   query UpdateChannels_getUpdateChannels_Query {
@@ -63,7 +65,14 @@ const UpdateChannelsContent = ({
             defaultMessage="Update Channels"
           />
         }
-      />
+      >
+        <Button as={Link} route={Route.updateChannelsNew}>
+          <FormattedMessage
+            id="pages.UpdateChannels.createButton"
+            defaultMessage="Create Update Channel"
+          />
+        </Button>
+      </Page.Header>
       <Page.Main>
         <UpdateChannelsTable updateChannelsRef={updateChannels} />
       </Page.Main>
