@@ -52,6 +52,9 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.Astarte.Device{}, _ ->
         :device
 
+      %Edgehog.BaseImages.BaseImage{}, _ ->
+        :base_image
+
       %Edgehog.BaseImages.BaseImageCollection{}, _ ->
         :base_image_collection
 
@@ -75,6 +78,9 @@ defmodule EdgehogWeb.Schema do
   query do
     node field do
       resolve fn
+        %{type: :base_image, id: id}, context ->
+          Resolvers.BaseImages.find_base_image(%{id: id}, context)
+
         %{type: :base_image_collection, id: id}, context ->
           Resolvers.BaseImages.find_base_image_collection(%{id: id}, context)
 

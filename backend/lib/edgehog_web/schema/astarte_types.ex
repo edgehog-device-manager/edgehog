@@ -60,8 +60,8 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :free_bytes, :integer
   end
 
-  @desc "Describes an operating system's base image for a device."
-  object :base_image do
+  @desc "Describes the information on the system's base image for a device."
+  object :base_image_info do
     @desc "The name of the image."
     field :name, :string
 

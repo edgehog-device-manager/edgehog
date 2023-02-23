@@ -23,6 +23,7 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
   use I18nHelpers.Ecto.TranslatableFields
   import Ecto.Changeset
 
+  alias Edgehog.BaseImages.BaseImage
   alias Edgehog.Devices
 
   schema "base_image_collections" do
@@ -30,6 +31,7 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     field :handle, :string
     field :name, :string
     translatable_belongs_to :system_model, Devices.SystemModel
+    translatable_has_many :base_images, BaseImage
 
     timestamps()
   end

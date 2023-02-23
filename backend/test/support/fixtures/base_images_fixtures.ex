@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ defmodule Edgehog.BaseImagesFixtures do
   This module defines test helpers for creating
   entities via the `Edgehog.BaseImages` context.
   """
+
+  alias Edgehog.DevicesFixtures
 
   @doc """
   Generate a unique base_image_collection handle.
@@ -49,5 +51,40 @@ defmodule Edgehog.BaseImagesFixtures do
       Edgehog.BaseImages.create_base_image_collection(system_model, attrs)
 
     base_image_collection
+  end
+
+  @doc """
+  Generate a unique base_image version.
+  """
+  def unique_base_image_version, do: "1.0.#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a base_image.
+  """
+  def base_image_fixture(attrs \\ []) do
+    # TODO: the lazy creation of nested resources should be pushed up to their relative
+    # fixtures. Do this in a second pass to avoid lots of unrelated noise in the PR.
+    base_image_collection =
+      Keyword.get_lazy(attrs, :base_image_collection, fn ->
+        system_model =
+          Keyword.get_lazy(attrs, :system_model, fn ->
+            hardware_type =
+              Keyword.get_lazy(attrs, :hardware_type, &DevicesFixtures.hardware_type_fixture/0)
+
+            DevicesFixtures.system_model_fixture(hardware_type)
+          end)
+
+        base_image_collection_fixture(system_model)
+      end)
+
+    attrs =
+      Enum.into(attrs, %{
+        version: unique_base_image_version(),
+        file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
+      })
+
+    {:ok, base_image} = Edgehog.BaseImages.create_base_image(base_image_collection, attrs)
+
+    base_image
   end
 end

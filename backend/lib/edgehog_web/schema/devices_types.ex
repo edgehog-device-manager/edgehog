@@ -215,7 +215,7 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
     end
 
     @desc "Information about the operating system's base image for the device."
-    field :base_image, :base_image do
+    field :base_image, :base_image_info do
       resolve &Resolvers.Astarte.fetch_base_image/3
       middleware Middleware.ErrorHandler
     end
