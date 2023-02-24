@@ -6,18 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Add support for device tags ([#191](https://github.com/edgehog-device-manager/edgehog/pull/191), [#212](https://github.com/edgehog-device-manager/edgehog/pull/212))
+- Add support for device tags ([#191](https://github.com/edgehog-device-manager/edgehog/pull/191), [#212](https://github.com/edgehog-device-manager/edgehog/pull/212)).
 - Add support for device custom attributes
-  ([#205](https://github.com/edgehog-device-manager/edgehog/pull/205))
+  ([#205](https://github.com/edgehog-device-manager/edgehog/pull/205)).
 - Add `MAX_UPLOAD_SIZE_BYTES` env variable to define the maximum dimension for uploads (particularly
   relevant for OTA updates). Defaults to 4 GB.
 - Allow creating and managing groups based on selectors.
 - Add support for device's `network_interfaces` ([#231](https://github.com/edgehog-device-manager/edgehog/pull/231), [#232](https://github.com/edgehog-device-manager/edgehog/pull/232)).
 - Add support for base image collections ([#229](https://github.com/edgehog-device-manager/edgehog/pull/229), [#230](https://github.com/edgehog-device-manager/edgehog/pull/230)).
-- Add support for base images ([#240](https://github.com/edgehog-device-manager/edgehog/pull/240))
+- Add support for base images ([#240](https://github.com/edgehog-device-manager/edgehog/pull/240), [#244](https://github.com/edgehog-device-manager/edgehog/pull/244)).
 
 ### Changed
-- Handle Device part numbers for nonexistent system models
+- Handle Device part numbers for nonexistent system models.
 - BREAKING: The `Description` field in the `SystemModel` object is now a `String` instead of a
   `LocalizedText`.
 
@@ -35,7 +35,7 @@ available.
 ## [0.5.1] - 2022-06-01
 ### Added
 - Add `connected` field to wifi scan result and highlight the latest connected network
-  ([#193](https://github.com/edgehog-device-manager/edgehog/pull/193))
+  ([#193](https://github.com/edgehog-device-manager/edgehog/pull/193)).
 
 ### Changed
 - Change Geo IP provider from FreeGeoIP to IPBase
@@ -44,8 +44,8 @@ available.
 
 ### Fixed
 - Add a workaround to correctly parse Astarte datastreams even if AppEngine API shows them with a
-  inconsistent format ([#194](https://github.com/edgehog-device-manager/edgehog/pull/194))
+  inconsistent format ([#194](https://github.com/edgehog-device-manager/edgehog/pull/194)).
 
 ## [0.5.0] - 2022-03-22
 ### Added
-- Initial Edgehog release
+- Initial Edgehog release.
