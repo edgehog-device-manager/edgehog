@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ defmodule Edgehog.OSManagementTest do
     alias Edgehog.OSManagement.OTAOperation
 
     import Edgehog.AstarteFixtures
+    import Edgehog.BaseImagesFixtures
     import Edgehog.DevicesFixtures
     import Edgehog.OSManagementFixtures
 
@@ -150,6 +151,41 @@ defmodule Edgehog.OSManagementTest do
 
       assert {:error, %Astarte.Client.APIError{}} =
                OSManagement.create_manual_ota_operation(device, fake_image)
+    end
+
+    test "create_managed_ota_operation/2 with valid data creates an ota_operation", %{
+      device: device
+    } do
+      base_image = base_image_fixture()
+
+      Edgehog.Astarte.Device.OTARequestMock
+      |> expect(:post, fn _client, device_id, _uuid, url ->
+        assert device_id == device.device_id
+        assert url == base_image.url
+        :ok
+      end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.create_managed_ota_operation(device, base_image)
+
+      assert ota_operation.base_image_url == base_image.url
+      assert ota_operation.status == :pending
+      assert ota_operation.status_code == nil
+      assert ota_operation.manual? == false
+    end
+
+    test "create_managed_ota_operation/2 fails if the Astarte request fails", %{
+      device: device
+    } do
+      base_image = base_image_fixture()
+
+      Edgehog.Astarte.Device.OTARequestMock
+      |> expect(:post, fn _client, _device_id, _uuid, _url ->
+        {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
+      end)
+
+      assert {:error, %Astarte.Client.APIError{}} =
+               OSManagement.create_managed_ota_operation(device, base_image)
     end
 
     test "update_ota_operation/2 with valid data updates the ota_operation", %{device: device} do

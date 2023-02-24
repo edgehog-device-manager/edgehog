@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ defmodule Edgehog.OSManagement do
 
   alias Ecto.Multi
   alias Edgehog.Astarte
+  alias Edgehog.BaseImages
   alias Edgehog.Devices
   alias Edgehog.OSManagement.EphemeralImage
   alias Edgehog.OSManagement.OTAOperation
@@ -134,6 +135,44 @@ defmodule Edgehog.OSManagement do
         # If we fail after a successful upload, we at least try to clean up the upload
         @ephemeral_image_module.delete(tenant_id, ota_operation_id, base_image_url)
         {:error, failed_value}
+
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
+    end
+  end
+
+  @doc """
+  Creates an OTAOperation using an existing `BaseImage`.
+
+  ## Example
+
+  iex> create_managed_ota_operation(%Devices.Device{} = device, %BaseImages.BaseImage{} = base_image)
+  {:ok, %OTAOperation{}}
+  """
+  def create_managed_ota_operation(
+        %Devices.Device{} = device,
+        %BaseImages.BaseImage{} = base_image
+      ) do
+    ota_operation_id = Ecto.UUID.generate()
+
+    Multi.new()
+    |> Multi.insert(:ota_operation, %OTAOperation{
+      id: ota_operation_id,
+      base_image_url: base_image.url,
+      device_id: device.id
+    })
+    |> Multi.run(:send_ota_request, fn _repo, _changes ->
+      device_id = device.device_id
+
+      with {:ok, client} <- Devices.appengine_client_from_device(device),
+           :ok <- Astarte.send_ota_request(client, device_id, ota_operation_id, base_image.url) do
+        {:ok, nil}
+      end
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{ota_operation: ota_operation}} ->
+        {:ok, Repo.preload(ota_operation, :device)}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
