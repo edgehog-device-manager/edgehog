@@ -20,6 +20,8 @@
 
 import * as yup from "yup";
 import { defineMessages } from "react-intl";
+import semverValid from "semver/functions/valid";
+import semverValidRange from "semver/ranges/valid";
 
 const messages = defineMessages({
   required: {
@@ -38,6 +40,19 @@ const messages = defineMessages({
     id: "validation.handle.format",
     defaultMessage:
       "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -",
+  },
+  baseImageFileSchema: {
+    id: "validation.baseImageFile.required",
+    defaultMessage: "Required.",
+  },
+  baseImageVersionFormat: {
+    id: "validation.baseImageVersion.format",
+    defaultMessage: "The version must follow the Semantic Versioning spec",
+  },
+  baseImageStartingVersionRequirementFormat: {
+    id: "validation.baseImageStartingVersionRequirement.format",
+    defaultMessage:
+      "The supported starting versions must be a valid version range",
   },
 });
 
@@ -66,11 +81,32 @@ const baseImageCollectionHandleSchema = yup
   .string()
   .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
 
+const baseImageFileSchema = yup.mixed().test({
+  name: "fileRequired",
+  message: messages.baseImageFileSchema.id,
+  test: (value) => value instanceof FileList && value.length > 0,
+});
+
+const baseImageVersionSchema = yup.string().test({
+  name: "versionFormat",
+  message: messages.baseImageVersionFormat.id,
+  test: (value) => semverValid(value) !== null,
+});
+
+const baseImageStartingVersionRequirementSchema = yup.string().test({
+  name: "startingVersionRequirementFormat",
+  message: messages.baseImageStartingVersionRequirementFormat.id,
+  test: (value) => semverValidRange(value) !== null,
+});
+
 export {
   deviceGroupHandleSchema,
   systemModelHandleSchema,
   hardwareTypeHandleSchema,
   baseImageCollectionHandleSchema,
+  baseImageFileSchema,
+  baseImageVersionSchema,
+  baseImageStartingVersionRequirementSchema,
   messages,
   yup,
 };

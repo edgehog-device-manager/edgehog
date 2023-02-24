@@ -31,6 +31,16 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       pictureUrl: assets.images.brand,
     };
   },
+  BaseImage() {
+    return {
+      id: btoa("BaseImage:1"),
+      description: "Base Image Description",
+      releaseDisplayName: "release-1",
+      startingVersionRequirement: null,
+      url: "https://sample-storage.com/bucket/base_images/1.0.0.bin",
+      version: "1.0.0",
+    };
+  },
   BaseImageCollection(_, generateId) {
     const id = generateId();
     const handle = `base-image-collection-id-${id}`;
@@ -103,7 +113,7 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-11T09:43:54.437Z",
     };
   },
-  BaseImage() {
+  BaseImageInfo() {
     return {
       name: "FreeRTOS",
       version: "10.4.3",

@@ -39,6 +39,8 @@ import type { BaseImageCollection_updateBaseImageCollection_Mutation } from "api
 import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";
 import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
+import BaseImagesTable from "components/BaseImagesTable";
+import Button from "components/Button";
 import Center from "components/Center";
 import DeleteModal from "components/DeleteModal";
 import Page from "components/Page";
@@ -56,6 +58,7 @@ const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
       systemModel {
         name
       }
+      ...BaseImagesTable_BaseImagesFragment
     }
   }
 `;
@@ -86,11 +89,11 @@ const DELETE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
   }
 `;
 
-interface BaseImageCollectionContentProps {
+type BaseImageCollectionContentProps = {
   baseImageCollection: NonNullable<
     BaseImageCollection_getBaseImageCollection_Query$data["baseImageCollection"]
   >;
-}
+};
 
 const BaseImageCollectionContent = ({
   baseImageCollection,
@@ -218,6 +221,30 @@ const BaseImageCollectionContent = ({
             isLoading={isUpdatingBaseImageCollection}
           />
         </div>
+        <hr className="bg-secondary border-2 border-top border-secondary" />
+        <div className="d-flex justify-content-between align-items-center gap-2">
+          <h3>
+            <FormattedMessage
+              id="pages.BaseImageCollection.baseImagesLabel"
+              defaultMessage="Base Images"
+            />
+          </h3>
+          <Button
+            variant="secondary"
+            as={Link}
+            route={Route.baseImagesNew}
+            params={{ baseImageCollectionId }}
+          >
+            <FormattedMessage
+              id="pages.BaseImageCollection.createBaseImageButton"
+              defaultMessage="Create Base Image"
+            />
+          </Button>
+        </div>
+        <BaseImagesTable
+          baseImageCollectionRef={baseImageCollection}
+          hideSearch
+        />
         {showDeleteModal && (
           <DeleteModal
             confirmText={baseImageCollection.handle}
@@ -250,9 +277,9 @@ const BaseImageCollectionContent = ({
   );
 };
 
-interface BaseImageCollectionWrapperProps {
+type BaseImageCollectionWrapperProps = {
   getBaseImageCollectionQuery: PreloadedQuery<BaseImageCollection_getBaseImageCollection_Query>;
-}
+};
 
 const BaseImageCollectionWrapper = ({
   getBaseImageCollectionQuery,
@@ -295,9 +322,14 @@ const BaseImageCollectionPage = () => {
       GET_BASE_IMAGE_COLLECTION_QUERY
     );
 
-  useEffect(() => {
-    getBaseImageCollection({ id: baseImageCollectionId });
+  const fetchBaseImageCollection = useCallback(() => {
+    getBaseImageCollection(
+      { id: baseImageCollectionId },
+      { fetchPolicy: "network-only" }
+    );
   }, [getBaseImageCollection, baseImageCollectionId]);
+
+  useEffect(fetchBaseImageCollection, [fetchBaseImageCollection]);
 
   return (
     <Suspense
@@ -313,9 +345,7 @@ const BaseImageCollectionPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => {
-          getBaseImageCollection({ id: baseImageCollectionId });
-        }}
+        onReset={fetchBaseImageCollection}
       >
         {getBaseImageCollectionQuery && (
           <BaseImageCollectionWrapper

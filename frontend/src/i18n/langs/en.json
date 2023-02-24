@@ -98,6 +98,18 @@
   "components.BaseImageForm.update": {
     "defaultMessage": "Update"
   },
+  "components.BaseImagesTable.releaseDisplayNameTitle": {
+    "defaultMessage": "Release Name",
+    "description": "Title for the Release Name column of the base images table"
+  },
+  "components.BaseImagesTable.startingVersionRequirementTitle": {
+    "defaultMessage": "Supported Starting Versions",
+    "description": "Title for the Supported Starting Versions column of the base images table"
+  },
+  "components.BaseImagesTable.versionTitle": {
+    "defaultMessage": "Base Image Version",
+    "description": "Title for the Version column of the base images table"
+  },
   "components.BatteryTable.chargeLevelTitle": {
     "defaultMessage": "Charge Level"
   },
@@ -506,6 +518,54 @@
   "device.otaOperationStatus.Unknown": {
     "defaultMessage": "Unknown"
   },
+  "forms.CreateBaseImage.baseImageCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "forms.CreateBaseImage.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "forms.CreateBaseImage.fileLabel": {
+    "defaultMessage": "Base Image File"
+  },
+  "forms.CreateBaseImage.releaseDisplayNameLabel": {
+    "defaultMessage": "Release Display Name"
+  },
+  "forms.CreateBaseImage.startingVersionRequirementLabel": {
+    "defaultMessage": "Supported Starting Versions"
+  },
+  "forms.CreateBaseImage.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateBaseImage.versionLabel": {
+    "defaultMessage": "Version"
+  },
+  "forms.UpdateBaseImage.baseImageCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "forms.UpdateBaseImage.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateBaseImage.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "forms.UpdateBaseImage.file": {
+    "defaultMessage": "<a>{baseImageName}</a>"
+  },
+  "forms.UpdateBaseImage.fileLabel": {
+    "defaultMessage": "Base Image file"
+  },
+  "forms.UpdateBaseImage.releaseDisplayNameLabel": {
+    "defaultMessage": "Release Display Name"
+  },
+  "forms.UpdateBaseImage.starting-version-requirementLabel": {
+    "defaultMessage": "Supported starting versions"
+  },
+  "forms.UpdateBaseImage.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "forms.UpdateBaseImage.versionLabel": {
+    "defaultMessage": "Version"
+  },
   "modem.RegistrationStatus.NotRegistered": {
     "defaultMessage": "Not Registered"
   },
@@ -551,11 +611,40 @@
   "modem.technology.Unknown": {
     "defaultMessage": "Unknown"
   },
+  "pages.BaseImage.baseImageNotFound.message": {
+    "defaultMessage": "Return to the Base Image Collection."
+  },
+  "pages.BaseImage.baseImageNotFound.title": {
+    "defaultMessage": "Base Image not found."
+  },
+  "pages.BaseImage.creationErrorFeedback": {
+    "defaultMessage": "Could not update the Base Image, please try again."
+  },
+  "pages.BaseImage.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Base Image version <bold>{baseImageVersion}</bold>.",
+    "description": "Description for the confirmation modal to delete a Base Image"
+  },
+  "pages.BaseImage.deleteModal.title": {
+    "defaultMessage": "Delete Base Image",
+    "description": "Title for the confirmation modal to delete a Base Image"
+  },
+  "pages.BaseImage.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Base Image, please try again."
+  },
+  "pages.BaseImage.title": {
+    "defaultMessage": "Base Image"
+  },
   "pages.BaseImageCollection.baseImageCollectionNotFound.message": {
     "defaultMessage": "Return to the Base Image Collection list."
   },
   "pages.BaseImageCollection.baseImageCollectionNotFound.title": {
     "defaultMessage": "Base Image Collection not found."
+  },
+  "pages.BaseImageCollection.baseImagesLabel": {
+    "defaultMessage": "Base Images"
+  },
+  "pages.BaseImageCollection.createBaseImageButton": {
+    "defaultMessage": "Create Base Image"
   },
   "pages.BaseImageCollection.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Base Image Collection <bold>{baseImageCollection}</bold>.",
@@ -591,6 +680,18 @@
   },
   "pages.BaseImageCollections.title": {
     "defaultMessage": "Base Image Collections"
+  },
+  "pages.BaseImageCreate.baseImageCollectionNotFound.message": {
+    "defaultMessage": "Return to the Base Image Collection list."
+  },
+  "pages.BaseImageCreate.baseImageCollectionNotFound.title": {
+    "defaultMessage": "Base Image Collection not found."
+  },
+  "pages.BaseImageCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Base Image, please try again."
+  },
+  "pages.BaseImageCreate.title": {
+    "defaultMessage": "Create Base Image"
   },
   "pages.Device.BatteryStatusTab": {
     "defaultMessage": "Battery"
@@ -829,6 +930,15 @@
   },
   "validation.array.min": {
     "defaultMessage": "Does not have enough values."
+  },
+  "validation.baseImageFile.required": {
+    "defaultMessage": "Required."
+  },
+  "validation.baseImageStartingVersionRequirement.format": {
+    "defaultMessage": "The supported starting versions must be a valid version range"
+  },
+  "validation.baseImageVersion.format": {
+    "defaultMessage": "The version must follow the Semantic Versioning spec"
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"

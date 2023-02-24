@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import {
   Store,
   UploadableMap,
 } from "relay-runtime";
+import type { TaskScheduler } from "relay-runtime";
+import ReactDOM from "react-dom";
 
 import { AuthConfig, loadAuthConfig } from "contexts/Auth";
 
@@ -132,9 +134,20 @@ const fetchRelay: FetchFunction = async (
     : fetchGraphQL(operation.text, variables, authConfig);
 };
 
+// TODO: remove custom scheduler when Relay starts to use React's batched updates
+// learn more: https://github.com/facebook/relay/issues/3514#issuecomment-988303222
+const relayScheduler: TaskScheduler = {
+  cancel: () => {},
+  schedule: (task) => {
+    ReactDOM.unstable_batchedUpdates(task);
+    return "";
+  },
+};
+
 const relayEnvironment = new Environment({
   network: Network.create(fetchRelay),
   store: new Store(new RecordSource()),
+  scheduler: relayScheduler,
 });
 
 export { fetchGraphQL, relayEnvironment };
