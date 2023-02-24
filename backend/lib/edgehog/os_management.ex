@@ -196,24 +196,35 @@ defmodule Edgehog.OSManagement do
       ota_operation
       |> OTAOperation.update_changeset(attrs)
 
-    with {:ok, %OTAOperation{manual?: manual?, status: status} = ota_operation} <-
-           Repo.update(changeset) do
-      if manual? and status in [:error, :done] do
-        # Manual operation ended, we have to cleanup the image
-        %OTAOperation{
-          id: id,
-          tenant_id: tenant_id,
-          base_image_url: base_image_url
-        } = ota_operation
+    with {:ok, %OTAOperation{id: id, status: status} = ota_operation} <- Repo.update(changeset) do
+      Logger.info("OTA operation #{id} updated with status #{status}")
 
-        Logger.info("OTA operation #{id} finished with status #{status}, cleaning up")
-
-        # TODO: image cleanup is currently best effort
-        @ephemeral_image_module.delete(tenant_id, id, base_image_url)
+      if status in [:error, :done] do
+        cleanup_ephemeral_image(ota_operation)
       end
 
       {:ok, Repo.preload(ota_operation, :device)}
     end
+  end
+
+  # We only need to cleanup ephemeral images for manual OTA Operations
+  defp cleanup_ephemeral_image(%OTAOperation{manual?: true} = ota_operation) do
+    %OTAOperation{
+      id: id,
+      tenant_id: tenant_id,
+      base_image_url: base_image_url
+    } = ota_operation
+
+    Logger.info("Cleaning up Ephemeral Image for OTA operation #{id}")
+
+    # TODO: image cleanup is currently best effort
+    _ = @ephemeral_image_module.delete(tenant_id, id, base_image_url)
+
+    :ok
+  end
+
+  defp cleanup_ephemeral_image(_ota_operation) do
+    :ok
   end
 
   @doc """
@@ -229,7 +240,10 @@ defmodule Edgehog.OSManagement do
 
   """
   def delete_ota_operation(%OTAOperation{} = ota_operation) do
-    Repo.delete(ota_operation)
+    with {:ok, ota_operation} <- Repo.delete(ota_operation),
+         :ok <- cleanup_ephemeral_image(ota_operation) do
+      {:ok, Repo.preload(ota_operation, :device)}
+    end
   end
 
   @doc """
