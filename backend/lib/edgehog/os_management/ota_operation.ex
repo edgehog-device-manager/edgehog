@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
     field :status, Ecto.Enum, values: @statuses, default: :pending
     field :status_code, Ecto.Enum, values: @status_codes
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
-    field :manual?, :boolean, source: :is_manual
+    field :manual?, :boolean, source: :is_manual, default: false
     belongs_to :device, Devices.Device
 
     timestamps(type: :utc_datetime)
