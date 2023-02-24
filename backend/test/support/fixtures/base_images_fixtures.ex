@@ -77,6 +77,9 @@ defmodule Edgehog.BaseImagesFixtures do
         base_image_collection_fixture(system_model)
       end)
 
+    # Stube StorageMock since create_base_image will call it
+    Mox.stub_with(Edgehog.BaseImages.StorageMock, Edgehog.Mocks.BaseImages.Storage)
+
     attrs =
       Enum.into(attrs, %{
         version: unique_base_image_version(),
