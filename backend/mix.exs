@@ -102,6 +102,8 @@ defmodule Edgehog.MixProject do
       {:plug_heartbeat, "~> 1.0"},
       # TODO: point to upstream once all relevant PRs are merged
       {:i18n_helpers, github: "secomind/i18n_helpers"},
+      {:recon, "~> 2.5"},
+      {:observer_cli, "~> 1.7"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]
   end
