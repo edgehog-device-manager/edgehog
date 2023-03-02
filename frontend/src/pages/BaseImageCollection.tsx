@@ -134,7 +134,11 @@ const BaseImageCollectionContent = ({
         );
         setShowDeleteModal(false);
       },
-      updater(store) {
+      updater(store, data) {
+        if (!data.deleteBaseImageCollection) {
+          return;
+        }
+
         const baseImageCollection = store
           .getRootField("deleteBaseImageCollection")
           .getLinkedRecord("baseImageCollection");

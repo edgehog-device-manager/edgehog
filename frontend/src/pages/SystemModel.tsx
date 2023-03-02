@@ -215,8 +215,8 @@ const SystemModelContent = ({
             },
           },
         },
-        updater(store) {
-          if (!input.partNumbers) {
+        updater(store, data) {
+          if (!data.updateSystemModel || !input.partNumbers) {
             return;
           }
           const systemModelId = store
@@ -276,7 +276,11 @@ const SystemModelContent = ({
           />
         );
       },
-      updater(store) {
+      updater(store, data) {
+        if (!data.deleteSystemModel) {
+          return;
+        }
+
         const systemModel = store
           .getRootField("deleteSystemModel")
           .getLinkedRecord("systemModel");

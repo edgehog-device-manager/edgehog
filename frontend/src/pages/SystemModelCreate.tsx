@@ -147,7 +147,11 @@ const SystemModelContent = ({
             />
           );
         },
-        updater(store) {
+        updater(store, data) {
+          if (!data.createSystemModel) {
+            return;
+          }
+
           const systemModel = store
             .getRootField("createSystemModel")
             .getLinkedRecord("systemModel");

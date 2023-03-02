@@ -140,7 +140,11 @@ const DeviceGroupContent = ({
         );
         setShowDeleteModal(false);
       },
-      updater(store) {
+      updater(store, data) {
+        if (!data.deleteDeviceGroup) {
+          return;
+        }
+
         const deviceGroup = store
           .getRootField("deleteDeviceGroup")
           .getLinkedRecord("deviceGroup");
@@ -211,7 +215,11 @@ const DeviceGroupContent = ({
             />
           );
         },
-        updater(store) {
+        updater(store, data) {
+          if (!data.updateDeviceGroup) {
+            return;
+          }
+
           const root = store.getRoot();
           const devices = root.getLinkedRecords("devices");
           if (!devices) {

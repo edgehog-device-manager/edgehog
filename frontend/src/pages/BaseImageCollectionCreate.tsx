@@ -126,7 +126,11 @@ const BaseImageCollection = ({
             />
           );
         },
-        updater(store) {
+        updater(store, data) {
+          if (!data.createBaseImageCollection) {
+            return;
+          }
+
           const baseImageCollection = store
             .getRootField("createBaseImageCollection")
             .getLinkedRecord("baseImageCollection");
