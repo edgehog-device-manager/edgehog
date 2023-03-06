@@ -773,9 +773,9 @@ System Info trigger:
 
 Values to be replaced
 - `BACKEND-TRIGGER-URL`: the URL where the backend receives triggers. This is
-  `<BASE-BACKEND-URL>/tenants/<TENANT-NAME>/triggers`, where `BASE-BACKEND-URL` is the URL to your
-  Edgehog backend and `TENANT-NAME` is the name of the tenant you chose in the [previous
-  step](#creating-a-tenant).
+  `<BASE-BACKEND-URL>/tenants/<TENANT-SLUG>/triggers`, where `BASE-BACKEND-URL` is the URL to your
+  Edgehog backend and `TENANT-SLUG` is the slug of the tenant you chose in the [previous
+  step](#creating-the-tenant).
 
 ### Accessing Edgehog
 
