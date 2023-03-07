@@ -249,6 +249,38 @@ defmodule Edgehog.UpdateCampaignsTest do
     assert %Ecto.Changeset{} = UpdateCampaigns.change_update_channel(update_channel)
   end
 
+  test "get_update_channels_for_device_group_ids/1 returns the correct result" do
+    target_group_1 = device_group_fixture()
+    target_group_2 = device_group_fixture()
+    target_group_3 = device_group_fixture()
+    target_group_4 = device_group_fixture()
+
+    update_channel_1 = update_channel_fixture(target_group_ids: [target_group_1.id])
+
+    update_channel_2 =
+      update_channel_fixture(target_group_ids: [target_group_2.id, target_group_3.id])
+
+    target_group_ids = [
+      target_group_1.id,
+      target_group_2.id,
+      target_group_3.id,
+      target_group_4.id
+    ]
+
+    assert update_channels_map =
+             UpdateCampaigns.get_update_channels_for_device_group_ids(target_group_ids)
+
+    assert is_map(update_channels_map)
+    assert length(Map.keys(update_channels_map)) == length(target_group_ids)
+    assert %UpdateChannel{id: id} = Map.fetch!(update_channels_map, target_group_1.id)
+    assert id == update_channel_1.id
+    assert %UpdateChannel{id: id} = Map.fetch!(update_channels_map, target_group_2.id)
+    assert id == update_channel_2.id
+    assert %UpdateChannel{id: id} = Map.fetch!(update_channels_map, target_group_3.id)
+    assert id == update_channel_2.id
+    assert Map.fetch!(update_channels_map, target_group_4.id) == nil
+  end
+
   defp create_update_channel(opts) do
     {target_group_ids, opts} =
       Keyword.pop_lazy(opts, :target_group_ids, fn ->

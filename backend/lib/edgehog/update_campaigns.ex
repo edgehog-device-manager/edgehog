@@ -258,4 +258,26 @@ defmodule Edgehog.UpdateCampaigns do
   def change_update_channel(%UpdateChannel{} = update_channel, attrs \\ %{}) do
     UpdateChannel.changeset(update_channel, attrs)
   end
+
+  @doc """
+  Returns a `device_group_id -> update_channel` map for the passed DeviceGroup ids.
+
+  This allows retrieving the update channels for a list of device groups by doing one query
+
+  ## Examples
+
+  iex> get_update_channels_for_device_group_ids(device_ids)
+  %{1 => %UpdateChannel{}, 2 => nil, 3 => ...}
+  """
+  def get_update_channels_for_device_group_ids(device_group_ids) when is_list(device_group_ids) do
+    query =
+      from dg in "device_groups",
+        where: dg.id in ^device_group_ids,
+        left_join: uc in UpdateChannel,
+        on: dg.update_channel_id == uc.id,
+        select: {dg.id, uc}
+
+    Repo.all(query)
+    |> Map.new()
+  end
 end
