@@ -38,6 +38,11 @@ defmodule EdgehogWeb.Schema.GroupsTypes do
     field :devices, non_null(list_of(non_null(:device))) do
       resolve &Resolvers.Groups.devices_for_group/3
     end
+
+    @desc "The UpdateChannel associated with this group, if present."
+    field :update_channel, :update_channel do
+      resolve &Resolvers.UpdateCampaigns.batched_update_channel_for_device_group/3
+    end
   end
 
   object :groups_queries do

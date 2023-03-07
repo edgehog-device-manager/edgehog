@@ -21,6 +21,7 @@
 defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
   alias Edgehog.UpdateCampaigns
   alias Edgehog.UpdateCampaigns.UpdateChannel
+  import Absinthe.Resolution.Helpers, only: [batch: 3]
 
   def find_update_channel(args, _resolution) do
     UpdateCampaigns.fetch_update_channel(args.id)
@@ -54,5 +55,30 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
            UpdateCampaigns.delete_update_channel(update_channel) do
       {:ok, %{update_channel: update_channel}}
     end
+  end
+
+  @doc """
+  Resolve the update_channel for a device group, batching it for all device groups.
+
+  This allows retrieving the list for all device_groups by doing one a single query.
+  """
+  def batched_update_channel_for_device_group(device_group, _args, %{context: context}) do
+    # We have to pass the tenant_id to the batch function since it gets executed in a separate process
+    tenant_id = context.current_tenant.tenant_id
+
+    batch(
+      {__MODULE__, :update_channels_by_device_group_id, tenant_id},
+      device_group.id,
+      fn batch_results ->
+        {:ok, Map.get(batch_results, device_group.id)}
+      end
+    )
+  end
+
+  def update_channels_by_device_group_id(tenant_id, device_group_ids) do
+    # Use the correct tenant_id in the batching process
+    Edgehog.Repo.put_tenant_id(tenant_id)
+
+    UpdateCampaigns.get_update_channels_for_device_group_ids(device_group_ids)
   end
 end
