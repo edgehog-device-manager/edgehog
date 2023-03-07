@@ -27,25 +27,10 @@ defmodule EdgehogWeb.Resolvers.Devices do
   alias EdgehogWeb.Schema.VariantTypes
   alias I18nHelpers.Ecto.Translator
 
-  @device_fields_querying_astarte [
-    :capabilities,
-    :hardware_info,
-    :location,
-    :storage_usage,
-    :system_status,
-    :wifi_scan_results,
-    :battery_status,
-    :base_image,
-    :os_info,
-    :cellular_connection,
-    :runtime_info,
-    :network_interfaces
-  ]
-
-  def find_device(%{id: id}, resolution) do
+  def find_device(%{id: id}, _resolution) do
     device =
       Devices.get_device!(id)
-      |> maybe_preload_astarte_resources_for_device(resolution)
+      |> Devices.preload_astarte_resources_for_device()
 
     {:ok, device}
   end
@@ -68,50 +53,30 @@ defmodule EdgehogWeb.Resolvers.Devices do
     {:ok, part_numbers}
   end
 
-  def list_devices(_parent, %{filter: filter}, resolution) do
+  def list_devices(_parent, %{filter: filter}, _resolution) do
     devices =
       Devices.list_devices(filter)
-      |> maybe_preload_astarte_resources_for_device(resolution)
+      |> Devices.preload_astarte_resources_for_device()
 
     {:ok, devices}
   end
 
-  def list_devices(_parent, _args, resolution) do
+  def list_devices(_parent, _args, _resolution) do
     devices =
       Devices.list_devices()
-      |> maybe_preload_astarte_resources_for_device(resolution)
+      |> Devices.preload_astarte_resources_for_device()
 
     {:ok, devices}
   end
 
-  def update_device(%{device_id: id} = attrs, resolution) do
+  def update_device(%{device_id: id} = attrs, _resolution) do
     device = Devices.get_device!(id)
     attrs = maybe_wrap_typed_values(attrs)
 
     with {:ok, device} <- Devices.update_device(device, attrs) do
-      device = maybe_preload_astarte_resources_for_device(device, resolution)
+      device = Devices.preload_astarte_resources_for_device(device)
 
       {:ok, %{device: device}}
-    end
-  end
-
-  defp maybe_preload_astarte_resources_for_device(device, resolution) do
-    # We project the resolution, i.e. we obtain all requested child fields
-    selections = Absinthe.Resolution.project(resolution)
-
-    # We have to create the MapSet at runtime, otherwise Dialyzer complains about missing opaqueness
-    astarte_fields = MapSet.new(@device_fields_querying_astarte)
-
-    # We preload Astarte resources only if we need one of the fields that require querying Astarte
-    should_preload? =
-      selections
-      |> Enum.any?(&MapSet.member?(astarte_fields, &1.schema_node.identifier))
-
-    if should_preload? do
-      device
-      |> Devices.preload_astarte_resources_for_device()
-    else
-      device
     end
   end
 
