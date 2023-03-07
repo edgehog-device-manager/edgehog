@@ -49,14 +49,14 @@ defmodule EdgehogWeb.Schema do
 
   node interface do
     resolve_type fn
-      %Edgehog.Astarte.Device{}, _ ->
-        :device
-
       %Edgehog.BaseImages.BaseImage{}, _ ->
         :base_image
 
       %Edgehog.BaseImages.BaseImageCollection{}, _ ->
         :base_image_collection
+
+      %Edgehog.Devices.Device{}, _ ->
+        :device
 
       %Edgehog.Devices.HardwareType{}, _ ->
         :hardware_type
