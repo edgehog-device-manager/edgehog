@@ -123,5 +123,21 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
 
       resolve &Resolvers.UpdateCampaigns.update_update_channel/2
     end
+
+    @desc "Deletes an update channel."
+    payload field :delete_update_channel do
+      input do
+        @desc "The ID of the update channel to be deleted."
+        field :update_channel_id, non_null(:id)
+      end
+
+      output do
+        @desc "The deleted update channel."
+        field :update_channel, non_null(:update_channel)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, update_channel_id: :update_channel
+      resolve &Resolvers.UpdateCampaigns.delete_update_channel/2
+    end
   end
 end
