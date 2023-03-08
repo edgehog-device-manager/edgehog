@@ -24,6 +24,7 @@ import React, {
   useEffect,
   useState,
   useMemo,
+  useRef,
 } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
@@ -34,7 +35,10 @@ import {
   useQueryLoader,
   PreloadedQuery,
   useMutation,
+  fetchQuery,
+  useRelayEnvironment,
 } from "react-relay/hooks";
+import type { Subscription } from "relay-runtime";
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import _ from "lodash";
@@ -51,6 +55,7 @@ import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiSc
 import type { Device_networkInterfaces$key } from "api/__generated__/Device_networkInterfaces.graphql";
 import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
 import type { Device_cellularConnection$key } from "api/__generated__/Device_cellularConnection.graphql";
+import type { Device_connectionStatus$key } from "api/__generated__/Device_connectionStatus.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
@@ -210,13 +215,19 @@ const DEVICE_NETWORK_INTERFACES__FRAGMENT = graphql`
   }
 `;
 
+const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
+  fragment Device_connectionStatus on Device {
+    online
+    lastConnection
+    lastDisconnection
+  }
+`;
+
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!) {
     device(id: $id) {
       id
       deviceId
-      lastConnection
-      lastDisconnection
       name
       online
       capabilities
@@ -244,6 +255,19 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_otaOperations
       ...Device_cellularConnection
       ...Device_networkInterfaces
+      ...Device_connectionStatus
+    }
+  }
+`;
+
+const GET_DEVICE_OTA_OPERATIONS_QUERY = graphql`
+  query Device_getDeviceOtaOperations_Query($id: ID!) {
+    device(id: $id) {
+      id
+      online
+      lastConnection
+      lastDisconnection
+      ...Device_otaOperations
     }
   }
 `;
@@ -955,17 +979,18 @@ type SoftwareUpdateTabProps = {
 };
 
 const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const intl = useIntl();
+  const relayEnvironment = useRelayEnvironment();
+
   const device = useFragment(DEVICE_OTA_OPERATIONS_FRAGMENT, deviceRef);
+  const deviceId = device.id;
+
   const [createOtaOperation, isCreatingOtaOperation] =
     useMutation<Device_createManualOtaOperation_Mutation>(
       DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION
     );
-
-  if (!device.capabilities.includes("SOFTWARE_UPDATES")) {
-    return null;
-  }
 
   const currentOperations = device.otaOperations
     .filter(
@@ -977,11 +1002,58 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
   // For now devices only support 1 update operation at a time
   const currentOperation = currentOperations?.[0] || null;
 
+  // TODO: use GraphQL subscription (when available) to get updates about OTA operation
+  const subscriptionRef = useRef<Subscription | null>(null);
+  useEffect(() => {
+    return () => {
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!currentOperation || isRefreshing) {
+      return;
+    }
+    const refreshTimerId = setTimeout(() => {
+      setIsRefreshing(true);
+      subscriptionRef.current = fetchQuery(
+        relayEnvironment,
+        GET_DEVICE_OTA_OPERATIONS_QUERY,
+        {
+          id: deviceId,
+        }
+      ).subscribe({
+        complete: () => {
+          setIsRefreshing(false);
+        },
+        error: () => {
+          setIsRefreshing(false);
+        },
+      });
+    }, 10000);
+
+    return () => {
+      clearTimeout(refreshTimerId);
+    };
+  }, [
+    currentOperation,
+    isRefreshing,
+    setIsRefreshing,
+    relayEnvironment,
+    deviceId,
+  ]);
+
+  if (!device.capabilities.includes("SOFTWARE_UPDATES")) {
+    return null;
+  }
+
   const launchManualOTAUpdate = (file: File) => {
     createOtaOperation({
       variables: {
         input: {
-          deviceId: device.id,
+          deviceId,
           baseImageFile: file,
         },
       },
@@ -1005,7 +1077,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
         const otaOperationId = data.createManualOtaOperation?.otaOperation?.id;
         if (otaOperationId) {
           const otaOperation = store.get(otaOperationId);
-          const storedDevice = store.get(device.id);
+          const storedDevice = store.get(deviceId);
           const otaOperations = storedDevice?.getLinkedRecords("otaOperations");
           if (storedDevice && otaOperation && otaOperations) {
             storedDevice.setLinkedRecords(
@@ -1059,6 +1131,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
                 baseImageName: currentOperation.baseImageUrl.split("/").pop(),
               }}
             />
+            {isRefreshing && <Spinner size="sm" className="ms-2" />}
           </div>
         ) : (
           <BaseImageForm
@@ -1134,6 +1207,50 @@ const DeviceNetworkInterfacesTab = ({
         <NetworkInterfacesTable deviceRef={device} />
       </div>
     </Tab>
+  );
+};
+
+interface DeviceConnectionFormRowsProps {
+  deviceRef: Device_connectionStatus$key;
+}
+const DeviceConnectionFormRows = ({
+  deviceRef,
+}: DeviceConnectionFormRowsProps) => {
+  const { online, lastConnection, lastDisconnection } = useFragment(
+    DEVICE_CONNECTION_STATUS_FRAGMENT,
+    deviceRef
+  );
+
+  return (
+    <>
+      <FormRow
+        id="form-device-connection-status"
+        label={
+          <FormattedMessage
+            id="Device.connectionStatus"
+            defaultMessage="Connection"
+          />
+        }
+      >
+        <FormValue>
+          <ConnectionStatus connected={online} />
+        </FormValue>
+      </FormRow>
+      <FormRow
+        id="form-device-last-seen"
+        label={
+          <FormattedMessage id="Device.lastSeen" defaultMessage="Last seen" />
+        }
+      >
+        <FormValue>
+          <LastSeen
+            lastConnection={lastConnection}
+            lastDisconnection={lastDisconnection}
+            online={online}
+          />
+        </FormValue>
+      </FormRow>
+    </>
   );
 };
 
@@ -1444,36 +1561,7 @@ const DeviceContent = ({
                       ))}
                     </Stack>
                   </FormRow>
-                  <FormRow
-                    id="form-device-connection-status"
-                    label={
-                      <FormattedMessage
-                        id="Device.connectionStatus"
-                        defaultMessage="Connection"
-                      />
-                    }
-                  >
-                    <FormValue>
-                      <ConnectionStatus connected={device.online} />
-                    </FormValue>
-                  </FormRow>
-                  <FormRow
-                    id="form-device-last-seen"
-                    label={
-                      <FormattedMessage
-                        id="Device.lastSeen"
-                        defaultMessage="Last seen"
-                      />
-                    }
-                  >
-                    <FormValue>
-                      <LastSeen
-                        lastConnection={device.lastConnection}
-                        lastDisconnection={device.lastDisconnection}
-                        online={device.online}
-                      />
-                    </FormValue>
-                  </FormRow>
+                  <DeviceConnectionFormRows deviceRef={device} />
                   {device.capabilities.includes("LED_BEHAVIORS") && (
                     <FormRow
                       id="form-device-check-my-device"
