@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,7 +61,10 @@ defmodule Edgehog.Error do
 
   defp handle(%Ecto.Changeset{} = changeset) do
     changeset
-    |> Ecto.Changeset.traverse_errors(fn
+    |> PolymorphicEmbed.traverse_errors(fn
+      # We use PolymorphicEmbed.traverse_errors/1 instead of Ecto.Changeset.traverse_errors/1
+      # since this also correctly traverses polymorphic embeds errors
+
       {message, opts} when is_binary(message) ->
         Regex.replace(~r"%{(\w+)}", message, fn _, key ->
           opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()

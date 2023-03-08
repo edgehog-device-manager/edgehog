@@ -100,6 +100,7 @@ defmodule Edgehog.MixProject do
       {:pretty_log, "~> 0.1"},
       {:prom_ex, "~> 1.7.1"},
       {:plug_heartbeat, "~> 1.0"},
+      {:polymorphic_embed, "~> 3.0"},
       # TODO: point to upstream once all relevant PRs are merged
       {:i18n_helpers, github: "secomind/i18n_helpers"},
       {:recon, "~> 2.5"},
