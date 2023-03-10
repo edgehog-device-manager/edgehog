@@ -86,7 +86,11 @@ const DeviceGroupCreatePage = () => {
             />
           );
         },
-        updater(store) {
+        updater(store, data) {
+          if (!data.createDeviceGroup) {
+            return;
+          }
+
           const deviceGroup = store
             .getRootField("createDeviceGroup")
             .getLinkedRecord("deviceGroup");

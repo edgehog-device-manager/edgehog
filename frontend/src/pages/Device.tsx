@@ -1338,7 +1338,11 @@ const DeviceContent = ({
                 />
               );
             },
-            updater(store) {
+            updater(store, data) {
+              if (!data.updateDevice) {
+                return;
+              }
+
               const root = store.getRoot();
               const deviceGroups = root.getLinkedRecords("deviceGroups");
               if (!deviceGroups) {
