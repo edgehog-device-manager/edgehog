@@ -22,21 +22,39 @@ defmodule Edgehog.Repo.Migrations.CreateUpdateCampaigns do
   use Ecto.Migration
 
   def change do
+    create unique_index(:base_images, [:id, :tenant_id])
+
     create table(:update_campaigns) do
-      add :name, :string
-      add :rollout_mechanism, :map
-      add :tenant_id, references(:tenants, on_delete: :nothing)
-      add :base_image_id, references(:base_images, on_delete: :nothing)
-      add :update_channel_id, references(:update_channel, on_delete: :nothing)
-      add :status, :string
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :update_channel_id,
+          references(:update_channels,
+            with: [tenant_id: :tenant_id],
+            match: :full,
+            on_delete: :nothing
+          ),
+          null: false
+
+      add :base_image_id,
+          references(:base_images,
+            with: [tenant_id: :tenant_id],
+            match: :full,
+            on_delete: :nothing
+          ),
+          null: false
+
+      add :name, :string, null: false
+      add :status, :string, null: false
       add :outcome, :string
+      add :rollout_mechanism, :map, null: false
 
       timestamps()
     end
 
-    create unique_index(:update_campaigns, [:name])
+    create unique_index(:update_campaigns, [:id, :tenant_id])
     create index(:update_campaigns, [:tenant_id])
-    create index(:update_campaigns, [:base_image_id])
-    create index(:update_campaigns, [:update_channel_id])
+    create index(:update_campaigns, [:base_image_id, :tenant_id])
+    create index(:update_campaigns, [:update_channel_id, :tenant_id])
   end
 end

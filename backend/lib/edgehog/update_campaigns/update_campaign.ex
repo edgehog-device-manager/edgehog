@@ -21,15 +21,24 @@
 defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   use Ecto.Schema
   import Ecto.Changeset
+  import PolymorphicEmbed
+
+  alias Edgehog.BaseImages
+  alias Edgehog.UpdateCampaigns.PushRollout
+  alias Edgehog.UpdateCampaigns.UpdateChannel
 
   schema "update_campaigns" do
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :name, :string
-    field :rollout_mechanism, :map
-    field :tenant_id, :id
-    field :base_image_id, :id
-    field :update_channel_id, :id
     field :status, Ecto.Enum, values: [:in_progress, :finished]
     field :outcome, Ecto.Enum, values: [:success, :failure]
+    belongs_to :base_image, BaseImages.BaseImage
+    belongs_to :update_channel, UpdateChannel
+
+    polymorphic_embeds_one :rollout_mechanism,
+      types: [push: PushRollout],
+      type_field: :type,
+      on_replace: :update
 
     timestamps()
   end
@@ -37,7 +46,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   @doc false
   def changeset(update_campaign, attrs) do
     update_campaign
-    |> cast(attrs, [:name, :rollout_mechanism])
-    |> validate_required([:name, :rollout_mechanism])
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+    |> cast_polymorphic_embed(:rollout_mechanism, required: true)
   end
 end
