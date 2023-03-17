@@ -21,11 +21,14 @@
 defmodule Edgehog.UpdateCampaignsTest do
   use Edgehog.DataCase
 
+  import Edgehog.BaseImagesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
   alias Edgehog.Groups
   alias Edgehog.UpdateCampaigns
+  alias Edgehog.UpdateCampaigns.PushRollout
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
   test "list_update_channels/0 returns all update_channels" do
@@ -279,6 +282,66 @@ defmodule Edgehog.UpdateCampaignsTest do
     assert %UpdateChannel{id: id} = Map.fetch!(update_channels_map, target_group_3.id)
     assert id == update_channel_2.id
     assert Map.fetch!(update_channels_map, target_group_4.id) == nil
+  end
+
+  test "list_update_campaigns/0 returns all update campaigns" do
+    update_campaign = update_campaign_fixture()
+    assert UpdateCampaigns.list_update_campaigns() == [update_campaign]
+  end
+
+  describe "fetch_update_campaign/1" do
+    test "returns the update_campaign with given id" do
+      update_campaign = update_campaign_fixture()
+      assert UpdateCampaigns.fetch_update_campaign(update_campaign.id) == {:ok, update_campaign}
+    end
+
+    test "returns {:error, :not_found} for non-existing id" do
+      assert UpdateCampaigns.fetch_update_campaign(1_234_567) == {:error, :not_found}
+    end
+  end
+
+  describe "create_update_campaign/3" do
+    test "with valid data creates an update_campaign" do
+      update_channel = update_channel_fixture()
+      base_image = base_image_fixture()
+
+      attrs = %{
+        name: "My Campaign",
+        rollout_mechanism: %{
+          type: "push",
+          max_errors_percentage: 10.0,
+          max_in_progress_updates: 10,
+          ota_request_retries: 5,
+          ota_request_timeout_seconds: 30
+        }
+      }
+
+      assert {:ok, %UpdateCampaign{} = update_campaign} =
+               UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
+
+      assert %PushRollout{
+               max_errors_percentage: 10.0,
+               max_in_progress_updates: 10,
+               ota_request_retries: 5,
+               ota_request_timeout_seconds: 30
+             } = update_campaign.rollout_mechanism
+    end
+
+    test "fails with invalid rollout mechanism" do
+      update_channel = update_channel_fixture()
+      base_image = base_image_fixture()
+
+      attrs = %{
+        rollout_mechanism: %{
+          type: "invalid"
+        }
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
+
+      assert "is invalid" in errors_on(changeset).rollout_mechanism
+    end
   end
 
   defp create_update_channel(opts) do

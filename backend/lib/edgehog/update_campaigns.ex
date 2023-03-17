@@ -27,6 +27,8 @@ defmodule Edgehog.UpdateCampaigns do
   alias Edgehog.Repo
 
   alias Ecto.Multi
+  alias Edgehog.BaseImages
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
   @doc """
@@ -279,5 +281,79 @@ defmodule Edgehog.UpdateCampaigns do
 
     Repo.all(query)
     |> Map.new()
+  end
+
+  @doc """
+  Preloads the default associations for an UpdateCampaign or a list of UpdateCampaigns
+  """
+  def preload_defaults_for_update_campaign(campaign_or_campaigns, opts \\ []) do
+    Repo.preload(campaign_or_campaigns, [base_image: [], update_channel: [:target_groups]], opts)
+  end
+
+  @doc """
+  Returns the list of update campaigns.
+
+  ## Examples
+
+      iex> list_update_campaigns()
+      [%UpdateCampaign{}, ...]
+
+  """
+  def list_update_campaigns do
+    Repo.all(UpdateCampaign)
+    |> preload_defaults_for_update_campaign()
+  end
+
+  @doc """
+  Fetches a single update campaign.
+
+  Returns `{:error, :not_found}` if the Update campaign does not exist.
+
+  ## Examples
+
+  iex> fetch_update_campaign(123)
+  {:ok, %UpdateCampaign{}}
+
+  iex> fetch_update_campaign(456)
+  {:error, :not_found}
+
+  """
+  def fetch_update_campaign(id) do
+    case Repo.get(UpdateCampaign, id) do
+      nil ->
+        {:error, :not_found}
+
+      %UpdateCampaign{} = update_campaign ->
+        {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    end
+  end
+
+  @doc """
+  Creates an update campaign.
+
+  ## Examples
+
+      iex> create_update_campaign(update_channel, base_image, %{field: value})
+      {:ok, %UpdateCampaign{}}
+
+      iex> create_update_campaign(update_channel, base_image, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_update_campaign(update_channel, base_image, attrs) do
+    %UpdateChannel{id: update_channel_id} = update_channel
+    %BaseImages.BaseImage{id: base_image_id} = base_image
+
+    changeset =
+      %UpdateCampaign{
+        update_channel_id: update_channel_id,
+        base_image_id: base_image_id,
+        status: :in_progress
+      }
+      |> UpdateCampaign.changeset(attrs)
+
+    with {:ok, update_campaign} <- Repo.insert(changeset) do
+      {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    end
   end
 end

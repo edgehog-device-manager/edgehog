@@ -35,6 +35,11 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   def unique_update_channel_name, do: "some name#{System.unique_integer([:positive])}"
 
   @doc """
+  Generate a unique update_campaign name.
+  """
+  def unique_update_campaign_name, do: "some name#{System.unique_integer([:positive])}"
+
+  @doc """
   Generate a update_channel.
   """
   def update_channel_fixture(attrs \\ []) do
@@ -54,5 +59,27 @@ defmodule Edgehog.UpdateCampaignsFixtures do
       |> Edgehog.UpdateCampaigns.create_update_channel()
 
     update_channel
+  end
+
+  def update_campaign_fixture(attrs \\ []) do
+    {update_channel, attrs} = Keyword.pop_lazy(attrs, :update_channel, &update_channel_fixture/0)
+
+    {base_image, attrs} =
+      Keyword.pop_lazy(attrs, :base_image, &Edgehog.BaseImagesFixtures.base_image_fixture/0)
+
+    attrs =
+      Enum.into(attrs, %{
+        name: unique_update_campaign_name(),
+        rollout_mechanism: %{
+          type: "push",
+          max_errors_percentage: 10.0,
+          max_in_progress_updates: 10
+        }
+      })
+
+    {:ok, update_campaign} =
+      Edgehog.UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
+
+    update_campaign
   end
 end
