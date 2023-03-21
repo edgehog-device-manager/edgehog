@@ -22,11 +22,14 @@ defmodule Edgehog.UpdateCampaigns.Target do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Edgehog.Devices
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
+
   schema "update_campaign_targets" do
+    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :status, Ecto.Enum, values: [:idle, :pending, :failed, :successful]
-    field :tenant_id, :id
-    field :update_campaign_id, :id
-    field :device_id, :id
+    belongs_to :update_campaign, UpdateCampaign
+    belongs_to :device, Devices.Device
 
     timestamps()
   end

@@ -23,16 +23,34 @@ defmodule Edgehog.Repo.Migrations.CreateUpdateCampaignTargets do
 
   def change do
     create table(:update_campaign_targets) do
-      add :status, :string
-      add :tenant_id, references(:tenants, on_delete: :nothing)
-      add :update_campaign_id, references(:update_campaigns, on_delete: :nothing)
-      add :device_id, references(:devices, on_delete: :nothing)
+      add :tenant_id, references(:tenants, column: :tenant_id, on_delete: :delete_all),
+        null: false
+
+      add :status, :string, null: false
+
+      add :update_campaign_id,
+          references(:update_campaigns,
+            with: [tenant_id: :tenant_id],
+            match: :full,
+            on_delete: :delete_all
+          ),
+          null: false
+
+      add :device_id,
+          references(:devices,
+            with: [tenant_id: :tenant_id],
+            match: :full,
+            on_delete: :nothing
+          ),
+          null: false
 
       timestamps()
     end
 
     create index(:update_campaign_targets, [:tenant_id])
-    create index(:update_campaign_targets, [:update_campaign_id])
     create index(:update_campaign_targets, [:device_id])
+    create index(:update_campaign_targets, [:update_campaign_id])
+    create unique_index(:update_campaign_targets, [:update_campaign_id, :device_id, :tenant_id])
+    create unique_index(:update_campaign_targets, [:id, :tenant_id])
   end
 end

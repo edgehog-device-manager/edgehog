@@ -26,6 +26,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   alias Edgehog.BaseImages
   alias Edgehog.UpdateCampaigns.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateChannel
+  alias Edgehog.UpdateCampaigns.Target
 
   schema "update_campaigns" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
@@ -39,6 +40,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
       types: [push: PushRollout],
       type_field: :type,
       on_replace: :update
+
+    has_many :update_targets, Target
 
     timestamps()
   end
