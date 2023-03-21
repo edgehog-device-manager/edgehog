@@ -24,6 +24,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
+  import Edgehog.UpdateCampaignsFixtures
 
   alias Edgehog.Devices
   alias Edgehog.Groups.DeviceGroup
@@ -103,6 +104,41 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
                Absinthe.Relay.Node.from_global_id(device["id"], EdgehogWeb.Schema)
 
       assert d_id == to_string(device_foo.id)
+    end
+
+    @update_channel_query """
+    query ($id: ID!) {
+      deviceGroup(id: $id) {
+        updateChannel {
+          id
+          handle
+          name
+        }
+      }
+    }
+    """
+    test "allows querying updateChannel if present", %{conn: conn, api_path: api_path} do
+      %DeviceGroup{id: dg_id} = device_group_fixture()
+      update_channel = update_channel_fixture(target_group_ids: [dg_id])
+
+      variables = %{id: Absinthe.Relay.Node.to_global_id(:device_group, dg_id, EdgehogWeb.Schema)}
+      conn = get(conn, api_path, query: @update_channel_query, variables: variables)
+
+      assert %{
+               "data" => %{
+                 "deviceGroup" => device_group
+               }
+             } = json_response(conn, 200)
+
+      assert device_group["updateChannel"]["id"] ==
+               Absinthe.Relay.Node.to_global_id(
+                 :update_channel,
+                 update_channel.id,
+                 EdgehogWeb.Schema
+               )
+
+      assert device_group["updateChannel"]["handle"] == update_channel.handle
+      assert device_group["updateChannel"]["name"] == update_channel.name
     end
   end
 end

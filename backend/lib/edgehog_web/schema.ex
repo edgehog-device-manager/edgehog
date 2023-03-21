@@ -31,6 +31,7 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
   import_types EdgehogWeb.Schema.TenantsTypes
+  import_types EdgehogWeb.Schema.UpdateCampaignsTypes
   import_types EdgehogWeb.Schema.VariantTypes
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
@@ -106,6 +107,7 @@ defmodule EdgehogWeb.Schema do
     import_fields :groups_queries
     import_fields :labeling_queries
     import_fields :tenants_queries
+    import_fields :update_campaigns_queries
   end
 
   mutation do
@@ -114,5 +116,6 @@ defmodule EdgehogWeb.Schema do
     import_fields :devices_mutations
     import_fields :groups_mutations
     import_fields :os_management_mutations
+    import_fields :update_campaigns_mutations
   end
 end

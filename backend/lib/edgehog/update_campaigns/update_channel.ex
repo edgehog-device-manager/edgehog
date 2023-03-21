@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,44 +18,41 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Groups.DeviceGroup do
+defmodule Edgehog.UpdateCampaigns.UpdateChannel do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Edgehog.Selector
+  alias Edgehog.Groups
 
-  schema "device_groups" do
+  schema "update_channels" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :handle, :string
     field :name, :string
-    field :selector, :string
-    field :update_channel_id, :id
+    has_many :target_groups, Groups.DeviceGroup
+
+    field :target_group_ids, {:array, :id}, virtual: true
 
     timestamps()
   end
 
   @doc false
-  def changeset(device_group, attrs) do
-    device_group
-    |> cast(attrs, [:name, :handle, :selector])
-    |> validate_required([:name, :handle, :selector])
+  def create_changeset(update_channel, attrs) do
+    update_channel
+    |> changeset(attrs)
+    |> validate_required([:target_group_ids])
+  end
+
+  @doc false
+  def changeset(update_channel, attrs) do
+    update_channel
+    |> cast(attrs, [:name, :handle, :target_group_ids])
+    |> validate_required([:name, :handle])
+    |> validate_length(:target_group_ids, min: 1)
+    |> unique_constraint([:handle, :tenant_id])
+    |> unique_constraint([:name, :tenant_id])
     |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
       message:
         "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
     )
-    |> validate_change(:selector, &validate_selector/2)
-    |> unique_constraint([:name, :tenant_id])
-    |> unique_constraint([:handle, :tenant_id])
-  end
-
-  defp validate_selector(field, selector) do
-    case Selector.to_ecto_query(selector) do
-      {:ok, _ecto_query} ->
-        []
-
-      {:error, %Selector.Parser.Error{message: message}} ->
-        msg = "failed to be parsed with error: " <> message
-        [{field, msg}]
-    end
   end
 end
