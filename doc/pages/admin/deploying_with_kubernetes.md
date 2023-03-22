@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -288,7 +288,7 @@ spec:
         #  valueFrom:
         #    secretKeyRef:
         #      key: api-key
-        #      name: edgehog-ipbase-credential
+        #      name: edgehog-ipbase-credentials
 
         # Uncomment this env if you have installed an optional Google Geolocation API Key in the
         # secrets
