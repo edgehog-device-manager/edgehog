@@ -25,6 +25,11 @@ defmodule Edgehog.UpdateCampaignsTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
+  alias Edgehog.Astarte
+  alias Edgehog.AstarteFixtures
+  alias Edgehog.BaseImages
+  alias Edgehog.DevicesFixtures
+  alias Edgehog.Devices
   alias Edgehog.Groups
   alias Edgehog.UpdateCampaigns
   alias Edgehog.UpdateCampaigns.PushRollout
@@ -344,6 +349,84 @@ defmodule Edgehog.UpdateCampaignsTest do
     end
   end
 
+  describe "list_updatable_devices" do
+    test "returns empty list without devices" do
+      update_channel = update_channel_fixture()
+      base_image = base_image_fixture()
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == []
+    end
+
+    test "returns only devices matching the system model of the base_image" do
+      base_image = base_image_fixture()
+
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
+
+      device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foobar"])
+
+      _other_device =
+        device_fixture()
+        |> add_tags(["foobar"])
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == [device]
+    end
+
+    test "returns only devices belonging to the UpdateChannel with the base_image" do
+      base_image = base_image_fixture()
+
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
+
+      device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foobar"])
+
+      _other_device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["not-foobar"])
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == [device]
+    end
+
+    test "returns the union of all target groups of the UpdateChannel" do
+      base_image = base_image_fixture()
+
+      foo_group = device_group_fixture(selector: ~s<"foo" in tags>)
+      bar_group = device_group_fixture(selector: ~s<"bar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [foo_group.id, bar_group.id])
+
+      foo_device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foo"])
+
+      bar_device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["bar"])
+
+      updatable_devices = UpdateCampaigns.list_updatable_devices(update_channel, base_image)
+      assert length(updatable_devices) == 2
+      assert foo_device in updatable_devices
+      assert bar_device in updatable_devices
+    end
+
+    test "deduplicates devices belonging to multiple groups" do
+      base_image = base_image_fixture()
+
+      foo_group = device_group_fixture(selector: ~s<"foo" in tags>)
+      bar_group = device_group_fixture(selector: ~s<"bar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [foo_group.id, bar_group.id])
+
+      device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foo", "bar"])
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == [device]
+    end
+  end
+
   defp create_update_channel(opts) do
     {target_group_ids, opts} =
       Keyword.pop_lazy(opts, :target_group_ids, fn ->
@@ -364,5 +447,39 @@ defmodule Edgehog.UpdateCampaignsTest do
     attrs = Enum.into(opts, %{})
 
     Edgehog.UpdateCampaigns.update_update_channel(update_channel, attrs)
+  end
+
+  defp device_fixture_compatible_with(%BaseImages.BaseImage{} = base_image) do
+    [%{part_number: part_number} | _] = base_image.base_image_collection.system_model.part_numbers
+
+    {:ok, device} =
+      astarte_device_fixture()
+      |> Astarte.update_device(%{part_number: part_number})
+
+    # Retrieve the updated device from the Devices context
+    Devices.get_device!(device.id)
+  end
+
+  defp add_tags(%Devices.Device{} = device, tags) do
+    {:ok, device} = Devices.update_device(device, %{tags: tags})
+    device
+  end
+
+  defp device_fixture do
+    # Helper to avoid having to manually create the cluster and realm
+    # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
+
+    AstarteFixtures.cluster_fixture()
+    |> AstarteFixtures.realm_fixture()
+    |> DevicesFixtures.device_fixture()
+  end
+
+  defp astarte_device_fixture do
+    # Helper to avoid having to manually create the cluster and realm
+    # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
+
+    AstarteFixtures.cluster_fixture()
+    |> AstarteFixtures.realm_fixture()
+    |> AstarteFixtures.astarte_device_fixture()
   end
 end

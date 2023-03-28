@@ -28,6 +28,7 @@ defmodule Edgehog.UpdateCampaigns do
 
   alias Ecto.Multi
   alias Edgehog.BaseImages
+  alias Edgehog.Devices
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
@@ -259,6 +260,37 @@ defmodule Edgehog.UpdateCampaigns do
   """
   def change_update_channel(%UpdateChannel{} = update_channel, attrs \\ %{}) do
     UpdateChannel.changeset(update_channel, attrs)
+  end
+
+  @doc """
+  Lists all devices belonging to an Update Channel that can be updated with a specific Base Image.
+
+  Note that this only checks the compatibility between the Device and the System Model targeted
+  by the Base Image, the starting version requirement will be checked just before the update and
+  will potentially result in a failed operation.
+
+  ## Examples
+
+  iex> list_updatable_devices(update_channel, base_image)
+  [%Devices.Device{}, ...]
+
+  """
+  def list_updatable_devices(update_channel, base_image) do
+    system_model_id = base_image.base_image_collection.system_model_id
+
+    update_channel.target_groups
+    |> Enum.map(fn target_group ->
+      # This gets validated when the DeviceGroup is created, if it fails here then there's a bug
+      # and it's legitimate we crash
+      {:ok, group_devices_query} = Edgehog.Selector.to_ecto_query(target_group.selector)
+
+      from d in group_devices_query,
+        join: sm in assoc(d, :system_model),
+        where: sm.id == ^system_model_id
+    end)
+    |> Enum.reduce(fn query, acc -> union(acc, ^query) end)
+    |> Repo.all()
+    |> Devices.preload_defaults_for_device()
   end
 
   @doc """
