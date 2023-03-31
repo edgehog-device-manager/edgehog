@@ -9,7 +9,7 @@
 ## Edgehog Device ESP32 SDK
 Edgehog Device ESP32 is an [ESP-IDF component](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/index.html)
 written in C, that enables remote device management using Edgehog.
-* [edgehog-esp32-device](https://github.com/edgehog-device-manager/edgehog-esp32-device2)
+* [edgehog-esp32-device](https://github.com/edgehog-device-manager/edgehog-esp32-device)
 * [documentation](device-sdks/esp32/index.html)
 
 ## Edgehog Device Runtime
