@@ -23,12 +23,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
   import Ecto.Changeset
   alias Edgehog.UpdateCampaigns.PushRollout
 
+  @primary_key false
   embedded_schema do
-    field :force_downgrade, :boolean
+    field :force_downgrade, :boolean, default: false
     field :max_errors_percentage, :float
     field :max_in_progress_updates, :integer
-    field :ota_request_retries, :integer
-    field :ota_request_timeout_seconds, :integer
+    field :ota_request_retries, :integer, default: 0
+    field :ota_request_timeout_seconds, :integer, default: 60
   end
 
   @doc false
@@ -42,11 +43,15 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
       :ota_request_timeout_seconds
     ])
     |> validate_required([
-      :force_downgrade,
       :max_errors_percentage,
-      :max_in_progress_updates,
-      :ota_request_retries,
-      :ota_request_timeout_seconds
+      :max_in_progress_updates
     ])
+    |> validate_number(:max_errors_percentage,
+      greater_than_or_equal_to: 0,
+      less_than_or_equal_to: 100
+    )
+    |> validate_number(:max_in_progress_updates, greater_than: 0)
+    |> validate_number(:ota_request_retries, greater_than_or_equal_to: 0)
+    |> validate_number(:ota_request_timeout_seconds, greater_than_or_equal_to: 30)
   end
 end
