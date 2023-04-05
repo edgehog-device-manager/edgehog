@@ -29,6 +29,7 @@ defmodule Edgehog.UpdateCampaigns do
   alias Ecto.Multi
   alias Edgehog.BaseImages
   alias Edgehog.Devices
+  alias Edgehog.UpdateCampaigns.Target
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
@@ -377,16 +378,72 @@ defmodule Edgehog.UpdateCampaigns do
     %UpdateChannel{id: update_channel_id} = update_channel
     %BaseImages.BaseImage{id: base_image_id} = base_image
 
+    updatable_devices = list_updatable_devices(update_channel, base_image)
+
     changeset =
       %UpdateCampaign{
         update_channel_id: update_channel_id,
-        base_image_id: base_image_id,
-        status: :in_progress
+        base_image_id: base_image_id
       }
       |> UpdateCampaign.changeset(attrs)
 
+    if updatable_devices == [] do
+      create_empty_update_campaign(changeset)
+    else
+      create_update_campaign_with_targets(changeset, updatable_devices)
+    end
+  end
+
+  defp create_empty_update_campaign(changeset) do
+    changeset =
+      changeset
+      |> Ecto.Changeset.put_change(:status, :finished)
+      |> Ecto.Changeset.put_change(:outcome, :success)
+
     with {:ok, update_campaign} <- Repo.insert(changeset) do
       {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    end
+  end
+
+  defp create_update_campaign_with_targets(changeset, updatable_devices) do
+    changeset = Ecto.Changeset.put_change(changeset, :status, :in_progress)
+
+    tenant_id = Repo.get_tenant_id()
+
+    timestamp =
+      NaiveDateTime.utc_now()
+      |> NaiveDateTime.truncate(:second)
+
+    placeholders = %{timestamp: timestamp, tenant_id: tenant_id}
+
+    Multi.new()
+    |> Multi.insert(:update_campaign, changeset)
+    |> Multi.insert_all(
+      :targets,
+      Target,
+      fn changes ->
+        %{update_campaign: update_campaign} = changes
+
+        Enum.map(updatable_devices, fn device ->
+          %{
+            tenant_id: {:placeholder, :tenant_id},
+            status: :idle,
+            update_campaign_id: update_campaign.id,
+            device_id: device.id,
+            inserted_at: {:placeholder, :timestamp},
+            updated_at: {:placeholder, :timestamp}
+          }
+        end)
+      end,
+      placeholders: placeholders
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{update_campaign: update_campaign}} ->
+        {:ok, preload_defaults_for_update_campaign(update_campaign)}
+
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
     end
   end
 end
