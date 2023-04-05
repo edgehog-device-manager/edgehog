@@ -461,4 +461,43 @@ defmodule Edgehog.UpdateCampaigns do
         {:error, failed_value}
     end
   end
+
+  @doc """
+  Preloads the default associations for a Target or a list of Targets
+  """
+  def preload_defaults_for_target(target_or_targets, opts \\ []) do
+    preloads = [
+      device: [
+        tags: [],
+        custom_attributes: [],
+        system_model: [:hardware_type, :part_numbers]
+      ]
+    ]
+
+    Repo.preload(target_or_targets, preloads, opts)
+  end
+
+  @doc """
+  Fetches a single target.
+
+  Returns `{:error, :not_found}` if the Target does not exist.
+
+  ## Examples
+
+  iex> fetch_target(123)
+  {:ok, %Target{}}
+
+  iex> fetch_target(456)
+  {:error, :not_found}
+
+  """
+  def fetch_target(id) do
+    case Repo.get(Target, id) do
+      nil ->
+        {:error, :not_found}
+
+      %Target{} = target ->
+        {:ok, preload_defaults_for_target(target)}
+    end
+  end
 end
