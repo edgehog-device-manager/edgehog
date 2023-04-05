@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,6 +71,12 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.OSManagement.OTAOperation{}, _ ->
         :ota_operation
 
+      %Edgehog.UpdateCampaigns.UpdateCampaign{}, _ ->
+        :update_campaign
+
+      %Edgehog.UpdateCampaigns.Target{}, _ ->
+        :update_target
+
       _, _ ->
         nil
     end
@@ -99,6 +105,12 @@ defmodule EdgehogWeb.Schema do
 
         %{type: :ota_operation, id: id}, context ->
           Resolvers.OSManagement.find_ota_operation(%{id: id}, context)
+
+        %{type: :update_campaign, id: id}, context ->
+          Resolvers.UpdateCampaigns.find_update_campaign(%{id: id}, context)
+
+        %{type: :update_target, id: id}, context ->
+          Resolvers.UpdateCampaigns.find_target(%{id: id}, context)
       end
     end
 

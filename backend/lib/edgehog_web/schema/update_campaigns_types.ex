@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation, :modern
 
+  alias Edgehog.UpdateCampaigns.PushRollout
   alias EdgehogWeb.Resolvers
 
   @desc """
@@ -39,6 +40,136 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
 
     @desc "The DeviceGroups associated with this UpdateChannel"
     field :target_groups, non_null(list_of(non_null(:device_group)))
+  end
+
+  @desc """
+  An object representing the properties of a Push Rollout Mechanism
+  """
+  object :push_rollout do
+    @desc """
+    The maximum percentage of errors allowed over the number of total targets. \
+    If the errors exceed this threshold, the Update Campaign terminates with \
+    an error.
+    """
+    field :max_errors_percentage, non_null(:float)
+
+    @desc """
+    The maximum number of in progress updates. The Update Campaign will have \
+    at most this number of OTA Operations that are started but not yet \
+    finished (either successfully or not).
+    """
+    field :max_in_progress_updates, non_null(:integer)
+
+    @desc """
+    The number of attempts that have to be tried before giving up on the \
+    update of a specific target (and considering it an error). Note that the \
+    update is retried only if the OTA Request doesn't get acknowledged from the \
+    device.
+    """
+    field :ota_request_retries, non_null(:integer)
+
+    @desc """
+    The timeout (in seconds) Edgehog has to wait before considering an OTA \
+    Request lost (and possibly retry). It must be at least 30 seconds.
+    """
+    field :ota_request_timeout_seconds, non_null(:integer)
+
+    @desc """
+    This boolean flag determines if the Base Image will be pushed to the \
+    Device even if it already has a greater version of the Base Image.
+    """
+    field :force_downgrade, non_null(:boolean)
+  end
+
+  @desc """
+  A Rollout Mechanism used by an Update Campaign
+  """
+  union :rollout_mechanism do
+    # This just has a single type for now, but we use a union to leave space
+    # for extension when we introduce new rollout mechanisms
+    types [:push_rollout]
+
+    resolve_type fn
+      %PushRollout{}, _ -> :push_rollout
+    end
+  end
+
+  @desc """
+  The status of an Update Target
+  """
+  enum :update_target_status do
+    @desc "The Update Campaign is waiting for the OTA Request to be sent"
+    value :idle
+    @desc "The Update Target is being updated"
+    value :pending
+    @desc "The Update Target has failed to be updated"
+    value :failed
+    @desc "The Update Target was successfully updated"
+    value :successful
+  end
+
+  @desc """
+  Represents an UpdateTarget.
+
+  An Update Target is the target of an Update Campaign, which is composed by \
+  the targeted device and the status of the target in the linked Update \
+  Campaign.
+  """
+  node object(:update_target) do
+    @desc "The status of the Update Target."
+    field :status, non_null(:update_target_status)
+
+    @desc "The Target device."
+    field :device, non_null(:device)
+  end
+
+  @desc """
+  The status of an Update Campaign
+  """
+  enum :update_campaign_status do
+    @desc "The Update Campaign is being rolled-out"
+    value :in_progress
+    @desc "The Update Campaign has finished"
+    value :finished
+  end
+
+  @desc """
+  The outcome of an Update Campaign
+  """
+  enum :update_campaign_outcome do
+    @desc "The Update Campaign has finished succesfully"
+    value :success
+    @desc "The Update Campaign has finished with a failure"
+    value :failure
+  end
+
+  @desc """
+  Represents an UpdateCampaign.
+
+  An Update Campaign is the operation that tracks the distribution of a \
+  specific Base Image to all devices belonging to an Update Channel.
+  """
+  node object(:update_campaign) do
+    @desc "The name of the Update Campaign."
+    field :name, non_null(:string)
+
+    @desc "The status of the Update Campaign."
+    field :status, non_null(:update_campaign_status)
+
+    @desc "The outcome of the Update Campaign, present only when it's finished."
+    field :outcome, :update_campaign_outcome
+
+    @desc "The Rollout Mechanism used in the Update Campaign."
+    field :rollout_mechanism, non_null(:rollout_mechanism)
+
+    @desc "The Base Image distributed in the Update Campaign."
+    field :base_image, non_null(:base_image)
+
+    @desc "The Update Channel targeted by the Update Campaign."
+    field :update_channel, non_null(:update_channel)
+
+    @desc "The Targets that will receive the update during the Update Campaign."
+    field :update_targets, non_null(list_of(non_null(:update_target)))
   end
 
   object :update_campaigns_queries do

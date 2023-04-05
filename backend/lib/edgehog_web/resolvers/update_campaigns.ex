@@ -23,6 +23,14 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
   alias Edgehog.UpdateCampaigns.UpdateChannel
   import Absinthe.Resolution.Helpers, only: [batch: 3]
 
+  def find_target(args, _resolution) do
+    UpdateCampaigns.fetch_target(args.id)
+  end
+
+  def find_update_campaign(args, _resolution) do
+    UpdateCampaigns.fetch_update_campaign(args.id)
+  end
+
   def find_update_channel(args, _resolution) do
     UpdateCampaigns.fetch_update_channel(args.id)
   end
