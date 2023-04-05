@@ -320,7 +320,22 @@ defmodule Edgehog.UpdateCampaigns do
   Preloads the default associations for an UpdateCampaign or a list of UpdateCampaigns
   """
   def preload_defaults_for_update_campaign(campaign_or_campaigns, opts \\ []) do
-    preloads = [base_image: [], update_channel: [:target_groups], update_targets: []]
+    preloads = [
+      base_image: [
+        base_image_collection: [
+          system_model: [:hardware_type, :part_numbers]
+        ]
+      ],
+      update_channel: [:target_groups],
+      update_targets: [
+        device: [
+          tags: [],
+          custom_attributes: [],
+          system_model: [:hardware_type, :part_numbers]
+        ]
+      ]
+    ]
+
     Repo.preload(campaign_or_campaigns, preloads, opts)
   end
 
