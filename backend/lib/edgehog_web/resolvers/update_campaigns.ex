@@ -19,6 +19,7 @@
 #
 
 defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
+  alias Edgehog.BaseImages
   alias Edgehog.UpdateCampaigns
   alias Edgehog.UpdateCampaigns.UpdateChannel
   import Absinthe.Resolution.Helpers, only: [batch: 3]
@@ -88,5 +89,21 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
     Edgehog.Repo.put_tenant_id(tenant_id)
 
     UpdateCampaigns.get_update_channels_for_device_group_ids(device_group_ids)
+  end
+
+  def create_update_campaign(args, _resolution) do
+    with {:ok, base_image} <- BaseImages.fetch_base_image(args.base_image_id),
+         {:ok, update_channel} <- UpdateCampaigns.fetch_update_channel(args.update_channel_id),
+         args = Map.update!(args, :rollout_mechanism, &tag_rollout_mechanism/1),
+         {:ok, update_campaign} <-
+           UpdateCampaigns.create_update_campaign(update_channel, base_image, args) do
+      {:ok, %{update_campaign: update_campaign}}
+    end
+  end
+
+  # This moves the type tag from the outer key to the inner map, which adapts the behaviour
+  # offered by GraphQL to the one required by PolymorphicEmbed in the changeset
+  defp tag_rollout_mechanism(%{push: push_rollout_mechanism}) do
+    Map.put(push_rollout_mechanism, :type, :push)
   end
 end

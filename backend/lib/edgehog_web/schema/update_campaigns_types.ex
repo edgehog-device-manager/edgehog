@@ -95,6 +95,62 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   end
 
   @desc """
+  An input object to set the properties of a Push Rollout Mechanism
+  """
+  input_object :push_rollout_input do
+    @desc """
+    The maximum percentage of errors allowed over the number of total targets. \
+    If the errors exceed this threshold, the Update Campaign terminates with \
+    an error.
+    """
+    field :max_errors_percentage, non_null(:float)
+
+    @desc """
+    The maximum number of in progress updates. The Update Campaign will have \
+    at most this number of OTA Operations that are started but not yet \
+    finished (either successfully or not).
+    """
+    field :max_in_progress_updates, non_null(:integer)
+
+    @desc """
+    The number of attempts that have to be tried before giving up on the \
+    update of a specific target (and considering it an error). Note that the \
+    update is retried only if the OTA Request doesn't get acknowledged from the \
+    device.
+
+    Defaults to #{PushRollout.__struct__().ota_request_retries} if not present.
+    """
+    field :ota_request_retries, :integer
+
+    @desc """
+    The timeout (in seconds) Edgehog has to wait before considering an OTA \
+    Request lost (and possibly retry).
+
+    Defaults to #{PushRollout.__struct__().ota_request_timeout_seconds} \
+    seconds if not present.
+    """
+    field :ota_request_timeout_seconds, :integer
+
+    @desc """
+    This boolean flag determines if the Base Image will be pushed to the \
+    Device even if it already has a greater version of the Base Image.
+
+    Defaults to #{PushRollout.__struct__().force_downgrade} if not present.
+    """
+    field :force_downgrade, :boolean
+  end
+
+  @desc """
+  An input object to provide a Rollout Mechanism
+  """
+  # TODO: this should become a @oneOf input_object (see
+  # https://github.com/graphql/graphql-spec/pull/825) as soon as we introduce
+  # a new possible rollout mechanism
+  input_object :rollout_mechanism_input do
+    field :push, non_null(:push_rollout_input)
+  end
+
+  @desc """
   The status of an Update Target
   """
   enum :update_target_status do
@@ -269,6 +325,39 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
 
       middleware Absinthe.Relay.Node.ParseIDs, update_channel_id: :update_channel
       resolve &Resolvers.UpdateCampaigns.delete_update_channel/2
+    end
+
+    @desc "Creates a new update campaign."
+    payload field :create_update_campaign do
+      input do
+        @desc "The name of the Update Campaign."
+        field :name, non_null(:string)
+
+        @desc """
+        The ID of the Base Image that will be distributed in the Update Campaign.
+        """
+        field :base_image_id, non_null(:id)
+
+        @desc """
+        The ID of the Update Channel that will be targeted by the Update \
+        Campaign.
+        """
+        field :update_channel_id, non_null(:id)
+
+        @desc "The Rollout Mechanism of the Update Campaign, with its properties"
+        field :rollout_mechanism, non_null(:rollout_mechanism_input)
+      end
+
+      output do
+        @desc "The created Update Campaign."
+        field :update_campaign, non_null(:update_campaign)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs,
+        base_image_id: :base_image,
+        update_channel_id: :update_channel
+
+      resolve &Resolvers.UpdateCampaigns.create_update_campaign/2
     end
   end
 end
