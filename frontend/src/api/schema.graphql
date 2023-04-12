@@ -44,6 +44,11 @@ enum VariantType {
   DATETIME
 }
 
+"An input object to provide a Rollout Mechanism"
+input RolloutMechanismInput {
+  push: PushRolloutInput!
+}
+
 type CreateManualOtaOperationPayload {
   "The pending OTA operation"
   otaOperation: OtaOperation!
@@ -233,6 +238,24 @@ enum DeviceAttributeNamespace {
   CUSTOM
 }
 
+"An object representing the properties of a Push Rollout Mechanism"
+type PushRollout {
+  "The maximum percentage of errors allowed over the number of total targets. If the errors exceed this threshold, the Update Campaign terminates with an error."
+  maxErrorsPercentage: Float!
+
+  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
+  maxInProgressUpdates: Int!
+
+  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
+  otaRequestRetries: Int!
+
+  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
+  otaRequestTimeoutSeconds: Int!
+
+  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
+  forceDowngrade: Boolean!
+}
+
 input UpdateDeviceInput {
   "The GraphQL ID (not the Astarte Device ID) of the device to be updated."
   deviceId: ID!
@@ -416,6 +439,12 @@ type RootQueryType {
   "Fetches a single update channel."
   updateChannel("The ID of the update channel." id: ID!): UpdateChannel
 
+  "Fetches the list of all update campaigns."
+  updateCampaigns: [UpdateCampaign!]!
+
+  "Fetches a single update campaign."
+  updateCampaign("The ID of the update campaign." id: ID!): UpdateCampaign
+
   node("The ID of an object." id: ID!): Node
 }
 
@@ -432,6 +461,15 @@ A variant value. It can contain any JSON value. The value will be checked togeth
 type to verify whether it's valid.
 """
 scalar VariantValue
+
+"The outcome of an Update Campaign"
+enum UpdateCampaignOutcome {
+  "The Update Campaign has finished succesfully"
+  SUCCESS
+
+  "The Update Campaign has finished with a failure"
+  FAILURE
+}
 
 """
 Denotes a device instance that connects and exchanges data.
@@ -586,6 +624,21 @@ input SetLedBehaviorInput {
   behavior: LedBehavior!
 }
 
+"The status of an Update Target"
+enum UpdateTargetStatus {
+  "The Update Campaign is waiting for the OTA Request to be sent"
+  IDLE
+
+  "The Update Target is being updated"
+  PENDING
+
+  "The Update Target has failed to be updated"
+  FAILED
+
+  "The Update Target was successfully updated"
+  SUCCESSFUL
+}
+
 """
 Represents a specific system model.
 
@@ -620,6 +673,36 @@ type SystemModel implements Node {
 "Represents an uploaded file."
 scalar Upload
 
+"An input object to set the properties of a Push Rollout Mechanism"
+input PushRolloutInput {
+  "The maximum percentage of errors allowed over the number of total targets. If the errors exceed this threshold, the Update Campaign terminates with an error."
+  maxErrorsPercentage: Float!
+
+  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
+  maxInProgressUpdates: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device.
+
+  Defaults to 0 if not present.
+  """
+  otaRequestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry).
+
+  Defaults to 60 seconds if not present.
+  """
+  otaRequestTimeoutSeconds: Int
+
+  """
+  This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image.
+
+  Defaults to false if not present.
+  """
+  forceDowngrade: Boolean
+}
+
 input CreateUpdateChannelInput {
   "The display name of the update channel."
   name: String!
@@ -633,6 +716,11 @@ input CreateUpdateChannelInput {
 
   "The IDs of the target groups that are targeted by this update channel"
   targetGroupIds: [ID!]!
+}
+
+type CreateUpdateCampaignPayload {
+  "The created Update Campaign."
+  updateCampaign: UpdateCampaign!
 }
 
 input UpdateDeviceGroupInput {
@@ -667,6 +755,20 @@ type StorageUnit {
 
   "The number of free bytes of the storage unit."
   freeBytes: Int
+}
+
+input CreateUpdateCampaignInput {
+  "The name of the Update Campaign."
+  name: String!
+
+  "The ID of the Base Image that will be distributed in the Update Campaign."
+  baseImageId: ID!
+
+  "The ID of the Update Channel that will be targeted by the Update Campaign."
+  updateChannelId: ID!
+
+  "The Rollout Mechanism of the Update Campaign, with its properties"
+  rolloutMechanism: RolloutMechanismInput!
 }
 
 type CreateDeviceGroupPayload {
@@ -949,6 +1051,37 @@ type HardwareInfo {
 }
 
 """
+Represents an UpdateCampaign.
+
+An Update Campaign is the operation that tracks the distribution of a specific Base Image to all devices belonging to an Update Channel.
+"""
+type UpdateCampaign implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The name of the Update Campaign."
+  name: String!
+
+  "The status of the Update Campaign."
+  status: UpdateCampaignStatus!
+
+  "The outcome of the Update Campaign, present only when it's finished."
+  outcome: UpdateCampaignOutcome
+
+  "The Rollout Mechanism used in the Update Campaign."
+  rolloutMechanism: RolloutMechanism!
+
+  "The Base Image distributed in the Update Campaign."
+  baseImage: BaseImage!
+
+  "The Update Channel targeted by the Update Campaign."
+  updateChannel: UpdateChannel!
+
+  "The Targets that will receive the update during the Update Campaign."
+  updateTargets: [UpdateTarget!]!
+}
+
+"""
 Represents an UpdateChannel.
 
 An UpdateChannel represents a set of TargetGroups that can be targeted in an UpdateCampaign
@@ -1030,6 +1163,22 @@ type NetworkInterface {
   technology: NetworkInterfaceTechnology
 }
 
+"""
+Represents an UpdateTarget.
+
+An Update Target is the target of an Update Campaign, which is composed by the targeted device and the status of the target in the linked Update Campaign.
+"""
+type UpdateTarget implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The status of the Update Target."
+  status: UpdateTargetStatus!
+
+  "The Target device."
+  device: Device!
+}
+
 type DeleteDeviceGroupPayload {
   "The deleted device group."
   deviceGroup: DeviceGroup!
@@ -1089,6 +1238,15 @@ input UpdateBaseImageCollectionInput {
   It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
   """
   handle: String
+}
+
+"The status of an Update Campaign"
+enum UpdateCampaignStatus {
+  "The Update Campaign is being rolled-out"
+  IN_PROGRESS
+
+  "The Update Campaign has finished"
+  FINISHED
 }
 
 type RootMutationType {
@@ -1168,7 +1326,15 @@ type RootMutationType {
   deleteUpdateChannel(
     input: DeleteUpdateChannelInput!
   ): DeleteUpdateChannelPayload
+
+  "Creates a new update campaign."
+  createUpdateCampaign(
+    input: CreateUpdateCampaignInput!
+  ): CreateUpdateCampaignPayload
 }
+
+"A Rollout Mechanism used by an Update Campaign"
+union RolloutMechanism = PushRollout
 
 input CreateManualOtaOperationInput {
   "The GraphQL ID (not the Astarte Device ID) of the target device"
