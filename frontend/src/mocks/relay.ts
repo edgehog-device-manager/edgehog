@@ -182,6 +182,28 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       handle: "update-channel-foo",
     };
   },
+  UpdateCampaign(_, generateId) {
+    const id = generateId();
+    return {
+      id: btoa(`UpdateCampaign:${id}`),
+      name: `Update Campaign ${id}`,
+      status: "IN_PROGRESS",
+      outcome: null,
+      rolloutMechanism: {
+        maxErrorsPercentage: 5,
+        maxInProgressUpdates: 2,
+        otaRequestRetries: 10,
+        otaRequestTimeoutSeconds: 120,
+        forceDowngrade: false,
+      },
+    };
+  },
+  UpdateTarget(_, generateId) {
+    return {
+      id: btoa(`UpdateTarget:${generateId()}`),
+      status: "PENDING",
+    };
+  },
   WifiScanResult() {
     return {
       channel: 1,
