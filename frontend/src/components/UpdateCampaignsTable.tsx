@@ -20,6 +20,7 @@
 
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
+import { Link, Route } from "Navigation";
 
 import type {
   UpdateCampaignsTable_UpdateCampaignFragment$data,
@@ -36,6 +37,7 @@ import UpdateCampaignStatus from "components/UpdateCampaignStatus";
 const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
   fragment UpdateCampaignsTable_UpdateCampaignFragment on UpdateCampaign
   @relay(plural: true) {
+    id
     name
     status
     ...UpdateCampaignStatus_UpdateCampaignStatusFragment
@@ -65,6 +67,14 @@ const columns: Column<TableRecord>[] = [
         defaultMessage="Update Campaign Name"
         description="Title for the Name column of the Update Campaigns table"
       />
+    ),
+    Cell: ({ row, value }) => (
+      <Link
+        route={Route.updateCampaignsEdit}
+        params={{ updateCampaignId: row.original.id }}
+      >
+        {value}
+      </Link>
     ),
   },
   {

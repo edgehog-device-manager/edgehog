@@ -45,6 +45,7 @@ enum Route {
   updateChannelsEdit = "/update-channels/:updateChannelId/edit",
   updateChannelsNew = "/update-channels/new",
   updateCampaigns = "/update-campaigns",
+  updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
   login = "/login",
   logout = "/logout",
 }
@@ -84,6 +85,7 @@ type ParametricRoute =
   | { route: Route.updateChannelsEdit; params: { updateChannelId: string } }
   | { route: Route.updateChannelsNew }
   | { route: Route.updateCampaigns }
+  | { route: Route.updateCampaignsEdit; params: { updateCampaignId: string } }
   | { route: Route.login }
   | { route: Route.logout };
 

@@ -192,6 +192,7 @@ const Sidebar = () => (
           />
         }
         route={Route.updateCampaigns}
+        activeRoutes={[Route.updateCampaigns, Route.updateCampaignsEdit]}
       />
     </SidebarItemGroup>
   </Navbar>
