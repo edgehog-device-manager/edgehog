@@ -54,6 +54,26 @@ const messages = defineMessages({
     defaultMessage:
       "The supported starting versions must be a valid version range",
   },
+  number: {
+    id: "validation.number",
+    defaultMessage: "{label} must be a number.",
+  },
+  numberMin: {
+    id: "validation.number.min",
+    defaultMessage: "{label} must be greater than or equal to {min}.",
+  },
+  numberMax: {
+    id: "validation.number.max",
+    defaultMessage: "{label} must be less than or equal to {max}.",
+  },
+  numberPositive: {
+    id: "validation.number.positive",
+    defaultMessage: "{label} must be a positive number.",
+  },
+  numberInteger: {
+    id: "validation.number.integer",
+    defaultMessage: "{label} must be an integer.",
+  },
 });
 
 yup.setLocale({
@@ -62,6 +82,12 @@ yup.setLocale({
   },
   array: {
     min: messages.arrayMin.id,
+  },
+  number: {
+    integer: (values) => ({ messageId: messages.numberInteger.id, values }),
+    min: (values) => ({ messageId: messages.numberMin.id, values }),
+    max: (values) => ({ messageId: messages.numberMax.id, values }),
+    positive: (values) => ({ messageId: messages.numberPositive.id, values }),
   },
 });
 
@@ -103,6 +129,10 @@ const updateChannelHandleSchema = yup
   .string()
   .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
 
+const numberSchema = yup
+  .number()
+  .typeError((values) => ({ messageId: messages.number.id, values }));
+
 export {
   deviceGroupHandleSchema,
   systemModelHandleSchema,
@@ -112,6 +142,7 @@ export {
   baseImageVersionSchema,
   baseImageStartingVersionRequirementSchema,
   updateChannelHandleSchema,
+  numberSchema,
   messages,
   yup,
 };

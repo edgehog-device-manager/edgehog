@@ -25,10 +25,12 @@ import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { UpdateCampaigns_getUpdateCampaigns_Query } from "api/__generated__/UpdateCampaigns_getUpdateCampaigns_Query.graphql";
+import Button from "components/Button";
 import Center from "components/Center";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import UpdateCampaignsTable from "components/UpdateCampaignsTable";
+import { Link, Route } from "Navigation";
 
 const GET_UPDATE_CAMPAIGNS_QUERY = graphql`
   query UpdateCampaigns_getUpdateCampaigns_Query {
@@ -59,7 +61,14 @@ const UpdateCampaignsContent = ({
             defaultMessage="Update Campaigns"
           />
         }
-      />
+      >
+        <Button as={Link} route={Route.updateCampaignsNew}>
+          <FormattedMessage
+            id="pages.UpdateCampaigns.createButton"
+            defaultMessage="Create Update Campaign"
+          />
+        </Button>
+      </Page.Header>
       <Page.Main>
         <UpdateCampaignsTable updateCampaignsRef={updateCampaigns} />
       </Page.Main>
