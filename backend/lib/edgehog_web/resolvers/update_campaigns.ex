@@ -91,6 +91,12 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
     UpdateCampaigns.get_update_channels_for_device_group_ids(device_group_ids)
   end
 
+  def list_update_campaigns(_args, _resolution) do
+    update_campaigns = UpdateCampaigns.list_update_campaigns()
+
+    {:ok, update_campaigns}
+  end
+
   def create_update_campaign(args, _resolution) do
     with {:ok, base_image} <- BaseImages.fetch_base_image(args.base_image_id),
          {:ok, update_channel} <- UpdateCampaigns.fetch_update_channel(args.update_channel_id),

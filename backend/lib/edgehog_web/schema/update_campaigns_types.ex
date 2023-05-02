@@ -243,6 +243,11 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
       resolve &Resolvers.UpdateCampaigns.find_update_channel/2
     end
 
+    @desc "Fetches the list of all update campaigns."
+    field :update_campaigns, non_null(list_of(non_null(:update_campaign))) do
+      resolve &Resolvers.UpdateCampaigns.list_update_campaigns/2
+    end
+
     @desc "Fetches a single update campaign."
     field :update_campaign, :update_campaign do
       @desc "The ID of the update campaign."
