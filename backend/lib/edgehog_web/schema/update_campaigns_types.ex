@@ -242,6 +242,15 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
       middleware Absinthe.Relay.Node.ParseIDs, id: :update_channel
       resolve &Resolvers.UpdateCampaigns.find_update_channel/2
     end
+
+    @desc "Fetches a single update campaign."
+    field :update_campaign, :update_campaign do
+      @desc "The ID of the update campaign."
+      arg :id, non_null(:id)
+
+      middleware Absinthe.Relay.Node.ParseIDs, id: :update_campaign
+      resolve &Resolvers.UpdateCampaigns.find_update_campaign/2
+    end
   end
 
   object :update_campaigns_mutations do
