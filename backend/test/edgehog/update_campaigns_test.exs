@@ -22,14 +22,12 @@ defmodule Edgehog.UpdateCampaignsTest do
   use Edgehog.DataCase
 
   import Edgehog.BaseImagesFixtures
+  import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.Astarte
   alias Edgehog.AstarteFixtures
-  alias Edgehog.BaseImages
   alias Edgehog.DevicesFixtures
-  alias Edgehog.Devices
   alias Edgehog.Groups
   alias Edgehog.UpdateCampaigns
   alias Edgehog.UpdateCampaigns.PushRollout
@@ -553,22 +551,6 @@ defmodule Edgehog.UpdateCampaignsTest do
     UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
   end
 
-  defp device_fixture_compatible_with(%BaseImages.BaseImage{} = base_image) do
-    [%{part_number: part_number} | _] = base_image.base_image_collection.system_model.part_numbers
-
-    {:ok, device} =
-      astarte_device_fixture()
-      |> Astarte.update_device(%{part_number: part_number})
-
-    # Retrieve the updated device from the Devices context
-    Devices.get_device!(device.id)
-  end
-
-  defp add_tags(%Devices.Device{} = device, tags) do
-    {:ok, device} = Devices.update_device(device, %{tags: tags})
-    device
-  end
-
   defp device_fixture do
     # Helper to avoid having to manually create the cluster and realm
     # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
@@ -576,14 +558,5 @@ defmodule Edgehog.UpdateCampaignsTest do
     AstarteFixtures.cluster_fixture()
     |> AstarteFixtures.realm_fixture()
     |> DevicesFixtures.device_fixture()
-  end
-
-  defp astarte_device_fixture do
-    # Helper to avoid having to manually create the cluster and realm
-    # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
-
-    AstarteFixtures.cluster_fixture()
-    |> AstarteFixtures.realm_fixture()
-    |> AstarteFixtures.astarte_device_fixture()
   end
 end

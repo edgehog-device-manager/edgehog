@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -334,11 +334,6 @@ defmodule Edgehog.SelectorTest do
       assert device_foo_20 in result
       assert device_bar_20 in result
     end
-  end
-
-  defp add_tags(%Devices.Device{} = device, tags) do
-    {:ok, device} = Devices.update_device(device, %{tags: tags})
-    device
   end
 
   defp add_custom_attributes(%Devices.Device{} = device, kv_map) do
