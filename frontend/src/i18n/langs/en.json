@@ -392,6 +392,9 @@
   "components.Sidebar.modelsLabel": {
     "defaultMessage": "System Models"
   },
+  "components.Sidebar.updateChannelsLabel": {
+    "defaultMessage": "Update Channels"
+  },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
   },
@@ -430,6 +433,18 @@
   },
   "components.UpdateBaseImageCollection.systemModelLabel": {
     "defaultMessage": "System Model"
+  },
+  "components.UpdateChannelsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the update channels table"
+  },
+  "components.UpdateChannelsTable.nameTitle": {
+    "defaultMessage": "Update Channel Name",
+    "description": "Title for the Name column of the update channels table"
+  },
+  "components.UpdateChannelsTable.targetGroupsTitle": {
+    "defaultMessage": "Target Groups",
+    "description": "Title for the Target Groups column of the update channels table"
   },
   "components.UpdateDeviceGroupForm.deleteButton": {
     "defaultMessage": "Delete"
@@ -539,6 +554,22 @@
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateUpdateChannel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateUpdateChannel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateUpdateChannel.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateUpdateChannel.targetGroupWithChannelLabel": {
+    "defaultMessage": "{targetGroupName} (used for {updateChannelName})",
+    "description": "Target group label of select option with optional update channel name it used for."
+  },
+  "forms.CreateUpdateChannel.targetGroupsLabel": {
+    "defaultMessage": "Target Groups"
+  },
   "forms.UpdateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
@@ -565,6 +596,25 @@
   },
   "forms.UpdateBaseImage.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "forms.UpdateUpdateChannel.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateUpdateChannel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateUpdateChannel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateUpdateChannel.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "forms.UpdateUpdateChannel.targetGroupWithChannelLabel": {
+    "defaultMessage": "{targetGroupName} (used for {updateChannelName})",
+    "description": "Target group label of select option with optional update channel name it used for."
+  },
+  "forms.UpdateUpdateChannel.targetGroupsLabel": {
+    "defaultMessage": "Target Groups"
   },
   "modem.RegistrationStatus.NotRegistered": {
     "defaultMessage": "Not Registered"
@@ -927,6 +977,38 @@
   },
   "pages.SystemModels.title": {
     "defaultMessage": "System Models"
+  },
+  "pages.UpdateChannel.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Update Channel <bold>{updateChannel}</bold>.",
+    "description": "Description for the confirmation modal to delete a Update Channel"
+  },
+  "pages.UpdateChannel.deleteModal.title": {
+    "defaultMessage": "Delete Update Channel",
+    "description": "Title for the confirmation modal to delete a Update Channel"
+  },
+  "pages.UpdateChannel.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Update Channel, please try again."
+  },
+  "pages.UpdateChannel.updateChannelNotFound.message": {
+    "defaultMessage": "Return to the Update Channel list."
+  },
+  "pages.UpdateChannel.updateChannelNotFound.title": {
+    "defaultMessage": "Update Channel not found."
+  },
+  "pages.UpdateChannel.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Update Channel, please try again."
+  },
+  "pages.UpdateChannelCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Update Channel, please try again."
+  },
+  "pages.UpdateChannelCreate.title": {
+    "defaultMessage": "Create Update Channel"
+  },
+  "pages.UpdateChannels.createButton": {
+    "defaultMessage": "Create Update Channel"
+  },
+  "pages.UpdateChannels.title": {
+    "defaultMessage": "Update Channels"
   },
   "validation.array.min": {
     "defaultMessage": "Does not have enough values."

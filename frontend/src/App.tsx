@@ -41,6 +41,9 @@ import BaseImageCollectionCreate from "pages/BaseImageCollectionCreate";
 import BaseImageCollections from "pages/BaseImageCollections";
 import BaseImage from "pages/BaseImage";
 import BaseImageCreate from "pages/BaseImageCreate";
+import UpdateChannel from "pages/UpdateChannel";
+import UpdateChannelCreate from "pages/UpdateChannelCreate";
+import UpdateChannels from "pages/UpdateChannels";
 import Login from "pages/Login";
 import Logout from "pages/Logout";
 
@@ -76,6 +79,9 @@ const authenticatedRoutes: RouterRule[] = [
   },
   { path: Route.baseImagesEdit, element: <BaseImage /> },
   { path: Route.baseImagesNew, element: <BaseImageCreate /> },
+  { path: Route.updateChannels, element: <UpdateChannels /> },
+  { path: Route.updateChannelsEdit, element: <UpdateChannel /> },
+  { path: Route.updateChannelsNew, element: <UpdateChannelCreate /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} /> },
 ];

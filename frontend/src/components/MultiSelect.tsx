@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,53 +18,39 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import {
-  components,
-  GroupBase,
+import Select, { components } from "react-select";
+import type {
+  MultiValue,
+  ActionMeta,
   MultiValueGenericProps,
   MultiValueRemoveProps,
 } from "react-select";
-import CreatableSelect, { CreatableProps } from "react-select/creatable";
+import CreatableSelect from "react-select/creatable";
 
 import Icon from "components/Icon";
 import Tag from "components/Tag";
+import "./MultiSelect.scss";
 
-type Option = {
-  label: string;
-  value: string;
-};
+const MultiValueContainer = <Option extends any>(
+  props: MultiValueGenericProps<Option, true>
+) => (
+  <Tag className="me-1">
+    <components.MultiValueContainer
+      {...props}
+      innerProps={{ className: "d-flex" }}
+    />
+  </Tag>
+);
 
-type MultiComponentProps = MultiValueGenericProps<Option, true>;
+const MultiValueLabel = <Option extends any>(
+  props: MultiValueGenericProps<Option, true>
+) => (
+  <components.MultiValueLabel {...props} innerProps={{ className: "me-1" }} />
+);
 
-const MultiValueContainer = (props: MultiComponentProps) => {
-  const { children, data, selectProps } = props;
-  return (
-    <Tag className="me-1">
-      <components.MultiValueContainer
-        data={data}
-        innerProps={{ className: "d-flex" }}
-        selectProps={selectProps}
-      >
-        {children}
-      </components.MultiValueContainer>
-    </Tag>
-  );
-};
-
-const MultiValueLabel = (props: MultiComponentProps) => {
-  const { data, selectProps } = props;
-  return (
-    <components.MultiValueLabel
-      data={data}
-      innerProps={{ className: "me-1" }}
-      selectProps={selectProps}
-    >
-      {data.label}
-    </components.MultiValueLabel>
-  );
-};
-
-const MultiValueRemove = (props: MultiValueRemoveProps<Option, true>) => {
+const MultiValueRemove = <Option extends any>(
+  props: MultiValueRemoveProps<Option, true>
+) => {
   if (props.selectProps.isDisabled) {
     return null;
   }
@@ -81,38 +67,55 @@ const customComponents = {
   MultiValueRemove,
 };
 
-const getOptionLabel = (option: Option) => option.label;
-const getOptionValue = (option: Option) => option.value;
-
-type MSProps = {
+type MultiSelectBaseProps<Option> = {
   disabled?: boolean;
+  invalid?: boolean;
   loading?: boolean;
+  value?: readonly Option[];
+  options?: readonly Option[];
+  onChange?: (
+    value: MultiValue<Option>,
+    actionMeta: ActionMeta<Option>
+  ) => void;
+  getOptionLabel?: (option: Option) => string;
+  getOptionValue?: (option: Option) => string;
+  isOptionDisabled?: (option: Option) => boolean;
+  onBlur?: () => void;
 };
-type MultiSelectProps = Omit<
-  CreatableProps<Option, true, GroupBase<Option>>,
-  | "isMulti"
-  | "isDisabled"
-  | "isLoading"
-  | "components"
-  | "getOptionLabel"
-  | "getOptionValue"
-> &
-  MSProps;
 
-const MultiSelect = ({
+type MultiSelectCreatableProps =
+  | {
+      creatable: true;
+      isValidNewOption?: (value: string) => boolean;
+      onCreateOption?: (value: string) => void;
+    }
+  | {
+      creatable?: false;
+      isValidNewOption?: never;
+      onCreateOption?: never;
+    };
+
+type MultiSelectProps<Option> = MultiSelectBaseProps<Option> &
+  MultiSelectCreatableProps;
+
+const MultiSelect = <Option extends any>({
+  creatable = false,
   disabled = false,
+  invalid = false,
   loading = false,
   ...restProps
-}: MultiSelectProps) => {
+}: MultiSelectProps<Option>) => {
+  const SelectComponent = creatable ? CreatableSelect : Select;
+
   return (
-    <CreatableSelect
+    <SelectComponent
       {...restProps}
       isMulti
       isDisabled={disabled}
       isLoading={loading}
       components={customComponents}
-      getOptionLabel={getOptionLabel}
-      getOptionValue={getOptionValue}
+      className={`multi-select ${invalid ? "is-invalid" : ""}`}
+      classNamePrefix="multi-select"
     />
   );
 };
