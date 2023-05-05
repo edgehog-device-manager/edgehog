@@ -24,6 +24,9 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   entities via the `Edgehog.UpdateCampaigns` context.
   """
 
+  alias Edgehog.DevicesFixtures
+  alias Edgehog.GroupsFixtures
+
   @doc """
   Generate a unique update_channel handle.
   """
@@ -81,5 +84,33 @@ defmodule Edgehog.UpdateCampaignsFixtures do
       Edgehog.UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
 
     update_campaign
+  end
+
+  def target_fixture(attrs \\ []) do
+    {base_image, attrs} =
+      Keyword.pop_lazy(attrs, :base_image, &Edgehog.BaseImagesFixtures.base_image_fixture/0)
+
+    {tag, attrs} = Keyword.pop(attrs, :tag, "foo")
+
+    {group, attrs} =
+      Keyword.pop_lazy(attrs, :device_group, fn ->
+        GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>)
+      end)
+
+    {update_channel, attrs} =
+      Keyword.pop_lazy(attrs, :update_channel, fn ->
+        update_channel_fixture(target_group_ids: [group.id])
+      end)
+
+    _ =
+      DevicesFixtures.device_fixture_compatible_with(base_image, attrs)
+      |> DevicesFixtures.add_tags([tag])
+
+    update_campaign =
+      update_campaign_fixture(base_image: base_image, update_channel: update_channel)
+
+    [target] = update_campaign.update_targets
+
+    target
   end
 end
