@@ -25,6 +25,7 @@ defmodule Edgehog.OSManagementTest do
 
   alias Edgehog.Devices
   alias Edgehog.OSManagement
+  alias Edgehog.PubSub
 
   describe "ota_operations" do
     alias Edgehog.OSManagement.OTAOperation
@@ -103,6 +104,19 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.manual? == true
     end
 
+    test "successful create_manual_ota_operation/2 publishes on PubSub", %{
+      device: device
+    } do
+      assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
+
+      fake_image = %Plug.Upload{path: "/tmp/ota_image_v2.bin", filename: "ota_image_v2.bin"}
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.create_manual_ota_operation(device, fake_image)
+
+      assert_receive {:ota_operation_created, ^ota_operation}
+    end
+
     test "create_manual_ota_operation/2 fails if upload fails", %{device: device} do
       fake_image = %Plug.Upload{path: "/tmp/ota_image_v2.bin", filename: "ota_image_v2.bin"}
 
@@ -172,6 +186,19 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.status == :pending
       assert ota_operation.status_code == nil
       assert ota_operation.manual? == false
+    end
+
+    test "successful create_managed_ota_operation/2 publishes on PubSub", %{
+      device: device
+    } do
+      base_image = base_image_fixture()
+
+      assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.create_managed_ota_operation(device, base_image)
+
+      assert_receive {:ota_operation_created, ^ota_operation}
     end
 
     test "create_managed_ota_operation/2 fails if the Astarte request fails", %{
@@ -284,6 +311,21 @@ defmodule Edgehog.OSManagementTest do
                OSManagement.update_ota_operation(ota_operation, @invalid_attrs)
 
       assert ota_operation == OSManagement.get_ota_operation!(ota_operation.id)
+    end
+
+    test "successful update_ota_operation/2 publishes on PubSub", %{
+      device: device
+    } do
+      ota_operation = manual_ota_operation_fixture(device)
+
+      assert :ok = PubSub.subscribe_to_events_for(ota_operation)
+
+      update_attrs = %{status: :error, status_code: "NetworkError"}
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.update_ota_operation(ota_operation, update_attrs)
+
+      assert_receive {:ota_operation_updated, ^ota_operation}
     end
 
     test "delete_ota_operation/1 deletes the ota_operation", %{device: device} do

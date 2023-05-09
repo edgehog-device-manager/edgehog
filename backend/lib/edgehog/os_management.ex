@@ -30,6 +30,7 @@ defmodule Edgehog.OSManagement do
   alias Edgehog.Astarte
   alias Edgehog.BaseImages
   alias Edgehog.Devices
+  alias Edgehog.PubSub
   alias Edgehog.OSManagement.EphemeralImage
   alias Edgehog.OSManagement.OTAOperation
 
@@ -130,7 +131,11 @@ defmodule Edgehog.OSManagement do
     |> Repo.transaction()
     |> case do
       {:ok, %{ota_operation: ota_operation}} ->
-        {:ok, Repo.preload(ota_operation, :device)}
+        ota_operation = Repo.preload(ota_operation, :device)
+
+        PubSub.publish!(:ota_operation_created, ota_operation)
+
+        {:ok, ota_operation}
 
       {:error, _failed_operation, failed_value, %{image_upload: base_image_url}} ->
         # If we fail after a successful upload, we at least try to clean up the upload
@@ -174,7 +179,11 @@ defmodule Edgehog.OSManagement do
     |> Repo.transaction()
     |> case do
       {:ok, %{ota_operation: ota_operation}} ->
-        {:ok, Repo.preload(ota_operation, :device)}
+        ota_operation = Repo.preload(ota_operation, :device)
+
+        PubSub.publish!(:ota_operation_created, ota_operation)
+
+        {:ok, ota_operation}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
@@ -205,7 +214,11 @@ defmodule Edgehog.OSManagement do
         cleanup_ephemeral_image(ota_operation)
       end
 
-      {:ok, Repo.preload(ota_operation, :device)}
+      ota_operation = Repo.preload(ota_operation, :device)
+
+      PubSub.publish!(:ota_operation_updated, ota_operation)
+
+      {:ok, ota_operation}
     end
   end
 
