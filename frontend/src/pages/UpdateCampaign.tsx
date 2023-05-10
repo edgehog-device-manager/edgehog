@@ -18,14 +18,23 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import {
+  fetchQuery,
+  graphql,
+  useFragment,
+  usePreloadedQuery,
+  useRelayEnvironment,
+  useQueryLoader,
+} from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
+import type { Subscription } from "relay-runtime";
 
 import type { UpdateCampaign_getUpdateCampaign_Query } from "api/__generated__/UpdateCampaign_getUpdateCampaign_Query.graphql";
+import type { UpdateCampaign_RefreshFragment$key } from "api/__generated__/UpdateCampaign_RefreshFragment.graphql";
 
 import Center from "components/Center";
 import Page from "components/Page";
@@ -41,9 +50,68 @@ const GET_UPDATE_CAMPAIGN_QUERY = graphql`
       name
       ...UpdateCampaignForm_UpdateCampaignFragment
       ...UpdateTargetsTable_UpdateTargetsFragment
+      ...UpdateCampaign_RefreshFragment
     }
   }
 `;
+
+const UPDATE_CAMPAIGN_REFRESH_FRAGMENT = graphql`
+  fragment UpdateCampaign_RefreshFragment on UpdateCampaign {
+    id
+    status
+  }
+`;
+
+type UpdateCampaignRefreshProps = {
+  updateCampaignRef: UpdateCampaign_RefreshFragment$key;
+};
+const UpdateCampaignRefresh = ({
+  updateCampaignRef,
+}: UpdateCampaignRefreshProps) => {
+  const relayEnvironment = useRelayEnvironment();
+  const { id, status } = useFragment(
+    UPDATE_CAMPAIGN_REFRESH_FRAGMENT,
+    updateCampaignRef
+  );
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // TODO: use GraphQL subscription (when available) to get updates about Update Campaign
+  const subscriptionRef = useRef<Subscription | null>(null);
+  useEffect(() => {
+    return () => {
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (status !== "IN_PROGRESS" || isRefreshing) {
+      return;
+    }
+    const refreshTimerId = setTimeout(() => {
+      setIsRefreshing(true);
+      subscriptionRef.current = fetchQuery(
+        relayEnvironment,
+        GET_UPDATE_CAMPAIGN_QUERY,
+        { updateCampaignId: id }
+      ).subscribe({
+        complete: () => {
+          setIsRefreshing(false);
+        },
+        error: () => {
+          setIsRefreshing(false);
+        },
+      });
+    }, 10000);
+
+    return () => {
+      clearTimeout(refreshTimerId);
+    };
+  }, [id, status, relayEnvironment, isRefreshing, setIsRefreshing]);
+
+  return isRefreshing ? <Spinner className="ms-2 mx-auto" /> : null;
+};
 
 type UpdateCampaignContentProps = {
   getUpdateCampaignQuery: PreloadedQuery<UpdateCampaign_getUpdateCampaign_Query>;
@@ -79,7 +147,9 @@ const UpdateCampaignContent = ({
 
   return (
     <Page>
-      <Page.Header title={updateCampaign.name} />
+      <Page.Header title={updateCampaign.name}>
+        <UpdateCampaignRefresh updateCampaignRef={updateCampaign} />
+      </Page.Header>
       <Page.Main>
         <div className="mb-3">
           <UpdateCampaignForm updateCampaignRef={updateCampaign} />
