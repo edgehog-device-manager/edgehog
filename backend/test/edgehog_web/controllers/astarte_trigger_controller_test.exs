@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -232,13 +232,25 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert device.system_model_part_number == nil
       assert device.system_model == nil
     end
+  end
 
-    test "updates the OTA operation when receiving an event on the OTAResponse interface", %{
-      conn: conn,
-      realm: realm,
-      device: device,
-      tenant: %{slug: tenant_slug}
-    } do
+  describe "process_event/2 for OTA updates" do
+    setup do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+      device = device_fixture(realm)
+
+      {:ok, cluster: cluster, realm: realm, device: device}
+    end
+
+    test "updates the OTA operation when receiving an event on the OTAEvent interface", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: %{slug: tenant_slug}
+      } = context
+
       ota_operation = manual_ota_operation_fixture(device)
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
@@ -247,11 +259,14 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_id: device.device_id,
         event: %{
           type: "incoming_data",
-          interface: "io.edgehog.devicemanager.OTAResponse",
-          path: "/response",
+          interface: "io.edgehog.devicemanager.OTAEvent",
+          path: "/event",
           value: %{
-            uuid: ota_operation.id,
-            status: "InProgress"
+            requestUUID: ota_operation.id,
+            status: "Downloading",
+            statusProgress: 50,
+            statusCode: nil,
+            message: "Waiting for download to finish"
           }
         },
         timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
@@ -266,8 +281,50 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       operation = OSManagement.get_ota_operation!(ota_operation.id)
 
-      assert operation.status == :in_progress
+      assert operation.status == :downloading
       assert operation.status_code == nil
+      assert operation.status_progress == 50
+      assert operation.message == "Waiting for download to finish"
+    end
+
+    test "adapts events received on the legacy OTAResponse interface", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: %{slug: tenant_slug}
+      } = context
+
+      ota_operation = manual_ota_operation_fixture(device)
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      ota_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.OTAResponse",
+          path: "/response",
+          value: %{
+            uuid: ota_operation.id,
+            status: "Error",
+            statusCode: "OTAErrorNetwork"
+          }
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, ota_event)
+
+      assert response(conn, 200)
+
+      operation = OSManagement.get_ota_operation!(ota_operation.id)
+
+      assert operation.status == :failure
+      assert operation.status_code == :network_error
     end
   end
 end

@@ -17,11 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for base images ([#240](https://github.com/edgehog-device-manager/edgehog/pull/240), [#244](https://github.com/edgehog-device-manager/edgehog/pull/244)).
 - Add support for update channels
   ([#243](https://github.com/edgehog-device-manager/edgehog/pull/243), [#245](https://github.com/edgehog-device-manager/edgehog/pull/245)).
+- Add support for
+  [`io.edgehog.devicemanager.OTAEvent`](https://github.com/edgehog-device-manager/edgehog-astarte-interfaces/pull/58).
 
 ### Changed
 - Handle Device part numbers for nonexistent system models.
 - BREAKING: The `Description` field in the `SystemModel` object is now a `String` instead of a
   `LocalizedText`.
+
+### Deprecated
+- Support for `io.edgehog.devicemanager.OTAResponse` is deprecated and will be removed in future
+  releases. Switch to `io.edgehog.devicemanager.OTAEvent` instead.
 
 ## [0.5.2] - 2022-06-22
 ### Added

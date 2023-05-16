@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,30 +30,46 @@ defmodule EdgehogWeb.Schema.OSManagementTypes do
   enum :ota_operation_status do
     @desc "The OTA operation was created and is waiting an acknowledgment from the device"
     value :pending
-    @desc "The OTA operation was accepted from the device"
-    value :in_progress
-    @desc "The OTA operation ended with an error"
+    @desc "The OTA operation was acknowledged from the device"
+    value :acknowledged
+    @desc "The device is downloading the update"
+    value :downloading
+    @desc "The device is deploying the update"
+    value :deploying
+    @desc "The device deployed the update"
+    value :deployed
+    @desc "The device is in the process of rebooting"
+    value :rebooting
+    @desc "A recoverable error happened during the OTA operation"
     value :error
-    @desc "The OTA operation ended succesfully"
-    value :done
+    @desc "The OTA operation ended with a failure. This is a final state of the OTA Operation"
+    value :failure
+    @desc "The OTA operation ended successfully. This is a final state of the OTA Operation"
+    value :success
   end
 
   @desc """
   Status code of the OTA operation.
   """
   enum :ota_operation_status_code do
+    @desc "The OTA Operation timed out while sending the request to the device"
+    value :request_timeout
+    @desc "The OTA Operation contained invalid data"
+    value :invalid_request
+    @desc "An OTA Operation is already in progress on the device"
+    value :update_already_in_progress
     @desc "A network error was encountered"
     value :network_error
-    @desc "An NVS error was encountered"
-    value :nvs_error
-    @desc "The OTA operation is already in progress"
-    value :already_in_progress
-    @desc "The OTA operation has failed"
-    value :failed
-    @desc "A deploy error was encountered"
-    value :deploy_error
-    @desc "A boot partition error was encountered"
-    value :wrong_partition
+    @desc "An IO error was encountered"
+    value :io_error
+    @desc "An internal error was encountered"
+    value :internal_error
+    @desc "The OTA Operation failed due to an invalid base image"
+    value :invalid_base_image
+    @desc "A system rollback has occurred"
+    value :system_rollback
+    @desc "The OTA Operation was canceled"
+    value :canceled
   end
 
   @desc "An OTA update operation"
@@ -64,8 +80,14 @@ defmodule EdgehogWeb.Schema.OSManagementTypes do
     @desc "The current status of the operation"
     field :status, non_null(:ota_operation_status)
 
+    @desc "The percentage progress [0-100] for the current status"
+    field :status_progress, non_null(:integer)
+
     @desc "The current status code of the operation"
     field :status_code, :ota_operation_status_code
+
+    @desc "A message with additional details about the current status"
+    field :message, :string
 
     @desc "The device targeted from the operation"
     field :device, non_null(:device)

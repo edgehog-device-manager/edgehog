@@ -199,7 +199,7 @@ defmodule Edgehog.OSManagement do
     with {:ok, %OTAOperation{id: id, status: status} = ota_operation} <- Repo.update(changeset) do
       Logger.info("OTA operation #{id} updated with status #{status}")
 
-      if status in [:error, :done] do
+      if OTAOperation.final_state?(status) do
         cleanup_ephemeral_image(ota_operation)
       end
 
