@@ -86,8 +86,8 @@ defmodule Edgehog.OSManagementTest do
         {:ok, file_url}
       end)
 
-      Edgehog.Astarte.Device.OTARequestMock
-      |> expect(:post, fn _client, device_id, _uuid, _url ->
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, device_id, _uuid, _url ->
         assert device_id == device.device_id
         :ok
       end)
@@ -111,8 +111,8 @@ defmodule Edgehog.OSManagementTest do
         {:error, :cannot_upload}
       end)
 
-      Edgehog.Astarte.Device.OTARequestMock
-      |> expect(:post, 0, fn _client, _device_id, _uuid, _url ->
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, 0, fn _client, _device_id, _uuid, _url ->
         :ok
       end)
 
@@ -144,8 +144,8 @@ defmodule Edgehog.OSManagementTest do
         :ok
       end)
 
-      Edgehog.Astarte.Device.OTARequestMock
-      |> expect(:post, fn _client, _device_id, _uuid, _url ->
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, _device_id, _uuid, _url ->
         {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
       end)
 
@@ -158,8 +158,8 @@ defmodule Edgehog.OSManagementTest do
     } do
       base_image = base_image_fixture()
 
-      Edgehog.Astarte.Device.OTARequestMock
-      |> expect(:post, fn _client, device_id, _uuid, url ->
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, device_id, _uuid, url ->
         assert device_id == device.device_id
         assert url == base_image.url
         :ok
@@ -179,8 +179,8 @@ defmodule Edgehog.OSManagementTest do
     } do
       base_image = base_image_fixture()
 
-      Edgehog.Astarte.Device.OTARequestMock
-      |> expect(:post, fn _client, _device_id, _uuid, _url ->
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, _device_id, _uuid, _url ->
         {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
       end)
 

@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ([#243](https://github.com/edgehog-device-manager/edgehog/pull/243), [#245](https://github.com/edgehog-device-manager/edgehog/pull/245)).
 - Add support for
   [`io.edgehog.devicemanager.OTAEvent`](https://github.com/edgehog-device-manager/edgehog-astarte-interfaces/pull/58).
+- Add support for
+  [`io.edgehog.devicemanager.OTAResponse`
+  v1.0](https://github.com/edgehog-device-manager/edgehog-astarte-interfaces/pull/57).
 
 ### Changed
 - Handle Device part numbers for nonexistent system models.
@@ -28,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 - Support for `io.edgehog.devicemanager.OTAResponse` is deprecated and will be removed in future
   releases. Switch to `io.edgehog.devicemanager.OTAEvent` instead.
+- Support for `io.edgehog.devicemanager.OTARequest` with major version `0` is deprecated and will be
+  removed in future releases. Switch to `io.edgehog.devicemanager.OTARequest` major version `1`
+  instead.
 
 ## [0.5.2] - 2022-06-22
 ### Added

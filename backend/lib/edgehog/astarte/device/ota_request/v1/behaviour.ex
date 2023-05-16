@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.OTARequest.Behaviour do
+defmodule Edgehog.Astarte.Device.OTARequest.V1.Behaviour do
   alias Astarte.Client.AppEngine
 
-  @callback post(
+  @callback update(
               client :: AppEngine.t(),
               device_id :: String.t(),
               uuid :: String.t(),
               url :: String.t()
+            ) ::
+              :ok | {:error, term()}
+
+  @callback cancel(
+              client :: AppEngine.t(),
+              device_id :: String.t(),
+              uuid :: String.t()
             ) ::
               :ok | {:error, term()}
 end
