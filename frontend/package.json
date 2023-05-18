@@ -59,7 +59,6 @@
     "react-select-event": "^5.5.0",
     "react-table": "^7.7.0",
     "relay-compiler": "^13.1.1",
-    "relay-compiler-language-typescript": "^15.0.1",
     "relay-runtime": "^13.1.1",
     "relay-test-utils": "^13.1.1",
     "semver": "^7.3.8",
