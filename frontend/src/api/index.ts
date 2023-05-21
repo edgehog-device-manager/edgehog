@@ -18,6 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import "api/relay";
 import {
   Environment,
   FetchFunction,
