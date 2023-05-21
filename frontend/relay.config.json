@@ -1,0 +1,13 @@
+{
+  "artifactDirectory": "./src/api/__generated__",
+  "customScalars": {
+    "DateTime": "string",
+    "Upload": "File"
+  },
+  "featureFlags": {
+    "enable_relay_resolver_transform": true
+  },
+  "language": "typescript",
+  "schema": "./src/api/schema.graphql",
+  "src": "./src"
+}

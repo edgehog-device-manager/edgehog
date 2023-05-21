@@ -109,19 +109,6 @@
       "last 1 safari version"
     ]
   },
-  "relay": {
-    "artifactDirectory": "./src/api/__generated__",
-    "customScalars": {
-      "DateTime": "string",
-      "Upload": "File"
-    },
-    "featureFlags": {
-      "enable_relay_resolver_transform": true
-    },
-    "language": "typescript",
-    "schema": "./src/api/schema.graphql",
-    "src": "./src"
-  },
   "proxy": "http://localhost:4000/",
   "overrides": {
     "react-error-overlay": "6.0.9"
