@@ -39,8 +39,7 @@ const UPDATE_CAMPAIGN_FORM_FRAGMENT = graphql`
     ...UpdateCampaignOutcome_UpdateCampaignOutcomeFragment
     baseImage {
       id
-      version
-      releaseDisplayName
+      name
       baseImageCollection {
         id
         name
@@ -147,10 +146,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
               baseImageId: baseImage.id,
             }}
           >
-            {baseImage.version}
-            {baseImage.releaseDisplayName !== null
-              ? ` (${baseImage.releaseDisplayName})`
-              : ""}
+            {baseImage.name}
           </Link>
         </FormRow>
         <FormRow

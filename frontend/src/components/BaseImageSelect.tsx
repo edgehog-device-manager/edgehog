@@ -46,22 +46,11 @@ const GET_BASE_IMAGES_QUERY = graphql`
     baseImageCollection(id: $baseImageCollectionId) {
       baseImages {
         id
-        version
-        releaseDisplayName
+        name
       }
     }
   }
 `;
-
-const getBaseImageSelectOptionLabel = ({
-  version,
-  releaseDisplayName,
-}: BaseImage) => {
-  if (releaseDisplayName === null) {
-    return version;
-  }
-  return `${version} (${releaseDisplayName})`;
-};
 
 type BaseImageSelectProps = {
   baseImages?: readonly BaseImage[];
@@ -81,7 +70,7 @@ const BaseImageSelect = forwardRef<HTMLSelectElement, BaseImageSelectProps>(
         </option>
         {baseImages.map((baseImage) => (
           <option key={baseImage.id} value={baseImage.id}>
-            {getBaseImageSelectOptionLabel(baseImage)}
+            {baseImage.name}
           </option>
         ))}
       </Form.Select>

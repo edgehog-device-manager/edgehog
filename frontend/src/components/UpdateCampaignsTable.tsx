@@ -44,8 +44,7 @@ const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
     outcome
     ...UpdateCampaignOutcome_UpdateCampaignOutcomeFragment
     baseImage {
-      version
-      releaseDisplayName
+      name
       baseImageCollection {
         name
       }
@@ -125,13 +124,7 @@ const columns: Column<TableRecord>[] = [
   },
   {
     id: "baseImage",
-    accessor: ({ baseImage }) => {
-      const { releaseDisplayName, version } = baseImage;
-      if (releaseDisplayName === null) {
-        return version;
-      }
-      return `${version} (${releaseDisplayName})`;
-    },
+    accessor: (row) => row.baseImage.name,
     Header: (
       <FormattedMessage
         id="components.UpdateCampaignsTable.baseImageTitle"
