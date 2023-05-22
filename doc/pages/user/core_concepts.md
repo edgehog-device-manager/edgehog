@@ -155,7 +155,7 @@ To provide some examples, here is a Selector to target all out of order Devices 
 
 Here is a selector to target all Devices that have their service timestamp in the past so they have
 to be serviced, imagining this information is contained in the `com.foo.ServiceInfo` Astarte
-interface in the `/nextServiceTimestamp`:
+interface in the `/serviceTimestamp`:
 
 ```
 attributes["astarte-values:com.foo.ServiceInfo/serviceTimestamp"] <= now()
