@@ -2,7 +2,15 @@
 # SPDX-License-Identifier: CC0-1.0
 
 [
-  import_deps: [:ecto, :phoenix, :absinthe, :skogsra, :nimble_parsec, :i18n_helpers],
+  import_deps: [
+    :ecto,
+    :phoenix,
+    :absinthe,
+    :skogsra,
+    :nimble_parsec,
+    :i18n_helpers,
+    :polymorphic_embed
+  ],
   inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],
   subdirectories: ["priv/*/migrations"]
 ]

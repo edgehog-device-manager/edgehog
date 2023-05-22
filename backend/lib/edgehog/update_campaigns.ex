@@ -27,6 +27,10 @@ defmodule Edgehog.UpdateCampaigns do
   alias Edgehog.Repo
 
   alias Ecto.Multi
+  alias Edgehog.BaseImages
+  alias Edgehog.Devices
+  alias Edgehog.UpdateCampaigns.Target
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
   @doc """
@@ -260,6 +264,37 @@ defmodule Edgehog.UpdateCampaigns do
   end
 
   @doc """
+  Lists all devices belonging to an Update Channel that can be updated with a specific Base Image.
+
+  Note that this only checks the compatibility between the Device and the System Model targeted
+  by the Base Image, the starting version requirement will be checked just before the update and
+  will potentially result in a failed operation.
+
+  ## Examples
+
+  iex> list_updatable_devices(update_channel, base_image)
+  [%Devices.Device{}, ...]
+
+  """
+  def list_updatable_devices(update_channel, base_image) do
+    system_model_id = base_image.base_image_collection.system_model_id
+
+    update_channel.target_groups
+    |> Enum.map(fn target_group ->
+      # This gets validated when the DeviceGroup is created, if it fails here then there's a bug
+      # and it's legitimate we crash
+      {:ok, group_devices_query} = Edgehog.Selector.to_ecto_query(target_group.selector)
+
+      from d in group_devices_query,
+        join: sm in assoc(d, :system_model),
+        where: sm.id == ^system_model_id
+    end)
+    |> Enum.reduce(fn query, acc -> union(acc, ^query) end)
+    |> Repo.all()
+    |> Devices.preload_defaults_for_device()
+  end
+
+  @doc """
   Returns a `device_group_id -> update_channel` map for the passed DeviceGroup ids.
 
   This allows retrieving the update channels for a list of device groups by doing one query
@@ -279,5 +314,190 @@ defmodule Edgehog.UpdateCampaigns do
 
     Repo.all(query)
     |> Map.new()
+  end
+
+  @doc """
+  Preloads the default associations for an UpdateCampaign or a list of UpdateCampaigns
+  """
+  def preload_defaults_for_update_campaign(campaign_or_campaigns, opts \\ []) do
+    preloads = [
+      base_image: [
+        base_image_collection: [
+          system_model: [:hardware_type, :part_numbers]
+        ]
+      ],
+      update_channel: [:target_groups],
+      update_targets: [
+        device: [
+          tags: [],
+          custom_attributes: [],
+          system_model: [:hardware_type, :part_numbers]
+        ]
+      ]
+    ]
+
+    Repo.preload(campaign_or_campaigns, preloads, opts)
+  end
+
+  @doc """
+  Returns the list of update campaigns.
+
+  ## Examples
+
+      iex> list_update_campaigns()
+      [%UpdateCampaign{}, ...]
+
+  """
+  def list_update_campaigns do
+    Repo.all(UpdateCampaign)
+    |> preload_defaults_for_update_campaign()
+  end
+
+  @doc """
+  Fetches a single update campaign.
+
+  Returns `{:error, :not_found}` if the Update campaign does not exist.
+
+  ## Examples
+
+  iex> fetch_update_campaign(123)
+  {:ok, %UpdateCampaign{}}
+
+  iex> fetch_update_campaign(456)
+  {:error, :not_found}
+
+  """
+  def fetch_update_campaign(id) do
+    case Repo.get(UpdateCampaign, id) do
+      nil ->
+        {:error, :not_found}
+
+      %UpdateCampaign{} = update_campaign ->
+        {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    end
+  end
+
+  @doc """
+  Creates an update campaign.
+
+  ## Examples
+
+      iex> create_update_campaign(update_channel, base_image, %{field: value})
+      {:ok, %UpdateCampaign{}}
+
+      iex> create_update_campaign(update_channel, base_image, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_update_campaign(update_channel, base_image, attrs) do
+    %UpdateChannel{id: update_channel_id} = update_channel
+    %BaseImages.BaseImage{id: base_image_id} = base_image
+
+    updatable_devices = list_updatable_devices(update_channel, base_image)
+
+    changeset =
+      %UpdateCampaign{
+        update_channel_id: update_channel_id,
+        base_image_id: base_image_id
+      }
+      |> UpdateCampaign.changeset(attrs)
+
+    if updatable_devices == [] do
+      create_empty_update_campaign(changeset)
+    else
+      create_update_campaign_with_targets(changeset, updatable_devices)
+    end
+  end
+
+  defp create_empty_update_campaign(changeset) do
+    changeset =
+      changeset
+      |> Ecto.Changeset.put_change(:status, :finished)
+      |> Ecto.Changeset.put_change(:outcome, :success)
+
+    with {:ok, update_campaign} <- Repo.insert(changeset) do
+      {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    end
+  end
+
+  defp create_update_campaign_with_targets(changeset, updatable_devices) do
+    changeset = Ecto.Changeset.put_change(changeset, :status, :in_progress)
+
+    tenant_id = Repo.get_tenant_id()
+
+    timestamp =
+      NaiveDateTime.utc_now()
+      |> NaiveDateTime.truncate(:second)
+
+    placeholders = %{timestamp: timestamp, tenant_id: tenant_id}
+
+    Multi.new()
+    |> Multi.insert(:update_campaign, changeset)
+    |> Multi.insert_all(
+      :targets,
+      Target,
+      fn changes ->
+        %{update_campaign: update_campaign} = changes
+
+        Enum.map(updatable_devices, fn device ->
+          %{
+            tenant_id: {:placeholder, :tenant_id},
+            status: :idle,
+            update_campaign_id: update_campaign.id,
+            device_id: device.id,
+            inserted_at: {:placeholder, :timestamp},
+            updated_at: {:placeholder, :timestamp}
+          }
+        end)
+      end,
+      placeholders: placeholders
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{update_campaign: update_campaign}} ->
+        {:ok, preload_defaults_for_update_campaign(update_campaign)}
+
+      {:error, _failed_operation, failed_value, _changes_so_far} ->
+        {:error, failed_value}
+    end
+  end
+
+  @doc """
+  Preloads the default associations for a Target or a list of Targets
+  """
+  def preload_defaults_for_target(target_or_targets, opts \\ []) do
+    preloads = [
+      device: [
+        tags: [],
+        custom_attributes: [],
+        system_model: [:hardware_type, :part_numbers]
+      ]
+    ]
+
+    Repo.preload(target_or_targets, preloads, opts)
+  end
+
+  @doc """
+  Fetches a single target.
+
+  Returns `{:error, :not_found}` if the Target does not exist.
+
+  ## Examples
+
+  iex> fetch_target(123)
+  {:ok, %Target{}}
+
+  iex> fetch_target(456)
+  {:error, :not_found}
+
+  """
+  def fetch_target(id) do
+    case Repo.get(Target, id) do
+      nil ->
+        {:error, :not_found}
+
+      %Target{} = target ->
+        {:ok, preload_defaults_for_target(target)}
+    end
   end
 end

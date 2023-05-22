@@ -21,11 +21,17 @@
 defmodule Edgehog.UpdateCampaignsTest do
   use Edgehog.DataCase
 
+  import Edgehog.BaseImagesFixtures
+  import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
+  alias Edgehog.AstarteFixtures
+  alias Edgehog.DevicesFixtures
   alias Edgehog.Groups
   alias Edgehog.UpdateCampaigns
+  alias Edgehog.UpdateCampaigns.PushRollout
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
   test "list_update_channels/0 returns all update_channels" do
@@ -281,6 +287,219 @@ defmodule Edgehog.UpdateCampaignsTest do
     assert Map.fetch!(update_channels_map, target_group_4.id) == nil
   end
 
+  test "list_update_campaigns/0 returns all update campaigns" do
+    update_campaign = update_campaign_fixture()
+    assert UpdateCampaigns.list_update_campaigns() == [update_campaign]
+  end
+
+  describe "fetch_update_campaign/1" do
+    test "returns the update_campaign with given id" do
+      update_campaign = update_campaign_fixture()
+      assert UpdateCampaigns.fetch_update_campaign(update_campaign.id) == {:ok, update_campaign}
+    end
+
+    test "returns {:error, :not_found} for non-existing id" do
+      assert UpdateCampaigns.fetch_update_campaign(1_234_567) == {:error, :not_found}
+    end
+  end
+
+  describe "create_update_campaign/3" do
+    test "with valid data creates an update_campaign" do
+      update_channel = update_channel_fixture()
+      base_image = base_image_fixture()
+
+      attrs = %{
+        name: "My Campaign",
+        rollout_mechanism: %{
+          type: "push",
+          max_errors_percentage: 10.0,
+          max_in_progress_updates: 10
+        }
+      }
+
+      assert {:ok, %UpdateCampaign{} = update_campaign} =
+               UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
+
+      assert %PushRollout{
+               max_errors_percentage: 10.0,
+               max_in_progress_updates: 10,
+               # Default value
+               ota_request_retries: 0,
+               # Default value
+               ota_request_timeout_seconds: 60,
+               # Default value
+               force_downgrade: false
+             } = update_campaign.rollout_mechanism
+    end
+
+    test "with no targets creates a update_campaign that succeeds immediately" do
+      {:ok, update_campaign} = create_update_campaign()
+
+      assert update_campaign.update_targets == []
+      assert update_campaign.status == :finished
+      assert update_campaign.outcome == :success
+    end
+
+    test "with some targets creates a update_campaign in_progress" do
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
+
+      base_image = base_image_fixture()
+
+      device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foobar"])
+
+      {:ok, update_campaign} =
+        create_update_campaign(update_channel: update_channel, base_image: base_image)
+
+      assert [target] = update_campaign.update_targets
+      assert target.device_id == device.id
+      assert update_campaign.status == :in_progress
+      assert update_campaign.outcome == nil
+    end
+
+    test "fails with invalid rollout mechanism" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_update_campaign(rollout_mechanism: [type: "invalid"])
+
+      assert "is invalid" in errors_on(changeset).rollout_mechanism
+    end
+
+    test "fails with invalid max_errors_percentage in rollout_mechanism" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_update_campaign(rollout_mechanism: [max_errors_percentage: 120.0])
+
+      assert "must be less than or equal to 100" in errors_on(changeset).rollout_mechanism.max_errors_percentage
+    end
+
+    test "fails with invalid max_in_progress_updates in rollout_mechanism" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_update_campaign(rollout_mechanism: [max_in_progress_updates: -3])
+
+      assert "must be greater than 0" in errors_on(changeset).rollout_mechanism.max_in_progress_updates
+    end
+
+    test "saves ota_request_retries in rollout_mechanism if explicitly passed" do
+      {:ok, update_campaign} = create_update_campaign(rollout_mechanism: [ota_request_retries: 5])
+
+      assert update_campaign.rollout_mechanism.ota_request_retries == 5
+    end
+
+    test "fails with invalid ota_request_retries in rollout_mechanism" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_update_campaign(rollout_mechanism: [ota_request_retries: -5])
+
+      assert "must be greater than or equal to 0" in errors_on(changeset).rollout_mechanism.ota_request_retries
+    end
+
+    test "saves ota_request_timeout_seconds in rollout_mechanism if explicitly passed" do
+      {:ok, update_campaign} =
+        create_update_campaign(rollout_mechanism: [ota_request_timeout_seconds: 120])
+
+      assert update_campaign.rollout_mechanism.ota_request_timeout_seconds == 120
+    end
+
+    test "fails with invalid ota_request_timeout_seconds in rollout_mechanism" do
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               create_update_campaign(rollout_mechanism: [ota_request_timeout_seconds: 5])
+
+      assert "must be greater than or equal to 30" in errors_on(changeset).rollout_mechanism.ota_request_timeout_seconds
+    end
+
+    test "saves force_downgrade in rollout_mechanism if explicitly passed" do
+      {:ok, update_campaign} = create_update_campaign(rollout_mechanism: [force_downgrade: true])
+
+      assert update_campaign.rollout_mechanism.force_downgrade == true
+    end
+
+    test "fails with invalid force_downgrade in rollout_mechanism" do
+      assert {:error, %Ecto.Changeset{}} =
+               create_update_campaign(rollout_mechanism: [force_downgrade: "foo"])
+
+      # TODO: add assertions on the specific error key after errors_on gets fixed to work on
+      # nested changeset errors
+    end
+  end
+
+  describe "list_updatable_devices" do
+    test "returns empty list without devices" do
+      update_channel = update_channel_fixture()
+      base_image = base_image_fixture()
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == []
+    end
+
+    test "returns only devices matching the system model of the base_image" do
+      base_image = base_image_fixture()
+
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
+
+      device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foobar"])
+
+      _other_device =
+        device_fixture()
+        |> add_tags(["foobar"])
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == [device]
+    end
+
+    test "returns only devices belonging to the UpdateChannel with the base_image" do
+      base_image = base_image_fixture()
+
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
+
+      device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foobar"])
+
+      _other_device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["not-foobar"])
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == [device]
+    end
+
+    test "returns the union of all target groups of the UpdateChannel" do
+      base_image = base_image_fixture()
+
+      foo_group = device_group_fixture(selector: ~s<"foo" in tags>)
+      bar_group = device_group_fixture(selector: ~s<"bar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [foo_group.id, bar_group.id])
+
+      foo_device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foo"])
+
+      bar_device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["bar"])
+
+      updatable_devices = UpdateCampaigns.list_updatable_devices(update_channel, base_image)
+      assert length(updatable_devices) == 2
+      assert foo_device in updatable_devices
+      assert bar_device in updatable_devices
+    end
+
+    test "deduplicates devices belonging to multiple groups" do
+      base_image = base_image_fixture()
+
+      foo_group = device_group_fixture(selector: ~s<"foo" in tags>)
+      bar_group = device_group_fixture(selector: ~s<"bar" in tags>)
+      update_channel = update_channel_fixture(target_group_ids: [foo_group.id, bar_group.id])
+
+      device =
+        device_fixture_compatible_with(base_image)
+        |> add_tags(["foo", "bar"])
+
+      assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == [device]
+    end
+  end
+
   defp create_update_channel(opts) do
     {target_group_ids, opts} =
       Keyword.pop_lazy(opts, :target_group_ids, fn ->
@@ -301,5 +520,43 @@ defmodule Edgehog.UpdateCampaignsTest do
     attrs = Enum.into(opts, %{})
 
     Edgehog.UpdateCampaigns.update_update_channel(update_channel, attrs)
+  end
+
+  defp create_update_campaign(opts \\ []) do
+    {update_channel, opts} =
+      Keyword.pop_lazy(opts, :update_channel, fn ->
+        update_channel_fixture()
+      end)
+
+    {base_image, opts} =
+      Keyword.pop_lazy(opts, :base_image, fn ->
+        base_image_fixture()
+      end)
+
+    {rollout_mechanism_opts, opts} = Keyword.pop(opts, :rollout_mechanism, [])
+
+    rollout_mechanism =
+      Enum.into(rollout_mechanism_opts, %{
+        type: "push",
+        max_errors_percentage: 10.0,
+        max_in_progress_updates: 10
+      })
+
+    attrs =
+      Enum.into(opts, %{
+        name: unique_update_campaign_name(),
+        rollout_mechanism: rollout_mechanism
+      })
+
+    UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
+  end
+
+  defp device_fixture do
+    # Helper to avoid having to manually create the cluster and realm
+    # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
+
+    AstarteFixtures.cluster_fixture()
+    |> AstarteFixtures.realm_fixture()
+    |> DevicesFixtures.device_fixture()
   end
 end

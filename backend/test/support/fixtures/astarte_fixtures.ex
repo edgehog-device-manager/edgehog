@@ -25,6 +25,16 @@ defmodule Edgehog.AstarteFixtures do
   """
 
   @doc """
+  Generate a unique cluster name.
+  """
+  def unique_cluster_name, do: "cluster#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique realm name.
+  """
+  def unique_realm_name, do: "realm#{System.unique_integer([:positive])}"
+
+  @doc """
   Generate a cluster.
   """
   def cluster_fixture(attrs \\ %{}) do
@@ -32,7 +42,7 @@ defmodule Edgehog.AstarteFixtures do
       attrs
       |> Enum.into(%{
         base_api_url: "https://api.astarte.example.com",
-        name: "some name"
+        name: unique_cluster_name()
       })
       |> Edgehog.Astarte.create_cluster()
 
@@ -48,7 +58,7 @@ defmodule Edgehog.AstarteFixtures do
     attrs =
       attrs
       |> Enum.into(%{
-        name: "somename",
+        name: unique_realm_name(),
         private_key: @private_key
       })
 

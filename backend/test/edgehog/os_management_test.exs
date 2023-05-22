@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ defmodule Edgehog.OSManagementTest do
     alias Edgehog.OSManagement.OTAOperation
 
     import Edgehog.AstarteFixtures
+    import Edgehog.BaseImagesFixtures
     import Edgehog.DevicesFixtures
     import Edgehog.OSManagementFixtures
 
@@ -152,6 +153,41 @@ defmodule Edgehog.OSManagementTest do
                OSManagement.create_manual_ota_operation(device, fake_image)
     end
 
+    test "create_managed_ota_operation/2 with valid data creates an ota_operation", %{
+      device: device
+    } do
+      base_image = base_image_fixture()
+
+      Edgehog.Astarte.Device.OTARequestMock
+      |> expect(:post, fn _client, device_id, _uuid, url ->
+        assert device_id == device.device_id
+        assert url == base_image.url
+        :ok
+      end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.create_managed_ota_operation(device, base_image)
+
+      assert ota_operation.base_image_url == base_image.url
+      assert ota_operation.status == :pending
+      assert ota_operation.status_code == nil
+      assert ota_operation.manual? == false
+    end
+
+    test "create_managed_ota_operation/2 fails if the Astarte request fails", %{
+      device: device
+    } do
+      base_image = base_image_fixture()
+
+      Edgehog.Astarte.Device.OTARequestMock
+      |> expect(:post, fn _client, _device_id, _uuid, _url ->
+        {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
+      end)
+
+      assert {:error, %Astarte.Client.APIError{}} =
+               OSManagement.create_managed_ota_operation(device, base_image)
+    end
+
     test "update_ota_operation/2 with valid data updates the ota_operation", %{device: device} do
       ota_operation = manual_ota_operation_fixture(device)
 
@@ -209,6 +245,38 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.status_code == :network_error
     end
 
+    test "update_ota_operation/2 with done status doesn't delete the image for a managed ota_operation",
+         %{device: device} do
+      ota_operation = managed_ota_operation_fixture(device)
+
+      update_attrs = %{status: :done, status_code: ""}
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.update_ota_operation(ota_operation, update_attrs)
+
+      assert ota_operation.status == :done
+      assert ota_operation.status_code == nil
+    end
+
+    test "update_ota_operation/2 with error status doesn't delete the image for a managed ota_operation",
+         %{device: device} do
+      ota_operation = managed_ota_operation_fixture(device)
+
+      update_attrs = %{status: :error, status_code: "OTAErrorNetwork"}
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.update_ota_operation(ota_operation, update_attrs)
+
+      assert ota_operation.status == :error
+      assert ota_operation.status_code == :network_error
+    end
+
     test "update_ota_operation/2 with invalid data returns error changeset", %{device: device} do
       ota_operation = manual_ota_operation_fixture(device)
 
@@ -225,6 +293,34 @@ defmodule Edgehog.OSManagementTest do
       assert_raise Ecto.NoResultsError, fn ->
         OSManagement.get_ota_operation!(ota_operation.id)
       end
+    end
+
+    test "delete_ota_operation/1 removes the ephemeral image for a manual ota_operation", %{
+      device: device
+    } do
+      ota_operation = manual_ota_operation_fixture(device)
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, fn tenant_id, ota_operation_id, url ->
+        assert tenant_id == ota_operation.tenant_id
+        assert ota_operation_id == ota_operation.id
+        assert url == ota_operation.base_image_url
+
+        :ok
+      end)
+
+      assert {:ok, %OTAOperation{}} = OSManagement.delete_ota_operation(ota_operation)
+    end
+
+    test "delete_ota_operation/1 doesn't remove the image for a managed ota_operation", %{
+      device: device
+    } do
+      ota_operation = managed_ota_operation_fixture(device)
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
+      assert {:ok, %OTAOperation{}} = OSManagement.delete_ota_operation(ota_operation)
     end
 
     test "change_ota_operation/1 returns a ota_operation changeset", %{device: device} do

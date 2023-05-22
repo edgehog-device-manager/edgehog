@@ -24,8 +24,10 @@ defmodule Edgehog.OSManagementFixtures do
   entities via the `Edgehog.OSManagement` context.
   """
 
+  alias Edgehog.BaseImagesFixtures
+
   @doc """
-  Generate a ota_operation.
+  Generate a manual ota_operation.
   """
   def manual_ota_operation_fixture(device) do
     fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
@@ -34,6 +36,20 @@ defmodule Edgehog.OSManagementFixtures do
       device
       |> Edgehog.Devices.preload_astarte_resources_for_device()
       |> Edgehog.OSManagement.create_manual_ota_operation(fake_image)
+
+    ota_operation
+  end
+
+  @doc """
+  Generate a managed ota_operation.
+  """
+  def managed_ota_operation_fixture(device) do
+    base_image = BaseImagesFixtures.base_image_fixture()
+
+    {:ok, ota_operation} =
+      device
+      |> Edgehog.Devices.preload_astarte_resources_for_device()
+      |> Edgehog.OSManagement.create_managed_ota_operation(base_image)
 
     ota_operation
   end
