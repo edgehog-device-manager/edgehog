@@ -34,6 +34,9 @@ defmodule Edgehog.AstarteTest do
   describe "clusters" do
     alias Edgehog.Astarte.Cluster
 
+    import Edgehog.AstarteFixtures
+
+    @valid_attrs %{base_api_url: "http://some-base-api.url", name: "some name"}
     @invalid_attrs %{base_api_url: nil, name: nil}
 
     test "list_clusters/0 returns all clusters" do
@@ -47,23 +50,61 @@ defmodule Edgehog.AstarteTest do
     end
 
     test "create_cluster/1 with valid data creates a cluster" do
-      valid_attrs = %{base_api_url: "some base_api_url", name: "some name"}
+      %{base_api_url: url, name: name} = @valid_attrs
 
-      assert {:ok, %Cluster{} = cluster} = Astarte.create_cluster(valid_attrs)
-      assert cluster.base_api_url == "some base_api_url"
-      assert cluster.name == "some name"
+      assert {:ok, %Cluster{} = cluster} = Astarte.create_cluster(@valid_attrs)
+      assert cluster.base_api_url == url
+      assert cluster.name == name
     end
 
     test "create_cluster/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Astarte.create_cluster(@invalid_attrs)
+      %{base_api_url: valid_url, name: valid_name} = @valid_attrs
+      %{base_api_url: invalid_url, name: invalid_name} = @invalid_attrs
+
+      invalid_attrs_list = [
+        @invalid_attrs,
+        %{base_api_url: valid_url, name: invalid_name},
+        %{base_api_url: invalid_url, name: valid_name},
+        %{base_api_url: "", name: valid_name},
+        %{base_api_url: "some url", name: valid_name}
+      ]
+
+      invalid_attrs_list
+      |> Enum.map(&Astarte.create_cluster/1)
+      |> Enum.each(fn cluster -> assert {:error, %Ecto.Changeset{}} = cluster end)
+    end
+
+    test "create_cluster/1 with invalid URL schema returns error changeset" do
+      %{name: valid_name} = @valid_attrs
+
+      valid_host_name = "host.com"
+      invalid_schemas = ["ftp://", ""]
+
+      invalid_schemas
+      |> Enum.map(fn schema -> schema <> valid_host_name end)
+      |> Enum.map(fn url -> %{base_api_url: url, name: valid_name} end)
+      |> Enum.map(&Astarte.create_cluster/1)
+      |> Enum.each(fn cluster -> assert {:error, %Ecto.Changeset{}} = cluster end)
+    end
+
+    test "create_cluster/1 with invalid URL host returns error changeset" do
+      %{name: valid_name} = @valid_attrs
+      valid_schema = "http://"
+      invalid_hosts = ["some url", ""]
+
+      invalid_hosts
+      |> Enum.map(fn host -> valid_schema <> host end)
+      |> Enum.map(fn url -> %{base_api_url: url, name: valid_name} end)
+      |> Enum.map(&Astarte.create_cluster/1)
+      |> Enum.each(fn cluster -> assert {:error, %Ecto.Changeset{}} = cluster end)
     end
 
     test "update_cluster/2 with valid data updates the cluster" do
       cluster = cluster_fixture()
-      update_attrs = %{base_api_url: "some updated base_api_url", name: "some updated name"}
+      update_attrs = %{base_api_url: "https://another-base.url", name: "some updated name"}
 
       assert {:ok, %Cluster{} = cluster} = Astarte.update_cluster(cluster, update_attrs)
-      assert cluster.base_api_url == "some updated base_api_url"
+      assert cluster.base_api_url == "https://another-base.url"
       assert cluster.name == "some updated name"
     end
 
