@@ -23,8 +23,11 @@ defmodule EdgehogWeb.AstarteTriggerController do
 
   alias Edgehog.Astarte
   alias Edgehog.OSManagement
+  alias EdgehogWeb.FallbackController
 
   require Logger
+
+  action_fallback(FallbackController)
 
   @ota_event_interface "io.edgehog.devicemanager.OTAEvent"
   @ota_response_interface "io.edgehog.devicemanager.OTAResponse"

@@ -21,10 +21,24 @@
 defmodule EdgehogWeb.FallbackController do
   use EdgehogWeb, :controller
 
-  def call(conn, {:error, :not_found}) do
+  def call(conn, {:error, :missing_astarte_realm_header}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(EdgehogWeb.ErrorView)
+    |> render(:"400")
+  end
+
+  def call(conn, {:error, :realm_not_found}) do
     conn
     |> put_status(:not_found)
     |> put_view(EdgehogWeb.ErrorView)
     |> render(:"404")
+  end
+
+  def call(conn, {:error, :cannot_process_device_event}) do
+    conn
+    |> put_status(422)
+    |> put_view(EdgehogWeb.ErrorView)
+    |> render(:"422")
   end
 end
