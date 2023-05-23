@@ -120,11 +120,7 @@ defmodule Edgehog.OSManagement do
       Repo.insert(ota_operation)
     end)
     |> Multi.run(:send_ota_request, fn _repo, %{image_upload: base_image_url} ->
-      device_id = device.device_id
-
-      with {:ok, client} <- Devices.appengine_client_from_device(device),
-           :ok <-
-             Astarte.send_ota_request_update(client, device_id, ota_operation_id, base_image_url) do
+      with :ok <- send_update_request(device, ota_operation_id, base_image_url) do
         {:ok, nil}
       end
     end)
@@ -168,11 +164,7 @@ defmodule Edgehog.OSManagement do
       device_id: device.id
     })
     |> Multi.run(:send_ota_request, fn _repo, _changes ->
-      device_id = device.device_id
-
-      with {:ok, client} <- Devices.appengine_client_from_device(device),
-           :ok <-
-             Astarte.send_ota_request_update(client, device_id, ota_operation_id, base_image.url) do
+      with :ok <- send_update_request(device, ota_operation_id, base_image.url) do
         {:ok, nil}
       end
     end)
@@ -187,6 +179,22 @@ defmodule Edgehog.OSManagement do
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
+    end
+  end
+
+  @doc """
+  Sends an update request to a device via the Astarte API
+
+  ## Example
+
+      iex> send_update_request(%Devices.Device{} = device, ota_operation_id, base_image_url)
+      :ok
+  """
+  def send_update_request(%Devices.Device{} = device, ota_operation_id, base_image_url) do
+    device_id = device.device_id
+
+    with {:ok, client} <- Devices.appengine_client_from_device(device) do
+      Astarte.send_ota_request_update(client, device_id, ota_operation_id, base_image_url)
     end
   end
 

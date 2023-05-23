@@ -215,6 +215,36 @@ defmodule Edgehog.OSManagementTest do
                OSManagement.create_managed_ota_operation(device, base_image)
     end
 
+    test "send_update_request/2 succeeds if the Astarte request succeeds", %{
+      device: device
+    } do
+      device_id = device.device_id
+      ota_request_id = "715cb3d6-a24d-4cb5-bc86-5c85f5a906f2"
+      image_url = "https://my.bucket.com/my_image.bin"
+
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, ^device_id, ^ota_request_id, ^image_url ->
+        :ok
+      end)
+
+      assert :ok = OSManagement.send_update_request(device, ota_request_id, image_url)
+    end
+
+    test "send_update_request/2 fails if the Astarte request fails", %{
+      device: device
+    } do
+      ota_request_id = "715cb3d6-a24d-4cb5-bc86-5c85f5a906f2"
+      image_url = "https://my.bucket.com/my_image.bin"
+
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, _device_id, _uuid, _fake_url ->
+        {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
+      end)
+
+      assert {:error, %Astarte.Client.APIError{}} =
+               OSManagement.send_update_request(device, ota_request_id, image_url)
+    end
+
     test "update_ota_operation/2 with valid data updates the ota_operation", %{device: device} do
       ota_operation = manual_ota_operation_fixture(device)
 
