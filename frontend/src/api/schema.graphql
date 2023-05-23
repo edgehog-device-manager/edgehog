@@ -699,14 +699,29 @@ enum OtaOperationStatus {
   "The OTA operation was created and is waiting an acknowledgment from the device"
   PENDING
 
-  "The OTA operation was accepted from the device"
-  IN_PROGRESS
+  "The OTA operation was acknowledged from the device"
+  ACKNOWLEDGED
 
-  "The OTA operation ended with an error"
+  "The device is downloading the update"
+  DOWNLOADING
+
+  "The device is deploying the update"
+  DEPLOYING
+
+  "The device deployed the update"
+  DEPLOYED
+
+  "The device is in the process of rebooting"
+  REBOOTING
+
+  "A recoverable error happened during the OTA operation"
   ERROR
 
-  "The OTA operation ended succesfully"
-  DONE
+  "The OTA operation ended with a failure. This is a final state of the OTA Operation"
+  FAILURE
+
+  "The OTA operation ended successfully. This is a final state of the OTA Operation"
+  SUCCESS
 }
 
 "The current GSM/LTE registration status of the modem."
@@ -788,8 +803,14 @@ type OtaOperation implements Node {
   "The current status of the operation"
   status: OtaOperationStatus!
 
+  "The percentage progress [0-100] for the current status"
+  statusProgress: Int!
+
   "The current status code of the operation"
   statusCode: OtaOperationStatusCode
+
+  "A message with additional details about the current status"
+  message: String
 
   "The device targeted from the operation"
   device: Device!
@@ -803,23 +824,32 @@ type OtaOperation implements Node {
 
 "Status code of the OTA operation."
 enum OtaOperationStatusCode {
+  "The OTA Operation timed out while sending the request to the device"
+  REQUEST_TIMEOUT
+
+  "The OTA Operation contained invalid data"
+  INVALID_REQUEST
+
+  "An OTA Operation is already in progress on the device"
+  UPDATE_ALREADY_IN_PROGRESS
+
   "A network error was encountered"
   NETWORK_ERROR
 
-  "An NVS error was encountered"
-  NVS_ERROR
+  "An IO error was encountered"
+  IO_ERROR
 
-  "The OTA operation is already in progress"
-  ALREADY_IN_PROGRESS
+  "An internal error was encountered"
+  INTERNAL_ERROR
 
-  "The OTA operation has failed"
-  FAILED
+  "The OTA Operation failed due to an invalid base image"
+  INVALID_BASE_IMAGE
 
-  "A deploy error was encountered"
-  DEPLOY_ERROR
+  "A system rollback has occurred"
+  SYSTEM_ROLLBACK
 
-  "A boot partition error was encountered"
-  WRONG_PARTITION
+  "The OTA Operation was canceled"
+  CANCELED
 }
 
 """
