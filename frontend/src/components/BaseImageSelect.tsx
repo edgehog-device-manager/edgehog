@@ -18,18 +18,23 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { forwardRef, Suspense } from "react";
-import type { ComponentProps } from "react";
+import { forwardRef, Suspense, useCallback, useEffect, useMemo } from "react";
+import type { ReactElement, ComponentProps } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { useIntl } from "react-intl";
-import { graphql, useLazyLoadQuery } from "react-relay/hooks";
+import type { FallbackProps } from "react-error-boundary";
+import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useQueryLoader, usePreloadedQuery } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 
 import type {
   BaseImageSelect_getBaseImages_Query,
   BaseImageSelect_getBaseImages_Query$data,
 } from "api/__generated__/BaseImageSelect_getBaseImages_Query.graphql";
 
+import Button from "components/Button";
 import Form from "components/Form";
+import Spinner from "components/Spinner";
+import Stack from "components/Stack";
 
 type SelectProps = ComponentProps<typeof Form.Select>;
 type BaseImage = NonNullable<
@@ -85,23 +90,22 @@ const BaseImageSelect = forwardRef<HTMLSelectElement, BaseImageSelectProps>(
 );
 BaseImageSelect.displayName = "BaseImageSelect";
 
-type BaseImageSelectLoaderProps = {
-  baseImageCollectionId: string;
+type BaseImageSelectContentProps = {
+  baseImagesQuery: PreloadedQuery<BaseImageSelect_getBaseImages_Query>;
+  notFoundComponent: ReactElement;
 } & SelectProps;
 
-const BaseImageSelectLoader = forwardRef<
+const BaseImageSelectContent = forwardRef<
   HTMLSelectElement,
-  BaseImageSelectLoaderProps
->(({ baseImageCollectionId, ...selectProps }, ref) => {
-  const { baseImageCollection } =
-    useLazyLoadQuery<BaseImageSelect_getBaseImages_Query>(
-      GET_BASE_IMAGES_QUERY,
-      { baseImageCollectionId },
-      { fetchPolicy: "network-only" }
-    );
+  BaseImageSelectContentProps
+>(({ baseImagesQuery, notFoundComponent, ...selectProps }, ref) => {
+  const { baseImageCollection } = usePreloadedQuery(
+    GET_BASE_IMAGES_QUERY,
+    baseImagesQuery
+  );
 
   if (baseImageCollection === null) {
-    return <BaseImageSelect {...selectProps} disabled ref={ref} />;
+    return notFoundComponent;
   }
 
   return (
@@ -112,7 +116,24 @@ const BaseImageSelectLoader = forwardRef<
     />
   );
 });
-BaseImageSelectLoader.displayName = "BaseImageSelectLoader";
+BaseImageSelectContent.displayName = "BaseImageSelectContent";
+
+const ErrorFallback = ({ resetErrorBoundary }: FallbackProps) => (
+  <Stack direction="horizontal">
+    <span>
+      <FormattedMessage
+        id="components.BaseImageSelect.ErrorFallback.message"
+        defaultMessage="Failed to load Base Images list."
+      />
+    </span>
+    <Button variant="link" onClick={resetErrorBoundary}>
+      <FormattedMessage
+        id="components.BaseImageSelect.ErrorFallback.reloadButton"
+        defaultMessage="Reload"
+      />
+    </Button>
+  </Stack>
+);
 
 type BaseImageSelectWrapperProps = {
   baseImageCollectionId?: string;
@@ -124,22 +145,47 @@ const BaseImageSelectWrapper = forwardRef<
 >((props, ref) => {
   const { baseImageCollectionId, ...selectProps } = props;
 
+  const [getBaseImagesQuery, getBaseImages] =
+    useQueryLoader<BaseImageSelect_getBaseImages_Query>(GET_BASE_IMAGES_QUERY);
+
+  const fetchBaseImages = useCallback(() => {
+    baseImageCollectionId &&
+      getBaseImages({ baseImageCollectionId }, { fetchPolicy: "network-only" });
+  }, [getBaseImages, baseImageCollectionId]);
+
+  useEffect(fetchBaseImages, [fetchBaseImages]);
+
+  const notFound = useMemo(
+    () => (
+      <ErrorFallback
+        resetErrorBoundary={fetchBaseImages}
+        error={new Error("Base Image Collection not found")}
+      />
+    ),
+    [fetchBaseImages]
+  );
+
   if (!baseImageCollectionId) {
-    return <BaseImageSelect {...selectProps} disabled />;
+    return <BaseImageSelect {...selectProps} ref={ref} disabled />;
   }
 
   return (
-    <Suspense fallback={<BaseImageSelect {...selectProps} disabled />}>
-      <ErrorBoundary
-        FallbackComponent={() => <span>Failed to load Base Images list</span>}
-      >
-        <BaseImageSelectLoader
-          {...selectProps}
-          baseImageCollectionId={baseImageCollectionId}
-          ref={ref}
-        />
-      </ErrorBoundary>
-    </Suspense>
+    <ErrorBoundary
+      resetKeys={[baseImageCollectionId]}
+      onReset={fetchBaseImages}
+      FallbackComponent={ErrorFallback}
+    >
+      <Suspense fallback={<Spinner />}>
+        {getBaseImagesQuery && (
+          <BaseImageSelectContent
+            {...selectProps}
+            baseImagesQuery={getBaseImagesQuery}
+            notFoundComponent={notFound}
+            ref={ref}
+          />
+        )}
+      </Suspense>
+    </ErrorBoundary>
   );
 });
 BaseImageSelectWrapper.displayName = "BaseImageSelectWrapper";
