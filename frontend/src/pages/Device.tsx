@@ -184,7 +184,6 @@ const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
       baseImageUrl
       status
     }
-
     ...OperationTable_otaOperations
   }
 `;
@@ -992,12 +991,9 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
       DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION
     );
 
-  const currentOperations = device.otaOperations
-    .filter(
-      (operation) =>
-        operation.status === "PENDING" || operation.status === "IN_PROGRESS"
-    )
-    .map((operation) => ({ ...operation }));
+  const currentOperations = device.otaOperations.filter(
+    ({ status }) => status !== "SUCCESS" && status !== "FAILURE"
+  );
 
   // For now devices only support 1 update operation at a time
   const currentOperation = currentOperations?.[0] || null;

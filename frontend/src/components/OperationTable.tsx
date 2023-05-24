@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
 import type { MessageDescriptor } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   OtaOperationStatus,
@@ -32,6 +32,8 @@ import Icon from "components/Icon";
 import Table from "components/Table";
 import type { Column } from "components/Table";
 
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
 const OPERATION_TABLE_FRAGMENT = graphql`
   fragment OperationTable_otaOperations on Device {
     otaOperations {
@@ -43,63 +45,59 @@ const OPERATION_TABLE_FRAGMENT = graphql`
   }
 `;
 
-const getStatusColor = (status: OtaOperationStatus) => {
+const otaOperationFinalStatuses = ["SUCCESS", "FAILURE"] as const;
+type OtaOperationFinalStatus = typeof otaOperationFinalStatuses[number];
+
+const isOtaOperationFinalStatus = (
+  status: OtaOperationStatus
+): status is OtaOperationFinalStatus =>
+  (otaOperationFinalStatuses as readonly string[]).includes(status);
+
+type OtaOperation = OperationTable_otaOperations$data["otaOperations"][number];
+type OtaOperationWithFinalStatus = Omit<OtaOperation, "status"> & {
+  readonly status: OtaOperationFinalStatus;
+};
+
+const isOtaOperationWithFinalStatus = (
+  operation: OtaOperation
+): operation is OtaOperationWithFinalStatus =>
+  isOtaOperationFinalStatus(operation.status);
+
+const getStatusColor = (status: OtaOperationFinalStatus): string => {
   switch (status) {
-    case "PENDING":
-    case "IN_PROGRESS":
-      return "text-warning";
-
-    case "ERROR":
-      return "text-danger";
-
-    case "DONE":
+    case "SUCCESS":
       return "text-success";
 
-    default:
-      return "text-muted";
+    case "FAILURE":
+      return "text-danger";
   }
 };
 
-const messages: Record<string, MessageDescriptor> = defineMessages({
-  PENDING: {
-    id: "device.otaOperationStatus.Pending",
-    defaultMessage: "Pending",
-  },
-  IN_PROGRESS: {
-    id: "device.otaOperationStatus.InProgress",
-    defaultMessage: "In progress",
-  },
-  ERROR: {
-    id: "device.otaOperationStatus.Error",
-    defaultMessage: "Error",
-  },
-  DONE: {
-    id: "device.otaOperationStatus.Done",
-    defaultMessage: "Done",
-  },
-  UnknownStatus: {
-    id: "device.otaOperationStatus.Unknown",
-    defaultMessage: "Unknown",
-  },
-});
+const messages: Record<OtaOperationFinalStatus, MessageDescriptor> =
+  defineMessages({
+    SUCCESS: {
+      id: "device.otaOperationStatus.Success",
+      defaultMessage: "Success",
+    },
+    FAILURE: {
+      id: "device.otaOperationStatus.Failure",
+      defaultMessage: "Failure",
+    },
+  });
 
-const OperationStatus = ({ status }: { status: OtaOperationStatus }) => {
+const OperationStatus = ({ status }: { status: OtaOperationFinalStatus }) => {
   const color = getStatusColor(status);
   return (
     <div className="d-flex align-items-center">
       <Icon icon="circle" className={`me-2 ${color}`} />
       <span>
-        <FormattedMessage
-          id={messages[status]?.id || messages.UnknownStatus.id}
-        />
+        <FormattedMessage id={messages[status].id} />
       </span>
     </div>
   );
 };
 
-type TableRecord = OperationTable_otaOperations$data["otaOperations"][0];
-
-const columns: Column<TableRecord>[] = [
+const columns: Column<OtaOperationWithFinalStatus>[] = [
   {
     accessor: "status",
     Header: (
@@ -172,16 +170,9 @@ const initialSortedColumns = [{ id: "updatedAt", desc: true }];
 const OperationTable = ({ className, deviceRef }: OperationTableProps) => {
   const data = useFragment(OPERATION_TABLE_FRAGMENT, deviceRef);
 
-  // react table requires mutable data
-  // TODO change this once a solution has been found
-  // see also https://github.com/TanStack/react-table/discussions/3648
-  const otaOperations = data.otaOperations
-    .filter(
-      (operation) => operation.status === "DONE" || operation.status === "ERROR"
-    )
-    .map((operation) => ({
-      ...operation,
-    }));
+  const otaOperations = data.otaOperations.filter(
+    isOtaOperationWithFinalStatus
+  );
 
   if (!otaOperations) {
     return (
