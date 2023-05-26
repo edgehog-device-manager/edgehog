@@ -518,20 +518,11 @@
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
   },
-  "device.otaOperationStatus.Done": {
-    "defaultMessage": "Done"
+  "device.otaOperationStatus.Failure": {
+    "defaultMessage": "Failure"
   },
-  "device.otaOperationStatus.Error": {
-    "defaultMessage": "Error"
-  },
-  "device.otaOperationStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "device.otaOperationStatus.Pending": {
-    "defaultMessage": "Pending"
-  },
-  "device.otaOperationStatus.Unknown": {
-    "defaultMessage": "Unknown"
+  "device.otaOperationStatus.Success": {
+    "defaultMessage": "Success"
   },
   "forms.CreateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"

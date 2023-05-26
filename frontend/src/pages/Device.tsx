@@ -183,8 +183,8 @@ const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
       id
       baseImageUrl
       status
+      createdAt
     }
-
     ...OperationTable_otaOperations
   }
 `;
@@ -992,15 +992,28 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
       DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION
     );
 
-  const currentOperations = device.otaOperations
-    .filter(
-      (operation) =>
-        operation.status === "PENDING" || operation.status === "IN_PROGRESS"
-    )
-    .map((operation) => ({ ...operation }));
+  const otaOperations = device.otaOperations
+    .map((operation) => ({ ...operation }))
+    .sort((a, b) => {
+      if (a.createdAt > b.createdAt) {
+        return -1;
+      }
+      if (a.createdAt < b.createdAt) {
+        return 1;
+      }
+      return 0;
+    });
+
+  const lastFinishedOperationIndex = otaOperations.findIndex(
+    ({ status }) => status === "SUCCESS" || status === "FAILURE"
+  );
+  const currentOperations =
+    lastFinishedOperationIndex === -1
+      ? otaOperations
+      : otaOperations.slice(0, lastFinishedOperationIndex);
 
   // For now devices only support 1 update operation at a time
-  const currentOperation = currentOperations?.[0] || null;
+  const currentOperation = currentOperations[0] || null;
 
   // TODO: use GraphQL subscription (when available) to get updates about OTA operation
   const subscriptionRef = useRef<Subscription | null>(null);
@@ -1113,7 +1126,12 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
         >
           {errorFeedback}
         </Alert>
-        {currentOperation ? (
+        <BaseImageForm
+          className="mt-3"
+          onSubmit={launchManualOTAUpdate}
+          isLoading={isCreatingOtaOperation}
+        />
+        {currentOperation && (
           <div className="mt-3">
             <FormattedMessage
               id="pages.Device.SoftwareUpdateTab.updatingTo"
@@ -1133,12 +1151,6 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
             />
             {isRefreshing && <Spinner size="sm" className="ms-2" />}
           </div>
-        ) : (
-          <BaseImageForm
-            className="mt-3"
-            onSubmit={launchManualOTAUpdate}
-            isLoading={isCreatingOtaOperation}
-          />
         )}
         <h5 className="mt-4">
           <FormattedMessage
