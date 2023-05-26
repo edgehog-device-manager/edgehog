@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ defmodule Edgehog.Astarte do
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.Device
+  alias Edgehog.Astarte.InterfaceVersion
 
   alias Edgehog.Astarte.Device.{
     BaseImage,
@@ -47,6 +48,7 @@ defmodule Edgehog.Astarte do
     WiFiScanResult
   }
 
+  @ota_request_interface "io.edgehog.devicemanager.OTARequest"
   @system_info_interface "io.edgehog.devicemanager.SystemInfo"
 
   @device_status_module Application.compile_env(
@@ -76,7 +78,16 @@ defmodule Edgehog.Astarte do
                          )
   @base_image_module Application.compile_env(:edgehog, :astarte_base_image_module, BaseImage)
   @os_info_module Application.compile_env(:edgehog, :astarte_os_info_module, OSInfo)
-  @ota_request_module Application.compile_env(:edgehog, :astarte_ota_request_module, OTARequest)
+  @ota_request_v0_module Application.compile_env(
+                           :edgehog,
+                           :astarte_ota_request_v0_module,
+                           OTARequest.V0
+                         )
+  @ota_request_v1_module Application.compile_env(
+                           :edgehog,
+                           :astarte_ota_request_v1_module,
+                           OTARequest.V1
+                         )
   @runtime_info_module Application.compile_env(
                          :edgehog,
                          :astarte_runtime_info_module,
@@ -511,8 +522,34 @@ defmodule Edgehog.Astarte do
     @os_info_module.get(client, device_id)
   end
 
-  def send_ota_request(%AppEngine{} = client, device_id, uuid, url) do
-    @ota_request_module.post(client, device_id, uuid, url)
+  def send_ota_request_update(%AppEngine{} = client, device_id, uuid, url) do
+    with {:ok, introspection} <- fetch_device_introspection(client, device_id) do
+      case Map.fetch(introspection, @ota_request_interface) do
+        {:ok, %InterfaceVersion{major: 1}} ->
+          @ota_request_v1_module.update(client, device_id, uuid, url)
+
+        {:ok, %InterfaceVersion{major: 0}} ->
+          @ota_request_v0_module.post(client, device_id, uuid, url)
+
+        :error ->
+          {:error, :ota_request_not_supported}
+      end
+    end
+  end
+
+  def send_ota_request_cancel(%AppEngine{} = client, device_id, uuid) do
+    with {:ok, introspection} <- fetch_device_introspection(client, device_id) do
+      case Map.fetch(introspection, @ota_request_interface) do
+        {:ok, %InterfaceVersion{major: 1}} ->
+          @ota_request_v1_module.cancel(client, device_id, uuid)
+
+        {:ok, %InterfaceVersion{major: 0}} ->
+          {:error, :cancel_not_supported}
+
+        :error ->
+          {:error, :ota_request_not_supported}
+      end
+    end
   end
 
   def fetch_cellular_connection_properties(%AppEngine{} = client, device_id) do

@@ -30,8 +30,12 @@ Mox.defmock(Edgehog.Astarte.Device.OSInfoMock,
   for: Edgehog.Astarte.Device.OSInfo.Behaviour
 )
 
-Mox.defmock(Edgehog.Astarte.Device.OTARequestMock,
-  for: Edgehog.Astarte.Device.OTARequest.Behaviour
+Mox.defmock(Edgehog.Astarte.Device.OTARequestV0Mock,
+  for: Edgehog.Astarte.Device.OTARequest.V0.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.OTARequestV1Mock,
+  for: Edgehog.Astarte.Device.OTARequest.V1.Behaviour
 )
 
 Mox.defmock(Edgehog.Astarte.Device.StorageUsageMock,

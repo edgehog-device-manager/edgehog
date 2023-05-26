@@ -26,18 +26,26 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
   @statuses [
     pending: "Pending",
-    in_progress: "InProgress",
+    acknowledged: "Acknowledged",
+    downloading: "Downloading",
+    deploying: "Deploying",
+    deployed: "Deployed",
+    rebooting: "Rebooting",
     error: "Error",
-    done: "Done"
+    failure: "Failure",
+    success: "Success"
   ]
 
   @status_codes [
-    network_error: "OTAErrorNetwork",
-    nvs_error: "OTAErrorNvs",
-    already_in_progress: "OTAAlreadyInProgress",
-    failed: "OTAFailed",
-    deploy_error: "OTAErrorDeploy",
-    wrong_partition: "OTAErrorBootWrongPartition"
+    request_timeout: "RequestTimeout",
+    invalid_request: "InvalidRequest",
+    update_already_in_progress: "UpdateAlreadyInProgress",
+    network_error: "NetworkError",
+    io_error: "IOError",
+    internal_error: "InternalError",
+    invalid_base_image: "InvalidBaseImage",
+    system_rollback: "SystemRollback",
+    canceled: "Canceled"
   ]
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -45,6 +53,8 @@ defmodule Edgehog.OSManagement.OTAOperation do
     field :base_image_url, :string
     field :status, Ecto.Enum, values: @statuses, default: :pending
     field :status_code, Ecto.Enum, values: @status_codes
+    field :status_progress, :integer, default: 0
+    field :message, :string
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :manual?, :boolean, source: :is_manual, default: false
     belongs_to :device, Devices.Device
@@ -55,13 +65,21 @@ defmodule Edgehog.OSManagement.OTAOperation do
   @doc false
   def create_changeset(ota_operation, attrs) do
     ota_operation
-    |> cast(attrs, [:base_image_url, :status, :status_code])
+    |> cast(attrs, [:base_image_url, :status, :status_code, :status_progress, :message])
     |> validate_required([:base_image_url])
   end
 
   @doc false
   def update_changeset(ota_operation, attrs) do
     ota_operation
-    |> cast(attrs, [:status, :status_code])
+    |> cast(attrs, [:status, :status_code, :status_progress, :message])
   end
+
+  @doc """
+  Returns true if this state is considered final, i.e. the OTA Operation is
+  considered finished and is not expected to do any other progress
+  """
+  def final_state?(:success), do: true
+  def final_state?(:failure), do: true
+  def final_state?(_other), do: false
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,16 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.OTARequest do
-  @behaviour Edgehog.Astarte.Device.OTARequest.Behaviour
-
+defmodule Edgehog.Astarte.Device.OTARequest.V0.Behaviour do
   alias Astarte.Client.AppEngine
 
-  @interface "io.edgehog.devicemanager.OTARequest"
-
-  @impl true
-  def post(%AppEngine{} = client, device_id, uuid, url) do
-    data = %{uuid: uuid, url: url}
-    AppEngine.Devices.send_datastream(client, device_id, @interface, "/request", data)
-  end
+  @callback post(
+              client :: AppEngine.t(),
+              device_id :: String.t(),
+              uuid :: String.t(),
+              url :: String.t()
+            ) ::
+              :ok | {:error, term()}
 end

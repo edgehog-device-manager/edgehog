@@ -122,7 +122,8 @@ defmodule Edgehog.OSManagement do
       device_id = device.device_id
 
       with {:ok, client} <- Devices.appengine_client_from_device(device),
-           :ok <- Astarte.send_ota_request(client, device_id, ota_operation_id, base_image_url) do
+           :ok <-
+             Astarte.send_ota_request_update(client, device_id, ota_operation_id, base_image_url) do
         {:ok, nil}
       end
     end)
@@ -165,7 +166,8 @@ defmodule Edgehog.OSManagement do
       device_id = device.device_id
 
       with {:ok, client} <- Devices.appengine_client_from_device(device),
-           :ok <- Astarte.send_ota_request(client, device_id, ota_operation_id, base_image.url) do
+           :ok <-
+             Astarte.send_ota_request_update(client, device_id, ota_operation_id, base_image.url) do
         {:ok, nil}
       end
     end)
@@ -199,7 +201,7 @@ defmodule Edgehog.OSManagement do
     with {:ok, %OTAOperation{id: id, status: status} = ota_operation} <- Repo.update(changeset) do
       Logger.info("OTA operation #{id} updated with status #{status}")
 
-      if status in [:error, :done] do
+      if OTAOperation.final_state?(status) do
         cleanup_ephemeral_image(ota_operation)
       end
 

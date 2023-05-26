@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Mocks.Astarte.Device.OTARequest do
-  @behaviour Edgehog.Astarte.Device.OTARequest.Behaviour
+defmodule Edgehog.Mocks.Astarte.Device.OTARequest.V0 do
+  @behaviour Edgehog.Astarte.Device.OTARequest.V0.Behaviour
 
   alias Astarte.Client.AppEngine
 
