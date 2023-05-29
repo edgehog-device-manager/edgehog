@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,14 @@ defmodule Edgehog.Capabilities do
 
   alias Edgehog.Astarte
 
-  @introspection_capability_map %{
+  # This is a keyword list that maps a capability, represented as an atom, to the set of all
+  # interfaces that the device must support to claim to support the capability.
+  # This needs to be a keyword list because a capability key can appear multiple times, because we
+  # could allow its support using different sets of interfaces. This way all devices supporting
+  # at least one of the sets will support the capability, and the Astarte context will be
+  # responsible of doing the right thing depending on the device introspection (see, for example,
+  # software updates)
+  @capability_to_required_interfaces [
     base_image: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.BaseImage",
@@ -106,6 +113,18 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
+    software_updates: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.OTARequest",
+        major: 1,
+        minor: 0
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.OTAEvent",
+        major: 0,
+        minor: 1
+      }
+    ],
     storage: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.StorageUsage",
@@ -141,20 +160,26 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ]
-  }
+  ]
 
+  @doc """
+  Returns a `MapSet` of atoms representing the capabilities supported by a device, given its
+  introspection as input.
+  """
   def from_introspection(introspection) when is_map(introspection) do
     capabilities =
-      Enum.reduce(@introspection_capability_map, [], fn {capability, interface_list}, acc ->
-        if Enum.all?(interface_list, &interface_supported?(introspection, &1)) do
-          [capability | acc]
-        else
-          acc
-        end
+      Enum.reduce(@capability_to_required_interfaces, MapSet.new(), fn
+        {capability, interface_list}, acc ->
+          if Enum.all?(interface_list, &interface_supported?(introspection, &1)) do
+            MapSet.put(acc, capability)
+          else
+            acc
+          end
       end)
 
     # TODO add checks on device privacy settings and geolocation providers
-    [:geolocation | capabilities]
+    MapSet.put(capabilities, :geolocation)
+    |> MapSet.to_list()
   end
 
   defp interface_supported?(introspection, %Astarte.InterfaceID{} = interface) do
