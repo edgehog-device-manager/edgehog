@@ -133,5 +133,35 @@ defmodule Edgehog.CapabilitiesTest do
 
       assert [:geolocation] = Capabilities.from_introspection(device_introspection)
     end
+
+    test "returns software_updates capability with the older set of interfaces" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.OTARequest" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.OTAResponse" => %InterfaceVersion{major: 0, minor: 1}
+      }
+
+      expected_capabilities = [
+        :software_updates,
+        :geolocation
+      ]
+
+      assert Enum.sort(expected_capabilities) ==
+               Enum.sort(Capabilities.from_introspection(device_introspection))
+    end
+
+    test "returns software_updates capability with the newer set of interfaces" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.OTARequest" => %InterfaceVersion{major: 1, minor: 0},
+        "io.edgehog.devicemanager.OTAEvent" => %InterfaceVersion{major: 0, minor: 1}
+      }
+
+      expected_capabilities = [
+        :software_updates,
+        :geolocation
+      ]
+
+      assert Enum.sort(expected_capabilities) ==
+               Enum.sort(Capabilities.from_introspection(device_introspection))
+    end
   end
 end
