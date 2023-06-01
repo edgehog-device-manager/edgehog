@@ -184,6 +184,16 @@ const Sidebar = () => (
           Route.updateChannelsNew,
         ]}
       />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.updateCampaignsLabel"
+            defaultMessage="Update Campaigns"
+          />
+        }
+        route={Route.updateCampaigns}
+        activeRoutes={[Route.updateCampaigns, Route.updateCampaignsEdit]}
+      />
     </SidebarItemGroup>
   </Navbar>
 );

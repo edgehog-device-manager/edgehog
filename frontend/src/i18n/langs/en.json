@@ -98,6 +98,15 @@
   "components.BaseImageForm.update": {
     "defaultMessage": "Update"
   },
+  "components.BaseImageSelect.ErrorFallback.message": {
+    "defaultMessage": "Failed to load Base Images list."
+  },
+  "components.BaseImageSelect.ErrorFallback.reloadButton": {
+    "defaultMessage": "Reload"
+  },
+  "components.BaseImageSelect.selectBaseImageOptionPlaceholder": {
+    "defaultMessage": "Select a Base Image"
+  },
   "components.BaseImagesTable.releaseDisplayNameTitle": {
     "defaultMessage": "Release Name",
     "description": "Title for the Release Name column of the base images table"
@@ -392,6 +401,9 @@
   "components.Sidebar.modelsLabel": {
     "defaultMessage": "System Models"
   },
+  "components.Sidebar.updateCampaignsLabel": {
+    "defaultMessage": "Update Campaigns"
+  },
   "components.Sidebar.updateChannelsLabel": {
     "defaultMessage": "Update Channels"
   },
@@ -433,6 +445,49 @@
   },
   "components.UpdateBaseImageCollection.systemModelLabel": {
     "defaultMessage": "System Model"
+  },
+  "components.UpdateCampaignOutcome.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.UpdateCampaignOutcome.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.UpdateCampaignOutcome.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.UpdateCampaignStatus.Finished": {
+    "defaultMessage": "Finished"
+  },
+  "components.UpdateCampaignStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.UpdateCampaignStatus.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
+    "defaultMessage": "Base Image Collection",
+    "description": "Title for the Base Image Collection column of the Update Campaigns table"
+  },
+  "components.UpdateCampaignsTable.baseImageTitle": {
+    "defaultMessage": "Base Image",
+    "description": "Title for the Base Image column of the Update Campaigns table"
+  },
+  "components.UpdateCampaignsTable.nameTitle": {
+    "defaultMessage": "Update Campaign Name",
+    "description": "Title for the Name column of the Update Campaigns table"
+  },
+  "components.UpdateCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.UpdateCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.UpdateCampaignsTable.updateCampaignStatus.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.UpdateCampaignsTable.updateChannelNameTitle": {
+    "defaultMessage": "Update Channel",
+    "description": "Title for the Update Channel column of the Update Campaigns table"
   },
   "components.UpdateChannelsTable.handleTitle": {
     "defaultMessage": "Handle",
@@ -503,6 +558,26 @@
   "components.UpdateSystemModelForm.submitButton": {
     "defaultMessage": "Update"
   },
+  "components.UpdateTargetsTable.deviceTitle": {
+    "defaultMessage": "Device",
+    "description": "Title for the Device column of the Update Targets table"
+  },
+  "components.UpdateTargetsTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the Update Targets table"
+  },
+  "components.UpdateTargetsTable.updateTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.UpdateTargetsTable.updateTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.UpdateTargetsTable.updateTargetStatus.Pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.UpdateTargetsTable.updateTargetStatus.Successful": {
+    "defaultMessage": "Successful"
+  },
   "components.WiFiScanResultsTable.apChannelTitle": {
     "defaultMessage": "Channel"
   },
@@ -544,6 +619,45 @@
   },
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "forms.CreateUpdateCampaign.baseImageCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "forms.CreateUpdateCampaign.baseImageCollectionOption": {
+    "defaultMessage": "Select a Base Image Collection"
+  },
+  "forms.CreateUpdateCampaign.baseImageLabel": {
+    "defaultMessage": "Base Image"
+  },
+  "forms.CreateUpdateCampaign.forceDowngradeLabel": {
+    "defaultMessage": "Force Downgrade"
+  },
+  "forms.CreateUpdateCampaign.maxErrorsPercentageLabel": {
+    "defaultMessage": "Max Errors <muted>(%)</muted>"
+  },
+  "forms.CreateUpdateCampaign.maxErrorsPercentageValidationLabel": {
+    "defaultMessage": "Max Errors"
+  },
+  "forms.CreateUpdateCampaign.maxInProgressUpdatesLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.CreateUpdateCampaign.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateUpdateCampaign.otaRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
+    "defaultMessage": "Request Timeout"
+  },
+  "forms.CreateUpdateCampaign.updateChannelLabel": {
+    "defaultMessage": "Update Channel"
+  },
+  "forms.CreateUpdateCampaign.updateChannelOption": {
+    "defaultMessage": "Select an Update Channel"
   },
   "forms.CreateUpdateChannel.handleLabel": {
     "defaultMessage": "Handle"
@@ -588,6 +702,36 @@
   "forms.UpdateBaseImage.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.UpdateCampaignForm.baseImageCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "forms.UpdateCampaignForm.baseImageLabel": {
+    "defaultMessage": "Base Image"
+  },
+  "forms.UpdateCampaignForm.forceDowngradeLabel": {
+    "defaultMessage": "Force Downgrade"
+  },
+  "forms.UpdateCampaignForm.maxErrorsPercentageLabel": {
+    "defaultMessage": "Max Errors <muted>(%)</muted>"
+  },
+  "forms.UpdateCampaignForm.maxInProgressUpdatesLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.UpdateCampaignForm.otaRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.UpdateCampaignForm.otaRequestTimeoutSeconds": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.UpdateCampaignForm.outcomeLabel": {
+    "defaultMessage": "Outcome"
+  },
+  "forms.UpdateCampaignForm.statusLabel": {
+    "defaultMessage": "Status"
+  },
+  "forms.UpdateCampaignForm.updateChannelLabel": {
+    "defaultMessage": "Update Channel"
+  },
   "forms.UpdateUpdateChannel.deleteButton": {
     "defaultMessage": "Delete"
   },
@@ -606,6 +750,9 @@
   },
   "forms.UpdateUpdateChannel.targetGroupsLabel": {
     "defaultMessage": "Target Groups"
+  },
+  "froms.CreateUpdateCampaign.submitButton": {
+    "defaultMessage": "Create"
   },
   "modem.RegistrationStatus.NotRegistered": {
     "defaultMessage": "Not Registered"
@@ -969,6 +1116,45 @@
   "pages.SystemModels.title": {
     "defaultMessage": "System Models"
   },
+  "pages.UpdateCampaign.updateCampaignNotFound.message": {
+    "defaultMessage": "Return to the Update Campaign list."
+  },
+  "pages.UpdateCampaign.updateCampaignNotFound.title": {
+    "defaultMessage": "Update Campaign not found."
+  },
+  "pages.UpdateCampaign.updateTargetsLabel": {
+    "defaultMessage": "Update Targets"
+  },
+  "pages.UpdateCampaignCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Update Campaign, please try again."
+  },
+  "pages.UpdateCampaignCreate.noBaseImageCollection.createButton": {
+    "defaultMessage": "Create Base Image Collection"
+  },
+  "pages.UpdateCampaignCreate.noBaseImageCollection.message": {
+    "defaultMessage": "You need at least one Base Image Collection with Base Image to create an Update Campaign"
+  },
+  "pages.UpdateCampaignCreate.noBaseImageCollection.title": {
+    "defaultMessage": "You haven't created any Base Image Collection yet"
+  },
+  "pages.UpdateCampaignCreate.noUpdateChannel.createButton": {
+    "defaultMessage": "Create Update Channel"
+  },
+  "pages.UpdateCampaignCreate.noUpdateChannel.message": {
+    "defaultMessage": "You need at least one Update Channel to create an Update Campaign"
+  },
+  "pages.UpdateCampaignCreate.noUpdateChannel.title": {
+    "defaultMessage": "You haven't created any Update Channel yet"
+  },
+  "pages.UpdateCampaignCreate.title": {
+    "defaultMessage": "Create Update Campaign"
+  },
+  "pages.UpdateCampaigns.createButton": {
+    "defaultMessage": "Create Update Campaign"
+  },
+  "pages.UpdateCampaigns.title": {
+    "defaultMessage": "Update Campaigns"
+  },
   "pages.UpdateChannel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Update Channel <bold>{updateChannel}</bold>.",
     "description": "Description for the confirmation modal to delete a Update Channel"
@@ -1015,6 +1201,21 @@
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
+  },
+  "validation.number": {
+    "defaultMessage": "{label} must be a number."
+  },
+  "validation.number.integer": {
+    "defaultMessage": "{label} must be an integer."
+  },
+  "validation.number.max": {
+    "defaultMessage": "{label} must be less than or equal to {max}."
+  },
+  "validation.number.min": {
+    "defaultMessage": "{label} must be greater than or equal to {min}."
+  },
+  "validation.number.positive": {
+    "defaultMessage": "{label} must be a positive number."
   },
   "validation.required": {
     "defaultMessage": "Required."
