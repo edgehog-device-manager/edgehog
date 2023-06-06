@@ -37,7 +37,7 @@ on:
 jobs:
   docs:
     if: github.repository_owner == 'edgehog-device-manager'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     # Checkout the source
     - uses: actions/checkout@v2
@@ -60,9 +60,9 @@ jobs:
       run: npm install -g @astarte-platform/astarte-docs-cli@0.0.7
     - name: Generate Interfaces Docs
       run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/doc/pages/integrating/astarte_interfaces.md
-    - uses: erlef/setup-beam@v1.13
+    - uses: erlef/setup-beam@v1.15
       with:
-        otp-version: "25.1"
+        otp-version: "26.0"
         elixir-version: "1.14"
     - name: Install Dependencies
       working-directory: ./edgehog/doc

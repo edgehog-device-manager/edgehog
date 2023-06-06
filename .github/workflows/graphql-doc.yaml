@@ -42,7 +42,7 @@ on:
 jobs:
   docs:
     if: github.repository_owner == 'edgehog-device-manager'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     # Checkout the source
     - uses: actions/checkout@v2
@@ -53,9 +53,9 @@ jobs:
       with:
         repository: edgehog-device-manager/docs
         path: docs
-    - uses: erlef/setup-beam@v1.13
+    - uses: erlef/setup-beam@v1.15
       with:
-        otp-version: "25.1"
+        otp-version: "26.0"
         elixir-version: "1.14"
     - name: Install Dependencies
       working-directory: ./edgehog/backend
