@@ -36,17 +36,17 @@ on:
 
 env:
   elixir_version: "1.14"
-  otp_version: "25.1"
+  otp_version: "26.0"
 jobs:
   test-dialyzer:
     name: Check Dialyzer
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       MIX_ENV: ci
     steps:
     - uses: actions/checkout@v2
 
-    - uses: erlef/setup-beam@v1.13
+    - uses: erlef/setup-beam@v1.15
       with:
         otp-version: ${{ env.otp_version }}
         elixir-version: ${{ env.elixir_version }}
@@ -120,7 +120,7 @@ jobs:
       with:
         path: backend/_build
         key: ${{ runner.os }}-_build-${{ env.otp_version }}-${{ env.elixir_version }}
-    - uses: erlef/setup-beam@v1.13
+    - uses: erlef/setup-beam@v1.15
       with:
         otp-version: ${{ env.otp_version }}
         elixir-version: ${{ env.elixir_version }}
