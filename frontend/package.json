@@ -122,5 +122,8 @@
     "schema": "./src/api/schema.graphql",
     "src": "./src"
   },
-  "proxy": "http://localhost:4000/"
+  "proxy": "http://localhost:4000/",
+  "overrides": {
+    "react-error-overlay": "6.0.9"
+  }
 }
