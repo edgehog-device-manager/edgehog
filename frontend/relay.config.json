@@ -8,6 +8,7 @@
     "enable_relay_resolver_transform": true
   },
   "language": "typescript",
+  "noFutureProofEnums": true,
   "schema": "./src/api/schema.graphql",
   "src": "./src"
 }
