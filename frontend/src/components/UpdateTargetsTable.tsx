@@ -19,7 +19,6 @@
 */
 
 import { defineMessages, FormattedMessage } from "react-intl";
-import type { MessageDescriptor } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
@@ -47,24 +46,14 @@ const UPDATE_TARGETS_TABLE_FRAGMENT = graphql`
   }
 `;
 
-const getStatusColor = (status: UpdateTargetStatus) => {
-  switch (status) {
-    case "PENDING":
-      return "text-warning";
-
-    case "SUCCESSFUL":
-      return "text-success";
-
-    case "FAILED":
-      return "text-danger";
-
-    case "IDLE":
-    default:
-      return "text-muted";
-  }
+const statusColors: Record<UpdateTargetStatus, string> = {
+  IDLE: "text-muted",
+  PENDING: "text-warning",
+  SUCCESSFUL: "text-success",
+  FAILED: "text-danger",
 };
 
-const statusMessages: Record<string, MessageDescriptor> = defineMessages({
+const statusMessages = defineMessages<UpdateTargetStatus>({
   IDLE: {
     id: "components.UpdateTargetsTable.updateTargetStatus.Idle",
     defaultMessage: "Idle",
@@ -81,25 +70,16 @@ const statusMessages: Record<string, MessageDescriptor> = defineMessages({
     id: "components.UpdateTargetsTable.updateTargetStatus.Failed",
     defaultMessage: "Failed",
   },
-  UnknownStatus: {
-    id: "components.UpdateCampaignsTable.updateCampaignStatus.Unknown",
-    defaultMessage: "Unknown",
-  },
 });
 
-const TargetStatus = ({ status }: { status: UpdateTargetStatus }) => {
-  const color = getStatusColor(status);
-  return (
-    <div className="d-flex align-items-center">
-      <Icon icon="circle" className={`me-2 ${color}`} />
-      <span>
-        <FormattedMessage
-          id={statusMessages[status]?.id || statusMessages.UnknownStatus.id}
-        />
-      </span>
-    </div>
-  );
-};
+const TargetStatus = ({ status }: { status: UpdateTargetStatus }) => (
+  <div className="d-flex align-items-center">
+    <Icon icon="circle" className={`me-2 ${statusColors[status]}`} />
+    <span>
+      <FormattedMessage id={statusMessages[status].id} />
+    </span>
+  </div>
+);
 
 type TableRecord =
   UpdateTargetsTable_UpdateTargetsFragment$data["updateTargets"][number];

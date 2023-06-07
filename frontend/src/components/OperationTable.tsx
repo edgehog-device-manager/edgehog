@@ -19,7 +19,6 @@
 */
 
 import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
-import type { MessageDescriptor } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
@@ -63,39 +62,30 @@ const isOtaOperationWithFinalStatus = (
 ): operation is OtaOperationWithFinalStatus =>
   isOtaOperationFinalStatus(operation.status);
 
-const getStatusColor = (status: OtaOperationFinalStatus): string => {
-  switch (status) {
-    case "SUCCESS":
-      return "text-success";
-
-    case "FAILURE":
-      return "text-danger";
-  }
+const statusColors: Record<OtaOperationFinalStatus, string> = {
+  SUCCESS: "text-success",
+  FAILURE: "text-danger",
 };
 
-const messages: Record<OtaOperationFinalStatus, MessageDescriptor> =
-  defineMessages({
-    SUCCESS: {
-      id: "device.otaOperationStatus.Success",
-      defaultMessage: "Success",
-    },
-    FAILURE: {
-      id: "device.otaOperationStatus.Failure",
-      defaultMessage: "Failure",
-    },
-  });
+const statusMessages = defineMessages<OtaOperationFinalStatus>({
+  SUCCESS: {
+    id: "device.otaOperationStatus.Success",
+    defaultMessage: "Success",
+  },
+  FAILURE: {
+    id: "device.otaOperationStatus.Failure",
+    defaultMessage: "Failure",
+  },
+});
 
-const OperationStatus = ({ status }: { status: OtaOperationFinalStatus }) => {
-  const color = getStatusColor(status);
-  return (
-    <div className="d-flex align-items-center">
-      <Icon icon="circle" className={`me-2 ${color}`} />
-      <span>
-        <FormattedMessage id={messages[status].id} />
-      </span>
-    </div>
-  );
-};
+const OperationStatus = ({ status }: { status: OtaOperationFinalStatus }) => (
+  <div className="d-flex align-items-center">
+    <Icon icon="circle" className={`me-2 ${statusColors[status]}`} />
+    <span>
+      <FormattedMessage id={statusMessages[status].id} />
+    </span>
+  </div>
+);
 
 const columns: Column<OtaOperationWithFinalStatus>[] = [
   {

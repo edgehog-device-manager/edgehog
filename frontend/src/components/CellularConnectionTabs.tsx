@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@
 */
 
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
-import type { MessageDescriptor } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import Col from "react-bootstrap/Col";
 import Nav from "react-bootstrap/Nav";
@@ -34,37 +33,38 @@ import Stack from "components/Stack";
 import type {
   CellularConnectionTabs_cellularConnection$data,
   CellularConnectionTabs_cellularConnection$key,
+  ModemRegistrationStatus,
+  ModemTechnology,
 } from "api/__generated__/CellularConnectionTabs_cellularConnection.graphql";
 
-const registrationStatusMessages: Record<string, MessageDescriptor> =
-  defineMessages({
-    NOT_REGISTERED: {
-      id: "modem.RegistrationStatus.NotRegistered",
-      defaultMessage: "Not Registered",
-    },
-    REGISTERED: {
-      id: "modem.RegistrationStatus.Registered",
-      defaultMessage: "Registered",
-    },
-    REGISTRATION_DENIED: {
-      id: "modem.RegistrationStatus.RegistrationDenied",
-      defaultMessage: "Registration denied",
-    },
-    REGISTERED_ROAMING: {
-      id: "modem.RegistrationStatus.RegisteredRoaming",
-      defaultMessage: "Registered, roaming",
-    },
-    SEARCHING_OPERATOR: {
-      id: "modem.RegistrationStatus.SearchingOperator",
-      defaultMessage: "Searching an operator to register to",
-    },
-    UNKNOWN: {
-      id: "modem.RegistrationStatus.Unknown",
-      defaultMessage: "Unknown",
-    },
-  });
+const registrationStatusMessages = defineMessages<ModemRegistrationStatus>({
+  NOT_REGISTERED: {
+    id: "modem.RegistrationStatus.NotRegistered",
+    defaultMessage: "Not Registered",
+  },
+  REGISTERED: {
+    id: "modem.RegistrationStatus.Registered",
+    defaultMessage: "Registered",
+  },
+  REGISTRATION_DENIED: {
+    id: "modem.RegistrationStatus.RegistrationDenied",
+    defaultMessage: "Registration denied",
+  },
+  REGISTERED_ROAMING: {
+    id: "modem.RegistrationStatus.RegisteredRoaming",
+    defaultMessage: "Registered, roaming",
+  },
+  SEARCHING_OPERATOR: {
+    id: "modem.RegistrationStatus.SearchingOperator",
+    defaultMessage: "Searching an operator to register to",
+  },
+  UNKNOWN: {
+    id: "modem.RegistrationStatus.Unknown",
+    defaultMessage: "Unknown",
+  },
+});
 
-const technologyMessages: Record<string, MessageDescriptor> = defineMessages({
+const technologyMessages = defineMessages<ModemTechnology>({
   EUTRAN: {
     id: "modem.technology.EUTRAN",
     defaultMessage: "E-UTRAN",
@@ -96,10 +96,6 @@ const technologyMessages: Record<string, MessageDescriptor> = defineMessages({
   UTRAN_HSUPA: {
     id: "modem.technology.UTRAN_HSUPA",
     defaultMessage: "UTRAN with HSUPA",
-  },
-  UNKNOWN: {
-    id: "modem.technology.Unknown",
-    defaultMessage: "Unknown",
   },
 });
 
@@ -222,8 +218,7 @@ const ModemTab = ({ modem }: { modem: Modem }) => {
             <Form.Control
               type="text"
               value={intl.formatMessage(
-                registrationStatusMessages[modem.registrationStatus] ||
-                  registrationStatusMessages.UNKNOWN
+                registrationStatusMessages[modem.registrationStatus]
               )}
               readOnly
             />
@@ -241,10 +236,7 @@ const ModemTab = ({ modem }: { modem: Modem }) => {
           >
             <Form.Control
               type="text"
-              value={intl.formatMessage(
-                technologyMessages[modem.technology] ||
-                  technologyMessages.UNKNOWN
-              )}
+              value={intl.formatMessage(technologyMessages[modem.technology])}
               readOnly
             />
           </FormRow>

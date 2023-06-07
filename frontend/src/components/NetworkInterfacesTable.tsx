@@ -18,10 +18,11 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { defineMessages, FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
+  NetworkInterfaceTechnology,
   NetworkInterfacesTable_networkInterfaces$data,
   NetworkInterfacesTable_networkInterfaces$key,
 } from "api/__generated__/NetworkInterfacesTable_networkInterfaces.graphql";
@@ -42,47 +43,28 @@ const NETWORK_INTERFACES_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const technologyMessages = defineMessages<NetworkInterfaceTechnology>({
+  ETHERNET: {
+    id: "components.NetworkInterfacesTable.technology.Ethernet",
+    defaultMessage: "Ethernet",
+  },
+  WIFI: {
+    id: "components.NetworkInterfacesTable.technology.WiFi",
+    defaultMessage: "WiFi",
+  },
+  CELLULAR: {
+    id: "components.NetworkInterfacesTable.technology.Cellular",
+    defaultMessage: "Cellular",
+  },
+  BLUETOOTH: {
+    id: "components.NetworkInterfacesTable.technology.Bluetooth",
+    defaultMessage: "Bluetooth",
+  },
+});
+
 type TableRecord = NonNullable<
   NetworkInterfacesTable_networkInterfaces$data["networkInterfaces"]
 >[number];
-
-const renderTechnology = (technology: TableRecord["technology"]) => {
-  switch (technology) {
-    case "ETHERNET":
-      return (
-        <FormattedMessage
-          id="components.NetworkInterfacesTable.technology.Ethernet"
-          defaultMessage="Ethernet"
-        />
-      );
-    case "WIFI":
-      return (
-        <FormattedMessage
-          id="components.NetworkInterfacesTable.technology.WiFi"
-          defaultMessage="WiFi"
-        />
-      );
-    case "CELLULAR":
-      return (
-        <FormattedMessage
-          id="components.NetworkInterfacesTable.technology.Cellular"
-          defaultMessage="Cellular"
-        />
-      );
-    case "BLUETOOTH":
-      return (
-        <FormattedMessage
-          id="components.NetworkInterfacesTable.technology.Bluetooth"
-          defaultMessage="Bluetooth"
-        />
-      );
-    case null:
-      return null;
-
-    default:
-      return null;
-  }
-};
 
 const columns: Column<TableRecord>[] = [
   {
@@ -102,7 +84,8 @@ const columns: Column<TableRecord>[] = [
         defaultMessage="Technology"
       />
     ),
-    Cell: ({ value }) => renderTechnology(value),
+    Cell: ({ value }) =>
+      value && <FormattedMessage id={technologyMessages[value].id} />,
   },
   {
     accessor: "macAddress",
@@ -121,9 +104,12 @@ interface Props {
 }
 
 const NetworkInterfacesTable = ({ className, deviceRef }: Props) => {
-  const data = useFragment(NETWORK_INTERFACES_TABLE_FRAGMENT, deviceRef);
+  const { networkInterfaces } = useFragment(
+    NETWORK_INTERFACES_TABLE_FRAGMENT,
+    deviceRef
+  );
 
-  if (!data.networkInterfaces || !data.networkInterfaces.length) {
+  if (!networkInterfaces || !networkInterfaces.length) {
     return (
       <Result.EmptyList
         title={
@@ -140,11 +126,6 @@ const NetworkInterfacesTable = ({ className, deviceRef }: Props) => {
       </Result.EmptyList>
     );
   }
-
-  // TODO: handle readonly type without mapping to mutable type
-  const networkInterfaces = data.networkInterfaces.map((networkInterface) => ({
-    ...networkInterface,
-  }));
 
   return (
     <Table className={className} columns={columns} data={networkInterfaces} />
