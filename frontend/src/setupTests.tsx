@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -31,9 +31,10 @@ import {
   Routes,
 } from "react-router-dom";
 import { RelayEnvironmentProvider } from "react-relay/hooks";
-import { createMockEnvironment, RelayMockEnvironment } from "relay-test-utils";
+import { createMockEnvironment } from "relay-test-utils";
+import type { MockEnvironment } from "relay-test-utils";
 
-import type { fetchGraphQL } from "api";
+import type { FetchGraphQL } from "api";
 import AuthProvider from "contexts/Auth";
 import I18nProvider from "i18n";
 
@@ -42,8 +43,8 @@ const fetchGraphQLMock = jest
   .mockReturnValue(Promise.resolve({ data: {} }));
 
 type ProvidersParams = {
-  fetchGraphQL?: typeof fetchGraphQL;
-  relayEnvironment?: RelayMockEnvironment;
+  fetchGraphQL?: FetchGraphQL;
+  relayEnvironment?: MockEnvironment;
   path?: string;
   route?: string;
 };

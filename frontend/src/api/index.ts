@@ -18,6 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import "api/relay";
 import {
   Environment,
   FetchFunction,
@@ -54,6 +55,7 @@ const fetchGraphQL = async (
   });
   return await response.json();
 };
+type FetchGraphQL = typeof fetchGraphQL;
 
 const uploadGraphQL = async (
   query: string | null | undefined,
@@ -150,4 +152,5 @@ const relayEnvironment = new Environment({
   scheduler: relayScheduler,
 });
 
+export type { FetchGraphQL };
 export { fetchGraphQL, relayEnvironment };
