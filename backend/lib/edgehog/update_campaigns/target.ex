@@ -28,6 +28,10 @@ defmodule Edgehog.UpdateCampaigns.Target do
   schema "update_campaign_targets" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :status, Ecto.Enum, values: [:idle, :pending, :failed, :successful]
+    field :retry_count, :integer, default: 0
+    field :latest_attempt, :utc_datetime_usec
+    field :ota_operation_id, :binary_id
+    field :completion_timestamp, :utc_datetime_usec
     belongs_to :update_campaign, UpdateCampaign
     belongs_to :device, Devices.Device
 
