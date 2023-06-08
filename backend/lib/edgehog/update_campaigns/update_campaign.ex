@@ -31,7 +31,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   schema "update_campaigns" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :name, :string
-    field :status, Ecto.Enum, values: [:in_progress, :finished]
+    field :status, Ecto.Enum, values: [:idle, :in_progress, :finished]
     field :outcome, Ecto.Enum, values: [:success, :failure]
     belongs_to :base_image, BaseImages.BaseImage
     belongs_to :update_channel, UpdateChannel

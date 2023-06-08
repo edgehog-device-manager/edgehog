@@ -340,7 +340,7 @@ defmodule Edgehog.UpdateCampaignsTest do
       assert update_campaign.outcome == :success
     end
 
-    test "with some targets creates a update_campaign in_progress" do
+    test "with some targets creates an :idle update_campaign" do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
       update_channel = update_channel_fixture(target_group_ids: [target_group.id])
 
@@ -355,7 +355,7 @@ defmodule Edgehog.UpdateCampaignsTest do
 
       assert [target] = update_campaign.update_targets
       assert target.device_id == device.id
-      assert update_campaign.status == :in_progress
+      assert update_campaign.status == :idle
       assert update_campaign.outcome == nil
     end
 

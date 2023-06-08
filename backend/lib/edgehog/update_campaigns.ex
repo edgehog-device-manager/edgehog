@@ -421,7 +421,7 @@ defmodule Edgehog.UpdateCampaigns do
   end
 
   defp create_update_campaign_with_targets(changeset, updatable_devices) do
-    changeset = Ecto.Changeset.put_change(changeset, :status, :in_progress)
+    changeset = Ecto.Changeset.put_change(changeset, :status, :idle)
 
     tenant_id = Repo.get_tenant_id()
 

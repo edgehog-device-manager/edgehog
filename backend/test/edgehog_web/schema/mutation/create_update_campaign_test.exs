@@ -59,7 +59,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
       update_campaign = response["data"]["createUpdateCampaign"]["updateCampaign"]
       assert update_campaign["name"] == "My Update Campaign"
-      assert update_campaign["status"] == "IN_PROGRESS"
+      assert update_campaign["status"] == "IDLE"
       assert update_campaign["outcome"] == nil
       assert update_campaign["baseImage"]["version"] == base_image.version
       assert update_campaign["baseImage"]["url"] == base_image.url

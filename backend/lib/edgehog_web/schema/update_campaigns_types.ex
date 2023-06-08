@@ -183,6 +183,8 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   The status of an Update Campaign
   """
   enum :update_campaign_status do
+    @desc "The Update Campaign has been created but is not being rolled-out yet"
+    value :idle
     @desc "The Update Campaign is being rolled-out"
     value :in_progress
     @desc "The Update Campaign has finished"
