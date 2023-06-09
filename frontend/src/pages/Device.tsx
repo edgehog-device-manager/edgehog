@@ -136,11 +136,7 @@ const DEVICE_LOCATION_FRAGMENT = graphql`
 const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
   fragment Device_storageUsage on Device {
     capabilities
-    storageUsage {
-      label
-      totalBytes
-      freeBytes
-    }
+    ...StorageTable_storageUsage
   }
 `;
 
@@ -692,14 +688,10 @@ interface DeviceStorageUsageTabProps {
 
 const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
   const intl = useIntl();
-  const { storageUsage, capabilities } = useFragment(
-    DEVICE_STORAGE_USAGE_FRAGMENT,
-    deviceRef
-  );
-  if (!storageUsage || !capabilities.includes("STORAGE")) {
+  const device = useFragment(DEVICE_STORAGE_USAGE_FRAGMENT, deviceRef);
+  if (!device.capabilities.includes("STORAGE")) {
     return null;
   }
-  const storageUnits = storageUsage.map((storageUnit) => ({ ...storageUnit }));
   return (
     <Tab
       eventKey="device-storage-usage-tab"
@@ -709,23 +701,7 @@ const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
       })}
     >
       <div className="mt-3">
-        {storageUnits.length === 0 ? (
-          <Result.EmptyList
-            title={
-              <FormattedMessage
-                id="pages.Device.storageTab.noStorage.title"
-                defaultMessage="No storage"
-              />
-            }
-          >
-            <FormattedMessage
-              id="pages.Device.storageTab.noResults.message"
-              defaultMessage="The device has not detected any storage unit yet."
-            />
-          </Result.EmptyList>
-        ) : (
-          <StorageTable data={storageUnits} />
-        )}
+        <StorageTable deviceRef={device} />
       </div>
     </Tab>
   );
