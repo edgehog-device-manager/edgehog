@@ -722,7 +722,7 @@ Disconnection trigger:
 }
 ```
 
-OTA trigger:
+OTA Response trigger:
 
 ```json
 {
@@ -737,6 +737,30 @@ OTA trigger:
         {
             "type": "data_trigger",
             "interface_name": "io.edgehog.devicemanager.OTAResponse",
+            "interface_major": 0,
+            "on": "incoming_data",
+            "match_path": "/*",
+            "value_match_operator": "*"
+        }
+    ]
+}
+```
+
+OTA Event trigger:
+
+```json
+{
+    "name": "edgehog-ota-event",
+    "action": {
+        "http_url": "<BACKEND-TRIGGER-URL>",
+        "ignore_ssl_errors": false,
+        "http_method": "post",
+        "http_static_headers": {}
+    },
+    "simple_triggers": [
+        {
+            "type": "data_trigger",
+            "interface_name": "io.edgehog.devicemanager.OTAEvent",
             "interface_major": 0,
             "on": "incoming_data",
             "match_path": "/*",

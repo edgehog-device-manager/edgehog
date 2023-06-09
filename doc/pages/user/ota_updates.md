@@ -1,5 +1,5 @@
 <!---
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -9,8 +9,8 @@
 Edgehog provides an OTA update mechanism that allows remotely updating devices. The OTA update
 mechanism is not tied to a specific platform and can be used on any [Edgehog
 runtime](device_sdks_runtime.html) which implements the
-[`io.edgehog.devicemanager.OTARequest`](astarte_interfaces.html#io-edgehog-devicemanager-otarequest-v0-1),
-[`io.edgehog.devicemanager.OTAResponse`](astarte_interfaces.html#io-edgehog-devicemanager-otaresponse-v0-1)
+[`io.edgehog.devicemanager.OTARequest`](astarte_interfaces.html#io-edgehog-devicemanager-otarequest-v1-0),
+[`io.edgehog.devicemanager.OTAEvent`](astarte_interfaces.html#io-edgehog-devicemanager-otaevent-v0-1)
 and
 [`io.edgehog.devicemanager.BaseImage`](astarte_interfaces.html#io-edgehog-devicemanager-baseimage-v0-1)
 interfaces.
