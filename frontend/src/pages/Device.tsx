@@ -166,12 +166,7 @@ const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
 const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
   fragment Device_batteryStatus on Device {
     capabilities
-    batteryStatus {
-      slot
-      status
-      levelPercentage
-      levelAbsoluteError
-    }
+    ...BatteryTable_batteryStatus
   }
 `;
 
@@ -932,17 +927,11 @@ interface DeviceBatteryTabProps {
 
 const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
   const intl = useIntl();
-  const { batteryStatus, capabilities } = useFragment(
-    DEVICE_BATTERY_STATUS_FRAGMENT,
-    deviceRef
-  );
-  if (!batteryStatus || !capabilities.includes("BATTERY_STATUS")) {
+  const device = useFragment(DEVICE_BATTERY_STATUS_FRAGMENT, deviceRef);
+  if (!device.capabilities.includes("BATTERY_STATUS")) {
     return null;
   }
-  // TODO: handle readonly type without mapping to mutable type
-  const batterySlots = batteryStatus.map((batterySlot) => ({
-    ...batterySlot,
-  }));
+
   return (
     <Tab
       eventKey="device-battery-tab"
@@ -952,23 +941,7 @@ const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
       })}
     >
       <div className="mt-3">
-        {batterySlots.length === 0 ? (
-          <Result.EmptyList
-            title={
-              <FormattedMessage
-                id="pages.Device.BatteryStatusTab.noBattery.title"
-                defaultMessage="No battery"
-              />
-            }
-          >
-            <FormattedMessage
-              id="pages.Device.BatteryStatusTab.noBattery.message"
-              defaultMessage="The device has not detected any battery yet."
-            />
-          </Result.EmptyList>
-        ) : (
-          <BatteryTable data={batterySlots} />
-        )}
+        <BatteryTable deviceRef={device} />
       </div>
     </Tab>
   );
