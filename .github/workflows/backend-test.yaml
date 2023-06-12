@@ -51,14 +51,14 @@ jobs:
         otp-version: ${{ env.otp_version }}
         elixir-version: ${{ env.elixir_version }}
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: backend/deps
         key: |
           ${{ runner.os }}-dialyzer-mix-${{ env.otp_version }}-${{ env.elixir_version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/backend/mix.lock')) }}
         restore-keys: |
           ${{ runner.os }}-dialyzer-mix-${{ env.otp_version }}-${{ env.elixir_version }}-
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       with:
         path: backend/_build
         key: |
@@ -73,7 +73,7 @@ jobs:
     # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
     # Cache key based on Elixir & Erlang version (also useful when running in matrix)
     - name: Restore PLT cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: plt_cache
       with:
         path: backend/priv/plts
@@ -112,11 +112,11 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/cache@v1
+    - uses: actions/cache@v3
       with:
         path: backend/deps
         key: ${{ runner.os }}-deps-${{ env.otp_version }}-${{ env.elixir_version }}-${{ hashFiles(format('{0}{1}{2}', github.workspace, '/backend/', '/mix.lock')) }}
-    - uses: actions/cache@v1
+    - uses: actions/cache@v3
       with:
         path: backend/_build
         key: ${{ runner.os }}-_build-${{ env.otp_version }}-${{ env.elixir_version }}
