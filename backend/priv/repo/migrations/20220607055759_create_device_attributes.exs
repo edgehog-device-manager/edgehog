@@ -28,7 +28,11 @@ defmodule Edgehog.Repo.Migrations.CreateDeviceAttributes do
         primary_key: true
 
       add :device_id,
-          references(:devices, with: [tenant_id: :tenant_id], match: :full, on_delete: :delete_all),
+          references(:devices,
+            with: [tenant_id: :tenant_id],
+            match: :full,
+            on_delete: :delete_all
+          ),
           null: false,
           primary_key: true
 

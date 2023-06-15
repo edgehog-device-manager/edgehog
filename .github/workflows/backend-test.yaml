@@ -35,8 +35,8 @@ on:
     - '.github/workflows/backend-test.yaml'
 
 env:
-  elixir_version: "1.14.5"
-  otp_version: "26.0"
+  elixir_version: "1.15.0-rc.2"
+  otp_version: "26.0.1"
 jobs:
   test-dialyzer:
     name: Check Dialyzer
