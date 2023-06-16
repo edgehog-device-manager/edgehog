@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,19 +19,35 @@
 */
 
 import { FormattedMessage, FormattedNumber } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
+import type {
+  BatteryTable_batteryStatus$data,
+  BatteryTable_batteryStatus$key,
+} from "api/__generated__/BatteryTable_batteryStatus.graphql";
+
+import Result from "components/Result";
 import Table from "components/Table";
 import type { Column } from "components/Table";
-import type { BatteryStatus } from "api/__generated__/Device_batteryStatus.graphql";
 
-type BatterySlotProps = {
-  slot: string;
-  levelPercentage: number | null;
-  levelAbsoluteError: number | null;
-  status: BatteryStatus | null;
-};
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const BATTERY_TABLE_FRAGMENT = graphql`
+  fragment BatteryTable_batteryStatus on Device {
+    batteryStatus {
+      slot
+      status
+      levelPercentage
+      levelAbsoluteError
+    }
+  }
+`;
 
-const renderBatteryStatus = (status: BatterySlotProps["status"]) => {
+type BatterySlot = NonNullable<
+  BatteryTable_batteryStatus$data["batteryStatus"]
+>[number];
+
+const renderBatteryStatus = (status: BatterySlot["status"]) => {
   switch (status) {
     case "CHARGING":
       return (
@@ -91,7 +107,7 @@ const renderBatteryStatus = (status: BatterySlotProps["status"]) => {
   }
 };
 
-const renderChargeLevel = (slot: BatterySlotProps) => {
+const renderChargeLevel = (slot: BatterySlot) => {
   switch (slot.status) {
     case "CHARGING":
     case "DISCHARGING":
@@ -119,7 +135,7 @@ const renderChargeLevel = (slot: BatterySlotProps) => {
   }
 };
 
-const columns: Column<BatterySlotProps>[] = [
+const columns: Column<BatterySlot>[] = [
   {
     accessor: "slot",
     Header: (
@@ -153,15 +169,38 @@ const columns: Column<BatterySlotProps>[] = [
 
 interface Props {
   className?: string;
-  data: BatterySlotProps[];
+  deviceRef: BatteryTable_batteryStatus$key;
 }
 
-const BatteryTable = ({ className, data }: Props) => {
+const BatteryTable = ({ className, deviceRef }: Props) => {
+  const { batteryStatus } = useFragment(BATTERY_TABLE_FRAGMENT, deviceRef);
+
+  if (!batteryStatus || !batteryStatus.length) {
+    return (
+      <Result.EmptyList
+        title={
+          <FormattedMessage
+            id="components.BatteryTable.noBattery.title"
+            defaultMessage="No battery"
+          />
+        }
+      >
+        <FormattedMessage
+          id="components.BatteryTable.noBattery.message"
+          defaultMessage="The device has not detected any battery yet."
+        />
+      </Result.EmptyList>
+    );
+  }
+
   return (
-    <Table className={className} columns={columns} data={data} hideSearch />
+    <Table
+      className={className}
+      columns={columns}
+      data={batteryStatus}
+      hideSearch
+    />
   );
 };
-
-export type { BatterySlotProps };
 
 export default BatteryTable;

@@ -122,6 +122,12 @@
   "components.BatteryTable.chargeLevelTitle": {
     "defaultMessage": "Charge Level"
   },
+  "components.BatteryTable.noBattery.message": {
+    "defaultMessage": "The device has not detected any battery yet."
+  },
+  "components.BatteryTable.noBattery.title": {
+    "defaultMessage": "No battery"
+  },
   "components.BatteryTable.slotTitle": {
     "defaultMessage": "Slot"
   },
@@ -412,6 +418,12 @@
   },
   "components.StorageTable.labelTitle": {
     "defaultMessage": "Storage Unit"
+  },
+  "components.StorageTable.noStorage.message": {
+    "defaultMessage": "The device has not detected any storage unit yet."
+  },
+  "components.StorageTable.noStorage.title": {
+    "defaultMessage": "No storage"
   },
   "components.StorageTable.totalSpaceTitle": {
     "defaultMessage": "Total Space"
@@ -884,12 +896,6 @@
   "pages.Device.BatteryStatusTab": {
     "defaultMessage": "Battery"
   },
-  "pages.Device.BatteryStatusTab.noBattery.message": {
-    "defaultMessage": "The device has not detected any battery yet."
-  },
-  "pages.Device.BatteryStatusTab.noBattery.title": {
-    "defaultMessage": "No battery"
-  },
   "pages.Device.CellularConnectionTab": {
     "defaultMessage": "Cellular Connection"
   },
@@ -946,12 +952,6 @@
   },
   "pages.Device.storageTab": {
     "defaultMessage": "Storage"
-  },
-  "pages.Device.storageTab.noResults.message": {
-    "defaultMessage": "The device has not detected any storage unit yet."
-  },
-  "pages.Device.storageTab.noStorage.title": {
-    "defaultMessage": "No storage"
   },
   "pages.Device.systemStatus.lastUpdateAt": {
     "defaultMessage": "Last updated at {date}"

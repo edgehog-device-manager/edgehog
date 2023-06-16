@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,9 +19,32 @@
 */
 
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
+import type {
+  StorageTable_storageUsage$data,
+  StorageTable_storageUsage$key,
+} from "api/__generated__/StorageTable_storageUsage.graphql";
+
+import Result from "components/Result";
 import Table from "components/Table";
 import type { Column } from "components/Table";
+
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const STORAGE_TABLE_FRAGMENT = graphql`
+  fragment StorageTable_storageUsage on Device {
+    storageUsage {
+      label
+      totalBytes
+      freeBytes
+    }
+  }
+`;
+
+type StorageUnit = NonNullable<
+  StorageTable_storageUsage$data["storageUsage"]
+>[number];
 
 const formatBytes = (bytes: number, decimals = 2) => {
   if (bytes === 0) return "0 B";
@@ -35,13 +58,7 @@ const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-type StorageProps = {
-  label: string;
-  totalBytes: number | null;
-  freeBytes: number | null;
-};
-
-const columns: Column<StorageProps>[] = [
+const columns: Column<StorageUnit>[] = [
   {
     accessor: "label",
     Header: (
@@ -85,15 +102,38 @@ const columns: Column<StorageProps>[] = [
 
 interface Props {
   className?: string;
-  data: StorageProps[];
+  deviceRef: StorageTable_storageUsage$key;
 }
 
-const StorageTable = ({ className, data }: Props) => {
+const StorageTable = ({ className, deviceRef }: Props) => {
+  const { storageUsage } = useFragment(STORAGE_TABLE_FRAGMENT, deviceRef);
+
+  if (!storageUsage || !storageUsage.length) {
+    return (
+      <Result.EmptyList
+        title={
+          <FormattedMessage
+            id="components.StorageTable.noStorage.title"
+            defaultMessage="No storage"
+          />
+        }
+      >
+        <FormattedMessage
+          id="components.StorageTable.noStorage.message"
+          defaultMessage="The device has not detected any storage unit yet."
+        />
+      </Result.EmptyList>
+    );
+  }
+
   return (
-    <Table className={className} columns={columns} data={data} hideSearch />
+    <Table
+      className={className}
+      columns={columns}
+      data={storageUsage}
+      hideSearch
+    />
   );
 };
-
-export type { StorageProps };
 
 export default StorageTable;

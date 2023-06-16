@@ -136,11 +136,7 @@ const DEVICE_LOCATION_FRAGMENT = graphql`
 const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
   fragment Device_storageUsage on Device {
     capabilities
-    storageUsage {
-      label
-      totalBytes
-      freeBytes
-    }
+    ...StorageTable_storageUsage
   }
 `;
 
@@ -166,12 +162,7 @@ const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
 const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
   fragment Device_batteryStatus on Device {
     capabilities
-    batteryStatus {
-      slot
-      status
-      levelPercentage
-      levelAbsoluteError
-    }
+    ...BatteryTable_batteryStatus
   }
 `;
 
@@ -697,14 +688,10 @@ interface DeviceStorageUsageTabProps {
 
 const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
   const intl = useIntl();
-  const { storageUsage, capabilities } = useFragment(
-    DEVICE_STORAGE_USAGE_FRAGMENT,
-    deviceRef
-  );
-  if (!storageUsage || !capabilities.includes("STORAGE")) {
+  const device = useFragment(DEVICE_STORAGE_USAGE_FRAGMENT, deviceRef);
+  if (!device.capabilities.includes("STORAGE")) {
     return null;
   }
-  const storageUnits = storageUsage.map((storageUnit) => ({ ...storageUnit }));
   return (
     <Tab
       eventKey="device-storage-usage-tab"
@@ -714,23 +701,7 @@ const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
       })}
     >
       <div className="mt-3">
-        {storageUnits.length === 0 ? (
-          <Result.EmptyList
-            title={
-              <FormattedMessage
-                id="pages.Device.storageTab.noStorage.title"
-                defaultMessage="No storage"
-              />
-            }
-          >
-            <FormattedMessage
-              id="pages.Device.storageTab.noResults.message"
-              defaultMessage="The device has not detected any storage unit yet."
-            />
-          </Result.EmptyList>
-        ) : (
-          <StorageTable data={storageUnits} />
-        )}
+        <StorageTable deviceRef={device} />
       </div>
     </Tab>
   );
@@ -932,17 +903,11 @@ interface DeviceBatteryTabProps {
 
 const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
   const intl = useIntl();
-  const { batteryStatus, capabilities } = useFragment(
-    DEVICE_BATTERY_STATUS_FRAGMENT,
-    deviceRef
-  );
-  if (!batteryStatus || !capabilities.includes("BATTERY_STATUS")) {
+  const device = useFragment(DEVICE_BATTERY_STATUS_FRAGMENT, deviceRef);
+  if (!device.capabilities.includes("BATTERY_STATUS")) {
     return null;
   }
-  // TODO: handle readonly type without mapping to mutable type
-  const batterySlots = batteryStatus.map((batterySlot) => ({
-    ...batterySlot,
-  }));
+
   return (
     <Tab
       eventKey="device-battery-tab"
@@ -952,23 +917,7 @@ const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
       })}
     >
       <div className="mt-3">
-        {batterySlots.length === 0 ? (
-          <Result.EmptyList
-            title={
-              <FormattedMessage
-                id="pages.Device.BatteryStatusTab.noBattery.title"
-                defaultMessage="No battery"
-              />
-            }
-          >
-            <FormattedMessage
-              id="pages.Device.BatteryStatusTab.noBattery.message"
-              defaultMessage="The device has not detected any battery yet."
-            />
-          </Result.EmptyList>
-        ) : (
-          <BatteryTable data={batterySlots} />
-        )}
+        <BatteryTable deviceRef={device} />
       </div>
     </Tab>
   );
