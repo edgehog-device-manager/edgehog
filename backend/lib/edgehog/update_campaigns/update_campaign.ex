@@ -33,6 +33,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
     field :name, :string
     field :status, Ecto.Enum, values: [:idle, :in_progress, :finished]
     field :outcome, Ecto.Enum, values: [:success, :failure]
+    field :start_timestamp, :utc_datetime_usec
+    field :completion_timestamp, :utc_datetime_usec
     belongs_to :base_image, BaseImages.BaseImage
     belongs_to :update_channel, UpdateChannel
 
