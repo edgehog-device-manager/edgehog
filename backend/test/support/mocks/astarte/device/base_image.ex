@@ -28,7 +28,7 @@ defmodule Edgehog.Mocks.Astarte.Device.BaseImage do
   def get(%AppEngine{} = _client, _device_id) do
     base_image = %BaseImage{
       name: "esp-idf",
-      version: "4.3.1",
+      version: "0.1.0",
       build_id: "2022-01-01 12:00:00",
       fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
     }
