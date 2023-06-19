@@ -62,8 +62,8 @@ jobs:
       run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/doc/pages/integrating/astarte_interfaces.md
     - uses: erlef/setup-beam@v1.15
       with:
-        otp-version: "26.0"
-        elixir-version: "1.14.5"
+        otp-version: "26.0.1"
+        elixir-version: "1.15.0-rc.2"
     - name: Install Dependencies
       working-directory: ./edgehog/doc
       run: mix deps.get

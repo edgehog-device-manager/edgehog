@@ -57,6 +57,8 @@ defmodule Edgehog.Devices.Device do
     device
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> cast_assoc(:custom_attributes, with: &Labeling.DeviceAttribute.custom_attribute_changeset/2)
+    |> cast_assoc(:custom_attributes,
+      with: &Labeling.DeviceAttribute.custom_attribute_changeset/2
+    )
   end
 end
