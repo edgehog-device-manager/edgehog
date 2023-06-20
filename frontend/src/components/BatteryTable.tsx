@@ -18,10 +18,12 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { FormattedMessage, FormattedNumber } from "react-intl";
+import type { ReactElement } from "react";
+import { defineMessages, FormattedMessage, FormattedNumber } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
+  BatteryStatus,
   BatteryTable_batteryStatus$data,
   BatteryTable_batteryStatus$key,
 } from "api/__generated__/BatteryTable_batteryStatus.graphql";
@@ -43,71 +45,42 @@ const BATTERY_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const statusMessages = defineMessages<BatteryStatus>({
+  CHARGING: {
+    id: "components.BatteryTable.status.Charging",
+    defaultMessage: "Charging",
+  },
+  DISCHARGING: {
+    id: "components.BatteryTable.status.Discharging",
+    defaultMessage: "Discharging",
+  },
+  EITHER_IDLE_OR_CHARGING: {
+    id: "components.BatteryTable.status.Either_idle_or_charging",
+    defaultMessage: "Idle/Charging",
+  },
+  FAILURE: {
+    id: "components.BatteryTable.status.Failure",
+    defaultMessage: "Failure",
+  },
+  IDLE: {
+    id: "components.BatteryTable.status.Idle",
+    defaultMessage: "Idle",
+  },
+  REMOVED: {
+    id: "components.BatteryTable.status.Removed",
+    defaultMessage: "Removed",
+  },
+  UNKNOWN: {
+    id: "components.BatteryTable.status.Unknown",
+    defaultMessage: "Unknown",
+  },
+});
+
 type BatterySlot = NonNullable<
   BatteryTable_batteryStatus$data["batteryStatus"]
 >[number];
 
-const renderBatteryStatus = (status: BatterySlot["status"]) => {
-  switch (status) {
-    case "CHARGING":
-      return (
-        <FormattedMessage
-          id="components.BatteryTable.status.Charging"
-          defaultMessage="Charging"
-        />
-      );
-    case "DISCHARGING":
-      return (
-        <FormattedMessage
-          id="components.BatteryTable.status.Discharging"
-          defaultMessage="Discharging"
-        />
-      );
-    case "IDLE":
-      return (
-        <FormattedMessage
-          id="components.BatteryTable.status.Idle"
-          defaultMessage="Idle"
-        />
-      );
-    case "EITHER_IDLE_OR_CHARGING":
-      return (
-        <FormattedMessage
-          id="components.BatteryTable.status.Either_idle_or_charging"
-          defaultMessage="Idle/Charging"
-        />
-      );
-    case "REMOVED":
-      return (
-        <FormattedMessage
-          id="components.BatteryTable.status.Removed"
-          defaultMessage="Removed"
-        />
-      );
-    case "FAILURE":
-      return (
-        <FormattedMessage
-          id="components.BatteryTable.status.Failure"
-          defaultMessage="Failure"
-        />
-      );
-    case "UNKNOWN":
-      return (
-        <FormattedMessage
-          id="components.BatteryTable.status.Unknown"
-          defaultMessage="Unknown"
-        />
-      );
-
-    case null:
-      return null;
-
-    default:
-      return null;
-  }
-};
-
-const renderChargeLevel = (slot: BatterySlot) => {
+const renderChargeLevel = (slot: BatterySlot): ReactElement | null => {
   switch (slot.status) {
     case "CHARGING":
     case "DISCHARGING":
@@ -130,7 +103,10 @@ const renderChargeLevel = (slot: BatterySlot) => {
         />
       );
 
-    default:
+    case null:
+    case "FAILURE":
+    case "REMOVED":
+    case "UNKNOWN":
       return null;
   }
 };
@@ -153,7 +129,8 @@ const columns: Column<BatterySlot>[] = [
         defaultMessage="Status"
       />
     ),
-    Cell: ({ value }) => renderBatteryStatus(value),
+    Cell: ({ value }) =>
+      value && <FormattedMessage id={statusMessages[value].id} />,
   },
   {
     accessor: "levelPercentage",

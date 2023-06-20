@@ -464,17 +464,11 @@
   "components.UpdateCampaignOutcome.Success": {
     "defaultMessage": "Success"
   },
-  "components.UpdateCampaignOutcome.Unknown": {
-    "defaultMessage": "Unknown"
-  },
   "components.UpdateCampaignStatus.Finished": {
     "defaultMessage": "Finished"
   },
   "components.UpdateCampaignStatus.InProgress": {
     "defaultMessage": "In progress"
-  },
-  "components.UpdateCampaignStatus.Unknown": {
-    "defaultMessage": "Unknown"
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
@@ -493,9 +487,6 @@
   },
   "components.UpdateCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
-  },
-  "components.UpdateCampaignsTable.updateCampaignStatus.Unknown": {
-    "defaultMessage": "Unknown"
   },
   "components.UpdateCampaignsTable.updateChannelNameTitle": {
     "defaultMessage": "Update Channel",
@@ -807,9 +798,6 @@
   },
   "modem.technology.UTRAN_HSUPA": {
     "defaultMessage": "UTRAN with HSUPA"
-  },
-  "modem.technology.Unknown": {
-    "defaultMessage": "Unknown"
   },
   "pages.BaseImage.baseImageNotFound.message": {
     "defaultMessage": "Return to the Base Image Collection."

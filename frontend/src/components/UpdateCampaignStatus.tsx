@@ -19,7 +19,6 @@
 */
 
 import { defineMessages, FormattedMessage } from "react-intl";
-import type { MessageDescriptor } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
@@ -35,20 +34,12 @@ const UPDATE_CAMPAIGN_STATUS_FRAGMENT = graphql`
   }
 `;
 
-const getColor = (status: UpdateCampaignStatusEnum) => {
-  switch (status) {
-    case "IN_PROGRESS":
-      return "text-warning";
-
-    case "FINISHED":
-      return "text-success";
-
-    default:
-      return "text-muted";
-  }
+const colors: Record<UpdateCampaignStatusEnum, string> = {
+  IN_PROGRESS: "text-warning",
+  FINISHED: "text-success",
 };
 
-const messages: Record<string, MessageDescriptor> = defineMessages({
+const messages = defineMessages<UpdateCampaignStatusEnum>({
   IN_PROGRESS: {
     id: "components.UpdateCampaignStatus.InProgress",
     defaultMessage: "In progress",
@@ -56,10 +47,6 @@ const messages: Record<string, MessageDescriptor> = defineMessages({
   FINISHED: {
     id: "components.UpdateCampaignStatus.Finished",
     defaultMessage: "Finished",
-  },
-  UnknownStatus: {
-    id: "components.UpdateCampaignStatus.Unknown",
-    defaultMessage: "Unknown",
   },
 });
 
@@ -73,14 +60,11 @@ const UpdateCampaignStatus = ({ updateCampaignRef }: Props) => {
     updateCampaignRef
   );
 
-  const color = getColor(status);
   return (
     <div className="d-flex align-items-center">
-      <Icon icon="circle" className={`me-2 ${color}`} />
+      <Icon icon="circle" className={`me-2 ${colors[status]}`} />
       <span>
-        <FormattedMessage
-          id={messages[status]?.id || messages.UnknownStatus.id}
-        />
+        <FormattedMessage id={messages[status].id} />
       </span>
     </div>
   );

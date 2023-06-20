@@ -19,7 +19,6 @@
 */
 
 import { defineMessages, FormattedMessage } from "react-intl";
-import type { MessageDescriptor } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
@@ -35,20 +34,12 @@ const UPDATE_CAMPAIGN_OUTCOME_FRAGMENT = graphql`
   }
 `;
 
-const getColor = (outcome: UpdateCampaignOutcomeEnum) => {
-  switch (outcome) {
-    case "SUCCESS":
-      return "text-success";
-
-    case "FAILURE":
-      return "text-danger";
-
-    default:
-      return "text-muted";
-  }
+const colors: Record<UpdateCampaignOutcomeEnum, string> = {
+  SUCCESS: "text-success",
+  FAILURE: "text-danger",
 };
 
-const messages: Record<string, MessageDescriptor> = defineMessages({
+const messages = defineMessages<UpdateCampaignOutcomeEnum>({
   SUCCESS: {
     id: "components.UpdateCampaignOutcome.Success",
     defaultMessage: "Success",
@@ -56,10 +47,6 @@ const messages: Record<string, MessageDescriptor> = defineMessages({
   FAILURE: {
     id: "components.UpdateCampaignOutcome.Failure",
     defaultMessage: "Failure",
-  },
-  UnknownOutcome: {
-    id: "components.UpdateCampaignOutcome.Unknown",
-    defaultMessage: "Unknown",
   },
 });
 
@@ -73,20 +60,15 @@ const UpdateCampaignOutcome = ({ updateCampaignRef }: Props) => {
     updateCampaignRef
   );
 
-  if (outcome === null) {
-    return null;
-  }
-
-  const color = getColor(outcome);
   return (
-    <div className="d-flex align-items-center">
-      <Icon icon="circle" className={`me-2 ${color}`} />
-      <span>
-        <FormattedMessage
-          id={messages[outcome]?.id || messages.UnknownOutcome.id}
-        />
-      </span>
-    </div>
+    outcome && (
+      <div className="d-flex align-items-center">
+        <Icon icon="circle" className={`me-2 ${colors[outcome]}`} />
+        <span>
+          <FormattedMessage id={messages[outcome].id} />
+        </span>
+      </div>
+    )
   );
 };
 
