@@ -57,7 +57,13 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
 
   @doc false
   def changeset(update_campaign, attrs) do
+    prev_rollout_mechanism_type = update_campaign.rollout_mechanism
+
     do_changeset(update_campaign, attrs)
+    |> validate_change(
+      :rollout_mechanism,
+      &preserve_rollout_mechanism_type(&1, prev_rollout_mechanism_type, &2)
+    )
   end
 
   defp do_changeset(update_campaign, attrs, opts \\ []) do
@@ -76,5 +82,14 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   defp rollout_types_mfa(changeset_function) do
     @rollout_mechanism_types
     |> Enum.map(fn {type, module} -> {type, {module, changeset_function, []}} end)
+  end
+
+  defp preserve_rollout_mechanism_type(_field, %t{} = _old_value, %t{} = _new_value), do: []
+
+  defp preserve_rollout_mechanism_type(field, %t{} = _old_value, _new_value) do
+    old_type_tuple = Enum.find(@rollout_mechanism_types, fn {_type_str, type} -> type == t end)
+    {prev_type, _} = old_type_tuple
+
+    [{field, "should be of the same type it was previously defined as, #{prev_type}"}]
   end
 end
