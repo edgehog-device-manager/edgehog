@@ -1,6 +1,6 @@
 {
   "name": "edgehog-device-manager-frontend",
-  "version": "0.6.0-dev",
+  "version": "0.7.0-dev",
   "bugs": {
     "url": "https://github.com/edgehog-device-manager/edgehog/issues"
   },

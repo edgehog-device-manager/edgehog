@@ -24,7 +24,7 @@ defmodule Doc.MixProject do
   def project do
     [
       app: :doc,
-      version: "0.5.0",
+      version: "0.7.0-dev",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
