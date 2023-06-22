@@ -466,6 +466,26 @@ defmodule Edgehog.UpdateCampaigns do
   end
 
   @doc """
+  Updates an update campaign.
+
+  ## Examples
+
+      iex> update_update_campaign(update_campaign, %{field: new_value})
+      {:ok, %UpdateCamapaign{}}
+
+      iex> update_update_campaign(update_campaign, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_update_campaign(%UpdateCampaign{} = update_campaign, attrs) do
+    changeset = UpdateCampaign.changeset(update_campaign, attrs)
+
+    with {:ok, update_campaign} <- Repo.update(changeset) do
+      {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    end
+  end
+
+  @doc """
   Preloads the default associations for a Target or a list of Targets
   """
   def preload_defaults_for_target(target_or_targets, opts \\ []) do

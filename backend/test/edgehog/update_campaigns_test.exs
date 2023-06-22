@@ -430,6 +430,63 @@ defmodule Edgehog.UpdateCampaignsTest do
     end
   end
 
+  describe "update_update_campaign/2" do
+    test "allows updating rollout_mechanism with an equal or higher max_in_progress_update" do
+      original_max_in_progress_updates = 3
+
+      {:ok, update_campaign} =
+        create_update_campaign(
+          rollout_mechanism: [max_in_progress_updates: original_max_in_progress_updates]
+        )
+
+      assert {:ok, updated_update_campaign} =
+               UpdateCampaigns.update_update_campaign(update_campaign, %{
+                 rollout_mechanism: %{
+                   type: "push",
+                   max_in_progress_updates: original_max_in_progress_updates
+                 }
+               })
+
+      assert updated_update_campaign.rollout_mechanism.max_in_progress_updates ==
+               original_max_in_progress_updates
+
+      assert {:ok, updated_update_campaign} =
+               UpdateCampaigns.update_update_campaign(update_campaign, %{
+                 rollout_mechanism: %{
+                   type: "push",
+                   max_in_progress_updates: original_max_in_progress_updates + 1
+                 }
+               })
+
+      assert updated_update_campaign.rollout_mechanism.max_in_progress_updates ==
+               original_max_in_progress_updates + 1
+    end
+
+    test "fails updating rollout_mechanism with a lower max_in_progress_update" do
+      original_max_in_progress_updates = 3
+
+      {:ok, update_campaign} =
+        create_update_campaign(
+          rollout_mechanism: [max_in_progress_updates: original_max_in_progress_updates]
+        )
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               UpdateCampaigns.update_update_campaign(
+                 update_campaign,
+                 %{
+                   rollout_mechanism: %{
+                     type: "push",
+                     max_in_progress_updates: original_max_in_progress_updates - 1
+                   }
+                 }
+               )
+
+      assert "must be greater than or equal to #{original_max_in_progress_updates}" in errors_on(
+               changeset
+             ).rollout_mechanism.max_in_progress_updates
+    end
+  end
+
   describe "list_updatable_devices" do
     test "returns empty list without devices" do
       update_channel = update_channel_fixture()

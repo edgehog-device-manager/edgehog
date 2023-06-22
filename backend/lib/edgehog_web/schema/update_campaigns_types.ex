@@ -141,6 +141,47 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   end
 
   @desc """
+  An input object to set the properties of a Push Rollout Mechanism for updates
+  """
+  input_object :push_rollout_update do
+    @desc """
+    The maximum percentage of errors allowed over the number of total targets. \
+    If the errors exceed this threshold, the Update Campaign terminates with \
+    an error.
+
+    Must be greater than (or equal to) the current value.
+    """
+    field :max_errors_percentage, :float
+
+    @desc """
+    The maximum number of in progress updates. The Update Campaign will have \
+    at most this number of OTA Operations that are started but not yet \
+    finished (either successfully or not).
+
+    Must be greater than (or equal to) the current value.
+    """
+    field :max_in_progress_updates, :integer
+
+    @desc """
+    The number of attempts that have to be tried before giving up on the \
+    update of a specific target (and considering it an error). Note that the \
+    update is retried only if the OTA Request doesn't get acknowledged from the \
+    device.
+
+    Must be greater than (or equal to) the current value.
+    """
+    field :ota_request_retries, :integer
+
+    @desc """
+    The timeout (in seconds) Edgehog has to wait before considering an OTA \
+    Request lost (and possibly retry).
+
+    Must be greater than (or equal to) the current value.
+    """
+    field :ota_request_timeout_seconds, :integer
+  end
+
+  @desc """
   An input object to provide a Rollout Mechanism
   """
   # TODO: this should become a @oneOf input_object (see
@@ -148,6 +189,10 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   # a new possible rollout mechanism
   input_object :rollout_mechanism_input do
     field :push, non_null(:push_rollout_input)
+  end
+
+  input_object :rollout_mechanism_update do
+    field :push, non_null(:push_rollout_update)
   end
 
   @desc """
@@ -374,6 +419,29 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
         update_channel_id: :update_channel
 
       resolve &Resolvers.UpdateCampaigns.create_update_campaign/2
+    end
+
+    @desc "Updates an existing update campaign."
+    payload field :update_update_campaign do
+      input do
+        @desc "The ID of the update campaign to be updated."
+        field :update_campaign_id, non_null(:id)
+
+        @desc "The name of the Update Campaign."
+        field :name, :string
+
+        @desc "The Rollout Mechanism of the Update Campaign, with its properties."
+        field :rollout_mechanism, :rollout_mechanism_update
+      end
+
+      output do
+        @desc "The updated Update Campaign."
+        field :update_campaign, non_null(:update_campaign)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, update_campaign_id: :update_campaign
+
+      resolve &Resolvers.UpdateCampaigns.update_update_campaign/2
     end
   end
 end
