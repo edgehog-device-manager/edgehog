@@ -401,7 +401,7 @@ defmodule Edgehog.UpdateCampaigns do
         update_channel_id: update_channel_id,
         base_image_id: base_image_id
       }
-      |> UpdateCampaign.changeset(attrs)
+      |> UpdateCampaign.create_changeset(attrs)
 
     if updatable_devices == [] do
       create_empty_update_campaign(changeset)

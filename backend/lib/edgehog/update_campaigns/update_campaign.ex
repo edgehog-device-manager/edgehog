@@ -28,6 +28,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   alias Edgehog.UpdateCampaigns.UpdateChannel
   alias Edgehog.UpdateCampaigns.Target
 
+  @rollout_mechanism_types [push: PushRollout]
+
   schema "update_campaigns" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :name, :string
@@ -39,7 +41,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
     belongs_to :update_channel, UpdateChannel
 
     polymorphic_embeds_one :rollout_mechanism,
-      types: [push: PushRollout],
+      types: @rollout_mechanism_types,
       type_field: :type,
       on_replace: :update
 
@@ -49,10 +51,30 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   end
 
   @doc false
+  def create_changeset(update_campaign, attrs) do
+    do_changeset(update_campaign, attrs, rollout_mechanism_changeset_function: :create_changeset)
+  end
+
+  @doc false
   def changeset(update_campaign, attrs) do
+    do_changeset(update_campaign, attrs)
+  end
+
+  defp do_changeset(update_campaign, attrs, opts \\ []) do
+    rollout_mechanism_changeset_function =
+      Keyword.get(opts, :rollout_mechanism_changeset_function, :changeset)
+
     update_campaign
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> cast_polymorphic_embed(:rollout_mechanism, required: true)
+    |> cast_polymorphic_embed(:rollout_mechanism,
+      required: true,
+      with: rollout_types_mfa(rollout_mechanism_changeset_function)
+    )
+  end
+
+  defp rollout_types_mfa(changeset_function) do
+    @rollout_mechanism_types
+    |> Enum.map(fn {type, module} -> {type, {module, changeset_function, []}} end)
   end
 end

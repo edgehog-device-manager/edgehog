@@ -385,7 +385,7 @@ defmodule Edgehog.UpdateCampaignsTest do
       assert {:error, %Ecto.Changeset{} = changeset} =
                create_update_campaign(rollout_mechanism: [max_in_progress_updates: -3])
 
-      assert "must be greater than 0" in errors_on(changeset).rollout_mechanism.max_in_progress_updates
+      assert "must be greater than or equal to 1" in errors_on(changeset).rollout_mechanism.max_in_progress_updates
     end
 
     test "saves ota_request_retries in rollout_mechanism if explicitly passed" do

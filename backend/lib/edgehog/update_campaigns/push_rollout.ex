@@ -23,6 +23,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
   import Ecto.Changeset
   alias Edgehog.UpdateCampaigns.PushRollout
 
+  @changeset_minimums [
+    max_errors_percentage: 0,
+    max_in_progress_updates: 1,
+    ota_request_retries: 0,
+    ota_request_timeout_seconds: 30
+  ]
+
   @primary_key false
   embedded_schema do
     field :force_downgrade, :boolean, default: false
@@ -33,7 +40,18 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
   end
 
   @doc false
+  def create_changeset(%PushRollout{} = push_rollout, attrs) do
+    do_changeset(push_rollout, attrs, fetch_existing_min: &to_nil/2)
+  end
+
+  @doc false
   def changeset(%PushRollout{} = push_rollout, attrs) do
+    do_changeset(push_rollout, attrs)
+  end
+
+  defp do_changeset(push_rollout, attrs, opts \\ []) do
+    fetch_existing_min = Keyword.get(opts, :fetch_existing_min, &fetch_minimum/2)
+
     push_rollout
     |> cast(attrs, [
       :force_downgrade,
@@ -46,12 +64,19 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
       :max_errors_percentage,
       :max_in_progress_updates
     ])
-    |> validate_number(:max_errors_percentage,
-      greater_than_or_equal_to: 0,
-      less_than_or_equal_to: 100
-    )
-    |> validate_number(:max_in_progress_updates, greater_than: 0)
-    |> validate_number(:ota_request_retries, greater_than_or_equal_to: 0)
-    |> validate_number(:ota_request_timeout_seconds, greater_than_or_equal_to: 30)
+    |> validate_minimums(push_rollout, fetch_existing_min, @changeset_minimums)
+    |> validate_number(:max_errors_percentage, less_than_or_equal_to: 100)
   end
+
+  defp validate_minimums(changeset, base, fetch_existing_min, minimums) do
+    Enum.reduce(minimums, changeset, &validate_min(&2, &1, base, fetch_existing_min))
+  end
+
+  defp validate_min(changeset, {field, default_min}, base, fetch_existing_min) do
+    new_min = fetch_existing_min.(base, field) || default_min
+    validate_number(changeset, field, greater_than_or_equal_to: new_min)
+  end
+
+  defp to_nil(_, _), do: nil
+  defp fetch_minimum(base, field), do: get_in(base, [Access.key!(field)])
 end
