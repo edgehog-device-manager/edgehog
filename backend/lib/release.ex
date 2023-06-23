@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,9 @@ defmodule Edgehog.Release do
     priv_dir = "#{:code.priv_dir(@app)}"
     seeds_file = Path.join([priv_dir, "repo", "seeds.exs"])
 
-    {:ok, _} = Code.eval_file(seeds_file)
+    {:ok, _} =
+      Code.eval_file(seeds_file)
+      |> elem(0)
 
     :ok
   end
