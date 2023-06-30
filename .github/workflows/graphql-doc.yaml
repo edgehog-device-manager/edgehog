@@ -30,7 +30,8 @@ on:
     - 'backend/mix.lock'
     # SpectaQL configuration file
     - 'backend/.spectaql-config.yaml'
-    # The action itself
+    # The action itself and the Elixir version
+    - '.tool-versions'
     - '.github/workflows/graphql-doc.yaml'
     branches:
     # Create the snapshot only when it matters
@@ -55,8 +56,8 @@ jobs:
         path: docs
     - uses: erlef/setup-beam@v1.15
       with:
-        otp-version: "26.0.1"
-        elixir-version: "1.15.0-rc.2"
+        version-file: edgehog/.tool-versions
+        version-type: strict
     - name: Install Dependencies
       working-directory: ./edgehog/backend
       run: mix deps.get

@@ -25,6 +25,7 @@ on:
   push:
     paths:
     - 'backend/**'
+    - '.tool-versions'
     - '.github/workflows/backend-test.yaml'
     branches:
     - 'main'
@@ -32,6 +33,7 @@ on:
   pull_request:
     paths:
     - 'backend/**'
+    - '.tool-versions'
     - '.github/workflows/backend-test.yaml'
 
 env:
@@ -48,8 +50,8 @@ jobs:
 
     - uses: erlef/setup-beam@v1.15
       with:
-        otp-version: ${{ env.otp_version }}
-        elixir-version: ${{ env.elixir_version }}
+        version-file: .tool-versions
+        version-type: strict
 
     - uses: actions/cache@v3
       with:
@@ -122,8 +124,8 @@ jobs:
         key: ${{ runner.os }}-_build-${{ env.otp_version }}-${{ env.elixir_version }}
     - uses: erlef/setup-beam@v1.15
       with:
-        otp-version: ${{ env.otp_version }}
-        elixir-version: ${{ env.elixir_version }}
+        version-file: .tool-versions
+        version-type: strict
     - name: Install Dependencies
       working-directory: backend
       run: mix deps.get
