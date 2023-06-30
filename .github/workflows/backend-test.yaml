@@ -45,7 +45,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: erlef/setup-beam@v1.15
+    - uses: erlef/setup-beam@v1
       id: beam
       with:
         version-file: .tool-versions
@@ -112,7 +112,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - uses: actions/checkout@v3
-    - uses: erlef/setup-beam@v1.15
+    - uses: erlef/setup-beam@v1
       id: beam
       with:
         version-file: .tool-versions

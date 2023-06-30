@@ -54,7 +54,7 @@ jobs:
       with:
         repository: edgehog-device-manager/docs
         path: docs
-    - uses: erlef/setup-beam@v1.15
+    - uses: erlef/setup-beam@v1
       with:
         version-file: edgehog/.tool-versions
         version-type: strict
