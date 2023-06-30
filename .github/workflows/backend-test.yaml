@@ -36,9 +36,6 @@ on:
     - '.tool-versions'
     - '.github/workflows/backend-test.yaml'
 
-env:
-  elixir_version: "1.15.0-rc.2"
-  otp_version: "26.0.1"
 jobs:
   test-dialyzer:
     name: Check Dialyzer
@@ -49,6 +46,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - uses: erlef/setup-beam@v1.15
+      id: beam
       with:
         version-file: .tool-versions
         version-type: strict
@@ -57,16 +55,16 @@ jobs:
       with:
         path: backend/deps
         key: |
-          ${{ runner.os }}-dialyzer-mix-${{ env.otp_version }}-${{ env.elixir_version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/backend/mix.lock')) }}
+          ${{ runner.os }}-dialyzer-mix-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/backend/mix.lock')) }}
         restore-keys: |
-          ${{ runner.os }}-dialyzer-mix-${{ env.otp_version }}-${{ env.elixir_version }}-
+          ${{ runner.os }}-dialyzer-mix-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
     - uses: actions/cache@v3
       with:
         path: backend/_build
         key: |
-          ${{ runner.os }}-dialyzer-_build-${{ env.otp_version }}-${{ env.elixir_version }}-${{ github.sha }}
+          ${{ runner.os }}-dialyzer-_build-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-dialyzer-_build-${{ env.otp_version }}-${{ env.elixir_version }}-
+          ${{ runner.os }}-dialyzer-_build-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
 
     - name: Install Dependencies
       working-directory: ./backend
@@ -80,9 +78,9 @@ jobs:
       with:
         path: backend/priv/plts
         key: |
-          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}
+          ${{ runner.os }}-dialyzer-plt-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}
         restore-keys: |
-          ${{ runner.os }}-dialyzer-plt-${{ env.otp_version }}-${{ env.elixir_version }}
+          ${{ runner.os }}-dialyzer-plt-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}
 
     # Create PLTs if no cache was found
     - name: Create PLTs
@@ -114,18 +112,19 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/cache@v3
-      with:
-        path: backend/deps
-        key: ${{ runner.os }}-deps-${{ env.otp_version }}-${{ env.elixir_version }}-${{ hashFiles(format('{0}{1}{2}', github.workspace, '/backend/', '/mix.lock')) }}
-    - uses: actions/cache@v3
-      with:
-        path: backend/_build
-        key: ${{ runner.os }}-_build-${{ env.otp_version }}-${{ env.elixir_version }}
     - uses: erlef/setup-beam@v1.15
+      id: beam
       with:
         version-file: .tool-versions
         version-type: strict
+    - uses: actions/cache@v3
+      with:
+        path: backend/deps
+        key: ${{ runner.os }}-deps-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles(format('{0}{1}{2}', github.workspace, '/backend/', '/mix.lock')) }}
+    - uses: actions/cache@v3
+      with:
+        path: backend/_build
+        key: ${{ runner.os }}-_build-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}
     - name: Install Dependencies
       working-directory: backend
       run: mix deps.get
