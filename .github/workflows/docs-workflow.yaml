@@ -25,7 +25,8 @@ on:
     paths:
     # Documentation pages
     - 'doc/**'
-    # The action itself
+    # The action itself and the Elixir version
+    - '.tool-versions'
     - '.github/workflows/docs-workflow.yaml'
     branches:
     # Create the snapshot only when it matters
@@ -60,10 +61,10 @@ jobs:
       run: npm install -g @astarte-platform/astarte-docs-cli@0.0.7
     - name: Generate Interfaces Docs
       run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/doc/pages/integrating/astarte_interfaces.md
-    - uses: erlef/setup-beam@v1.15
+    - uses: erlef/setup-beam@v1
       with:
-        otp-version: "26.0.1"
-        elixir-version: "1.15.0-rc.2"
+        version-file: edgehog/.tool-versions
+        version-type: strict
     - name: Install Dependencies
       working-directory: ./edgehog/doc
       run: mix deps.get
