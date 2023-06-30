@@ -55,4 +55,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
         "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
     )
   end
+
+  def default_preloads do
+    [:target_groups]
+  end
 end

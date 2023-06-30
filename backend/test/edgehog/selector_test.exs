@@ -259,7 +259,7 @@ defmodule Edgehog.SelectorTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Devices.preload_defaults_for_device()
+        |> Repo.preload_defaults()
 
       assert is_list(result)
       assert length(result) == 2
@@ -284,7 +284,7 @@ defmodule Edgehog.SelectorTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Devices.preload_defaults_for_device()
+        |> Repo.preload_defaults()
 
       assert is_list(result)
       assert length(result) == 2
@@ -312,7 +312,7 @@ defmodule Edgehog.SelectorTest do
       assert [device_foo_10] ==
                Repo.all(query)
                # Preload the same associations preloaded in the Astarte context
-               |> Devices.preload_defaults_for_device()
+               |> Repo.preload_defaults()
     end
 
     test "accepts a binary selector and generates a query", %{
@@ -326,7 +326,7 @@ defmodule Edgehog.SelectorTest do
       result =
         Repo.all(query)
         # Preload the same associations preloaded in the Astarte context
-        |> Devices.preload_defaults_for_device()
+        |> Repo.preload_defaults()
 
       assert is_list(result)
       assert length(result) == 3

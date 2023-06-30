@@ -80,4 +80,12 @@ defmodule Edgehog.BaseImages.BaseImage do
         [{field, "is not a valid version requirement"}]
     end
   end
+
+  def default_preloads do
+    [
+      base_image_collection: [
+        system_model: [:hardware_type, :part_numbers]
+      ]
+    ]
+  end
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,5 +70,38 @@ defmodule Edgehog.Repo do
   @impl true
   def default_options(_operation) do
     [tenant_id: get_tenant_id()]
+  end
+
+  @doc """
+  Preloads default relationships for the given struct(s), defined by a `default_preloads/0` function
+  in the struct's module.
+  """
+  def preload_defaults(struct_or_structs_or_nil, opts \\ [])
+
+  def preload_defaults(struct_or_structs_or_nil, opts)
+      when is_struct(struct_or_structs_or_nil) or is_nil(struct_or_structs_or_nil) do
+    do_preload_defaults(struct_or_structs_or_nil, struct_or_structs_or_nil, opts)
+  end
+
+  def preload_defaults(struct_or_structs_or_nil, opts)
+      when is_list(struct_or_structs_or_nil) do
+    non_nil_item = Enum.find(struct_or_structs_or_nil, & &1)
+    do_preload_defaults(non_nil_item, struct_or_structs_or_nil, opts)
+  end
+
+  defp do_preload_defaults(nil = _reference_item, struct_or_structs_or_nil, _opts) do
+    struct_or_structs_or_nil
+  end
+
+  defp do_preload_defaults(reference_item, struct_or_structs_or_nil, opts) do
+    module = reference_item.__struct__
+    preloads = module.default_preloads()
+    preload(struct_or_structs_or_nil, preloads, opts)
+  end
+
+  def preload_defaults_in_result(result, opts \\ []) do
+    with {:ok, item} <- result do
+      {:ok, preload_defaults(item, opts)}
+    end
   end
 end

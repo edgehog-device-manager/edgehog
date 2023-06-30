@@ -61,4 +61,8 @@ defmodule Edgehog.Devices.Device do
       with: &Labeling.DeviceAttribute.custom_attribute_changeset/2
     )
   end
+
+  def default_preloads do
+    [tags: [], custom_attributes: [], system_model: [:hardware_type, :part_numbers]]
+  end
 end

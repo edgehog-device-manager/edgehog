@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ defmodule Edgehog.Groups do
   """
 
   import Ecto.Query, warn: false
-  alias Edgehog.Devices
   alias Edgehog.Groups.DeviceGroup
   alias Edgehog.Repo
   alias Edgehog.Selector
@@ -57,7 +56,7 @@ defmodule Edgehog.Groups do
     {:ok, device_query} = Selector.to_ecto_query(device_group.selector)
 
     Repo.all(device_query)
-    |> Devices.preload_defaults_for_device()
+    |> Repo.preload_defaults()
   end
 
   @doc """

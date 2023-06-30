@@ -28,17 +28,9 @@ defmodule Edgehog.UpdateCampaigns do
 
   alias Ecto.Multi
   alias Edgehog.BaseImages
-  alias Edgehog.Devices
   alias Edgehog.UpdateCampaigns.Target
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
-
-  @doc """
-  Preloads the default associations for an UpdateChannel or a list of UpdateChannels
-  """
-  def preload_defaults_for_update_channel(channel_or_channels, opts \\ []) do
-    Repo.preload(channel_or_channels, [:target_groups], opts)
-  end
 
   @doc """
   Returns the list of update_channels.
@@ -51,7 +43,7 @@ defmodule Edgehog.UpdateCampaigns do
   """
   def list_update_channels do
     Repo.all(UpdateChannel)
-    |> preload_defaults_for_update_channel()
+    |> Repo.preload_defaults()
   end
 
   @doc """
@@ -69,9 +61,8 @@ defmodule Edgehog.UpdateCampaigns do
 
   """
   def fetch_update_channel(id) do
-    with {:ok, update_channel} <- Repo.fetch(UpdateChannel, id) do
-      {:ok, preload_defaults_for_update_channel(update_channel)}
-    end
+    Repo.fetch(UpdateChannel, id)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -97,7 +88,7 @@ defmodule Edgehog.UpdateCampaigns do
       {:ok, %{update_channel: update_channel}} ->
         update_channel =
           %{update_channel | target_group_ids: nil}
-          |> preload_defaults_for_update_channel()
+          |> Repo.preload_defaults()
 
         {:ok, update_channel}
 
@@ -130,7 +121,7 @@ defmodule Edgehog.UpdateCampaigns do
         # Force the preload since groups could have changed
         update_channel =
           %{update_channel | target_group_ids: nil}
-          |> preload_defaults_for_update_channel(force: true)
+          |> Repo.preload_defaults(force: true)
 
         {:ok, update_channel}
 
@@ -239,7 +230,7 @@ defmodule Edgehog.UpdateCampaigns do
     |> Repo.transaction()
     |> case do
       {:ok, %{update_channel: update_channel}} ->
-        {:ok, preload_defaults_for_update_channel(update_channel)}
+        {:ok, Repo.preload_defaults(update_channel)}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
@@ -287,7 +278,7 @@ defmodule Edgehog.UpdateCampaigns do
     end)
     |> Enum.reduce(fn query, acc -> union(acc, ^query) end)
     |> Repo.all()
-    |> Devices.preload_defaults_for_device()
+    |> Repo.preload_defaults()
   end
 
   @doc """
@@ -313,29 +304,6 @@ defmodule Edgehog.UpdateCampaigns do
   end
 
   @doc """
-  Preloads the default associations for an UpdateCampaign or a list of UpdateCampaigns
-  """
-  def preload_defaults_for_update_campaign(campaign_or_campaigns, opts \\ []) do
-    preloads = [
-      base_image: [
-        base_image_collection: [
-          system_model: [:hardware_type, :part_numbers]
-        ]
-      ],
-      update_channel: [:target_groups],
-      update_targets: [
-        device: [
-          tags: [],
-          custom_attributes: [],
-          system_model: [:hardware_type, :part_numbers]
-        ]
-      ]
-    ]
-
-    Repo.preload(campaign_or_campaigns, preloads, opts)
-  end
-
-  @doc """
   Returns the list of update campaigns.
 
   ## Examples
@@ -346,7 +314,7 @@ defmodule Edgehog.UpdateCampaigns do
   """
   def list_update_campaigns do
     Repo.all(UpdateCampaign)
-    |> preload_defaults_for_update_campaign()
+    |> Repo.preload_defaults()
   end
 
   @doc """
@@ -364,9 +332,8 @@ defmodule Edgehog.UpdateCampaigns do
 
   """
   def fetch_update_campaign(id) do
-    with {:ok, update_campaign} <- Repo.fetch(UpdateCampaign, id) do
-      {:ok, preload_defaults_for_update_campaign(update_campaign)}
-    end
+    Repo.fetch(UpdateCampaign, id)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -407,9 +374,8 @@ defmodule Edgehog.UpdateCampaigns do
       |> Ecto.Changeset.put_change(:status, :finished)
       |> Ecto.Changeset.put_change(:outcome, :success)
 
-    with {:ok, update_campaign} <- Repo.insert(changeset) do
-      {:ok, preload_defaults_for_update_campaign(update_campaign)}
-    end
+    Repo.insert(changeset)
+    |> Repo.preload_defaults_in_result()
   end
 
   defp create_update_campaign_with_targets(changeset, updatable_devices) do
@@ -447,26 +413,11 @@ defmodule Edgehog.UpdateCampaigns do
     |> Repo.transaction()
     |> case do
       {:ok, %{update_campaign: update_campaign}} ->
-        {:ok, preload_defaults_for_update_campaign(update_campaign)}
+        {:ok, Repo.preload_defaults(update_campaign)}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
     end
-  end
-
-  @doc """
-  Preloads the default associations for a Target or a list of Targets
-  """
-  def preload_defaults_for_target(target_or_targets, opts \\ []) do
-    preloads = [
-      device: [
-        tags: [],
-        custom_attributes: [],
-        system_model: [:hardware_type, :part_numbers]
-      ]
-    ]
-
-    Repo.preload(target_or_targets, preloads, opts)
   end
 
   @doc """
@@ -484,8 +435,7 @@ defmodule Edgehog.UpdateCampaigns do
 
   """
   def fetch_target(id) do
-    with {:ok, target} <- Repo.fetch(Target, id) do
-      {:ok, preload_defaults_for_target(target)}
-    end
+    Repo.fetch(Target, id)
+    |> Repo.preload_defaults_in_result()
   end
 end

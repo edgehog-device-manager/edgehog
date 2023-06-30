@@ -53,4 +53,22 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
     |> validate_required([:name])
     |> cast_polymorphic_embed(:rollout_mechanism, required: true)
   end
+
+  def default_preloads do
+    [
+      base_image: [
+        base_image_collection: [
+          system_model: [:hardware_type, :part_numbers]
+        ]
+      ],
+      update_channel: [:target_groups],
+      update_targets: [
+        device: [
+          tags: [],
+          custom_attributes: [],
+          system_model: [:hardware_type, :part_numbers]
+        ]
+      ]
+    ]
+  end
 end

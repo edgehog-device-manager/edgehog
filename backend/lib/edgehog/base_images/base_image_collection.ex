@@ -49,4 +49,8 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
         "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
     )
   end
+
+  def default_preloads do
+    [base_images: [], system_model: [:hardware_type, :part_numbers]]
+  end
 end

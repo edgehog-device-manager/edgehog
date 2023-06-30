@@ -40,4 +40,14 @@ defmodule Edgehog.UpdateCampaigns.Target do
     |> cast(attrs, [:status])
     |> validate_required([:status])
   end
+
+  def default_preloads do
+    [
+      device: [
+        tags: [],
+        custom_attributes: [],
+        system_model: [:hardware_type, :part_numbers]
+      ]
+    ]
+  end
 end

@@ -39,16 +39,6 @@ defmodule Edgehog.BaseImages do
                   )
 
   @doc """
-  Preloads the default associations for a Base Image Collection (or a list of base image collections)
-  """
-  def preload_defaults_for_base_image_collection(collection_or_collections) do
-    Repo.preload(collection_or_collections,
-      base_images: [],
-      system_model: [:hardware_type, :part_numbers]
-    )
-  end
-
-  @doc """
   Returns the list of base_image_collections.
 
   ## Examples
@@ -59,7 +49,7 @@ defmodule Edgehog.BaseImages do
   """
   def list_base_image_collections do
     Repo.all(BaseImageCollection)
-    |> preload_defaults_for_base_image_collection()
+    |> Repo.preload_defaults()
   end
 
   @doc """
@@ -77,9 +67,8 @@ defmodule Edgehog.BaseImages do
 
   """
   def fetch_base_image_collection(id) do
-    with {:ok, base_image_collection} <- Repo.fetch(BaseImageCollection, id) do
-      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
-    end
+    Repo.fetch(BaseImageCollection, id)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -99,9 +88,8 @@ defmodule Edgehog.BaseImages do
       %BaseImageCollection{system_model_id: system_model.id}
       |> BaseImageCollection.changeset(attrs)
 
-    with {:ok, base_image_collection} <- Repo.insert(changeset) do
-      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
-    end
+    Repo.insert(changeset)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -119,9 +107,8 @@ defmodule Edgehog.BaseImages do
   def update_base_image_collection(%BaseImageCollection{} = base_image_collection, attrs) do
     changeset = BaseImageCollection.changeset(base_image_collection, attrs)
 
-    with {:ok, base_image_collection} <- Repo.update(changeset) do
-      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
-    end
+    Repo.update(changeset)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -137,9 +124,8 @@ defmodule Edgehog.BaseImages do
 
   """
   def delete_base_image_collection(%BaseImageCollection{} = base_image_collection) do
-    with {:ok, base_image_collection} <- Repo.delete(base_image_collection) do
-      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
-    end
+    Repo.delete(base_image_collection)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -156,17 +142,6 @@ defmodule Edgehog.BaseImages do
   end
 
   @doc """
-  Preloads the default associations for a Base Image (or a list of base images)
-  """
-  def preload_defaults_for_base_image(image_or_images) do
-    Repo.preload(image_or_images,
-      base_image_collection: [
-        system_model: [:hardware_type, :part_numbers]
-      ]
-    )
-  end
-
-  @doc """
   Returns the list of base_images.
 
   ## Examples
@@ -177,7 +152,7 @@ defmodule Edgehog.BaseImages do
   """
   def list_base_images do
     Repo.all(BaseImage)
-    |> preload_defaults_for_base_image()
+    |> Repo.preload_defaults()
   end
 
   @doc """
@@ -192,7 +167,7 @@ defmodule Edgehog.BaseImages do
   def list_base_images_for_collection(%BaseImageCollection{} = base_image_collection) do
     Ecto.assoc(base_image_collection, :base_images)
     |> Repo.all()
-    |> preload_defaults_for_base_image()
+    |> Repo.preload_defaults()
   end
 
   @doc """
@@ -210,9 +185,8 @@ defmodule Edgehog.BaseImages do
 
   """
   def fetch_base_image(id) do
-    with {:ok, base_image} <- Repo.fetch(BaseImage, id) do
-      {:ok, preload_defaults_for_base_image(base_image)}
-    end
+    Repo.fetch(BaseImage, id)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -245,7 +219,7 @@ defmodule Edgehog.BaseImages do
     |> Repo.transaction()
     |> case do
       {:ok, %{base_image: base_image}} ->
-        {:ok, preload_defaults_for_base_image(base_image)}
+        {:ok, Repo.preload_defaults(base_image)}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
@@ -267,9 +241,8 @@ defmodule Edgehog.BaseImages do
   def update_base_image(%BaseImage{} = base_image, attrs) do
     changeset = BaseImage.update_changeset(base_image, attrs)
 
-    with {:ok, base_image} <- Repo.update(changeset) do
-      {:ok, preload_defaults_for_base_image(base_image)}
-    end
+    Repo.update(changeset)
+    |> Repo.preload_defaults_in_result()
   end
 
   @doc """
@@ -296,7 +269,7 @@ defmodule Edgehog.BaseImages do
     |> Repo.transaction()
     |> case do
       {:ok, %{base_image: base_image}} ->
-        {:ok, preload_defaults_for_base_image(base_image)}
+        {:ok, Repo.preload_defaults(base_image)}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
