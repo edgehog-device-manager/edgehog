@@ -104,7 +104,7 @@ defmodule Edgehog.Error do
 
       # If something else comes up, we return the status and print out an error
       response ->
-        Logger.warn("Unhandled API Error: #{inspect(response)}")
+        Logger.warning("Unhandled API Error: #{inspect(response)}")
 
         %Error{
           code: :astarte_api_error,
@@ -115,7 +115,7 @@ defmodule Edgehog.Error do
   end
 
   defp handle(other) do
-    Logger.warn("Unhandled error term: #{inspect(other)}")
+    Logger.warning("Unhandled error term: #{inspect(other)}")
     handle(:unknown)
   end
 
@@ -143,7 +143,7 @@ defmodule Edgehog.Error do
   defp metadata(:unknown), do: {500, "Something went wrong"}
 
   defp metadata(code) do
-    Logger.warn("Unhandled error code: #{inspect(code)}")
+    Logger.warning("Unhandled error code: #{inspect(code)}")
     {422, to_string(code)}
   end
 end
