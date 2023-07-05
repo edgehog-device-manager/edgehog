@@ -39,9 +39,20 @@ services:
       DATABASE_HOSTNAME: postgresql
       DATABASE_NAME: postgres
       SECRET_KEY_BASE: KKtB6BEPk1NVk6EmBfQCafphxLj7EW1M+BGPIFCT8X2LTywTFuGC6lM3yc8e3VKH
+      SEEDS_REALM_PRIVATE_KEY_FILE: /keys/realm_private.pem
+      SEEDS_TENANT_PRIVATE_KEY_FILE: /keys/tenant_private.pem
+      SEEDS_REALM_ORIGINAL_FILE: ${SEEDS_REALM_PRIVATE_KEY_FILE}
+      SEEDS_TENANT_ORIGINAL_FILE: ${SEEDS_TENANT_PRIVATE_KEY_FILE}
     ports:
       - 4000:4000
     restart: on-failure
+    volumes:
+      - type: bind
+        source: "${SEEDS_TENANT_PRIVATE_KEY_FILE}"
+        target: /keys/tenant_private.pem
+      - type: bind
+        source: "${SEEDS_REALM_PRIVATE_KEY_FILE}"
+        target: /keys/realm_private.pem
     depends_on:
       - postgresql
       - minio

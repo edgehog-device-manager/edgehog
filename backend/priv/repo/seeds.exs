@@ -25,19 +25,46 @@ alias Edgehog.{
   Tenants
 }
 
+require Logger
+
+# original_file_name_var is used in docker to keep a reference to the original file.
+read_file_from_env_var! = fn file_var, original_file_name_var ->
+  file_name = System.fetch_env!(file_var)
+  original_file_name = System.get_env(original_file_name_var, file_name)
+
+  File.read(file_name)
+  |> case do
+    {:ok, content} ->
+      content
+
+    {:error, reason} ->
+      raise ~s[#{file_var} (set to "#{original_file_name}"): #{:file.format_error(reason)}]
+  end
+end
+
 {:ok, cluster} =
   Astarte.create_cluster(%{
     name: "Test Cluster",
-    base_api_url: "https://api.astarte.example.com"
+    base_api_url: System.get_env("SEEDS_ASTARTE_BASE_API_URL")
   })
 
-private_key = """
------BEGIN EC PRIVATE KEY-----
-MHcCAQEEICx5W2odFd5CyMTv5VlLW96fgvWtcJ3bIJVVc3GWhMHBoAoGCCqGSM49
-AwEHoUQDQgAEhV0KI4hByk0uDkCg4yZImMTiAtz2azmpbh0sLAKOESdlRYOFw90U
-p4F9fRRV5Li6Pn5XZiMCZhVkS/PoUbIKpA==
------END EC PRIVATE KEY-----
-"""
+default_key =
+  :code.priv_dir(:edgehog)
+  |> to_string()
+  |> Path.join("repo/seeds/keys/tenant_private.pem")
+  |> File.read!()
+
+private_key =
+  read_file_from_env_var!.("SEEDS_TENANT_PRIVATE_KEY_FILE", "SEEDS_TENANT_ORIGINAL_FILE")
+
+if private_key == default_key do
+  """
+  Using default tenant private key. \
+  Please be sure to avoid using this for production.
+  """
+  |> String.trim_trailing("\n")
+  |> Logger.warning()
+end
 
 public_key =
   X509.PrivateKey.from_pem!(private_key)
@@ -49,7 +76,30 @@ public_key =
 
 _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 
-{:ok, realm} = Astarte.create_realm(cluster, %{name: "test", private_key: "notaprivatekey"})
+realm_pk = read_file_from_env_var!.("SEEDS_REALM_PRIVATE_KEY_FILE", "SEEDS_REALM_ORIGINAL_FILE")
+
+realm_pk =
+  case X509.PrivateKey.from_pem(realm_pk) do
+    {:ok, pk_binary} ->
+      # Like returning pk but removes all text outside BEGIN KEY and END KEY sections.
+      X509.PrivateKey.to_pem(pk_binary)
+
+    {:error, _} ->
+      """
+      The realm's private key is not a valid RSA/RC private key. \
+      This instance will not be able to connect to Astarte.
+      """
+      |> String.trim_trailing("\n")
+      |> Logger.warning()
+
+      realm_pk
+  end
+
+{:ok, realm} =
+  Astarte.create_realm(cluster, %{
+    name: System.get_env("SEEDS_REALM"),
+    private_key: realm_pk
+  })
 
 {:ok, hardware_type} =
   Devices.create_hardware_type(%{
