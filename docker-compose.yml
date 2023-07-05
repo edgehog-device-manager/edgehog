@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,24 +32,13 @@ services:
     image: edgehogdevicemanager/edgehog-backend:snapshot
     build:
       context: backend
+    env_file: .env
     environment:
       DATABASE_USERNAME: edgehog
       DATABASE_PASSWORD: edgehog
       DATABASE_HOSTNAME: postgresql
       DATABASE_NAME: postgres
       SECRET_KEY_BASE: KKtB6BEPk1NVk6EmBfQCafphxLj7EW1M+BGPIFCT8X2LTywTFuGC6lM3yc8e3VKH
-      IPBASE_API_KEY: ${IPBASE_API_KEY:-}
-      GOOGLE_GEOLOCATION_API_KEY: ${GOOGLE_GEOLOCATION_API_KEY:-}
-      GOOGLE_GEOCODING_API_KEY: ${GOOGLE_GEOCODING_API_KEY:-}
-      S3_ACCESS_KEY_ID: "${S3_ACCESS_KEY_ID:-minioadmin}"
-      S3_SECRET_ACCESS_KEY: "${S3_SECRET_ACCESS_KEY:-minioadmin}"
-      S3_REGION: "${S3_REGION:-local}"
-      S3_SCHEME: "${S3_SCHEME:-http://}"
-      S3_HOST: "${S3_HOST:-minio}"
-      S3_PORT: "${S3_PORT:-9000}"
-      S3_BUCKET: "${S3_BUCKET:-edgehog}"
-      S3_ASSET_HOST: "${S3_ASSET_HOST:-http://localhost:9000/edgehog}"
-      S3_GCP_CREDENTIALS: "${S3_GCP_CREDENTIALS:-}"
     ports:
       - 4000:4000
     restart: on-failure
