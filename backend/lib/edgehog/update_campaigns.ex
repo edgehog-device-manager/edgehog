@@ -29,6 +29,7 @@ defmodule Edgehog.UpdateCampaigns do
   alias Ecto.Multi
   alias Edgehog.BaseImages
   alias Edgehog.Devices
+  alias Edgehog.UpdateCampaigns.ExecutorSupervisor
   alias Edgehog.UpdateCampaigns.Target
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
@@ -455,6 +456,8 @@ defmodule Edgehog.UpdateCampaigns do
     |> Repo.transaction()
     |> case do
       {:ok, %{update_campaign: update_campaign}} ->
+        _pid = ExecutorSupervisor.start_executor!(update_campaign)
+
         {:ok, preload_defaults_for_update_campaign(update_campaign)}
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
