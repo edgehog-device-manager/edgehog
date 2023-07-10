@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +43,8 @@ defmodule Edgehog.Application do
       {Phoenix.PubSub, name: Edgehog.PubSub},
       # Start Finch
       {Finch, name: EdgehogFinch},
+      # Start the UpdateCampaigns supervisor
+      Edgehog.UpdateCampaigns.Supervisor,
       # Start the Endpoint (http/https)
       EdgehogWeb.Endpoint
       # Start a worker by calling: Edgehog.Worker.start_link(arg)
