@@ -18,17 +18,15 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   BaseImageCollectionsTable_BaseImageCollectionFragment$data,
   BaseImageCollectionsTable_BaseImageCollectionFragment$key,
 } from "api/__generated__/BaseImageCollectionsTable_BaseImageCollectionFragment.graphql";
 
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
@@ -48,75 +46,59 @@ const BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT = graphql`
 type TableRecord =
   BaseImageCollectionsTable_BaseImageCollectionFragment$data[number];
 
-const columns: Column<TableRecord>[] = [
-  {
-    accessor: "name",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
       <FormattedMessage
         id="components.BaseImageCollectionsTable.nameTitle"
         defaultMessage="Base Image Collection Name"
         description="Title for the Name column of the base image collections table"
       />
     ),
-    Cell: ({ row, value }) => (
+    cell: ({ row, getValue }) => (
       <Link
         route={Route.baseImageCollectionsEdit}
         params={{ baseImageCollectionId: row.original.id }}
       >
-        {value}
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    accessor: "handle",
-    Header: (
+  }),
+  columnHelper.accessor("handle", {
+    header: () => (
       <FormattedMessage
         id="components.BaseImageCollectionsTable.handleTitle"
         defaultMessage="Handle"
         description="Title for the Handle column of the base image collections table"
       />
     ),
-  },
-  {
+  }),
+  columnHelper.accessor((row) => row.systemModel?.name, {
     id: "systemModel",
-    accessor: (row) => row.systemModel?.name,
-    Header: (
+    header: () => (
       <FormattedMessage
         id="components.BaseImageCollectionsTable.systemModelTitle"
         defaultMessage="System Model"
         description="Title for the System Model column of the base image collections table"
       />
     ),
-    Cell: ({ value }: { value: string }) => (
-      <span className="text-nowrap">{value}</span>
-    ),
-  },
+    cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   baseImageCollectionsRef: BaseImageCollectionsTable_BaseImageCollectionFragment$key;
-}
+};
 
 const BaseImageCollectionsTable = ({
   className,
   baseImageCollectionsRef,
 }: Props) => {
-  const baseImageCollectionsData = useFragment(
+  const baseImageCollections = useFragment(
     BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT,
     baseImageCollectionsRef
-  );
-
-  // TODO: handle readonly type without mapping to mutable type
-  const baseImageCollections = useMemo(
-    () =>
-      baseImageCollectionsData.map((collection) => ({
-        ...collection,
-        systemModel: collection.systemModel && {
-          name: collection.systemModel.name,
-        },
-      })),
-    [baseImageCollectionsData]
   );
 
   return (

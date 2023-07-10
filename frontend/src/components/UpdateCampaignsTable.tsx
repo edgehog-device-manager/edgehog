@@ -27,8 +27,7 @@ import type {
   UpdateCampaignsTable_UpdateCampaignFragment$key,
 } from "api/__generated__/UpdateCampaignsTable_UpdateCampaignFragment.graphql";
 
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import UpdateCampaignOutcome from "components/UpdateCampaignOutcome";
 import UpdateCampaignStatus from "components/UpdateCampaignStatus";
 
@@ -57,88 +56,80 @@ const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
 
 type TableRecord = UpdateCampaignsTable_UpdateCampaignFragment$data[number];
 
-const columns: Column<TableRecord>[] = [
-  {
-    accessor: "name",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateCampaignsTable.nameTitle"
         defaultMessage="Update Campaign Name"
         description="Title for the Name column of the Update Campaigns table"
       />
     ),
-    Cell: ({ row, value }) => (
+    cell: ({ row, getValue }) => (
       <Link
         route={Route.updateCampaignsEdit}
         params={{ updateCampaignId: row.original.id }}
       >
-        {value}
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    accessor: "status",
-    Header: (
+  }),
+  columnHelper.accessor("status", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateCampaignsTable.statusTitle"
         defaultMessage="Status"
       />
     ),
-    Cell: ({ row }) => (
+    cell: ({ row }) => (
       <UpdateCampaignStatus updateCampaignRef={row.original} />
     ),
-  },
-  {
-    accessor: "outcome",
-    Header: (
+  }),
+  columnHelper.accessor("outcome", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateCampaignsTable.outcomeTitle"
         defaultMessage="Outcome"
       />
     ),
-    Cell: ({ row }) => (
+    cell: ({ row }) => (
       <UpdateCampaignOutcome updateCampaignRef={row.original} />
     ),
-  },
-  {
-    id: "updateChannel",
-    accessor: (row) => row.updateChannel.name,
-    Header: (
+  }),
+  columnHelper.accessor("updateChannel.name", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateCampaignsTable.updateChannelNameTitle"
         defaultMessage="Update Channel"
         description="Title for the Update Channel column of the Update Campaigns table"
       />
     ),
-  },
-  {
-    id: "baseImageCollection",
-    accessor: (row) => row.baseImage.baseImageCollection.name,
-    Header: (
+  }),
+  columnHelper.accessor("baseImage.baseImageCollection.name", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateCampaignsTable.baseImageCollectionNameTitle"
         defaultMessage="Base Image Collection"
         description="Title for the Base Image Collection column of the Update Campaigns table"
       />
     ),
-  },
-  {
-    id: "baseImage",
-    accessor: (row) => row.baseImage.name,
-    Header: (
+  }),
+  columnHelper.accessor("baseImage.name", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateCampaignsTable.baseImageTitle"
         defaultMessage="Base Image"
         description="Title for the Base Image column of the Update Campaigns table"
       />
     ),
-  },
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   updateCampaignsRef: UpdateCampaignsTable_UpdateCampaignFragment$key;
-}
+};
 
 const UpdateCampaignsTable = ({ className, updateCampaignsRef }: Props) => {
   const updateCampaigns = useFragment(

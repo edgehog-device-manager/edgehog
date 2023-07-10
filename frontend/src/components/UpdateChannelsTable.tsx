@@ -19,15 +19,14 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   UpdateChannelsTable_UpdateChannelFragment$data,
   UpdateChannelsTable_UpdateChannelFragment$key,
 } from "api/__generated__/UpdateChannelsTable_UpdateChannelFragment.graphql";
 
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import Tag from "components/Tag";
 import { Link, Route } from "Navigation";
 
@@ -47,55 +46,53 @@ const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
 
 type TableRecord = UpdateChannelsTable_UpdateChannelFragment$data[0];
 
-const columns: Column<TableRecord>[] = [
-  {
-    accessor: "name",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateChannelsTable.nameTitle"
         defaultMessage="Update Channel Name"
         description="Title for the Name column of the update channels table"
       />
     ),
-    Cell: ({ row, value }) => (
+    cell: ({ row, getValue }) => (
       <Link
         route={Route.updateChannelsEdit}
         params={{ updateChannelId: row.original.id }}
       >
-        {value}
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    accessor: "handle",
-    Header: (
+  }),
+  columnHelper.accessor("handle", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateChannelsTable.handleTitle"
         defaultMessage="Handle"
         description="Title for the Handle column of the update channels table"
       />
     ),
-  },
-  {
-    accessor: "targetGroups",
-    disableSortBy: true,
-    Header: (
+  }),
+  columnHelper.accessor("targetGroups", {
+    enableSorting: false,
+    header: () => (
       <FormattedMessage
         id="components.UpdateChannelsTable.targetGroupsTitle"
         defaultMessage="Target Groups"
         description="Title for the Target Groups column of the update channels table"
       />
     ),
-    Cell: ({ value }) => (
+    cell: ({ getValue }) => (
       <>
-        {value.map((group) => (
+        {getValue().map((group) => (
           <Tag key={group.name} className="me-2">
             {group.name}
           </Tag>
         ))}
       </>
     ),
-  },
+  }),
 ];
 
 type Props = {

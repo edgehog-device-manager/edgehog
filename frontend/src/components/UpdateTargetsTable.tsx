@@ -28,8 +28,7 @@ import type {
 } from "api/__generated__/UpdateTargetsTable_UpdateTargetsFragment.graphql";
 
 import Icon from "components/Icon";
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
@@ -84,33 +83,35 @@ const TargetStatus = ({ status }: { status: UpdateTargetStatus }) => (
 type TableRecord =
   UpdateTargetsTable_UpdateTargetsFragment$data["updateTargets"][number];
 
-const columns: Column<TableRecord>[] = [
-  {
-    accessor: "device",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("device.name", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateTargetsTable.deviceTitle"
         defaultMessage="Device"
         description="Title for the Device column of the Update Targets table"
       />
     ),
-    Cell: ({ value }) => (
-      <Link route={Route.devicesEdit} params={{ deviceId: value.id }}>
-        {value.name}
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.devicesEdit}
+        params={{ deviceId: row.original.device.id }}
+      >
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    accessor: "status",
-    Header: (
+  }),
+  columnHelper.accessor("status", {
+    header: () => (
       <FormattedMessage
         id="components.UpdateTargetsTable.statusTitle"
         defaultMessage="Status"
         description="Title for the Status column of the Update Targets table"
       />
     ),
-    Cell: ({ value }) => <TargetStatus status={value} />,
-  },
+    cell: ({ getValue }) => <TargetStatus status={getValue()} />,
+  }),
 ];
 
 type Props = {

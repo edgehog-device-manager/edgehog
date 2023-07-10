@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 */
 
 import { FormattedDate, FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   WiFiScanResultsTable_wifiScanResults$data,
@@ -27,8 +27,8 @@ import type {
 } from "api/__generated__/WiFiScanResultsTable_wifiScanResults.graphql";
 
 import Result from "components/Result";
-import Table from "components/Table";
-import type { Column, Row } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
+import type { Row } from "components/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -50,55 +50,54 @@ type TableRecord = Omit<
   "timestamp"
 > & { readonly seenAt: Date };
 
-const columns: Column<TableRecord>[] = [
-  {
-    accessor: "essid",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("essid", {
+    header: () => (
       <FormattedMessage
         id="components.WiFiScanResultsTable.apEssidTitle"
         defaultMessage="ESSID"
       />
     ),
-  },
-  {
-    accessor: "channel",
-    Header: (
+  }),
+  columnHelper.accessor("channel", {
+    header: () => (
       <FormattedMessage
         id="components.WiFiScanResultsTable.apChannelTitle"
         defaultMessage="Channel"
       />
     ),
-  },
-  {
-    accessor: "macAddress",
-    Header: (
+  }),
+  columnHelper.accessor("macAddress", {
+    header: () => (
       <FormattedMessage
         id="components.WiFiScanResultsTable.apMacAddressTitle"
         defaultMessage="MAC Address"
       />
     ),
-  },
-  {
-    accessor: "rssi",
-    Header: (
+  }),
+  columnHelper.accessor("rssi", {
+    header: () => (
       <FormattedMessage
         id="components.WiFiScanResultsTable.apRssiTitle"
         defaultMessage="RSSI"
       />
     ),
-    Cell: ({ value }) => (value ? `${value} dBm` : ""),
-  },
-  {
-    accessor: "seenAt",
-    Header: (
+    cell: ({ getValue }) => {
+      const rssi = getValue();
+      return rssi === null ? "" : `${rssi} dBm`;
+    },
+  }),
+  columnHelper.accessor("seenAt", {
+    header: () => (
       <FormattedMessage
         id="components.WiFiScanResultsTable.seenAtTitle"
         defaultMessage="Seen at"
       />
     ),
-    Cell: ({ value }) => (
+    cell: ({ getValue }) => (
       <FormattedDate
-        value={value}
+        value={getValue()}
         year="numeric"
         month="long"
         day="numeric"
@@ -106,17 +105,17 @@ const columns: Column<TableRecord>[] = [
         minute="numeric"
       />
     ),
-  },
+  }),
 ];
 
 const getRowProps = (row: Row<TableRecord>) => {
   return row.original.connected ? { className: "fw-bold" } : {};
 };
 
-interface Props {
+type Props = {
   className?: string;
   deviceRef: WiFiScanResultsTable_wifiScanResults$key;
-}
+};
 
 const WiFiScanResultsTable = ({ className, deviceRef }: Props) => {
   const data = useFragment(WIFI_SCAN_RESULTS_TABLE_FRAGMENT, deviceRef);

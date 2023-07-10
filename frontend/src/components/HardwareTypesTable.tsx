@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
 
 type HardwareTypeProps = {
@@ -32,57 +31,55 @@ type HardwareTypeProps = {
   partNumbers: string[];
 };
 
-const columns: Column<HardwareTypeProps>[] = [
-  {
-    accessor: "name",
-    Header: (
+const columnHelper = createColumnHelper<HardwareTypeProps>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
       <FormattedMessage
         id="components.HardwareTypesTable.nameTitle"
         defaultMessage="Hardware Type Name"
       />
     ),
-    Cell: ({ row, value }) => (
+    cell: ({ row, getValue }) => (
       <Link
         route={Route.hardwareTypesEdit}
         params={{ hardwareTypeId: row.original.id }}
       >
-        {value}
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    accessor: "handle",
-    Header: (
+  }),
+  columnHelper.accessor("handle", {
+    header: () => (
       <FormattedMessage
         id="components.HardwareTypesTable.handleTitle"
         defaultMessage="Handle"
       />
     ),
-    Cell: ({ value }) => <span className="text-nowrap">{value}</span>,
-  },
-  {
-    accessor: "partNumbers",
-    Header: (
+    cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
+  }),
+  columnHelper.accessor("partNumbers", {
+    enableSorting: false,
+    header: () => (
       <FormattedMessage
         id="components.HardwareTypesTable.partNumbersTitle"
         defaultMessage="Part Numbers"
       />
     ),
-    Cell: ({ value }) =>
-      value.map((partNumber, index) => (
+    cell: ({ getValue }) =>
+      getValue().map((partNumber, index) => (
         <React.Fragment key={partNumber}>
           {index > 0 && ", "}
           <span className="text-nowrap">{partNumber}</span>
         </React.Fragment>
       )),
-    disableSortBy: true,
-  },
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   data: HardwareTypeProps[];
-}
+};
 
 const HardwareTypesTable = ({ className, data }: Props) => {
   return <Table className={className} columns={columns} data={data} />;

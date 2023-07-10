@@ -20,15 +20,14 @@
 
 import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   BaseImagesTable_BaseImagesFragment$data,
   BaseImagesTable_BaseImagesFragment$key,
 } from "api/__generated__/BaseImagesTable_BaseImagesFragment.graphql";
 
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
@@ -48,54 +47,50 @@ const BASE_IMAGES_TABLE_FRAGMENT = graphql`
 type TableRecord =
   BaseImagesTable_BaseImagesFragment$data["baseImages"][number];
 
-const getColumnsDefinition = (
-  baseImageCollectionId: string
-): Column<TableRecord>[] => [
-  {
-    accessor: "version",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const getColumnsDefinition = (baseImageCollectionId: string) => [
+  columnHelper.accessor("version", {
+    header: () => (
       <FormattedMessage
         id="components.BaseImagesTable.versionTitle"
         defaultMessage="Base Image Version"
         description="Title for the Version column of the base images table"
       />
     ),
-    Cell: ({ row, value }) => (
+    cell: ({ row, getValue }) => (
       <Link
         route={Route.baseImagesEdit}
         params={{ baseImageCollectionId, baseImageId: row.original.id }}
       >
-        {value}
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    accessor: "releaseDisplayName",
-    Header: (
+  }),
+  columnHelper.accessor("releaseDisplayName", {
+    header: () => (
       <FormattedMessage
         id="components.BaseImagesTable.releaseDisplayNameTitle"
         defaultMessage="Release Name"
         description="Title for the Release Name column of the base images table"
       />
     ),
-  },
-  {
-    accessor: "startingVersionRequirement",
-    Header: (
+  }),
+  columnHelper.accessor("startingVersionRequirement", {
+    header: () => (
       <FormattedMessage
         id="components.BaseImagesTable.startingVersionRequirementTitle"
         defaultMessage="Supported Starting Versions"
         description="Title for the Supported Starting Versions column of the base images table"
       />
     ),
-  },
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   baseImageCollectionRef: BaseImagesTable_BaseImagesFragment$key;
   hideSearch?: boolean;
-}
+};
 
 const BaseImagesTable = ({
   className,

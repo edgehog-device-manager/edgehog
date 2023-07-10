@@ -28,8 +28,7 @@ import type {
 } from "api/__generated__/NetworkInterfacesTable_networkInterfaces.graphql";
 
 import Result from "components/Result";
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -66,42 +65,46 @@ type TableRecord = NonNullable<
   NetworkInterfacesTable_networkInterfaces$data["networkInterfaces"]
 >[number];
 
-const columns: Column<TableRecord>[] = [
-  {
-    accessor: "name",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
       <FormattedMessage
         id="components.NetworkInterfacesTable.nameTitle"
         defaultMessage="Name"
       />
     ),
-  },
-  {
-    accessor: "technology",
-    Header: (
+  }),
+  columnHelper.accessor("technology", {
+    header: () => (
       <FormattedMessage
         id="components.NetworkInterfacesTable.technologyTitle"
         defaultMessage="Technology"
       />
     ),
-    Cell: ({ value }) =>
-      value && <FormattedMessage id={technologyMessages[value].id} />,
-  },
-  {
-    accessor: "macAddress",
-    Header: (
+    cell: ({ getValue }) => {
+      const technology = getValue();
+      return (
+        technology && (
+          <FormattedMessage id={technologyMessages[technology].id} />
+        )
+      );
+    },
+  }),
+  columnHelper.accessor("macAddress", {
+    header: () => (
       <FormattedMessage
         id="components.NetworkInterfacesTable.macAddressTitle"
         defaultMessage="MAC Address"
       />
     ),
-  },
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   deviceRef: NetworkInterfacesTable_networkInterfaces$key;
-}
+};
 
 const NetworkInterfacesTable = ({ className, deviceRef }: Props) => {
   const { networkInterfaces } = useFragment(

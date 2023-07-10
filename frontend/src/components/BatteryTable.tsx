@@ -29,8 +29,7 @@ import type {
 } from "api/__generated__/BatteryTable_batteryStatus.graphql";
 
 import Result from "components/Result";
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -111,43 +110,43 @@ const renderChargeLevel = (slot: BatterySlot): ReactElement | null => {
   }
 };
 
-const columns: Column<BatterySlot>[] = [
-  {
-    accessor: "slot",
-    Header: (
+const columnHelper = createColumnHelper<BatterySlot>();
+const columns = [
+  columnHelper.accessor("slot", {
+    header: () => (
       <FormattedMessage
         id="components.BatteryTable.slotTitle"
         defaultMessage="Slot"
       />
     ),
-  },
-  {
-    accessor: "status",
-    Header: (
+  }),
+  columnHelper.accessor("status", {
+    header: () => (
       <FormattedMessage
         id="components.BatteryTable.statusTitle"
         defaultMessage="Status"
       />
     ),
-    Cell: ({ value }) =>
-      value && <FormattedMessage id={statusMessages[value].id} />,
-  },
-  {
-    accessor: "levelPercentage",
-    Header: (
+    cell: ({ getValue }) => {
+      const status = getValue();
+      return status && <FormattedMessage id={statusMessages[status].id} />;
+    },
+  }),
+  columnHelper.accessor("levelPercentage", {
+    header: () => (
       <FormattedMessage
         id="components.BatteryTable.chargeLevelTitle"
         defaultMessage="Charge Level"
       />
     ),
-    Cell: ({ row }) => renderChargeLevel(row.original),
-  },
+    cell: ({ row }) => renderChargeLevel(row.original),
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   deviceRef: BatteryTable_batteryStatus$key;
-}
+};
 
 const BatteryTable = ({ className, deviceRef }: Props) => {
   const { batteryStatus } = useFragment(BATTERY_TABLE_FRAGMENT, deviceRef);

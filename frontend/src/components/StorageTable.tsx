@@ -27,8 +27,7 @@ import type {
 } from "api/__generated__/StorageTable_storageUsage.graphql";
 
 import Result from "components/Result";
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -58,52 +57,54 @@ const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const columns: Column<StorageUnit>[] = [
-  {
-    accessor: "label",
-    Header: (
+const columnHelper = createColumnHelper<StorageUnit>();
+const columns = [
+  columnHelper.accessor("label", {
+    header: () => (
       <FormattedMessage
         id="components.StorageTable.labelTitle"
         defaultMessage="Storage Unit"
       />
     ),
-  },
-  {
-    accessor: "totalBytes",
-    Header: (
+  }),
+  columnHelper.accessor("totalBytes", {
+    header: () => (
       <FormattedMessage
         id="components.StorageTable.totalSpaceTitle"
         defaultMessage="Total Space"
       />
     ),
-    Cell: ({ value }) =>
-      value == null ? (
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value === null ? (
         ""
       ) : (
         <span className="text-nowrap">{formatBytes(value)}</span>
-      ),
-  },
-  {
-    accessor: "freeBytes",
-    Header: (
+      );
+    },
+  }),
+  columnHelper.accessor("freeBytes", {
+    header: () => (
       <FormattedMessage
         id="components.StorageTable.freeSpaceTitle"
         defaultMessage="Free Space"
       />
     ),
-    Cell: ({ value }) =>
-      value == null ? (
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value === null ? (
         ""
       ) : (
         <span className="text-nowrap">{formatBytes(value)}</span>
-      ),
-  },
+      );
+    },
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   deviceRef: StorageTable_storageUsage$key;
-}
+};
 
 const StorageTable = ({ className, deviceRef }: Props) => {
   const { storageUsage } = useFragment(STORAGE_TABLE_FRAGMENT, deviceRef);
