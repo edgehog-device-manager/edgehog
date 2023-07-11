@@ -35,6 +35,24 @@ defmodule Edgehog.Repo do
     Process.get(@tenant_key)
   end
 
+  def fetch(queryable, id, opts \\ []) do
+    empty = Keyword.get(opts, :empty_return, :not_found)
+
+    case get(queryable, id, opts) do
+      nil -> {:error, empty}
+      item -> {:ok, item}
+    end
+  end
+
+  def fetch_by(queryable, clauses, opts \\ []) do
+    empty = Keyword.get(opts, :empty_return, :not_found)
+
+    case get_by(queryable, clauses, opts) do
+      nil -> {:error, empty}
+      item -> {:ok, item}
+    end
+  end
+
   @impl true
   def prepare_query(_operation, query, opts) do
     cond do

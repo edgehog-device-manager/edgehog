@@ -109,10 +109,7 @@ defmodule Edgehog.Groups do
 
   """
   def fetch_device_group(id) do
-    case Repo.get(DeviceGroup, id) do
-      %DeviceGroup{} = device_group -> {:ok, device_group}
-      nil -> {:error, :not_found}
-    end
+    Repo.fetch(DeviceGroup, id)
   end
 
   @doc """

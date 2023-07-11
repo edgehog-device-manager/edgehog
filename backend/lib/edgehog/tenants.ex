@@ -72,10 +72,7 @@ defmodule Edgehog.Tenants do
 
   """
   def fetch_tenant_by_slug(slug) do
-    case Repo.get_by(Tenant, [slug: slug], skip_tenant_id: true) do
-      %Tenant{} = tenant -> {:ok, tenant}
-      nil -> {:error, :not_found}
-    end
+    Repo.fetch_by(Tenant, [slug: slug], skip_tenant_id: true)
   end
 
   @doc """
