@@ -77,12 +77,8 @@ defmodule Edgehog.BaseImages do
 
   """
   def fetch_base_image_collection(id) do
-    case Repo.get(BaseImageCollection, id) do
-      %BaseImageCollection{} = base_image_collection ->
-        {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
-
-      nil ->
-        {:error, :not_found}
+    with {:ok, base_image_collection} <- Repo.fetch(BaseImageCollection, id) do
+      {:ok, preload_defaults_for_base_image_collection(base_image_collection)}
     end
   end
 
@@ -214,9 +210,8 @@ defmodule Edgehog.BaseImages do
 
   """
   def fetch_base_image(id) do
-    case Repo.get(BaseImage, id) do
-      nil -> {:error, :not_found}
-      %BaseImage{} = base_image -> {:ok, preload_defaults_for_base_image(base_image)}
+    with {:ok, base_image} <- Repo.fetch(BaseImage, id) do
+      {:ok, preload_defaults_for_base_image(base_image)}
     end
   end
 

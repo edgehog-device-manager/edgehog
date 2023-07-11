@@ -248,10 +248,7 @@ defmodule Edgehog.Astarte do
 
   """
   def fetch_realm_by_name(realm_name) do
-    case Repo.get_by(Realm, name: realm_name) do
-      %Realm{} = realm -> {:ok, realm}
-      nil -> {:error, :realm_not_found}
-    end
+    Repo.fetch_by(Realm, [name: realm_name], error: :realm_not_found)
   end
 
   @doc """
@@ -399,10 +396,7 @@ defmodule Edgehog.Astarte do
 
   """
   def fetch_realm_device(%Realm{id: realm_id}, device_id) do
-    case Repo.get_by(Device, realm_id: realm_id, device_id: device_id) do
-      %Device{} = device -> {:ok, device}
-      nil -> {:error, :device_not_found}
-    end
+    Repo.fetch_by(Device, [realm_id: realm_id, device_id: device_id], error: :device_not_found)
   end
 
   @doc """

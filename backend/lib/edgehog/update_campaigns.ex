@@ -69,12 +69,8 @@ defmodule Edgehog.UpdateCampaigns do
 
   """
   def fetch_update_channel(id) do
-    case Repo.get(UpdateChannel, id) do
-      nil ->
-        {:error, :not_found}
-
-      %UpdateChannel{} = update_channel ->
-        {:ok, preload_defaults_for_update_channel(update_channel)}
+    with {:ok, update_channel} <- Repo.fetch(UpdateChannel, id) do
+      {:ok, preload_defaults_for_update_channel(update_channel)}
     end
   end
 
@@ -368,12 +364,8 @@ defmodule Edgehog.UpdateCampaigns do
 
   """
   def fetch_update_campaign(id) do
-    case Repo.get(UpdateCampaign, id) do
-      nil ->
-        {:error, :not_found}
-
-      %UpdateCampaign{} = update_campaign ->
-        {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    with {:ok, update_campaign} <- Repo.fetch(UpdateCampaign, id) do
+      {:ok, preload_defaults_for_update_campaign(update_campaign)}
     end
   end
 
@@ -492,12 +484,8 @@ defmodule Edgehog.UpdateCampaigns do
 
   """
   def fetch_target(id) do
-    case Repo.get(Target, id) do
-      nil ->
-        {:error, :not_found}
-
-      %Target{} = target ->
-        {:ok, preload_defaults_for_target(target)}
+    with {:ok, target} <- Repo.fetch(Target, id) do
+      {:ok, preload_defaults_for_target(target)}
     end
   end
 end
