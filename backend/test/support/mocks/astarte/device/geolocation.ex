@@ -32,7 +32,7 @@ defmodule Edgehog.Mocks.Astarte.Device.Geolocation do
         latitude: 45.4095285,
         longitude: 11.8788231,
         altitude: nil,
-        accuracy: 0,
+        accuracy: 0.0,
         altitude_accuracy: nil,
         heading: nil,
         speed: nil,

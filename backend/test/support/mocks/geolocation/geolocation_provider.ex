@@ -21,9 +21,11 @@
 defmodule Edgehog.Mocks.Geolocation.GeolocationProvider do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
+  alias Edgehog.Geolocation.Position
+
   @impl true
   def geolocate(_device) do
-    coordinates = %{
+    coordinates = %Position{
       accuracy: 12,
       latitude: 45.4095285,
       longitude: 11.8788231,
