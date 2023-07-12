@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: Build and Test Backend
+name: Backend CI
 
 on:
   # Run when pushing to stable branches
@@ -36,65 +36,93 @@ on:
     - '.tool-versions'
     - '.github/workflows/backend-test.yaml'
 
-jobs:
-  test-dialyzer:
-    name: Check Dialyzer
-    runs-on: ubuntu-22.04
-    env:
-      MIX_ENV: ci
-    steps:
-    - uses: actions/checkout@v3
+env:
+  MIX_ENV: test
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: erlef/setup-beam@v1
+defaults:
+  run:
+    # Define the default working-directory for all run steps
+    working-directory: backend
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Clone the repository
+      uses: actions/checkout@v3
+
+    - name: Install OTP and Elixir
+      uses: erlef/setup-beam@v1
       id: beam
       with:
         version-file: .tool-versions
         version-type: strict
 
-    - uses: actions/cache@v3
+    - name: Cache dependencies
+      id: cache-deps
+      uses: actions/cache@v3
       with:
-        path: backend/deps
-        key: |
-          ${{ runner.os }}-dialyzer-mix-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles(format('{0}{1}', github.workspace, '/backend/mix.lock')) }}
-        restore-keys: |
-          ${{ runner.os }}-dialyzer-mix-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
-    - uses: actions/cache@v3
-      with:
-        path: backend/_build
-        key: |
-          ${{ runner.os }}-dialyzer-_build-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-dialyzer-_build-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
+        path: |
+          backend/deps
+          backend/_build
+        key: "${{ runner.os }}-\
+              otp-${{ steps.beam.outputs.otp-version }}-\
+              elixir-${{ steps.beam.outputs.elixir-version }}-\
+              ${{ hashFiles('backend/mix.lock') }}"
 
-    - name: Install Dependencies
-      working-directory: ./backend
-      run: mix deps.get
+    - name: Install and compile dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        mix deps.get --only test
+        mix deps.compile
+
+    - name: Check formatting
+      run: mix format --check-formatted
+
+    - name: Run Credo code analysis
+      run: mix credo
+
+    - name: Check for unused dependencies
+      run: mix do deps.get, deps.unlock --check-unused
+
+    - name: Compile with --warnings-as-errors
+      run: mix compile --warnings-as-errors --force
 
     # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
     # Cache key based on Elixir & Erlang version (also useful when running in matrix)
-    - name: Restore PLT cache
-      uses: actions/cache@v3
+    - name: Cache Dialyzer's PLT
+      uses: actions/cache/restore@v3
       id: plt_cache
       with:
+        key: "${{ runner.os }}-\
+              otp-${{ steps.beam.outputs.otp-version }}-\
+              elixir-${{ steps.beam.outputs.elixir-version }}-\
+              dialyzer-plt"
         path: backend/priv/plts
-        key: |
-          ${{ runner.os }}-dialyzer-plt-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}
-        restore-keys: |
-          ${{ runner.os }}-dialyzer-plt-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}
 
     # Create PLTs if no cache was found
     - name: Create PLTs
-      working-directory: ./backend
       if: steps.plt_cache.outputs.cache-hit != 'true'
-      run: mkdir -p priv/plts && mix dialyzer --plt
+      run: mix dialyzer --plt
+
+    # By default, the GitHub Cache action will only save the cache if all steps in the job succeed,
+    # so we separate the cache restore and save steps in case running dialyzer fails.
+    - name: Save PLT cache
+      uses: actions/cache/save@v3
+      if: steps.plt_cache.outputs.cache-hit != 'true'
+      id: plt_cache_save
+      with:
+        key: "${{ steps.plt_cache.outputs.cache-primary-key }}"
+        path: backend/priv/plts
 
     - name: Run dialyzer
-      working-directory: ./backend
-      run: mix dialyzer
+      run: mix dialyzer --format github
 
   test-coverage:
     name: Build and Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     services:
       postgres:
         image: postgres:14
@@ -107,36 +135,36 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    env:
-      MIX_ENV: test
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
-    - uses: actions/checkout@v3
-    - uses: erlef/setup-beam@v1
+    - name: Clone the repository
+      uses: actions/checkout@v3
+
+    - name: Install OTP and Elixir
+      uses: erlef/setup-beam@v1
       id: beam
       with:
         version-file: .tool-versions
         version-type: strict
-    - uses: actions/cache@v3
+
+    - name: Cache dependencies
+      id: cache-deps
+      uses: actions/cache@v3
       with:
-        path: backend/deps
-        key: ${{ runner.os }}-deps-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles(format('{0}{1}{2}', github.workspace, '/backend/', '/mix.lock')) }}
-    - uses: actions/cache@v3
-      with:
-        path: backend/_build
-        key: ${{ runner.os }}-_build-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}
-    - name: Install Dependencies
-      working-directory: backend
-      run: mix deps.get
-    - name: Check formatting
-      working-directory: backend
-      run: mix format --check-formatted
-    - name: Run Credo code analysis
-      working-directory: backend
-      run: mix credo
-    - name: Compile
-      working-directory: backend
-      run: mix do compile
+        path: |
+          backend/deps
+          backend/_build
+        key: "${{ runner.os }}-\
+              otp-${{ steps.beam.outputs.otp-version }}-\
+              elixir-${{ steps.beam.outputs.elixir-version }}-\
+              ${{ hashFiles('backend/mix.lock') }}"
+
+
+    - name: Install and compile dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        mix deps.get --only test
+        mix deps.compile
+
     - name: Test
-      working-directory: backend
-      run: mix coveralls.github --exclude wip -o coverage_results
+      run: mix coveralls.github -o coverage_results

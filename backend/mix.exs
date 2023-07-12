@@ -38,9 +38,7 @@ defmodule Edgehog.MixProject do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
-      dialyzer: [
-        plt_core_path: dialyzer_cache_directory(Mix.env())
-      ]
+      dialyzer: dialyzer_opts(Mix.env())
     ]
   end
 
@@ -57,6 +55,15 @@ defmodule Edgehog.MixProject do
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp dialyzer_opts(:test) do
+    [
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+      plt_add_apps: [:ex_unit]
+    ]
+  end
+
+  defp dialyzer_opts(_env), do: []
 
   # Specifies your project dependencies.
   #
@@ -94,7 +101,7 @@ defmodule Edgehog.MixProject do
       {:skogsra, "~> 2.3"},
       {:nimble_parsec, "~> 1.2"},
       {:excoveralls, "~> 0.10", only: :test},
-      {:dialyxir, "~> 1.0", only: [:dev, :ci], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:pretty_log, "~> 0.1"},
       {:prom_ex, "~> 1.7.1"},
       {:plug_heartbeat, "~> 1.0"},
@@ -120,13 +127,5 @@ defmodule Edgehog.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
-  end
-
-  defp dialyzer_cache_directory(:ci) do
-    "priv/plts"
-  end
-
-  defp dialyzer_cache_directory(_) do
-    nil
   end
 end
