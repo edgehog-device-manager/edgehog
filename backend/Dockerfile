@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,49 +18,87 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-FROM elixir:1.15.0 as builder
+# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
+# instead of Alpine to avoid DNS resolution issues in production.
+#
+# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
+# https://hub.docker.com/_/ubuntu?tab=tags
+#
+# This file is based on these images:
+#
+#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
+#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20230612-slim - for the release image
+#   - https://pkgs.org/ - resource for finding needed packages
+#   - Ex: hexpm/elixir:1.15.0-erlang-26.0.2-debian-bullseye-20230612-slim
+#
+ARG ELIXIR_VERSION=1.15.0
+ARG OTP_VERSION=26.0.2
+ARG DEBIAN_VERSION=bullseye-20230612-slim
 
+ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
+ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
+
+FROM ${BUILDER_IMAGE} as builder
+
+# install build dependencies
+RUN apt-get update -y && apt-get install -y build-essential git \
+    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+# prepare build dir
 WORKDIR /app
 
-# Install hex
+# install hex + rebar
 RUN mix local.hex --force && \
-    mix local.rebar --force && \
-    mix hex.info
+    mix hex.info && \
+    mix local.rebar --force
 
-# Pass --build-arg BUILD_ENV=dev to build a dev image
-ARG BUILD_ENV=prod
+# set build ENV
+ENV MIX_ENV="prod"
 
-ENV MIX_ENV=$BUILD_ENV
+# install mix dependencies
+COPY mix.exs mix.lock ./
+RUN mix deps.get --only $MIX_ENV
+RUN mkdir config
 
-# Cache elixir deps
-ADD mix.exs mix.lock ./
-ADD config config
-RUN mix do deps.get --only $MIX_ENV, deps.compile
+# copy compile-time config files before we compile dependencies
+# to ensure any relevant config change will trigger the dependencies
+# to be re-compiled.
+COPY config/config.exs config/${MIX_ENV}.exs config/
+RUN mix deps.compile
 
-ADD priv priv
+COPY priv priv
 
-# Add the actual code
-ADD lib lib
-RUN mix do compile, release
+# Compile the release
+COPY lib lib
 
-# Note: it is important to keep Debian versions in sync, or incompatibilities between libcrypto will happen
-FROM debian:bullseye-slim
+RUN mix compile
 
-WORKDIR /app
+# Changes to config/runtime.exs don't require recompiling the code
+COPY config/runtime.exs config/
 
-RUN apt-get -qq update
+COPY rel rel
+RUN mix release
+
+# start a new build stage so that the final image will only contain
+# the compiled release and other runtime necessities
+FROM ${RUNNER_IMAGE}
+
+RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales \
+  && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Set the locale
-ENV LANG C.UTF-8
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
-# We need SSL
-RUN apt-get -qq install libssl1.1
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
-# We have to redefine this here since it goes out of scope for each build stage
-ARG BUILD_ENV=prod
+WORKDIR "/app"
+RUN chown nobody /app
 
-COPY --from=builder /app/_build/$BUILD_ENV/rel/edgehog .
-COPY entrypoint.sh .
+# Only copy the final release from the build stage
+COPY --from=builder --chown=nobody:root /app/_build/prod/rel/edgehog ./
 
-ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
-CMD ["start"]
+USER nobody
+
+CMD ["/app/bin/server"]

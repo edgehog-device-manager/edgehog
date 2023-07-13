@@ -20,6 +20,10 @@
 
 import Config
 
+if System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME") do
+  config :edgehog, EdgehogWeb.Endpoint, server: true
+end
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
@@ -54,7 +58,6 @@ if config_env() == :prod do
       """
 
   config :edgehog, EdgehogWeb.Endpoint,
-    server: true,
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
