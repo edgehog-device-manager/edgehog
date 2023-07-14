@@ -24,6 +24,10 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   entities via the `Edgehog.UpdateCampaigns` context.
   """
 
+  alias Edgehog.BaseImagesFixtures
+  alias Edgehog.DevicesFixtures
+  alias Edgehog.GroupsFixtures
+
   @doc """
   Generate a unique update_channel handle.
   """
@@ -67,19 +71,78 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     {base_image, attrs} =
       Keyword.pop_lazy(attrs, :base_image, &Edgehog.BaseImagesFixtures.base_image_fixture/0)
 
+    {rollout_mechanism_attrs, attrs} = Keyword.pop(attrs, :rollout_mechanism, [])
+
+    rollout_mechanism_attrs =
+      Enum.into(rollout_mechanism_attrs, %{
+        type: "push",
+        max_errors_percentage: 50.0,
+        max_in_progress_updates: 100
+      })
+
     attrs =
       Enum.into(attrs, %{
         name: unique_update_campaign_name(),
-        rollout_mechanism: %{
-          type: "push",
-          max_errors_percentage: 10.0,
-          max_in_progress_updates: 10
-        }
+        rollout_mechanism: rollout_mechanism_attrs
       })
 
     {:ok, update_campaign} =
       Edgehog.UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
 
     update_campaign
+  end
+
+  @doc """
+  Generates an update campaign with N targets
+  """
+  def update_campaign_with_targets_fixture(target_count, attrs \\ [])
+      when is_integer(target_count) and target_count > 0 do
+    # Initializes an update campaign with N targets
+    {base_image, attrs} =
+      Keyword.pop_lazy(attrs, :base_image, &BaseImagesFixtures.base_image_fixture/0)
+
+    tag = "foo"
+    group = GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>)
+
+    update_channel = update_channel_fixture(target_group_ids: [group.id])
+
+    for _ <- 1..target_count do
+      # Create devices as online by default
+      _ =
+        DevicesFixtures.device_fixture_compatible_with(base_image, online: true)
+        |> DevicesFixtures.add_tags([tag])
+    end
+
+    attrs
+    |> Keyword.merge(base_image: base_image, update_channel: update_channel)
+    |> update_campaign_fixture()
+  end
+
+  def target_fixture(attrs \\ []) do
+    {base_image, attrs} =
+      Keyword.pop_lazy(attrs, :base_image, &Edgehog.BaseImagesFixtures.base_image_fixture/0)
+
+    {tag, attrs} = Keyword.pop(attrs, :tag, "foo")
+
+    {group, attrs} =
+      Keyword.pop_lazy(attrs, :device_group, fn ->
+        GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>)
+      end)
+
+    {update_channel, attrs} =
+      Keyword.pop_lazy(attrs, :update_channel, fn ->
+        update_channel_fixture(target_group_ids: [group.id])
+      end)
+
+    _ =
+      DevicesFixtures.device_fixture_compatible_with(base_image, attrs)
+      |> DevicesFixtures.add_tags([tag])
+
+    update_campaign =
+      update_campaign_fixture(base_image: base_image, update_channel: update_channel)
+
+    [target] = update_campaign.update_targets
+
+    target
   end
 end

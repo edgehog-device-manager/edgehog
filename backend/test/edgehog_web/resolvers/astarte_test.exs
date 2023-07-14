@@ -119,7 +119,7 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
 
       assert %BaseImage{
                name: "esp-idf",
-               version: "4.3.1",
+               version: "0.1.0",
                build_id: "2022-01-01 12:00:00",
                fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
              } == base_image

@@ -25,6 +25,7 @@ defmodule Edgehog.OSManagementTest do
 
   alias Edgehog.Devices
   alias Edgehog.OSManagement
+  alias Edgehog.PubSub
 
   describe "ota_operations" do
     alias Edgehog.OSManagement.OTAOperation
@@ -103,6 +104,19 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.manual? == true
     end
 
+    test "successful create_manual_ota_operation/2 publishes on PubSub", %{
+      device: device
+    } do
+      assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
+
+      fake_image = %Plug.Upload{path: "/tmp/ota_image_v2.bin", filename: "ota_image_v2.bin"}
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.create_manual_ota_operation(device, fake_image)
+
+      assert_receive {:ota_operation_created, ^ota_operation}
+    end
+
     test "create_manual_ota_operation/2 fails if upload fails", %{device: device} do
       fake_image = %Plug.Upload{path: "/tmp/ota_image_v2.bin", filename: "ota_image_v2.bin"}
 
@@ -174,6 +188,19 @@ defmodule Edgehog.OSManagementTest do
       assert ota_operation.manual? == false
     end
 
+    test "successful create_managed_ota_operation/2 publishes on PubSub", %{
+      device: device
+    } do
+      base_image = base_image_fixture()
+
+      assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.create_managed_ota_operation(device, base_image)
+
+      assert_receive {:ota_operation_created, ^ota_operation}
+    end
+
     test "create_managed_ota_operation/2 fails if the Astarte request fails", %{
       device: device
     } do
@@ -186,6 +213,36 @@ defmodule Edgehog.OSManagementTest do
 
       assert {:error, %Astarte.Client.APIError{}} =
                OSManagement.create_managed_ota_operation(device, base_image)
+    end
+
+    test "send_update_request/2 succeeds if the Astarte request succeeds", %{
+      device: device
+    } do
+      device_id = device.device_id
+      ota_request_id = "715cb3d6-a24d-4cb5-bc86-5c85f5a906f2"
+      image_url = "https://my.bucket.com/my_image.bin"
+
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, ^device_id, ^ota_request_id, ^image_url ->
+        :ok
+      end)
+
+      assert :ok = OSManagement.send_update_request(device, ota_request_id, image_url)
+    end
+
+    test "send_update_request/2 fails if the Astarte request fails", %{
+      device: device
+    } do
+      ota_request_id = "715cb3d6-a24d-4cb5-bc86-5c85f5a906f2"
+      image_url = "https://my.bucket.com/my_image.bin"
+
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, _device_id, _uuid, _fake_url ->
+        {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
+      end)
+
+      assert {:error, %Astarte.Client.APIError{}} =
+               OSManagement.send_update_request(device, ota_request_id, image_url)
     end
 
     test "update_ota_operation/2 with valid data updates the ota_operation", %{device: device} do
@@ -284,6 +341,21 @@ defmodule Edgehog.OSManagementTest do
                OSManagement.update_ota_operation(ota_operation, @invalid_attrs)
 
       assert ota_operation == OSManagement.get_ota_operation!(ota_operation.id)
+    end
+
+    test "successful update_ota_operation/2 publishes on PubSub", %{
+      device: device
+    } do
+      ota_operation = manual_ota_operation_fixture(device)
+
+      assert :ok = PubSub.subscribe_to_events_for(ota_operation)
+
+      update_attrs = %{status: :error, status_code: "NetworkError"}
+
+      assert {:ok, %OTAOperation{} = ota_operation} =
+               OSManagement.update_ota_operation(ota_operation, update_attrs)
+
+      assert_receive {:ota_operation_updated, ^ota_operation}
     end
 
     test "delete_ota_operation/1 deletes the ota_operation", %{device: device} do

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Mocks.Astarte.Device.BaseImage do
-  @behaviour Edgehog.Astarte.Device.BaseImage.Behaviour
+defmodule Edgehog.UpdateCampaigns.Supervisor do
+  use Supervisor
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.BaseImage
+  alias Edgehog.UpdateCampaigns.ExecutorRegistry
+  alias Edgehog.UpdateCampaigns.ExecutorSupervisor
 
-  @impl true
-  def get(%AppEngine{} = _client, _device_id) do
-    base_image = %BaseImage{
-      name: "esp-idf",
-      version: "0.1.0",
-      build_id: "2022-01-01 12:00:00",
-      fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
-    }
+  def start_link(init_arg) do
+    Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  end
 
-    {:ok, base_image}
+  @impl Supervisor
+  def init(_init_arg) do
+    children = [
+      {Registry, name: ExecutorRegistry, keys: :unique},
+      ExecutorSupervisor
+    ]
+
+    Supervisor.init(children, strategy: :rest_for_one)
   end
 end

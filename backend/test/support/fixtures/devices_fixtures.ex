@@ -24,7 +24,6 @@ defmodule Edgehog.DevicesFixtures do
   entities via the `Edgehog.Devices` context.
   """
 
-  alias Edgehog.Astarte
   alias Edgehog.AstarteFixtures
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
@@ -82,12 +81,14 @@ defmodule Edgehog.DevicesFixtures do
   @doc """
   Generate a %Devices.Device{} compatible with a specific %BaseImages.BaseImage{}, passed as argument.
   """
-  def device_fixture_compatible_with(base_image) do
+  def device_fixture_compatible_with(base_image, attrs \\ []) do
     [%{part_number: part_number} | _] = base_image.base_image_collection.system_model.part_numbers
 
-    {:ok, device} =
-      astarte_device_fixture()
-      |> Astarte.update_device(%{part_number: part_number})
+    device =
+      attrs
+      |> Enum.into(%{})
+      |> Map.put(:part_number, part_number)
+      |> astarte_device_fixture()
 
     # Retrieve the updated device from the Devices context
     Devices.get_device!(device.id)
@@ -134,12 +135,12 @@ defmodule Edgehog.DevicesFixtures do
     device
   end
 
-  defp astarte_device_fixture do
+  defp astarte_device_fixture(attrs) do
     # Helper to avoid having to manually create the cluster and realm
     # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
 
     AstarteFixtures.cluster_fixture()
     |> AstarteFixtures.realm_fixture()
-    |> AstarteFixtures.astarte_device_fixture()
+    |> AstarteFixtures.astarte_device_fixture(attrs)
   end
 end

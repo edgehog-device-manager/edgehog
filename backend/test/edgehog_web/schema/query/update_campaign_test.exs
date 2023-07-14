@@ -64,7 +64,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       update_campaign_data = response["data"]["updateCampaign"]
 
       assert update_campaign_data["name"] == update_campaign.name
-      assert update_campaign_data["status"] == "IN_PROGRESS"
+      assert update_campaign_data["status"] == "IDLE"
       assert update_campaign_data["outcome"] == nil
       assert update_campaign_data["baseImage"]["version"] == base_image.version
       assert update_campaign_data["baseImage"]["url"] == base_image.url

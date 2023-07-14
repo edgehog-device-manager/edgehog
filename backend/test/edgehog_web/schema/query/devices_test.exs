@@ -330,7 +330,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } = json_response(conn, 200)
 
       assert base_image["name"] == "esp-idf"
-      assert base_image["version"] == "4.3.1"
+      assert base_image["version"] == "0.1.0"
       assert base_image["buildId"] == "2022-01-01 12:00:00"
 
       assert base_image["fingerprint"] ==

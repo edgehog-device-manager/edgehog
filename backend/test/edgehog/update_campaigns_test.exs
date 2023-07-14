@@ -30,6 +30,7 @@ defmodule Edgehog.UpdateCampaignsTest do
   alias Edgehog.DevicesFixtures
   alias Edgehog.Groups
   alias Edgehog.UpdateCampaigns
+  alias Edgehog.UpdateCampaigns.ExecutorRegistry
   alias Edgehog.UpdateCampaigns.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateChannel
@@ -338,9 +339,12 @@ defmodule Edgehog.UpdateCampaignsTest do
       assert update_campaign.update_targets == []
       assert update_campaign.status == :finished
       assert update_campaign.outcome == :success
+
+      # Check that no executor got started
+      assert :error = fetch_update_campaign_executor_pid(update_campaign)
     end
 
-    test "with some targets creates a update_campaign in_progress" do
+    test "with some targets creates an :idle update_campaign" do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
       update_channel = update_channel_fixture(target_group_ids: [target_group.id])
 
@@ -355,8 +359,12 @@ defmodule Edgehog.UpdateCampaignsTest do
 
       assert [target] = update_campaign.update_targets
       assert target.device_id == device.id
-      assert update_campaign.status == :in_progress
+      assert update_campaign.status == :idle
       assert update_campaign.outcome == nil
+
+      # Check that the executor got started
+      assert {:ok, pid} = fetch_update_campaign_executor_pid(update_campaign)
+      assert {:wait_for_start_execution, _data} = :sys.get_state(pid)
     end
 
     test "fails with invalid rollout mechanism" do
@@ -549,6 +557,15 @@ defmodule Edgehog.UpdateCampaignsTest do
       })
 
     UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
+  end
+
+  defp fetch_update_campaign_executor_pid(update_campaign) do
+    key = {update_campaign.tenant_id, update_campaign.id}
+
+    case Registry.lookup(ExecutorRegistry, key) do
+      [] -> :error
+      [{pid, _}] -> {:ok, pid}
+    end
   end
 
   defp device_fixture do
