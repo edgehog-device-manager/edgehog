@@ -467,6 +467,9 @@
   "components.UpdateCampaignStatus.Finished": {
     "defaultMessage": "Finished"
   },
+  "components.UpdateCampaignStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
   "components.UpdateCampaignStatus.InProgress": {
     "defaultMessage": "In progress"
   },

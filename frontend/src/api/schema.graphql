@@ -1272,6 +1272,9 @@ input UpdateBaseImageCollectionInput {
 
 "The status of an Update Campaign"
 enum UpdateCampaignStatus {
+  "The Update Campaign has been created but is not being rolled-out yet"
+  IDLE
+
   "The Update Campaign is being rolled-out"
   IN_PROGRESS
 

@@ -35,11 +35,16 @@ const UPDATE_CAMPAIGN_STATUS_FRAGMENT = graphql`
 `;
 
 const colors: Record<UpdateCampaignStatusEnum, string> = {
+  IDLE: "text-muted",
   IN_PROGRESS: "text-warning",
   FINISHED: "text-success",
 };
 
 const messages = defineMessages<UpdateCampaignStatusEnum>({
+  IDLE: {
+    id: "components.UpdateCampaignStatus.Idle",
+    defaultMessage: "Idle",
+  },
   IN_PROGRESS: {
     id: "components.UpdateCampaignStatus.InProgress",
     defaultMessage: "In progress",
@@ -50,9 +55,9 @@ const messages = defineMessages<UpdateCampaignStatusEnum>({
   },
 });
 
-interface Props {
+type Props = {
   updateCampaignRef: UpdateCampaignStatus_UpdateCampaignStatusFragment$key;
-}
+};
 
 const UpdateCampaignStatus = ({ updateCampaignRef }: Props) => {
   const { status } = useFragment(
