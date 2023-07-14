@@ -24,8 +24,9 @@ defmodule Edgehog.PubSub do
   """
 
   alias Edgehog.OSManagement.OTAOperation
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
 
-  @type event :: :ota_operation_created | :ota_operation_updated
+  @type event :: :ota_operation_created | :ota_operation_updated | :update_campaign_updated
 
   @doc """
   Publish an event to the PubSub. Raises if any of the publish fails.
@@ -47,6 +48,13 @@ defmodule Edgehog.PubSub do
       topic_for_subject(ota_operation),
       wildcard_topic_for_subject(ota_operation)
     ]
+
+    broadcast_many!(topics, payload)
+  end
+
+  def publish!(:update_campaign_updated = event, %UpdateCampaign{} = update_campaign) do
+    payload = {event, update_campaign}
+    topics = [topic_for_subject(update_campaign)]
 
     broadcast_many!(topics, payload)
   end
@@ -73,4 +81,6 @@ defmodule Edgehog.PubSub do
   defp topic_for_subject(%OTAOperation{id: id}), do: "ota_operations:#{id}"
   defp topic_for_subject({:ota_operation, id}), do: "ota_operations:#{id}"
   defp topic_for_subject(:ota_operations), do: "ota_operations:*"
+  defp topic_for_subject(%UpdateCampaign{id: id}), do: "update_campaign:#{id}"
+  defp topic_for_subject({:update_campaign, id}), do: "update_campaign:#{id}"
 end

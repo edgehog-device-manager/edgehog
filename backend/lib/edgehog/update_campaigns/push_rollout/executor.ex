@@ -86,10 +86,6 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
   end
 
   def handle_event(:internal, :init_data, :initialization, update_campaign_id) do
-    # TODO: when we expose the possibility of updating the UpdateCampaign, specifically the rollout,
-    # we should publish changes to it via PubSub, subscribing to them here, since we will allow
-    # increasing max_in_progress_updates during the campaign execution, which will affect
-    # available_slots.
     update_campaign = Core.get_update_campaign!(update_campaign_id)
     base_image = Core.get_update_campaign_base_image!(update_campaign_id)
     target_count = Core.get_target_count(update_campaign_id)
@@ -101,6 +97,9 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
       target_count: target_count,
       update_campaign_id: update_campaign_id
     }
+
+    # Subscribe to updates for the update campaign
+    Core.subscribe_to_update_campaign_updates!(update_campaign_id)
 
     case update_campaign.status do
       :idle ->
@@ -353,6 +352,12 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
+  def handle_event(:info, {:update_campaign_updated, update_campaign}, _state, data) do
+    new_data = update_rollout_mechanism(data, update_campaign.rollout_mechanism)
+
+    {:keep_state, new_data, []}
+  end
+
   def handle_event(:info, {:ota_operation_updated, ota_operation}, _state, _data) do
     # Event generated from PubSub when an OTAOperation is updated
     additional_actions =
@@ -574,5 +579,16 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
 
   defp targets_in_progress?(data) do
     data.in_progress_count > 0
+  end
+
+  defp update_rollout_mechanism(data, rollout) do
+    current_in_progress = data.in_progress_count
+    available_slots = Core.available_update_slots(rollout, current_in_progress)
+
+    %{
+      data
+      | rollout: rollout,
+        available_slots: available_slots
+    }
   end
 end

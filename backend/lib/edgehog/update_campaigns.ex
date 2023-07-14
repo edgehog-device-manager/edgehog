@@ -29,6 +29,7 @@ defmodule Edgehog.UpdateCampaigns do
   alias Ecto.Multi
   alias Edgehog.BaseImages
   alias Edgehog.Devices
+  alias Edgehog.PubSub
   alias Edgehog.UpdateCampaigns.ExecutorSupervisor
   alias Edgehog.UpdateCampaigns.Target
   alias Edgehog.UpdateCampaigns.UpdateCampaign
@@ -481,7 +482,11 @@ defmodule Edgehog.UpdateCampaigns do
     changeset = UpdateCampaign.changeset(update_campaign, attrs)
 
     with {:ok, update_campaign} <- Repo.update(changeset) do
-      {:ok, preload_defaults_for_update_campaign(update_campaign)}
+      update_campaign = preload_defaults_for_update_campaign(update_campaign)
+
+      _ = PubSub.publish!(:update_campaign_updated, update_campaign)
+
+      {:ok, update_campaign}
     end
   end
 
