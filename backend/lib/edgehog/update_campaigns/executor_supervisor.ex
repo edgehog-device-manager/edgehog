@@ -83,7 +83,7 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
     {PushRollout.Executor, args}
   end
 
-  if Mix.env(:test) do
+  if Mix.env() == :test do
     # Pass additional executor-specific test args only in the test env
     defp executor_test_args(%PushRollout{} = _rollout_mechanism) do
       [wait_for_start_execution: true]
