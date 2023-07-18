@@ -28,3 +28,6 @@ edgehog-*.tar
 # Ignore dialyzer PLT files
 /priv/plts/*.plt
 /priv/plts/*.plt.hash
+
+/.direnv/
+/.envrc
