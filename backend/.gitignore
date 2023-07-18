@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2023 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
 # The directory Mix will write compiled artifacts to.
@@ -31,3 +31,6 @@ edgehog-*.tar
 
 /.direnv/
 /.envrc
+
+/.nix-mix
+/.mix-hex
