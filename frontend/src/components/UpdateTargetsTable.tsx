@@ -48,7 +48,7 @@ const UPDATE_TARGETS_TABLE_FRAGMENT = graphql`
 
 const statusColors: Record<UpdateTargetStatus, string> = {
   IDLE: "text-muted",
-  PENDING: "text-warning",
+  IN_PROGRESS: "text-warning",
   SUCCESSFUL: "text-success",
   FAILED: "text-danger",
 };
@@ -58,9 +58,9 @@ const statusMessages = defineMessages<UpdateTargetStatus>({
     id: "components.UpdateTargetsTable.updateTargetStatus.Idle",
     defaultMessage: "Idle",
   },
-  PENDING: {
-    id: "components.UpdateTargetsTable.updateTargetStatus.Pending",
-    defaultMessage: "Pending",
+  IN_PROGRESS: {
+    id: "components.UpdateTargetsTable.updateTargetStatus.InProgress",
+    defaultMessage: "In progress",
   },
   SUCCESSFUL: {
     id: "components.UpdateTargetsTable.updateTargetStatus.Successful",
