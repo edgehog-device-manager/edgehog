@@ -578,8 +578,8 @@
   "components.UpdateTargetsTable.updateTargetStatus.Idle": {
     "defaultMessage": "Idle"
   },
-  "components.UpdateTargetsTable.updateTargetStatus.Pending": {
-    "defaultMessage": "Pending"
+  "components.UpdateTargetsTable.updateTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
   },
   "components.UpdateTargetsTable.updateTargetStatus.Successful": {
     "defaultMessage": "Successful"
