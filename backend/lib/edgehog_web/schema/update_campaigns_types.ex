@@ -156,8 +156,8 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   enum :update_target_status do
     @desc "The Update Campaign is waiting for the OTA Request to be sent"
     value :idle
-    @desc "The Update Target is being updated"
-    value :pending
+    @desc "The Update Target is in progress"
+    value :in_progress
     @desc "The Update Target has failed to be updated"
     value :failed
     @desc "The Update Target was successfully updated"
