@@ -86,7 +86,7 @@ const UpdateCampaignRefresh = ({
   }, []);
 
   useEffect(() => {
-    if (status !== "IN_PROGRESS" || isRefreshing) {
+    if (status === "FINISHED" || isRefreshing) {
       return;
     }
     const refreshTimerId = setTimeout(() => {
@@ -94,7 +94,8 @@ const UpdateCampaignRefresh = ({
       subscriptionRef.current = fetchQuery(
         relayEnvironment,
         GET_UPDATE_CAMPAIGN_QUERY,
-        { updateCampaignId: id }
+        { updateCampaignId: id },
+        { fetchPolicy: "network-only" }
       ).subscribe({
         complete: () => {
           setIsRefreshing(false);
