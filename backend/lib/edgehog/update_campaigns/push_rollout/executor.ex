@@ -382,7 +382,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:ota_operation_success, ota_operation}, _state, data) do
-    Logger.info("Device #{ota_operation.device.device_id} updated succesfully")
+    Logger.info("Device #{ota_operation.device.device_id} updated successfully")
 
     _ =
       Core.get_target_for_ota_operation!(ota_operation.id)
