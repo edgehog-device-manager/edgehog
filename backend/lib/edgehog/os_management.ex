@@ -124,7 +124,7 @@ defmodule Edgehog.OSManagement do
         {:ok, nil}
       end
     end)
-    |> Repo.transaction()
+    |> Repo.transaction(timeout: 120_000)
     |> case do
       {:ok, %{ota_operation: ota_operation}} ->
         ota_operation = Repo.preload(ota_operation, :device)
