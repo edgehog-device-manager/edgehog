@@ -21,6 +21,7 @@
 defmodule Edgehog.BaseImages.Uploaders.BaseImage do
   use Waffle.Definition
 
+  @async false
   @acl :public_read
   @versions [:original]
 
