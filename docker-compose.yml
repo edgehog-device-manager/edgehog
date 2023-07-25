@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-version: "3.3"
+version: "3.8"
 services:
   postgresql:
     image: postgres:14.0
@@ -97,3 +97,7 @@ volumes:
   postgresql-data:
   minio-data-v2:
     driver: local
+
+networks:
+  default:
+    name: astarte
