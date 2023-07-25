@@ -230,7 +230,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       # Verify that all the expectations we defined until now were called
       verify!()
 
-      # Extract OTA Operation for a taget that received the OTA Request
+      # Extract OTA Operation for a target that received the OTA Request
       ota_operation_id =
         receive do
           {:updated_target, ota_operation_id} ->
