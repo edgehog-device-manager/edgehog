@@ -242,7 +242,7 @@ defmodule Edgehog.BaseImages do
       %{no_file_base_image: base_image, image_upload: url} = changes
       Ecto.Changeset.change(base_image, url: url)
     end)
-    |> Repo.transaction(timeout: 120_000)
+    |> Repo.transaction(timeout: 300_000)
     |> case do
       {:ok, %{base_image: base_image}} ->
         {:ok, preload_defaults_for_base_image(base_image)}
