@@ -25,6 +25,16 @@ defmodule Edgehog.TenantsFixtures do
   """
 
   @doc """
+  Generate a unique tenant name.
+  """
+  def unique_tenant_name, do: "Tenant #{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique tenant slug.
+  """
+  def unique_tenant_slug, do: "tenant-#{System.unique_integer([:positive])}"
+
+  @doc """
   Generate a tenant.
   """
   def tenant_fixture(attrs \\ %{}) do
@@ -36,8 +46,8 @@ defmodule Edgehog.TenantsFixtures do
     {:ok, tenant} =
       attrs
       |> Enum.into(%{
-        name: "some name",
-        slug: "some-name",
+        name: unique_tenant_name(),
+        slug: unique_tenant_slug(),
         public_key: public_key
       })
       |> Edgehog.Tenants.create_tenant()
