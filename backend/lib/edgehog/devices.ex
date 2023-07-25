@@ -309,12 +309,8 @@ defmodule Edgehog.Devices do
 
   """
   def fetch_hardware_type(id) do
-    case Repo.get(HardwareType, id) do
-      %HardwareType{} = hardware_type ->
-        {:ok, Repo.preload(hardware_type, :part_numbers)}
-
-      nil ->
-        {:error, :not_found}
+    with {:ok, hardware_type} <- Repo.fetch(HardwareType, id) do
+      {:ok, Repo.preload(hardware_type, :part_numbers)}
     end
   end
 
@@ -483,12 +479,8 @@ defmodule Edgehog.Devices do
 
   """
   def fetch_system_model(id) do
-    case Repo.get(SystemModel, id) do
-      %SystemModel{} = system ->
-        {:ok, Repo.preload(system, [:part_numbers, :hardware_type])}
-
-      nil ->
-        {:error, :not_found}
+    with {:ok, system} <- Repo.fetch(SystemModel, id) do
+      {:ok, Repo.preload(system, [:part_numbers, :hardware_type])}
     end
   end
 
