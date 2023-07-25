@@ -57,7 +57,7 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :tesla, :adapter, {Tesla.Adapter.Finch, name: EdgehogFinch}
+config :tesla, :adapter, {Tesla.Adapter.Finch, name: EdgehogFinch, receive_timeout: 300_000}
 
 config :ex_aws,
   json_codec: Jason
