@@ -232,6 +232,71 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert device.system_model_part_number == nil
       assert device.system_model == nil
     end
+
+    test "trigger with missing astarte-realm header returns 400", %{
+      conn: conn,
+      device: device,
+      tenant: %{slug: tenant_slug}
+    } do
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "some_event"
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn_missing_astarte_realm_header = post(conn, path, event)
+
+      assert response(conn_missing_astarte_realm_header, 400)
+    end
+
+    test "trigger with non-existing realm returns 404", %{
+      conn: conn,
+      device: device,
+      tenant: %{slug: tenant_slug}
+    } do
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "some_event"
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn_realm_not_found =
+        conn
+        |> put_req_header("astarte-realm", "invalid realm")
+        |> post(path, event)
+
+      assert response(conn_realm_not_found, 404)
+    end
+
+    test "trigger with invalid event values returns 422", %{
+      conn: conn,
+      realm: realm,
+      device: device,
+      tenant: %{slug: tenant_slug}
+    } do
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      unprocessable_event = %{
+        device_id: device.device_id,
+        event: %{type: "device_connected"},
+        timestamp: DateTime.utc_now() |> DateTime.to_unix()
+      }
+
+      conn_cannot_process_device_event =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, unprocessable_event)
+
+      assert response(conn_cannot_process_device_event, 422)
+    end
   end
 
   describe "process_event/2 for OTA updates" do
