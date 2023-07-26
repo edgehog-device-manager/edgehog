@@ -492,13 +492,34 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       # Wait for the Executor to arrive at :wait_for_campaign_completion
       wait_for_state(pid, :wait_for_campaign_completion)
 
+      {failing_targets, remaining_targets} =
+        Core.list_targets_with_pending_ota_operation(update_campaign_id)
+        |> Enum.split(failing_target_count)
+
       # Produce failing_target_count failures
-      Core.list_targets_with_pending_ota_operation(update_campaign_id)
-      |> Enum.take(failing_target_count)
-      |> Enum.each(fn target ->
+      Enum.each(failing_targets, fn target ->
         update_ota_operation_status!(target.ota_operation_id, :failure)
       end)
 
+      # Now the Executor should arrive at :campaign_failure, but not terminate yet
+      wait_for_state(pid, :campaign_failure)
+
+      # Make the remaining targets reach a final state, some with success, some with failure
+      # The random count guarantees that we have at least one success and one failure
+      remaining_failing_count = Enum.random(1..(length(remaining_targets) - 1))
+
+      {remaining_failing_targets, remaining_successful_targets} =
+        Enum.split(remaining_targets, remaining_failing_count)
+
+      Enum.each(remaining_successful_targets, fn target ->
+        update_ota_operation_status!(target.ota_operation_id, :success)
+      end)
+
+      Enum.each(remaining_failing_targets, fn target ->
+        update_ota_operation_status!(target.ota_operation_id, :failure)
+      end)
+
+      # Now the Executor should terminate
       assert_normal_exit(pid, ref)
       assert_update_campaign_outcome(update_campaign_id, :failure)
     end
@@ -568,6 +589,45 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     end
   end
 
+  describe "PushRollout.Executor terminates immediately" do
+    setup do
+      target_count = 1
+
+      update_campaign = update_campaign_with_targets_fixture(target_count)
+
+      %{pid: pid, ref: ref} = start_and_monitor_executor!(update_campaign, start_execution: false)
+
+      ctx = [
+        executor_pid: pid,
+        monitor_ref: ref,
+        update_campaign_id: update_campaign.id
+      ]
+
+      {:ok, ctx}
+    end
+
+    test "if there are no in progress targets when failure threshold is reached", ctx do
+      %{
+        executor_pid: pid,
+        monitor_ref: ref,
+        update_campaign_id: update_campaign_id
+      } = ctx
+
+      # Start the execution
+      start_execution(pid)
+
+      # Wait for the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      [target] = Core.list_targets_with_pending_ota_operation(update_campaign_id)
+      update_ota_operation_status!(target.ota_operation_id, :failure)
+
+      # The Executor should terminate right away
+      assert_normal_exit(pid, ref)
+      assert_update_campaign_outcome(update_campaign_id, :failure)
+    end
+  end
+
   # Helper functions
 
   # This functions are used to coordinate the test, waiting for a specific ref or a list of
@@ -608,9 +668,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     loop_until_state!(executor_pid, state, start_time, timeout)
   end
 
-  defp loop_until_state!(_executor_pid, state, _start_time, remaining_time)
+  defp loop_until_state!(executor_pid, state, _start_time, remaining_time)
        when remaining_time <= 0 do
-    flunk("State #{state} not reached")
+    {actual_state, _data} = :sys.get_state(executor_pid)
+    flunk("State #{state} not reached, last state: #{actual_state}")
   end
 
   defp loop_until_state!(executor_pid, state, start_time, _remaining_time) do

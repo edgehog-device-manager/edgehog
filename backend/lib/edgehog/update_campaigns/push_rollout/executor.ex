@@ -332,7 +332,23 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
       Core.get_update_campaign!(data.update_campaign_id)
       |> Core.mark_update_campaign_as_failed!()
 
-    {:stop, :normal}
+    if targets_in_progress?(data) do
+      # Here we don't terminate immediately, otherwise we would lose all the updates for the targets
+      # that are currently in progress. If all the remaining targets reach a final state, we will
+      # terminate while handling the relative :ota_operation_completion internal event. Otherwise,
+      # the executor will terminate after the grace period.
+      termination_grace_period = :timer.hours(1)
+      action = {:state_timeout, termination_grace_period, :terminate_executor}
+      {:keep_state_and_data, action}
+    else
+      # If we don't have any other in progress updates, we just terminate right away
+      terminate_executor(data.update_campaign_id)
+    end
+  end
+
+  def handle_event(:state_timeout, :terminate_executor, :campaign_failure, data) do
+    # Grace period is over, terminate the executor
+    terminate_executor(data.update_campaign_id)
   end
 
   # State: :campaign_success
@@ -344,7 +360,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
       Core.get_update_campaign!(data.update_campaign_id)
       |> Core.mark_update_campaign_as_successful!()
 
-    {:stop, :normal}
+    terminate_executor(data.update_campaign_id)
   end
 
   # Common event handling
@@ -394,7 +410,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
     {:keep_state, new_data, internal_event(:ota_operation_completion)}
   end
 
-  def handle_event(:internal, {:ota_operation_failure, ota_operation}, _state, data) do
+  def handle_event(:internal, {:ota_operation_failure, ota_operation}, state, data) do
     Logger.notice(
       "Device #{ota_operation.device.device_id} failed to update: #{ota_operation.status_code}"
     )
@@ -409,9 +425,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
       |> add_failure()
       |> free_up_slot()
 
-    if failure_threshold_exceeded?(new_data) do
+    if state != :campaign_failure and failure_threshold_exceeded?(new_data) do
+      # Enter the :campaign_failure state if it's the first time we exceed the threshold
       {:next_state, :campaign_failure, new_data}
     else
+      # Otherwise, we just handle the OTA Operation completion
       {:keep_state, new_data, internal_event(:ota_operation_completion)}
     end
   end
@@ -425,6 +443,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
       state == :wait_for_campaign_completion and not targets_in_progress?(data) ->
         # We finished updating everything, go to the final state for the finishing touches
         {:next_state, :campaign_success, data}
+
+      state == :campaign_failure and not targets_in_progress?(data) ->
+        # We received all the updates for the remaining targets, we can terminate
+        terminate_executor(data.update_campaign_id)
 
       true ->
         # Otherwise, we keep doing what we were doing
@@ -531,6 +553,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
 
   defp internal_event(payload) do
     {:next_event, :internal, payload}
+  end
+
+  defp terminate_executor(update_campaign_id) do
+    Logger.info("Terminating executor process for Update Campaign #{update_campaign_id}")
+    {:stop, :normal}
   end
 
   # Data manipulation
