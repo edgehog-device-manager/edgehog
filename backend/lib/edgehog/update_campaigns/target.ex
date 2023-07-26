@@ -23,6 +23,7 @@ defmodule Edgehog.UpdateCampaigns.Target do
   import Ecto.Changeset
 
   alias Edgehog.Devices
+  alias Edgehog.OSManagement
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
   schema "update_campaign_targets" do
@@ -30,10 +31,10 @@ defmodule Edgehog.UpdateCampaigns.Target do
     field :status, Ecto.Enum, values: [:idle, :in_progress, :failed, :successful]
     field :retry_count, :integer, default: 0
     field :latest_attempt, :utc_datetime_usec
-    field :ota_operation_id, :binary_id
     field :completion_timestamp, :utc_datetime_usec
     belongs_to :update_campaign, UpdateCampaign
     belongs_to :device, Devices.Device
+    belongs_to :ota_operation, OSManagement.OTAOperation, type: :binary_id
 
     timestamps()
   end
