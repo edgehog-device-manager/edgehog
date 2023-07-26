@@ -385,7 +385,7 @@ defmodule Edgehog.UpdateCampaignsTest do
       assert {:error, %Ecto.Changeset{} = changeset} =
                create_update_campaign(rollout_mechanism: [max_in_progress_updates: -3])
 
-      assert "must be greater than 0" in errors_on(changeset).rollout_mechanism.max_in_progress_updates
+      assert "must be greater than or equal to 1" in errors_on(changeset).rollout_mechanism.max_in_progress_updates
     end
 
     test "saves ota_request_retries in rollout_mechanism if explicitly passed" do
@@ -427,6 +427,63 @@ defmodule Edgehog.UpdateCampaignsTest do
 
       # TODO: add assertions on the specific error key after errors_on gets fixed to work on
       # nested changeset errors
+    end
+  end
+
+  describe "update_update_campaign/2" do
+    test "allows updating rollout_mechanism with an equal or higher max_in_progress_update" do
+      original_max_in_progress_updates = 3
+
+      {:ok, update_campaign} =
+        create_update_campaign(
+          rollout_mechanism: [max_in_progress_updates: original_max_in_progress_updates]
+        )
+
+      assert {:ok, updated_update_campaign} =
+               UpdateCampaigns.update_update_campaign(update_campaign, %{
+                 rollout_mechanism: %{
+                   type: "push",
+                   max_in_progress_updates: original_max_in_progress_updates
+                 }
+               })
+
+      assert updated_update_campaign.rollout_mechanism.max_in_progress_updates ==
+               original_max_in_progress_updates
+
+      assert {:ok, updated_update_campaign} =
+               UpdateCampaigns.update_update_campaign(update_campaign, %{
+                 rollout_mechanism: %{
+                   type: "push",
+                   max_in_progress_updates: original_max_in_progress_updates + 1
+                 }
+               })
+
+      assert updated_update_campaign.rollout_mechanism.max_in_progress_updates ==
+               original_max_in_progress_updates + 1
+    end
+
+    test "fails updating rollout_mechanism with a lower max_in_progress_update" do
+      original_max_in_progress_updates = 3
+
+      {:ok, update_campaign} =
+        create_update_campaign(
+          rollout_mechanism: [max_in_progress_updates: original_max_in_progress_updates]
+        )
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               UpdateCampaigns.update_update_campaign(
+                 update_campaign,
+                 %{
+                   rollout_mechanism: %{
+                     type: "push",
+                     max_in_progress_updates: original_max_in_progress_updates - 1
+                   }
+                 }
+               )
+
+      assert "must be greater than or equal to #{original_max_in_progress_updates}" in errors_on(
+               changeset
+             ).rollout_mechanism.max_in_progress_updates
     end
   end
 

@@ -296,6 +296,16 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Core do
   end
 
   @doc """
+  Subscribes to update events for the given Update Campaign. Raises on failure.
+  """
+  def subscribe_to_update_campaign_updates!(update_campaign_id) do
+    with {:error, reason} <-
+           PubSub.subscribe_to_events_for({:update_campaign, update_campaign_id}) do
+      raise reason
+    end
+  end
+
+  @doc """
   Subscribes to receive the events for the OTA Operation with the given id. Raises in case of failure.
   """
   def subscribe_to_ota_operation_updates!(ota_operation_id) do
