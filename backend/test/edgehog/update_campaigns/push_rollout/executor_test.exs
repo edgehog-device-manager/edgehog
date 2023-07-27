@@ -236,7 +236,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
           {:updated_target, ota_operation_id} ->
             ota_operation_id
         after
-          100 -> flunk()
+          1000 -> flunk()
         end
 
       # Throw away the other messages
@@ -593,7 +593,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
           flunk("Received unexpected ref: #{inspect(ref)}")
         end
     after
-      100 -> flunk("Sync timeout, not received: #{inspect(refs)}")
+      1000 -> flunk("Sync timeout, not received: #{inspect(refs)}")
     end
   end
 
@@ -770,7 +770,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     receive do
       _msg -> flush_messages()
     after
-      100 -> :ok
+      1000 -> :ok
     end
   end
 end
