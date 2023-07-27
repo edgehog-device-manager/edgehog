@@ -393,7 +393,7 @@ defmodule Edgehog.UpdateCampaigns do
         update_channel_id: update_channel_id,
         base_image_id: base_image_id
       }
-      |> UpdateCampaign.changeset(attrs)
+      |> UpdateCampaign.create_changeset(attrs)
 
     if updatable_devices == [] do
       create_empty_update_campaign(changeset)
@@ -454,6 +454,26 @@ defmodule Edgehog.UpdateCampaigns do
 
       {:error, _failed_operation, failed_value, _changes_so_far} ->
         {:error, failed_value}
+    end
+  end
+
+  @doc """
+  Updates an update campaign.
+
+  ## Examples
+
+      iex> update_update_campaign(update_campaign, %{field: new_value})
+      {:ok, %UpdateCamapaign{}}
+
+      iex> update_update_campaign(update_campaign, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_update_campaign(%UpdateCampaign{} = update_campaign, attrs) do
+    changeset = UpdateCampaign.changeset(update_campaign, attrs)
+
+    with {:ok, update_campaign} <- Repo.update(changeset) do
+      {:ok, preload_defaults_for_update_campaign(update_campaign)}
     end
   end
 
