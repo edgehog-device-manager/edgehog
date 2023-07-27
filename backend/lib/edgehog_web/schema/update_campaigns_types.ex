@@ -47,11 +47,11 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   """
   object :push_rollout do
     @desc """
-    The maximum percentage of errors allowed over the number of total targets. \
-    If the errors exceed this threshold, the Update Campaign terminates with \
-    an error.
+    The maximum percentage of failures allowed over the number of total targets. \
+    If the failures exceed this threshold, the Update Campaign terminates with \
+    a failure.
     """
-    field :max_errors_percentage, non_null(:float)
+    field :max_failure_percentage, non_null(:float)
 
     @desc """
     The maximum number of in progress updates. The Update Campaign will have \
@@ -99,11 +99,11 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   """
   input_object :push_rollout_input do
     @desc """
-    The maximum percentage of errors allowed over the number of total targets. \
-    If the errors exceed this threshold, the Update Campaign terminates with \
-    an error.
+    The maximum percentage of failures allowed over the number of total targets. \
+    If the failures exceed this threshold, the Update Campaign terminates with \
+    a failure.
     """
-    field :max_errors_percentage, non_null(:float)
+    field :max_failure_percentage, non_null(:float)
 
     @desc """
     The maximum number of in progress updates. The Update Campaign will have \

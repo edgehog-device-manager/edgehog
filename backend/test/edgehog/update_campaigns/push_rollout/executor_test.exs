@@ -289,7 +289,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     setup do
       target_count = Enum.random(10..20)
       # 20 < x <= 70
-      max_errors_percentage = 20 + :rand.uniform() * 50
+      max_failure_percentage = 20 + :rand.uniform() * 50
 
       # Create a base image with a specific version
       base_image_version = "2.1.0"
@@ -304,7 +304,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
           rollout_mechanism: [
             force_downgrade: true,
             max_in_progress_updates: target_count,
-            max_errors_percentage: max_errors_percentage
+            max_failure_percentage: max_failure_percentage
           ]
         )
 
@@ -314,7 +314,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         base_image_version: base_image_version,
         executor_pid: pid,
         higher_base_image_version: higher_base_image_version,
-        max_errors_percentage: max_errors_percentage,
+        max_failure_percentage: max_failure_percentage,
         monitor_ref: ref,
         target_count: target_count,
         update_campaign_id: update_campaign.id
@@ -388,10 +388,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       assert_update_campaign_outcome(update_campaign_id, :success)
     end
 
-    test "if just less than max_errors_percentage targets fail", ctx do
+    test "if just less than max_failure_percentage targets fail", ctx do
       %{
         executor_pid: pid,
-        max_errors_percentage: max_errors_percentage,
+        max_failure_percentage: max_failure_percentage,
         monitor_ref: ref,
         target_count: target_count,
         update_campaign_id: update_campaign_id
@@ -406,7 +406,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         Core.list_targets_with_pending_ota_operation(update_campaign_id)
         |> Enum.map(& &1.ota_operation_id)
 
-      failing_target_count = max_failed_targets_for_success(target_count, max_errors_percentage)
+      failing_target_count = max_failed_targets_for_success(target_count, max_failure_percentage)
 
       {failing_ota_operation_ids, successful_ota_operation_ids} =
         Enum.split(ota_operation_ids, failing_target_count)
@@ -422,14 +422,14 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     end
   end
 
-  describe "PushRollout.Executor marks campaign as failed if max_errors_percentage is exceeded" do
+  describe "PushRollout.Executor marks campaign as failed if max_failure_percentage is exceeded" do
     setup do
       target_count = Enum.random(10..20)
       # 20 < x <= 70
-      max_errors_percentage = 20 + :rand.uniform() * 50
+      max_failure_percentage = 20 + :rand.uniform() * 50
 
       # The minimum number of targets that have to fail to trigger a failure
-      failing_target_count = min_failed_targets_for_failure(target_count, max_errors_percentage)
+      failing_target_count = min_failed_targets_for_failure(target_count, max_failure_percentage)
 
       # Create a base image with a specific version and starting_version_requirement
       base_image_version = "2.1.0"
@@ -460,7 +460,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
           rollout_mechanism: [
             force_downgrade: false,
             max_in_progress_updates: target_count,
-            max_errors_percentage: max_errors_percentage
+            max_failure_percentage: max_failure_percentage
           ]
         )
 
@@ -722,14 +722,14 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     assert update_campaign.outcome == outcome
   end
 
-  defp max_failed_targets_for_success(target_count, max_errors_percentage) do
+  defp max_failed_targets_for_success(target_count, max_failure_percentage) do
     # Returns the maximum number of targets that can fail and still produce a successful campaign
-    floor(target_count * max_errors_percentage / 100)
+    floor(target_count * max_failure_percentage / 100)
   end
 
-  defp min_failed_targets_for_failure(target_count, max_errors_percentage) do
+  defp min_failed_targets_for_failure(target_count, max_failure_percentage) do
     # Returns the minimum number of targets that must fail to produce a failed campaign
-    1 + max_failed_targets_for_success(target_count, max_errors_percentage)
+    1 + max_failed_targets_for_success(target_count, max_failure_percentage)
   end
 
   defp update_device_online_for_targets(targets, online) do

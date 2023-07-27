@@ -51,7 +51,7 @@ const UPDATE_CAMPAIGN_FORM_FRAGMENT = graphql`
     }
     rolloutMechanism {
       ... on PushRollout {
-        maxErrorsPercentage
+        maxFailurePercentage
         maxInProgressUpdates
         otaRequestRetries
         otaRequestTimeoutSeconds
@@ -88,7 +88,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
   const { baseImageCollection } = baseImage;
   const {
     maxInProgressUpdates,
-    maxErrorsPercentage,
+    maxFailurePercentage,
     otaRequestTimeoutSeconds,
     otaRequestRetries,
     forceDowngrade,
@@ -178,12 +178,12 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
             {maxInProgressUpdates}
           </FormRow>
         )}
-        {maxErrorsPercentage !== undefined && (
+        {maxFailurePercentage !== undefined && (
           <FormRow
             label={
               <FormattedMessage
-                id="forms.UpdateCampaignForm.maxErrorsPercentageLabel"
-                defaultMessage="Max Errors <muted>(%)</muted>"
+                id="forms.UpdateCampaignForm.maxFailurePercentageLabel"
+                defaultMessage="Max Failures <muted>(%)</muted>"
                 values={{
                   muted: (chunks: React.ReactNode) => (
                     <span className="small text-muted">{chunks}</span>
@@ -192,7 +192,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
               />
             }
           >
-            {maxErrorsPercentage}
+            {maxFailurePercentage}
           </FormRow>
         )}
         {otaRequestTimeoutSeconds !== undefined && (

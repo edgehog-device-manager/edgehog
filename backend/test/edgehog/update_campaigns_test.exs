@@ -313,7 +313,7 @@ defmodule Edgehog.UpdateCampaignsTest do
         name: "My Campaign",
         rollout_mechanism: %{
           type: "push",
-          max_errors_percentage: 10.0,
+          max_failure_percentage: 10.0,
           max_in_progress_updates: 10
         }
       }
@@ -322,7 +322,7 @@ defmodule Edgehog.UpdateCampaignsTest do
                UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
 
       assert %PushRollout{
-               max_errors_percentage: 10.0,
+               max_failure_percentage: 10.0,
                max_in_progress_updates: 10,
                # Default value
                ota_request_retries: 0,
@@ -374,11 +374,11 @@ defmodule Edgehog.UpdateCampaignsTest do
       assert "is invalid" in errors_on(changeset).rollout_mechanism
     end
 
-    test "fails with invalid max_errors_percentage in rollout_mechanism" do
+    test "fails with invalid max_failure_percentage in rollout_mechanism" do
       assert {:error, %Ecto.Changeset{} = changeset} =
-               create_update_campaign(rollout_mechanism: [max_errors_percentage: 120.0])
+               create_update_campaign(rollout_mechanism: [max_failure_percentage: 120.0])
 
-      assert "must be less than or equal to 100" in errors_on(changeset).rollout_mechanism.max_errors_percentage
+      assert "must be less than or equal to 100" in errors_on(changeset).rollout_mechanism.max_failure_percentage
     end
 
     test "fails with invalid max_in_progress_updates in rollout_mechanism" do
@@ -546,7 +546,7 @@ defmodule Edgehog.UpdateCampaignsTest do
     rollout_mechanism =
       Enum.into(rollout_mechanism_opts, %{
         type: "push",
-        max_errors_percentage: 10.0,
+        max_failure_percentage: 10.0,
         max_in_progress_updates: 10
       })
 

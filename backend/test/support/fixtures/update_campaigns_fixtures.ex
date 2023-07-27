@@ -76,7 +76,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     rollout_mechanism_attrs =
       Enum.into(rollout_mechanism_attrs, %{
         type: "push",
-        max_errors_percentage: 50.0,
+        max_failure_percentage: 50.0,
         max_in_progress_updates: 100
       })
 

@@ -26,7 +26,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
   @primary_key false
   embedded_schema do
     field :force_downgrade, :boolean, default: false
-    field :max_errors_percentage, :float
+    field :max_failure_percentage, :float
     field :max_in_progress_updates, :integer
     field :ota_request_retries, :integer, default: 0
     field :ota_request_timeout_seconds, :integer, default: 60
@@ -37,16 +37,16 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
     push_rollout
     |> cast(attrs, [
       :force_downgrade,
-      :max_errors_percentage,
+      :max_failure_percentage,
       :max_in_progress_updates,
       :ota_request_retries,
       :ota_request_timeout_seconds
     ])
     |> validate_required([
-      :max_errors_percentage,
+      :max_failure_percentage,
       :max_in_progress_updates
     ])
-    |> validate_number(:max_errors_percentage,
+    |> validate_number(:max_failure_percentage,
       greater_than_or_equal_to: 0,
       less_than_or_equal_to: 100
     )
