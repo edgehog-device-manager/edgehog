@@ -337,7 +337,8 @@ defmodule Edgehog.UpdateCampaigns do
   end
 
   @doc """
-  Returns the list of update campaigns.
+  Returns the list of update campaigns, in descending creation order (i.e. update campaigns created
+  more recently are returned first)
 
   ## Examples
 
@@ -346,7 +347,11 @@ defmodule Edgehog.UpdateCampaigns do
 
   """
   def list_update_campaigns do
-    Repo.all(UpdateCampaign)
+    query =
+      from UpdateCampaign,
+        order_by: [desc: :id]
+
+    Repo.all(query)
     |> preload_defaults_for_update_campaign()
   end
 

@@ -293,6 +293,14 @@ defmodule Edgehog.UpdateCampaignsTest do
     assert UpdateCampaigns.list_update_campaigns() == [update_campaign]
   end
 
+  test "list_update_campaigns/0 returns update campaigns in descending order of creation" do
+    older_update_campaign = update_campaign_fixture()
+    newer_update_campaign = update_campaign_fixture()
+
+    assert [newer_update_campaign, older_update_campaign] ==
+             UpdateCampaigns.list_update_campaigns()
+  end
+
   describe "fetch_update_campaign/1" do
     test "returns the update_campaign with given id" do
       update_campaign = update_campaign_fixture()

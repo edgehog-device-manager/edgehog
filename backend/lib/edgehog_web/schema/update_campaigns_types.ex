@@ -245,7 +245,7 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
       resolve &Resolvers.UpdateCampaigns.find_update_channel/2
     end
 
-    @desc "Fetches the list of all update campaigns."
+    @desc "Fetches the list of all update campaigns. Newer update campaigns are returned first."
     field :update_campaigns, non_null(list_of(non_null(:update_campaign))) do
       resolve &Resolvers.UpdateCampaigns.list_update_campaigns/2
     end
