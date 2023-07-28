@@ -99,6 +99,54 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       assert response["data"]["updateCampaign"] == nil
       assert [%{"code" => "not_found", "status_code" => 404}] = response["errors"]
     end
+
+    test "returns all UpdateTarget fields", ctx do
+      %{
+        conn: conn,
+        api_path: api_path
+      } = ctx
+
+      now = DateTime.utc_now()
+      target = successful_target_fixture(now: now)
+      update_campaign_id = target.update_campaign_id
+
+      query = """
+      query ($id: ID!) {
+        updateCampaign(id: $id) {
+          updateTargets {
+            id
+            status
+            retryCount
+            latestAttempt
+            completionTimestamp
+            otaOperation {
+              id
+            }
+          }
+        }
+      }
+      """
+
+      response = update_campaign_query(conn, api_path, update_campaign_id, query: query)
+
+      assert [update_target] = response["data"]["updateCampaign"]["updateTargets"]
+
+      assert {:ok, %{id: update_target_id, type: :update_target}} =
+               update_target["id"]
+               |> Absinthe.Relay.Node.from_global_id(EdgehogWeb.Schema)
+
+      assert to_string(target.id) == update_target_id
+      assert update_target["status"] == "SUCCESSFUL"
+      assert update_target["retryCount"] == 0
+      assert update_target["latestAttempt"] == DateTime.to_iso8601(now)
+      assert update_target["completionTimestamp"] == DateTime.to_iso8601(now)
+
+      assert {:ok, %{id: ota_operation_id, type: :ota_operation}} =
+               update_target["otaOperation"]["id"]
+               |> Absinthe.Relay.Node.from_global_id(EdgehogWeb.Schema)
+
+      assert ota_operation_id == target.ota_operation_id
+    end
   end
 
   @query """

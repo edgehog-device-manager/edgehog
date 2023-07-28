@@ -118,6 +118,9 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     |> update_campaign_fixture()
   end
 
+  @doc """
+  Generates an idle update target
+  """
   def target_fixture(attrs \\ []) do
     {base_image, attrs} =
       Keyword.pop_lazy(attrs, :base_image, &Edgehog.BaseImagesFixtures.base_image_fixture/0)
@@ -144,5 +147,81 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     [target] = update_campaign.update_targets
 
     target
+  end
+
+  @doc """
+  Generates an update target with an associated OTA Operation
+  """
+  def in_progress_target_fixture(opts \\ []) do
+    alias Edgehog.UpdateCampaigns.PushRollout.Core
+
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+
+    # A little dance to create a target_fixture which has an associated OTA Operation
+    target =
+      target_fixture(opts)
+      |> Core.preload_defaults_for_target()
+
+    base_image = Core.get_update_campaign_base_image!(target.update_campaign_id)
+
+    # Stub Astarte Device Status and OTA Request
+    Mox.stub_with(
+      Edgehog.Astarte.Device.DeviceStatusMock,
+      Edgehog.Mocks.Astarte.Device.DeviceStatus
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.OTARequestV1Mock,
+      Edgehog.Mocks.Astarte.Device.OTARequest.V1
+    )
+
+    {:ok, target} =
+      target
+      |> Core.update_target_latest_attempt!(now)
+      |> Core.start_target_update(base_image)
+
+    target
+  end
+
+  @doc """
+  Generates a terminated update target with a success status
+  This also sets the correct termination status to the associated OTA Operation.
+  """
+  def successful_target_fixture(opts \\ []) do
+    terminated_target_fixture(opts, :success)
+  end
+
+  @doc """
+  Generates a terminated update target with a failure status.
+  This also sets the correct termination status to the associated OTA Operation.
+  """
+  def failed_target_fixture(opts \\ []) do
+    terminated_target_fixture(opts, :failure)
+  end
+
+  defp terminated_target_fixture(opts, status) do
+    alias Edgehog.OSManagement
+    alias Edgehog.UpdateCampaigns.PushRollout.Core
+    alias Edgehog.UpdateCampaigns
+
+    now = Keyword.get(opts, :now, DateTime.utc_now())
+
+    target = in_progress_target_fixture(opts)
+
+    {:ok, _} =
+      target.ota_operation_id
+      |> OSManagement.get_ota_operation!()
+      |> OSManagement.update_ota_operation(%{status: status})
+
+    # Fetch the target again so we get the updated OTA Operation preloaded
+    {:ok, target} = UpdateCampaigns.fetch_target(target.id)
+
+    case status do
+      :failure ->
+        Core.mark_target_as_failed!(target, now)
+
+      :success ->
+        Core.mark_target_as_successful!(target, now)
+    end
   end
 end

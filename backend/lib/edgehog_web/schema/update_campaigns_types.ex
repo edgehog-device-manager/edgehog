@@ -175,8 +175,26 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
     @desc "The status of the Update Target."
     field :status, non_null(:update_target_status)
 
+    @desc """
+    The retry count of the Update Target. This indicates how many times Edgehog \
+    has tried to send an OTA Update towards the device without receiving an ack.
+    """
+    field :retry_count, non_null(:integer)
+
+    @desc "The timestamp of the latest attempt to update the Update Target"
+    field :latest_attempt, :datetime
+
+    @desc """
+    The timestamp when the Update Target completed its update, either with a \
+    success or a failure
+    """
+    field :completion_timestamp, :datetime
+
     @desc "The Target device."
     field :device, non_null(:device)
+
+    @desc "The OTA Operation that tracks the Update Target in-progress update"
+    field :ota_operation, :ota_operation
   end
 
   @desc """

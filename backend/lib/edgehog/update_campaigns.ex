@@ -329,7 +329,8 @@ defmodule Edgehog.UpdateCampaigns do
           tags: [],
           custom_attributes: [],
           system_model: [:hardware_type, :part_numbers]
-        ]
+        ],
+        ota_operation: []
       ]
     ]
 
@@ -471,7 +472,8 @@ defmodule Edgehog.UpdateCampaigns do
         tags: [],
         custom_attributes: [],
         system_model: [:hardware_type, :part_numbers]
-      ]
+      ],
+      ota_operation: []
     ]
 
     Repo.preload(target_or_targets, preloads, opts)
