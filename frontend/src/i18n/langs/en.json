@@ -407,6 +407,9 @@
   "components.Sidebar.modelsLabel": {
     "defaultMessage": "System Models"
   },
+  "components.Sidebar.otaUpdatesGroupLabel": {
+    "defaultMessage": "OTA Updates"
+  },
   "components.Sidebar.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
   },
