@@ -120,6 +120,56 @@ const Sidebar = () => (
     <SidebarItemGroup
       label={
         <FormattedMessage
+          id="components.Sidebar.otaUpdatesGroupLabel"
+          defaultMessage="OTA Updates"
+        />
+      }
+      icon="otaUpdates"
+    >
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.updateCampaignsLabel"
+            defaultMessage="Update Campaigns"
+          />
+        }
+        route={Route.updateCampaigns}
+        activeRoutes={[Route.updateCampaigns, Route.updateCampaignsEdit]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.updateChannelsLabel"
+            defaultMessage="Update Channels"
+          />
+        }
+        route={Route.updateChannels}
+        activeRoutes={[
+          Route.updateChannels,
+          Route.updateChannelsEdit,
+          Route.updateChannelsNew,
+        ]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.baseImageCollectionsLabel"
+            defaultMessage="Base Image Collections"
+          />
+        }
+        route={Route.baseImageCollections}
+        activeRoutes={[
+          Route.baseImageCollections,
+          Route.baseImageCollectionsNew,
+          Route.baseImageCollectionsEdit,
+          Route.baseImagesNew,
+          Route.baseImagesEdit,
+        ]}
+      />
+    </SidebarItemGroup>
+    <SidebarItemGroup
+      label={
+        <FormattedMessage
           id="components.Sidebar.modelsGroupLabel"
           defaultMessage="Models"
         />
@@ -153,46 +203,6 @@ const Sidebar = () => (
           Route.hardwareTypesNew,
           Route.hardwareTypesEdit,
         ]}
-      />
-      <SidebarItem
-        label={
-          <FormattedMessage
-            id="components.Sidebar.baseImageCollectionsLabel"
-            defaultMessage="Base Image Collections"
-          />
-        }
-        route={Route.baseImageCollections}
-        activeRoutes={[
-          Route.baseImageCollections,
-          Route.baseImageCollectionsNew,
-          Route.baseImageCollectionsEdit,
-          Route.baseImagesNew,
-          Route.baseImagesEdit,
-        ]}
-      />
-      <SidebarItem
-        label={
-          <FormattedMessage
-            id="components.Sidebar.updateChannelsLabel"
-            defaultMessage="Update Channels"
-          />
-        }
-        route={Route.updateChannels}
-        activeRoutes={[
-          Route.updateChannels,
-          Route.updateChannelsEdit,
-          Route.updateChannelsNew,
-        ]}
-      />
-      <SidebarItem
-        label={
-          <FormattedMessage
-            id="components.Sidebar.updateCampaignsLabel"
-            defaultMessage="Update Campaigns"
-          />
-        }
-        route={Route.updateCampaigns}
-        activeRoutes={[Route.updateCampaigns, Route.updateCampaignsEdit]}
       />
     </SidebarItemGroup>
   </Navbar>

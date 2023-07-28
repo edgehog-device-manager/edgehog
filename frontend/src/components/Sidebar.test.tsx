@@ -30,6 +30,28 @@ it("renders correctly", async () => {
   expect(devicesLink).toBeInTheDocument();
   expect(devicesLink).toHaveTextContent("Devices");
 
+  const groupsLink = container.querySelector("a[href='/device-groups']");
+  expect(groupsLink).toBeInTheDocument();
+  expect(groupsLink).toHaveTextContent("Groups");
+
+  const updateCampaignsLink = container.querySelector(
+    "a[href='/update-campaigns']"
+  );
+  expect(updateCampaignsLink).toBeInTheDocument();
+  expect(updateCampaignsLink).toHaveTextContent("Update Campaigns");
+
+  const updateChannelsLink = container.querySelector(
+    "a[href='/update-channels']"
+  );
+  expect(updateChannelsLink).toBeInTheDocument();
+  expect(updateChannelsLink).toHaveTextContent("Update Channels");
+
+  const baseImageCollectionsLink = container.querySelector(
+    "a[href='/base-image-collections']"
+  );
+  expect(baseImageCollectionsLink).toBeInTheDocument();
+  expect(baseImageCollectionsLink).toHaveTextContent("Base Image Collections");
+
   const systemModelsLink = container.querySelector("a[href='/system-models']");
   expect(systemModelsLink).toBeInTheDocument();
   expect(systemModelsLink).toHaveTextContent("System Models");
@@ -41,9 +63,14 @@ it("renders correctly", async () => {
   expect(hardwareTypesLink).toHaveTextContent("Hardware Types");
 
   const menuGroups = container.querySelectorAll(".accordion");
-  expect(menuGroups).toHaveLength(1);
-  expect(menuGroups[0]).toHaveTextContent("System Models");
-  expect(menuGroups[0]).toHaveTextContent("Hardware Types");
+  expect(menuGroups).toHaveLength(2);
+
+  expect(menuGroups[0]).toHaveTextContent("Update Campaigns");
+  expect(menuGroups[0]).toHaveTextContent("Update Channels");
+  expect(menuGroups[0]).toHaveTextContent("Base Image Collections");
+
+  expect(menuGroups[1]).toHaveTextContent("System Models");
+  expect(menuGroups[1]).toHaveTextContent("Hardware Types");
 });
 
 it("shows links as active when route matches", async () => {
@@ -52,7 +79,31 @@ it("shows links as active when route matches", async () => {
   });
 
   const devicesLink = container.querySelector("a[href='/devices']");
-  const systemModelsLink = container.querySelector("a[href='/system-models']");
   expect(devicesLink).toHaveClass("bg-primary");
+
+  const groupsLink = container.querySelector("a[href='/device-groups']");
+  expect(groupsLink).not.toHaveClass("bg-primary");
+
+  const updateCampaignsLink = container.querySelector(
+    "a[href='/update-campaigns']"
+  );
+  expect(updateCampaignsLink).not.toHaveClass("bg-primary");
+
+  const updateChannelsLink = container.querySelector(
+    "a[href='/update-channels']"
+  );
+  expect(updateChannelsLink).not.toHaveClass("bg-primary");
+
+  const baseImageCollectionsLink = container.querySelector(
+    "a[href='/base-image-collections']"
+  );
+  expect(baseImageCollectionsLink).not.toHaveClass("bg-primary");
+
+  const systemModelsLink = container.querySelector("a[href='/system-models']");
   expect(systemModelsLink).not.toHaveClass("bg-primary");
+
+  const hardwareTypesLink = container.querySelector(
+    "a[href='/hardware-types']"
+  );
+  expect(hardwareTypesLink).not.toHaveClass("bg-primary");
 });

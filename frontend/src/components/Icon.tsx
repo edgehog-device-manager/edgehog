@@ -36,6 +36,7 @@ import {
   faCheck,
   faTimes,
   faDatabase,
+  faCloud,
 } from "@fortawesome/free-solid-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
@@ -57,6 +58,7 @@ const icons = {
   search: faSearch,
   check: faCheck,
   close: faTimes,
+  otaUpdates: faCloud,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;
