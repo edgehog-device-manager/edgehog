@@ -139,7 +139,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "returns false if the target has no retries left", ctx do
-      target = set_target_retry_count!(ctx.target, 6)
+      target = set_target_retry_count!(ctx.target, 5)
       rollout_mechanism = push_rollout_fixture(ota_request_retries: 5)
 
       assert Core.can_retry?(target, rollout_mechanism) == false

@@ -433,10 +433,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
   end
 
   def handle_event({:timeout, {:retry, _ota_operation_id}}, target_id, _state, data) do
-    # First we retrieve the target and increase its retry count
-    target =
-      Core.get_target!(target_id)
-      |> Core.increase_retry_count!()
+    target = Core.get_target!(target_id)
 
     if Core.can_retry?(target, data.rollout_mechanism) do
       {:keep_state_and_data, internal_event({:retry_target, target})}
@@ -446,8 +443,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:retry_target, target}, _state, data) do
-    # Bump latest attempt
-    target = Core.update_target_latest_attempt!(target, DateTime.utc_now())
+    # Increase retry count and bump latest attempt
+    target =
+      target
+      |> Core.increase_retry_count!()
+      |> Core.update_target_latest_attempt!(DateTime.utc_now())
 
     case Core.retry_target_update(target, data.base_image) do
       :ok ->
