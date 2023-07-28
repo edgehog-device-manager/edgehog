@@ -41,7 +41,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
       rollout_mechanism = %{
         push: %{
-          max_errors_percentage: 5.0,
+          max_failure_percentage: 5.0,
           max_in_progress_updates: 5,
           ota_request_retries: 10,
           ota_request_timeout_seconds: 120,
@@ -66,7 +66,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       assert update_campaign["updateChannel"]["name"] == update_channel.name
       assert update_campaign["updateChannel"]["handle"] == update_channel.handle
       assert response_rollout_mechanism = update_campaign["rolloutMechanism"]
-      assert response_rollout_mechanism["maxErrorsPercentage"] == 5.0
+      assert response_rollout_mechanism["maxFailurePercentage"] == 5.0
       assert response_rollout_mechanism["maxInProgressUpdates"] == 5
       assert response_rollout_mechanism["otaRequestRetries"] == 10
       assert response_rollout_mechanism["otaRequestTimeoutSeconds"] == 120
@@ -112,7 +112,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       response =
         create_update_campaign_mutation(conn, api_path,
           rollout_mechanism: %{
-            push: %{max_errors_percentage: -10.0, max_in_progress_updates: 5}
+            push: %{max_failure_percentage: -10.0, max_in_progress_updates: 5}
           }
         )
 
@@ -131,7 +131,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
         outcome
         rolloutMechanism {
           ... on PushRollout {
-            maxErrorsPercentage
+            maxFailurePercentage
             maxInProgressUpdates
             otaRequestRetries
             otaRequestTimeoutSeconds
@@ -177,7 +177,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     {rollout_mechanism, opts} =
       Keyword.pop_lazy(opts, :rollout_mechanism, fn ->
-        %{push: %{max_errors_percentage: 10.0, max_in_progress_updates: 10}}
+        %{push: %{max_failure_percentage: 10.0, max_in_progress_updates: 10}}
       end)
 
     input =

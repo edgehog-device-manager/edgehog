@@ -240,8 +240,8 @@ enum DeviceAttributeNamespace {
 
 "An object representing the properties of a Push Rollout Mechanism"
 type PushRollout {
-  "The maximum percentage of errors allowed over the number of total targets. If the errors exceed this threshold, the Update Campaign terminates with an error."
-  maxErrorsPercentage: Float!
+  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
+  maxFailurePercentage: Float!
 
   "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
   maxInProgressUpdates: Int!
@@ -675,8 +675,8 @@ scalar Upload
 
 "An input object to set the properties of a Push Rollout Mechanism"
 input PushRolloutInput {
-  "The maximum percentage of errors allowed over the number of total targets. If the errors exceed this threshold, the Update Campaign terminates with an error."
-  maxErrorsPercentage: Float!
+  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
+  maxFailurePercentage: Float!
 
   "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
   maxInProgressUpdates: Int!

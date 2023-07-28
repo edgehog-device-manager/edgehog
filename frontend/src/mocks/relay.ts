@@ -190,7 +190,7 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       status: "IN_PROGRESS",
       outcome: null,
       rolloutMechanism: {
-        maxErrorsPercentage: 5,
+        maxFailurePercentage: 5,
         maxInProgressUpdates: 2,
         otaRequestRetries: 10,
         otaRequestTimeoutSeconds: 120,

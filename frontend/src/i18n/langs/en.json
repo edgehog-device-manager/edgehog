@@ -638,11 +638,11 @@
   "forms.CreateUpdateCampaign.forceDowngradeLabel": {
     "defaultMessage": "Force Downgrade"
   },
-  "forms.CreateUpdateCampaign.maxErrorsPercentageLabel": {
-    "defaultMessage": "Max Errors <muted>(%)</muted>"
+  "forms.CreateUpdateCampaign.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
   },
-  "forms.CreateUpdateCampaign.maxErrorsPercentageValidationLabel": {
-    "defaultMessage": "Max Errors"
+  "forms.CreateUpdateCampaign.maxFailurePercentageValidationLabel": {
+    "defaultMessage": "Max Failures"
   },
   "forms.CreateUpdateCampaign.maxInProgressUpdatesLabel": {
     "defaultMessage": "Max Pending Operations"
@@ -717,8 +717,8 @@
   "forms.UpdateCampaignForm.forceDowngradeLabel": {
     "defaultMessage": "Force Downgrade"
   },
-  "forms.UpdateCampaignForm.maxErrorsPercentageLabel": {
-    "defaultMessage": "Max Errors <muted>(%)</muted>"
+  "forms.UpdateCampaignForm.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
   },
   "forms.UpdateCampaignForm.maxInProgressUpdatesLabel": {
     "defaultMessage": "Max Pending Operations"

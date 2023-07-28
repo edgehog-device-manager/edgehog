@@ -409,7 +409,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Core do
   Returns true if the failure threshold for the rollout has been exceeded
   """
   def failure_threshold_exceeded?(target_count, failed_count, rollout) do
-    failed_count / target_count * 100 > rollout.max_errors_percentage
+    failed_count / target_count * 100 > rollout.max_failure_percentage
   end
 
   @doc """

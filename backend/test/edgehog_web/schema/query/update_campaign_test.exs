@@ -72,8 +72,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       assert update_campaign_data["updateChannel"]["handle"] == update_channel.handle
       assert response_rollout_mechanism = update_campaign_data["rolloutMechanism"]
 
-      assert response_rollout_mechanism["maxErrorsPercentage"] ==
-               update_campaign.rollout_mechanism.max_errors_percentage
+      assert response_rollout_mechanism["maxFailurePercentage"] ==
+               update_campaign.rollout_mechanism.max_failure_percentage
 
       assert response_rollout_mechanism["maxInProgressUpdates"] ==
                update_campaign.rollout_mechanism.max_in_progress_updates
@@ -109,7 +109,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       outcome
       rolloutMechanism {
         ... on PushRollout {
-          maxErrorsPercentage
+          maxFailurePercentage
           maxInProgressUpdates
           otaRequestRetries
           otaRequestTimeoutSeconds

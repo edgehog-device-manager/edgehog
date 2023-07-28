@@ -72,7 +72,7 @@ type UpdateCampaignData = {
   name: string;
   rolloutMechanism: {
     push: {
-      maxErrorsPercentage: number;
+      maxFailurePercentage: number;
       maxInProgressUpdates: number;
       otaRequestRetries: number;
       otaRequestTimeoutSeconds: number;
@@ -86,7 +86,7 @@ type FormData = {
   updateChannelId: string;
   baseImageCollectionId: string;
   baseImageId: string;
-  maxErrorsPercentage: number | string;
+  maxFailurePercentage: number | string;
   maxInProgressUpdates: number | string;
   otaRequestRetries: number;
   otaRequestTimeoutSeconds: number;
@@ -98,7 +98,7 @@ const initialData: FormData = {
   updateChannelId: "",
   baseImageCollectionId: "",
   baseImageId: "",
-  maxErrorsPercentage: "",
+  maxFailurePercentage: "",
   maxInProgressUpdates: "",
   otaRequestRetries: 0,
   otaRequestTimeoutSeconds: 60,
@@ -110,7 +110,7 @@ const transformOutputData = (data: FormData): UpdateCampaignData => {
     name,
     baseImageId,
     updateChannelId,
-    maxErrorsPercentage,
+    maxFailurePercentage,
     maxInProgressUpdates,
     otaRequestRetries,
     otaRequestTimeoutSeconds,
@@ -123,10 +123,10 @@ const transformOutputData = (data: FormData): UpdateCampaignData => {
     updateChannelId,
     rolloutMechanism: {
       push: {
-        maxErrorsPercentage:
-          typeof maxErrorsPercentage === "string"
-            ? parseFloat(maxErrorsPercentage)
-            : maxErrorsPercentage,
+        maxFailurePercentage:
+          typeof maxFailurePercentage === "string"
+            ? parseFloat(maxFailurePercentage)
+            : maxFailurePercentage,
         maxInProgressUpdates:
           typeof maxInProgressUpdates === "string"
             ? parseInt(maxInProgressUpdates)
@@ -167,13 +167,13 @@ const CreateBaseImageCollectionForm = ({
             defaultMessage: "Max Pending Operations",
           })
         ),
-      maxErrorsPercentage: numberSchema
+      maxFailurePercentage: numberSchema
         .min(0)
         .max(100)
         .label(
           intl.formatMessage({
-            id: "forms.CreateUpdateCampaign.maxErrorsPercentageValidationLabel",
-            defaultMessage: "Max Errors",
+            id: "forms.CreateUpdateCampaign.maxFailurePercentageValidationLabel",
+            defaultMessage: "Max Failures",
           })
         ),
       otaRequestTimeoutSeconds: numberSchema
@@ -334,11 +334,11 @@ const CreateBaseImageCollectionForm = ({
           <FormFeedback feedback={errors.maxInProgressUpdates?.message} />
         </FormRow>
         <FormRow
-          id="create-update-campaign-form-max-errors-percentage"
+          id="create-update-campaign-form-max-failure-percentage"
           label={
             <FormattedMessage
-              id="forms.CreateUpdateCampaign.maxErrorsPercentageLabel"
-              defaultMessage="Max Errors <muted>(%)</muted>"
+              id="forms.CreateUpdateCampaign.maxFailurePercentageLabel"
+              defaultMessage="Max Failures <muted>(%)</muted>"
               values={{
                 muted: (chunks: React.ReactNode) => (
                   <span className="small text-muted">{chunks}</span>
@@ -348,13 +348,13 @@ const CreateBaseImageCollectionForm = ({
           }
         >
           <Form.Control
-            {...register("maxErrorsPercentage")}
+            {...register("maxFailurePercentage")}
             type="number"
             min="0"
             max="100"
-            isInvalid={!!errors.maxErrorsPercentage}
+            isInvalid={!!errors.maxFailurePercentage}
           />
-          <FormFeedback feedback={errors.maxErrorsPercentage?.message} />
+          <FormFeedback feedback={errors.maxFailurePercentage?.message} />
         </FormRow>
         <FormRow
           id="create-update-campaign-form-ota-request-timeout"

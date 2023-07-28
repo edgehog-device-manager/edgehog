@@ -815,24 +815,24 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   end
 
   describe "failure_threshold_exceeded?" do
-    test "returns true when exceeding max_errors_percentage" do
-      rollout = push_rollout_fixture(max_errors_percentage: 10)
+    test "returns true when exceeding max_failure_percentage" do
+      rollout = push_rollout_fixture(max_failure_percentage: 10)
       target_count = 100
       failed_count = 11
 
       assert Core.failure_threshold_exceeded?(target_count, failed_count, rollout) == true
     end
 
-    test "returns false when not exceeding max_errors_percentage" do
-      rollout = push_rollout_fixture(max_errors_percentage: 10)
+    test "returns false when not exceeding max_failure_percentage" do
+      rollout = push_rollout_fixture(max_failure_percentage: 10)
       target_count = 100
       failed_count = 9
 
       assert Core.failure_threshold_exceeded?(target_count, failed_count, rollout) == false
     end
 
-    test "returns false if the error percentage is exactly max_errors_percentage" do
-      rollout = push_rollout_fixture(max_errors_percentage: 10)
+    test "returns false if the error percentage is exactly max_failure_percentage" do
+      rollout = push_rollout_fixture(max_failure_percentage: 10)
       target_count = 100
       failed_count = 10
 
@@ -980,7 +980,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   defp push_rollout_fixture(attrs \\ []) do
     attrs
     |> Enum.into(%{
-      max_errors_percentage: 5.0,
+      max_failure_percentage: 5.0,
       max_in_progress_updates: 10
     })
     |> then(&struct!(PushRollout, &1))
