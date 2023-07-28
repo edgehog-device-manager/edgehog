@@ -100,8 +100,8 @@ const initialData: FormData = {
   baseImageId: "",
   maxFailurePercentage: "",
   maxInProgressUpdates: "",
-  otaRequestRetries: 0,
-  otaRequestTimeoutSeconds: 60,
+  otaRequestRetries: 3,
+  otaRequestTimeoutSeconds: 300,
   forceDowngrade: false,
 };
 
