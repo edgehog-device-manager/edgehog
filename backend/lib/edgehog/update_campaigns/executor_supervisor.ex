@@ -60,10 +60,6 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
         pid
 
       {:error, {:already_started, pid}} ->
-        Logger.warning(
-          "Update Campaign executor for campaign #{update_campaign_id} was already started"
-        )
-
         pid
 
       {:error, reason} ->
