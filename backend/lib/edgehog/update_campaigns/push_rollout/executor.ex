@@ -137,10 +137,15 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
         available_slots: available_slots
     }
 
-    # Setup a timer for each pending OTA Operation
     timeout_actions =
       Core.list_targets_with_pending_ota_operation(update_campaign_id)
-      |> Enum.map(&setup_retry_timeout(&1, rollout_mechanism))
+      |> Enum.map(fn pending_target ->
+        # Side effect: receive updates for the OTA Operation so we can track it
+        Core.subscribe_to_ota_operation_updates!(pending_target.ota_operation_id)
+
+        # Return the retry timeout action for the pending target
+        setup_retry_timeout(pending_target, rollout_mechanism)
+      end)
 
     # Fetch the next target
     actions = [internal_event(:fetch_next_target) | timeout_actions]
