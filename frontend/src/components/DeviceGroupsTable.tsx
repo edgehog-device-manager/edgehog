@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,17 +18,15 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   DeviceGroupsTable_DeviceGroupFragment$data,
   DeviceGroupsTable_DeviceGroupFragment$key,
 } from "api/__generated__/DeviceGroupsTable_DeviceGroupFragment.graphql";
 
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
@@ -45,62 +43,54 @@ const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
 
 type TableRecord = DeviceGroupsTable_DeviceGroupFragment$data[0];
 
-const columns: Column<TableRecord>[] = [
-  {
-    accessor: "name",
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
       <FormattedMessage
         id="components.DeviceGroupsTable.nameTitle"
         defaultMessage="Group Name"
         description="Title for the Name column of the device groups table"
       />
     ),
-    Cell: ({ row, value }) => (
+    cell: ({ row, getValue }) => (
       <Link
         route={Route.deviceGroupsEdit}
         params={{ deviceGroupId: row.original.id }}
       >
-        {value}
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    accessor: "handle",
-    Header: (
+  }),
+  columnHelper.accessor("handle", {
+    header: () => (
       <FormattedMessage
         id="components.DeviceGroupsTable.handleTitle"
         defaultMessage="Handle"
         description="Title for the Handle column of the device groups table"
       />
     ),
-  },
-  {
-    accessor: "selector",
-    Header: (
+  }),
+  columnHelper.accessor("selector", {
+    header: () => (
       <FormattedMessage
         id="components.DeviceGroupsTable.selectorTitle"
         defaultMessage="Selector"
         description="Title for the Selector column of the device groups table"
       />
     ),
-  },
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   deviceGroupsRef: DeviceGroupsTable_DeviceGroupFragment$key;
-}
+};
 
 const DeviceGroupsTable = ({ className, deviceGroupsRef }: Props) => {
-  const deviceGroupsData = useFragment(
+  const deviceGroups = useFragment(
     DEVICE_GROUPS_TABLE_FRAGMENT,
     deviceGroupsRef
-  );
-
-  // TODO: handle readonly type without mapping to mutable type
-  const deviceGroups = useMemo(
-    () => deviceGroupsData.map((group) => ({ ...group })),
-    [deviceGroupsData]
   );
 
   return <Table className={className} columns={columns} data={deviceGroups} />;

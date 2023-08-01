@@ -28,8 +28,7 @@ import type {
 } from "api/__generated__/OperationTable_otaOperations.graphql";
 
 import Icon from "components/Icon";
-import Table from "components/Table";
-import type { Column } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -87,40 +86,38 @@ const OperationStatus = ({ status }: { status: OtaOperationFinalStatus }) => (
   </div>
 );
 
-const columns: Column<OtaOperationWithFinalStatus>[] = [
-  {
-    accessor: "status",
-    Header: (
+const columnHelper = createColumnHelper<OtaOperationWithFinalStatus>();
+const columns = [
+  columnHelper.accessor("status", {
+    header: () => (
       <FormattedMessage
         id="components.OperationTable.operationStatus"
         defaultMessage="Status"
       />
     ),
-    Cell: ({ value }) => <OperationStatus status={value} />,
-  },
-  {
-    accessor: "baseImageUrl",
-    Header: (
+    cell: ({ getValue }) => <OperationStatus status={getValue()} />,
+  }),
+  columnHelper.accessor("baseImageUrl", {
+    header: () => (
       <FormattedMessage
         id="components.OperationTable.baseImage"
         defaultMessage="Base Image"
       />
     ),
-    Cell: ({ value }) => (
-      <span className="text-nowrap">{value.split("/").pop()}</span>
+    cell: ({ getValue }) => (
+      <span className="text-nowrap">{getValue().split("/").pop()}</span>
     ),
-  },
-  {
-    accessor: "createdAt",
-    Header: (
+  }),
+  columnHelper.accessor("createdAt", {
+    header: () => (
       <FormattedMessage
         id="components.OperationTable.startedAt"
         defaultMessage="Started At"
       />
     ),
-    Cell: ({ value }) => (
+    cell: ({ getValue }) => (
       <FormattedDate
-        value={value}
+        value={getValue()}
         year="numeric"
         month="long"
         day="numeric"
@@ -128,18 +125,17 @@ const columns: Column<OtaOperationWithFinalStatus>[] = [
         minute="numeric"
       />
     ),
-  },
-  {
-    accessor: "updatedAt",
-    Header: (
+  }),
+  columnHelper.accessor("updatedAt", {
+    header: () => (
       <FormattedMessage
         id="components.OperationTable.updatedAt"
         defaultMessage="Updated At"
       />
     ),
-    Cell: ({ value }) => (
+    cell: ({ getValue }) => (
       <FormattedDate
-        value={value}
+        value={getValue()}
         year="numeric"
         month="long"
         day="numeric"
@@ -147,7 +143,7 @@ const columns: Column<OtaOperationWithFinalStatus>[] = [
         minute="numeric"
       />
     ),
-  },
+  }),
 ];
 
 type OperationTableProps = {

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   DevicesTable_DeviceFragment$data,
@@ -28,12 +27,13 @@ import type {
 } from "api/__generated__/DevicesTable_DeviceFragment.graphql";
 
 import LastSeen from "components/LastSeen";
-import Table from "components/Table";
-import type { Column, Row } from "components/Table";
+import Table, { createColumnHelper } from "components/Table";
 import ConnectionStatus from "components/ConnectionStatus";
 import Tag from "components/Tag";
 import { Link, Route } from "Navigation";
 
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
 const DEVICES_TABLE_FRAGMENT = graphql`
   fragment DevicesTable_DeviceFragment on Device @relay(plural: true) {
     id
@@ -54,126 +54,114 @@ const DEVICES_TABLE_FRAGMENT = graphql`
 
 type TableRecord = DevicesTable_DeviceFragment$data[0];
 
-const columns: Column<TableRecord>[] = [
-  {
-    id: "status",
-    accessor: (device) => Boolean(device.online),
-    Header: (
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("online", {
+    header: () => (
       <FormattedMessage
         id="components.DevicesTable.statusTitle"
         defaultMessage="Status"
         description="Title for the Status column of the devices table"
       />
     ),
-    Cell: ({ value }: { value: boolean }) => (
-      <ConnectionStatus connected={value} />
-    ),
-    sortType: "basic",
-  },
-  {
-    accessor: "name",
-    Header: (
+    cell: ({ getValue }) => <ConnectionStatus connected={getValue()} />,
+    sortingFn: "basic",
+  }),
+  columnHelper.accessor("name", {
+    header: () => (
       <FormattedMessage
         id="components.DevicesTable.nameTitle"
         defaultMessage="Device Name"
         description="Title for the Name column of the devices table"
       />
     ),
-    Cell: ({ row, value }) => (
+    cell: ({ row, getValue }) => (
       <Link route={Route.devicesEdit} params={{ deviceId: row.original.id }}>
-        {value}
+        {getValue()}
       </Link>
     ),
-  },
-  {
-    id: "deviceId",
-    accessor: (device) => device.deviceId,
-    Header: (
+  }),
+  columnHelper.accessor("deviceId", {
+    header: () => (
       <FormattedMessage
         id="components.DevicesTable.deviceIdTitle"
         defaultMessage="Device ID"
         description="Title for the Device ID column of the devices table"
       />
     ),
-    sortType: "basic",
-  },
-  {
+    sortingFn: "basic",
+  }),
+  columnHelper.accessor((device) => device.systemModel?.name, {
     id: "systemModel",
-    accessor: (device) => device.systemModel?.name,
-    Header: (
+    header: () => (
       <FormattedMessage id="Device.systemModel" defaultMessage="System Model" />
     ),
-  },
-  {
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor((device) => device.systemModel?.hardwareType.name, {
     id: "hardwareType",
-    accessor: (device) => device.systemModel?.hardwareType.name,
-    Header: (
+    header: () => (
       <FormattedMessage
         id="Device.hardwareType"
         defaultMessage="Hardware Type"
       />
     ),
-  },
-  {
-    id: "lastSeen",
-    accessor: (device) => {
+  }),
+  columnHelper.accessor(
+    (device) => {
       if (device.online) {
         return "now";
       } else {
         return device.lastDisconnection || "never";
       }
     },
-    Header: (
-      <FormattedMessage
-        id="components.DevicesTable.lastSeenTitle"
-        defaultMessage="Last Seen"
-        description="Title for the Last Seen column of the devices table"
-      />
-    ),
-    Cell: ({ row }: { row: Row<TableRecord> }) => (
-      <LastSeen
-        lastConnection={row.original.lastConnection}
-        lastDisconnection={row.original.lastDisconnection}
-        online={row.original.online}
-      />
-    ),
-  },
-  {
-    accessor: "tags",
-    disableSortBy: true,
-    Header: (
+    {
+      id: "lastSeen",
+      header: () => (
+        <FormattedMessage
+          id="components.DevicesTable.lastSeenTitle"
+          defaultMessage="Last Seen"
+          description="Title for the Last Seen column of the devices table"
+        />
+      ),
+      cell: ({ row }) => (
+        <LastSeen
+          lastConnection={row.original.lastConnection}
+          lastDisconnection={row.original.lastDisconnection}
+          online={row.original.online}
+        />
+      ),
+    }
+  ),
+  columnHelper.accessor("tags", {
+    enableSorting: false,
+    header: () => (
       <FormattedMessage
         id="components.DevicesTable.tagsTitle"
         defaultMessage="Tags"
         description="Title for the Tags column of the devices table"
       />
     ),
-    Cell: ({ value }) => (
+    cell: ({ getValue }) => (
       <>
-        {value.map((tag) => (
+        {getValue().map((tag) => (
           <Tag key={tag} className="me-2">
             {tag}
           </Tag>
         ))}
       </>
     ),
-  },
+  }),
 ];
 
-interface Props {
+type Props = {
   className?: string;
   devicesRef: DevicesTable_DeviceFragment$key;
   hideSearch?: boolean;
-}
+};
 
 const DevicesTable = ({ className, devicesRef, hideSearch = false }: Props) => {
-  const devicesData = useFragment(DEVICES_TABLE_FRAGMENT, devicesRef);
-
-  // TODO: handle readonly type without mapping to mutable type
-  const devices = useMemo(
-    () => devicesData.map((device) => ({ ...device, tags: [...device.tags] })),
-    [devicesData]
-  );
+  const devices = useFragment(DEVICES_TABLE_FRAGMENT, devicesRef);
 
   return (
     <Table

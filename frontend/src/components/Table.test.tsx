@@ -21,27 +21,26 @@
 import React from "react";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import _ from "lodash";
 
 import { renderWithProviders } from "setupTests";
-import Table, { Column, Row } from "./Table";
+import Table, { createColumnHelper } from "./Table";
+import type { Row } from "./Table";
 
 type Data = { id: string; name: string };
 
-const data: Data[] = _.range(100).map((index) => ({
+const data: Data[] = Array.from({ length: 100 }, (_, index) => ({
   id: `${index}`,
   name: `Name ${index}`,
 }));
 
-const columns: Column<Data>[] = [
-  {
-    accessor: "id",
-    Header: "ID",
-  },
-  {
-    accessor: "name",
-    Header: "Name",
-  },
+const columnHelper = createColumnHelper<Data>();
+const columns = [
+  columnHelper.accessor("id", {
+    header: "ID",
+  }),
+  columnHelper.accessor("name", {
+    header: "Name",
+  }),
 ];
 
 it("correctly renders empty list", () => {
@@ -104,7 +103,7 @@ it("correctly paginates a long list", () => {
 
 it("correctly passes props with getRowProps", () => {
   const getRowProps = (row: Row<Data>) => {
-    return { className: "custom-class-" + row.values.id };
+    return { className: "custom-class-" + row.original.id };
   };
   const { container } = renderWithProviders(
     <Table
