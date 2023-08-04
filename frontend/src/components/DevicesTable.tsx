@@ -96,7 +96,6 @@ const columns = [
     header: () => (
       <FormattedMessage id="Device.systemModel" defaultMessage="System Model" />
     ),
-    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor((device) => device.systemModel?.hardwareType.name, {
     id: "hardwareType",
