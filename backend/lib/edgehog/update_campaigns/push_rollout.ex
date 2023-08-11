@@ -23,6 +23,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
   import Ecto.Changeset
   alias Edgehog.UpdateCampaigns.PushRollout
 
+  @changeset_minimums [
+    max_failure_percentage: 0,
+    max_in_progress_updates: 1,
+    ota_request_retries: 0,
+    ota_request_timeout_seconds: 30
+  ]
+
   @primary_key false
   embedded_schema do
     field :force_downgrade, :boolean, default: false
@@ -46,12 +53,44 @@ defmodule Edgehog.UpdateCampaigns.PushRollout do
       :max_failure_percentage,
       :max_in_progress_updates
     ])
-    |> validate_number(:max_failure_percentage,
-      greater_than_or_equal_to: 0,
-      less_than_or_equal_to: 100
-    )
-    |> validate_number(:max_in_progress_updates, greater_than: 0)
-    |> validate_number(:ota_request_retries, greater_than_or_equal_to: 0)
-    |> validate_number(:ota_request_timeout_seconds, greater_than_or_equal_to: 30)
+    |> validate_minimums(push_rollout, @changeset_minimums)
+    |> validate_number(:max_failure_percentage, less_than_or_equal_to: 100)
+  end
+
+  defp validate_minimums(changeset, base, default_minimums) do
+    %{minimums: minimums, error_message: error_message} =
+      minimum_parameters_for(base, default_minimums)
+
+    Enum.reduce(minimums, changeset, &validate_min(&2, &1, error_message))
+  end
+
+  defp validate_min(changeset, {field, minimum}, error_message) do
+    validate_number(changeset, field, greater_than_or_equal_to: minimum, message: error_message)
+  end
+
+  defp minimum_parameters_for(base, default_minimums) do
+    if was_default?(base) do
+      %{
+        minimums: default_minimums,
+        error_message: "must be greater than or equal to %{number}"
+      }
+    else
+      keys = Keyword.keys(default_minimums)
+      values_from_base = Map.take(base, keys)
+
+      %{
+        minimums: values_from_base,
+        error_message: "must be greater than or equal to its previous value, %{number}"
+      }
+    end
+  end
+
+  defp was_default?(base) do
+    # PushRollouts cannot have nil :max_failure_percentage and :max_in_progress_updates
+    # under normal circumstances as they are required in the changeset,
+    # but it is their default value for the struct.
+    # We use this piece of information to infer whether we're updating an existing struct
+    # or defining a new one.
+    base == %PushRollout{}
   end
 end

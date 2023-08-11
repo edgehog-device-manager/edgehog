@@ -377,6 +377,28 @@ defmodule Edgehog.UpdateCampaigns do
   end
 
   @doc """
+  Updates an update_campaign.
+
+  ## Examples
+
+      iex> update_update_campaign(update_campaign, %{field: new_value})
+      {:ok, %UpdateCampaign{}}
+
+      iex> update_update_campaign(update_campaign, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_update_campaign(%UpdateCampaign{} = update_campaign, attrs \\ %{}) do
+    update_result =
+      UpdateCampaign.changeset(update_campaign, attrs)
+      |> Repo.update()
+
+    with {:ok, update_campaign} <- update_result do
+      {:ok, preload_defaults_for_update_campaign(update_campaign)}
+    end
+  end
+
+  @doc """
   Creates an update campaign.
 
   ## Examples

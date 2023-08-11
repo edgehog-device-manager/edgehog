@@ -151,6 +151,20 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
   end
 
   @desc """
+  Properties that can be updated for a Push Rollout Mechanism
+  """
+  input_object :push_rollout_update do
+    @desc """
+    The maximum number of in progress updates. The Update Campaign will have \
+    at most this number of OTA Operations that are started but not yet \
+    finished (either successfully or not).
+
+    Must be greater than (or equal to) the current value.
+    """
+    field :max_in_progress_updates, :integer
+  end
+
+  @desc """
   The status of an Update Target
   """
   enum :update_target_status do
@@ -392,6 +406,25 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
         update_channel_id: :update_channel
 
       resolve &Resolvers.UpdateCampaigns.create_update_campaign/2
+    end
+
+    @desc "Update an update campaign's push rollout mechanism"
+    payload field :update_push_rollout do
+      input do
+        @desc "The id of the Campaign."
+        field :update_campaign_id, non_null(:id)
+
+        import_fields :push_rollout_update
+      end
+
+      output do
+        @desc "The updated Update Campaign."
+        field :update_campaign, non_null(:update_campaign)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, update_campaign_id: :update_campaign
+
+      resolve &Resolvers.UpdateCampaigns.update_rollout_mechanism(&1, &2, :push)
     end
   end
 end

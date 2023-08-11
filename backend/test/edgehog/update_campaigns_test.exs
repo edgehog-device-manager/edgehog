@@ -393,7 +393,7 @@ defmodule Edgehog.UpdateCampaignsTest do
       assert {:error, %Ecto.Changeset{} = changeset} =
                create_update_campaign(rollout_mechanism: [max_in_progress_updates: -3])
 
-      assert "must be greater than 0" in errors_on(changeset).rollout_mechanism.max_in_progress_updates
+      assert "must be greater than or equal to 1" in errors_on(changeset).rollout_mechanism.max_in_progress_updates
     end
 
     test "saves ota_request_retries in rollout_mechanism if explicitly passed" do
@@ -435,6 +435,52 @@ defmodule Edgehog.UpdateCampaignsTest do
 
       # TODO: add assertions on the specific error key after errors_on gets fixed to work on
       # nested changeset errors
+    end
+  end
+
+  describe "update_update_campaign/2" do
+    setup do
+      {:ok, update_campaign: update_campaign_fixture()}
+    end
+
+    test "with valid data updates a campaign", %{update_campaign: campaign} do
+      valid_attrs = %{
+        rollout_mechanism: %{
+          max_in_progress_updates: campaign.rollout_mechanism.max_in_progress_updates + 1
+        },
+        name: "some other name"
+      }
+
+      assert {:ok, updated_campaign = %UpdateCampaign{}} =
+               UpdateCampaigns.update_update_campaign(campaign, valid_attrs)
+
+      assert updated_campaign.name != campaign.name
+
+      assert updated_campaign.rollout_mechanism.max_in_progress_updates ==
+               valid_attrs.rollout_mechanism.max_in_progress_updates
+
+      assert updated_campaign.name == valid_attrs.name
+    end
+
+    test "with invalid data returns error changeset", %{update_campaign: campaign} do
+      invalid_attrs = %{
+        rollout_mechanism: %{
+          max_in_progress_updates: campaign.rollout_mechanism.max_in_progress_updates - 1
+        }
+      }
+
+      assert {:error, %Ecto.Changeset{} = changeset} =
+               UpdateCampaigns.update_update_campaign(campaign, invalid_attrs)
+
+      max_in_progress_update_errors =
+        errors_on(changeset).rollout_mechanism.max_in_progress_updates
+
+      assert [error] = max_in_progress_update_errors
+      assert error =~ "must be greater than or equal to its previous value"
+    end
+
+    test "doesn't allow updating rollout_mechanism type and returns error changeset" do
+      # TODO: implement test when we have more than one rollout mechanism type
     end
   end
 

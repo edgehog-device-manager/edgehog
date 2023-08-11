@@ -28,6 +28,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   alias Edgehog.UpdateCampaigns.UpdateChannel
   alias Edgehog.UpdateCampaigns.Target
 
+  @rollout_mechanism_types [push: PushRollout]
+
   schema "update_campaigns" do
     field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
     field :name, :string
@@ -39,7 +41,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
     belongs_to :update_channel, UpdateChannel
 
     polymorphic_embeds_one :rollout_mechanism,
-      types: [push: PushRollout],
+      types: @rollout_mechanism_types,
       type_field: :type,
       on_replace: :update
 
@@ -50,9 +52,29 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
 
   @doc false
   def changeset(update_campaign, attrs) do
+    prev_rollout_mechanism_type = update_campaign.rollout_mechanism
+
     update_campaign
     |> cast(attrs, [:name])
     |> validate_required([:name])
     |> cast_polymorphic_embed(:rollout_mechanism, required: true)
+    |> validate_change(
+      :rollout_mechanism,
+      &preserve_rollout_mechanism_type(&1, prev_rollout_mechanism_type, &2)
+    )
+  end
+
+  defp preserve_rollout_mechanism_type(_field, nil = _old_value, %_t{} = _new_value), do: []
+  defp preserve_rollout_mechanism_type(_field, %t{} = _old_value, %t{} = _new_value), do: []
+  defp preserve_rollout_mechanism_type(_field, _old_value, %Ecto.Changeset{} = _new_value), do: []
+
+  defp preserve_rollout_mechanism_type(field, %t{} = _old_value, _new_value) do
+    prev_type =
+      Enum.find_value(@rollout_mechanism_types, fn
+        {handle, ^t} -> handle
+        {_handle, _t} -> false
+      end)
+
+    [{field, "should be of the same type it was previously defined as, #{prev_type}"}]
   end
 end
