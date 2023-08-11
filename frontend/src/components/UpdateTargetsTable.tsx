@@ -22,7 +22,6 @@ import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  UpdateTargetStatus,
   OtaOperationStatus,
   OtaOperationStatusCode,
   UpdateTargetsTable_UpdateTargetsFragment$data,
@@ -36,58 +35,21 @@ import { Link, Route } from "Navigation";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const UPDATE_TARGETS_TABLE_FRAGMENT = graphql`
-  fragment UpdateTargetsTable_UpdateTargetsFragment on UpdateCampaign {
-    updateTargets {
-      device {
-        id
-        name
-      }
+  fragment UpdateTargetsTable_UpdateTargetsFragment on UpdateTarget
+  @relay(plural: true) {
+    device {
+      id
+      name
+    }
+    latestAttempt
+    completionTimestamp
+    otaOperation {
       status
-      latestAttempt
-      completionTimestamp
-      otaOperation {
-        status
-        statusProgress
-        statusCode
-      }
+      statusProgress
+      statusCode
     }
   }
 `;
-
-const statusColors: Record<UpdateTargetStatus, string> = {
-  IDLE: "text-muted",
-  IN_PROGRESS: "text-warning",
-  SUCCESSFUL: "text-success",
-  FAILED: "text-danger",
-};
-
-const statusMessages = defineMessages<UpdateTargetStatus>({
-  IDLE: {
-    id: "components.UpdateTargetsTable.updateTargetStatus.Idle",
-    defaultMessage: "Idle",
-  },
-  IN_PROGRESS: {
-    id: "components.UpdateTargetsTable.updateTargetStatus.InProgress",
-    defaultMessage: "In progress",
-  },
-  SUCCESSFUL: {
-    id: "components.UpdateTargetsTable.updateTargetStatus.Successful",
-    defaultMessage: "Successful",
-  },
-  FAILED: {
-    id: "components.UpdateTargetsTable.updateTargetStatus.Failed",
-    defaultMessage: "Failed",
-  },
-});
-
-const TargetStatus = ({ status }: { status: UpdateTargetStatus }) => (
-  <div className="d-flex align-items-center">
-    <Icon icon="circle" className={`me-2 ${statusColors[status]}`} />
-    <span>
-      <FormattedMessage id={statusMessages[status].id} />
-    </span>
-  </div>
-);
 
 const getOperationStatusColor = (status: OtaOperationStatus): string => {
   switch (status) {
@@ -195,12 +157,21 @@ const operationStatusCodeMessages = defineMessages<OtaOperationStatusCode>({
   },
 });
 
-type TableRecord =
-  UpdateTargetsTable_UpdateTargetsFragment$data["updateTargets"][number];
+type TableRecord = UpdateTargetsTable_UpdateTargetsFragment$data[number];
+const columnIds = [
+  "deviceName",
+  "otaOperationStatus",
+  "otaOperationStatusProgress",
+  "otaOperationStatusCode",
+  "latestAttempt",
+  "completionTimestamp",
+] as const;
+type ColumnId = typeof columnIds[number];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
   columnHelper.accessor("device.name", {
+    id: "deviceName",
     header: () => (
       <FormattedMessage
         id="components.UpdateTargetsTable.deviceTitle"
@@ -216,16 +187,6 @@ const columns = [
         {getValue()}
       </Link>
     ),
-  }),
-  columnHelper.accessor("status", {
-    header: () => (
-      <FormattedMessage
-        id="components.UpdateTargetsTable.statusTitle"
-        defaultMessage="Status"
-        description="Title for the Status column of the Update Targets table"
-      />
-    ),
-    cell: ({ getValue }) => <TargetStatus status={getValue()} />,
   }),
   columnHelper.accessor(
     (updateTarget) => updateTarget.otaOperation?.status ?? null,
@@ -334,13 +295,18 @@ const columns = [
 
 type Props = {
   className?: string;
-  updateCampaignRef: UpdateTargetsTable_UpdateTargetsFragment$key;
+  hiddenColumns?: ColumnId[];
+  updateTargetsRef: UpdateTargetsTable_UpdateTargetsFragment$key;
 };
 
-const UpdateTargetsTable = ({ className, updateCampaignRef }: Props) => {
-  const { updateTargets } = useFragment(
+const UpdateTargetsTable = ({
+  className,
+  updateTargetsRef,
+  hiddenColumns = [],
+}: Props) => {
+  const updateTargets = useFragment(
     UPDATE_TARGETS_TABLE_FRAGMENT,
-    updateCampaignRef
+    updateTargetsRef
   );
 
   return (
@@ -348,9 +314,12 @@ const UpdateTargetsTable = ({ className, updateCampaignRef }: Props) => {
       className={className}
       columns={columns}
       data={updateTargets}
+      hiddenColumns={hiddenColumns}
       hideSearch
     />
   );
 };
 
 export default UpdateTargetsTable;
+export { columnIds };
+export type { ColumnId };

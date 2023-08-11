@@ -40,7 +40,7 @@ import Center from "components/Center";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
-import UpdateTargetsTable from "components/UpdateTargetsTable";
+import UpdateTargetsTabs from "components/UpdateTargetsTabs";
 import UpdateCampaignForm from "forms/UpdateCampaignForm";
 import { Link, Route } from "Navigation";
 
@@ -49,7 +49,7 @@ const GET_UPDATE_CAMPAIGN_QUERY = graphql`
     updateCampaign(id: $updateCampaignId) {
       name
       ...UpdateCampaignForm_UpdateCampaignFragment
-      ...UpdateTargetsTable_UpdateTargetsFragment
+      ...UpdateTargetsTabs_UpdateTargetsFragment
       ...UpdateCampaign_RefreshFragment
     }
   }
@@ -156,15 +156,7 @@ const UpdateCampaignContent = ({
           <UpdateCampaignForm updateCampaignRef={updateCampaign} />
         </div>
         <hr className="bg-secondary border-2 border-top border-secondary" />
-        <div className="d-flex justify-content-between align-items-center gap-2">
-          <h3>
-            <FormattedMessage
-              id="pages.UpdateCampaign.updateTargetsLabel"
-              defaultMessage="Update Targets"
-            />
-          </h3>
-        </div>
-        <UpdateTargetsTable updateCampaignRef={updateCampaign} />
+        <UpdateTargetsTabs updateCampaignRef={updateCampaign} />
       </Page.Main>
     </Page>
   );
