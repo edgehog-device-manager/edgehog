@@ -161,7 +161,7 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
 
     Must be greater than (or equal to) the current value.
     """
-    field :max_in_progress_updates, :integer
+    field :max_in_progress_updates, non_null(:integer)
   end
 
   @desc """
