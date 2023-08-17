@@ -107,6 +107,7 @@ defmodule Edgehog.MixProject do
       {:plug_heartbeat, "~> 1.0"},
       {:polymorphic_embed, "~> 3.0"},
       {:gen_state_machine, "~> 3.0"},
+      {:typed_struct, "~> 0.1.4", runtime: false},
       # TODO: point to upstream once all relevant PRs are merged
       {:i18n_helpers, github: "secomind/i18n_helpers"},
       {:recon, "~> 2.5"},
