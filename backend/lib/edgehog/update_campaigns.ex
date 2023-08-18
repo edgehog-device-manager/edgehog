@@ -32,6 +32,7 @@ defmodule Edgehog.UpdateCampaigns do
   alias Edgehog.UpdateCampaigns.ExecutorSupervisor
   alias Edgehog.UpdateCampaigns.Target
   alias Edgehog.UpdateCampaigns.UpdateCampaign
+  alias Edgehog.UpdateCampaigns.UpdateCampaignStats
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
   @doc """
@@ -497,5 +498,44 @@ defmodule Edgehog.UpdateCampaigns do
     with {:ok, target} <- Repo.fetch(Target, id) do
       {:ok, preload_defaults_for_target(target)}
     end
+  end
+
+  @doc """
+  Returns an `update_campaign_id -> %UpdateCampaignStats{}` map for the given Update Campaign ids.
+
+  This allows batching the stats retrieval instead of doing one query per Update Campaign.
+
+  ## Examples
+
+  iex> get_stats_for_update_campaign_ids(update_campaign_ids)
+  %{1 => %UpdateCampaignStats{}, 2 => ...}
+  """
+  def get_stats_for_update_campaign_ids(update_campaign_ids) do
+    query =
+      from t in Target,
+        where: t.update_campaign_id in ^update_campaign_ids,
+        group_by: [:update_campaign_id, :status],
+        select: {t.update_campaign_id, {t.status, count(t.id)}}
+
+    query
+    |> Repo.all()
+    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    |> Enum.into(%{}, fn {update_campaign_id, status_count_list} ->
+      {update_campaign_id, build_update_campaign_stats(status_count_list)}
+    end)
+  end
+
+  defp build_update_campaign_stats(status_count_list) do
+    count_map = Enum.into(status_count_list, %{})
+
+    total_count = Enum.reduce(count_map, 0, fn {_status, count}, acc -> count + acc end)
+
+    %UpdateCampaignStats{
+      total_target_count: total_count,
+      idle_target_count: Map.get(count_map, :idle, 0),
+      in_progress_target_count: Map.get(count_map, :in_progress, 0),
+      failed_target_count: Map.get(count_map, :failed, 0),
+      successful_target_count: Map.get(count_map, :successful, 0)
+    }
   end
 end
