@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   use Edgehog.AstarteMockCase
   use Edgehog.EphemeralImageMockCase
 

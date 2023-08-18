@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaignsTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
 
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures

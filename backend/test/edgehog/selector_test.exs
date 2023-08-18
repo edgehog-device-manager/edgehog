@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.SelectorTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures

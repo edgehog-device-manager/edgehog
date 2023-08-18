@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.TenantInfoTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
 
   alias Edgehog.Tenants.Tenant
 

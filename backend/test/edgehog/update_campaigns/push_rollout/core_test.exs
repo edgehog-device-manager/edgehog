@@ -20,7 +20,7 @@
 
 defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   use Edgehog.AstarteMockCase
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
 
   alias Edgehog.UpdateCampaigns.PushRollout
   alias Edgehog.UpdateCampaigns.PushRollout.Core

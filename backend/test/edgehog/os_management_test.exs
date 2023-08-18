@@ -20,7 +20,7 @@
 
 defmodule Edgehog.OSManagementTest do
   use Edgehog.AstarteMockCase
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
   use Edgehog.EphemeralImageMockCase
 
   alias Edgehog.Devices

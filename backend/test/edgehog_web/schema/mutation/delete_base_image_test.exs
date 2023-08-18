@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   use Edgehog.BaseImagesStorageMockCase
 
   alias Edgehog.BaseImages

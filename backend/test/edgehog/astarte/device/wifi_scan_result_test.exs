@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.WiFiScanResult

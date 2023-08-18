@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures

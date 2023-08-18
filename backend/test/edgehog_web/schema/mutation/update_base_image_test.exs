@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.BaseImagesFixtures

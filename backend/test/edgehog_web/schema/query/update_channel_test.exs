@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
 
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures

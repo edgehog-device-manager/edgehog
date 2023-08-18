@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   use Edgehog.AstarteMockCase
   use Edgehog.EphemeralImageMockCase
 

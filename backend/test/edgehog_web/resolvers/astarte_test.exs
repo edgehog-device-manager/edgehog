@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Resolvers.AstarteTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   use Edgehog.AstarteMockCase
 
   alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot

@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
 
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures

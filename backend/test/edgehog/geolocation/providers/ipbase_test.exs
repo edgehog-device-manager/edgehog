@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.IPBaseTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
