@@ -149,6 +149,82 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
     end
   end
 
+  describe "updateCampaign stats field" do
+    defp update_target_status!(target, status) do
+      Ecto.Changeset.change(target, status: status)
+      |> Edgehog.Repo.update!()
+    end
+
+    defp update_campaign_for_stats_fixture do
+      target_count = Enum.random(20..40)
+
+      update_campaign = update_campaign_with_targets_fixture(target_count)
+
+      # Pick some targets to be put in a different status
+      in_progress_target_count = Enum.random(0..5)
+      failed_target_count = Enum.random(0..5)
+      successful_target_count = Enum.random(0..5)
+
+      idle_target_count =
+        target_count - in_progress_target_count - failed_target_count - successful_target_count
+
+      {in_progress, rest} = Enum.split(update_campaign.update_targets, in_progress_target_count)
+      {failed, rest} = Enum.split(rest, failed_target_count)
+      {successful, rest} = Enum.split(rest, successful_target_count)
+      assert length(rest) == idle_target_count
+
+      # Update the target status
+      for {targets, status} <- [
+            {in_progress, :in_progress},
+            {failed, :failed},
+            {successful, :successful}
+          ],
+          target <- targets do
+        update_target_status!(target, status)
+      end
+
+      # Re-read the update campaign from the database so we have the targets with the updated status
+      {:ok, update_campaign} = Edgehog.UpdateCampaigns.fetch_update_campaign(update_campaign.id)
+
+      update_campaign
+    end
+
+    test "returns update campaign stats", ctx do
+      %{
+        conn: conn,
+        api_path: api_path
+      } = ctx
+
+      update_campaign = update_campaign_for_stats_fixture()
+
+      query = """
+      query ($id: ID!) {
+        updateCampaign(id: $id) {
+          stats {
+            totalTargetCount
+            idleTargetCount
+            inProgressTargetCount
+            failedTargetCount
+            successfulTargetCount
+          }
+        }
+      }
+      """
+
+      response = update_campaign_query(conn, api_path, update_campaign, query: query)
+
+      assert stats = response["data"]["updateCampaign"]["stats"]
+
+      targets = update_campaign.update_targets
+
+      assert stats["totalTargetCount"] == length(targets)
+      assert stats["idleTargetCount"] == Enum.count(targets, &(&1.status == :idle))
+      assert stats["inProgressTargetCount"] == Enum.count(targets, &(&1.status == :in_progress))
+      assert stats["failedTargetCount"] == Enum.count(targets, &(&1.status == :failed))
+      assert stats["successfulTargetCount"] == Enum.count(targets, &(&1.status == :successful))
+    end
+  end
+
   @query """
   query ($id: ID!) {
     updateCampaign(id: $id) {

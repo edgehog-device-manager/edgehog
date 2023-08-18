@@ -112,4 +112,27 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
   defp tag_rollout_mechanism(%{push: push_rollout_mechanism}) do
     Map.put(push_rollout_mechanism, :type, :push)
   end
+
+  @doc """
+  Resolve the stats for an update campaign, batching it for all update campaigns.
+
+  This avoids N+1 queries when querying stats in a list of update campaigns.
+  """
+  def batched_stats_for_update_campaign(update_campaign, _args, %{context: context}) do
+    # We have to pass the tenant_id to the batch function since it gets executed in a separate process
+    tenant_id = context.current_tenant.tenant_id
+
+    batch(
+      {__MODULE__, :stats_by_update_campaign_id, tenant_id},
+      update_campaign.id,
+      fn batch_results -> {:ok, Map.get(batch_results, update_campaign.id)} end
+    )
+  end
+
+  def stats_by_update_campaign_id(tenant_id, update_campaign_ids) do
+    # Use the correct tenant_id in the batching process
+    Edgehog.Repo.put_tenant_id(tenant_id)
+
+    UpdateCampaigns.get_stats_for_update_campaign_ids(update_campaign_ids)
+  end
 end

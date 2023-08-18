@@ -246,6 +246,28 @@ defmodule EdgehogWeb.Schema.UpdateCampaignsTypes do
 
     @desc "The Targets that will receive the update during the Update Campaign."
     field :update_targets, non_null(list_of(non_null(:update_target)))
+
+    @desc "The Stats of the Update Campaign"
+    field :stats, non_null(:update_campaign_stats) do
+      resolve &Resolvers.UpdateCampaigns.batched_stats_for_update_campaign/3
+    end
+  end
+
+  object :update_campaign_stats do
+    @desc "The total number of targets of the Update Campaign"
+    field :total_target_count, non_null(:integer)
+
+    @desc "The number of targets of the Update Campaign having IDLE status"
+    field :idle_target_count, non_null(:integer)
+
+    @desc "The number of targets of the Update Campaign having IN_PROGRESS status"
+    field :in_progress_target_count, non_null(:integer)
+
+    @desc "The number of targets of the Update Campaign having FAILED status"
+    field :failed_target_count, non_null(:integer)
+
+    @desc "The number of targets of the Update Campaign having SUCCESSFUL status"
+    field :successful_target_count, non_null(:integer)
   end
 
   object :update_campaigns_queries do

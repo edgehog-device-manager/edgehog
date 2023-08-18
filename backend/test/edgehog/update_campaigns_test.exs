@@ -33,6 +33,7 @@ defmodule Edgehog.UpdateCampaignsTest do
   alias Edgehog.UpdateCampaigns.ExecutorRegistry
   alias Edgehog.UpdateCampaigns.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateCampaign
+  alias Edgehog.UpdateCampaigns.UpdateCampaignStats
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
   test "list_update_channels/0 returns all update_channels" do
@@ -513,6 +514,86 @@ defmodule Edgehog.UpdateCampaignsTest do
         |> add_tags(["foo", "bar"])
 
       assert UpdateCampaigns.list_updatable_devices(update_channel, base_image) == [device]
+    end
+  end
+
+  describe "get_stats_for_update_campaign_ids" do
+    defp update_target_status!(target, status) do
+      Ecto.Changeset.change(target, status: status)
+      |> Edgehog.Repo.update!()
+    end
+
+    defp update_campaign_for_stats_fixture do
+      target_count = Enum.random(20..40)
+
+      update_campaign = update_campaign_with_targets_fixture(target_count)
+
+      # Pick some targets to be put in a different status
+      in_progress_target_count = Enum.random(0..5)
+      failed_target_count = Enum.random(0..5)
+      successful_target_count = Enum.random(0..5)
+
+      idle_target_count =
+        target_count - in_progress_target_count - failed_target_count - successful_target_count
+
+      {in_progress, rest} = Enum.split(update_campaign.update_targets, in_progress_target_count)
+      {failed, rest} = Enum.split(rest, failed_target_count)
+      {successful, rest} = Enum.split(rest, successful_target_count)
+      assert length(rest) == idle_target_count
+
+      # Update the target status
+      for {targets, status} <- [
+            {in_progress, :in_progress},
+            {failed, :failed},
+            {successful, :successful}
+          ],
+          target <- targets do
+        update_target_status!(target, status)
+      end
+
+      # Re-read the update campaign from the database so we have the targets with the updated status
+      {:ok, update_campaign} = UpdateCampaigns.fetch_update_campaign(update_campaign.id)
+
+      update_campaign
+    end
+
+    setup do
+      update_campaign_count = Enum.random(1..10)
+
+      update_campaigns =
+        for _ <- 1..update_campaign_count, do: update_campaign_for_stats_fixture()
+
+      {:ok, update_campaigns: update_campaigns}
+    end
+
+    test "returns the update campaign stats for each update campaign id", ctx do
+      %{update_campaigns: update_campaigns} = ctx
+
+      update_campaign_ids = Enum.map(update_campaigns, & &1.id)
+
+      assert stats_map = UpdateCampaigns.get_stats_for_update_campaign_ids(update_campaign_ids)
+
+      for update_campaign <- update_campaigns do
+        assert %UpdateCampaignStats{
+                 total_target_count: total_count,
+                 idle_target_count: idle_count,
+                 in_progress_target_count: in_progress_count,
+                 failed_target_count: failed_count,
+                 successful_target_count: successful_count
+               } = Map.fetch!(stats_map, update_campaign.id)
+
+        targets = update_campaign.update_targets
+
+        assert total_count == length(targets)
+        assert idle_count == Enum.count(targets, &(&1.status == :idle))
+        assert in_progress_count == Enum.count(targets, &(&1.status == :in_progress))
+        assert failed_count == Enum.count(targets, &(&1.status == :failed))
+        assert successful_count == Enum.count(targets, &(&1.status == :successful))
+      end
+    end
+
+    test "returns empty map for non-existing update campaign ids" do
+      assert %{} == UpdateCampaigns.get_stats_for_update_campaign_ids([1_234_567])
     end
   end
 
