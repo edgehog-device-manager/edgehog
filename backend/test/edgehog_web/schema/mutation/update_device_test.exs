@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures

@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.DevicesFixtures

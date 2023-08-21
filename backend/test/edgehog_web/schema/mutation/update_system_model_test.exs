@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
 
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel

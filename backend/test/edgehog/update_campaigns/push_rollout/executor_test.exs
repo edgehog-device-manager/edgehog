@@ -831,7 +831,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     receive do
       _msg -> flush_messages()
     after
-      1000 -> :ok
+      10 -> :ok
     end
   end
 end

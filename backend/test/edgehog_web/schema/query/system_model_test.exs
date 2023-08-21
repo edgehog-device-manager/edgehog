@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.SystemModelTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
 
   import Edgehog.DevicesFixtures
 

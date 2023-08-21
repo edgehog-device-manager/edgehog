@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.TenantsTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
   @moduletag :no_tenant_fixtures
 
   alias Edgehog.Tenants

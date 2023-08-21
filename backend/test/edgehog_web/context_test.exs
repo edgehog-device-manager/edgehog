@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.ContextTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
 
   alias EdgehogWeb.Context
 

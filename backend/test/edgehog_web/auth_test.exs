@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.AuthTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.ConnCase, async: true
   alias Edgehog.Config
 
   # Use an unauthenticated conn so we can control auth manually

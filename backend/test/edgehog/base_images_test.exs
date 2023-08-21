@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.BaseImagesTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
   use Edgehog.BaseImagesStorageMockCase
 
   alias Edgehog.BaseImages

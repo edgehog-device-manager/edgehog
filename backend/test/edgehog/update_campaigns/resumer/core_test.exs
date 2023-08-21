@@ -120,7 +120,7 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
       :fun_called ->
         count_fun_called(acc + 1)
     after
-      1000 ->
+      10 ->
         acc
     end
   end

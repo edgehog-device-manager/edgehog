@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.GoogleGeocodingTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
 
   import Tesla.Mock
   alias Edgehog.Geolocation.Coordinates

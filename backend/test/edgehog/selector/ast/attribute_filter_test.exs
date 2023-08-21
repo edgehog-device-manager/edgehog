@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Selector.AST.AttributeFilterTest do
-  use Edgehog.DataCase
+  use Edgehog.DataCase, async: true
 
   import Ecto.Query
   import Edgehog.AstarteFixtures
