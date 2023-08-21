@@ -19,20 +19,20 @@
 */
 
 import { useState, useMemo } from "react";
-import { defineMessages, FormattedMessage } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  UpdateTargetStatus,
+  UpdateTargetStatus as UpdateTargetStatusType,
   UpdateTargetsTabs_UpdateTargetsFragment$key,
 } from "api/__generated__/UpdateTargetsTabs_UpdateTargetsFragment.graphql";
 
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
-import Icon from "components/Icon";
 import UpdateTargetsTable, { columnIds } from "components/UpdateTargetsTable";
 import type { ColumnId } from "components/UpdateTargetsTable";
+import UpdateTargetStatus from "components/UpdateTargetStatus";
 
 const UPDATE_TARGETS_TABS_FRAGMENT = graphql`
   fragment UpdateTargetsTabs_UpdateTargetsFragment on UpdateCampaign {
@@ -43,26 +43,7 @@ const UPDATE_TARGETS_TABS_FRAGMENT = graphql`
   }
 `;
 
-const statusMessages = defineMessages<UpdateTargetStatus>({
-  IDLE: {
-    id: "components.UpdateTargetsTabs.updateTargetStatus.Idle",
-    defaultMessage: "Idle",
-  },
-  IN_PROGRESS: {
-    id: "components.UpdateTargetsTabs.updateTargetStatus.InProgress",
-    defaultMessage: "In progress",
-  },
-  SUCCESSFUL: {
-    id: "components.UpdateTargetsTabs.updateTargetStatus.Successful",
-    defaultMessage: "Successful",
-  },
-  FAILED: {
-    id: "components.UpdateTargetsTabs.updateTargetStatus.Failed",
-    defaultMessage: "Failed",
-  },
-});
-
-const getVisibleColumns = (status: UpdateTargetStatus): ColumnId[] => {
+const getVisibleColumns = (status: UpdateTargetStatusType): ColumnId[] => {
   switch (status) {
     case "IDLE":
       return ["deviceName"];
@@ -83,12 +64,12 @@ const getVisibleColumns = (status: UpdateTargetStatus): ColumnId[] => {
   }
 };
 
-const getHiddenColumns = (status: UpdateTargetStatus): ColumnId[] => {
+const getHiddenColumns = (status: UpdateTargetStatusType): ColumnId[] => {
   const visibleColumns = getVisibleColumns(status);
   return columnIds.filter((column) => !visibleColumns.includes(column));
 };
 
-const updateTargetTabs: UpdateTargetStatus[] = [
+const updateTargetTabs: UpdateTargetStatusType[] = [
   "SUCCESSFUL",
   "FAILED",
   "IN_PROGRESS",
@@ -100,7 +81,8 @@ type Props = {
 };
 
 const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
-  const [activeTab, setActiveTab] = useState<UpdateTargetStatus>("SUCCESSFUL");
+  const [activeTab, setActiveTab] =
+    useState<UpdateTargetStatusType>("SUCCESSFUL");
   const { updateTargets } = useFragment(
     UPDATE_TARGETS_TABS_FRAGMENT,
     updateCampaignRef
@@ -129,7 +111,7 @@ const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
                 active={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
               >
-                <FormattedMessage id={statusMessages[tab].id} />
+                <UpdateTargetStatus status={tab} />
               </NavLink>
             </NavItem>
           ))}
