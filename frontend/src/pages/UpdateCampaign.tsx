@@ -37,9 +37,12 @@ import type { UpdateCampaign_getUpdateCampaign_Query } from "api/__generated__/U
 import type { UpdateCampaign_RefreshFragment$key } from "api/__generated__/UpdateCampaign_RefreshFragment.graphql";
 
 import Center from "components/Center";
+import Col from "components/Col";
 import Page from "components/Page";
 import Result from "components/Result";
+import Row from "components/Row";
 import Spinner from "components/Spinner";
+import UpdateCampaignStatsChart from "components/UpdateCampaignStatsChart";
 import UpdateTargetsTabs from "components/UpdateTargetsTabs";
 import UpdateCampaignForm from "forms/UpdateCampaignForm";
 import { Link, Route } from "Navigation";
@@ -49,6 +52,7 @@ const GET_UPDATE_CAMPAIGN_QUERY = graphql`
     updateCampaign(id: $updateCampaignId) {
       name
       ...UpdateCampaignForm_UpdateCampaignFragment
+      ...UpdateCampaignStatsChart_UpdateCampaignStatsChartFragment
       ...UpdateTargetsTabs_UpdateTargetsFragment
       ...UpdateCampaign_RefreshFragment
     }
@@ -152,9 +156,14 @@ const UpdateCampaignContent = ({
         <UpdateCampaignRefresh updateCampaignRef={updateCampaign} />
       </Page.Header>
       <Page.Main>
-        <div className="mb-3">
-          <UpdateCampaignForm updateCampaignRef={updateCampaign} />
-        </div>
+        <Row>
+          <Col lg={9}>
+            <UpdateCampaignForm updateCampaignRef={updateCampaign} />
+          </Col>
+          <Col lg={3}>
+            <UpdateCampaignStatsChart updateCampaignRef={updateCampaign} />
+          </Col>
+        </Row>
         <hr className="bg-secondary border-2 border-top border-secondary" />
         <UpdateTargetsTabs updateCampaignRef={updateCampaign} />
       </Page.Main>
