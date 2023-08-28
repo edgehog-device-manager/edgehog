@@ -26,6 +26,9 @@ import type {
   UpdateTargetStatus_UpdateTargetStatusFragment$key,
 } from "api/__generated__/UpdateTargetStatus_UpdateTargetStatusFragment.graphql";
 
+import Icon from "components/Icon";
+import "./UpdateTargetStatus.scss";
+
 const UPDATE_TARGET_STATUS_FRAGMENT = graphql`
   fragment UpdateTargetStatus_UpdateTargetStatusFragment on UpdateTarget {
     status
@@ -51,11 +54,21 @@ const messages = defineMessages<UpdateTargetStatusType>({
   },
 });
 
+const colors: Record<UpdateTargetStatusType, string> = {
+  IDLE: "color-idle",
+  IN_PROGRESS: "color-in-progress",
+  SUCCESSFUL: "color-successful",
+  FAILED: "color-failed",
+};
+
 type UpdateTargetStatusProps = {
   status: UpdateTargetStatusType;
 };
 const UpdateTargetStatus = ({ status }: UpdateTargetStatusProps) => (
-  <FormattedMessage id={messages[status].id} />
+  <span className="update-target-status text-nowrap">
+    <Icon icon="circle" className={`me-2 ${colors[status]}`} />
+    <FormattedMessage id={messages[status].id} />
+  </span>
 );
 
 type UpdateTargetStatusFragmentProps = {

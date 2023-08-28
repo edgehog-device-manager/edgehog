@@ -56,6 +56,12 @@ const UpdateCampaignStatsChart = ({ updateCampaignRef }: Props) => {
       intl.formatMessage(statusMessages.IN_PROGRESS),
       intl.formatMessage(statusMessages.IDLE),
     ],
+    colors: [
+      "var(--update-target-status_color_successful)",
+      "var(--update-target-status_color_failed)",
+      "var(--update-target-status_color_in-progress)",
+      "var(--update-target-status_color_idle)",
+    ],
     dataLabels: {
       enabled: true,
     },
