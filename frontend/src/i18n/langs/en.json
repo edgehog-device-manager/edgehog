@@ -567,25 +567,86 @@
   "components.UpdateSystemModelForm.submitButton": {
     "defaultMessage": "Update"
   },
+  "components.UpdateTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at",
+    "description": "Title for the Completed at column of the Update Targets table"
+  },
   "components.UpdateTargetsTable.deviceTitle": {
     "defaultMessage": "Device",
     "description": "Title for the Device column of the Update Targets table"
   },
-  "components.UpdateTargetsTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the Update Targets table"
+  "components.UpdateTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at",
+    "description": "Title for the Latest attempt at column of the Update Targets table"
   },
-  "components.UpdateTargetsTable.updateTargetStatus.Failed": {
-    "defaultMessage": "Failed"
+  "components.UpdateTargetsTable.otaOperationStatus.Acknowledged": {
+    "defaultMessage": "Acknowledged"
   },
-  "components.UpdateTargetsTable.updateTargetStatus.Idle": {
-    "defaultMessage": "Idle"
+  "components.UpdateTargetsTable.otaOperationStatus.Deployed": {
+    "defaultMessage": "Deployed"
   },
-  "components.UpdateTargetsTable.updateTargetStatus.InProgress": {
-    "defaultMessage": "In progress"
+  "components.UpdateTargetsTable.otaOperationStatus.Deploying": {
+    "defaultMessage": "Deploying"
   },
-  "components.UpdateTargetsTable.updateTargetStatus.Successful": {
-    "defaultMessage": "Successful"
+  "components.UpdateTargetsTable.otaOperationStatus.Downloading": {
+    "defaultMessage": "Downloading"
+  },
+  "components.UpdateTargetsTable.otaOperationStatus.Error": {
+    "defaultMessage": "Error"
+  },
+  "components.UpdateTargetsTable.otaOperationStatus.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.UpdateTargetsTable.otaOperationStatus.Pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.UpdateTargetsTable.otaOperationStatus.Rebooting": {
+    "defaultMessage": "Rebooting"
+  },
+  "components.UpdateTargetsTable.otaOperationStatus.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.Canceled": {
+    "defaultMessage": "Canceled"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.IOError": {
+    "defaultMessage": "IO error"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.InternalError": {
+    "defaultMessage": "Internal error"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.InvalidBaseImage": {
+    "defaultMessage": "Invalid Base Image"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.InvalidRequest": {
+    "defaultMessage": "Invalid request"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.NetworkError": {
+    "defaultMessage": "Network error"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.RequestTimeout": {
+    "defaultMessage": "Request timeout"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.SystemRollback": {
+    "defaultMessage": "System rollback"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCode.UpdateAlreadyInProgress": {
+    "defaultMessage": "Update already in progress"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusCodeTitle": {
+    "defaultMessage": "Failure Reason",
+    "description": "Title for the Operation Status Code column of the Update Targets table"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusProgressTitle": {
+    "defaultMessage": "Operation progress",
+    "description": "Title for the Operation Status Progress column of the Update Targets table"
+  },
+  "components.UpdateTargetsTable.otaOperationStatusTitle": {
+    "defaultMessage": "Operation",
+    "description": "Title for the Operation Status column of the Update Targets table"
+  },
+  "components.UpdateTargetsTabs.updateTargetsLabel": {
+    "defaultMessage": "Devices"
   },
   "components.WiFiScanResultsTable.apChannelTitle": {
     "defaultMessage": "Channel"
@@ -601,6 +662,18 @@
   },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
+  },
+  "components.updateTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.updateTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.updateTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.updateTargetStatus.Successful": {
+    "defaultMessage": "Successful"
   },
   "device.otaOperationStatus.Failure": {
     "defaultMessage": "Failure"
@@ -717,23 +790,23 @@
   "forms.UpdateCampaignForm.baseImageLabel": {
     "defaultMessage": "Base Image"
   },
-  "forms.UpdateCampaignForm.forceDowngradeLabel": {
-    "defaultMessage": "Force Downgrade"
-  },
-  "forms.UpdateCampaignForm.maxFailurePercentageLabel": {
-    "defaultMessage": "Max Failures <muted>(%)</muted>"
-  },
-  "forms.UpdateCampaignForm.maxInProgressUpdatesLabel": {
-    "defaultMessage": "Max Pending Operations"
-  },
-  "forms.UpdateCampaignForm.otaRequestRetriesLabel": {
-    "defaultMessage": "Request Retries"
-  },
-  "forms.UpdateCampaignForm.otaRequestTimeoutSeconds": {
-    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
-  },
   "forms.UpdateCampaignForm.outcomeLabel": {
     "defaultMessage": "Outcome"
+  },
+  "forms.UpdateCampaignForm.rolloutMechanism.forceDowngradeLabel": {
+    "defaultMessage": "Force Downgrade"
+  },
+  "forms.UpdateCampaignForm.rolloutMechanism.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "forms.UpdateCampaignForm.rolloutMechanism.maxInProgressUpdatesLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.UpdateCampaignForm.rolloutMechanism.otaRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.UpdateCampaignForm.rolloutMechanism.otaRequestTimeoutSeconds": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
   },
   "forms.UpdateCampaignForm.statusLabel": {
     "defaultMessage": "Status"
@@ -1115,9 +1188,6 @@
   },
   "pages.UpdateCampaign.updateCampaignNotFound.title": {
     "defaultMessage": "Update Campaign not found."
-  },
-  "pages.UpdateCampaign.updateTargetsLabel": {
-    "defaultMessage": "Update Targets"
   },
   "pages.UpdateCampaignCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Update Campaign, please try again."

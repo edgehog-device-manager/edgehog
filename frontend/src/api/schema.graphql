@@ -439,7 +439,7 @@ type RootQueryType {
   "Fetches a single update channel."
   updateChannel("The ID of the update channel." id: ID!): UpdateChannel
 
-  "Fetches the list of all update campaigns."
+  "Fetches the list of all update campaigns. Newer update campaigns are returned first."
   updateCampaigns: [UpdateCampaign!]!
 
   "Fetches a single update campaign."
@@ -637,6 +637,23 @@ enum UpdateTargetStatus {
 
   "The Update Target was successfully updated"
   SUCCESSFUL
+}
+
+type UpdateCampaignStats {
+  "The total number of targets of the Update Campaign"
+  totalTargetCount: Int!
+
+  "The number of targets of the Update Campaign having IDLE status"
+  idleTargetCount: Int!
+
+  "The number of targets of the Update Campaign having IN_PROGRESS status"
+  inProgressTargetCount: Int!
+
+  "The number of targets of the Update Campaign having FAILED status"
+  failedTargetCount: Int!
+
+  "The number of targets of the Update Campaign having SUCCESSFUL status"
+  successfulTargetCount: Int!
 }
 
 """
@@ -1109,6 +1126,9 @@ type UpdateCampaign implements Node {
 
   "The Targets that will receive the update during the Update Campaign."
   updateTargets: [UpdateTarget!]!
+
+  "The Stats of the Update Campaign"
+  stats: UpdateCampaignStats!
 }
 
 """
@@ -1205,8 +1225,20 @@ type UpdateTarget implements Node {
   "The status of the Update Target."
   status: UpdateTargetStatus!
 
+  "The retry count of the Update Target. This indicates how many times Edgehog has tried to send an OTA Update towards the device without receiving an ack."
+  retryCount: Int!
+
+  "The timestamp of the latest attempt to update the Update Target"
+  latestAttempt: DateTime
+
+  "The timestamp when the Update Target completed its update, either with a success or a failure"
+  completionTimestamp: DateTime
+
   "The Target device."
   device: Device!
+
+  "The OTA Operation that tracks the Update Target in-progress update"
+  otaOperation: OtaOperation
 }
 
 type DeleteDeviceGroupPayload {

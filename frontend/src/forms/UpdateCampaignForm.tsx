@@ -22,7 +22,10 @@ import type { ReactNode } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
-import type { UpdateCampaignForm_UpdateCampaignFragment$key } from "api/__generated__/UpdateCampaignForm_UpdateCampaignFragment.graphql";
+import type {
+  UpdateCampaignForm_UpdateCampaignFragment$data,
+  UpdateCampaignForm_UpdateCampaignFragment$key,
+} from "api/__generated__/UpdateCampaignForm_UpdateCampaignFragment.graphql";
 
 import Col from "components/Col";
 import Form from "components/Form";
@@ -50,6 +53,7 @@ const UPDATE_CAMPAIGN_FORM_FRAGMENT = graphql`
       name
     }
     rolloutMechanism {
+      __typename
       ... on PushRollout {
         maxFailurePercentage
         maxInProgressUpdates
@@ -69,10 +73,90 @@ const FormRow = ({
   children: ReactNode;
 }) => (
   <Row>
-    <Col sm={4}>{label}</Col>
-    <Col sm={8}>{children}</Col>
+    <Col sm={4} lg>
+      {label}
+    </Col>
+    <Col sm={8} lg>
+      {children}
+    </Col>
   </Row>
 );
+
+type RolloutMechanismColProps = {
+  rolloutMechanism: UpdateCampaignForm_UpdateCampaignFragment$data["rolloutMechanism"];
+};
+const RolloutMechanismCol = ({
+  rolloutMechanism,
+}: RolloutMechanismColProps) => {
+  if (rolloutMechanism.__typename !== "PushRollout") {
+    return null;
+  }
+
+  return (
+    <Col lg>
+      <FormRow
+        label={
+          <FormattedMessage
+            id="forms.UpdateCampaignForm.rolloutMechanism.maxInProgressUpdatesLabel"
+            defaultMessage="Max Pending Operations"
+          />
+        }
+      >
+        {rolloutMechanism.maxInProgressUpdates}
+      </FormRow>
+      <FormRow
+        label={
+          <FormattedMessage
+            id="forms.UpdateCampaignForm.rolloutMechanism.maxFailurePercentageLabel"
+            defaultMessage="Max Failures <muted>(%)</muted>"
+            values={{
+              muted: (chunks: React.ReactNode) => (
+                <span className="small text-muted">{chunks}</span>
+              ),
+            }}
+          />
+        }
+      >
+        {rolloutMechanism.maxFailurePercentage}
+      </FormRow>
+      <FormRow
+        label={
+          <FormattedMessage
+            id="forms.UpdateCampaignForm.rolloutMechanism.otaRequestTimeoutSeconds"
+            defaultMessage="Request Timeout <muted>(seconds)</muted>"
+            values={{
+              muted: (chunks: React.ReactNode) => (
+                <span className="small text-muted">{chunks}</span>
+              ),
+            }}
+          />
+        }
+      >
+        {rolloutMechanism.otaRequestTimeoutSeconds}
+      </FormRow>
+      <FormRow
+        label={
+          <FormattedMessage
+            id="forms.UpdateCampaignForm.rolloutMechanism.otaRequestRetriesLabel"
+            defaultMessage="Request Retries"
+          />
+        }
+      >
+        {rolloutMechanism.otaRequestRetries}
+      </FormRow>
+      <FormRow
+        label={
+          <FormattedMessage
+            id="forms.UpdateCampaignForm.rolloutMechanism.forceDowngradeLabel"
+            defaultMessage="Force Downgrade"
+          />
+        }
+      >
+        <Form.Check checked={rolloutMechanism.forceDowngrade} disabled />
+      </FormRow>
+    </Col>
+  );
+};
 
 type UpdateCampaignProps = {
   updateCampaignRef: UpdateCampaignForm_UpdateCampaignFragment$key;
@@ -86,13 +170,6 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
 
   const { baseImage, updateChannel, rolloutMechanism } = updateCampaign;
   const { baseImageCollection } = baseImage;
-  const {
-    maxInProgressUpdates,
-    maxFailurePercentage,
-    otaRequestTimeoutSeconds,
-    otaRequestRetries,
-    forceDowngrade,
-  } = rolloutMechanism;
   return (
     <Row>
       <Col lg>
@@ -165,78 +242,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
           </Link>
         </FormRow>
       </Col>
-      <Col lg>
-        {maxInProgressUpdates !== undefined && (
-          <FormRow
-            label={
-              <FormattedMessage
-                id="forms.UpdateCampaignForm.maxInProgressUpdatesLabel"
-                defaultMessage="Max Pending Operations"
-              />
-            }
-          >
-            {maxInProgressUpdates}
-          </FormRow>
-        )}
-        {maxFailurePercentage !== undefined && (
-          <FormRow
-            label={
-              <FormattedMessage
-                id="forms.UpdateCampaignForm.maxFailurePercentageLabel"
-                defaultMessage="Max Failures <muted>(%)</muted>"
-                values={{
-                  muted: (chunks: React.ReactNode) => (
-                    <span className="small text-muted">{chunks}</span>
-                  ),
-                }}
-              />
-            }
-          >
-            {maxFailurePercentage}
-          </FormRow>
-        )}
-        {otaRequestTimeoutSeconds !== undefined && (
-          <FormRow
-            label={
-              <FormattedMessage
-                id="forms.UpdateCampaignForm.otaRequestTimeoutSeconds"
-                defaultMessage="Request Timeout <muted>(seconds)</muted>"
-                values={{
-                  muted: (chunks: React.ReactNode) => (
-                    <span className="small text-muted">{chunks}</span>
-                  ),
-                }}
-              />
-            }
-          >
-            {otaRequestTimeoutSeconds}
-          </FormRow>
-        )}
-        {otaRequestRetries !== undefined && (
-          <FormRow
-            label={
-              <FormattedMessage
-                id="forms.UpdateCampaignForm.otaRequestRetriesLabel"
-                defaultMessage="Request Retries"
-              />
-            }
-          >
-            {otaRequestRetries}
-          </FormRow>
-        )}
-        {forceDowngrade !== undefined && (
-          <FormRow
-            label={
-              <FormattedMessage
-                id="forms.UpdateCampaignForm.forceDowngradeLabel"
-                defaultMessage="Force Downgrade"
-              />
-            }
-          >
-            <Form.Check checked={forceDowngrade} disabled />
-          </FormRow>
-        )}
-      </Col>
+      <RolloutMechanismCol rolloutMechanism={rolloutMechanism} />
     </Row>
   );
 };
