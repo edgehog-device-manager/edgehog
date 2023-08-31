@@ -21,13 +21,13 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
 import {
+  graphql,
   useMutation,
   usePreloadedQuery,
   useQueryLoader,
-  PreloadedQuery,
 } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { UpdateChannelCreate_getDeviceGroups_Query } from "api/__generated__/UpdateChannelCreate_getDeviceGroups_Query.graphql";
 import type { UpdateChannelCreate_createUpdateChannel_Mutation } from "api/__generated__/UpdateChannelCreate_createUpdateChannel_Mutation.graphql";

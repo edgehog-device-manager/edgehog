@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@
 */
 
 import { useCallback, useEffect, useState } from "react";
-import graphql from "babel-plugin-relay/macro";
-import { useMutation } from "react-relay/hooks";
+import { graphql, useMutation } from "react-relay/hooks";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import type { MessageDescriptor } from "react-intl";
 
