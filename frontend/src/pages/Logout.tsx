@@ -30,7 +30,6 @@ const LogoutPage = () => {
   const relayEnvironment = useRelayEnvironment();
 
   useEffect(() => {
-    // @ts-expect-error wrong Relay types, store should be a RecordSourceSelectorProxy
     commitLocalUpdate(relayEnvironment, (store) => store.invalidateStore());
     auth.logout();
   }, [relayEnvironment, auth]);

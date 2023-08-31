@@ -31,9 +31,7 @@ import type { BaseImageNameResolver$key } from "api/__generated__/BaseImageNameR
  *
  * Base Image name
  */
-export default function baseImageNameResolver(
-  baseImageKey: BaseImageNameResolver$key
-): string {
+function name(baseImageKey: BaseImageNameResolver$key): string {
   const { releaseDisplayName, version } = readFragment(
     graphql`
       fragment BaseImageNameResolver on BaseImage {
@@ -49,3 +47,5 @@ export default function baseImageNameResolver(
   }
   return `${version} (${releaseDisplayName})`;
 }
+
+export { name };
