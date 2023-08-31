@@ -72,10 +72,11 @@
   },
   "scripts": {
     "init": "npm run relay:compile && npm run i18n:compile",
-    "start": "craco start",
+    "start": "vite",
     "prestart": "npm run init",
-    "build": "craco build",
+    "build": "tsc && vite build",
     "prebuild": "npm run init",
+    "serve": "vite preview",
     "relay:generate-schema": "cd ../backend && mix absinthe.schema.sdl --schema EdgehogWeb.Schema ../frontend/src/api/schema.graphql",
     "relay:compile": "mkdir -p src/api/__generated__ && relay-compiler",
     "format": "prettier --write src",
