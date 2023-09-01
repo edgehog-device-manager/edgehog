@@ -32,8 +32,8 @@ export default defineConfig((env) => {
       coverage: {
         provider: "v8",
         reporter: ["lcov"],
-        exclude: ["src/api/__generated__/**"]
-      }
+        exclude: ["src/api/__generated__/**"],
+      },
     },
   };
 });

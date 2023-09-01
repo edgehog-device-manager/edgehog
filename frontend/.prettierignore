@@ -1,3 +1,7 @@
-# SPDX-FileCopyrightText: 2021-2022 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2023 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
-__generated__
+build
+coverage
+node_modules
+src/api/__generated__
+src/i18n/langs-compiled
