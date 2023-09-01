@@ -30,7 +30,7 @@ on:
     - 'backend/mix.lock'
     # SpectaQL configuration file
     - 'backend/.spectaql-config.yaml'
-    # The action itself and the Elixir version
+    # The action itself, Elixir and Node.js versions
     - '.tool-versions'
     - '.github/workflows/graphql-doc.yaml'
     branches:
@@ -66,7 +66,7 @@ jobs:
       run: mix absinthe.schema.sdl --schema EdgehogWeb.Schema
     - uses: actions/setup-node@v3
       with:
-        node-version: '16.x'
+        node-version-file: edgehog/.tool-versions
     - name: Install SpectaQL
       run: npm install -g spectaql
     - name: Build SpectaQL Docs
