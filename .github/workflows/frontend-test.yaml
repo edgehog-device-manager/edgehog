@@ -64,7 +64,7 @@ jobs:
         run: npm run check-types
       - name: Run tests
         working-directory: frontend
-        run: npm run jest:coverage
+        run: npm run coverage
       - name: Upload to Coveralls
         uses: coverallsapp/github-action@master
         with:

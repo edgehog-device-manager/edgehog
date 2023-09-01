@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { it, expect, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { screen } from "@testing-library/react";
 
@@ -28,8 +29,8 @@ it("renders correctly", () => {
   const props = {
     title: "Modal Title",
     confirmText: "confirm-text",
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
   renderWithProviders(<DeleteModal {...props}>Prompt message.</DeleteModal>);
   const modal = document.querySelector("[role='dialog']");
@@ -44,8 +45,8 @@ it("cannot confirm without entering the confirm text", () => {
   const props = {
     title: "Modal Title",
     confirmText: "confirm-text",
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
   renderWithProviders(<DeleteModal {...props}>Prompt message.</DeleteModal>);
 
@@ -66,8 +67,8 @@ it("does not confirm by dismissing", () => {
   const props = {
     title: "Modal Title",
     confirmText: "confirm-text",
-    onCancel: jest.fn(),
-    onConfirm: jest.fn(),
+    onCancel: vi.fn(),
+    onConfirm: vi.fn(),
   };
   renderWithProviders(<DeleteModal {...props}>Prompt message.</DeleteModal>);
 

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import { it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 import TablePagination from "./TablePagination";
 
 it("renders correctly", () => {
-  const pageChangeHandler = jest.fn();
+  const pageChangeHandler = vi.fn();
   const { rerender } = render(
     <TablePagination
       activePage={0}
@@ -59,7 +59,7 @@ it("renders correctly", () => {
 });
 
 it("shows only available pages", () => {
-  const pageChangeHandler = jest.fn();
+  const pageChangeHandler = vi.fn();
   render(
     <TablePagination
       activePage={2}
@@ -76,7 +76,7 @@ it("shows only available pages", () => {
 });
 
 it("shows there are more pages available", () => {
-  const pageChangeHandler = jest.fn();
+  const pageChangeHandler = vi.fn();
   const { rerender } = render(
     <TablePagination
       activePage={0}
@@ -129,7 +129,7 @@ it("shows there are more pages available", () => {
 });
 
 it("correctly notifies page index on change", () => {
-  const pageChangeHandler = jest.fn();
+  const pageChangeHandler = vi.fn();
   render(
     <TablePagination
       activePage={15}
@@ -146,8 +146,8 @@ it("correctly notifies page index on change", () => {
 });
 
 it("shows that more pages can be loaded", () => {
-  const pageChangeHandler = jest.fn();
-  const onLoadMoreHandler = jest.fn();
+  const pageChangeHandler = vi.fn();
+  const onLoadMoreHandler = vi.fn();
   render(
     <TablePagination
       activePage={0}

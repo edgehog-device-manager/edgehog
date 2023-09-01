@@ -4,7 +4,7 @@ FROM node:16.20 as builder
 
 WORKDIR /app
 ADD package*.json ./
-RUN npm ci --production
+RUN npm ci --omit=dev
 ADD . .
 ARG backend_url
 RUN npm run build

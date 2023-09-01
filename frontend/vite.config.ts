@@ -4,15 +4,24 @@ import eslint from "vite-plugin-eslint";
 import viteTsconfigPaths from "vite-tsconfig-paths";
 import relay from "vite-plugin-relay-lite";
 
-export default defineConfig(() => {
+export default defineConfig((env) => {
   return {
     server: {
-      open: true,
+      open: env.mode !== 'test',
       port: 3000,
     },
     build: {
       outDir: "build",
     },
     plugins: [react(), eslint(), viteTsconfigPaths(), relay()],
+    test: {
+      environment: "jsdom",
+      setupFiles: "./src/setupTests.tsx",
+      coverage: {
+        provider: "v8",
+        reporter: ['lcov'],
+        exclude: ['src/api/__generated__/**']
+      }
+    },
   };
 });
