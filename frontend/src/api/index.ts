@@ -35,7 +35,8 @@ import { AuthConfig, loadAuthConfig } from "contexts/Auth";
 const applicationMetatag: HTMLElement = document.head.querySelector(
   "[name=application-name]"
 )!;
-const backendUrl = applicationMetatag.dataset?.backendUrl || "";
+const backendUrl =
+  applicationMetatag.dataset?.backendUrl || "http://localhost:4000";
 
 const fetchGraphQL = async (
   query: string | null | undefined,
