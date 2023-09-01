@@ -89,17 +89,6 @@
     "i18n:compile": "formatjs compile-folder src/i18n/langs --ast src/i18n/langs-compiled",
     "eject": "react-scripts eject"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest",
-      "plugin:relay/recommended",
-      "prettier"
-    ],
-    "plugins": [
-      "relay"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",

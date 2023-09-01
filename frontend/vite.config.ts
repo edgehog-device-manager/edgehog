@@ -7,20 +7,32 @@ import relay from "vite-plugin-relay-lite";
 export default defineConfig((env) => {
   return {
     server: {
-      open: env.mode !== 'test',
+      open: env.mode !== "test",
       port: 3000,
     },
     build: {
       outDir: "build",
     },
-    plugins: [react(), eslint(), viteTsconfigPaths(), relay()],
+    plugins: [
+      react(),
+      viteTsconfigPaths(),
+      relay(),
+      {
+        ...eslint({
+          failOnWarning: false,
+          failOnError: false,
+        }),
+        apply: "serve",
+        enforce: "post",
+      },
+    ],
     test: {
       environment: "jsdom",
       setupFiles: "./src/setupTests.tsx",
       coverage: {
         provider: "v8",
-        reporter: ['lcov'],
-        exclude: ['src/api/__generated__/**']
+        reporter: ["lcov"],
+        exclude: ["src/api/__generated__/**"]
       }
     },
   };

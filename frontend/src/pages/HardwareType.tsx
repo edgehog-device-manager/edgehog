@@ -125,7 +125,7 @@ const HardwareTypeContent = ({
         }
         navigate({ route: Route.hardwareTypes });
       },
-      onError(error) {
+      onError() {
         setErrorFeedback(
           <FormattedMessage
             id="pages.HardwareTypeUpdate.deletionErrorFeedback"
@@ -184,7 +184,7 @@ const HardwareTypeContent = ({
             return setErrorFeedback(errorFeedback);
           }
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.HardwareTypeUpdate.creationErrorFeedback"

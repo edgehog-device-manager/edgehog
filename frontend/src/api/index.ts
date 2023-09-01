@@ -19,14 +19,8 @@
 */
 
 import "api/relay";
-import {
-  Environment,
-  FetchFunction,
-  Network,
-  RecordSource,
-  Store,
-  UploadableMap,
-} from "relay-runtime";
+import { Environment, Network, RecordSource, Store } from "relay-runtime";
+import type { FetchFunction, Variables, UploadableMap } from "relay-runtime";
 import type { TaskScheduler } from "relay-runtime";
 import ReactDOM from "react-dom";
 
@@ -83,10 +77,13 @@ const uploadGraphQL = async (
 };
 
 const extractUploadables = (
-  initVariables: Record<string, any>
-): { variables: Record<string, any>; uploadables?: Record<string, File> } => {
-  let variables: Record<string, any> = {};
-  let uploadables: Record<string, any> | undefined = undefined;
+  initVariables: Variables
+): {
+  variables: Variables;
+  uploadables?: Record<string, File>;
+} => {
+  const variables: Variables = {};
+  let uploadables: Record<string, File> | undefined = undefined;
   Object.entries(initVariables).forEach(([key, value]) => {
     if (value instanceof File) {
       variables[key] = key;
@@ -117,8 +114,8 @@ const extractUploadables = (
 const fetchRelay: FetchFunction = async (
   operation,
   variables,
-  cacheConfig,
-  uploadables
+  _cacheConfig,
+  _uploadables
 ) => {
   const authConfig = loadAuthConfig();
   if (!authConfig) {

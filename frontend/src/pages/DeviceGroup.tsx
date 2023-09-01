@@ -131,7 +131,7 @@ const DeviceGroupContent = ({
         }
         navigate({ route: Route.deviceGroups });
       },
-      onError(error) {
+      onError() {
         setErrorFeedback(
           <FormattedMessage
             id="pages.DeviceGroup.deletionErrorFeedback"
@@ -207,7 +207,7 @@ const DeviceGroupContent = ({
           }
           setErrorFeedback(null);
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.DeviceGroup.updateErrorFeedback"

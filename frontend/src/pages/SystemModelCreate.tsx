@@ -139,7 +139,7 @@ const SystemModelContent = ({
             navigate({ route: Route.systemModels });
           }
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.SystemModelCreate.creationErrorFeedback"

@@ -77,7 +77,7 @@ const DeviceGroupCreatePage = () => {
             navigate({ route: Route.deviceGroups });
           }
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.DeviceGroupCreate.creationErrorFeedback"

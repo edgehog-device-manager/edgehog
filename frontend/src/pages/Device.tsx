@@ -1027,7 +1027,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
           return setErrorFeedback(errorFeedback);
         }
       },
-      onError(error) {
+      onError() {
         setErrorFeedback(
           <FormattedMessage
             id="pages.Device.otaUpdateCreationErrorFeedback"
@@ -1289,7 +1289,7 @@ const DeviceContent = ({
                 refreshTags();
               }
             },
-            onError(error) {
+            onError() {
               setDeviceDraft(draft);
               setErrorFeedback(
                 <FormattedMessage

@@ -74,7 +74,7 @@ const HardwareTypeCreatePage = () => {
             navigate({ route: Route.hardwareTypes });
           }
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.HardwareTypeCreate.creationErrorFeedback"

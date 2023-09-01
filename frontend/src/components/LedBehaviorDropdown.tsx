@@ -130,7 +130,7 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
             setCurrentBehavior(maybeBehavior);
           }
         },
-        onError(error) {
+        onError() {
           onError(
             <FormattedMessage
               id="components.LedBehaviorDropdown.genericErrorFeedback"

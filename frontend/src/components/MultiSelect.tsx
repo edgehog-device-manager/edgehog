@@ -31,7 +31,7 @@ import Icon from "components/Icon";
 import Tag from "components/Tag";
 import "./MultiSelect.scss";
 
-const MultiValueContainer = <Option extends any>(
+const MultiValueContainer = <Option,>(
   props: MultiValueGenericProps<Option, true>
 ) => (
   <Tag className="me-1">
@@ -42,13 +42,13 @@ const MultiValueContainer = <Option extends any>(
   </Tag>
 );
 
-const MultiValueLabel = <Option extends any>(
+const MultiValueLabel = <Option,>(
   props: MultiValueGenericProps<Option, true>
 ) => (
   <components.MultiValueLabel {...props} innerProps={{ className: "me-1" }} />
 );
 
-const MultiValueRemove = <Option extends any>(
+const MultiValueRemove = <Option,>(
   props: MultiValueRemoveProps<Option, true>
 ) => {
   if (props.selectProps.isDisabled) {
@@ -98,7 +98,7 @@ type MultiSelectCreatableProps =
 type MultiSelectProps<Option> = MultiSelectBaseProps<Option> &
   MultiSelectCreatableProps;
 
-const MultiSelect = <Option extends any>({
+const MultiSelect = <Option,>({
   creatable = false,
   disabled = false,
   invalid = false,
