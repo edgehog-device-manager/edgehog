@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for
   [`io.edgehog.devicemanager.OTARequest`
   v1.0](https://github.com/edgehog-device-manager/edgehog-astarte-interfaces/pull/57).
+- Add OTA Campaigns execution support.
 
 ### Changed
 - Handle Device part numbers for nonexistent system models.
