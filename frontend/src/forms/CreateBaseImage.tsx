@@ -89,7 +89,7 @@ const baseImageSchema = yup
   .required();
 
 const transformInputData = (
-  baseImageCollection: BaseImageCollection
+  baseImageCollection: BaseImageCollection,
 ): FormData => ({
   baseImageCollection: baseImageCollection.name,
   file: null,
@@ -106,7 +106,7 @@ type FormOutput = FormData & {
 const transformOutputData = (
   baseImageCollection: BaseImageCollection,
   locale: string,
-  data: FormOutput
+  data: FormOutput,
 ): BaseImageData => ({
   baseImageCollectionId: baseImageCollection.id,
   file: data.file[0],

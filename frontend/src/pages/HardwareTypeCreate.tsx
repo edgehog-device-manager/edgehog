@@ -50,7 +50,7 @@ const HardwareTypeCreatePage = () => {
 
   const [createHardwareType, isCreatingHardwareType] =
     useMutation<HardwareTypeCreate_createHardwareType_Mutation>(
-      CREATE_HARDWARE_TYPE_MUTATION
+      CREATE_HARDWARE_TYPE_MUTATION,
     );
 
   const handleCreateHardwareType = useCallback(
@@ -79,7 +79,7 @@ const HardwareTypeCreatePage = () => {
             <FormattedMessage
               id="pages.HardwareTypeCreate.creationErrorFeedback"
               defaultMessage="Could not create the hardware type, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -91,14 +91,14 @@ const HardwareTypeCreatePage = () => {
             if (hardwareType && hardwareTypes) {
               root.setLinkedRecords(
                 [hardwareType, ...hardwareTypes],
-                "hardwareTypes"
+                "hardwareTypes",
               );
             }
           }
         },
       });
     },
-    [createHardwareType, navigate]
+    [createHardwareType, navigate],
   );
 
   return (

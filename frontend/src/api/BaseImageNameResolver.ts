@@ -39,7 +39,7 @@ function name(baseImageKey: BaseImageNameResolver$key): string {
         releaseDisplayName
       }
     `,
-    baseImageKey
+    baseImageKey,
   );
 
   if (releaseDisplayName === null) {

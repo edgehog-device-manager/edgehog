@@ -79,12 +79,12 @@ const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
 
   const { deviceGroups } = usePreloadedQuery(
     GET_DEVICE_GROUPS_QUERY,
-    getDeviceGroupsQuery
+    getDeviceGroupsQuery,
   );
 
   const [createUpdateChannel, isCreatingUpdateChannel] =
     useMutation<UpdateChannelCreate_createUpdateChannel_Mutation>(
-      CREATE_UPDATE_CHANNEL_MUTATION
+      CREATE_UPDATE_CHANNEL_MUTATION,
     );
 
   const handleCreateUpdateChannel = useCallback(
@@ -111,7 +111,7 @@ const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
             <FormattedMessage
               id="pages.UpdateChannelCreate.creationErrorFeedback"
               defaultMessage="Could not create the Update Channel, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -128,13 +128,13 @@ const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
           if (updateChannels) {
             root.setLinkedRecords(
               [...updateChannels, updateChannel],
-              "updateChannels"
+              "updateChannels",
             );
           }
         },
       });
     },
-    [createUpdateChannel, navigate]
+    [createUpdateChannel, navigate],
   );
 
   return (
@@ -169,12 +169,12 @@ const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
 const UpdateChannelCreatePage = () => {
   const [getDeviceGroupsQuery, getDeviceGroups] =
     useQueryLoader<UpdateChannelCreate_getDeviceGroups_Query>(
-      GET_DEVICE_GROUPS_QUERY
+      GET_DEVICE_GROUPS_QUERY,
     );
 
   useEffect(
     () => getDeviceGroups({}, { fetchPolicy: "network-only" }),
-    [getDeviceGroups]
+    [getDeviceGroups],
   );
 
   return (

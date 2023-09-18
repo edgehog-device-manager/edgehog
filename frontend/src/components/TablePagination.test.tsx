@@ -30,7 +30,7 @@ it("renders correctly", () => {
       activePage={0}
       totalPages={5}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
@@ -46,7 +46,7 @@ it("renders correctly", () => {
       activePage={5}
       totalPages={5}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
@@ -65,7 +65,7 @@ it("shows only available pages", () => {
       activePage={2}
       totalPages={3}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
@@ -82,7 +82,7 @@ it("shows there are more pages available", () => {
       activePage={0}
       totalPages={30}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
@@ -98,7 +98,7 @@ it("shows there are more pages available", () => {
       activePage={15}
       totalPages={30}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   expect(screen.queryByTestId(`pagination-item-12`)).not.toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-13`)).toBeInTheDocument();
@@ -115,7 +115,7 @@ it("shows there are more pages available", () => {
       activePage={30}
       totalPages={30}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   expect(screen.queryByTestId(`pagination-item-24`)).not.toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-25`)).toBeInTheDocument();
@@ -135,7 +135,7 @@ it("correctly notifies page index on change", () => {
       activePage={15}
       totalPages={30}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   screen.getByTestId("pagination-item-16").click();
   expect(pageChangeHandler).toHaveBeenCalledWith(16);
@@ -155,7 +155,7 @@ it("shows that more pages can be loaded", () => {
       canLoadMorePages
       onLoadMore={onLoadMoreHandler}
       onPageChange={pageChangeHandler}
-    />
+    />,
   );
   const paginationLast = screen.queryByTestId(`pagination-last`);
   expect(paginationLast).toBeInTheDocument();

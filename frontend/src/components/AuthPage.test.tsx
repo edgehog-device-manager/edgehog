@@ -27,7 +27,7 @@ it("renders correctly", () => {
   render(
     <AuthPage>
       <div data-testid="auth-page" />
-    </AuthPage>
+    </AuthPage>,
   );
   expect(screen.queryByTestId("auth-page")).toBeInTheDocument();
 });

@@ -42,7 +42,7 @@ it("renders a fallback image instead if src cannot be displayed", async () => {
   const invalidImage = "invalid";
   const { container } = render(<Figure src={invalidImage} />);
   await waitFor(() =>
-    expect(container.querySelector("img")).toHaveAttribute("src", invalidImage)
+    expect(container.querySelector("img")).toHaveAttribute("src", invalidImage),
   );
 });
 
@@ -50,6 +50,6 @@ it("renders a fallback image if src is missing", () => {
   const { container } = render(<Figure />);
   expect(container.querySelector("img")).toHaveAttribute(
     "src",
-    placeholderImage
+    placeholderImage,
   );
 });

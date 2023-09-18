@@ -49,7 +49,7 @@ const SUPPORTED_LED_BEHAVIORS = [
   "DOUBLE_BLINK",
   "SLOW_BLINK",
 ] as const;
-type SupportedLedBehavior = typeof SUPPORTED_LED_BEHAVIORS[number];
+type SupportedLedBehavior = (typeof SUPPORTED_LED_BEHAVIORS)[number];
 
 const supportedBehaviorMessages: Record<
   SupportedLedBehavior,
@@ -87,7 +87,7 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
 
   const [setLedBehavior, isSettingLedBehavior] =
     useMutation<LedBehaviorDropdown_setLedBehavior_Mutation>(
-      SET_LED_BEHAVIOR_MUTATION
+      SET_LED_BEHAVIOR_MUTATION,
     );
 
   const [currentBehavior, setCurrentBehavior] =
@@ -135,12 +135,12 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
             <FormattedMessage
               id="components.LedBehaviorDropdown.genericErrorFeedback"
               defaultMessage="The request could not reach the server, please try again."
-            />
+            />,
           );
         },
       });
     },
-    [setLedBehavior, deviceId, onError, setCurrentBehavior]
+    [setLedBehavior, deviceId, onError, setCurrentBehavior],
   );
 
   if (currentBehavior) {

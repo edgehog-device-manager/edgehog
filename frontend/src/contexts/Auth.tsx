@@ -50,7 +50,7 @@ const AUTH_CONFIG_VERSION = 1;
 
 function saveAuthConfig(
   authConfig?: AuthConfig | null,
-  persistConfig: boolean = false
+  persistConfig: boolean = false,
 ): void {
   // If expires is undefined, closing the browser/session will delete the cookie
   const cookieOptions = {
@@ -64,7 +64,7 @@ function saveAuthConfig(
     Cookies.set(
       "authConfig",
       JSON.stringify({ ...authConfig, _version: AUTH_CONFIG_VERSION }),
-      cookieOptions
+      cookieOptions,
     );
   }
 }
@@ -91,7 +91,7 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const hasRequiredValues = (
-  authConfig?: AuthConfig | null
+  authConfig?: AuthConfig | null,
 ): authConfig is AuthConfig =>
   authConfig != null &&
   authConfig.tenantSlug != null &&
@@ -105,7 +105,7 @@ interface AuthProviderProps {
 const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
   const [authConfig, setAuthConfig] = useState(loadAuthConfig());
   const [isValidatingInitialConfig, setIsValidatingInitialConfig] = useState(
-    hasRequiredValues(authConfig)
+    hasRequiredValues(authConfig),
   );
 
   const updateAuthConfig = useCallback(
@@ -113,7 +113,7 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
       saveAuthConfig(newAuthConfig, persistConfig);
       setAuthConfig(newAuthConfig);
     },
-    []
+    [],
   );
 
   const validateAuthConfig = useCallback(
@@ -125,7 +125,7 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
         .then((response) => (response.errors ? false : true))
         .catch(() => false);
     },
-    [fetchGraphQL]
+    [fetchGraphQL],
   );
 
   const login = useCallback(
@@ -136,7 +136,7 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
       }
       return isValid;
     },
-    [updateAuthConfig, validateAuthConfig]
+    [updateAuthConfig, validateAuthConfig],
   );
 
   const logout = useCallback(() => {
@@ -145,12 +145,12 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
 
   const isAuthenticated = useMemo(
     () => hasRequiredValues(authConfig) && !isValidatingInitialConfig,
-    [authConfig, isValidatingInitialConfig]
+    [authConfig, isValidatingInitialConfig],
   );
 
   const contextValue = useMemo(
     () => ({ isAuthenticated, login, logout }),
-    [isAuthenticated, login, logout]
+    [isAuthenticated, login, logout],
   );
 
   useEffect(() => {

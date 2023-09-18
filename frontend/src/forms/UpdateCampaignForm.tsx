@@ -165,7 +165,7 @@ type UpdateCampaignProps = {
 const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
   const updateCampaign = useFragment(
     UPDATE_CAMPAIGN_FORM_FRAGMENT,
-    updateCampaignRef
+    updateCampaignRef,
   );
 
   const { baseImage, updateChannel, rolloutMechanism } = updateCampaign;

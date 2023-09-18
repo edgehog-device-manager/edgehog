@@ -35,19 +35,19 @@ it("renders correctly", async () => {
   expect(groupsLink).toHaveTextContent("Groups");
 
   const updateCampaignsLink = container.querySelector(
-    "a[href='/update-campaigns']"
+    "a[href='/update-campaigns']",
   );
   expect(updateCampaignsLink).toBeInTheDocument();
   expect(updateCampaignsLink).toHaveTextContent("Update Campaigns");
 
   const updateChannelsLink = container.querySelector(
-    "a[href='/update-channels']"
+    "a[href='/update-channels']",
   );
   expect(updateChannelsLink).toBeInTheDocument();
   expect(updateChannelsLink).toHaveTextContent("Update Channels");
 
   const baseImageCollectionsLink = container.querySelector(
-    "a[href='/base-image-collections']"
+    "a[href='/base-image-collections']",
   );
   expect(baseImageCollectionsLink).toBeInTheDocument();
   expect(baseImageCollectionsLink).toHaveTextContent("Base Image Collections");
@@ -57,7 +57,7 @@ it("renders correctly", async () => {
   expect(systemModelsLink).toHaveTextContent("System Models");
 
   const hardwareTypesLink = container.querySelector(
-    "a[href='/hardware-types']"
+    "a[href='/hardware-types']",
   );
   expect(hardwareTypesLink).toBeInTheDocument();
   expect(hardwareTypesLink).toHaveTextContent("Hardware Types");
@@ -85,17 +85,17 @@ it("shows links as active when route matches", async () => {
   expect(groupsLink).not.toHaveClass("bg-primary");
 
   const updateCampaignsLink = container.querySelector(
-    "a[href='/update-campaigns']"
+    "a[href='/update-campaigns']",
   );
   expect(updateCampaignsLink).not.toHaveClass("bg-primary");
 
   const updateChannelsLink = container.querySelector(
-    "a[href='/update-channels']"
+    "a[href='/update-channels']",
   );
   expect(updateChannelsLink).not.toHaveClass("bg-primary");
 
   const baseImageCollectionsLink = container.querySelector(
-    "a[href='/base-image-collections']"
+    "a[href='/base-image-collections']",
   );
   expect(baseImageCollectionsLink).not.toHaveClass("bg-primary");
 
@@ -103,7 +103,7 @@ it("shows links as active when route matches", async () => {
   expect(systemModelsLink).not.toHaveClass("bg-primary");
 
   const hardwareTypesLink = container.querySelector(
-    "a[href='/hardware-types']"
+    "a[href='/hardware-types']",
   );
   expect(hardwareTypesLink).not.toHaveClass("bg-primary");
 });

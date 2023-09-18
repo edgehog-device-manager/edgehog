@@ -75,7 +75,7 @@ const UpdateCampaignRefresh = ({
   const relayEnvironment = useRelayEnvironment();
   const { id, status } = useFragment(
     UPDATE_CAMPAIGN_REFRESH_FRAGMENT,
-    updateCampaignRef
+    updateCampaignRef,
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -99,7 +99,7 @@ const UpdateCampaignRefresh = ({
         relayEnvironment,
         GET_UPDATE_CAMPAIGN_QUERY,
         { updateCampaignId: id },
-        { fetchPolicy: "network-only" }
+        { fetchPolicy: "network-only" },
       ).subscribe({
         complete: () => {
           setIsRefreshing(false);
@@ -127,7 +127,7 @@ const UpdateCampaignContent = ({
 }: UpdateCampaignContentProps) => {
   const { updateCampaign } = usePreloadedQuery(
     GET_UPDATE_CAMPAIGN_QUERY,
-    getUpdateCampaignQuery
+    getUpdateCampaignQuery,
   );
 
   if (!updateCampaign) {
@@ -176,7 +176,7 @@ const UpdateCampaignPage = () => {
 
   const [getUpdateCampaignQuery, getUpdateCampaign] =
     useQueryLoader<UpdateCampaign_getUpdateCampaign_Query>(
-      GET_UPDATE_CAMPAIGN_QUERY
+      GET_UPDATE_CAMPAIGN_QUERY,
     );
 
   const fetchUpdateCampaign = useCallback(() => {

@@ -49,7 +49,7 @@ const UpdateChannelsContent = ({
 }: UpdateChannelsContentProps) => {
   const { updateChannels } = usePreloadedQuery(
     GET_UPDATE_CHANNELS_QUERY,
-    getUpdateChannelsQuery
+    getUpdateChannelsQuery,
   );
 
   return (
@@ -79,7 +79,7 @@ const UpdateChannelsContent = ({
 const UpdateChannelsPage = () => {
   const [getUpdateChannelsQuery, getUpdateChannels] =
     useQueryLoader<UpdateChannels_getUpdateChannels_Query>(
-      GET_UPDATE_CHANNELS_QUERY
+      GET_UPDATE_CHANNELS_QUERY,
     );
 
   useEffect(() => getUpdateChannels({}), [getUpdateChannels]);

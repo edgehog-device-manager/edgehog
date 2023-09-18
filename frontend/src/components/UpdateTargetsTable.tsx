@@ -166,7 +166,7 @@ const columnIds = [
   "latestAttempt",
   "completionTimestamp",
 ] as const;
-type ColumnId = typeof columnIds[number];
+type ColumnId = (typeof columnIds)[number];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
@@ -203,7 +203,7 @@ const columns = [
         const status = getValue();
         return status && <OperationStatus status={status} />;
       },
-    }
+    },
   ),
   columnHelper.accessor(
     (updateTarget) => updateTarget.otaOperation?.statusProgress ?? null,
@@ -220,7 +220,7 @@ const columns = [
         const progress = getValue();
         return typeof progress === "number" ? `${progress}%` : "";
       },
-    }
+    },
   ),
   columnHelper.accessor(
     (updateTarget) => updateTarget.otaOperation?.statusCode ?? null,
@@ -241,7 +241,7 @@ const columns = [
           )
         );
       },
-    }
+    },
   ),
   columnHelper.accessor("latestAttempt", {
     header: () => (
@@ -306,7 +306,7 @@ const UpdateTargetsTable = ({
 }: Props) => {
   const updateTargets = useFragment(
     UPDATE_TARGETS_TABLE_FRAGMENT,
-    updateTargetsRef
+    updateTargetsRef,
   );
 
   return (

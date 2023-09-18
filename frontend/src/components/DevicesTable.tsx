@@ -130,7 +130,7 @@ const columns = [
           online={row.original.online}
         />
       ),
-    }
+    },
   ),
   columnHelper.accessor("tags", {
     enableSorting: false,

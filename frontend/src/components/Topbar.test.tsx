@@ -36,7 +36,7 @@ it("renders correctly", async () => {
   userEvent.click(userMenuToggle);
   await waitFor(() => {
     expect(document.querySelector("a[href='/logout']")).toHaveTextContent(
-      "Logout"
+      "Logout",
     );
   });
 });

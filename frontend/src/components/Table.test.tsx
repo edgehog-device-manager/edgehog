@@ -51,17 +51,17 @@ it("correctly renders empty list", () => {
 
 it("correctly hides columns", () => {
   const { container } = renderWithProviders(
-    <Table data={data} columns={columns} hiddenColumns={["id"]} />
+    <Table data={data} columns={columns} hiddenColumns={["id"]} />,
   );
   expect(container.querySelectorAll("thead th")).toHaveLength(
-    columns.length - 1
+    columns.length - 1,
   );
   expect(container.querySelector("thead")).not.toHaveTextContent("ID");
 });
 
 it("correctly renders list of data", () => {
   const { container } = renderWithProviders(
-    <Table data={data.slice(0, 2)} columns={columns} />
+    <Table data={data.slice(0, 2)} columns={columns} />,
   );
   expect(container.querySelectorAll("tbody tr")).toHaveLength(2);
   const firstRow = container.querySelector("tbody tr:nth-child(1)");
@@ -72,7 +72,7 @@ it("correctly renders list of data", () => {
 
 it("can search data", () => {
   const { container } = renderWithProviders(
-    <Table data={data} columns={columns} />
+    <Table data={data} columns={columns} />,
   );
   userEvent.type(screen.getByPlaceholderText("Search"), "Name 42");
   expect(container.querySelectorAll("tbody tr")).toHaveLength(1);
@@ -82,7 +82,7 @@ it("can search data", () => {
 
 it("correctly paginates a long list", () => {
   const { container } = renderWithProviders(
-    <Table data={data} columns={columns} />
+    <Table data={data} columns={columns} />,
   );
   expect(container.querySelectorAll("tbody tr")).toHaveLength(10);
   const firstRow = container.querySelector("tbody tr:first-child");
@@ -110,7 +110,7 @@ it("correctly passes props with getRowProps", () => {
       data={data.slice(0, 2)}
       columns={columns}
       getRowProps={getRowProps}
-    />
+    />,
   );
   const firstRow = container.querySelector("tbody tr:nth-child(1)");
   expect(firstRow).toHaveClass("custom-class-0");

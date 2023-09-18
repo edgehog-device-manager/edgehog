@@ -49,7 +49,7 @@ const UpdateCampaignsContent = ({
 }: UpdateCampaignsContentProps) => {
   const { updateCampaigns } = usePreloadedQuery(
     GET_UPDATE_CAMPAIGNS_QUERY,
-    getUpdateCampaignsQuery
+    getUpdateCampaignsQuery,
   );
 
   return (
@@ -79,7 +79,7 @@ const UpdateCampaignsContent = ({
 const UpdateCampaignsPage = () => {
   const [getUpdateCampaignsQuery, getUpdateCampaigns] =
     useQueryLoader<UpdateCampaigns_getUpdateCampaigns_Query>(
-      GET_UPDATE_CAMPAIGNS_QUERY
+      GET_UPDATE_CAMPAIGNS_QUERY,
     );
 
   useEffect(() => getUpdateCampaigns({}), [getUpdateCampaigns]);

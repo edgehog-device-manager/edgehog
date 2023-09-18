@@ -51,7 +51,7 @@ it("correctly selects an option", async () => {
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith(
     options.slice(0, 1),
-    expect.anything()
+    expect.anything(),
   );
 });
 
@@ -68,7 +68,7 @@ it("correctly adds an option to selected", async () => {
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith(
     options.slice(0, 2),
-    expect.anything()
+    expect.anything(),
   );
 });
 
@@ -118,7 +118,7 @@ it("correctly creates new option adding to selected", async () => {
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith(
     options.concat([customOption]),
-    expect.anything()
+    expect.anything(),
   );
 });
 

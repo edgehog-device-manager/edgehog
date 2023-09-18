@@ -109,7 +109,7 @@ const BaseImageCollectionContent = ({
 
   const [deleteBaseImageCollection, isDeletingBaseImageCollection] =
     useMutation<BaseImageCollection_deleteBaseImageCollection_Mutation>(
-      DELETE_BASE_IMAGE_COLLECTION_MUTATION
+      DELETE_BASE_IMAGE_COLLECTION_MUTATION,
     );
 
   const handleDeleteBaseImageCollection = useCallback(() => {
@@ -133,7 +133,7 @@ const BaseImageCollectionContent = ({
           <FormattedMessage
             id="pages.BaseImageCollection.deletionErrorFeedback"
             defaultMessage="Could not delete the Base Image Collection, please try again."
-          />
+          />,
         );
         setShowDeleteModal(false);
       },
@@ -149,15 +149,15 @@ const BaseImageCollectionContent = ({
         const root = store.getRoot();
 
         const baseImageCollections = root.getLinkedRecords(
-          "baseImageCollections"
+          "baseImageCollections",
         );
         if (baseImageCollections) {
           root.setLinkedRecords(
             baseImageCollections.filter(
               (baseImageCollection) =>
-                baseImageCollection.getDataID() !== baseImageCollectionId
+                baseImageCollection.getDataID() !== baseImageCollectionId,
             ),
-            "baseImageCollections"
+            "baseImageCollections",
           );
         }
 
@@ -168,7 +168,7 @@ const BaseImageCollectionContent = ({
 
   const [updateBaseImageCollection, isUpdatingBaseImageCollection] =
     useMutation<BaseImageCollection_updateBaseImageCollection_Mutation>(
-      UPDATE_BASE_IMAGE_COLLECTION_MUTATION
+      UPDATE_BASE_IMAGE_COLLECTION_MUTATION,
     );
 
   const handleUpdateBaseImageCollection = useCallback(
@@ -193,12 +193,12 @@ const BaseImageCollectionContent = ({
             <FormattedMessage
               id="pages.BaseImageCollection.updateErrorFeedback"
               defaultMessage="Could not update the Base Image Collection, please try again."
-            />
+            />,
           );
         },
       });
     },
-    [updateBaseImageCollection, baseImageCollectionId]
+    [updateBaseImageCollection, baseImageCollectionId],
   );
 
   return (
@@ -290,7 +290,7 @@ const BaseImageCollectionWrapper = ({
 }: BaseImageCollectionWrapperProps) => {
   const { baseImageCollection } = usePreloadedQuery(
     GET_BASE_IMAGE_COLLECTION_QUERY,
-    getBaseImageCollectionQuery
+    getBaseImageCollectionQuery,
   );
 
   if (!baseImageCollection) {
@@ -323,13 +323,13 @@ const BaseImageCollectionPage = () => {
 
   const [getBaseImageCollectionQuery, getBaseImageCollection] =
     useQueryLoader<BaseImageCollection_getBaseImageCollection_Query>(
-      GET_BASE_IMAGE_COLLECTION_QUERY
+      GET_BASE_IMAGE_COLLECTION_QUERY,
     );
 
   const fetchBaseImageCollection = useCallback(() => {
     getBaseImageCollection(
       { id: baseImageCollectionId },
-      { fetchPolicy: "network-only" }
+      { fetchPolicy: "network-only" },
     );
   }, [getBaseImageCollection, baseImageCollectionId]);
 

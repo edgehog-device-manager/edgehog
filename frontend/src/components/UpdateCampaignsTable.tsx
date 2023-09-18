@@ -134,7 +134,7 @@ type Props = {
 const UpdateCampaignsTable = ({ className, updateCampaignsRef }: Props) => {
   const updateCampaigns = useFragment(
     UPDATE_CAMPAIGNS_TABLE_FRAGMENT,
-    updateCampaignsRef
+    updateCampaignsRef,
   );
 
   return (

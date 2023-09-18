@@ -103,7 +103,7 @@ const DeviceGroupContent = ({
 
   const deviceGroupData = usePreloadedQuery(
     GET_DEVICE_GROUP_QUERY,
-    getDeviceGroupQuery
+    getDeviceGroupQuery,
   );
 
   const handleShowDeleteModal = useCallback(() => {
@@ -112,7 +112,7 @@ const DeviceGroupContent = ({
 
   const [deleteDeviceGroup, isDeletingDeviceGroup] =
     useMutation<DeviceGroup_deleteDeviceGroup_Mutation>(
-      DELETE_DEVICE_GROUP_MUTATION
+      DELETE_DEVICE_GROUP_MUTATION,
     );
 
   const handleDeleteDeviceGroup = useCallback(() => {
@@ -136,7 +136,7 @@ const DeviceGroupContent = ({
           <FormattedMessage
             id="pages.DeviceGroup.deletionErrorFeedback"
             defaultMessage="Could not delete the group, please try again."
-          />
+          />,
         );
         setShowDeleteModal(false);
       },
@@ -155,9 +155,9 @@ const DeviceGroupContent = ({
         if (deviceGroups) {
           root.setLinkedRecords(
             deviceGroups.filter(
-              (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId
+              (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId,
             ),
-            "deviceGroups"
+            "deviceGroups",
           );
         }
 
@@ -167,9 +167,9 @@ const DeviceGroupContent = ({
           if (deviceGroups) {
             device.setLinkedRecords(
               deviceGroups.filter(
-                (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId
+                (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId,
               ),
-              "deviceGroups"
+              "deviceGroups",
             );
           }
         });
@@ -181,13 +181,13 @@ const DeviceGroupContent = ({
 
   const [updateDeviceGroup, isUpdatingDeviceGroup] =
     useMutation<DeviceGroup_updateDeviceGroup_Mutation>(
-      UPDATE_DEVICE_GROUP_MUTATION
+      UPDATE_DEVICE_GROUP_MUTATION,
     );
 
   // TODO: handle readonly type without mapping to mutable type
   const deviceGroup = useMemo(
     () => deviceGroupData.deviceGroup && { ...deviceGroupData.deviceGroup },
-    [deviceGroupData.deviceGroup]
+    [deviceGroupData.deviceGroup],
   );
 
   const handleUpdateDeviceGroup = useCallback(
@@ -212,7 +212,7 @@ const DeviceGroupContent = ({
             <FormattedMessage
               id="pages.DeviceGroup.updateErrorFeedback"
               defaultMessage="Could not update the group, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -234,7 +234,7 @@ const DeviceGroupContent = ({
           const linkedDevices = new Set(
             deviceGroup
               .getLinkedRecords("devices")
-              ?.map((device) => device.getDataID())
+              ?.map((device) => device.getDataID()),
           );
 
           devices.forEach((device) => {
@@ -246,27 +246,27 @@ const DeviceGroupContent = ({
             if (!linkedDevices.has(device.getDataID())) {
               return device.setLinkedRecords(
                 deviceGroups.filter(
-                  (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId
+                  (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId,
                 ),
-                "deviceGroups"
+                "deviceGroups",
               );
             }
 
             if (
               !deviceGroups.some(
-                (deviceGroup) => deviceGroup.getDataID() === deviceGroupId
+                (deviceGroup) => deviceGroup.getDataID() === deviceGroupId,
               )
             ) {
               device.setLinkedRecords(
                 [...deviceGroups, deviceGroup],
-                "deviceGroups"
+                "deviceGroups",
               );
             }
           });
         },
       });
     },
-    [updateDeviceGroup, deviceGroupId]
+    [updateDeviceGroup, deviceGroupId],
   );
 
   if (!deviceGroup) {

@@ -79,9 +79,9 @@ const hardwareTypeSchema = yup
             const itemIndex = context.parent.indexOf(partNumber);
             return !context.parent.find(
               (pn: PartNumber, index: number) =>
-                pn.value === partNumber.value && index < itemIndex
+                pn.value === partNumber.value && index < itemIndex,
             );
-          })
+          }),
       ),
   })
   .required();
@@ -142,7 +142,7 @@ const UpdateHardwareTypeForm = ({
         partNumbers.update(index, { value: "" });
       }
     },
-    [partNumbers]
+    [partNumbers],
   );
 
   const canSubmit = !isLoading && isDirty;

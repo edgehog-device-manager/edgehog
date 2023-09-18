@@ -339,7 +339,7 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
   const intl = useIntl();
   const { hardwareInfo, capabilities } = useFragment(
     DEVICE_HARDWARE_INFO_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
   if (!hardwareInfo || !capabilities.includes("HARDWARE_INFO")) {
     return null;
@@ -453,7 +453,7 @@ const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
   const intl = useIntl();
   const { baseImage, capabilities } = useFragment(
     DEVICE_BASE_IMAGE_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
   if (
     !baseImage ||
@@ -542,7 +542,7 @@ const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
   const intl = useIntl();
   const { osInfo, capabilities } = useFragment(
     DEVICE_OS_INFO_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
   if (
     !osInfo ||
@@ -601,7 +601,7 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
   const intl = useIntl();
   const { runtimeInfo, capabilities } = useFragment(
     DEVICE_RUNTIME_INFO_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
   if (
     !runtimeInfo ||
@@ -715,7 +715,7 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
   const intl = useIntl();
   const { location, capabilities } = useFragment(
     DEVICE_LOCATION_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
   if (!location || !capabilities.includes("GEOLOCATION")) {
     return null;
@@ -772,7 +772,7 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
   const intl = useIntl();
   const { systemStatus, capabilities } = useFragment(
     DEVICE_SYSTEM_STATUS_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
   if (!systemStatus || !capabilities.includes("SYSTEM_STATUS")) {
     return null;
@@ -938,7 +938,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
 
   const [createOtaOperation, isCreatingOtaOperation] =
     useMutation<Device_createManualOtaOperation_Mutation>(
-      DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION
+      DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION,
     );
 
   const otaOperations = device.otaOperations
@@ -954,7 +954,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
     });
 
   const lastFinishedOperationIndex = otaOperations.findIndex(
-    ({ status }) => status === "SUCCESS" || status === "FAILURE"
+    ({ status }) => status === "SUCCESS" || status === "FAILURE",
   );
   const currentOperations =
     lastFinishedOperationIndex === -1
@@ -985,7 +985,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
         GET_DEVICE_OTA_OPERATIONS_QUERY,
         {
           id: deviceId,
-        }
+        },
       ).subscribe({
         complete: () => {
           setIsRefreshing(false);
@@ -1032,7 +1032,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
           <FormattedMessage
             id="pages.Device.otaUpdateCreationErrorFeedback"
             defaultMessage="Could not start the OTA update, please try again."
-          />
+          />,
         );
       },
       updater(store, data) {
@@ -1044,7 +1044,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
           if (storedDevice && otaOperation && otaOperations) {
             storedDevice.setLinkedRecords(
               [otaOperation, ...otaOperations],
-              "otaOperations"
+              "otaOperations",
             );
           }
         }
@@ -1179,7 +1179,7 @@ const DeviceConnectionFormRows = ({
 }: DeviceConnectionFormRowsProps) => {
   const { online, lastConnection, lastDisconnection } = useFragment(
     DEVICE_CONNECTION_STATUS_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
 
   return (
@@ -1237,11 +1237,11 @@ const DeviceContent = ({
         ...deviceData.device,
         tags: deviceData.device.tags.slice(),
       },
-    [deviceData.device]
+    [deviceData.device],
   );
 
   const [deviceDraft, setDeviceDraft] = useState(
-    _.pick(device, ["name", "tags"])
+    _.pick(device, ["name", "tags"]),
   );
 
   const deviceTags = useMemo(
@@ -1250,7 +1250,7 @@ const DeviceContent = ({
         label: tag,
         value: tag,
       })) || [],
-    [deviceDraft.tags]
+    [deviceDraft.tags],
   );
 
   const tags = useMemo(
@@ -1259,13 +1259,13 @@ const DeviceContent = ({
         label: tag,
         value: tag,
       })),
-    [tagsData.existingDeviceTags]
+    [tagsData.existingDeviceTags],
   );
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
-    UPDATE_DEVICE_MUTATION
+    UPDATE_DEVICE_MUTATION,
   );
 
   const handleUpdateDevice = useMemo(
@@ -1273,7 +1273,7 @@ const DeviceContent = ({
       _.debounce(
         (
           draft: typeof deviceDraft,
-          deviceChanges: Partial<typeof deviceDraft>
+          deviceChanges: Partial<typeof deviceDraft>,
         ) => {
           updateDevice({
             variables: { input: { deviceId, ...deviceChanges } },
@@ -1296,7 +1296,7 @@ const DeviceContent = ({
                   id="pages.Device.updateDeviceErrorFeedback"
                   defaultMessage="Could not update the device, please try again."
                   description="Feedback for unknown error while updating a device"
-                />
+                />,
               );
             },
             updater(store, data) {
@@ -1318,7 +1318,7 @@ const DeviceContent = ({
               const linkedGroups = new Set(
                 device
                   .getLinkedRecords("deviceGroups")
-                  ?.map((deviceGroup) => deviceGroup.getDataID())
+                  ?.map((deviceGroup) => deviceGroup.getDataID()),
               );
 
               deviceGroups.forEach((deviceGroup) => {
@@ -1330,7 +1330,7 @@ const DeviceContent = ({
                 if (!linkedGroups.has(deviceGroup.getDataID())) {
                   return deviceGroup.setLinkedRecords(
                     devices.filter((device) => device.getDataID() !== deviceId),
-                    "devices"
+                    "devices",
                   );
                 }
 
@@ -1344,9 +1344,9 @@ const DeviceContent = ({
           });
         },
         500,
-        { leading: true }
+        { leading: true },
       ),
-    [updateDevice, deviceId, refreshTags]
+    [updateDevice, deviceId, refreshTags],
   );
 
   const handleDeviceChange = useCallback(
@@ -1354,14 +1354,14 @@ const DeviceContent = ({
       setDeviceDraft((draft) => ({ ...draft, ...deviceChanges }));
       handleUpdateDevice(deviceDraft, deviceChanges);
     },
-    [handleUpdateDevice, deviceDraft]
+    [handleUpdateDevice, deviceDraft],
   );
   const isValidNewTag = useCallback(
     (inputValue: string) => {
       const newTag = inputValue.trim().toLowerCase();
       return newTag !== "" && !deviceTags.some((tag) => tag.value === newTag);
     },
-    [deviceTags]
+    [deviceTags],
   );
   const handleTagCreate = useCallback(
     (inputValue: string) => {
@@ -1370,7 +1370,7 @@ const DeviceContent = ({
         tags: deviceTags.map((tag) => tag.value).concat([newTag]),
       });
     },
-    [handleDeviceChange, deviceTags]
+    [handleDeviceChange, deviceTags],
   );
 
   if (!device) {
@@ -1595,7 +1595,7 @@ const DevicePage = () => {
 
   const refreshTags = useCallback(
     () => getTags({}, { fetchPolicy: "store-and-network" }),
-    [getTags]
+    [getTags],
   );
 
   useEffect(() => {

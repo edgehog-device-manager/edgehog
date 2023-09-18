@@ -31,11 +31,11 @@ it("renders and toggles correctly", async () => {
         <div data-testid="dropdown-item" />
       </Dropdown.Item>
       <Dropdown.Divider />
-    </Dropdown>
+    </Dropdown>,
   );
   expect(screen.queryByTestId("dropdown-item")).not.toBeInTheDocument();
   userEvent.click(screen.getByRole("button"));
   await waitFor(() =>
-    expect(screen.queryByTestId("dropdown-item")).toBeInTheDocument()
+    expect(screen.queryByTestId("dropdown-item")).toBeInTheDocument(),
   );
 });

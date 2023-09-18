@@ -84,7 +84,7 @@ const BaseImageCreateContent = ({
 
   const [createBaseImage, isCreatingBaseImage] =
     useMutation<BaseImageCreate_createBaseImage_Mutation>(
-      CREATE_BASE_IMAGE_MUTATION
+      CREATE_BASE_IMAGE_MUTATION,
     );
 
   const handleCreateBaseImage = useCallback(
@@ -113,7 +113,7 @@ const BaseImageCreateContent = ({
             <FormattedMessage
               id="pages.BaseImageCreate.creationErrorFeedback"
               defaultMessage="Could not create the Base Image, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -129,7 +129,7 @@ const BaseImageCreateContent = ({
         },
       });
     },
-    [createBaseImage, navigate]
+    [createBaseImage, navigate],
   );
 
   return (
@@ -171,7 +171,7 @@ const BaseImageCreateWrapper = ({
 }: BaseImageCreateWrapperProps) => {
   const { baseImageCollection, tenantInfo } = usePreloadedQuery(
     GET_BASE_IMAGE_COLLECTION_QUERY,
-    getBaseImageCollectionQuery
+    getBaseImageCollectionQuery,
   );
 
   if (!baseImageCollection) {
@@ -207,13 +207,13 @@ const BaseImageCreatePage = () => {
 
   const [getBaseImageCollectionQuery, getBaseImageCollection] =
     useQueryLoader<BaseImageCreate_getBaseImageCollection_Query>(
-      GET_BASE_IMAGE_COLLECTION_QUERY
+      GET_BASE_IMAGE_COLLECTION_QUERY,
     );
 
   const fetchBaseImageCollection = useCallback(() => {
     getBaseImageCollection(
       { id: baseImageCollectionId },
-      { fetchPolicy: "network-only" }
+      { fetchPolicy: "network-only" },
     );
   }, [getBaseImageCollection, baseImageCollectionId]);
 

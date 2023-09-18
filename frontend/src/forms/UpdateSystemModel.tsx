@@ -106,9 +106,9 @@ const systemModelSchema = yup
             const itemIndex = context.parent.indexOf(partNumber);
             return !context.parent.find(
               (pn: PartNumber, index: number) =>
-                pn.value === partNumber.value && index < itemIndex
+                pn.value === partNumber.value && index < itemIndex,
             );
-          })
+          }),
       ),
   })
   .required();
@@ -125,7 +125,7 @@ const transformInputData = (data: SystemModelData): FormData => ({
 
 const transformOutputData = (
   locale: string,
-  data: FormData
+  data: FormData,
 ): SystemModelChanges => {
   const systemModel: SystemModelChanges = {
     name: data.name,
@@ -198,7 +198,7 @@ const UpdateSystemModelForm = ({
         partNumbers.update(index, { value: "" });
       }
     },
-    [partNumbers]
+    [partNumbers],
   );
 
   useEffect(() => {

@@ -161,10 +161,10 @@ const UpdateUpdateChannel = ({
         {
           targetGroupName: targetGroup.name,
           updateChannelName: targetGroup.updateChannel.name,
-        }
+        },
       );
     },
-    [intl, updateChannel.id]
+    [intl, updateChannel.id],
   );
   const isTargetGroupUsedByOtherChannel = useCallback(
     (targetGroup: TargetGroup) => {
@@ -173,7 +173,7 @@ const UpdateUpdateChannel = ({
         targetGroup.updateChannel.id === updateChannel.id
       );
     },
-    [updateChannel.id]
+    [updateChannel.id],
   );
 
   const targetGroupOptions = useMemo(() => {

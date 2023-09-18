@@ -44,10 +44,10 @@ const OPERATION_TABLE_FRAGMENT = graphql`
 `;
 
 const otaOperationFinalStatuses = ["SUCCESS", "FAILURE"] as const;
-type OtaOperationFinalStatus = typeof otaOperationFinalStatuses[number];
+type OtaOperationFinalStatus = (typeof otaOperationFinalStatuses)[number];
 
 const isOtaOperationFinalStatus = (
-  status: OtaOperationStatus
+  status: OtaOperationStatus,
 ): status is OtaOperationFinalStatus =>
   (otaOperationFinalStatuses as readonly string[]).includes(status);
 
@@ -57,7 +57,7 @@ type OtaOperationWithFinalStatus = Omit<OtaOperation, "status"> & {
 };
 
 const isOtaOperationWithFinalStatus = (
-  operation: OtaOperation
+  operation: OtaOperation,
 ): operation is OtaOperationWithFinalStatus =>
   isOtaOperationFinalStatus(operation.status);
 
@@ -157,7 +157,7 @@ const OperationTable = ({ className, deviceRef }: OperationTableProps) => {
   const data = useFragment(OPERATION_TABLE_FRAGMENT, deviceRef);
 
   const otaOperations = data.otaOperations.filter(
-    isOtaOperationWithFinalStatus
+    isOtaOperationWithFinalStatus,
   );
 
   if (!otaOperations) {

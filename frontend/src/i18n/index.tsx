@@ -53,12 +53,12 @@ const I18nProvider = ({ children }: I18nProviderProps) => {
     () =>
       translationsByLanguage[language] ||
       translationsByLanguage[defaultLanguage],
-    [language]
+    [language],
   );
 
   const contextValue: I18nContextValue = useMemo(
     () => [language, setLanguage],
-    [language]
+    [language],
   );
 
   return (

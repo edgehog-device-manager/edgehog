@@ -38,7 +38,7 @@ const SearchBox = ({ className = "", onChange }: Props) => {
       const searchText = event.target.value;
       onChange && onChange(searchText);
     },
-    [onChange]
+    [onChange],
   );
 
   return (

@@ -58,7 +58,7 @@ type ProvidersParams = {
 
 const renderWithProviders = (
   ui: React.ReactElement,
-  params: ProvidersParams = {}
+  params: ProvidersParams = {},
 ) => {
   const {
     relayEnvironment = createMockEnvironment(),
