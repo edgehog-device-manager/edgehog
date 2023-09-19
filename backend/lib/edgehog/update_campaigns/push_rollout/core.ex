@@ -375,12 +375,12 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Core do
 
   def error_message(%APIError{status: status} = error, device_id) when status in 400..499 do
     # Client error, assume it's always going to fail
-    "Device #{device_id} failed to send OTA Request: received status #{status} (#{error.response})"
+    "Device #{device_id} failed Astarte API call: received status #{status} (#{error.response})"
   end
 
   def error_message(%APIError{status: status} = error, device_id) when status in 500..599 do
     # Server error, assume temporary error
-    "Device #{device_id} failed to send OTA Request: received status #{status} (#{error.response})"
+    "Device #{device_id} failed Astarte API call: received status #{status} (#{error.response})"
   end
 
   def error_message(other, device_id) do
