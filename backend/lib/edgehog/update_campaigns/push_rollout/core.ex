@@ -159,10 +159,18 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Core do
 
     with {:ok, client} <- Devices.appengine_client_from_device(device),
          {:ok, device_base_image} <- Astarte.fetch_base_image(client, device.device_id) do
-      case Version.parse(device_base_image.version) do
-        {:ok, version} -> {:ok, version}
-        :error -> {:error, :invalid_version}
-      end
+      parse_version(device_base_image.version)
+    end
+  end
+
+  defp parse_version(nil) do
+    {:error, :missing_version}
+  end
+
+  defp parse_version(version) when is_binary(version) do
+    case Version.parse(version) do
+      {:ok, version} -> {:ok, version}
+      :error -> {:error, :invalid_version}
     end
   end
 
@@ -354,6 +362,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Core do
 
   def error_message(:invalid_version, device_id) do
     "Device #{device_id} has an invalid BaseImage version published on Astarte"
+  end
+
+  def error_message(:missing_version, device_id) do
+    "Device #{device_id} has a null BaseImage version published on Astarte"
   end
 
   def error_message("connection refused", device_id) do
