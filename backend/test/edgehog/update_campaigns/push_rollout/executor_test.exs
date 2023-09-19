@@ -587,6 +587,26 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       assert_normal_exit(pid, ref)
       assert_update_campaign_outcome(update_campaign_id, :failure)
     end
+
+    test "by targets that return an empty base image version", ctx do
+      %{
+        executor_pid: pid,
+        failing_target_count: failing_target_count,
+        monitor_ref: ref,
+        update_campaign_id: update_campaign_id
+      } = ctx
+
+      Edgehog.Astarte.Device.BaseImageMock
+      |> expect(:get, failing_target_count, fn _client, _device_id ->
+        # Reply like the target already has an incompatible version
+        {:ok, astarte_base_image_with_version(nil)}
+      end)
+
+      start_execution(pid)
+
+      assert_normal_exit(pid, ref)
+      assert_update_campaign_outcome(update_campaign_id, :failure)
+    end
   end
 
   describe "PushRollout.Executor terminates immediately" do

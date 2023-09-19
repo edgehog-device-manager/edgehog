@@ -362,6 +362,24 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
       assert {:error, :invalid_version} = Core.fetch_target_current_version(target)
     end
+
+    test "returns error if the returned version is empty", ctx do
+      %{target: target} = ctx
+
+      Edgehog.Astarte.Device.BaseImageMock
+      |> expect(:get, fn _client, _device_id ->
+        base_image = %Edgehog.Astarte.Device.BaseImage{
+          name: "esp-idf",
+          version: nil,
+          build_id: "2022-01-01 12:00:00",
+          fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
+        }
+
+        {:ok, base_image}
+      end)
+
+      assert {:error, :missing_version} = Core.fetch_target_current_version(target)
+    end
   end
 
   describe "needs_update?/2" do
@@ -705,6 +723,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
         :downgrade_not_allowed,
         :ambiguous_version_ordering,
         :invalid_version,
+        :missing_version,
         "connection refused",
         %APIError{status: 422, response: "Invalid entity"},
         %APIError{status: 500, response: "Internal server error"}
@@ -741,6 +760,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
         :downgrade_not_allowed,
         :ambiguous_version_ordering,
         :invalid_version,
+        :missing_version,
         %APIError{status: 404, response: "Not found"}
       ]
 
