@@ -21,13 +21,13 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
 import {
+  graphql,
   useMutation,
   usePreloadedQuery,
   useQueryLoader,
-  PreloadedQuery,
 } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 import _ from "lodash";
 
@@ -107,7 +107,7 @@ const DELETE_SYSTEM_MODEL_MUTATION = graphql`
 `;
 
 const systemModelDiff = (a1: SystemModelData, a2: SystemModelChanges) => {
-  let diff: Partial<SystemModelChanges> = {};
+  const diff: Partial<SystemModelChanges> = {};
   if (a1.name !== a2.name) {
     diff.name = a2.name;
   }
@@ -192,7 +192,7 @@ const SystemModelContent = ({
             return setErrorFeedback(errorFeedback);
           }
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.SystemModelUpdate.creationErrorFeedback"
@@ -268,7 +268,7 @@ const SystemModelContent = ({
         }
         navigate({ route: Route.systemModels });
       },
-      onError(error) {
+      onError() {
         setErrorFeedback(
           <FormattedMessage
             id="pages.SystemModel.deletionErrorFeedback"

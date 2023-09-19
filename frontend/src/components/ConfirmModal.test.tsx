@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { it, expect, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { screen } from "@testing-library/react";
 
@@ -28,7 +29,7 @@ it("renders correctly", () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
-    onConfirm: jest.fn(),
+    onConfirm: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   const modal = document.querySelector("[role='dialog']");
@@ -42,7 +43,7 @@ it("correctly confirms with the confirm button", () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
-    onConfirm: jest.fn(),
+    onConfirm: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   userEvent.click(screen.getByText("OK"));
@@ -53,7 +54,7 @@ it("correctly confirms by typing Enter", () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
-    onConfirm: jest.fn(),
+    onConfirm: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   const title = screen.getByText(props.title);
@@ -66,8 +67,8 @@ it("correctly dimisses with the cancel button", () => {
     title: "Modal Title",
     confirmLabel: "OK",
     cancelLabel: "Cancel",
-    onConfirm: jest.fn(),
-    onCancel: jest.fn(),
+    onConfirm: vi.fn(),
+    onCancel: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   userEvent.click(screen.getByText("Cancel"));
@@ -80,8 +81,8 @@ it("correctly dimisses by typing Esc", () => {
     title: "Modal Title",
     confirmLabel: "OK",
     cancelLabel: "Cancel",
-    onConfirm: jest.fn(),
-    onCancel: jest.fn(),
+    onConfirm: vi.fn(),
+    onCancel: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   const modal = document.querySelector("[role='dialog']")!;

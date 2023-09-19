@@ -102,7 +102,7 @@ const updateChannelSchema = yup
   .required();
 
 const transformOutputData = ({
-  id,
+  id: _id,
   targetGroups,
   ...rest
 }: UpdateChannel): UpdateChannelData => ({

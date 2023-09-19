@@ -96,8 +96,6 @@ const renderChargeLevel = (slot: BatterySlot): ReactElement | null => {
         <FormattedNumber
           value={slot.levelPercentage / 100}
           maximumFractionDigits={2}
-          // FormattedNumber has custom style property
-          // eslint-disable-next-line react/style-prop-object
           style="percent"
         />
       );

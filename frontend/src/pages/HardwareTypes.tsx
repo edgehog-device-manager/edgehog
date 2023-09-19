@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,12 +21,8 @@
 import { Suspense, useEffect, useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
-import {
-  usePreloadedQuery,
-  useQueryLoader,
-  PreloadedQuery,
-} from "react-relay/hooks";
+import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { HardwareTypes_getHardwareTypes_Query } from "api/__generated__/HardwareTypes_getHardwareTypes_Query.graphql";
 import Button from "components/Button";

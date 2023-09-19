@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ type Props = {
   online: boolean;
 };
 
-const LastSeen = ({ lastConnection, lastDisconnection, online }: Props) => {
+const LastSeen = ({ lastDisconnection, online }: Props) => {
   if (online) {
     return (
       <FormattedMessage id="components.LastSeen.now" defaultMessage="Now" />

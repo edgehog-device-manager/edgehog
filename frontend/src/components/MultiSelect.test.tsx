@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import selectEvent from "react-select-event";
@@ -39,7 +40,7 @@ const customOption: Option = {
 };
 
 it("correctly selects an option", async () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const props = {
     options,
     onChange,
@@ -55,7 +56,7 @@ it("correctly selects an option", async () => {
 });
 
 it("correctly adds an option to selected", async () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const props = {
     options,
     value: options.slice(0, 1),
@@ -72,7 +73,7 @@ it("correctly adds an option to selected", async () => {
 });
 
 it("correctly clears selected options", async () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const props = {
     options,
     value: options,
@@ -86,7 +87,7 @@ it("correctly clears selected options", async () => {
 });
 
 it("correctly creates new option", async () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const props = {
     creatable: true,
     options,
@@ -102,7 +103,7 @@ it("correctly creates new option", async () => {
 });
 
 it("correctly creates new option adding to selected", async () => {
-  const onChange = jest.fn();
+  const onChange = vi.fn();
   const props = {
     creatable: true,
     options,
@@ -122,7 +123,7 @@ it("correctly creates new option adding to selected", async () => {
 });
 
 it("correctly call onBlur", async () => {
-  const onBlur = jest.fn();
+  const onBlur = vi.fn();
   const props = {
     options,
     onBlur,

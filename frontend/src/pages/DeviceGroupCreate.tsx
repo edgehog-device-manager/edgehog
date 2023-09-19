@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@
 
 import { useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import graphql from "babel-plugin-relay/macro";
-import { useMutation } from "react-relay/hooks";
+import { graphql, useMutation } from "react-relay/hooks";
 
 import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "api/__generated__/DeviceGroupCreate_createDeviceGroup_Mutation.graphql";
 import Alert from "components/Alert";
@@ -78,7 +77,7 @@ const DeviceGroupCreatePage = () => {
             navigate({ route: Route.deviceGroups });
           }
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.DeviceGroupCreate.creationErrorFeedback"

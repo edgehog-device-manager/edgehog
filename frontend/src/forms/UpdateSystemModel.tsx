@@ -127,7 +127,7 @@ const transformOutputData = (
   locale: string,
   data: FormData
 ): SystemModelChanges => {
-  let systemModel: SystemModelChanges = {
+  const systemModel: SystemModelChanges = {
     name: data.name,
     handle: data.handle,
     hardwareType: {

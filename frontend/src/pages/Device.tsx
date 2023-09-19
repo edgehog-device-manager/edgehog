@@ -28,16 +28,16 @@ import React, {
 } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
 import {
+  graphql,
   useFragment,
   usePreloadedQuery,
   useQueryLoader,
-  PreloadedQuery,
   useMutation,
   fetchQuery,
   useRelayEnvironment,
 } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 import type { Subscription } from "relay-runtime";
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
@@ -1027,7 +1027,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
           return setErrorFeedback(errorFeedback);
         }
       },
-      onError(error) {
+      onError() {
         setErrorFeedback(
           <FormattedMessage
             id="pages.Device.otaUpdateCreationErrorFeedback"
@@ -1289,7 +1289,7 @@ const DeviceContent = ({
                 refreshTags();
               }
             },
-            onError(error) {
+            onError() {
               setDeviceDraft(draft);
               setErrorFeedback(
                 <FormattedMessage

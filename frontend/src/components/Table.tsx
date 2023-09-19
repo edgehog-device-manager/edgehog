@@ -30,7 +30,7 @@ import {
 } from "@tanstack/react-table";
 import type {
   ColumnDef,
-  FilterFn,
+  FilterFnOption,
   PaginationState,
   Row,
   RowData,
@@ -63,9 +63,9 @@ type TableProps<T extends RowData> = {
   maxPageRows?: number;
   hiddenColumns?: string[];
   sortBy?: SortingState;
-  searchFunction?: FilterFn<any>;
+  searchFunction?: FilterFnOption<T>;
   hideSearch?: boolean;
-  getRowProps?: (row: Row<T>) => Object;
+  getRowProps?: (row: Row<T>) => object;
 };
 
 const Table = <T extends RowData>({

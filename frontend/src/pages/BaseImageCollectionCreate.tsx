@@ -21,13 +21,13 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
 import {
+  graphql,
   useMutation,
   usePreloadedQuery,
   useQueryLoader,
-  PreloadedQuery,
 } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { BaseImageCollectionCreate_getSystemModels_Query } from "api/__generated__/BaseImageCollectionCreate_getSystemModels_Query.graphql";
 import type { BaseImageCollectionCreate_createBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollectionCreate_createBaseImageCollection_Mutation.graphql";

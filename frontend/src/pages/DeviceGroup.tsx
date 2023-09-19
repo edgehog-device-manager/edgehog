@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
 import {
+  graphql,
   useMutation,
   usePreloadedQuery,
   useQueryLoader,
-  PreloadedQuery,
 } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 import _ from "lodash";
 
@@ -131,7 +131,7 @@ const DeviceGroupContent = ({
         }
         navigate({ route: Route.deviceGroups });
       },
-      onError(error) {
+      onError() {
         setErrorFeedback(
           <FormattedMessage
             id="pages.DeviceGroup.deletionErrorFeedback"
@@ -207,7 +207,7 @@ const DeviceGroupContent = ({
           }
           setErrorFeedback(null);
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.DeviceGroup.updateErrorFeedback"

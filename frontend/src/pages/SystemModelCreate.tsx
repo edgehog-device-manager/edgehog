@@ -21,13 +21,13 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
 import {
+  graphql,
   useMutation,
   usePreloadedQuery,
   useQueryLoader,
-  PreloadedQuery,
 } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { SystemModelCreate_getHardwareTypes_Query } from "api/__generated__/SystemModelCreate_getHardwareTypes_Query.graphql";
 import type { SystemModelCreate_createSystemModel_Mutation } from "api/__generated__/SystemModelCreate_createSystemModel_Mutation.graphql";
@@ -139,7 +139,7 @@ const SystemModelContent = ({
             navigate({ route: Route.systemModels });
           }
         },
-        onError(error) {
+        onError() {
           setErrorFeedback(
             <FormattedMessage
               id="pages.SystemModelCreate.creationErrorFeedback"

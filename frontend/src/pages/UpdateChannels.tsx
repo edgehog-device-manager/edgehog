@@ -21,12 +21,8 @@
 import { Suspense, useEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
-import graphql from "babel-plugin-relay/macro";
-import {
-  usePreloadedQuery,
-  useQueryLoader,
-  PreloadedQuery,
-} from "react-relay/hooks";
+import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { UpdateChannels_getUpdateChannels_Query } from "api/__generated__/UpdateChannels_getUpdateChannels_Query.graphql";
 import Button from "components/Button";

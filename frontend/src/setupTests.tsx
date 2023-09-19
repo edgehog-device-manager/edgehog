@@ -18,13 +18,11 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import React from "react";
-import { render } from "@testing-library/react";
+import { vi, afterEach } from "vitest";
+import { render, cleanup } from "@testing-library/react";
+
 import {
   MemoryRouter as RouterProvider,
   Route,
@@ -38,9 +36,18 @@ import type { FetchGraphQL } from "api";
 import AuthProvider from "contexts/Auth";
 import I18nProvider from "i18n";
 
-const fetchGraphQLMock = jest
-  .fn()
-  .mockReturnValue(Promise.resolve({ data: {} }));
+// relay-test-utils expect to have a jest global https://github.com/facebook/relay/issues/4228
+declare global {
+  /* eslint-disable no-var */
+  var jest: typeof vi;
+}
+global.jest = vi;
+// runs a cleanup after each test case (e.g. clearing jsdom)
+afterEach(() => {
+  cleanup();
+});
+
+const fetchGraphQLMock = vi.fn().mockReturnValue(Promise.resolve({ data: {} }));
 
 type ProvidersParams = {
   fetchGraphQL?: FetchGraphQL;
