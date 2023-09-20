@@ -592,6 +592,23 @@ defmodule Edgehog.UpdateCampaignsTest do
       end
     end
 
+    test "returns empty stats for update campaign with no targets" do
+      update_campaign = update_campaign_fixture()
+
+      # Ensure we actually have no targets
+      assert 0 == length(update_campaign.update_targets)
+
+      assert stats_map = UpdateCampaigns.get_stats_for_update_campaign_ids([update_campaign.id])
+
+      assert %UpdateCampaignStats{
+               total_target_count: 0,
+               idle_target_count: 0,
+               in_progress_target_count: 0,
+               failed_target_count: 0,
+               successful_target_count: 0
+             } = Map.fetch!(stats_map, update_campaign.id)
+    end
+
     test "returns empty map for non-existing update campaign ids" do
       assert %{} == UpdateCampaigns.get_stats_for_update_campaign_ids([1_234_567])
     end

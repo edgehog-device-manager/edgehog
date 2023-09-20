@@ -512,10 +512,12 @@ defmodule Edgehog.UpdateCampaigns do
   """
   def get_stats_for_update_campaign_ids(update_campaign_ids) do
     query =
-      from t in Target,
-        where: t.update_campaign_id in ^update_campaign_ids,
-        group_by: [:update_campaign_id, :status],
-        select: {t.update_campaign_id, {t.status, count(t.id)}}
+      from uc in UpdateCampaign,
+        where: uc.id in ^update_campaign_ids,
+        left_join: t in Target,
+        on: uc.id == t.update_campaign_id,
+        group_by: [uc.id, t.status],
+        select: {uc.id, {t.status, count(t.id)}}
 
     query
     |> Repo.all()
