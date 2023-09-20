@@ -596,7 +596,7 @@ defmodule Edgehog.UpdateCampaignsTest do
       update_campaign = update_campaign_fixture()
 
       # Ensure we actually have no targets
-      assert 0 == length(update_campaign.update_targets)
+      assert [] == update_campaign.update_targets
 
       assert stats_map = UpdateCampaigns.get_stats_for_update_campaign_ids([update_campaign.id])
 
