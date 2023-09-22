@@ -25,6 +25,7 @@ on:
   push:
     paths:
       - "frontend/**"
+      - ".tool-versions"
       - ".github/workflows/frontend-test.yaml"
     branches:
       - "main"
@@ -32,22 +33,20 @@ on:
   pull_request:
     paths:
       - "frontend/**"
+      - ".tool-versions"
       - ".github/workflows/frontend-test.yaml"
 
 jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: ['16']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: .tool-versions
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
