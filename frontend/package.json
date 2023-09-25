@@ -47,7 +47,7 @@
     "react-leaflet": "^3.2.2",
     "react-relay": "^15.0.0",
     "react-router-dom": "^6.0.0-beta.8",
-    "react-select": "^5.7.0",
+    "react-select": "^5.7.5",
     "react-select-event": "^5.5.0",
     "relay-compiler": "^15.0.0",
     "relay-runtime": "^15.0.0",
