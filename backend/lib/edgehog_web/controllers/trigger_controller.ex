@@ -129,6 +129,7 @@ defmodule EdgehogWeb.AstarteTriggerController do
   defp translate_ota_response_status("Done"), do: "Success"
 
   defp translate_ota_response_status_code(nil), do: nil
+  defp translate_ota_response_status_code(""), do: nil
   defp translate_ota_response_status_code("OTAErrorNetwork"), do: "NetworkError"
   defp translate_ota_response_status_code("OTAErrorNvs"), do: nil
   defp translate_ota_response_status_code("OTAAlreadyInProgress"), do: "UpdateAlreadyInProgress"

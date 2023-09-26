@@ -391,5 +391,44 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert operation.status == :failure
       assert operation.status_code == :network_error
     end
+
+    test "supports empty strings for status code in legacy OTAResponse interface", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: %{slug: tenant_slug}
+      } = context
+
+      ota_operation = manual_ota_operation_fixture(device)
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+
+      ota_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.OTAResponse",
+          path: "/response",
+          value: %{
+            uuid: ota_operation.id,
+            status: "Error",
+            statusCode: ""
+          }
+        },
+        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, ota_event)
+
+      assert response(conn, 200)
+
+      operation = OSManagement.get_ota_operation!(ota_operation.id)
+
+      assert operation.status_code == nil
+    end
   end
 end
