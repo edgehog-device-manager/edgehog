@@ -32,7 +32,7 @@ import Tag from "components/Tag";
 import "./MultiSelect.scss";
 
 const MultiValueContainer = <Option,>(
-  props: MultiValueGenericProps<Option, true>
+  props: MultiValueGenericProps<Option, true>,
 ) => (
   <Tag className="me-1">
     <components.MultiValueContainer
@@ -43,13 +43,13 @@ const MultiValueContainer = <Option,>(
 );
 
 const MultiValueLabel = <Option,>(
-  props: MultiValueGenericProps<Option, true>
+  props: MultiValueGenericProps<Option, true>,
 ) => (
   <components.MultiValueLabel {...props} innerProps={{ className: "me-1" }} />
 );
 
 const MultiValueRemove = <Option,>(
-  props: MultiValueRemoveProps<Option, true>
+  props: MultiValueRemoveProps<Option, true>,
 ) => {
   if (props.selectProps.isDisabled) {
     return null;
@@ -75,7 +75,7 @@ type MultiSelectBaseProps<Option> = {
   options?: readonly Option[];
   onChange?: (
     value: MultiValue<Option>,
-    actionMeta: ActionMeta<Option>
+    actionMeta: ActionMeta<Option>,
   ) => void;
   getOptionLabel?: (option: Option) => string;
   getOptionValue?: (option: Option) => string;

@@ -85,11 +85,11 @@ const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
     useState<UpdateTargetStatusType>("SUCCESSFUL");
   const { updateTargets } = useFragment(
     UPDATE_TARGETS_TABS_FRAGMENT,
-    updateCampaignRef
+    updateCampaignRef,
   );
   const visibleTargets = useMemo(
     () => updateTargets.filter(({ status }) => status === activeTab),
-    [activeTab, updateTargets]
+    [activeTab, updateTargets],
   );
   const hiddenColumns = useMemo(() => getHiddenColumns(activeTab), [activeTab]);
 

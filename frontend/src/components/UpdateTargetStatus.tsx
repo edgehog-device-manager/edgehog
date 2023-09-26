@@ -79,7 +79,7 @@ const UpdateTargetStatusFragment = ({
 }: UpdateTargetStatusFragmentProps) => {
   const { status } = useFragment(
     UPDATE_TARGET_STATUS_FRAGMENT,
-    updateTargetRef
+    updateTargetRef,
   );
   return <UpdateTargetStatus status={status} />;
 };

@@ -143,16 +143,16 @@ const SystemModelContent = ({
 
   const systemModelData = usePreloadedQuery(
     GET_SYSTEM_MODEL_QUERY,
-    getSystemModelQuery
+    getSystemModelQuery,
   );
   const defaultLocaleData = usePreloadedQuery(
     GET_DEFAULT_TENANT_LOCALE_QUERY,
-    getDefaultTenantLocaleQuery
+    getDefaultTenantLocaleQuery,
   );
 
   const [updateSystemModel, isUpdatingSystemModel] =
     useMutation<SystemModel_updateSystemModel_Mutation>(
-      UPDATE_SYSTEM_MODEL_MUTATION
+      UPDATE_SYSTEM_MODEL_MUTATION,
     );
 
   // TODO: handle readonly type without mapping to mutable type
@@ -170,7 +170,7 @@ const SystemModelContent = ({
 
   const locale = useMemo(
     () => defaultLocaleData.tenantInfo.defaultLocale,
-    [defaultLocaleData]
+    [defaultLocaleData],
   );
 
   const handleUpdateSystemModel = useCallback(
@@ -197,7 +197,7 @@ const SystemModelContent = ({
             <FormattedMessage
               id="pages.SystemModelUpdate.creationErrorFeedback"
               defaultMessage="Could not update the system model, please try again."
-            />
+            />,
           );
         },
         optimisticResponse: {
@@ -236,7 +236,7 @@ const SystemModelContent = ({
         },
       });
     },
-    [updateSystemModel, systemModel]
+    [updateSystemModel, systemModel],
   );
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -246,7 +246,7 @@ const SystemModelContent = ({
 
   const [deleteSystemModel, isDeletingSystemModel] =
     useMutation<SystemModel_deleteSystemModel_Mutation>(
-      DELETE_SYSTEM_MODEL_MUTATION
+      DELETE_SYSTEM_MODEL_MUTATION,
     );
 
   const handleDeleteSystemModel = useCallback(() => {
@@ -273,7 +273,7 @@ const SystemModelContent = ({
           <FormattedMessage
             id="pages.SystemModel.deletionErrorFeedback"
             defaultMessage="Could not delete the system model, please try again."
-          />
+          />,
         );
       },
       updater(store, data) {
@@ -291,9 +291,9 @@ const SystemModelContent = ({
         if (systemModels) {
           root.setLinkedRecords(
             systemModels.filter(
-              (systemModel) => systemModel.getDataID() !== systemModelId
+              (systemModel) => systemModel.getDataID() !== systemModelId,
             ),
-            "systemModels"
+            "systemModels",
           );
         }
 
@@ -387,7 +387,7 @@ const SystemModelPage = () => {
     useQueryLoader<SystemModel_getSystemModel_Query>(GET_SYSTEM_MODEL_QUERY);
   const [getDefaultTenantLocaleQuery, getDefaultTenantLocale] =
     useQueryLoader<SystemModel_getDefaultTenantLocale_Query>(
-      GET_DEFAULT_TENANT_LOCALE_QUERY
+      GET_DEFAULT_TENANT_LOCALE_QUERY,
     );
 
   useEffect(() => getDefaultTenantLocale({}), [getDefaultTenantLocale]);

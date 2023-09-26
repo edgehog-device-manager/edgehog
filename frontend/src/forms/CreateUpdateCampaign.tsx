@@ -165,7 +165,7 @@ const CreateBaseImageCollectionForm = ({
           intl.formatMessage({
             id: "forms.CreateUpdateCampaign.maxInProgressUpdatesLabel",
             defaultMessage: "Max Pending Operations",
-          })
+          }),
         ),
       maxFailurePercentage: numberSchema
         .min(0)
@@ -174,7 +174,7 @@ const CreateBaseImageCollectionForm = ({
           intl.formatMessage({
             id: "forms.CreateUpdateCampaign.maxFailurePercentageValidationLabel",
             defaultMessage: "Max Failures",
-          })
+          }),
         ),
       otaRequestTimeoutSeconds: numberSchema
         .positive()
@@ -184,7 +184,7 @@ const CreateBaseImageCollectionForm = ({
           intl.formatMessage({
             id: "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel",
             defaultMessage: "Request Timeout",
-          })
+          }),
         ),
       otaRequestRetries: numberSchema
         .integer()
@@ -193,7 +193,7 @@ const CreateBaseImageCollectionForm = ({
           intl.formatMessage({
             id: "forms.CreateUpdateCampaign.otaRequestRetriesLabel",
             defaultMessage: "Request Retries",
-          })
+          }),
         ),
     })
     .required();
@@ -214,7 +214,7 @@ const CreateBaseImageCollectionForm = ({
 
   const { baseImageCollections, updateChannels } = useFragment(
     UPDATE_CAMPAIGN_OPTIONS_FRAGMENT,
-    updateCampaignOptionsRef
+    updateCampaignOptionsRef,
   );
 
   const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));

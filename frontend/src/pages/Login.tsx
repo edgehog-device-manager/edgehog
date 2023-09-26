@@ -69,13 +69,13 @@ const LoginPage = () => {
             <FormattedMessage
               id="pages.Login.loginErrorFeedback"
               defaultMessage="Could not login, please make sure the credentials are valid."
-            />
+            />,
           );
           setIsLogginIn(false);
         }
       });
     },
-    [auth, navigate]
+    [auth, navigate],
   );
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
@@ -88,7 +88,7 @@ const LoginPage = () => {
       }
       handleLogin(formData);
     },
-    [formData, handleLogin]
+    [formData, handleLogin],
   );
 
   const handleInputChange: React.ChangeEventHandler<HTMLInputElement> =

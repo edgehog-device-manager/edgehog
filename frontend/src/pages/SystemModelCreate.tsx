@@ -93,16 +93,16 @@ const SystemModelContent = ({
   const navigate = useNavigate();
   const hardwareTypesData = usePreloadedQuery(
     GET_HARDWARE_TYPES_QUERY,
-    getHardwareTypesQuery
+    getHardwareTypesQuery,
   );
   const defaultLocaleData = usePreloadedQuery(
     GET_DEFAULT_TENANT_LOCALE_QUERY,
-    getDefaultTenantLocaleQuery
+    getDefaultTenantLocaleQuery,
   );
 
   const [createSystemModel, isCreatingSystemModel] =
     useMutation<SystemModelCreate_createSystemModel_Mutation>(
-      CREATE_SYSTEM_MODEL_MUTATION
+      CREATE_SYSTEM_MODEL_MUTATION,
     );
 
   // TODO: handle readonly type without mapping to mutable type
@@ -111,11 +111,11 @@ const SystemModelContent = ({
       hardwareTypesData.hardwareTypes.map((hardwareType) => ({
         ...hardwareType,
       })),
-    [hardwareTypesData]
+    [hardwareTypesData],
   );
   const locale = useMemo(
     () => defaultLocaleData.tenantInfo.defaultLocale,
-    [defaultLocaleData]
+    [defaultLocaleData],
   );
 
   const handleCreateSystemModel = useCallback(
@@ -144,7 +144,7 @@ const SystemModelContent = ({
             <FormattedMessage
               id="pages.SystemModelCreate.creationErrorFeedback"
               defaultMessage="Could not create the system model, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -161,7 +161,7 @@ const SystemModelContent = ({
           if (systemModels) {
             root.setLinkedRecords(
               [...systemModels, systemModel],
-              "systemModels"
+              "systemModels",
             );
           }
 
@@ -173,7 +173,7 @@ const SystemModelContent = ({
         },
       });
     },
-    [createSystemModel, navigate]
+    [createSystemModel, navigate],
   );
 
   return (
@@ -235,11 +235,11 @@ const SystemModelContent = ({
 const SystemModelCreatePage = () => {
   const [getHardwareTypesQuery, getHardwareTypes] =
     useQueryLoader<SystemModelCreate_getHardwareTypes_Query>(
-      GET_HARDWARE_TYPES_QUERY
+      GET_HARDWARE_TYPES_QUERY,
     );
   const [getDefaultTenantLocaleQuery, getDefaultTenantLocale] =
     useQueryLoader<SystemModelCreate_getDefaultTenantLocale_Query>(
-      GET_DEFAULT_TENANT_LOCALE_QUERY
+      GET_DEFAULT_TENANT_LOCALE_QUERY,
     );
 
   useEffect(() => getHardwareTypes({}), [getHardwareTypes]);

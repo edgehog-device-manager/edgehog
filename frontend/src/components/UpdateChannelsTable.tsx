@@ -103,7 +103,7 @@ type Props = {
 const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
   const updateChannels = useFragment(
     DEVICE_GROUPS_TABLE_FRAGMENT,
-    updateChannelsRef
+    updateChannelsRef,
   );
 
   return (

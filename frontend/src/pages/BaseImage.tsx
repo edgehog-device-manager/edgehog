@@ -133,7 +133,7 @@ const BaseImageContent = ({ baseImage, locale }: BaseImageContentProps) => {
           <FormattedMessage
             id="pages.BaseImage.deletionErrorFeedback"
             defaultMessage="Could not delete the Base Image, please try again."
-          />
+          />,
         );
         setShowDeleteModal(false);
       },
@@ -176,12 +176,12 @@ const BaseImageContent = ({ baseImage, locale }: BaseImageContentProps) => {
             <FormattedMessage
               id="pages.BaseImage.creationErrorFeedback"
               defaultMessage="Could not update the Base Image, please try again."
-            />
+            />,
           );
         },
       });
     },
-    [updateBaseImage, baseImage]
+    [updateBaseImage, baseImage],
   );
 
   return (
@@ -251,7 +251,7 @@ const BaseImageWrapper = ({ getBaseImageQuery }: BaseImageWrapperProps) => {
 
   const { baseImage, tenantInfo } = usePreloadedQuery(
     GET_BASE_IMAGE_QUERY,
-    getBaseImageQuery
+    getBaseImageQuery,
   );
 
   if (!baseImage) {

@@ -122,7 +122,7 @@ const useNavigate = () => {
       const path = typeof route === "string" ? route : generatePath(route);
       routerNavigate(path);
     },
-    [routerNavigate]
+    [routerNavigate],
   );
   return navigate;
 };

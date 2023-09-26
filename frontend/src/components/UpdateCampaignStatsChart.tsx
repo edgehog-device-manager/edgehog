@@ -45,7 +45,7 @@ type Props = {
 const UpdateCampaignStatsChart = ({ updateCampaignRef }: Props) => {
   const { stats } = useFragment(
     UPDATE_CAMPAIGN_PROGRESS_BAR_FRAGMENT,
-    updateCampaignRef
+    updateCampaignRef,
   );
 
   const intl = useIntl();

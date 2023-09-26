@@ -90,7 +90,7 @@ type Props = {
 const DeviceGroupsTable = ({ className, deviceGroupsRef }: Props) => {
   const deviceGroups = useFragment(
     DEVICE_GROUPS_TABLE_FRAGMENT,
-    deviceGroupsRef
+    deviceGroupsRef,
   );
 
   return <Table className={className} columns={columns} data={deviceGroups} />;

@@ -56,7 +56,7 @@ const SystemModelsContent = ({
 }: SystemModelsContentProps) => {
   const systemModelsData = usePreloadedQuery(
     GET_SYSTEM_MODELS_QUERY,
-    getSystemModelsQuery
+    getSystemModelsQuery,
   );
 
   // TODO: handle readonly type without mapping to mutable type
@@ -66,7 +66,7 @@ const SystemModelsContent = ({
         ...systemModel,
         partNumbers: [...systemModel.partNumbers],
       })),
-    [systemModelsData]
+    [systemModelsData],
   );
 
   return (

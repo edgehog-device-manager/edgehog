@@ -88,9 +88,9 @@ const Table = <T extends RowData>({
     () =>
       hiddenColumns.reduce(
         (acc, columnId) => ({ ...acc, [columnId]: false }),
-        {}
+        {},
       ),
-    [hiddenColumns]
+    [hiddenColumns],
   );
 
   const table = useReactTable<T>({
@@ -132,7 +132,7 @@ const Table = <T extends RowData>({
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                   {header.column.getIsSorted() && (
                     <SortDirectionIndicator

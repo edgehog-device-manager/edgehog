@@ -89,7 +89,7 @@ const baseImageSchema = yup
 
 const transformOutputData = (
   locale: string,
-  data: FormData
+  data: FormData,
 ): BaseImageChanges => ({
   startingVersionRequirement: data.startingVersionRequirement,
   releaseDisplayName: {
@@ -125,7 +125,7 @@ const UpdateBaseImage = ({
       releaseDisplayName: baseImage.releaseDisplayName || "",
       description: baseImage.description || "",
     }),
-    [baseImage]
+    [baseImage],
   );
 
   const {

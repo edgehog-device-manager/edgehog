@@ -27,7 +27,7 @@ import ReactDOM from "react-dom";
 import { AuthConfig, loadAuthConfig } from "contexts/Auth";
 
 const applicationMetatag: HTMLElement = document.head.querySelector(
-  "[name=application-name]"
+  "[name=application-name]",
 )!;
 const backendUrl =
   applicationMetatag.dataset?.backendUrl || "http://localhost:4000";
@@ -35,7 +35,7 @@ const backendUrl =
 const fetchGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,
-  authConfig: AuthConfig
+  authConfig: AuthConfig,
 ) => {
   const userLanguage = navigator.language; // TODO allow users to overwrite this
   const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
@@ -56,7 +56,7 @@ const uploadGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,
   uploadables: UploadableMap,
-  authConfig: AuthConfig
+  authConfig: AuthConfig,
 ) => {
   const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
   const request: RequestInit = {
@@ -77,7 +77,7 @@ const uploadGraphQL = async (
 };
 
 const extractUploadables = (
-  initVariables: Variables
+  initVariables: Variables,
 ): {
   variables: Variables;
   uploadables?: Record<string, File>;
@@ -115,12 +115,12 @@ const fetchRelay: FetchFunction = async (
   operation,
   variables,
   _cacheConfig,
-  _uploadables
+  _uploadables,
 ) => {
   const authConfig = loadAuthConfig();
   if (!authConfig) {
     throw new Error(
-      "Auth configuration not found, a tenant need to be selected."
+      "Auth configuration not found, a tenant need to be selected.",
     );
   }
   const extracted = extractUploadables(variables);
@@ -129,7 +129,7 @@ const fetchRelay: FetchFunction = async (
         operation.text,
         extracted.variables,
         extracted.uploadables,
-        authConfig
+        authConfig,
       )
     : fetchGraphQL(operation.text, variables, authConfig);
 };

@@ -138,7 +138,7 @@ const UpdateChannelContent = ({
 
   const [deleteUpdateChannel, isDeletingUpdateChannel] =
     useMutation<UpdateChannel_deleteUpdateChannel_Mutation>(
-      DELETE_UPDATE_CHANNEL_MUTATION
+      DELETE_UPDATE_CHANNEL_MUTATION,
     );
 
   const handleDeleteUpdateChannel = useCallback(() => {
@@ -162,7 +162,7 @@ const UpdateChannelContent = ({
           <FormattedMessage
             id="pages.UpdateChannel.deletionErrorFeedback"
             defaultMessage="Could not delete the Update Channel, please try again."
-          />
+          />,
         );
         setShowDeleteModal(false);
       },
@@ -180,16 +180,16 @@ const UpdateChannelContent = ({
         if (updateChannels) {
           root.setLinkedRecords(
             updateChannels.filter(
-              (updateChannel) => updateChannel.getDataID() !== updateChannelId
+              (updateChannel) => updateChannel.getDataID() !== updateChannelId,
             ),
-            "updateChannels"
+            "updateChannels",
           );
         }
 
         const targetGroupIds = new Set(
           updateChannel
             .getLinkedRecords("targetGroups")
-            .map((targetGroup) => targetGroup.getDataID())
+            .map((targetGroup) => targetGroup.getDataID()),
         );
         const deviceGroups = root.getLinkedRecords("deviceGroups");
         if (deviceGroups && targetGroupIds.size) {
@@ -207,7 +207,7 @@ const UpdateChannelContent = ({
 
   const [updateUpdateChannel, isUpdatingUpdateChannel] =
     useMutation<UpdateChannel_updateUpdateChannel_Mutation>(
-      UPDATE_UPDATE_CHANNEL_MUTATION
+      UPDATE_UPDATE_CHANNEL_MUTATION,
     );
 
   const handleUpdateUpdateChannel = useCallback(
@@ -233,12 +233,12 @@ const UpdateChannelContent = ({
             <FormattedMessage
               id="pages.UpdateChannel.updateErrorFeedback"
               defaultMessage="Could not update the Update Channel, please try again."
-            />
+            />,
           );
         },
       });
     },
-    [updateUpdateChannel, updateChannelId, refreshDeviceGroups]
+    [updateUpdateChannel, updateChannelId, refreshDeviceGroups],
   );
 
   return (
@@ -307,11 +307,11 @@ const UpdateChannelWrapper = ({
 }: UpdateChannelWrapperProps) => {
   const { updateChannel } = usePreloadedQuery(
     GET_UPDATE_CHANNEL_QUERY,
-    getUpdateChannelQuery
+    getUpdateChannelQuery,
   );
   const { deviceGroups } = usePreloadedQuery(
     GET_DEVICE_GROUPS_QUERY,
-    getDeviceGroupsQuery
+    getDeviceGroupsQuery,
   );
 
   if (!updateChannel) {
@@ -348,17 +348,17 @@ const UpdateChannelPage = () => {
 
   const [getUpdateChannelQuery, getUpdateChannel] =
     useQueryLoader<UpdateChannel_getUpdateChannel_Query>(
-      GET_UPDATE_CHANNEL_QUERY
+      GET_UPDATE_CHANNEL_QUERY,
     );
 
   const [getDeviceGroupsQuery, getDeviceGroups] =
     useQueryLoader<UpdateChannel_getDeviceGroups_Query>(
-      GET_DEVICE_GROUPS_QUERY
+      GET_DEVICE_GROUPS_QUERY,
     );
 
   const refreshDeviceGroups = useCallback(
     () => getDeviceGroups({}, { fetchPolicy: "store-and-network" }),
-    [getDeviceGroups]
+    [getDeviceGroups],
   );
 
   useEffect(() => {
@@ -383,7 +383,7 @@ const UpdateChannelPage = () => {
         onReset={() => {
           getUpdateChannel(
             { id: updateChannelId },
-            { fetchPolicy: "network-only" }
+            { fetchPolicy: "network-only" },
           );
           refreshDeviceGroups();
         }}

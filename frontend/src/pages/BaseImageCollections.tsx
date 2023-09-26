@@ -49,7 +49,7 @@ const BaseImageCollectionsContent = ({
 }: BaseImageCollectionsContentProps) => {
   const { baseImageCollections } = usePreloadedQuery(
     GET_BASE_IMAGE_COLLECTIONS_QUERY,
-    getBaseImageCollectionsQuery
+    getBaseImageCollectionsQuery,
   );
 
   return (
@@ -81,7 +81,7 @@ const BaseImageCollectionsContent = ({
 const BaseImageCollectionsPage = () => {
   const [getBaseImageCollectionsQuery, getBaseImageCollections] =
     useQueryLoader<BaseImageCollections_getBaseImageCollections_Query>(
-      GET_BASE_IMAGE_COLLECTIONS_QUERY
+      GET_BASE_IMAGE_COLLECTIONS_QUERY,
     );
 
   useEffect(() => getBaseImageCollections({}), [getBaseImageCollections]);

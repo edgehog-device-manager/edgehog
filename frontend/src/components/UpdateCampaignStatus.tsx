@@ -62,7 +62,7 @@ type Props = {
 const UpdateCampaignStatus = ({ updateCampaignRef }: Props) => {
   const { status } = useFragment(
     UPDATE_CAMPAIGN_STATUS_FRAGMENT,
-    updateCampaignRef
+    updateCampaignRef,
   );
 
   return (

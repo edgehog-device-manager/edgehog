@@ -53,7 +53,7 @@ const HardwareTypesContent = ({
 }: HardwareTypesContentProps) => {
   const hardwareTypesData = usePreloadedQuery(
     GET_HARDWARE_TYPES_QUERY,
-    getHardwareTypesQuery
+    getHardwareTypesQuery,
   );
 
   // TODO: handle readonly type without mapping to mutable type
@@ -63,7 +63,7 @@ const HardwareTypesContent = ({
         ...hardwareType,
         partNumbers: [...hardwareType.partNumbers],
       })),
-    [hardwareTypesData]
+    [hardwareTypesData],
   );
 
   return (
@@ -109,7 +109,7 @@ const HardwareTypesContent = ({
 const HardwareTypesPage = () => {
   const [getHardwareTypesQuery, getHardwareTypes] =
     useQueryLoader<HardwareTypes_getHardwareTypes_Query>(
-      GET_HARDWARE_TYPES_QUERY
+      GET_HARDWARE_TYPES_QUERY,
     );
 
   useEffect(() => getHardwareTypes({}), [getHardwareTypes]);

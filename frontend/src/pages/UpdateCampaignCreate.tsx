@@ -79,7 +79,7 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
 
   const [createUpdateCampaign, isCreatingUpdateCampaign] =
     useMutation<UpdateCampaignCreate_createUpdateCampaign_Mutation>(
-      CREATE_UPDATE_CAMPAIGN_MUTATION
+      CREATE_UPDATE_CAMPAIGN_MUTATION,
     );
 
   const handleCreateUpdateCampaign = useCallback(
@@ -107,7 +107,7 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
             <FormattedMessage
               id="pages.UpdateCampaignCreate.creationErrorFeedback"
               defaultMessage="Could not create the Update Campaign, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -124,13 +124,13 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
           if (updateCampaigns) {
             root.setLinkedRecords(
               [...updateCampaigns, updateCampaign],
-              "updateCampaigns"
+              "updateCampaigns",
             );
           }
         },
       });
     },
-    [createUpdateCampaign, navigate]
+    [createUpdateCampaign, navigate],
   );
 
   return (
@@ -209,7 +209,7 @@ const UpdateCampaignWrapper = ({
 }: UpdateCampaignWrapperProps) => {
   const updateCampaignOptions = usePreloadedQuery(
     GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY,
-    getCreateUpdateCampaignOptionsQuery
+    getCreateUpdateCampaignOptionsQuery,
   );
   const { baseImageCollections, updateChannels } = updateCampaignOptions;
 
@@ -226,12 +226,12 @@ const UpdateCampaignWrapper = ({
 const UpdateCampaignCreatePage = () => {
   const [getCreateUpdateCampaignOptionsQuery, getCreateUpdateCampaignOptions] =
     useQueryLoader<UpdateCampaignCreate_getOptions_Query>(
-      GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY
+      GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY,
     );
 
   const fetchCreateUpdateCampaignOptions = useCallback(
     () => getCreateUpdateCampaignOptions({}, { fetchPolicy: "network-only" }),
-    [getCreateUpdateCampaignOptions]
+    [getCreateUpdateCampaignOptions],
   );
 
   useEffect(fetchCreateUpdateCampaignOptions, [

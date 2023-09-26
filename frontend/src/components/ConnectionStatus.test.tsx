@@ -25,15 +25,15 @@ import ConnectionStatus from "./ConnectionStatus";
 
 it("renders correctly", () => {
   const connectedStatus = renderWithProviders(
-    <ConnectionStatus connected={true} />
+    <ConnectionStatus connected={true} />,
   );
   const disconnectedStatus = renderWithProviders(
-    <ConnectionStatus connected={false} />
+    <ConnectionStatus connected={false} />,
   );
   expect(
-    connectedStatus.container.querySelector(".text-success")
+    connectedStatus.container.querySelector(".text-success"),
   ).toBeInTheDocument();
   expect(
-    disconnectedStatus.container.querySelector(".text-secondary")
+    disconnectedStatus.container.querySelector(".text-secondary"),
   ).toBeInTheDocument();
 });

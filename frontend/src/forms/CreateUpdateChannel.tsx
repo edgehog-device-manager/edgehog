@@ -153,10 +153,10 @@ const CreateUpdateChannel = ({
         {
           targetGroupName: targetGroup.name,
           updateChannelName: targetGroup.updateChannel.name,
-        }
+        },
       );
     },
-    [intl]
+    [intl],
   );
 
   const targetGroupOptions = useMemo(() => {

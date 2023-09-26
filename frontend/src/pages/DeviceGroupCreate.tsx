@@ -53,7 +53,7 @@ const DeviceGroupCreatePage = () => {
 
   const [createDeviceGroup, isCreatingDeviceGroup] =
     useMutation<DeviceGroupCreate_createDeviceGroup_Mutation>(
-      CREATE_DEVICE_GROUP_MUTATION
+      CREATE_DEVICE_GROUP_MUTATION,
     );
 
   const handleCreateDeviceGroup = useCallback(
@@ -82,7 +82,7 @@ const DeviceGroupCreatePage = () => {
             <FormattedMessage
               id="pages.DeviceGroupCreate.creationErrorFeedback"
               defaultMessage="Could not create the group, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -99,7 +99,7 @@ const DeviceGroupCreatePage = () => {
           if (deviceGroups) {
             root.setLinkedRecords(
               [...deviceGroups, deviceGroup],
-              "deviceGroups"
+              "deviceGroups",
             );
           }
 
@@ -109,14 +109,14 @@ const DeviceGroupCreatePage = () => {
             if (deviceGroups) {
               device.setLinkedRecords(
                 [...deviceGroups, deviceGroup],
-                "deviceGroups"
+                "deviceGroups",
               );
             }
           });
         },
       });
     },
-    [createDeviceGroup, navigate]
+    [createDeviceGroup, navigate],
   );
 
   return (

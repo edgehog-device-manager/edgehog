@@ -70,7 +70,7 @@ const TablePagination = ({
         }}
       >
         {pageIndex + 1}
-      </Pagination.Item>
+      </Pagination.Item>,
     );
   }
 

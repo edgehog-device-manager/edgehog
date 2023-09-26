@@ -47,7 +47,7 @@ const DeleteModal = ({
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setConfirmString(e.target.value),
-    []
+    [],
   );
 
   const canDelete = confirmString === confirmText;

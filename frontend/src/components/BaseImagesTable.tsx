@@ -99,12 +99,12 @@ const BaseImagesTable = ({
 }: Props) => {
   const baseImageCollection = useFragment(
     BASE_IMAGES_TABLE_FRAGMENT,
-    baseImageCollectionRef
+    baseImageCollectionRef,
   );
 
   const columns = useMemo(
     () => getColumnsDefinition(baseImageCollection.id),
-    [baseImageCollection.id]
+    [baseImageCollection.id],
   );
 
   return (

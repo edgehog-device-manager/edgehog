@@ -109,7 +109,7 @@ type Props = {
 const NetworkInterfacesTable = ({ className, deviceRef }: Props) => {
   const { networkInterfaces } = useFragment(
     NETWORK_INTERFACES_TABLE_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
 
   if (!networkInterfaces || !networkInterfaces.length) {

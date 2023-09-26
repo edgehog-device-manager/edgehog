@@ -41,5 +41,5 @@ ReactDOM.render(
       </AuthProvider>
     </RelayEnvironmentProvider>
   </React.StrictMode>,
-  document.getElementById("root")
+  document.getElementById("root"),
 );

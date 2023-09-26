@@ -75,7 +75,7 @@ const BaseImageSelect = forwardRef<HTMLSelectElement, BaseImageSelectProps>(
         ))}
       </Form.Select>
     );
-  }
+  },
 );
 BaseImageSelect.displayName = "BaseImageSelect";
 
@@ -90,7 +90,7 @@ const BaseImageSelectContent = forwardRef<
 >(({ baseImagesQuery, notFoundComponent, ...selectProps }, ref) => {
   const { baseImageCollection } = usePreloadedQuery(
     GET_BASE_IMAGES_QUERY,
-    baseImagesQuery
+    baseImagesQuery,
   );
 
   if (baseImageCollection === null) {
@@ -151,7 +151,7 @@ const BaseImageSelectWrapper = forwardRef<
         error={new Error("Base Image Collection not found")}
       />
     ),
-    [fetchBaseImages]
+    [fetchBaseImages],
   );
 
   if (!baseImageCollectionId) {

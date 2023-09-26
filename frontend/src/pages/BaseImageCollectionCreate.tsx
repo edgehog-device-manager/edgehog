@@ -79,12 +79,12 @@ const BaseImageCollection = ({
 
   const systemModelsData = usePreloadedQuery(
     GET_SYSTEM_MODELS_QUERY,
-    getSystemModelsQuery
+    getSystemModelsQuery,
   );
 
   const [createBaseImageCollection, isCreatingBaseImageCollection] =
     useMutation<BaseImageCollectionCreate_createBaseImageCollection_Mutation>(
-      CREATE_BASE_IMAGE_COLLECTION_MUTATION
+      CREATE_BASE_IMAGE_COLLECTION_MUTATION,
     );
 
   // TODO: handle readonly type without mapping to mutable type
@@ -93,7 +93,7 @@ const BaseImageCollection = ({
       systemModelsData.systemModels.map((systemModel) => ({
         ...systemModel,
       })),
-    [systemModelsData]
+    [systemModelsData],
   );
 
   const handleCreateBaseImageCollection = useCallback(
@@ -123,7 +123,7 @@ const BaseImageCollection = ({
             <FormattedMessage
               id="pages.BaseImageCollectionCreate.creationErrorFeedback"
               defaultMessage="Could not create the Base Image Collection, please try again."
-            />
+            />,
           );
         },
         updater(store, data) {
@@ -137,18 +137,18 @@ const BaseImageCollection = ({
           const root = store.getRoot();
 
           const baseImageCollections = root.getLinkedRecords(
-            "baseImageCollections"
+            "baseImageCollections",
           );
           if (baseImageCollections) {
             root.setLinkedRecords(
               [...baseImageCollections, baseImageCollection],
-              "baseImageCollections"
+              "baseImageCollections",
             );
           }
         },
       });
     },
-    [createBaseImageCollection, navigate]
+    [createBaseImageCollection, navigate],
   );
 
   return (
@@ -209,7 +209,7 @@ const BaseImageCollection = ({
 const BaseImageCollectionCreatePage = () => {
   const [getSystemModelsQuery, getSystemModels] =
     useQueryLoader<BaseImageCollectionCreate_getSystemModels_Query>(
-      GET_SYSTEM_MODELS_QUERY
+      GET_SYSTEM_MODELS_QUERY,
     );
 
   useEffect(() => getSystemModels({}), [getSystemModels]);

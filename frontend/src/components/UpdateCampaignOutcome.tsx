@@ -57,7 +57,7 @@ interface Props {
 const UpdateCampaignOutcome = ({ updateCampaignRef }: Props) => {
   const { outcome } = useFragment(
     UPDATE_CAMPAIGN_OUTCOME_FRAGMENT,
-    updateCampaignRef
+    updateCampaignRef,
   );
 
   return (

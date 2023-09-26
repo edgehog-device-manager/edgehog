@@ -218,7 +218,7 @@ const ModemTab = ({ modem }: { modem: Modem }) => {
             <Form.Control
               type="text"
               value={intl.formatMessage(
-                registrationStatusMessages[modem.registrationStatus]
+                registrationStatusMessages[modem.registrationStatus],
               )}
               readOnly
             />
@@ -326,7 +326,7 @@ interface Props {
 const CellularConnectionTabs = ({ deviceRef }: Props) => {
   const { cellularConnection } = useFragment(
     CELLULAR_CONNECTION_TABS_FRAGMENT,
-    deviceRef
+    deviceRef,
   );
 
   if (!cellularConnection || cellularConnection.length === 0) {

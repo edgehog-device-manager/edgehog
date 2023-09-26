@@ -66,7 +66,7 @@ const Tabs = ({
   tabsOrder = [],
 }: TabsProps) => {
   const [activeKey, setActiveKey] = useState<EventKey | undefined>(
-    defaultActiveKey
+    defaultActiveKey,
   );
   const [tabRefs, setTabRefs] = useState<TabRef[]>([]);
 
@@ -78,10 +78,10 @@ const Tabs = ({
   const unregisterTab = useCallback((eventKey: EventKey) => {
     setTabRefs((tabRefs) => {
       const newTabRefs = tabRefs.filter(
-        (tabRef) => tabRef.eventKey !== eventKey
+        (tabRef) => tabRef.eventKey !== eventKey,
       );
       setActiveKey((activeKey) =>
-        activeKey === eventKey ? newTabRefs[0]?.eventKey : activeKey
+        activeKey === eventKey ? newTabRefs[0]?.eventKey : activeKey,
       );
       return newTabRefs;
     });
@@ -93,7 +93,7 @@ const Tabs = ({
       registerTab,
       unregisterTab,
     }),
-    [activeKey, registerTab, unregisterTab]
+    [activeKey, registerTab, unregisterTab],
   );
 
   const sortedTabRefs = useMemo(() => {
@@ -103,7 +103,7 @@ const Tabs = ({
     // 2. union the result with eventKeys to pick the remaining eventKeys
     const sortedEventKeys = _.union(
       _.intersection(tabsOrder, eventKeys),
-      eventKeys
+      eventKeys,
     );
     return sortedEventKeys.map((eventKey) => tabRefsByEventKey[eventKey]);
   }, [tabRefs, tabsOrder]);

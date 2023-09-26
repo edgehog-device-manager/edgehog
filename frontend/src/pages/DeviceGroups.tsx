@@ -49,7 +49,7 @@ const DeviceGroupsContent = ({
 }: DeviceGroupsContentProps) => {
   const { deviceGroups } = usePreloadedQuery(
     GET_DEVICE_GROUPS_QUERY,
-    getDeviceGroupsQuery
+    getDeviceGroupsQuery,
   );
 
   return (

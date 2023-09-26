@@ -98,7 +98,7 @@ const BaseImageCollectionsTable = ({
 }: Props) => {
   const baseImageCollections = useFragment(
     BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT,
-    baseImageCollectionsRef
+    baseImageCollectionsRef,
   );
 
   return (

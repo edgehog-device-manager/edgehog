@@ -97,7 +97,7 @@ const HardwareTypeContent = ({
 
   const hardwareTypeData = usePreloadedQuery(
     GET_HARDWARE_TYPE_QUERY,
-    getHardwareTypeQuery
+    getHardwareTypeQuery,
   );
 
   const handleShowDeleteModal = useCallback(() => {
@@ -106,7 +106,7 @@ const HardwareTypeContent = ({
 
   const [deleteHardwareType, isDeletingHardwareType] =
     useMutation<HardwareType_deleteHardwareType_Mutation>(
-      DELETE_HARDWARE_TYPE_MUTATION
+      DELETE_HARDWARE_TYPE_MUTATION,
     );
 
   const handleDeleteHardwareType = useCallback(() => {
@@ -130,7 +130,7 @@ const HardwareTypeContent = ({
           <FormattedMessage
             id="pages.HardwareTypeUpdate.deletionErrorFeedback"
             defaultMessage="Could not delete the hardware type, please try again."
-          />
+          />,
         );
         setShowDeleteModal(false);
       },
@@ -142,9 +142,9 @@ const HardwareTypeContent = ({
           if (hardwareTypes) {
             root.setLinkedRecords(
               hardwareTypes.filter(
-                (hardwareType) => hardwareType.getDataID() !== hardwareTypeId
+                (hardwareType) => hardwareType.getDataID() !== hardwareTypeId,
               ),
-              "hardwareTypes"
+              "hardwareTypes",
             );
           }
           store.delete(hardwareTypeId);
@@ -155,7 +155,7 @@ const HardwareTypeContent = ({
 
   const [updateHardwareType, isUpdatingHardwareType] =
     useMutation<HardwareType_updateHardwareType_Mutation>(
-      UPDATE_HARDWARE_TYPE_MUTATION
+      UPDATE_HARDWARE_TYPE_MUTATION,
     );
 
   // TODO: handle readonly type without mapping to mutable type
@@ -165,7 +165,7 @@ const HardwareTypeContent = ({
         ...hardwareTypeData.hardwareType,
         partNumbers: [...hardwareTypeData.hardwareType.partNumbers],
       },
-    [hardwareTypeData.hardwareType]
+    [hardwareTypeData.hardwareType],
   );
 
   const handleUpdateHardwareType = useCallback(
@@ -189,12 +189,12 @@ const HardwareTypeContent = ({
             <FormattedMessage
               id="pages.HardwareTypeUpdate.creationErrorFeedback"
               defaultMessage="Could not update the hardware type, please try again."
-            />
+            />,
           );
         },
       });
     },
-    [updateHardwareType, hardwareTypeId]
+    [updateHardwareType, hardwareTypeId],
   );
 
   if (!hardwareType) {

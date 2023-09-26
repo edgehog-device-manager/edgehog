@@ -79,7 +79,7 @@ const ConfirmModal = ({
         onConfirm();
       }
     },
-    [confirmOnEnter, isConfirming, disabled, onConfirm]
+    [confirmOnEnter, isConfirming, disabled, onConfirm],
   );
 
   const handleHide = useCallback(() => {

@@ -93,16 +93,16 @@ const systemModelSchema = yup
             const itemIndex = context.parent.indexOf(partNumber);
             return !context.parent.find(
               (pn: PartNumber, index: number) =>
-                pn.value === partNumber.value && index < itemIndex
+                pn.value === partNumber.value && index < itemIndex,
             );
-          })
+          }),
       ),
   })
   .required();
 
 const transformOutputData = (
   locale: string,
-  data: FormData
+  data: FormData,
 ): SystemModelChanges => {
   const systemModel: SystemModelChanges = {
     name: data.name,
@@ -188,7 +188,7 @@ const CreateSystemModelForm = ({
         partNumbers.update(index, { value: "" });
       }
     },
-    [partNumbers]
+    [partNumbers],
   );
 
   const pictureFile = watch("pictureFile");
