@@ -1,10 +1,12 @@
 <!---
-  Copyright 2022 SECO Mind Srl
+  Copyright 2023 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
 
-# Batch Operations
+# Batch Operations*
+
+*_This feature is planned for a future release_
 
 Edgehog provides facilities to perform batch operations on groups of devices. These are used to
 avoid having to perform repetitive tasks on many devices.

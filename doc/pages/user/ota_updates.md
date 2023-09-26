@@ -142,22 +142,15 @@ The properties of this Roll-out Mechanism are
 - Retries: the number of times an update must be retried on a specific Device before considering it
   an error.
 - Timeout: the time after which a pending OTA Operation is considered an error.
-   
-##### `optional`
+
+##### `optional`*
+
+*_The Optional rollout mechanism is planned for a future release_
 
 This Roll-out mechanism just pushes a message towards the Device informing that an update is
 available. The update is downloaded to the device only after the user accepts the update. The update
 is not required to be pushed immediately, to provide a backpressure mechanism if many users accept
 the update at the same time.
-
-The properties of this Roll-out Mechanism are
-
-- Max pending confirmations: the maximum number of Devices with a pending OTA Operation.
-- Max errors: the maximum number of OTA Operation errors. If more OTA Operations produce an error,
-  the Update Campaign is aborted with an error state.
-- Retries: the number of times an update must be retried on a specific Device before considering it
-  an error.
-- Timeout: the time after which a pending OTA Operation is considered an error.
 
 ## Manual OTA Updates
 

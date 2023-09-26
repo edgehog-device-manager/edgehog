@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -66,7 +66,9 @@ users are free to use them as they see fit.
 Some examples of tags that can be assigned to the e-bikes or electric scooters in our examples
 could be `out-of-order`, `test_machine` or `Upgraded Brakes`.
 
-### Attributes
+### Attributes*
+
+*_This feature is planned for a future release_
 
 Attributes are namespaced key-value pairs that can be attached to Devices. The namespacing happens
 by prepending the namespace to the key using a colon as separator (i.e. `namespace:key`). This
@@ -94,7 +96,9 @@ The supported namespaces are:
 
 Note that all values will be converted to a string when using them as attribute values
 
-### Attribute Value Source
+### Attribute Value Source*
+
+*_This feature is planned for a future release_
 
 An Attribute Value Source populates the attributes of a Device according to some rule.
 
@@ -119,7 +123,10 @@ Created with the syntax `"<value>" in tags`, it returns `true` if `value` is inc
 tags. It's also possible to use a negative filter with `"value" not in tags`, in this case the
 filter will match all Devices which _don't_ have the tag.
 
-##### Attribute filter
+##### Attribute filter*
+
+*_Note that while Attribute filters are already supported, Attributes are going to be available in a
+future release_
 
 Created with the syntax `attributes["<namespace>:<key>"] <operator> <value>`, it returns `true` if
 the value of the chosen attribute satisfies the expression.
@@ -140,7 +147,9 @@ of the values supported using special syntax:
   string contained in double quotes must be a valid Base64 encoding of the binary value. Example:
   `binaryblob("Zm9vYmFy")` to encode the string `"foobar"`.
 
-##### Attribute inclusion filter (Not supported yet)
+##### Attribute inclusion filter*
+
+*_This feature is planned for a future release_
 
 - `"<value>" in attributes["<namespace>:<key>"]`: returns `true` if `value` is included in the
   chosen attribute. Note that the attribute must be an array for the expression to be valid.
@@ -254,9 +263,11 @@ interacting with them.
 It also defines other details like how many devices are updated at a time, how many errors should be
 supported before aborting the campaign etc.
 
-There are currently two main Mechanisms available: Push and Optional. The Push mechanism pushes the
+There are currently two main Mechanisms available: Push and Optional*. The Push mechanism pushes the
 update towards the device unconditionally, while the Optional mechanism waits for a confirmation on
 the Device side (usually given by a user) before starting to download the update.
+
+*_The Optional rollout mechanism is planned for a future release_
 
 ## OTA Operation
 
@@ -264,7 +275,9 @@ An OTA Operation tracks the progress of an update to a specific Device. It is st
 starts pushing the update to the Device and ends either with a success or with an error (possibly
 due to a timeout).
 
-## Maintenance Window
+## Maintenance Window*
+
+*_This feature is planned for a future release_
 
 Each Device can have an optional Maintenance Window. This is used by Update Campaign to determine
 which Devices can be updated at a specific time.
