@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Don't crash the OTA campaign if a misconfigured device doesn't send its base image version.
 - Correctly return stats even for OTA campaigns with no targets.
+- Handle empty string when translating legacy OTAResponse messages.
 
 ## [0.7.0-alpha.1] - 2023-09-12
 ### Added
