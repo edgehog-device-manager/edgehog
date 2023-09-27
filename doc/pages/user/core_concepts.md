@@ -224,8 +224,17 @@ A Base Image Collection contains all the Base Images that ran, are running or co
 System Model. Drawing from the bike sharing example, there would be a different Base Image
 Collection for, e.g., e-bikes from each specific country to handle the different speed limitations.
 
-Basically the job of a Base Image Collection is to limit what can be installed to a System Model, to
-avoid accidentally installing the firmware for an electric scooter on an e-bike.
+The primary purpose of a Base Image Collection is to limit what can be installed to a System Model,
+preventing unintended installations, such as electric scooter firmware on an e-bike.
+
+### Version Requirement
+
+A Version Requirement specifies compatibility between versions. It is expressed as a string containing
+various criteria and adheres to syntax detailed in
+[Elixir's Version.Requirement](https://hexdocs.pm/elixir/Version.html#module-requirements).
+For example, when the Version Requirement `>= 2.0.0 and < 3.0.0` is used to define the
+`Supported starting versions` of Base Image `foo`, it identifies a subset of Base Images
+within the same Base Image Collection that can be updated to the Base Image `foo`.
 
 ### Update Channels
 
