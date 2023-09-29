@@ -33,7 +33,7 @@ necessarily) the Hardware Type Part Number is a code that is written on the PCB.
 A device is an entity connected to Astarte. A Device has a uniquely identified by its Device ID, and
 it usually lives inside a product such as an e-bike (if it is not on a shelf or in a repair shop).
 
-### System Models
+### System Model
 
 A System Model constitutes a group of devices implementing the same functionality for some users.
 For example, two e-bikes can be physically identical and still belong to different System Models,
