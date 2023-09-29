@@ -43,9 +43,7 @@ within the same Base Image Collection that can be updated to the Base Image `foo
 ## Update Channel
 
 An Update Channel represents the subscription of a Device to a specific set of Base Images.
-
-Each Device is always associated with an Update Channel (e.g. `default`, `stable`, `beta`, `devel`,
-...). To assign a Device to a specific Update Channel (other than the default one) the device must
+To assign a Device to a specific Update Channel (other than the default one) the device must
 belong to a [Group](core_concepts.html#group) and that Group has to be assigned to the Target Groups of the Update
 Channel.
 
@@ -53,15 +51,10 @@ The same Base Image can be associated with multiple Update Channels. This guaran
 that once testers in the `beta` Update Channel validate the Base Image, the exact same Base Image
 will be used to update devices in the `default` Update Channel.
 
-It's possible to automatically assign an Update Channel to one or more [Groups](core_concepts.html#group).
-
 ## Update Campaign
 
 An Update Campaign is the operation that tracks the distribution of a specific Base Image to all
 devices belonging to an Update Channel.
-
-Each Update Channel can have only one live campaign at a time for a specific System Model, so
-creating a new campaign implicitly replaces the old one if it was still active.
 
 An Update Campaign can define additional constraints about which devices can be updated (e.g.
 minimum current version, force downgrade, etc).
@@ -87,6 +80,11 @@ the Device side (usually given by a user) before starting to download the update
 An OTA Operation tracks the progress of an update to a specific Device. It is started when Edgehog
 starts pushing the update to the Device and ends either with a success or with an error (possibly
 due to a timeout).
+
+## Update Target
+
+An Update Target is the target of an Update Campaign, which is composed by the targeted device, 
+the status of the target in the linked Update Campaign, OTA Operation and additional metadata.
 
 ## Maintenance Window*
 
