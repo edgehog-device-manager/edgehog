@@ -73,8 +73,10 @@ populated with the supported formats.
 
 Before creating the first Update Campaign, at least an Update Channel must be created.
 
-The first Update Channel is automatically marked as the default one. All Devices that are not
+The first Update Channel is automatically marked as the default* one. All Devices that are not
 assigned to any other Update Channel will be implicitly assigned to this one.
+
+*_The default Update Channel feature is planned for a future release_
 
 When creating an Update Channel, the following information must be provided
 
@@ -121,8 +123,10 @@ receive the Base Image and will require a separate campaign to be started.
   
 Only a single Update Campaign can be started for a given System Model and Update Channel
 combination, so creating a new Update Campaign while another one is already running will implicitly
-cancel the old one. This means that Devices that didn't yet receive the Base Image of the old Update
+cancel* the old one. This means that Devices that didn't yet receive the Base Image of the old Update
 Campaign will directly receive the new one, without any intermediate step.
+
+*_Implicit Cancellation feature is planned for a future release_
 
 #### Roll-out mechanism
 
