@@ -71,6 +71,7 @@ defmodule Doc.MixProject do
       "pages/ota_updates/ota_update_concepts.md",
       "pages/ota_updates/base_images.md",
       "pages/ota_updates/base_image_collections.md",
+      "pages/ota_updates/update_channels.md",
       "pages/ota_updates/ota_updates.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
