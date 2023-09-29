@@ -69,6 +69,7 @@ defmodule Doc.MixProject do
       "pages/user/groups.md",
       "pages/user/batch_operations.md",
       "pages/ota_updates/ota_update_concepts.md",
+      "pages/ota_updates/base_image_collections.md",
       "pages/ota_updates/ota_updates.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
