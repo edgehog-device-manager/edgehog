@@ -87,6 +87,7 @@ defmodule Edgehog.Labeling do
   def list_device_tags do
     query =
       from t in Tag,
+        distinct: true,
         join: dt in DeviceTag,
         on: t.id == dt.tag_id
 
