@@ -213,7 +213,7 @@ firmware. Each Base Image belongs to a [Base Image Collection](#base-image-colle
 Base Images follow semantic versioning, so that the user is able to know when a specific update can
 contain breaking changes. Each Base Image must have a unique version number.
 
-## Base Image Collection
+### Base Image Collection
 
 A Base Image Collection is a set of Base Images associated with a specific [System
 Model](#system-models) and, implicitly via the System Model, with a specific [Hardware
@@ -224,10 +224,19 @@ A Base Image Collection contains all the Base Images that ran, are running or co
 System Model. Drawing from the bike sharing example, there would be a different Base Image
 Collection for, e.g., e-bikes from each specific country to handle the different speed limitations.
 
-Basically the job of a Base Image Collection is to limit what can be installed to a System Model, to
-avoid accidentally installing the firmware for an electric scooter on an e-bike.
+The primary purpose of a Base Image Collection is to limit what can be installed to a System Model,
+preventing unintended installations, such as electric scooter firmware on an e-bike.
 
-## Update Channels
+### Version Requirement
+
+A Version Requirement specifies compatibility between versions. It is expressed as a string containing
+various criteria and adheres to syntax detailed in
+[Elixir's Version.Requirement](https://hexdocs.pm/elixir/Version.html#module-requirements).
+For example, when the Version Requirement `>= 2.0.0 and < 3.0.0` is used to define the
+`Supported starting versions` of Base Image `foo`, it identifies a subset of Base Images
+within the same Base Image Collection that can be updated to the Base Image `foo`.
+
+### Update Channels
 
 An Update Channel represents the subscription of a Device to a specific set of Base Images.
 
@@ -242,7 +251,7 @@ will be used to update devices in the `default` Update Channel.
 
 It's possible to automatically assign an Update Channel to one or more [Groups](#group).
 
-## Update Campaign
+### Update Campaign
 
 An Update Campaign is the operation that tracks the distribution of a specific Base Image to all
 devices belonging to an Update Channel.
@@ -253,7 +262,7 @@ creating a new campaign implicitly replaces the old one if it was still active.
 An Update Campaign can define additional constraints about which devices can be updated (e.g.
 minimum current version, allow downgrade, etc).
 
-## Rollout Mechanism
+### Rollout Mechanism
 
 The Rollout Mechanism determines the details of how an Update Campaign is carried out.
 
@@ -269,13 +278,13 @@ the Device side (usually given by a user) before starting to download the update
 
 *_The Optional rollout mechanism is planned for a future release_
 
-## OTA Operation
+### OTA Operation
 
 An OTA Operation tracks the progress of an update to a specific Device. It is started when Edgehog
 starts pushing the update to the Device and ends either with a success or with an error (possibly
 due to a timeout).
 
-## Maintenance Window*
+### Maintenance Window*
 
 *_This feature is planned for a future release_
 

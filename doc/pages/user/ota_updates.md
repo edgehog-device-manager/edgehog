@@ -44,16 +44,16 @@ functionalities or implementing the same functionalities on different hardware.
 
 Once a new Base Image is baked, it can be uploaded into a specific Base Image Collection.
 
-When uploading a Base Image, the following information must be provided
+When uploading a Base Image, the following information must be provided:
 
 - Version: a version number following the [Semantic Versioning](https://semver.org) spec. The
   version number must be unique.
 - Release Display Name (optional): a localized user-friendly name for the release.
 - Description (optional): a localized description of the content of the Base Image.
-- Supported starting versions (optional): a version requirement that the Device must satisfy with
-  its current Base Image to be updated with this Base Image. If a Device that does not satisfy the
-  requirement is included in an Update Campaign that uses this Base Image, the result of the OTA
-  Operation is an error.
+- Supported starting versions (optional): a [Version Requirement](core_concepts.html#version-requirement)
+  that the Device must satisfy with its current Base Image to be updated with this Base Image.
+  If a Device that does not satisfy the requirement is included in an Update Campaign
+  that uses this Base Image, the result of the [OTA Operation](core_concepts.html#ota-operation) is an error.
 
 Some information can be automatically filled in if the Base Image can be parsed by one of the
 [supported Base Image parsers](#supported-base-image-parsers). Other than that, users are free to
