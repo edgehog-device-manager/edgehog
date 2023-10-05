@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2023 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
 # The directory Mix will write compiled artifacts to.
@@ -28,3 +28,9 @@ edgehog-*.tar
 # Ignore dialyzer PLT files
 /priv/plts/*.plt
 /priv/plts/*.plt.hash
+
+/.direnv/
+/.envrc
+
+/.nix-mix
+/.mix-hex
