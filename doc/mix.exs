@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ defmodule Doc.MixProject do
       api_reference: false,
       groups_for_extras: [
         "User Guide": ~r"/user/",
+        "OTA Updates": ~r"/ota_updates/",
         Architecture: ~r"/architecture/",
         "Admin Guide": ~r"/admin/",
         "Integrating with Edgehog": ~r"/integrating/"
@@ -66,8 +67,13 @@ defmodule Doc.MixProject do
       "pages/user/device_sdks_runtime.md",
       "pages/user/attribute_value_sources.md",
       "pages/user/groups.md",
-      "pages/user/ota_updates.md",
       "pages/user/batch_operations.md",
+      "pages/ota_updates/ota_update_concepts.md",
+      "pages/ota_updates/base_images.md",
+      "pages/ota_updates/base_image_collections.md",
+      "pages/ota_updates/update_channels.md",
+      "pages/ota_updates/update_campaigns.md",
+      "pages/ota_updates/ota_updates.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
       "pages/integrating/astarte_interfaces.md",
