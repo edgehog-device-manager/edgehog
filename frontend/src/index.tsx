@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
-import ReactDOM from "react-dom";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { RelayEnvironmentProvider } from "react-relay/hooks";
 import { BrowserRouter as RouterProvider } from "react-router-dom";
 
@@ -29,8 +29,8 @@ import I18nProvider from "i18n";
 import App from "./App";
 import "./index.scss";
 
-ReactDOM.render(
-  <React.StrictMode>
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
     <RelayEnvironmentProvider environment={relayEnvironment}>
       <AuthProvider fetchGraphQL={fetchGraphQL}>
         <RouterProvider>
@@ -40,6 +40,5 @@ ReactDOM.render(
         </RouterProvider>
       </AuthProvider>
     </RelayEnvironmentProvider>
-  </React.StrictMode>,
-  document.getElementById("root"),
+  </StrictMode>,
 );

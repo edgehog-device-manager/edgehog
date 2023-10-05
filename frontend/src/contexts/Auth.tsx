@@ -154,8 +154,12 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
   );
 
   useEffect(() => {
+    let mounted = true;
     if (isValidatingInitialConfig) {
       validateAuthConfig(authConfig).then((isValid) => {
+        if (!mounted) {
+          return;
+        }
         if (!isValid) {
           updateAuthConfig(null);
           // TODO: the initial config is invalid, meaning the authToken is
@@ -165,6 +169,9 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
         setIsValidatingInitialConfig(false);
       });
     }
+    return () => {
+      mounted = false;
+    };
   }, [
     authConfig,
     isValidatingInitialConfig,

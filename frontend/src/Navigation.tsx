@@ -19,8 +19,12 @@
 */
 
 import { useCallback } from "react";
-import { generatePath as routerGeneratePath, matchPath } from "react-router";
-import { useNavigate as useRouterNavigate } from "react-router";
+import {
+  generatePath as routerGeneratePath,
+  matchPath,
+  useNavigate as useRouterNavigate,
+} from "react-router";
+import type { ParamParseKey } from "react-router";
 import { Link as RouterLink } from "react-router-dom";
 import type { LinkProps as RouterLinkProps } from "react-router-dom";
 
@@ -56,61 +60,63 @@ const matchPaths = (routes: Route | Route[], path: string) => {
   return r.some((route: Route) => matchPath(route, path) != null);
 };
 
-type ParametricRoute =
-  | { route: Route.devices }
-  | { route: Route.devicesEdit; params: { deviceId: string } }
-  | { route: Route.deviceGroups }
-  | { route: Route.deviceGroupsEdit; params: { deviceGroupId: string } }
-  | { route: Route.deviceGroupsNew }
-  | { route: Route.systemModels }
-  | { route: Route.systemModelsNew }
-  | { route: Route.systemModelsEdit; params: { systemModelId: string } }
-  | { route: Route.hardwareTypes }
-  | { route: Route.hardwareTypesNew }
-  | { route: Route.hardwareTypesEdit; params: { hardwareTypeId: string } }
-  | { route: Route.baseImageCollections }
-  | { route: Route.baseImageCollectionsNew }
-  | {
-      route: Route.baseImageCollectionsEdit;
-      params: { baseImageCollectionId: string };
-    }
-  | {
-      route: Route.baseImagesEdit;
-      params: { baseImageCollectionId: string; baseImageId: string };
-    }
-  | {
-      route: Route.baseImagesNew;
-      params: { baseImageCollectionId: string };
-    }
-  | { route: Route.updateChannels }
-  | { route: Route.updateChannelsEdit; params: { updateChannelId: string } }
-  | { route: Route.updateChannelsNew }
-  | { route: Route.updateCampaigns }
-  | { route: Route.updateCampaignsNew }
-  | { route: Route.updateCampaignsEdit; params: { updateCampaignId: string } }
-  | { route: Route.login }
-  | { route: Route.logout };
+type RouteKeys = keyof typeof Route;
+type RouteWithParams<T extends string> = T extends ParamParseKey<T>
+  ? { route: T }
+  : { route: T; params: { [P in ParamParseKey<T>]: string } };
+
+type ParametricRoute = {
+  [K in RouteKeys]: RouteWithParams<(typeof Route)[K]>;
+}[RouteKeys];
 
 type LinkProps = Omit<RouterLinkProps, "to"> & ParametricRoute;
 
 const generatePath = (route: ParametricRoute): string => {
-  if ("params" in route && route.params) {
-    return routerGeneratePath(route.route, route.params);
+  switch (route.route) {
+    case Route.devicesEdit:
+      return routerGeneratePath(route.route, route.params);
+    case Route.deviceGroupsEdit:
+      return routerGeneratePath(route.route, route.params);
+    case Route.systemModelsEdit:
+      return routerGeneratePath(route.route, route.params);
+    case Route.hardwareTypesEdit:
+      return routerGeneratePath(route.route, route.params);
+    case Route.baseImageCollectionsEdit:
+      return routerGeneratePath(route.route, route.params);
+    case Route.baseImagesNew:
+      return routerGeneratePath(route.route, route.params);
+    case Route.baseImagesEdit:
+      return routerGeneratePath(route.route, route.params);
+    case Route.updateChannelsEdit:
+      return routerGeneratePath(route.route, route.params);
+    case Route.updateCampaignsEdit:
+      return routerGeneratePath(route.route, route.params);
+
+    case Route.devices:
+    case Route.deviceGroups:
+    case Route.deviceGroupsNew:
+    case Route.systemModels:
+    case Route.systemModelsNew:
+    case Route.hardwareTypes:
+    case Route.hardwareTypesNew:
+    case Route.baseImageCollections:
+    case Route.baseImageCollectionsNew:
+    case Route.updateChannels:
+    case Route.updateChannelsNew:
+    case Route.updateCampaigns:
+    case Route.updateCampaignsNew:
+    case Route.login:
+    case Route.logout:
+      return route.route;
   }
-  return route.route;
 };
 
 const Link = (props: LinkProps) => {
-  let to, forwardProps;
-  if ("params" in props) {
-    const { route, params, ...rest } = props;
-    to = routerGeneratePath(route, params);
-    forwardProps = rest;
-  } else {
-    const { route, ...rest } = props;
-    to = route;
-    forwardProps = rest;
-  }
+  const to = generatePath(props);
+  const forwardProps =
+    "params" in props
+      ? (({ route: _route, params: _params, ...rest }) => rest)(props)
+      : (({ route: _route, ...rest }) => rest)(props);
 
   return <RouterLink to={to} {...forwardProps} />;
 };
@@ -118,7 +124,7 @@ const Link = (props: LinkProps) => {
 const useNavigate = () => {
   const routerNavigate = useRouterNavigate();
   const navigate = useCallback(
-    (route: ParametricRoute | string) => {
+    (route: ParametricRoute | `${Route}`) => {
       const path = typeof route === "string" ? route : generatePath(route);
       routerNavigate(path);
     },
