@@ -37,8 +37,6 @@ on:
     # Create the snapshot only when it matters
     - 'main'
     - 'release-*'
-  # Run on branch/tag creation
-  create:
 
 jobs:
   docs:
