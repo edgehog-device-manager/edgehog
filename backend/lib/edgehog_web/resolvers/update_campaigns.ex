@@ -107,6 +107,20 @@ defmodule EdgehogWeb.Resolvers.UpdateCampaigns do
     end
   end
 
+  def update_rollout_mechanism(args, _resolution, mechanism_type) do
+    rollout_args =
+      args
+      |> Map.delete(:update_campaign_id)
+      |> Map.put(:type, mechanism_type)
+
+    update_args = %{rollout_mechanism: rollout_args}
+
+    with {:ok, campaign} <- UpdateCampaigns.fetch_update_campaign(args.update_campaign_id),
+         {:ok, updated_campaign} <- UpdateCampaigns.update_update_campaign(campaign, update_args) do
+      {:ok, %{update_campaign: updated_campaign}}
+    end
+  end
+
   # This moves the type tag from the outer key to the inner map, which adapts the behaviour
   # offered by GraphQL to the one required by PolymorphicEmbed in the changeset
   defp tag_rollout_mechanism(%{push: push_rollout_mechanism}) do
