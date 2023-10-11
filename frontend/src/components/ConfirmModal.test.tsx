@@ -39,18 +39,18 @@ it("renders correctly", () => {
   expect(modal).toHaveTextContent("OK");
 });
 
-it("correctly confirms with the confirm button", () => {
+it("correctly confirms with the confirm button", async () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
     onConfirm: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
-  userEvent.click(screen.getByText("OK"));
+  await userEvent.click(screen.getByText("OK"));
   expect(props.onConfirm).toHaveBeenCalledTimes(1);
 });
 
-it("correctly confirms by typing Enter", () => {
+it("correctly confirms by typing Enter", async () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
@@ -58,11 +58,11 @@ it("correctly confirms by typing Enter", () => {
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   const title = screen.getByText(props.title);
-  userEvent.type(title, "{enter}");
+  await userEvent.type(title, "{Enter}");
   expect(props.onConfirm).toHaveBeenCalledTimes(1);
 });
 
-it("correctly dimisses with the cancel button", () => {
+it("correctly dimisses with the cancel button", async () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
@@ -71,12 +71,12 @@ it("correctly dimisses with the cancel button", () => {
     onCancel: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
-  userEvent.click(screen.getByText("Cancel"));
+  await userEvent.click(screen.getByText("Cancel"));
   expect(props.onCancel).toHaveBeenCalledTimes(1);
   expect(props.onConfirm).not.toHaveBeenCalled();
 });
 
-it("correctly dimisses by typing Esc", () => {
+it("correctly dimisses by typing Esc", async () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
@@ -86,7 +86,7 @@ it("correctly dimisses by typing Esc", () => {
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   const modal = document.querySelector("[role='dialog']")!;
-  userEvent.type(modal, "{esc}");
+  await userEvent.type(modal, "{Escape}");
   expect(props.onCancel).toHaveBeenCalled();
   expect(props.onConfirm).not.toHaveBeenCalled();
 });

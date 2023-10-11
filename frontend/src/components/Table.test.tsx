@@ -70,17 +70,17 @@ it("correctly renders list of data", () => {
   expect(secondRow).toHaveTextContent("Name 1");
 });
 
-it("can search data", () => {
+it("can search data", async () => {
   const { container } = renderWithProviders(
     <Table data={data} columns={columns} />,
   );
-  userEvent.type(screen.getByPlaceholderText("Search"), "Name 42");
+  await userEvent.type(screen.getByPlaceholderText("Search"), "Name 42");
   expect(container.querySelectorAll("tbody tr")).toHaveLength(1);
   const firstRow = container.querySelector("tbody tr:nth-child(1)");
   expect(firstRow).toHaveTextContent("Name 42");
 });
 
-it("correctly paginates a long list", () => {
+it("correctly paginates a long list", async () => {
   const { container } = renderWithProviders(
     <Table data={data} columns={columns} />,
   );
@@ -91,7 +91,7 @@ it("correctly paginates a long list", () => {
   expect(screen.queryByTestId(`pagination-item-4`)).toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-5`)).not.toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-last`)).toBeInTheDocument();
-  userEvent.click(screen.getByTestId(`pagination-last`));
+  await userEvent.click(screen.getByTestId(`pagination-last`));
   expect(screen.queryByTestId(`pagination-item-4`)).not.toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-5`)).toBeInTheDocument();
   expect(screen.queryByTestId(`pagination-item-9`)).toBeInTheDocument();

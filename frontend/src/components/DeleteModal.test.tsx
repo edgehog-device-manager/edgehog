@@ -41,7 +41,7 @@ it("renders correctly", () => {
   expect(modal).toHaveTextContent("Delete");
 });
 
-it("cannot confirm without entering the confirm text", () => {
+it("cannot confirm without entering the confirm text", async () => {
   const props = {
     title: "Modal Title",
     confirmText: "confirm-text",
@@ -50,20 +50,20 @@ it("cannot confirm without entering the confirm text", () => {
   };
   renderWithProviders(<DeleteModal {...props}>Prompt message.</DeleteModal>);
 
-  userEvent.click(screen.getByText("Delete"));
+  await userEvent.click(screen.getByText("Delete"));
   const title = screen.getByText(props.title);
-  userEvent.type(title, "{enter}");
+  await userEvent.type(title, "{Enter}");
   expect(props.onConfirm).not.toHaveBeenCalled();
 
-  userEvent.type(screen.getByRole("textbox"), "confirm-text");
+  await userEvent.type(screen.getByRole("textbox"), "confirm-text");
 
-  userEvent.click(screen.getByText("Delete"));
+  await userEvent.click(screen.getByText("Delete"));
   expect(props.onConfirm).toHaveBeenCalledTimes(1);
-  userEvent.type(title, "{enter}");
+  await userEvent.type(title, "{Enter}");
   expect(props.onConfirm).toHaveBeenCalledTimes(2);
 });
 
-it("does not confirm by dismissing", () => {
+it("does not confirm by dismissing", async () => {
   const props = {
     title: "Modal Title",
     confirmText: "confirm-text",
@@ -72,9 +72,9 @@ it("does not confirm by dismissing", () => {
   };
   renderWithProviders(<DeleteModal {...props}>Prompt message.</DeleteModal>);
 
-  userEvent.click(screen.getByText("Cancel"));
+  await userEvent.click(screen.getByText("Cancel"));
   const modal = document.querySelector("[role='dialog']")!;
-  userEvent.type(modal, "{esc}");
+  await userEvent.type(modal, "{Escape}");
   expect(props.onConfirm).not.toHaveBeenCalled();
   expect(props.onCancel).toHaveBeenCalled();
 });
