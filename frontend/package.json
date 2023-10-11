@@ -47,7 +47,6 @@
     "react-select": "^5.7.5",
     "relay-compiler": "^15.0.0",
     "relay-runtime": "^15.0.0",
-    "relay-test-utils": "^15.0.0",
     "sass": "^1.68.0",
     "semver": "^7.3.8",
     "typescript": "^5.2.2",
@@ -110,6 +109,7 @@
     "jsdom": "^22.1.0",
     "prettier": "^3.0.3",
     "react-select-event": "^5.5.1",
+    "relay-test-utils": "^15.0.0",
     "vitest": "^0.34.5"
   }
 }
