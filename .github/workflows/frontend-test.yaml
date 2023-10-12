@@ -29,6 +29,7 @@ on:
       - ".github/workflows/frontend-test.yaml"
     branches:
       - "main"
+      - 'release-*'
   # Run on pull requests matching apps
   pull_request:
     paths:
@@ -69,3 +70,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: frontend/coverage/lcov.info
+
+  build-docker-image:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        working-directory: frontend
+        run: docker build .
