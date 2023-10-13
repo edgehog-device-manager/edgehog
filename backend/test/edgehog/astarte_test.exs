@@ -58,6 +58,13 @@ defmodule Edgehog.AstarteTest do
       assert cluster.name == name
     end
 
+    test "create_cluster/1 strips trailing slash from base_api_url" do
+      attrs = %{base_api_url: "https://api.test.astarte.example/foo/", name: "test-trailing"}
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.create_cluster(attrs)
+      assert cluster.base_api_url == "https://api.test.astarte.example/foo"
+    end
+
     test "create_cluster/1 with invalid data returns error changeset" do
       %{base_api_url: valid_url, name: valid_name} = @valid_attrs
       %{base_api_url: invalid_url, name: invalid_name} = @invalid_attrs
@@ -100,6 +107,14 @@ defmodule Edgehog.AstarteTest do
       |> Enum.each(fn cluster -> assert {:error, %Ecto.Changeset{}} = cluster end)
     end
 
+    test "create_cluster/1 with duplicate base_api_url returns error changeset" do
+      cluster = cluster_fixture()
+      attrs = %{@valid_attrs | base_api_url: cluster.base_api_url}
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Astarte.create_cluster(attrs)
+      assert "has already been taken" in errors_on(changeset)[:base_api_url]
+    end
+
     test "update_cluster/2 with valid data updates the cluster" do
       cluster = cluster_fixture()
       update_attrs = %{base_api_url: "https://another-base.url", name: "some updated name"}
@@ -109,10 +124,27 @@ defmodule Edgehog.AstarteTest do
       assert cluster.name == "some updated name"
     end
 
+    test "update_cluster/1 strips trailing slash from base_api_url" do
+      cluster = cluster_fixture()
+      update_attrs = %{base_api_url: "https://another-base.url/"}
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.update_cluster(cluster, update_attrs)
+      assert cluster.base_api_url == "https://another-base.url"
+    end
+
     test "update_cluster/2 with invalid data returns error changeset" do
       cluster = cluster_fixture()
       assert {:error, %Ecto.Changeset{}} = Astarte.update_cluster(cluster, @invalid_attrs)
       assert cluster == Astarte.get_cluster!(cluster.id)
+    end
+
+    test "update_cluster/1 with duplicate base_api_url returns error changeset" do
+      cluster = cluster_fixture()
+      other_cluster = cluster_fixture()
+      attrs = %{base_api_url: other_cluster.base_api_url}
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Astarte.update_cluster(cluster, attrs)
+      assert "has already been taken" in errors_on(changeset)[:base_api_url]
     end
 
     test "delete_cluster/1 deletes the cluster" do

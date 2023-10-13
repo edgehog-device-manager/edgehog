@@ -38,7 +38,9 @@ defmodule Edgehog.Astarte.Cluster do
     |> cast(attrs, [:name, :base_api_url])
     |> validate_required([:name, :base_api_url])
     |> unique_constraint(:name)
+    |> unique_constraint(:base_api_url)
     |> validate_change(:base_api_url, &validate_url/2)
+    |> update_change(:base_api_url, &String.trim_trailing(&1, "/"))
   end
 
   defp validate_url(field, url) do
