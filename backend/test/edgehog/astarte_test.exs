@@ -66,12 +66,11 @@ defmodule Edgehog.AstarteTest do
     end
 
     test "create_cluster/1 with invalid data returns error changeset" do
-      %{base_api_url: valid_url, name: valid_name} = @valid_attrs
-      %{base_api_url: invalid_url, name: invalid_name} = @invalid_attrs
+      %{name: valid_name} = @valid_attrs
+      %{base_api_url: invalid_url} = @invalid_attrs
 
       invalid_attrs_list = [
         @invalid_attrs,
-        %{base_api_url: valid_url, name: invalid_name},
         %{base_api_url: invalid_url, name: valid_name},
         %{base_api_url: "", name: valid_name},
         %{base_api_url: "some url", name: valid_name}
