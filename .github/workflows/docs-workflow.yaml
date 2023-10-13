@@ -18,13 +18,20 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: Docs generation for Github Pages
+name: Edgehog docs generation
 
 on:
   push:
     paths:
     # Documentation pages
     - 'doc/**'
+    # Schema files
+    - 'backend/lib/edgehog_web/schema.ex'
+    - 'backend/lib/edgehog_web/schema/**'
+    - 'backend/mix.exs'
+    - 'backend/mix.lock'
+    # SpectaQL configuration file
+    - 'backend/.spectaql-config.yaml'
     # The action itself, Elixir and Node.js versions
     - '.tool-versions'
     - '.github/workflows/docs-workflow.yaml'
@@ -55,6 +62,8 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version-file: edgehog/.tool-versions
+
+    # This section builds the doc pages
     - name: Install astarte-docs-cli
       run: npm install -g @astarte-platform/astarte-docs-cli@0.0.7
     - name: Generate Interfaces Docs
@@ -63,12 +72,27 @@ jobs:
       with:
         version-file: edgehog/.tool-versions
         version-type: strict
-    - name: Install Dependencies
+    - name: Install Docs Dependencies
       working-directory: ./edgehog/doc
       run: mix deps.get
     - name: Build Docs
       working-directory: ./edgehog/doc
       run: mix docs
+
+    # This section builds the GraphQL API docs
+    - name: Install Backend Dependencies
+      working-directory: ./edgehog/backend
+      run: mix deps.get
+    - name: Extract GraphQL Schema
+      working-directory: ./edgehog/backend
+      run: mix absinthe.schema.sdl --schema EdgehogWeb.Schema
+    - name: Install SpectaQL
+      run: npm install -g spectaql
+    - name: Build SpectaQL Docs
+      working-directory: ./edgehog/backend
+      run: npx spectaql .spectaql-config.yaml -t graphql-api-docs
+
+    # Copy docs over to the docs repository
     - name: Copy Docs, preserving Device SDK docs
       run: |
         export DOCS_DIRNAME="$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/main/snapshot/g' | sed 's/release-//g')"
@@ -76,8 +100,10 @@ jobs:
         mkdir docs/$DOCS_DIRNAME
         # Restore Device SDK docs. Don't fail if they're not there.
         cd docs && git restore $DOCS_DIRNAME/device-sdks || true && cd ..
-        cd docs && git restore $DOCS_DIRNAME/graphql-api-docs || true && cd ..
+        # Copy doc pages
         cp -r edgehog/doc/doc/* docs/$DOCS_DIRNAME/
+        # Copy GraphQL docs
+        cp -r ./edgehog/backend/graphql-api-docs docs/$DOCS_DIRNAME/
     - name: Commit files
       working-directory: ./docs
       run: |
