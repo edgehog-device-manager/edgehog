@@ -42,6 +42,7 @@ defmodule Edgehog.Astarte.Realm do
     |> validate_required([:name, :private_key])
     |> foreign_key_constraint(:cluster_id)
     |> unique_constraint([:name, :tenant_id])
+    |> unique_constraint([:name, :cluster_id])
     |> validate_format(:name, ~r/^[a-z][a-z0-9]{0,47}$/)
   end
 end
