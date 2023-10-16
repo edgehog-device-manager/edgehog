@@ -21,6 +21,7 @@
 defmodule Edgehog.Astarte.Realm do
   use Ecto.Schema
   import Ecto.Changeset
+  import Edgehog.ChangesetValidation
 
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.Device
@@ -43,6 +44,6 @@ defmodule Edgehog.Astarte.Realm do
     |> foreign_key_constraint(:cluster_id)
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:name, :cluster_id])
-    |> validate_format(:name, ~r/^[a-z][a-z0-9]{0,47}$/)
+    |> validate_realm_name(:name)
   end
 end
