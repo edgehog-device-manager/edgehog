@@ -114,6 +114,41 @@ defmodule Edgehog.AstarteTest do
       assert "has already been taken" in errors_on(changeset)[:base_api_url]
     end
 
+    test "fetch_or_create_cluster/1 with valid url creates a cluster" do
+      url = unique_cluster_base_api_url()
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.fetch_or_create_cluster(url)
+      assert cluster.base_api_url == url
+    end
+
+    test "fetch_or_create_cluster/1 strips trailing slash from base_api_url" do
+      url = "https://api.test.astarte.example/foo/"
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.fetch_or_create_cluster(url)
+      assert cluster.base_api_url == "https://api.test.astarte.example/foo"
+    end
+
+    test "fetch_or_create_cluster/1 with invalid data returns error changeset" do
+      %{base_api_url: invalid_url} = @invalid_attrs
+
+      invalid_urls_list = [
+        invalid_url,
+        "",
+        "some invalid url"
+      ]
+
+      invalid_urls_list
+      |> Enum.map(&Astarte.fetch_or_create_cluster/1)
+      |> Enum.each(fn cluster -> assert {:error, %Ecto.Changeset{}} = cluster end)
+    end
+
+    test "fetch_or_create_cluster/1 with duplicate base_api_url succeeds" do
+      cluster = cluster_fixture()
+      url = cluster.base_api_url
+
+      assert {:ok, ^cluster} = Astarte.fetch_or_create_cluster(url)
+    end
+
     test "update_cluster/2 with valid data updates the cluster" do
       cluster = cluster_fixture()
       update_attrs = %{base_api_url: "https://another-base.url", name: "some updated name"}

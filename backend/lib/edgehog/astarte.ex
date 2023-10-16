@@ -158,6 +158,30 @@ defmodule Edgehog.Astarte do
   end
 
   @doc """
+  Fetches a cluster with the given `base_api_url`, or creates it if it doesn't exist.
+
+  ## Examples
+
+  iex> fetch_or_create_cluster("https://api.existing-cluster.example")
+  {:ok, %Cluster{}}
+
+  iex> fetch_or_create_cluster("bad value")
+  {:error, %Ecto.Changeset{}}
+
+  """
+  def fetch_or_create_cluster(base_api_url) do
+    %Cluster{}
+    |> Cluster.anonymous_changeset(%{base_api_url: base_api_url})
+    |> Repo.insert(
+      # We need this update so that Ecto reads back from
+      # the database, populating the ID
+      on_conflict: {:replace, [:base_api_url]},
+      conflict_target: :base_api_url,
+      returning: true
+    )
+  end
+
+  @doc """
   Updates a cluster.
 
   ## Examples

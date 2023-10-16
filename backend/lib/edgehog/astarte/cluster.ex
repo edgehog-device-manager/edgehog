@@ -34,12 +34,18 @@ defmodule Edgehog.Astarte.Cluster do
   end
 
   @doc false
-  def changeset(cluster, attrs) do
+  def anonymous_changeset(cluster, attrs) do
     cluster
-    |> cast(attrs, [:name, :base_api_url])
+    |> cast(attrs, [:base_api_url])
     |> validate_required([:base_api_url])
-    |> unique_constraint(:base_api_url)
     |> validate_url(:base_api_url)
     |> update_change(:base_api_url, &String.trim_trailing(&1, "/"))
+  end
+
+  @doc false
+  def changeset(cluster, attrs) do
+    anonymous_changeset(cluster, attrs)
+    |> cast(attrs, [:name])
+    |> unique_constraint(:base_api_url)
   end
 end
