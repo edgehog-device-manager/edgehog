@@ -30,6 +30,7 @@ defmodule Edgehog.AstarteTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
 
   describe "clusters" do
     alias Edgehog.Astarte.Cluster
@@ -155,6 +156,31 @@ defmodule Edgehog.AstarteTest do
 
     test "create_realm/1 with invalid data returns error changeset", %{cluster: cluster} do
       assert {:error, %Ecto.Changeset{}} = Astarte.create_realm(cluster, @invalid_attrs)
+    end
+
+    test "create_realm/2 with a duplicate name in the same tenant returns error", %{
+      cluster: cluster
+    } do
+      realm = realm_fixture(cluster)
+
+      attrs = %{name: realm.name, private_key: "some private_key"}
+
+      assert {:error, changeset} = Astarte.create_realm(cluster, attrs)
+      assert "has already been taken" in errors_on(changeset)[:name]
+    end
+
+    test "create_realm/2 with a duplicate name in another tenant returns error", %{
+      cluster: cluster
+    } do
+      realm = realm_fixture(cluster)
+
+      tenant = tenant_fixture()
+      Repo.put_tenant_id(tenant.tenant_id)
+
+      attrs = %{name: realm.name, private_key: "some private_key"}
+
+      assert {:error, changeset} = Astarte.create_realm(cluster, attrs)
+      assert "has already been taken" in errors_on(changeset)[:name]
     end
 
     test "update_realm/2 with valid data updates the realm", %{cluster: cluster} do
