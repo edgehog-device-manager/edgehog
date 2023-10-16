@@ -48,6 +48,15 @@ defmodule Edgehog.ChangesetValidation do
     end)
   end
 
+  def validate_pem_private_key(changeset, field) do
+    validate_change(changeset, field, fn field, pem_private_key ->
+      case X509.PrivateKey.from_pem(pem_private_key) do
+        {:ok, _} -> []
+        {:error, _reason} -> [{field, "is not a valid PEM private key"}]
+      end
+    end)
+  end
+
   def validate_url(changeset, field) do
     validate_change(changeset, field, fn field, url ->
       %URI{scheme: scheme, host: maybe_host} = URI.parse(url)

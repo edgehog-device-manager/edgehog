@@ -45,5 +45,6 @@ defmodule Edgehog.Astarte.Realm do
     |> unique_constraint([:name, :tenant_id])
     |> unique_constraint([:name, :cluster_id])
     |> validate_realm_name(:name)
+    |> validate_pem_private_key(:private_key)
   end
 end

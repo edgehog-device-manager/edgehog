@@ -161,6 +161,9 @@ defmodule Edgehog.AstarteTest do
   describe "realms" do
     alias Edgehog.Astarte.Realm
 
+    @valid_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
+    @other_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
+
     setup do
       %{cluster: cluster_fixture()}
     end
@@ -178,11 +181,11 @@ defmodule Edgehog.AstarteTest do
     end
 
     test "create_realm/1 with valid data creates a realm", %{cluster: cluster} do
-      valid_attrs = %{name: "somename", private_key: "some private_key"}
+      valid_attrs = %{name: "somename", private_key: @valid_private_key}
 
       assert {:ok, %Realm{} = realm} = Astarte.create_realm(cluster, valid_attrs)
       assert realm.name == "somename"
-      assert realm.private_key == "some private_key"
+      assert realm.private_key == @valid_private_key
     end
 
     test "create_realm/1 with invalid data returns error changeset", %{cluster: cluster} do
@@ -194,7 +197,7 @@ defmodule Edgehog.AstarteTest do
     } do
       realm = realm_fixture(cluster)
 
-      attrs = %{name: realm.name, private_key: "some private_key"}
+      attrs = %{name: realm.name, private_key: @valid_private_key}
 
       assert {:error, changeset} = Astarte.create_realm(cluster, attrs)
       assert "has already been taken" in errors_on(changeset)[:name]
@@ -208,7 +211,7 @@ defmodule Edgehog.AstarteTest do
       tenant = tenant_fixture()
       Repo.put_tenant_id(tenant.tenant_id)
 
-      attrs = %{name: realm.name, private_key: "some private_key"}
+      attrs = %{name: realm.name, private_key: @valid_private_key}
 
       assert {:error, changeset} = Astarte.create_realm(cluster, attrs)
       assert "has already been taken" in errors_on(changeset)[:name]
@@ -216,11 +219,11 @@ defmodule Edgehog.AstarteTest do
 
     test "update_realm/2 with valid data updates the realm", %{cluster: cluster} do
       realm = realm_fixture(cluster)
-      update_attrs = %{name: "someupdatedname", private_key: "some updated private_key"}
+      update_attrs = %{name: "someupdatedname", private_key: @other_private_key}
 
       assert {:ok, %Realm{} = realm} = Astarte.update_realm(realm, update_attrs)
       assert realm.name == "someupdatedname"
-      assert realm.private_key == "some updated private_key"
+      assert realm.private_key == @other_private_key
     end
 
     test "update_realm/2 with invalid data returns error changeset", %{cluster: cluster} do
