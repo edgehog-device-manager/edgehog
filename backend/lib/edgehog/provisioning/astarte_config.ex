@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,33 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Tenants.Tenant do
+defmodule Edgehog.Provisioning.AstarteConfig do
   use Ecto.Schema
   import Ecto.Changeset
   import Edgehog.ChangesetValidation
 
-  alias Edgehog.Astarte.Realm
-
-  @primary_key {:tenant_id, :id, autogenerate: true}
-  schema "tenants" do
-    field :name, :string
-    field :slug, :string
-    field :default_locale, :string, default: "en-US"
-    field :public_key, :string
-    has_one :realm, Realm, foreign_key: :tenant_id
-
-    timestamps()
+  @primary_key false
+  embedded_schema do
+    field :base_api_url, :string
+    field :realm_name, :string
+    field :realm_private_key, :string
   end
 
   @doc false
-  def changeset(tenant, attrs) do
-    tenant
-    |> cast(attrs, [:name, :slug, :default_locale, :public_key])
-    |> validate_required([:name, :slug, :public_key])
-    |> unique_constraint(:name)
-    |> unique_constraint(:slug)
-    |> validate_tenant_slug(:slug)
-    |> validate_locale(:default_locale)
-    |> validate_pem_public_key(:public_key)
+  def changeset(astarte_config, attrs) do
+    astarte_config
+    |> cast(attrs, [:base_api_url, :realm_name, :realm_private_key])
+    |> validate_required([:base_api_url, :realm_name, :realm_private_key])
+    |> validate_realm_name(:realm_name)
+    |> validate_pem_private_key(:realm_private_key)
+    |> validate_url(:base_api_url)
   end
 end

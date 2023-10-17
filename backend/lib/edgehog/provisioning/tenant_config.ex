@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,33 +18,28 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Tenants.Tenant do
+defmodule Edgehog.Provisioning.TenantConfig do
   use Ecto.Schema
   import Ecto.Changeset
   import Edgehog.ChangesetValidation
 
-  alias Edgehog.Astarte.Realm
+  alias Edgehog.Provisioning.AstarteConfig
 
-  @primary_key {:tenant_id, :id, autogenerate: true}
-  schema "tenants" do
+  @primary_key false
+  embedded_schema do
     field :name, :string
     field :slug, :string
-    field :default_locale, :string, default: "en-US"
     field :public_key, :string
-    has_one :realm, Realm, foreign_key: :tenant_id
-
-    timestamps()
+    embeds_one :astarte_config, AstarteConfig
   end
 
   @doc false
   def changeset(tenant, attrs) do
     tenant
-    |> cast(attrs, [:name, :slug, :default_locale, :public_key])
+    |> cast(attrs, [:name, :slug, :public_key])
+    |> cast_embed(:astarte_config, required: true)
     |> validate_required([:name, :slug, :public_key])
-    |> unique_constraint(:name)
-    |> unique_constraint(:slug)
     |> validate_tenant_slug(:slug)
-    |> validate_locale(:default_locale)
     |> validate_pem_public_key(:public_key)
   end
 end

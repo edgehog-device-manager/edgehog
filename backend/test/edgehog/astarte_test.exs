@@ -58,13 +58,19 @@ defmodule Edgehog.AstarteTest do
       assert cluster.name == name
     end
 
+    test "create_cluster/1 strips trailing slash from base_api_url" do
+      attrs = %{base_api_url: "https://api.test.astarte.example/foo/", name: "test-trailing"}
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.create_cluster(attrs)
+      assert cluster.base_api_url == "https://api.test.astarte.example/foo"
+    end
+
     test "create_cluster/1 with invalid data returns error changeset" do
-      %{base_api_url: valid_url, name: valid_name} = @valid_attrs
-      %{base_api_url: invalid_url, name: invalid_name} = @invalid_attrs
+      %{name: valid_name} = @valid_attrs
+      %{base_api_url: invalid_url} = @invalid_attrs
 
       invalid_attrs_list = [
         @invalid_attrs,
-        %{base_api_url: valid_url, name: invalid_name},
         %{base_api_url: invalid_url, name: valid_name},
         %{base_api_url: "", name: valid_name},
         %{base_api_url: "some url", name: valid_name}
@@ -100,6 +106,49 @@ defmodule Edgehog.AstarteTest do
       |> Enum.each(fn cluster -> assert {:error, %Ecto.Changeset{}} = cluster end)
     end
 
+    test "create_cluster/1 with duplicate base_api_url returns error changeset" do
+      cluster = cluster_fixture()
+      attrs = %{@valid_attrs | base_api_url: cluster.base_api_url}
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Astarte.create_cluster(attrs)
+      assert "has already been taken" in errors_on(changeset)[:base_api_url]
+    end
+
+    test "fetch_or_create_cluster/1 with valid url creates a cluster" do
+      url = unique_cluster_base_api_url()
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.fetch_or_create_cluster(url)
+      assert cluster.base_api_url == url
+    end
+
+    test "fetch_or_create_cluster/1 strips trailing slash from base_api_url" do
+      url = "https://api.test.astarte.example/foo/"
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.fetch_or_create_cluster(url)
+      assert cluster.base_api_url == "https://api.test.astarte.example/foo"
+    end
+
+    test "fetch_or_create_cluster/1 with invalid data returns error changeset" do
+      %{base_api_url: invalid_url} = @invalid_attrs
+
+      invalid_urls_list = [
+        invalid_url,
+        "",
+        "some invalid url"
+      ]
+
+      invalid_urls_list
+      |> Enum.map(&Astarte.fetch_or_create_cluster/1)
+      |> Enum.each(fn cluster -> assert {:error, %Ecto.Changeset{}} = cluster end)
+    end
+
+    test "fetch_or_create_cluster/1 with duplicate base_api_url succeeds" do
+      cluster = cluster_fixture()
+      url = cluster.base_api_url
+
+      assert {:ok, ^cluster} = Astarte.fetch_or_create_cluster(url)
+    end
+
     test "update_cluster/2 with valid data updates the cluster" do
       cluster = cluster_fixture()
       update_attrs = %{base_api_url: "https://another-base.url", name: "some updated name"}
@@ -109,10 +158,27 @@ defmodule Edgehog.AstarteTest do
       assert cluster.name == "some updated name"
     end
 
+    test "update_cluster/1 strips trailing slash from base_api_url" do
+      cluster = cluster_fixture()
+      update_attrs = %{base_api_url: "https://another-base.url/"}
+
+      assert {:ok, %Cluster{} = cluster} = Astarte.update_cluster(cluster, update_attrs)
+      assert cluster.base_api_url == "https://another-base.url"
+    end
+
     test "update_cluster/2 with invalid data returns error changeset" do
       cluster = cluster_fixture()
       assert {:error, %Ecto.Changeset{}} = Astarte.update_cluster(cluster, @invalid_attrs)
       assert cluster == Astarte.get_cluster!(cluster.id)
+    end
+
+    test "update_cluster/1 with duplicate base_api_url returns error changeset" do
+      cluster = cluster_fixture()
+      other_cluster = cluster_fixture()
+      attrs = %{base_api_url: other_cluster.base_api_url}
+
+      assert {:error, %Ecto.Changeset{} = changeset} = Astarte.update_cluster(cluster, attrs)
+      assert "has already been taken" in errors_on(changeset)[:base_api_url]
     end
 
     test "delete_cluster/1 deletes the cluster" do
@@ -129,6 +195,9 @@ defmodule Edgehog.AstarteTest do
 
   describe "realms" do
     alias Edgehog.Astarte.Realm
+
+    @valid_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
+    @other_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
 
     setup do
       %{cluster: cluster_fixture()}
@@ -147,11 +216,11 @@ defmodule Edgehog.AstarteTest do
     end
 
     test "create_realm/1 with valid data creates a realm", %{cluster: cluster} do
-      valid_attrs = %{name: "somename", private_key: "some private_key"}
+      valid_attrs = %{name: "somename", private_key: @valid_private_key}
 
       assert {:ok, %Realm{} = realm} = Astarte.create_realm(cluster, valid_attrs)
       assert realm.name == "somename"
-      assert realm.private_key == "some private_key"
+      assert realm.private_key == @valid_private_key
     end
 
     test "create_realm/1 with invalid data returns error changeset", %{cluster: cluster} do
@@ -163,7 +232,7 @@ defmodule Edgehog.AstarteTest do
     } do
       realm = realm_fixture(cluster)
 
-      attrs = %{name: realm.name, private_key: "some private_key"}
+      attrs = %{name: realm.name, private_key: @valid_private_key}
 
       assert {:error, changeset} = Astarte.create_realm(cluster, attrs)
       assert "has already been taken" in errors_on(changeset)[:name]
@@ -177,7 +246,7 @@ defmodule Edgehog.AstarteTest do
       tenant = tenant_fixture()
       Repo.put_tenant_id(tenant.tenant_id)
 
-      attrs = %{name: realm.name, private_key: "some private_key"}
+      attrs = %{name: realm.name, private_key: @valid_private_key}
 
       assert {:error, changeset} = Astarte.create_realm(cluster, attrs)
       assert "has already been taken" in errors_on(changeset)[:name]
@@ -185,11 +254,11 @@ defmodule Edgehog.AstarteTest do
 
     test "update_realm/2 with valid data updates the realm", %{cluster: cluster} do
       realm = realm_fixture(cluster)
-      update_attrs = %{name: "someupdatedname", private_key: "some updated private_key"}
+      update_attrs = %{name: "someupdatedname", private_key: @other_private_key}
 
       assert {:ok, %Realm{} = realm} = Astarte.update_realm(realm, update_attrs)
       assert realm.name == "someupdatedname"
-      assert realm.private_key == "some updated private_key"
+      assert realm.private_key == @other_private_key
     end
 
     test "update_realm/2 with invalid data returns error changeset", %{cluster: cluster} do
