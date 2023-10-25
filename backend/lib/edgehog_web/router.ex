@@ -35,6 +35,7 @@ defmodule EdgehogWeb.Router do
 
   pipeline :admin_api do
     plug :accepts, ["json"]
+    plug EdgehogWeb.AdminAPI.Auth
   end
 
   scope "/admin-api/v1", EdgehogWeb.AdminAPI do

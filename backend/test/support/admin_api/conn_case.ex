@@ -57,6 +57,54 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
 
     conn = Phoenix.ConnTest.build_conn()
 
-    {:ok, conn: conn}
+    cond do
+      tags[:unconfigured] ->
+        [conn: conn]
+
+      tags[:unauthenticated] ->
+        admin_private_key = configure_authentication()
+        [conn: conn, admin_private_key: admin_private_key]
+
+      true ->
+        admin_private_key = configure_authentication()
+        conn = authenticate_connection(conn, admin_private_key)
+        [conn: conn, admin_private_key: admin_private_key]
+    end
+  end
+
+  @doc """
+  Setup Admin authentication via public key.
+  Returns private key.
+  """
+  def configure_authentication(private_key \\ X509.PrivateKey.new_ec(:secp256r1)) do
+    private_key
+    |> X509.PublicKey.derive()
+    |> X509.PublicKey.to_pem()
+    |> JOSE.JWK.from_pem()
+    |> Edgehog.Config.put_admin_jwk()
+
+    private_key
+  end
+
+  @doc """
+  Authenticates the conn with Admin API claims
+  """
+  def authenticate_connection(conn, admin_private_key, claims \\ nil) do
+    jwk =
+      admin_private_key
+      |> X509.PrivateKey.to_pem()
+      |> JOSE.JWK.from_pem()
+
+    # The value of e_ara claims is ignored for now
+    claims = claims || %{e_ara: "*"}
+
+    # Generate the JWT
+    {:ok, jwt, _claims} =
+      EdgehogWeb.Auth.Token.encode_and_sign("dontcare", claims,
+        secret: jwk,
+        allowed_algos: ["ES256"]
+      )
+
+    Plug.Conn.put_req_header(conn, "authorization", "bearer #{jwt}")
   end
 end

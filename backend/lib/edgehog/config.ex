@@ -23,8 +23,21 @@ defmodule Edgehog.Config do
   This module handles the configuration of Edgehog
   """
   use Skogsra
-  alias Edgehog.Config.{GeocodingProviders, GeolocationProviders}
+  alias Edgehog.Config.{GeocodingProviders, GeolocationProviders, JWTPublicKeyPEMType}
   alias Edgehog.Geolocation
+
+  @envdoc """
+  Disables admin authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
+  """
+  app_env :disable_admin_authentication, :edgehog, :disable_admin_authentication,
+    os_env: "DISABLE_ADMIN_AUTHENTICATION",
+    type: :boolean,
+    default: false
+
+  @envdoc "The Admin API JWT public key."
+  app_env :admin_jwk, :edgehog, :admin_jwk,
+    os_env: "ADMIN_JWT_PUBLIC_KEY_PATH",
+    type: JWTPublicKeyPEMType
 
   @envdoc """
   Disables tenant authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
@@ -70,6 +83,12 @@ defmodule Edgehog.Config do
     os_env: "PREFERRED_GEOCODING_PROVIDERS",
     type: GeocodingProviders,
     default: [Geolocation.Providers.GoogleGeocoding]
+
+  @doc """
+  Returns true if admin authentication is disabled.
+  """
+  @spec admin_authentication_disabled?() :: boolean()
+  def admin_authentication_disabled?, do: disable_admin_authentication!()
 
   @doc """
   Returns true if tenant authentication is disabled.
