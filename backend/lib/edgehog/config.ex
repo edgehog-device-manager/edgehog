@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ defmodule Edgehog.Config do
   alias Edgehog.Geolocation
 
   @envdoc """
-  Disables the authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
+  Disables tenant authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
   """
-  app_env :disable_authentication, :edgehog, :disable_authentication,
-    os_env: "DISABLE_AUTHENTICATION",
+  app_env :disable_tenant_authentication, :edgehog, :disable_tenant_authentication,
+    os_env: "DISABLE_TENANT_AUTHENTICATION",
     type: :boolean,
     default: false
 
@@ -72,10 +72,10 @@ defmodule Edgehog.Config do
     default: [Geolocation.Providers.GoogleGeocoding]
 
   @doc """
-  Returns true if the authentication is disabled.
+  Returns true if tenant authentication is disabled.
   """
-  @spec authentication_disabled?() :: boolean()
-  def authentication_disabled?, do: disable_authentication!()
+  @spec tenant_authentication_disabled?() :: boolean()
+  def tenant_authentication_disabled?, do: disable_tenant_authentication!()
 
   @doc """
   Returns the list of geolocation modules to use.
