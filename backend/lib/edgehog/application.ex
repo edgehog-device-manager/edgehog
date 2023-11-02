@@ -27,10 +27,13 @@ defmodule Edgehog.Application do
 
   use Application
   require Logger
+  alias Edgehog.Config
 
   @impl true
   def start(_type, _args) do
     Logger.info("Starting application version #{@version}.", tag: "edgehog_start")
+
+    Config.validate_admin_authentication!()
 
     children = [
       # Prometheus metrics

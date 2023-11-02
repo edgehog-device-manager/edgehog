@@ -120,4 +120,17 @@ defmodule Edgehog.Config do
 
     preferred_geocoding_providers!() |> Enum.reject(&disabled_providers[&1])
   end
+
+  @doc """
+  Validates admin authentication config, raises if invalid.
+  """
+  @spec validate_admin_authentication!() :: :ok | no_return()
+  def validate_admin_authentication! do
+    if admin_authentication_disabled?() do
+      :ok
+    else
+      admin_jwk!()
+      :ok
+    end
+  end
 end
