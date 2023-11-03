@@ -123,6 +123,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Realm.Interfaces
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Realm.TriggersMock,
+      Edgehog.Mocks.Astarte.Realm.Triggers
+    )
+
     :ok
   end
 end

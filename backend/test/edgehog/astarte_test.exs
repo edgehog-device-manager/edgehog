@@ -819,6 +819,176 @@ defmodule Edgehog.AstarteTest do
     end
   end
 
+  describe "fetch_trigger/2" do
+    setup do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      %{base_api_url: base_api_url} = cluster
+      %{name: realm_name, private_key: private_key} = realm
+
+      {:ok, client} = RealmManagement.new(base_api_url, realm_name, private_key: private_key)
+
+      trigger_name = "edgehog-connection"
+
+      {:ok, client: client, trigger_name: trigger_name}
+    end
+
+    test "returns the trigger map if Astarte replies successfully", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:get, fn ^client, ^trigger_name ->
+        {:ok, %{"data" => trigger_map_fixture(name: trigger_name)}}
+      end)
+
+      assert {:ok, _trigger} = Astarte.fetch_trigger(client, trigger_name)
+    end
+
+    test "returns {:error, :not_found} if Astarte returns a 404", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:get, fn ^client, ^trigger_name ->
+        {:error, api_error(status: 404)}
+      end)
+
+      assert {:error, :not_found} = Astarte.fetch_trigger(client, trigger_name)
+    end
+
+    # TODO: workaround, remove when the Astarte API does the right thing
+    test "returns {:error, :not_found} if Astarte returns a 500", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:get, fn ^client, ^trigger_name ->
+        {:error, api_error(status: 500)}
+      end)
+
+      assert {:error, :not_found} = Astarte.fetch_trigger(client, trigger_name)
+    end
+
+    test "returns {:error, %APIError{}} if Astarte returns another error", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:get, fn ^client, ^trigger_name ->
+        {:error, api_error(status: 502, message: "Bad Gateway")}
+      end)
+
+      assert {:error, %APIError{status: 502, response: response}} =
+               Astarte.fetch_trigger(client, trigger_name)
+
+      assert response["errors"]["detail"] == "Bad Gateway"
+    end
+  end
+
+  describe "create_trigger/2" do
+    setup do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      %{base_api_url: base_api_url} = cluster
+      %{name: realm_name, private_key: private_key} = realm
+
+      {:ok, client} = RealmManagement.new(base_api_url, realm_name, private_key: private_key)
+
+      trigger_map = trigger_map_fixture(name: "edgehog-connection")
+
+      {:ok, client: client, trigger_map: trigger_map}
+    end
+
+    test "returns :ok if Astarte replies successfully", ctx do
+      %{
+        client: client,
+        trigger_map: trigger_map
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:create, fn ^client, ^trigger_map ->
+        :ok
+      end)
+
+      assert :ok = Astarte.create_trigger(client, trigger_map)
+    end
+
+    test "returns {:error, %APIError{}} if Astarte returns an error", ctx do
+      %{
+        client: client,
+        trigger_map: trigger_map
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:create, fn ^client, ^trigger_map ->
+        {:error, api_error(status: 422, message: "Invalid Entity")}
+      end)
+
+      assert {:error, %APIError{status: 422, response: response}} =
+               Astarte.create_trigger(client, trigger_map)
+
+      assert response["errors"]["detail"] == "Invalid Entity"
+    end
+  end
+
+  describe "delete_trigger/2" do
+    setup do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      %{base_api_url: base_api_url} = cluster
+      %{name: realm_name, private_key: private_key} = realm
+
+      {:ok, client} = RealmManagement.new(base_api_url, realm_name, private_key: private_key)
+
+      trigger_name = "edgehog-connection"
+
+      {:ok, client: client, trigger_name: trigger_name}
+    end
+
+    test "returns :ok if Astarte replies successfully", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:delete, fn ^client, ^trigger_name ->
+        :ok
+      end)
+
+      assert :ok = Astarte.delete_trigger(client, trigger_name)
+    end
+
+    test "returns {:error, %APIError{}} if Astarte returns an error", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:delete, fn ^client, ^trigger_name ->
+        {:error, api_error(status: 403, message: "Forbidden")}
+      end)
+
+      assert {:error, %APIError{status: 403, response: response}} =
+               Astarte.delete_trigger(client, trigger_name)
+
+      assert response["errors"]["detail"] == "Forbidden"
+    end
+  end
+
   defp mock_device_status_introspection(device, interfaces) do
     device_id = device.device_id
 

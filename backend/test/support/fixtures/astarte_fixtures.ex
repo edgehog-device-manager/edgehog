@@ -123,4 +123,30 @@ defmodule Edgehog.AstarteFixtures do
       ]
     }
   end
+
+  @doc """
+  Returns a trigger map with the (optional) given name and http_url.
+
+  All the other parts of the trigger are fixed.
+  """
+  def trigger_map_fixture(opts \\ []) do
+    name = Keyword.get(opts, :name, "edgehog-connection")
+    http_url = Keyword.get(opts, :http_url, "https://api.edgehog.example/tenants/test/triggers")
+
+    %{
+      "name" => name,
+      "action" => %{
+        "http_url" => http_url,
+        "ignore_ssl_errors" => false,
+        "http_method" => "post",
+        "http_static_headers" => %{}
+      },
+      "simple_triggers" => [
+        %{
+          "type" => "device_trigger",
+          "on" => "device_connected"
+        }
+      ]
+    }
+  end
 end

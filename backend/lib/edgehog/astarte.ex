@@ -50,7 +50,10 @@ defmodule Edgehog.Astarte do
     WiFiScanResult
   }
 
-  alias Edgehog.Astarte.Realm.Interfaces
+  alias Edgehog.Astarte.Realm.{
+    Interfaces,
+    Triggers
+  }
 
   @ota_request_interface "io.edgehog.devicemanager.OTARequest"
   @system_info_interface "io.edgehog.devicemanager.SystemInfo"
@@ -115,6 +118,7 @@ defmodule Edgehog.Astarte do
                             )
 
   @interfaces_module Application.compile_env(:edgehog, :astarte_interfaces_module, Interfaces)
+  @triggers_module Application.compile_env(:edgehog, :astarte_triggers_module, Triggers)
 
   @doc """
   Returns the list of clusters.
@@ -621,6 +625,33 @@ defmodule Edgehog.Astarte do
         interface_json
       ) do
     @interfaces_module.update(client, interface_name, interface_major, interface_json)
+  end
+
+  def fetch_trigger(%RealmManagement{} = client, trigger_name) do
+    case @triggers_module.get(client, trigger_name) do
+      {:ok, %{"data" => trigger_map}} ->
+        {:ok, trigger_map}
+
+      {:error, %APIError{status: 404}} ->
+        # We just convert a 404 status to :not_found, and return all other errors as-is
+        {:error, :not_found}
+
+      # TODO: workaround due to the fact that currently Astarte RM API returns 500 for a
+      # non-existing trigger
+      {:error, %APIError{status: 500}} ->
+        {:error, :not_found}
+
+      {:error, other} ->
+        {:error, other}
+    end
+  end
+
+  def create_trigger(%RealmManagement{} = client, trigger_json) do
+    @triggers_module.create(client, trigger_json)
+  end
+
+  def delete_trigger(%RealmManagement{} = client, trigger_name) do
+    @triggers_module.delete(client, trigger_name)
   end
 
   # get_device_status is already called to fetch other info from the device
