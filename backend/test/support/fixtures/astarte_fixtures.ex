@@ -98,4 +98,29 @@ defmodule Edgehog.AstarteFixtures do
 
     device
   end
+
+  @doc """
+  Returns an interface map with the given name and major (and optionally minor, which defaults to 1).
+
+  All the other parts of the interface are fixed.
+  """
+  def interface_map_fixture(opts \\ []) do
+    name = Keyword.get(opts, :name, "io.edgehog.devicemanager.SystemInfo")
+    major = Keyword.get(opts, :major, 1)
+    minor = Keyword.get(opts, :minor, 1)
+
+    %{
+      "interface_name" => name,
+      "version_major" => major,
+      "version_minor" => minor,
+      "type" => "datastream",
+      "ownership" => "device",
+      "mappings" => [
+        %{
+          "endpoint" => "/foo",
+          "type" => "integer"
+        }
+      ]
+    }
+  end
 end

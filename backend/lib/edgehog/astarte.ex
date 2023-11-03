@@ -27,6 +27,8 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Repo
 
   alias Astarte.Client.AppEngine
+  alias Astarte.Client.APIError
+  alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.InterfaceVersion
@@ -47,6 +49,8 @@ defmodule Edgehog.Astarte do
     SystemStatus,
     WiFiScanResult
   }
+
+  alias Edgehog.Astarte.Realm.Interfaces
 
   @ota_request_interface "io.edgehog.devicemanager.OTARequest"
   @system_info_interface "io.edgehog.devicemanager.SystemInfo"
@@ -109,6 +113,8 @@ defmodule Edgehog.Astarte do
                               :astarte_network_interface_module,
                               NetworkInterface
                             )
+
+  @interfaces_module Application.compile_env(:edgehog, :astarte_interfaces_module, Interfaces)
 
   @doc """
   Returns the list of clusters.
@@ -588,6 +594,33 @@ defmodule Edgehog.Astarte do
 
   def send_led_behavior(%AppEngine{} = client, device_id, behavior) do
     @led_behavior_module.post(client, device_id, behavior)
+  end
+
+  def fetch_interface(%RealmManagement{} = client, interface_name, interface_major) do
+    case @interfaces_module.get(client, interface_name, interface_major) do
+      {:ok, %{"data" => interface_map}} ->
+        {:ok, interface_map}
+
+      {:error, %APIError{status: 404}} ->
+        # We just convert a 404 status to :not_found, and return all other errors as-is
+        {:error, :not_found}
+
+      {:error, other} ->
+        {:error, other}
+    end
+  end
+
+  def create_interface(%RealmManagement{} = client, interface_json) do
+    @interfaces_module.create(client, interface_json)
+  end
+
+  def update_interface(
+        %RealmManagement{} = client,
+        interface_name,
+        interface_major,
+        interface_json
+      ) do
+    @interfaces_module.update(client, interface_name, interface_major, interface_json)
   end
 
   # get_device_status is already called to fetch other info from the device

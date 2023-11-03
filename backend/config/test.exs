@@ -70,6 +70,8 @@ config :edgehog,
        :astarte_cellular_connection_module,
        Edgehog.Astarte.Device.CellularConnectionMock
 
+config :edgehog, :astarte_interfaces_module, Edgehog.Astarte.Realm.InterfacesMock
+
 # Storage mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
 config :edgehog, :base_images_storage_module, Edgehog.BaseImages.StorageMock
