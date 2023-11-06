@@ -26,6 +26,7 @@ defmodule Edgehog.Tenants do
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 
+  alias Edgehog.Tenants.Reconciler
   alias Edgehog.Tenants.Tenant
 
   @doc """
@@ -145,6 +146,10 @@ defmodule Edgehog.Tenants do
   """
   def preload_astarte_resources_for_tenant(tenant_or_tenants) do
     Repo.preload(tenant_or_tenants, [realm: [:cluster]], skip_tenant_id: true)
+  end
+
+  def reconcile_tenant(%Tenant{} = tenant) do
+    Reconciler.reconcile_tenant(tenant)
   end
 
   @doc """
