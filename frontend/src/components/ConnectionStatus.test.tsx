@@ -19,21 +19,35 @@
 */
 
 import { it, expect } from "vitest";
+import { screen } from "@testing-library/react";
 
 import { renderWithProviders } from "setupTests";
 import ConnectionStatus from "./ConnectionStatus";
 
-it("renders correctly", () => {
-  const connectedStatus = renderWithProviders(
-    <ConnectionStatus connected={true} />,
+it("renders connected status correctly", () => {
+  renderWithProviders(<ConnectionStatus connected={true} icon />);
+
+  expect(screen.getByText("Connected")).toBeVisible();
+  expect(screen.getByRole("img", { hidden: true })).toHaveClass("text-success");
+});
+
+it("renders disconnected status correctly", () => {
+  renderWithProviders(<ConnectionStatus connected={false} icon />);
+
+  expect(screen.getByText("Disconnected")).toBeVisible();
+  expect(screen.getByRole("img", { hidden: true })).toHaveClass(
+    "text-secondary",
   );
-  const disconnectedStatus = renderWithProviders(
-    <ConnectionStatus connected={false} />,
-  );
-  expect(
-    connectedStatus.container.querySelector(".text-success"),
-  ).toBeInTheDocument();
-  expect(
-    disconnectedStatus.container.querySelector(".text-secondary"),
-  ).toBeInTheDocument();
+});
+
+it("renders icon if no value is specified", () => {
+  renderWithProviders(<ConnectionStatus connected={true} />);
+
+  expect(screen.getByRole("img", { hidden: true })).toBeVisible();
+});
+
+it("does not render icon correctly", () => {
+  renderWithProviders(<ConnectionStatus connected={true} icon={false} />);
+
+  expect(screen.queryByRole("img", { hidden: true })).not.toBeInTheDocument();
 });

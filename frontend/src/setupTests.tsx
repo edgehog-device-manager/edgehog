@@ -84,9 +84,7 @@ const renderWithProviders = (
     );
   };
 
-  const result = render(ui, { wrapper: ProvidersWrapper });
-
-  return result;
+  return render(ui, { wrapper: ProvidersWrapper });
 };
 
 export { renderWithProviders };

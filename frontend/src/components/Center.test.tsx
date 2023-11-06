@@ -19,14 +19,21 @@
 */
 
 import { it, expect } from "vitest";
-import { render } from "@testing-library/react";
+import { screen, render } from "@testing-library/react";
 
 import Center from "./Center";
 
 it("renders with the passed className", () => {
-  const { container } = render(
-    <Center children="innerText" className="foo-class" />,
+  render(
+    <Center className="foo-class" data-testid="center-component">
+      <div data-testid="center-children" />
+    </Center>,
   );
 
-  expect(container.querySelector(".foo-class")).toBeInTheDocument();
+  const centerComponent = screen.getByTestId("center-component");
+
+  expect(centerComponent).toBeVisible();
+  expect(centerComponent).toHaveClass("foo-class");
+
+  expect(screen.getByTestId("center-children")).toBeVisible();
 });

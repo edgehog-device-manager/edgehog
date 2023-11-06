@@ -32,14 +32,14 @@ it("renders correctly", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-2`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-3`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-4`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-5`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-first`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-last`)).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-item-0")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-1")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-2")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-3")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-4")).toBeVisible();
+  expect(screen.queryByTestId("pagination-item-5")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
 
   rerender(
     <TablePagination
@@ -48,14 +48,14 @@ it("renders correctly", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-2`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-3`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-4`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-5`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-first`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-last`)).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-item-0")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-1")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-2")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-3")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-4")).toBeVisible();
+  expect(screen.queryByTestId("pagination-item-5")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
 });
 
 it("shows only available pages", () => {
@@ -67,12 +67,12 @@ it("shows only available pages", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-2`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-3`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-first`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-last`)).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-item-0")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-1")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-2")).toBeVisible();
+  expect(screen.queryByTestId("pagination-item-3")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
 });
 
 it("shows there are more pages available", () => {
@@ -84,14 +84,14 @@ it("shows there are more pages available", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  expect(screen.queryByTestId(`pagination-item-0`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-1`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-2`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-3`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-4`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-5`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-first`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-last`)).toBeInTheDocument();
+  expect(screen.getByTestId("pagination-item-0")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-1")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-2")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-3")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-4")).toBeVisible();
+  expect(screen.queryByTestId("pagination-item-5")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-last")).toBeVisible();
 
   rerender(
     <TablePagination
@@ -100,15 +100,15 @@ it("shows there are more pages available", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  expect(screen.queryByTestId(`pagination-item-12`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-13`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-14`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-15`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-16`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-17`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-18`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-first`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-last`)).toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-item-12")).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-item-13")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-14")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-15")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-16")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-17")).toBeVisible();
+  expect(screen.queryByTestId("pagination-item-18")).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-first")).toBeVisible();
+  expect(screen.getByTestId("pagination-last")).toBeVisible();
 
   rerender(
     <TablePagination
@@ -117,15 +117,15 @@ it("shows there are more pages available", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  expect(screen.queryByTestId(`pagination-item-24`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-25`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-26`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-27`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-28`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-29`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-item-30`)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-first`)).toBeInTheDocument();
-  expect(screen.queryByTestId(`pagination-last`)).not.toBeInTheDocument();
+  expect(screen.queryByTestId("pagination-item-24")).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-item-25")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-26")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-27")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-28")).toBeVisible();
+  expect(screen.getByTestId("pagination-item-29")).toBeVisible();
+  expect(screen.queryByTestId("pagination-item-30")).not.toBeInTheDocument();
+  expect(screen.getByTestId("pagination-first")).toBeVisible();
+  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
 });
 
 it("correctly notifies page index on change", () => {
@@ -157,7 +157,7 @@ it("shows that more pages can be loaded", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  const paginationLast = screen.queryByTestId(`pagination-last`);
+  const paginationLast = screen.queryByTestId("pagination-last");
   expect(paginationLast).toBeInTheDocument();
   expect(onLoadMoreHandler).toHaveBeenCalledTimes(0);
   paginationLast?.click();

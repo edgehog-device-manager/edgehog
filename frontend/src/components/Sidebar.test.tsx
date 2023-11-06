@@ -19,91 +19,42 @@
 */
 
 import { it, expect } from "vitest";
+import { screen } from "@testing-library/react";
 
 import { renderWithProviders } from "setupTests";
 import Sidebar from "./Sidebar";
 
-it("renders correctly", async () => {
-  const { container } = renderWithProviders(<Sidebar />, {});
+const sidebarLinks = [
+  ["Devices", "/devices"],
+  ["Groups", "/device-groups"],
+  ["Update Campaigns", "/update-campaigns"],
+  ["Update Channels", "/update-channels"],
+  ["Base Image Collections", "/base-image-collections"],
+  ["System Models", "/system-models"],
+  ["Hardware Types", "/hardware-types"],
+];
 
-  const devicesLink = container.querySelector("a[href='/devices']");
-  expect(devicesLink).toBeInTheDocument();
-  expect(devicesLink).toHaveTextContent("Devices");
+it.each(sidebarLinks)("has link to %s", (name, href) => {
+  renderWithProviders(<Sidebar />);
 
-  const groupsLink = container.querySelector("a[href='/device-groups']");
-  expect(groupsLink).toBeInTheDocument();
-  expect(groupsLink).toHaveTextContent("Groups");
-
-  const updateCampaignsLink = container.querySelector(
-    "a[href='/update-campaigns']",
-  );
-  expect(updateCampaignsLink).toBeInTheDocument();
-  expect(updateCampaignsLink).toHaveTextContent("Update Campaigns");
-
-  const updateChannelsLink = container.querySelector(
-    "a[href='/update-channels']",
-  );
-  expect(updateChannelsLink).toBeInTheDocument();
-  expect(updateChannelsLink).toHaveTextContent("Update Channels");
-
-  const baseImageCollectionsLink = container.querySelector(
-    "a[href='/base-image-collections']",
-  );
-  expect(baseImageCollectionsLink).toBeInTheDocument();
-  expect(baseImageCollectionsLink).toHaveTextContent("Base Image Collections");
-
-  const systemModelsLink = container.querySelector("a[href='/system-models']");
-  expect(systemModelsLink).toBeInTheDocument();
-  expect(systemModelsLink).toHaveTextContent("System Models");
-
-  const hardwareTypesLink = container.querySelector(
-    "a[href='/hardware-types']",
-  );
-  expect(hardwareTypesLink).toBeInTheDocument();
-  expect(hardwareTypesLink).toHaveTextContent("Hardware Types");
-
-  const menuGroups = container.querySelectorAll(".accordion");
-  expect(menuGroups).toHaveLength(2);
-
-  expect(menuGroups[0]).toHaveTextContent("Update Campaigns");
-  expect(menuGroups[0]).toHaveTextContent("Update Channels");
-  expect(menuGroups[0]).toHaveTextContent("Base Image Collections");
-
-  expect(menuGroups[1]).toHaveTextContent("System Models");
-  expect(menuGroups[1]).toHaveTextContent("Hardware Types");
+  const link = screen.getByRole("link", { name });
+  expect(link).toBeVisible();
+  expect(link).toHaveAttribute("href", href);
 });
 
-it("shows links as active when route matches", async () => {
-  const { container } = renderWithProviders(<Sidebar />, {
-    path: "/devices",
-  });
+it.each(sidebarLinks)(
+  "shows %s link as active, others - as inactive on route %s",
+  (name, href) => {
+    renderWithProviders(<Sidebar />, { path: href });
 
-  const devicesLink = container.querySelector("a[href='/devices']");
-  expect(devicesLink).toHaveClass("bg-primary");
+    const activeLink = screen.getByRole("link", { name });
+    const links = screen.getAllByRole("link");
 
-  const groupsLink = container.querySelector("a[href='/device-groups']");
-  expect(groupsLink).not.toHaveClass("bg-primary");
-
-  const updateCampaignsLink = container.querySelector(
-    "a[href='/update-campaigns']",
-  );
-  expect(updateCampaignsLink).not.toHaveClass("bg-primary");
-
-  const updateChannelsLink = container.querySelector(
-    "a[href='/update-channels']",
-  );
-  expect(updateChannelsLink).not.toHaveClass("bg-primary");
-
-  const baseImageCollectionsLink = container.querySelector(
-    "a[href='/base-image-collections']",
-  );
-  expect(baseImageCollectionsLink).not.toHaveClass("bg-primary");
-
-  const systemModelsLink = container.querySelector("a[href='/system-models']");
-  expect(systemModelsLink).not.toHaveClass("bg-primary");
-
-  const hardwareTypesLink = container.querySelector(
-    "a[href='/hardware-types']",
-  );
-  expect(hardwareTypesLink).not.toHaveClass("bg-primary");
-});
+    expect(activeLink).toHaveClass("bg-primary");
+    links.forEach((link) => {
+      if (link !== activeLink) {
+        expect(link).not.toHaveClass("bg-primary");
+      }
+    });
+  },
+);

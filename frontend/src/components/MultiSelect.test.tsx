@@ -19,7 +19,7 @@
 */
 
 import { it, expect, vi } from "vitest";
-import { render, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import selectEvent from "react-select-event";
 
@@ -45,9 +45,9 @@ it("correctly selects an option", async () => {
     options,
     onChange,
   };
-  const { getByRole } = render(<MultiSelect {...props} />);
+  render(<MultiSelect {...props} />);
 
-  await selectEvent.select(getByRole("combobox"), options[0].label);
+  await selectEvent.select(screen.getByRole("combobox"), options[0].label);
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith(
     options.slice(0, 1),
@@ -62,9 +62,9 @@ it("correctly adds an option to selected", async () => {
     value: options.slice(0, 1),
     onChange,
   };
-  const { getByRole } = render(<MultiSelect {...props} />);
+  render(<MultiSelect {...props} />);
 
-  await selectEvent.select(getByRole("combobox"), options[1].label);
+  await selectEvent.select(screen.getByRole("combobox"), options[1].label);
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith(
     options.slice(0, 2),
@@ -79,9 +79,9 @@ it("correctly clears selected options", async () => {
     value: options,
     onChange,
   };
-  const { getByRole } = render(<MultiSelect {...props} />);
+  render(<MultiSelect {...props} />);
 
-  await selectEvent.clearAll(getByRole("combobox"));
+  await selectEvent.clearAll(screen.getByRole("combobox"));
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith([], expect.anything());
 });
@@ -93,10 +93,9 @@ it("correctly creates new option", async () => {
     options,
     onChange,
   };
-  const { getByRole } = render(<MultiSelect {...props} />);
-  const input = getByRole("combobox");
-  fireEvent.change(input, { target: { value: customOption.value } });
-  fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
+  render(<MultiSelect {...props} />);
+  const input = screen.getByRole("combobox");
+  await userEvent.type(input, `${customOption.value}{Enter}`);
 
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith([customOption], expect.anything());
@@ -110,10 +109,9 @@ it("correctly creates new option adding to selected", async () => {
     value: options,
     onChange,
   };
-  const { getByRole } = render(<MultiSelect {...props} />);
-  const input = getByRole("combobox");
-  fireEvent.change(input, { target: { value: customOption.value } });
-  fireEvent.keyDown(input, { key: "Enter", code: "Enter", charCode: 13 });
+  render(<MultiSelect {...props} />);
+  const input = screen.getByRole("combobox");
+  await userEvent.type(input, `${customOption.value}{Enter}`);
 
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange).toHaveBeenLastCalledWith(
@@ -128,8 +126,9 @@ it("correctly call onBlur", async () => {
     options,
     onBlur,
   };
-  const { getByRole } = render(<MultiSelect {...props} />);
-  const input = getByRole("combobox");
+  render(<MultiSelect {...props} />);
+  const input = screen.getByRole("combobox");
+
   input.focus();
   expect(input).toHaveFocus();
 

@@ -19,7 +19,7 @@
 */
 
 import { it, expect } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Dropdown from "./Dropdown";
@@ -34,8 +34,6 @@ it("renders and toggles correctly", async () => {
     </Dropdown>,
   );
   expect(screen.queryByTestId("dropdown-item")).not.toBeInTheDocument();
-  userEvent.click(screen.getByRole("button"));
-  await waitFor(() =>
-    expect(screen.queryByTestId("dropdown-item")).toBeInTheDocument(),
-  );
+  await userEvent.click(screen.getByRole("button"));
+  await screen.findByTestId("dropdown-item");
 });
