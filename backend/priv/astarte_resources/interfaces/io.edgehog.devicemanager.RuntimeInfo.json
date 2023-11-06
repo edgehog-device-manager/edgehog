@@ -1,0 +1,29 @@
+{
+  "interface_name": "io.edgehog.devicemanager.RuntimeInfo",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "endpoint": "/name",
+      "type": "string",
+      "description": "Name of the Edgehog runtime. Example value: `edgehog-esp32-device`"
+    },
+    {
+      "endpoint": "/url",
+      "type": "string",
+      "description": "URL that uniquely identifies the Edgehog Edgehog runtime implementation. Example value: `https://github.com/edgehog-device-manager/edgehog-esp32-device`."
+    },
+    {
+      "endpoint": "/version",
+      "type": "string",
+      "description": "Version of the Edgehog runtime. Example value: `0.5`"
+    },
+    {
+      "endpoint": "/environment",
+      "type": "string",
+      "description": "Environment of the Edgehog runtime. Example value: `esp-idf VERSION`, `Rust 1.58` or `Java 8`"
+    }
+  ]
+}

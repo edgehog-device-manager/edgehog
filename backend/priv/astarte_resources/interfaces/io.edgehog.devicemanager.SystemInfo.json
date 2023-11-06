@@ -1,0 +1,20 @@
+{
+  "interface_name": "io.edgehog.devicemanager.SystemInfo",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "description": "Information about the system",
+  "mappings": [
+    {
+      "endpoint": "/serialNumber",
+      "type": "string",
+      "description": "The serial number of the system"
+    },
+    {
+      "endpoint": "/partNumber",
+      "type": "string",
+      "description": "The part number of the system"
+    }
+  ]
+}

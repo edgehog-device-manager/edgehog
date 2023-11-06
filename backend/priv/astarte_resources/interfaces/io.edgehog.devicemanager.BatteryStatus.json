@@ -1,0 +1,34 @@
+{
+  "interface_name": "io.edgehog.devicemanager.BatteryStatus",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "device",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/%{battery_slot}/levelPercentage",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Battery level estimated percentage [0.0%-100.0%]",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{battery_slot}/levelAbsoluteError",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Battery level measurement absolute error [0.0-100.0]",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{battery_slot}/status",
+      "type": "string",
+      "explicit_timestamp": true,
+      "description": "Battery status string, any of: Charging, Discharging, Idle, EitherIdleOrCharging, Failure, Removed, Unknown",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    }
+  ]
+}

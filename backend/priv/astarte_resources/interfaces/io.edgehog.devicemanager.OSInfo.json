@@ -1,0 +1,19 @@
+{
+  "interface_name": "io.edgehog.devicemanager.OSInfo",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "endpoint": "/osName",
+      "type": "string",
+      "description": "Name of the Operating System"
+    },
+    {
+      "endpoint": "/osVersion",
+      "type": "string",
+      "description": "Version of the Operating System"
+    }
+  ]
+}

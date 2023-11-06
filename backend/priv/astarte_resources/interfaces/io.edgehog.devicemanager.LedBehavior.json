@@ -1,0 +1,18 @@
+{
+  "interface_name": "io.edgehog.devicemanager.LedBehavior",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "mappings": [
+    {
+      "endpoint": "/%{led_id}/behavior",
+      "type": "string",
+      "reliability": "unique",
+      "description": "Enum describing the behavior of the given led. Possible values: [Blink60Seconds | DoubleBlink60Seconds | SlowBlink60Seconds]",
+      "doc": "Blink60Seconds: Blinking\nDoubleBlink60Seconds: Double blinking\nSlowBlink60Seconds: Slow blinking",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    }
+  ]
+}
