@@ -257,6 +257,8 @@ spec:
           value: edgehog
         - name: PORT
           value: "4000"
+        - name: URL_HOST
+          value: <BACKEND-HOST>
         - name: DATABASE_HOSTNAME
           value: <DATABASE-HOSTNAME>
         - name: DATABASE_NAME
@@ -349,6 +351,8 @@ spec:
 ```
 
 Values to be replaced
+- `BACKEND-HOST`: the host of the Edgehog backend (see the [Creating DNS
+  entries](#creating-dns-entries) section).
 - `DATABASE-HOSTNAME`: the hostname of the PostgreSQL database.
 - `MAX-UPLOAD-SIZE-BYTES`: the maximum dimension for uploads, particularly relevant for OTA updates.
   If omitted, it defaults to 4 Gigabytes.
