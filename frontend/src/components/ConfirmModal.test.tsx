@@ -32,8 +32,8 @@ it("renders correctly", () => {
     onConfirm: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
-  const modal = document.querySelector("[role='dialog']");
-  expect(modal).toBeInTheDocument();
+  const modal = screen.getByRole("dialog");
+  expect(modal).toBeVisible();
   expect(modal).toHaveTextContent("Modal Title");
   expect(modal).toHaveTextContent("Prompt message.");
   expect(modal).toHaveTextContent("OK");
@@ -85,7 +85,7 @@ it("correctly dimisses by typing Esc", async () => {
     onCancel: vi.fn(),
   };
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
-  const modal = document.querySelector("[role='dialog']")!;
+  const modal = screen.getByRole("dialog");
   await userEvent.type(modal, "{Escape}");
   expect(props.onCancel).toHaveBeenCalled();
   expect(props.onConfirm).not.toHaveBeenCalled();

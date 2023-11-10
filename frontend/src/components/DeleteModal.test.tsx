@@ -33,8 +33,8 @@ it("renders correctly", () => {
     onConfirm: vi.fn(),
   };
   renderWithProviders(<DeleteModal {...props}>Prompt message.</DeleteModal>);
-  const modal = document.querySelector("[role='dialog']");
-  expect(modal).toBeInTheDocument();
+  const modal = screen.getByRole("dialog");
+  expect(modal).toBeVisible();
   expect(modal).toHaveTextContent("Modal Title");
   expect(modal).toHaveTextContent("Prompt message.");
   expect(modal).toHaveTextContent("Please type confirm-text to confirm.");
@@ -73,7 +73,7 @@ it("does not confirm by dismissing", async () => {
   renderWithProviders(<DeleteModal {...props}>Prompt message.</DeleteModal>);
 
   await userEvent.click(screen.getByText("Cancel"));
-  const modal = document.querySelector("[role='dialog']")!;
+  const modal = screen.getByRole("dialog");
   await userEvent.type(modal, "{Escape}");
   expect(props.onConfirm).not.toHaveBeenCalled();
   expect(props.onCancel).toHaveBeenCalled();

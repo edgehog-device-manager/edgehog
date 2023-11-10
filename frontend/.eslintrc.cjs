@@ -27,6 +27,7 @@ module.exports = {
     "plugin:react-hooks/recommended",
     "plugin:relay/recommended",
     "prettier",
+    "plugin:testing-library/react",
   ],
   ignorePatterns: ["build", ".eslintrc.cjs"],
   parser: "@typescript-eslint/parser",
