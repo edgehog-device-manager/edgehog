@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,11 +43,11 @@ defmodule EdgehogWeb.AuthTest do
     conn: conn,
     api_path: api_path
   } do
-    Config.put_disable_authentication(true)
+    Config.put_disable_tenant_authentication(true)
 
     on_exit(fn ->
       # Cleanup at the end
-      Config.reload_disable_authentication()
+      Config.reload_disable_tenant_authentication()
     end)
 
     conn = get(conn, api_path, query: @query)

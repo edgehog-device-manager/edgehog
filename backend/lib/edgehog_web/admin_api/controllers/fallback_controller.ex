@@ -1,7 +1,8 @@
 #
+#
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +19,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Auth do
-  alias Edgehog.Config
-  alias EdgehogWeb.Auth.Pipeline
+defmodule EdgehogWeb.AdminAPI.FallbackController do
+  use EdgehogWeb, :controller
 
-  def init(opts) do
-    Pipeline.init(opts)
-  end
-
-  def call(conn, opts) do
-    if Config.tenant_authentication_disabled?() do
-      # TODO: when we add Authz this path will probably have to
-      # put some type of all-access Authz in the GraphQL context
-      conn
-    else
-      Pipeline.call(conn, opts)
-    end
+  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(EdgehogWeb.AdminAPI.ChangesetView)
+    |> render("error.json", changeset: changeset)
   end
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Auth do
-  alias Edgehog.Config
-  alias EdgehogWeb.Auth.Pipeline
+defmodule EdgehogWeb.AdminAPI.Auth.Pipeline do
+  use Plug.Builder
 
-  def init(opts) do
-    Pipeline.init(opts)
-  end
+  plug Guardian.Plug.Pipeline,
+    otp_app: :edgehog,
+    module: EdgehogWeb.AdminAPI.Auth.Token,
+    error_handler: EdgehogWeb.AdminAPI.Auth.ErrorHandler
 
-  def call(conn, opts) do
-    if Config.tenant_authentication_disabled?() do
-      # TODO: when we add Authz this path will probably have to
-      # put some type of all-access Authz in the GraphQL context
-      conn
-    else
-      Pipeline.call(conn, opts)
-    end
-  end
+  plug Guardian.Plug.VerifyHeader, claims: %{e_ara: "*"}
+  plug Guardian.Plug.EnsureAuthenticated
 end

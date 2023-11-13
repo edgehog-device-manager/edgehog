@@ -62,18 +62,23 @@ config :tesla, :adapter, {Tesla.Adapter.Finch, name: EdgehogFinch, receive_timeo
 config :ex_aws,
   json_codec: Jason
 
-config :edgehog, EdgehogWeb.Auth.Token,
-  allowed_algos: [
-    "ES256",
-    "ES384",
-    "ES512",
-    "PS256",
-    "PS384",
-    "PS512",
-    "RS256",
-    "RS384",
-    "RS512"
-  ]
+allowed_algos = [
+  "ES256",
+  "ES384",
+  "ES512",
+  "PS256",
+  "PS384",
+  "PS512",
+  "RS256",
+  "RS384",
+  "RS512"
+]
+
+config :edgehog, EdgehogWeb.Auth.Token, allowed_algos: allowed_algos
+
+config :edgehog, EdgehogWeb.AdminAPI.Auth.Token,
+  allowed_algos: allowed_algos,
+  secret_key: {Edgehog.Config, :admin_jwk!, []}
 
 # Prometheus metrics
 config :edgehog, Edgehog.PromEx,

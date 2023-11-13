@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,17 @@ defmodule EdgehogWeb.Router do
   pipeline :triggers do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
+  end
+
+  pipeline :admin_api do
+    plug :accepts, ["json"]
+    plug EdgehogWeb.AdminAPI.Auth
+  end
+
+  scope "/admin-api/v1", EdgehogWeb.AdminAPI do
+    pipe_through :admin_api
+
+    post "/tenants", TenantsController, :create
   end
 
   forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema

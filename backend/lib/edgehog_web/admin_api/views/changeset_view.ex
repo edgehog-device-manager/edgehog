@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Auth do
-  alias Edgehog.Config
-  alias EdgehogWeb.Auth.Pipeline
+defmodule EdgehogWeb.AdminAPI.ChangesetView do
+  alias EdgehogWeb.ErrorHelpers
 
-  def init(opts) do
-    Pipeline.init(opts)
-  end
-
-  def call(conn, opts) do
-    if Config.tenant_authentication_disabled?() do
-      # TODO: when we add Authz this path will probably have to
-      # put some type of all-access Authz in the GraphQL context
-      conn
-    else
-      Pipeline.call(conn, opts)
-    end
+  @doc """
+  Renders changeset errors.
+  """
+  def render("error.json", %{changeset: changeset}) do
+    # When encoded, the changeset returns its errors
+    # as a JSON object. So we just pass it forward.
+    %{errors: Ecto.Changeset.traverse_errors(changeset, &ErrorHelpers.translate_error/1)}
   end
 end
