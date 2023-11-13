@@ -1,0 +1,60 @@
+{
+    "interface_name": "io.edgehog.devicemanager.OTAEvent",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "datastream",
+    "ownership": "device",
+    "aggregation": "object",
+    "description": "OTA Events sampled data.",
+    "doc": "Allows to stream OTA Events data, including OTA Update status, its progress, code and internal message.",
+    "mappings": [
+        {
+            "endpoint": "/event/requestUUID",
+            "type": "string",
+            "reliability": "unique",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 31556952,
+            "explicit_timestamp": true,
+            "description": "OTA Request identifier."
+        },
+        {
+            "endpoint": "/event/status",
+            "type": "string",
+            "reliability": "unique",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 31556952,
+            "explicit_timestamp": true,
+            "description": "OTA Update status.",
+            "doc": "Value is one of the following strings:\n\n - `Acknowledged`: the device received an OTA Request.\n - `Downloading`: an update is in the process of downloading.\n - `Deploying`: an update is in the process of deploying.\n - `Deployed`: an update deployed on the device.\n - `Rebooting`: the device is in the process of rebooting.\n - `Success`: an update succeeded. This is a final status of OTA Update.\n - `Error`: an error happened during the update. Also this status can be used to notify about handled errors.\n - `Failure`: an update failed. This is a final status of OTA Update."
+        },
+        {
+            "endpoint": "/event/statusProgress",
+            "type": "integer",
+            "reliability": "unique",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 31556952,
+            "explicit_timestamp": true,
+            "description": "Current OTA Update status progress percentage [0%-100%].",
+            "doc": "Every OTA Update status has own progress that starts from 0 and ends at 100, for example (pairs of `\"status, progress\"`): `\"Downloading, 0\"`, `\"Downloading, 50\"`, `\"Downloading, 100\"`, `\"Deploying, 10\"`, etc."
+        },
+        {
+            "endpoint": "/event/statusCode",
+            "type": "string",
+            "reliability": "unique",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 31556952,
+            "explicit_timestamp": true,
+            "description": "Status code expands OTA Update status with additional information.",
+            "doc": "Some common status codes are:\n\n  - `InvalidRequest`: an update request contains incorrect data.\n - `UpdateAlreadyInProgress`: another update is currently in progress.\n  - `NetworkError`: a network error happened during the update.\n  - `IOError`: a filesystem error happened during the update.\n  - `InternalError`: an internal error happened during the update.\n  - `InvalidBaseImage`: an update failed to apply due to an invalid base image.\n  - `SystemRollback`: a system rollback has occurred.\n  - `Canceled`: an update was canceled."
+        },
+        {
+            "endpoint": "/event/message",
+            "type": "string",
+            "reliability": "unique",
+            "database_retention_policy": "use_ttl",
+            "database_retention_ttl": 31556952,
+            "explicit_timestamp": true,
+            "description": "Contains internal message for status code or empty string otherwise."
+        }
+    ]
+}

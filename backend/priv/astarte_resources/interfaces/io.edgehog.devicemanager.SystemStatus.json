@@ -1,0 +1,42 @@
+{
+  "interface_name": "io.edgehog.devicemanager.SystemStatus",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "device",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/systemStatus/availMemoryBytes",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Available memory (Bytes)",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/systemStatus/bootId",
+      "type": "string",
+      "explicit_timestamp": true,
+      "description": "UUID representing the Boot Id",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/systemStatus/taskCount",
+      "type": "integer",
+      "explicit_timestamp": true,
+      "description": "Number of running tasks or processes",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/systemStatus/uptimeMillis",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Get time in milliseconds since boot",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    }
+  ]
+}

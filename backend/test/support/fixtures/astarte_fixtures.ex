@@ -98,4 +98,55 @@ defmodule Edgehog.AstarteFixtures do
 
     device
   end
+
+  @doc """
+  Returns an interface map with the given name and major (and optionally minor, which defaults to 1).
+
+  All the other parts of the interface are fixed.
+  """
+  def interface_map_fixture(opts \\ []) do
+    name = Keyword.get(opts, :name, "io.edgehog.devicemanager.SystemInfo")
+    major = Keyword.get(opts, :major, 1)
+    minor = Keyword.get(opts, :minor, 1)
+
+    %{
+      "interface_name" => name,
+      "version_major" => major,
+      "version_minor" => minor,
+      "type" => "datastream",
+      "ownership" => "device",
+      "mappings" => [
+        %{
+          "endpoint" => "/foo",
+          "type" => "integer"
+        }
+      ]
+    }
+  end
+
+  @doc """
+  Returns a trigger map with the (optional) given name and http_url.
+
+  All the other parts of the trigger are fixed.
+  """
+  def trigger_map_fixture(opts \\ []) do
+    name = Keyword.get(opts, :name, "edgehog-connection")
+    http_url = Keyword.get(opts, :http_url, "https://api.edgehog.example/tenants/test/triggers")
+
+    %{
+      "name" => name,
+      "action" => %{
+        "http_url" => http_url,
+        "ignore_ssl_errors" => false,
+        "http_method" => "post",
+        "http_static_headers" => %{}
+      },
+      "simple_triggers" => [
+        %{
+          "type" => "device_trigger",
+          "on" => "device_connected"
+        }
+      ]
+    }
+  end
 end

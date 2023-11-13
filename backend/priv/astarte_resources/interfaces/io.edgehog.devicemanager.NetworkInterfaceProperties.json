@@ -1,0 +1,21 @@
+{
+  "interface_name": "io.edgehog.devicemanager.NetworkInterfaceProperties",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "endpoint": "/%{iface_name}/macAddress",
+      "type": "string",
+      "allow_unset": true,
+      "description": "Normalized physical address. Example value is \"00:aa:bb:cc:dd:ee\" (always lower case)"
+    },
+    {
+      "endpoint": "/%{iface_name}/technologyType",
+      "type": "string",
+      "allow_unset": true,
+      "description": "Connection technology. Possible values: [Ethernet, Bluetooth, Cellular, WiFi]"
+    }
+  ]
+}

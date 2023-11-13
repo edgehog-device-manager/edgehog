@@ -19,17 +19,20 @@
 #
 
 defmodule Edgehog.ProvisioningTest do
-  use Edgehog.DataCase, async: true
+  # This can't be async: true because we're using Mox in global mode
+  use Edgehog.DataCase
   use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 
+  alias Astarte.Client.APIError
   alias Edgehog.Astarte
   alias Edgehog.Provisioning
   alias Edgehog.Provisioning.AstarteConfig
   alias Edgehog.Provisioning.TenantConfig
   alias Edgehog.Tenants
+  alias Edgehog.Tenants.Reconciler
 
   @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
                         |> X509.PublicKey.derive()
@@ -38,6 +41,15 @@ defmodule Edgehog.ProvisioningTest do
   @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
 
   describe "provision_tenant/1" do
+    setup do
+      # We have to use Mox in global mode because the Interfaces and Triggers mocks are
+      # called by an anoymous task launched by the reconciler and we can't easily recover
+      # its pid to allow mocks call from it
+      Mox.set_mox_global()
+
+      :ok
+    end
+
     test "with valid attrs creates the tenant, cluster and realm" do
       attrs = %{
         name: "Test",
@@ -50,7 +62,8 @@ defmodule Edgehog.ProvisioningTest do
         }
       }
 
-      assert {:ok, %TenantConfig{} = tenant_config} = Provisioning.provision_tenant(attrs)
+      assert {:ok, %TenantConfig{} = tenant_config} =
+               wait_for_reconciliation!(fn -> Provisioning.provision_tenant(attrs) end)
 
       %TenantConfig{
         name: name,
@@ -94,7 +107,9 @@ defmodule Edgehog.ProvisioningTest do
       cluster = cluster_fixture()
 
       assert {:ok, _tenant_config} =
-               provision_tenant(astarte_config: [base_api_url: cluster.base_api_url])
+               wait_for_reconciliation!(fn ->
+                 provision_tenant(astarte_config: [base_api_url: cluster.base_api_url])
+               end)
     end
 
     test "fails with invalid tenant slug" do
@@ -171,5 +186,49 @@ defmodule Edgehog.ProvisioningTest do
       })
 
     Provisioning.provision_tenant(attrs)
+  end
+
+  defp wait_for_reconciliation!(fun) do
+    interface_count = Reconciler.Core.list_required_interfaces() |> length()
+    trigger_count = Reconciler.Core.list_required_triggers("foo") |> length()
+
+    test_process = self()
+
+    Edgehog.Astarte.Realm.InterfacesMock
+    |> expect(:get, interface_count, fn _client, _interface_name, _major ->
+      {:error, api_error(status: 404)}
+    end)
+    |> expect(:create, interface_count, fn _client, _interface_map ->
+      send(test_process, :reconciled)
+
+      :ok
+    end)
+
+    Edgehog.Astarte.Realm.TriggersMock
+    |> expect(:get, trigger_count, fn _client, _trigger_name ->
+      {:error, api_error(status: 404)}
+    end)
+    |> expect(:create, trigger_count, fn _client, _trigger_map ->
+      send(test_process, :reconciled)
+
+      :ok
+    end)
+
+    result = fun.()
+
+    1..(interface_count + trigger_count)
+    |> Enum.each(fn _ -> assert_receive :reconciled end)
+
+    result
+  end
+
+  defp api_error(opts) do
+    status = Keyword.get(opts, :status, 500)
+    message = Keyword.get(opts, :message, "Generic error")
+
+    %APIError{
+      status: status,
+      response: %{"errors" => %{"detail" => message}}
+    }
   end
 end

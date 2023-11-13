@@ -35,6 +35,11 @@ defmodule Edgehog.Application do
 
     Config.validate_admin_authentication!()
 
+    # We inject this here so that the non-web part of the application doesn't depend on the web part
+    tenant_to_trigger_url_fun = fn %Edgehog.Tenants.Tenant{slug: slug} ->
+      EdgehogWeb.Router.Helpers.astarte_trigger_url(EdgehogWeb.Endpoint, :process_event, slug)
+    end
+
     children = [
       # Prometheus metrics
       Edgehog.PromEx,
@@ -49,9 +54,10 @@ defmodule Edgehog.Application do
       # Start the UpdateCampaigns supervisor
       Edgehog.UpdateCampaigns.Supervisor,
       # Start the Endpoint (http/https)
-      EdgehogWeb.Endpoint
-      # Start a worker by calling: Edgehog.Worker.start_link(arg)
-      # {Edgehog.Worker, arg}
+      EdgehogWeb.Endpoint,
+      # Start the Tenant Reconciler Supervisor
+      {Edgehog.Tenants.Reconciler.Supervisor,
+       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -1,0 +1,21 @@
+{
+    "interface_name": "io.edgehog.devicemanager.config.Telemetry",
+    "version_major": 0,
+    "version_minor": 1,
+    "type": "properties",
+    "ownership": "server",
+    "mappings": [
+        {
+            "endpoint": "/request/%{interface_name}/enable",
+            "type": "boolean",
+            "allow_unset": true,
+            "description": "Enable/Disable telemetry update. Unset returns to the previous state configured in the device."
+        },
+        {
+            "endpoint": "/request/%{interface_name}/periodSeconds",
+            "type": "longinteger",
+            "allow_unset": true,
+            "description": "Set interval of period seconds between the end of the previous update and the start of the next one. Unset returns to the previous state configured in the device."
+        }
+    ]
+}

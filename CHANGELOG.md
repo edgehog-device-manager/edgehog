@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.7.1] - Unreleased
 ### Added
 - Add Admin API ([#400](https://github.com/edgehog-device-manager/edgehog/pull/400)).
+- Add a reconciler that takes care of installing Astarte resources (interfaces and triggers) for a
+  tenant ([#403](https://github.com/edgehog-device-manager/edgehog/pull/403))
+- BREAKING: Add mandatory `URL_HOST` env variable. It must point to the host where the Edgehog
+  backend is exposed.
 
 ## [0.7.0] - 2023-10-06
 ### Fixed

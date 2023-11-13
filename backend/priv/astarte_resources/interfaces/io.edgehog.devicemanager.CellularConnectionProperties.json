@@ -1,0 +1,27 @@
+{
+  "interface_name": "io.edgehog.devicemanager.CellularConnectionProperties",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "endpoint": "/%{id}/apn",
+      "type": "string",
+      "description": "Operator apn address.",
+      "allow_unset": true
+    },
+    {
+      "endpoint": "/%{id}/imei",
+      "type": "string",
+      "description": "The modem IMEI code of the device.",
+      "allow_unset": true
+    },
+    {
+      "endpoint": "/%{id}/imsi",
+      "type": "string",
+      "description": "The SIM IMSI code of the device.",
+      "allow_unset": true
+    }
+  ]
+}

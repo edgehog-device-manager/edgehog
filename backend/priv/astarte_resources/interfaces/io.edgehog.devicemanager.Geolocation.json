@@ -1,0 +1,68 @@
+{
+  "interface_name": "io.edgehog.devicemanager.Geolocation",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "description": "Generic Geolocation sampled data.",
+  "doc": "Geolocation allows geolocation sensors to stream location data, such as GPS data. Values availability depends on what sensors are present on devices and what measurement systems are in use. The id represents a unique identifier for an individual sensor.",
+  "mappings": [
+    {
+      "endpoint": "/%{id}/latitude",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Sampled latitude value.",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{id}/longitude",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Sampled longitude value.",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{id}/altitude",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Sampled altitude value.",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{id}/accuracy",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Sampled accuracy of the latitude and longitude properties.",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{id}/altitudeAccuracy",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Sampled accuracy of the altitude property.",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{id}/heading",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Sampled value representing the direction towards which the device is facing.",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    },
+    {
+      "endpoint": "/%{id}/speed",
+      "type": "double",
+      "explicit_timestamp": true,
+      "description": "Sampled value representing the velocity of the device.",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 5184000
+    }
+  ]
+}

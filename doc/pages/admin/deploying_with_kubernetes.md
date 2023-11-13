@@ -257,6 +257,8 @@ spec:
           value: edgehog
         - name: PORT
           value: "4000"
+        - name: URL_HOST
+          value: <BACKEND-HOST>
         - name: DATABASE_HOSTNAME
           value: <DATABASE-HOSTNAME>
         - name: DATABASE_NAME
@@ -349,6 +351,8 @@ spec:
 ```
 
 Values to be replaced
+- `BACKEND-HOST`: the host of the Edgehog backend (see the [Creating DNS
+  entries](#creating-dns-entries) section).
 - `DATABASE-HOSTNAME`: the hostname of the PostgreSQL database.
 - `MAX-UPLOAD-SIZE-BYTES`: the maximum dimension for uploads, particularly relevant for OTA updates.
   If omitted, it defaults to 4 Gigabytes.
@@ -619,37 +623,34 @@ $ kubectl exec -it deploy/edgehog-backend -n edgehog -- /app/bin/edgehog remote
 All the following commands have to be executed inside that shell, in a single session (since some
 commands will reuse the result of previous commands)
 
-### Creating a cluster
-
-The following commands will create a database entry representing the Astarte cluster this Edgehog
-instance points to
-
-```elixir
-iex> alias Edgehog.Astarte
-iex> cluster_name = "<CLUSTER-NAME>"
-iex> base_api_url = "<ASTARTE-BASE-API-URL>"
-iex> {:ok, cluster} = Astarte.create_cluster(%{name: cluster_name, base_api_url: base_api_url})
-```
-
-Values to be replaced
-- `CLUSTER-NAME`: a name for the Astarte cluster.
-- `ASTARTE-BASE-API-URL`: the base API url of the Astarte instance (e.g.
-  https://api.astarte.example.com).
-
 ### Creating the tenant
 
-The following commands will create a database entry representing the tenant and will use its ID to
-scope the following calls to the database
+The following commands will create a database entry representing the tenant, with its associated
+Astarte cluster and Realm.
 
 ```elixir
-iex> alias Edgehog.Tenants
+iex> alias Edgehog.Provisioning
 iex> tenant_name = "<TENANT-NAME>"
 iex> tenant_slug = "<TENANT-SLUG>"
 iex> tenant_public_key = """
 <TENANT-PUBLIC-KEY>
 """
-iex> {:ok, tenant} = Tenants.create_tenant(%{name: tenant_name, slug: tenant_slug, public_key: tenant_public_key})
-iex> _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+iex> base_api_url = "<ASTARTE-BASE-API-URL>"
+iex> realm_name = "<ASTARTE-REALM-NAME>"
+iex> realm_private_key = """
+<ASTARTE-REALM-PRIVATE-KEY>
+"""
+iex> {:ok, tenant} = Provisioning.provision_tenant(
+  %{
+    name: tenant_name,
+    slug: tenant_slug,
+    public_key: tenant_public_key,
+    astarte_config: %{
+      base_api_url: base_api_url,
+      realm_name: realm_name,
+      realm_private_key: realm_private_key
+    }
+  })
 ```
 
 Values to be replaced
@@ -658,148 +659,12 @@ Values to be replaced
 - `TENANT-PUBLIC-KEY`: the content of `public_key.pem` created in the [previous
   step](#creating-a-keypair). Open a multiline string with `"""`, press Enter, paste the content of
   the file in the `iex` shell and then close the multiline string with `"""` on a new line.
-
-### Creating the realm
-
-The following commands will create a database entry representing the realm used by the tenant
-
-```elixir
-iex> alias Edgehog.Tenants
-iex> realm_name = "<REALM-NAME>"
-iex> realm_private_key = """
-<REALM-PRIVATE-KEY>
-"""
-iex> {:ok, realm} = Astarte.create_realm(cluster, %{name: realm_name, private_key: realm_private_key})
-```
-
-Values to be replaced
-- `REALM-NAME`: the name of the Astarte realm you're using.
-- `REALM-PRIVATE-KEY`: the content of you realm's private key. Open a multiline string with `"""`,
-  press Enter, paste the content of the file in the `iex` shell and then close the multiline string
-  with `"""` on a new line.
-
-### Installing triggers
-
-In your Astarte instance, install these 4 triggers.
-
-Connection trigger:
-
-```json
-{
-    "name": "edgehog-connection",
-    "action": {
-        "http_url": "<BACKEND-TRIGGER-URL>",
-        "ignore_ssl_errors": false,
-        "http_method": "post",
-        "http_static_headers": {}
-    },
-    "simple_triggers": [
-        {
-            "type": "device_trigger",
-            "on": "device_connected"
-        }
-    ]
-}
-```
-
-Disconnection trigger:
-
-```json
-{
-    "name": "edgehog-disconnection",
-    "action": {
-        "http_url": "<BACKEND-TRIGGER-URL>",
-        "ignore_ssl_errors": false,
-        "http_method": "post",
-        "http_static_headers": {}
-    },
-    "simple_triggers": [
-        {
-            "type": "device_trigger",
-            "on": "device_disconnected"
-        }
-    ]
-}
-```
-
-OTA Response trigger:
-
-```json
-{
-    "name": "edgehog-ota",
-    "action": {
-        "http_url": "<BACKEND-TRIGGER-URL>",
-        "ignore_ssl_errors": false,
-        "http_method": "post",
-        "http_static_headers": {}
-    },
-    "simple_triggers": [
-        {
-            "type": "data_trigger",
-            "interface_name": "io.edgehog.devicemanager.OTAResponse",
-            "interface_major": 0,
-            "on": "incoming_data",
-            "match_path": "/*",
-            "value_match_operator": "*"
-        }
-    ]
-}
-```
-
-OTA Event trigger:
-
-```json
-{
-    "name": "edgehog-ota-event",
-    "action": {
-        "http_url": "<BACKEND-TRIGGER-URL>",
-        "ignore_ssl_errors": false,
-        "http_method": "post",
-        "http_static_headers": {}
-    },
-    "simple_triggers": [
-        {
-            "type": "data_trigger",
-            "interface_name": "io.edgehog.devicemanager.OTAEvent",
-            "interface_major": 0,
-            "on": "incoming_data",
-            "match_path": "/*",
-            "value_match_operator": "*"
-        }
-    ]
-}
-```
-
-System Info trigger:
-
-```json
-{
-    "name": "edgehog-system-info",
-    "action": {
-        "http_url": "<BACKEND-TRIGGER-URL>",
-        "ignore_ssl_errors": false,
-        "http_method": "post",
-        "http_static_headers": {}
-    },
-    "simple_triggers": [
-        {
-            "type": "data_trigger",
-            "on": "incoming_data",
-            "interface_name": "io.edgehog.devicemanager.SystemInfo",
-            "interface_major": 0,
-            "match_path": "/*",
-            "value_match_operator": "*"
-        }
-    ]
-}
-
-```
-
-Values to be replaced
-- `BACKEND-TRIGGER-URL`: the URL where the backend receives triggers. This is
-  `<BASE-BACKEND-URL>/tenants/<TENANT-SLUG>/triggers`, where `BASE-BACKEND-URL` is the URL to your
-  Edgehog backend and `TENANT-SLUG` is the slug of the tenant you chose in the [previous
-  step](#creating-the-tenant).
+- `ASTARTE-BASE-API-URL`: the base API url of the Astarte instance (e.g.
+  https://api.astarte.example.com).
+- `ASTARTE-REALM-NAME`: the name of the Astarte realm you're using.
+- `ASTARTE-REALM-PRIVATE-KEY`: the content of you realm's private key. Open a multiline string with
+  `"""`, press Enter, paste the content of the file in the `iex` shell and then close the multiline
+  string with `"""` on a new line.
 
 ### Accessing Edgehog
 

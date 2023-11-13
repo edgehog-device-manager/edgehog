@@ -42,6 +42,9 @@ defmodule Edgehog.Provisioning do
            Repo.put_tenant_id(tenant.tenant_id),
            {:ok, cluster} <- fetch_or_create_cluster(astarte_config),
            {:ok, realm} <- create_realm(cluster, astarte_config) do
+        # Trigger immediate tenant reconciliation
+        reconcile_tenant(tenant)
+
         # Build back the tenant config, to reflect what has actually been
         # saved in the database
         tenant_config = %TenantConfig{
@@ -63,6 +66,11 @@ defmodule Edgehog.Provisioning do
   defp create_tenant(tenant_config) do
     tenant_params = Map.take(tenant_config, [:name, :slug, :public_key])
     Tenants.create_tenant(tenant_params)
+  end
+
+  defp reconcile_tenant(tenant) do
+    Tenants.preload_astarte_resources_for_tenant(tenant)
+    |> Tenants.reconcile_tenant()
   end
 
   defp fetch_or_create_cluster(astarte_config) do
