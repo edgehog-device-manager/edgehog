@@ -27,9 +27,28 @@ alias Edgehog.{
 
 require Logger
 
+default_var =
+  if File.exists?("../.env") do
+    defaults = Envar.read("../.env")
+
+    fn var ->
+      # paths in the .env are relative to ../
+      Map.fetch!(defaults, var)
+      |> String.replace_prefix("./", "../")
+    end
+  else
+    fn _var -> nil end
+  end
+
+# gives priority to system env vars
+read_env_var = fn var ->
+  default = default_var.(var)
+  System.get_env(var, default)
+end
+
 # original_file_name_var is used in docker to keep a reference to the original file.
 read_file_from_env_var! = fn file_var, original_file_name_var ->
-  file_name = System.fetch_env!(file_var)
+  file_name = read_env_var.(file_var)
   original_file_name = System.get_env(original_file_name_var, file_name)
 
   File.read(file_name)
@@ -45,7 +64,7 @@ end
 {:ok, cluster} =
   Astarte.create_cluster(%{
     name: "Test Cluster",
-    base_api_url: System.get_env("SEEDS_ASTARTE_BASE_API_URL")
+    base_api_url: read_env_var.("SEEDS_ASTARTE_BASE_API_URL")
   })
 
 default_key =
@@ -97,7 +116,7 @@ realm_pk =
 
 {:ok, realm} =
   Astarte.create_realm(cluster, %{
-    name: System.get_env("SEEDS_REALM"),
+    name: read_env_var.("SEEDS_REALM"),
     private_key: realm_pk
   })
 
