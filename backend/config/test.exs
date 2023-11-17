@@ -73,6 +73,9 @@ config :edgehog,
 config :edgehog, :astarte_interfaces_module, Edgehog.Astarte.Realm.InterfacesMock
 config :edgehog, :astarte_triggers_module, Edgehog.Astarte.Realm.TriggersMock
 
+# Reconciler mock for tests
+config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock
+
 # Storage mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
 config :edgehog, :base_images_storage_module, Edgehog.BaseImages.StorageMock

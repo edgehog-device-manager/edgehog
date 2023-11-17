@@ -29,6 +29,12 @@ defmodule Edgehog.Tenants do
   alias Edgehog.Tenants.Reconciler
   alias Edgehog.Tenants.Tenant
 
+  @reconciler_module Application.compile_env(
+                       :edgehog,
+                       :reconciler_module,
+                       Reconciler
+                     )
+
   @doc """
   Returns the list of tenants.
 
@@ -149,7 +155,7 @@ defmodule Edgehog.Tenants do
   end
 
   def reconcile_tenant(%Tenant{} = tenant) do
-    Reconciler.reconcile_tenant(tenant)
+    @reconciler_module.reconcile_tenant(tenant)
   end
 
   @doc """

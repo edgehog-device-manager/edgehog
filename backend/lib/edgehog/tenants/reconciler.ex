@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler do
+  @behaviour Edgehog.Tenants.Reconciler.Behaviour
   use GenServer
 
   alias Edgehog.Tenants
@@ -32,11 +33,12 @@ defmodule Edgehog.Tenants.Reconciler do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
+  @impl Edgehog.Tenants.Reconciler.Behaviour
   def reconcile_tenant(%Tenant{} = tenant) do
     GenServer.cast(__MODULE__, {:reconcile_tenant, tenant})
   end
 
-  @impl true
+  @impl GenServer
   def init(opts) do
     tenant_to_trigger_url_fun = Keyword.fetch!(opts, :tenant_to_trigger_url_fun)
 
@@ -53,7 +55,7 @@ defmodule Edgehog.Tenants.Reconciler do
     end
   end
 
-  @impl true
+  @impl GenServer
   def handle_info(:reconcile_all, state) do
     %{
       mode: mode,
@@ -71,7 +73,7 @@ defmodule Edgehog.Tenants.Reconciler do
     {:noreply, state}
   end
 
-  @impl true
+  @impl GenServer
   def handle_cast({:reconcile_tenant, tenant}, state) do
     %{
       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun
