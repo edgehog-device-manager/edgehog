@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,25 @@ defmodule Edgehog.OSManagementFixtures do
   """
   def manual_ota_operation_fixture(device) do
     fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
+
+    # Stub mocks since create_manual_ota_operation will call
+    # EphemeralImageMock.upload/3 to upload image
+    Mox.stub_with(
+      Edgehog.OSManagement.EphemeralImageMock,
+      Edgehog.Mocks.OSManagement.EphemeralImage
+    )
+
+    # DeviceStatusMock.get/2 to fetch device_introspection
+    Mox.stub_with(
+      Edgehog.Astarte.Device.DeviceStatusMock,
+      Edgehog.Mocks.Astarte.Device.DeviceStatus
+    )
+
+    # OTARequestV1Mock.update/4 to send OTA request
+    Mox.stub_with(
+      Edgehog.Astarte.Device.OTARequestV1Mock,
+      Edgehog.Mocks.Astarte.Device.OTARequest.V1
+    )
 
     {:ok, ota_operation} =
       device
