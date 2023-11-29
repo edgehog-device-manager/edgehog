@@ -59,7 +59,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         name: name,
         handle: handle,
         part_numbers: [%SystemModelPartNumber{part_number: part_number}]
-      } = system_model_fixture(hardware_type)
+      } = system_model_fixture(hardware_type: hardware_type)
 
       conn = get(conn, api_path, query: @query)
 
@@ -80,13 +80,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       api_path: api_path,
       tenant: tenant
     } do
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, description: description)
+      _system_model = system_model_fixture(description: description)
 
       conn = get(conn, api_path, query: @query)
 
@@ -104,13 +102,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       api_path: api_path,
       tenant: tenant
     } do
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, description: description)
+      _system_model = system_model_fixture(description: description)
 
       conn =
         conn
@@ -131,13 +127,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       api_path: api_path,
       tenant: tenant
     } do
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, description: description)
+      _system_model = system_model_fixture(description: description)
 
       conn =
         conn
@@ -157,11 +151,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       conn: conn,
       api_path: api_path
     } do
-      hardware_type = hardware_type_fixture()
-
       description = %{"it-IT" => "Un modello di sistema"}
 
-      _system_model = system_model_fixture(hardware_type, description: description)
+      _system_model = system_model_fixture(description: description)
 
       conn =
         conn

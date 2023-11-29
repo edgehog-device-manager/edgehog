@@ -50,7 +50,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
         name: name,
         handle: handle,
         part_numbers: [%SystemModelPartNumber{part_number: part_number}]
-      } = system_model_fixture(hardware_type)
+      } = system_model_fixture(hardware_type: hardware_type)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -87,13 +87,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       api_path: api_path,
       tenant: tenant
     } do
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
+      %SystemModel{id: id} = system_model_fixture(description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -113,13 +111,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       api_path: api_path,
       tenant: tenant
     } do
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
+      %SystemModel{id: id} = system_model_fixture(description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -142,13 +138,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       api_path: api_path,
       tenant: tenant
     } do
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
+      %SystemModel{id: id} = system_model_fixture(description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -171,13 +165,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       api_path: api_path,
       tenant: tenant
     } do
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
+      %SystemModel{id: id} = system_model_fixture(description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 
@@ -199,11 +191,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       conn: conn,
       api_path: api_path
     } do
-      hardware_type = hardware_type_fixture()
-
       description = %{"it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
+      %SystemModel{id: id} = system_model_fixture(description: description)
 
       variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
 

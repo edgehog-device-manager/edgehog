@@ -60,12 +60,10 @@ defmodule Edgehog.DevicesTest do
     end
 
     test "list_devices/1 filters with system_model_part_number", %{realm: realm} do
-      hardware_type = hardware_type_fixture()
-
       system_model_part_number_1 = "XYZ/1234"
 
       _system_model_1 =
-        system_model_fixture(hardware_type,
+        system_model_fixture(
           name: "Foo",
           handle: "foo",
           part_numbers: [system_model_part_number_1]
@@ -74,7 +72,7 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_2 = "ABC/0987"
 
       _system_model_2 =
-        system_model_fixture(hardware_type,
+        system_model_fixture(
           name: "Bar",
           handle: "bar",
           part_numbers: [system_model_part_number_2]
@@ -98,12 +96,10 @@ defmodule Edgehog.DevicesTest do
     end
 
     test "list_devices/1 filters with system_model_name", %{realm: realm} do
-      hardware_type = hardware_type_fixture()
-
       system_model_part_number_1 = "XYZ/1234"
 
       _system_model_1 =
-        system_model_fixture(hardware_type,
+        system_model_fixture(
           name: "Foo",
           handle: "foo",
           part_numbers: [system_model_part_number_1]
@@ -112,7 +108,7 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_2 = "ABC/0987"
 
       _system_model_2 =
-        system_model_fixture(hardware_type,
+        system_model_fixture(
           name: "Bar",
           handle: "bar",
           part_numbers: [system_model_part_number_2]
@@ -136,12 +132,10 @@ defmodule Edgehog.DevicesTest do
     end
 
     test "list_devices/1 filters with system_model_handle", %{realm: realm} do
-      hardware_type = hardware_type_fixture()
-
       system_model_part_number_1 = "XYZ/1234"
 
       _system_model_1 =
-        system_model_fixture(hardware_type,
+        system_model_fixture(
           name: "Foo",
           handle: "foo",
           part_numbers: [system_model_part_number_1]
@@ -150,7 +144,7 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_2 = "ABC/0987"
 
       _system_model_2 =
-        system_model_fixture(hardware_type,
+        system_model_fixture(
           name: "Bar",
           handle: "bar",
           part_numbers: [system_model_part_number_2]
@@ -180,7 +174,8 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_1 = "XYZ/1234"
 
       _system_model_1 =
-        system_model_fixture(hardware_type_1,
+        system_model_fixture(
+          hardware_type: hardware_type_1,
           name: "Foo",
           handle: "foo",
           part_numbers: [system_model_part_number_1]
@@ -192,7 +187,8 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_2 = "ABC/0987"
 
       _system_model_2 =
-        system_model_fixture(hardware_type_2,
+        system_model_fixture(
+          hardware_type: hardware_type_2,
           name: "Bar",
           handle: "bar",
           part_numbers: [system_model_part_number_2]
@@ -222,7 +218,8 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_1 = "XYZ/1234"
 
       _system_model_1 =
-        system_model_fixture(hardware_type_1,
+        system_model_fixture(
+          hardware_type: hardware_type_1,
           name: "Foo",
           handle: "foo",
           part_numbers: [system_model_part_number_1]
@@ -234,7 +231,8 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_2 = "ABC/0987"
 
       _system_model_2 =
-        system_model_fixture(hardware_type_2,
+        system_model_fixture(
+          hardware_type: hardware_type_2,
           name: "Bar",
           handle: "bar",
           part_numbers: [system_model_part_number_2]
@@ -264,7 +262,8 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_1 = "XYZ/1234"
 
       _system_model_1 =
-        system_model_fixture(hardware_type_1,
+        system_model_fixture(
+          hardware_type: hardware_type_1,
           name: "Foo",
           handle: "foo",
           part_numbers: [system_model_part_number_1]
@@ -276,7 +275,8 @@ defmodule Edgehog.DevicesTest do
       system_model_part_number_2 = "ABC/0987"
 
       _system_model_2 =
-        system_model_fixture(hardware_type_2,
+        system_model_fixture(
+          hardware_type: hardware_type_2,
           name: "Bar",
           handle: "bar",
           part_numbers: [system_model_part_number_2]
@@ -624,7 +624,7 @@ defmodule Edgehog.DevicesTest do
 
     test "delete_hardware_type/1 returns error changeset for hardware_type in use" do
       hardware_type = hardware_type_fixture()
-      _system_model = system_model_fixture(hardware_type)
+      _system_model = system_model_fixture(hardware_type: hardware_type)
 
       assert {:error, %Ecto.Changeset{}} = Devices.delete_hardware_type(hardware_type)
       assert {:ok, hardware_type} == Devices.fetch_hardware_type(hardware_type.id)
@@ -657,15 +657,13 @@ defmodule Edgehog.DevicesTest do
 
     @invalid_attrs %{handle: nil, name: nil, part_numbers: []}
 
-    test "list_system_models/0 returns all system_models", %{hardware_type: hardware_type} do
-      system_model = system_model_fixture(hardware_type)
+    test "list_system_models/0 returns all system_models" do
+      system_model = system_model_fixture()
       assert Devices.list_system_models() == [system_model]
     end
 
-    test "fetch_system_model/1 returns the system_model with given id", %{
-      hardware_type: hardware_type
-    } do
-      system_model = system_model_fixture(hardware_type)
+    test "fetch_system_model/1 returns the system_model with given id" do
+      system_model = system_model_fixture()
       assert Devices.fetch_system_model(system_model.id) == {:ok, system_model}
     end
 
@@ -775,7 +773,7 @@ defmodule Edgehog.DevicesTest do
     test "create_system_model/1 with duplicate handle returns error changeset", %{
       hardware_type: hardware_type
     } do
-      system_model = system_model_fixture(hardware_type)
+      system_model = system_model_fixture()
       attrs = %{handle: system_model.handle, name: "some other name"}
 
       assert {:error, %Ecto.Changeset{}} = Devices.create_system_model(hardware_type, attrs)
@@ -784,19 +782,14 @@ defmodule Edgehog.DevicesTest do
     test "create_system_model/1 with duplicate name returns error changeset", %{
       hardware_type: hardware_type
     } do
-      system_model = system_model_fixture(hardware_type)
+      system_model = system_model_fixture()
       attrs = %{handle: "some-other-handle", name: system_model.name}
 
       assert {:error, %Ecto.Changeset{}} = Devices.create_system_model(hardware_type, attrs)
     end
 
-    test "update_system_model/2 with valid data updates the system_model", %{
-      hardware_type: hardware_type
-    } do
-      system_model =
-        system_model_fixture(hardware_type,
-          description: %{"en-US" => "Yadda"}
-        )
+    test "update_system_model/2 with valid data updates the system_model" do
+      system_model = system_model_fixture(description: %{"en-US" => "Yadda"})
 
       update_attrs = %{
         handle: "some-updated-handle",
@@ -815,10 +808,8 @@ defmodule Edgehog.DevicesTest do
       assert %{"en-US" => "Yadda yadda"} = system_model.description
     end
 
-    test "update_system_model/2 with invalid data returns error changeset", %{
-      hardware_type: hardware_type
-    } do
-      system_model = system_model_fixture(hardware_type)
+    test "update_system_model/2 with invalid data returns error changeset" do
+      system_model = system_model_fixture()
 
       assert {:error, %Ecto.Changeset{}} =
                Devices.update_system_model(system_model, @invalid_attrs)
@@ -826,19 +817,19 @@ defmodule Edgehog.DevicesTest do
       assert {:ok, system_model} == Devices.fetch_system_model(system_model.id)
     end
 
-    test "delete_system_model/1 deletes the system_model", %{hardware_type: hardware_type} do
-      system_model = system_model_fixture(hardware_type)
+    test "delete_system_model/1 deletes the system_model" do
+      system_model = system_model_fixture()
       assert {:ok, %SystemModel{}} = Devices.delete_system_model(system_model)
 
       assert Devices.fetch_system_model(system_model.id) == {:error, :not_found}
     end
 
-    test "delete_system_model/1 deletes the system_model in use", %{hardware_type: hardware_type} do
+    test "delete_system_model/1 deletes the system_model in use" do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster)
       part_number = "1234-rev4"
 
-      system_model = system_model_fixture(hardware_type, part_numbers: [part_number])
+      system_model = system_model_fixture(part_numbers: [part_number])
 
       device =
         realm
@@ -858,10 +849,8 @@ defmodule Edgehog.DevicesTest do
       assert device.part_number == part_number
     end
 
-    test "change_system_model/1 returns a system_model changeset", %{
-      hardware_type: hardware_type
-    } do
-      system_model = system_model_fixture(hardware_type)
+    test "change_system_model/1 returns a system_model changeset" do
+      system_model = system_model_fixture()
       assert %Ecto.Changeset{} = Devices.change_system_model(system_model)
     end
   end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -138,8 +138,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
     test "update_system_model/3 changes the picture by storing picture_file", %{
       context: context
     } do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type, %{picture_url: nil})
+      system_model = system_model_fixture(picture_url: nil)
 
       attrs = %{
         system_model_id: system_model.id,
@@ -154,8 +153,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
     end
 
     test "update_system_model/3 changes the picture with picture_url", %{context: context} do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type, %{picture_url: nil})
+      system_model = system_model_fixture(picture_url: nil)
 
       attrs = %{
         system_model_id: system_model.id,
@@ -171,8 +169,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
     test "update_system_model/3 prefers saving picture_file over picture_url", %{
       context: context
     } do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type, %{picture_url: nil})
+      system_model = system_model_fixture(picture_url: nil)
 
       attrs = %{
         system_model_id: system_model.id,
@@ -189,10 +186,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
     test "update_system_model/3 removes the picture when picture_url is set to null", %{
       context: context
     } do
-      hardware_type = hardware_type_fixture()
-
-      system_model =
-        system_model_fixture(hardware_type, %{picture_url: "https://domain.com/foo.jpg"})
+      system_model = system_model_fixture(picture_url: "https://domain.com/foo.jpg")
 
       attrs = %{
         system_model_id: system_model.id,
@@ -209,10 +203,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
          %{
            context: context
          } do
-      hardware_type = hardware_type_fixture()
-
-      system_model =
-        system_model_fixture(hardware_type, %{picture_url: "https://domain.com/foo.jpg"})
+      system_model = system_model_fixture(picture_url: "https://domain.com/foo.jpg")
 
       attrs = %{
         system_model_id: system_model.id,
@@ -228,10 +219,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
     test "update_system_model/3 does not change the picture when not specified", %{
       context: context
     } do
-      hardware_type = hardware_type_fixture()
-
-      system_model =
-        system_model_fixture(hardware_type, %{picture_url: "https://domain.com/foo.jpg"})
+      system_model = system_model_fixture(picture_url: "https://domain.com/foo.jpg")
 
       # Picture field not specified in the update attrs
       attrs = %{
@@ -246,8 +234,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
 
     test "update_system_model/3 does not store the picture file if other changes are invalid",
          %{context: context} do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type, %{picture_url: nil})
+      system_model = system_model_fixture(picture_url: nil)
 
       attrs = %{
         system_model_id: system_model.id,
@@ -263,8 +250,7 @@ defmodule EdgehogWeb.Resolvers.DevicesTest do
     end
 
     test "delete_system_model/2 deletes the system model", %{context: context} do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type)
+      system_model = system_model_fixture()
 
       attrs = %{
         system_model_id: system_model.id

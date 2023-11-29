@@ -66,13 +66,8 @@ defmodule Edgehog.BaseImagesFixtures do
     # fixtures. Do this in a second pass to avoid lots of unrelated noise in the PR.
     base_image_collection =
       Keyword.get_lazy(attrs, :base_image_collection, fn ->
-        system_model =
-          Keyword.get_lazy(attrs, :system_model, fn ->
-            hardware_type =
-              Keyword.get_lazy(attrs, :hardware_type, &DevicesFixtures.hardware_type_fixture/0)
-
-            DevicesFixtures.system_model_fixture(hardware_type)
-          end)
+        {system_model, _attrs} =
+          Keyword.pop_lazy(attrs, :system_model, &DevicesFixtures.system_model_fixture/0)
 
         base_image_collection_fixture(system_model)
       end)

@@ -147,14 +147,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     } do
       alias Edgehog.Devices.SystemModel
 
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
       %SystemModel{name: system_model_name, part_numbers: [pn]} =
-        system_model_fixture(hardware_type, description: description)
+        system_model_fixture(description: description)
 
       part_number = pn.part_number
       _device = device_fixture(realm, part_number: part_number)
@@ -179,14 +177,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     } do
       alias Edgehog.Devices.SystemModel
 
-      hardware_type = hardware_type_fixture()
-
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
       %SystemModel{name: system_model_name, part_numbers: [pn]} =
-        system_model_fixture(hardware_type, description: description)
+        system_model_fixture(description: description)
 
       part_number = pn.part_number
 

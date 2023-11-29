@@ -29,14 +29,9 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
 
   describe "baseImageCollection field" do
     setup do
-      hardware_type = hardware_type_fixture(name: "Fixture", handle: "fixture")
-      system_model = system_model_fixture(hardware_type, name: "Fixture", handle: "fixture")
-      base_image_collection = base_image_collection_fixture(system_model)
+      system_model = system_model_fixture()
 
-      {:ok,
-       hardware_type: hardware_type,
-       system_model: system_model,
-       base_image_collection: base_image_collection}
+      {:ok, base_image_collection: base_image_collection_fixture(system_model)}
     end
 
     @query """
@@ -96,8 +91,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
     test "returns the default locale description for system model", %{
       conn: conn,
       api_path: api_path,
-      tenant: tenant,
-      hardware_type: hardware_type
+      tenant: tenant
     } do
       default_locale = tenant.default_locale
 
@@ -106,7 +100,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
         "it-IT" => "Un modello di sistema"
       }
 
-      system_model = system_model_fixture(hardware_type, description: description)
+      system_model = system_model_fixture(description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 
@@ -135,8 +129,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
     test "returns the explicit locale system model description", %{
       conn: conn,
       api_path: api_path,
-      tenant: tenant,
-      hardware_type: hardware_type
+      tenant: tenant
     } do
       default_locale = tenant.default_locale
 
@@ -145,7 +138,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
         "it-IT" => "Un modello di sistema"
       }
 
-      system_model = system_model_fixture(hardware_type, description: description)
+      system_model = system_model_fixture(description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 
@@ -177,8 +170,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
     test "returns description in the tenant's default locale for non existing locale", %{
       conn: conn,
       api_path: api_path,
-      tenant: tenant,
-      hardware_type: hardware_type
+      tenant: tenant
     } do
       default_locale = tenant.default_locale
 
@@ -187,7 +179,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
         "it-IT" => "Un modello di sistema"
       }
 
-      system_model = system_model_fixture(hardware_type, description: description)
+      system_model = system_model_fixture(description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 
@@ -219,14 +211,13 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
     test "returns no system model description when both user and tenant's locale are missing",
          %{
            conn: conn,
-           api_path: api_path,
-           hardware_type: hardware_type
+           api_path: api_path
          } do
       description = %{
         "it-IT" => "Un modello di sistema"
       }
 
-      system_model = system_model_fixture(hardware_type, description: description)
+      system_model = system_model_fixture(description: description)
 
       base_image_collection = base_image_collection_fixture(system_model)
 

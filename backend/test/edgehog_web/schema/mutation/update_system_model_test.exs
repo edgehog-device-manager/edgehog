@@ -28,14 +28,12 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
     import Edgehog.DevicesFixtures
 
     setup %{tenant: tenant} do
-      hardware_type = hardware_type_fixture()
-
       description = %{
         tenant.default_locale => "A system model",
         "it-IT" => "Un modello di sistema"
       }
 
-      {:ok, system_model: system_model_fixture(hardware_type, description: description)}
+      {:ok, system_model: system_model_fixture(description: description)}
     end
 
     @query """

@@ -27,8 +27,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
   describe "createBaseImage mutation" do
     setup do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type)
+      system_model = system_model_fixture()
 
       {:ok, base_image_collection: base_image_collection_fixture(system_model)}
     end

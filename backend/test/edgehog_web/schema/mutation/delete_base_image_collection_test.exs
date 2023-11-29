@@ -27,11 +27,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
     import Edgehog.DevicesFixtures
     import Edgehog.BaseImagesFixtures
 
-    setup do
-      hardware_type = hardware_type_fixture()
-      {:ok, hardware_type: hardware_type}
-    end
-
     @query """
     mutation DeleteBaseImageCollection($input: DeleteBaseImageCollectionInput!) {
       deleteBaseImageCollection(input: $input) {
@@ -50,8 +45,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
     test "deletes the base image collection", %{
       conn: conn,
       api_path: api_path,
-      tenant: tenant,
-      hardware_type: hardware_type
+      tenant: tenant
     } do
       default_description_locale = tenant.default_locale
       default_description_text = "A system model"
@@ -61,7 +55,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
         "it-IT" => "Un modello di sistema"
       }
 
-      system_model = system_model_fixture(hardware_type, description: description)
+      system_model = system_model_fixture(description: description)
 
       name = "Ultimate Firmware"
       handle = "ultimate-firmware"
@@ -102,8 +96,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
     test "returns the explicit locale description of the system model", %{
       conn: conn,
       api_path: api_path,
-      tenant: tenant,
-      hardware_type: hardware_type
+      tenant: tenant
     } do
       default_locale = tenant.default_locale
 
@@ -112,7 +105,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
         "it-IT" => "Un modello di sistema"
       }
 
-      system_model = system_model_fixture(hardware_type, description: description)
+      system_model = system_model_fixture(description: description)
 
       name = "Ultimate Firmware"
       handle = "ultimate-firmware"

@@ -164,8 +164,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       device: %{id: id, device_id: device_id},
       tenant: %{slug: tenant_slug}
     } do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type)
+      system_model = system_model_fixture()
       [%{part_number: part_number}] = system_model.part_numbers
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)

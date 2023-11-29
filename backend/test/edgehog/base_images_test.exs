@@ -32,9 +32,7 @@ defmodule Edgehog.BaseImagesTest do
     alias Edgehog.BaseImages.BaseImageCollection
 
     setup do
-      hardware_type = hardware_type_fixture()
-
-      {:ok, system_model: system_model_fixture(hardware_type)}
+      {:ok, system_model: system_model_fixture()}
     end
 
     @invalid_attrs %{handle: "3 invalid handle", name: ""}
@@ -289,10 +287,7 @@ defmodule Edgehog.BaseImagesTest do
   defp create_base_image_collection!(opts \\ []) do
     # TODO: we need this helper until the lazy creation of nested resources is pushed up to their
     # relative fixtures
-    hardware_type = Keyword.get_lazy(opts, :hardware_type, fn -> hardware_type_fixture() end)
-
-    system_model =
-      Keyword.get_lazy(opts, :system_model, fn -> system_model_fixture(hardware_type) end)
+    {system_model, opts} = Keyword.pop_lazy(opts, :system_model, &system_model_fixture/0)
 
     base_image_collection_fixture(system_model, opts)
   end
