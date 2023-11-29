@@ -39,10 +39,12 @@ defmodule Edgehog.BaseImagesFixtures do
   @doc """
   Generate a base_image_collection.
   """
-  def base_image_collection_fixture(system_model, attrs \\ %{}) do
+  def base_image_collection_fixture(opts \\ []) do
+    {system_model, opts} =
+      Keyword.pop_lazy(opts, :system_model, &DevicesFixtures.system_model_fixture/0)
+
     attrs =
-      attrs
-      |> Enum.into(%{
+      Enum.into(opts, %{
         handle: unique_base_image_collection_handle(),
         name: unique_base_image_collection_name()
       })
@@ -61,22 +63,15 @@ defmodule Edgehog.BaseImagesFixtures do
   @doc """
   Generate a base_image.
   """
-  def base_image_fixture(attrs \\ []) do
-    # TODO: the lazy creation of nested resources should be pushed up to their relative
-    # fixtures. Do this in a second pass to avoid lots of unrelated noise in the PR.
-    base_image_collection =
-      Keyword.get_lazy(attrs, :base_image_collection, fn ->
-        {system_model, _attrs} =
-          Keyword.pop_lazy(attrs, :system_model, &DevicesFixtures.system_model_fixture/0)
+  def base_image_fixture(opts \\ []) do
+    {base_image_collection, opts} =
+      Keyword.pop_lazy(opts, :base_image_collection, &base_image_collection_fixture/0)
 
-        base_image_collection_fixture(system_model)
-      end)
-
-    # Stube StorageMock since create_base_image will call it
+    # Stub StorageMock since create_base_image will call it
     Mox.stub_with(Edgehog.BaseImages.StorageMock, Edgehog.Mocks.BaseImages.Storage)
 
     attrs =
-      Enum.into(attrs, %{
+      Enum.into(opts, %{
         version: unique_base_image_version(),
         file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
       })

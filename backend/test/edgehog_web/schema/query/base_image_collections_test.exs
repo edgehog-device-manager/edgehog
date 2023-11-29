@@ -49,13 +49,11 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
     end
 
     test "returns base image collections if they're present", %{conn: conn, api_path: api_path} do
-      system_model = system_model_fixture()
-
       %BaseImageCollection{
         id: id,
         name: name,
         handle: handle
-      } = base_image_collection_fixture(system_model)
+      } = base_image_collection_fixture()
 
       id = Absinthe.Relay.Node.to_global_id(:base_image_collection, id, EdgehogWeb.Schema)
 
@@ -92,7 +90,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
 
       system_model = system_model_fixture(description: description)
 
-      _base_image_collection = base_image_collection_fixture(system_model)
+      _base_image_collection = base_image_collection_fixture(system_model: system_model)
 
       conn = get(conn, api_path, query: @query)
 
@@ -123,7 +121,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
 
       system_model = system_model_fixture(description: description)
 
-      _base_image_collection = base_image_collection_fixture(system_model)
+      _base_image_collection = base_image_collection_fixture(system_model: system_model)
 
       conn =
         conn
@@ -157,7 +155,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
 
       system_model = system_model_fixture(description: description)
 
-      _base_image_collection = base_image_collection_fixture(system_model)
+      _base_image_collection = base_image_collection_fixture(system_model: system_model)
 
       conn =
         conn
@@ -188,7 +186,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
 
       system_model = system_model_fixture(description: description)
 
-      _base_image_collection = base_image_collection_fixture(system_model)
+      _base_image_collection = base_image_collection_fixture(system_model: system_model)
 
       conn =
         conn

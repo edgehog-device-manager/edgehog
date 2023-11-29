@@ -26,12 +26,9 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
 
   describe "updateBaseImageCollection field" do
     import Edgehog.BaseImagesFixtures
-    import Edgehog.DevicesFixtures
 
     setup do
-      system_model = system_model_fixture()
-
-      {:ok, base_image_collection: base_image_collection_fixture(system_model)}
+      {:ok, base_image_collection: base_image_collection_fixture()}
     end
 
     @query """

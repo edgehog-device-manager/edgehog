@@ -61,7 +61,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
       handle = "ultimate-firmware"
 
       %BaseImageCollection{id: id} =
-        base_image_collection_fixture(system_model,
+        base_image_collection_fixture(
           name: name,
           handle: handle,
           system_model: system_model
@@ -111,7 +111,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
       handle = "ultimate-firmware"
 
       %BaseImageCollection{id: id} =
-        base_image_collection_fixture(system_model,
+        base_image_collection_fixture(
           name: name,
           handle: handle,
           system_model: system_model

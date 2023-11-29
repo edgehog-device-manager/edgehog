@@ -37,17 +37,13 @@ defmodule Edgehog.BaseImagesTest do
 
     @invalid_attrs %{handle: "3 invalid handle", name: ""}
 
-    test "list_base_image_collections/0 returns all base_image_collections", %{
-      system_model: system_model
-    } do
-      base_image_collection = base_image_collection_fixture(system_model)
+    test "list_base_image_collections/0 returns all base_image_collections" do
+      base_image_collection = base_image_collection_fixture()
       assert BaseImages.list_base_image_collections() == [base_image_collection]
     end
 
-    test "fetch_base_image_collection/1 returns the base_image_collection with given id", %{
-      system_model: system_model
-    } do
-      base_image_collection = base_image_collection_fixture(system_model)
+    test "fetch_base_image_collection/1 returns the base_image_collection with given id" do
+      base_image_collection = base_image_collection_fixture()
 
       assert BaseImages.fetch_base_image_collection(base_image_collection.id) ==
                {:ok, base_image_collection}
@@ -72,10 +68,8 @@ defmodule Edgehog.BaseImagesTest do
                BaseImages.create_base_image_collection(system_model, @invalid_attrs)
     end
 
-    test "update_base_image_collection/2 with valid data updates the base_image_collection", %{
-      system_model: system_model
-    } do
-      base_image_collection = base_image_collection_fixture(system_model)
+    test "update_base_image_collection/2 with valid data updates the base_image_collection" do
+      base_image_collection = base_image_collection_fixture()
       update_attrs = %{handle: "some-updated-handle", name: "some updated name"}
 
       assert {:ok, %BaseImageCollection{} = base_image_collection} =
@@ -85,10 +79,8 @@ defmodule Edgehog.BaseImagesTest do
       assert base_image_collection.name == "some updated name"
     end
 
-    test "update_base_image_collection/2 with invalid data returns error changeset", %{
-      system_model: system_model
-    } do
-      base_image_collection = base_image_collection_fixture(system_model)
+    test "update_base_image_collection/2 with invalid data returns error changeset" do
+      base_image_collection = base_image_collection_fixture()
 
       assert {:error, %Ecto.Changeset{}} =
                BaseImages.update_base_image_collection(base_image_collection, @invalid_attrs)
@@ -97,10 +89,8 @@ defmodule Edgehog.BaseImagesTest do
                BaseImages.fetch_base_image_collection(base_image_collection.id)
     end
 
-    test "delete_base_image_collection/1 deletes the base_image_collection", %{
-      system_model: system_model
-    } do
-      base_image_collection = base_image_collection_fixture(system_model)
+    test "delete_base_image_collection/1 deletes the base_image_collection" do
+      base_image_collection = base_image_collection_fixture()
 
       assert {:ok, %BaseImageCollection{}} =
                BaseImages.delete_base_image_collection(base_image_collection)
@@ -109,10 +99,8 @@ defmodule Edgehog.BaseImagesTest do
                BaseImages.fetch_base_image_collection(base_image_collection.id)
     end
 
-    test "change_base_image_collection/1 returns a base_image_collection changeset", %{
-      system_model: system_model
-    } do
-      base_image_collection = base_image_collection_fixture(system_model)
+    test "change_base_image_collection/1 returns a base_image_collection changeset" do
+      base_image_collection = base_image_collection_fixture()
       assert %Ecto.Changeset{} = BaseImages.change_base_image_collection(base_image_collection)
     end
   end
@@ -126,10 +114,10 @@ defmodule Edgehog.BaseImagesTest do
     end
 
     test "list_base_images_for_collection/0 returns only base_images that belong to the collection" do
-      base_image_collection_1 = create_base_image_collection!()
+      base_image_collection_1 = base_image_collection_fixture()
       base_image_fixture(base_image_collection: base_image_collection_1)
 
-      base_image_collection_2 = create_base_image_collection!()
+      base_image_collection_2 = base_image_collection_fixture()
       base_image_2 = base_image_fixture(base_image_collection: base_image_collection_2)
 
       assert BaseImages.list_base_images_for_collection(base_image_collection_2) == [base_image_2]
@@ -141,7 +129,7 @@ defmodule Edgehog.BaseImagesTest do
     end
 
     test "create_base_image/1 with valid data creates a base_image" do
-      base_image_collection = create_base_image_collection!()
+      base_image_collection = base_image_collection_fixture()
 
       attrs = %{
         description: %{"en-US" => "A feature packed release"},
@@ -171,10 +159,10 @@ defmodule Edgehog.BaseImagesTest do
     end
 
     test "create_base_image/1 with same version for the different base image collections succeeds" do
-      collection_1 = create_base_image_collection!()
+      collection_1 = base_image_collection_fixture()
       base_image_fixture(base_image_collection: collection_1, version: "1.3.0")
 
-      collection_2 = create_base_image_collection!()
+      collection_2 = base_image_collection_fixture()
 
       assert {:ok, %BaseImage{}} =
                create_base_image(base_image_collection: collection_2, version: "1.3.0")
@@ -208,7 +196,7 @@ defmodule Edgehog.BaseImagesTest do
     end
 
     test "create_base_image/1 with conflicting version for the same base image collection fails" do
-      collection = create_base_image_collection!()
+      collection = base_image_collection_fixture()
       base_image_fixture(base_image_collection: collection, version: "1.3.0")
 
       assert {:error, %Ecto.Changeset{} = changeset} =
@@ -284,19 +272,9 @@ defmodule Edgehog.BaseImagesTest do
     end
   end
 
-  defp create_base_image_collection!(opts \\ []) do
-    # TODO: we need this helper until the lazy creation of nested resources is pushed up to their
-    # relative fixtures
-    {system_model, opts} = Keyword.pop_lazy(opts, :system_model, &system_model_fixture/0)
-
-    base_image_collection_fixture(system_model, opts)
-  end
-
   defp create_base_image(opts \\ []) do
     base_image_collection =
-      Keyword.get_lazy(opts, :base_image_collection, fn ->
-        create_base_image_collection!()
-      end)
+      Keyword.get_lazy(opts, :base_image_collection, &base_image_collection_fixture/0)
 
     attrs =
       Enum.into(opts, %{
