@@ -25,6 +25,8 @@ defmodule Edgehog.Tenants.Tenant do
 
   alias Edgehog.Astarte.Realm
 
+  @type t :: Ecto.Schema.t()
+
   @primary_key {:tenant_id, :id, autogenerate: true}
   schema "tenants" do
     field :name, :string

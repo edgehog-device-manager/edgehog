@@ -20,6 +20,7 @@
 
 defmodule EdgehogWeb.AdminAPI.AuthTest do
   use EdgehogWeb.AdminAPI.ConnCase, async: true
+  use Edgehog.ReconcilerMockCase
 
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures

@@ -20,6 +20,7 @@
 
 defmodule EdgehogWeb.AdminAPI.TenantsControllerTest do
   use EdgehogWeb.AdminAPI.ConnCase, async: true
+  use Edgehog.ReconcilerMockCase
 
   import Ecto.Query, only: [where: 2]
   import Edgehog.AstarteFixtures

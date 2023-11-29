@@ -31,7 +31,7 @@ config :edgehog, Edgehog.Repo,
   database: "edgehog_test#{System.get_env("MIX_TEST_PARTITION")}",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 10
+  pool_size: 50
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
@@ -72,6 +72,9 @@ config :edgehog,
 
 config :edgehog, :astarte_interfaces_module, Edgehog.Astarte.Realm.InterfacesMock
 config :edgehog, :astarte_triggers_module, Edgehog.Astarte.Realm.TriggersMock
+
+# Reconciler mock for tests
+config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock
 
 # Storage mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
