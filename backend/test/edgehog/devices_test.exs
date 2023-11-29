@@ -294,7 +294,7 @@ defmodule Edgehog.DevicesTest do
           part_number: system_model_part_number_2
         )
 
-      filters = %{hardware_type_name: "1"}
+      filters = %{hardware_type_handle: "1"}
 
       assert Devices.list_devices(filters) == [device_1]
     end
