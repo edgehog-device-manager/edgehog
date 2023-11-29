@@ -71,4 +71,18 @@ defmodule Edgehog.Repo do
   def default_options(_operation) do
     [tenant_id: get_tenant_id()]
   end
+
+  def transact(fun, opts \\ []) do
+    transaction(
+      fn ->
+        case fun.() do
+          {:ok, value} -> value
+          :ok -> :transaction_committed
+          {:error, reason} -> rollback(reason)
+          :error -> rollback(:transaction_rollback_error)
+        end
+      end,
+      opts
+    )
+  end
 end

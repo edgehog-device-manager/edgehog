@@ -19,11 +19,13 @@
 */
 
 import { it, expect } from "vitest";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import Icon from "./Icon";
 
 it("renders correctly", () => {
-  const { container } = render(<Icon icon="circle" />);
-  expect(container.querySelector(".fa-circle")).toBeInTheDocument();
+  render(<Icon icon="circle" />);
+  const image = screen.getByRole("img", { hidden: true });
+  expect(image).toBeVisible();
+  expect(image).toHaveClass("fa-circle");
 });

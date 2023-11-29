@@ -74,6 +74,14 @@ Mox.defmock(Edgehog.Astarte.Device.LedBehaviorMock,
   for: Edgehog.Astarte.Device.LedBehavior.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Realm.InterfacesMock,
+  for: Edgehog.Astarte.Realm.Interfaces.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Realm.TriggersMock,
+  for: Edgehog.Astarte.Realm.Triggers.Behaviour
+)
+
 Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
   for: Edgehog.Geolocation.GeolocationProvider
 )
@@ -87,3 +95,5 @@ Mox.defmock(Edgehog.OSManagement.EphemeralImageMock,
 )
 
 Mox.defmock(Edgehog.BaseImages.StorageMock, for: Edgehog.BaseImages.Storage)
+
+Mox.defmock(Edgehog.Tenants.ReconcilerMock, for: Edgehog.Tenants.Reconciler.Behaviour)

@@ -1,0 +1,35 @@
+{
+  "interface_name": "io.edgehog.devicemanager.HardwareInfo",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "description": "General hardware capabilities",
+  "mappings": [
+    {
+      "endpoint": "/cpu/architecture",
+      "type": "string",
+      "description": "CPU Architecture "
+    },
+    {
+      "endpoint": "/cpu/model",
+      "type": "string",
+      "description": "CPU Model Code"
+    },
+    {
+      "endpoint": "/cpu/modelName",
+      "type": "string",
+      "description": "CPU Model Display Name"
+    },
+    {
+      "endpoint": "/cpu/vendor",
+      "type": "string",
+      "description": "CPU Vendor"
+    },
+    {
+      "endpoint": "/mem/totalBytes",
+      "type": "longinteger",
+      "description": "Total RAM quantity (Bytes)"
+    }
+  ]
+}

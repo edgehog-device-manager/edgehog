@@ -14,3 +14,11 @@ License: CC0-1.0
 Files: backend/priv/repo/seeds/keys/*.pem
 Copyright: 2023 Seco Mind Srl
 License: CC0-1.0
+
+Files: backend/priv/astarte_resources/interfaces/*.json
+Copyright: 2023 Seco Mind Srl
+License: Apache-2.0
+
+Files: backend/priv/astarte_resources/trigger_templates/*.json.eex
+Copyright: 2023 Seco Mind Srl
+License: Apache-2.0

@@ -29,5 +29,5 @@ it("renders correctly", () => {
       <div data-testid="auth-page" />
     </AuthPage>,
   );
-  expect(screen.queryByTestId("auth-page")).toBeInTheDocument();
+  expect(screen.getByTestId("auth-page")).toBeVisible();
 });

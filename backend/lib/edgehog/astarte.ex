@@ -27,6 +27,8 @@ defmodule Edgehog.Astarte do
   alias Edgehog.Repo
 
   alias Astarte.Client.AppEngine
+  alias Astarte.Client.APIError
+  alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Cluster
   alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.InterfaceVersion
@@ -46,6 +48,11 @@ defmodule Edgehog.Astarte do
     StorageUsage,
     SystemStatus,
     WiFiScanResult
+  }
+
+  alias Edgehog.Astarte.Realm.{
+    Interfaces,
+    Triggers
   }
 
   @ota_request_interface "io.edgehog.devicemanager.OTARequest"
@@ -110,6 +117,9 @@ defmodule Edgehog.Astarte do
                               NetworkInterface
                             )
 
+  @interfaces_module Application.compile_env(:edgehog, :astarte_interfaces_module, Interfaces)
+  @triggers_module Application.compile_env(:edgehog, :astarte_triggers_module, Triggers)
+
   @doc """
   Returns the list of clusters.
 
@@ -155,6 +165,30 @@ defmodule Edgehog.Astarte do
     %Cluster{}
     |> Cluster.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Fetches a cluster with the given `base_api_url`, or creates it if it doesn't exist.
+
+  ## Examples
+
+  iex> fetch_or_create_cluster("https://api.existing-cluster.example")
+  {:ok, %Cluster{}}
+
+  iex> fetch_or_create_cluster("bad value")
+  {:error, %Ecto.Changeset{}}
+
+  """
+  def fetch_or_create_cluster(base_api_url) do
+    %Cluster{}
+    |> Cluster.anonymous_changeset(%{base_api_url: base_api_url})
+    |> Repo.insert(
+      # We need this update so that Ecto reads back from
+      # the database, populating the ID
+      on_conflict: {:replace, [:base_api_url]},
+      conflict_target: :base_api_url,
+      returning: true
+    )
   end
 
   @doc """
@@ -564,6 +598,60 @@ defmodule Edgehog.Astarte do
 
   def send_led_behavior(%AppEngine{} = client, device_id, behavior) do
     @led_behavior_module.post(client, device_id, behavior)
+  end
+
+  def fetch_interface(%RealmManagement{} = client, interface_name, interface_major) do
+    case @interfaces_module.get(client, interface_name, interface_major) do
+      {:ok, %{"data" => interface_map}} ->
+        {:ok, interface_map}
+
+      {:error, %APIError{status: 404}} ->
+        # We just convert a 404 status to :not_found, and return all other errors as-is
+        {:error, :not_found}
+
+      {:error, other} ->
+        {:error, other}
+    end
+  end
+
+  def create_interface(%RealmManagement{} = client, interface_json) do
+    @interfaces_module.create(client, interface_json)
+  end
+
+  def update_interface(
+        %RealmManagement{} = client,
+        interface_name,
+        interface_major,
+        interface_json
+      ) do
+    @interfaces_module.update(client, interface_name, interface_major, interface_json)
+  end
+
+  def fetch_trigger(%RealmManagement{} = client, trigger_name) do
+    case @triggers_module.get(client, trigger_name) do
+      {:ok, %{"data" => trigger_map}} ->
+        {:ok, trigger_map}
+
+      {:error, %APIError{status: 404}} ->
+        # We just convert a 404 status to :not_found, and return all other errors as-is
+        {:error, :not_found}
+
+      # TODO: workaround due to the fact that currently Astarte RM API returns 500 for a
+      # non-existing trigger
+      {:error, %APIError{status: 500}} ->
+        {:error, :not_found}
+
+      {:error, other} ->
+        {:error, other}
+    end
+  end
+
+  def create_trigger(%RealmManagement{} = client, trigger_json) do
+    @triggers_module.create(client, trigger_json)
+  end
+
+  def delete_trigger(%RealmManagement{} = client, trigger_name) do
+    @triggers_module.delete(client, trigger_name)
   end
 
   # get_device_status is already called to fetch other info from the device

@@ -21,8 +21,11 @@
 defmodule Edgehog.Tenants.Tenant do
   use Ecto.Schema
   import Ecto.Changeset
+  import Edgehog.ChangesetValidation
 
   alias Edgehog.Astarte.Realm
+
+  @type t :: Ecto.Schema.t()
 
   @primary_key {:tenant_id, :id, autogenerate: true}
   schema "tenants" do
@@ -42,19 +45,8 @@ defmodule Edgehog.Tenants.Tenant do
     |> validate_required([:name, :slug, :public_key])
     |> unique_constraint(:name)
     |> unique_constraint(:slug)
-    |> validate_format(:slug, ~r/^[a-z\d\-]+$/,
-      message: "should only contain lower case ASCII letters (from a to z), digits and -"
-    )
-    |> validate_format(:default_locale, ~r/^[a-z]{2,3}-[A-Z]{2}$/,
-      message: "is not a valid locale"
-    )
-    |> validate_change(:public_key, &validate_pem_public_key/2)
-  end
-
-  defp validate_pem_public_key(field, pem_public_key) do
-    case X509.PublicKey.from_pem(pem_public_key) do
-      {:ok, _} -> []
-      {:error, _reason} -> [{field, "is not a valid PEM public key"}]
-    end
+    |> validate_tenant_slug(:slug)
+    |> validate_locale(:default_locale)
+    |> validate_pem_public_key(:public_key)
   end
 end

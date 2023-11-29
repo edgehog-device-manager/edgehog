@@ -21,6 +21,7 @@
 defmodule Edgehog.Astarte.Cluster do
   use Ecto.Schema
   import Ecto.Changeset
+  import Edgehog.ChangesetValidation
 
   alias Edgehog.Astarte.Realm
 
@@ -33,28 +34,18 @@ defmodule Edgehog.Astarte.Cluster do
   end
 
   @doc false
-  def changeset(cluster, attrs) do
+  def anonymous_changeset(cluster, attrs) do
     cluster
-    |> cast(attrs, [:name, :base_api_url])
-    |> validate_required([:name, :base_api_url])
-    |> unique_constraint(:name)
-    |> validate_change(:base_api_url, &validate_url/2)
+    |> cast(attrs, [:base_api_url])
+    |> validate_required([:base_api_url])
+    |> validate_url(:base_api_url)
+    |> update_change(:base_api_url, &String.trim_trailing(&1, "/"))
   end
 
-  defp validate_url(field, url) do
-    %URI{scheme: scheme, host: maybe_host} = URI.parse(url)
-
-    host = to_string(maybe_host)
-    empty_host? = host == ""
-    space_in_host? = host =~ " "
-
-    valid_host? = not empty_host? and not space_in_host?
-    valid_scheme? = scheme in ["http", "https"]
-
-    if valid_host? and valid_scheme? do
-      []
-    else
-      [{field, "is not a valid URL"}]
-    end
+  @doc false
+  def changeset(cluster, attrs) do
+    anonymous_changeset(cluster, attrs)
+    |> cast(attrs, [:name])
+    |> unique_constraint(:base_api_url)
   end
 end

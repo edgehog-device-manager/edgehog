@@ -1,0 +1,15 @@
+{
+    "name": "edgehog-disconnection",
+    "action": {
+        "http_url": "<%= @trigger_url %>",
+        "ignore_ssl_errors": false,
+        "http_method": "post",
+        "http_static_headers": {}
+    },
+    "simple_triggers": [
+        {
+            "type": "device_trigger",
+            "on": "device_disconnected"
+        }
+    ]
+}

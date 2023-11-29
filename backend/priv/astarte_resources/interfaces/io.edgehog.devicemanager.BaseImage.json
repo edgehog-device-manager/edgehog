@@ -1,0 +1,29 @@
+{
+  "interface_name": "io.edgehog.devicemanager.BaseImage",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "endpoint": "/fingerprint",
+      "type": "string",
+      "description": "OS bundle release identification code"
+    },
+    {
+      "endpoint": "/name",
+      "type": "string",
+      "description": "Name of the bundle"
+    },
+    {
+      "endpoint": "/version",
+      "type": "string",
+      "description": "Version of the bundle"
+    },
+    {
+      "endpoint": "/buildId",
+      "type": "string",
+      "description": "Human readable build identifier. Examples are `[date][time]` or `[date]-[time]-[git-commit]`"
+    }
+  ]
+}

@@ -19,24 +19,28 @@
 */
 
 import { it, expect } from "vitest";
-import { waitFor } from "@testing-library/react";
+
+import { screen, queryByAttribute } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import { renderWithProviders } from "setupTests";
 import Topbar from "./Topbar";
 
 it("renders correctly", async () => {
-  const { container } = renderWithProviders(<Topbar />);
-  expect(container.querySelector(".navbar-brand")).toBeInTheDocument();
-  const menuGroups = container.querySelectorAll(".dropdown");
-  expect(menuGroups).toHaveLength(1);
+  renderWithProviders(<Topbar />);
+  const navbar = screen.getByRole("navigation");
+  expect(navbar).toBeInTheDocument();
 
-  const userMenu = menuGroups[0];
-  const userMenuToggle = userMenu.querySelector(".dropdown-toggle")!;
-  userEvent.click(userMenuToggle);
-  await waitFor(() => {
-    expect(document.querySelector("a[href='/logout']")).toHaveTextContent(
-      "Logout",
-    );
-  });
+  expect(screen.getByRole("img", { name: "Logo" })).toBeVisible();
+
+  expect(
+    screen.queryByRole("link", { name: "Logout" }),
+  ).not.toBeInTheDocument();
+
+  const dropdown = queryByAttribute("data-icon", navbar, "angle-down");
+  expect(dropdown).not.toBeNull();
+  expect(dropdown).toBeVisible();
+  await userEvent.click(dropdown!);
+
+  expect(screen.getByRole("link", { name: "Logout" })).toBeVisible();
 });

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,14 @@ defmodule Edgehog.Tenants do
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 
+  alias Edgehog.Tenants.Reconciler
   alias Edgehog.Tenants.Tenant
+
+  @reconciler_module Application.compile_env(
+                       :edgehog,
+                       :reconciler_module,
+                       Reconciler
+                     )
 
   @doc """
   Returns the list of tenants.
@@ -138,5 +145,43 @@ defmodule Edgehog.Tenants do
   """
   def change_tenant(%Tenant{} = tenant, attrs \\ %{}) do
     Tenant.changeset(tenant, attrs)
+  end
+
+  @doc """
+  Preloads the Astarte realm and its cluster for a Tenant.
+  """
+  def preload_astarte_resources_for_tenant(tenant_or_tenants) do
+    Repo.preload(tenant_or_tenants, [realm: [:cluster]], skip_tenant_id: true)
+  end
+
+  def reconcile_tenant(%Tenant{} = tenant) do
+    @reconciler_module.reconcile_tenant(tenant)
+  end
+
+  @doc """
+  Returns an `%Astarte.Client.RealmManagement{}` for the given tenant.
+
+  The tenant must have the Astarte realm and cluster preloaded, call
+  `preload_astarte_resources_for_tenant/1` before calling this function to make sure of this.
+
+  ## Examples
+
+  iex> realm_management_client_from_tenant(tenant)
+  {:ok, %Astarte.Client.RealmManagement{}}
+
+  iex> realm_management_client_from_tenant(tenant)
+  {:error, :invalid_private_key}
+
+  """
+  def realm_management_client_from_tenant(%Tenant{realm: %{cluster: cluster} = realm})
+      when is_struct(realm, Edgehog.Astarte.Realm) and is_struct(cluster, Edgehog.Astarte.Cluster) do
+    %{
+      name: realm_name,
+      private_key: private_key
+    } = realm
+
+    %{base_api_url: base_api_url} = cluster
+
+    Astarte.Client.RealmManagement.new(base_api_url, realm_name, private_key: private_key)
   end
 end

@@ -19,7 +19,7 @@
 */
 
 import { it, expect } from "vitest";
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 
 import Figure from "./Figure";
 
@@ -27,29 +27,30 @@ const placeholderImage =
   "data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500' style='background-color:%23f8f8f8'%3e%3c/svg%3e";
 
 it("renders correctly", () => {
-  const { container } = render(<Figure />);
-  expect(container.querySelector("img")).toBeInTheDocument();
+  render(<Figure />);
+  expect(screen.getByRole("img")).toBeVisible();
 });
 
 it("renders the image if src is valid", () => {
   const validImage =
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
-  const { container } = render(<Figure src={validImage} />);
-  expect(container.querySelector("img")).toHaveAttribute("src", validImage);
+  render(<Figure src={validImage} />);
+
+  expect(screen.getByRole("img")).toHaveAttribute("src", validImage);
 });
 
 it("renders a fallback image instead if src cannot be displayed", async () => {
   const invalidImage = "invalid";
-  const { container } = render(<Figure src={invalidImage} />);
+  render(<Figure src={invalidImage} />);
+
+  const image = screen.getByRole("img");
+  image.dispatchEvent(new Event("error"));
   await waitFor(() =>
-    expect(container.querySelector("img")).toHaveAttribute("src", invalidImage),
+    expect(screen.getByRole("img")).toHaveAttribute("src", placeholderImage),
   );
 });
 
 it("renders a fallback image if src is missing", () => {
-  const { container } = render(<Figure />);
-  expect(container.querySelector("img")).toHaveAttribute(
-    "src",
-    placeholderImage,
-  );
+  render(<Figure />);
+  expect(screen.getByRole("img")).toHaveAttribute("src", placeholderImage);
 });
