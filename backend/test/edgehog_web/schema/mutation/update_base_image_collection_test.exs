@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,13 +26,9 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
 
   describe "updateBaseImageCollection field" do
     import Edgehog.BaseImagesFixtures
-    import Edgehog.DevicesFixtures
 
     setup do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type)
-
-      {:ok, base_image_collection: base_image_collection_fixture(system_model)}
+      {:ok, base_image_collection: base_image_collection_fixture()}
     end
 
     @query """

@@ -107,7 +107,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     @ota_operations_query """
-    query ($id: id!) {
+    query ($id: ID!) {
       device(id: $id) {
         otaOperations {
           id
