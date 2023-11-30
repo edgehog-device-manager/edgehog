@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix seeds not working when used outside docker
+- Fix seeds's default values not working correctly
 
 ## [0.7.0] - 2023-10-06
 ### Fixed
