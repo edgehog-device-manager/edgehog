@@ -10,7 +10,7 @@
     :nimble_parsec,
     :i18n_helpers,
     :polymorphic_embed,
-    :typed_struct
+    :typedstruct
   ],
   inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],
   subdirectories: ["priv/*/migrations"]
