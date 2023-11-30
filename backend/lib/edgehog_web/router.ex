@@ -50,7 +50,7 @@ defmodule EdgehogWeb.Router do
     scope "/api" do
       pipe_through :api
 
-      forward "/", Absinthe.Plug, schema: EdgehogWeb.Schema
+      match :*, "/", Absinthe.Plug, schema: EdgehogWeb.Schema
     end
 
     scope "/triggers", EdgehogWeb do

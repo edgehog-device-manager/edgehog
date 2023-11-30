@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,9 +36,12 @@ defmodule EdgehogWeb.ConnCase do
   """
 
   use ExUnit.CaseTemplate
+  use EdgehogWeb, :verified_routes
 
   using do
     quote do
+      use EdgehogWeb, :verified_routes
+
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
@@ -79,7 +82,7 @@ defmodule EdgehogWeb.ConnCase do
       end
 
     # Populate the API path since it's tenant-specific
-    api_path = "/tenants/#{tenant.slug}/api"
+    api_path = ~p"/tenants/#{tenant.slug}/api"
 
     {:ok, conn: conn, tenant: tenant, api_path: api_path, tenant_private_key: tenant_private_key}
   end
