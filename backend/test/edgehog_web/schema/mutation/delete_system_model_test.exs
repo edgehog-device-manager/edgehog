@@ -26,11 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
   describe "deleteSystemModel field" do
     import Edgehog.DevicesFixtures
 
-    setup do
-      hardware_type = hardware_type_fixture()
-      {:ok, hardware_type: hardware_type}
-    end
-
     @query """
     mutation DeleteSystemModel($input: DeleteSystemModelInput!) {
       deleteSystemModel(input: $input) {
@@ -48,8 +43,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
     test "deletes system model", %{
       conn: conn,
       api_path: api_path,
-      tenant: tenant,
-      hardware_type: hardware_type
+      tenant: tenant
     } do
       name = "Foobaz"
       handle = "foobaz"
@@ -64,7 +58,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
       }
 
       %SystemModel{id: id} =
-        system_model_fixture(hardware_type,
+        system_model_fixture(
           description: description,
           name: name,
           handle: handle,
@@ -99,14 +93,13 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
     test "returns the explicit locale description", %{
       conn: conn,
       api_path: api_path,
-      tenant: tenant,
-      hardware_type: hardware_type
+      tenant: tenant
     } do
       default_locale = tenant.default_locale
 
       description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
 
-      %SystemModel{id: id} = system_model_fixture(hardware_type, description: description)
+      %SystemModel{id: id} = system_model_fixture(description: description)
 
       variables = %{
         input: %{

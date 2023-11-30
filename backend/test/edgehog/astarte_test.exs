@@ -403,7 +403,7 @@ defmodule Edgehog.AstarteTest do
 
       part_number = "XYZ123"
 
-      _system_model = system_model_fixture(hardware_type_fixture(), part_numbers: [part_number])
+      _system_model = system_model_fixture(part_numbers: [part_number])
 
       device_id = device.device_id
 

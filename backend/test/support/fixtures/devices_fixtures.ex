@@ -113,10 +113,11 @@ defmodule Edgehog.DevicesFixtures do
   @doc """
   Generate a system_model.
   """
-  def system_model_fixture(hardware_type, attrs \\ %{}) do
+  def system_model_fixture(opts \\ []) do
+    {hardware_type, opts} = Keyword.pop_lazy(opts, :hardware_type, &hardware_type_fixture/0)
+
     attrs =
-      attrs
-      |> Enum.into(%{
+      Enum.into(opts, %{
         handle: unique_system_model_handle(),
         name: unique_system_model_name(),
         part_numbers: [unique_system_model_part_number()]

@@ -23,14 +23,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
   use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.BaseImagesFixtures
-  import Edgehog.DevicesFixtures
 
   describe "createBaseImage mutation" do
     setup do
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture(hardware_type)
-
-      {:ok, base_image_collection: base_image_collection_fixture(system_model)}
+      {:ok, base_image_collection: base_image_collection_fixture()}
     end
 
     test "creates base image with valid data", %{
