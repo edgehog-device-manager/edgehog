@@ -91,6 +91,7 @@ defmodule Edgehog.MixProject do
       {:tesla, "~> 1.4"},
       {:finch, "~> 0.12", override: true},
       {:waffle, "~> 1.1"},
+      {:envar, "~> 1.1"},
       {:ex_aws, "~> 2.2"},
       {:ex_aws_s3, "~> 2.0"},
       {:hackney, "~> 1.9"},
