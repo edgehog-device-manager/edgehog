@@ -70,10 +70,11 @@ defmodule Edgehog.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.6.2"},
+      {:phoenix, "~> 1.7.0"},
+      {:phoenix_view, "~> 2.0"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
-      {:postgrex, "~> 0.16.0"},
+      {:postgrex, "~> 0.16"},
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
@@ -103,7 +104,7 @@ defmodule Edgehog.MixProject do
       {:excoveralls, "~> 0.10", only: :test},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:pretty_log, "~> 0.1"},
-      {:prom_ex, "~> 1.7.1"},
+      {:prom_ex, "~> 1.9"},
       {:plug_heartbeat, "~> 1.0"},
       {:polymorphic_embed, "~> 3.0"},
       {:gen_state_machine, "~> 3.0"},
