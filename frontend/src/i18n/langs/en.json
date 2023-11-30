@@ -307,6 +307,18 @@
     "defaultMessage": "Tags",
     "description": "Title for the Tags column of the devices table"
   },
+  "components.Footer.edgehogHomeLinkLabel": {
+    "defaultMessage": "Edgehog Homepage Link"
+  },
+  "components.Footer.issuesLinkLabel": {
+    "defaultMessage": "GitHub-Issues"
+  },
+  "components.Footer.logo": {
+    "defaultMessage": "Logo"
+  },
+  "components.Footer.repositoryLinkLabel": {
+    "defaultMessage": "GitHub"
+  },
   "components.HardwareTypesTable.handleTitle": {
     "defaultMessage": "Handle"
   },
