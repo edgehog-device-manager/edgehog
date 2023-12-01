@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - BREAKING: Add mandatory `URL_HOST` env variable. It must point to the host where the Edgehog
   backend is exposed.
 
+### Fixed
+- Fix seeds not working when used outside docker
+- Fix seeds's default values not working correctly
+
 ## [0.7.0] - 2023-10-06
 ### Fixed
 - Don't crash the OTA campaign if a misconfigured device doesn't send its base image version.

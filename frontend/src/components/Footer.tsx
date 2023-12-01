@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2023 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 
   SPDX-License-Identifier: Apache-2.0
 */
+
+import { useIntl } from "react-intl";
 
 import assets from "assets";
 import Center from "components/Center";
@@ -39,13 +41,26 @@ const Footer = ({
   repoUrl,
   issueTrackerUrl,
 }: FooterProps) => {
+  const intl = useIntl();
   return (
     <footer className="pt-2 pb-1 border-top">
       <Center>
         <div>
           <Stack gap={2} direction="horizontal">
-            <a href={homepageUrl}>
-              <img alt="Logo" src={assets.images.brand} />
+            <a
+              href={homepageUrl}
+              aria-label={intl.formatMessage({
+                id: "components.Footer.edgehogHomeLinkLabel",
+                defaultMessage: "Edgehog Homepage Link",
+              })}
+            >
+              <img
+                alt={intl.formatMessage({
+                  id: "components.Footer.logo",
+                  defaultMessage: "Logo",
+                })}
+                src={assets.images.brand}
+              />
             </a>
             <span>
               {appName} <small>(v{appVersion})</small>
@@ -55,6 +70,10 @@ const Footer = ({
               className="text-reset"
               target="_blank"
               rel="noreferrer"
+              aria-label={intl.formatMessage({
+                id: "components.Footer.repositoryLinkLabel",
+                defaultMessage: "GitHub",
+              })}
             >
               <Icon icon="github" />
             </a>
@@ -63,6 +82,10 @@ const Footer = ({
               className="text-reset"
               target="_blank"
               rel="noreferrer"
+              aria-label={intl.formatMessage({
+                id: "components.Footer.issuesLinkLabel",
+                defaultMessage: "GitHub-Issues",
+              })}
             >
               <Icon icon="bug" />
             </a>

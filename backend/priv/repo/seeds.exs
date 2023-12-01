@@ -27,10 +27,34 @@ alias Edgehog.{
 
 require Logger
 
+default_var =
+  if File.exists?("../.env") do
+    defaults = Envar.read("../.env")
+
+    fn var ->
+      # paths in the .env are relative to ../
+      Map.fetch!(defaults, var)
+      |> String.replace_prefix("./", "../")
+    end
+  else
+    fn _var -> nil end
+  end
+
+# gives priority to system env vars
+read_env_var = fn var ->
+  default = default_var.(var)
+  System.get_env(var, default)
+end
+
+file_names_from_env_vars = fn file_name_var, original_file_name_var ->
+  file_name = read_env_var.(file_name_var)
+  original_file_name = System.get_env(original_file_name_var, file_name)
+  {file_name, original_file_name}
+end
+
 # original_file_name_var is used in docker to keep a reference to the original file.
 read_file_from_env_var! = fn file_var, original_file_name_var ->
-  file_name = System.fetch_env!(file_var)
-  original_file_name = System.get_env(original_file_name_var, file_name)
+  {file_name, original_file_name} = file_names_from_env_vars.(file_var, original_file_name_var)
 
   File.read(file_name)
   |> case do
@@ -42,22 +66,49 @@ read_file_from_env_var! = fn file_var, original_file_name_var ->
   end
 end
 
+read_key! = fn key_file_var, original_key_file_var, default_key_file_name ->
+  {_, original_file_name} =
+    file_names_from_env_vars.(key_file_var, original_key_file_var)
+
+  key_content = read_file_from_env_var!.(key_file_var, original_key_file_var)
+
+  # from_pem! + to_pem is used to remove indentation and comments
+  default_key =
+    :code.priv_dir(:edgehog)
+    |> to_string()
+    |> Path.join("repo/seeds/keys/#{default_key_file_name}.pem")
+    |> File.read!()
+    |> X509.PrivateKey.from_pem!()
+    |> X509.PrivateKey.to_pem()
+
+  key =
+    case X509.PrivateKey.from_pem(key_content) do
+      {:ok, pk_binary} ->
+        X509.PrivateKey.to_pem(pk_binary)
+
+      {:error, _} ->
+        raise ~s[#{key_file_var} (set to "#{original_file_name}"): not a valid private key]
+    end
+
+  status =
+    case key do
+      ^default_key -> :default
+      _ -> :ok
+    end
+
+  {status, key}
+end
+
 {:ok, cluster} =
   Astarte.create_cluster(%{
     name: "Test Cluster",
-    base_api_url: System.get_env("SEEDS_ASTARTE_BASE_API_URL")
+    base_api_url: read_env_var.("SEEDS_ASTARTE_BASE_API_URL")
   })
 
-default_key =
-  :code.priv_dir(:edgehog)
-  |> to_string()
-  |> Path.join("repo/seeds/keys/tenant_private.pem")
-  |> File.read!()
+{status, private_key} =
+  read_key!.("SEEDS_TENANT_PRIVATE_KEY_FILE", "SEEDS_TENANT_ORIGINAL_FILE", "tenant_private")
 
-private_key =
-  read_file_from_env_var!.("SEEDS_TENANT_PRIVATE_KEY_FILE", "SEEDS_TENANT_ORIGINAL_FILE")
-
-if private_key == default_key do
+if status == :default do
   """
   Using default tenant private key. \
   Please be sure to avoid using this for production.
@@ -76,28 +127,21 @@ public_key =
 
 _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
 
-realm_pk = read_file_from_env_var!.("SEEDS_REALM_PRIVATE_KEY_FILE", "SEEDS_REALM_ORIGINAL_FILE")
+{status, realm_pk} =
+  read_key!.("SEEDS_REALM_PRIVATE_KEY_FILE", "SEEDS_REALM_ORIGINAL_FILE", "realm_private")
 
-realm_pk =
-  case X509.PrivateKey.from_pem(realm_pk) do
-    {:ok, pk_binary} ->
-      # Like returning pk but removes all text outside BEGIN KEY and END KEY sections.
-      X509.PrivateKey.to_pem(pk_binary)
-
-    {:error, _} ->
-      """
-      The realm's private key is not a valid RSA/RC private key. \
-      This instance will not be able to connect to Astarte.
-      """
-      |> String.trim_trailing("\n")
-      |> Logger.warning()
-
-      realm_pk
-  end
+if status == :default do
+  """
+  You are using the default realm private key. \
+  This instance will not be able to connect to Astarte.
+  """
+  |> String.trim_trailing("\n")
+  |> Logger.warning()
+end
 
 {:ok, realm} =
   Astarte.create_realm(cluster, %{
-    name: System.get_env("SEEDS_REALM"),
+    name: read_env_var.("SEEDS_REALM"),
     private_key: realm_pk
   })
 
