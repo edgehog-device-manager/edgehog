@@ -161,6 +161,18 @@ defmodule Edgehog.ProvisioningTest do
     end
   end
 
+  describe "delete_tenant_by_slug/1" do
+    test "returns {:error, :not_found} for unexisting tenant" do
+      assert {:error, :not_found} = Provisioning.delete_tenant_by_slug("not_existing_slug")
+    end
+
+    test "deletes existing tenant", %{tenant: tenant} do
+      assert {:ok, ^tenant} = Tenants.fetch_tenant_by_slug(tenant.slug)
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+      assert {:error, :not_found} = Tenants.fetch_tenant_by_slug(tenant.slug)
+    end
+  end
+
   defp provision_tenant(opts) do
     {astarte_config, opts} = Keyword.pop(opts, :astarte_config, [])
 

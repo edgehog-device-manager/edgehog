@@ -34,6 +34,14 @@ defmodule Edgehog.Provisioning do
     end
   end
 
+  def delete_tenant_by_slug(tenant_slug) do
+    with {:ok, tenant} <- Tenants.fetch_tenant_by_slug(tenant_slug) do
+      # TODO: clean up Astarte resources
+      # TODO: clean up S3 storage (base and ephemeral images)
+      Tenants.delete_tenant(tenant)
+    end
+  end
+
   defp provision_tenant_from_config(tenant_config) do
     %TenantConfig{astarte_config: astarte_config} = tenant_config
 
