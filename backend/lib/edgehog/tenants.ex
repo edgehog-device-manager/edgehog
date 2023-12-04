@@ -158,6 +158,10 @@ defmodule Edgehog.Tenants do
     @reconciler_module.reconcile_tenant(tenant)
   end
 
+  def cleanup_tenant(%Tenant{} = tenant) do
+    @reconciler_module.cleanup_tenant(tenant)
+  end
+
   @doc """
   Returns an `%Astarte.Client.RealmManagement{}` for the given tenant.
 

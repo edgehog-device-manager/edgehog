@@ -171,6 +171,20 @@ defmodule Edgehog.ProvisioningTest do
       assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
       assert {:error, :not_found} = Tenants.fetch_tenant_by_slug(tenant.slug)
     end
+
+    test "triggers tenant clean up", %{tenant: tenant} do
+      cluster = cluster_fixture()
+      _realm = realm_fixture(cluster)
+
+      Edgehog.Tenants.ReconcilerMock
+      |> expect(:cleanup_tenant, fn %Tenants.Tenant{} = cleanup_tenant ->
+        assert cleanup_tenant.tenant_id == tenant.tenant_id
+
+        :ok
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+    end
   end
 
   defp provision_tenant(opts) do

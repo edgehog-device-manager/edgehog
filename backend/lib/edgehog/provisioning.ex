@@ -35,10 +35,13 @@ defmodule Edgehog.Provisioning do
   end
 
   def delete_tenant_by_slug(tenant_slug) do
-    with {:ok, tenant} <- Tenants.fetch_tenant_by_slug(tenant_slug) do
-      # TODO: clean up Astarte resources
+    with {:ok, tenant} <- Tenants.fetch_tenant_by_slug(tenant_slug),
+         tenant = Tenants.preload_astarte_resources_for_tenant(tenant),
+         {:ok, deleted_tenant} <- Tenants.delete_tenant(tenant) do
       # TODO: clean up S3 storage (base and ephemeral images)
-      Tenants.delete_tenant(tenant)
+      Tenants.cleanup_tenant(tenant)
+
+      {:ok, deleted_tenant}
     end
   end
 
