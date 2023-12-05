@@ -30,4 +30,10 @@ defmodule EdgehogWeb.AdminAPI.TenantsController do
       send_resp(conn, :created, "")
     end
   end
+
+  def delete_by_slug(conn, %{"tenant_slug" => tenant_slug}) do
+    with {:ok, _tenant} <- Provisioning.delete_tenant_by_slug(tenant_slug) do
+      send_resp(conn, :no_content, "")
+    end
+  end
 end

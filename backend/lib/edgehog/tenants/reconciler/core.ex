@@ -82,6 +82,14 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end
   end
 
+  def cleanup_trigger(%Client.RealmManagement{} = client, trigger) do
+    %{
+      "name" => trigger_name
+    } = trigger
+
+    Astarte.delete_trigger(client, trigger_name)
+  end
+
   defp update_interface!(rm_client, name, major, interface_json) do
     # TODO: crash with a nicer exception instead of MatchError
     :ok = Astarte.update_interface(rm_client, name, major, interface_json)
