@@ -3,6 +3,9 @@
 
 [
   import_deps: [
+    :ash,
+    :ash_graphql,
+    :ash_postgres,
     :ecto,
     :phoenix,
     :absinthe,
