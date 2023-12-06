@@ -20,18 +20,30 @@
 
 import React from "react";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
+import type {
+  HardwareTypesTable_HardwareTypesFragment$key,
+  HardwareTypesTable_HardwareTypesFragment$data,
+} from "api/__generated__/HardwareTypesTable_HardwareTypesFragment.graphql";
 
-type HardwareTypeProps = {
-  id: string;
-  handle: string;
-  name: string;
-  partNumbers: string[];
-};
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const HARDWARE_TYPES_TABLE_FRAGMENT = graphql`
+  fragment HardwareTypesTable_HardwareTypesFragment on HardwareType
+  @relay(plural: true) {
+    id
+    handle
+    name
+    partNumbers
+  }
+`;
 
-const columnHelper = createColumnHelper<HardwareTypeProps>();
+type TableRecord = HardwareTypesTable_HardwareTypesFragment$data[number];
+
+const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
   columnHelper.accessor("name", {
     header: () => (
@@ -78,13 +90,18 @@ const columns = [
 
 type Props = {
   className?: string;
-  data: HardwareTypeProps[];
+  hardwareTypesRef: HardwareTypesTable_HardwareTypesFragment$key;
 };
 
-const HardwareTypesTable = ({ className, data }: Props) => {
-  return <Table className={className} columns={columns} data={data} />;
+const HardwareTypesTable = ({ className, hardwareTypesRef }: Props) => {
+  const hardwareTypes = useFragment(
+    HARDWARE_TYPES_TABLE_FRAGMENT,
+    hardwareTypesRef,
+  );
+
+  return <Table className={className} columns={columns} data={hardwareTypes} />;
 };
 
-export type { HardwareTypeProps };
+export type { TableRecord };
 
 export default HardwareTypesTable;
