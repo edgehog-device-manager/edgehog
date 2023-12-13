@@ -19,8 +19,10 @@
 #
 
 defmodule Edgehog.Provisioning do
+  alias Edgehog.Assets
   alias Edgehog.Astarte
   alias Edgehog.BaseImages
+  alias Edgehog.Devices
   alias Edgehog.OSManagement
   alias Edgehog.Provisioning.{AstarteConfig, TenantConfig, CleanupSupervisor}
   alias Edgehog.Repo
@@ -41,12 +43,13 @@ defmodule Edgehog.Provisioning do
          Repo.put_tenant_id(tenant.tenant_id),
          base_images = BaseImages.list_base_images(),
          ota_operations = OSManagement.list_ota_operations(),
+         system_models = Devices.list_system_models(),
          {:ok, deleted_tenant} <- Tenants.delete_tenant(tenant) do
       Tenants.cleanup_tenant(tenant)
 
       cleanup_base_images(base_images)
       cleanup_ota_operations(ota_operations)
-      # TODO: clean up S3 storage (assets)
+      cleanup_system_models(system_models)
 
       {:ok, deleted_tenant}
     end
@@ -57,6 +60,9 @@ defmodule Edgehog.Provisioning do
 
   defp cleanup_ota_operations(ota_operations),
     do: start_cleanup_task(ota_operations, &OSManagement.cleanup_ephemeral_image/1)
+
+  defp cleanup_system_models(system_models),
+    do: start_cleanup_task(system_models, &Assets.delete_system_model_picture(&1, &1.picture_url))
 
   defp start_cleanup_task([], _cleanup_fun), do: :ok
 

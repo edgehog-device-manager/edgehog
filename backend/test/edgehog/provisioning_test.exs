@@ -287,6 +287,62 @@ defmodule Edgehog.ProvisioningTest do
 
       refute_receive {:manual_ota_operation_deletion_error, ^ref}
     end
+
+    test "cleans up system model pictures", %{tenant: tenant} do
+      system_models_count = Enum.random(2..10)
+
+      for _ <- 1..system_models_count do
+        picture_name =
+          :crypto.strong_rand_bytes(10) |> Base.url_encode64(padding: false) |> String.downcase()
+
+        picture_url = "https://domain.com/#{picture_name}.jpg"
+        system_model_fixture(picture_url: picture_url)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:delete, system_models_count, fn _system_model, _picture_url ->
+        send(test_pid, {:system_model_picture_deleted, ref})
+        :ok
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..system_models_count
+      |> Enum.each(fn _ -> assert_receive {:system_model_picture_deleted, ^ref} end)
+
+      refute_receive {:system_model_picture_deleted, ^ref}
+    end
+
+    test "ignores system model pictures cleanup errors", %{tenant: tenant} do
+      system_models_count = Enum.random(2..10)
+
+      for _ <- 1..system_models_count do
+        picture_name =
+          :crypto.strong_rand_bytes(10) |> Base.url_encode64(padding: false) |> String.downcase()
+
+        picture_url = "https://domain.com/#{picture_name}.jpg"
+        system_model_fixture(picture_url: picture_url)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:delete, system_models_count, fn _system_model, _picture_url ->
+        send(test_pid, {:system_model_picture_deletion_error, ref})
+        {:error, :network_error}
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..system_models_count
+      |> Enum.each(fn _ -> assert_receive {:system_model_picture_deletion_error, ^ref} end)
+
+      refute_receive {:system_model_picture_deletion_error, ^ref}
+    end
   end
 
   defp provision_tenant(opts) do
