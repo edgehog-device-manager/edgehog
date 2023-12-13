@@ -50,17 +50,6 @@ defmodule Edgehog.DataCase do
   setup tags do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
-
-    if tags[:no_tenant_fixtures] do
-      :ok
-    else
-      # Create a tenant fixture and populate the tenant id, since we don't have the web part that
-      # does it for us here
-      tenant = Edgehog.TenantsFixtures.tenant_fixture()
-      _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-
-      {:ok, tenant: tenant}
-    end
   end
 
   @doc """
