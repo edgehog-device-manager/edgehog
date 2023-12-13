@@ -54,10 +54,11 @@ defmodule Edgehog.Application do
       # Start the UpdateCampaigns supervisor
       Edgehog.UpdateCampaigns.Supervisor,
       # Start the Endpoint (http/https)
-      EdgehogWeb.Endpoint,
-      # Start the Tenant Reconciler Supervisor
-      {Edgehog.Tenants.Reconciler.Supervisor,
-       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun}
+      EdgehogWeb.Endpoint
+      # TODO: enable this back after Ash porting is complete
+      # # Start the Tenant Reconciler Supervisor
+      # {Edgehog.Tenants.Reconciler.Supervisor,
+      #  tenant_to_trigger_url_fun: tenant_to_trigger_url_fun}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

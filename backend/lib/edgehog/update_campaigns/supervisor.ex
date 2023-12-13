@@ -54,6 +54,8 @@ defmodule Edgehog.UpdateCampaigns.Supervisor do
   end
 
   defp children(_mix_env) do
-    @base_children ++ [Resumer]
+    # TODO: enable this back after Ash porting is complete
+    # @base_children ++ [Resumer]
+    @base_children
   end
 end
