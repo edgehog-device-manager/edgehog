@@ -19,10 +19,12 @@
 #
 
 defmodule Edgehog.ProvisioningTest do
-  use Edgehog.DataCase, async: true
+  # This can't be async: true because we're using Mox in global mode
+  use Edgehog.DataCase
   use Edgehog.ReconcilerMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.BaseImagesFixtures
   import Edgehog.TenantsFixtures
 
   alias Edgehog.Astarte
@@ -184,6 +186,48 @@ defmodule Edgehog.ProvisioningTest do
       end)
 
       assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+    end
+
+    test "cleans up base images", %{tenant: tenant} do
+      base_images_count = Enum.random(2..10)
+      for _ <- 1..base_images_count, do: base_image_fixture()
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.BaseImages.StorageMock
+      |> expect(:delete, base_images_count, fn _base_image ->
+        send(test_pid, {:base_image_deleted, ref})
+        :ok
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..base_images_count
+      |> Enum.each(fn _ -> assert_receive {:base_image_deleted, ^ref} end)
+
+      refute_receive {:base_image_deleted, ^ref}
+    end
+
+    test "ignores base image cleanup errors", %{tenant: tenant} do
+      base_images_count = Enum.random(2..10)
+      for _ <- 1..base_images_count, do: base_image_fixture()
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.BaseImages.StorageMock
+      |> expect(:delete, base_images_count, fn _base_image ->
+        send(test_pid, {:base_image_deletion_error, ref})
+        {:error, :network_error}
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..base_images_count
+      |> Enum.each(fn _ -> assert_receive {:base_image_deletion_error, ^ref} end)
+
+      refute_receive {:base_image_deletion_error, ^ref}
     end
   end
 

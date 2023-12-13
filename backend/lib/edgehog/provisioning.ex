@@ -20,8 +20,8 @@
 
 defmodule Edgehog.Provisioning do
   alias Edgehog.Astarte
-  alias Edgehog.Provisioning.AstarteConfig
-  alias Edgehog.Provisioning.TenantConfig
+  alias Edgehog.BaseImages
+  alias Edgehog.Provisioning.{AstarteConfig, TenantConfig, CleanupSupervisor}
   alias Edgehog.Repo
   alias Edgehog.Tenants
 
@@ -37,12 +37,29 @@ defmodule Edgehog.Provisioning do
   def delete_tenant_by_slug(tenant_slug) do
     with {:ok, tenant} <- Tenants.fetch_tenant_by_slug(tenant_slug),
          tenant = Tenants.preload_astarte_resources_for_tenant(tenant),
+         Repo.put_tenant_id(tenant.tenant_id),
+         base_images = BaseImages.list_base_images(),
          {:ok, deleted_tenant} <- Tenants.delete_tenant(tenant) do
-      # TODO: clean up S3 storage (base and ephemeral images)
       Tenants.cleanup_tenant(tenant)
+
+      cleanup_base_images(base_images)
+      # TODO: clean up S3 storage (ephemeral images, assets)
 
       {:ok, deleted_tenant}
     end
+  end
+
+  defp cleanup_base_images([]), do: :ok
+
+  defp cleanup_base_images(base_images) do
+    Task.Supervisor.start_child(CleanupSupervisor, fn ->
+      CleanupSupervisor
+      |> Task.Supervisor.async_stream_nolink(base_images, &BaseImages.cleanup_base_image/1,
+        ordered: false,
+        on_timeout: :kill_task
+      )
+      |> Stream.run()
+    end)
   end
 
   defp provision_tenant_from_config(tenant_config) do
