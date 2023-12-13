@@ -88,6 +88,8 @@ config :edgehog, Edgehog.PromEx,
   grafana: :disabled,
   metrics_server: :disabled
 
+config :edgehog, :ash_apis, [Edgehog.Tenants]
+
 config :ash, :default_belongs_to_type, :integer
 config :ash_graphql, :default_managed_relationship_type_name_template, :action_name
 
