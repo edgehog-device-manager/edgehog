@@ -21,6 +21,7 @@
 defmodule Edgehog.Provisioning do
   alias Edgehog.Astarte
   alias Edgehog.BaseImages
+  alias Edgehog.OSManagement
   alias Edgehog.Provisioning.{AstarteConfig, TenantConfig, CleanupSupervisor}
   alias Edgehog.Repo
   alias Edgehog.Tenants
@@ -39,22 +40,30 @@ defmodule Edgehog.Provisioning do
          tenant = Tenants.preload_astarte_resources_for_tenant(tenant),
          Repo.put_tenant_id(tenant.tenant_id),
          base_images = BaseImages.list_base_images(),
+         ota_operations = OSManagement.list_ota_operations(),
          {:ok, deleted_tenant} <- Tenants.delete_tenant(tenant) do
       Tenants.cleanup_tenant(tenant)
 
       cleanup_base_images(base_images)
-      # TODO: clean up S3 storage (ephemeral images, assets)
+      cleanup_ota_operations(ota_operations)
+      # TODO: clean up S3 storage (assets)
 
       {:ok, deleted_tenant}
     end
   end
 
-  defp cleanup_base_images([]), do: :ok
+  defp cleanup_base_images(base_images),
+    do: start_cleanup_task(base_images, &BaseImages.cleanup_base_image/1)
 
-  defp cleanup_base_images(base_images) do
+  defp cleanup_ota_operations(ota_operations),
+    do: start_cleanup_task(ota_operations, &OSManagement.cleanup_ephemeral_image/1)
+
+  defp start_cleanup_task([], _cleanup_fun), do: :ok
+
+  defp start_cleanup_task(list, cleanup_fun) when is_function(cleanup_fun, 1) do
     Task.Supervisor.start_child(CleanupSupervisor, fn ->
       CleanupSupervisor
-      |> Task.Supervisor.async_stream_nolink(base_images, &BaseImages.cleanup_base_image/1,
+      |> Task.Supervisor.async_stream_nolink(list, &cleanup_fun.(&1),
         ordered: false,
         on_timeout: :kill_task
       )

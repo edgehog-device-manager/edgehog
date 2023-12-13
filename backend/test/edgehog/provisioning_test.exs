@@ -25,6 +25,8 @@ defmodule Edgehog.ProvisioningTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.BaseImagesFixtures
+  import Edgehog.DevicesFixtures
+  import Edgehog.OSManagementFixtures
   import Edgehog.TenantsFixtures
 
   alias Edgehog.Astarte
@@ -228,6 +230,62 @@ defmodule Edgehog.ProvisioningTest do
       |> Enum.each(fn _ -> assert_receive {:base_image_deletion_error, ^ref} end)
 
       refute_receive {:base_image_deletion_error, ^ref}
+    end
+
+    test "cleans up manual OTA operations", %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      manual_ota_operations_count = Enum.random(2..10)
+
+      for _ <- 1..manual_ota_operations_count do
+        device = device_fixture(realm)
+        _ = manual_ota_operation_fixture(device)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, manual_ota_operations_count, fn _tenant_id, _ota_operation_id, _url ->
+        send(test_pid, {:manual_ota_operation_deleted, ref})
+        :ok
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..manual_ota_operations_count
+      |> Enum.each(fn _ -> assert_receive {:manual_ota_operation_deleted, ^ref} end)
+
+      refute_receive {:manual_ota_operation_deleted, ^ref}
+    end
+
+    test "ignores manual ota operations cleanup errors", %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      manual_ota_operations_count = Enum.random(2..10)
+
+      for _ <- 1..manual_ota_operations_count do
+        device = device_fixture(realm)
+        _ = manual_ota_operation_fixture(device)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, manual_ota_operations_count, fn _tenant_id, _ota_operation_id, _url ->
+        send(test_pid, {:manual_ota_operation_deletion_error, ref})
+        {:error, :network_error}
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..manual_ota_operations_count
+      |> Enum.each(fn _ -> assert_receive {:manual_ota_operation_deletion_error, ^ref} end)
+
+      refute_receive {:manual_ota_operation_deletion_error, ^ref}
     end
   end
 
