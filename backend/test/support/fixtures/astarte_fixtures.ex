@@ -43,16 +43,13 @@ defmodule Edgehog.AstarteFixtures do
   @doc """
   Generate a cluster.
   """
-  def cluster_fixture(attrs \\ %{}) do
-    {:ok, cluster} =
-      attrs
-      |> Enum.into(%{
-        base_api_url: unique_cluster_base_api_url(),
-        name: unique_cluster_name()
-      })
-      |> Edgehog.Astarte.create_cluster()
-
-    cluster
+  def cluster_fixture(opts \\ []) do
+    opts
+    |> Enum.into(%{
+      base_api_url: unique_cluster_base_api_url(),
+      name: unique_cluster_name()
+    })
+    |> Edgehog.Astarte.Cluster.create!()
   end
 
   @private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
