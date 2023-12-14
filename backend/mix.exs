@@ -114,7 +114,10 @@ defmodule Edgehog.MixProject do
       {:i18n_helpers, github: "secomind/i18n_helpers"},
       {:recon, "~> 2.5"},
       {:observer_cli, "~> 1.7"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:ash, "~> 2.0"},
+      {:ash_postgres, "~> 1.3"},
+      {:ash_graphql, "~> 0.26"}
     ]
   end
 
