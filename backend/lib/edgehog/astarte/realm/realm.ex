@@ -21,6 +21,7 @@
 defmodule Edgehog.Astarte.Realm do
   use Edgehog.MultitenantResource
 
+  alias Edgehog.Astarte.Realm
   alias Edgehog.Validations
 
   code_interface do
@@ -62,6 +63,14 @@ defmodule Edgehog.Astarte.Realm do
 
   relationships do
     belongs_to :cluster, Edgehog.Astarte.Cluster
+  end
+
+  calculations do
+    calculate :realm_management_client, :struct, Realm.Calculations.RealmManagementClient do
+      constraints instance_of: Astarte.Client.RealmManagement
+      private? true
+      filterable? false
+    end
   end
 
   identities do
