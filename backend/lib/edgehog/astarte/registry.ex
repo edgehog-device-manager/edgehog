@@ -23,5 +23,6 @@ defmodule Edgehog.Astarte.Registry do
 
   entries do
     entry Edgehog.Astarte.Cluster
+    entry Edgehog.Astarte.Realm
   end
 end

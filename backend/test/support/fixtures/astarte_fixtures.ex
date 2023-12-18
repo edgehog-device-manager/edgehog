@@ -57,17 +57,19 @@ defmodule Edgehog.AstarteFixtures do
   @doc """
   Generate a realm.
   """
-  def realm_fixture(cluster, attrs \\ %{}) do
-    attrs =
-      attrs
-      |> Enum.into(%{
-        name: unique_realm_name(),
-        private_key: @private_key
-      })
+  def realm_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop_lazy(opts, :tenant, &Edgehog.TenantsFixtures.tenant_fixture/0)
 
-    {:ok, realm} = Edgehog.Astarte.create_realm(cluster, attrs)
+    {cluster_id, opts} =
+      Keyword.pop_lazy(opts, :cluster_id, fn -> cluster_fixture() |> Map.fetch!(:id) end)
 
-    realm
+    opts
+    |> Enum.into(%{
+      cluster_id: cluster_id,
+      name: unique_realm_name(),
+      private_key: @private_key
+    })
+    |> Edgehog.Astarte.Realm.create!(tenant: tenant.tenant_id)
   end
 
   @doc """
