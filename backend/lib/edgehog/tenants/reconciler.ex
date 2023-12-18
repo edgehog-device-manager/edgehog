@@ -66,8 +66,8 @@ defmodule Edgehog.Tenants.Reconciler do
       schedule_reconciliation(@reconcile_interval)
     end
 
-    Tenants.list_tenants()
-    |> Tenants.preload_astarte_resources_for_tenant()
+    Tenant
+    |> Tenants.read!(load: tenant_reconciliation_loads())
     |> Enum.each(&start_reconciliation_task(&1, tenant_to_trigger_url_fun))
 
     {:noreply, state}
@@ -80,7 +80,7 @@ defmodule Edgehog.Tenants.Reconciler do
     } = state
 
     tenant
-    |> Tenants.preload_astarte_resources_for_tenant()
+    |> Tenants.load!(tenant_reconciliation_loads())
     |> start_reconciliation_task(tenant_to_trigger_url_fun)
 
     {:noreply, state}
@@ -88,7 +88,7 @@ defmodule Edgehog.Tenants.Reconciler do
 
   defp start_reconciliation_task(%Tenant{} = tenant, tenant_to_trigger_url_fun) do
     Task.Supervisor.start_child(TaskSupervisor, fn ->
-      {:ok, rm_client} = Tenants.realm_management_client_from_tenant(tenant)
+      rm_client = tenant.realm.realm_management_client
 
       Core.list_required_interfaces()
       |> Enum.each(&Core.reconcile_interface!(rm_client, &1))
@@ -104,5 +104,9 @@ defmodule Edgehog.Tenants.Reconciler do
     Process.send_after(self(), :reconcile_all, time)
 
     :ok
+  end
+
+  defp tenant_reconciliation_loads do
+    [realm: [:realm_management_client]]
   end
 end

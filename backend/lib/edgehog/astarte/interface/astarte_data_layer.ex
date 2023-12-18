@@ -18,22 +18,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Realm.Interfaces.Behaviour do
+defmodule Edgehog.Astarte.Interface.AstarteDataLayer do
+  @behaviour Edgehog.Astarte.Interface.DataLayer
+
   alias Astarte.Client.RealmManagement
 
-  @callback get(
-              client :: RealmManagement.t(),
-              interface_name :: String.t(),
-              interface_major :: non_neg_integer
-            ) :: {:ok, map()} | {:error, term()}
+  @impl true
+  def get(%RealmManagement{} = client, interface_name, interface_major) do
+    RealmManagement.Interfaces.get(client, interface_name, interface_major)
+  end
 
-  @callback create(client :: RealmManagement.t(), interface_json :: map()) ::
-              :ok | {:error, term()}
+  @impl true
+  def create(%RealmManagement{} = client, interface_json) do
+    RealmManagement.Interfaces.create(client, interface_json)
+  end
 
-  @callback update(
-              client :: RealmManagement.t(),
-              interface_name :: String.t(),
-              interface_major :: non_neg_integer,
-              interface_json :: map()
-            ) :: :ok | {:error, term()}
+  @impl true
+  def update(%RealmManagement{} = client, interface_name, interface_major, interface_json) do
+    RealmManagement.Interfaces.update(client, interface_name, interface_major, interface_json)
+  end
 end

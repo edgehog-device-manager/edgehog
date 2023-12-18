@@ -22,6 +22,8 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
   use Edgehog.DataCase, async: true
   use Edgehog.AstarteMockCase
 
+  @moduletag :ported_to_ash
+
   import Edgehog.AstarteFixtures
 
   alias Astarte.Client.APIError
@@ -68,13 +70,10 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
 
   describe "reconcile_interface!/2" do
     setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-
-      %{base_api_url: base_api_url} = cluster
-      %{name: realm_name, private_key: private_key} = realm
-
-      {:ok, client} = RealmManagement.new(base_api_url, realm_name, private_key: private_key)
+      client =
+        realm_fixture()
+        |> Edgehog.Astarte.load!(:realm_management_client)
+        |> Map.fetch!(:realm_management_client)
 
       interface_name = "io.edgehog.devicemanager.SystemInfo"
       major = 0
@@ -106,7 +105,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Realm.InterfacesMock
+      Edgehog.Astarte.Interface.MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:error, api_error(status: 404)}
       end)
@@ -125,7 +124,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Realm.InterfacesMock
+      Edgehog.Astarte.Interface.MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => interface_map}}
       end)
@@ -144,7 +143,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Realm.InterfacesMock
+      Edgehog.Astarte.Interface.MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => put_minor_version(interface_map, minor + 1)}}
       end)
@@ -163,7 +162,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Realm.InterfacesMock
+      Edgehog.Astarte.Interface.MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => put_minor_version(interface_map, minor - 1)}}
       end)
@@ -180,7 +179,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Realm.InterfacesMock
+      Edgehog.Astarte.Interface.MockDataLayer
       |> expect(:get, fn _client, _interface_name, _major ->
         {:error, api_error(status: 500)}
       end)
@@ -193,13 +192,10 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
 
   describe "reconcile_trigger!/2" do
     setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-
-      %{base_api_url: base_api_url} = cluster
-      %{name: realm_name, private_key: private_key} = realm
-
-      {:ok, client} = RealmManagement.new(base_api_url, realm_name, private_key: private_key)
+      client =
+        realm_fixture()
+        |> Edgehog.Astarte.load!(:realm_management_client)
+        |> Map.fetch!(:realm_management_client)
 
       trigger_name = "edgehog-connection"
 
@@ -221,7 +217,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         trigger_map: trigger_map
       } = ctx
 
-      Edgehog.Astarte.Realm.TriggersMock
+      Edgehog.Astarte.Trigger.MockDataLayer
       |> expect(:get, fn ^client, ^trigger_name ->
         {:error, api_error(status: 404)}
       end)
@@ -239,7 +235,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         trigger_map: trigger_map
       } = ctx
 
-      Edgehog.Astarte.Realm.TriggersMock
+      Edgehog.Astarte.Trigger.MockDataLayer
       |> expect(:get, fn ^client, ^trigger_name ->
         {:ok, %{"data" => trigger_map}}
       end)
@@ -256,7 +252,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         trigger_map: trigger_map
       } = ctx
 
-      Edgehog.Astarte.Realm.TriggersMock
+      Edgehog.Astarte.Trigger.MockDataLayer
       |> expect(:get, fn ^client, ^trigger_name ->
         {:ok, %{"data" => put_trigger_url(trigger_map, "https://other.url.example/triggers")}}
       end)
@@ -272,7 +268,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         trigger_map: trigger_map
       } = ctx
 
-      Edgehog.Astarte.Realm.TriggersMock
+      Edgehog.Astarte.Trigger.MockDataLayer
       |> expect(:get, fn _client, _trigger_name ->
         {:error, api_error(status: 502)}
       end)

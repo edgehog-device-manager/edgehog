@@ -118,16 +118,6 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Device.LedBehavior
     )
 
-    Mox.stub_with(
-      Edgehog.Astarte.Realm.InterfacesMock,
-      Edgehog.Mocks.Astarte.Realm.Interfaces
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Realm.TriggersMock,
-      Edgehog.Mocks.Astarte.Realm.Triggers
-    )
-
     :ok
   end
 end

@@ -18,23 +18,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Realm.Triggers do
-  @behaviour Edgehog.Astarte.Realm.Triggers.Behaviour
-
+defmodule Edgehog.Astarte.Trigger.DataLayer do
   alias Astarte.Client.RealmManagement
 
-  @impl true
-  def get(%RealmManagement{} = client, trigger_name) do
-    RealmManagement.Triggers.get(client, trigger_name)
-  end
+  @callback get(client :: RealmManagement.t(), trigger_name :: String.t()) ::
+              {:ok, map()} | {:error, term()}
 
-  @impl true
-  def create(%RealmManagement{} = client, trigger_json) do
-    RealmManagement.Triggers.create(client, trigger_json)
-  end
+  @callback create(client :: RealmManagement.t(), trigger_json :: map()) ::
+              :ok | {:error, term()}
 
-  @impl true
-  def delete(%RealmManagement{} = client, trigger_name) do
-    RealmManagement.Triggers.delete(client, trigger_name)
-  end
+  @callback delete(client :: RealmManagement.t(), trigger_name :: String.t()) ::
+              :ok | {:error, term()}
 end

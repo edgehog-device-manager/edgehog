@@ -18,24 +18,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Mocks.Astarte.Realm.Triggers do
-  @behaviour Edgehog.Astarte.Realm.Triggers.Behaviour
+defmodule Edgehog.Astarte.Trigger.AstarteDataLayer do
+  @behaviour Edgehog.Astarte.Trigger.DataLayer
 
-  import Edgehog.AstarteFixtures
   alias Astarte.Client.RealmManagement
 
   @impl true
-  def get(%RealmManagement{} = _client, trigger_name) do
-    {:ok, %{"data" => trigger_map_fixture(name: trigger_name)}}
+  def get(%RealmManagement{} = client, trigger_name) do
+    RealmManagement.Triggers.get(client, trigger_name)
   end
 
   @impl true
-  def create(%RealmManagement{} = _client, _trigger_json) do
-    :ok
+  def create(%RealmManagement{} = client, trigger_json) do
+    RealmManagement.Triggers.create(client, trigger_json)
   end
 
   @impl true
-  def delete(%RealmManagement{} = _client, _trigger_name) do
-    :ok
+  def delete(%RealmManagement{} = client, trigger_name) do
+    RealmManagement.Triggers.delete(client, trigger_name)
   end
 end
