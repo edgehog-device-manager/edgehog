@@ -168,6 +168,9 @@ jobs:
         mix deps.get --only test
         mix deps.compile
 
+    - name: Test
+      run: mix test --only ported_to_ash
+
     # TODO: enable this back after Ash porting is complete
     # - name: Test
     #   run: mix coveralls.github -o coverage_results

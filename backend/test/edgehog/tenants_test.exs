@@ -21,22 +21,13 @@
 defmodule Edgehog.TenantsTest do
   use Edgehog.DataCase, async: true
 
-  alias Edgehog.Tenants
   alias Edgehog.Tenants.Tenant
 
   import Edgehog.TenantsFixtures
 
-  test "list_tenants/0 returns all tenants" do
-    tenant = tenant_fixture()
-    assert Tenants.list_tenants() == [tenant]
-  end
+  describe "Tenant.create/1" do
+    @describetag :ported_to_ash
 
-  test "get_tenant!/1 returns the tenant with given id" do
-    tenant = tenant_fixture()
-    assert Tenants.get_tenant!(tenant.tenant_id) == tenant
-  end
-
-  describe "create_tenant/1" do
     test "with valid data creates a tenant" do
       public_key =
         X509.PrivateKey.new_ec(:secp256r1)
@@ -45,143 +36,68 @@ defmodule Edgehog.TenantsTest do
 
       valid_attrs = %{name: "some name", slug: "some-name", public_key: public_key}
 
-      assert {:ok, %Tenant{} = tenant} = Tenants.create_tenant(valid_attrs)
+      assert {:ok, %Tenant{} = tenant} = Tenant.create(valid_attrs)
       assert tenant.name == "some name"
       assert tenant.slug == "some-name"
       assert tenant.default_locale == "en-US"
     end
 
-    test "with empty name returns error changeset" do
-      assert {:error, %Ecto.Changeset{} = changeset} = create_tenant(name: nil)
+    test "with empty name returns error" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = create_tenant(name: nil)
 
-      assert "can't be blank" in errors_on(changeset).name
+      assert %Ash.Error.Changes.Required{field: :name} = error
     end
 
-    test "with non-unique name returns error changeset" do
+    test "with non-unique name returns error" do
       _ = tenant_fixture(name: "foobar")
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = create_tenant(name: "foobar")
 
-      assert {:error, %Ecto.Changeset{} = changeset} = create_tenant(name: "foobar")
-
-      assert "has already been taken" in errors_on(changeset).name
+      assert %{field: :name, message: "has already been taken"} = error
     end
 
-    test "with empty slug returns error changeset" do
-      assert {:error, %Ecto.Changeset{} = changeset} = create_tenant(slug: nil)
+    test "with empty slug returns error" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = create_tenant(slug: nil)
 
-      assert "can't be blank" in errors_on(changeset).slug
+      assert %Ash.Error.Changes.Required{field: :slug} = error
     end
 
-    test "with invalid slug returns error changeset" do
-      assert {:error, %Ecto.Changeset{} = changeset} = create_tenant(slug: "Invalid Slug")
+    test "with invalid slug returns error" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = create_tenant(slug: "Invalid Slug")
 
       error_msg = "should only contain lower case ASCII letters (from a to z), digits and -"
-      assert error_msg in errors_on(changeset).slug
+      assert %{field: :slug, message: ^error_msg} = error
     end
 
-    test "with non-unique slug returns error changeset" do
+    test "with non-unique slug returns error" do
       _ = tenant_fixture(slug: "foobar")
 
-      assert {:error, %Ecto.Changeset{} = changeset} = create_tenant(slug: "foobar")
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = create_tenant(slug: "foobar")
 
-      assert "has already been taken" in errors_on(changeset).slug
+      assert %{field: :slug, message: "has already been taken"} = error
     end
 
-    test "with invalid default locale returns error changeset" do
-      assert {:error, %Ecto.Changeset{} = changeset} =
+    test "with invalid default locale returns error" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]} = changeset} =
                create_tenant(default_locale: "not_a_locale")
 
-      assert "is not a valid locale" in errors_on(changeset).default_locale
+      assert %{field: :default_locale, message: "is not a valid locale"} = error
     end
 
-    test "with empty public key returns error changeset" do
-      assert {:error, %Ecto.Changeset{} = changeset} = create_tenant(public_key: nil)
+    test "with empty public key returns error" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = create_tenant(public_key: nil)
 
-      assert "can't be blank" in errors_on(changeset).public_key
+      assert %Ash.Error.Changes.Required{field: :public_key} = error
     end
 
-    test "with invalid public key returns error changeset" do
-      assert {:error, %Ecto.Changeset{} = changeset} =
+    test "with invalid public key returns error" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
                create_tenant(public_key: "not_a_public_key")
 
-      assert "is not a valid PEM public key" in errors_on(changeset).public_key
+      assert %{field: :public_key, message: "is not a valid PEM public key"} = error
     end
   end
 
-  describe "update_tenant/2" do
-    setup do
-      {:ok, tenant: tenant_fixture()}
-    end
-
-    test "with valid data updates the tenant", %{tenant: tenant} do
-      attrs = %{
-        name: "some updated name",
-        slug: "some-updated-name",
-        default_locale: "it-IT"
-      }
-
-      assert {:ok, %Tenant{} = tenant} = Tenants.update_tenant(tenant, attrs)
-      assert tenant.name == "some updated name"
-      assert tenant.slug == "some-updated-name"
-      assert tenant.default_locale == "it-IT"
-    end
-
-    test "with empty name returns error changeset", %{tenant: tenant} do
-      assert {:error, %Ecto.Changeset{} = changeset} = update_tenant(tenant, name: nil)
-
-      assert "can't be blank" in errors_on(changeset).name
-    end
-
-    test "with non-unique name returns error changeset", %{tenant: tenant} do
-      _ = tenant_fixture(name: "foobar")
-
-      assert {:error, %Ecto.Changeset{} = changeset} = update_tenant(tenant, name: "foobar")
-
-      assert "has already been taken" in errors_on(changeset).name
-    end
-
-    test "with empty slug returns error changeset", %{tenant: tenant} do
-      assert {:error, %Ecto.Changeset{} = changeset} = update_tenant(tenant, slug: nil)
-
-      assert "can't be blank" in errors_on(changeset).slug
-    end
-
-    test "with invalid slug returns error changeset", %{tenant: tenant} do
-      assert {:error, %Ecto.Changeset{} = changeset} = update_tenant(tenant, slug: "Invalid Slug")
-
-      error_msg = "should only contain lower case ASCII letters (from a to z), digits and -"
-      assert error_msg in errors_on(changeset).slug
-    end
-
-    test "with non-unique slug returns error changeset", %{tenant: tenant} do
-      _ = tenant_fixture(slug: "foobar")
-
-      assert {:error, %Ecto.Changeset{} = changeset} = update_tenant(tenant, slug: "foobar")
-
-      assert "has already been taken" in errors_on(changeset).slug
-    end
-
-    test "with invalid default locale returns error changeset", %{tenant: tenant} do
-      assert {:error, %Ecto.Changeset{} = changeset} =
-               update_tenant(tenant, default_locale: "not_a_locale")
-
-      assert "is not a valid locale" in errors_on(changeset).default_locale
-    end
-
-    test "with empty public key returns error changeset", %{tenant: tenant} do
-      assert {:error, %Ecto.Changeset{} = changeset} = update_tenant(tenant, public_key: nil)
-
-      assert "can't be blank" in errors_on(changeset).public_key
-    end
-
-    test "with invalid public key returns error changeset", %{tenant: tenant} do
-      assert {:error, %Ecto.Changeset{} = changeset} =
-               update_tenant(tenant, public_key: "not_a_public_key")
-
-      assert "is not a valid PEM public key" in errors_on(changeset).public_key
-    end
-  end
-
-  describe "delete_tenant/1" do
+  describe "Tenant.destroy/1" do
     import Edgehog.AstarteFixtures
     import Edgehog.BaseImagesFixtures
     import Edgehog.DevicesFixtures
@@ -195,9 +111,10 @@ defmodule Edgehog.TenantsTest do
       %{tenant: tenant_fixture()}
     end
 
+    @tag :ported_to_ash
     test "deletes the tenant", %{tenant: tenant} do
-      assert {:ok, %Tenant{}} = Tenants.delete_tenant(tenant)
-      assert_raise Ecto.NoResultsError, fn -> Tenants.get_tenant!(tenant.tenant_id) end
+      assert :ok = Tenant.destroy(tenant)
+      assert_raise Ash.Error.Query.NotFound, fn -> Tenant.by_slug!(tenant.slug) end
     end
 
     test "cascading deletes associated realm", %{tenant: tenant} do
@@ -206,7 +123,7 @@ defmodule Edgehog.TenantsTest do
       realm = realm_fixture(cluster)
 
       assert {:ok, ^realm} = Astarte.fetch_realm_by_name(realm.name)
-      assert {:ok, %Tenant{}} = Tenants.delete_tenant(tenant)
+      assert :ok = Tenant.destroy(tenant)
       {:error, :realm_not_found} = Astarte.fetch_realm_by_name(realm.name)
     end
 
@@ -230,7 +147,7 @@ defmodule Edgehog.TenantsTest do
       update_campaign = update_campaign_fixture()
       update_target = target_fixture()
 
-      assert {:ok, %Tenant{}} = Tenants.delete_tenant(tenant)
+      assert :ok = Tenant.destroy(tenant)
 
       refute entry_exists?(Edgehog.Devices.HardwareType, hardware_type.id)
       refute entry_exists?(Edgehog.Devices.SystemModel, system_model.id)
@@ -249,11 +166,6 @@ defmodule Edgehog.TenantsTest do
     end
   end
 
-  test "change_tenant/1 returns a tenant changeset" do
-    tenant = tenant_fixture()
-    assert %Ecto.Changeset{} = Tenants.change_tenant(tenant)
-  end
-
   defp create_tenant(opts) do
     {public_key, opts} =
       Keyword.pop_lazy(opts, :public_key, fn ->
@@ -268,13 +180,7 @@ defmodule Edgehog.TenantsTest do
       slug: unique_tenant_slug(),
       public_key: public_key
     })
-    |> Tenants.create_tenant()
-  end
-
-  defp update_tenant(tenant, opts) do
-    attrs = Enum.into(opts, %{})
-
-    Tenants.update_tenant(tenant, attrs)
+    |> Tenant.create()
   end
 
   defp entry_exists?(schema, id) do

@@ -88,8 +88,31 @@ config :edgehog, Edgehog.PromEx,
   grafana: :disabled,
   metrics_server: :disabled
 
+config :edgehog, :ash_apis, [Edgehog.Tenants]
+
 config :ash, :default_belongs_to_type, :integer
 config :ash_graphql, :default_managed_relationship_type_name_template, :action_name
+
+config :spark, :formatter,
+  remove_parens?: true,
+  "Ash.Resource": [
+    section_order: [
+      :resource,
+      :graphql,
+      :code_interface,
+      :actions,
+      :attributes,
+      :relationships,
+      :calculations,
+      :aggregates,
+      :identities,
+      :validations,
+      :preparations,
+      :changes,
+      :pub_sub,
+      :postgres
+    ]
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

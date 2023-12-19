@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2023 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,34 +19,49 @@
 #
 
 defmodule Edgehog.Tenants.Tenant do
-  use Ecto.Schema
-  import Ecto.Changeset
-  import Edgehog.ChangesetValidation
+  use Ash.Resource,
+    data_layer: AshPostgres.DataLayer
 
-  alias Edgehog.Astarte.Realm
+  alias Edgehog.Validations
 
-  @type t :: Ecto.Schema.t()
-
-  @primary_key {:tenant_id, :id, autogenerate: true}
-  schema "tenants" do
-    field :name, :string
-    field :slug, :string
-    field :default_locale, :string, default: "en-US"
-    field :public_key, :string
-    has_one :realm, Realm, foreign_key: :tenant_id
-
-    timestamps()
+  code_interface do
+    define_for Edgehog.Tenants
+    define :create
+    define :by_slug, args: [:slug]
+    define :destroy
   end
 
-  @doc false
-  def changeset(tenant, attrs) do
-    tenant
-    |> cast(attrs, [:name, :slug, :default_locale, :public_key])
-    |> validate_required([:name, :slug, :public_key])
-    |> unique_constraint(:name)
-    |> unique_constraint(:slug)
-    |> validate_tenant_slug(:slug)
-    |> validate_locale(:default_locale)
-    |> validate_pem_public_key(:public_key)
+  actions do
+    defaults [:create, :read, :destroy]
+
+    read :by_slug, get_by: :slug
+  end
+
+  attributes do
+    integer_primary_key :tenant_id
+
+    attribute :name, :string, allow_nil?: false
+    attribute :slug, :string, allow_nil?: false
+    attribute :default_locale, :string, default: "en-US"
+    attribute :public_key, :string, allow_nil?: false
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  identities do
+    identity :name, [:name]
+    identity :slug, [:slug]
+  end
+
+  validations do
+    validate Validations.slug(:slug)
+    validate Validations.locale(:default_locale)
+    validate {Validations.PEMPublicKey, attribute: :public_key}
+  end
+
+  postgres do
+    table "tenants"
+    repo Edgehog.Repo
   end
 end
