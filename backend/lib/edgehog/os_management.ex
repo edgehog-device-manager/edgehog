@@ -231,7 +231,7 @@ defmodule Edgehog.OSManagement do
   end
 
   # We only need to cleanup ephemeral images for manual OTA Operations
-  defp cleanup_ephemeral_image(%OTAOperation{manual?: true} = ota_operation) do
+  def cleanup_ephemeral_image(%OTAOperation{manual?: true} = ota_operation) do
     %OTAOperation{
       id: id,
       tenant_id: tenant_id,
@@ -246,7 +246,7 @@ defmodule Edgehog.OSManagement do
     :ok
   end
 
-  defp cleanup_ephemeral_image(_ota_operation) do
+  def cleanup_ephemeral_image(_ota_operation) do
     :ok
   end
 

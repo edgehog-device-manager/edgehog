@@ -19,10 +19,14 @@
 #
 
 defmodule Edgehog.ProvisioningTest do
-  use Edgehog.DataCase, async: true
+  # This can't be async: true because we're using Mox in global mode
+  use Edgehog.DataCase
   use Edgehog.ReconcilerMockCase
 
   import Edgehog.AstarteFixtures
+  import Edgehog.BaseImagesFixtures
+  import Edgehog.DevicesFixtures
+  import Edgehog.OSManagementFixtures
   import Edgehog.TenantsFixtures
 
   alias Edgehog.Astarte
@@ -184,6 +188,160 @@ defmodule Edgehog.ProvisioningTest do
       end)
 
       assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+    end
+
+    test "cleans up base images", %{tenant: tenant} do
+      base_images_count = Enum.random(2..10)
+      for _ <- 1..base_images_count, do: base_image_fixture()
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.BaseImages.StorageMock
+      |> expect(:delete, base_images_count, fn _base_image ->
+        send(test_pid, {:base_image_deleted, ref})
+        :ok
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..base_images_count
+      |> Enum.each(fn _ -> assert_receive {:base_image_deleted, ^ref} end)
+
+      refute_receive {:base_image_deleted, ^ref}
+    end
+
+    test "ignores base image cleanup errors", %{tenant: tenant} do
+      base_images_count = Enum.random(2..10)
+      for _ <- 1..base_images_count, do: base_image_fixture()
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.BaseImages.StorageMock
+      |> expect(:delete, base_images_count, fn _base_image ->
+        send(test_pid, {:base_image_deletion_error, ref})
+        {:error, :network_error}
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..base_images_count
+      |> Enum.each(fn _ -> assert_receive {:base_image_deletion_error, ^ref} end)
+
+      refute_receive {:base_image_deletion_error, ^ref}
+    end
+
+    test "cleans up manual OTA operations", %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      manual_ota_operations_count = Enum.random(2..10)
+
+      for _ <- 1..manual_ota_operations_count do
+        device = device_fixture(realm)
+        _ = manual_ota_operation_fixture(device)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, manual_ota_operations_count, fn _tenant_id, _ota_operation_id, _url ->
+        send(test_pid, {:manual_ota_operation_deleted, ref})
+        :ok
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..manual_ota_operations_count
+      |> Enum.each(fn _ -> assert_receive {:manual_ota_operation_deleted, ^ref} end)
+
+      refute_receive {:manual_ota_operation_deleted, ^ref}
+    end
+
+    test "ignores manual ota operations cleanup errors", %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster)
+
+      manual_ota_operations_count = Enum.random(2..10)
+
+      for _ <- 1..manual_ota_operations_count do
+        device = device_fixture(realm)
+        _ = manual_ota_operation_fixture(device)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, manual_ota_operations_count, fn _tenant_id, _ota_operation_id, _url ->
+        send(test_pid, {:manual_ota_operation_deletion_error, ref})
+        {:error, :network_error}
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..manual_ota_operations_count
+      |> Enum.each(fn _ -> assert_receive {:manual_ota_operation_deletion_error, ^ref} end)
+
+      refute_receive {:manual_ota_operation_deletion_error, ^ref}
+    end
+
+    test "cleans up system model pictures", %{tenant: tenant} do
+      system_models_count = Enum.random(2..10)
+
+      for _ <- 1..system_models_count do
+        picture_name =
+          :crypto.strong_rand_bytes(10) |> Base.url_encode64(padding: false) |> String.downcase()
+
+        picture_url = "https://domain.com/#{picture_name}.jpg"
+        system_model_fixture(picture_url: picture_url)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:delete, system_models_count, fn _system_model, _picture_url ->
+        send(test_pid, {:system_model_picture_deleted, ref})
+        :ok
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..system_models_count
+      |> Enum.each(fn _ -> assert_receive {:system_model_picture_deleted, ^ref} end)
+
+      refute_receive {:system_model_picture_deleted, ^ref}
+    end
+
+    test "ignores system model pictures cleanup errors", %{tenant: tenant} do
+      system_models_count = Enum.random(2..10)
+
+      for _ <- 1..system_models_count do
+        picture_name =
+          :crypto.strong_rand_bytes(10) |> Base.url_encode64(padding: false) |> String.downcase()
+
+        picture_url = "https://domain.com/#{picture_name}.jpg"
+        system_model_fixture(picture_url: picture_url)
+      end
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:delete, system_models_count, fn _system_model, _picture_url ->
+        send(test_pid, {:system_model_picture_deletion_error, ref})
+        {:error, :network_error}
+      end)
+
+      assert {:ok, _tenant} = Provisioning.delete_tenant_by_slug(tenant.slug)
+
+      1..system_models_count
+      |> Enum.each(fn _ -> assert_receive {:system_model_picture_deletion_error, ^ref} end)
+
+      refute_receive {:system_model_picture_deletion_error, ^ref}
     end
   end
 
