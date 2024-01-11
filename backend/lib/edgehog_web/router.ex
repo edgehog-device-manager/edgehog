@@ -40,8 +40,6 @@ defmodule EdgehogWeb.Router do
 
   scope "/admin-api/v1", EdgehogWeb.AdminAPI do
     pipe_through :admin_api
-
-    post "/tenants", TenantsController, :create
   end
 
   forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema
