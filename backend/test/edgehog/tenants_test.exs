@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 defmodule Edgehog.TenantsTest do
   use Edgehog.DataCase, async: true
+  use Edgehog.ReconcilerMockCase
 
   alias Edgehog.Tenants.Tenant
 
@@ -94,6 +95,20 @@ defmodule Edgehog.TenantsTest do
                create_tenant(public_key: "not_a_public_key")
 
       assert %{field: :public_key, message: "is not a valid PEM public key"} = error
+    end
+  end
+
+  describe "Tenant.reconcile/1" do
+    test "triggers tenant reconciliation" do
+      Edgehog.Tenants.ReconcilerMock
+      |> expect(:reconcile_tenant, fn %Tenant{} = tenant ->
+        assert tenant.slug == "test"
+
+        :ok
+      end)
+
+      tenant = tenant_fixture()
+      assert :ok = Tenant.reconcile!(tenant)
     end
   end
 
