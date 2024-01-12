@@ -39,12 +39,12 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
 
   using do
     quote do
+      use EdgehogWeb, :verified_routes
+
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
       import EdgehogWeb.AdminAPI.ConnCase
-
-      alias EdgehogWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
       @endpoint EdgehogWeb.Endpoint
@@ -55,7 +55,10 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
 
-    conn = Phoenix.ConnTest.build_conn()
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Conn.put_req_header("content-type", "application/vnd.api+json")
+      |> Plug.Conn.put_req_header("accept", "application/vnd.api+json")
 
     cond do
       tags[:unconfigured] ->

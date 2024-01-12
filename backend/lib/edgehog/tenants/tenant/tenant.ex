@@ -20,11 +20,23 @@
 
 defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshJsonApi.Resource]
 
   alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
   alias Edgehog.Validations
+
+  json_api do
+    type "tenant"
+
+    routes do
+      base "/tenants"
+
+      index :read
+      post :provision
+    end
+  end
 
   code_interface do
     define_for Edgehog.Tenants

@@ -22,32 +22,40 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
   use EdgehogWeb.AdminAPI.ConnCase, async: true
   use Edgehog.ReconcilerMockCase
 
+  @moduletag :ported_to_ash
+
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 
   @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
                         |> X509.PublicKey.derive()
                         |> X509.PublicKey.to_pem()
+                        |> String.trim()
 
-  @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
+  @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1)
+                         |> X509.PrivateKey.to_pem()
+                         |> String.trim()
 
   @valid_tenant_config %{
-    name: unique_tenant_name(),
-    slug: unique_tenant_slug(),
-    public_key: @valid_pem_public_key,
-    astarte_config: %{
-      base_api_url: unique_cluster_base_api_url(),
-      realm_name: unique_realm_name(),
-      realm_private_key: @valid_pem_private_key
+    data: %{
+      type: "tenant",
+      attributes: %{
+        name: unique_tenant_name(),
+        slug: unique_tenant_slug(),
+        public_key: @valid_pem_public_key,
+        astarte_config: %{
+          base_api_url: unique_cluster_base_api_url(),
+          realm_name: unique_realm_name(),
+          realm_private_key: @valid_pem_private_key
+        }
+      }
     }
   }
 
   alias Edgehog.Config
 
-  setup %{conn: conn} do
-    path = Routes.tenants_path(conn, :create)
-
-    [path: path]
+  setup do
+    {:ok, path: ~p"/admin-api/v1/tenants"}
   end
 
   describe "disabled Admin authentication" do
