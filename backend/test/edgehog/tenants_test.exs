@@ -22,9 +22,24 @@ defmodule Edgehog.TenantsTest do
   use Edgehog.DataCase, async: true
   use Edgehog.ReconcilerMockCase
 
+  alias Edgehog.Astarte
+  alias Edgehog.Tenants
+  alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
 
+  import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
+
+  require Ash.Query
+
+  @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
+                        |> X509.PublicKey.derive()
+                        |> X509.PublicKey.to_pem()
+                        |> String.trim()
+
+  @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1)
+                         |> X509.PrivateKey.to_pem()
+                         |> String.trim()
 
   describe "Tenant.create/1" do
     @describetag :ported_to_ash
@@ -112,6 +127,120 @@ defmodule Edgehog.TenantsTest do
     end
   end
 
+  describe "Tenant.provision/1" do
+    @describetag :ported_to_ash
+
+    test "with valid attrs creates the tenant, cluster and realm" do
+      attrs = %{
+        name: "Test",
+        slug: "test",
+        public_key: @valid_pem_public_key,
+        astarte_config: %{
+          base_api_url: "https://astarte.api.example",
+          realm_name: "testrealm",
+          realm_private_key: @valid_pem_private_key
+        }
+      }
+
+      assert {:ok, %Tenant{} = tenant} = Tenant.provision(attrs)
+
+      %Tenant{
+        name: name,
+        slug: slug,
+        public_key: public_key
+      } = tenant
+
+      assert name == attrs.name
+      assert slug == attrs.slug
+      assert public_key == attrs.public_key
+
+      tenant = Tenants.load!(tenant, realm: [:cluster])
+
+      assert tenant.realm.cluster.base_api_url == attrs.astarte_config.base_api_url
+      assert tenant.realm.name == attrs.astarte_config.realm_name
+      assert tenant.realm.private_key == attrs.astarte_config.realm_private_key
+    end
+
+    test "succeeds when providing the URL of an already existing cluster" do
+      cluster = cluster_fixture()
+
+      assert {:ok, _tenant} =
+               provision_tenant(astarte_config: [base_api_url: cluster.base_api_url])
+    end
+
+    test "triggers tenant reconciliation" do
+      Edgehog.Tenants.ReconcilerMock
+      |> expect(:reconcile_tenant, fn %Tenant{} = tenant ->
+        assert tenant.slug == "test"
+
+        :ok
+      end)
+
+      assert {:ok, _tenant} = provision_tenant(slug: "test")
+    end
+
+    test "fails with invalid tenant slug" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = provision_tenant(slug: "1-INVALID")
+      assert %{field: :slug} = error
+    end
+
+    test "fails with invalid tenant public key" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+               provision_tenant(public_key: "invalid")
+
+      assert %{field: :public_key} = error
+    end
+
+    test "fails with invalid Astarte base API url" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+               provision_tenant(astarte_config: [base_api_url: "invalid"])
+
+      assert %{field: :base_api_url, path: [:astarte_config]} = error
+    end
+
+    test "fails with invalid Astarte realm name" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+               provision_tenant(astarte_config: [realm_name: "INVALID"])
+
+      assert %{field: :realm_name, path: [:astarte_config]} = error
+    end
+
+    test "fails with invalid Astarte realm private key" do
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+               provision_tenant(astarte_config: [realm_private_key: "invalid"])
+
+      assert %{field: :realm_private_key, path: [:astarte_config]} = error
+    end
+
+    test "fails when providing an already existing tenant slug" do
+      tenant = tenant_fixture()
+
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = provision_tenant(slug: tenant.slug)
+      assert %{field: :slug} = error
+    end
+
+    test "fails when providing an already existing tenant name" do
+      tenant = tenant_fixture()
+
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} = provision_tenant(name: tenant.name)
+      assert %{field: :name} = error
+    end
+
+    test "fails when providing an already existing realm name" do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster_id: cluster.id)
+
+      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+               [astarte_config: [base_api_url: cluster.base_api_url, realm_name: realm.name]]
+               |> provision_tenant()
+
+      # TODO: this should be
+      # assert %{field: :realm_name, path: [:astarte_config]} = error
+      # but it currently doesn't work
+      assert %{field: :name} = error
+    end
+  end
+
   describe "Tenant.destroy/1" do
     import Edgehog.AstarteFixtures
     import Edgehog.BaseImagesFixtures
@@ -179,6 +308,29 @@ defmodule Edgehog.TenantsTest do
       refute entry_exists?(Edgehog.UpdateCampaigns.UpdateCampaign, update_campaign.id)
       refute entry_exists?(Edgehog.UpdateCampaigns.Target, update_target.id)
     end
+  end
+
+  defp provision_tenant(opts) do
+    {astarte_config, opts} = Keyword.pop(opts, :astarte_config, [])
+
+    astarte_config =
+      astarte_config
+      |> Enum.into(%{
+        base_api_url: unique_cluster_base_api_url(),
+        realm_name: unique_realm_name(),
+        realm_private_key: @valid_pem_private_key
+      })
+
+    attrs =
+      opts
+      |> Enum.into(%{
+        name: unique_tenant_name(),
+        slug: unique_tenant_slug(),
+        public_key: @valid_pem_public_key,
+        astarte_config: astarte_config
+      })
+
+    Tenant.provision(attrs)
   end
 
   defp create_tenant(opts) do

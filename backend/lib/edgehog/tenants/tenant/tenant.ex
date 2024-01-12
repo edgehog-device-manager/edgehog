@@ -22,12 +22,14 @@ defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer
 
+  alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
   alias Edgehog.Validations
 
   code_interface do
     define_for Edgehog.Tenants
     define :create
+    define :provision
     define :fetch_by_slug, action: :by_slug, args: [:slug]
     define :reconcile, args: [:tenant]
     define :destroy
@@ -37,6 +39,13 @@ defmodule Edgehog.Tenants.Tenant do
     defaults [:create, :read, :destroy]
 
     read :by_slug, get_by: :slug
+
+    create :provision do
+      argument :astarte_config, AstarteConfig, allow_nil?: false
+
+      change Tenant.Changes.ProvisionAstarteResources
+      change Tenant.Changes.TriggerReconciliation
+    end
 
     action :reconcile, :term do
       argument :tenant, :struct do
