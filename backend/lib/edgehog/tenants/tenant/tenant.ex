@@ -21,13 +21,33 @@
 defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshJsonApi.Resource]
+    extensions: [
+      AshGraphql.Resource,
+      AshJsonApi.Resource
+    ]
 
   alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
   alias Edgehog.Validations
 
+  require Ash.Query
+
   @type record :: Ash.Resource.record()
+
+  graphql do
+    type :tenant_info
+
+    # We don't care about filtering here
+    derive_filter? false
+    # :tenant_id, the primary key, already gets exposed as ID, so we hide it here
+    # to avoid showing it twice. We also hide the public key to be consistent with
+    # the old API
+    hide_fields [:tenant_id, :public_key]
+
+    queries do
+      read_one :tenant_info, :current_tenant, allow_nil?: false
+    end
+  end
 
   json_api do
     type "tenant"
@@ -53,6 +73,21 @@ defmodule Edgehog.Tenants.Tenant do
     defaults [:create, :read, :destroy]
 
     read :by_slug, get_by: :slug
+
+    read :current_tenant do
+      get? true
+
+      prepare fn query, _context ->
+        if query.tenant do
+          Ash.Query.filter(query, tenant_id: query.tenant.tenant_id)
+        else
+          Ash.Query.add_error(
+            query,
+            Ash.Error.Invalid.TenantRequired.exception(resource: query.resource)
+          )
+        end
+      end
+    end
 
     create :provision do
       argument :astarte_config, AstarteConfig, allow_nil?: false

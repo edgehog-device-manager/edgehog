@@ -19,7 +19,11 @@
 #
 
 defmodule Edgehog.Tenants do
-  use Ash.Api, extensions: [AshJsonApi.Api]
+  use Ash.Api,
+    extensions: [AshGraphql.Api, AshJsonApi.Api]
+
+  graphql do
+  end
 
   json_api do
     prefix "/admin-api/v1"

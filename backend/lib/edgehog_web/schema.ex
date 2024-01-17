@@ -30,13 +30,12 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.LabelingTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
-  import_types EdgehogWeb.Schema.TenantsTypes
   import_types EdgehogWeb.Schema.UpdateCampaignsTypes
   import_types EdgehogWeb.Schema.VariantTypes
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
-  @apis []
+  @apis [Edgehog.Tenants]
 
   # TODO: remove define_relay_types?: false once we convert everything to Ash
   use AshGraphql, apis: @apis, define_relay_types?: false
@@ -123,7 +122,6 @@ defmodule EdgehogWeb.Schema do
     import_fields :devices_queries
     import_fields :groups_queries
     import_fields :labeling_queries
-    import_fields :tenants_queries
     import_fields :update_campaigns_queries
   end
 
