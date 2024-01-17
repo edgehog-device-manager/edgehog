@@ -36,6 +36,11 @@ defmodule EdgehogWeb.Schema do
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
+  @apis []
+
+  # TODO: remove define_relay_types?: false once we convert everything to Ash
+  use AshGraphql, apis: @apis, define_relay_types?: false
+
   alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
 
