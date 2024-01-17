@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@
 #
 
 defmodule EdgehogWeb.AuthTest do
-  use EdgehogWeb.ConnCase, async: true
+  # This can't be async: true since it modifies the Application env
+  use EdgehogWeb.ConnCase, async: false
   alias Edgehog.Config
 
-  # Use an unauthenticated conn so we can control auth manually
-  @moduletag :unauthenticated
+  @moduletag :ported_to_ash
 
   @query """
   {

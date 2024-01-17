@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@
 defmodule EdgehogWeb.ContextTest do
   use EdgehogWeb.ConnCase, async: true
 
+  @moduletag :ported_to_ash
+
   alias EdgehogWeb.Context
 
   test "build_context/1 fetches preferred locales from accept-language header", %{
@@ -28,7 +30,7 @@ defmodule EdgehogWeb.ContextTest do
     tenant: tenant
   } do
     default_locale = tenant.default_locale
-    conn = Plug.Conn.assign(conn, :current_tenant, tenant)
+    conn = Ash.PlugHelpers.set_tenant(conn, tenant)
 
     language_headers = [
       {"accept-language", "it-IT,it;q=0.8,en-UK;q=0.6,en;q=0.4"},
@@ -50,7 +52,7 @@ defmodule EdgehogWeb.ContextTest do
     tenant: tenant
   } do
     default_locale = tenant.default_locale
-    conn = Plug.Conn.assign(conn, :current_tenant, tenant)
+    conn = Ash.PlugHelpers.set_tenant(conn, tenant)
 
     %{preferred_locales: [], tenant_locale: tenant_locale} = Context.build_context(conn)
 

@@ -68,18 +68,8 @@ defmodule EdgehogWeb.ConnCase do
       |> X509.PublicKey.derive()
       |> X509.PublicKey.to_pem()
 
-    # Create a tenant fixture and populate the tenant id, so that fixtures that run
-    # before the web part use the same tenant
+    # Create a tenant fixture
     tenant = Edgehog.TenantsFixtures.tenant_fixture(public_key: tenant_public_key)
-    _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-
-    conn =
-      if tags[:unauthenticated] do
-        # Just return the conn
-        conn
-      else
-        authenticate_connection(conn, tenant_private_key)
-      end
 
     # Populate the API path since it's tenant-specific
     api_path = ~p"/tenants/#{tenant.slug}/api"
