@@ -114,7 +114,7 @@ defmodule Edgehog.TenantsTest do
     @tag :ported_to_ash
     test "deletes the tenant", %{tenant: tenant} do
       assert :ok = Tenant.destroy(tenant)
-      assert_raise Ash.Error.Query.NotFound, fn -> Tenant.by_slug!(tenant.slug) end
+      assert_raise Ash.Error.Query.NotFound, fn -> Tenant.fetch_by_slug!(tenant.slug) end
     end
 
     test "cascading deletes associated realm", %{tenant: tenant} do
