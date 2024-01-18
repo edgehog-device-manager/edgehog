@@ -30,7 +30,7 @@ defmodule EdgehogWeb.PopulateTenant do
   def call(conn, _opts) do
     tenant_slug = conn.path_params["tenant_slug"]
 
-    case Tenants.Tenant.by_slug(tenant_slug) do
+    case Tenants.Tenant.fetch_by_slug(tenant_slug) do
       {:ok, tenant} ->
         _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
         Plug.Conn.assign(conn, :current_tenant, tenant)

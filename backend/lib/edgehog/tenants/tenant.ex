@@ -27,7 +27,7 @@ defmodule Edgehog.Tenants.Tenant do
   code_interface do
     define_for Edgehog.Tenants
     define :create
-    define :by_slug, args: [:slug]
+    define :fetch_by_slug, action: :by_slug, args: [:slug]
     define :destroy
   end
 
