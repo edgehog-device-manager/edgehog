@@ -93,25 +93,32 @@ config :edgehog, :ash_apis, [Edgehog.Astarte, Edgehog.Tenants]
 config :ash, :default_belongs_to_type, :integer
 config :ash_graphql, :default_managed_relationship_type_name_template, :action_name
 
+resource_section_order = [
+  :resource,
+  :graphql,
+  :code_interface,
+  :actions,
+  :attributes,
+  :relationships,
+  :calculations,
+  :aggregates,
+  :identities,
+  :validations,
+  :preparations,
+  :changes,
+  :pub_sub,
+  :multitenancy,
+  :postgres
+]
+
 config :spark, :formatter,
   remove_parens?: true,
   "Ash.Resource": [
-    section_order: [
-      :resource,
-      :graphql,
-      :code_interface,
-      :actions,
-      :attributes,
-      :relationships,
-      :calculations,
-      :aggregates,
-      :identities,
-      :validations,
-      :preparations,
-      :changes,
-      :pub_sub,
-      :postgres
-    ]
+    section_order: resource_section_order
+  ],
+  "Edgehog.MultitenantResource": [
+    type: Ash.Resource,
+    section_order: resource_section_order
   ]
 
 # Import environment specific config. This must remain at the bottom

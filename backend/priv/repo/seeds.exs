@@ -99,11 +99,12 @@ read_key! = fn key_file_var, original_key_file_var, default_key_file_name ->
   {status, key}
 end
 
-{:ok, cluster} =
-  Astarte.create_cluster(%{
+cluster =
+  %{
     name: "Test Cluster",
     base_api_url: read_env_var.("SEEDS_ASTARTE_BASE_API_URL")
-  })
+  }
+  |> Astarte.Cluster.create!()
 
 {status, private_key} =
   read_key!.("SEEDS_TENANT_PRIVATE_KEY_FILE", "SEEDS_TENANT_ORIGINAL_FILE", "tenant_private")
@@ -122,10 +123,13 @@ public_key =
   |> X509.PublicKey.derive()
   |> X509.PublicKey.to_pem()
 
-{:ok, tenant} =
-  Tenants.create_tenant(%{name: "ACME Inc", slug: "acme-inc", public_key: public_key})
-
-_ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
+tenant =
+  %{
+    name: "ACME Inc",
+    slug: "acme-inc",
+    public_key: public_key
+  }
+  |> Tenants.Tenant.create!()
 
 {status, realm_pk} =
   read_key!.("SEEDS_REALM_PRIVATE_KEY_FILE", "SEEDS_REALM_ORIGINAL_FILE", "realm_private")
@@ -139,37 +143,12 @@ if status == :default do
   |> Logger.warning()
 end
 
-{:ok, realm} =
-  Astarte.create_realm(cluster, %{
+realm =
+  %{
+    cluster_id: cluster.id,
     name: read_env_var.("SEEDS_REALM"),
     private_key: realm_pk
-  })
-
-{:ok, hardware_type} =
-  Devices.create_hardware_type(%{
-    handle: "some-hardware-type",
-    name: "Some hardware type",
-    part_numbers: ["HT-1234"]
-  })
-
-{:ok, system_model} =
-  Devices.create_system_model(hardware_type, %{
-    handle: "some-system-model",
-    name: "Some system model",
-    part_numbers: ["AM-1234"]
-  })
-
-{:ok, _device} =
-  Astarte.create_device(realm, %{
-    name: "Thingie",
-    device_id: "DqL4H107S42WBEHmDrvPLQ",
-    part_number: "AM-1234"
-  })
-
-{:ok, _base_image_collection} =
-  BaseImages.create_base_image_collection(system_model, %{
-    handle: "ultra-firmware",
-    name: "Ultra Firmware"
-  })
+  }
+  |> Astarte.Realm.create!(tenant: tenant)
 
 :ok

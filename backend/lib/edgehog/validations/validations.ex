@@ -32,4 +32,13 @@ defmodule Edgehog.Validations do
      match: ~r/^[a-z\d\-]+$/,
      message: "should only contain lower case ASCII letters (from a to z), digits and -"}
   end
+
+  def realm_name(attribute) do
+    {Validation.Match,
+     attribute: attribute,
+     match: ~r/^[a-z][a-z0-9]{0,47}$/,
+     message:
+       "should only contain lower case ASCII letters (from a to z) and digits, " <>
+         "and start with a lower case ASCII letter"}
+  end
 end
