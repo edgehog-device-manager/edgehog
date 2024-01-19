@@ -70,8 +70,8 @@ config :edgehog,
        :astarte_cellular_connection_module,
        Edgehog.Astarte.Device.CellularConnectionMock
 
-config :edgehog, :astarte_interfaces_module, Edgehog.Astarte.Realm.InterfacesMock
-config :edgehog, :astarte_triggers_module, Edgehog.Astarte.Realm.TriggersMock
+config :edgehog, :astarte_interface_data_layer, Edgehog.Astarte.Interface.MockDataLayer
+config :edgehog, :astarte_trigger_data_layer, Edgehog.Astarte.Trigger.MockDataLayer
 
 # Reconciler mock for tests
 config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock

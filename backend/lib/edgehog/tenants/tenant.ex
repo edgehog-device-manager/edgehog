@@ -49,6 +49,13 @@ defmodule Edgehog.Tenants.Tenant do
     update_timestamp :updated_at
   end
 
+  relationships do
+    has_one :realm, Edgehog.Astarte.Realm do
+      api Edgehog.Astarte
+      source_attribute :tenant_id
+    end
+  end
+
   identities do
     identity :name, [:name]
     identity :slug, [:slug]

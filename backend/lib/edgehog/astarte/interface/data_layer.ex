@@ -18,24 +18,22 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Mocks.Astarte.Realm.Interfaces do
-  @behaviour Edgehog.Astarte.Realm.Interfaces.Behaviour
-
-  import Edgehog.AstarteFixtures
+defmodule Edgehog.Astarte.Interface.DataLayer do
   alias Astarte.Client.RealmManagement
 
-  @impl true
-  def get(%RealmManagement{} = _client, interface_name, interface_major) do
-    {:ok, %{"data" => interface_map_fixture(name: interface_name, major: interface_major)}}
-  end
+  @callback get(
+              client :: RealmManagement.t(),
+              interface_name :: String.t(),
+              interface_major :: non_neg_integer
+            ) :: {:ok, map()} | {:error, term()}
 
-  @impl true
-  def create(%RealmManagement{} = _client, _interface_json) do
-    :ok
-  end
+  @callback create(client :: RealmManagement.t(), interface_json :: map()) ::
+              :ok | {:error, term()}
 
-  @impl true
-  def update(%RealmManagement{} = _client, _interface_name, _interface_major, _interface_json) do
-    :ok
-  end
+  @callback update(
+              client :: RealmManagement.t(),
+              interface_name :: String.t(),
+              interface_major :: non_neg_integer,
+              interface_json :: map()
+            ) :: :ok | {:error, term()}
 end

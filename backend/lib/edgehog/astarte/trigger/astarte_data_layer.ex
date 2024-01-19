@@ -18,8 +18,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Realm.Triggers do
-  @behaviour Edgehog.Astarte.Realm.Triggers.Behaviour
+defmodule Edgehog.Astarte.Trigger.AstarteDataLayer do
+  @behaviour Edgehog.Astarte.Trigger.DataLayer
 
   alias Astarte.Client.RealmManagement
 

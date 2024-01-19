@@ -23,10 +23,13 @@ defmodule Edgehog.Tenants.ReconcilerTest do
   use Edgehog.DataCase
   use Edgehog.AstarteMockCase
 
+  @moduletag :ported_to_ash
+
   alias Astarte.Client.APIError
   alias Edgehog.Tenants.Reconciler
 
   import Edgehog.AstarteFixtures
+  import Edgehog.TenantsFixtures
 
   describe "reconcile_tenant/1" do
     setup do
@@ -35,10 +38,10 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # its pid to allow mocks call from it
       Mox.set_mox_global()
 
-      cluster = cluster_fixture()
-      _realm = realm_fixture(cluster)
+      tenant = tenant_fixture()
+      _realm = realm_fixture(tenant: tenant)
 
-      :ok
+      %{tenant: tenant}
     end
 
     test "reconciles interfaces and triggers", %{tenant: tenant} do
@@ -48,7 +51,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       test_pid = self()
       ref = make_ref()
 
-      Edgehog.Astarte.Realm.InterfacesMock
+      Edgehog.Astarte.Interface.MockDataLayer
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
@@ -58,7 +61,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
         :ok
       end)
 
-      Edgehog.Astarte.Realm.TriggersMock
+      Edgehog.Astarte.Trigger.MockDataLayer
       |> expect(:get, trigger_count, fn _client, _trigger_name ->
         {:error, api_error(status: 404)}
       end)

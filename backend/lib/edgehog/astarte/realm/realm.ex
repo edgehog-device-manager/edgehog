@@ -21,6 +21,7 @@
 defmodule Edgehog.Astarte.Realm do
   use Edgehog.MultitenantResource
 
+  alias Edgehog.Astarte.Realm
   alias Edgehog.Validations
 
   code_interface do
@@ -64,6 +65,14 @@ defmodule Edgehog.Astarte.Realm do
     belongs_to :cluster, Edgehog.Astarte.Cluster
   end
 
+  calculations do
+    calculate :realm_management_client, :struct, Realm.Calculations.RealmManagementClient do
+      constraints instance_of: Astarte.Client.RealmManagement
+      private? true
+      filterable? false
+    end
+  end
+
   identities do
     identity :name_tenant_id, [:name, :tenant_id]
     identity :name_cluster_id, [:name, :cluster_id]
@@ -72,6 +81,12 @@ defmodule Edgehog.Astarte.Realm do
   validations do
     validate Validations.realm_name(:name)
     validate {Validations.PEMPrivateKey, attribute: :private_key}
+  end
+
+  multitenancy do
+    # This is needed when we batch load realms starting from Tenants in the Reconciler
+    # TODO: should we ensure that a tenant is passed in all other queries?
+    global? true
   end
 
   postgres do

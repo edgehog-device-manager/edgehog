@@ -74,12 +74,12 @@ Mox.defmock(Edgehog.Astarte.Device.LedBehaviorMock,
   for: Edgehog.Astarte.Device.LedBehavior.Behaviour
 )
 
-Mox.defmock(Edgehog.Astarte.Realm.InterfacesMock,
-  for: Edgehog.Astarte.Realm.Interfaces.Behaviour
+Mox.defmock(Edgehog.Astarte.Interface.MockDataLayer,
+  for: Edgehog.Astarte.Interface.DataLayer
 )
 
-Mox.defmock(Edgehog.Astarte.Realm.TriggersMock,
-  for: Edgehog.Astarte.Realm.Triggers.Behaviour
+Mox.defmock(Edgehog.Astarte.Trigger.MockDataLayer,
+  for: Edgehog.Astarte.Trigger.DataLayer
 )
 
 Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,

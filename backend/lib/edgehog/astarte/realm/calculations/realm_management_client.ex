@@ -18,24 +18,29 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Mocks.Astarte.Realm.Triggers do
-  @behaviour Edgehog.Astarte.Realm.Triggers.Behaviour
-
-  import Edgehog.AstarteFixtures
-  alias Astarte.Client.RealmManagement
+defmodule Edgehog.Astarte.Realm.Calculations.RealmManagementClient do
+  use Ash.Calculation
 
   @impl true
-  def get(%RealmManagement{} = _client, trigger_name) do
-    {:ok, %{"data" => trigger_map_fixture(name: trigger_name)}}
+  def load(_query, _opts, _context) do
+    [:cluster]
   end
 
   @impl true
-  def create(%RealmManagement{} = _client, _trigger_json) do
-    :ok
-  end
+  def calculate(realms, _opts, _context) do
+    Enum.map(realms, fn realm ->
+      %{
+        name: realm_name,
+        private_key: private_key,
+        cluster: %{
+          base_api_url: base_api_url
+        }
+      } = realm
 
-  @impl true
-  def delete(%RealmManagement{} = _client, _trigger_name) do
-    :ok
+      case Astarte.Client.RealmManagement.new(base_api_url, realm_name, private_key: private_key) do
+        {:ok, client} -> client
+        _error -> nil
+      end
+    end)
   end
 end
