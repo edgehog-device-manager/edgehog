@@ -27,6 +27,8 @@ defmodule Edgehog.Tenants.Tenant do
   alias Edgehog.Tenants.Tenant
   alias Edgehog.Validations
 
+  @type record :: Ash.Resource.record()
+
   json_api do
     type "tenant"
 
