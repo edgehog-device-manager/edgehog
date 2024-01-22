@@ -18,28 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Provisioning.TenantConfig do
-  use Ecto.Schema
-  import Ecto.Changeset
-  import Edgehog.ChangesetValidation
+defmodule Edgehog.Tenants.Tenant.Changes.TriggerReconciliation do
+  use Ash.Resource.Change
 
-  alias Edgehog.Provisioning.AstarteConfig
+  alias Edgehog.Tenants
 
-  @primary_key false
-  embedded_schema do
-    field :name, :string
-    field :slug, :string
-    field :public_key, :string
-    embeds_one :astarte_config, AstarteConfig
-  end
+  @impl true
+  def change(changeset, _opts, _ctx) do
+    Ash.Changeset.after_action(changeset, fn _changeset, tenant ->
+      # TODO: this can probably be done with Ash notifiers, investigate that
+      Tenants.Tenant.reconcile(tenant)
 
-  @doc false
-  def changeset(tenant, attrs) do
-    tenant
-    |> cast(attrs, [:name, :slug, :public_key])
-    |> cast_embed(:astarte_config, required: true)
-    |> validate_required([:name, :slug, :public_key])
-    |> validate_tenant_slug(:slug)
-    |> validate_pem_public_key(:public_key)
+      {:ok, tenant}
+    end)
   end
 end

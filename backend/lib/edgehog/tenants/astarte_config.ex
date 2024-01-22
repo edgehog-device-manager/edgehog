@@ -18,25 +18,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Provisioning.AstarteConfig do
-  use Ecto.Schema
-  import Ecto.Changeset
-  import Edgehog.ChangesetValidation
+defmodule Edgehog.Tenants.AstarteConfig do
+  use Ash.Resource,
+    data_layer: :embedded
 
-  @primary_key false
-  embedded_schema do
-    field :base_api_url, :string
-    field :realm_name, :string
-    field :realm_private_key, :string
+  actions do
+    defaults [:create, :read]
   end
 
-  @doc false
-  def changeset(astarte_config, attrs) do
-    astarte_config
-    |> cast(attrs, [:base_api_url, :realm_name, :realm_private_key])
-    |> validate_required([:base_api_url, :realm_name, :realm_private_key])
-    |> validate_realm_name(:realm_name)
-    |> validate_pem_private_key(:realm_private_key)
-    |> validate_url(:base_api_url)
+  attributes do
+    attribute :base_api_url, :string, allow_nil?: false
+    attribute :realm_name, :string, allow_nil?: false
+    attribute :realm_private_key, :string, allow_nil?: false
   end
 end

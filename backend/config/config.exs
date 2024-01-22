@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@ config :ash_graphql, :default_managed_relationship_type_name_template, :action_n
 resource_section_order = [
   :resource,
   :graphql,
+  :json_api,
   :code_interface,
   :actions,
   :attributes,
@@ -120,6 +121,14 @@ config :spark, :formatter,
     type: Ash.Resource,
     section_order: resource_section_order
   ]
+
+config :mime, :types, %{
+  "application/vnd.api+json" => ["json"]
+}
+
+config :mime, :extensions, %{
+  "json" => "application/vnd.api+json"
+}
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

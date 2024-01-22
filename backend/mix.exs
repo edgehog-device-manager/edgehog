@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -117,7 +117,8 @@ defmodule Edgehog.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ash, "~> 2.0"},
       {:ash_postgres, "~> 1.3"},
-      {:ash_graphql, "~> 0.26"}
+      {:ash_graphql, "~> 0.26"},
+      {:ash_json_api, "~> 0.34"}
     ]
   end
 

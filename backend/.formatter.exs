@@ -1,10 +1,11 @@
-# SPDX-FileCopyrightText: 2021-2023 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2024 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
 [
   import_deps: [
     :ash,
     :ash_graphql,
+    :ash_json_api,
     :ash_postgres,
     :ecto,
     :phoenix,

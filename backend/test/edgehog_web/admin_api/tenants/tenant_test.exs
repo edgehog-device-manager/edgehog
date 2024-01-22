@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.AdminAPI.TenantsControllerTest do
+defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
   use EdgehogWeb.AdminAPI.ConnCase, async: true
   use Edgehog.ReconcilerMockCase
+
+  @moduletag :ported_to_ash
 
   import Ecto.Query, only: [where: 2]
   import Edgehog.AstarteFixtures
@@ -33,14 +35,15 @@ defmodule EdgehogWeb.AdminAPI.TenantsControllerTest do
   @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
                         |> X509.PublicKey.derive()
                         |> X509.PublicKey.to_pem()
+                        |> String.trim()
 
-  @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
+  @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1)
+                         |> X509.PrivateKey.to_pem()
+                         |> String.trim()
 
   describe "POST /admin-api/v1/tenants" do
-    setup %{conn: conn} do
-      path = Routes.tenants_path(conn, :create)
-
-      {:ok, path: path}
+    setup do
+      {:ok, path: ~p"/admin-api/v1/tenants"}
     end
 
     test "creates tenant with valid data", %{conn: conn, path: path} do
@@ -51,22 +54,27 @@ defmodule EdgehogWeb.AdminAPI.TenantsControllerTest do
       realm_name = unique_realm_name()
       realm_private_key = @valid_pem_private_key
 
-      tenant_config = %{
-        name: tenant_name,
-        slug: tenant_slug,
-        public_key: tenant_public_key,
-        astarte_config: %{
-          base_api_url: cluster_base_api_url,
-          realm_name: realm_name,
-          realm_private_key: @valid_pem_private_key
+      params = %{
+        data: %{
+          type: "tenant",
+          attributes: %{
+            name: tenant_name,
+            slug: tenant_slug,
+            public_key: tenant_public_key,
+            astarte_config: %{
+              base_api_url: cluster_base_api_url,
+              realm_name: realm_name,
+              realm_private_key: @valid_pem_private_key
+            }
+          }
         }
       }
 
-      conn = post(conn, path, tenant_config)
+      conn = post(conn, path, params)
 
       assert response(conn, :created)
 
-      assert {:ok, tenant} = Tenants.fetch_tenant_by_slug(tenant_slug)
+      assert tenant = Tenants.Tenant.fetch_by_slug!(tenant_slug)
 
       assert %Tenants.Tenant{
                name: ^tenant_name,
@@ -74,47 +82,52 @@ defmodule EdgehogWeb.AdminAPI.TenantsControllerTest do
                public_key: ^tenant_public_key
              } = tenant
 
-      Repo.put_tenant_id(tenant.tenant_id)
-
-      assert {:ok, realm} = Astarte.fetch_realm_by_name(realm_name)
+      tenant = Tenants.load!(tenant, realm: [:cluster])
 
       assert %Astarte.Realm{
                name: ^realm_name,
                private_key: ^realm_private_key
-             } = realm
+             } = tenant.realm
 
-      assert Astarte.Cluster
-             |> where(base_api_url: ^cluster_base_api_url)
-             |> Repo.exists?(skip_tenant_id: true)
+      assert tenant.realm.cluster.base_api_url == cluster_base_api_url
     end
 
     test "render errors for invalid tenant data", %{conn: conn, path: path} do
-      conn = post(conn, path, %{})
+      params = %{data: %{type: "tenant"}}
 
-      body = json_response(conn, 422)
+      conn = post(conn, path, params)
+
+      assert %{"errors" => errors} = json_response(conn, 400)
 
       required_data = ["name", "slug", "public_key", "astarte_config"]
 
-      for path <- required_data do
-        assert "can't be blank" in body["errors"][path]
+      for required <- required_data do
+        assert Enum.find(errors, &(&1["detail"] =~ "#{required} is required"))
       end
     end
 
     test "render errors for invalid astarte_config data", %{conn: conn, path: path} do
-      conn =
-        post(conn, path, %{
-          name: unique_tenant_name(),
-          slug: unique_tenant_slug(),
-          public_key: @valid_pem_public_key,
-          astarte_config: %{}
-        })
+      params = %{
+        data: %{
+          type: "tenant",
+          attributes: %{
+            name: unique_tenant_name(),
+            slug: unique_tenant_slug(),
+            public_key: @valid_pem_public_key,
+            astarte_config: %{}
+          }
+        }
+      }
 
-      body = json_response(conn, 422)
+      conn =
+        post(conn, path, params)
+
+      assert %{"errors" => errors} = json_response(conn, 400)
 
       required_data = ["base_api_url", "realm_name", "realm_private_key"]
 
-      for path <- required_data do
-        assert "can't be blank" in body["errors"]["astarte_config"][path]
+      for required <- required_data do
+        assert Enum.find(errors, &(&1["detail"] =~ "#{required} is required"))
       end
     end
   end

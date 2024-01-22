@@ -19,7 +19,12 @@
 #
 
 defmodule Edgehog.Tenants do
-  use Ash.Api
+  use Ash.Api, extensions: [AshJsonApi.Api]
+
+  json_api do
+    prefix "/admin-api/v1"
+    log_errors? false
+  end
 
   resources do
     registry Edgehog.Tenants.Registry

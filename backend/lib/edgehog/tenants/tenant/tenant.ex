@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,14 +20,32 @@
 
 defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshJsonApi.Resource]
 
+  alias Edgehog.Tenants.AstarteConfig
+  alias Edgehog.Tenants.Tenant
   alias Edgehog.Validations
+
+  @type record :: Ash.Resource.record()
+
+  json_api do
+    type "tenant"
+
+    routes do
+      base "/tenants"
+
+      index :read
+      post :provision
+    end
+  end
 
   code_interface do
     define_for Edgehog.Tenants
     define :create
+    define :provision
     define :fetch_by_slug, action: :by_slug, args: [:slug]
+    define :reconcile, args: [:tenant]
     define :destroy
   end
 
@@ -35,6 +53,22 @@ defmodule Edgehog.Tenants.Tenant do
     defaults [:create, :read, :destroy]
 
     read :by_slug, get_by: :slug
+
+    create :provision do
+      argument :astarte_config, AstarteConfig, allow_nil?: false
+
+      change Tenant.Changes.ProvisionAstarteResources
+      change Tenant.Changes.TriggerReconciliation
+    end
+
+    action :reconcile, :term do
+      argument :tenant, :struct do
+        allow_nil? false
+        constraints instance_of: __MODULE__
+      end
+
+      run Tenant.ManualActions.ReconcilerAction
+    end
   end
 
   attributes do
