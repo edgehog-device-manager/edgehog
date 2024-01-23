@@ -43,15 +43,6 @@ defmodule EdgehogWeb.Schema do
   alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
 
-  def middleware(middleware, _field, %Absinthe.Type.Object{identifier: type})
-      when type in [:query, :subscription, :mutation] do
-    middleware ++ [Middleware.ErrorHandler]
-  end
-
-  def middleware(middleware, _field, _object) do
-    middleware
-  end
-
   node interface do
     resolve_type fn
       %Edgehog.BaseImages.BaseImage{}, _ ->
