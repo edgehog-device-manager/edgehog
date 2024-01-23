@@ -252,27 +252,6 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
   end
 
   @desc """
-  Denotes a type of hardware that devices can have.
-
-  It refers to the physical components embedded in a device.
-  This can represent, e.g., multiple revisions of a PCB (each with a \
-  different part number) which are functionally equivalent from the device \
-  point of view.
-  """
-  node object(:hardware_type) do
-    @desc "The display name of the hardware type."
-    field :name, non_null(:string)
-
-    @desc "The identifier of the hardware type."
-    field :handle, non_null(:string)
-
-    @desc "The list of part numbers associated with the hardware type."
-    field :part_numbers, non_null(list_of(non_null(:string))) do
-      resolve &Resolvers.Devices.extract_hardware_type_part_numbers/3
-    end
-  end
-
-  @desc """
   Represents a specific system model.
 
   A system model corresponds to what the users thinks as functionally \
@@ -326,20 +305,6 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
       resolve &Resolvers.Devices.find_device/2
     end
 
-    @desc "Fetches the list of all hardware types."
-    field :hardware_types, non_null(list_of(non_null(:hardware_type))) do
-      resolve &Resolvers.Devices.list_hardware_types/3
-    end
-
-    @desc "Fetches a single hardware type."
-    field :hardware_type, :hardware_type do
-      @desc "The ID of the hardware type."
-      arg :id, non_null(:id)
-
-      middleware Absinthe.Relay.Node.ParseIDs, id: :hardware_type
-      resolve &Resolvers.Devices.find_hardware_type/2
-    end
-
     @desc "Fetches the list of all system models."
     field :system_models, non_null(list_of(non_null(:system_model))) do
       resolve &Resolvers.Devices.list_system_models/3
@@ -379,78 +344,6 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
 
       middleware Absinthe.Relay.Node.ParseIDs, device_id: :device
       resolve &Resolvers.Devices.update_device/2
-    end
-
-    @desc "Creates a new hardware type."
-    payload field :create_hardware_type do
-      input do
-        @desc "The display name of the hardware type."
-        field :name, non_null(:string)
-
-        @desc """
-        The identifier of the hardware type.
-
-        It should start with a lower case ASCII letter and only contain \
-        lower case ASCII letters, digits and the hyphen - symbol.
-        """
-        field :handle, non_null(:string)
-
-        @desc "The list of part numbers associated with the hardware type."
-        field :part_numbers, non_null(list_of(non_null(:string)))
-      end
-
-      output do
-        @desc "The created hardware type."
-        field :hardware_type, non_null(:hardware_type)
-      end
-
-      resolve &Resolvers.Devices.create_hardware_type/3
-    end
-
-    @desc "Updates a hardware type."
-    payload field :update_hardware_type do
-      input do
-        @desc "The ID of the hardware type to be updated."
-        field :hardware_type_id, non_null(:id)
-
-        @desc "The display name of the hardware type."
-        field :name, :string
-
-        @desc """
-        The identifier of the hardware type.
-
-        It should start with a lower case ASCII letter and only contain \
-        lower case ASCII letters, digits and the hyphen - symbol.
-        """
-        field :handle, :string
-
-        @desc "The list of part numbers associated with the hardware type."
-        field :part_numbers, list_of(non_null(:string))
-      end
-
-      output do
-        @desc "The updated hardware type."
-        field :hardware_type, non_null(:hardware_type)
-      end
-
-      middleware Absinthe.Relay.Node.ParseIDs, hardware_type_id: :hardware_type
-      resolve &Resolvers.Devices.update_hardware_type/3
-    end
-
-    @desc "Deletes a hardware type."
-    payload field :delete_hardware_type do
-      input do
-        @desc "The ID of the hardware type to be deleted."
-        field :hardware_type_id, non_null(:id)
-      end
-
-      output do
-        @desc "The deleted hardware type."
-        field :hardware_type, non_null(:hardware_type)
-      end
-
-      middleware Absinthe.Relay.Node.ParseIDs, hardware_type_id: :hardware_type
-      resolve &Resolvers.Devices.delete_hardware_type/2
     end
 
     @desc "Creates a new system model."

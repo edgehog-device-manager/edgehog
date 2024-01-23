@@ -97,17 +97,20 @@ defmodule Edgehog.DevicesFixtures do
   @doc """
   Generate a hardware_type.
   """
-  def hardware_type_fixture(attrs \\ %{}) do
-    {:ok, hardware_type} =
-      attrs
+  def hardware_type_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      opts
       |> Enum.into(%{
         handle: unique_hardware_type_handle(),
         name: unique_hardware_type_name(),
         part_numbers: [unique_hardware_type_part_number()]
       })
-      |> Edgehog.Devices.create_hardware_type()
 
-    hardware_type
+    Edgehog.Devices.HardwareType
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Edgehog.Devices.create!()
   end
 
   @doc """

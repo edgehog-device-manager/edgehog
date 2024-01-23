@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,19 @@ defmodule Edgehog.Devices do
   The Devices context.
   """
 
+  use Ash.Api,
+    extensions: [
+      AshGraphql.Api
+    ]
+
+  graphql do
+  end
+
+  resources do
+    registry Edgehog.Devices.Registry
+  end
+
+  # TODO: legacy context, delete implementations below as we move them to Ash
   import Ecto.Query, warn: false
   alias Ecto.Multi
   alias Edgehog.Repo
@@ -278,77 +291,6 @@ defmodule Edgehog.Devices do
 
     # TODO: this should create the client with a scoped JWT
     Astarte.Client.AppEngine.new(base_api_url, realm_name, private_key: private_key)
-  end
-
-  @doc """
-  Returns the list of hardware_types.
-
-  ## Examples
-
-      iex> list_hardware_types()
-      [%HardwareType{}, ...]
-
-  """
-  def list_hardware_types do
-    Repo.all(HardwareType)
-    |> Repo.preload(:part_numbers)
-  end
-
-  @doc """
-  Gets a single hardware_type.
-
-  Returns `{:error, :not_found}` if the Hardware type does not exist.
-
-  ## Examples
-
-      iex> fetch_hardware_type(123)
-      {:ok, %HardwareType{}}
-
-      iex> fetch_hardware_type(456)
-      {:error, :not_found}
-
-  """
-  def fetch_hardware_type(id) do
-    with {:ok, hardware_type} <- Repo.fetch(HardwareType, id) do
-      {:ok, Repo.preload(hardware_type, :part_numbers)}
-    end
-  end
-
-  @doc """
-  Creates a hardware_type.
-
-  ## Examples
-
-      iex> create_hardware_type(%{field: value})
-      {:ok, %HardwareType{}}
-
-      iex> create_hardware_type(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_hardware_type(attrs \\ %{}) do
-    {part_numbers, attrs} = Map.pop(attrs, :part_numbers, [])
-
-    changeset =
-      %HardwareType{tenant_id: Repo.get_tenant_id()}
-      |> HardwareType.changeset(attrs)
-
-    Multi.new()
-    |> Multi.run(:assoc_part_numbers, fn _repo, _changes ->
-      {:ok,
-       insert_or_get_part_numbers(HardwareTypePartNumber, changeset, part_numbers, required: true)}
-    end)
-    |> Multi.insert(:hardware_type, fn %{assoc_part_numbers: changeset} ->
-      changeset
-    end)
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{hardware_type: hardware_type}} ->
-        {:ok, Repo.preload(hardware_type, :part_numbers)}
-
-      {:error, _failed_operation, failed_value, _changes_so_far} ->
-        {:error, failed_value}
-    end
   end
 
   defp insert_or_get_part_numbers(schema, changeset, part_numbers, opts \\ [])

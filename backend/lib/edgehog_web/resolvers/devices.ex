@@ -21,7 +21,6 @@
 defmodule EdgehogWeb.Resolvers.Devices do
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
-  alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
   alias Edgehog.Labeling.DeviceAttribute
   alias EdgehogWeb.Schema.VariantTypes
@@ -33,24 +32,6 @@ defmodule EdgehogWeb.Resolvers.Devices do
       |> Devices.preload_astarte_resources_for_device()
 
     {:ok, device}
-  end
-
-  def find_hardware_type(%{id: id}, _resolution) do
-    Devices.fetch_hardware_type(id)
-  end
-
-  def list_hardware_types(_parent, _args, _context) do
-    {:ok, Devices.list_hardware_types()}
-  end
-
-  def extract_hardware_type_part_numbers(
-        %HardwareType{part_numbers: part_numbers},
-        _args,
-        _context
-      ) do
-    part_numbers = Enum.map(part_numbers, &Map.get(&1, :part_number))
-
-    {:ok, part_numbers}
   end
 
   def list_devices(_parent, %{filter: filter}, _resolution) do
@@ -77,27 +58,6 @@ defmodule EdgehogWeb.Resolvers.Devices do
       device = Devices.preload_astarte_resources_for_device(device)
 
       {:ok, %{device: device}}
-    end
-  end
-
-  def create_hardware_type(_parent, attrs, _context) do
-    with {:ok, hardware_type} <- Devices.create_hardware_type(attrs) do
-      {:ok, %{hardware_type: hardware_type}}
-    end
-  end
-
-  def update_hardware_type(_parent, %{hardware_type_id: id} = attrs, _context) do
-    with {:ok, %HardwareType{} = hardware_type} <- Devices.fetch_hardware_type(id),
-         {:ok, %HardwareType{} = hardware_type} <-
-           Devices.update_hardware_type(hardware_type, attrs) do
-      {:ok, %{hardware_type: hardware_type}}
-    end
-  end
-
-  def delete_hardware_type(%{hardware_type_id: id}, _context) do
-    with {:ok, %HardwareType{} = hardware_type} <- Devices.fetch_hardware_type(id),
-         {:ok, %HardwareType{} = hardware_type} <- Devices.delete_hardware_type(hardware_type) do
-      {:ok, %{hardware_type: hardware_type}}
     end
   end
 
