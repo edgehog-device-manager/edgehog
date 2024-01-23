@@ -75,6 +75,7 @@ defmodule Edgehog.Tenants.Tenant do
     read :by_slug, get_by: :slug
 
     read :current_tenant do
+      description "Retrieves the current tenant."
       get? true
 
       prepare fn query, _context ->
@@ -109,10 +110,25 @@ defmodule Edgehog.Tenants.Tenant do
   attributes do
     integer_primary_key :tenant_id
 
-    attribute :name, :string, allow_nil?: false
-    attribute :slug, :string, allow_nil?: false
-    attribute :default_locale, :string, default: "en-US"
-    attribute :public_key, :string, allow_nil?: false
+    attribute :name, :string do
+      description "The tenant name."
+      allow_nil? false
+    end
+
+    attribute :slug, :string do
+      description "The tenant slug."
+      allow_nil? false
+    end
+
+    attribute :default_locale, :string do
+      description "The default locale supported by the tenant."
+      default "en-US"
+    end
+
+    attribute :public_key, :string do
+      description "The tenant public key."
+      allow_nil? false
+    end
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
