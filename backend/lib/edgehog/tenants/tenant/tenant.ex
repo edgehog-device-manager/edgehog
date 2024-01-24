@@ -122,6 +122,7 @@ defmodule Edgehog.Tenants.Tenant do
 
     attribute :default_locale, :string do
       description "The default locale supported by the tenant."
+      allow_nil? false
       default "en-US"
     end
 
