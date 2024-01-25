@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,18 +25,16 @@ defmodule EdgehogWeb.Context do
 
   def call(conn, _opts) do
     context = build_context(conn)
-    Absinthe.Plug.put_options(conn, context: context)
+    Ash.PlugHelpers.set_context(conn, context)
   end
 
   def build_context(conn) do
-    current_tenant = conn.assigns[:current_tenant]
-    tenant_locale = current_tenant.default_locale
+    tenant = Ash.PlugHelpers.get_tenant(conn)
     preferred_locales = get_preferred_locales(conn)
 
     %{
-      current_tenant: current_tenant,
-      preferred_locales: preferred_locales,
-      tenant_locale: tenant_locale
+      tenant_locale: tenant.default_locale,
+      preferred_locales: preferred_locales
     }
   end
 

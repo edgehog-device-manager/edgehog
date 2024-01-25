@@ -26,6 +26,7 @@ defmodule EdgehogWeb.Router do
     plug EdgehogWeb.PopulateTenant
     plug EdgehogWeb.Auth
     plug EdgehogWeb.Context
+    plug AshGraphql.Plug
   end
 
   pipeline :triggers do

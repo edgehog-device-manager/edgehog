@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ defmodule EdgehogWeb.Auth.VerifyHeader do
   end
 
   defp get_public_key(conn) do
-    tenant = conn.assigns[:current_tenant]
+    tenant = Ash.PlugHelpers.get_tenant(conn)
 
     case JWK.from_pem(tenant.public_key) do
       %JWK{} = public_key ->

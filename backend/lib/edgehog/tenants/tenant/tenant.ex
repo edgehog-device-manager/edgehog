@@ -21,13 +21,33 @@
 defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
     data_layer: AshPostgres.DataLayer,
-    extensions: [AshJsonApi.Resource]
+    extensions: [
+      AshGraphql.Resource,
+      AshJsonApi.Resource
+    ]
 
   alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
   alias Edgehog.Validations
 
+  require Ash.Query
+
   @type record :: Ash.Resource.record()
+
+  graphql do
+    type :tenant_info
+
+    # We don't care about filtering here
+    derive_filter? false
+    # :tenant_id, the primary key, already gets exposed as ID, so we hide it here
+    # to avoid showing it twice. We also hide the public key to be consistent with
+    # the old API
+    hide_fields [:tenant_id, :public_key]
+
+    queries do
+      read_one :tenant_info, :current_tenant, allow_nil?: false
+    end
+  end
 
   json_api do
     type "tenant"
@@ -54,6 +74,22 @@ defmodule Edgehog.Tenants.Tenant do
 
     read :by_slug, get_by: :slug
 
+    read :current_tenant do
+      description "Retrieves the current tenant."
+      get? true
+
+      prepare fn query, _context ->
+        if query.tenant do
+          Ash.Query.filter(query, tenant_id: query.tenant.tenant_id)
+        else
+          Ash.Query.add_error(
+            query,
+            Ash.Error.Invalid.TenantRequired.exception(resource: query.resource)
+          )
+        end
+      end
+    end
+
     create :provision do
       argument :astarte_config, AstarteConfig, allow_nil?: false
 
@@ -74,10 +110,26 @@ defmodule Edgehog.Tenants.Tenant do
   attributes do
     integer_primary_key :tenant_id
 
-    attribute :name, :string, allow_nil?: false
-    attribute :slug, :string, allow_nil?: false
-    attribute :default_locale, :string, default: "en-US"
-    attribute :public_key, :string, allow_nil?: false
+    attribute :name, :string do
+      description "The tenant name."
+      allow_nil? false
+    end
+
+    attribute :slug, :string do
+      description "The tenant slug."
+      allow_nil? false
+    end
+
+    attribute :default_locale, :string do
+      description "The default locale supported by the tenant."
+      allow_nil? false
+      default "en-US"
+    end
+
+    attribute :public_key, :string do
+      description "The tenant public key."
+      allow_nil? false
+    end
 
     create_timestamp :inserted_at
     update_timestamp :updated_at

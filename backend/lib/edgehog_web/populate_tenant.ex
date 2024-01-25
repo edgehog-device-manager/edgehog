@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ defmodule EdgehogWeb.PopulateTenant do
 
     case Tenants.Tenant.fetch_by_slug(tenant_slug) do
       {:ok, tenant} ->
-        _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-        Plug.Conn.assign(conn, :current_tenant, tenant)
+        Ash.PlugHelpers.set_tenant(conn, tenant)
 
       {:error, %Ash.Error.Query.NotFound{}} ->
         conn
