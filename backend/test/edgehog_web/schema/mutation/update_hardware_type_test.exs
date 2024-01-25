@@ -34,14 +34,20 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
         hardware_type_fixture(tenant: tenant)
         |> Devices.load!(:part_number_strings)
 
-      %{hardware_type: hardware_type}
+      id = AshGraphql.Resource.encode_relay_id(hardware_type)
+
+      %{hardware_type: hardware_type, id: id}
     end
 
-    test "successfully updates with valid data", %{tenant: tenant, hardware_type: hardware_type} do
+    test "successfully updates with valid data", %{
+      tenant: tenant,
+      hardware_type: hardware_type,
+      id: id
+    } do
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           name: "Updated Name",
           handle: "updatedhandle",
           part_numbers: "updated-1234"
@@ -59,13 +65,13 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
              } = hardware_type
     end
 
-    test "supports partial updates", %{tenant: tenant, hardware_type: hardware_type} do
+    test "supports partial updates", %{tenant: tenant, hardware_type: hardware_type, id: id} do
       %{part_number_strings: old_part_numbers, handle: old_handle} = hardware_type
 
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           name: "Only Name Update"
         )
 
@@ -84,13 +90,13 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
       end)
     end
 
-    test "manages part numbers correctly", %{tenant: tenant, hardware_type: hardware_type} do
+    test "manages part numbers correctly", %{tenant: tenant, hardware_type: hardware_type, id: id} do
       fixture = hardware_type_fixture(tenant: tenant, part_numbers: ["A", "B", "C"])
 
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           part_numbers: ["B", "D"]
         )
 
@@ -102,11 +108,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
       assert %{"partNumber" => "D"} in part_numbers
     end
 
-    test "returns error for invalid handle", %{tenant: tenant, hardware_type: hardware_type} do
+    test "returns error for invalid handle", %{
+      tenant: tenant,
+      hardware_type: hardware_type,
+      id: id
+    } do
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           handle: "123Invalid$"
         )
 
@@ -114,11 +124,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
                extract_error!(result)
     end
 
-    test "returns error for empty part_numbers", %{tenant: tenant, hardware_type: hardware_type} do
+    test "returns error for empty part_numbers", %{
+      tenant: tenant,
+      hardware_type: hardware_type,
+      id: id
+    } do
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           part_numbers: []
         )
 
@@ -126,13 +140,17 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
                extract_error!(result)
     end
 
-    test "returns error for duplicate name", %{tenant: tenant, hardware_type: hardware_type} do
+    test "returns error for duplicate name", %{
+      tenant: tenant,
+      hardware_type: hardware_type,
+      id: id
+    } do
       fixture = hardware_type_fixture(tenant: tenant)
 
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           name: fixture.name
         )
 
@@ -140,13 +158,17 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
                extract_error!(result)
     end
 
-    test "returns error for duplicate handle", %{tenant: tenant, hardware_type: hardware_type} do
+    test "returns error for duplicate handle", %{
+      tenant: tenant,
+      hardware_type: hardware_type,
+      id: id
+    } do
       fixture = hardware_type_fixture(tenant: tenant)
 
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           handle: fixture.handle
         )
 
@@ -156,7 +178,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
     test "reassociates an existing HardwareTypePartNumber", %{
       tenant: tenant,
-      hardware_type: hardware_type
+      hardware_type: hardware_type,
+      id: id
     } do
       # TODO: see issue #228, this documents the current behaviour
 
@@ -165,7 +188,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
       result =
         update_hardware_type_mutation(
           tenant: tenant,
-          id: hardware_type.id,
+          id: id,
           part_numbers: ["foo"]
         )
 

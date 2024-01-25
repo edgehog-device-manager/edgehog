@@ -54,7 +54,10 @@ defmodule EdgehogWeb.Schema.Query.TenantInfoTest do
                }
              } = Absinthe.run!(doc, EdgehogWeb.Schema, context: %{tenant: tenant})
 
-      assert graphql_id == to_string(id)
+      assert {:ok, %{type: :tenant_info, id: decoded_id}} =
+               AshGraphql.Resource.decode_relay_id(graphql_id)
+
+      assert decoded_id == to_string(id)
     end
   end
 end

@@ -31,19 +31,30 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
   describe "deleteHardwareType field" do
     test "deletes hardware type", %{tenant: tenant} do
       fixture = hardware_type_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(fixture)
 
-      result = delete_hardware_type_mutation(tenant: tenant, id: fixture.id)
+      result = delete_hardware_type_mutation(tenant: tenant, id: id)
 
       hardware_type = extract_result!(result)
 
-      assert hardware_type["id"] == to_string(fixture.id)
+      assert hardware_type["id"] == id
     end
 
     test "fails with non-existing id", %{tenant: tenant} do
-      result = delete_hardware_type_mutation(tenant: tenant, id: 123_789)
+      id = non_existing_hardware_type_id(tenant)
+
+      result = delete_hardware_type_mutation(tenant: tenant, id: id)
 
       assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
     end
+  end
+
+  defp non_existing_hardware_type_id(tenant) do
+    fixture = hardware_type_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Devices.destroy!(fixture)
+
+    id
   end
 
   defp delete_hardware_type_mutation(opts) do

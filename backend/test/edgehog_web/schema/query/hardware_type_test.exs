@@ -25,6 +25,8 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
 
   import Edgehog.DevicesFixtures
 
+  alias Edgehog.Devices
+
   alias Edgehog.Devices.{
     HardwareType,
     HardwareTypePartNumber
@@ -36,7 +38,9 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
         hardware_type_fixture(tenant: tenant)
         |> Edgehog.Devices.load!(:part_number_strings)
 
-      result = hardware_type_query(tenant: tenant, id: fixture.id)
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      result = hardware_type_query(tenant: tenant, id: id)
 
       refute Map.has_key?(result, :errors)
       assert %{data: %{"hardwareType" => hardware_type}} = result
@@ -50,9 +54,18 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
     end
 
     test "returns nil if non existing", %{tenant: tenant} do
-      result = hardware_type_query(tenant: tenant, id: "123")
+      id = non_existing_hardware_type_id(tenant)
+      result = hardware_type_query(tenant: tenant, id: id)
       assert %{data: %{"hardwareType" => nil}} = result
     end
+  end
+
+  defp non_existing_hardware_type_id(tenant) do
+    fixture = hardware_type_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Devices.destroy!(fixture)
+
+    id
   end
 
   defp hardware_type_query(opts) do
