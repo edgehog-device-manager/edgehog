@@ -45,16 +45,31 @@ defmodule Edgehog.TenantsTest do
     @describetag :ported_to_ash
 
     test "with valid data creates a tenant" do
-      public_key =
-        X509.PrivateKey.new_ec(:secp256r1)
-        |> X509.PublicKey.derive()
-        |> X509.PublicKey.to_pem()
+      name = unique_tenant_name()
+      slug = unique_tenant_slug()
+      public_key = @valid_pem_public_key
+      default_locale = "it-IT"
 
-      valid_attrs = %{name: "some name", slug: "some-name", public_key: public_key}
+      attrs = %{name: name, slug: slug, public_key: public_key, default_locale: default_locale}
 
-      assert {:ok, %Tenant{} = tenant} = Tenant.create(valid_attrs)
-      assert tenant.name == "some name"
-      assert tenant.slug == "some-name"
+      assert {:ok, tenant} = Tenant.create(attrs)
+
+      assert %Tenant{
+               name: ^name,
+               slug: ^slug,
+               public_key: ^public_key,
+               default_locale: ^default_locale
+             } = tenant
+    end
+
+    test "without default locale assigns 'en-US' as default one" do
+      attrs = %{
+        name: unique_tenant_name(),
+        slug: unique_tenant_slug(),
+        public_key: @valid_pem_public_key
+      }
+
+      assert {:ok, %Tenant{} = tenant} = Tenant.create(attrs)
       assert tenant.default_locale == "en-US"
     end
 
@@ -131,34 +146,56 @@ defmodule Edgehog.TenantsTest do
     @describetag :ported_to_ash
 
     test "with valid attrs creates the tenant, cluster and realm" do
+      tenant_name = unique_tenant_name()
+      tenant_slug = unique_tenant_slug()
+      tenant_public_key = @valid_pem_public_key
+      tenant_default_locale = "it-IT"
+      cluster_base_api_url = unique_cluster_base_api_url()
+      realm_name = unique_realm_name()
+      realm_private_key = @valid_pem_private_key
+
       attrs = %{
-        name: "Test",
-        slug: "test",
-        public_key: @valid_pem_public_key,
+        name: tenant_name,
+        slug: tenant_slug,
+        public_key: tenant_public_key,
+        default_locale: tenant_default_locale,
         astarte_config: %{
-          base_api_url: "https://astarte.api.example",
-          realm_name: "testrealm",
-          realm_private_key: @valid_pem_private_key
+          base_api_url: cluster_base_api_url,
+          realm_name: realm_name,
+          realm_private_key: realm_private_key
         }
       }
 
-      assert {:ok, %Tenant{} = tenant} = Tenant.provision(attrs)
+      assert {:ok, tenant} = Tenant.provision(attrs)
 
-      %Tenant{
-        name: name,
-        slug: slug,
-        public_key: public_key
-      } = tenant
-
-      assert name == attrs.name
-      assert slug == attrs.slug
-      assert public_key == attrs.public_key
+      assert %Tenant{
+               name: ^tenant_name,
+               slug: ^tenant_slug,
+               public_key: ^tenant_public_key,
+               default_locale: ^tenant_default_locale
+             } = tenant
 
       tenant = Tenants.load!(tenant, realm: [:cluster])
 
       assert tenant.realm.cluster.base_api_url == attrs.astarte_config.base_api_url
       assert tenant.realm.name == attrs.astarte_config.realm_name
       assert tenant.realm.private_key == attrs.astarte_config.realm_private_key
+    end
+
+    test "without default locale provisions 'en-US' as default one" do
+      attrs = %{
+        name: unique_tenant_name(),
+        slug: unique_tenant_slug(),
+        public_key: @valid_pem_public_key,
+        astarte_config: %{
+          base_api_url: unique_cluster_base_api_url(),
+          realm_name: unique_realm_name(),
+          realm_private_key: @valid_pem_private_key
+        }
+      }
+
+      assert {:ok, %Tenant{} = tenant} = Tenant.provision(attrs)
+      assert tenant.default_locale == "en-US"
     end
 
     test "succeeds when providing the URL of an already existing cluster" do

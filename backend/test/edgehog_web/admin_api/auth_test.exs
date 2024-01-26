@@ -19,7 +19,8 @@
 #
 
 defmodule EdgehogWeb.AdminAPI.AuthTest do
-  use EdgehogWeb.AdminAPI.ConnCase, async: true
+  # This can't be async: true since it modifies the Application env
+  use EdgehogWeb.AdminAPI.ConnCase, async: false
   use Edgehog.ReconcilerMockCase
 
   @moduletag :ported_to_ash

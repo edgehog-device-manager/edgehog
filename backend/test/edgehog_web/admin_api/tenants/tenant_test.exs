@@ -50,6 +50,7 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
       tenant_name = unique_tenant_name()
       tenant_slug = unique_tenant_slug()
       tenant_public_key = @valid_pem_public_key
+      tenant_default_locale = "it-IT"
       cluster_base_api_url = unique_cluster_base_api_url()
       realm_name = unique_realm_name()
       realm_private_key = @valid_pem_private_key
@@ -61,10 +62,11 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
             name: tenant_name,
             slug: tenant_slug,
             public_key: tenant_public_key,
+            default_locale: tenant_default_locale,
             astarte_config: %{
               base_api_url: cluster_base_api_url,
               realm_name: realm_name,
-              realm_private_key: @valid_pem_private_key
+              realm_private_key: realm_private_key
             }
           }
         }
@@ -79,7 +81,8 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
       assert %Tenants.Tenant{
                name: ^tenant_name,
                slug: ^tenant_slug,
-               public_key: ^tenant_public_key
+               public_key: ^tenant_public_key,
+               default_locale: ^tenant_default_locale
              } = tenant
 
       tenant = Tenants.load!(tenant, realm: [:cluster])
@@ -90,6 +93,34 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
              } = tenant.realm
 
       assert tenant.realm.cluster.base_api_url == cluster_base_api_url
+    end
+
+    test "without default locale assigns 'en-US' as default one", %{conn: conn, path: path} do
+      tenant_slug = unique_tenant_slug()
+
+      params = %{
+        data: %{
+          type: "tenant",
+          attributes: %{
+            name: unique_tenant_name(),
+            slug: tenant_slug,
+            public_key: @valid_pem_public_key,
+            astarte_config: %{
+              base_api_url: unique_cluster_base_api_url(),
+              realm_name: unique_realm_name(),
+              realm_private_key: @valid_pem_private_key
+            }
+          }
+        }
+      }
+
+      conn = post(conn, path, params)
+
+      assert response(conn, :created)
+
+      assert tenant = Tenants.Tenant.fetch_by_slug!(tenant_slug)
+
+      assert tenant.default_locale == "en-US"
     end
 
     test "render errors for invalid tenant data", %{conn: conn, path: path} do
