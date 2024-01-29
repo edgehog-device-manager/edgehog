@@ -43,6 +43,9 @@ services:
       SEEDS_TENANT_PRIVATE_KEY_FILE: /keys/tenant_private.pem
       SEEDS_REALM_ORIGINAL_FILE: ${SEEDS_REALM_PRIVATE_KEY_FILE}
       SEEDS_TENANT_ORIGINAL_FILE: ${SEEDS_TENANT_PRIVATE_KEY_FILE}
+      URL_HOST: edgehog-backend
+      URL_PORT: 4000
+      URL_SCHEME: http
     ports:
       - 4000:4000
     restart: on-failure
