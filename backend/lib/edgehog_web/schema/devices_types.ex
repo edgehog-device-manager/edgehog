@@ -251,43 +251,6 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
     end
   end
 
-  @desc """
-  Represents a specific system model.
-
-  A system model corresponds to what the users thinks as functionally \
-  equivalent devices (e.g. two revisions of a device containing two different \
-  embedded chips but having the same enclosure and the same functionality).\
-  Each SystemModel must be associated to a specific HardwareType.
-  """
-  node object(:system_model) do
-    @desc "The display name of the system model."
-    field :name, non_null(:string)
-
-    @desc "The identifier of the system model."
-    field :handle, non_null(:string)
-
-    @desc "The URL of the related picture."
-    field :picture_url, :string
-
-    @desc "The type of hardware that can be plugged into the system model."
-    field :hardware_type, non_null(:hardware_type)
-
-    @desc "The list of part numbers associated with the system model."
-    field :part_numbers, non_null(list_of(non_null(:string))) do
-      resolve &Resolvers.Devices.extract_system_model_part_numbers/3
-    end
-
-    @desc """
-    A localized description of the system model.
-    The language of the description can be controlled passing an \
-    Accept-Language header in the request. If no such header is present, the \
-    default tenant language is returned.
-    """
-    field :description, :string do
-      resolve &Resolvers.Devices.extract_localized_description/3
-    end
-  end
-
   object :devices_queries do
     @desc "Fetches the list of all devices."
     field :devices, non_null(list_of(non_null(:device))) do
@@ -303,20 +266,6 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
 
       middleware Absinthe.Relay.Node.ParseIDs, id: :device
       resolve &Resolvers.Devices.find_device/2
-    end
-
-    @desc "Fetches the list of all system models."
-    field :system_models, non_null(list_of(non_null(:system_model))) do
-      resolve &Resolvers.Devices.list_system_models/3
-    end
-
-    @desc "Fetches a single system model."
-    field :system_model, :system_model do
-      @desc "The ID of the system model."
-      arg :id, non_null(:id)
-
-      middleware Absinthe.Relay.Node.ParseIDs, id: :system_model
-      resolve &Resolvers.Devices.find_system_model/2
     end
   end
 
@@ -344,130 +293,6 @@ defmodule EdgehogWeb.Schema.DevicesTypes do
 
       middleware Absinthe.Relay.Node.ParseIDs, device_id: :device
       resolve &Resolvers.Devices.update_device/2
-    end
-
-    @desc "Creates a new system model."
-    payload field :create_system_model do
-      input do
-        @desc "The display name of the system model."
-        field :name, non_null(:string)
-
-        @desc """
-        The identifier of the system model.
-
-        It should start with a lower case ASCII letter and only contain \
-        lower case ASCII letters, digits and the hyphen - symbol.
-        """
-        field :handle, non_null(:string)
-
-        @desc """
-        The file blob of a related picture.
-
-        When this field is specified, the pictureUrl field is ignored.
-        """
-        field :picture_file, :upload
-
-        @desc """
-        The file URL of a related picture.
-
-        Specifying a null value will remove the existing picture.
-        When the pictureFile field is specified, this field is ignored.
-        """
-        field :picture_url, :string
-
-        @desc "The list of part numbers associated with the system model."
-        field :part_numbers, non_null(list_of(non_null(:string)))
-
-        @desc """
-        The ID of the hardware type that can be used by devices of this model.
-        """
-        field :hardware_type_id, non_null(:id)
-
-        @desc """
-        An optional localized description. This description can only use the \
-        default tenant locale.
-        """
-        field :description, :localized_text_input
-      end
-
-      output do
-        @desc "The created system model."
-        field :system_model, non_null(:system_model)
-      end
-
-      middleware Absinthe.Relay.Node.ParseIDs, hardware_type_id: :hardware_type
-
-      resolve &Resolvers.Devices.create_system_model/3
-    end
-
-    @desc "Updates a system model."
-    payload field :update_system_model do
-      input do
-        @desc "The ID of the system model to be updated."
-        field :system_model_id, non_null(:id)
-
-        @desc "The display name of the system model."
-        field :name, :string
-
-        @desc """
-        The identifier of the system model.
-
-        It should start with a lower case ASCII letter and only contain \
-        lower case ASCII letters, digits and the hyphen - symbol.
-        """
-        field :handle, :string
-
-        @desc """
-        The file blob of a related picture.
-
-        When this field is specified, the pictureUrl field is ignored.
-        """
-        field :picture_file, :upload
-
-        @desc """
-        The file URL of a related picture.
-
-        Specifying a null value will remove the existing picture.
-        When the pictureFile field is specified, this field is ignored.
-        """
-        field :picture_url, :string
-
-        @desc "The list of part numbers associated with the system model."
-        field :part_numbers, list_of(non_null(:string))
-
-        @desc """
-        An optional localized description. This description can only use the \
-        default tenant locale.
-        """
-        field :description, :localized_text_input
-      end
-
-      output do
-        @desc "The updated system model."
-        field :system_model, non_null(:system_model)
-      end
-
-      middleware Absinthe.Relay.Node.ParseIDs,
-        system_model_id: :system_model,
-        hardware_type_id: :hardware_type
-
-      resolve &Resolvers.Devices.update_system_model/3
-    end
-
-    @desc "Deletes a system model."
-    payload field :delete_system_model do
-      input do
-        @desc "The ID of the system model to be deleted."
-        field :system_model_id, non_null(:id)
-      end
-
-      output do
-        @desc "The deleted system model."
-        field :system_model, non_null(:system_model)
-      end
-
-      middleware Absinthe.Relay.Node.ParseIDs, system_model_id: :system_model
-      resolve &Resolvers.Devices.delete_system_model/2
     end
   end
 end

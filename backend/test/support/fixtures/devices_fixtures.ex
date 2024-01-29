@@ -117,18 +117,25 @@ defmodule Edgehog.DevicesFixtures do
   Generate a system_model.
   """
   def system_model_fixture(opts \\ []) do
-    {hardware_type, opts} = Keyword.pop_lazy(opts, :hardware_type, &hardware_type_fixture/0)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    attrs =
+    {hardware_type_id, opts} =
+      Keyword.pop_lazy(opts, :hardware_type_id, fn ->
+        hardware_type_fixture(tenant: tenant)
+        |> Map.fetch!(:id)
+      end)
+
+    params =
       Enum.into(opts, %{
         handle: unique_system_model_handle(),
         name: unique_system_model_name(),
-        part_numbers: [unique_system_model_part_number()]
+        part_numbers: [unique_system_model_part_number()],
+        hardware_type_id: hardware_type_id
       })
 
-    {:ok, system_model} = Edgehog.Devices.create_system_model(hardware_type, attrs)
-
-    system_model
+    Edgehog.Devices.SystemModel
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Edgehog.Devices.create!()
   end
 
   @doc """

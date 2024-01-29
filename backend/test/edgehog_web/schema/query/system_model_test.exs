@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,196 +19,83 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.SystemModelTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
+
+  @moduletag :ported_to_ash
 
   import Edgehog.DevicesFixtures
+
+  alias Edgehog.Devices
 
   alias Edgehog.Devices.{
     SystemModel,
     SystemModelPartNumber
   }
 
-  describe "systemModel field" do
-    @query """
+  describe "systemModel query" do
+    test "returns system model if present", %{tenant: tenant} do
+      hardware_type = hardware_type_fixture(tenant: tenant)
+
+      fixture =
+        system_model_fixture(tenant: tenant, hardware_type_id: hardware_type.id)
+        |> Edgehog.Devices.load!(:part_number_strings)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      result = system_model_query(tenant: tenant, id: id)
+
+      refute Map.has_key?(result, :errors)
+      assert %{data: %{"systemModel" => system_model}} = result
+      assert system_model["name"] == fixture.name
+      assert system_model["handle"] == fixture.handle
+      assert length(system_model["partNumbers"]) == length(fixture.part_number_strings)
+
+      Enum.each(fixture.part_number_strings, fn pn ->
+        assert(%{"partNumber" => pn} in system_model["partNumbers"])
+      end)
+
+      assert system_model["hardwareType"]["id"] ==
+               AshGraphql.Resource.encode_relay_id(hardware_type)
+    end
+
+    test "returns nil if non existing", %{tenant: tenant} do
+      id = non_existing_system_model_id(tenant)
+      result = system_model_query(tenant: tenant, id: id)
+      assert %{data: %{"systemModel" => nil}} = result
+    end
+  end
+
+  defp non_existing_system_model_id(tenant) do
+    fixture = system_model_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Devices.destroy!(fixture)
+
+    id
+  end
+
+  defp system_model_query(opts) do
+    default_document = """
     query ($id: ID!) {
       systemModel(id: $id) {
         name
         handle
-        partNumbers
-        hardwareType {
-          name
+        partNumbers {
+          partNumber
         }
-        description
+        hardwareType {
+          id
+        }
       }
     }
     """
-    test "returns system model if present", %{conn: conn, api_path: api_path} do
-      hardware_type = hardware_type_fixture()
 
-      %SystemModel{
-        id: id,
-        name: name,
-        handle: handle,
-        part_numbers: [%SystemModelPartNumber{part_number: part_number}]
-      } = system_model_fixture(hardware_type: hardware_type)
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
 
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
+    variables = %{"id" => id}
 
-      conn = get(conn, api_path, query: @query, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
 
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "systemModel" => %{
-                   "name" => name,
-                   "handle" => handle,
-                   "partNumbers" => [part_number],
-                   "hardwareType" => %{
-                     "name" => hardware_type.name
-                   },
-                   "description" => nil
-                 }
-               }
-             }
-    end
-
-    test "returns not found if non existing", %{conn: conn, api_path: api_path} do
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, 1, EdgehogWeb.Schema)}
-
-      conn = get(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{"systemModel" => nil},
-               "errors" => [%{"code" => "not_found", "status_code" => 404}]
-             } = json_response(conn, 200)
-    end
-
-    test "returns the default locale description", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
-
-      %SystemModel{id: id} = system_model_fixture(description: description)
-
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
-
-      conn = get(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "systemModel" => %{
-                   "description" => "A system model"
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "returns the explicit locale description with a single language in accept-language", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
-
-      %SystemModel{id: id} = system_model_fixture(description: description)
-
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "it-IT")
-        |> get(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "systemModel" => %{
-                   "description" => "Un modello di sistema"
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "returns the explicit locale description with a complex accept-language header", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
-
-      %SystemModel{id: id} = system_model_fixture(description: description)
-
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "fr-FR;q=0.9, it-IT;q=0.5")
-        |> get(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "systemModel" => %{
-                   "description" => "Un modello di sistema"
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "returns description in the tenant's default locale for non existing locale", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
-
-      %SystemModel{id: id} = system_model_fixture(description: description)
-
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "fr-FR")
-        |> get(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "systemModel" => %{
-                   "description" => "A system model"
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "returns no description when both user and tenant's locale are missing", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      description = %{"it-IT" => "Un modello di sistema"}
-
-      %SystemModel{id: id} = system_model_fixture(description: description)
-
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)}
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "fr-FR")
-        |> get(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "systemModel" => %{
-                   "description" => nil
-                 }
-               }
-             } = json_response(conn, 200)
-    end
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 end
