@@ -108,11 +108,133 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       assert %{"partNumber" => "D"} in part_numbers
     end
 
-    test "returns error for invalid handle", %{
-      tenant: tenant,
-      system_model: system_model,
-      id: id
-    } do
+    test "allows saving a picture url", %{tenant: tenant, id: id} do
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          picture_url: "https://example.com/image.jpg"
+        )
+
+      assert %{"pictureUrl" => "https://example.com/image.jpg"} = extract_result!(result)
+    end
+
+    test "allows uploading a picture file", %{tenant: tenant, id: id} do
+      picture_url = "https://example.com/image.jpg"
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
+
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{"pictureUrl" => ^picture_url} = extract_result!(result)
+    end
+
+    test "tries to delete the old picture when uploading a new picture file, but ignores failure",
+         %{tenant: tenant} do
+      old_picture_url = "https://example.com/old_image.jpg"
+
+      system_model =
+        system_model_fixture(tenant: tenant, picture_url: old_picture_url)
+
+      id = AshGraphql.Resource.encode_relay_id(system_model)
+
+      new_picture_url = "https://example.com/new_image.jpg"
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:delete, fn _, ^old_picture_url -> {:error, :cannot_delete} end)
+      |> expect(:upload, fn _, _ -> {:ok, new_picture_url} end)
+
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{"pictureUrl" => ^new_picture_url} = extract_result!(result)
+    end
+
+    test "doesn't delete the old picture if the URL is the same as the old one", %{tenant: tenant} do
+      picture_url = "https://example.com/image.jpg"
+
+      system_model =
+        system_model_fixture(tenant: tenant, picture_url: picture_url)
+
+      id = AshGraphql.Resource.encode_relay_id(system_model)
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
+      |> expect(:delete, 0, fn _, _ -> :ok end)
+
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{"pictureUrl" => ^picture_url} = extract_result!(result)
+    end
+
+    test "cleans up the image for a failed update", %{tenant: tenant, id: id} do
+      duplicate = system_model_fixture(tenant: tenant)
+      picture_url = "https://example.com/image.jpg"
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
+      |> expect(:delete, fn _, ^picture_url -> :ok end)
+
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          handle: duplicate.handle,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert extract_error!(result)
+    end
+
+    test "returns error when passing both picture_file and picture_url", %{tenant: tenant, id: id} do
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          picture_url: "https://example.com/image.jpg",
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{
+               fields: [:picture_url],
+               message: "is mutually exclusive with picture_file"
+             } = extract_error!(result)
+    end
+
+    test "returns error when fails to update picture_file", %{tenant: tenant, id: id} do
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:upload, fn _, _ -> {:error, :no_space_left} end)
+      |> expect(:delete, 0, fn _, _ -> :ok end)
+
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{
+               fields: [:picture_file],
+               message: "failed to upload"
+             } = extract_error!(result)
+    end
+
+    test "returns error for invalid handle", %{tenant: tenant, id: id} do
       result =
         update_system_model_mutation(
           tenant: tenant,
@@ -230,6 +352,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
           id
           name
           handle
+          pictureUrl
           partNumbers {
             partNumber
           }
@@ -245,7 +368,9 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       %{
         "handle" => opts[:handle],
         "name" => opts[:name],
-        "partNumbers" => opts[:part_numbers]
+        "partNumbers" => opts[:part_numbers],
+        "pictureUrl" => opts[:picture_url],
+        "pictureFile" => opts[:picture_file] && "picture_file"
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
       |> Enum.into(%{})
@@ -254,7 +379,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     document = Keyword.get(opts, :document, default_document)
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    context =
+      %{tenant: tenant}
+      |> add_upload("picture_file", opts[:picture_file])
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
   end
 
   defp extract_error!(result) do

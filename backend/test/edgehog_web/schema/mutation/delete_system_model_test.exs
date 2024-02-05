@@ -50,6 +50,21 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
              |> Devices.exists?()
     end
 
+    test "tries to delete the picture if there's one, but ignores failure", %{tenant: tenant} do
+      picture_url = "https://example.com/image.jpg"
+
+      fixture = system_model_fixture(tenant: tenant, picture_url: picture_url)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:delete, fn _, ^picture_url -> {:error, :cannot_delete} end)
+
+      _ =
+        delete_system_model_mutation(tenant: tenant, id: id)
+        |> extract_result!()
+    end
+
     test "fails with non-existing id", %{tenant: tenant} do
       id = non_existing_system_model_id(tenant)
 
@@ -67,6 +82,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
           id
           name
           handle
+          pictureUrl
         }
       }
     }

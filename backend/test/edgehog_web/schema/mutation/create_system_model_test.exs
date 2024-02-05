@@ -49,6 +49,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
                "id" => _,
                "name" => "Foobar",
                "handle" => "foobar",
+               "pictureUrl" => nil,
                "partNumbers" => part_numbers,
                "hardwareType" => %{
                  "id" => ^hardware_type_id
@@ -58,6 +59,66 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
       assert length(part_numbers) == 2
       assert %{"partNumber" => "123"} in part_numbers
       assert %{"partNumber" => "456"} in part_numbers
+    end
+
+    test "allows saving a picture url", %{tenant: tenant} do
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          picture_url: "https://example.com/image.jpg"
+        )
+
+      assert %{"pictureUrl" => "https://example.com/image.jpg"} = extract_result!(result)
+    end
+
+    test "allows uploading a picture file", %{tenant: tenant} do
+      picture_url = "https://example.com/image.jpg"
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:upload, fn _, _ ->
+        {:ok, picture_url}
+      end)
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{"pictureUrl" => ^picture_url} = extract_result!(result)
+    end
+
+    test "returns error when passing both picture_file and picture_url", %{tenant: tenant} do
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          picture_url: "https://example.com/image.jpg",
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{
+               fields: [:picture_url],
+               message: "is mutually exclusive with picture_file"
+             } = extract_error!(result)
+    end
+
+    test "cleans up the image for a failed create", %{tenant: tenant} do
+      duplicate = system_model_fixture(tenant: tenant)
+
+      picture_url = "https://example.com/image.jpg"
+
+      Edgehog.Assets.SystemModelPictureMock
+      |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
+      |> expect(:delete, fn _, ^picture_url -> :ok end)
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          handle: duplicate.handle,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert extract_error!(result)
     end
 
     test "returns error for non-existing hardware type", %{tenant: tenant} do
@@ -152,6 +213,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
           id
           name
           handle
+          pictureUrl
           partNumbers {
             partNumber
           }
@@ -175,14 +237,23 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
       "hardwareTypeId" => hardware_type_id,
       "handle" => opts[:handle] || unique_system_model_handle(),
       "name" => opts[:name] || unique_system_model_name(),
-      "partNumbers" => opts[:part_numbers] || [unique_system_model_part_number()]
+      "partNumbers" => opts[:part_numbers] || [unique_system_model_part_number()],
+      "pictureUrl" => opts[:picture_url],
+      "pictureFile" => opts[:picture_file] && "picture_file"
     }
 
     variables = %{"input" => input}
 
     document = Keyword.get(opts, :document, default_document)
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    context =
+      %{tenant: tenant}
+      |> add_upload("picture_file", opts[:picture_file])
+
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: context
+    )
   end
 
   defp extract_error!(result) do

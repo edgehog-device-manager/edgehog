@@ -37,7 +37,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       hardware_type = hardware_type_fixture(tenant: tenant)
 
       fixture =
-        system_model_fixture(tenant: tenant, hardware_type_id: hardware_type.id)
+        system_model_fixture(
+          tenant: tenant,
+          hardware_type_id: hardware_type.id,
+          picture_url: "https://example.com/image.jpg"
+        )
         |> Edgehog.Devices.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
@@ -48,6 +52,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       assert %{data: %{"systemModel" => system_model}} = result
       assert system_model["name"] == fixture.name
       assert system_model["handle"] == fixture.handle
+      assert system_model["pictureUrl"] == fixture.picture_url
       assert length(system_model["partNumbers"]) == length(fixture.part_number_strings)
 
       Enum.each(fixture.part_number_strings, fn pn ->
@@ -79,6 +84,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       systemModel(id: $id) {
         name
         handle
+        pictureUrl
         partNumbers {
           partNumber
         }

@@ -24,7 +24,8 @@ defmodule Edgehog.Devices.SystemModel do
       AshGraphql.Resource
     ]
 
-  alias Edgehog.Validations
+  alias Edgehog.Devices.SystemModel.Changes
+  alias Edgehog.Devices.SystemModel.Validations
 
   resource do
     description """
@@ -81,6 +82,12 @@ defmodule Edgehog.Devices.SystemModel do
         constraints min_length: 1
       end
 
+      argument :picture_file, Edgehog.Types.Upload do
+        description "A picture representing the system model that will be uploaded to a bucket."
+      end
+
+      validate Validations.EitherPictureUrlOrPictureFile
+
       # TODO: see issue #228, which is still relevant
       change manage_relationship(:part_numbers,
                on_lookup: :relate,
@@ -90,6 +97,7 @@ defmodule Edgehog.Devices.SystemModel do
              )
 
       change manage_relationship(:hardware_type_id, :hardware_type, type: :append)
+      change Changes.HandlePictureUpload
     end
 
     update :update do
@@ -101,6 +109,12 @@ defmodule Edgehog.Devices.SystemModel do
         constraints min_length: 1
       end
 
+      argument :picture_file, Edgehog.Types.Upload do
+        description "A picture representing the system model that will be uploaded to a bucket."
+      end
+
+      validate Validations.EitherPictureUrlOrPictureFile
+
       change manage_relationship(:part_numbers,
                on_lookup: :relate,
                on_no_match: :create,
@@ -108,11 +122,16 @@ defmodule Edgehog.Devices.SystemModel do
                value_is_key: :part_number,
                use_identities: [:part_number_tenant_id]
              )
+
+      change Changes.HandlePictureUpload
+      change Changes.HandlePictureDeletion
     end
 
     destroy :destroy do
       description "Deletes a system model."
       primary? true
+
+      change {Changes.HandlePictureDeletion, force?: true}
     end
   end
 
@@ -135,7 +154,11 @@ defmodule Edgehog.Devices.SystemModel do
       allow_nil? false
     end
 
-    # TODO: localized description, picture upload
+    attribute :picture_url, :string do
+      description "A URL to a picture representing the system model."
+    end
+
+    # TODO: localized description
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
@@ -167,7 +190,7 @@ defmodule Edgehog.Devices.SystemModel do
   end
 
   validations do
-    validate Validations.slug(:handle)
+    validate Edgehog.Validations.slug(:handle)
   end
 
   postgres do

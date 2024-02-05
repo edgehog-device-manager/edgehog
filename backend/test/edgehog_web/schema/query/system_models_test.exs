@@ -39,13 +39,18 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       hardware_type = hardware_type_fixture(tenant: tenant)
 
       fixture =
-        system_model_fixture(tenant: tenant, hardware_type_id: hardware_type.id)
+        system_model_fixture(
+          tenant: tenant,
+          hardware_type_id: hardware_type.id,
+          picture_url: "https://example.com/image.jpg"
+        )
         |> Edgehog.Devices.load!(:part_number_strings)
 
       assert %{data: %{"systemModels" => [system_model]}} = system_models_query(tenant: tenant)
 
       assert system_model["name"] == fixture.name
       assert system_model["handle"] == fixture.handle
+      assert system_model["pictureUrl"] == fixture.picture_url
       assert length(system_model["partNumbers"]) == length(fixture.part_number_strings)
 
       Enum.each(fixture.part_number_strings, fn pn ->
@@ -104,6 +109,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         systemModels(filter: $filter, sort: $sort) {
           name
           handle
+          pictureUrl
           partNumbers {
             partNumber
           }
