@@ -92,6 +92,7 @@ config :edgehog, :ash_apis, [Edgehog.Astarte, Edgehog.Tenants]
 
 config :ash, :default_belongs_to_type, :integer
 config :ash_graphql, :default_managed_relationship_type_name_template, :action_name
+config :ash_graphql, :allow_non_null_mutation_arguments?, true
 
 resource_section_order = [
   :resource,
