@@ -29,7 +29,7 @@ import React, {
 import _ from "lodash";
 import Cookies from "js-cookie";
 
-import type { fetchGraphQL } from "api";
+import type { FetchGraphQL } from "api";
 import Spinner from "components/Spinner";
 
 type AuthConfig = {
@@ -39,9 +39,9 @@ type AuthConfig = {
 
 // Use a lightweight query at startup to test if authentication is valid
 const authQuery = `
-query Auth_getSystemModels_Query {
-    systemModels {
-        __typename
+  query Auth_getTenantInfo_Query {
+    tenantInfo {
+      __typename
     }
   }
 `;
@@ -99,7 +99,7 @@ const hasRequiredValues = (
 
 interface AuthProviderProps {
   children: React.ReactNode;
-  fetchGraphQL: typeof fetchGraphQL;
+  fetchGraphQL: FetchGraphQL;
 }
 
 const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
