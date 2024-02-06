@@ -23,6 +23,7 @@ defmodule Edgehog.Tenants do
     extensions: [AshGraphql.Api, AshJsonApi.Api]
 
   graphql do
+    root_level_errors? true
   end
 
   json_api do

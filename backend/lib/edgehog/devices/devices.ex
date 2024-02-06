@@ -29,6 +29,7 @@ defmodule Edgehog.Devices do
     ]
 
   graphql do
+    root_level_errors? true
   end
 
   resources do

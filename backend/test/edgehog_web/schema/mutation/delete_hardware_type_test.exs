@@ -42,7 +42,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
     test "fails with non-existing id", %{tenant: tenant} do
       result = delete_hardware_type_mutation(tenant: tenant, id: 123_789)
 
-      assert %{"fields" => ["id"], "message" => "could not be found"} = extract_error!(result)
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
     end
   end
 
@@ -52,13 +52,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
       deleteHardwareType(id: $id) {
         result {
           id
-        }
-        errors {
-          code
-          fields
-          message
-          shortMessage
-          vars
         }
       }
     }
@@ -77,11 +70,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
   defp extract_error!(result) do
     assert %{
              data: %{
-               "deleteHardwareType" => %{
-                 "result" => nil,
-                 "errors" => [error]
-               }
-             }
+               "deleteHardwareType" => nil
+             },
+             errors: [error]
            } = result
 
     error
@@ -94,8 +85,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
     assert %{
              data: %{
                "deleteHardwareType" => %{
-                 "result" => hardware_type,
-                 "errors" => []
+                 "result" => hardware_type
                }
              }
            } = result

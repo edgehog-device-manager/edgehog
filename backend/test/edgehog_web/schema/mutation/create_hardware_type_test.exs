@@ -59,7 +59,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
           handle: "123Invalid$"
         )
 
-      assert %{"fields" => ["handle"], "message" => "should only contain" <> _} =
+      assert %{fields: [:handle], message: "should only contain" <> _} =
                extract_error!(result)
     end
 
@@ -70,7 +70,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
           part_numbers: []
         )
 
-      assert %{"fields" => ["part_numbers"], "message" => "must have 1 or more items"} =
+      assert %{fields: [:part_numbers], message: "must have 1 or more items"} =
                extract_error!(result)
     end
 
@@ -83,7 +83,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
           name: fixture.name
         )
 
-      assert %{"fields" => ["name"], "message" => "has already been taken"} =
+      assert %{fields: [:name], message: "has already been taken"} =
                extract_error!(result)
     end
 
@@ -96,7 +96,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
           handle: fixture.handle
         )
 
-      assert %{"fields" => ["handle"], "message" => "has already been taken"} =
+      assert %{fields: [:handle], message: "has already been taken"} =
                extract_error!(result)
     end
 
@@ -132,13 +132,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
             partNumber
           }
         }
-        errors {
-          code
-          fields
-          message
-          shortMessage
-          vars
-        }
       }
     }
     """
@@ -161,11 +154,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
   defp extract_error!(result) do
     assert %{
              data: %{
-               "createHardwareType" => %{
-                 "result" => nil,
-                 "errors" => [error]
-               }
-             }
+               "createHardwareType" => nil
+             },
+             errors: [error]
            } = result
 
     error
@@ -178,8 +169,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
     assert %{
              data: %{
                "createHardwareType" => %{
-                 "result" => hardware_type,
-                 "errors" => []
+                 "result" => hardware_type
                }
              }
            } = result
