@@ -23,9 +23,14 @@ defmodule EdgehogWeb.GraphqlCase do
 
   using do
     quote do
+      import Mox
       import EdgehogWeb.GraphqlCase
     end
   end
+
+  import Mox
+
+  setup :verify_on_exit!
 
   setup tags do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
