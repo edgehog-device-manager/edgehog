@@ -96,6 +96,7 @@ config :edgehog, :ash_apis, [
 
 config :ash, :default_belongs_to_type, :integer
 config :ash, :custom_types, id: Edgehog.Types.Id
+config :ash, :utc_datetime_type, :datetime
 config :ash_graphql, :default_managed_relationship_type_name_template, :action_name
 config :ash_graphql, :allow_non_null_mutation_arguments?, true
 

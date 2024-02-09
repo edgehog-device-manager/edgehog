@@ -673,13 +673,4 @@ defmodule Edgehog.UpdateCampaignsTest do
       [{pid, _}] -> {:ok, pid}
     end
   end
-
-  defp device_fixture do
-    # Helper to avoid having to manually create the cluster and realm
-    # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
-
-    AstarteFixtures.cluster_fixture()
-    |> AstarteFixtures.realm_fixture()
-    |> DevicesFixtures.device_fixture()
-  end
 end

@@ -22,6 +22,7 @@ defmodule Edgehog.Devices.Registry do
   use Ash.Registry
 
   entries do
+    entry Edgehog.Devices.Device
     entry Edgehog.Devices.HardwareType
     entry Edgehog.Devices.HardwareTypePartNumber
     entry Edgehog.Devices.SystemModel
