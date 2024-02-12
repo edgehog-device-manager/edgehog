@@ -42,6 +42,36 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["online"] == fixture.online
     end
 
+    test "queries associated system model", %{tenant: tenant} do
+      part_number = "foo123"
+      system_model = system_model_fixture(tenant: tenant, part_numbers: [part_number])
+      system_model_id = AshGraphql.Resource.encode_relay_id(system_model)
+
+      fixture = device_fixture(tenant: tenant, part_number: part_number)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          systemModel {
+            id
+            partNumbers {
+              partNumber
+            }
+          }
+        }
+      }
+      """
+
+      device =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert device["systemModel"]["id"] == system_model_id
+      assert device["systemModel"]["partNumbers"] == [%{"partNumber" => part_number}]
+    end
+
     test "returns nil if non existing", %{tenant: tenant} do
       id = non_existing_device_id(tenant)
       result = device_query(tenant: tenant, id: id)

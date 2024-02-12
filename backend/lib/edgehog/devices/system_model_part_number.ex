@@ -48,6 +48,11 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
 
   relationships do
     belongs_to :system_model, Edgehog.Devices.SystemModel
+
+    has_many :devices, Edgehog.Devices.Device do
+      source_attribute :part_number
+      destination_attribute :part_number
+    end
   end
 
   identities do

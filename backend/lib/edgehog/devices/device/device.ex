@@ -24,6 +24,8 @@ defmodule Edgehog.Devices.Device do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Devices.Device.ManualRelationships
+
   resource do
     description """
     Denotes a device instance that connects and exchanges data.
@@ -115,6 +117,12 @@ defmodule Edgehog.Devices.Device do
       attribute_type :string
       source_attribute :part_number
       destination_attribute :part_number
+      attribute_writable? true
+    end
+
+    has_one :system_model, Edgehog.Devices.SystemModel do
+      description "The system model of the device"
+      manual ManualRelationships.SystemModel
     end
   end
 

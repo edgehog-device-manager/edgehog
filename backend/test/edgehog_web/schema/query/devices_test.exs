@@ -40,6 +40,46 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert device["online"] == fixture.online
     end
 
+    test "queries associated system models", %{tenant: tenant} do
+      part_number_1 = "foo123"
+      _ = system_model_fixture(tenant: tenant, part_numbers: [part_number_1])
+
+      part_number_2 = "bar456"
+      _ = system_model_fixture(tenant: tenant, part_numbers: [part_number_2])
+
+      _ = device_fixture(tenant: tenant, part_number: part_number_1)
+      _ = device_fixture(tenant: tenant, part_number: part_number_2)
+      _ = device_fixture(tenant: tenant, part_number: part_number_2)
+      _ = device_fixture(tenant: tenant)
+
+      document = """
+      query {
+        devices {
+          systemModel {
+            id
+            partNumbers {
+              partNumber
+            }
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert Enum.count(devices, fn device ->
+               %{"partNumber" => part_number_1} in (device["systemModel"]["partNumbers"] || [])
+             end) == 1
+
+      assert Enum.count(devices, fn device ->
+               %{"partNumber" => part_number_2} in (device["systemModel"]["partNumbers"] || [])
+             end) == 2
+
+      assert Enum.count(devices, fn device -> device["systemModel"] == nil end) == 1
+    end
+
     test "allows filtering", %{tenant: tenant} do
       _ = device_fixture(tenant: tenant, name: "online-1", online: true)
       _ = device_fixture(tenant: tenant, name: "offline-1", online: false)
