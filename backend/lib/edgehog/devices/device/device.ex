@@ -24,6 +24,7 @@ defmodule Edgehog.Devices.Device do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.ManualRelationships
 
   resource do
@@ -123,6 +124,14 @@ defmodule Edgehog.Devices.Device do
     has_one :system_model, Edgehog.Devices.SystemModel do
       description "The system model of the device"
       manual ManualRelationships.SystemModel
+    end
+  end
+
+  calculations do
+    calculate :appengine_client, :struct, Calculations.AppEngineClient do
+      constraints instance_of: Astarte.Client.AppEngine
+      private? true
+      filterable? false
     end
   end
 
