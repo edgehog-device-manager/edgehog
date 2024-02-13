@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,75 +19,79 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
+  alias Edgehog.Devices
   alias Edgehog.Devices.HardwareType
 
-  describe "deleteHardwareType field" do
-    import Edgehog.DevicesFixtures
+  import Edgehog.DevicesFixtures
 
-    @query """
-    mutation DeleteHardwareType($input: DeleteHardwareTypeInput!) {
-      deleteHardwareType(input: $input) {
-        hardwareType {
+  @moduletag :ported_to_ash
+
+  describe "deleteHardwareType field" do
+    test "deletes hardware type", %{tenant: tenant} do
+      fixture = hardware_type_fixture(tenant: tenant)
+
+      result = delete_hardware_type_mutation(tenant: tenant, id: fixture.id)
+
+      hardware_type = extract_result!(result)
+
+      assert hardware_type["id"] == to_string(fixture.id)
+    end
+
+    test "fails with non-existing id", %{tenant: tenant} do
+      result = delete_hardware_type_mutation(tenant: tenant, id: 123_789)
+
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+  end
+
+  defp delete_hardware_type_mutation(opts) do
+    default_document = """
+    mutation DeleteHardwareType($id: ID!) {
+      deleteHardwareType(id: $id) {
+        result {
           id
-          handle
-          name
-          partNumbers
         }
       }
     }
     """
 
-    test "deletes hardware type", %{conn: conn, api_path: api_path} do
-      name = "Foobaz"
-      handle = "foobaz"
-      part_number = "HT-1234"
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
 
-      %HardwareType{id: id} =
-        hardware_type_fixture(
-          name: name,
-          handle: handle,
-          part_numbers: [part_number]
-        )
+    variables = %{"id" => id}
 
-      id = Absinthe.Relay.Node.to_global_id(:hardware_type, id, EdgehogWeb.Schema)
+    document = Keyword.get(opts, :document, default_document)
 
-      variables = %{
-        input: %{
-          hardware_type_id: id
-        }
-      }
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+  defp extract_error!(result) do
+    assert %{
+             data: %{
+               "deleteHardwareType" => nil
+             },
+             errors: [error]
+           } = result
 
-      assert %{
-               "data" => %{
-                 "deleteHardwareType" => %{
-                   "hardwareType" => %{
-                     "id" => ^id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "partNumbers" => [^part_number]
-                   }
-                 }
+    error
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "deleteHardwareType" => %{
+                 "result" => hardware_type
                }
-             } = json_response(conn, 200)
-    end
+             }
+           } = result
 
-    test "fails with non-existing id", %{conn: conn, api_path: api_path} do
-      id = Absinthe.Relay.Node.to_global_id(:hardware_type, 10_000_000, EdgehogWeb.Schema)
+    assert hardware_type != nil
 
-      variables = %{
-        input: %{
-          hardware_type_id: id
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
-               json_response(conn, 200)
-    end
+    hardware_type
   end
 end

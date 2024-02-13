@@ -23,6 +23,8 @@ defmodule Edgehog.Error do
   Module used to normalize all errors in Edghog, so that they can be shown by the API.
   """
 
+  # TODO: Remove this once it's not a compile dependency anymore
+
   require Logger
   alias __MODULE__
 

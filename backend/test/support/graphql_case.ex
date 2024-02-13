@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Tenants do
-  use Ash.Api,
-    extensions: [AshGraphql.Api, AshJsonApi.Api]
+defmodule EdgehogWeb.GraphqlCase do
+  use ExUnit.CaseTemplate
 
-  graphql do
-    root_level_errors? true
+  using do
+    quote do
+      import EdgehogWeb.GraphqlCase
+    end
   end
 
-  json_api do
-    prefix "/admin-api/v1"
-    log_errors? false
-  end
+  setup tags do
+    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
+    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
 
-  resources do
-    registry Edgehog.Tenants.Registry
+    %{tenant: Edgehog.TenantsFixtures.tenant_fixture()}
   end
 end

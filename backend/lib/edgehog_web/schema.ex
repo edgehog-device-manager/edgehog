@@ -35,22 +35,13 @@ defmodule EdgehogWeb.Schema do
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
-  @apis [Edgehog.Tenants]
+  @apis [Edgehog.Devices, Edgehog.Tenants]
 
   # TODO: remove define_relay_types?: false once we convert everything to Ash
   use AshGraphql, apis: @apis, define_relay_types?: false
 
   alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
-
-  def middleware(middleware, _field, %Absinthe.Type.Object{identifier: type})
-      when type in [:query, :subscription, :mutation] do
-    middleware ++ [Middleware.ErrorHandler]
-  end
-
-  def middleware(middleware, _field, _object) do
-    middleware
-  end
 
   node interface do
     resolve_type fn
