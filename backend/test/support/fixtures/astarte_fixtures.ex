@@ -148,4 +148,11 @@ defmodule Edgehog.AstarteFixtures do
       ]
     }
   end
+
+  def os_info_fixture(opts \\ []) do
+    %Edgehog.Astarte.Device.OSInfo{
+      name: opts[:name] || "esp-idf",
+      version: opts[:version] || "3.0.0"
+    }
+  end
 end

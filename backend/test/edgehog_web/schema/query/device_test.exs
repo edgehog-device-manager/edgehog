@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
   @moduletag :ported_to_ash
 
+  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Devices
@@ -70,6 +71,36 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert device["systemModel"]["id"] == system_model_id
       assert device["systemModel"]["partNumbers"] == [%{"partNumber" => part_number}]
+    end
+
+    test "queries OS info", %{tenant: tenant} do
+      fixture = device_fixture(tenant: tenant)
+      device_id = fixture.device_id
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      Edgehog.Astarte.Device.OSInfoMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, os_info_fixture(name: "foo", version: "3.0.0")}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          osInfo {
+            name
+            version
+          }
+        }
+      }
+      """
+
+      device =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert device["osInfo"]["name"] == "foo"
+      assert device["osInfo"]["version"] == "3.0.0"
     end
 
     test "returns nil if non existing", %{tenant: tenant} do

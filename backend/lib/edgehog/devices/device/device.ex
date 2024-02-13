@@ -26,6 +26,7 @@ defmodule Edgehog.Devices.Device do
 
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.ManualRelationships
+  alias Edgehog.Devices.Device.Types
 
   resource do
     description """
@@ -132,6 +133,10 @@ defmodule Edgehog.Devices.Device do
       constraints instance_of: Astarte.Client.AppEngine
       private? true
       filterable? false
+    end
+
+    calculate :os_info, Types.OSInfo do
+      calculation {Calculations.AstarteInterfaceValue, value_id: :os_info}
     end
   end
 

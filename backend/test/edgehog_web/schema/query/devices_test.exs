@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
   @moduletag :ported_to_ash
 
+  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
   describe "devices query" do
@@ -107,6 +108,47 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       assert [%{"name" => "c"}, %{"name" => "b"}, %{"name" => "a"}] =
                devices_query(tenant: tenant, sort: sort)
                |> extract_result!()
+    end
+
+    test "queries OS info", %{tenant: tenant} do
+      fixture_1 = device_fixture(tenant: tenant)
+      device_id_1 = fixture_1.device_id
+      fixture_2 = device_fixture(tenant: tenant)
+      device_id_2 = fixture_2.device_id
+
+      Edgehog.Astarte.Device.OSInfoMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, os_info_fixture(name: "foo_1", version: "1.0.0")}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, os_info_fixture(name: "foo_2", version: "2.0.0")}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          osInfo {
+            name
+            version
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "osInfo" => %{"name" => "foo_1", "version" => "1.0.0"}
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "osInfo" => %{"name" => "foo_2", "version" => "2.0.0"}
+             } in devices
     end
   end
 
