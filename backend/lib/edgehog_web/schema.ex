@@ -38,7 +38,10 @@ defmodule EdgehogWeb.Schema do
   @apis [Edgehog.Devices, Edgehog.Tenants]
 
   # TODO: remove define_relay_types?: false once we convert everything to Ash
-  use AshGraphql, apis: @apis, define_relay_types?: false
+  use AshGraphql,
+    apis: @apis,
+    define_relay_types?: false,
+    relay_ids?: true
 
   alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
