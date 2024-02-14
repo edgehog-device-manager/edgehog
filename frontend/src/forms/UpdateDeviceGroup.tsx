@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,6 +30,16 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { deviceGroupHandleSchema, yup } from "forms";
+import { graphql, useFragment } from "react-relay/hooks";
+import type { UpdateDeviceGroup_DeviceGroupFragment$key } from "api/__generated__/UpdateDeviceGroup_DeviceGroupFragment.graphql";
+
+const UPDATE_DEVICE_GROUP_FRAGMENT = graphql`
+  fragment UpdateDeviceGroup_DeviceGroupFragment on DeviceGroup {
+    name
+    handle
+    selector
+  }
+`;
 
 const FormRow = ({
   id,
@@ -63,25 +73,30 @@ const deviceGroupSchema = yup
   .required();
 
 type Props = {
-  initialData: DeviceGroupData;
+  deviceGroupRef: UpdateDeviceGroup_DeviceGroupFragment$key;
   isLoading?: boolean;
   onSubmit: (data: DeviceGroupData) => void;
   onDelete: () => void;
 };
 
 const UpdateDeviceGroupForm = ({
-  initialData,
+  deviceGroupRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: Props) => {
+  const deviceGroupData = useFragment(
+    UPDATE_DEVICE_GROUP_FRAGMENT,
+    deviceGroupRef,
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<DeviceGroupData>({
     mode: "onTouched",
-    defaultValues: initialData,
+    defaultValues: deviceGroupData,
     resolver: yupResolver(deviceGroupSchema),
   });
 
