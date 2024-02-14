@@ -103,6 +103,36 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["osInfo"]["version"] == "3.0.0"
     end
 
+    test "queries WiFi scan results", %{tenant: tenant} do
+      fixture = device_fixture(tenant: tenant)
+      device_id = fixture.device_id
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      Edgehog.Astarte.Device.WiFiScanResultMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, wifi_scan_results_fixture(channel: 7, essid: "MyAP")}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          wifiScanResults {
+            channel
+            essid
+          }
+        }
+      }
+      """
+
+      assert %{"wifiScanResults" => [wifi_scan_result]} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      assert wifi_scan_result["channel"] == 7
+      assert wifi_scan_result["essid"] == "MyAP"
+    end
+
     test "returns nil if non existing", %{tenant: tenant} do
       id = non_existing_device_id(tenant)
       result = device_query(tenant: tenant, id: id)

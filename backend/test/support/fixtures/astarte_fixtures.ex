@@ -155,4 +155,17 @@ defmodule Edgehog.AstarteFixtures do
       version: opts[:version] || "3.0.0"
     }
   end
+
+  def wifi_scan_results_fixture(opts \\ []) do
+    [
+      %Edgehog.Astarte.Device.WiFiScanResult{
+        channel: opts[:channel] || 11,
+        connected: Keyword.get(opts, :connected, true),
+        essid: opts[:essid] || "MyEssid",
+        mac_address: opts[:mac_address] || "01:23:45:67:89:ab",
+        rssi: opts[:rssi] || -43,
+        timestamp: opts[:timestamp] || ~U[2021-11-15 11:44:57.432516Z]
+      }
+    ]
+  end
 end

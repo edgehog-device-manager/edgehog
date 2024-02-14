@@ -150,6 +150,47 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
                "osInfo" => %{"name" => "foo_2", "version" => "2.0.0"}
              } in devices
     end
+
+    test "queries WiFi scan results", %{tenant: tenant} do
+      fixture_1 = device_fixture(tenant: tenant)
+      device_id_1 = fixture_1.device_id
+      fixture_2 = device_fixture(tenant: tenant)
+      device_id_2 = fixture_2.device_id
+
+      Edgehog.Astarte.Device.WiFiScanResultMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, wifi_scan_results_fixture(connected: true, rssi: -40)}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, wifi_scan_results_fixture(connected: false, rssi: -78)}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          wifiScanResults {
+            connected
+            rssi
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "wifiScanResults" => [%{"connected" => true, "rssi" => -40}]
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "wifiScanResults" => [%{"connected" => false, "rssi" => -78}]
+             } in devices
+    end
   end
 
   defp devices_query(opts) do
