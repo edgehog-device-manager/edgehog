@@ -115,6 +115,32 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["baseImage"]["version"] == "1.2.5"
     end
 
+    test "Battery Status", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.BatteryStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, battery_status_fixture(level_percentage: 29, status: "Charging")}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          deviceId
+          batteryStatus {
+            levelPercentage
+            status
+          }
+        }
+      }
+      """
+
+      assert %{"batteryStatus" => [battery_status]} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      assert battery_status["levelPercentage"] == 29
+      assert battery_status["status"] == "CHARGING"
+    end
+
     test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.OSInfoMock
       |> expect(:get, fn _client, ^device_id ->

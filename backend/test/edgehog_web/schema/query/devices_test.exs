@@ -159,6 +159,44 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
+    test "Battery Status", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.BatteryStatusMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, battery_status_fixture(level_percentage: 29.0, status: "Charging")}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, battery_status_fixture(level_percentage: 81.0, status: "Discharging")}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          batteryStatus {
+            levelPercentage
+            status
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "batteryStatus" => [%{"levelPercentage" => 29.0, "status" => "CHARGING"}]
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "batteryStatus" => [%{"levelPercentage" => 81.0, "status" => "DISCHARGING"}]
+             } in devices
+    end
+
     test "OS info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 

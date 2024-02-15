@@ -159,6 +159,17 @@ defmodule Edgehog.AstarteFixtures do
     }
   end
 
+  def battery_status_fixture(opts \\ []) do
+    [
+      %Edgehog.Astarte.Device.BatteryStatus.BatterySlot{
+        slot: opts[:slot] || "Main slot",
+        level_percentage: opts[:level_percentage] || 80.3,
+        level_absolute_error: opts[:level_absolute_error] || 0.1,
+        status: opts[:status] || "Charging"
+      }
+    ]
+  end
+
   def os_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.OSInfo{
       name: opts[:name] || "esp-idf",
