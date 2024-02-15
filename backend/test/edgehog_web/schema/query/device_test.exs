@@ -141,6 +141,37 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert battery_status["status"] == "CHARGING"
     end
 
+    test "Cellular Connection", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.CellularConnectionMock
+      |> expect(:get_modem_properties, fn _client, ^device_id ->
+        {:ok, modem_properties_fixture(slot: "1", imei: "1234")}
+      end)
+      |> expect(:get_modem_status, fn _client, ^device_id ->
+        {:ok, modem_status_fixture(slot: "1", mobile_country_code: 222)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          deviceId
+          cellularConnection {
+            slot
+            imei
+            mobileCountryCode
+          }
+        }
+      }
+      """
+
+      assert %{"cellularConnection" => [modem]} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      assert modem["slot"] == "1"
+      assert modem["imei"] == "1234"
+      assert modem["mobileCountryCode"] == 222
+    end
+
     test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.OSInfoMock
       |> expect(:get, fn _client, ^device_id ->

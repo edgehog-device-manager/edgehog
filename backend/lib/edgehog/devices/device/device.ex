@@ -42,7 +42,12 @@ defmodule Edgehog.Devices.Device do
   graphql do
     type :device
 
-    hide_fields [:tenant, :part_number_strings]
+    hide_fields [
+      :tenant,
+      :part_number_strings,
+      :modem_properties,
+      :modem_status
+    ]
 
     queries do
       get :device, :get
@@ -135,6 +140,10 @@ defmodule Edgehog.Devices.Device do
       filterable? false
     end
 
+    calculate :cellular_connection, {:array, Types.Modem} do
+      calculation Calculations.CellularConnection
+    end
+
     calculate :base_image, Types.BaseImage do
       calculation {Calculations.AstarteInterfaceValue, value_id: :base_image_info}
     end
@@ -149,6 +158,18 @@ defmodule Edgehog.Devices.Device do
 
     calculate :wifi_scan_results, {:array, Types.WiFiScanResult} do
       calculation {Calculations.AstarteInterfaceValue, value_id: :wifi_scan_result}
+    end
+
+    # The following Astarte values don't have a custom type because they're not exposed via GraphQL
+    # but they're used to synthesize other values
+    calculate :modem_properties, {:array, :struct} do
+      constraints items: [instance_of: Edgehog.Astarte.Device.CellularConnection.ModemProperties]
+      calculation {Calculations.AstarteInterfaceValue, value_id: :modem_properties}
+    end
+
+    calculate :modem_status, {:array, :struct} do
+      constraints items: [instance_of: Edgehog.Astarte.Device.CellularConnection.ModemStatus]
+      calculation {Calculations.AstarteInterfaceValue, value_id: :modem_status}
     end
   end
 

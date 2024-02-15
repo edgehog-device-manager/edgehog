@@ -55,6 +55,12 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                     Edgehog.Astarte.Device.BatteryStatus
                   )
 
+  @cellular_connection Application.compile_env(
+                         :edgehog,
+                         :astarte_cellular_connection_module,
+                         Edgehog.Astarte.Device.CellularConnection
+                       )
+
   @os_info Application.compile_env(
              :edgehog,
              :astarte_os_info_module,
@@ -69,6 +75,8 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
 
   defp value_id_to_fetch_fun(:base_image_info), do: &@base_image.get/2
   defp value_id_to_fetch_fun(:battery_status), do: &@battery_status.get/2
+  defp value_id_to_fetch_fun(:modem_properties), do: &@cellular_connection.get_modem_properties/2
+  defp value_id_to_fetch_fun(:modem_status), do: &@cellular_connection.get_modem_status/2
   defp value_id_to_fetch_fun(:os_info), do: &@os_info.get/2
   defp value_id_to_fetch_fun(:wifi_scan_result), do: &@wifi_scan_result.get/2
 end

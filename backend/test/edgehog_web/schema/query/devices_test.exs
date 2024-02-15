@@ -197,6 +197,55 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
+    test "Cellular Connection", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.CellularConnectionMock
+      |> expect(:get_modem_properties, fn _client, ^device_id_1 ->
+        {:ok, modem_properties_fixture(slot: "1", imei: "1234")}
+      end)
+      |> expect(:get_modem_status, fn _client, ^device_id_1 ->
+        {:ok, modem_status_fixture(slot: "1", mobile_country_code: 222)}
+      end)
+      |> expect(:get_modem_properties, fn _client, ^device_id_2 ->
+        {:ok, modem_properties_fixture(slot: "2", imei: "5678")}
+      end)
+      |> expect(:get_modem_status, fn _client, ^device_id_2 ->
+        {:ok, modem_status_fixture(slot: "2", mobile_country_code: 622)}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          cellularConnection {
+            slot
+            imei
+            mobileCountryCode
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "cellularConnection" => [
+                 %{"slot" => "1", "imei" => "1234", "mobileCountryCode" => 222}
+               ]
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "cellularConnection" => [
+                 %{"slot" => "2", "imei" => "5678", "mobileCountryCode" => 622}
+               ]
+             } in devices
+    end
+
     test "OS info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 

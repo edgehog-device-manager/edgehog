@@ -170,6 +170,33 @@ defmodule Edgehog.AstarteFixtures do
     ]
   end
 
+  def modem_properties_fixture(opts \\ []) do
+    [
+      %Edgehog.Astarte.Device.CellularConnection.ModemProperties{
+        slot: opts[:slot] || "modem_1",
+        apn: opts[:apn] || "company.com",
+        imei: opts[:imei] || "509504877678976",
+        imsi: opts[:imsi] || "313460000000001"
+      }
+    ]
+  end
+
+  def modem_status_fixture(opts \\ []) do
+    [
+      %Edgehog.Astarte.Device.CellularConnection.ModemStatus{
+        slot: opts[:slot] || "modem_1",
+        carrier: opts[:carrier] || "Carrier",
+        cell_id: opts[:cell_id] || 170_402_199,
+        mobile_country_code: opts[:mobile_country_code] || 310,
+        mobile_network_code: opts[:mobile_network_code] || 410,
+        local_area_code: opts[:local_area_code] || 35_632,
+        registration_status: opts[:registration_status] || "Registered",
+        rssi: opts[:rssi] || -60,
+        technology: opts[:technology] || "GSM"
+      }
+    ]
+  end
+
   def os_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.OSInfo{
       name: opts[:name] || "esp-idf",
