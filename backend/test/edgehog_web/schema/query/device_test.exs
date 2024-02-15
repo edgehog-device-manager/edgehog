@@ -73,12 +73,49 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["systemModel"]["partNumbers"] == [%{"partNumber" => part_number}]
     end
 
-    test "queries OS info", %{tenant: tenant} do
+    test "returns nil if non existing", %{tenant: tenant} do
+      id = non_existing_device_id(tenant)
+      result = device_query(tenant: tenant, id: id)
+      assert %{data: %{"device" => nil}} = result
+    end
+  end
+
+  describe "can retrieve from Astarte" do
+    setup %{tenant: tenant} do
       fixture = device_fixture(tenant: tenant)
       device_id = fixture.device_id
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
+      %{device: fixture, device_id: device_id, tenant: tenant, id: id}
+    end
+
+    test "Base Image info", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.BaseImageMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, base_image_info_fixture(name: "my-image", version: "1.2.5")}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          baseImage {
+            name
+            version
+          }
+        }
+      }
+      """
+
+      device =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert device["baseImage"]["name"] == "my-image"
+      assert device["baseImage"]["version"] == "1.2.5"
+    end
+
+    test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.OSInfoMock
       |> expect(:get, fn _client, ^device_id ->
         {:ok, os_info_fixture(name: "foo", version: "3.0.0")}
@@ -103,12 +140,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["osInfo"]["version"] == "3.0.0"
     end
 
-    test "queries WiFi scan results", %{tenant: tenant} do
-      fixture = device_fixture(tenant: tenant)
-      device_id = fixture.device_id
-
-      id = AshGraphql.Resource.encode_relay_id(fixture)
-
+    test "WiFi scan results", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.WiFiScanResultMock
       |> expect(:get, fn _client, ^device_id ->
         {:ok, wifi_scan_results_fixture(channel: 7, essid: "MyAP")}
@@ -131,12 +163,6 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert wifi_scan_result["channel"] == 7
       assert wifi_scan_result["essid"] == "MyAP"
-    end
-
-    test "returns nil if non existing", %{tenant: tenant} do
-      id = non_existing_device_id(tenant)
-      result = device_query(tenant: tenant, id: id)
-      assert %{data: %{"device" => nil}} = result
     end
   end
 

@@ -149,6 +149,16 @@ defmodule Edgehog.AstarteFixtures do
     }
   end
 
+  def base_image_info_fixture(opts \\ []) do
+    %Edgehog.Astarte.Device.BaseImage{
+      name: opts[:name] || "esp-idf",
+      version: opts[:version] || "0.1.0",
+      build_id: opts[:build_id] || "2022-01-01 12:00:00",
+      fingerprint:
+        opts[:fingerprint] || "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
+    }
+  end
+
   def os_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.OSInfo{
       name: opts[:name] || "esp-idf",

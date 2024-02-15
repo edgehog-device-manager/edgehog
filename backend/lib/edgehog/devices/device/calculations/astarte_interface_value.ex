@@ -21,18 +21,6 @@
 defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
   use Ash.Calculation
 
-  @os_info Application.compile_env(
-             :edgehog,
-             :astarte_os_info_module,
-             Edgehog.Astarte.Device.OSInfo
-           )
-
-  @wifi_scan_result Application.compile_env(
-                      :edgehog,
-                      :astarte_wifi_scan_result_module,
-                      Edgehog.Astarte.Device.WiFiScanResult
-                    )
-
   @impl true
   def load(_query, _opts, _context) do
     [:device_id, :appengine_client]
@@ -55,6 +43,25 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
     end)
   end
 
+  @base_image Application.compile_env(
+                :edgehog,
+                :astarte_base_image_module,
+                Edgehog.Astarte.Device.BaseImage
+              )
+
+  @os_info Application.compile_env(
+             :edgehog,
+             :astarte_os_info_module,
+             Edgehog.Astarte.Device.OSInfo
+           )
+
+  @wifi_scan_result Application.compile_env(
+                      :edgehog,
+                      :astarte_wifi_scan_result_module,
+                      Edgehog.Astarte.Device.WiFiScanResult
+                    )
+
+  defp value_id_to_fetch_fun(:base_image_info), do: &@base_image.get/2
   defp value_id_to_fetch_fun(:os_info), do: &@os_info.get/2
   defp value_id_to_fetch_fun(:wifi_scan_result), do: &@wifi_scan_result.get/2
 end

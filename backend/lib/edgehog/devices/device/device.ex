@@ -135,6 +135,10 @@ defmodule Edgehog.Devices.Device do
       filterable? false
     end
 
+    calculate :base_image, Types.BaseImage do
+      calculation {Calculations.AstarteInterfaceValue, value_id: :base_image_info}
+    end
+
     calculate :os_info, Types.OSInfo do
       calculation {Calculations.AstarteInterfaceValue, value_id: :os_info}
     end

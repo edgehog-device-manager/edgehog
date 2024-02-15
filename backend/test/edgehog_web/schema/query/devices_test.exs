@@ -109,12 +109,58 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
                devices_query(tenant: tenant, sort: sort)
                |> extract_result!()
     end
+  end
 
-    test "queries OS info", %{tenant: tenant} do
+  describe "can retrieve from Astarte" do
+    setup %{tenant: tenant} do
       fixture_1 = device_fixture(tenant: tenant)
       device_id_1 = fixture_1.device_id
       fixture_2 = device_fixture(tenant: tenant)
       device_id_2 = fixture_2.device_id
+
+      %{device_id_1: device_id_1, device_id_2: device_id_2, tenant: tenant}
+    end
+
+    test "Base Image info", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.BaseImageMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, os_info_fixture(name: "foo", version: "1.0.0")}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, os_info_fixture(name: "bar", version: "2.0.0")}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          baseImage {
+            name
+            version
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "baseImage" => %{"name" => "foo", "version" => "1.0.0"}
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "baseImage" => %{"name" => "bar", "version" => "2.0.0"}
+             } in devices
+    end
+
+    test "OS info", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.OSInfoMock
       |> expect(:get, fn _client, ^device_id_1 ->
@@ -151,11 +197,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
-    test "queries WiFi scan results", %{tenant: tenant} do
-      fixture_1 = device_fixture(tenant: tenant)
-      device_id_1 = fixture_1.device_id
-      fixture_2 = device_fixture(tenant: tenant)
-      device_id_2 = fixture_2.device_id
+    test "queries WiFi scan results", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.WiFiScanResultMock
       |> expect(:get, fn _client, ^device_id_1 ->
