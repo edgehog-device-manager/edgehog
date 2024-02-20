@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ defmodule EdgehogWeb.Schema.CapabilitiesTypes do
     @desc "The device supports commands, for example the rebooting command."
     value :commands
     @desc "The device can be geolocated."
+    value :remote_terminal
+    @desc "The device supports remote terminal sessions."
     value :geolocation
     @desc "The device provides information about its hardware."
     value :hardware_info
