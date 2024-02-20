@@ -126,7 +126,6 @@ const DEVICE_LOCATION_FRAGMENT = graphql`
     location {
       latitude
       longitude
-      accuracy
       address
       timestamp
     }
