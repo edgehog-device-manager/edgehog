@@ -36,4 +36,19 @@ defmodule EdgehogWeb.Resolvers.ForwarderSessions do
       {:ok, nil}
     end
   end
+
+  @doc """
+  Requests a forwarder session for the specified device ID.
+  """
+  def request_forwarder_session(%{device_id: device_id}, _resolution) do
+    device =
+      device_id
+      |> Devices.get_device!()
+      |> Devices.preload_astarte_resources_for_device()
+
+    with {:ok, session_token} <-
+           Forwarder.fetch_or_request_available_forwarder_session_token(device) do
+      {:ok, %{session_token: session_token}}
+    end
+  end
 end

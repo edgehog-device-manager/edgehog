@@ -62,4 +62,22 @@ defmodule EdgehogWeb.Schema.ForwarderSessionsTypes do
       resolve &Resolvers.ForwarderSessions.find_forwarder_session/2
     end
   end
+
+  object :forwarder_sessions_mutations do
+    @desc "Requests a forwarder session for the specified device."
+    payload field :request_forwarder_session do
+      input do
+        @desc "The GraphQL ID of the device for the requested session."
+        field :device_id, non_null(:id)
+      end
+
+      output do
+        @desc "The token of the requested forwarder session."
+        field :session_token, non_null(:string)
+      end
+
+      middleware Absinthe.Relay.Node.ParseIDs, device_id: :device
+      resolve &Resolvers.ForwarderSessions.request_forwarder_session/2
+    end
+  end
 end
