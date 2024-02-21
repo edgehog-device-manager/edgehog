@@ -140,6 +140,8 @@ defmodule Edgehog.Error do
     {422, "The default tenant locale must be used when creating or updating this resource"}
   end
 
+  defp metadata(:device_disconnected), do: {409, "The device is not connected"}
+
   defp metadata(:unknown), do: {500, "Something went wrong"}
 
   defp metadata(code) do
