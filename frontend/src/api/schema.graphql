@@ -1,390 +1,11 @@
 schema {
-  query: RootQueryType
   mutation: RootMutationType
-}
-
-input CreateBaseImageCollectionInput {
-  "The display name of the base image collection."
-  name: String!
-
-  """
-  The identifier of the base image collection.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  "The ID of the system model that is targeted by this base image collection"
-  systemModelId: ID!
-}
-
-enum VariantType {
-  "Double type"
-  DOUBLE
-
-  "32 bit integer type"
-  INTEGER
-
-  "Boolean type"
-  BOOLEAN
-
-  """
-  64 bit integer type. When this is the type, the value will be a string representing the number.
-  This is done to avoid representation errors when using JSON Numbers.
-  """
-  LONGINTEGER
-
-  "String type"
-  STRING
-
-  "Binary blob type. When this is the type, the value will be Base64 encoded."
-  BINARYBLOB
-
-  "Datetime type. When this is the type, the value will be an ISO8601 timestamp."
-  DATETIME
-}
-
-"An input object to provide a Rollout Mechanism"
-input RolloutMechanismInput {
-  push: PushRolloutInput!
-}
-
-type CreateManualOtaOperationPayload {
-  "The pending OTA operation"
-  otaOperation: OtaOperation!
-}
-
-"Led behavior"
-enum LedBehavior {
-  "Blink for 60 seconds."
-  BLINK
-
-  "Double blink for 60 seconds."
-  DOUBLE_BLINK
-
-  "Slow blink for 60 seconds."
-  SLOW_BLINK
-}
-
-"The current access technology of the serving cell."
-enum ModemTechnology {
-  "GSM."
-  GSM
-
-  "GSM Compact."
-  GSM_COMPACT
-
-  "UTRAN."
-  UTRAN
-
-  "GSM with EGPRS."
-  GSM_EGPRS
-
-  "UTRAN with HSDPA."
-  UTRAN_HSDPA
-
-  "UTRAN with HSUPA."
-  UTRAN_HSUPA
-
-  "UTRAN with HSDPA and HSUPA."
-  UTRAN_HSDPA_HSUPA
-
-  "E-UTRAN."
-  EUTRAN
-}
-
-type DeviceAttribute {
-  "The namespace of the device attribute."
-  namespace: DeviceAttributeNamespace!
-
-  "The key of the device attribute."
-  key: String!
-
-  "The type of the device attribute."
-  type: VariantType!
-
-  "The value of the device attribute."
-  value: VariantValue!
-}
-
-type CreateUpdateChannelPayload {
-  "The created update channel."
-  updateChannel: UpdateChannel!
-}
-
-type UpdateUpdateChannelPayload {
-  "The updated update channel."
-  updateChannel: UpdateChannel!
-}
-
-type UpdateDevicePayload {
-  "The updated device."
-  device: Device!
-}
-
-input CreateHardwareTypeInput {
-  "The display name of the hardware type."
-  name: String!
-
-  """
-  The identifier of the hardware type.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  "The list of part numbers associated with the hardware type."
-  partNumbers: [String!]!
-}
-
-input DeleteHardwareTypeInput {
-  "The ID of the hardware type to be deleted."
-  hardwareTypeId: ID!
-}
-
-type SetLedBehaviorPayload {
-  "The resulting led behavior."
-  behavior: LedBehavior!
-}
-
-"Describes an Edgehog runtime."
-type RuntimeInfo {
-  "The name of the Edgehog runtime."
-  name: String
-
-  "The version of the Edgehog runtime."
-  version: String
-
-  "The environment of the Edgehog runtime."
-  environment: String
-
-  "The URL that uniquely identifies the Edgehog runtime implementation."
-  url: String
-}
-
-"Describes an operating system of a device."
-type OsInfo {
-  "The name of the operating system."
-  name: String
-
-  "The version of the operating system."
-  version: String
-}
-
-"""
-Represents a collection of Base Images.
-
-A base image collection represents the collection of all Base Images that can run on a specific System Model.
-"""
-type BaseImageCollection implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the base image collection."
-  name: String!
-
-  "The identifier of the base image collection."
-  handle: String!
-
-  "The System Model associated with the Base Image Collection"
-  systemModel: SystemModel
-
-  "The Base Images associated with the Base Image Collection"
-  baseImages: [BaseImage!]!
-}
-
-"Describes a modem of a device."
-type Modem {
-  "The identifier of the modem."
-  slot: String!
-
-  "The operator apn address."
-  apn: String
-
-  "The modem IMEI code."
-  imei: String
-
-  "The SIM IMSI code."
-  imsi: String
-
-  "Carrier operator name."
-  carrier: String
-
-  "Unique identifier of the cell."
-  cellId: Int
-
-  "The cell tower's Mobile Country Code (MCC)."
-  mobileCountryCode: Int
-
-  "The cell tower's Mobile Network Code."
-  mobileNetworkCode: Int
-
-  "The Local Area Code."
-  localAreaCode: Int
-
-  "The current registration status of the modem."
-  registrationStatus: ModemRegistrationStatus
-
-  "Signal strength in dBm."
-  rssi: Float
-
-  "Access Technology"
-  technology: ModemTechnology
-}
-
-"The possible namespace values for device attributes"
-enum DeviceAttributeNamespace {
-  "Custom attributes, user defined"
-  CUSTOM
-}
-
-"An object representing the properties of a Push Rollout Mechanism"
-type PushRollout {
-  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
-  maxFailurePercentage: Float!
-
-  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
-  maxInProgressUpdates: Int!
-
-  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
-  otaRequestRetries: Int!
-
-  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
-  otaRequestTimeoutSeconds: Int!
-
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean!
-}
-
-input UpdateDeviceInput {
-  "The GraphQL ID (not the Astarte Device ID) of the device to be updated."
-  deviceId: ID!
-
-  "The display name of the device."
-  name: String
-
-  "The tags of the device. These replace all the current tags."
-  tags: [String!]
-
-  "The custom attributes of the device. These replace all the current custom attributes."
-  customAttributes: [DeviceAttributeInput!]
-}
-
-type CreateHardwareTypePayload {
-  "The created hardware type."
-  hardwareType: HardwareType!
-}
-
-input UpdateHardwareTypeInput {
-  "The ID of the hardware type to be updated."
-  hardwareTypeId: ID!
-
-  "The display name of the hardware type."
-  name: String
-
-  """
-  The identifier of the hardware type.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  "The list of part numbers associated with the hardware type."
-  partNumbers: [String!]
-}
-
-"The current status of the battery."
-enum BatteryStatus {
-  "The battery is charging."
-  CHARGING
-
-  "The battery is discharging."
-  DISCHARGING
-
-  "The battery is idle."
-  IDLE
-
-  "The battery is either in a charging or in an idle state, since the hardware doesn't allow to distinguish between them."
-  EITHER_IDLE_OR_CHARGING
-
-  "The battery is in a failed state."
-  FAILURE
-
-  "The battery is removed."
-  REMOVED
-
-  "The battery status cannot be determined."
-  UNKNOWN
-}
-
-"""
-Describes the position of a device.
-
-The position is estimated by means of Edgehog's Geolocation modules and the data published by the device.
-"""
-type DeviceLocation {
-  "The latitude coordinate."
-  latitude: Float!
-
-  "The longitude coordinate."
-  longitude: Float!
-
-  "The accuracy of the measurement, in meters."
-  accuracy: Float
-
-  "The formatted address estimated for the position."
-  address: String
-
-  "The date at which the measurement was made."
-  timestamp: DateTime!
+  query: RootQueryType
 }
 
 interface Node {
   "The ID of the object."
   id: ID!
-}
-
-input DeleteBaseImageCollectionInput {
-  "The ID of the base image collection to be deleted."
-  baseImageCollectionId: ID!
-}
-
-type UpdateBaseImagePayload {
-  "The updated base image."
-  baseImage: BaseImage!
-}
-
-"Describes a battery slot of a device."
-type BatterySlot {
-  "The identifier of the battery slot."
-  slot: String!
-
-  "Battery level estimated percentage [0.0%-100.0%]"
-  levelPercentage: Float
-
-  "Battery level measurement absolute error [0.0-100.0]"
-  levelAbsoluteError: Float
-
-  "The current status of the battery."
-  status: BatteryStatus
-}
-
-"Describes the current status of the operating system of a device."
-type SystemStatus {
-  "The identifier of the performed boot sequence."
-  bootId: String
-
-  "The number of free bytes of memory."
-  memoryFreeBytes: Int
-
-  "The number of running tasks on the system."
-  taskCount: Int
-
-  "The number of milliseconds since the last system boot."
-  uptimeMilliseconds: Int
-
-  "The date at which the system status was read."
-  timestamp: DateTime!
 }
 
 type RootQueryType {
@@ -421,6 +42,15 @@ type RootQueryType {
   "Fetches a single system model."
   systemModel("The ID of the system model." id: ID!): SystemModel
 
+  "Fetches a forwarder session by its token and the device ID."
+  forwarderSession(
+    "The GraphQL ID of the device corresponding to the session."
+    deviceId: ID!
+
+    "The token that identifies the session."
+    sessionToken: String!
+  ): ForwarderSession
+
   "Fetches the list of all device groups."
   deviceGroups: [DeviceGroup!]!
 
@@ -448,6 +78,95 @@ type RootQueryType {
   node("The ID of an object." id: ID!): Node
 }
 
+type RootMutationType {
+  "Sets led behavior."
+  setLedBehavior(input: SetLedBehaviorInput!): SetLedBehaviorPayload
+
+  "Creates a new base image collection."
+  createBaseImageCollection(
+    input: CreateBaseImageCollectionInput!
+  ): CreateBaseImageCollectionPayload
+
+  "Updates a base image collection."
+  updateBaseImageCollection(
+    input: UpdateBaseImageCollectionInput!
+  ): UpdateBaseImageCollectionPayload
+
+  "Deletes a base image collection."
+  deleteBaseImageCollection(
+    input: DeleteBaseImageCollectionInput!
+  ): DeleteBaseImageCollectionPayload
+
+  "Create a new base image in a base image collection."
+  createBaseImage(input: CreateBaseImageInput!): CreateBaseImagePayload
+
+  "Updates a base image."
+  updateBaseImage(input: UpdateBaseImageInput!): UpdateBaseImagePayload
+
+  "Deletes a base image."
+  deleteBaseImage(input: DeleteBaseImageInput!): DeleteBaseImagePayload
+
+  "Updates a device."
+  updateDevice(input: UpdateDeviceInput!): UpdateDevicePayload
+
+  "Creates a new hardware type."
+  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
+
+  "Updates a hardware type."
+  updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
+
+  "Deletes a hardware type."
+  deleteHardwareType(input: DeleteHardwareTypeInput!): DeleteHardwareTypePayload
+
+  "Creates a new system model."
+  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelPayload
+
+  "Updates a system model."
+  updateSystemModel(input: UpdateSystemModelInput!): UpdateSystemModelPayload
+
+  "Deletes a system model."
+  deleteSystemModel(input: DeleteSystemModelInput!): DeleteSystemModelPayload
+
+  "Requests a forwarder session for the specified device."
+  requestForwarderSession(
+    input: RequestForwarderSessionInput!
+  ): RequestForwarderSessionPayload
+
+  "Creates a new device group."
+  createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupPayload
+
+  "Updates a device group."
+  updateDeviceGroup(input: UpdateDeviceGroupInput!): UpdateDeviceGroupPayload
+
+  "Deletes a device group."
+  deleteDeviceGroup(input: DeleteDeviceGroupInput!): DeleteDeviceGroupPayload
+
+  "Initiates an OTA update with a user provided OS image"
+  createManualOtaOperation(
+    input: CreateManualOtaOperationInput!
+  ): CreateManualOtaOperationPayload
+
+  "Creates a new update channel."
+  createUpdateChannel(
+    input: CreateUpdateChannelInput!
+  ): CreateUpdateChannelPayload
+
+  "Updates an update channel."
+  updateUpdateChannel(
+    input: UpdateUpdateChannelInput!
+  ): UpdateUpdateChannelPayload
+
+  "Deletes an update channel."
+  deleteUpdateChannel(
+    input: DeleteUpdateChannelInput!
+  ): DeleteUpdateChannelPayload
+
+  "Creates a new update campaign."
+  createUpdateCampaign(
+    input: CreateUpdateCampaignInput!
+  ): CreateUpdateCampaignPayload
+}
+
 """
 The `DateTime` scalar type represents a date and time in the UTC
 timezone. The DateTime appears in a JSON response as an ISO8601 formatted
@@ -456,11 +175,170 @@ be converted to UTC if there is an offset.
 """
 scalar DateTime
 
+"Represents an uploaded file."
+scalar Upload
+
+enum VariantType {
+  "Double type"
+  DOUBLE
+
+  "32 bit integer type"
+  INTEGER
+
+  "Boolean type"
+  BOOLEAN
+
+  """
+  64 bit integer type. When this is the type, the value will be a string representing the number.
+  This is done to avoid representation errors when using JSON Numbers.
+  """
+  LONGINTEGER
+
+  "String type"
+  STRING
+
+  "Binary blob type. When this is the type, the value will be Base64 encoded."
+  BINARYBLOB
+
+  "Datetime type. When this is the type, the value will be an ISO8601 timestamp."
+  DATETIME
+}
+
 """
 A variant value. It can contain any JSON value. The value will be checked together with the
 type to verify whether it's valid.
 """
 scalar VariantValue
+
+"""
+Represents an UpdateChannel.
+
+An UpdateChannel represents a set of TargetGroups that can be targeted in an UpdateCampaign
+"""
+type UpdateChannel implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the target group."
+  name: String!
+
+  "The identifier of the target group."
+  handle: String!
+
+  "The DeviceGroups associated with this UpdateChannel"
+  targetGroups: [DeviceGroup!]!
+}
+
+"An object representing the properties of a Push Rollout Mechanism"
+type PushRollout {
+  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
+  maxFailurePercentage: Float!
+
+  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
+  maxInProgressUpdates: Int!
+
+  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
+  otaRequestRetries: Int!
+
+  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
+  otaRequestTimeoutSeconds: Int!
+
+  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
+  forceDowngrade: Boolean!
+}
+
+"A Rollout Mechanism used by an Update Campaign"
+union RolloutMechanism = PushRollout
+
+"An input object to set the properties of a Push Rollout Mechanism"
+input PushRolloutInput {
+  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
+  maxFailurePercentage: Float!
+
+  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
+  maxInProgressUpdates: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device.
+
+  Defaults to 0 if not present.
+  """
+  otaRequestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry).
+
+  Defaults to 60 seconds if not present.
+  """
+  otaRequestTimeoutSeconds: Int
+
+  """
+  This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image.
+
+  Defaults to false if not present.
+  """
+  forceDowngrade: Boolean
+}
+
+"An input object to provide a Rollout Mechanism"
+input RolloutMechanismInput {
+  push: PushRolloutInput!
+}
+
+"The status of an Update Target"
+enum UpdateTargetStatus {
+  "The Update Campaign is waiting for the OTA Request to be sent"
+  IDLE
+
+  "The Update Target is in progress"
+  IN_PROGRESS
+
+  "The Update Target has failed to be updated"
+  FAILED
+
+  "The Update Target was successfully updated"
+  SUCCESSFUL
+}
+
+"""
+Represents an UpdateTarget.
+
+An Update Target is the target of an Update Campaign, which is composed by the targeted device and the status of the target in the linked Update Campaign.
+"""
+type UpdateTarget implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The status of the Update Target."
+  status: UpdateTargetStatus!
+
+  "The retry count of the Update Target. This indicates how many times Edgehog has tried to send an OTA Update towards the device without receiving an ack."
+  retryCount: Int!
+
+  "The timestamp of the latest attempt to update the Update Target"
+  latestAttempt: DateTime
+
+  "The timestamp when the Update Target completed its update, either with a success or a failure"
+  completionTimestamp: DateTime
+
+  "The Target device."
+  device: Device!
+
+  "The OTA Operation that tracks the Update Target in-progress update"
+  otaOperation: OtaOperation
+}
+
+"The status of an Update Campaign"
+enum UpdateCampaignStatus {
+  "The Update Campaign has been created but is not being rolled-out yet"
+  IDLE
+
+  "The Update Campaign is being rolled-out"
+  IN_PROGRESS
+
+  "The Update Campaign has finished"
+  FINISHED
+}
 
 "The outcome of an Update Campaign"
 enum UpdateCampaignOutcome {
@@ -469,6 +347,483 @@ enum UpdateCampaignOutcome {
 
   "The Update Campaign has finished with a failure"
   FAILURE
+}
+
+"""
+Represents an UpdateCampaign.
+
+An Update Campaign is the operation that tracks the distribution of a specific Base Image to all devices belonging to an Update Channel.
+"""
+type UpdateCampaign implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The name of the Update Campaign."
+  name: String!
+
+  "The status of the Update Campaign."
+  status: UpdateCampaignStatus!
+
+  "The outcome of the Update Campaign, present only when it's finished."
+  outcome: UpdateCampaignOutcome
+
+  "The Rollout Mechanism used in the Update Campaign."
+  rolloutMechanism: RolloutMechanism!
+
+  "The Base Image distributed in the Update Campaign."
+  baseImage: BaseImage!
+
+  "The Update Channel targeted by the Update Campaign."
+  updateChannel: UpdateChannel!
+
+  "The Targets that will receive the update during the Update Campaign."
+  updateTargets: [UpdateTarget!]!
+
+  "The Stats of the Update Campaign"
+  stats: UpdateCampaignStats!
+}
+
+type UpdateCampaignStats {
+  "The total number of targets of the Update Campaign"
+  totalTargetCount: Int!
+
+  "The number of targets of the Update Campaign having IDLE status"
+  idleTargetCount: Int!
+
+  "The number of targets of the Update Campaign having IN_PROGRESS status"
+  inProgressTargetCount: Int!
+
+  "The number of targets of the Update Campaign having FAILED status"
+  failedTargetCount: Int!
+
+  "The number of targets of the Update Campaign having SUCCESSFUL status"
+  successfulTargetCount: Int!
+}
+
+input CreateUpdateChannelInput {
+  "The display name of the update channel."
+  name: String!
+
+  """
+  The identifier of the update channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The IDs of the target groups that are targeted by this update channel"
+  targetGroupIds: [ID!]!
+}
+
+type CreateUpdateChannelPayload {
+  "The created update channel."
+  updateChannel: UpdateChannel!
+}
+
+input UpdateUpdateChannelInput {
+  "The ID of the update channel to be updated"
+  updateChannelId: ID!
+
+  "The updated display name of the update channel."
+  name: String
+
+  """
+  The updated identifier of the update channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The updated IDs of the target groups that are targeted by this update channel"
+  targetGroupIds: [ID!]
+}
+
+type UpdateUpdateChannelPayload {
+  "The updated update channel."
+  updateChannel: UpdateChannel!
+}
+
+input DeleteUpdateChannelInput {
+  "The ID of the update channel to be deleted."
+  updateChannelId: ID!
+}
+
+type DeleteUpdateChannelPayload {
+  "The deleted update channel."
+  updateChannel: UpdateChannel!
+}
+
+input CreateUpdateCampaignInput {
+  "The name of the Update Campaign."
+  name: String!
+
+  "The ID of the Base Image that will be distributed in the Update Campaign."
+  baseImageId: ID!
+
+  "The ID of the Update Channel that will be targeted by the Update Campaign."
+  updateChannelId: ID!
+
+  "The Rollout Mechanism of the Update Campaign, with its properties"
+  rolloutMechanism: RolloutMechanismInput!
+}
+
+type CreateUpdateCampaignPayload {
+  "The created Update Campaign."
+  updateCampaign: UpdateCampaign!
+}
+
+"Represents information about a tenant"
+type TenantInfo {
+  "The tenant name"
+  name: String!
+
+  "The tenant slug"
+  slug: String!
+
+  "The default locale supported by the tenant"
+  defaultLocale: String!
+}
+
+"Status of the OTA operation."
+enum OtaOperationStatus {
+  "The OTA operation was created and is waiting an acknowledgment from the device"
+  PENDING
+
+  "The OTA operation was acknowledged from the device"
+  ACKNOWLEDGED
+
+  "The device is downloading the update"
+  DOWNLOADING
+
+  "The device is deploying the update"
+  DEPLOYING
+
+  "The device deployed the update"
+  DEPLOYED
+
+  "The device is in the process of rebooting"
+  REBOOTING
+
+  "A recoverable error happened during the OTA operation"
+  ERROR
+
+  "The OTA operation ended with a failure. This is a final state of the OTA Operation"
+  FAILURE
+
+  "The OTA operation ended successfully. This is a final state of the OTA Operation"
+  SUCCESS
+}
+
+"Status code of the OTA operation."
+enum OtaOperationStatusCode {
+  "The OTA Operation timed out while sending the request to the device"
+  REQUEST_TIMEOUT
+
+  "The OTA Operation contained invalid data"
+  INVALID_REQUEST
+
+  "An OTA Operation is already in progress on the device"
+  UPDATE_ALREADY_IN_PROGRESS
+
+  "A network error was encountered"
+  NETWORK_ERROR
+
+  "An IO error was encountered"
+  IO_ERROR
+
+  "An internal error was encountered"
+  INTERNAL_ERROR
+
+  "The OTA Operation failed due to an invalid base image"
+  INVALID_BASE_IMAGE
+
+  "A system rollback has occurred"
+  SYSTEM_ROLLBACK
+
+  "The OTA Operation was canceled"
+  CANCELED
+}
+
+"An OTA update operation"
+type OtaOperation implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The URL of the base image being installed on the device"
+  baseImageUrl: String!
+
+  "The current status of the operation"
+  status: OtaOperationStatus!
+
+  "The percentage progress [0-100] for the current status"
+  statusProgress: Int!
+
+  "The current status code of the operation"
+  statusCode: OtaOperationStatusCode
+
+  "A message with additional details about the current status"
+  message: String
+
+  "The device targeted from the operation"
+  device: Device!
+
+  "The creation timestamp of the operation"
+  createdAt: DateTime!
+
+  "The timestamp of the last update to the operation"
+  updatedAt: DateTime!
+}
+
+input CreateManualOtaOperationInput {
+  "The GraphQL ID (not the Astarte Device ID) of the target device"
+  deviceId: ID!
+
+  "An uploaded file of the base image."
+  baseImageFile: Upload
+}
+
+type CreateManualOtaOperationPayload {
+  "The pending OTA operation"
+  otaOperation: OtaOperation!
+}
+
+"Input object used to provide a localizedText as an input."
+input LocalizedTextInput {
+  "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
+  locale: String!
+
+  "The localized text"
+  text: String!
+}
+
+type DeviceGroup implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the device group."
+  name: String!
+
+  "The handle of the device group."
+  handle: String!
+
+  "The selector of the device group."
+  selector: String!
+
+  "The devices belonging to the group."
+  devices: [Device!]!
+
+  "The UpdateChannel associated with this group, if present."
+  updateChannel: UpdateChannel
+}
+
+input CreateDeviceGroupInput {
+  "The display name of the device group."
+  name: String!
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String!
+}
+
+type CreateDeviceGroupPayload {
+  "The created device group."
+  deviceGroup: DeviceGroup!
+}
+
+input UpdateDeviceGroupInput {
+  "The ID of the device group to be updated."
+  deviceGroupId: ID!
+
+  "The display name of the device group."
+  name: String
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String
+}
+
+type UpdateDeviceGroupPayload {
+  "The updated device group."
+  deviceGroup: DeviceGroup!
+}
+
+input DeleteDeviceGroupInput {
+  "The ID of the device group to be deleted."
+  deviceGroupId: ID!
+}
+
+type DeleteDeviceGroupPayload {
+  "The deleted device group."
+  deviceGroup: DeviceGroup!
+}
+
+"""
+Describes the position of a device.
+
+The position is estimated by means of Edgehog's Geolocation modules and the data published by the device.
+"""
+type DeviceLocation {
+  "The latitude coordinate."
+  latitude: Float!
+
+  "The longitude coordinate."
+  longitude: Float!
+
+  "The accuracy of the measurement, in meters."
+  accuracy: Float
+
+  "The formatted address estimated for the position."
+  address: String
+
+  "The date at which the measurement was made."
+  timestamp: DateTime!
+}
+
+"The status of a forwarder session"
+enum ForwarderSessionStatus {
+  "The device is connected to the forwarder."
+  CONNECTED
+
+  "The device is connecting to the forwarder."
+  CONNECTING
+}
+
+"The details of a forwarder session"
+type ForwarderSession {
+  "The token that identifies the session."
+  token: String!
+
+  "The status of the session."
+  status: ForwarderSessionStatus!
+
+  "Indicates if TLS is used when the device connects to the forwarder."
+  secure: Boolean!
+
+  "The hostname of the forwarder instance."
+  forwarderHostname: String!
+
+  "The port of the forwarder instance."
+  forwarderPort: Int!
+}
+
+input RequestForwarderSessionInput {
+  "The GraphQL ID of the device for the requested session."
+  deviceId: ID!
+}
+
+type RequestForwarderSessionPayload {
+  "The token of the requested forwarder session."
+  sessionToken: String!
+}
+
+"""
+Describes a set of filters to apply when fetching a list of devices.
+
+When multiple filters are specified, they are applied in an AND fashion to further refine the results.
+"""
+input DeviceFilter {
+  "Whether to return devices connected or not to Astarte."
+  online: Boolean
+
+  "A string to match against the device ID. The match is case-insensitive and tests whether the string is included in the device ID."
+  deviceId: String
+
+  """
+  A string to match against the part number of the device's system model.
+  The match is case-insensitive and tests whether the string is included in the part number of the device's system model.
+  """
+  systemModelPartNumber: String
+
+  """
+  A string to match against the handle of the device's system model.
+  The match is case-insensitive and tests whether the string is included in the handle of the device's system model.
+  """
+  systemModelHandle: String
+
+  """
+  A string to match against the name of the device's system model.
+  The match is case-insensitive and tests whether the string is included in the name of the device's system model.
+  """
+  systemModelName: String
+
+  """
+  A string to match against the part number of the device's hardware type.
+  The match is case-insensitive and tests whether the string is included in the part number of the device's hardware type.
+  """
+  hardwareTypePartNumber: String
+
+  """
+  A string to match against the handle of the device's hardware type.
+  The match is case-insensitive and tests whether the string is included in the handle of the device's hardware type.
+  """
+  hardwareTypeHandle: String
+
+  """
+  A string to match against the name of the device's hardware type.
+  The match is case-insensitive and tests whether the string is included in the name of the device's hardware type.
+  """
+  hardwareTypeName: String
+
+  """
+  A string to match against the tags of the device.
+  The match is case-insensitive and tests whether the string is included in one of the tags of the device.
+  """
+  tag: String
+}
+
+"An input object for a device attribute."
+input DeviceAttributeInput {
+  "The namespace of the device attribute."
+  namespace: DeviceAttributeNamespace!
+
+  "The key of the device attribute."
+  key: String!
+
+  "The type of the device attribute."
+  type: VariantType!
+
+  "The value of the device attribute."
+  value: VariantValue!
+}
+
+"The possible namespace values for device attributes"
+enum DeviceAttributeNamespace {
+  "Custom attributes, user defined"
+  CUSTOM
+}
+
+type DeviceAttribute {
+  "The namespace of the device attribute."
+  namespace: DeviceAttributeNamespace!
+
+  "The key of the device attribute."
+  key: String!
+
+  "The type of the device attribute."
+  type: VariantType!
+
+  "The value of the device attribute."
+  value: VariantValue!
 }
 
 """
@@ -548,39 +903,6 @@ type Device implements Node {
   networkInterfaces: [NetworkInterface!]
 }
 
-input UpdateUpdateChannelInput {
-  "The ID of the update channel to be updated"
-  updateChannelId: ID!
-
-  "The updated display name of the update channel."
-  name: String
-
-  """
-  The updated identifier of the update channel.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  "The updated IDs of the target groups that are targeted by this update channel"
-  targetGroupIds: [ID!]
-}
-
-type DeleteUpdateChannelPayload {
-  "The deleted update channel."
-  updateChannel: UpdateChannel!
-}
-
-type CreateBaseImagePayload {
-  "The created base image."
-  baseImage: BaseImage!
-}
-
-type DeleteBaseImagePayload {
-  "The deleted base image."
-  baseImage: BaseImage!
-}
-
 """
 Denotes a type of hardware that devices can have.
 
@@ -599,61 +921,6 @@ type HardwareType implements Node {
 
   "The list of part numbers associated with the hardware type."
   partNumbers: [String!]!
-}
-
-type UpdateDeviceGroupPayload {
-  "The updated device group."
-  deviceGroup: DeviceGroup!
-}
-
-type UpdateHardwareTypePayload {
-  "The updated hardware type."
-  hardwareType: HardwareType!
-}
-
-type UpdateSystemModelPayload {
-  "The updated system model."
-  systemModel: SystemModel!
-}
-
-input SetLedBehaviorInput {
-  "The GraphQL ID (not the Astarte Device ID) of the target device"
-  deviceId: ID!
-
-  "The led behavior"
-  behavior: LedBehavior!
-}
-
-"The status of an Update Target"
-enum UpdateTargetStatus {
-  "The Update Campaign is waiting for the OTA Request to be sent"
-  IDLE
-
-  "The Update Target is in progress"
-  IN_PROGRESS
-
-  "The Update Target has failed to be updated"
-  FAILED
-
-  "The Update Target was successfully updated"
-  SUCCESSFUL
-}
-
-type UpdateCampaignStats {
-  "The total number of targets of the Update Campaign"
-  totalTargetCount: Int!
-
-  "The number of targets of the Update Campaign having IDLE status"
-  idleTargetCount: Int!
-
-  "The number of targets of the Update Campaign having IN_PROGRESS status"
-  inProgressTargetCount: Int!
-
-  "The number of targets of the Update Campaign having FAILED status"
-  failedTargetCount: Int!
-
-  "The number of targets of the Update Campaign having SUCCESSFUL status"
-  successfulTargetCount: Int!
 }
 
 """
@@ -687,741 +954,76 @@ type SystemModel implements Node {
   description: String
 }
 
-"Represents an uploaded file."
-scalar Upload
-
-"An input object to set the properties of a Push Rollout Mechanism"
-input PushRolloutInput {
-  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
-  maxFailurePercentage: Float!
-
-  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
-  maxInProgressUpdates: Int!
-
-  """
-  The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device.
-
-  Defaults to 0 if not present.
-  """
-  otaRequestRetries: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry).
-
-  Defaults to 60 seconds if not present.
-  """
-  otaRequestTimeoutSeconds: Int
-
-  """
-  This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image.
-
-  Defaults to false if not present.
-  """
-  forceDowngrade: Boolean
-}
-
-input CreateUpdateChannelInput {
-  "The display name of the update channel."
-  name: String!
-
-  """
-  The identifier of the update channel.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  "The IDs of the target groups that are targeted by this update channel"
-  targetGroupIds: [ID!]!
-}
-
-type CreateUpdateCampaignPayload {
-  "The created Update Campaign."
-  updateCampaign: UpdateCampaign!
-}
-
-input UpdateDeviceGroupInput {
-  "The ID of the device group to be updated."
-  deviceGroupId: ID!
-
-  "The display name of the device group."
-  name: String
-
-  """
-  The identifier of the device group.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  """
-  The Selector that will determine which devices belong to the device group.
-
-  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
-  """
-  selector: String
-}
-
-"Describes the current usage of a storage unit on a device."
-type StorageUnit {
-  "The label of the storage unit."
-  label: String!
-
-  "The total number of bytes of the storage unit."
-  totalBytes: Int
-
-  "The number of free bytes of the storage unit."
-  freeBytes: Int
-}
-
-input CreateUpdateCampaignInput {
-  "The name of the Update Campaign."
-  name: String!
-
-  "The ID of the Base Image that will be distributed in the Update Campaign."
-  baseImageId: ID!
-
-  "The ID of the Update Channel that will be targeted by the Update Campaign."
-  updateChannelId: ID!
-
-  "The Rollout Mechanism of the Update Campaign, with its properties"
-  rolloutMechanism: RolloutMechanismInput!
-}
-
-type CreateDeviceGroupPayload {
-  "The created device group."
-  deviceGroup: DeviceGroup!
-}
-
-type CreateSystemModelPayload {
-  "The created system model."
-  systemModel: SystemModel!
-}
-
-type CreateBaseImageCollectionPayload {
-  "The created base image collection."
-  baseImageCollection: BaseImageCollection!
-}
-
-type UpdateBaseImageCollectionPayload {
-  "The updated base image collection."
-  baseImageCollection: BaseImageCollection!
-}
-
-type DeleteBaseImageCollectionPayload {
-  "The deleted base image collection."
-  baseImageCollection: BaseImageCollection!
-}
-
-"Status of the OTA operation."
-enum OtaOperationStatus {
-  "The OTA operation was created and is waiting an acknowledgment from the device"
-  PENDING
-
-  "The OTA operation was acknowledged from the device"
-  ACKNOWLEDGED
-
-  "The device is downloading the update"
-  DOWNLOADING
-
-  "The device is deploying the update"
-  DEPLOYING
-
-  "The device deployed the update"
-  DEPLOYED
-
-  "The device is in the process of rebooting"
-  REBOOTING
-
-  "A recoverable error happened during the OTA operation"
-  ERROR
-
-  "The OTA operation ended with a failure. This is a final state of the OTA Operation"
-  FAILURE
-
-  "The OTA operation ended successfully. This is a final state of the OTA Operation"
-  SUCCESS
-}
-
-"The current GSM/LTE registration status of the modem."
-enum ModemRegistrationStatus {
-  "Not registered, modem is not currently searching a new operator to register to."
-  NOT_REGISTERED
-
-  "Registered, home network."
-  REGISTERED
-
-  "Not registered, but modem is currently searching a new operator to register to."
-  SEARCHING_OPERATOR
-
-  "Registration denied."
-  REGISTRATION_DENIED
-
-  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
-  UNKNOWN
-
-  "Registered, roaming."
-  REGISTERED_ROAMING
-}
-
-"The connection technology of the network interface."
-enum NetworkInterfaceTechnology {
-  "Ethernet."
-  ETHERNET
-
-  "Bluetooth."
-  BLUETOOTH
-
-  "Cellular."
-  CELLULAR
-
-  "WiFi."
-  WIFI
-}
-
-type DeviceGroup implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the device group."
-  name: String!
-
-  "The handle of the device group."
-  handle: String!
-
-  "The selector of the device group."
-  selector: String!
-
-  "The devices belonging to the group."
-  devices: [Device!]!
-
-  "The UpdateChannel associated with this group, if present."
-  updateChannel: UpdateChannel
-}
-
-"Represents information about a tenant"
-type TenantInfo {
-  "The tenant name"
-  name: String!
-
-  "The tenant slug"
-  slug: String!
-
-  "The default locale supported by the tenant"
-  defaultLocale: String!
-}
-
-"An OTA update operation"
-type OtaOperation implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The URL of the base image being installed on the device"
-  baseImageUrl: String!
-
-  "The current status of the operation"
-  status: OtaOperationStatus!
-
-  "The percentage progress [0-100] for the current status"
-  statusProgress: Int!
-
-  "The current status code of the operation"
-  statusCode: OtaOperationStatusCode
-
-  "A message with additional details about the current status"
-  message: String
-
-  "The device targeted from the operation"
-  device: Device!
-
-  "The creation timestamp of the operation"
-  createdAt: DateTime!
-
-  "The timestamp of the last update to the operation"
-  updatedAt: DateTime!
-}
-
-"Status code of the OTA operation."
-enum OtaOperationStatusCode {
-  "The OTA Operation timed out while sending the request to the device"
-  REQUEST_TIMEOUT
-
-  "The OTA Operation contained invalid data"
-  INVALID_REQUEST
-
-  "An OTA Operation is already in progress on the device"
-  UPDATE_ALREADY_IN_PROGRESS
-
-  "A network error was encountered"
-  NETWORK_ERROR
-
-  "An IO error was encountered"
-  IO_ERROR
-
-  "An internal error was encountered"
-  INTERNAL_ERROR
-
-  "The OTA Operation failed due to an invalid base image"
-  INVALID_BASE_IMAGE
-
-  "A system rollback has occurred"
-  SYSTEM_ROLLBACK
-
-  "The OTA Operation was canceled"
-  CANCELED
-}
-
-"""
-Represents an uploaded Base Image.
-
-A base image represents a downloadable base image that can be installed on a device
-"""
-type BaseImage implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The base image version"
-  version: String!
-
-  "The url where the base image can be downloaded"
-  url: String!
-
-  "The starting version requirement for the base image"
-  startingVersionRequirement: String
-
-  """
-  The localized description of the base image
-  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
-  """
-  description: String
-
-  """
-  The localized release display name of the base image
-  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
-  """
-  releaseDisplayName: String
-
-  "The Base Image Collection the Base Image belongs to"
-  baseImageCollection: BaseImageCollection!
-}
-
-input CreateDeviceGroupInput {
-  "The display name of the device group."
-  name: String!
-
-  """
-  The identifier of the device group.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  """
-  The Selector that will determine which devices belong to the device group.
-
-  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
-  """
-  selector: String!
-}
-
-input DeleteDeviceGroupInput {
-  "The ID of the device group to be deleted."
-  deviceGroupId: ID!
-}
-
-input DeleteBaseImageInput {
-  "The ID of the base image to be deleted."
-  baseImageId: ID!
-}
-
-"Describes the information on the system's base image for a device."
-type BaseImageInfo {
-  "The name of the image."
-  name: String
-
-  "The version of the image."
-  version: String
-
-  "Human readable build identifier of the image."
-  buildId: String
-
-  "A unique string that identifies the release, usually the image hash."
-  fingerprint: String
-}
-
-input DeleteUpdateChannelInput {
-  "The ID of the update channel to be deleted."
-  updateChannelId: ID!
-}
-
-"Describes the list of WiFi Access Points found by the device."
-type WifiScanResult {
-  "The channel used by the Access Point."
-  channel: Int
-
-  "Indicates whether the device is connected to the Access Point."
-  connected: Boolean
-
-  "The ESSID advertised by the Access Point."
-  essid: String
-
-  "The MAC address advertised by the Access Point."
-  macAddress: String
-
-  "The power of the radio signal, measured in dBm."
-  rssi: Int
-
-  "The date at which the device found the Access Point."
-  timestamp: DateTime!
-}
-
-"""
-Describes hardware-related info of a device.
-
-It exposes data read by a device's operating system about the underlying hardware.
-"""
-type HardwareInfo {
-  "The architecture of the CPU."
-  cpuArchitecture: String
-
-  "The reference code of the CPU model."
-  cpuModel: String
-
-  "The display name of the CPU model."
-  cpuModelName: String
-
-  "The vendor's name."
-  cpuVendor: String
-
-  "The Bytes count of memory."
-  memoryTotalBytes: Int
-}
-
-"""
-Represents an UpdateCampaign.
-
-An Update Campaign is the operation that tracks the distribution of a specific Base Image to all devices belonging to an Update Channel.
-"""
-type UpdateCampaign implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The name of the Update Campaign."
-  name: String!
-
-  "The status of the Update Campaign."
-  status: UpdateCampaignStatus!
-
-  "The outcome of the Update Campaign, present only when it's finished."
-  outcome: UpdateCampaignOutcome
-
-  "The Rollout Mechanism used in the Update Campaign."
-  rolloutMechanism: RolloutMechanism!
-
-  "The Base Image distributed in the Update Campaign."
-  baseImage: BaseImage!
-
-  "The Update Channel targeted by the Update Campaign."
-  updateChannel: UpdateChannel!
-
-  "The Targets that will receive the update during the Update Campaign."
-  updateTargets: [UpdateTarget!]!
-
-  "The Stats of the Update Campaign"
-  stats: UpdateCampaignStats!
-}
-
-"""
-Represents an UpdateChannel.
-
-An UpdateChannel represents a set of TargetGroups that can be targeted in an UpdateCampaign
-"""
-type UpdateChannel implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the target group."
-  name: String!
-
-  "The identifier of the target group."
-  handle: String!
-
-  "The DeviceGroups associated with this UpdateChannel"
-  targetGroups: [DeviceGroup!]!
-}
-
-"The capabilities that devices can support"
-enum DeviceCapability {
-  "The device provides information about its base image."
-  BASE_IMAGE
-
-  "The device provides information about its battery status."
-  BATTERY_STATUS
-
-  "The device provides information about its cellular connection."
-  CELLULAR_CONNECTION
-
-  "The device supports commands, for example the rebooting command."
-  COMMANDS
-
-  "The device can be geolocated."
-  GEOLOCATION
-
-  "The device provides information about its hardware."
-  HARDWARE_INFO
-
-  "The device can be asked to blink its LED in a specific pattern."
-  LED_BEHAVIORS
-
-  "The device can provide information about its network interfaces."
-  NETWORK_INTERFACE_INFO
-
-  "The device provides information about its operating system."
-  OPERATING_SYSTEM
-
-  "The device provides information about its runtime."
-  RUNTIME_INFO
-
-  "The device can be updated remotely."
-  SOFTWARE_UPDATES
-
-  "The device provides information about its storage units."
-  STORAGE
-
-  "The device provides information about its system."
-  SYSTEM_INFO
-
-  "The device provides information about its system status."
-  SYSTEM_STATUS
-
-  "The device telemetry can be configured."
-  TELEMETRY_CONFIG
-
-  "The device provides information about surrounding WiFi APs."
-  WIFI
-}
-
-"Describes a network interface of a device."
-type NetworkInterface {
-  "The identifier of the network interface."
-  name: String!
-
-  "The normalized physical address."
-  macAddress: String
-
-  "Connection Technology"
-  technology: NetworkInterfaceTechnology
-}
-
-"""
-Represents an UpdateTarget.
-
-An Update Target is the target of an Update Campaign, which is composed by the targeted device and the status of the target in the linked Update Campaign.
-"""
-type UpdateTarget implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The status of the Update Target."
-  status: UpdateTargetStatus!
-
-  "The retry count of the Update Target. This indicates how many times Edgehog has tried to send an OTA Update towards the device without receiving an ack."
-  retryCount: Int!
-
-  "The timestamp of the latest attempt to update the Update Target"
-  latestAttempt: DateTime
-
-  "The timestamp when the Update Target completed its update, either with a success or a failure"
-  completionTimestamp: DateTime
-
-  "The Target device."
-  device: Device!
-
-  "The OTA Operation that tracks the Update Target in-progress update"
-  otaOperation: OtaOperation
-}
-
-type DeleteDeviceGroupPayload {
-  "The deleted device group."
-  deviceGroup: DeviceGroup!
-}
-
-input UpdateSystemModelInput {
-  "The ID of the system model to be updated."
-  systemModelId: ID!
-
-  "The display name of the system model."
-  name: String
-
-  """
-  The identifier of the system model.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  """
-  The file blob of a related picture.
-
-  When this field is specified, the pictureUrl field is ignored.
-  """
-  pictureFile: Upload
-
-  """
-  The file URL of a related picture.
-
-  Specifying a null value will remove the existing picture.
-  When the pictureFile field is specified, this field is ignored.
-  """
-  pictureUrl: String
-
-  "The list of part numbers associated with the system model."
-  partNumbers: [String!]
-
-  "An optional localized description. This description can only use the default tenant locale."
-  description: LocalizedTextInput
-}
-
-type DeleteSystemModelPayload {
-  "The deleted system model."
-  systemModel: SystemModel!
-}
-
-input UpdateBaseImageCollectionInput {
-  "The ID of the base image collection to be updated."
-  baseImageCollectionId: ID!
-
-  "The display name of the base image collection."
-  name: String
-
-  """
-  The identifier of the base image collection.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-}
-
-"The status of an Update Campaign"
-enum UpdateCampaignStatus {
-  "The Update Campaign has been created but is not being rolled-out yet"
-  IDLE
-
-  "The Update Campaign is being rolled-out"
-  IN_PROGRESS
-
-  "The Update Campaign has finished"
-  FINISHED
-}
-
-type RootMutationType {
-  "Sets led behavior."
-  setLedBehavior(input: SetLedBehaviorInput!): SetLedBehaviorPayload
-
-  "Creates a new base image collection."
-  createBaseImageCollection(
-    input: CreateBaseImageCollectionInput!
-  ): CreateBaseImageCollectionPayload
-
-  "Updates a base image collection."
-  updateBaseImageCollection(
-    input: UpdateBaseImageCollectionInput!
-  ): UpdateBaseImageCollectionPayload
-
-  "Deletes a base image collection."
-  deleteBaseImageCollection(
-    input: DeleteBaseImageCollectionInput!
-  ): DeleteBaseImageCollectionPayload
-
-  "Create a new base image in a base image collection."
-  createBaseImage(input: CreateBaseImageInput!): CreateBaseImagePayload
-
-  "Updates a base image."
-  updateBaseImage(input: UpdateBaseImageInput!): UpdateBaseImagePayload
-
-  "Deletes a base image."
-  deleteBaseImage(input: DeleteBaseImageInput!): DeleteBaseImagePayload
-
-  "Updates a device."
-  updateDevice(input: UpdateDeviceInput!): UpdateDevicePayload
-
-  "Creates a new hardware type."
-  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
-
-  "Updates a hardware type."
-  updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
-
-  "Deletes a hardware type."
-  deleteHardwareType(input: DeleteHardwareTypeInput!): DeleteHardwareTypePayload
-
-  "Creates a new system model."
-  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelPayload
-
-  "Updates a system model."
-  updateSystemModel(input: UpdateSystemModelInput!): UpdateSystemModelPayload
-
-  "Deletes a system model."
-  deleteSystemModel(input: DeleteSystemModelInput!): DeleteSystemModelPayload
-
-  "Creates a new device group."
-  createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupPayload
-
-  "Updates a device group."
-  updateDeviceGroup(input: UpdateDeviceGroupInput!): UpdateDeviceGroupPayload
-
-  "Deletes a device group."
-  deleteDeviceGroup(input: DeleteDeviceGroupInput!): DeleteDeviceGroupPayload
-
-  "Initiates an OTA update with a user provided OS image"
-  createManualOtaOperation(
-    input: CreateManualOtaOperationInput!
-  ): CreateManualOtaOperationPayload
-
-  "Creates a new update channel."
-  createUpdateChannel(
-    input: CreateUpdateChannelInput!
-  ): CreateUpdateChannelPayload
-
-  "Updates an update channel."
-  updateUpdateChannel(
-    input: UpdateUpdateChannelInput!
-  ): UpdateUpdateChannelPayload
-
-  "Deletes an update channel."
-  deleteUpdateChannel(
-    input: DeleteUpdateChannelInput!
-  ): DeleteUpdateChannelPayload
-
-  "Creates a new update campaign."
-  createUpdateCampaign(
-    input: CreateUpdateCampaignInput!
-  ): CreateUpdateCampaignPayload
-}
-
-"A Rollout Mechanism used by an Update Campaign"
-union RolloutMechanism = PushRollout
-
-input CreateManualOtaOperationInput {
-  "The GraphQL ID (not the Astarte Device ID) of the target device"
+input UpdateDeviceInput {
+  "The GraphQL ID (not the Astarte Device ID) of the device to be updated."
   deviceId: ID!
 
-  "An uploaded file of the base image."
-  baseImageFile: Upload
+  "The display name of the device."
+  name: String
+
+  "The tags of the device. These replace all the current tags."
+  tags: [String!]
+
+  "The custom attributes of the device. These replace all the current custom attributes."
+  customAttributes: [DeviceAttributeInput!]
 }
 
-"An input object for a device attribute."
-input DeviceAttributeInput {
-  "The namespace of the device attribute."
-  namespace: DeviceAttributeNamespace!
+type UpdateDevicePayload {
+  "The updated device."
+  device: Device!
+}
 
-  "The key of the device attribute."
-  key: String!
+input CreateHardwareTypeInput {
+  "The display name of the hardware type."
+  name: String!
 
-  "The type of the device attribute."
-  type: VariantType!
+  """
+  The identifier of the hardware type.
 
-  "The value of the device attribute."
-  value: VariantValue!
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers: [String!]!
+}
+
+type CreateHardwareTypePayload {
+  "The created hardware type."
+  hardwareType: HardwareType!
+}
+
+input UpdateHardwareTypeInput {
+  "The ID of the hardware type to be updated."
+  hardwareTypeId: ID!
+
+  "The display name of the hardware type."
+  name: String
+
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers: [String!]
+}
+
+type UpdateHardwareTypePayload {
+  "The updated hardware type."
+  hardwareType: HardwareType!
+}
+
+input DeleteHardwareTypeInput {
+  "The ID of the hardware type to be deleted."
+  hardwareTypeId: ID!
+}
+
+type DeleteHardwareTypePayload {
+  "The deleted hardware type."
+  hardwareType: HardwareType!
 }
 
 input CreateSystemModelInput {
@@ -1460,78 +1062,220 @@ input CreateSystemModelInput {
   description: LocalizedTextInput
 }
 
+type CreateSystemModelPayload {
+  "The created system model."
+  systemModel: SystemModel!
+}
+
+input UpdateSystemModelInput {
+  "The ID of the system model to be updated."
+  systemModelId: ID!
+
+  "The display name of the system model."
+  name: String
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  """
+  The file blob of a related picture.
+
+  When this field is specified, the pictureUrl field is ignored.
+  """
+  pictureFile: Upload
+
+  """
+  The file URL of a related picture.
+
+  Specifying a null value will remove the existing picture.
+  When the pictureFile field is specified, this field is ignored.
+  """
+  pictureUrl: String
+
+  "The list of part numbers associated with the system model."
+  partNumbers: [String!]
+
+  "An optional localized description. This description can only use the default tenant locale."
+  description: LocalizedTextInput
+}
+
+type UpdateSystemModelPayload {
+  "The updated system model."
+  systemModel: SystemModel!
+}
+
 input DeleteSystemModelInput {
   "The ID of the system model to be deleted."
   systemModelId: ID!
 }
 
-"""
-Describes a set of filters to apply when fetching a list of devices.
-
-When multiple filters are specified, they are applied in an AND fashion to further refine the results.
-"""
-input DeviceFilter {
-  "Whether to return devices connected or not to Astarte."
-  online: Boolean
-
-  "A string to match against the device ID. The match is case-insensitive and tests whether the string is included in the device ID."
-  deviceId: String
-
-  """
-  A string to match against the part number of the device's system model.
-  The match is case-insensitive and tests whether the string is included in the part number of the device's system model.
-  """
-  systemModelPartNumber: String
-
-  """
-  A string to match against the handle of the device's system model.
-  The match is case-insensitive and tests whether the string is included in the handle of the device's system model.
-  """
-  systemModelHandle: String
-
-  """
-  A string to match against the name of the device's system model.
-  The match is case-insensitive and tests whether the string is included in the name of the device's system model.
-  """
-  systemModelName: String
-
-  """
-  A string to match against the part number of the device's hardware type.
-  The match is case-insensitive and tests whether the string is included in the part number of the device's hardware type.
-  """
-  hardwareTypePartNumber: String
-
-  """
-  A string to match against the handle of the device's hardware type.
-  The match is case-insensitive and tests whether the string is included in the handle of the device's hardware type.
-  """
-  hardwareTypeHandle: String
-
-  """
-  A string to match against the name of the device's hardware type.
-  The match is case-insensitive and tests whether the string is included in the name of the device's hardware type.
-  """
-  hardwareTypeName: String
-
-  """
-  A string to match against the tags of the device.
-  The match is case-insensitive and tests whether the string is included in one of the tags of the device.
-  """
-  tag: String
+type DeleteSystemModelPayload {
+  "The deleted system model."
+  systemModel: SystemModel!
 }
 
-"Input object used to provide a localizedText as an input."
-input LocalizedTextInput {
-  "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
-  locale: String!
+"The capabilities that devices can support"
+enum DeviceCapability {
+  "The device provides information about its base image."
+  BASE_IMAGE
 
-  "The localized text"
-  text: String!
+  "The device provides information about its battery status."
+  BATTERY_STATUS
+
+  "The device provides information about its cellular connection."
+  CELLULAR_CONNECTION
+
+  "The device supports commands, for example the rebooting command."
+  COMMANDS
+
+  "The device can be geolocated."
+  REMOTE_TERMINAL
+
+  "The device supports remote terminal sessions."
+  GEOLOCATION
+
+  "The device provides information about its hardware."
+  HARDWARE_INFO
+
+  "The device can be asked to blink its LED in a specific pattern."
+  LED_BEHAVIORS
+
+  "The device can provide information about its network interfaces."
+  NETWORK_INTERFACE_INFO
+
+  "The device provides information about its operating system."
+  OPERATING_SYSTEM
+
+  "The device provides information about its runtime."
+  RUNTIME_INFO
+
+  "The device can be updated remotely."
+  SOFTWARE_UPDATES
+
+  "The device provides information about its storage units."
+  STORAGE
+
+  "The device provides information about its system."
+  SYSTEM_INFO
+
+  "The device provides information about its system status."
+  SYSTEM_STATUS
+
+  "The device telemetry can be configured."
+  TELEMETRY_CONFIG
+
+  "The device provides information about surrounding WiFi APs."
+  WIFI
 }
 
-type DeleteHardwareTypePayload {
-  "The deleted hardware type."
-  hardwareType: HardwareType!
+"""
+Represents a collection of Base Images.
+
+A base image collection represents the collection of all Base Images that can run on a specific System Model.
+"""
+type BaseImageCollection implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The display name of the base image collection."
+  name: String!
+
+  "The identifier of the base image collection."
+  handle: String!
+
+  "The System Model associated with the Base Image Collection"
+  systemModel: SystemModel
+
+  "The Base Images associated with the Base Image Collection"
+  baseImages: [BaseImage!]!
+}
+
+"""
+Represents an uploaded Base Image.
+
+A base image represents a downloadable base image that can be installed on a device
+"""
+type BaseImage implements Node {
+  "The ID of an object"
+  id: ID!
+
+  "The base image version"
+  version: String!
+
+  "The url where the base image can be downloaded"
+  url: String!
+
+  "The starting version requirement for the base image"
+  startingVersionRequirement: String
+
+  """
+  The localized description of the base image
+  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
+  """
+  description: String
+
+  """
+  The localized release display name of the base image
+  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
+  """
+  releaseDisplayName: String
+
+  "The Base Image Collection the Base Image belongs to"
+  baseImageCollection: BaseImageCollection!
+}
+
+input CreateBaseImageCollectionInput {
+  "The display name of the base image collection."
+  name: String!
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The ID of the system model that is targeted by this base image collection"
+  systemModelId: ID!
+}
+
+type CreateBaseImageCollectionPayload {
+  "The created base image collection."
+  baseImageCollection: BaseImageCollection!
+}
+
+input UpdateBaseImageCollectionInput {
+  "The ID of the base image collection to be updated."
+  baseImageCollectionId: ID!
+
+  "The display name of the base image collection."
+  name: String
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+}
+
+type UpdateBaseImageCollectionPayload {
+  "The updated base image collection."
+  baseImageCollection: BaseImageCollection!
+}
+
+input DeleteBaseImageCollectionInput {
+  "The ID of the base image collection to be deleted."
+  baseImageCollectionId: ID!
+}
+
+type DeleteBaseImageCollectionPayload {
+  "The deleted base image collection."
+  baseImageCollection: BaseImageCollection!
 }
 
 input CreateBaseImageInput {
@@ -1554,6 +1298,11 @@ input CreateBaseImageInput {
   releaseDisplayName: LocalizedTextInput
 }
 
+type CreateBaseImagePayload {
+  "The created base image."
+  baseImage: BaseImage!
+}
+
 input UpdateBaseImageInput {
   "The ID of the base image to be updated."
   baseImageId: ID!
@@ -1566,4 +1315,309 @@ input UpdateBaseImageInput {
 
   "The localized relase display name. This can currently only use the default tenant locale."
   releaseDisplayName: LocalizedTextInput
+}
+
+type UpdateBaseImagePayload {
+  "The updated base image."
+  baseImage: BaseImage!
+}
+
+input DeleteBaseImageInput {
+  "The ID of the base image to be deleted."
+  baseImageId: ID!
+}
+
+type DeleteBaseImagePayload {
+  "The deleted base image."
+  baseImage: BaseImage!
+}
+
+"""
+Describes hardware-related info of a device.
+
+It exposes data read by a device's operating system about the underlying hardware.
+"""
+type HardwareInfo {
+  "The architecture of the CPU."
+  cpuArchitecture: String
+
+  "The reference code of the CPU model."
+  cpuModel: String
+
+  "The display name of the CPU model."
+  cpuModelName: String
+
+  "The vendor's name."
+  cpuVendor: String
+
+  "The Bytes count of memory."
+  memoryTotalBytes: Int
+}
+
+"Describes the current usage of a storage unit on a device."
+type StorageUnit {
+  "The label of the storage unit."
+  label: String!
+
+  "The total number of bytes of the storage unit."
+  totalBytes: Int
+
+  "The number of free bytes of the storage unit."
+  freeBytes: Int
+}
+
+"Describes the information on the system's base image for a device."
+type BaseImageInfo {
+  "The name of the image."
+  name: String
+
+  "The version of the image."
+  version: String
+
+  "Human readable build identifier of the image."
+  buildId: String
+
+  "A unique string that identifies the release, usually the image hash."
+  fingerprint: String
+}
+
+"Describes an operating system of a device."
+type OsInfo {
+  "The name of the operating system."
+  name: String
+
+  "The version of the operating system."
+  version: String
+}
+
+"Describes the current status of the operating system of a device."
+type SystemStatus {
+  "The identifier of the performed boot sequence."
+  bootId: String
+
+  "The number of free bytes of memory."
+  memoryFreeBytes: Int
+
+  "The number of running tasks on the system."
+  taskCount: Int
+
+  "The number of milliseconds since the last system boot."
+  uptimeMilliseconds: Int
+
+  "The date at which the system status was read."
+  timestamp: DateTime!
+}
+
+"Describes the list of WiFi Access Points found by the device."
+type WifiScanResult {
+  "The channel used by the Access Point."
+  channel: Int
+
+  "Indicates whether the device is connected to the Access Point."
+  connected: Boolean
+
+  "The ESSID advertised by the Access Point."
+  essid: String
+
+  "The MAC address advertised by the Access Point."
+  macAddress: String
+
+  "The power of the radio signal, measured in dBm."
+  rssi: Int
+
+  "The date at which the device found the Access Point."
+  timestamp: DateTime!
+}
+
+"The current status of the battery."
+enum BatteryStatus {
+  "The battery is charging."
+  CHARGING
+
+  "The battery is discharging."
+  DISCHARGING
+
+  "The battery is idle."
+  IDLE
+
+  "The battery is either in a charging or in an idle state, since the hardware doesn't allow to distinguish between them."
+  EITHER_IDLE_OR_CHARGING
+
+  "The battery is in a failed state."
+  FAILURE
+
+  "The battery is removed."
+  REMOVED
+
+  "The battery status cannot be determined."
+  UNKNOWN
+}
+
+"Describes a battery slot of a device."
+type BatterySlot {
+  "The identifier of the battery slot."
+  slot: String!
+
+  "Battery level estimated percentage [0.0%-100.0%]"
+  levelPercentage: Float
+
+  "Battery level measurement absolute error [0.0-100.0]"
+  levelAbsoluteError: Float
+
+  "The current status of the battery."
+  status: BatteryStatus
+}
+
+"The current GSM/LTE registration status of the modem."
+enum ModemRegistrationStatus {
+  "Not registered, modem is not currently searching a new operator to register to."
+  NOT_REGISTERED
+
+  "Registered, home network."
+  REGISTERED
+
+  "Not registered, but modem is currently searching a new operator to register to."
+  SEARCHING_OPERATOR
+
+  "Registration denied."
+  REGISTRATION_DENIED
+
+  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
+  UNKNOWN
+
+  "Registered, roaming."
+  REGISTERED_ROAMING
+}
+
+"The current access technology of the serving cell."
+enum ModemTechnology {
+  "GSM."
+  GSM
+
+  "GSM Compact."
+  GSM_COMPACT
+
+  "UTRAN."
+  UTRAN
+
+  "GSM with EGPRS."
+  GSM_EGPRS
+
+  "UTRAN with HSDPA."
+  UTRAN_HSDPA
+
+  "UTRAN with HSUPA."
+  UTRAN_HSUPA
+
+  "UTRAN with HSDPA and HSUPA."
+  UTRAN_HSDPA_HSUPA
+
+  "E-UTRAN."
+  EUTRAN
+}
+
+"Describes a modem of a device."
+type Modem {
+  "The identifier of the modem."
+  slot: String!
+
+  "The operator apn address."
+  apn: String
+
+  "The modem IMEI code."
+  imei: String
+
+  "The SIM IMSI code."
+  imsi: String
+
+  "Carrier operator name."
+  carrier: String
+
+  "Unique identifier of the cell."
+  cellId: Int
+
+  "The cell tower's Mobile Country Code (MCC)."
+  mobileCountryCode: Int
+
+  "The cell tower's Mobile Network Code."
+  mobileNetworkCode: Int
+
+  "The Local Area Code."
+  localAreaCode: Int
+
+  "The current registration status of the modem."
+  registrationStatus: ModemRegistrationStatus
+
+  "Signal strength in dBm."
+  rssi: Float
+
+  "Access Technology"
+  technology: ModemTechnology
+}
+
+"The connection technology of the network interface."
+enum NetworkInterfaceTechnology {
+  "Ethernet."
+  ETHERNET
+
+  "Bluetooth."
+  BLUETOOTH
+
+  "Cellular."
+  CELLULAR
+
+  "WiFi."
+  WIFI
+}
+
+"Describes a network interface of a device."
+type NetworkInterface {
+  "The identifier of the network interface."
+  name: String!
+
+  "The normalized physical address."
+  macAddress: String
+
+  "Connection Technology"
+  technology: NetworkInterfaceTechnology
+}
+
+"Describes an Edgehog runtime."
+type RuntimeInfo {
+  "The name of the Edgehog runtime."
+  name: String
+
+  "The version of the Edgehog runtime."
+  version: String
+
+  "The environment of the Edgehog runtime."
+  environment: String
+
+  "The URL that uniquely identifies the Edgehog runtime implementation."
+  url: String
+}
+
+"Led behavior"
+enum LedBehavior {
+  "Blink for 60 seconds."
+  BLINK
+
+  "Double blink for 60 seconds."
+  DOUBLE_BLINK
+
+  "Slow blink for 60 seconds."
+  SLOW_BLINK
+}
+
+input SetLedBehaviorInput {
+  "The GraphQL ID (not the Astarte Device ID) of the target device"
+  deviceId: ID!
+
+  "The led behavior"
+  behavior: LedBehavior!
+}
+
+type SetLedBehaviorPayload {
+  "The resulting led behavior."
+  behavior: LedBehavior!
 }
