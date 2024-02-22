@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -59,9 +59,12 @@ import type { Device_connectionStatus$key } from "api/__generated__/Device_conne
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
+import type { Device_requestForwarderSession_Mutation } from "api/__generated__/Device_requestForwarderSession_Mutation.graphql";
+import type { Device_getForwarderSession_Query } from "api/__generated__/Device_getForwarderSession_Query.graphql";
 import type { Device_getExistingDeviceTags_Query } from "api/__generated__/Device_getExistingDeviceTags_Query.graphql";
 import { Link, Route } from "Navigation";
 import Alert from "components/Alert";
+import Button from "components/Button";
 import CellularConnectionTabs from "components/CellularConnectionTabs";
 import Center from "components/Center";
 import ConnectionStatus from "components/ConnectionStatus";
@@ -301,6 +304,32 @@ const GET_TAGS_QUERY = graphql`
     existingDeviceTags
   }
 `;
+
+const REQUEST_FORWARDER_SESSION_MUTATION = graphql`
+  mutation Device_requestForwarderSession_Mutation(
+    $input: RequestForwarderSessionInput!
+  ) {
+    requestForwarderSession(input: $input) {
+      sessionToken
+    }
+  }
+`;
+
+const GET_FORWARDER_SESSION_QUERY = graphql`
+  query Device_getForwarderSession_Query(
+    $deviceId: ID!
+    $sessionToken: String!
+  ) {
+    forwarderSession(deviceId: $deviceId, sessionToken: $sessionToken) {
+      status
+      secure
+      forwarderHostname
+      forwarderPort
+    }
+  }
+`;
+
+const TTYD_PORT = 7681;
 
 const FormRow: (params: {
   id: string;
@@ -1215,6 +1244,36 @@ const DeviceConnectionFormRows = ({
   );
 };
 
+function timeoutPromise<T>(promise: Promise<T>, millis: number) {
+  return Promise.race([
+    promise,
+    new Promise((resolve, reject) => setTimeout(() => reject(), millis)),
+  ]);
+}
+
+async function retryWithExponentialBackoff<T>(
+  fn: () => Promise<T>,
+  attempt = 1,
+  maxAttempts = 4,
+  baseDelayMs = 1000,
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (attempt >= maxAttempts) {
+      throw error;
+    }
+    const delayMs = baseDelayMs * (2 ** attempt - 1);
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return await retryWithExponentialBackoff(
+      fn,
+      attempt + 1,
+      maxAttempts,
+      baseDelayMs,
+    );
+  }
+}
+
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
   getTagsQuery: PreloadedQuery<Device_getExistingDeviceTags_Query>;
@@ -1227,8 +1286,12 @@ const DeviceContent = ({
   refreshTags,
 }: DeviceContentProps) => {
   const { deviceId = "" } = useParams();
+  const relayEnvironment = useRelayEnvironment();
   const deviceData = usePreloadedQuery(GET_DEVICE_QUERY, getDeviceQuery);
   const tagsData = usePreloadedQuery(GET_TAGS_QUERY, getTagsQuery);
+  const [isOpeningRemoteTerminal, setIsOpeningRemoteTerminal] = useState(false);
+  const [remoteTerminalErrorFeedback, setRemoteTerminalErrorFeedback] =
+    useState<React.ReactNode>(null);
 
   // TODO: handle readonly type without mapping to mutable type
   const device = useMemo(
@@ -1267,6 +1330,86 @@ const DeviceContent = ({
   const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
     UPDATE_DEVICE_MUTATION,
   );
+
+  const [requestForwarderSession, isRequestingForwarderSession] =
+    useMutation<Device_requestForwarderSession_Mutation>(
+      REQUEST_FORWARDER_SESSION_MUTATION,
+    );
+
+  const handleOpenRemoteTerminal = useCallback(
+    async (sessionToken: string) => {
+      const data = await fetchQuery<Device_getForwarderSession_Query>(
+        relayEnvironment,
+        GET_FORWARDER_SESSION_QUERY,
+        { deviceId, sessionToken },
+      ).toPromise();
+
+      if (!data?.forwarderSession) {
+        throw new Error("The forwarder session does not exist.");
+      }
+
+      const { forwarderHostname, forwarderPort, secure, status } =
+        data.forwarderSession;
+
+      if (status !== "CONNECTED") {
+        throw new Error("The forwarder session is not connected.");
+      }
+
+      const forwarderProtocol = secure ? "https" : "http";
+
+      window.open(
+        `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/v1/${sessionToken}/http/${TTYD_PORT}`,
+        "_blank",
+      );
+    },
+    [relayEnvironment, deviceId],
+  );
+
+  const handleRequestForwarderSession = useCallback(() => {
+    requestForwarderSession({
+      variables: { input: { deviceId } },
+      onCompleted(data, errors) {
+        if (errors) {
+          const errorFeedback = errors
+            .map((error) => error.message)
+            .join(". \n");
+          return setErrorFeedback(errorFeedback);
+        }
+        if (data.requestForwarderSession) {
+          const { sessionToken } = data.requestForwarderSession;
+
+          setIsOpeningRemoteTerminal(true);
+          timeoutPromise(
+            retryWithExponentialBackoff(() =>
+              handleOpenRemoteTerminal(sessionToken),
+            ),
+            10_000,
+          )
+            .catch(() => {
+              setRemoteTerminalErrorFeedback(
+                <FormattedMessage
+                  id="pages.Device.openRemoteTerminalErrorFeedback"
+                  defaultMessage="Could not access the remote terminal, please try again."
+                  description="Feedback for unknown error while opening a remote terminal session"
+                />,
+              );
+            })
+            .finally(() => {
+              setIsOpeningRemoteTerminal(false);
+            });
+        }
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.Device.openRemoteTerminalErrorFeedback"
+            defaultMessage="Could not access the remote terminal, please try again."
+            description="Feedback for unknown error while opening a remote terminal session"
+          />,
+        );
+      },
+    });
+  }, [requestForwarderSession, handleOpenRemoteTerminal, deviceId]);
 
   const handleUpdateDevice = useMemo(
     () =>
@@ -1543,6 +1686,47 @@ const DeviceContent = ({
                         disabled={!device.online}
                         onError={setErrorFeedback}
                       />
+                    </FormRow>
+                  )}
+                  {device.capabilities.includes("REMOTE_TERMINAL") && (
+                    <FormRow
+                      id="form-device-open-remote-terminal"
+                      label={
+                        <FormattedMessage
+                          id="Device.remoteTerminal.label"
+                          defaultMessage="Remote Terminal"
+                        />
+                      }
+                    >
+                      <>
+                        <Button
+                          variant="secondary"
+                          onClick={handleRequestForwarderSession}
+                          disabled={
+                            !device.online ||
+                            isRequestingForwarderSession ||
+                            isOpeningRemoteTerminal
+                          }
+                        >
+                          {(isRequestingForwarderSession ||
+                            isOpeningRemoteTerminal) && (
+                            <Spinner size="sm" className="me-2" />
+                          )}
+                          <FormattedMessage
+                            id="Device.remoteTerminal.openTerminalButton"
+                            defaultMessage="Open"
+                          />
+                        </Button>
+                        <Alert
+                          show={!!remoteTerminalErrorFeedback}
+                          variant="danger"
+                          onClose={() => setRemoteTerminalErrorFeedback(null)}
+                          dismissible
+                          className="mt-3"
+                        >
+                          {remoteTerminalErrorFeedback}
+                        </Alert>
+                      </>
                     </FormRow>
                   )}
                 </Stack>
