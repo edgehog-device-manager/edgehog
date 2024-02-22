@@ -246,6 +246,44 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
+    test "Hardware Info", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.HardwareInfoMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, hardware_info_fixture(cpu_architecture: "arm", cpu_model: "ARMv7")}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, hardware_info_fixture(cpu_architecture: "Xtensa", cpu_model: "ESP32")}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          hardwareInfo {
+            cpuArchitecture
+            cpuModel
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "hardwareInfo" => %{"cpuArchitecture" => "arm", "cpuModel" => "ARMv7"}
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "hardwareInfo" => %{"cpuArchitecture" => "Xtensa", "cpuModel" => "ESP32"}
+             } in devices
+    end
+
     test "OS info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 

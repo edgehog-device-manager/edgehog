@@ -26,6 +26,10 @@ Mox.defmock(Edgehog.Astarte.Device.BaseImageMock,
   for: Edgehog.Astarte.Device.BaseImage.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.HardwareInfoMock,
+  for: Edgehog.Astarte.Device.HardwareInfo.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.OSInfoMock,
   for: Edgehog.Astarte.Device.OSInfo.Behaviour
 )

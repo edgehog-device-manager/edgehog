@@ -152,6 +152,10 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :battery_status}
     end
 
+    calculate :hardware_info, Types.HardwareInfo do
+      calculation {Calculations.AstarteInterfaceValue, value_id: :hardware_info}
+    end
+
     calculate :os_info, Types.OSInfo do
       calculation {Calculations.AstarteInterfaceValue, value_id: :os_info}
     end

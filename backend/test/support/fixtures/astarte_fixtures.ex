@@ -197,6 +197,16 @@ defmodule Edgehog.AstarteFixtures do
     ]
   end
 
+  def hardware_info_fixture(opts \\ []) do
+    %Edgehog.Astarte.Device.HardwareInfo{
+      cpu_architecture: opts[:cpu_architecture] || "Xtensa",
+      cpu_model: opts[:cpu_model] || "ESP32",
+      cpu_model_name: opts[:cpu_model_name] || "Dual-core Xtensa LX6",
+      cpu_vendor: opts[:cpu_vendor] || "Espressif Systems",
+      memory_total_bytes: opts[:memory_total_bytes] || 344_212
+    }
+  end
+
   def os_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.OSInfo{
       name: opts[:name] || "esp-idf",

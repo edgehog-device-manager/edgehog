@@ -172,6 +172,31 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert modem["mobileCountryCode"] == 222
     end
 
+    test "Hardware Info", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.HardwareInfoMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, hardware_info_fixture(cpu_architecture: "arm", cpu_model: "ARMv7")}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          hardwareInfo {
+            cpuArchitecture
+            cpuModel
+          }
+        }
+      }
+      """
+
+      device =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert device["hardwareInfo"]["cpuArchitecture"] == "arm"
+      assert device["hardwareInfo"]["cpuModel"] == "ARMv7"
+    end
+
     test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.OSInfoMock
       |> expect(:get, fn _client, ^device_id ->
