@@ -170,6 +170,16 @@ defmodule Edgehog.AstarteFixtures do
     ]
   end
 
+  def network_interfaces_fixture(opts \\ []) do
+    [
+      %Edgehog.Astarte.Device.NetworkInterface{
+        name: opts[:name] || "enp2s0",
+        mac_address: opts[:mac_address] || "00:aa:bb:cc:dd:ee",
+        technology: opts[:technology] || "Ethernet"
+      }
+    ]
+  end
+
   def modem_properties_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.CellularConnection.ModemProperties{

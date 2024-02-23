@@ -156,6 +156,10 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :hardware_info}
     end
 
+    calculate :network_interfaces, {:array, Types.NetworkInterface} do
+      calculation {Calculations.AstarteInterfaceValue, value_id: :network_interfaces}
+    end
+
     calculate :os_info, Types.OSInfo do
       calculation {Calculations.AstarteInterfaceValue, value_id: :os_info}
     end

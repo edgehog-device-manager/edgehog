@@ -197,6 +197,31 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["hardwareInfo"]["cpuModel"] == "ARMv7"
     end
 
+    test "Network Interfaces", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.NetworkInterfaceMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, network_interfaces_fixture(name: "eth0", technology: "Ethernet")}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          networkInterfaces {
+            name
+            technology
+          }
+        }
+      }
+      """
+
+      %{"networkInterfaces" => [network_interface]} =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert network_interface["name"] == "eth0"
+      assert network_interface["technology"] == "ETHERNET"
+    end
+
     test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.OSInfoMock
       |> expect(:get, fn _client, ^device_id ->

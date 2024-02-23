@@ -284,6 +284,44 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
+    test "Network Interfaces", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.NetworkInterfaceMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, network_interfaces_fixture(name: "eth0", technology: "Ethernet")}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, network_interfaces_fixture(name: "wlan0", technology: "WiFi")}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          networkInterfaces {
+            name
+            technology
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "networkInterfaces" => [%{"name" => "eth0", "technology" => "ETHERNET"}]
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "networkInterfaces" => [%{"name" => "wlan0", "technology" => "WIFI"}]
+             } in devices
+    end
+
     test "OS info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
