@@ -398,6 +398,44 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
+    test "Storage Usage", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.StorageUsageMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, storage_usage_fixture(label: "Disk 0", free_bytes: 1_000_000)}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, storage_usage_fixture(label: "Disk 1", free_bytes: 5_999_999)}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          storageUsage {
+            label
+            freeBytes
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "storageUsage" => [%{"label" => "Disk 0", "freeBytes" => 1_000_000}]
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "storageUsage" => [%{"label" => "Disk 1", "freeBytes" => 5_999_999}]
+             } in devices
+    end
+
     test "queries WiFi scan results", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 

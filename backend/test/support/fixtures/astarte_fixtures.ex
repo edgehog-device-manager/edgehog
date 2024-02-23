@@ -233,6 +233,16 @@ defmodule Edgehog.AstarteFixtures do
     }
   end
 
+  def storage_usage_fixture(opts \\ []) do
+    [
+      %Edgehog.Astarte.Device.StorageUsage.StorageUnit{
+        label: opts[:label] || "Disk 0",
+        total_bytes: opts[:total_bytes] || 348_360_704,
+        free_bytes: opts[:free_bytes] || 281_360_704
+      }
+    ]
+  end
+
   def wifi_scan_results_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.WiFiScanResult{

@@ -272,6 +272,32 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["runtimeInfo"]["version"] == "0.7.0"
     end
 
+    test "Storage Usage", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.StorageUsageMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, storage_usage_fixture(label: "Flash", free_bytes: 345_678)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          deviceId
+          storageUsage {
+            label
+            freeBytes
+          }
+        }
+      }
+      """
+
+      assert %{"storageUsage" => [storage_unit]} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      assert storage_unit["label"] == "Flash"
+      assert storage_unit["freeBytes"] == 345_678
+    end
+
     test "WiFi scan results", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.WiFiScanResultMock
       |> expect(:get, fn _client, ^device_id ->
