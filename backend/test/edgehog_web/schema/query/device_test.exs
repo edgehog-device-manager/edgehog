@@ -247,6 +247,31 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert device["osInfo"]["version"] == "3.0.0"
     end
 
+    test "Runtime info", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.RuntimeInfoMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, runtime_info_fixture(name: "edgehog-esp32-device", version: "0.7.0")}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          runtimeInfo {
+            name
+            version
+          }
+        }
+      }
+      """
+
+      device =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert device["runtimeInfo"]["name"] == "edgehog-esp32-device"
+      assert device["runtimeInfo"]["version"] == "0.7.0"
+    end
+
     test "WiFi scan results", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.WiFiScanResultMock
       |> expect(:get, fn _client, ^device_id ->

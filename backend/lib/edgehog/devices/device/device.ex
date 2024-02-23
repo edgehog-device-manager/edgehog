@@ -164,6 +164,10 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :os_info}
     end
 
+    calculate :runtime_info, Types.RuntimeInfo do
+      calculation {Calculations.AstarteInterfaceValue, value_id: :runtime_info}
+    end
+
     calculate :wifi_scan_results, {:array, Types.WiFiScanResult} do
       calculation {Calculations.AstarteInterfaceValue, value_id: :wifi_scan_result}
     end

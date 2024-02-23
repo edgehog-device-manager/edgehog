@@ -360,6 +360,44 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
+    test "Runtime info", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.RuntimeInfoMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, runtime_info_fixture(name: "edgehog-esp32-device", version: "0.7.0")}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, runtime_info_fixture(name: "edgehog-device-runtime", version: "0.8.0")}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          runtimeInfo {
+            name
+            version
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "runtimeInfo" => %{"name" => "edgehog-esp32-device", "version" => "0.7.0"}
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "runtimeInfo" => %{"name" => "edgehog-device-runtime", "version" => "0.8.0"}
+             } in devices
+    end
+
     test "queries WiFi scan results", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 

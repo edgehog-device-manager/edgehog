@@ -224,6 +224,15 @@ defmodule Edgehog.AstarteFixtures do
     }
   end
 
+  def runtime_info_fixture(opts \\ []) do
+    %Edgehog.Astarte.Device.RuntimeInfo{
+      name: opts[:name] || "edgehog-esp32-device",
+      version: opts[:version] || "0.1.0",
+      environment: opts[:environment] || "esp-idf v4.3",
+      url: opts[:url] || "https://github.com/edgehog-device-manager/edgehog-esp32-device"
+    }
+  end
+
   def wifi_scan_results_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.WiFiScanResult{

@@ -79,6 +79,12 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
              Edgehog.Astarte.Device.OSInfo
            )
 
+  @runtime_info Application.compile_env(
+                  :edgehog,
+                  :astarte_runtime_info_module,
+                  Edgehog.Astarte.Device.RuntimeInfo
+                )
+
   @wifi_scan_result Application.compile_env(
                       :edgehog,
                       :astarte_wifi_scan_result_module,
@@ -92,5 +98,6 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
   defp value_id_to_fetch_fun(:modem_status), do: &@cellular_connection.get_modem_status/2
   defp value_id_to_fetch_fun(:network_interfaces), do: &@network_interface.get/2
   defp value_id_to_fetch_fun(:os_info), do: &@os_info.get/2
+  defp value_id_to_fetch_fun(:runtime_info), do: &@runtime_info.get/2
   defp value_id_to_fetch_fun(:wifi_scan_result), do: &@wifi_scan_result.get/2
 end
