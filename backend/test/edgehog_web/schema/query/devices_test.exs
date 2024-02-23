@@ -436,6 +436,44 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
              } in devices
     end
 
+    test "System Status", ctx do
+      %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
+
+      Edgehog.Astarte.Device.SystemStatusMock
+      |> expect(:get, fn _client, ^device_id_1 ->
+        {:ok, system_status_fixture(task_count: 193, uptime_milliseconds: 200_159)}
+      end)
+      |> expect(:get, fn _client, ^device_id_2 ->
+        {:ok, system_status_fixture(task_count: 21, uptime_milliseconds: 10_249)}
+      end)
+
+      document = """
+      query {
+        devices {
+          deviceId
+          systemStatus {
+            taskCount
+            uptimeMilliseconds
+          }
+        }
+      }
+      """
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      assert %{
+               "deviceId" => device_id_1,
+               "systemStatus" => %{"taskCount" => 193, "uptimeMilliseconds" => 200_159}
+             } in devices
+
+      assert %{
+               "deviceId" => device_id_2,
+               "systemStatus" => %{"taskCount" => 21, "uptimeMilliseconds" => 10_249}
+             } in devices
+    end
+
     test "queries WiFi scan results", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 

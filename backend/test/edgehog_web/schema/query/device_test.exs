@@ -298,6 +298,31 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert storage_unit["freeBytes"] == 345_678
     end
 
+    test "System Status", %{tenant: tenant, id: id, device_id: device_id} do
+      Edgehog.Astarte.Device.SystemStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, system_status_fixture(task_count: 193, uptime_milliseconds: 200_159)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          systemStatus {
+            taskCount
+            uptimeMilliseconds
+          }
+        }
+      }
+      """
+
+      device =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert device["systemStatus"]["taskCount"] == 193
+      assert device["systemStatus"]["uptimeMilliseconds"] == 200_159
+    end
+
     test "WiFi scan results", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.WiFiScanResultMock
       |> expect(:get, fn _client, ^device_id ->

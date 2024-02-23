@@ -243,6 +243,16 @@ defmodule Edgehog.AstarteFixtures do
     ]
   end
 
+  def system_status_fixture(opts \\ []) do
+    %Edgehog.Astarte.Device.SystemStatus{
+      boot_id: opts[:boot_id] || "1c0cf72f-8428-4838-8626-1a748df5b889",
+      memory_free_bytes: opts[:memory_free_bytes] || 166_772,
+      task_count: opts[:task_count] || 12,
+      uptime_milliseconds: opts[:uptime_milliseconds] || 5785,
+      timestamp: opts[:timestamp] || ~U[2021-11-15 11:44:57.432516Z]
+    }
+  end
+
   def wifi_scan_results_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.WiFiScanResult{

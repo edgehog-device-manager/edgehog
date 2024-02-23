@@ -91,6 +91,12 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                    Edgehog.Astarte.Device.StorageUsage
                  )
 
+  @system_status Application.compile_env(
+                   :edgehog,
+                   :astarte_system_status_module,
+                   Edgehog.Astarte.Device.SystemStatus
+                 )
+
   @wifi_scan_result Application.compile_env(
                       :edgehog,
                       :astarte_wifi_scan_result_module,
@@ -106,5 +112,6 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
   defp value_id_to_fetch_fun(:os_info), do: &@os_info.get/2
   defp value_id_to_fetch_fun(:runtime_info), do: &@runtime_info.get/2
   defp value_id_to_fetch_fun(:storage_usage), do: &@storage_usage.get/2
+  defp value_id_to_fetch_fun(:system_status), do: &@system_status.get/2
   defp value_id_to_fetch_fun(:wifi_scan_result), do: &@wifi_scan_result.get/2
 end
