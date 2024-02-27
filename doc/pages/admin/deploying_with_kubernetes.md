@@ -341,6 +341,12 @@ spec:
           value: <S3-ASSET-HOST>
         - name: S3_REGION
           value: <S3-REGION>
+        - name: EDGEHOG_FORWARDER_HOSTNAME
+          value: <EDGEHOG-FORWARDER-HOSTNAME>
+        - name: EDGEHOG_FORWARDER_PORT
+          value: <EDGEHOG-FORWARDER-PORT>
+        - name: EDGEHOG_FORWARDER_SECURE_SESSIONS
+          value: <EDGEHOG-FORWARDER-SECURE-SESSIONS>
         image: edgehogdevicemanager/edgehog-backend:snapshot
         imagePullPolicy: Always
         name: edgehog-backend
@@ -364,6 +370,9 @@ Values to be replaced
 - `S3-ASSET-HOST`: the asset host for the S3 storage, e.g. `storage.googleapis.com/<S3-BUCKET>` for
   GCP or `<S3-BUCKET>.s3.amazonaws.com` for AWS.
 - `S3-REGION`: the region where the S3 storage resides.
+- `EDGEHOG-FORWARDER-HOSTNAME`: the host for the instance of [Edgehog Device Forwarder](https://github.com/edgehog-device-manager/edgehog_device_forwarder). It should only contain the hostname without the `http://` or `https://` scheme.
+- `EDGEHOG-FORWARDER-PORT`: the port for the instance of [Edgehog Device Forwarder](https://github.com/edgehog-device-manager/edgehog_device_forwarder). It defaults to `443`.
+- `EDGEHOG-FORWARDER-SECURE-SESSIONS`: either `true` or `false`, indicates whether devices use TLS to connect to the [Edgehog Device Forwarder](https://github.com/edgehog-device-manager/edgehog_device_forwarder). It defaults to `true`.
 
 The optional env variable in the `yaml` also have to be uncommented where relevant (see comments
 above the commented blocks for more information).
