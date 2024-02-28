@@ -151,118 +151,128 @@ defmodule Edgehog.AstarteFixtures do
 
   def base_image_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.BaseImage{
-      name: opts[:name] || "esp-idf",
-      version: opts[:version] || "0.1.0",
-      build_id: opts[:build_id] || "2022-01-01 12:00:00",
-      fingerprint:
-        opts[:fingerprint] || "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
+      name: "esp-idf",
+      version: "0.1.0",
+      build_id: "2022-01-01 12:00:00",
+      fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
     }
+    |> struct!(opts)
   end
 
   def battery_status_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.BatteryStatus.BatterySlot{
-        slot: opts[:slot] || "Main slot",
-        level_percentage: opts[:level_percentage] || 80.3,
-        level_absolute_error: opts[:level_absolute_error] || 0.1,
-        status: opts[:status] || "Charging"
+        slot: "Main slot",
+        level_percentage: 80.3,
+        level_absolute_error: 0.1,
+        status: "Charging"
       }
+      |> struct!(opts)
     ]
   end
 
   def network_interfaces_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.NetworkInterface{
-        name: opts[:name] || "enp2s0",
-        mac_address: opts[:mac_address] || "00:aa:bb:cc:dd:ee",
-        technology: opts[:technology] || "Ethernet"
+        name: "enp2s0",
+        mac_address: "00:aa:bb:cc:dd:ee",
+        technology: "Ethernet"
       }
+      |> struct!(opts)
     ]
   end
 
   def modem_properties_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.CellularConnection.ModemProperties{
-        slot: opts[:slot] || "modem_1",
-        apn: opts[:apn] || "company.com",
-        imei: opts[:imei] || "509504877678976",
-        imsi: opts[:imsi] || "313460000000001"
+        slot: "modem_1",
+        apn: "company.com",
+        imei: "509504877678976",
+        imsi: "313460000000001"
       }
+      |> struct!(opts)
     ]
   end
 
   def modem_status_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.CellularConnection.ModemStatus{
-        slot: opts[:slot] || "modem_1",
-        carrier: opts[:carrier] || "Carrier",
-        cell_id: opts[:cell_id] || 170_402_199,
-        mobile_country_code: opts[:mobile_country_code] || 310,
-        mobile_network_code: opts[:mobile_network_code] || 410,
-        local_area_code: opts[:local_area_code] || 35_632,
-        registration_status: opts[:registration_status] || "Registered",
-        rssi: opts[:rssi] || -60,
-        technology: opts[:technology] || "GSM"
+        slot: "modem_1",
+        carrier: "Carrier",
+        cell_id: 170_402_199,
+        mobile_country_code: 310,
+        mobile_network_code: 410,
+        local_area_code: 35_632,
+        registration_status: "Registered",
+        rssi: -60,
+        technology: "GSM"
       }
+      |> struct!(opts)
     ]
   end
 
   def hardware_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.HardwareInfo{
-      cpu_architecture: opts[:cpu_architecture] || "Xtensa",
-      cpu_model: opts[:cpu_model] || "ESP32",
-      cpu_model_name: opts[:cpu_model_name] || "Dual-core Xtensa LX6",
-      cpu_vendor: opts[:cpu_vendor] || "Espressif Systems",
-      memory_total_bytes: opts[:memory_total_bytes] || 344_212
+      cpu_architecture: "Xtensa",
+      cpu_model: "ESP32",
+      cpu_model_name: "Dual-core Xtensa LX6",
+      cpu_vendor: "Espressif Systems",
+      memory_total_bytes: 344_212
     }
+    |> struct!(opts)
   end
 
   def os_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.OSInfo{
-      name: opts[:name] || "esp-idf",
-      version: opts[:version] || "3.0.0"
+      name: "esp-idf",
+      version: "3.0.0"
     }
+    |> struct!(opts)
   end
 
   def runtime_info_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.RuntimeInfo{
-      name: opts[:name] || "edgehog-esp32-device",
-      version: opts[:version] || "0.1.0",
-      environment: opts[:environment] || "esp-idf v4.3",
-      url: opts[:url] || "https://github.com/edgehog-device-manager/edgehog-esp32-device"
+      name: "edgehog-esp32-device",
+      version: "0.1.0",
+      environment: "esp-idf v4.3",
+      url: "https://github.com/edgehog-device-manager/edgehog-esp32-device"
     }
+    |> struct!(opts)
   end
 
   def storage_usage_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.StorageUsage.StorageUnit{
-        label: opts[:label] || "Disk 0",
-        total_bytes: opts[:total_bytes] || 348_360_704,
-        free_bytes: opts[:free_bytes] || 281_360_704
+        label: "Disk 0",
+        total_bytes: 348_360_704,
+        free_bytes: 281_360_704
       }
+      |> struct!(opts)
     ]
   end
 
   def system_status_fixture(opts \\ []) do
     %Edgehog.Astarte.Device.SystemStatus{
-      boot_id: opts[:boot_id] || "1c0cf72f-8428-4838-8626-1a748df5b889",
-      memory_free_bytes: opts[:memory_free_bytes] || 166_772,
-      task_count: opts[:task_count] || 12,
-      uptime_milliseconds: opts[:uptime_milliseconds] || 5785,
-      timestamp: opts[:timestamp] || ~U[2021-11-15 11:44:57.432516Z]
+      boot_id: "1c0cf72f-8428-4838-8626-1a748df5b889",
+      memory_free_bytes: 166_772,
+      task_count: 12,
+      uptime_milliseconds: 5785,
+      timestamp: ~U[2021-11-15 11:44:57.432516Z]
     }
+    |> struct!(opts)
   end
 
   def wifi_scan_results_fixture(opts \\ []) do
     [
       %Edgehog.Astarte.Device.WiFiScanResult{
-        channel: opts[:channel] || 11,
+        channel: 11,
         connected: Keyword.get(opts, :connected, true),
-        essid: opts[:essid] || "MyEssid",
-        mac_address: opts[:mac_address] || "01:23:45:67:89:ab",
-        rssi: opts[:rssi] || -43,
-        timestamp: opts[:timestamp] || ~U[2021-11-15 11:44:57.432516Z]
+        essid: "MyEssid",
+        mac_address: "01:23:45:67:89:ab",
+        rssi: -43,
+        timestamp: ~U[2021-11-15 11:44:57.432516Z]
       }
+      |> struct!(opts)
     ]
   end
 end
