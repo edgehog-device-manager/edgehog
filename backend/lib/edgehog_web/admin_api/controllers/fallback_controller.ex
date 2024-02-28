@@ -1,5 +1,4 @@
 #
-#
 # This file is part of Edgehog.
 #
 # Copyright 2023 SECO Mind Srl
@@ -27,5 +26,12 @@ defmodule EdgehogWeb.AdminAPI.FallbackController do
     |> put_status(:unprocessable_entity)
     |> put_view(EdgehogWeb.AdminAPI.ChangesetView)
     |> render("error.json", changeset: changeset)
+  end
+
+  def call(conn, {:error, :not_found}) do
+    conn
+    |> put_status(:not_found)
+    |> put_view(EdgehogWeb.ErrorView)
+    |> render(:"404")
   end
 end

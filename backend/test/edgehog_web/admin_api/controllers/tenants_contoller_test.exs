@@ -118,4 +118,25 @@ defmodule EdgehogWeb.AdminAPI.TenantsControllerTest do
       end
     end
   end
+
+  describe "DELETE /admin-api/v1/tenants/:tenant_slug" do
+    test "deletes tenant with valid slug", %{conn: conn} do
+      tenant = tenant_fixture()
+      path = Routes.tenants_path(conn, :delete_by_slug, tenant.slug)
+
+      conn = delete(conn, path)
+
+      assert response(conn, :no_content)
+
+      assert assert {:error, :not_found} = Tenants.fetch_tenant_by_slug(tenant.slug)
+    end
+
+    test "returns error for invalid tenant slug", %{conn: conn} do
+      path = Routes.tenants_path(conn, :delete_by_slug, "not_existing_slug")
+
+      conn = delete(conn, path)
+
+      assert json_response(conn, 404) == %{"errors" => %{"detail" => "Not Found"}}
+    end
+  end
 end

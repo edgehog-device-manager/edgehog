@@ -6,17 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.0-dev] - Unreleased
 
-## [0.7.1] - Unreleased
+## [0.7.1] - 2024-02-01
 ### Added
-- Add Admin API ([#400](https://github.com/edgehog-device-manager/edgehog/pull/400)).
+- Add Admin API to [create](https://github.com/edgehog-device-manager/edgehog/pull/400) and
+  to [delete](https://github.com/edgehog-device-manager/edgehog/pull/416) tenants.
 - Add a reconciler that takes care of installing Astarte resources (interfaces and triggers) for a
-  tenant ([#403](https://github.com/edgehog-device-manager/edgehog/pull/403))
+  tenant ([#403](https://github.com/edgehog-device-manager/edgehog/pull/403)).
 - BREAKING: Add mandatory `URL_HOST` env variable. It must point to the host where the Edgehog
   backend is exposed.
 
 ### Fixed
-- Fix seeds not working when used outside docker
-- Fix seeds's default values not working correctly
+- Fix seeds not working when used outside docker.
+- Fix seeds's default values not working correctly.
 
 ## [0.7.0] - 2023-10-06
 ### Fixed
@@ -30,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expose OTA Campaigns stats.
 
 ### Fixed
-- Fix DevicesTable component for devices without SystemModel
+- Fix DevicesTable component for devices without SystemModel.
 
 ### Changed
 - Enhance the OTA Campaigns frontend, using the exposed stats.

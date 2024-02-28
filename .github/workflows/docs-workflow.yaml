@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,20 +45,23 @@ jobs:
     if: github.repository_owner == 'edgehog-device-manager'
     runs-on: ubuntu-22.04
     steps:
-    # Checkout the source
-    - uses: actions/checkout@v3
+    - name: Checkout the source
+      uses: actions/checkout@v4
       with:
         path: edgehog
-    # Checkout the docs repository
-    - uses: actions/checkout@v3
+        show-progress: false
+    - name: Checkout the docs repository
+      uses: actions/checkout@v4
       with:
         repository: edgehog-device-manager/docs
         path: docs
-    # Checkout the interfaces repository
-    - uses: actions/checkout@v3
+        show-progress: false
+    - name: Checkout the interfaces repository
+      uses: actions/checkout@v4
       with:
         repository: edgehog-device-manager/edgehog-astarte-interfaces
         path: edgehog-astarte-interfaces
+        show-progress: false
     - uses: actions/setup-node@v3
       with:
         node-version-file: edgehog/.tool-versions
