@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ if config_env() == :prod do
       """
 
   # We're in the prod env, so assume https unless otherwise specified
-  url_port = System.get_env("URL_PORT", 443)
+  url_port = System.get_env("URL_PORT", "443")
   url_scheme = System.get_env("URL_SCHEME", "https")
 
   config :edgehog, EdgehogWeb.Endpoint,
@@ -78,12 +78,12 @@ if config_env() == :prod do
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: String.to_integer(System.get_env("PORT") || "4000"),
-      protocol_options: [idle_timeout: 300_000],
-      url: [
-        host: url_host,
-        scheme: url_scheme,
-        port: url_port
-      ]
+      protocol_options: [idle_timeout: 300_000]
+    ],
+    url: [
+      host: url_host,
+      scheme: url_scheme,
+      port: url_port
     ],
     secret_key_base: secret_key_base
 

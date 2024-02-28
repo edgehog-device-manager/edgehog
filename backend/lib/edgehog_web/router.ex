@@ -42,6 +42,7 @@ defmodule EdgehogWeb.Router do
     pipe_through :admin_api
 
     post "/tenants", TenantsController, :create
+    delete "/tenants/:tenant_slug", TenantsController, :delete_by_slug
   end
 
   forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema

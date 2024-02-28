@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,8 +51,10 @@ jobs:
     name: Lint
     runs-on: ubuntu-22.04
     steps:
-    - name: Clone the repository
-      uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        show-progress: false
 
     - name: Install OTP and Elixir
       uses: erlef/setup-beam@v1
@@ -138,8 +140,10 @@ jobs:
           --health-retries 5
 
     steps:
-    - name: Clone the repository
-      uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        show-progress: false
 
     - name: Install OTP and Elixir
       uses: erlef/setup-beam@v1
@@ -176,6 +180,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          show-progress: false
 
       - name: Build Docker image
         run: docker build .
