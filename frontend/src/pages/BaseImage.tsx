@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -51,14 +51,10 @@ const GET_BASE_IMAGE_QUERY = graphql`
     baseImage(id: $id) {
       id
       version
-      url
-      startingVersionRequirement
-      releaseDisplayName
-      description
       baseImageCollection {
         id
-        name
       }
+      ...UpdateBaseImage_BaseImageFragment
     }
     tenantInfo {
       defaultLocale
@@ -204,7 +200,7 @@ const BaseImageContent = ({ baseImage, locale }: BaseImageContentProps) => {
           {errorFeedback}
         </Alert>
         <UpdateBaseImageForm
-          baseImage={baseImage}
+          baseImageRef={baseImage}
           locale={locale}
           onSubmit={handleUpdateBaseImage}
           onDelete={handleShowDeleteModal}
