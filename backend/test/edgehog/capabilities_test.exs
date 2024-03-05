@@ -20,6 +20,7 @@
 
 defmodule Edgehog.CapabilitiesTest do
   use ExUnit.Case
+  use Edgehog.ForwarderMockCase
 
   alias Edgehog.Astarte.InterfaceVersion
   alias Edgehog.Capabilities
@@ -168,6 +169,46 @@ defmodule Edgehog.CapabilitiesTest do
 
       assert Enum.sort(expected_capabilities) ==
                Enum.sort(Capabilities.from_introspection(device_introspection))
+    end
+
+    test "returns remote_terminal capability if the device supports it and the forwarder is enabled" do
+      enable_forwarder()
+
+      device_introspection = %{
+        "io.edgehog.devicemanager.ForwarderSessionState" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.ForwarderSessionRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
+      }
+
+      capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.member?(capabilities, :remote_terminal)
+    end
+
+    test "does not return remote_terminal capability if the device supports it but the forwarder is disabled" do
+      disable_forwarder()
+
+      device_introspection = %{
+        "io.edgehog.devicemanager.ForwarderSessionState" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.ForwarderSessionRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
+      }
+
+      capabilities = Capabilities.from_introspection(device_introspection)
+
+      refute Enum.member?(capabilities, :remote_terminal)
+    end
+
+    defp enable_forwarder do
+      expect(Edgehog.ForwarderMock, :forwarder_enabled?, fn -> true end)
+    end
+
+    defp disable_forwarder do
+      expect(Edgehog.ForwarderMock, :forwarder_enabled?, fn -> false end)
     end
   end
 end

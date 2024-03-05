@@ -24,6 +24,13 @@ defmodule Edgehog.Capabilities do
   """
 
   alias Edgehog.Astarte
+  alias Edgehog.Forwarder
+
+  @forwarder_module Application.compile_env(
+                      :edgehog,
+                      :forwarder_module,
+                      Forwarder
+                    )
 
   # This is a keyword list that maps a capability, represented as an atom, to the set of all
   # interfaces that the device must support to claim to support the capability.
@@ -188,6 +195,13 @@ defmodule Edgehog.Capabilities do
             acc
           end
       end)
+
+    capabilities =
+      if @forwarder_module.forwarder_enabled?() do
+        capabilities
+      else
+        MapSet.delete(capabilities, :remote_terminal)
+      end
 
     # TODO add checks on device privacy settings and geolocation providers
     MapSet.put(capabilities, :geolocation)

@@ -21,6 +21,7 @@
 defmodule EdgehogWeb.Resolvers.CapabilitiesTest do
   use EdgehogWeb.ConnCase, async: true
   use Edgehog.AstarteMockCase
+  use Edgehog.ForwarderMockCase
   use Edgehog.GeolocationMockCase
 
   alias Astarte.Client.APIError
