@@ -48,7 +48,7 @@ defmodule Edgehog.Forwarder do
     forwarder_config.secure_sessions?
   end
 
-  defp forwarder_enabled? do
+  def forwarder_enabled? do
     forwarder_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
     forwarder_config.enabled?
   end

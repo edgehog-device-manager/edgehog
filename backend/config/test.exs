@@ -74,6 +74,8 @@ config :edgehog,
 config :edgehog, :astarte_interfaces_module, Edgehog.Astarte.Realm.InterfacesMock
 config :edgehog, :astarte_triggers_module, Edgehog.Astarte.Realm.TriggersMock
 
+config :edgehog, :forwarder_module, Edgehog.ForwarderMock
+
 # Reconciler mock for tests
 config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock
 
