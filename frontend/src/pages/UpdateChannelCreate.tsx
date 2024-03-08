@@ -42,11 +42,7 @@ import { Route, useNavigate } from "Navigation";
 const GET_DEVICE_GROUPS_QUERY = graphql`
   query UpdateChannelCreate_getDeviceGroups_Query {
     deviceGroups {
-      id
-      name
-      updateChannel {
-        name
-      }
+      ...CreateUpdateChannel_DeviceGroupFragment
     }
   }
 `;
@@ -157,7 +153,7 @@ const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
           {errorFeedback}
         </Alert>
         <CreateUpdateChannelForm
-          targetGroups={deviceGroups}
+          targetGroupsRef={deviceGroups}
           onSubmit={handleCreateUpdateChannel}
           isLoading={isCreatingUpdateChannel}
         />

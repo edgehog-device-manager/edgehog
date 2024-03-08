@@ -31,6 +31,19 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { updateChannelHandleSchema, yup, messages } from "forms";
+import { graphql, useFragment } from "react-relay/hooks";
+import type { CreateUpdateChannel_DeviceGroupFragment$key } from "api/__generated__/CreateUpdateChannel_DeviceGroupFragment.graphql";
+
+const CREATE_UPDATE_CHANNEL_FRAGMENT = graphql`
+  fragment CreateUpdateChannel_DeviceGroupFragment on DeviceGroup
+  @relay(plural: true) {
+    id
+    name
+    updateChannel {
+      name
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -116,16 +129,20 @@ const transformOutputData = ({
 });
 
 type Props = {
-  targetGroups: ReadonlyArray<TargetGroup>;
+  targetGroupsRef: CreateUpdateChannel_DeviceGroupFragment$key;
   isLoading?: boolean;
   onSubmit: (data: UpdateChannelData) => void;
 };
 
 const CreateUpdateChannel = ({
+  targetGroupsRef,
   isLoading = false,
-  targetGroups,
   onSubmit,
 }: Props) => {
+  const targetGroups = useFragment(
+    CREATE_UPDATE_CHANNEL_FRAGMENT,
+    targetGroupsRef,
+  );
   const {
     register,
     handleSubmit,
