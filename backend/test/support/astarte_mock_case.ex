@@ -128,6 +128,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Realm.Triggers
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Device.ForwarderSessionMock,
+      Edgehog.Mocks.Astarte.Device.ForwarderSession
+    )
+
     :ok
   end
 end

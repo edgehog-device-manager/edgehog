@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.BaseImagesTypes
   import_types EdgehogWeb.Schema.CapabilitiesTypes
   import_types EdgehogWeb.Schema.DevicesTypes
+  import_types EdgehogWeb.Schema.ForwarderSessionsTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
   import_types EdgehogWeb.Schema.GroupsTypes
   import_types EdgehogWeb.Schema.LabelingTypes
@@ -116,6 +117,7 @@ defmodule EdgehogWeb.Schema do
 
     import_fields :base_images_queries
     import_fields :devices_queries
+    import_fields :forwarder_sessions_queries
     import_fields :groups_queries
     import_fields :labeling_queries
     import_fields :tenants_queries
@@ -126,6 +128,7 @@ defmodule EdgehogWeb.Schema do
     import_fields :astarte_mutations
     import_fields :base_images_mutations
     import_fields :devices_mutations
+    import_fields :forwarder_sessions_mutations
     import_fields :groups_mutations
     import_fields :os_management_mutations
     import_fields :update_campaigns_mutations
