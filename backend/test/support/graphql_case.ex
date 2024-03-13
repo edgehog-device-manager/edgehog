@@ -23,14 +23,31 @@ defmodule EdgehogWeb.GraphqlCase do
 
   using do
     quote do
+      import Mox
       import EdgehogWeb.GraphqlCase
     end
   end
+
+  import Mox
+
+  setup :verify_on_exit!
 
   setup tags do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
     on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
 
     %{tenant: Edgehog.TenantsFixtures.tenant_fixture()}
+  end
+
+  def add_upload(context, _upload_name, nil), do: context
+
+  def add_upload(context, upload_name, upload) do
+    upload_path = [:__absinthe_plug__, :uploads]
+
+    upload_map =
+      (get_in(context, upload_path) || %{})
+      |> Map.put(upload_name, upload)
+
+    put_in(context, Enum.map(upload_path, &Access.key(&1, %{})), upload_map)
   end
 end

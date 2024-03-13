@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,26 +19,47 @@
 #
 
 defmodule Edgehog.Devices.SystemModelPartNumber do
-  use Ecto.Schema
-  use I18nHelpers.Ecto.TranslatableFields
-  import Ecto.Changeset
+  use Edgehog.MultitenantResource,
+    extensions: [
+      AshGraphql.Resource
+    ]
 
-  alias Edgehog.Astarte.Device
-  alias Edgehog.Devices.SystemModel
+  graphql do
+    type :system_model_part_number
 
-  schema "system_model_part_numbers" do
-    field :part_number, :string
-    field :tenant_id, :id
-    translatable_belongs_to :system_model, SystemModel
-    translatable_has_many :devices, Device, foreign_key: :part_number, references: :part_number
-
-    timestamps()
+    hide_fields [:tenant]
   end
 
-  @doc false
-  def changeset(system_model_part_number, attrs) do
-    system_model_part_number
-    |> cast(attrs, [:part_number])
-    |> validate_required([:part_number])
+  actions do
+    defaults [:create, :read, :update, :destroy]
+  end
+
+  attributes do
+    integer_primary_key :id
+
+    attribute :part_number, :string do
+      description "The part number identifier."
+      allow_nil? false
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :system_model, Edgehog.Devices.SystemModel
+  end
+
+  identities do
+    identity :part_number_tenant_id, [:part_number]
+  end
+
+  postgres do
+    table "system_model_part_numbers"
+    repo Edgehog.Repo
+
+    references do
+      reference :system_model, on_delete: :delete
+    end
   end
 end

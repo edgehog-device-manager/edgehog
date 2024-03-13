@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,24 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Registry do
-  use Ash.Registry
+defmodule Edgehog.Devices.SystemModel.Validations.EitherPictureUrlOrPictureFile do
+  use Ash.Resource.Validation
 
-  entries do
-    entry Edgehog.Devices.HardwareType
-    entry Edgehog.Devices.HardwareTypePartNumber
-    entry Edgehog.Devices.SystemModel
-    entry Edgehog.Devices.SystemModelPartNumber
+  @impl true
+  def init(opts) do
+    {:ok, opts}
+  end
+
+  @impl true
+  def validate(changeset, _opts) do
+    with {:ok, url} when is_binary(url) <-
+           Ash.Changeset.fetch_argument_or_change(changeset, :picture_url),
+         {:ok, %Plug.Upload{} = _upload} <-
+           Ash.Changeset.fetch_argument_or_change(changeset, :picture_file) do
+      {:error, field: :picture_url, message: "is mutually exclusive with picture_file"}
+    else
+      _ ->
+        :ok
+    end
   end
 end

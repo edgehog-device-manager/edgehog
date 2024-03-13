@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,27 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Registry do
-  use Ash.Registry
+defmodule Edgehog.Types.Upload do
+  use Ash.Type
+  use AshGraphql.Type
 
-  entries do
-    entry Edgehog.Devices.HardwareType
-    entry Edgehog.Devices.HardwareTypePartNumber
-    entry Edgehog.Devices.SystemModel
-    entry Edgehog.Devices.SystemModelPartNumber
-  end
+  @impl true
+  def graphql_input_type(_), do: :upload
+
+  @impl true
+  def storage_type(_), do: :term
+
+  @impl true
+  def cast_input(nil, _), do: {:ok, nil}
+  def cast_input(%Plug.Upload{} = value, _), do: {:ok, value}
+  def cast_input(_, _), do: :error
+
+  @impl true
+  def cast_stored(nil, _), do: {:ok, nil}
+  def cast_stored(%Plug.Upload{} = value, _), do: {:ok, value}
+  def cast_stored(_, _), do: :error
+
+  @impl true
+  def dump_to_native(nil, _), do: {:ok, nil}
+  def dump_to_native(_, _), do: :error
 end
