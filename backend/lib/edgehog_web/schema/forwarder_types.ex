@@ -25,6 +25,18 @@ defmodule EdgehogWeb.Schema.ForwarderSessionsTypes do
   alias EdgehogWeb.Resolvers
 
   @desc """
+  The details of a forwarder instance.
+  """
+  object :forwarder_config do
+    @desc "The hostname of the forwarder instance."
+    field :hostname, non_null(:string)
+    @desc "The port of the forwarder instance."
+    field :port, non_null(:integer)
+    @desc "Indicates if TLS should used when connecting to the forwarder."
+    field :secure_sessions, non_null(:boolean)
+  end
+
+  @desc """
   The status of a forwarder session
   """
   enum :forwarder_session_status do
@@ -51,6 +63,14 @@ defmodule EdgehogWeb.Schema.ForwarderSessionsTypes do
   end
 
   object :forwarder_sessions_queries do
+    @desc """
+    Fetches the forwarder config, if available.
+    Without a configuration, forwarding functionalities are not available.
+    """
+    field :forwarder_config, :forwarder_config do
+      resolve &Resolvers.ForwarderSessions.find_forwarder_config/2
+    end
+
     @desc "Fetches a forwarder session by its token and the device ID."
     field :forwarder_session, :forwarder_session do
       @desc "The GraphQL ID of the device corresponding to the session."
