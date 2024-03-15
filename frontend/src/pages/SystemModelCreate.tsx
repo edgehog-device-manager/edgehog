@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ const GET_HARDWARE_TYPES_QUERY = graphql`
   query SystemModelCreate_getHardwareTypes_Query {
     hardwareTypes {
       id
-      name
+      ...CreateSystemModel_HardwareTypeFragment
     }
   }
 `;
@@ -91,7 +91,7 @@ const SystemModelContent = ({
 }: SystemModelContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
-  const hardwareTypesData = usePreloadedQuery(
+  const { hardwareTypes } = usePreloadedQuery(
     GET_HARDWARE_TYPES_QUERY,
     getHardwareTypesQuery,
   );
@@ -105,14 +105,6 @@ const SystemModelContent = ({
       CREATE_SYSTEM_MODEL_MUTATION,
     );
 
-  // TODO: handle readonly type without mapping to mutable type
-  const hardwareTypes = useMemo(
-    () =>
-      hardwareTypesData.hardwareTypes.map((hardwareType) => ({
-        ...hardwareType,
-      })),
-    [hardwareTypesData],
-  );
   const locale = useMemo(
     () => defaultLocaleData.tenantInfo.defaultLocale,
     [defaultLocaleData],
@@ -220,7 +212,7 @@ const SystemModelContent = ({
               {errorFeedback}
             </Alert>
             <CreateSystemModelForm
-              hardwareTypes={hardwareTypes}
+              hardwareTypesRef={hardwareTypes}
               locale={locale}
               onSubmit={handleCreateSystemModel}
               isLoading={isCreatingSystemModel}

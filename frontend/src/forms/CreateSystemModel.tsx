@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,6 +33,16 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { systemModelHandleSchema, messages, yup } from "forms";
+import { graphql, useFragment } from "react-relay/hooks";
+import type { CreateSystemModel_HardwareTypeFragment$key } from "api/__generated__/CreateSystemModel_HardwareTypeFragment.graphql";
+
+const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
+  fragment CreateSystemModel_HardwareTypeFragment on HardwareType
+  @relay(plural: true) {
+    id
+    name
+  }
+`;
 
 const FormRow = ({
   id,
@@ -135,25 +145,25 @@ const initialData: FormData = {
   partNumbers: [{ value: "" }],
 };
 
-type HardwareTypeOption = {
-  id: string;
-  name: string;
-};
-
 type Props = {
-  hardwareTypes: HardwareTypeOption[];
+  hardwareTypesRef: CreateSystemModel_HardwareTypeFragment$key;
   locale: string;
   isLoading?: boolean;
   onSubmit: (data: SystemModelChanges) => void;
 };
 
 const CreateSystemModelForm = ({
-  hardwareTypes,
+  hardwareTypesRef,
   locale,
   isLoading = false,
   onSubmit,
 }: Props) => {
   const intl = useIntl();
+  const hardwareTypesData = useFragment(
+    CREATE_SYSTEM_MODEL_FRAGMENT,
+    hardwareTypesRef,
+  );
+
   const {
     control,
     register,
@@ -291,7 +301,7 @@ const CreateSystemModelForm = ({
                       defaultMessage: "Select a Hardware Type",
                     })}
                   </option>
-                  {hardwareTypes.map((hardwareTypeOption) => (
+                  {hardwareTypesData.map((hardwareTypeOption) => (
                     <option
                       key={hardwareTypeOption.id}
                       value={hardwareTypeOption.id}
