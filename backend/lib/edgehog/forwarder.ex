@@ -26,6 +26,7 @@ defmodule Edgehog.Forwarder do
   alias Edgehog.Astarte.Device.ForwarderSession
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
+  alias Edgehog.Forwarder
 
   @forwarder_session_module Application.compile_env(
                               :edgehog,
@@ -33,31 +34,24 @@ defmodule Edgehog.Forwarder do
                               ForwarderSession
                             )
 
-  defp forwarder_hostname do
+  def fetch_forwarder_config do
     forwarder_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
-    forwarder_config.hostname
-  end
 
-  defp forwarder_port do
-    forwarder_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
-    forwarder_config.port
-  end
-
-  defp forwarder_secure_sessions? do
-    forwarder_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
-    forwarder_config.secure_sessions?
-  end
-
-  defp forwarder_enabled? do
-    forwarder_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
-    forwarder_config.enabled?
+    if forwarder_config.enabled? do
+      {:ok,
+       %Forwarder.Config{
+         hostname: forwarder_config.hostname,
+         port: forwarder_config.port,
+         secure_sessions?: forwarder_config.secure_sessions?
+       }}
+    else
+      {:error, :forwarder_config_not_found}
+    end
   end
 
   defp validate_forwarder_enabled do
-    if forwarder_enabled?() do
+    with {:ok, _forwarder_config} <- fetch_forwarder_config() do
       :ok
-    else
-      {:error, :edgehog_forwarder_disabled}
     end
   end
 
@@ -81,16 +75,16 @@ defmodule Edgehog.Forwarder do
   end
 
   defp request_forwarder_session(%Device{} = device, session_token) do
-    with :ok <- validate_forwarder_enabled(),
+    with {:ok, forwarder_config} <- fetch_forwarder_config(),
          :ok <- validate_device_connected(device),
          {:ok, appengine_client} <- Devices.appengine_client_from_device(device) do
       @forwarder_session_module.request_session(
         appengine_client,
         device.device_id,
         session_token,
-        forwarder_hostname(),
-        forwarder_port(),
-        forwarder_secure_sessions?()
+        forwarder_config.hostname,
+        forwarder_config.port,
+        forwarder_config.secure_sessions?
       )
     end
   end

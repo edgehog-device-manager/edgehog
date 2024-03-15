@@ -142,6 +142,11 @@ defmodule Edgehog.Error do
 
   defp metadata(:device_disconnected), do: {409, "The device is not connected"}
 
+  defp metadata(:forwarder_config_not_found),
+    do:
+      {409,
+       "A forwarder has not been configured, therefore forwarding functionalities are not available"}
+
   defp metadata(:unknown), do: {500, "Something went wrong"}
 
   defp metadata(code) do
