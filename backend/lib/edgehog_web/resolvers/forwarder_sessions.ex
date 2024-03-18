@@ -23,6 +23,24 @@ defmodule EdgehogWeb.Resolvers.ForwarderSessions do
   alias Edgehog.Forwarder
 
   @doc """
+  Fetches the forwarder config, if available
+  """
+  def find_forwarder_config(_args, _resolution) do
+    case Forwarder.fetch_forwarder_config() do
+      {:ok, forwarder_config} ->
+        {:ok,
+         %{
+           hostname: forwarder_config.hostname,
+           port: forwarder_config.port,
+           secure_sessions: forwarder_config.secure_sessions?
+         }}
+
+      {:error, :forwarder_config_not_found} ->
+        {:ok, nil}
+    end
+  end
+
+  @doc """
   Fetches a forwarder session by its token and the device ID
   """
   def find_forwarder_session(%{device_id: device_id, session_token: session_token}, _resolution) do

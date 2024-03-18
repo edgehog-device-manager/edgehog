@@ -219,6 +219,9 @@ const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
 
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!) {
+    forwarderConfig {
+      __typename
+    }
     device(id: $id) {
       id
       deviceId
@@ -1303,6 +1306,11 @@ const DeviceContent = ({
     [deviceData.device],
   );
 
+  const isForwarderEnabled = useMemo(
+    () => deviceData.forwarderConfig != null,
+    [deviceData.forwarderConfig],
+  );
+
   const [deviceDraft, setDeviceDraft] = useState(
     _.pick(device, ["name", "tags"]),
   );
@@ -1536,6 +1544,9 @@ const DeviceContent = ({
     );
   }
 
+  const isRemoteTerminalSupported =
+    isForwarderEnabled && device.capabilities.includes("REMOTE_TERMINAL");
+
   return (
     <Page>
       <Page.Header title={device.name} />
@@ -1688,7 +1699,7 @@ const DeviceContent = ({
                       />
                     </FormRow>
                   )}
-                  {device.capabilities.includes("REMOTE_TERMINAL") && (
+                  {isRemoteTerminalSupported && (
                     <FormRow
                       id="form-device-open-remote-terminal"
                       label={

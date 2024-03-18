@@ -42,6 +42,12 @@ type RootQueryType {
   "Fetches a single system model."
   systemModel("The ID of the system model." id: ID!): SystemModel
 
+  """
+  Fetches the forwarder config, if available.
+  Without a configuration, forwarding functionalities are not available.
+  """
+  forwarderConfig: ForwarderConfig
+
   "Fetches a forwarder session by its token and the device ID."
   forwarderSession(
     "The GraphQL ID of the device corresponding to the session."
@@ -697,6 +703,18 @@ type DeviceLocation {
 
   "The date at which the measurement was made."
   timestamp: DateTime!
+}
+
+"The details of a forwarder instance."
+type ForwarderConfig {
+  "The hostname of the forwarder instance."
+  hostname: String!
+
+  "The port of the forwarder instance."
+  port: Int!
+
+  "Indicates if TLS should used when connecting to the forwarder."
+  secureSessions: Boolean!
 }
 
 "The status of a forwarder session"
