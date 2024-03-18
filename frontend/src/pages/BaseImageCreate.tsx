@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -47,8 +47,7 @@ import { Link, Route, useNavigate } from "Navigation";
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCreate_getBaseImageCollection_Query($id: ID!) {
     baseImageCollection(id: $id) {
-      id
-      name
+      ...CreateBaseImage_BaseImageCollectionFragment
     }
     tenantInfo {
       defaultLocale
@@ -152,7 +151,7 @@ const BaseImageCreateContent = ({
           {errorFeedback}
         </Alert>
         <CreateBaseImageForm
-          baseImageCollection={baseImageCollection}
+          baseImageCollectionRef={baseImageCollection}
           locale={locale}
           onSubmit={handleCreateBaseImage}
           isLoading={isCreatingBaseImage}
