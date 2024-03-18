@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -44,8 +44,7 @@ import { Link, Route, useNavigate } from "Navigation";
 const GET_SYSTEM_MODELS_QUERY = graphql`
   query BaseImageCollectionCreate_getSystemModels_Query {
     systemModels {
-      id
-      name
+      ...CreateBaseImageCollection_SystemModelsFragment
     }
   }
 `;
@@ -77,7 +76,7 @@ const BaseImageCollection = ({
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
 
-  const systemModelsData = usePreloadedQuery(
+  const { systemModels } = usePreloadedQuery(
     GET_SYSTEM_MODELS_QUERY,
     getSystemModelsQuery,
   );
@@ -88,13 +87,13 @@ const BaseImageCollection = ({
     );
 
   // TODO: handle readonly type without mapping to mutable type
-  const systemModels = useMemo(
-    () =>
-      systemModelsData.systemModels.map((systemModel) => ({
-        ...systemModel,
-      })),
-    [systemModelsData],
-  );
+  // const systemModels = useMemo(
+  //   () =>
+  //     systemModelsData.systemModels.map((systemModel) => ({
+  //       ...systemModel,
+  //     })),
+  //   [systemModelsData],
+  // );
 
   const handleCreateBaseImageCollection = useCallback(
     (baseImageCollection: BaseImageCollectionData) => {
@@ -195,7 +194,7 @@ const BaseImageCollection = ({
               {errorFeedback}
             </Alert>
             <CreateBaseImageCollectionForm
-              systemModels={systemModels}
+              systemModelsRef={systemModels}
               onSubmit={handleCreateBaseImageCollection}
               isLoading={isCreatingBaseImageCollection}
             />
