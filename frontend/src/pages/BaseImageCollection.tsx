@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
-import _ from "lodash";
 
 import type {
   BaseImageCollection_getBaseImageCollection_Query,
@@ -55,9 +54,7 @@ const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
       id
       name
       handle
-      systemModel {
-        name
-      }
+      ...UpdateBaseImageCollection_SystemModelFragment
       ...BaseImagesTable_BaseImagesFragment
     }
   }
@@ -215,11 +212,7 @@ const BaseImageCollectionContent = ({
         </Alert>
         <div className="mb-3">
           <UpdateBaseImageCollectionForm
-            initialData={_.pick(baseImageCollection, [
-              "name",
-              "handle",
-              "systemModel",
-            ])}
+            baseImageCollectionRef={baseImageCollection}
             onSubmit={handleUpdateBaseImageCollection}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingBaseImageCollection}
