@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,6 +30,18 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageCollectionHandleSchema, yup } from "forms";
+import { graphql, useFragment } from "react-relay/hooks";
+import type { UpdateBaseImageCollection_SystemModelFragment$key } from "api/__generated__/UpdateBaseImageCollection_SystemModelFragment.graphql";
+
+const UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
+  fragment UpdateBaseImageCollection_SystemModelFragment on BaseImageCollection {
+    name
+    handle
+    systemModel {
+      name
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -56,15 +68,12 @@ type BaseImageCollectionData = {
   } | null;
 };
 
-type FormData = {
-  name: string;
-  handle: string;
-  systemModel: string;
-};
-
 type BaseImageCollectionChanges = {
   name: string;
   handle: string;
+  systemModel: {
+    name: string;
+  } | null;
 };
 
 const baseImageCollectionSchema = yup
@@ -75,43 +84,46 @@ const baseImageCollectionSchema = yup
   })
   .required();
 
-const transformInputData = (data: BaseImageCollectionData): FormData => ({
-  ...data,
-  systemModel: data.systemModel?.name || "",
-});
-
 const transformOutputData = ({
   name,
   handle,
-}: FormData): BaseImageCollectionChanges => ({
+  systemModel,
+}: BaseImageCollectionData): BaseImageCollectionChanges => ({
   name,
   handle,
+  systemModel,
 });
 
 type Props = {
-  initialData: BaseImageCollectionData;
+  baseImageCollectionRef: UpdateBaseImageCollection_SystemModelFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionChanges) => void;
   onDelete: () => void;
 };
 
 const UpdateBaseImageCollection = ({
-  initialData,
+  baseImageCollectionRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: Props) => {
+  const baseImageCollectionRefData = useFragment(
+    UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT,
+    baseImageCollectionRef,
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
-  } = useForm<FormData>({
+  } = useForm<BaseImageCollectionData>({
     mode: "onTouched",
-    defaultValues: initialData && transformInputData(initialData),
+    defaultValues: baseImageCollectionRefData,
     resolver: yupResolver(baseImageCollectionSchema),
   });
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: BaseImageCollectionData) =>
+    onSubmit(transformOutputData(data));
 
   const canSubmit = !isLoading && isDirty;
 
