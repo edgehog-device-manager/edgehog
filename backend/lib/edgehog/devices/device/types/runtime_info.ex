@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Registry do
-  use Ash.Registry
-
-  entries do
-    entry Edgehog.Devices.Device
-    entry Edgehog.Devices.HardwareType
-    entry Edgehog.Devices.HardwareTypePartNumber
-    entry Edgehog.Devices.SystemModel
-    entry Edgehog.Devices.SystemModelPartNumber
-  end
+defmodule Edgehog.Devices.Device.Types.RuntimeInfo do
+  use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
+    value_id: :runtime_info,
+    value_struct: Edgehog.Astarte.Device.RuntimeInfo
 end

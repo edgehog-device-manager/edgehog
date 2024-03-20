@@ -26,6 +26,10 @@ Mox.defmock(Edgehog.Astarte.Device.BaseImageMock,
   for: Edgehog.Astarte.Device.BaseImage.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.HardwareInfoMock,
+  for: Edgehog.Astarte.Device.HardwareInfo.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.OSInfoMock,
   for: Edgehog.Astarte.Device.OSInfo.Behaviour
 )
@@ -80,10 +84,6 @@ Mox.defmock(Edgehog.Astarte.Interface.MockDataLayer,
 
 Mox.defmock(Edgehog.Astarte.Trigger.MockDataLayer,
   for: Edgehog.Astarte.Trigger.DataLayer
-)
-
-Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
-  for: Edgehog.Geolocation.GeolocationProvider
 )
 
 Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)

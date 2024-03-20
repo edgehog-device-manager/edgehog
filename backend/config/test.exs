@@ -58,6 +58,7 @@ config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiSc
 config :edgehog, :astarte_system_status_module, Edgehog.Astarte.Device.SystemStatusMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
 config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMock
+config :edgehog, :astarte_hardware_info_module, Edgehog.Astarte.Device.HardwareInfoMock
 config :edgehog, :astarte_os_info_module, Edgehog.Astarte.Device.OSInfoMock
 config :edgehog, :astarte_ota_request_v0_module, Edgehog.Astarte.Device.OTARequestV0Mock
 config :edgehog, :astarte_ota_request_v1_module, Edgehog.Astarte.Device.OTARequestV1Mock

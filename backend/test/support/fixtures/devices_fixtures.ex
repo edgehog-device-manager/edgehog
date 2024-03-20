@@ -62,36 +62,39 @@ defmodule Edgehog.DevicesFixtures do
   @doc """
   Generate a %Devices.Device{}.
   """
-  def device_fixture(realm, attrs \\ %{}) do
-    # The Devices context does not (currently) have a create functions since devices are always
-    # created by Astarte, so we directly call Repo functions passing attrs as-is and preloading
-    # what gets usually preloaded in %Devices.Device{}
-    attrs = Enum.into(attrs, %{})
+  def device_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    %Device{
-      realm_id: realm.id,
-      device_id: AstarteFixtures.random_device_id(),
-      name: "some name"
-    }
-    |> Map.merge(attrs)
-    |> Repo.insert!()
-    |> Edgehog.Devices.preload_defaults_for_device()
+    {realm_id, opts} =
+      Keyword.pop_lazy(opts, :realm_id, fn ->
+        AstarteFixtures.realm_fixture(tenant: tenant) |> Map.fetch!(:id)
+      end)
+
+    default_device_id = AstarteFixtures.random_device_id()
+
+    params =
+      opts
+      |> Enum.into(%{
+        device_id: default_device_id,
+        name: default_device_id,
+        realm_id: realm_id
+      })
+
+    Edgehog.Devices.Device
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Edgehog.Devices.create!()
   end
 
   @doc """
   Generate a %Devices.Device{} compatible with a specific %BaseImages.BaseImage{}, passed as argument.
   """
-  def device_fixture_compatible_with(base_image, attrs \\ []) do
+  def device_fixture_compatible_with(opts \\ []) do
+    {base_image, opts} = Keyword.pop!(opts, :base_image)
     [%{part_number: part_number} | _] = base_image.base_image_collection.system_model.part_numbers
 
-    device =
-      attrs
-      |> Enum.into(%{})
-      |> Map.put(:part_number, part_number)
-      |> astarte_device_fixture()
-
-    # Retrieve the updated device from the Devices context
-    Devices.get_device!(device.id)
+    opts
+    |> Keyword.put(:part_number, part_number)
+    |> device_fixture()
   end
 
   @doc """
@@ -146,12 +149,7 @@ defmodule Edgehog.DevicesFixtures do
     device
   end
 
-  defp astarte_device_fixture(attrs) do
-    # Helper to avoid having to manually create the cluster and realm
-    # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
-
-    AstarteFixtures.cluster_fixture()
-    |> AstarteFixtures.realm_fixture()
-    |> AstarteFixtures.astarte_device_fixture(attrs)
-  end
+  # Needed to avoid legacy tests compilation errors
+  # TODO: remove when Ash porting is complete
+  def device_fixture(_, _), do: nil
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Registry do
-  use Ash.Registry
+defmodule Edgehog.Astarte.Device.HardwareInfo.Behaviour do
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.HardwareInfo
 
-  entries do
-    entry Edgehog.Devices.Device
-    entry Edgehog.Devices.HardwareType
-    entry Edgehog.Devices.HardwareTypePartNumber
-    entry Edgehog.Devices.SystemModel
-    entry Edgehog.Devices.SystemModelPartNumber
-  end
+  @callback get(client :: AppEngine.t(), device_id :: String.t()) ::
+              {:ok, HardwareInfo.t()} | {:error, term()}
 end

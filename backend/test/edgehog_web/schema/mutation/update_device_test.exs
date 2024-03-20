@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,142 +19,95 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
-  use EdgehogWeb.ConnCase, async: true
-  use Edgehog.AstarteMockCase
+  use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.AstarteFixtures
-  import Edgehog.DevicesFixtures
   alias Edgehog.Devices
+  alias Edgehog.Devices.SystemModel
 
-  describe "updateDevice field" do
-    setup do
-      device =
-        cluster_fixture()
-        |> realm_fixture()
-        |> device_fixture()
+  import Edgehog.DevicesFixtures
 
-      {:ok, device: device}
+  @moduletag :ported_to_ash
+
+  describe "updateDevice mutation" do
+    setup %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+
+      id = AshGraphql.Resource.encode_relay_id(device)
+
+      %{device: device, id: id}
     end
 
-    @query """
-    mutation UpdateDevice($input: UpdateDeviceInput!) {
-      updateDevice(input: $input) {
-        device {
-          id
+    test "successfully updates with valid data", %{tenant: tenant, device: device, id: id} do
+      result = update_device_mutation(tenant: tenant, id: id, name: "Updated Name")
+      assert %{"name" => "Updated Name"} = extract_result!(result)
+    end
+
+    test "fails with non-existing id", %{tenant: tenant} do
+      id = non_existing_device_id(tenant)
+      result = update_device_mutation(tenant: tenant, id: id, name: "Updated Name")
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+  end
+
+  defp update_device_mutation(opts) do
+    default_document = """
+    mutation UpdateDevice($id: ID!, $input: UpdateDeviceInput!) {
+      updateDevice(id: $id, input: $input) {
+        result {
           name
-          tags
-          customAttributes {
-            namespace
-            key
-            type
-            value
-          }
+          deviceId
+          online
         }
       }
     }
     """
-    test "updates device with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      device: device
-    } do
-      variables = %{
-        input: %{
-          device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-          name: "Some new name",
-          tags: ["foo", "bar", "baz"],
-          custom_attributes: %{
-            namespace: "CUSTOM",
-            key: "foo",
-            type: "STRING",
-            value: "bar"
-          }
-        }
-      }
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-      assert %{
-               "data" => %{
-                 "updateDevice" => %{
-                   "device" => %{
-                     "name" => "Some new name",
-                     "tags" => ["foo", "bar", "baz"],
-                     "customAttributes" => [
-                       %{
-                         "namespace" => "CUSTOM",
-                         "key" => "foo",
-                         "type" => "STRING",
-                         "value" => "bar"
-                       }
-                     ]
-                   }
-                 }
+    input =
+      %{"name" => opts[:name]}
+      |> Enum.filter(fn {_k, v} -> v != nil end)
+      |> Enum.into(%{})
+
+    variables = %{"id" => id, "input" => input}
+    document = Keyword.get(opts, :document, default_document)
+    context = %{tenant: tenant}
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"updateDevice" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "updateDevice" => %{
+                 "result" => device
                }
-             } = json_response(conn, 200)
-    end
+             }
+           } = result
 
-    test "fails with invalid data", %{conn: conn, api_path: api_path, device: device} do
-      variables = %{
-        input: %{
-          device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-          # empty name
-          name: ""
-        }
-      }
+    assert device != nil
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    device
+  end
 
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
+  defp non_existing_device_id(tenant) do
+    fixture = device_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Devices.destroy!(fixture)
 
-    test "handles partial updates", %{
-      conn: conn,
-      api_path: api_path,
-      device: device
-    } do
-      {:ok, _} =
-        Devices.update_device(device, %{
-          tags: ["not", "touched"],
-          custom_attributes: [
-            %{
-              namespace: :custom,
-              key: "string",
-              typed_value: %{
-                type: :string,
-                value: "not touched"
-              }
-            }
-          ]
-        })
-
-      variables = %{
-        input: %{
-          device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-          name: "Some new name"
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "updateDevice" => %{
-                   "device" => %{
-                     "name" => "Some new name",
-                     "tags" => ["not", "touched"],
-                     "customAttributes" => [
-                       %{
-                         "namespace" => "CUSTOM",
-                         "key" => "string",
-                         "type" => "STRING",
-                         "value" => "not touched"
-                       }
-                     ]
-                   }
-                 }
-               }
-             } = json_response(conn, 200)
-    end
+    id
   end
 end
