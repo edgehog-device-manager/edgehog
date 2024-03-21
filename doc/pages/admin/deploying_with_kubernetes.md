@@ -81,10 +81,9 @@ Controllers are outside the scope of this guide.
 
 Once you have the Load Balancer IP (obtained in the [previous
 step](#installing-nginx-ingress-controller-and-cert-manager-example)), head to your DNS provider and
-point two domains (one for the backend and one for the frontend) to that IP address.
+point three domains (one for the backend, one for the frontend, and one for the [Device Forwarder](https://github.com/edgehog-device-manager/edgehog_device_forwarder)) to that IP address.
 
-Save the two hosts (e.g. `api.edgehog.example.com` and `edgehog.example.com`) since they're going to
-be needed for the following steps.
+Save the three hosts (e.g. `api.edgehog.example.com`, `edgehog.example.com`, and `forwarder.edgehog.example.com`) since they're going to be needed for the following steps.
 
 ### Secrets
 
@@ -108,10 +107,17 @@ Values to be replaced
 
 #### Secret key base
 
-This command creates the secret key base used by Phoenix:
+This command creates the secret key base used by Phoenix for the backend:
 
 ```bash
 $ kubectl create secret generic -n edgehog edgehog-secret-key-base \
+  --from-literal="secret-key-base=$(openssl rand -base64 48)"
+```
+
+Another secret key base can be generated for the device forwarder:
+
+```bash
+$ kubectl create secret generic -n edgehog edgehog-device-forwarder-secret-key-base \
   --from-literal="secret-key-base=$(openssl rand -base64 48)"
 ```
 
@@ -421,6 +427,58 @@ Values to be replaced
 - `BACKEND-URL`: the API base URL of the Edgehog backend (see the [Creating DNS
   entries](#creating-dns-entries) section). This should be, e.g., `https://<BACKEND-HOST>`.
 
+#### Device Forwarder
+
+To deploy the device forwarder, copy the following `yaml` snippet in `device-forwarder-deployment.yaml`, fill the
+missing values (detailed below) and execute
+
+```bash
+$ kubectl apply -f device-forwarder-deployment.yaml
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: edgehog-device-forwarder
+  name: edgehog-device-forwarder
+  namespace: edgehog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edgehog-device-forwarder
+  template:
+    metadata:
+      labels:
+        app: edgehog-device-forwarder
+    spec:
+      containers:
+      - env:
+        - name: RELEASE_NAME
+          value: edgehog-device-forwarder
+        - name: PORT
+          value: "4000"
+        - name: PHX_HOST
+          value: <DEVICE-FORWARDER-HOST>
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              key: secret-key-base
+              name: edgehog-device-forwarder-secret-key-base
+        image: edgehogdevicemanager/edgehog-device-forwarder:0.1.0
+        imagePullPolicy: Always
+        name: edgehog-device-forwarder
+        ports:
+        - containerPort: 4000
+          name: http
+          protocol: TCP
+```
+
+Values to be replaced
+- `DEVICE-FORWARDER-HOST`: the host of the Edgehog Device Forwarder (see the [Creating DNS entries](#creating-dns-entries) section).
+
 ### Services
 
 #### Backend
@@ -473,6 +531,32 @@ spec:
     targetPort: 80
   selector:
     app: edgehog-frontend
+```
+
+#### Device Forwarder
+
+To deploy the device forwarder service, copy the following `yaml` snippet in `device-forwarder-service.yaml` and
+execute
+
+```bash
+$ kubectl apply -f device-forwarder-service.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: edgehog-device-forwarder
+  name: edgehog-device-forwarder
+  namespace: edgehog
+spec:
+  ports:
+  - port: 4000
+    protocol: TCP
+    targetPort: 4000
+  selector:
+    app: edgehog-device-forwarder
 ```
 
 ### Exposing Edgehog to the Internet
@@ -529,6 +613,7 @@ spec:
   dnsNames:
   - <FRONTEND-HOST>
   - <BACKEND-HOST>
+  - <DEVICE-FORWARDER-HOST>
   issuerRef:
     group: cert-manager.io
     kind: ClusterIssuer
@@ -538,6 +623,7 @@ spec:
 Values to be replaced
 - `FRONTEND-HOST`: the frontend host.
 - `BACKEND-HOST`: the backend host.
+- `DEVICE-FORWARDER-HOST`: the device forwarder host.
 
 Note that this step must be performed after DNS for the frontend and backend hosts are correctly
 propagated (see [Creating DNS Entries](#creating-dns-entries)).
@@ -562,6 +648,8 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: <MAX-UPLOAD-SIZE>
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
   name: edgehog-ingress
   namespace: edgehog
 spec:
@@ -586,21 +674,38 @@ spec:
               number: 4000
         path: /
         pathType: Prefix
+  - host: <DEVICE-FORWARDER-HOST>
+    http:
+      paths:
+      - backend:
+          service:
+            name: edgehog-device-forwarder
+            port:
+              number: 4000
+        path: /
+        pathType: Prefix
   tls:
   - hosts:
     - <FRONTEND-HOST>
     - <BACKEND-HOST>
+    - <DEVICE-FORWARDER-HOST>
     secretName: tls-secret
 ```
 
 Values to be replaced
 - `FRONTEND-HOST`: the frontend host.
 - `BACKEND-HOST`: the backend host.
+- `DEVICE-FORWARDER-HOST`: the device forwarder host.
 - `MAX-UPLOAD-SIZE`: the maximum upload size that you defined in the [Edgehog backend
   deployment](https://edgehog-device-manager.github.io/docs/snapshot/deploying_with_kubernetes.html#deployments).
   Note that NGINX accepts also size suffixes, so you can put, e.g., `4G` for 4 gigabytes. Also note
   that, differently from the value in the Deployment, this is required because NGINX default is 1
   megabyte.
+
+Note that we are setting `proxy-read-timeout` and `proxy-send-timeout` to 120 seconds.
+This value represents the timeout after which inactive connections are terminated.
+This configuration has implications on the inactive sessions of the Device Forwarder: the forwarder has its own default timeout of 1 minute for terminating inactive WebSocket connections, and setting a lower timeout here would conflict with the forwarder's internal processes. For this reason, we leave that responsibility to the forwarder by setting a slightly higher timeout here, such as 2 minutes.
+When changing the value, one should also evaluate the implications on connections to Edgehog's frontend and backend. In addition, higher values may lead to higher risk of DoS attacks. 
 
 ## Edgehog Initialization
 
