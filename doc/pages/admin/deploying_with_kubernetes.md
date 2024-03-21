@@ -353,7 +353,7 @@ spec:
           value: <EDGEHOG-FORWARDER-PORT>
         - name: EDGEHOG_FORWARDER_SECURE_SESSIONS
           value: <EDGEHOG-FORWARDER-SECURE-SESSIONS>
-        image: edgehogdevicemanager/edgehog-backend:snapshot
+        image: edgehogdevicemanager/edgehog-backend:0.8.0-rc.0
         imagePullPolicy: Always
         name: edgehog-backend
         ports:
@@ -414,7 +414,7 @@ spec:
       - env:
         - name: BACKEND_URL
           value: <BACKEND-HOST>
-        image: edgehogdevicemanager/edgehog-frontend:snapshot
+        image: edgehogdevicemanager/edgehog-frontend:0.8.0-rc.0
         imagePullPolicy: Always
         name: edgehog-frontend
         ports:
