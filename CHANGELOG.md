@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.0-dev] - Unreleased
+## [0.8.0-rc.0] - 2024-03-21
 ### Added
-- Add support for an instance of [Edgehog Device Forwarder](https://github.com/edgehog-device-manager/edgehog_device_forwarder). When configured, forwarding functionalities are enabled for devices that support forwarding connections to their internal services, allowing features such as remote terminal sessions ([#447](https://github.com/edgehog-device-manager/edgehog/pull/447)).
+- Add support for an instance of [Edgehog Device
+  Forwarder](https://github.com/edgehog-device-manager/edgehog_device_forwarder). When configured,
+  forwarding functionalities are enabled for devices that support forwarding connections to their
+  internal services, allowing features such as remote terminal sessions
+  ([#447](https://github.com/edgehog-device-manager/edgehog/pull/447)).
 
 ## [0.7.1] - 2024-02-01
 ### Added
