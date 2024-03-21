@@ -1,0 +1,17 @@
+{
+  "interface_name": "io.edgehog.devicemanager.ForwarderSessionState",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "description": "Information provided by the device about the status of a forwarder session.",
+  "mappings": [
+    {
+      "endpoint": "/%{session_token}/status",
+      "type": "string",
+      "allow_unset": true,
+      "description": "Indicates if the device is connecting, or connected to a forwarder session.",
+      "doc": "An enum with the following possible values: Connecting | Connected."
+    }
+  ]
+}

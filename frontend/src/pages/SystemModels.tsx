@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -36,13 +36,7 @@ import { Link, Route } from "Navigation";
 const GET_SYSTEM_MODELS_QUERY = graphql`
   query SystemModels_getSystemModels_Query {
     systemModels {
-      id
-      handle
-      name
-      hardwareType {
-        name
-      }
-      partNumbers
+      ...SystemModelsTable_SystemModelsFragment
     }
   }
 `;
@@ -54,19 +48,9 @@ type SystemModelsContentProps = {
 const SystemModelsContent = ({
   getSystemModelsQuery,
 }: SystemModelsContentProps) => {
-  const systemModelsData = usePreloadedQuery(
+  const { systemModels } = usePreloadedQuery(
     GET_SYSTEM_MODELS_QUERY,
     getSystemModelsQuery,
-  );
-
-  // TODO: handle readonly type without mapping to mutable type
-  const systemModels = useMemo(
-    () =>
-      systemModelsData.systemModels.map((systemModel) => ({
-        ...systemModel,
-        partNumbers: [...systemModel.partNumbers],
-      })),
-    [systemModelsData],
   );
 
   return (
@@ -102,7 +86,7 @@ const SystemModelsContent = ({
             />
           </Result.EmptyList>
         ) : (
-          <SystemModelsTable data={systemModels} />
+          <SystemModelsTable systemModelsRef={systemModels} />
         )}
       </Page.Main>
     </Page>

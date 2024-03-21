@@ -88,6 +88,13 @@ config :edgehog, Edgehog.PromEx,
   grafana: :disabled,
   metrics_server: :disabled
 
+config :edgehog, :edgehog_forwarder, %{
+  hostname: "localhost",
+  port: 4001,
+  secure_sessions?: false,
+  enabled?: true
+}
+
 config :edgehog, :ash_apis, [
   Edgehog.Astarte,
   Edgehog.Devices,

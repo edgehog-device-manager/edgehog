@@ -289,7 +289,7 @@ defmodule Edgehog.BaseImages do
     |> Multi.delete(:base_image, base_image)
     |> Multi.run(:image_deletion, fn _repo, %{base_image: base_image} ->
       # If version is nil, the changeset will fail below
-      with :ok <- @storage_module.delete(base_image) do
+      with :ok <- cleanup_base_image(base_image) do
         {:ok, nil}
       end
     end)
@@ -302,6 +302,11 @@ defmodule Edgehog.BaseImages do
         {:error, failed_value}
     end
   end
+
+  @doc """
+  Deletes a base_image from the storage.
+  """
+  def cleanup_base_image(%BaseImage{} = base_image), do: @storage_module.delete(base_image)
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking base_image changes.

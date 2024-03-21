@@ -266,6 +266,12 @@ defmodule Edgehog.BaseImagesTest do
       assert BaseImages.fetch_base_image(base_image.id) == {:ok, base_image}
     end
 
+    test "cleanup_base_image/1 deletes the base image from the storage" do
+      base_image = base_image_fixture()
+      expect(StorageMock, :delete, &Mocks.BaseImages.Storage.delete/1)
+      assert :ok == BaseImages.cleanup_base_image(base_image)
+    end
+
     test "change_base_image/1 returns a base_image changeset" do
       base_image = base_image_fixture()
       assert %Ecto.Changeset{} = BaseImages.change_base_image(base_image)

@@ -94,4 +94,39 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       }
     end
   end
+
+  describe "cleanup_tenant/1" do
+    setup do
+      # We have to use Mox in global mode because the Interfaces and Triggers mocks are
+      # called by an anoymous task launched by the reconciler and we can't easily recover
+      # its pid to allow mocks call from it
+      Mox.set_mox_global()
+
+      tenant = tenant_fixture()
+      _realm = realm_fixture(tenant: tenant)
+
+      %{tenant: tenant}
+    end
+
+    test "deletes triggers", %{tenant: tenant} do
+      trigger_count = Reconciler.Core.list_required_triggers("foo") |> length()
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.Astarte.Trigger.MockDataLayer
+      |> expect(:delete, trigger_count, fn _client, _trigger_name ->
+        send(test_pid, {:trigger_deleted, ref})
+
+        :ok
+      end)
+
+      assert :ok = Reconciler.cleanup_tenant(tenant)
+
+      1..trigger_count
+      |> Enum.each(fn _ -> assert_receive {:trigger_deleted, ^ref} end)
+
+      refute_receive {:trigger_deleted, ^ref}
+    end
+  end
 end

@@ -114,8 +114,8 @@ defmodule Edgehog.AstarteMockCase do
     )
 
     Mox.stub_with(
-      Edgehog.Astarte.Device.LedBehaviorMock,
-      Edgehog.Mocks.Astarte.Device.LedBehavior
+      Edgehog.Astarte.Device.ForwarderSessionMock,
+      Edgehog.Mocks.Astarte.Device.ForwarderSession
     )
 
     :ok

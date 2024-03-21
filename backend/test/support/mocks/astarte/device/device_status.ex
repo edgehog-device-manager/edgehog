@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +43,9 @@ defmodule Edgehog.Mocks.Astarte.Device.DeviceStatus do
     {"io.edgehog.devicemanager.BatteryStatus", 0, 1},
     {"io.edgehog.devicemanager.OTARequest", 1, 0},
     {"io.edgehog.devicemanager.OSInfo", 0, 1},
-    {"io.edgehog.devicemanager.NetworkInterfaceProperties", 0, 1}
+    {"io.edgehog.devicemanager.NetworkInterfaceProperties", 0, 1},
+    {"io.edgehog.devicemanager.ForwarderSessionState", 0, 1},
+    {"io.edgehog.devicemanager.ForwarderSessionRequest", 0, 1}
   ]
 
   @impl true

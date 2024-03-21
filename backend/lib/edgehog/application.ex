@@ -56,6 +56,8 @@ defmodule Edgehog.Application do
       # Start the Tenant Reconciler Supervisor
       {Edgehog.Tenants.Reconciler.Supervisor,
        tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
+      # Start Supervisor for Provisioning Cleanup Tasks
+      {Task.Supervisor, name: Edgehog.Provisioning.CleanupSupervisor},
       # Start the Endpoint (http/https)
       EdgehogWeb.Endpoint
     ]

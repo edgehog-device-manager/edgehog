@@ -32,6 +32,7 @@ defmodule Edgehog.Tenants.Tenant.ManualActions.ReconcilerAction do
     result =
       case input.action.name do
         :reconcile -> @reconciler_module.reconcile_tenant(tenant)
+        :cleanup -> @reconciler_module.cleanup_tenant(tenant)
       end
 
     {:ok, result}

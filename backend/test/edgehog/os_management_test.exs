@@ -395,6 +395,28 @@ defmodule Edgehog.OSManagementTest do
       assert {:ok, %OTAOperation{}} = OSManagement.delete_ota_operation(ota_operation)
     end
 
+    test "cleanup_ephemeral_image/1 removes the ephemeral image for a manual ota_operation", %{
+      device: device
+    } do
+      ota_operation = manual_ota_operation_fixture(device)
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
+      assert :ok == OSManagement.cleanup_ephemeral_image(ota_operation)
+    end
+
+    test "cleanup_ephemeral_image/1 doesn't remove the image for a managed ota_operation", %{
+      device: device
+    } do
+      ota_operation = managed_ota_operation_fixture(device)
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
+      assert :ok == OSManagement.cleanup_ephemeral_image(ota_operation)
+    end
+
     test "change_ota_operation/1 returns a ota_operation changeset", %{device: device} do
       ota_operation = manual_ota_operation_fixture(device)
       assert %Ecto.Changeset{} = OSManagement.change_ota_operation(ota_operation)

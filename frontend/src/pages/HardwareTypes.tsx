@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -36,10 +36,7 @@ import { Link, Route } from "Navigation";
 const GET_HARDWARE_TYPES_QUERY = graphql`
   query HardwareTypes_getHardwareTypes_Query {
     hardwareTypes {
-      id
-      handle
-      name
-      partNumbers
+      ...HardwareTypesTable_HardwareTypesFragment
     }
   }
 `;
@@ -51,19 +48,9 @@ interface HardwareTypesContentProps {
 const HardwareTypesContent = ({
   getHardwareTypesQuery,
 }: HardwareTypesContentProps) => {
-  const hardwareTypesData = usePreloadedQuery(
+  const { hardwareTypes } = usePreloadedQuery(
     GET_HARDWARE_TYPES_QUERY,
     getHardwareTypesQuery,
-  );
-
-  // TODO: handle readonly type without mapping to mutable type
-  const hardwareTypes = useMemo(
-    () =>
-      hardwareTypesData.hardwareTypes.map((hardwareType) => ({
-        ...hardwareType,
-        partNumbers: [...hardwareType.partNumbers],
-      })),
-    [hardwareTypesData],
   );
 
   return (
@@ -99,7 +86,7 @@ const HardwareTypesContent = ({
             />
           </Result.EmptyList>
         ) : (
-          <HardwareTypesTable data={hardwareTypes} />
+          <HardwareTypesTable hardwareTypesRef={hardwareTypes} />
         )}
       </Page.Main>
     </Page>

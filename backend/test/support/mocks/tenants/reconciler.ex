@@ -25,4 +25,7 @@ defmodule Edgehog.Mocks.Tenants.Reconciler do
 
   @impl true
   def reconcile_tenant(%Tenant{} = _tenant), do: :ok
+
+  @impl true
+  def cleanup_tenant(%Tenant{} = _tenant), do: :ok
 end

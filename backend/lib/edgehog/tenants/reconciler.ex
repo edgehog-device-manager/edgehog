@@ -38,6 +38,11 @@ defmodule Edgehog.Tenants.Reconciler do
     GenServer.cast(__MODULE__, {:reconcile_tenant, tenant})
   end
 
+  @impl Edgehog.Tenants.Reconciler.Behaviour
+  def cleanup_tenant(%Tenant{} = tenant) do
+    GenServer.cast(__MODULE__, {:cleanup_tenant, tenant})
+  end
+
   @impl GenServer
   def init(opts) do
     tenant_to_trigger_url_fun = Keyword.fetch!(opts, :tenant_to_trigger_url_fun)
@@ -82,6 +87,26 @@ defmodule Edgehog.Tenants.Reconciler do
     tenant
     |> Ash.load!(tenant_reconciliation_loads())
     |> start_reconciliation_task(tenant_to_trigger_url_fun)
+
+    {:noreply, state}
+  end
+
+  @impl GenServer
+  def handle_cast({:cleanup_tenant, tenant}, state) do
+    %{
+      tenant_to_trigger_url_fun: tenant_to_trigger_url_fun
+    } = state
+
+    tenant =
+      Ash.load!(tenant, tenant_reconciliation_loads())
+
+    Task.Supervisor.start_child(TaskSupervisor, fn ->
+      rm_client = tenant.realm.realm_management_client
+      trigger_url = tenant_to_trigger_url_fun.(tenant)
+
+      Core.list_required_triggers(trigger_url)
+      |> Enum.each(&Core.cleanup_trigger(rm_client, &1))
+    end)
 
     {:noreply, state}
   end

@@ -22,4 +22,6 @@ defmodule Edgehog.Tenants.Reconciler.Behaviour do
   alias Edgehog.Tenants.Tenant
 
   @callback reconcile_tenant(tenant :: Tenant.record()) :: :ok
+
+  @callback cleanup_tenant(tenant :: Tenant.record()) :: :ok
 end

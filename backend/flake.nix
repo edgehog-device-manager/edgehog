@@ -22,7 +22,7 @@
   description = "Open Source software focused on the management of the whole life-cycle of IoT devices";
   inputs = {
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
-    elixir-utils = { url = github:noaccOS/elixir-utils; inputs.nixpkgs.follows = "nixpkgs"; };
+    elixir-utils = { url = github:noaccOS/elixir-utils; inputs.nixpkgs.follows = "nixpkgs"; inputs.flake-utils.follows = "flake-utils"; };
     flake-utils.url = github:numtide/flake-utils;
     flake-compat = {
       url = github:edolstra/flake-compat;
@@ -31,7 +31,7 @@
   };
   outputs = { self, nixpkgs, elixir-utils, flake-utils, ... }:
     {
-      overlays.tools = elixir-utils.lib.asdfOverlay { src = ../.; };
+      overlays.tools = elixir-utils.lib.asdfOverlay { src = ../.; wxSupport = false; };
     } //
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = import nixpkgs { inherit system; overlays = [ self.overlays.tools ]; };

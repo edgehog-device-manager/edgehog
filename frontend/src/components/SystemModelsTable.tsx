@@ -20,21 +20,33 @@
 
 import React from "react";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
+import type {
+  SystemModelsTable_SystemModelsFragment$key,
+  SystemModelsTable_SystemModelsFragment$data,
+} from "../api/__generated__/SystemModelsTable_SystemModelsFragment.graphql";
 
-type SystemModelProps = {
-  id: string;
-  handle: string;
-  name: string;
-  hardwareType: {
-    name: string;
-  };
-  partNumbers: string[];
-};
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const SYSTEM_MODELS_TABLE_FRAGMENT = graphql`
+  fragment SystemModelsTable_SystemModelsFragment on SystemModel
+  @relay(plural: true) {
+    id
+    handle
+    name
+    hardwareType {
+      name
+    }
+    partNumbers
+  }
+`;
 
-const columnHelper = createColumnHelper<SystemModelProps>();
+type TableRecord = SystemModelsTable_SystemModelsFragment$data[number];
+
+const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
   columnHelper.accessor("name", {
     header: () => (
@@ -90,13 +102,17 @@ const columns = [
 
 type Props = {
   className?: string;
-  data: SystemModelProps[];
+  systemModelsRef: SystemModelsTable_SystemModelsFragment$key;
 };
 
-const SystemModelsTable = ({ className, data }: Props) => {
-  return <Table className={className} columns={columns} data={data} />;
+const SystemModelsTable = ({ className, systemModelsRef }: Props) => {
+  const systemModels = useFragment(
+    SYSTEM_MODELS_TABLE_FRAGMENT,
+    systemModelsRef,
+  );
+  return <Table className={className} columns={columns} data={systemModels} />;
 };
 
-export type { SystemModelProps };
+export type { TableRecord };
 
 export default SystemModelsTable;
