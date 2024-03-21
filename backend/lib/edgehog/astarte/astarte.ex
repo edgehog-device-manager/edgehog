@@ -22,6 +22,7 @@ defmodule Edgehog.Astarte do
   use Ash.Api
 
   resources do
-    registry Edgehog.Astarte.Registry
+    resource Edgehog.Astarte.Cluster
+    resource Edgehog.Astarte.Realm
   end
 end

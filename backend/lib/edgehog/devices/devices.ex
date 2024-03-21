@@ -33,7 +33,11 @@ defmodule Edgehog.Devices do
   end
 
   resources do
-    registry Edgehog.Devices.Registry
+    resource Edgehog.Devices.Device
+    resource Edgehog.Devices.HardwareType
+    resource Edgehog.Devices.HardwareTypePartNumber
+    resource Edgehog.Devices.SystemModel
+    resource Edgehog.Devices.SystemModelPartNumber
   end
 
   # TODO: legacy context, delete implementations below as we move them to Ash
