@@ -84,7 +84,7 @@ Mox.defmock(Edgehog.Astarte.Device.ForwarderSessionMock,
 
 Mox.defmock(Edgehog.Astarte.Interface.MockDataLayer,
   for: Edgehog.Astarte.Interface.DataLayer
-  )
+)
 
 Mox.defmock(Edgehog.Astarte.Trigger.MockDataLayer,
   for: Edgehog.Astarte.Trigger.DataLayer

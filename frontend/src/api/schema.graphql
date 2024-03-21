@@ -3,6 +3,766 @@ schema {
   query: RootQueryType
 }
 
+enum SystemModelPartNumberSortField {
+  ID
+  PART_NUMBER
+}
+
+input SystemModelPartNumberFilterPartNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelPartNumberFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input SystemModelPartNumberFilterInput {
+  and: [SystemModelPartNumberFilterInput!]
+
+  or: [SystemModelPartNumberFilterInput!]
+
+  not: [SystemModelPartNumberFilterInput!]
+
+  id: SystemModelPartNumberFilterId
+
+  "The part number identifier."
+  partNumber: SystemModelPartNumberFilterPartNumber
+
+  systemModel: SystemModelFilterInput
+
+  devices: DeviceFilterInput
+}
+
+input SystemModelPartNumberSortInput {
+  order: SortOrder
+  field: SystemModelPartNumberSortField!
+}
+
+type SystemModelPartNumber {
+  id: ID!
+
+  "The part number identifier."
+  partNumber: String!
+
+  systemModel: SystemModel
+
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [Device!]!
+}
+
+"The result of the :delete_system_model mutation"
+type DeleteSystemModelResult {
+  "The record that was successfully deleted"
+  result: SystemModel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]
+}
+
+"The result of the :update_system_model mutation"
+type UpdateSystemModelResult {
+  "The successful result of the mutation"
+  result: SystemModel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]
+}
+
+input UpdateSystemModelInput {
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The display name of the system model."
+  name: String
+
+  "A URL to a picture representing the system model."
+  pictureUrl: String
+
+  "The list of part numbers associated with the system model."
+  partNumbers: [String!]
+
+  "A picture representing the system model that will be uploaded to a bucket."
+  pictureFile: Upload
+}
+
+"The result of the :create_system_model mutation"
+type CreateSystemModelResult {
+  "The successful result of the mutation"
+  result: SystemModel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]
+}
+
+input CreateSystemModelInput {
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the system model."
+  name: String!
+
+  "A URL to a picture representing the system model."
+  pictureUrl: String
+
+  "The ID of the hardware type that can be used by devices of this model"
+  hardwareTypeId: ID!
+
+  "The list of part numbers associated with the system model."
+  partNumbers: [String!]!
+
+  "A picture representing the system model that will be uploaded to a bucket."
+  pictureFile: Upload
+}
+
+enum SystemModelSortField {
+  ID
+  HANDLE
+  NAME
+  PICTURE_URL
+}
+
+input SystemModelFilterPictureUrl {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input SystemModelFilterInput {
+  and: [SystemModelFilterInput!]
+
+  or: [SystemModelFilterInput!]
+
+  not: [SystemModelFilterInput!]
+
+  id: SystemModelFilterId
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: SystemModelFilterHandle
+
+  "The display name of the system model."
+  name: SystemModelFilterName
+
+  "A URL to a picture representing the system model."
+  pictureUrl: SystemModelFilterPictureUrl
+
+  "The list of part numbers associated with the system model."
+  partNumbers: SystemModelPartNumberFilterInput
+
+  "The Hardware type associated with the System Model"
+  hardwareType: HardwareTypeFilterInput
+}
+
+input SystemModelSortInput {
+  order: SortOrder
+  field: SystemModelSortField!
+}
+
+"""
+A system model corresponds to what the users thinks as functionally
+equivalent devices (e.g. two revisions of a device containing two different
+embedded chips but having the same enclosure and the same functionality).
+Each SystemModel must be associated to a specific HardwareType.
+"""
+type SystemModel implements Node {
+  id: ID!
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the system model."
+  name: String!
+
+  "A URL to a picture representing the system model."
+  pictureUrl: String
+
+  "The list of part numbers associated with the system model."
+  partNumbers(
+    "How to sort the records in the response"
+    sort: [SystemModelPartNumberSortInput]
+
+    "A filter to limit the results"
+    filter: SystemModelPartNumberFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [SystemModelPartNumber!]!
+
+  "The Hardware type associated with the System Model"
+  hardwareType: HardwareType
+}
+
+enum HardwareTypePartNumberSortField {
+  ID
+  PART_NUMBER
+}
+
+input HardwareTypePartNumberFilterPartNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input HardwareTypePartNumberFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input HardwareTypePartNumberFilterInput {
+  and: [HardwareTypePartNumberFilterInput!]
+
+  or: [HardwareTypePartNumberFilterInput!]
+
+  not: [HardwareTypePartNumberFilterInput!]
+
+  id: HardwareTypePartNumberFilterId
+
+  "The part number identifier."
+  partNumber: HardwareTypePartNumberFilterPartNumber
+
+  hardwareType: HardwareTypeFilterInput
+}
+
+input HardwareTypePartNumberSortInput {
+  order: SortOrder
+  field: HardwareTypePartNumberSortField!
+}
+
+type HardwareTypePartNumber {
+  id: ID!
+
+  "The part number identifier."
+  partNumber: String!
+
+  hardwareType: HardwareType
+}
+
+"The result of the :delete_hardware_type mutation"
+type DeleteHardwareTypeResult {
+  "The record that was successfully deleted"
+  result: HardwareType
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]
+}
+
+"The result of the :update_hardware_type mutation"
+type UpdateHardwareTypeResult {
+  "The successful result of the mutation"
+  result: HardwareType
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]
+}
+
+input UpdateHardwareTypeInput {
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The display name of the hardware type."
+  name: String
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers: [String!]
+}
+
+"The result of the :create_hardware_type mutation"
+type CreateHardwareTypeResult {
+  "The successful result of the mutation"
+  result: HardwareType
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]
+}
+
+input CreateHardwareTypeInput {
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the hardware type."
+  name: String!
+
+  partNumbers: [String!]!
+}
+
+enum HardwareTypeSortField {
+  ID
+  HANDLE
+  NAME
+}
+
+input HardwareTypeFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input HardwareTypeFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input HardwareTypeFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input HardwareTypeFilterInput {
+  and: [HardwareTypeFilterInput!]
+
+  or: [HardwareTypeFilterInput!]
+
+  not: [HardwareTypeFilterInput!]
+
+  id: HardwareTypeFilterId
+
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: HardwareTypeFilterHandle
+
+  "The display name of the hardware type."
+  name: HardwareTypeFilterName
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers: HardwareTypePartNumberFilterInput
+}
+
+input HardwareTypeSortInput {
+  order: SortOrder
+  field: HardwareTypeSortField!
+}
+
+"""
+Denotes a type of hardware that devices can have.
+
+It refers to the physical components embedded in a device.
+This can represent, e.g., multiple revisions of a PCB (each with a
+different part number) which are functionally equivalent from the device
+point of view.
+"""
+type HardwareType implements Node {
+  id: ID!
+
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the hardware type."
+  name: String!
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers(
+    "How to sort the records in the response"
+    sort: [HardwareTypePartNumberSortInput]
+
+    "A filter to limit the results"
+    filter: HardwareTypePartNumberFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [HardwareTypePartNumber!]!
+}
+
+"The result of the :update_device mutation"
+type UpdateDeviceResult {
+  "The successful result of the mutation"
+  result: Device
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]
+}
+
+input UpdateDeviceInput {
+  "The display name of the device."
+  name: String
+}
+
+enum DeviceSortField {
+  ID
+  DEVICE_ID
+  NAME
+  ONLINE
+  LAST_CONNECTION
+  LAST_DISCONNECTION
+  SERIAL_NUMBER
+  REALM_ID
+  PART_NUMBER
+}
+
+input DeviceFilterPartNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterRealmId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeviceFilterSerialNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterLastDisconnection {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeviceFilterLastConnection {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeviceFilterOnline {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input DeviceFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterDeviceId {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeviceFilterInput {
+  and: [DeviceFilterInput!]
+
+  or: [DeviceFilterInput!]
+
+  not: [DeviceFilterInput!]
+
+  id: DeviceFilterId
+
+  "The Astarte device ID of the device."
+  deviceId: DeviceFilterDeviceId
+
+  "The display name of the device."
+  name: DeviceFilterName
+
+  "Whether the device is connected or not to Astarte"
+  online: DeviceFilterOnline
+
+  "The date at which the device last connected to Astarte."
+  lastConnection: DeviceFilterLastConnection
+
+  "The date at which the device last disconnected from Astarte."
+  lastDisconnection: DeviceFilterLastDisconnection
+
+  "The serial number of the device."
+  serialNumber: DeviceFilterSerialNumber
+
+  realmId: DeviceFilterRealmId
+
+  partNumber: DeviceFilterPartNumber
+
+  systemModelPartNumber: SystemModelPartNumberFilterInput
+
+  "The system model of the device"
+  systemModel: SystemModelFilterInput
+}
+
+input DeviceSortInput {
+  order: SortOrder
+  field: DeviceSortField!
+}
+
+"""
+Denotes a device instance that connects and exchanges data.
+
+Each Device is associated to a specific SystemModel, which in turn is
+associated to a specific HardwareType.
+A Device also exposes info about its connection status and some sets of data read by its operating system.
+"""
+type Device implements Node {
+  id: ID!
+
+  "The Astarte device ID of the device."
+  deviceId: String!
+
+  "The display name of the device."
+  name: String!
+
+  "Whether the device is connected or not to Astarte"
+  online: Boolean!
+
+  "The date at which the device last connected to Astarte."
+  lastConnection: DateTime
+
+  "The date at which the device last disconnected from Astarte."
+  lastDisconnection: DateTime
+
+  "The serial number of the device."
+  serialNumber: String
+
+  realmId: Int
+
+  partNumber: String
+
+  systemModelPartNumber: SystemModelPartNumber
+
+  "The system model of the device"
+  systemModel: SystemModel
+
+  cellularConnection: [Modem!]
+
+  baseImage: BaseImageInfo
+
+  batteryStatus: [BatterySlot!]
+
+  hardwareInfo: HardwareInfo
+
+  networkInterfaces: [NetworkInterface!]
+
+  osInfo: OsInfo
+
+  runtimeInfo: RuntimeInfo
+
+  storageUsage: [StorageUnit!]
+
+  systemStatus: SystemStatus
+
+  wifiScanResults: [WifiScanResult!]
+}
+
+enum SortOrder {
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+}
+
+"An error generated by a failed mutation"
+type MutationError {
+  "The human readable error message"
+  message: String
+
+  "A shorter error message, with vars not replaced"
+  shortMessage: String
+
+  "Replacements for the short message"
+  vars: Json
+
+  "An error code for the given error"
+  code: String
+
+  "The field or fields that produced the error"
+  fields: [String!]
+}
+
 type TenantInfo {
   id: ID!
 
@@ -34,26 +794,20 @@ type RootQueryType {
   "Fetches a single base image."
   baseImage("The ID of the base image." id: ID!): BaseImage
 
-  "Fetches the list of all devices."
-  devices(
-    "An optional set of filters to apply when fetching the devices."
-    filter: DeviceFilter
-  ): [Device!]!
+  """
+  Fetches the forwarder config, if available.
+  Without a configuration, forwarding functionalities are not available.
+  """
+  forwarderConfig: ForwarderConfig
 
-  "Fetches a single device."
-  device("The ID of the device." id: ID!): Device
+  "Fetches a forwarder session by its token and the device ID."
+  forwarderSession(
+    "The GraphQL ID of the device corresponding to the session."
+    deviceId: ID!
 
-  "Fetches the list of all hardware types."
-  hardwareTypes: [HardwareType!]!
-
-  "Fetches a single hardware type."
-  hardwareType("The ID of the hardware type." id: ID!): HardwareType
-
-  "Fetches the list of all system models."
-  systemModels: [SystemModel!]!
-
-  "Fetches a single system model."
-  systemModel("The ID of the system model." id: ID!): SystemModel
+    "The token that identifies the session."
+    sessionToken: String!
+  ): ForwarderSession
 
   "Fetches the list of all device groups."
   deviceGroups: [DeviceGroup!]!
@@ -80,6 +834,42 @@ type RootQueryType {
 
   "Retrieves the current tenant."
   tenantInfo: TenantInfo!
+
+  "Returns a single device."
+  device("The id of the record" id: ID!): Device
+
+  "Returns a list of devices."
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): [Device!]!
+
+  "Returns a hardware type."
+  hardwareType("The id of the record" id: ID!): HardwareType
+
+  "Returns a list of hardware types."
+  hardwareTypes(
+    "How to sort the records in the response"
+    sort: [HardwareTypeSortInput]
+
+    "A filter to limit the results"
+    filter: HardwareTypeFilterInput
+  ): [HardwareType!]!
+
+  "Returns a system model."
+  systemModel("The id of the record" id: ID!): SystemModel
+
+  "Returns a list of system models."
+  systemModels(
+    "How to sort the records in the response"
+    sort: [SystemModelSortInput]
+
+    "A filter to limit the results"
+    filter: SystemModelFilterInput
+  ): [SystemModel!]!
 }
 
 type RootMutationType {
@@ -110,26 +900,10 @@ type RootMutationType {
   "Deletes a base image."
   deleteBaseImage(input: DeleteBaseImageInput!): DeleteBaseImagePayload
 
-  "Updates a device."
-  updateDevice(input: UpdateDeviceInput!): UpdateDevicePayload
-
-  "Creates a new hardware type."
-  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypePayload
-
-  "Updates a hardware type."
-  updateHardwareType(input: UpdateHardwareTypeInput!): UpdateHardwareTypePayload
-
-  "Deletes a hardware type."
-  deleteHardwareType(input: DeleteHardwareTypeInput!): DeleteHardwareTypePayload
-
-  "Creates a new system model."
-  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelPayload
-
-  "Updates a system model."
-  updateSystemModel(input: UpdateSystemModelInput!): UpdateSystemModelPayload
-
-  "Deletes a system model."
-  deleteSystemModel(input: DeleteSystemModelInput!): DeleteSystemModelPayload
+  "Requests a forwarder session for the specified device."
+  requestForwarderSession(
+    input: RequestForwarderSessionInput!
+  ): RequestForwarderSessionPayload
 
   "Creates a new device group."
   createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupPayload
@@ -164,7 +938,41 @@ type RootMutationType {
   createUpdateCampaign(
     input: CreateUpdateCampaignInput!
   ): CreateUpdateCampaignPayload
+
+  "Updates a device."
+  updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult
+
+  "Creates a hardware type."
+  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypeResult
+
+  "Updates a hardware type."
+  updateHardwareType(
+    id: ID!
+    input: UpdateHardwareTypeInput
+  ): UpdateHardwareTypeResult
+
+  "Deletes a hardware type."
+  deleteHardwareType(id: ID!): DeleteHardwareTypeResult
+
+  "Creates a system model."
+  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelResult
+
+  "Updates an system model."
+  updateSystemModel(
+    id: ID!
+    input: UpdateSystemModelInput
+  ): UpdateSystemModelResult
+
+  "Deletes a system model."
+  deleteSystemModel(id: ID!): DeleteSystemModelResult
 }
+
+"""
+The `Json` scalar type represents arbitrary json string data, represented as UTF-8
+character sequences. The Json type is most often used to represent a free-form
+human-readable json string.
+"""
+scalar Json
 
 """
 The `DateTime` scalar type represents a date and time in the UTC
@@ -176,38 +984,6 @@ scalar DateTime
 
 "Represents an uploaded file."
 scalar Upload
-
-enum VariantType {
-  "Double type"
-  DOUBLE
-
-  "32 bit integer type"
-  INTEGER
-
-  "Boolean type"
-  BOOLEAN
-
-  """
-  64 bit integer type. When this is the type, the value will be a string representing the number.
-  This is done to avoid representation errors when using JSON Numbers.
-  """
-  LONGINTEGER
-
-  "String type"
-  STRING
-
-  "Binary blob type. When this is the type, the value will be Base64 encoded."
-  BINARYBLOB
-
-  "Datetime type. When this is the type, the value will be an ISO8601 timestamp."
-  DATETIME
-}
-
-"""
-A variant value. It can contain any JSON value. The value will be checked together with the
-type to verify whether it's valid.
-"""
-scalar VariantValue
 
 """
 Represents an UpdateChannel.
@@ -664,459 +1440,53 @@ type DeleteDeviceGroupPayload {
   deviceGroup: DeviceGroup!
 }
 
-"""
-Describes the position of a device.
+"The details of a forwarder instance."
+type ForwarderConfig {
+  "The hostname of the forwarder instance."
+  hostname: String!
 
-The position is estimated by means of Edgehog's Geolocation modules and the data published by the device.
-"""
-type DeviceLocation {
-  "The latitude coordinate."
-  latitude: Float!
+  "The port of the forwarder instance."
+  port: Int!
 
-  "The longitude coordinate."
-  longitude: Float!
-
-  "The accuracy of the measurement, in meters."
-  accuracy: Float
-
-  "The formatted address estimated for the position."
-  address: String
-
-  "The date at which the measurement was made."
-  timestamp: DateTime!
+  "Indicates if TLS should used when connecting to the forwarder."
+  secureSessions: Boolean!
 }
 
-"""
-Describes a set of filters to apply when fetching a list of devices.
+"The status of a forwarder session"
+enum ForwarderSessionStatus {
+  "The device is connected to the forwarder."
+  CONNECTED
 
-When multiple filters are specified, they are applied in an AND fashion to further refine the results.
-"""
-input DeviceFilter {
-  "Whether to return devices connected or not to Astarte."
-  online: Boolean
-
-  "A string to match against the device ID. The match is case-insensitive and tests whether the string is included in the device ID."
-  deviceId: String
-
-  """
-  A string to match against the part number of the device's system model.
-  The match is case-insensitive and tests whether the string is included in the part number of the device's system model.
-  """
-  systemModelPartNumber: String
-
-  """
-  A string to match against the handle of the device's system model.
-  The match is case-insensitive and tests whether the string is included in the handle of the device's system model.
-  """
-  systemModelHandle: String
-
-  """
-  A string to match against the name of the device's system model.
-  The match is case-insensitive and tests whether the string is included in the name of the device's system model.
-  """
-  systemModelName: String
-
-  """
-  A string to match against the part number of the device's hardware type.
-  The match is case-insensitive and tests whether the string is included in the part number of the device's hardware type.
-  """
-  hardwareTypePartNumber: String
-
-  """
-  A string to match against the handle of the device's hardware type.
-  The match is case-insensitive and tests whether the string is included in the handle of the device's hardware type.
-  """
-  hardwareTypeHandle: String
-
-  """
-  A string to match against the name of the device's hardware type.
-  The match is case-insensitive and tests whether the string is included in the name of the device's hardware type.
-  """
-  hardwareTypeName: String
-
-  """
-  A string to match against the tags of the device.
-  The match is case-insensitive and tests whether the string is included in one of the tags of the device.
-  """
-  tag: String
+  "The device is connecting to the forwarder."
+  CONNECTING
 }
 
-"An input object for a device attribute."
-input DeviceAttributeInput {
-  "The namespace of the device attribute."
-  namespace: DeviceAttributeNamespace!
+"The details of a forwarder session"
+type ForwarderSession {
+  "The token that identifies the session."
+  token: String!
 
-  "The key of the device attribute."
-  key: String!
+  "The status of the session."
+  status: ForwarderSessionStatus!
 
-  "The type of the device attribute."
-  type: VariantType!
+  "Indicates if TLS is used when the device connects to the forwarder."
+  secure: Boolean!
 
-  "The value of the device attribute."
-  value: VariantValue!
+  "The hostname of the forwarder instance."
+  forwarderHostname: String!
+
+  "The port of the forwarder instance."
+  forwarderPort: Int!
 }
 
-"The possible namespace values for device attributes"
-enum DeviceAttributeNamespace {
-  "Custom attributes, user defined"
-  CUSTOM
-}
-
-type DeviceAttribute {
-  "The namespace of the device attribute."
-  namespace: DeviceAttributeNamespace!
-
-  "The key of the device attribute."
-  key: String!
-
-  "The type of the device attribute."
-  type: VariantType!
-
-  "The value of the device attribute."
-  value: VariantValue!
-}
-
-"""
-Denotes a device instance that connects and exchanges data.
-
-Each Device is associated to a specific SystemModel, which in turn is associated to a specific HardwareType.
-A Device also exposes info about its connection status and some sets of data read by its operating system.
-"""
-type Device implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the device."
-  name: String!
-
-  "The device ID used to connect to the Astarte cluster."
-  deviceId: String!
-
-  "Tells whether the device is connected or not to Astarte."
-  online: Boolean!
-
-  "The date at which the device last connected to Astarte."
-  lastConnection: DateTime
-
-  "The date at which the device last disconnected from Astarte."
-  lastDisconnection: DateTime
-
-  "The system model of the device."
-  systemModel: SystemModel
-
-  "The device groups the device belongs to."
-  deviceGroups: [DeviceGroup!]!
-
-  "The tags of the device"
-  tags: [String!]!
-
-  "The custom attributes of the device. These attributes are user editable."
-  customAttributes: [DeviceAttribute!]!
-
-  "List of capabilities supported by the device."
-  capabilities: [DeviceCapability!]!
-
-  "Info read from the device's hardware."
-  hardwareInfo: HardwareInfo
-
-  "The estimated location of the device."
-  location: DeviceLocation
-
-  "The current usage of the storage units of the device."
-  storageUsage: [StorageUnit!]
-
-  "The current status of the operating system of the device."
-  systemStatus: SystemStatus
-
-  "The list of WiFi Access Points found by the device."
-  wifiScanResults: [WifiScanResult!]
-
-  "The status of the battery slots of the device."
-  batteryStatus: [BatterySlot!]
-
-  "Information about the operating system's base image for the device."
-  baseImage: BaseImageInfo
-
-  "Information about the operating system of the device."
-  osInfo: OsInfo
-
-  "The existing OTA operations for this device"
-  otaOperations: [OtaOperation!]!
-
-  "The status of cellular connection of the device."
-  cellularConnection: [Modem!]
-
-  "Information about the Edgehog runtime running on the device."
-  runtimeInfo: RuntimeInfo
-
-  "The list of Network Interfaces of the device."
-  networkInterfaces: [NetworkInterface!]
-}
-
-"""
-Denotes a type of hardware that devices can have.
-
-It refers to the physical components embedded in a device.
-This can represent, e.g., multiple revisions of a PCB (each with a different part number) which are functionally equivalent from the device point of view.
-"""
-type HardwareType implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the hardware type."
-  name: String!
-
-  "The identifier of the hardware type."
-  handle: String!
-
-  "The list of part numbers associated with the hardware type."
-  partNumbers: [String!]!
-}
-
-"""
-Represents a specific system model.
-
-A system model corresponds to what the users thinks as functionally equivalent devices (e.g. two revisions of a device containing two different embedded chips but having the same enclosure and the same functionality).Each SystemModel must be associated to a specific HardwareType.
-"""
-type SystemModel implements Node {
-  "The ID of an object"
-  id: ID!
-
-  "The display name of the system model."
-  name: String!
-
-  "The identifier of the system model."
-  handle: String!
-
-  "The URL of the related picture."
-  pictureUrl: String
-
-  "The type of hardware that can be plugged into the system model."
-  hardwareType: HardwareType!
-
-  "The list of part numbers associated with the system model."
-  partNumbers: [String!]!
-
-  """
-  A localized description of the system model.
-  The language of the description can be controlled passing an Accept-Language header in the request. If no such header is present, the default tenant language is returned.
-  """
-  description: String
-}
-
-input UpdateDeviceInput {
-  "The GraphQL ID (not the Astarte Device ID) of the device to be updated."
+input RequestForwarderSessionInput {
+  "The GraphQL ID of the device for the requested session."
   deviceId: ID!
-
-  "The display name of the device."
-  name: String
-
-  "The tags of the device. These replace all the current tags."
-  tags: [String!]
-
-  "The custom attributes of the device. These replace all the current custom attributes."
-  customAttributes: [DeviceAttributeInput!]
 }
 
-type UpdateDevicePayload {
-  "The updated device."
-  device: Device!
-}
-
-input CreateHardwareTypeInput {
-  "The display name of the hardware type."
-  name: String!
-
-  """
-  The identifier of the hardware type.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  "The list of part numbers associated with the hardware type."
-  partNumbers: [String!]!
-}
-
-type CreateHardwareTypePayload {
-  "The created hardware type."
-  hardwareType: HardwareType!
-}
-
-input UpdateHardwareTypeInput {
-  "The ID of the hardware type to be updated."
-  hardwareTypeId: ID!
-
-  "The display name of the hardware type."
-  name: String
-
-  """
-  The identifier of the hardware type.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  "The list of part numbers associated with the hardware type."
-  partNumbers: [String!]
-}
-
-type UpdateHardwareTypePayload {
-  "The updated hardware type."
-  hardwareType: HardwareType!
-}
-
-input DeleteHardwareTypeInput {
-  "The ID of the hardware type to be deleted."
-  hardwareTypeId: ID!
-}
-
-type DeleteHardwareTypePayload {
-  "The deleted hardware type."
-  hardwareType: HardwareType!
-}
-
-input CreateSystemModelInput {
-  "The display name of the system model."
-  name: String!
-
-  """
-  The identifier of the system model.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  """
-  The file blob of a related picture.
-
-  When this field is specified, the pictureUrl field is ignored.
-  """
-  pictureFile: Upload
-
-  """
-  The file URL of a related picture.
-
-  Specifying a null value will remove the existing picture.
-  When the pictureFile field is specified, this field is ignored.
-  """
-  pictureUrl: String
-
-  "The list of part numbers associated with the system model."
-  partNumbers: [String!]!
-
-  "The ID of the hardware type that can be used by devices of this model."
-  hardwareTypeId: ID!
-
-  "An optional localized description. This description can only use the default tenant locale."
-  description: LocalizedTextInput
-}
-
-type CreateSystemModelPayload {
-  "The created system model."
-  systemModel: SystemModel!
-}
-
-input UpdateSystemModelInput {
-  "The ID of the system model to be updated."
-  systemModelId: ID!
-
-  "The display name of the system model."
-  name: String
-
-  """
-  The identifier of the system model.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  """
-  The file blob of a related picture.
-
-  When this field is specified, the pictureUrl field is ignored.
-  """
-  pictureFile: Upload
-
-  """
-  The file URL of a related picture.
-
-  Specifying a null value will remove the existing picture.
-  When the pictureFile field is specified, this field is ignored.
-  """
-  pictureUrl: String
-
-  "The list of part numbers associated with the system model."
-  partNumbers: [String!]
-
-  "An optional localized description. This description can only use the default tenant locale."
-  description: LocalizedTextInput
-}
-
-type UpdateSystemModelPayload {
-  "The updated system model."
-  systemModel: SystemModel!
-}
-
-input DeleteSystemModelInput {
-  "The ID of the system model to be deleted."
-  systemModelId: ID!
-}
-
-type DeleteSystemModelPayload {
-  "The deleted system model."
-  systemModel: SystemModel!
-}
-
-"The capabilities that devices can support"
-enum DeviceCapability {
-  "The device provides information about its base image."
-  BASE_IMAGE
-
-  "The device provides information about its battery status."
-  BATTERY_STATUS
-
-  "The device provides information about its cellular connection."
-  CELLULAR_CONNECTION
-
-  "The device supports commands, for example the rebooting command."
-  COMMANDS
-
-  "The device can be geolocated."
-  GEOLOCATION
-
-  "The device provides information about its hardware."
-  HARDWARE_INFO
-
-  "The device can be asked to blink its LED in a specific pattern."
-  LED_BEHAVIORS
-
-  "The device can provide information about its network interfaces."
-  NETWORK_INTERFACE_INFO
-
-  "The device provides information about its operating system."
-  OPERATING_SYSTEM
-
-  "The device provides information about its runtime."
-  RUNTIME_INFO
-
-  "The device can be updated remotely."
-  SOFTWARE_UPDATES
-
-  "The device provides information about its storage units."
-  STORAGE
-
-  "The device provides information about its system."
-  SYSTEM_INFO
-
-  "The device provides information about its system status."
-  SYSTEM_STATUS
-
-  "The device telemetry can be configured."
-  TELEMETRY_CONFIG
-
-  "The device provides information about surrounding WiFi APs."
-  WIFI
+type RequestForwarderSessionPayload {
+  "The token of the requested forwarder session."
+  sessionToken: String!
 }
 
 """
