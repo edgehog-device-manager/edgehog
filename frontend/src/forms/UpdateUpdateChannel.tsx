@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -31,6 +31,32 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { updateChannelHandleSchema, yup, messages } from "forms";
+import { graphql, useFragment } from "react-relay/hooks";
+import type { UpdateUpdateChannel_UpdateChannelFragment$key } from "api/__generated__/UpdateUpdateChannel_UpdateChannelFragment.graphql";
+import type { UpdateUpdateChannel_DeviceGroupsFragment$key } from "api/__generated__/UpdateUpdateChannel_DeviceGroupsFragment.graphql";
+
+const UPDATE_CHANNEL_FRAGMENT = graphql`
+  fragment UpdateUpdateChannel_UpdateChannelFragment on UpdateChannel {
+    id
+    name
+    handle
+    targetGroups {
+      ...UpdateUpdateChannel_DeviceGroupsFragment
+    }
+  }
+`;
+
+const DEVICE_GROUPS_FRAGMENT = graphql`
+  fragment UpdateUpdateChannel_DeviceGroupsFragment on DeviceGroup
+  @relay(plural: true) {
+    id
+    name
+    updateChannel {
+      id
+      name
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -110,21 +136,35 @@ const transformOutputData = ({
   targetGroupIds: targetGroups.map((targetGroup) => targetGroup.id),
 });
 
+const initialData: UpdateChannel = {
+  id: "",
+  name: "",
+  handle: "",
+  targetGroups: [],
+};
+
 type Props = {
-  updateChannel: UpdateChannel;
-  targetGroups: readonly TargetGroup[];
+  updateChannelRef: UpdateUpdateChannel_UpdateChannelFragment$key;
+  targetGroupsRef: UpdateUpdateChannel_DeviceGroupsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: UpdateChannelData) => void;
   onDelete: () => void;
 };
 
 const UpdateUpdateChannel = ({
-  updateChannel,
+  updateChannelRef,
+  targetGroupsRef,
   isLoading = false,
-  targetGroups,
   onSubmit,
   onDelete,
 }: Props) => {
+  const updateChannelData = useFragment(
+    UPDATE_CHANNEL_FRAGMENT,
+    updateChannelRef,
+  );
+
+  const targetGroupsData = useFragment(DEVICE_GROUPS_FRAGMENT, targetGroupsRef);
+
   const {
     register,
     handleSubmit,
@@ -133,13 +173,13 @@ const UpdateUpdateChannel = ({
     reset,
   } = useForm<UpdateChannel>({
     mode: "onTouched",
-    defaultValues: updateChannel,
+    defaultValues: initialData,
     resolver: yupResolver(updateChannelSchema),
   });
 
   useEffect(() => {
-    reset(updateChannel);
-  }, [reset, updateChannel]);
+    reset(initialData);
+  }, [reset, updateChannelData]);
 
   const intl = useIntl();
 
@@ -147,7 +187,7 @@ const UpdateUpdateChannel = ({
     (targetGroup: TargetGroup) => {
       if (
         targetGroup.updateChannel === null ||
-        targetGroup.updateChannel.id === updateChannel.id
+        targetGroup.updateChannel.id === updateChannelData.id
       ) {
         return targetGroup.name;
       }
@@ -164,21 +204,21 @@ const UpdateUpdateChannel = ({
         },
       );
     },
-    [intl, updateChannel.id],
+    [intl, updateChannelData.id],
   );
   const isTargetGroupUsedByOtherChannel = useCallback(
     (targetGroup: TargetGroup) => {
       return !(
         targetGroup.updateChannel === null ||
-        targetGroup.updateChannel.id === updateChannel.id
+        targetGroup.updateChannel.id === updateChannelData.id
       );
     },
-    [updateChannel.id],
+    [updateChannelData.id],
   );
 
   const targetGroupOptions = useMemo(() => {
     // move disabled options to the end
-    return [...targetGroups].sort((group1, group2) => {
+    return [...targetGroupsData].sort((group1, group2) => {
       const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
       const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
 
@@ -190,7 +230,7 @@ const UpdateUpdateChannel = ({
       }
       return -1;
     });
-  }, [targetGroups, isTargetGroupUsedByOtherChannel]);
+  }, [targetGroupsData, isTargetGroupUsedByOtherChannel]);
 
   const onFormSubmit = (data: UpdateChannel) =>
     onSubmit(transformOutputData(data));

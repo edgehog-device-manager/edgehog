@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -56,14 +56,7 @@ const GET_UPDATE_CHANNEL_QUERY = graphql`
       id
       name
       handle
-      targetGroups {
-        id
-        name
-        updateChannel {
-          id
-          name
-        }
-      }
+      ...UpdateUpdateChannel_UpdateChannelFragment
     }
   }
 `;
@@ -71,12 +64,7 @@ const GET_UPDATE_CHANNEL_QUERY = graphql`
 const GET_DEVICE_GROUPS_QUERY = graphql`
   query UpdateChannel_getDeviceGroups_Query {
     deviceGroups {
-      id
-      name
-      updateChannel {
-        id
-        name
-      }
+      ...UpdateUpdateChannel_DeviceGroupsFragment
     }
   }
 `;
@@ -255,8 +243,8 @@ const UpdateChannelContent = ({
         </Alert>
         <div className="mb-3">
           <UpdateUpdateChannelForm
-            updateChannel={updateChannel}
-            targetGroups={deviceGroups}
+            updateChannelRef={updateChannel}
+            targetGroupsRef={deviceGroups}
             onSubmit={handleUpdateUpdateChannel}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingUpdateChannel}
@@ -309,6 +297,7 @@ const UpdateChannelWrapper = ({
     GET_UPDATE_CHANNEL_QUERY,
     getUpdateChannelQuery,
   );
+
   const { deviceGroups } = usePreloadedQuery(
     GET_DEVICE_GROUPS_QUERY,
     getDeviceGroupsQuery,
