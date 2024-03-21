@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,6 +30,16 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageCollectionHandleSchema, yup } from "forms";
+import { graphql, useFragment } from "react-relay";
+import type { CreateBaseImageCollection_SystemModelsFragment$key } from "api/__generated__/CreateBaseImageCollection_SystemModelsFragment.graphql";
+
+const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
+  fragment CreateBaseImageCollection_SystemModelsFragment on SystemModel
+  @relay(plural: true) {
+    id
+    name
+  }
+`;
 
 const FormRow = ({
   id,
@@ -68,23 +78,22 @@ const initialData: BaseImageCollectionData = {
   systemModelId: "",
 };
 
-type SystemModelOption = {
-  id: string;
-  name: string;
-};
-
 type Props = {
-  systemModels: SystemModelOption[];
+  systemModelsRef: CreateBaseImageCollection_SystemModelsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionData) => void;
 };
 
 const CreateBaseImageCollectionForm = ({
-  systemModels,
+  systemModelsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
   const intl = useIntl();
+  const systemModelsData = useFragment(
+    CREATE_BASE_IMAGE_COLLECTION_FRAGMENT,
+    systemModelsRef,
+  );
   const {
     register,
     handleSubmit,
@@ -149,7 +158,7 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select a System Model",
               })}
             </option>
-            {systemModels.map((systemModelOption) => (
+            {systemModelsData.map((systemModelOption) => (
               <option key={systemModelOption.id} value={systemModelOption.id}>
                 {systemModelOption.name}
               </option>
