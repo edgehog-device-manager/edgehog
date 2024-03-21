@@ -54,7 +54,8 @@ defmodule Doc.MixProject do
         "Integrating with Edgehog": ~r"/integrating/",
         Tutorials: ~r"/tutorials/"
       ],
-      groups_for_modules: []
+      groups_for_modules: [],
+      javascript_config_path: "../versions.js"
     ]
   end
 

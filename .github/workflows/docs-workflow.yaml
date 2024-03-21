@@ -105,6 +105,8 @@ jobs:
         cd docs && git restore $DOCS_DIRNAME/device-sdks || true && cd ..
         # Copy doc pages
         cp -r edgehog/doc/doc/* docs/$DOCS_DIRNAME/
+        # Copy version dropdown config
+        cp edgehog/doc/versions.js docs/
         # Copy GraphQL docs
         cp -r ./edgehog/backend/graphql-api-docs docs/$DOCS_DIRNAME/
     - name: Commit files
