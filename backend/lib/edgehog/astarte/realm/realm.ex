@@ -19,13 +19,13 @@
 #
 
 defmodule Edgehog.Astarte.Realm do
-  use Edgehog.MultitenantResource
+  use Edgehog.MultitenantResource,
+    api: Edgehog.Astarte
 
   alias Edgehog.Astarte.Realm
   alias Edgehog.Validations
 
   code_interface do
-    define_for Edgehog.Astarte
     define :fetch_by_name, action: :by_name, args: [:name]
     define :create
     define :destroy

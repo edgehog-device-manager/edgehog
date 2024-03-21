@@ -20,12 +20,12 @@
 
 defmodule Edgehog.Astarte.Cluster do
   use Ash.Resource,
+    api: Edgehog.Astarte,
     data_layer: AshPostgres.DataLayer
 
   alias Edgehog.Astarte.Cluster
 
   code_interface do
-    define_for Edgehog.Astarte
     define :create
   end
 
