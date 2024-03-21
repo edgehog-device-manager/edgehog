@@ -184,11 +184,13 @@ defmodule Edgehog.Devices.Device do
     # The following Astarte values don't have a custom type because they're not exposed via GraphQL
     # but they're used to synthesize other values
     calculate :modem_properties, {:array, :struct} do
+      private? true
       constraints items: [instance_of: Edgehog.Astarte.Device.CellularConnection.ModemProperties]
       calculation {Calculations.AstarteInterfaceValue, value_id: :modem_properties}
     end
 
     calculate :modem_status, {:array, :struct} do
+      private? true
       constraints items: [instance_of: Edgehog.Astarte.Device.CellularConnection.ModemStatus]
       calculation {Calculations.AstarteInterfaceValue, value_id: :modem_status}
     end
