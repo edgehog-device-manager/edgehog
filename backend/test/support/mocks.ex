@@ -78,9 +78,13 @@ Mox.defmock(Edgehog.Astarte.Device.LedBehaviorMock,
   for: Edgehog.Astarte.Device.LedBehavior.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.ForwarderSessionMock,
+  for: Edgehog.Astarte.Device.ForwarderSession.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Interface.MockDataLayer,
   for: Edgehog.Astarte.Interface.DataLayer
-)
+  )
 
 Mox.defmock(Edgehog.Astarte.Trigger.MockDataLayer,
   for: Edgehog.Astarte.Trigger.DataLayer

@@ -66,6 +66,7 @@ defmodule Edgehog.Tenants.Tenant do
     define :provision
     define :fetch_by_slug, action: :by_slug, args: [:slug]
     define :reconcile, args: [:tenant]
+    define :cleanup, args: [:tenant]
     define :destroy
   end
 
@@ -98,6 +99,15 @@ defmodule Edgehog.Tenants.Tenant do
     end
 
     action :reconcile, :term do
+      argument :tenant, :struct do
+        allow_nil? false
+        constraints instance_of: __MODULE__
+      end
+
+      run Tenant.ManualActions.ReconcilerAction
+    end
+
+    action :cleanup, :term do
       argument :tenant, :struct do
         allow_nil? false
         constraints instance_of: __MODULE__
