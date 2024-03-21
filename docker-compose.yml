@@ -29,7 +29,7 @@ services:
       - postgresql-data:/var/lib/postgresql/data
 
   edgehog-backend:
-    image: edgehogdevicemanager/edgehog-backend:0.8.0-rc.0
+    image: edgehogdevicemanager/edgehog-backend:snapshot
     build:
       context: backend
     env_file: .env
@@ -66,7 +66,7 @@ services:
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: edgehogdevicemanager/edgehog-frontend:0.8.0-rc.0
+    image: edgehogdevicemanager/edgehog-frontend:snapshot
     build:
       context: frontend
     environment:

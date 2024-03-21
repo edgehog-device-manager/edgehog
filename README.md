@@ -13,7 +13,7 @@ written in [Elixir](https://github.com/elixir-lang/elixir). It is based on
 It packs in convenient features such as OTA updates, device status information management,
 geolocation and everything you need for IoT fleet management.
 
-See also [Edgehog documentation](https://edgehog-device-manager.github.io/docs/0.8/) for more
+See also [Edgehog documentation](https://edgehog-device-manager.github.io/docs/snapshot/) for more
 information.
 
 # Where do I find binaries?
