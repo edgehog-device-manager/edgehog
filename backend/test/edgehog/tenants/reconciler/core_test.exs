@@ -72,7 +72,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
     setup do
       client =
         realm_fixture()
-        |> Edgehog.Astarte.load!(:realm_management_client)
+        |> Ash.load!(:realm_management_client)
         |> Map.fetch!(:realm_management_client)
 
       interface_name = "io.edgehog.devicemanager.SystemInfo"
@@ -194,7 +194,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
     setup do
       client =
         realm_fixture()
-        |> Edgehog.Astarte.load!(:realm_management_client)
+        |> Ash.load!(:realm_management_client)
         |> Map.fetch!(:realm_management_client)
 
       trigger_name = "edgehog-connection"

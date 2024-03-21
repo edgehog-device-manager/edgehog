@@ -20,6 +20,7 @@
 
 defmodule Edgehog.Devices.SystemModel do
   use Edgehog.MultitenantResource,
+    api: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
     ]

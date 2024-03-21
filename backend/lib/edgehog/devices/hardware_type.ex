@@ -20,6 +20,7 @@
 
 defmodule Edgehog.Devices.HardwareType do
   use Edgehog.MultitenantResource,
+    api: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
     ]

@@ -124,7 +124,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
     test "returns error for non-existing hardware type", %{tenant: tenant} do
       hardware_type = hardware_type_fixture(tenant: tenant)
       hardware_type_id = AshGraphql.Resource.encode_relay_id(hardware_type)
-      _ = Edgehog.Devices.destroy!(hardware_type)
+      _ = Ash.destroy!(hardware_type)
 
       result =
         create_system_model_mutation(

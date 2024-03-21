@@ -34,7 +34,7 @@ defmodule Edgehog.Devices.Device.ManualRelationships.SystemModel do
       |> Ash.Query.set_tenant(tenant)
       |> Ash.Query.filter(part_numbers.devices.id in ^device_ids)
       |> Ash.Query.load(part_numbers: [:devices])
-      |> Devices.read!()
+      |> Ash.read!()
 
     device_id_to_system_model =
       related_system_models

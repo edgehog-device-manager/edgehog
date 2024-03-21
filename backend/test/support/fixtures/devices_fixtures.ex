@@ -82,7 +82,7 @@ defmodule Edgehog.DevicesFixtures do
 
     Edgehog.Devices.Device
     |> Ash.Changeset.for_create(:create, params, tenant: tenant)
-    |> Edgehog.Devices.create!()
+    |> Ash.create!()
   end
 
   @doc """
@@ -113,7 +113,7 @@ defmodule Edgehog.DevicesFixtures do
 
     Edgehog.Devices.HardwareType
     |> Ash.Changeset.for_create(:create, params, tenant: tenant)
-    |> Edgehog.Devices.create!()
+    |> Ash.create!()
   end
 
   @doc """
@@ -138,7 +138,7 @@ defmodule Edgehog.DevicesFixtures do
 
     Edgehog.Devices.SystemModel
     |> Ash.Changeset.for_create(:create, params, tenant: tenant)
-    |> Edgehog.Devices.create!()
+    |> Ash.create!()
   end
 
   @doc """

@@ -44,7 +44,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
           hardware_type_id: hardware_type.id,
           picture_url: "https://example.com/image.jpg"
         )
-        |> Edgehog.Devices.load!(:part_number_strings)
+        |> Ash.load!(:part_number_strings)
 
       assert %{data: %{"systemModels" => [system_model]}} = system_models_query(tenant: tenant)
 

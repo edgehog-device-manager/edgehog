@@ -20,6 +20,7 @@
 
 defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
+    api: Edgehog.Tenants,
     data_layer: AshPostgres.DataLayer,
     extensions: [
       AshGraphql.Resource,
@@ -61,7 +62,6 @@ defmodule Edgehog.Tenants.Tenant do
   end
 
   code_interface do
-    define_for Edgehog.Tenants
     define :create
     define :provision
     define :fetch_by_slug, action: :by_slug, args: [:slug]

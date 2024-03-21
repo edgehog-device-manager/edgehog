@@ -32,6 +32,6 @@ defmodule Edgehog.Tenants do
   end
 
   resources do
-    registry Edgehog.Tenants.Registry
+    resource Edgehog.Tenants.Tenant
   end
 end

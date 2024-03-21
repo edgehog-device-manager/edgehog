@@ -67,7 +67,7 @@ defmodule Edgehog.Tenants.Reconciler do
     end
 
     Tenant
-    |> Tenants.read!(load: tenant_reconciliation_loads())
+    |> Ash.read!(load: tenant_reconciliation_loads())
     |> Enum.each(&start_reconciliation_task(&1, tenant_to_trigger_url_fun))
 
     {:noreply, state}
@@ -80,7 +80,7 @@ defmodule Edgehog.Tenants.Reconciler do
     } = state
 
     tenant
-    |> Tenants.load!(tenant_reconciliation_loads())
+    |> Ash.load!(tenant_reconciliation_loads())
     |> start_reconciliation_task(tenant_to_trigger_url_fun)
 
     {:noreply, state}

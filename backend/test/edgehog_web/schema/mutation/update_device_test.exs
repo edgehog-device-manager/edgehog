@@ -106,7 +106,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
   defp non_existing_device_id(tenant) do
     fixture = device_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
-    :ok = Devices.destroy!(fixture)
+    :ok = Ash.destroy!(fixture)
 
     id
   end
