@@ -146,6 +146,36 @@ if config_env() == :prod do
     disabled: !use_google_cloud_storage,
     json: s3.gcp_credentials
 
+  forwarder_secure_sessions? =
+    System.get_env("EDGEHOG_FORWARDER_SECURE_SESSIONS", "true") == "true"
+
+  forwarder_hostname = System.get_env("EDGEHOG_FORWARDER_HOSTNAME")
+
+  if forwarder_hostname != nil &&
+       (String.starts_with?(forwarder_hostname, "http://") ||
+          String.starts_with?(forwarder_hostname, "https://")) do
+    raise """
+    environment variable EDGEHOG_FORWARDER_HOSTNAME must contain only the
+    hostname without the http:// or https:// scheme.
+    """
+  end
+
+  forwarder_port = System.get_env("EDGEHOG_FORWARDER_PORT")
+
+  forwarder_port =
+    cond do
+      forwarder_port != nil -> String.to_integer(forwarder_port)
+      forwarder_secure_sessions? -> 443
+      true -> 80
+    end
+
+  config :edgehog, :edgehog_forwarder, %{
+    hostname: forwarder_hostname,
+    port: forwarder_port,
+    secure_sessions?: forwarder_secure_sessions?,
+    enabled?: forwarder_hostname != nil
+  }
+
   # ## Using releases
   #
   # If you are doing OTP releases, you need to instruct Phoenix
