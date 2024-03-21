@@ -53,7 +53,8 @@ defmodule Doc.MixProject do
         "Admin Guide": ~r"/admin/",
         "Integrating with Edgehog": ~r"/integrating/"
       ],
-      groups_for_modules: []
+      groups_for_modules: [],
+      javascript_config_path: "../versions.js"
     ]
   end
 

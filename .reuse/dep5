@@ -7,6 +7,10 @@ Files: doc/images/*
 Copyright: 2021-2023 SECO Mind Srl
 License: Apache-2.0
 
+Files: doc/versions.js
+Copyright: 2024 SECO Mind Srl
+License: CC0-1.0
+
 Files: CHANGELOG.md
 Copyright: 2021-2023 SECO Mind Srl
 License: CC0-1.0
