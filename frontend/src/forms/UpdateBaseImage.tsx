@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -30,6 +30,22 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageStartingVersionRequirementSchema, yup } from "forms";
+import { graphql } from "relay-runtime";
+import { useFragment } from "react-relay";
+import type { UpdateBaseImage_BaseImageFragment$key } from "api/__generated__/UpdateBaseImage_BaseImageFragment.graphql";
+
+const UPDATE_BASE_IMAGE_FRAGMENT = graphql`
+  fragment UpdateBaseImage_BaseImageFragment on BaseImage {
+    version
+    url
+    startingVersionRequirement
+    releaseDisplayName
+    description
+    baseImageCollection {
+      name
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -48,16 +64,7 @@ const FormRow = ({
   </Form.Group>
 );
 
-type BaseImageData = {
-  baseImageCollection: {
-    name: string;
-  };
-  version: string;
-  url: string;
-  startingVersionRequirement: string | null;
-  releaseDisplayName: string | null;
-  description: string | null;
-};
+type BaseImageData = UpdateBaseImage_BaseImageFragment$key;
 
 type FormData = {
   baseImageCollection: string;
@@ -103,7 +110,7 @@ const transformOutputData = (
 });
 
 type UpdateBaseImageProps = {
-  baseImage: BaseImageData;
+  baseImageRef: BaseImageData;
   locale: string;
   isLoading?: boolean;
   onSubmit: (data: BaseImageChanges) => void;
@@ -111,21 +118,23 @@ type UpdateBaseImageProps = {
 };
 
 const UpdateBaseImage = ({
-  baseImage,
+  baseImageRef,
   locale,
   isLoading = false,
   onSubmit,
   onDelete,
 }: UpdateBaseImageProps) => {
+  const baseImageData = useFragment(UPDATE_BASE_IMAGE_FRAGMENT, baseImageRef);
   const defaultValues = useMemo(
     () => ({
-      baseImageCollection: baseImage.baseImageCollection.name,
-      version: baseImage.version,
-      startingVersionRequirement: baseImage.startingVersionRequirement || "",
-      releaseDisplayName: baseImage.releaseDisplayName || "",
-      description: baseImage.description || "",
+      baseImageCollection: baseImageData.baseImageCollection.name,
+      version: baseImageData.version,
+      startingVersionRequirement:
+        baseImageData.startingVersionRequirement || "",
+      releaseDisplayName: baseImageData.releaseDisplayName || "",
+      description: baseImageData.description || "",
     }),
-    [baseImage],
+    [baseImageData],
   );
 
   const {
@@ -180,11 +189,11 @@ const UpdateBaseImage = ({
             defaultMessage="<a>{baseImageName}</a>"
             values={{
               a: (chunks: React.ReactNode) => (
-                <a target="_blank" rel="noreferrer" href={baseImage.url}>
+                <a target="_blank" rel="noreferrer" href={baseImageData.url}>
                   {chunks}
                 </a>
               ),
-              baseImageName: baseImage.url.split("/").pop(),
+              baseImageName: baseImageData.url.split("/").pop(),
             }}
           />
         </FormRow>
