@@ -52,7 +52,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
   defp non_existing_hardware_type_id(tenant) do
     fixture = hardware_type_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
-    :ok = Devices.destroy!(fixture)
+    :ok = Ash.destroy!(fixture)
 
     id
   end

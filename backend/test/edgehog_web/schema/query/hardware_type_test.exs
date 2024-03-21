@@ -36,7 +36,7 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
     test "returns hardware type if present", %{tenant: tenant} do
       fixture =
         hardware_type_fixture(tenant: tenant)
-        |> Edgehog.Devices.load!(:part_number_strings)
+        |> Ash.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
@@ -63,7 +63,7 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
   defp non_existing_hardware_type_id(tenant) do
     fixture = hardware_type_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
-    :ok = Devices.destroy!(fixture)
+    :ok = Ash.destroy!(fixture)
 
     id
   end

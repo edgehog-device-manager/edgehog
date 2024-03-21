@@ -85,7 +85,7 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
                default_locale: ^tenant_default_locale
              } = tenant
 
-      tenant = Tenants.load!(tenant, realm: [:cluster])
+      tenant = Ash.load!(tenant, realm: [:cluster])
 
       assert %Astarte.Realm{
                name: ^realm_name,

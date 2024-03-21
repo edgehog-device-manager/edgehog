@@ -127,7 +127,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
   defp non_existing_system_model_id(tenant) do
     fixture = system_model_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
-    :ok = Devices.destroy!(fixture)
+    :ok = Ash.destroy!(fixture)
 
     id
   end

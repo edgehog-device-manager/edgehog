@@ -175,7 +175,7 @@ defmodule Edgehog.TenantsTest do
                default_locale: ^tenant_default_locale
              } = tenant
 
-      tenant = Tenants.load!(tenant, realm: [:cluster])
+      tenant = Ash.load!(tenant, realm: [:cluster])
 
       assert tenant.realm.cluster.base_api_url == attrs.astarte_config.base_api_url
       assert tenant.realm.name == attrs.astarte_config.realm_name

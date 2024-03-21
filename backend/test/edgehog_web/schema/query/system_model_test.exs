@@ -42,7 +42,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
           hardware_type_id: hardware_type.id,
           picture_url: "https://example.com/image.jpg"
         )
-        |> Edgehog.Devices.load!(:part_number_strings)
+        |> Ash.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
@@ -73,7 +73,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
   defp non_existing_system_model_id(tenant) do
     fixture = system_model_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
-    :ok = Devices.destroy!(fixture)
+    :ok = Ash.destroy!(fixture)
 
     id
   end
