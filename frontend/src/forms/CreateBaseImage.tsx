@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -35,6 +35,15 @@ import {
   baseImageStartingVersionRequirementSchema,
   yup,
 } from "forms";
+import { graphql, useFragment } from "react-relay/hooks";
+import type { CreateBaseImage_BaseImageCollectionFragment$key } from "api/__generated__/CreateBaseImage_BaseImageCollectionFragment.graphql";
+
+const CREATE_BASE_IMAGE_FRAGMENT = graphql`
+  fragment CreateBaseImage_BaseImageCollectionFragment on BaseImageCollection {
+    id
+    name
+  }
+`;
 
 const FormRow = ({
   id,
@@ -128,25 +137,29 @@ type BaseImageCollection = {
 };
 
 type Props = {
-  baseImageCollection: BaseImageCollection;
+  baseImageCollectionRef: CreateBaseImage_BaseImageCollectionFragment$key;
   locale: string;
   isLoading?: boolean;
   onSubmit: (data: BaseImageData) => void;
 };
 
 const CreateBaseImageForm = ({
-  baseImageCollection,
+  baseImageCollectionRef,
   locale,
   isLoading = false,
   onSubmit,
 }: Props) => {
+  const baseImageCollectionData = useFragment(
+    CREATE_BASE_IMAGE_FRAGMENT,
+    baseImageCollectionRef,
+  );
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: transformInputData(baseImageCollection),
+    defaultValues: transformInputData(baseImageCollectionData),
     resolver: yupResolver(baseImageSchema),
   });
 
@@ -156,7 +169,9 @@ const CreateBaseImageForm = ({
         ...data,
         file: data.file,
       };
-      onSubmit(transformOutputData(baseImageCollection, locale, baseImageData));
+      onSubmit(
+        transformOutputData(baseImageCollectionData, locale, baseImageData),
+      );
     }
   };
 
