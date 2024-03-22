@@ -49,7 +49,7 @@ defmodule Edgehog.Astarte.Device.SystemStatus do
     # type Object Aggregrate.
     # For details, see https://github.com/astarte-platform/astarte/issues/630
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface, query: [limit: 1]) do
       case Map.fetch(data, "systemStatus") do
         {:ok, [status]} ->
           {:ok,
