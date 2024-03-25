@@ -141,6 +141,12 @@ defmodule Edgehog.Devices.Device do
       filterable? false
     end
 
+    calculate :device_status, :struct, Calculations.DeviceStatus do
+      constraints instance_of: Astarte.Device.DeviceStatus
+      private? true
+      filterable? false
+    end
+
     calculate :cellular_connection, {:array, Types.Modem} do
       calculation Calculations.CellularConnection
     end
