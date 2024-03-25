@@ -147,6 +147,12 @@ defmodule Edgehog.Devices.Device do
       filterable? false
     end
 
+    calculate :capabilities, {:array, Types.Capability} do
+      description "The capabilities that the device can support."
+      allow_nil? false
+      calculation Calculations.Capabilities
+    end
+
     calculate :cellular_connection, {:array, Types.Modem} do
       calculation Calculations.CellularConnection
     end

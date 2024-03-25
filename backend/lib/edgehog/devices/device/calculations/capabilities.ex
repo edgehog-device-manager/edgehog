@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,18 +18,24 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Resolvers.Capabilities do
-  alias Edgehog.Astarte
-  alias Edgehog.Capabilities
-  alias Edgehog.Devices
-  alias Edgehog.Devices.Device
+defmodule Edgehog.Devices.Device.Calculations.Capabilities do
+  use Ash.Calculation
 
-  def list_device_capabilities(%Device{device_id: device_id} = device, _args, _context) do
-    with {:ok, client} <- Devices.appengine_client_from_device(device),
-         {:ok, introspection} <- Astarte.fetch_device_introspection(client, device_id) do
-      {:ok, Capabilities.from_introspection(introspection)}
-    else
-      _ -> {:ok, []}
-    end
+  alias Edgehog.Capabilities
+
+  @impl true
+  def load(_query, _opts, _context) do
+    [:device_status]
+  end
+
+  @impl true
+  def calculate(devices, _opts, _context) do
+    Enum.map(devices, fn
+      %{device_status: %{introspection: introspection}} when is_map(introspection) ->
+        Capabilities.from_introspection(introspection)
+
+      _ ->
+        []
+    end)
   end
 end
