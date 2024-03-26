@@ -21,16 +21,23 @@
 defmodule Edgehog.MultitenantResource do
   alias Edgehog.Tenants.Tenant
 
+  @custom_opts [:tenant_id_in_primary_key?]
+
   defmacro __using__(opts) do
     quote do
       use Ash.Resource,
-          unquote(opts |> Keyword.put_new(:data_layer, AshPostgres.DataLayer))
+          unquote(
+            opts
+            |> Keyword.drop(@custom_opts)
+            |> Keyword.put_new(:data_layer, AshPostgres.DataLayer)
+          )
 
       relationships do
         belongs_to :tenant, Edgehog.Tenants.Tenant do
           allow_nil? false
           api Edgehog.Tenants
           destination_attribute :tenant_id
+          primary_key? unquote(Keyword.get(opts, :tenant_id_in_primary_key?, false))
         end
       end
 
