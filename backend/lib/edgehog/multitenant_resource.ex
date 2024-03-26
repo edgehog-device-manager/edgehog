@@ -28,6 +28,7 @@ defmodule Edgehog.MultitenantResource do
 
       relationships do
         belongs_to :tenant, Edgehog.Tenants.Tenant do
+          allow_nil? false
           api Edgehog.Tenants
           destination_attribute :tenant_id
         end
