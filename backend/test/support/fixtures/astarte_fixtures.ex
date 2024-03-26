@@ -275,4 +275,27 @@ defmodule Edgehog.AstarteFixtures do
       |> struct!(opts)
     ]
   end
+
+  @default_introspection Edgehog.Tenants.Reconciler.AstarteResources.load_interfaces()
+                         |> Map.new(fn
+                           %{
+                             "interface_name" => name,
+                             "version_major" => major,
+                             "version_minor" => minor
+                           } ->
+                             {name, %Edgehog.Astarte.InterfaceVersion{major: major, minor: minor}}
+                         end)
+
+  def device_status_fixture(opts \\ []) do
+    %Edgehog.Astarte.Device.DeviceStatus{
+      attributes: %{"attribute_key" => "attribute_value"},
+      groups: ["test-devices"],
+      introspection: @default_introspection,
+      last_connection: ~U[2021-11-15 10:44:57.432516Z],
+      last_disconnection: ~U[2021-11-15 10:45:57.432516Z],
+      last_seen_ip: "198.51.100.25",
+      online: false
+    }
+    |> struct!(opts)
+  end
 end

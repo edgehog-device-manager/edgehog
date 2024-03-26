@@ -349,6 +349,95 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
   end
 
+  describe "capabilities" do
+    setup %{tenant: tenant} do
+      fixture = device_fixture(tenant: tenant)
+      device_id = fixture.device_id
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      %{device: fixture, device_id: device_id, tenant: tenant, id: id}
+    end
+
+    test "are all returned with full introspection", ctx do
+      %{tenant: tenant, id: id, device_id: device_id} = ctx
+
+      all_interfaces_introspection =
+        Edgehog.Tenants.Reconciler.AstarteResources.load_interfaces()
+        |> Map.new(fn
+          %{
+            "interface_name" => name,
+            "version_major" => major,
+            "version_minor" => minor
+          } ->
+            {name, %Edgehog.Astarte.InterfaceVersion{major: major, minor: minor}}
+        end)
+
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, device_status_fixture(introspection: all_interfaces_introspection)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          capabilities
+        }
+      }
+      """
+
+      assert %{"capabilities" => capabilities} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      all_capabilities = [
+        "BASE_IMAGE",
+        "BATTERY_STATUS",
+        "CELLULAR_CONNECTION",
+        "COMMANDS",
+        "GEOLOCATION",
+        "HARDWARE_INFO",
+        "LED_BEHAVIORS",
+        "NETWORK_INTERFACE_INFO",
+        "OPERATING_SYSTEM",
+        "RUNTIME_INFO",
+        "SOFTWARE_UPDATES",
+        "STORAGE",
+        "SYSTEM_INFO",
+        "SYSTEM_STATUS",
+        "TELEMETRY_CONFIG",
+        "WIFI"
+      ]
+
+      assert length(capabilities) == length(all_capabilities)
+
+      for capability <- all_capabilities do
+        assert capability in capabilities
+      end
+    end
+
+    test "contain only geolocation for empty introspection", ctx do
+      %{tenant: tenant, id: id, device_id: device_id} = ctx
+
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok, device_status_fixture(introspection: %{})}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          capabilities
+        }
+      }
+      """
+
+      assert %{"capabilities" => ["GEOLOCATION"]} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+    end
+  end
+
   defp non_existing_device_id(tenant) do
     fixture = device_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)

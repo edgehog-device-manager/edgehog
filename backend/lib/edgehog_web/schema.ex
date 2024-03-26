@@ -23,7 +23,6 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
   import_types EdgehogWeb.Schema.BaseImagesTypes
-  import_types EdgehogWeb.Schema.CapabilitiesTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
   import_types EdgehogWeb.Schema.GroupsTypes
   import_types EdgehogWeb.Schema.LabelingTypes
