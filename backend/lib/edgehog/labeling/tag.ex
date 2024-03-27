@@ -19,21 +19,40 @@
 #
 
 defmodule Edgehog.Labeling.Tag do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Edgehog.MultitenantResource,
+    api: Edgehog.Labeling
 
-  schema "tags" do
-    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
-    field :name, :string
+  actions do
+    defaults [:read, :destroy]
 
-    timestamps()
+    create :create do
+      primary? true
+      upsert? true
+      upsert_identity :name_tenant_id
+    end
   end
 
-  @doc false
-  def changeset(tag, attrs) do
-    tag
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
-    |> unique_constraint([:name, :tenant_id])
+  attributes do
+    integer_primary_key :id
+
+    attribute :name, :string, allow_nil?: false
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  identities do
+    # These have to be named this way to match the existing unique indexes
+    # we already have. Ash uses identities to add a `unique_constraint` to the
+    # Ecto changeset, so names have to match. There's no need to explicitly add
+    # :tenant_id in the fields because identity in a multitenant resource are
+    # automatically scoped to a specific :tenant_id
+    # TODO: change index names when we generate migrations at the end of the porting
+    identity :name_tenant_id, [:name]
+  end
+
+  postgres do
+    table "tags"
+    repo Edgehog.Repo
   end
 end
