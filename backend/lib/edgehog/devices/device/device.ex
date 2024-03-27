@@ -57,6 +57,8 @@ defmodule Edgehog.Devices.Device do
 
     mutations do
       update :update_device, :update
+      update :add_device_tags, :add_tags
+      update :remove_device_tags, :remove_tags
     end
   end
 
@@ -77,6 +79,41 @@ defmodule Edgehog.Devices.Device do
       description "Updates a device."
 
       accept [:name]
+    end
+
+    update :add_tags do
+      description "Add tags to a device."
+      accept []
+
+      argument :tags, {:array, :string} do
+        allow_nil? false
+        constraints min_length: 1
+      end
+
+      change manage_relationship(:tags,
+               on_lookup: :relate,
+               on_no_match: :create,
+               value_is_key: :name,
+               use_identities: [:name_tenant_id]
+             )
+    end
+
+    update :remove_tags do
+      description "Remove tags from a device."
+      accept []
+
+      argument :tags, {:array, :string} do
+        allow_nil? false
+        constraints min_length: 1
+      end
+
+      change manage_relationship(:tags,
+               on_match: :unrelate,
+               on_no_match: :ignore,
+               on_missing: :ignore,
+               value_is_key: :name,
+               use_identities: [:name_tenant_id]
+             )
     end
   end
 
@@ -131,6 +168,12 @@ defmodule Edgehog.Devices.Device do
     has_one :system_model, Edgehog.Devices.SystemModel do
       description "The system model of the device"
       manual ManualRelationships.SystemModel
+    end
+
+    many_to_many :tags, Edgehog.Labeling.Tag do
+      description "The tags of the device"
+      api Edgehog.Labeling
+      through Edgehog.Labeling.DeviceTag
     end
   end
 
