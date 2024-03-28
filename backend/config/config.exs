@@ -91,6 +91,7 @@ config :edgehog, Edgehog.PromEx,
 config :edgehog, :ash_apis, [
   Edgehog.Astarte,
   Edgehog.Devices,
+  Edgehog.Labeling,
   Edgehog.Tenants
 ]
 

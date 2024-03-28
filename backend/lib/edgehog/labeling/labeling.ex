@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,16 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema.LabelingTypes do
-  use Absinthe.Schema.Notation
-  use Absinthe.Relay.Schema.Notation, :modern
+defmodule Edgehog.Labeling do
+  @moduledoc """
+  The Labeling context, containing all functionalities regarding tags and attributes assignment
+  """
 
-  alias EdgehogWeb.Resolvers
+  use Ash.Api, extensions: [AshGraphql.Api]
 
-  object :labeling_queries do
-    @desc "Fetches the list of all device tags."
-    field :existing_device_tags, non_null(list_of(non_null(:string))) do
-      resolve &Resolvers.Labeling.list_device_tags/2
-    end
+  graphql do
+    root_level_errors? true
+  end
+
+  resources do
+    resource Edgehog.Labeling.DeviceTag
+    resource Edgehog.Labeling.Tag
   end
 end
