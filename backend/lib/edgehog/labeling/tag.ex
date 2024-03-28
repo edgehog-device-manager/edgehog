@@ -22,6 +22,8 @@ defmodule Edgehog.Labeling.Tag do
   use Edgehog.MultitenantResource,
     api: Edgehog.Labeling
 
+  require Ash.Query
+
   actions do
     defaults [:read, :destroy]
 
@@ -29,6 +31,11 @@ defmodule Edgehog.Labeling.Tag do
       primary? true
       upsert? true
       upsert_identity :name_tenant_id
+    end
+
+    read :assigned_to_devices do
+      description "Returns only tags currently assigned to some device"
+      prepare build(filter: expr(exists(device_tags, true)))
     end
   end
 
@@ -39,6 +46,10 @@ defmodule Edgehog.Labeling.Tag do
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
+  end
+
+  relationships do
+    has_many :device_tags, Edgehog.Labeling.DeviceTag
   end
 
   identities do

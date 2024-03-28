@@ -55,6 +55,7 @@ defmodule Edgehog.Devices.Device do
     queries do
       get :device, :get
       list :devices, :list
+      action :existing_device_tags, :list_assigned_tag_names
     end
 
     mutations do
@@ -116,6 +117,18 @@ defmodule Edgehog.Devices.Device do
                value_is_key: :name,
                use_identities: [:name_tenant_id]
              )
+    end
+
+    action :list_assigned_tag_names, {:array, :string} do
+      # TODO: this should probably live in the Tag resource, but currently is blocked
+      # by https://github.com/ash-project/ash_graphql/issues/119
+      # Move it there once it's fixed
+      description "Fetches the list of all tags currently assigned to some device."
+
+      run fn _input, context ->
+        opts = Ash.context_to_opts(context, action: :assigned_to_devices)
+        Ash.list(Edgehog.Labeling.Tag, :name, opts)
+      end
     end
   end
 
