@@ -25,6 +25,8 @@ defmodule Edgehog.Labeling.Tag do
       AshGraphql.Resource
     ]
 
+  require Ash.Query
+
   resource do
     description """
     A Tag that can be applied to a resource.
@@ -35,6 +37,10 @@ defmodule Edgehog.Labeling.Tag do
     type :tag
 
     hide_fields [:tenant]
+
+    queries do
+      list :existing_device_tags, :assigned_to_devices
+    end
   end
 
   actions do
@@ -44,6 +50,11 @@ defmodule Edgehog.Labeling.Tag do
       primary? true
       upsert? true
       upsert_identity :name_tenant_id
+    end
+
+    read :assigned_to_devices do
+      description "Returns Tags currently assigned to some device."
+      prepare build(filter: expr(exists(device_tags, true)))
     end
   end
 
