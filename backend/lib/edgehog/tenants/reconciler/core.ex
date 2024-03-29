@@ -68,10 +68,10 @@ defmodule Edgehog.Tenants.Reconciler.Core do
 
     case Astarte.fetch_trigger(client, trigger_name) do
       {:ok, existing_trigger} ->
-        if existing_trigger != required_trigger do
-          update_trigger!(client, trigger_name, required_trigger)
-        else
+        if trigger_matches?(existing_trigger, required_trigger) do
           :ok
+        else
+          update_trigger!(client, trigger_name, required_trigger)
         end
 
       # This intentionally doesn't match on different errors since we want to crash
@@ -119,5 +119,22 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     :ok = Astarte.create_trigger(rm_client, trigger_json)
 
     :ok
+  end
+
+  defp trigger_matches?(required, existing) do
+    normalize_defaults(required) == normalize_defaults(existing)
+  end
+
+  defp normalize_defaults(trigger) do
+    trigger
+    |> drop_if_default(["action", "ignore_ssl_errors"], false)
+    |> drop_if_default(["action", "http_static_headers"], %{})
+  end
+
+  defp drop_if_default(trigger, path, default) do
+    case pop_in(trigger, path) do
+      {^default, no_default_trigger} -> no_default_trigger
+      {_not_default, _} -> trigger
+    end
   end
 end
