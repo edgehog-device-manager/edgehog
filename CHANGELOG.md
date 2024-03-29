@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.0] - Unreleased
 ### Changed
 - Configure cookie attribute based on protocol.
+- Normalize triggers when comparing them for reconciliation to avoid useless reconciliations.
 
 ## [0.8.0-rc.1] - 2024-03-22
 ### Fixed
