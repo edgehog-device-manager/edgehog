@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.8.0] - Unreleased
+## [0.8.0] - 2024-03-29
 ### Changed
 - Configure cookie attribute based on protocol.
 - Normalize triggers when comparing them for reconciliation to avoid useless reconciliations.
