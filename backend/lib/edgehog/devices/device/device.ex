@@ -87,8 +87,10 @@ defmodule Edgehog.Devices.Device do
 
       argument :tags, {:array, :string} do
         allow_nil? false
-        constraints min_length: 1
+        constraints min_length: 1, items: [min_length: 1]
       end
+
+      change {Edgehog.Changes.NormalizeTagName, argument: :tags}
 
       change manage_relationship(:tags,
                on_lookup: :relate,
@@ -104,8 +106,10 @@ defmodule Edgehog.Devices.Device do
 
       argument :tags, {:array, :string} do
         allow_nil? false
-        constraints min_length: 1
+        constraints min_length: 1, items: [min_length: 1]
       end
+
+      change {Edgehog.Changes.NormalizeTagName, argument: :tags}
 
       change manage_relationship(:tags,
                on_match: :unrelate,

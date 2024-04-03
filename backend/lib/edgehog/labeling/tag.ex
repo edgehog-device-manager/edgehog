@@ -50,6 +50,7 @@ defmodule Edgehog.Labeling.Tag do
       primary? true
       upsert? true
       upsert_identity :name_tenant_id
+      change {Edgehog.Changes.NormalizeTagName, attribute: :name}
     end
 
     read :assigned_to_devices do

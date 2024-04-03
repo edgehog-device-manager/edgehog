@@ -44,6 +44,18 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
       assert "bar" in tag_names
     end
 
+    test "normalizes and deduplicates tags", %{tenant: tenant, id: id} do
+      result =
+        add_device_tags_mutation(tenant: tenant, id: id, tags: ["FOO", "bAr", "  BaZ  ", "baz"])
+
+      assert %{"tags" => tags} = extract_result!(result)
+      assert length(tags) == 3
+      tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
+      assert "foo" in tag_names
+      assert "bar" in tag_names
+      assert "baz" in tag_names
+    end
+
     test "is idempotent and doesn't remove tags", %{tenant: tenant, device: device, id: id} do
       device
       |> Ash.Changeset.for_update(:add_tags, %{tags: ["foo", "bar"]})
@@ -63,6 +75,11 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
     test "fails with empty tags", %{tenant: tenant, id: id} do
       result = add_device_tags_mutation(tenant: tenant, id: id, tags: [])
       assert %{fields: [:tags], message: "must have 1 or more items"} = extract_error!(result)
+    end
+
+    test "fails with invalid tags after normalization", %{tenant: tenant, id: id} do
+      result = add_device_tags_mutation(tenant: tenant, id: id, tags: ["    "])
+      assert %{fields: [:tags], message: "no nil values"} = extract_error!(result)
     end
 
     test "fails with non-existing id", %{tenant: tenant} do

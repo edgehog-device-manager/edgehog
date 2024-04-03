@@ -43,6 +43,12 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
       assert %{"tags" => [%{"name" => "bar"}]} = extract_result!(result)
     end
 
+    test "normalizes tag names", %{tenant: tenant, id: id} do
+      result = remove_device_tags_mutation(tenant: tenant, id: id, tags: ["FOO", "   bar "])
+
+      assert %{"tags" => []} = extract_result!(result)
+    end
+
     test "is idempotent and works with non-existing tags", ctx do
       %{tenant: tenant, device: device, id: id} = ctx
 
@@ -59,6 +65,11 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
     test "fails with empty tags", %{tenant: tenant, id: id} do
       result = remove_device_tags_mutation(tenant: tenant, id: id, tags: [])
       assert %{fields: [:tags], message: "must have 1 or more items"} = extract_error!(result)
+    end
+
+    test "fails with invalid tag after normalization", %{tenant: tenant, id: id} do
+      result = remove_device_tags_mutation(tenant: tenant, id: id, tags: ["     "])
+      assert %{fields: [:tags], message: "no nil values"} = extract_error!(result)
     end
 
     test "fails with non-existing id", %{tenant: tenant} do
