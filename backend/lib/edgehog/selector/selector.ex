@@ -21,6 +21,7 @@
 defmodule Edgehog.Selector do
   alias Edgehog.Devices
   alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.Filter
   alias Edgehog.Selector.Parser
   alias Edgehog.Selector.Parser.Error
 
@@ -48,6 +49,18 @@ defmodule Edgehog.Selector do
 
       {:ok, query}
     end
+  end
+
+  @doc """
+  Translates a selector to an `%Ash.Expr{}` matching all devices matched by the selector.
+
+  It accepts the AST root (the Selector must be parsed separately).
+
+  Returns `%Ash.Expr{}`.
+  """
+  def to_ash_expr(%node{} = ast_root)
+      when node in [AttributeFilter, BinaryOp, TagFilter] do
+    Filter.to_ash_expr(ast_root)
   end
 
   @doc """

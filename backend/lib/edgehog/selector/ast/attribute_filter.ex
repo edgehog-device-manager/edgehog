@@ -222,4 +222,11 @@ defmodule Edgehog.Selector.AST.AttributeFilter do
         where: compare(cast_json_variant(a.typed_value, unquote(type)), unquote(operator), ^value)
     end
   end
+
+  defimpl Edgehog.Selector.Filter do
+    # TODO: see https://github.com/edgehog-device-manager/edgehog/issues/486
+    def to_ash_expr(_attribute_filter) do
+      raise "TODO"
+    end
+  end
 end
