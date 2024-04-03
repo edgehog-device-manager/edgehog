@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,22 +19,50 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
+
+  @moduletag :ported_to_ash
 
   import Edgehog.GroupsFixtures
 
-  alias Edgehog.Groups
   alias Edgehog.Groups.DeviceGroup
 
-  describe "deleteDeviceGroup field" do
-    setup do
-      {:ok, device_group: device_group_fixture()}
+  describe "deleteDeviceGroup query" do
+    setup %{tenant: tenant} do
+      device_group =
+        device_group_fixture(tenant: tenant)
+
+      id = AshGraphql.Resource.encode_relay_id(device_group)
+
+      %{device_group: device_group, id: id}
     end
 
-    @query """
-    mutation DeleteDeviceGroup($input: DeleteDeviceGroupInput!) {
-      deleteDeviceGroup(input: $input) {
-        deviceGroup {
+    test "deletes a device group", %{tenant: tenant, id: id, device_group: fixture} do
+      device_group =
+        delete_device_group_mutation(tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert device_group["handle"] == fixture.handle
+
+      refute DeviceGroup
+             |> Ash.Query.for_read(:get, %{id: fixture.id}, tenant: tenant)
+             |> Ash.exists?()
+    end
+
+    test "fails with non-existing id", %{tenant: tenant} do
+      id = non_existing_device_group_id(tenant)
+
+      result = delete_device_group_mutation(tenant: tenant, id: id)
+
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+  end
+
+  defp delete_device_group_mutation(opts) do
+    default_document = """
+    mutation DeleteDeviceGroup($id: ID!) {
+      deleteDeviceGroup(id: $id) {
+        result {
           id
           name
           handle
@@ -43,51 +71,48 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
       }
     }
     """
-    test "deletes device group", %{
-      conn: conn,
-      api_path: api_path,
-      device_group: device_group
-    } do
-      %DeviceGroup{name: name, handle: handle, selector: selector} = device_group
-      id = Absinthe.Relay.Node.to_global_id(:device_group, device_group.id, EdgehogWeb.Schema)
 
-      variables = %{
-        input: %{
-          device_group_id: id
-        }
-      }
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
+    variables = %{"id" => id}
+    context = %{tenant: tenant}
 
-      assert %{
-               "data" => %{
-                 "deleteDeviceGroup" => %{
-                   "deviceGroup" => %{
-                     "id" => ^id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "selector" => ^selector
-                   }
-                 }
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"deleteDeviceGroup" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "deleteDeviceGroup" => %{
+                 "result" => device_group
                }
-             } = assert(json_response(conn, 200))
+             }
+           } = result
 
-      assert {:error, :not_found} = Groups.fetch_device_group(device_group.id)
-    end
+    assert device_group != nil
 
-    test "fails with non existing id", %{conn: conn, api_path: api_path} do
-      id = Absinthe.Relay.Node.to_global_id(:device_group, 1_234_539, EdgehogWeb.Schema)
+    device_group
+  end
 
-      variables = %{
-        input: %{
-          device_group_id: id
-        }
-      }
+  defp non_existing_device_group_id(tenant) do
+    fixture = device_group_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
 
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
-               assert(json_response(conn, 200))
-    end
+    id
   end
 end
