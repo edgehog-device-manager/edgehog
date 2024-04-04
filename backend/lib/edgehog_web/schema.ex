@@ -25,7 +25,6 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.BaseImagesTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
   import_types EdgehogWeb.Schema.GroupsTypes
-  import_types EdgehogWeb.Schema.LabelingTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.OSManagementTypes
   import_types EdgehogWeb.Schema.UpdateCampaignsTypes
@@ -33,7 +32,7 @@ defmodule EdgehogWeb.Schema do
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
-  @apis [Edgehog.Devices, Edgehog.Tenants]
+  @apis [Edgehog.Devices, Edgehog.Labeling, Edgehog.Tenants]
 
   # TODO: remove define_relay_types?: false once we convert everything to Ash
   use AshGraphql,
@@ -112,7 +111,6 @@ defmodule EdgehogWeb.Schema do
 
     import_fields :base_images_queries
     import_fields :groups_queries
-    import_fields :labeling_queries
     import_fields :update_campaigns_queries
   end
 

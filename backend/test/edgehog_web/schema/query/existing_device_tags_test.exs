@@ -19,66 +19,80 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Devices
 
-  describe "existingDeviceTags field" do
-    @query """
-    {
-      existingDeviceTags
+  @moduletag :ported_to_ash
+
+  describe "existingDeviceTags query" do
+    test "returns empty tags", %{tenant: tenant} do
+      assert [] == existing_device_tags_query(tenant: tenant) |> extract_result!()
+    end
+
+    test "returns tags if they're present", %{tenant: tenant} do
+      device_fixture(tenant: tenant)
+      |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "bar"])
+      |> Ash.update!()
+
+      assert tags = existing_device_tags_query(tenant: tenant) |> extract_result!()
+      assert length(tags) == 2
+      tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
+      assert "foo" in tag_names
+      assert "bar" in tag_names
+    end
+
+    test "returns only tags currently assigned to some device", %{tenant: tenant} do
+      device_fixture(tenant: tenant)
+      |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "bar"])
+      |> Ash.update!()
+      |> Ash.Changeset.for_update(:remove_tags, tags: ["foo"])
+      |> Ash.update!()
+
+      assert [%{"name" => "bar"}] ==
+               existing_device_tags_query(tenant: tenant) |> extract_result!()
+    end
+
+    test "does not return duplicates if a tag is assigned multiple times", %{tenant: tenant} do
+      device_fixture(tenant: tenant)
+      |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "bar"])
+      |> Ash.update!()
+
+      device_fixture(tenant: tenant)
+      |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "baz"])
+      |> Ash.update!()
+
+      assert tags = existing_device_tags_query(tenant: tenant) |> extract_result!()
+      assert length(tags) == 3
+      tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
+      assert "foo" in tag_names
+      assert "bar" in tag_names
+      assert "baz" in tag_names
+    end
+  end
+
+  defp existing_device_tags_query(opts) do
+    document = """
+    query {
+      existingDeviceTags {
+        name
+      }
     }
     """
 
-    test "returns empty tags", %{conn: conn, api_path: api_path} do
-      conn = get(conn, api_path, query: @query)
+    tenant = Keyword.fetch!(opts, :tenant)
 
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "existingDeviceTags" => []
-               }
-             }
-    end
+    Absinthe.run!(document, EdgehogWeb.Schema, context: %{tenant: tenant})
+  end
 
-    test "returns tags if they're present", %{conn: conn, api_path: api_path} do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    assert %{data: %{"existingDeviceTags" => tags}} = result
+    assert tags != nil
 
-      tags = ["foo", "bar"]
-
-      {:ok, _device} =
-        device_fixture(realm)
-        |> Devices.update_device(%{tags: tags})
-
-      conn = get(conn, api_path, query: @query)
-
-      assert %{
-               "data" => %{
-                 "existingDeviceTags" => tags
-               }
-             } == json_response(conn, 200)
-    end
-
-    test "return tags only if there're assigned to devices", %{conn: conn, api_path: api_path} do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-
-      {:ok, device} =
-        device_fixture(realm)
-        |> Devices.update_device(%{tags: ["foo", "bar"]})
-
-      Devices.update_device(device, %{tags: ["bar"]})
-
-      conn = get(conn, api_path, query: @query)
-
-      assert %{
-               "data" => %{
-                 "existingDeviceTags" => ["bar"]
-               }
-             } == json_response(conn, 200)
-    end
+    tags
   end
 end
