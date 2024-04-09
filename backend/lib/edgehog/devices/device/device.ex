@@ -179,6 +179,13 @@ defmodule Edgehog.Devices.Device do
       api Edgehog.Labeling
       through Edgehog.Labeling.DeviceTag
     end
+
+    has_many :device_groups, Edgehog.Groups.DeviceGroup do
+      description "The groups the device belongs to."
+      writable? false
+      api Edgehog.Groups
+      manual ManualRelationships.DeviceGroups
+    end
   end
 
   calculations do

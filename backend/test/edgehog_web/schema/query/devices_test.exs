@@ -513,6 +513,88 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     end
   end
 
+  describe "device groups field" do
+    import Edgehog.GroupsFixtures
+
+    setup %{tenant: tenant} do
+      fixture_1 = device_fixture(tenant: tenant)
+      device_id_1 = fixture_1.device_id
+      fixture_2 = device_fixture(tenant: tenant)
+      device_id_2 = fixture_2.device_id
+
+      document = """
+      query {
+        devices {
+          deviceId
+          deviceGroups {
+            name
+          }
+        }
+      }
+      """
+
+      %{
+        device_1: fixture_1,
+        device_id_1: device_id_1,
+        device_2: fixture_2,
+        device_id_2: device_id_2,
+        tenant: tenant,
+        document: document
+      }
+    end
+
+    test "is empty with no groups", ctx do
+      %{tenant: tenant, document: document} = ctx
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      Enum.each(devices, &assert(&1["deviceGroups"] == []))
+    end
+
+    test "returns matching groups", ctx do
+      %{
+        tenant: tenant,
+        device_1: device_1,
+        device_id_1: device_id_1,
+        device_2: device_2,
+        device_id_2: device_id_2,
+        document: document
+      } = ctx
+
+      _device_1_with_tags =
+        device_1
+        |> add_tags(["foo", "bar"])
+
+      _device_2_with_tags =
+        device_2
+        |> add_tags(["bar", "baz"])
+
+      _ = device_group_fixture(tenant: tenant, name: "foos", selector: ~s<"foo" in tags>)
+      _ = device_group_fixture(tenant: tenant, name: "bars", selector: ~s<"bar" in tags>)
+      _ = device_group_fixture(tenant: tenant, name: "bazs", selector: ~s<"baz" in tags>)
+
+      devices =
+        devices_query(document: document, tenant: tenant)
+        |> extract_result!()
+
+      device_1_groups =
+        Enum.find_value(devices, &(&1["deviceId"] == device_id_1 && &1["deviceGroups"]))
+
+      assert length(device_1_groups) == 2
+      assert %{"name" => "foos"} in device_1_groups
+      assert %{"name" => "bars"} in device_1_groups
+
+      device_2_groups =
+        Enum.find_value(devices, &(&1["deviceId"] == device_id_2 && &1["deviceGroups"]))
+
+      assert length(device_2_groups) == 2
+      assert %{"name" => "bars"} in device_2_groups
+      assert %{"name" => "bazs"} in device_2_groups
+    end
+  end
+
   defp devices_query(opts) do
     default_document =
       """
