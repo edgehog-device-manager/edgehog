@@ -19,11 +19,11 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.AppEngineClient do
-  use Ash.Calculation
+  use Ash.Resource.Calculation
 
   @impl true
   def load(_query, _opts, _context) do
-    [realm: [:cluster]]
+    [realm: [:name, :private_key, cluster: [:base_api_url]]]
   end
 
   @impl true

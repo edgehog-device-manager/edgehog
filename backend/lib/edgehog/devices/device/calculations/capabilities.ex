@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.Capabilities do
-  use Ash.Calculation
+  use Ash.Resource.Calculation
 
   alias Edgehog.Capabilities
 

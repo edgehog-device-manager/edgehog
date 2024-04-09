@@ -24,7 +24,7 @@ defmodule Edgehog.Groups.DeviceGroup.Validations.Selector do
   alias Edgehog.Selector
 
   @impl true
-  def validate(changeset, _opts) do
+  def validate(changeset, _opts, _context) do
     case Ash.Changeset.fetch_change(changeset, :selector) do
       {:ok, selector} when is_binary(selector) ->
         case Selector.parse(selector) do

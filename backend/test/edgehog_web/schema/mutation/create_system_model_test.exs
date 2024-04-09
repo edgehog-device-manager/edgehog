@@ -200,8 +200,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
 
       assert %SystemModel{part_number_strings: ["bar"]} =
                SystemModel
-               |> Devices.get!(fixture.id, tenant: tenant)
-               |> Devices.load!(:part_number_strings)
+               |> Ash.get!(fixture.id, tenant: tenant)
+               |> Ash.load!(:part_number_strings)
     end
   end
 

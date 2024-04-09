@@ -23,7 +23,7 @@ defmodule Edgehog.Groups do
   The Groups context.
   """
 
-  use Ash.Api, extensions: [AshGraphql.Api]
+  use Ash.Domain, extensions: [AshGraphql.Domain]
 
   graphql do
     root_level_errors? true

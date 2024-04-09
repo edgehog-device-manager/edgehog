@@ -43,12 +43,16 @@ defmodule Edgehog.TenantsFixtures do
       |> X509.PublicKey.derive()
       |> X509.PublicKey.to_pem()
 
-    opts
-    |> Enum.into(%{
-      name: unique_tenant_name(),
-      slug: unique_tenant_slug(),
-      public_key: public_key
-    })
-    |> Edgehog.Tenants.Tenant.create!()
+    params =
+      opts
+      |> Enum.into(%{
+        name: unique_tenant_name(),
+        slug: unique_tenant_slug(),
+        public_key: public_key
+      })
+
+    Edgehog.Tenants.Tenant
+    |> Ash.Changeset.for_create(:create, params)
+    |> Ash.create!()
   end
 end

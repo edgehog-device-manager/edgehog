@@ -133,7 +133,11 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
       required_data = ["name", "slug", "public_key", "astarte_config"]
 
       for required <- required_data do
-        assert Enum.find(errors, &(&1["detail"] =~ "#{required} is required"))
+        assert Enum.find(
+                 errors,
+                 &(&1["detail"] == "is required" and
+                     &1["source"] == %{"pointer" => "/data/attributes/#{required}"})
+               )
       end
     end
 
@@ -158,7 +162,11 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
       required_data = ["base_api_url", "realm_name", "realm_private_key"]
 
       for required <- required_data do
-        assert Enum.find(errors, &(&1["detail"] =~ "#{required} is required"))
+        assert Enum.find(
+                 errors,
+                 &(&1["detail"] == "is required" and
+                     &1["source"] == %{"pointer" => "/data/attributes/astarte_config/#{required}"})
+               )
       end
     end
   end

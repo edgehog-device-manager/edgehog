@@ -32,7 +32,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
     setup %{tenant: tenant} do
       system_model =
         system_model_fixture(tenant: tenant)
-        |> Devices.load!(:part_number_strings)
+        |> Ash.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(system_model)
 
@@ -318,8 +318,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
       assert %SystemModel{part_number_strings: ["bar"]} =
                SystemModel
-               |> Devices.get!(fixture.id, tenant: tenant)
-               |> Devices.load!(:part_number_strings)
+               |> Ash.get!(fixture.id, tenant: tenant)
+               |> Ash.load!(:part_number_strings)
     end
 
     test "deletes unused SystemModelPartNumber", %{
@@ -340,7 +340,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
       assert nil ==
                Edgehog.Devices.SystemModelPartNumber
-               |> Devices.get!(old_system_model_part_number_id, tenant: tenant, error?: false)
+               |> Ash.get!(old_system_model_part_number_id, tenant: tenant, error?: false)
     end
   end
 

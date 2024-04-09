@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
 
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
+  require Ash.Query
 
   import Edgehog.DevicesFixtures
 
@@ -46,8 +47,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
       assert system_model["handle"] == fixture.handle
 
       refute SystemModel
-             |> Ash.Query.for_read(:get, %{id: fixture.id}, tenant: tenant)
-             |> Devices.exists?()
+             |> Ash.Query.filter(id == ^fixture.id)
+             |> Ash.Query.set_tenant(tenant)
+             |> Ash.exists?()
     end
 
     test "tries to delete the picture if there's one, but ignores failure", %{tenant: tenant} do

@@ -19,6 +19,6 @@
 #
 
 defmodule EdgehogWeb.AdminAPI.Router do
-  use AshJsonApi.Api.Router,
-    apis: [Edgehog.Tenants]
+  use AshJsonApi.Router,
+    domains: [Edgehog.Tenants]
 end

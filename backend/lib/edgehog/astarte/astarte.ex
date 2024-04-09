@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Astarte do
-  use Ash.Api
+  use Ash.Domain
 
   resources do
     resource Edgehog.Astarte.Cluster

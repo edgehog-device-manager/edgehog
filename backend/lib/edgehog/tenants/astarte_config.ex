@@ -20,15 +20,32 @@
 
 defmodule Edgehog.Tenants.AstarteConfig do
   use Ash.Resource,
+    domain: Edgehog.Tenants,
     data_layer: :embedded
 
   actions do
-    defaults [:create, :read]
+    defaults [:read]
+
+    create :create do
+      primary? true
+      accept [:base_api_url, :realm_name, :realm_private_key]
+    end
   end
 
   attributes do
-    attribute :base_api_url, :string, allow_nil?: false
-    attribute :realm_name, :string, allow_nil?: false
-    attribute :realm_private_key, :string, allow_nil?: false
+    attribute :base_api_url, :string do
+      public? true
+      allow_nil? false
+    end
+
+    attribute :realm_name, :string do
+      public? true
+      allow_nil? false
+    end
+
+    attribute :realm_private_key, :string do
+      public? true
+      allow_nil? false
+    end
   end
 end

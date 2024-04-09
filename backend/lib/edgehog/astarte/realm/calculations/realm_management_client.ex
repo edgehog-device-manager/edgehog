@@ -19,11 +19,11 @@
 #
 
 defmodule Edgehog.Astarte.Realm.Calculations.RealmManagementClient do
-  use Ash.Calculation
+  use Ash.Resource.Calculation
 
   @impl true
   def load(_query, _opts, _context) do
-    [:cluster]
+    [cluster: [:base_api_url]]
   end
 
   @impl true

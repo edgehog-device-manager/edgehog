@@ -21,7 +21,7 @@
 defmodule Edgehog.Selector.AST.BinaryOp do
   defstruct [:operator, :lhs, :rhs]
 
-  require Ash.Query
+  import Ash.Expr
 
   defimpl Edgehog.Selector.Filter do
     def to_ash_expr(binary_op) do
@@ -29,8 +29,8 @@ defmodule Edgehog.Selector.AST.BinaryOp do
       rhs = Edgehog.Selector.Filter.to_ash_expr(binary_op.rhs)
 
       case binary_op.operator do
-        :and -> Ash.Query.expr(^lhs and ^rhs)
-        :or -> Ash.Query.expr(^lhs or ^rhs)
+        :and -> expr(^lhs and ^rhs)
+        :or -> expr(^lhs or ^rhs)
       end
     end
   end
