@@ -438,6 +438,68 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
   end
 
+  describe "device groups field" do
+    import Edgehog.GroupsFixtures
+
+    setup %{tenant: tenant} do
+      fixture = device_fixture(tenant: tenant)
+
+      device_id = fixture.device_id
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          deviceGroups {
+            name
+          }
+        }
+      }
+      """
+
+      %{device: fixture, device_id: device_id, tenant: tenant, id: id, document: document}
+    end
+
+    test "is empty with no groups", ctx do
+      %{tenant: tenant, id: id, device_id: device_id, document: document} = ctx
+
+      assert %{"deviceGroups" => []} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+    end
+
+    test "returns matching group", ctx do
+      %{tenant: tenant, id: id, device_id: device_id, device: device, document: document} = ctx
+
+      _device_with_tag =
+        device
+        |> add_tags(["foo"])
+
+      _matching_group =
+        device_group_fixture(tenant: tenant, name: "foos", selector: ~s<"foo" in tags>)
+
+      assert %{"deviceGroups" => [%{"name" => "foos"}]} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+    end
+
+    test "doesn't return non matching group", ctx do
+      %{tenant: tenant, id: id, device_id: device_id, device: device, document: document} = ctx
+
+      _device_with_tag =
+        device
+        |> add_tags(["foo"])
+
+      _non_matching_group =
+        device_group_fixture(tenant: tenant, name: "foos", selector: ~s<"bar" in tags>)
+
+      assert %{"deviceGroups" => []} =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+    end
+  end
+
   defp non_existing_device_id(tenant) do
     fixture = device_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)

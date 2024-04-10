@@ -42,16 +42,18 @@ defmodule Edgehog.GroupsFixtures do
   @doc """
   Generate a device_group.
   """
-  def device_group_fixture(attrs \\ %{}) do
-    {:ok, device_group} =
-      attrs
-      |> Enum.into(%{
+  def device_group_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
         handle: unique_device_group_handle(),
         name: unique_device_group_name(),
         selector: unique_device_group_selector()
       })
-      |> Edgehog.Groups.create_device_group()
 
-    device_group
+    Edgehog.Groups.DeviceGroup
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 end

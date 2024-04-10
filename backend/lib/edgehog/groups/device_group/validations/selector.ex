@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Selector.AST.BinaryOp do
-  defstruct [:operator, :lhs, :rhs]
+defmodule Edgehog.Groups.DeviceGroup.Validations.Selector do
+  use Ash.Resource.Validation
 
-  require Ash.Query
+  alias Edgehog.Selector
 
-  defimpl Edgehog.Selector.Filter do
-    def to_ash_expr(binary_op) do
-      lhs = Edgehog.Selector.Filter.to_ash_expr(binary_op.lhs)
-      rhs = Edgehog.Selector.Filter.to_ash_expr(binary_op.rhs)
+  @impl true
+  def validate(changeset, _opts) do
+    case Ash.Changeset.fetch_change(changeset, :selector) do
+      {:ok, selector} when is_binary(selector) ->
+        case Selector.parse(selector) do
+          {:ok, _ash_expr} ->
+            :ok
 
-      case binary_op.operator do
-        :and -> Ash.Query.expr(^lhs and ^rhs)
-        :or -> Ash.Query.expr(^lhs or ^rhs)
-      end
+          {:error, %Selector.Parser.Error{message: message}} ->
+            {:error, field: :selector, message: "failed to be parsed with error: " <> message}
+        end
+
+      _ ->
+        :ok
     end
   end
 end

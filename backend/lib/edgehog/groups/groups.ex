@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Selector.AST.BinaryOp do
-  defstruct [:operator, :lhs, :rhs]
+defmodule Edgehog.Groups do
+  @moduledoc """
+  The Groups context.
+  """
 
-  require Ash.Query
+  use Ash.Api, extensions: [AshGraphql.Api]
 
-  defimpl Edgehog.Selector.Filter do
-    def to_ash_expr(binary_op) do
-      lhs = Edgehog.Selector.Filter.to_ash_expr(binary_op.lhs)
-      rhs = Edgehog.Selector.Filter.to_ash_expr(binary_op.rhs)
+  graphql do
+    root_level_errors? true
+  end
 
-      case binary_op.operator do
-        :and -> Ash.Query.expr(^lhs and ^rhs)
-        :or -> Ash.Query.expr(^lhs or ^rhs)
-      end
-    end
+  resources do
+    resource Edgehog.Groups.DeviceGroup
   end
 end

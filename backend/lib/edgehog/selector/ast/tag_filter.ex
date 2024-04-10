@@ -29,6 +29,7 @@ defmodule Edgehog.Selector.AST.TagFilter do
   import Ecto.Query
   alias Edgehog.Labeling
   alias Edgehog.Selector.AST.TagFilter
+  require Ash.Query
 
   @doc """
   Converts a `%TagFilter{}` to a dynamic where clause filtering `Astarte.Device`s that match the
@@ -50,5 +51,16 @@ defmodule Edgehog.Selector.AST.TagFilter do
       end
 
     {:ok, dynamic}
+  end
+
+  defimpl Edgehog.Selector.Filter do
+    def to_ash_expr(tag_filter) do
+      tag_name = tag_filter.tag
+
+      case tag_filter.operator do
+        :in -> Ash.Query.expr(exists(tags, name == ^tag_name))
+        :not_in -> Ash.Query.expr(not exists(tags, name == ^tag_name))
+      end
+    end
   end
 end

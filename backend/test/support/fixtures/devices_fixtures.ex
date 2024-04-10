@@ -145,8 +145,9 @@ defmodule Edgehog.DevicesFixtures do
   Adds tags to a %Devices.Device{}
   """
   def add_tags(device, tags) do
-    {:ok, device} = Devices.update_device(device, %{tags: tags})
     device
+    |> Ash.Changeset.for_update(:add_tags, %{tags: tags})
+    |> Ash.update!()
   end
 
   # Needed to avoid legacy tests compilation errors
