@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,20 @@ defmodule Edgehog.BaseImages do
   The BaseImages context.
   """
 
+  use Ash.Domain,
+    extensions: [
+      AshGraphql.Domain
+    ]
+
+  graphql do
+    root_level_errors? true
+  end
+
+  resources do
+    resource Edgehog.BaseImages.BaseImageCollection
+  end
+
+  # TODO: legacy context, delete implementations below as we move them to Ash
   import Ecto.Query, warn: false
   alias Edgehog.Repo
 

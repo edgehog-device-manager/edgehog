@@ -21,6 +21,14 @@
 defmodule Edgehog.Validations do
   alias Ash.Resource.Validation
 
+  def handle(attribute) do
+    {Validation.Match,
+     attribute: attribute,
+     match: ~r/^[a-z][a-z\d\-]*$/,
+     message:
+       "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"}
+  end
+
   def locale(attribute) do
     {Validation.Match,
      attribute: attribute, match: ~r/^[a-z]{2,3}-[A-Z]{2}$/, message: "is not a valid locale"}
