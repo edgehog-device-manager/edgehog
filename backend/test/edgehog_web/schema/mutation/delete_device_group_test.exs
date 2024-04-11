@@ -26,6 +26,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
   import Edgehog.GroupsFixtures
 
   alias Edgehog.Groups.DeviceGroup
+  require Ash.Query
 
   describe "deleteDeviceGroup query" do
     setup %{tenant: tenant} do
@@ -45,7 +46,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
       assert device_group["handle"] == fixture.handle
 
       refute DeviceGroup
-             |> Ash.Query.for_read(:get, %{id: fixture.id}, tenant: tenant)
+             |> Ash.Query.filter(id == ^fixture.id)
+             |> Ash.Query.set_tenant(tenant)
              |> Ash.exists?()
     end
 

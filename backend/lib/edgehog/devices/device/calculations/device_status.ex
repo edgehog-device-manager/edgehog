@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.DeviceStatus do
-  use Ash.Calculation
+  use Ash.Resource.Calculation
 
   @device_status Application.compile_env(
                    :edgehog,

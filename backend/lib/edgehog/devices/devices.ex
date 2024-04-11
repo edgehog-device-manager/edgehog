@@ -23,9 +23,9 @@ defmodule Edgehog.Devices do
   The Devices context.
   """
 
-  use Ash.Api,
+  use Ash.Domain,
     extensions: [
-      AshGraphql.Api
+      AshGraphql.Domain
     ]
 
   graphql do

@@ -39,5 +39,5 @@ defmodule Edgehog.Devices.Device.Types.Capability do
       wifi: "The device provides information about surrounding WiFi APs."
     ]
 
-  def graphql_type, do: :device_capability
+  def graphql_type(_), do: :device_capability
 end

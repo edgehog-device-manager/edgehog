@@ -19,7 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.CellularConnection do
-  use Ash.Calculation
+  use Ash.Resource.Calculation
 
   alias Edgehog.Devices.Device.Types.Modem
 

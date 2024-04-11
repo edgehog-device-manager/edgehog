@@ -27,7 +27,7 @@ defmodule Edgehog.Devices.SystemModel.Validations.EitherPictureUrlOrPictureFile 
   end
 
   @impl true
-  def validate(changeset, _opts) do
+  def validate(changeset, _opts, _context) do
     with {:ok, url} when is_binary(url) <-
            Ash.Changeset.fetch_argument_or_change(changeset, :picture_url),
          {:ok, %Plug.Upload{} = _upload} <-

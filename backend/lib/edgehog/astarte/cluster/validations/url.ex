@@ -31,7 +31,7 @@ defmodule Edgehog.Astarte.Cluster.Validations.URL do
   end
 
   @impl true
-  def validate(changeset, opts) do
+  def validate(changeset, opts, _context) do
     case Ash.Changeset.fetch_argument_or_change(changeset, opts[:attribute]) do
       {:ok, url} when is_binary(url) ->
         %URI{scheme: scheme, host: maybe_host} = URI.parse(url)

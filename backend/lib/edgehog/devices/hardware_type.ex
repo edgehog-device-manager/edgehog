@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Devices.HardwareType do
   use Edgehog.MultitenantResource,
-    api: Edgehog.Devices,
+    domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
     ]
@@ -40,8 +40,6 @@ defmodule Edgehog.Devices.HardwareType do
 
   graphql do
     type :hardware_type
-
-    hide_fields [:tenant, :part_number_strings]
 
     queries do
       get :hardware_type, :get
@@ -70,6 +68,8 @@ defmodule Edgehog.Devices.HardwareType do
       description "Creates a hardware type."
       primary? true
 
+      accept [:handle, :name]
+
       argument :part_numbers, {:array, :string} do
         allow_nil? false
         constraints min_length: 1
@@ -87,6 +87,9 @@ defmodule Edgehog.Devices.HardwareType do
     update :update do
       description "Updates a hardware type."
       primary? true
+      require_atomic? false
+
+      accept [:handle, :name]
 
       argument :part_numbers, {:array, :string} do
         description "The list of part numbers associated with the hardware type."
@@ -112,6 +115,8 @@ defmodule Edgehog.Devices.HardwareType do
     integer_primary_key :id
 
     attribute :handle, :string do
+      public? true
+
       description """
       The identifier of the hardware type.
 
@@ -123,6 +128,7 @@ defmodule Edgehog.Devices.HardwareType do
     end
 
     attribute :name, :string do
+      public? true
       description "The display name of the hardware type."
       allow_nil? false
     end
@@ -133,6 +139,7 @@ defmodule Edgehog.Devices.HardwareType do
 
   relationships do
     has_many :part_numbers, Edgehog.Devices.HardwareTypePartNumber do
+      public? true
       description "The list of part numbers associated with the hardware type."
     end
 

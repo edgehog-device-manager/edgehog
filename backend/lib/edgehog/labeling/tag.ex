@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Labeling.Tag do
   use Edgehog.MultitenantResource,
-    api: Edgehog.Labeling,
+    domain: Edgehog.Labeling,
     extensions: [
       AshGraphql.Resource
     ]
@@ -36,8 +36,6 @@ defmodule Edgehog.Labeling.Tag do
   graphql do
     type :tag
 
-    hide_fields [:tenant]
-
     queries do
       list :existing_device_tags, :assigned_to_devices
     end
@@ -50,6 +48,7 @@ defmodule Edgehog.Labeling.Tag do
       primary? true
       upsert? true
       upsert_identity :name_tenant_id
+      accept [:name]
       change {Edgehog.Changes.NormalizeTagName, attribute: :name}
     end
 
@@ -62,14 +61,17 @@ defmodule Edgehog.Labeling.Tag do
   attributes do
     integer_primary_key :id
 
-    attribute :name, :string, allow_nil?: false
+    attribute :name, :string do
+      public? true
+      allow_nil? false
+    end
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
   end
 
   relationships do
-    has_many :device_tags, Edgehog.Labeling.DeviceTag, private?: true
+    has_many :device_tags, Edgehog.Labeling.DeviceTag
   end
 
   identities do

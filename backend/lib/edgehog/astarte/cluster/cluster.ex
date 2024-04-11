@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Astarte.Cluster do
   use Ash.Resource,
-    api: Edgehog.Astarte,
+    domain: Edgehog.Astarte,
     data_layer: AshPostgres.DataLayer
 
   alias Edgehog.Astarte.Cluster
@@ -34,6 +34,7 @@ defmodule Edgehog.Astarte.Cluster do
 
     create :create do
       primary? true
+      accept [:base_api_url, :name]
       upsert? true
       upsert_identity :url
       upsert_fields [:updated_at]
@@ -45,8 +46,14 @@ defmodule Edgehog.Astarte.Cluster do
   attributes do
     integer_primary_key :id
 
-    attribute :base_api_url, :string, allow_nil?: false
-    attribute :name, :string
+    attribute :base_api_url, :string do
+      public? true
+      allow_nil? false
+    end
+
+    attribute :name, :string do
+      public? true
+    end
 
     create_timestamp :inserted_at
     update_timestamp :updated_at

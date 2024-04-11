@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Devices.SystemModel do
   use Edgehog.MultitenantResource,
-    api: Edgehog.Devices,
+    domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
     ]
@@ -39,8 +39,6 @@ defmodule Edgehog.Devices.SystemModel do
 
   graphql do
     type :system_model
-
-    hide_fields [:tenant, :part_number_strings]
 
     queries do
       get :system_model, :get
@@ -71,6 +69,8 @@ defmodule Edgehog.Devices.SystemModel do
     create :create do
       description "Creates a system model."
       primary? true
+
+      accept [:handle, :name, :picture_url]
 
       argument :hardware_type_id, :id do
         description "The ID of the hardware type that can be used by devices of this model"
@@ -104,6 +104,9 @@ defmodule Edgehog.Devices.SystemModel do
     update :update do
       description "Updates an system model."
       primary? true
+      require_atomic? false
+
+      accept [:handle, :name, :picture_url]
 
       argument :part_numbers, {:array, :string} do
         description "The list of part numbers associated with the system model."
@@ -131,6 +134,7 @@ defmodule Edgehog.Devices.SystemModel do
     destroy :destroy do
       description "Deletes a system model."
       primary? true
+      require_atomic? false
 
       change {Changes.HandlePictureDeletion, force?: true}
     end
@@ -140,6 +144,8 @@ defmodule Edgehog.Devices.SystemModel do
     integer_primary_key :id
 
     attribute :handle, :string do
+      public? true
+
       description """
       The identifier of the system model.
 
@@ -151,11 +157,13 @@ defmodule Edgehog.Devices.SystemModel do
     end
 
     attribute :name, :string do
+      public? true
       description "The display name of the system model."
       allow_nil? false
     end
 
     attribute :picture_url, :string do
+      public? true
       description "A URL to a picture representing the system model."
     end
 
@@ -167,11 +175,14 @@ defmodule Edgehog.Devices.SystemModel do
 
   relationships do
     has_many :part_numbers, Edgehog.Devices.SystemModelPartNumber do
+      public? true
       description "The list of part numbers associated with the system model."
     end
 
     belongs_to :hardware_type, Edgehog.Devices.HardwareType do
+      public? true
       description "The Hardware type associated with the System Model"
+      attribute_public? false
     end
   end
 

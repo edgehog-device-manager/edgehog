@@ -25,7 +25,7 @@ defmodule Edgehog.MixProject do
     [
       app: :edgehog,
       version: "0.8.0-dev",
-      elixir: "~> 1.15",
+      elixir: "~> 1.16",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -115,10 +115,11 @@ defmodule Edgehog.MixProject do
       {:recon, "~> 2.5"},
       {:observer_cli, "~> 1.7"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:ash, "~> 2.0"},
-      {:ash_postgres, "~> 1.3"},
-      {:ash_graphql, github: "ash-project/ash_graphql"},
-      {:ash_json_api, "~> 0.34"}
+      {:ash, "~> 3.0-dev"},
+      {:ash_postgres, "~> 2.0-dev"},
+      {:ash_graphql, "~> 1.0-dev"},
+      {:ash_json_api, "~> 1.0-dev"},
+      {:picosat_elixir, "~> 0.2"}
     ]
   end
 

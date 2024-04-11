@@ -31,7 +31,7 @@ defmodule EdgehogWeb.Schema do
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
-  @apis [
+  @domains [
     Edgehog.Devices,
     Edgehog.Groups,
     Edgehog.Labeling,
@@ -40,7 +40,7 @@ defmodule EdgehogWeb.Schema do
 
   # TODO: remove define_relay_types?: false once we convert everything to Ash
   use AshGraphql,
-    apis: @apis,
+    domains: @domains,
     define_relay_types?: false,
     relay_ids?: true
 

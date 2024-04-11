@@ -19,8 +19,8 @@
 #
 
 defmodule Edgehog.Tenants do
-  use Ash.Api,
-    extensions: [AshGraphql.Api, AshJsonApi.Api]
+  use Ash.Domain,
+    extensions: [AshGraphql.Domain, AshJsonApi.Domain]
 
   graphql do
     root_level_errors? true

@@ -20,25 +20,34 @@
 
 defmodule Edgehog.Devices.SystemModelPartNumber do
   use Edgehog.MultitenantResource,
-    api: Edgehog.Devices,
+    domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
     ]
 
   graphql do
     type :system_model_part_number
-
-    hide_fields [:tenant]
   end
 
   actions do
-    defaults [:create, :read, :update, :destroy]
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      accept [:part_number]
+    end
+
+    update :update do
+      primary? true
+      accept [:part_number]
+    end
   end
 
   attributes do
     integer_primary_key :id
 
     attribute :part_number, :string do
+      public? true
       description "The part number identifier."
       allow_nil? false
     end
@@ -48,7 +57,10 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
   end
 
   relationships do
-    belongs_to :system_model, Edgehog.Devices.SystemModel
+    belongs_to :system_model, Edgehog.Devices.SystemModel do
+      public? true
+      attribute_public? false
+    end
 
     has_many :devices, Edgehog.Devices.Device do
       source_attribute :part_number

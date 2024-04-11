@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
-    api: Edgehog.Tenants,
+    domain: Edgehog.Tenants,
     data_layer: AshPostgres.DataLayer,
     extensions: [
       AshGraphql.Resource,
@@ -70,7 +70,12 @@ defmodule Edgehog.Tenants.Tenant do
   end
 
   actions do
-    defaults [:create, :read, :destroy]
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      accept [:name, :slug, :public_key, :default_locale]
+    end
 
     read :by_slug, get_by: :slug
 
@@ -91,6 +96,7 @@ defmodule Edgehog.Tenants.Tenant do
     end
 
     create :provision do
+      accept [:name, :slug, :public_key, :default_locale]
       argument :astarte_config, AstarteConfig, allow_nil?: false
 
       change Tenant.Changes.ProvisionAstarteResources
@@ -111,22 +117,26 @@ defmodule Edgehog.Tenants.Tenant do
     integer_primary_key :tenant_id
 
     attribute :name, :string do
+      public? true
       description "The tenant name."
       allow_nil? false
     end
 
     attribute :slug, :string do
+      public? true
       description "The tenant slug."
       allow_nil? false
     end
 
     attribute :default_locale, :string do
+      public? true
       description "The default locale supported by the tenant."
       allow_nil? false
       default "en-US"
     end
 
     attribute :public_key, :string do
+      public? true
       description "The tenant public key."
       allow_nil? false
     end
@@ -137,8 +147,9 @@ defmodule Edgehog.Tenants.Tenant do
 
   relationships do
     has_one :realm, Edgehog.Astarte.Realm do
-      api Edgehog.Astarte
+      public? true
       source_attribute :tenant_id
+      allow_nil? false
     end
   end
 
@@ -156,5 +167,9 @@ defmodule Edgehog.Tenants.Tenant do
   postgres do
     table "tenants"
     repo Edgehog.Repo
+  end
+
+  defimpl Ash.ToTenant do
+    def to_tenant(tenant, _resource), do: tenant.tenant_id
   end
 end

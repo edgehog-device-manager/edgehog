@@ -35,7 +35,6 @@ defmodule Edgehog.MultitenantResource do
       relationships do
         belongs_to :tenant, Edgehog.Tenants.Tenant do
           allow_nil? false
-          api Edgehog.Tenants
           destination_attribute :tenant_id
           primary_key? unquote(Keyword.get(opts, :tenant_id_in_primary_key?, false))
         end
@@ -44,7 +43,6 @@ defmodule Edgehog.MultitenantResource do
       multitenancy do
         strategy :attribute
         attribute :tenant_id
-        parse_attribute {Edgehog.MultitenantResource, :parse_tenant_id, []}
       end
 
       postgres do
@@ -56,8 +54,4 @@ defmodule Edgehog.MultitenantResource do
       end
     end
   end
-
-  # Do this so we can do both `tenant: tenant` and `tenant: tenant_id`
-  def parse_tenant_id(%Tenant{tenant_id: tenant_id}), do: tenant_id
-  def parse_tenant_id(tenant_id), do: tenant_id
 end

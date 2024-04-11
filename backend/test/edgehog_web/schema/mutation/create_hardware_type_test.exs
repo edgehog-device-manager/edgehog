@@ -115,8 +115,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
 
       assert %HardwareType{part_number_strings: ["bar"]} =
                HardwareType
-               |> Devices.get!(fixture.id, tenant: tenant)
-               |> Devices.load!(:part_number_strings)
+               |> Ash.get!(fixture.id, tenant: tenant)
+               |> Ash.load!(:part_number_strings)
     end
   end
 

@@ -23,7 +23,7 @@ defmodule Edgehog.Labeling do
   The Labeling context, containing all functionalities regarding tags and attributes assignment
   """
 
-  use Ash.Api, extensions: [AshGraphql.Api]
+  use Ash.Domain, extensions: [AshGraphql.Domain]
 
   graphql do
     root_level_errors? true

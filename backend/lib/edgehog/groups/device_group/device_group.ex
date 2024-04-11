@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Groups.DeviceGroup do
   use Edgehog.MultitenantResource,
-    api: Edgehog.Groups,
+    domain: Edgehog.Groups,
     extensions: [
       AshGraphql.Resource
     ]
@@ -62,6 +62,7 @@ defmodule Edgehog.Groups.DeviceGroup do
     update :update do
       description "Updates a device group."
       primary? true
+      require_atomic? false
 
       accept [:name, :handle, :selector]
     end
@@ -76,11 +77,14 @@ defmodule Edgehog.Groups.DeviceGroup do
     integer_primary_key :id
 
     attribute :name, :string do
+      public? true
       description "The display name of the device group."
       allow_nil? false
     end
 
     attribute :handle, :string do
+      public? true
+
       description """
       The identifier of the device group.
 
@@ -93,6 +97,8 @@ defmodule Edgehog.Groups.DeviceGroup do
 
     # TODO: custom type here
     attribute :selector, :string do
+      public? true
+
       description """
       The Selector that will determine which devices belong to the device group.
 
@@ -109,9 +115,9 @@ defmodule Edgehog.Groups.DeviceGroup do
 
   relationships do
     has_many :devices, Edgehog.Devices.Device do
+      public? true
       description "The devices belonging to the group."
       writable? false
-      api Edgehog.Devices
       manual ManualRelationships.Devices
     end
 

@@ -32,7 +32,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
     setup %{tenant: tenant} do
       hardware_type =
         hardware_type_fixture(tenant: tenant)
-        |> Devices.load!(:part_number_strings)
+        |> Ash.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(hardware_type)
 
@@ -196,8 +196,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
       assert %HardwareType{part_number_strings: ["bar"]} =
                HardwareType
-               |> Devices.get!(fixture.id, tenant: tenant)
-               |> Devices.load!(:part_number_strings)
+               |> Ash.get!(fixture.id, tenant: tenant)
+               |> Ash.load!(:part_number_strings)
     end
   end
 

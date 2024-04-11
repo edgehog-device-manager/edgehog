@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2021-2023 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2024 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
-erlang 26.1.2
-elixir 1.15.7-otp-26
+erlang 26.2.3
+elixir 1.16.2-otp-26
 nodejs 20.7.0

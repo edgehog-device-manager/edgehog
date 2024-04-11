@@ -20,15 +20,23 @@
 
 defmodule Edgehog.Labeling.DeviceTag do
   use Edgehog.MultitenantResource,
-    api: Edgehog.Labeling,
+    domain: Edgehog.Labeling,
     tenant_id_in_primary_key?: true
 
   actions do
-    defaults [:read, :update, :destroy]
+    defaults [:read, :destroy]
 
     create :create do
       primary? true
       upsert? true
+
+      accept [:tag_id, :device_id]
+    end
+
+    update :update do
+      primary? true
+
+      accept [:tag_id, :device_id]
     end
   end
 
@@ -40,7 +48,6 @@ defmodule Edgehog.Labeling.DeviceTag do
 
     belongs_to :device, Edgehog.Devices.Device do
       allow_nil? false
-      api Edgehog.Devices
       primary_key? true
     end
   end

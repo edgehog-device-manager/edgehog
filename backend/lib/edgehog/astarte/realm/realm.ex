@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Astarte.Realm do
   use Edgehog.MultitenantResource,
-    api: Edgehog.Astarte
+    domain: Edgehog.Astarte
 
   alias Edgehog.Astarte.Realm
   alias Edgehog.Validations
@@ -40,20 +40,22 @@ defmodule Edgehog.Astarte.Realm do
 
     create :create do
       primary? true
-
-      argument :cluster_id, :integer, allow_nil?: false
-
-      change manage_relationship(:cluster_id, :cluster, type: :append)
+      accept [:name, :private_key, :cluster_id]
     end
   end
 
   attributes do
     integer_primary_key :id
 
-    attribute :name, :string, allow_nil?: false
+    attribute :name, :string do
+      public? true
+      allow_nil? false
+    end
 
     attribute :private_key, :string do
+      public? true
       allow_nil? false
+      sensitive? true
       constraints trim?: false
     end
 
@@ -62,13 +64,14 @@ defmodule Edgehog.Astarte.Realm do
   end
 
   relationships do
-    belongs_to :cluster, Edgehog.Astarte.Cluster
+    belongs_to :cluster, Edgehog.Astarte.Cluster do
+      allow_nil? false
+    end
   end
 
   calculations do
     calculate :realm_management_client, :struct, Realm.Calculations.RealmManagementClient do
       constraints instance_of: Astarte.Client.RealmManagement
-      private? true
       filterable? false
     end
   end
