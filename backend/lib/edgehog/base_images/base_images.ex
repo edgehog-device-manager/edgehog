@@ -33,6 +33,7 @@ defmodule Edgehog.BaseImages do
   end
 
   resources do
+    resource Edgehog.BaseImages.BaseImage
     resource Edgehog.BaseImages.BaseImageCollection
   end
 
