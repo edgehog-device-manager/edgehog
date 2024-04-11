@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,22 +19,144 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageCollectionTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.BaseImages
-  alias Edgehog.BaseImages.BaseImageCollection
-
+  import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures
 
-  describe "createBaseImageCollection field" do
-    setup do
-      {:ok, system_model: system_model_fixture()}
+  @moduletag :ported_to_ash
+
+  describe "createBaseImageCollection mutation" do
+    test "creates base image collection with valid data", %{tenant: tenant} do
+      system_model = system_model_fixture(tenant: tenant)
+      system_model_id = AshGraphql.Resource.encode_relay_id(system_model)
+      system_model_name = system_model.name
+      system_model_handle = system_model.handle
+
+      base_image_collection =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          system_model_id: system_model_id,
+          name: "Foobar",
+          handle: "foobar"
+        )
+        |> extract_result!()
+
+      assert %{
+               "id" => _,
+               "name" => "Foobar",
+               "handle" => "foobar",
+               "systemModel" => %{
+                 "id" => ^system_model_id,
+                 "name" => ^system_model_name,
+                 "handle" => ^system_model_handle
+               }
+             } = base_image_collection
     end
 
-    @query """
+    test "returns error for non-existing system model", %{tenant: tenant} do
+      system_model = system_model_fixture(tenant: tenant)
+      system_model_id = AshGraphql.Resource.encode_relay_id(system_model)
+      _ = Ash.destroy!(system_model)
+
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          system_model_id: system_model_id
+        )
+
+      # TODO: wrong fields returned by AshGraphql
+      assert %{fields: [:id], message: "could not be found" <> _} =
+               extract_error!(result)
+    end
+
+    test "returns error for missing name", %{tenant: tenant} do
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          name: nil
+        )
+
+      assert %{message: message} = extract_error!(result)
+      assert String.contains?(message, ~s<In field "name": Expected type "String!">)
+    end
+
+    test "returns error for missing handle", %{tenant: tenant} do
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          handle: nil
+        )
+
+      assert %{message: message} = extract_error!(result)
+      assert String.contains?(message, ~s<In field "handle": Expected type "String!">)
+    end
+
+    test "returns error for empty name", %{tenant: tenant} do
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          name: ""
+        )
+
+      assert %{fields: [:name], message: "is required"} =
+               extract_error!(result)
+    end
+
+    test "returns error for empty handle", %{tenant: tenant} do
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          handle: ""
+        )
+
+      assert %{fields: [:handle], message: "is required"} =
+               extract_error!(result)
+    end
+
+    test "returns error for invalid handle", %{tenant: tenant} do
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          handle: "123Invalid$"
+        )
+
+      assert %{fields: [:handle], message: "should start with" <> _} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate name", %{tenant: tenant} do
+      fixture = base_image_collection_fixture(tenant: tenant)
+
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          name: fixture.name
+        )
+
+      assert %{fields: [:name], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate handle", %{tenant: tenant} do
+      fixture = base_image_collection_fixture(tenant: tenant)
+
+      result =
+        create_base_image_collection_mutation(
+          tenant: tenant,
+          handle: fixture.handle
+        )
+
+      assert %{fields: [:handle], message: "has already been taken"} =
+               extract_error!(result)
+    end
+  end
+
+  defp create_base_image_collection_mutation(opts) do
+    default_document = """
     mutation CreateBaseImageCollection($input: CreateBaseImageCollectionInput!) {
       createBaseImageCollection(input: $input) {
-        baseImageCollection {
+        result {
           id
           name
           handle
@@ -47,91 +169,56 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageCollectionTest do
       }
     }
     """
-    test "creates base image collection with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      system_model: system_model
-    } do
-      name = "Foobar"
-      handle = "foobar"
 
-      system_model_id =
-        Absinthe.Relay.Node.to_global_id(:system_model, system_model.id, EdgehogWeb.Schema)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-      system_model_name = system_model.name
-      system_model_handle = system_model.handle
+    {system_model_id, opts} =
+      Keyword.pop_lazy(opts, :system_model_id, fn ->
+        system_model_fixture(tenant: tenant)
+        |> AshGraphql.Resource.encode_relay_id()
+      end)
 
-      variables = %{
-        input: %{
-          name: name,
-          handle: handle,
-          system_model_id: system_model_id
-        }
-      }
+    {handle, opts} = Keyword.pop_lazy(opts, :handle, &unique_base_image_collection_handle/0)
+    {name, opts} = Keyword.pop_lazy(opts, :name, &unique_base_image_collection_name/0)
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    input = %{
+      "systemModelId" => system_model_id,
+      "handle" => handle,
+      "name" => name
+    }
 
-      assert %{
-               "data" => %{
-                 "createBaseImageCollection" => %{
-                   "baseImageCollection" => %{
-                     "id" => id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "systemModel" => %{
-                       "id" => ^system_model_id,
-                       "name" => ^system_model_name,
-                       "handle" => ^system_model_handle
-                     }
-                   }
-                 }
+    variables = %{"input" => input}
+
+    document = Keyword.get(opts, :document, default_document)
+
+    context = %{tenant: tenant}
+
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: context
+    )
+  end
+
+  defp extract_error!(result) do
+    assert is_nil(result[:data]["createBaseImageCollection"])
+    assert %{errors: [error]} = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "createBaseImageCollection" => %{
+                 "result" => base_image_collection
                }
-             } = assert(json_response(conn, 200))
+             }
+           } = result
 
-      {:ok, %{type: :base_image_collection, id: db_id}} =
-        Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
+    refute Map.get(result, :errors)
 
-      assert {:ok, %BaseImageCollection{name: ^name, handle: ^handle}} =
-               BaseImages.fetch_base_image_collection(db_id)
-    end
+    assert base_image_collection != nil
 
-    test "fails with invalid data", %{conn: conn, api_path: api_path} do
-      variables = %{
-        input: %{
-          base_image_collection: %{
-            name: nil,
-            handle: nil
-          }
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
-
-    test "fails when trying to use a non-existing system model", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      name = "Foobar"
-      handle = "foobar"
-
-      system_model_id =
-        Absinthe.Relay.Node.to_global_id(:system_model, "12345678", EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          name: name,
-          handle: handle,
-          system_model_id: system_model_id
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"status_code" => 404, "code" => "not_found"}]} =
-               assert(json_response(conn, 200))
-    end
+    base_image_collection
   end
 end

@@ -40,19 +40,24 @@ defmodule Edgehog.BaseImagesFixtures do
   Generate a base_image_collection.
   """
   def base_image_collection_fixture(opts \\ []) do
-    {system_model, opts} =
-      Keyword.pop_lazy(opts, :system_model, &DevicesFixtures.system_model_fixture/0)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    attrs =
-      Enum.into(opts, %{
+    {system_model_id, opts} =
+      Keyword.pop_lazy(opts, :system_model_id, fn ->
+        DevicesFixtures.system_model_fixture(tenant: tenant) |> Map.fetch!(:id)
+      end)
+
+    params =
+      opts
+      |> Enum.into(%{
         handle: unique_base_image_collection_handle(),
-        name: unique_base_image_collection_name()
+        name: unique_base_image_collection_name(),
+        system_model_id: system_model_id
       })
 
-    {:ok, base_image_collection} =
-      Edgehog.BaseImages.create_base_image_collection(system_model, attrs)
-
-    base_image_collection
+    Edgehog.BaseImages.BaseImageCollection
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
