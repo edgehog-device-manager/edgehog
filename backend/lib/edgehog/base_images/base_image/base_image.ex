@@ -74,6 +74,17 @@ defmodule Edgehog.BaseImages.BaseImage do
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
     end
 
+    create :create_fixture do
+      accept [:starting_version_requirement, :version, :url]
+
+      argument :base_image_collection_id, :id do
+        description "The ID of the base image collection this base image will belong to."
+        allow_nil? false
+      end
+
+      change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
+    end
+
     read :get do
       description "Returns a single base image."
       get? true
@@ -99,6 +110,8 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       change Changes.HandleFileDeletion
     end
+
+    destroy :destroy_fixture
   end
 
   attributes do

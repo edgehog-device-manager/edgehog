@@ -54,6 +54,32 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
       result = base_image_collection_query(tenant: tenant, id: id)
       assert result == %{data: %{"baseImageCollection" => nil}}
     end
+
+    test "returns associated base images", %{tenant: tenant} do
+      _other_base_image = base_image_fixture(tenant: tenant, version: "1.0.0")
+      base_image_collection = base_image_collection_fixture(tenant: tenant)
+
+      base_image =
+        base_image_fixture(
+          tenant: tenant,
+          version: "2.0.0",
+          base_image_collection_id: base_image_collection.id
+        )
+
+      base_image_collection_id = AshGraphql.Resource.encode_relay_id(base_image_collection)
+      base_image_id = AshGraphql.Resource.encode_relay_id(base_image)
+
+      result = base_image_collection_query(tenant: tenant, id: base_image_collection_id)
+
+      assert %{
+               "baseImages" => [
+                 %{
+                   "id" => ^base_image_id,
+                   "version" => "2.0.0"
+                 }
+               ]
+             } = extract_result!(result)
+    end
   end
 
   defp non_existing_base_image_collection_id(tenant) do
@@ -70,6 +96,10 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
       baseImageCollection(id: $id) {
         name
         handle
+        baseImages {
+          id
+          version
+        }
         systemModel {
           id
         }

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,132 +19,141 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
-  use EdgehogWeb.ConnCase, async: true
-  use Edgehog.BaseImagesStorageMockCase
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
 
+  @moduletag :ported_to_ash
+
   describe "updateBaseImage mutation" do
-    setup do
-      {:ok, base_image: base_image_fixture()}
+    setup %{tenant: tenant} do
+      base_image = base_image_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(base_image)
+
+      %{base_image: base_image, id: id}
     end
 
     test "updates base image with valid data", %{
-      conn: conn,
-      api_path: api_path,
       tenant: tenant,
-      base_image: base_image
+      base_image: base_image,
+      id: id
     } do
-      default_tenant_locale = tenant.default_locale
-
-      response =
-        update_base_image_mutation(conn, api_path,
-          base_image_id: base_image.id,
-          starting_version_requirement: "~> 1.7.0-updated",
-          description: localized_text(default_tenant_locale, "Updated description"),
-          release_display_name: localized_text(default_tenant_locale, "Updated display name")
+      result =
+        update_base_image_mutation(
+          tenant: tenant,
+          id: id,
+          starting_version_requirement: "~> 1.7.0-updated"
         )
 
-      base_image = response["data"]["updateBaseImage"]["baseImage"]
-      assert base_image["startingVersionRequirement"] == "~> 1.7.0-updated"
-      assert base_image["description"] == "Updated description"
-      assert base_image["releaseDisplayName"] == "Updated display name"
+      base_image = extract_result!(result)
+
+      assert %{
+               "id" => ^id,
+               "startingVersionRequirement" => "~> 1.7.0-updated"
+             } = base_image
     end
 
-    test "fails with invalid data", %{
-      conn: conn,
-      api_path: api_path,
-      base_image: base_image
+    test "returns error for invalid starting version requirement", %{
+      tenant: tenant,
+      base_image: base_image,
+      id: id
     } do
-      response =
-        update_base_image_mutation(conn, api_path,
-          base_image_id: base_image.id,
-          version: "invalid"
+      result =
+        update_base_image_mutation(
+          tenant: tenant,
+          id: id,
+          starting_version_requirement: "invalid"
         )
 
-      assert response["data"]["updateBaseImage"] == nil
-      assert response["errors"] != nil
+      assert %{
+               fields: [:starting_version_requirement],
+               message: "is not a valid version requirement"
+             } = extract_error!(result)
     end
 
-    test "fails when not using the default tenant locale for the description", %{
-      conn: conn,
-      api_path: api_path,
-      base_image: base_image
-    } do
-      response =
-        update_base_image_mutation(conn, api_path,
-          base_image_id: base_image.id,
-          description: localized_text("it-IT", "Descrizione aggiornata")
+    test "fails when trying to use a non-existing base image", %{tenant: tenant} do
+      id = non_existing_base_image_id(tenant)
+
+      result =
+        update_base_image_mutation(
+          tenant: tenant,
+          id: id,
+          starting_version_requirement: "~> 1.7.0-updated"
         )
 
-      assert response["data"]["updateBaseImage"] == nil
-      assert %{"errors" => [%{"status_code" => 422, "code" => "not_default_locale"}]} = response
-    end
-
-    test "fails when not using the default tenant locale for the release display name", %{
-      conn: conn,
-      api_path: api_path,
-      base_image: base_image
-    } do
-      response =
-        update_base_image_mutation(conn, api_path,
-          base_image_id: base_image.id,
-          release_display_name: localized_text("it-IT", "Nome aggiornato")
-        )
-
-      assert response["data"]["updateBaseImage"] == nil
-      assert %{"errors" => [%{"status_code" => 422, "code" => "not_default_locale"}]} = response
-    end
-
-    test "fails when trying to use a non-existing base image", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      response = update_base_image_mutation(conn, api_path, base_image_id: "123456")
-
-      assert %{"errors" => [%{"status_code" => 404, "code" => "not_found"}]} = response
+      assert %{fields: [:id], message: "could not be found" <> _} =
+               extract_error!(result)
     end
   end
 
-  @query """
-  mutation UpdateBaseImage($input: UpdateBaseImageInput!) {
-    updateBaseImage(input: $input) {
-      baseImage {
-        version
-        url
-        startingVersionRequirement
-        description
-        releaseDisplayName
-        baseImageCollection {
-          handle
+  defp update_base_image_mutation(opts) do
+    default_document = """
+    mutation UpdateBaseImage($id: ID!, $input: UpdateBaseImageInput!) {
+      updateBaseImage(id: $id, input: $input) {
+        result {
+          id
+          version
+          url
+          startingVersionRequirement
+          baseImageCollection {
+            id
+            handle
+          }
         }
       }
     }
-  }
-  """
-  defp update_base_image_mutation(conn, api_path, opts) do
-    base_image_id =
-      Absinthe.Relay.Node.to_global_id(
-        :base_image,
-        opts[:base_image_id],
-        EdgehogWeb.Schema
-      )
+    """
+
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
     input =
-      Enum.into(opts, %{})
-      |> Map.put(:base_image_id, base_image_id)
+      %{
+        "startingVersionRequirement" => opts[:starting_version_requirement]
+      }
+      |> Enum.filter(fn {_k, v} -> v != nil end)
+      |> Enum.into(%{})
 
-    variables = %{input: input}
+    variables = %{"id" => id, "input" => input}
 
-    conn = post(conn, api_path, query: @query, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
 
-    json_response(conn, 200)
+    context = %{tenant: tenant}
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
   end
 
-  defp localized_text(locale, text) do
-    %{
-      locale: locale,
-      text: text
-    }
+  defp extract_error!(result) do
+    assert %{
+             data: %{"updateBaseImage" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "updateBaseImage" => %{
+                 "result" => base_image
+               }
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert base_image != nil
+
+    base_image
+  end
+
+  defp non_existing_base_image_id(tenant) do
+    fixture = base_image_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+
+    :ok = Ash.destroy!(fixture, action: :destroy_fixture)
+
+    id
   end
 end
