@@ -60,7 +60,16 @@ defmodule Edgehog.Devices.Device do
 
     create :create do
       primary? true
-      accept [:device_id, :name, :part_number, :online, :realm_id]
+
+      accept [
+        :device_id,
+        :name,
+        :part_number,
+        :online,
+        :realm_id,
+        :last_connection,
+        :last_disconnection
+      ]
     end
 
     read :get do
