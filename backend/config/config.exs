@@ -93,7 +93,8 @@ config :edgehog, :ash_domains, [
   Edgehog.Devices,
   Edgehog.Groups,
   Edgehog.Labeling,
-  Edgehog.Tenants
+  Edgehog.Tenants,
+  Edgehog.Triggers
 ]
 
 config :ash, :default_belongs_to_type, :integer
