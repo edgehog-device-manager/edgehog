@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,281 +20,330 @@
 
 defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   use EdgehogWeb.ConnCase, async: true
-  use Edgehog.AstarteMockCase
   use Edgehog.EphemeralImageMockCase
 
-  alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device
-  alias Edgehog.Devices
+  alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
-  @system_info_interface "io.edgehog.devicemanager.SystemInfo"
+  describe "process_event for device events" do
+    @describetag :ported_to_ash
 
-  describe "process_event" do
-    setup do
+    setup %{conn: conn, tenant: tenant} do
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-      device = device_fixture(realm)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
-      {:ok, cluster: cluster, realm: realm, device: device}
+      device =
+        device_fixture(
+          realm_id: realm.id,
+          online: false,
+          last_connection: utc_now_second() |> DateTime.add(-50, :minute),
+          last_disconnection: utc_now_second() |> DateTime.add(-10, :minute),
+          tenant: tenant
+        )
+
+      conn = put_req_header(conn, "astarte-realm", realm.name)
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      {:ok, conn: conn, cluster: cluster, realm: realm, device: device, path: path}
     end
 
-    test "creates an unexisting device when receiving a connection event", %{
-      conn: conn,
-      realm: realm,
-      tenant: %{slug: tenant_slug}
-    } do
-      device_id = "JCr8Q5F-QmyaEu19mUW9qw"
+    test "creates an unexisting device and populates it from Device Status", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
 
-      assert {:error, :device_not_found} == Astarte.fetch_realm_device(realm, device_id)
+      device_id = random_device_id()
+      timestamp = utc_now_second()
+      event = connection_trigger(device_id, timestamp)
 
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+      astarte_disconnection_timestamp = DateTime.add(timestamp, -1, :hour)
 
-      connection_event = %{
-        device_id: device_id,
-        event: %{
-          type: "device_connected"
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        device_status =
+          [
+            online: true,
+            last_connection: timestamp,
+            last_disconnection: astarte_disconnection_timestamp
+          ]
+          |> device_status_fixture()
 
-      conn =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, connection_event)
+        {:ok, device_status}
+      end)
 
-      assert response(conn, 200)
+      assert post(conn, path, event) |> response(200)
 
-      assert {:ok, %Device{online: true}} = Astarte.fetch_realm_device(realm, device_id)
+      assert {:ok, device} = fetch_device(realm, device_id, tenant)
+
+      assert %Device{
+               online: true,
+               last_connection: ^timestamp,
+               last_disconnection: ^astarte_disconnection_timestamp
+             } = device
     end
 
-    test "updates an existing device when receiving a connection event", %{
-      conn: conn,
-      realm: realm,
-      device: %{device_id: device_id},
-      tenant: %{slug: tenant_slug}
-    } do
-      assert {:ok, %Device{online: false}} = Astarte.fetch_realm_device(realm, device_id)
+    test "uses Device Status as the ultimate source of truth when creating a new device", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
 
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+      device_id = random_device_id()
+      timestamp = utc_now_second()
+      event = connection_trigger(device_id, timestamp)
 
-      connection_event = %{
-        device_id: device_id,
-        event: %{
-          type: "device_connected"
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      astarte_disconnection_timestamp = DateTime.add(timestamp, 1, :second)
 
-      conn =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, connection_event)
+      # We simulate the fact that the device has already disconnected
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:ok,
+         device_status_fixture(online: false, last_disconnection: astarte_disconnection_timestamp)}
+      end)
 
-      assert response(conn, 200)
+      assert post(conn, path, event) |> response(200)
 
-      assert {:ok, %Device{online: true}} = Astarte.fetch_realm_device(realm, device_id)
+      assert {:ok, %Device{online: false, last_disconnection: ^astarte_disconnection_timestamp}} =
+               fetch_device(realm, device_id, tenant)
     end
 
-    test "creates an unexisting device when receiving an unhandled event", %{
-      conn: conn,
-      realm: realm,
-      tenant: %{slug: tenant_slug}
-    } do
-      device_id = "JCr8Q5F-QmyaEu19mUW9qw"
+    test "ignores errors on Device Status retrieval for unexisting device", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
 
-      assert {:error, :device_not_found} == Astarte.fetch_realm_device(realm, device_id)
+      device_id = random_device_id()
+      timestamp = utc_now_second()
+      event = connection_trigger(device_id, timestamp)
 
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        {:error, api_error(status: 500, message: "Internal Server Error")}
+      end)
 
-      connection_event = %{
-        device_id: device_id,
-        event: %{
-          type: "unhandled_event"
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      assert post(conn, path, event) |> response(200)
 
-      conn =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, connection_event)
+      assert {:ok, device} = fetch_device(realm, device_id, tenant)
 
-      assert response(conn, 200)
-
-      assert {:ok, %Device{online: false}} = Astarte.fetch_realm_device(realm, device_id)
+      assert %Device{
+               online: true,
+               last_connection: ^timestamp,
+               last_disconnection: nil
+             } = device
     end
 
-    test "updates an existing device when receiving serial number", %{
-      conn: conn,
-      realm: realm,
-      device: %{device_id: device_id},
-      tenant: %{slug: tenant_slug}
-    } do
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+    test "updates an existing device, not calling Astarte", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
 
-      connection_event = %{
-        device_id: device_id,
-        event: %{
-          type: "incoming_data",
-          interface: @system_info_interface,
-          path: "/serialNumber",
-          value: "12345"
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      %Device{device_id: device_id} =
+        device_fixture(
+          realm_id: realm.id,
+          online: true,
+          last_connection: utc_now_second() |> DateTime.add(-10, :minute),
+          last_disconnection: utc_now_second() |> DateTime.add(-50, :minute),
+          tenant: tenant
+        )
 
-      conn =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, connection_event)
+      timestamp = utc_now_second()
+      event = disconnection_trigger(device_id, timestamp)
 
-      assert response(conn, 200)
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, 0, fn _client, _device_id -> flunk() end)
 
-      assert {:ok, %Device{serial_number: "12345"}} = Astarte.fetch_realm_device(realm, device_id)
+      assert post(conn, path, event) |> response(200)
+
+      assert {:ok, device} = fetch_device(realm, device_id, tenant)
+
+      assert %Device{
+               online: false,
+               last_disconnection: ^timestamp
+             } = device
     end
 
-    test "associates a device with a system model when receiving part number", %{
-      conn: conn,
-      realm: realm,
-      device: %{id: id, device_id: device_id},
-      tenant: %{slug: tenant_slug}
-    } do
-      system_model = system_model_fixture()
+    test "creates an unexisting device when receiving an unhandled event", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
+
+      device_id = random_device_id()
+      event = unknown_trigger(device_id)
+      connection_timestamp = utc_now_second() |> DateTime.add(-10, :minute)
+      disconnection_timestamp = DateTime.add(connection_timestamp, -40, :minute)
+
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, fn _client, ^device_id ->
+        device_status =
+          device_status_fixture(
+            online: true,
+            last_connection: connection_timestamp,
+            last_disconnection: disconnection_timestamp
+          )
+
+        {:ok, device_status}
+      end)
+
+      assert post(conn, path, event) |> response(200)
+
+      assert {:ok, device} = fetch_device(realm, device_id, tenant)
+
+      assert %Device{
+               online: true,
+               last_connection: ^connection_timestamp,
+               last_disconnection: ^disconnection_timestamp
+             } = device
+    end
+
+    test "updates an existing device when receiving serial number", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        device: %{device_id: device_id},
+        tenant: tenant
+      } = ctx
+
+      event = serial_number_trigger(device_id, "12345")
+      assert post(conn, path, event) |> response(200)
+
+      assert {:ok, %Device{online: true, serial_number: "12345"}} =
+               fetch_device(realm, device_id, tenant)
+    end
+
+    test "associates a device with a system model when receiving part number", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        device: %{device_id: device_id},
+        tenant: tenant
+      } = ctx
+
+      system_model = system_model_fixture(tenant: tenant)
       [%{part_number: part_number}] = system_model.part_numbers
 
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+      event = part_number_trigger(device_id, part_number)
 
-      connection_event = %{
-        device_id: device_id,
-        event: %{
-          type: "incoming_data",
-          interface: @system_info_interface,
-          path: "/partNumber",
-          value: part_number
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      assert post(conn, path, event) |> response(200)
 
-      conn =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, connection_event)
-
-      assert response(conn, 200)
-
-      assert device = Devices.get_device!(id)
-      device = Devices.preload_system_model(device)
+      assert {:ok, device} = fetch_device(realm, device_id, tenant, [:system_model])
+      assert device.online == true
+      assert device.part_number == part_number
       assert device.system_model.id == system_model.id
       assert device.system_model.name == system_model.name
       assert device.system_model.handle == system_model.handle
     end
 
-    test "saves a device's part number when SystemModelPartNumber does not exist", %{
-      conn: conn,
-      realm: realm,
-      device: %{id: id, device_id: device_id},
-      tenant: %{slug: tenant_slug}
-    } do
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+    test "saves a device's part number when SystemModelPartNumber does not exist", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        device: %{device_id: device_id},
+        tenant: tenant
+      } = ctx
 
       part_number = "PN12345"
+      event = part_number_trigger(device_id, part_number)
 
-      connection_event = %{
-        device_id: device_id,
-        event: %{
-          type: "incoming_data",
-          interface: @system_info_interface,
-          path: "/partNumber",
-          value: part_number
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      assert post(conn, path, event) |> response(200)
 
-      conn =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, connection_event)
+      assert {:ok, device} =
+               fetch_device(realm, device_id, tenant, [:system_model, :system_model_part_number])
 
-      assert response(conn, 200)
-
-      device =
-        id
-        |> Devices.get_device!()
-        |> Devices.preload_system_model()
-
+      assert device.online == true
       assert device.part_number == part_number
       assert device.system_model_part_number == nil
       assert device.system_model == nil
     end
 
-    test "trigger with missing astarte-realm header returns 400", %{
-      conn: conn,
-      device: device,
-      tenant: %{slug: tenant_slug}
-    } do
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+    test "trigger with missing astarte-realm header returns error", ctx do
+      %{
+        conn: conn,
+        path: path,
+        device: %{device_id: device_id}
+      } = ctx
 
-      event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "some_event"
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      event = connection_trigger(device_id, utc_now_second())
 
-      conn_missing_astarte_realm_header = post(conn, path, event)
-
-      assert response(conn_missing_astarte_realm_header, 400)
+      assert conn
+             |> delete_req_header("astarte-realm")
+             |> post(path, event)
+             |> response(400)
     end
 
-    test "trigger with non-existing realm returns 404", %{
-      conn: conn,
-      device: device,
-      tenant: %{slug: tenant_slug}
-    } do
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+    test "trigger with non-existing realm returns error", ctx do
+      %{
+        conn: conn,
+        path: path,
+        device: %{device_id: device_id}
+      } = ctx
 
-      event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "some_event"
-        },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
-      }
+      event = connection_trigger(device_id, utc_now_second())
 
-      conn_realm_not_found =
-        conn
-        |> put_req_header("astarte-realm", "invalid realm")
-        |> post(path, event)
-
-      assert response(conn_realm_not_found, 404)
+      assert conn
+             |> put_req_header("astarte-realm", "invalid")
+             |> post(path, event)
+             |> response(404)
     end
 
-    test "trigger with invalid event values returns 422", %{
-      conn: conn,
-      realm: realm,
-      device: device,
-      tenant: %{slug: tenant_slug}
-    } do
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+    test "with an unexisting tenant returns 403", ctx do
+      %{
+        conn: conn
+      } = ctx
+
+      path = Routes.astarte_trigger_path(conn, :process_event, "notexists")
+      event = connection_trigger(random_device_id(), utc_now_second())
+
+      assert post(conn, path, event) |> response(403)
+    end
+
+    test "trigger with invalid event values returns error", ctx do
+      %{
+        conn: conn,
+        path: path,
+        device: %{device_id: device_id}
+      } = ctx
 
       unprocessable_event = %{
-        device_id: device.device_id,
-        event: %{type: "device_connected"},
+        device_id: device_id,
+        event: %{type: "unknown"},
         timestamp: DateTime.utc_now() |> DateTime.to_unix()
       }
 
-      conn_cannot_process_device_event =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, unprocessable_event)
+      assert post(conn, path, unprocessable_event) |> response(422)
+    end
 
-      assert response(conn_cannot_process_device_event, 422)
+    test "with different tenant does not find realm and returns error", ctx do
+      %{
+        conn: conn,
+        device: %{device_id: device_id}
+      } = ctx
+
+      other_tenant = Edgehog.TenantsFixtures.tenant_fixture(slug: "other")
+      path = Routes.astarte_trigger_path(conn, :process_event, other_tenant.slug)
+      event = connection_trigger(device_id, utc_now_second())
+
+      assert post(conn, path, event) |> response(404)
     end
   end
 
@@ -429,5 +478,87 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       assert operation.status_code == nil
     end
+  end
+
+  defp fetch_device(realm, device_id, tenant, load \\ []) do
+    Device
+    |> Ash.get(%{realm_id: realm.id, device_id: device_id}, tenant: tenant, load: load)
+  end
+
+  defp utc_now_second do
+    DateTime.utc_now()
+    |> DateTime.truncate(:second)
+  end
+
+  defp connection_trigger(device_id, timestamp) do
+    %{
+      device_id: device_id,
+      event: %{
+        type: "device_connected",
+        device_ip_address: "1.2.3.4"
+      },
+      timestamp: DateTime.to_iso8601(timestamp)
+    }
+  end
+
+  defp disconnection_trigger(device_id, timestamp) do
+    %{
+      device_id: device_id,
+      event: %{
+        type: "device_disconnected"
+      },
+      timestamp: DateTime.to_iso8601(timestamp)
+    }
+  end
+
+  @system_info_interface "io.edgehog.devicemanager.SystemInfo"
+
+  defp part_number_trigger(device_id, part_number) do
+    %{
+      device_id: device_id,
+      event: %{
+        type: "incoming_data",
+        interface: @system_info_interface,
+        path: "/partNumber",
+        value: part_number
+      },
+      timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+    }
+  end
+
+  defp serial_number_trigger(device_id, serial_number) do
+    %{
+      device_id: device_id,
+      event: %{
+        type: "incoming_data",
+        interface: @system_info_interface,
+        path: "/serialNumber",
+        value: serial_number
+      },
+      timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+    }
+  end
+
+  defp unknown_trigger(device_id) do
+    %{
+      device_id: device_id,
+      event: %{
+        type: "incoming_data",
+        interface: "org.example.SomeOtherInterface",
+        path: "/foo",
+        value: 42
+      },
+      timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+    }
+  end
+
+  defp api_error(opts) do
+    status = Keyword.get(opts, :status, 500)
+    message = Keyword.get(opts, :message, "Generic error")
+
+    %Astarte.Client.APIError{
+      status: status,
+      response: %{"errors" => %{"detail" => message}}
+    }
   end
 end
