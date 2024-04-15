@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,15 +32,16 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { updateChannelHandleSchema, yup, messages } from "forms";
 import { graphql, useFragment } from "react-relay/hooks";
-import type { CreateUpdateChannel_DeviceGroupFragment$key } from "api/__generated__/CreateUpdateChannel_DeviceGroupFragment.graphql";
+import type { CreateUpdateChannel_OptionsFragment$key } from "api/__generated__/CreateUpdateChannel_OptionsFragment.graphql";
 
-const CREATE_UPDATE_CHANNEL_FRAGMENT = graphql`
-  fragment CreateUpdateChannel_DeviceGroupFragment on DeviceGroup
-  @relay(plural: true) {
-    id
-    name
-    updateChannel {
+const CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
+  fragment CreateUpdateChannel_OptionsFragment on RootQueryType {
+    deviceGroups {
+      id
       name
+      updateChannel {
+        name
+      }
     }
   }
 `;
@@ -129,19 +130,19 @@ const transformOutputData = ({
 });
 
 type Props = {
-  targetGroupsRef: CreateUpdateChannel_DeviceGroupFragment$key;
+  queryRef: CreateUpdateChannel_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: UpdateChannelData) => void;
 };
 
 const CreateUpdateChannel = ({
-  targetGroupsRef,
+  queryRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
-  const targetGroups = useFragment(
-    CREATE_UPDATE_CHANNEL_FRAGMENT,
-    targetGroupsRef,
+  const { deviceGroups: targetGroups } = useFragment(
+    CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT,
+    queryRef,
   );
   const {
     register,

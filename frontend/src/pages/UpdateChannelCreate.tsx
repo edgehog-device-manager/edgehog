@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -39,11 +39,9 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Route, useNavigate } from "Navigation";
 
-const GET_DEVICE_GROUPS_QUERY = graphql`
+const GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY = graphql`
   query UpdateChannelCreate_getDeviceGroups_Query {
-    deviceGroups {
-      ...CreateUpdateChannel_DeviceGroupFragment
-    }
+    ...CreateUpdateChannel_OptionsFragment
   }
 `;
 
@@ -54,28 +52,24 @@ const CREATE_UPDATE_CHANNEL_MUTATION = graphql`
     createUpdateChannel(input: $input) {
       updateChannel {
         id
-        name
-        handle
-        targetGroups {
-          id
-          name
-        }
       }
     }
   }
 `;
 
 type UpdateChannelProps = {
-  getDeviceGroupsQuery: PreloadedQuery<UpdateChannelCreate_getDeviceGroups_Query>;
+  getCreateUpdateChannelOptionsQuery: PreloadedQuery<UpdateChannelCreate_getDeviceGroups_Query>;
 };
 
-const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
+const UpdateChannel = ({
+  getCreateUpdateChannelOptionsQuery,
+}: UpdateChannelProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
 
-  const { deviceGroups } = usePreloadedQuery(
-    GET_DEVICE_GROUPS_QUERY,
-    getDeviceGroupsQuery,
+  const updateChannelCreateData = usePreloadedQuery(
+    GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY,
+    getCreateUpdateChannelOptionsQuery,
   );
 
   const [createUpdateChannel, isCreatingUpdateChannel] =
@@ -153,7 +147,7 @@ const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
           {errorFeedback}
         </Alert>
         <CreateUpdateChannelForm
-          targetGroupsRef={deviceGroups}
+          queryRef={updateChannelCreateData}
           onSubmit={handleCreateUpdateChannel}
           isLoading={isCreatingUpdateChannel}
         />
@@ -163,15 +157,17 @@ const UpdateChannel = ({ getDeviceGroupsQuery }: UpdateChannelProps) => {
 };
 
 const UpdateChannelCreatePage = () => {
-  const [getDeviceGroupsQuery, getDeviceGroups] =
+  const [getCreateUpdateChannelOptionsQuery, getCreateUpdateChannelOptions] =
     useQueryLoader<UpdateChannelCreate_getDeviceGroups_Query>(
-      GET_DEVICE_GROUPS_QUERY,
+      GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY,
     );
 
-  useEffect(
-    () => getDeviceGroups({}, { fetchPolicy: "network-only" }),
-    [getDeviceGroups],
+  const fetchCreateUpdateChannelOptions = useCallback(
+    () => getCreateUpdateChannelOptions({}, { fetchPolicy: "network-only" }),
+    [getCreateUpdateChannelOptions],
   );
+
+  useEffect(fetchCreateUpdateChannelOptions, [fetchCreateUpdateChannelOptions]);
 
   return (
     <Suspense
@@ -187,10 +183,14 @@ const UpdateChannelCreatePage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => getDeviceGroups({}, { fetchPolicy: "network-only" })}
+        onReset={fetchCreateUpdateChannelOptions}
       >
-        {getDeviceGroupsQuery && (
-          <UpdateChannel getDeviceGroupsQuery={getDeviceGroupsQuery} />
+        {getCreateUpdateChannelOptionsQuery && (
+          <UpdateChannel
+            getCreateUpdateChannelOptionsQuery={
+              getCreateUpdateChannelOptionsQuery
+            }
+          />
         )}
       </ErrorBoundary>
     </Suspense>
