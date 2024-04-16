@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -28,10 +28,11 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
-
-import type { SystemModelCreate_getHardwareTypes_Query } from "api/__generated__/SystemModelCreate_getHardwareTypes_Query.graphql";
+import type {
+  SystemModelCreate_getOptions_Query,
+  SystemModelCreate_getOptions_Query$data,
+} from "api/__generated__/SystemModelCreate_getOptions_Query.graphql";
 import type { SystemModelCreate_createSystemModel_Mutation } from "api/__generated__/SystemModelCreate_createSystemModel_Mutation.graphql";
-import type { SystemModelCreate_getDefaultTenantLocale_Query } from "api/__generated__/SystemModelCreate_getDefaultTenantLocale_Query.graphql";
 import Alert from "components/Alert";
 import Button from "components/Button";
 import Center from "components/Center";
@@ -42,20 +43,12 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import { Link, Route, useNavigate } from "Navigation";
 
-const GET_HARDWARE_TYPES_QUERY = graphql`
-  query SystemModelCreate_getHardwareTypes_Query {
+const CREATE_SYSTEM_MODEL_PAGE_QUERY = graphql`
+  query SystemModelCreate_getOptions_Query {
     hardwareTypes {
-      id
-      ...CreateSystemModel_HardwareTypeFragment
+      __typename
     }
-  }
-`;
-
-const GET_DEFAULT_TENANT_LOCALE_QUERY = graphql`
-  query SystemModelCreate_getDefaultTenantLocale_Query {
-    tenantInfo {
-      defaultLocale
-    }
+    ...CreateSystemModel_OptionsFragment
   }
 `;
 
@@ -66,69 +59,41 @@ const CREATE_SYSTEM_MODEL_MUTATION = graphql`
     createSystemModel(input: $input) {
       systemModel {
         id
-        name
-        handle
-        description
-        hardwareType {
-          id
-          name
-        }
-        partNumbers
-        pictureUrl
       }
     }
   }
 `;
 
-type SystemModelContentProps = {
-  getHardwareTypesQuery: PreloadedQuery<SystemModelCreate_getHardwareTypes_Query>;
-  getDefaultTenantLocaleQuery: PreloadedQuery<SystemModelCreate_getDefaultTenantLocale_Query>;
+type SystemModelProps = {
+  systemModelOptions: SystemModelCreate_getOptions_Query$data;
 };
 
-const SystemModelContent = ({
-  getHardwareTypesQuery,
-  getDefaultTenantLocaleQuery,
-}: SystemModelContentProps) => {
-  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+const SystemModel = ({ systemModelOptions }: SystemModelProps) => {
   const navigate = useNavigate();
-  const { hardwareTypes } = usePreloadedQuery(
-    GET_HARDWARE_TYPES_QUERY,
-    getHardwareTypesQuery,
-  );
-  const defaultLocaleData = usePreloadedQuery(
-    GET_DEFAULT_TENANT_LOCALE_QUERY,
-    getDefaultTenantLocaleQuery,
-  );
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const [createSystemModel, isCreatingSystemModel] =
     useMutation<SystemModelCreate_createSystemModel_Mutation>(
       CREATE_SYSTEM_MODEL_MUTATION,
     );
 
-  const locale = useMemo(
-    () => defaultLocaleData.tenantInfo.defaultLocale,
-    [defaultLocaleData],
-  );
-
   const handleCreateSystemModel = useCallback(
     (systemModel: SystemModelChanges) => {
       createSystemModel({
         variables: { input: systemModel },
         onCompleted(data, errors) {
+          if (data.createSystemModel) {
+            const systemModelId = data.createSystemModel.systemModel.id;
+            return navigate({
+              route: Route.systemModelsEdit,
+              params: { systemModelId },
+            });
+          }
           if (errors) {
             const errorFeedback = errors
               .map((error) => error.message)
               .join(". \n");
             return setErrorFeedback(errorFeedback);
-          }
-          const systemModelId = data.createSystemModel?.systemModel.id;
-          if (systemModelId) {
-            navigate({
-              route: Route.systemModelsEdit,
-              params: { systemModelId },
-            });
-          } else {
-            navigate({ route: Route.systemModels });
           }
         },
         onError() {
@@ -169,73 +134,78 @@ const SystemModelContent = ({
   );
 
   return (
-    <Page>
-      <Page.Header
-        title={
-          <FormattedMessage
-            id="pages.SystemModelCreate.title"
-            defaultMessage="Create System Model"
-          />
-        }
+    <>
+      <Alert
+        show={!!errorFeedback}
+        variant="danger"
+        onClose={() => setErrorFeedback(null)}
+        dismissible
+      >
+        {errorFeedback}
+      </Alert>
+      <CreateSystemModelForm
+        optionsRef={systemModelOptions}
+        onSubmit={handleCreateSystemModel}
+        isLoading={isCreatingSystemModel}
       />
-      <Page.Main>
-        {hardwareTypes.length === 0 ? (
-          <Result.EmptyList
-            title={
-              <FormattedMessage
-                id="pages.SystemModelCreate.noHardwareTypes.title"
-                defaultMessage="You haven't created any hardware type yet"
-              />
-            }
-          >
-            <p>
-              <FormattedMessage
-                id="pages.SystemModelCreate.noHardwareTypes.message"
-                defaultMessage="You need at least one hardware type to create an application model"
-              />
-            </p>
-            <Button as={Link} route={Route.hardwareTypesNew}>
-              <FormattedMessage
-                id="pages.SystemModelCreate.noHardwareTypes.createButton"
-                defaultMessage="Create Hardware Type"
-              />
-            </Button>
-          </Result.EmptyList>
-        ) : (
-          <>
-            <Alert
-              show={!!errorFeedback}
-              variant="danger"
-              onClose={() => setErrorFeedback(null)}
-              dismissible
-            >
-              {errorFeedback}
-            </Alert>
-            <CreateSystemModelForm
-              hardwareTypesRef={hardwareTypes}
-              locale={locale}
-              onSubmit={handleCreateSystemModel}
-              isLoading={isCreatingSystemModel}
-            />
-          </>
-        )}
-      </Page.Main>
-    </Page>
+    </>
   );
 };
 
+const NoHardwareTypes = () => (
+  <Result.EmptyList
+    title={
+      <FormattedMessage
+        id="pages.SystemModelCreate.noHardwareTypes.title"
+        defaultMessage="You haven't created any hardware type yet"
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        id="pages.SystemModelCreate.noHardwareTypes.message"
+        defaultMessage="You need at least one hardware type to create an application model"
+      />
+    </p>
+    <Button as={Link} route={Route.hardwareTypesNew}>
+      <FormattedMessage
+        id="pages.SystemModelCreate.noHardwareTypes.createButton"
+        defaultMessage="Create Hardware Type"
+      />
+    </Button>
+  </Result.EmptyList>
+);
+
+type SystemModelWrapperProps = {
+  getCreateSystemModelOptionsQuery: PreloadedQuery<SystemModelCreate_getOptions_Query>;
+};
+
+const SystemModelWrapper = ({
+  getCreateSystemModelOptionsQuery,
+}: SystemModelWrapperProps) => {
+  const systemModelOptions = usePreloadedQuery(
+    CREATE_SYSTEM_MODEL_PAGE_QUERY,
+    getCreateSystemModelOptionsQuery,
+  );
+  const { hardwareTypes } = systemModelOptions;
+  if (hardwareTypes.length === 0) {
+    return <NoHardwareTypes />;
+  }
+  return <SystemModel systemModelOptions={systemModelOptions} />;
+};
+
 const SystemModelCreatePage = () => {
-  const [getHardwareTypesQuery, getHardwareTypes] =
-    useQueryLoader<SystemModelCreate_getHardwareTypes_Query>(
-      GET_HARDWARE_TYPES_QUERY,
-    );
-  const [getDefaultTenantLocaleQuery, getDefaultTenantLocale] =
-    useQueryLoader<SystemModelCreate_getDefaultTenantLocale_Query>(
-      GET_DEFAULT_TENANT_LOCALE_QUERY,
+  const [getCreateSystemModelOptionsQuery, getCreateSystemModelOptions] =
+    useQueryLoader<SystemModelCreate_getOptions_Query>(
+      CREATE_SYSTEM_MODEL_PAGE_QUERY,
     );
 
-  useEffect(() => getHardwareTypes({}), [getHardwareTypes]);
-  useEffect(() => getDefaultTenantLocale({}), [getDefaultTenantLocale]);
+  const fetchCreateSystemModelOptions = useCallback(
+    () => getCreateSystemModelOptions({}, { fetchPolicy: "network-only" }),
+    [getCreateSystemModelOptions],
+  );
+
+  useEffect(fetchCreateSystemModelOptions, [fetchCreateSystemModelOptions]);
 
   return (
     <Suspense
@@ -251,13 +221,26 @@ const SystemModelCreatePage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => getHardwareTypes({})}
+        onReset={fetchCreateSystemModelOptions}
       >
-        {getHardwareTypesQuery && getDefaultTenantLocaleQuery && (
-          <SystemModelContent
-            getHardwareTypesQuery={getHardwareTypesQuery}
-            getDefaultTenantLocaleQuery={getDefaultTenantLocaleQuery}
-          />
+        {getCreateSystemModelOptionsQuery && (
+          <Page>
+            <Page.Header
+              title={
+                <FormattedMessage
+                  id="pages.SystemModelCreate.title"
+                  defaultMessage="Create System Model"
+                />
+              }
+            />
+            <Page.Main>
+              <SystemModelWrapper
+                getCreateSystemModelOptionsQuery={
+                  getCreateSystemModelOptionsQuery
+                }
+              />
+            </Page.Main>
+          </Page>
         )}
       </ErrorBoundary>
     </Suspense>

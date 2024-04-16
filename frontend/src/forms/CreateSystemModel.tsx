@@ -21,6 +21,7 @@
 import React, { useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -33,14 +34,18 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { systemModelHandleSchema, messages, yup } from "forms";
-import { graphql, useFragment } from "react-relay/hooks";
-import type { CreateSystemModel_HardwareTypeFragment$key } from "api/__generated__/CreateSystemModel_HardwareTypeFragment.graphql";
+
+import type { CreateSystemModel_OptionsFragment$key } from "api/__generated__/CreateSystemModel_OptionsFragment.graphql";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
-  fragment CreateSystemModel_HardwareTypeFragment on HardwareType
-  @relay(plural: true) {
-    id
-    name
+  fragment CreateSystemModel_OptionsFragment on RootQueryType {
+    hardwareTypes {
+      id
+      name
+    }
+    tenantInfo {
+      defaultLocale
+    }
   }
 `;
 
@@ -146,23 +151,21 @@ const initialData: FormData = {
 };
 
 type Props = {
-  hardwareTypesRef: CreateSystemModel_HardwareTypeFragment$key;
-  locale: string;
+  optionsRef: CreateSystemModel_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: SystemModelChanges) => void;
 };
 
 const CreateSystemModelForm = ({
-  hardwareTypesRef,
-  locale,
+  optionsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
   const intl = useIntl();
-  const hardwareTypesData = useFragment(
-    CREATE_SYSTEM_MODEL_FRAGMENT,
-    hardwareTypesRef,
-  );
+  const {
+    hardwareTypes,
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(CREATE_SYSTEM_MODEL_FRAGMENT, optionsRef);
 
   const {
     control,
@@ -301,12 +304,9 @@ const CreateSystemModelForm = ({
                       defaultMessage: "Select a Hardware Type",
                     })}
                   </option>
-                  {hardwareTypesData.map((hardwareTypeOption) => (
-                    <option
-                      key={hardwareTypeOption.id}
-                      value={hardwareTypeOption.id}
-                    >
-                      {hardwareTypeOption.name}
+                  {hardwareTypes.map((hardwareType) => (
+                    <option key={hardwareType.id} value={hardwareType.id}>
+                      {hardwareType.name}
                     </option>
                   ))}
                 </Form.Select>
