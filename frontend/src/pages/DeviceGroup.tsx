@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -29,7 +29,6 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
-import _ from "lodash";
 
 import type { DeviceGroup_getDeviceGroup_Query } from "api/__generated__/DeviceGroup_getDeviceGroup_Query.graphql";
 import type { DeviceGroup_updateDeviceGroup_Mutation } from "api/__generated__/DeviceGroup_updateDeviceGroup_Mutation.graphql";
@@ -48,10 +47,9 @@ import type { DeviceGroupData } from "forms/UpdateDeviceGroup";
 const GET_DEVICE_GROUP_QUERY = graphql`
   query DeviceGroup_getDeviceGroup_Query($id: ID!) {
     deviceGroup(id: $id) {
-      id
       name
       handle
-      selector
+      ...UpdateDeviceGroup_DeviceGroupFragment
       devices {
         ...DevicesTable_DeviceFragment
       }
@@ -65,10 +63,9 @@ const UPDATE_DEVICE_GROUP_MUTATION = graphql`
   ) {
     updateDeviceGroup(input: $input) {
       deviceGroup {
-        id
         name
         handle
-        selector
+        ...UpdateDeviceGroup_DeviceGroupFragment
         devices {
           ...DevicesTable_DeviceFragment
         }
@@ -101,7 +98,7 @@ const DeviceGroupContent = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const deviceGroupData = usePreloadedQuery(
+  const { deviceGroup } = usePreloadedQuery(
     GET_DEVICE_GROUP_QUERY,
     getDeviceGroupQuery,
   );
@@ -183,12 +180,6 @@ const DeviceGroupContent = ({
     useMutation<DeviceGroup_updateDeviceGroup_Mutation>(
       UPDATE_DEVICE_GROUP_MUTATION,
     );
-
-  // TODO: handle readonly type without mapping to mutable type
-  const deviceGroup = useMemo(
-    () => deviceGroupData.deviceGroup && { ...deviceGroupData.deviceGroup },
-    [deviceGroupData.deviceGroup],
-  );
 
   const handleUpdateDeviceGroup = useCallback(
     (deviceGroup: DeviceGroupData) => {
@@ -303,7 +294,7 @@ const DeviceGroupContent = ({
         </Alert>
         <div className="mb-3">
           <UpdateDeviceGroupForm
-            initialData={_.pick(deviceGroup, ["name", "handle", "selector"])}
+            deviceGroupRef={deviceGroup}
             onSubmit={handleUpdateDeviceGroup}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingDeviceGroup}
