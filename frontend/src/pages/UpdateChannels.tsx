@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useCallback } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -82,7 +82,12 @@ const UpdateChannelsPage = () => {
       GET_UPDATE_CHANNELS_QUERY,
     );
 
-  useEffect(() => getUpdateChannels({}), [getUpdateChannels]);
+  const fetchUpdateChannels = useCallback(
+    () => getUpdateChannels({}, { fetchPolicy: "store-and-network" }),
+    [getUpdateChannels],
+  );
+
+  useEffect(fetchUpdateChannels, [fetchUpdateChannels]);
 
   return (
     <Suspense
@@ -98,7 +103,7 @@ const UpdateChannelsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => getUpdateChannels({})}
+        onReset={fetchUpdateChannels}
       >
         {getUpdateChannelsQuery && (
           <UpdateChannelsContent
