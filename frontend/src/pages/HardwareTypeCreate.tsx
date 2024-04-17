@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -36,9 +36,6 @@ const CREATE_HARDWARE_TYPE_MUTATION = graphql`
     createHardwareType(input: $input) {
       hardwareType {
         id
-        name
-        handle
-        partNumbers
       }
     }
   }
@@ -58,20 +55,18 @@ const HardwareTypeCreatePage = () => {
       createHardwareType({
         variables: { input: hardwareType },
         onCompleted(data, errors) {
+          if (data.createHardwareType) {
+            const hardwareTypeId = data.createHardwareType.hardwareType.id;
+            return navigate({
+              route: Route.hardwareTypesEdit,
+              params: { hardwareTypeId },
+            });
+          }
           if (errors) {
             const errorFeedback = errors
               .map((error) => error.message)
               .join(". \n");
             return setErrorFeedback(errorFeedback);
-          }
-          const hardwareTypeId = data.createHardwareType?.hardwareType.id;
-          if (hardwareTypeId) {
-            navigate({
-              route: Route.hardwareTypesEdit,
-              params: { hardwareTypeId },
-            });
-          } else {
-            navigate({ route: Route.hardwareTypes });
           }
         },
         onError() {
@@ -83,17 +78,21 @@ const HardwareTypeCreatePage = () => {
           );
         },
         updater(store, data) {
-          const hardwareTypeId = data.createHardwareType?.hardwareType?.id;
-          if (hardwareTypeId) {
-            const hardwareType = store.get(hardwareTypeId);
-            const root = store.getRoot();
-            const hardwareTypes = root.getLinkedRecords("hardwareTypes");
-            if (hardwareType && hardwareTypes) {
-              root.setLinkedRecords(
-                [hardwareType, ...hardwareTypes],
-                "hardwareTypes",
-              );
-            }
+          if (!data.createHardwareType) {
+            return;
+          }
+
+          const hardwareType = store
+            .getRootField("createHardwareType")
+            .getLinkedRecord("hardwareType");
+          const root = store.getRoot();
+          const hardwareTypes = root.getLinkedRecords("hardwareTypes");
+
+          if (hardwareTypes) {
+            root.setLinkedRecords(
+              [...hardwareTypes, hardwareType],
+              "hardwareTypes",
+            );
           }
         },
       });
