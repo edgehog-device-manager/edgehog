@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -29,9 +29,11 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
-import _ from "lodash";
 
-import type { HardwareType_getHardwareType_Query } from "api/__generated__/HardwareType_getHardwareType_Query.graphql";
+import type {
+  HardwareType_getHardwareType_Query,
+  HardwareType_getHardwareType_Query$data,
+} from "api/__generated__/HardwareType_getHardwareType_Query.graphql";
 import type { HardwareType_updateHardwareType_Mutation } from "api/__generated__/HardwareType_updateHardwareType_Mutation.graphql";
 import type { HardwareType_deleteHardwareType_Mutation } from "api/__generated__/HardwareType_deleteHardwareType_Mutation.graphql";
 import { Link, Route, useNavigate } from "Navigation";
@@ -41,17 +43,16 @@ import DeleteModal from "components/DeleteModal";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
-import UpdateHardwareTypeForm, {
-  HardwareTypeData,
-} from "forms/UpdateHardwareType";
+import UpdateHardwareTypeForm from "forms/UpdateHardwareType";
+import type { HardwareTypeData } from "forms/UpdateHardwareType";
 
 const GET_HARDWARE_TYPE_QUERY = graphql`
-  query HardwareType_getHardwareType_Query($id: ID!) {
-    hardwareType(id: $id) {
+  query HardwareType_getHardwareType_Query($hardwareTypeId: ID!) {
+    hardwareType(id: $hardwareTypeId) {
       id
       name
       handle
-      partNumbers
+      ...UpdateHardwareType_HardwareTypeFragment
     }
   }
 `;
@@ -65,7 +66,7 @@ const UPDATE_HARDWARE_TYPE_MUTATION = graphql`
         id
         name
         handle
-        partNumbers
+        ...UpdateHardwareType_HardwareTypeFragment
       }
     }
   }
@@ -84,21 +85,17 @@ const DELETE_HARDWARE_TYPE_MUTATION = graphql`
 `;
 
 interface HardwareTypeContentProps {
-  getHardwareTypeQuery: PreloadedQuery<HardwareType_getHardwareType_Query>;
+  hardwareType: NonNullable<
+    HardwareType_getHardwareType_Query$data["hardwareType"]
+  >;
 }
 
-const HardwareTypeContent = ({
-  getHardwareTypeQuery,
-}: HardwareTypeContentProps) => {
-  const { hardwareTypeId = "" } = useParams();
+const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const hardwareTypeData = usePreloadedQuery(
-    GET_HARDWARE_TYPE_QUERY,
-    getHardwareTypeQuery,
-  );
+  const hardwareTypeId = hardwareType.id;
 
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
@@ -110,20 +107,20 @@ const HardwareTypeContent = ({
     );
 
   const handleDeleteHardwareType = useCallback(() => {
-    const input = {
-      hardwareTypeId,
-    };
+    const input = { hardwareTypeId };
     deleteHardwareType({
       variables: { input },
       onCompleted(data, errors) {
+        if (data.deleteHardwareType) {
+          return navigate({ route: Route.hardwareTypes });
+        }
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)
             .join(". \n");
           setErrorFeedback(errorFeedback);
-          return setShowDeleteModal(false);
+          setShowDeleteModal(false);
         }
-        navigate({ route: Route.hardwareTypes });
       },
       onError() {
         setErrorFeedback(
@@ -135,20 +132,22 @@ const HardwareTypeContent = ({
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        const hardwareTypeId = data.deleteHardwareType?.hardwareType.id;
-        if (hardwareTypeId) {
-          const root = store.getRoot();
-          const hardwareTypes = root.getLinkedRecords("hardwareTypes");
-          if (hardwareTypes) {
-            root.setLinkedRecords(
-              hardwareTypes.filter(
-                (hardwareType) => hardwareType.getDataID() !== hardwareTypeId,
-              ),
-              "hardwareTypes",
-            );
-          }
-          store.delete(hardwareTypeId);
+        if (!data.deleteHardwareType) {
+          return;
         }
+
+        const hardwareTypeId = data.deleteHardwareType.hardwareType.id;
+        const root = store.getRoot();
+        const hardwareTypes = root.getLinkedRecords("hardwareTypes");
+        if (hardwareTypes) {
+          root.setLinkedRecords(
+            hardwareTypes.filter(
+              (hardwareType) => hardwareType.getDataID() !== hardwareTypeId,
+            ),
+            "hardwareTypes",
+          );
+        }
+        store.delete(hardwareTypeId);
       },
     });
   }, [deleteHardwareType, hardwareTypeId, navigate]);
@@ -157,16 +156,6 @@ const HardwareTypeContent = ({
     useMutation<HardwareType_updateHardwareType_Mutation>(
       UPDATE_HARDWARE_TYPE_MUTATION,
     );
-
-  // TODO: handle readonly type without mapping to mutable type
-  const hardwareType = useMemo(
-    () =>
-      hardwareTypeData.hardwareType && {
-        ...hardwareTypeData.hardwareType,
-        partNumbers: [...hardwareTypeData.hardwareType.partNumbers],
-      },
-    [hardwareTypeData.hardwareType],
-  );
 
   const handleUpdateHardwareType = useCallback(
     (hardwareType: HardwareTypeData) => {
@@ -183,6 +172,9 @@ const HardwareTypeContent = ({
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
+          if (data.updateHardwareType) {
+            return setErrorFeedback(null);
+          }
         },
         onError() {
           setErrorFeedback(
@@ -197,26 +189,6 @@ const HardwareTypeContent = ({
     [updateHardwareType, hardwareTypeId],
   );
 
-  if (!hardwareType) {
-    return (
-      <Result.NotFound
-        title={
-          <FormattedMessage
-            id="pages.HardwareType.hardwareTypeNotFound.title"
-            defaultMessage="Hardware type not found."
-          />
-        }
-      >
-        <Link route={Route.hardwareTypes}>
-          <FormattedMessage
-            id="pages.HardwareType.hardwareTypeNotFound.message"
-            defaultMessage="Return to the hardware type list."
-          />
-        </Link>
-      </Result.NotFound>
-    );
-  }
-
   return (
     <Page>
       <Page.Header title={hardwareType.name} />
@@ -230,7 +202,7 @@ const HardwareTypeContent = ({
           {errorFeedback}
         </Alert>
         <UpdateHardwareTypeForm
-          initialData={_.pick(hardwareType, ["name", "handle", "partNumbers"])}
+          hardwareTypeRef={hardwareType}
           onSubmit={handleUpdateHardwareType}
           onDelete={handleShowDeleteModal}
           isLoading={isUpdatingHardwareType}
@@ -267,15 +239,52 @@ const HardwareTypeContent = ({
   );
 };
 
+type HardwareTypeWrapperProps = {
+  getHardwareTypeQuery: PreloadedQuery<HardwareType_getHardwareType_Query>;
+};
+
+const HardwareTypeWrapper = ({
+  getHardwareTypeQuery,
+}: HardwareTypeWrapperProps) => {
+  const { hardwareType } = usePreloadedQuery(
+    GET_HARDWARE_TYPE_QUERY,
+    getHardwareTypeQuery,
+  );
+
+  if (!hardwareType) {
+    return (
+      <Result.NotFound
+        title={
+          <FormattedMessage
+            id="pages.HardwareType.hardwareTypeNotFound.title"
+            defaultMessage="Hardware type not found."
+          />
+        }
+      >
+        <Link route={Route.hardwareTypes}>
+          <FormattedMessage
+            id="pages.HardwareType.hardwareTypeNotFound.message"
+            defaultMessage="Return to the hardware type list."
+          />
+        </Link>
+      </Result.NotFound>
+    );
+  }
+
+  return <HardwareTypeContent hardwareType={hardwareType} />;
+};
+
 const HardwareTypePage = () => {
   const { hardwareTypeId = "" } = useParams();
 
   const [getHardwareTypeQuery, getHardwareType] =
     useQueryLoader<HardwareType_getHardwareType_Query>(GET_HARDWARE_TYPE_QUERY);
 
-  useEffect(() => {
-    getHardwareType({ id: hardwareTypeId });
+  const fetchHardwareType = useCallback(() => {
+    getHardwareType({ hardwareTypeId }, { fetchPolicy: "network-only" });
   }, [getHardwareType, hardwareTypeId]);
+
+  useEffect(fetchHardwareType, [fetchHardwareType]);
 
   return (
     <Suspense
@@ -291,12 +300,10 @@ const HardwareTypePage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => {
-          getHardwareType({ id: hardwareTypeId });
-        }}
+        onReset={fetchHardwareType}
       >
         {getHardwareTypeQuery && (
-          <HardwareTypeContent getHardwareTypeQuery={getHardwareTypeQuery} />
+          <HardwareTypeWrapper getHardwareTypeQuery={getHardwareTypeQuery} />
         )}
       </ErrorBoundary>
     </Suspense>
