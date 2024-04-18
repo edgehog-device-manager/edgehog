@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
-  import_types EdgehogWeb.Schema.BaseImagesTypes
   import_types EdgehogWeb.Schema.ForwarderSessionsTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
@@ -33,6 +32,7 @@ defmodule EdgehogWeb.Schema do
   import_types Absinthe.Type.Custom
 
   @domains [
+    Edgehog.BaseImages,
     Edgehog.Devices,
     Edgehog.Groups,
     Edgehog.Labeling,
@@ -45,7 +45,6 @@ defmodule EdgehogWeb.Schema do
     define_relay_types?: false,
     relay_ids?: true
 
-  alias EdgehogWeb.Middleware
   alias EdgehogWeb.Resolvers
 
   node interface do
@@ -114,14 +113,12 @@ defmodule EdgehogWeb.Schema do
       end
     end
 
-    import_fields :base_images_queries
     import_fields :forwarder_sessions_queries
     import_fields :update_campaigns_queries
   end
 
   mutation do
     import_fields :astarte_mutations
-    import_fields :base_images_mutations
     import_fields :forwarder_sessions_mutations
     import_fields :os_management_mutations
     import_fields :update_campaigns_mutations

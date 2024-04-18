@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,210 +19,93 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.BaseImageTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
   use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.BaseImagesFixtures
 
   alias Edgehog.BaseImages.BaseImage
 
+  @moduletag :ported_to_ash
+
   describe "baseImage query" do
-    test "returns base image with all fields if present", %{conn: conn, api_path: api_path} do
-      base_image = base_image_fixture()
-      response = base_image_query(conn, api_path, base_image)
+    setup %{tenant: tenant} do
+      base_image =
+        base_image_fixture(tenant: tenant)
 
-      assert response["data"]["baseImage"]["version"] == base_image.version
-      assert response["data"]["baseImage"]["url"] == base_image.url
+      id = AshGraphql.Resource.encode_relay_id(base_image)
 
-      assert response["data"]["baseImage"]["baseImageCollection"]["handle"] ==
-               base_image.base_image_collection.handle
+      %{base_image: base_image, id: id}
     end
 
-    test "returns not found if non existing", %{conn: conn, api_path: api_path} do
-      response = base_image_query(conn, api_path, 1_234_567)
-      assert response["data"]["baseImage"] == nil
-      assert [%{"code" => "not_found", "status_code" => 404}] = response["errors"]
+    test "returns base image with all fields if present", %{
+      tenant: tenant,
+      base_image: fixture,
+      id: id
+    } do
+      base_image = base_image_query(tenant: tenant, id: id) |> extract_result!()
+
+      assert base_image["id"] == id
+      assert base_image["version"] == fixture.version
+      assert base_image["startingVersionRequirement"] == fixture.starting_version_requirement
+      assert base_image["url"] == fixture.url
+      assert base_image["baseImageCollection"]["handle"] == fixture.base_image_collection.handle
+    end
+
+    test "returns nil if non existing", %{tenant: tenant} do
+      id = non_existing_base_image_id(tenant)
+
+      result = base_image_query(tenant: tenant, id: id)
+
+      assert result == %{data: %{"baseImage" => nil}}
     end
   end
 
-  describe "baseImage query, description field" do
-    test "returns the default locale", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = description_fixture([default_locale, "it-IT"])
-      base_image = base_image_fixture(description: description)
-      response = base_image_query(conn, api_path, base_image)
-
-      assert response["data"]["baseImage"]["description"] == description[default_locale]
-    end
-
-    test "returns the locale in the accept-language header if present", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = description_fixture([default_locale, "it-IT"])
-      base_image = base_image_fixture(description: description)
-
-      response =
-        conn
-        |> accept_language("it-IT")
-        |> base_image_query(api_path, base_image)
-
-      assert response["data"]["baseImage"]["description"] == description["it-IT"]
-    end
-
-    test "returns the tenant's default locale for non existing locale", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = description_fixture([default_locale, "it-IT"])
-      base_image = base_image_fixture(description: description)
-
-      response =
-        conn
-        |> accept_language("fr-FR")
-        |> base_image_query(api_path, base_image)
-
-      assert response["data"]["baseImage"]["description"] == description[default_locale]
-    end
-
-    test "returns nil if both explicit and tenant default locale are missing", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      description = description_fixture(["it-IT"])
-      base_image = base_image_fixture(description: description)
-
-      response =
-        conn
-        |> accept_language("fr-FR")
-        |> base_image_query(api_path, base_image)
-
-      assert response["data"]["baseImage"]["description"] == nil
-    end
-  end
-
-  describe "baseImage query, release_display_name field" do
-    test "returns the default locale", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      release_display_name = release_display_name_fixture([default_locale, "it-IT"])
-      base_image = base_image_fixture(release_display_name: release_display_name)
-      response = base_image_query(conn, api_path, base_image)
-
-      assert response["data"]["baseImage"]["releaseDisplayName"] ==
-               release_display_name[default_locale]
-    end
-
-    test "returns the locale in the accept-language header if present", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      release_display_name = release_display_name_fixture([default_locale, "it-IT"])
-      base_image = base_image_fixture(release_display_name: release_display_name)
-
-      response =
-        conn
-        |> accept_language("it-IT")
-        |> base_image_query(api_path, base_image)
-
-      assert response["data"]["baseImage"]["releaseDisplayName"] == release_display_name["it-IT"]
-    end
-
-    test "returns the tenant's default locale for non existing locale", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      release_display_name = release_display_name_fixture([default_locale, "it-IT"])
-      base_image = base_image_fixture(release_display_name: release_display_name)
-
-      response =
-        conn
-        |> accept_language("fr-FR")
-        |> base_image_query(api_path, base_image)
-
-      assert response["data"]["baseImage"]["releaseDisplayName"] ==
-               release_display_name[default_locale]
-    end
-
-    test "returns nil if both explicit and tenant default locale are missing", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      description = description_fixture(["it-IT"])
-      base_image = base_image_fixture(description: description)
-
-      response =
-        conn
-        |> accept_language("fr-FR")
-        |> base_image_query(api_path, base_image)
-
-      assert response["data"]["baseImage"]["description"] == nil
-    end
-  end
-
-  @query """
-  query ($id: ID!) {
-    baseImage(id: $id) {
-      version
-      url
-      description
-      releaseDisplayName
-      baseImageCollection {
-        handle
+  defp base_image_query(opts) do
+    default_document = """
+    query ($id: ID!) {
+      baseImage(id: $id) {
+        id
+        url
+        version
+        startingVersionRequirement
+        baseImageCollection {
+          handle
+        }
       }
     }
-  }
-  """
-  defp base_image_query(conn, api_path, target, opts \\ [])
+    """
 
-  defp base_image_query(conn, api_path, %BaseImage{} = base_image, opts) do
-    base_image_query(conn, api_path, base_image.id, opts)
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
+
+    variables = %{"id" => id}
+
+    document = Keyword.get(opts, :document, default_document)
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 
-  defp base_image_query(conn, api_path, id, opts) do
-    id = Absinthe.Relay.Node.to_global_id(:base_image, id, EdgehogWeb.Schema)
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "baseImage" => base_image
+             }
+           } = result
 
-    variables = %{id: id}
-    query = Keyword.get(opts, :query, @query)
-    conn = get(conn, api_path, query: query, variables: variables)
+    refute Map.get(result, :errors)
 
-    json_response(conn, 200)
+    assert base_image != nil
+
+    base_image
   end
 
-  defp accept_language(conn, locale) do
-    put_req_header(conn, "accept-language", locale)
-  end
+  defp non_existing_base_image_id(tenant) do
+    fixture = base_image_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
 
-  defp description_fixture(locales) when is_list(locales) do
-    for locale <- locales, into: %{} do
-      {locale, "#{locale} description"}
-    end
-  end
+    :ok = Ash.destroy!(fixture, action: :destroy_fixture)
 
-  defp release_display_name_fixture(locales) when is_list(locales) do
-    for locale <- locales, into: %{} do
-      {locale, "#{locale} release display name"}
-    end
+    id
   end
 end

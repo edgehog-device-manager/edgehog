@@ -90,6 +90,7 @@ config :edgehog, Edgehog.PromEx,
 
 config :edgehog, :ash_domains, [
   Edgehog.Astarte,
+  Edgehog.BaseImages,
   Edgehog.Devices,
   Edgehog.Groups,
   Edgehog.Labeling,

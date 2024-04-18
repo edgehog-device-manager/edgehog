@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,140 +19,245 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
   use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.BaseImagesFixtures
 
+  @moduletag :ported_to_ash
+
   describe "createBaseImage mutation" do
-    setup do
-      {:ok, base_image_collection: base_image_collection_fixture()}
-    end
+    test "creates base image with valid data", %{tenant: tenant} do
+      base_image_collection_id =
+        base_image_collection_fixture(tenant: tenant)
+        |> AshGraphql.Resource.encode_relay_id()
 
-    test "creates base image with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant,
-      base_image_collection: base_image_collection
-    } do
-      default_tenant_locale = tenant.default_locale
+      file_url = "https://example.com/ota.bin"
 
-      response =
-        create_base_image_mutation(conn, api_path,
-          base_image_collection_id: base_image_collection.id,
+      Edgehog.BaseImages.StorageMock
+      |> expect(:store, fn _, _ -> {:ok, file_url} end)
+
+      result =
+        create_base_image_mutation(
+          tenant: tenant,
+          base_image_collection_id: base_image_collection_id,
           version: "2.0.0",
           starting_version_requirement: "~> 1.0",
-          description: localized_text(default_tenant_locale, "Description"),
-          release_display_name: localized_text(default_tenant_locale, "Display name")
+          file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
         )
 
-      base_image = response["data"]["createBaseImage"]["baseImage"]
-      assert base_image["version"] == "2.0.0"
-      assert base_image["startingVersionRequirement"] == "~> 1.0"
-      assert base_image["description"] == "Description"
-      assert base_image["releaseDisplayName"] == "Display name"
-      assert base_image["baseImageCollection"]["handle"] == base_image_collection.handle
+      base_image = extract_result!(result)
+
+      assert %{
+               "id" => _,
+               "version" => "2.0.0",
+               "startingVersionRequirement" => "~> 1.0",
+               "url" => ^file_url,
+               "baseImageCollection" => %{
+                 "id" => ^base_image_collection_id
+               }
+             } = base_image
     end
 
-    test "fails with invalid data", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
-    } do
-      response =
-        create_base_image_mutation(conn, api_path,
-          base_image_collection_id: base_image_collection.id,
-          version: "invalid"
+    test "returns error for non-existing base image collection", %{tenant: tenant} do
+      base_image_collection = base_image_collection_fixture(tenant: tenant)
+      base_image_collection_id = AshGraphql.Resource.encode_relay_id(base_image_collection)
+      _ = Ash.destroy!(base_image_collection)
+
+      result =
+        create_base_image_mutation(
+          tenant: tenant,
+          base_image_collection_id: base_image_collection_id
         )
 
-      assert response["data"]["createBaseImage"] == nil
-      assert response["errors"] != nil
+      # TODO: wrong fields returned by AshGraphql
+      assert %{fields: [:id], message: "could not be found" <> _} =
+               extract_error!(result)
     end
 
-    test "fails when not using the default tenant locale for the description", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
-    } do
-      response =
-        create_base_image_mutation(conn, api_path,
-          base_image_collection_id: base_image_collection.id,
-          description: localized_text("it-IT", "Descrizione")
+    test "returns error for missing version", %{tenant: tenant} do
+      result = create_base_image_mutation(tenant: tenant, version: nil)
+
+      assert %{message: message} = extract_error!(result)
+
+      assert String.contains?(
+               message,
+               "In field \"version\": Expected type \"String!\", found null."
+             )
+    end
+
+    test "returns error for empty version", %{tenant: tenant} do
+      result = create_base_image_mutation(tenant: tenant, version: "")
+
+      assert %{fields: [:version], message: "is required"} =
+               extract_error!(result)
+    end
+
+    test "returns error for invalid version", %{tenant: tenant} do
+      result = create_base_image_mutation(tenant: tenant, version: "invalid")
+
+      assert %{fields: [:version], message: "is not a valid version"} =
+               extract_error!(result)
+    end
+
+    test "returns error for invalid starting version requirement", %{tenant: tenant} do
+      result =
+        create_base_image_mutation(
+          tenant: tenant,
+          starting_version_requirement: "invalid"
         )
 
-      assert response["data"]["createBaseImage"] == nil
-      assert %{"errors" => [%{"status_code" => 422, "code" => "not_default_locale"}]} = response
+      assert %{
+               fields: [:starting_version_requirement],
+               message: "is not a valid version requirement"
+             } =
+               extract_error!(result)
     end
 
-    test "fails when not using the default tenant locale for the release display name", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
+    test "returns error for duplicate version in the same base image collection", %{
+      tenant: tenant
     } do
-      response =
-        create_base_image_mutation(conn, api_path,
-          base_image_collection_id: base_image_collection.id,
-          release_display_name: localized_text("it-IT", "Nome")
+      base_image_collection = base_image_collection_fixture(tenant: tenant)
+
+      base_image =
+        base_image_fixture(tenant: tenant, base_image_collection_id: base_image_collection.id)
+
+      result =
+        create_base_image_mutation(
+          tenant: tenant,
+          version: base_image.version,
+          base_image_collection_id: AshGraphql.Resource.encode_relay_id(base_image_collection)
         )
 
-      assert response["data"]["createBaseImage"] == nil
-      assert %{"errors" => [%{"status_code" => 422, "code" => "not_default_locale"}]} = response
+      assert %{fields: [:version], message: "has already been taken"} =
+               extract_error!(result)
     end
 
-    test "fails when trying to use a non-existing base image collection", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      response = create_base_image_mutation(conn, api_path, base_image_collection_id: "123456")
+    test "succeeds for duplicate version on a different base image collection", %{tenant: tenant} do
+      fixture = base_image_fixture(tenant: tenant)
+      result = create_base_image_mutation(tenant: tenant, version: fixture.version)
+      base_image = extract_result!(result)
 
-      assert %{"errors" => [%{"status_code" => 404, "code" => "not_found"}]} = response
+      assert base_image["version"] == fixture.version
+    end
+
+    test "doesn't upload the base image to the storage with invalid data", %{tenant: tenant} do
+      Edgehog.BaseImages.StorageMock
+      |> expect(:store, 0, fn _, _ -> {:error, :unreachable} end)
+
+      result = create_base_image_mutation(tenant: tenant, version: "invalid")
+
+      assert %{message: "is not a valid version"} = extract_error!(result)
+    end
+
+    test "returns error if the upload to the storage fails", %{tenant: tenant} do
+      Edgehog.BaseImages.StorageMock
+      |> expect(:store, fn _, _ -> {:error, :bucket_is_full} end)
+
+      result = create_base_image_mutation(tenant: tenant)
+
+      assert %{
+               fields: [:file],
+               message: "failed to upload"
+             } = extract_error!(result)
+    end
+
+    test "attempts to delete the uploaded file when the mutation fails", %{tenant: tenant} do
+      Edgehog.BaseImages.StorageMock
+      |> expect(:delete, fn _ -> :ok end)
+
+      # Simulate a mutation that fail because of unique constraints on :version
+      # so that data validation succeeds but the database transaction fails.
+
+      base_image_collection = base_image_collection_fixture(tenant: tenant)
+
+      base_image =
+        base_image_fixture(tenant: tenant, base_image_collection_id: base_image_collection.id)
+
+      result =
+        create_base_image_mutation(
+          tenant: tenant,
+          version: base_image.version,
+          base_image_collection_id: AshGraphql.Resource.encode_relay_id(base_image_collection)
+        )
+
+      assert %{message: "has already been taken"} = extract_error!(result)
     end
   end
 
-  @query """
-  mutation CreateBaseImage($input: CreateBaseImageInput!) {
-    createBaseImage(input: $input) {
-      baseImage {
-        version
-        url
-        startingVersionRequirement
-        description
-        releaseDisplayName
-        baseImageCollection {
-          handle
+  defp create_base_image_mutation(opts) do
+    default_document = """
+    mutation CreateBaseImage($input: CreateBaseImageInput!) {
+      createBaseImage(input: $input) {
+        result {
+          id
+          version
+          url
+          startingVersionRequirement
+          baseImageCollection {
+            id
+          }
         }
       }
     }
-  }
-  """
-  defp create_base_image_mutation(conn, api_path, opts) do
-    base_image_collection_id =
-      Absinthe.Relay.Node.to_global_id(
-        :base_image_collection,
-        opts[:base_image_collection_id],
-        EdgehogWeb.Schema
-      )
+    """
 
-    fake_image = %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    input =
-      Enum.into(opts, %{
-        version: unique_base_image_version(),
-        file: "fake_image"
-      })
-      |> Map.put(:base_image_collection_id, base_image_collection_id)
+    {base_image_collection_id, opts} =
+      Keyword.pop_lazy(opts, :base_image_collection_id, fn ->
+        base_image_collection_fixture(tenant: tenant)
+        |> AshGraphql.Resource.encode_relay_id()
+      end)
 
-    variables = %{input: input}
+    {version, opts} = Keyword.pop_lazy(opts, :version, &unique_base_image_version/0)
 
-    conn = post(conn, api_path, query: @query, variables: variables, fake_image: fake_image)
+    {file, opts} =
+      Keyword.pop_lazy(opts, :file, fn ->
+        %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
+      end)
 
-    json_response(conn, 200)
+    input = %{
+      "baseImageCollectionId" => base_image_collection_id,
+      "version" => version,
+      "startingVersionRequirement" => opts[:starting_version_requirement],
+      "file" => file && "file"
+    }
+
+    variables = %{"input" => input}
+
+    document = Keyword.get(opts, :document, default_document)
+
+    context =
+      %{tenant: tenant}
+      |> add_upload("file", file)
+
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: context
+    )
   end
 
-  defp localized_text(locale, text) do
-    %{
-      locale: locale,
-      text: text
-    }
+  defp extract_error!(result) do
+    assert is_nil(result[:data]["createBaseImage"])
+    assert %{errors: [error]} = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "createBaseImage" => %{
+                 "result" => base_image
+               }
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert base_image != nil
+
+    base_image
   end
 end
