@@ -400,6 +400,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         "LED_BEHAVIORS",
         "NETWORK_INTERFACE_INFO",
         "OPERATING_SYSTEM",
+        "REMOTE_TERMINAL",
         "RUNTIME_INFO",
         "SOFTWARE_UPDATES",
         "STORAGE",

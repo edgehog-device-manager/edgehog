@@ -24,7 +24,7 @@ defmodule Doc.MixProject do
   def project do
     [
       app: :doc,
-      version: "0.8.0-dev",
+      version: "0.9.0-dev",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -51,9 +51,11 @@ defmodule Doc.MixProject do
         "OTA Updates": ~r"/ota_updates/",
         Architecture: ~r"/architecture/",
         "Admin Guide": ~r"/admin/",
-        "Integrating with Edgehog": ~r"/integrating/"
+        "Integrating with Edgehog": ~r"/integrating/",
+        Tutorials: ~r"/tutorials/"
       ],
-      groups_for_modules: []
+      groups_for_modules: [],
+      javascript_config_path: "../versions.js"
     ]
   end
 
@@ -74,6 +76,7 @@ defmodule Doc.MixProject do
       "pages/ota_updates/update_channels.md",
       "pages/ota_updates/update_campaigns.md",
       "pages/ota_updates/ota_updates.md",
+      "pages/tutorials/edgehog_in_5_minutes.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
       "pages/integrating/astarte_interfaces.md",

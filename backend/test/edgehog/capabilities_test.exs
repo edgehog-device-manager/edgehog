@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ defmodule Edgehog.CapabilitiesTest do
           minor: 1
         },
         "io.edgehog.devicemanager.Commands" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.ForwarderSessionState" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.HardwareInfo" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.LedBehavior" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.NetworkInterfaceProperties" => %InterfaceVersion{
@@ -45,6 +46,10 @@ defmodule Edgehog.CapabilitiesTest do
           minor: 1
         },
         "io.edgehog.devicemanager.OSInfo" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.ForwarderSessionRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
         "io.edgehog.devicemanager.RuntimeInfo" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.OTARequest" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.OTAResponse" => %InterfaceVersion{major: 0, minor: 1},
@@ -65,6 +70,7 @@ defmodule Edgehog.CapabilitiesTest do
         :led_behaviors,
         :network_interface_info,
         :operating_system,
+        :remote_terminal,
         :runtime_info,
         :software_updates,
         :storage,
