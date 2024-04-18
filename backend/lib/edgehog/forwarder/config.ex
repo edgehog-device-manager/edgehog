@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-IPBASE_API_KEY=
-GOOGLE_GEOLOCATION_API_KEY=
-GOOGLE_GEOCODING_API_KEY=
+defmodule Edgehog.Forwarder.Config do
+  @type t :: %__MODULE__{
+          hostname: String.t(),
+          port: integer(),
+          secure_sessions?: boolean()
+        }
 
-S3_ACCESS_KEY_ID=minioadmin
-S3_SECRET_ACCESS_KEY=minioadmin
-S3_REGION=local
-S3_SCHEME=http://
-S3_HOST=minio
-S3_PORT=9000
-S3_BUCKET=edgehog
-S3_ASSET_HOST=http://minio-storage.edgehog.localhost/edgehog
-S3_GCP_CREDENTIALS=
-
-SEEDS_REALM=test
-SEEDS_REALM_PRIVATE_KEY_FILE=./backend/priv/repo/seeds/keys/realm_private.pem
-SEEDS_TENANT_PRIVATE_KEY_FILE=./backend/priv/repo/seeds/keys/tenant_private.pem
-SEEDS_ASTARTE_BASE_API_URL=http://api.astarte.localhost
+  @enforce_keys [:hostname, :port, :secure_sessions?]
+  defstruct @enforce_keys
+end

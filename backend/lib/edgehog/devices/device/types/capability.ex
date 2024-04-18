@@ -30,6 +30,7 @@ defmodule Edgehog.Devices.Device.Types.Capability do
       led_behaviors: "The device can be asked to blink its LED in a specific pattern.",
       network_interface_info: "The device can provide information about its network interfaces.",
       operating_system: "The device provides information about its operating system.",
+      remote_terminal: "The device supports remote terminal sessions.",
       runtime_info: "The device provides information about its runtime.",
       software_updates: "The device can be updated remotely.",
       storage: "The device provides information about its storage units.",
