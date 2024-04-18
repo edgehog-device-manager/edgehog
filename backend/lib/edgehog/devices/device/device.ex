@@ -26,6 +26,7 @@ defmodule Edgehog.Devices.Device do
     ]
 
   alias Edgehog.Devices.Device.Calculations
+  alias Edgehog.Devices.Device.Changes
   alias Edgehog.Devices.Device.ManualRelationships
   alias Edgehog.Devices.Device.Types
 
@@ -60,7 +61,113 @@ defmodule Edgehog.Devices.Device do
 
     create :create do
       primary? true
-      accept [:device_id, :name, :part_number, :online, :realm_id]
+
+      accept [
+        :device_id,
+        :name,
+        :part_number,
+        :online,
+        :realm_id,
+        :last_connection,
+        :last_disconnection
+      ]
+    end
+
+    create :from_device_connected_event do
+      upsert? true
+      upsert_identity :device_id_realm_id_tenant_id
+      upsert_fields [:online, :last_connection, :updated_at]
+
+      accept [:realm_id]
+      argument :device_id, :string, allow_nil?: false
+      argument :timestamp, :datetime, allow_nil?: false
+
+      change Changes.InitializeFromDeviceStatus
+
+      # Only if created
+      change set_attribute(:device_id, arg(:device_id))
+      change set_attribute(:name, arg(:device_id))
+
+      # If updated or created
+      change set_attribute(:online, true)
+      change set_attribute(:last_connection, arg(:timestamp))
+    end
+
+    create :from_device_disconnected_event do
+      upsert? true
+      upsert_identity :device_id_realm_id_tenant_id
+      upsert_fields [:online, :last_disconnection, :updated_at]
+
+      accept [:realm_id]
+      argument :device_id, :string, allow_nil?: false
+      argument :timestamp, :datetime, allow_nil?: false
+
+      change Changes.InitializeFromDeviceStatus
+
+      # Only if created
+      change set_attribute(:device_id, arg(:device_id))
+      change set_attribute(:name, arg(:device_id))
+
+      # If updated or created
+      change set_attribute(:online, false)
+      change set_attribute(:last_disconnection, arg(:timestamp))
+    end
+
+    create :from_serial_number_event do
+      upsert? true
+      upsert_identity :device_id_realm_id_tenant_id
+      upsert_fields [:online, :serial_number, :updated_at]
+
+      accept [:serial_number, :realm_id]
+      argument :device_id, :string, allow_nil?: false
+
+      change Changes.InitializeFromDeviceStatus
+
+      # Only if created
+      change set_attribute(:device_id, arg(:device_id))
+      change set_attribute(:name, arg(:device_id))
+
+      # We also set the device to online since it sent some data. This helps resynchronizing the
+      # online state for long-running devices if a device connected trigger is missed
+      change set_attribute(:online, true)
+    end
+
+    create :from_part_number_event do
+      upsert? true
+      upsert_identity :device_id_realm_id_tenant_id
+      upsert_fields [:online, :part_number, :updated_at]
+
+      accept [:part_number, :realm_id]
+      argument :device_id, :string, allow_nil?: false
+
+      change Changes.InitializeFromDeviceStatus
+
+      # Only if created
+      change set_attribute(:device_id, arg(:device_id))
+      change set_attribute(:name, arg(:device_id))
+
+      # We also set the device to online since it sent some data. This helps resynchronizing the
+      # online state for long-running devices if a device connected trigger is missed
+      change set_attribute(:online, true)
+    end
+
+    create :from_unhandled_event do
+      upsert? true
+      upsert_identity :device_id_realm_id_tenant_id
+      upsert_fields [:online, :updated_at]
+
+      accept [:realm_id]
+      argument :device_id, :string, allow_nil?: false
+
+      change Changes.InitializeFromDeviceStatus
+
+      # Only if created
+      change set_attribute(:device_id, arg(:device_id))
+      change set_attribute(:name, arg(:device_id))
+
+      # We also set the device to online since it sent some data. This helps resynchronizing the
+      # online state for long-running devices if a device connected trigger is missed
+      change set_attribute(:online, true)
     end
 
     read :get do
@@ -116,6 +223,10 @@ defmodule Edgehog.Devices.Device do
                value_is_key: :name,
                use_identities: [:name_tenant_id]
              )
+    end
+
+    update :from_device_status do
+      accept [:online, :last_connection, :last_disconnection]
     end
   end
 
