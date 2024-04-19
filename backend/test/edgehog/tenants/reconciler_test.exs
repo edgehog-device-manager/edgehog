@@ -31,6 +31,64 @@ defmodule Edgehog.Tenants.ReconcilerTest do
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 
+  describe "reconcile_all" do
+    setup do
+      # We have to use Mox in global mode because the Interfaces and Triggers mocks are
+      # called by an anoymous task launched by the reconciler and we can't easily recover
+      # its pid to allow mocks call from it
+      Mox.set_mox_global()
+
+      tenant_1 = tenant_fixture()
+      tenant_2 = tenant_fixture()
+      _realm_1 = realm_fixture(tenant: tenant_1)
+      _realm_2 = realm_fixture(tenant: tenant_2)
+
+      :ok
+    end
+
+    test "reconciles interfaces and triggers for all tenants" do
+      # Multiply by 2 since we have 2 tenants
+      interface_count = (Reconciler.Core.list_required_interfaces() |> length()) * 2
+      trigger_count = (Reconciler.Core.list_required_triggers("foo") |> length()) * 2
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.Astarte.Interface.MockDataLayer
+      |> expect(:get, interface_count, fn _client, _interface_name, _major ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, interface_count, fn _client, _interface_map ->
+        send(test_pid, {:interface_reconciled, ref})
+
+        :ok
+      end)
+
+      Edgehog.Astarte.Trigger.MockDataLayer
+      |> expect(:get, trigger_count, fn _client, _trigger_name ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, trigger_count, fn _client, _trigger_map ->
+        send(test_pid, {:trigger_reconciled, ref})
+
+        :ok
+      end)
+
+      # Trigger reconciliation
+      send(Reconciler, :reconcile_all)
+
+      1..interface_count
+      |> Enum.each(fn _ -> assert_receive {:interface_reconciled, ^ref} end)
+
+      refute_receive {:interface_reconciled, ^ref}
+
+      1..trigger_count
+      |> Enum.each(fn _ -> assert_receive {:trigger_reconciled, ^ref} end)
+
+      refute_receive {:trigger_reconciled, ^ref}
+    end
+  end
+
   describe "reconcile_tenant/1" do
     setup do
       # We have to use Mox in global mode because the Interfaces and Triggers mocks are
@@ -83,15 +141,15 @@ defmodule Edgehog.Tenants.ReconcilerTest do
 
       refute_receive {:trigger_reconciled, ^ref}
     end
+  end
 
-    defp api_error(opts) do
-      status = Keyword.get(opts, :status, 500)
-      message = Keyword.get(opts, :message, "Generic error")
+  defp api_error(opts) do
+    status = Keyword.get(opts, :status, 500)
+    message = Keyword.get(opts, :message, "Generic error")
 
-      %APIError{
-        status: status,
-        response: %{"errors" => %{"detail" => message}}
-      }
-    end
+    %APIError{
+      status: status,
+      response: %{"errors" => %{"detail" => message}}
+    }
   end
 end
