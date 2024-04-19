@@ -66,8 +66,13 @@ defmodule Edgehog.Tenants.Reconciler do
       schedule_reconciliation(@reconcile_interval)
     end
 
+    global_realm_query =
+      Edgehog.Astarte.Realm
+      |> Ash.Query.for_read(:global)
+      |> Ash.Query.load(:realm_management_client)
+
     Tenant
-    |> Ash.read!(load: tenant_reconciliation_loads())
+    |> Ash.read!(load: [realm: global_realm_query])
     |> Enum.each(&start_reconciliation_task(&1, tenant_to_trigger_url_fun))
 
     {:noreply, state}
@@ -80,7 +85,7 @@ defmodule Edgehog.Tenants.Reconciler do
     } = state
 
     tenant
-    |> Ash.load!(tenant_reconciliation_loads())
+    |> Ash.load!([realm: [:realm_management_client]], tenant: tenant)
     |> start_reconciliation_task(tenant_to_trigger_url_fun)
 
     {:noreply, state}
@@ -104,9 +109,5 @@ defmodule Edgehog.Tenants.Reconciler do
     Process.send_after(self(), :reconcile_all, time)
 
     :ok
-  end
-
-  defp tenant_reconciliation_loads do
-    [realm: [:realm_management_client]]
   end
 end
