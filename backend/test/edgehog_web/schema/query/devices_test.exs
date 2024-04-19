@@ -125,11 +125,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, os_info_fixture(name: "foo", version: "1.0.0")}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, os_info_fixture(name: "bar", version: "2.0.0")}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, base_image_info_fixture(name: "foo", version: "1.0.0")}
+
+        _client, ^device_id_2 ->
+          {:ok, base_image_info_fixture(name: "bar", version: "2.0.0")}
       end)
 
       document = """
@@ -163,11 +164,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.BatteryStatusMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, battery_status_fixture(level_percentage: 29.0, status: "Charging")}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, battery_status_fixture(level_percentage: 81.0, status: "Discharging")}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, battery_status_fixture(level_percentage: 29.0, status: "Charging")}
+
+        _client, ^device_id_2 ->
+          {:ok, battery_status_fixture(level_percentage: 81.0, status: "Discharging")}
       end)
 
       document = """
@@ -201,17 +203,19 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.CellularConnectionMock
-      |> expect(:get_modem_properties, fn _client, ^device_id_1 ->
-        {:ok, modem_properties_fixture(slot: "1", imei: "1234")}
+      |> expect(:get_modem_properties, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, modem_properties_fixture(slot: "1", imei: "1234")}
+
+        _client, ^device_id_2 ->
+          {:ok, modem_properties_fixture(slot: "2", imei: "5678")}
       end)
-      |> expect(:get_modem_status, fn _client, ^device_id_1 ->
-        {:ok, modem_status_fixture(slot: "1", mobile_country_code: 222)}
-      end)
-      |> expect(:get_modem_properties, fn _client, ^device_id_2 ->
-        {:ok, modem_properties_fixture(slot: "2", imei: "5678")}
-      end)
-      |> expect(:get_modem_status, fn _client, ^device_id_2 ->
-        {:ok, modem_status_fixture(slot: "2", mobile_country_code: 622)}
+      |> expect(:get_modem_status, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, modem_status_fixture(slot: "1", mobile_country_code: 222)}
+
+        _client, ^device_id_2 ->
+          {:ok, modem_status_fixture(slot: "2", mobile_country_code: 622)}
       end)
 
       document = """
@@ -250,11 +254,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.HardwareInfoMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, hardware_info_fixture(cpu_architecture: "arm", cpu_model: "ARMv7")}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, hardware_info_fixture(cpu_architecture: "Xtensa", cpu_model: "ESP32")}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, hardware_info_fixture(cpu_architecture: "arm", cpu_model: "ARMv7")}
+
+        _client, ^device_id_2 ->
+          {:ok, hardware_info_fixture(cpu_architecture: "Xtensa", cpu_model: "ESP32")}
       end)
 
       document = """
@@ -288,11 +293,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.NetworkInterfaceMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, network_interfaces_fixture(name: "eth0", technology: "Ethernet")}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, network_interfaces_fixture(name: "wlan0", technology: "WiFi")}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, network_interfaces_fixture(name: "eth0", technology: "Ethernet")}
+
+        _client, ^device_id_2 ->
+          {:ok, network_interfaces_fixture(name: "wlan0", technology: "WiFi")}
       end)
 
       document = """
@@ -326,11 +332,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.OSInfoMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, os_info_fixture(name: "foo_1", version: "1.0.0")}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, os_info_fixture(name: "foo_2", version: "2.0.0")}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, os_info_fixture(name: "foo_1", version: "1.0.0")}
+
+        _client, ^device_id_2 ->
+          {:ok, os_info_fixture(name: "foo_2", version: "2.0.0")}
       end)
 
       document = """
@@ -364,11 +371,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.RuntimeInfoMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, runtime_info_fixture(name: "edgehog-esp32-device", version: "0.7.0")}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, runtime_info_fixture(name: "edgehog-device-runtime", version: "0.8.0")}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, runtime_info_fixture(name: "edgehog-esp32-device", version: "0.7.0")}
+
+        _client, ^device_id_2 ->
+          {:ok, runtime_info_fixture(name: "edgehog-device-runtime", version: "0.8.0")}
       end)
 
       document = """
@@ -402,11 +410,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.StorageUsageMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, storage_usage_fixture(label: "Disk 0", free_bytes: 1_000_000)}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, storage_usage_fixture(label: "Disk 1", free_bytes: 5_999_999)}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, storage_usage_fixture(label: "Disk 0", free_bytes: 1_000_000)}
+
+        _client, ^device_id_2 ->
+          {:ok, storage_usage_fixture(label: "Disk 1", free_bytes: 5_999_999)}
       end)
 
       document = """
@@ -440,11 +449,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.SystemStatusMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, system_status_fixture(task_count: 193, uptime_milliseconds: 200_159)}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, system_status_fixture(task_count: 21, uptime_milliseconds: 10_249)}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, system_status_fixture(task_count: 193, uptime_milliseconds: 200_159)}
+
+        _client, ^device_id_2 ->
+          {:ok, system_status_fixture(task_count: 21, uptime_milliseconds: 10_249)}
       end)
 
       document = """
@@ -478,11 +488,12 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
       Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, fn _client, ^device_id_1 ->
-        {:ok, wifi_scan_results_fixture(connected: true, rssi: -40)}
-      end)
-      |> expect(:get, fn _client, ^device_id_2 ->
-        {:ok, wifi_scan_results_fixture(connected: false, rssi: -78)}
+      |> expect(:get, 2, fn
+        _client, ^device_id_1 ->
+          {:ok, wifi_scan_results_fixture(connected: true, rssi: -40)}
+
+        _client, ^device_id_2 ->
+          {:ok, wifi_scan_results_fixture(connected: false, rssi: -78)}
       end)
 
       document = """
