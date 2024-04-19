@@ -34,6 +34,10 @@ defmodule Edgehog.Astarte.Realm do
   actions do
     defaults [:read, :destroy]
 
+    read :global do
+      multitenancy :allow_global
+    end
+
     read :by_name do
       get_by :name
     end
@@ -84,12 +88,6 @@ defmodule Edgehog.Astarte.Realm do
   validations do
     validate Validations.realm_name(:name)
     validate {Validations.PEMPrivateKey, attribute: :private_key}
-  end
-
-  multitenancy do
-    # This is needed when we batch load realms starting from Tenants in the Reconciler
-    # TODO: should we ensure that a tenant is passed in all other queries?
-    global? true
   end
 
   postgres do
