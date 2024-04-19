@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Triggers.IncomingData do
   use Ash.Resource,
-    domain: Edgehog.Triggers,
     data_layer: :embedded
 
   attributes do

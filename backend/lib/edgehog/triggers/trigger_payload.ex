@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Triggers.TriggerPayload do
   use Ash.Resource,
-    domain: Edgehog.Triggers,
     data_layer: :embedded
 
   alias Edgehog.Triggers.Event

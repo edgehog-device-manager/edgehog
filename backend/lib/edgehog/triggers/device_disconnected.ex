@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Triggers.DeviceDisconnected do
   use Ash.Resource,
-    domain: Edgehog.Triggers,
     data_layer: :embedded
 
   # This does not have any attributes

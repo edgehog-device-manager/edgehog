@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Tenants.AstarteConfig do
   use Ash.Resource,
-    domain: Edgehog.Tenants,
     data_layer: :embedded
 
   actions do
