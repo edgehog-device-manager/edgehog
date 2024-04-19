@@ -99,3 +99,6 @@ config :edgehog, google_geocoding_api_key: "test_api_key"
 
 config :goth,
   disabled: true
+
+config :ash, :disable_async?, true
+config :ash, :missed_notifications, :ignore
