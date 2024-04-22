@@ -21,6 +21,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,14 +31,15 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageCollectionHandleSchema, yup } from "forms";
-import { graphql, useFragment } from "react-relay";
-import type { CreateBaseImageCollection_SystemModelsFragment$key } from "api/__generated__/CreateBaseImageCollection_SystemModelsFragment.graphql";
+
+import type { CreateBaseImageCollection_OptionsFragment$key } from "api/__generated__/CreateBaseImageCollection_OptionsFragment.graphql";
 
 const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
-  fragment CreateBaseImageCollection_SystemModelsFragment on SystemModel
-  @relay(plural: true) {
-    id
-    name
+  fragment CreateBaseImageCollection_OptionsFragment on RootQueryType {
+    systemModels {
+      id
+      name
+    }
   }
 `;
 
@@ -79,20 +81,20 @@ const initialData: BaseImageCollectionData = {
 };
 
 type Props = {
-  systemModelsRef: CreateBaseImageCollection_SystemModelsFragment$key;
+  optionsRef: CreateBaseImageCollection_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionData) => void;
 };
 
 const CreateBaseImageCollectionForm = ({
-  systemModelsRef,
+  optionsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
   const intl = useIntl();
-  const systemModelsData = useFragment(
+  const { systemModels } = useFragment(
     CREATE_BASE_IMAGE_COLLECTION_FRAGMENT,
-    systemModelsRef,
+    optionsRef,
   );
   const {
     register,
@@ -158,9 +160,9 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select a System Model",
               })}
             </option>
-            {systemModelsData.map((systemModelOption) => (
-              <option key={systemModelOption.id} value={systemModelOption.id}>
-                {systemModelOption.name}
+            {systemModels.map((systemModel) => (
+              <option key={systemModel.id} value={systemModel.id}>
+                {systemModel.name}
               </option>
             ))}
           </Form.Select>
