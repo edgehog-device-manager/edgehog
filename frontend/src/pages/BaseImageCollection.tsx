@@ -49,8 +49,10 @@ import UpdateBaseImageCollectionForm from "forms/UpdateBaseImageCollection";
 import type { BaseImageCollectionChanges } from "forms/UpdateBaseImageCollection";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
-  query BaseImageCollection_getBaseImageCollection_Query($id: ID!) {
-    baseImageCollection(id: $id) {
+  query BaseImageCollection_getBaseImageCollection_Query(
+    $baseImageCollectionId: ID!
+  ) {
+    baseImageCollection(id: $baseImageCollectionId) {
       id
       name
       handle
@@ -69,6 +71,8 @@ const UPDATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
         id
         name
         handle
+        ...UpdateBaseImageCollection_SystemModelFragment
+        ...BaseImagesTable_BaseImagesFragment
       }
     }
   }
@@ -110,12 +114,13 @@ const BaseImageCollectionContent = ({
     );
 
   const handleDeleteBaseImageCollection = useCallback(() => {
-    const input = {
-      baseImageCollectionId,
-    };
+    const input = { baseImageCollectionId };
     deleteBaseImageCollection({
       variables: { input },
       onCompleted(data, errors) {
+        if (data.deleteBaseImageCollection) {
+          return navigate({ route: Route.baseImageCollections });
+        }
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)
@@ -123,7 +128,6 @@ const BaseImageCollectionContent = ({
           setErrorFeedback(errorFeedback);
           return setShowDeleteModal(false);
         }
-        navigate({ route: Route.baseImageCollections });
       },
       onError() {
         setErrorFeedback(
@@ -177,13 +181,15 @@ const BaseImageCollectionContent = ({
       updateBaseImageCollection({
         variables: { input },
         onCompleted(data, errors) {
+          if (data.updateBaseImageCollection) {
+            setErrorFeedback(null);
+          }
           if (errors) {
             const errorFeedback = errors
               .map((error) => error.message)
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          setErrorFeedback(null);
         },
         onError() {
           setErrorFeedback(
@@ -319,12 +325,14 @@ const BaseImageCollectionPage = () => {
       GET_BASE_IMAGE_COLLECTION_QUERY,
     );
 
-  const fetchBaseImageCollection = useCallback(() => {
-    getBaseImageCollection(
-      { id: baseImageCollectionId },
-      { fetchPolicy: "network-only" },
-    );
-  }, [getBaseImageCollection, baseImageCollectionId]);
+  const fetchBaseImageCollection = useCallback(
+    () =>
+      getBaseImageCollection(
+        { baseImageCollectionId },
+        { fetchPolicy: "network-only" },
+      ),
+    [getBaseImageCollection, baseImageCollectionId],
+  );
 
   useEffect(fetchBaseImageCollection, [fetchBaseImageCollection]);
 

@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,8 +31,11 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageCollectionHandleSchema, yup } from "forms";
-import { graphql, useFragment } from "react-relay/hooks";
-import type { UpdateBaseImageCollection_SystemModelFragment$key } from "api/__generated__/UpdateBaseImageCollection_SystemModelFragment.graphql";
+
+import type {
+  UpdateBaseImageCollection_SystemModelFragment$key,
+  UpdateBaseImageCollection_SystemModelFragment$data,
+} from "api/__generated__/UpdateBaseImageCollection_SystemModelFragment.graphql";
 
 const UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   fragment UpdateBaseImageCollection_SystemModelFragment on BaseImageCollection {
@@ -63,17 +67,12 @@ const FormRow = ({
 type BaseImageCollectionData = {
   name: string;
   handle: string;
-  systemModel: {
-    name: string;
-  } | null;
+  systemModel: string;
 };
 
 type BaseImageCollectionChanges = {
   name: string;
   handle: string;
-  systemModel: {
-    name: string;
-  } | null;
 };
 
 const baseImageCollectionSchema = yup
@@ -84,14 +83,19 @@ const baseImageCollectionSchema = yup
   })
   .required();
 
+const transformInputData = (
+  data: UpdateBaseImageCollection_SystemModelFragment$data,
+): BaseImageCollectionData => ({
+  ...data,
+  systemModel: data.systemModel?.name || "",
+});
+
 const transformOutputData = ({
   name,
   handle,
-  systemModel,
 }: BaseImageCollectionData): BaseImageCollectionChanges => ({
   name,
   handle,
-  systemModel,
 });
 
 type Props = {
@@ -107,23 +111,29 @@ const UpdateBaseImageCollection = ({
   onSubmit,
   onDelete,
 }: Props) => {
-  const baseImageCollectionRefData = useFragment(
+  const baseImageCollection = useFragment(
     UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT,
     baseImageCollectionRef,
   );
 
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors, isDirty },
   } = useForm<BaseImageCollectionData>({
     mode: "onTouched",
-    defaultValues: baseImageCollectionRefData,
+    defaultValues: transformInputData(baseImageCollection),
     resolver: yupResolver(baseImageCollectionSchema),
   });
 
   const onFormSubmit = (data: BaseImageCollectionData) =>
     onSubmit(transformOutputData(data));
+
+  useEffect(
+    () => reset(transformInputData(baseImageCollection)),
+    [baseImageCollection, reset],
+  );
 
   const canSubmit = !isLoading && isDirty;
 
@@ -194,6 +204,6 @@ const UpdateBaseImageCollection = ({
   );
 };
 
-export type { BaseImageCollectionData, BaseImageCollectionChanges };
+export type { BaseImageCollectionChanges };
 
 export default UpdateBaseImageCollection;
