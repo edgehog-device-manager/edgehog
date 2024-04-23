@@ -19,6 +19,21 @@
 #
 
 defmodule Edgehog.Forwarder do
+  use Ash.Domain,
+    extensions: [
+      AshGraphql.Domain
+    ]
+
+  graphql do
+    root_level_errors? true
+  end
+
+  resources do
+    resource Edgehog.Forwarder.Config
+  end
+
+  # TODO: legacy context, delete implementations below as we move them to Ash
+
   @moduledoc """
   The Forwarder context.
   """

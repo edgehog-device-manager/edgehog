@@ -22,7 +22,6 @@ defmodule EdgehogWeb.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   import_types EdgehogWeb.Schema.AstarteTypes
-  import_types EdgehogWeb.Schema.ForwarderSessionsTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
   import_types EdgehogWeb.Schema.UpdateCampaignsTypes
@@ -33,6 +32,7 @@ defmodule EdgehogWeb.Schema do
   @domains [
     Edgehog.BaseImages,
     Edgehog.Devices,
+    Edgehog.Forwarder,
     Edgehog.Groups,
     Edgehog.Labeling,
     Edgehog.OSManagement,
@@ -113,13 +113,11 @@ defmodule EdgehogWeb.Schema do
       end
     end
 
-    import_fields :forwarder_sessions_queries
     import_fields :update_campaigns_queries
   end
 
   mutation do
     import_fields :astarte_mutations
-    import_fields :forwarder_sessions_mutations
     import_fields :update_campaigns_mutations
   end
 end

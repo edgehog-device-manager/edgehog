@@ -92,6 +92,7 @@ config :edgehog, :ash_domains, [
   Edgehog.Astarte,
   Edgehog.BaseImages,
   Edgehog.Devices,
+  Edgehog.Forwarder,
   Edgehog.Groups,
   Edgehog.Labeling,
   Edgehog.OSManagement,
