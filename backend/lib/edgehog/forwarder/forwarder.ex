@@ -30,6 +30,7 @@ defmodule Edgehog.Forwarder do
 
   resources do
     resource Edgehog.Forwarder.Config
+    resource Edgehog.Forwarder.Session
   end
 
   # TODO: legacy context, delete implementations below as we move them to Ash

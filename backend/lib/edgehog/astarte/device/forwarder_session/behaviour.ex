@@ -25,13 +25,6 @@ defmodule Edgehog.Astarte.Device.ForwarderSession.Behaviour do
   @callback list_sessions(client :: AppEngine.t(), device_id :: String.t()) ::
               {:ok, list(ForwarderSession.t())} | {:error, term()}
 
-  @callback fetch_session(
-              client :: AppEngine.t(),
-              device_id :: String.t(),
-              session_token :: String.t()
-            ) ::
-              {:ok, ForwarderSession.t()} | {:error, term()}
-
   @callback request_session(
               client :: AppEngine.t(),
               device_id :: String.t(),
