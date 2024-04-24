@@ -31,9 +31,9 @@ import {
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type {
-  BaseImageCreate_getBaseImageCollection_Query,
-  BaseImageCreate_getBaseImageCollection_Query$data,
-} from "api/__generated__/BaseImageCreate_getBaseImageCollection_Query.graphql";
+  BaseImageCreate_getOptions_Query,
+  BaseImageCreate_getOptions_Query$data,
+} from "api/__generated__/BaseImageCreate_getOptions_Query.graphql";
 import type { BaseImageCreate_createBaseImage_Mutation } from "api/__generated__/BaseImageCreate_createBaseImage_Mutation.graphql";
 import Alert from "components/Alert";
 import Center from "components/Center";
@@ -45,13 +45,12 @@ import type { BaseImageData } from "forms/CreateBaseImage";
 import { Link, Route, useNavigate } from "Navigation";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
-  query BaseImageCreate_getBaseImageCollection_Query($id: ID!) {
-    baseImageCollection(id: $id) {
+  query BaseImageCreate_getOptions_Query($baseImageCollectionId: ID!) {
+    baseImageCollection(id: $baseImageCollectionId) {
+      id
       ...CreateBaseImage_BaseImageCollectionFragment
     }
-    tenantInfo {
-      defaultLocale
-    }
+    ...CreateBaseImage_OptionsFragment
   }
 `;
 
@@ -61,7 +60,7 @@ const CREATE_BASE_IMAGE_MUTATION = graphql`
   ) {
     createBaseImage(input: $input) {
       baseImage {
-        __typename
+        id
       }
     }
   }
@@ -69,17 +68,19 @@ const CREATE_BASE_IMAGE_MUTATION = graphql`
 
 type BaseImageCreateContentProps = {
   baseImageCollection: NonNullable<
-    BaseImageCreate_getBaseImageCollection_Query$data["baseImageCollection"]
+    BaseImageCreate_getOptions_Query$data["baseImageCollection"]
   >;
-  locale: BaseImageCreate_getBaseImageCollection_Query$data["tenantInfo"]["defaultLocale"];
+  queryRef: BaseImageCreate_getOptions_Query$data;
 };
 
 const BaseImageCreateContent = ({
   baseImageCollection,
-  locale,
+  queryRef,
 }: BaseImageCreateContentProps) => {
-  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
+
+  const baseImageCollectionId = baseImageCollection.id;
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const [createBaseImage, isCreatingBaseImage] =
     useMutation<BaseImageCreate_createBaseImage_Mutation>(
@@ -94,9 +95,7 @@ const BaseImageCreateContent = ({
           if (data.createBaseImage) {
             return navigate({
               route: Route.baseImageCollectionsEdit,
-              params: {
-                baseImageCollectionId: baseImage.baseImageCollectionId,
-              },
+              params: { baseImageCollectionId },
             });
           }
 
@@ -119,16 +118,27 @@ const BaseImageCreateContent = ({
           if (!data.createBaseImage) {
             return;
           }
-          store
+
+          const baseImage = store
+            .getRootField("createBaseImage")
+            .getLinkedRecord("baseImage");
+          const baseImageCollection = store
             .getRoot()
             .getLinkedRecord("baseImageCollection", {
-              id: baseImage.baseImageCollectionId,
-            })
-            ?.invalidateRecord();
+              id: baseImageCollectionId,
+            });
+          const baseImages =
+            baseImageCollection?.getLinkedRecords("baseImages");
+          if (baseImageCollection && baseImages) {
+            baseImageCollection.setLinkedRecords(
+              [...baseImages, baseImage],
+              "baseImages",
+            );
+          }
         },
       });
     },
-    [createBaseImage, navigate],
+    [createBaseImage, navigate, baseImageCollectionId],
   );
 
   return (
@@ -152,7 +162,7 @@ const BaseImageCreateContent = ({
         </Alert>
         <CreateBaseImageForm
           baseImageCollectionRef={baseImageCollection}
-          locale={locale}
+          optionsRef={queryRef}
           onSubmit={handleCreateBaseImage}
           isLoading={isCreatingBaseImage}
         />
@@ -162,18 +172,18 @@ const BaseImageCreateContent = ({
 };
 
 type BaseImageCreateWrapperProps = {
-  getBaseImageCollectionQuery: PreloadedQuery<BaseImageCreate_getBaseImageCollection_Query>;
+  getBaseImageCollectionQuery: PreloadedQuery<BaseImageCreate_getOptions_Query>;
 };
 
 const BaseImageCreateWrapper = ({
   getBaseImageCollectionQuery,
 }: BaseImageCreateWrapperProps) => {
-  const { baseImageCollection, tenantInfo } = usePreloadedQuery(
+  const queryData = usePreloadedQuery(
     GET_BASE_IMAGE_COLLECTION_QUERY,
     getBaseImageCollectionQuery,
   );
 
-  if (!baseImageCollection) {
+  if (!queryData.baseImageCollection) {
     return (
       <Result.NotFound
         title={
@@ -195,8 +205,8 @@ const BaseImageCreateWrapper = ({
 
   return (
     <BaseImageCreateContent
-      baseImageCollection={baseImageCollection}
-      locale={tenantInfo.defaultLocale}
+      baseImageCollection={queryData.baseImageCollection}
+      queryRef={queryData}
     />
   );
 };
@@ -205,16 +215,18 @@ const BaseImageCreatePage = () => {
   const { baseImageCollectionId = "" } = useParams();
 
   const [getBaseImageCollectionQuery, getBaseImageCollection] =
-    useQueryLoader<BaseImageCreate_getBaseImageCollection_Query>(
+    useQueryLoader<BaseImageCreate_getOptions_Query>(
       GET_BASE_IMAGE_COLLECTION_QUERY,
     );
 
-  const fetchBaseImageCollection = useCallback(() => {
-    getBaseImageCollection(
-      { id: baseImageCollectionId },
-      { fetchPolicy: "network-only" },
-    );
-  }, [getBaseImageCollection, baseImageCollectionId]);
+  const fetchBaseImageCollection = useCallback(
+    () =>
+      getBaseImageCollection(
+        { baseImageCollectionId },
+        { fetchPolicy: "network-only" },
+      ),
+    [getBaseImageCollection, baseImageCollectionId],
+  );
 
   useEffect(fetchBaseImageCollection, [fetchBaseImageCollection]);
 

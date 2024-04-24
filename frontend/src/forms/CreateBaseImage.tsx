@@ -21,6 +21,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -35,13 +36,25 @@ import {
   baseImageStartingVersionRequirementSchema,
   yup,
 } from "forms";
-import { graphql, useFragment } from "react-relay/hooks";
-import type { CreateBaseImage_BaseImageCollectionFragment$key } from "api/__generated__/CreateBaseImage_BaseImageCollectionFragment.graphql";
+
+import type {
+  CreateBaseImage_BaseImageCollectionFragment$key,
+  CreateBaseImage_BaseImageCollectionFragment$data,
+} from "api/__generated__/CreateBaseImage_BaseImageCollectionFragment.graphql";
+import type { CreateBaseImage_OptionsFragment$key } from "api/__generated__/CreateBaseImage_OptionsFragment.graphql";
 
 const CREATE_BASE_IMAGE_FRAGMENT = graphql`
   fragment CreateBaseImage_BaseImageCollectionFragment on BaseImageCollection {
     id
     name
+  }
+`;
+
+const CREATE_BASE_IMAGE_OPTIONS_FRAGMENT = graphql`
+  fragment CreateBaseImage_OptionsFragment on RootQueryType {
+    tenantInfo {
+      defaultLocale
+    }
   }
 `;
 
@@ -98,7 +111,7 @@ const baseImageSchema = yup
   .required();
 
 const transformInputData = (
-  baseImageCollection: BaseImageCollection,
+  baseImageCollection: CreateBaseImage_BaseImageCollectionFragment$data,
 ): FormData => ({
   baseImageCollection: baseImageCollection.name,
   file: null,
@@ -113,7 +126,7 @@ type FormOutput = FormData & {
 };
 
 const transformOutputData = (
-  baseImageCollection: BaseImageCollection,
+  baseImageCollection: CreateBaseImage_BaseImageCollectionFragment$data,
   locale: string,
   data: FormOutput,
 ): BaseImageData => ({
@@ -131,21 +144,16 @@ const transformOutputData = (
   },
 });
 
-type BaseImageCollection = {
-  id: string;
-  name: string;
-};
-
 type Props = {
   baseImageCollectionRef: CreateBaseImage_BaseImageCollectionFragment$key;
-  locale: string;
+  optionsRef: CreateBaseImage_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageData) => void;
 };
 
 const CreateBaseImageForm = ({
   baseImageCollectionRef,
-  locale,
+  optionsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
@@ -153,6 +161,10 @@ const CreateBaseImageForm = ({
     CREATE_BASE_IMAGE_FRAGMENT,
     baseImageCollectionRef,
   );
+  const {
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(CREATE_BASE_IMAGE_OPTIONS_FRAGMENT, optionsRef);
+
   const {
     register,
     handleSubmit,
