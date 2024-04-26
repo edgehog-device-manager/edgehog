@@ -47,8 +47,8 @@ import type { BaseImageChanges } from "forms/UpdateBaseImage";
 import { Link, Route, useNavigate } from "Navigation";
 
 const GET_BASE_IMAGE_QUERY = graphql`
-  query BaseImage_getBaseImage_Query($id: ID!) {
-    baseImage(id: $id) {
+  query BaseImage_getBaseImage_Query($baseImageId: ID!) {
+    baseImage(id: $baseImageId) {
       id
       version
       baseImageCollection {
@@ -56,9 +56,7 @@ const GET_BASE_IMAGE_QUERY = graphql`
       }
       ...UpdateBaseImage_BaseImageFragment
     }
-    tenantInfo {
-      defaultLocale
-    }
+    ...UpdateBaseImage_OptionsFragment
   }
 `;
 
@@ -67,9 +65,11 @@ const UPDATE_BASE_IMAGE_MUTATION = graphql`
     updateBaseImage(input: $input) {
       baseImage {
         id
-        startingVersionRequirement
-        description
-        releaseDisplayName
+        version
+        baseImageCollection {
+          id
+        }
+        ...UpdateBaseImage_BaseImageFragment
       }
     }
   }
@@ -87,10 +87,10 @@ const DELETE_BASE_IMAGE_MUTATION = graphql`
 
 type BaseImageContentProps = {
   baseImage: NonNullable<BaseImage_getBaseImage_Query$data["baseImage"]>;
-  locale: BaseImage_getBaseImage_Query$data["tenantInfo"]["defaultLocale"];
+  queryRef: BaseImage_getBaseImage_Query$data;
 };
 
-const BaseImageContent = ({ baseImage, locale }: BaseImageContentProps) => {
+const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
   const baseImageId = baseImage.id;
   const baseImageCollectionId = baseImage.baseImageCollection.id;
   const navigate = useNavigate();
@@ -112,6 +112,12 @@ const BaseImageContent = ({ baseImage, locale }: BaseImageContentProps) => {
     deleteBaseImage({
       variables: { input },
       onCompleted(data, errors) {
+        if (data.deleteBaseImage) {
+          return navigate({
+            route: Route.baseImageCollectionsEdit,
+            params: { baseImageCollectionId },
+          });
+        }
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)
@@ -119,10 +125,6 @@ const BaseImageContent = ({ baseImage, locale }: BaseImageContentProps) => {
           setErrorFeedback(errorFeedback);
           return setShowDeleteModal(false);
         }
-        navigate({
-          route: Route.baseImageCollectionsEdit,
-          params: { baseImageCollectionId },
-        });
       },
       onError() {
         setErrorFeedback(
@@ -201,7 +203,7 @@ const BaseImageContent = ({ baseImage, locale }: BaseImageContentProps) => {
         </Alert>
         <UpdateBaseImageForm
           baseImageRef={baseImage}
-          locale={locale}
+          optionsRef={queryRef}
           onSubmit={handleUpdateBaseImage}
           onDelete={handleShowDeleteModal}
           isLoading={isUpdatingBaseImage}
@@ -245,12 +247,9 @@ type BaseImageWrapperProps = {
 const BaseImageWrapper = ({ getBaseImageQuery }: BaseImageWrapperProps) => {
   const { baseImageCollectionId = "" } = useParams();
 
-  const { baseImage, tenantInfo } = usePreloadedQuery(
-    GET_BASE_IMAGE_QUERY,
-    getBaseImageQuery,
-  );
+  const queryData = usePreloadedQuery(GET_BASE_IMAGE_QUERY, getBaseImageQuery);
 
-  if (!baseImage) {
+  if (!queryData.baseImage) {
     return (
       <Result.NotFound
         title={
@@ -274,7 +273,7 @@ const BaseImageWrapper = ({ getBaseImageQuery }: BaseImageWrapperProps) => {
   }
 
   return (
-    <BaseImageContent baseImage={baseImage} locale={tenantInfo.defaultLocale} />
+    <BaseImageContent baseImage={queryData.baseImage} queryRef={queryData} />
   );
 };
 
@@ -285,7 +284,7 @@ const BaseImagePage = () => {
     useQueryLoader<BaseImage_getBaseImage_Query>(GET_BASE_IMAGE_QUERY);
 
   const fetchBaseImage = useCallback(() => {
-    getBaseImage({ id: baseImageId }, { fetchPolicy: "network-only" });
+    getBaseImage({ baseImageId }, { fetchPolicy: "network-only" });
   }, [getBaseImage, baseImageId]);
 
   useEffect(fetchBaseImage, [fetchBaseImage]);

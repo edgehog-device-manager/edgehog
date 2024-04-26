@@ -21,6 +21,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,9 +31,9 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageStartingVersionRequirementSchema, yup } from "forms";
-import { graphql } from "relay-runtime";
-import { useFragment } from "react-relay";
+
 import type { UpdateBaseImage_BaseImageFragment$key } from "api/__generated__/UpdateBaseImage_BaseImageFragment.graphql";
+import type { UpdateBaseImage_OptionsFragment$key } from "api/__generated__/UpdateBaseImage_OptionsFragment.graphql";
 
 const UPDATE_BASE_IMAGE_FRAGMENT = graphql`
   fragment UpdateBaseImage_BaseImageFragment on BaseImage {
@@ -43,6 +44,14 @@ const UPDATE_BASE_IMAGE_FRAGMENT = graphql`
     description
     baseImageCollection {
       name
+    }
+  }
+`;
+
+const UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT = graphql`
+  fragment UpdateBaseImage_OptionsFragment on RootQueryType {
+    tenantInfo {
+      defaultLocale
     }
   }
 `;
@@ -63,8 +72,6 @@ const FormRow = ({
     <Col sm={9}>{children}</Col>
   </Form.Group>
 );
-
-type BaseImageData = UpdateBaseImage_BaseImageFragment$key;
 
 type FormData = {
   baseImageCollection: string;
@@ -110,8 +117,8 @@ const transformOutputData = (
 });
 
 type UpdateBaseImageProps = {
-  baseImageRef: BaseImageData;
-  locale: string;
+  baseImageRef: UpdateBaseImage_BaseImageFragment$key;
+  optionsRef: UpdateBaseImage_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageChanges) => void;
   onDelete: () => void;
@@ -119,22 +126,25 @@ type UpdateBaseImageProps = {
 
 const UpdateBaseImage = ({
   baseImageRef,
-  locale,
+  optionsRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: UpdateBaseImageProps) => {
-  const baseImageData = useFragment(UPDATE_BASE_IMAGE_FRAGMENT, baseImageRef);
+  const baseImage = useFragment(UPDATE_BASE_IMAGE_FRAGMENT, baseImageRef);
+  const {
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT, optionsRef);
+
   const defaultValues = useMemo(
     () => ({
-      baseImageCollection: baseImageData.baseImageCollection.name,
-      version: baseImageData.version,
-      startingVersionRequirement:
-        baseImageData.startingVersionRequirement || "",
-      releaseDisplayName: baseImageData.releaseDisplayName || "",
-      description: baseImageData.description || "",
+      baseImageCollection: baseImage.baseImageCollection.name,
+      version: baseImage.version,
+      startingVersionRequirement: baseImage.startingVersionRequirement || "",
+      releaseDisplayName: baseImage.releaseDisplayName || "",
+      description: baseImage.description || "",
     }),
-    [baseImageData],
+    [baseImage],
   );
 
   const {
@@ -189,11 +199,11 @@ const UpdateBaseImage = ({
             defaultMessage="<a>{baseImageName}</a>"
             values={{
               a: (chunks: React.ReactNode) => (
-                <a target="_blank" rel="noreferrer" href={baseImageData.url}>
+                <a target="_blank" rel="noreferrer" href={baseImage.url}>
                   {chunks}
                 </a>
               ),
-              baseImageName: baseImageData.url.split("/").pop(),
+              baseImageName: baseImage.url.split("/").pop(),
             }}
           />
         </FormRow>
@@ -279,6 +289,6 @@ const UpdateBaseImage = ({
   );
 };
 
-export type { BaseImageData, BaseImageChanges };
+export type { BaseImageChanges };
 
 export default UpdateBaseImage;
