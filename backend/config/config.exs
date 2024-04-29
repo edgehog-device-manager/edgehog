@@ -94,6 +94,7 @@ config :edgehog, :ash_domains, [
   Edgehog.Devices,
   Edgehog.Groups,
   Edgehog.Labeling,
+  Edgehog.OSManagement,
   Edgehog.Tenants,
   Edgehog.Triggers
 ]
