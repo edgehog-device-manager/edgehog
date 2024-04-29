@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.OSManagementFixtures
 
   alias Edgehog.Devices
 
@@ -71,6 +72,41 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert device["systemModel"]["id"] == system_model_id
       assert device["systemModel"]["partNumbers"] == [%{"partNumber" => part_number}]
+    end
+
+    test "queries associated OTA operations", %{tenant: tenant} do
+      fixture = device_fixture(tenant: tenant)
+
+      base_image_url = "https://example.com/ota.bin"
+
+      ota_operation =
+        manual_ota_operation_fixture(
+          tenant: tenant,
+          device_id: fixture.id,
+          base_image_url: base_image_url
+        )
+
+      ota_operation_id = AshGraphql.Resource.encode_relay_id(ota_operation)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          otaOperations {
+            id
+            baseImageUrl
+          }
+        }
+      }
+      """
+
+      %{"otaOperations" => [ota_operation]} =
+        device_query(document: document, tenant: tenant, id: id)
+        |> extract_result!()
+
+      assert ota_operation["id"] == ota_operation_id
+      assert ota_operation["baseImageUrl"] == base_image_url
     end
 
     test "returns nil if non existing", %{tenant: tenant} do

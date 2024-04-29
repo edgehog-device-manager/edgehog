@@ -300,6 +300,12 @@ defmodule Edgehog.Devices.Device do
       writable? false
       manual ManualRelationships.DeviceGroups
     end
+
+    has_many :ota_operations, Edgehog.OSManagement.OTAOperation do
+      public? true
+      description "The existing OTA operations for this device"
+      writable? false
+    end
   end
 
   calculations do
