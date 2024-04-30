@@ -36,6 +36,7 @@ defmodule Edgehog.Groups.DeviceGroup do
     end
 
     mutations do
+      create :create_device_group, :create
       update :update_device_group, :update
       destroy :delete_device_group, :destroy
     end
