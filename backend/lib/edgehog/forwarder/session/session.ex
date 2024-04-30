@@ -26,6 +26,7 @@ defmodule Edgehog.Forwarder.Session do
     ]
 
   alias Edgehog.Forwarder.Session.ManualActions
+  alias Edgehog.Forwarder.Session.Status
 
   resource do
     description "The details of a forwarder session."
@@ -81,11 +82,10 @@ defmodule Edgehog.Forwarder.Session do
       allow_nil? false
     end
 
-    attribute :status, :atom do
+    attribute :status, Status do
       description "The status of the session."
       public? true
       allow_nil? false
-      constraints one_of: [:connected, :connecting]
     end
 
     attribute :forwarder_hostname, :string do

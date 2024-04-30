@@ -57,8 +57,7 @@ defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
 
       assert %{
                "token" => "session_token",
-               # TODO: Ash leaves atoms lowercase?
-               "status" => "connected",
+               "status" => "CONNECTED",
                "forwarderHostname" => "localhost",
                "forwarderPort" => 4001
              } = extract_result!(result)
