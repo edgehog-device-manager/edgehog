@@ -24,52 +24,37 @@ defmodule Edgehog.OSManagementFixtures do
   entities via the `Edgehog.OSManagement` context.
   """
 
-  alias Edgehog.BaseImagesFixtures
+  alias Edgehog.DevicesFixtures
 
   @doc """
   Generate a manual ota_operation.
   """
-  def manual_ota_operation_fixture(device) do
-    fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
+  def manual_ota_operation_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    # Stub mocks since create_manual_ota_operation will call
-    # EphemeralImageMock.upload/3 to upload image
-    Mox.stub_with(
-      Edgehog.OSManagement.EphemeralImageMock,
-      Edgehog.Mocks.OSManagement.EphemeralImage
-    )
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        DevicesFixtures.device_fixture(tenant: tenant) |> Map.fetch!(:id)
+      end)
 
-    # DeviceStatusMock.get/2 to fetch device_introspection
-    Mox.stub_with(
-      Edgehog.Astarte.Device.DeviceStatusMock,
-      Edgehog.Mocks.Astarte.Device.DeviceStatus
-    )
+    params =
+      opts
+      |> Enum.into(%{
+        manual?: true,
+        base_image_url: "https://my.bucket.example/ota.bin",
+        device_id: device_id
+      })
 
-    # OTARequestV1Mock.update/4 to send OTA request
-    Mox.stub_with(
-      Edgehog.Astarte.Device.OTARequestV1Mock,
-      Edgehog.Mocks.Astarte.Device.OTARequest.V1
-    )
-
-    {:ok, ota_operation} =
-      device
-      |> Edgehog.Devices.preload_astarte_resources_for_device()
-      |> Edgehog.OSManagement.create_manual_ota_operation(fake_image)
-
-    ota_operation
+    Edgehog.OSManagement.OTAOperation
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
   Generate a managed ota_operation.
   """
-  def managed_ota_operation_fixture(device) do
-    base_image = BaseImagesFixtures.base_image_fixture()
-
-    {:ok, ota_operation} =
-      device
-      |> Edgehog.Devices.preload_astarte_resources_for_device()
-      |> Edgehog.OSManagement.create_managed_ota_operation(base_image)
-
-    ota_operation
+  def managed_ota_operation_fixture(opts \\ []) do
+    # TODO: implement this when we implement update campaigns
+    raise "Not implemented"
   end
 end

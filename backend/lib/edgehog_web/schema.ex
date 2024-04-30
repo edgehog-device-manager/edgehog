@@ -25,7 +25,6 @@ defmodule EdgehogWeb.Schema do
   import_types EdgehogWeb.Schema.ForwarderSessionsTypes
   import_types EdgehogWeb.Schema.GeolocationTypes
   import_types EdgehogWeb.Schema.LocalizationTypes
-  import_types EdgehogWeb.Schema.OSManagementTypes
   import_types EdgehogWeb.Schema.UpdateCampaignsTypes
   import_types EdgehogWeb.Schema.VariantTypes
   import_types Absinthe.Plug.Types
@@ -36,6 +35,7 @@ defmodule EdgehogWeb.Schema do
     Edgehog.Devices,
     Edgehog.Groups,
     Edgehog.Labeling,
+    Edgehog.OSManagement,
     Edgehog.Tenants
   ]
 
@@ -120,7 +120,6 @@ defmodule EdgehogWeb.Schema do
   mutation do
     import_fields :astarte_mutations
     import_fields :forwarder_sessions_mutations
-    import_fields :os_management_mutations
     import_fields :update_campaigns_mutations
   end
 end
