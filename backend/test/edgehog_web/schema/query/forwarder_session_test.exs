@@ -19,25 +19,95 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
   use Edgehog.AstarteMockCase
 
   alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Astarte.Device.ForwarderSessionMock
 
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
-  describe "forwarderSession query" do
-    setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+  @moduletag :ported_to_ash
 
-      {:ok, realm: realm}
+  describe "forwarderSession query" do
+    test "returns the forwarder session", %{tenant: tenant} do
+      device = device_fixture(online: true, tenant: tenant)
+      device_id = device.device_id
+
+      expect(ForwarderSessionMock, :list_sessions, fn _appengine_client, ^device_id ->
+        {:ok,
+         [
+           %ForwarderSession{
+             token: "session_token",
+             status: :connected,
+             secure: false,
+             forwarder_hostname: "localhost",
+             forwarder_port: 4001
+           }
+         ]}
+      end)
+
+      result =
+        run_query(
+          tenant: tenant,
+          device_id: AshGraphql.Resource.encode_relay_id(device),
+          session_token: "session_token"
+        )
+
+      assert %{
+               "token" => "session_token",
+               # TODO: Ash leaves atoms lowercase?
+               "status" => "connected",
+               "forwarderHostname" => "localhost",
+               "forwarderPort" => 4001
+             } = extract_result!(result)
     end
 
-    @query """
+    test "returns null if the session does not exist", %{tenant: tenant} do
+      device = device_fixture(online: true, tenant: tenant)
+      device_id = device.device_id
+
+      expect(ForwarderSessionMock, :list_sessions, fn _appengine_client, ^device_id ->
+        {:ok, []}
+      end)
+
+      result =
+        run_query(
+          tenant: tenant,
+          device_id: AshGraphql.Resource.encode_relay_id(device),
+          session_token: "session_token"
+        )
+
+      forwarder_session = extract_result!(result)
+
+      assert is_nil(forwarder_session)
+    end
+
+    test "returns null if the device is disconnected", %{tenant: tenant} do
+      device = device_fixture(online: false, tenant: tenant)
+
+      expect(ForwarderSessionMock, :list_sessions, 0, fn _appengine_client, _device_id ->
+        :unreachable
+      end)
+
+      result =
+        run_query(
+          tenant: tenant,
+          device_id: AshGraphql.Resource.encode_relay_id(device),
+          session_token: "session_token"
+        )
+
+      forwarder_session = extract_result!(result)
+
+      assert is_nil(forwarder_session)
+    end
+  end
+
+  defp run_query(opts) do
+    document = """
     query ($device_id: ID!, $session_token: String!) {
-      forwarderSession(deviceId: $device_id, sessionToken: $session_token) {
+      forwarderSession(deviceId: $device_id, token: $session_token) {
         token
         status
         forwarderHostname
@@ -46,102 +116,36 @@ defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
     }
     """
 
-    test "returns the forwarder session", %{conn: conn, api_path: api_path, realm: realm} do
-      device = device_fixture(realm, %{online: true})
+    tenant = Keyword.fetch!(opts, :tenant)
+    device_id = Keyword.fetch!(opts, :device_id)
+    session_token = Keyword.fetch!(opts, :session_token)
 
-      mock_forwarder_session(device, "session_token", %ForwarderSession{
-        token: "session_token",
-        status: :connected,
-        secure: false,
-        forwarder_hostname: "localhost",
-        forwarder_port: 4001
-      })
+    variables = %{
+      "device_id" => device_id,
+      "session_token" => session_token
+    }
 
-      variables = %{
-        device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-        session_token: "session_token"
-      }
-
-      result = run_query(conn, api_path, variables)
-
-      assert %{
-               "data" => %{
-                 "forwarderSession" => %{
-                   "token" => "session_token",
-                   "status" => "CONNECTED",
-                   "forwarderHostname" => "localhost",
-                   "forwarderPort" => 4001
-                 }
-               }
-             } = result
-    end
-
-    test "returns null if the session does not exist", %{
-      conn: conn,
-      api_path: api_path,
-      realm: realm
-    } do
-      device = device_fixture(realm, %{online: true})
-
-      mock_forwarder_session(device, "session_token", nil)
-
-      variables = %{
-        device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-        session_token: "session_token"
-      }
-
-      result = run_query(conn, api_path, variables)
-
-      assert %{
-               "data" => %{
-                 "forwarderSession" => nil
-               }
-             } = result
-    end
-
-    test "returns error if the device is disconnected", %{
-      conn: conn,
-      api_path: api_path,
-      realm: realm
-    } do
-      device = device_fixture(realm, %{online: false})
-
-      variables = %{
-        device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-        session_token: "session_token"
-      }
-
-      result = run_query(conn, api_path, variables)
-
-      assert %{
-               "data" => %{"forwarderSession" => nil},
-               "errors" => [
-                 %{
-                   "code" => "device_disconnected",
-                   "message" => "The device is not connected",
-                   "status_code" => 409
-                 }
-               ]
-             } = result
-    end
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 
-  defp mock_forwarder_session(device, session_token, forwarder_session) do
-    device_id = device.device_id
+  defp extract_error!(result) do
+    assert %{
+             data: %{"forwarderSession" => nil},
+             errors: [error]
+           } = result
 
-    Edgehog.Astarte.Device.ForwarderSessionMock
-    |> expect(:fetch_session, fn _appengine_client, ^device_id, ^session_token ->
-      if forwarder_session != nil do
-        {:ok, forwarder_session}
-      else
-        {:error, :forwarder_session_not_found}
-      end
-    end)
+    error
   end
 
-  defp run_query(conn, api_path, variables) do
-    conn
-    |> get(api_path, query: @query, variables: variables)
-    |> json_response(200)
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "forwarderSession" => forwarder_session
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    forwarder_session
   end
 end

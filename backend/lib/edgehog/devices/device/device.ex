@@ -341,6 +341,12 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :battery_status}
     end
 
+    calculate :forwarder_sessions, {:array, :struct} do
+      description "The existing forwarder sessions of the device."
+      filterable? false
+      calculation Calculations.ForwarderSessions
+    end
+
     calculate :hardware_info, Types.HardwareInfo do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :hardware_info}

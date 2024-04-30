@@ -18,20 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.ForwarderSession.Behaviour do
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.ForwarderSession
+defmodule Edgehog.Forwarder do
+  use Ash.Domain,
+    extensions: [
+      AshGraphql.Domain
+    ]
 
-  @callback list_sessions(client :: AppEngine.t(), device_id :: String.t()) ::
-              {:ok, list(ForwarderSession.t())} | {:error, term()}
+  graphql do
+    root_level_errors? true
+  end
 
-  @callback request_session(
-              client :: AppEngine.t(),
-              device_id :: String.t(),
-              session_token :: String.t(),
-              forwarder_hostname :: String.t(),
-              forwarder_port :: integer(),
-              secure_sessions? :: boolean()
-            ) ::
-              :ok | {:error, term()}
+  resources do
+    resource Edgehog.Forwarder.Config
+    resource Edgehog.Forwarder.Session
+  end
 end

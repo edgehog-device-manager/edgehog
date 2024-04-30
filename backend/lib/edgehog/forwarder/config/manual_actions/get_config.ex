@@ -18,13 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Forwarder.Config do
-  @type t :: %__MODULE__{
-          hostname: String.t(),
-          port: integer(),
-          secure_sessions?: boolean()
-        }
+defmodule Edgehog.Forwarder.Config.ManualActions.GetConfig do
+  use Ash.Resource.ManualRead
 
-  @enforce_keys [:hostname, :port, :secure_sessions?]
-  defstruct @enforce_keys
+  alias Edgehog.Forwarder.Config
+
+  def read(_ash_query, _ecto_query, _opts, _context) do
+    forwarder_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
+
+    if forwarder_config.enabled? do
+      {:ok,
+       [
+         %Config{
+           hostname: forwarder_config.hostname,
+           port: forwarder_config.port,
+           secure_sessions: forwarder_config.secure_sessions?
+         }
+       ]}
+    else
+      {:ok, []}
+    end
+  end
 end

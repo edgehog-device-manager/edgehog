@@ -51,19 +51,6 @@ defmodule Edgehog.Mocks.Astarte.Device.ForwarderSession do
   end
 
   @impl true
-  def fetch_session(%AppEngine{} = _client, _device_id, session_token) do
-    session = %ForwarderSession{
-      token: session_token,
-      status: :connected,
-      secure: @secure_sessions?,
-      forwarder_hostname: @forwarder_hostname,
-      forwarder_port: @forwarder_port
-    }
-
-    {:ok, session}
-  end
-
-  @impl true
   def request_session(
         %AppEngine{} = _client,
         _device_id,

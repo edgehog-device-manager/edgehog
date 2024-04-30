@@ -19,20 +19,13 @@
 #
 
 defmodule Edgehog.Astarte.Device.ForwarderSession do
-  @type t :: %__MODULE__{
-          token: String.t(),
-          status: :connecting | :connected,
-          secure: boolean(),
-          forwarder_hostname: String.t(),
-          forwarder_port: integer()
-        }
-
   @enforce_keys [:token, :status, :secure, :forwarder_hostname, :forwarder_port]
   defstruct @enforce_keys
 
   @behaviour Edgehog.Astarte.Device.ForwarderSession.Behaviour
 
   alias Astarte.Client.AppEngine
+  alias Edgehog.Forwarder.Session
 
   @session_request_interface "io.edgehog.devicemanager.ForwarderSessionRequest"
   @sessions_state_interface "io.edgehog.devicemanager.ForwarderSessionState"
@@ -44,17 +37,6 @@ defmodule Edgehog.Astarte.Device.ForwarderSession do
       sessions = parse_session_list(data)
 
       {:ok, sessions}
-    end
-  end
-
-  @impl true
-  def fetch_session(%AppEngine{} = client, device_id, session_token)
-      when is_binary(session_token) do
-    with {:ok, sessions} <- list_sessions(client, device_id) do
-      case Enum.find(sessions, &(&1.token == session_token)) do
-        nil -> {:error, :forwarder_session_not_found}
-        session -> {:ok, session}
-      end
     end
   end
 
@@ -92,7 +74,7 @@ defmodule Edgehog.Astarte.Device.ForwarderSession do
   end
 
   defp parse_session(session_token, session_state) do
-    %__MODULE__{
+    %Session{
       token: session_token,
       status: parse_session_status(session_state["status"]),
       # TODO: forwarder info should be specified in the session_state.
