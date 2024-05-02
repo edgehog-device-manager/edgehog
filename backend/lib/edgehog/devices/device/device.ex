@@ -393,6 +393,12 @@ defmodule Edgehog.Devices.Device do
       constraints items: [instance_of: Edgehog.Astarte.Device.CellularConnection.ModemStatus]
       calculation {Calculations.AstarteInterfaceValue, value_id: :modem_status}
     end
+
+    calculate :sensor_positions, {:array, :struct} do
+      constraints items: [instance_of: Edgehog.Astarte.Device.Geolocation.SensorPosition]
+      filterable? false
+      calculation Calculations.SensorPositions
+    end
   end
 
   identities do
