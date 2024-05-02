@@ -82,9 +82,13 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
       assert {:ok, position} = GoogleGeolocation.geolocate(device)
 
       assert %Position{
-               accuracy: 12,
                latitude: 45.4095285,
                longitude: 11.8788231,
+               accuracy: 12,
+               altitude: nil,
+               altitude_accuracy: nil,
+               heading: nil,
+               speed: nil,
                timestamp: ~U[2021-11-11 09:43:54.437Z]
              } ==
                position

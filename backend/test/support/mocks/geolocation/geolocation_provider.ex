@@ -26,9 +26,13 @@ defmodule Edgehog.Mocks.Geolocation.GeolocationProvider do
   @impl true
   def geolocate(_device) do
     coordinates = %Position{
-      accuracy: 12,
       latitude: 45.4095285,
       longitude: 11.8788231,
+      accuracy: 12,
+      altitude: nil,
+      altitude_accuracy: nil,
+      heading: nil,
+      speed: nil,
       timestamp: ~U[2021-11-15 11:44:57.432516Z]
     }
 

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@
 defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
-  alias Edgehog.Astarte
   alias Edgehog.Astarte.Device.WiFiScanResult
-  alias Edgehog.Devices
   alias Edgehog.Devices.Device
   alias Edgehog.Config
   alias Edgehog.Geolocation.Position
@@ -34,13 +32,16 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
-  def geolocate(%Device{device_id: device_id} = device) do
-    with {:ok, client} <- Devices.appengine_client_from_device(device),
-         {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(client, device_id),
-         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(wifi_scan_results) do
+  def geolocate(%Device{} = device) do
+    with {:ok, device} <- Ash.load(device, :wifi_scan_results),
+         :ok <- validate_wifi_scan_results_exist(device.wifi_scan_results),
+         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(device.wifi_scan_results) do
       geolocate_wifi(wifi_scan_results)
     end
   end
+
+  defp validate_wifi_scan_results_exist(nil), do: {:error, :wifi_scan_results_not_found}
+  defp validate_wifi_scan_results_exist(_), do: :ok
 
   defp filter_latest_wifi_scan_results([_scan | _] = wifi_scan_results) do
     latest_scan = Enum.max_by(wifi_scan_results, & &1.timestamp, DateTime)
@@ -87,6 +88,10 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
         latitude: latitude,
         longitude: longitude,
         accuracy: body["accuracy"],
+        altitude: nil,
+        altitude_accuracy: nil,
+        heading: nil,
+        speed: nil,
         timestamp: timestamp
       }
 
