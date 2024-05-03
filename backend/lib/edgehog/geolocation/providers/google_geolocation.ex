@@ -48,7 +48,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
     latest_wifi_scan_results =
       Enum.filter(
         wifi_scan_results,
-        &(DateTime.diff(latest_scan.timestamp, &1.timestamp, :second) < 1)
+        &(DateTime.diff(latest_scan.timestamp, &1.timestamp, :second) < 5)
       )
 
     {:ok, latest_wifi_scan_results}
