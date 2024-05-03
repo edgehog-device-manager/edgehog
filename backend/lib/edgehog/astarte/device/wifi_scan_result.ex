@@ -47,7 +47,9 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
 
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface, limit: 1000) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface,
+             query: [limit: 1000]
+           ) do
       wifi_scan_results =
         Map.get(data, "ap", [])
         |> Enum.map(fn ap ->

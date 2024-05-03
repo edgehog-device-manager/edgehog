@@ -249,6 +249,26 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       assert :ok = Core.reconcile_trigger!(client, trigger_map)
     end
 
+    test "works even if Astarte returns the trigger without some defaults", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name,
+        trigger_map: trigger_map
+      } = ctx
+
+      Edgehog.Astarte.Realm.TriggersMock
+      |> expect(:get, fn ^client, ^trigger_name ->
+        {_, no_ignore_ssl_errors_map} = pop_in(trigger_map["action"]["ignore_ssl_errors"])
+        {_, no_defaults_map} = pop_in(no_ignore_ssl_errors_map["action"]["http_static_headers"])
+
+        {:ok, %{"data" => no_defaults_map}}
+      end)
+      |> expect(:create, 0, fn _client, _trigger_map -> :ok end)
+      |> expect(:delete, 0, fn _client, _trigger_name -> :ok end)
+
+      assert :ok = Core.reconcile_trigger!(client, trigger_map)
+    end
+
     test "deletes and recreates the trigger if it differs from the required one", ctx do
       %{
         client: client,
