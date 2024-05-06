@@ -29,7 +29,9 @@ defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureUpload do
   def change(changeset, _opts, _context) do
     case Ash.Changeset.fetch_argument(changeset, :picture_file) do
       {:ok, %Plug.Upload{} = picture_file} ->
-        Ash.Changeset.before_transaction(changeset, &upload_picture(&1, picture_file))
+        changeset
+        |> Ash.Changeset.before_transaction(&upload_picture(&1, picture_file))
+        |> Ash.Changeset.after_transaction(&cleanup_on_error(&1, &2))
 
       _ ->
         changeset
@@ -43,7 +45,7 @@ defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureUpload do
       {:ok, picture_url} ->
         changeset
         |> Ash.Changeset.force_change_attribute(:picture_url, picture_url)
-        |> Ash.Changeset.after_transaction(&maybe_cleanup(&1, &2))
+        |> Ash.Changeset.put_context(:picture_uploaded?, true)
 
       {:error, _reason} ->
         Ash.Changeset.add_error(changeset, field: :picture_file, message: "failed to upload")
@@ -52,13 +54,16 @@ defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureUpload do
 
   # If we've uploaded the picture and the transaction resulted in an error, we do our
   # best to clean up
-  defp maybe_cleanup(changeset, {:error, _} = result) do
-    {:ok, %{picture_url: picture_url} = system_model} = Ash.Changeset.apply_attributes(changeset)
+  defp cleanup_on_error(changeset, {:error, _} = result) do
+    if changeset.context[:picture_uploaded?] do
+      {:ok, %{picture_url: picture_url} = system_model} =
+        Ash.Changeset.apply_attributes(changeset)
 
-    _ = Assets.delete_system_model_picture(system_model, picture_url)
+      _ = Assets.delete_system_model_picture(system_model, picture_url)
+    end
 
     result
   end
 
-  defp maybe_cleanup(_changeset, result), do: result
+  defp cleanup_on_error(_changeset, result), do: result
 end
