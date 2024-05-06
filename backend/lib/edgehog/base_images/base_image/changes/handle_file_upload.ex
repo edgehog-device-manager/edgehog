@@ -35,7 +35,9 @@ defmodule Edgehog.BaseImages.BaseImage.Changes.HandleFileUpload do
   def change(changeset, _opts, _context) do
     case Ash.Changeset.fetch_argument(changeset, :file) do
       {:ok, %Plug.Upload{} = file} ->
-        Ash.Changeset.before_transaction(changeset, &upload_file(&1, file))
+        changeset
+        |> Ash.Changeset.before_transaction(&upload_file(&1, file))
+        |> Ash.Changeset.after_transaction(&cleanup_on_error(&1, &2))
 
       _ ->
         changeset
@@ -49,7 +51,7 @@ defmodule Edgehog.BaseImages.BaseImage.Changes.HandleFileUpload do
       {:ok, file_url} ->
         changeset
         |> Ash.Changeset.force_change_attribute(:url, file_url)
-        |> Ash.Changeset.after_transaction(&maybe_cleanup(&1, &2))
+        |> Ash.Changeset.put_context(:file_uploaded?, true)
 
       {:error, _reason} ->
         Ash.Changeset.add_error(changeset, field: :file, message: "failed to upload")
@@ -58,15 +60,14 @@ defmodule Edgehog.BaseImages.BaseImage.Changes.HandleFileUpload do
 
   # If we've uploaded the file and the transaction resulted in an error, we do our
   # best to clean up
-  defp maybe_cleanup(changeset, {:error, _} = result) do
-    {:ok, %{url: file_url} = base_image} = Ash.Changeset.apply_attributes(changeset)
-
-    unless is_nil(file_url) do
+  defp cleanup_on_error(changeset, {:error, _} = result) do
+    if changeset.context[:file_uploaded?] do
+      {:ok, base_image} = Ash.Changeset.apply_attributes(changeset)
       _ = @storage_module.delete(base_image)
     end
 
     result
   end
 
-  defp maybe_cleanup(_changeset, result), do: result
+  defp cleanup_on_error(_changeset, result), do: result
 end

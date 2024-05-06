@@ -35,7 +35,9 @@ defmodule Edgehog.OSManagement.OTAOperation.Changes.HandleEphemeralImageUpload d
   def change(changeset, _opts, _context) do
     case Ash.Changeset.fetch_argument(changeset, :base_image_file) do
       {:ok, %Plug.Upload{} = file} ->
-        Ash.Changeset.before_transaction(changeset, &upload_file(&1, file))
+        changeset
+        |> Ash.Changeset.before_transaction(&upload_file(&1, file))
+        |> Ash.Changeset.after_transaction(&cleanup_on_error(&1, &2))
 
       _ ->
         changeset
@@ -51,7 +53,7 @@ defmodule Edgehog.OSManagement.OTAOperation.Changes.HandleEphemeralImageUpload d
       {:ok, file_url} ->
         changeset
         |> Ash.Changeset.force_change_attribute(:base_image_url, file_url)
-        |> Ash.Changeset.after_transaction(&maybe_cleanup(&1, &2))
+        |> Ash.Changeset.put_context(:base_image_uploaded?, true)
 
       {:error, _reason} ->
         Ash.Changeset.add_error(changeset, field: :base_image_file, message: "failed to upload")
@@ -60,17 +62,17 @@ defmodule Edgehog.OSManagement.OTAOperation.Changes.HandleEphemeralImageUpload d
 
   # If we've uploaded the file and the transaction resulted in an error, we do our
   # best to clean up
-  defp maybe_cleanup(changeset, {:error, _} = result) do
-    tenant_id = changeset.to_tenant
-    ota_operation_id = Ash.Changeset.get_attribute(changeset, :id)
-    base_image_url = Ash.Changeset.get_attribute(changeset, :base_image_url)
+  defp cleanup_on_error(changeset, {:error, _} = result) do
+    if changeset.context[:base_image_uploaded?] do
+      tenant_id = changeset.to_tenant
+      ota_operation_id = Ash.Changeset.get_attribute(changeset, :id)
+      base_image_url = Ash.Changeset.get_attribute(changeset, :base_image_url)
 
-    unless is_nil(base_image_url) do
       _ = @ephemeral_image_module.delete(tenant_id, ota_operation_id, base_image_url)
     end
 
     result
   end
 
-  defp maybe_cleanup(_changeset, result), do: result
+  defp cleanup_on_error(_changeset, result), do: result
 end
