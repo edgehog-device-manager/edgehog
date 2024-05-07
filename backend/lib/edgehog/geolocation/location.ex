@@ -51,5 +51,10 @@ defmodule Edgehog.Geolocation.Location do
       public? true
       allow_nil? false
     end
+
+    attribute :source, :string do
+      description "Describes how the location was calculated."
+      public? true
+    end
   end
 end

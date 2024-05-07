@@ -65,7 +65,11 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocation do
       altitude_accuracy: sensor_position.altitude_accuracy,
       heading: sensor_position.heading,
       speed: sensor_position.speed,
-      timestamp: sensor_position.timestamp
+      timestamp: sensor_position.timestamp,
+      source: """
+      Sensor position published by the device on the \
+      io.edgehog.devicemanager.Geolocation Astarte interface.\
+      """
     }
 
     {:ok, position}

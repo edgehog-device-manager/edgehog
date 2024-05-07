@@ -48,7 +48,10 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocoding do
 
         location = %Location{
           formatted_address: formatted_address,
-          timestamp: timestamp
+          timestamp: timestamp,
+          source: """
+          Location estimated by reverse geocoding the available position.\
+          """
         }
 
         {:ok, location}

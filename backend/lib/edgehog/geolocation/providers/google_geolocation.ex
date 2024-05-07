@@ -92,7 +92,12 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
         altitude_accuracy: nil,
         heading: nil,
         speed: nil,
-        timestamp: timestamp
+        timestamp: timestamp,
+        source: """
+        GPS position estimated from the list of WiFi access points that the \
+        device detected and published on the \
+        io.edgehog.devicemanager.WiFiScanResults Astarte interface.\
+        """
       }
 
       {:ok, position}

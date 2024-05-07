@@ -70,7 +70,10 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
         altitude_accuracy: nil,
         heading: nil,
         speed: nil,
-        timestamp: timestamp
+        timestamp: timestamp,
+        source: """
+        GPS position estimated from the last known IP address of the device.\
+        """
       }
 
       {:ok, position}
