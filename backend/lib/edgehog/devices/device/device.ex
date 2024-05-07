@@ -352,6 +352,20 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :hardware_info}
     end
 
+    calculate :location, Edgehog.Geolocation.Location do
+      description """
+      Describes the place where the device is located.
+
+      The field holds information about the device's address, which is
+      estimated by means of Edgehog's geolocation modules and the data
+      published by the device.
+      """
+
+      public? true
+      filterable? false
+      calculation Calculations.Location
+    end
+
     calculate :network_interfaces, {:array, Types.NetworkInterface} do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :network_interfaces}
