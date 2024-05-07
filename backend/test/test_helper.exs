@@ -20,3 +20,11 @@
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Edgehog.Repo, :manual)
+
+Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
+  for: Edgehog.Geolocation.GeolocationProvider
+)
+
+Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock,
+  for: Edgehog.Geolocation.GeocodingProvider
+)

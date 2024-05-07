@@ -90,8 +90,6 @@ Mox.defmock(Edgehog.Astarte.Trigger.MockDataLayer,
   for: Edgehog.Astarte.Trigger.DataLayer
 )
 
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)
-
 Mox.defmock(Edgehog.Assets.SystemModelPictureMock, for: Edgehog.Assets.Store.Behaviour)
 
 Mox.defmock(Edgehog.OSManagement.EphemeralImageMock,
