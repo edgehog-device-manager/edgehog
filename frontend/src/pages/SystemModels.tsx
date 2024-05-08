@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useCallback } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -97,7 +97,12 @@ const SystemModelsPage = () => {
   const [getSystemModelsQuery, getSystemModels] =
     useQueryLoader<SystemModels_getSystemModels_Query>(GET_SYSTEM_MODELS_QUERY);
 
-  useEffect(() => getSystemModels({}), [getSystemModels]);
+  const fetchSystemModels = useCallback(
+    () => getSystemModels({}, { fetchPolicy: "store-and-network" }),
+    [getSystemModels],
+  );
+
+  useEffect(fetchSystemModels, [fetchSystemModels]);
 
   return (
     <Suspense
@@ -113,7 +118,7 @@ const SystemModelsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => getSystemModels({})}
+        onReset={fetchSystemModels}
       >
         {getSystemModelsQuery && (
           <SystemModelsContent getSystemModelsQuery={getSystemModelsQuery} />

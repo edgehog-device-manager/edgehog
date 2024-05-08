@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 import React, { useCallback, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -33,6 +34,33 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { systemModelHandleSchema, messages, yup } from "forms";
+
+import type {
+  UpdateSystemModel_SystemModelFragment$key,
+  UpdateSystemModel_SystemModelFragment$data,
+} from "api/__generated__/UpdateSystemModel_SystemModelFragment.graphql";
+import type { UpdateSystemModel_OptionsFragment$key } from "api/__generated__/UpdateSystemModel_OptionsFragment.graphql";
+
+const UPDATE_SYSTEM_MODEL_FRAGMENT = graphql`
+  fragment UpdateSystemModel_SystemModelFragment on SystemModel {
+    name
+    handle
+    description
+    hardwareType {
+      name
+    }
+    partNumbers
+    pictureUrl
+  }
+`;
+
+const UPDATE_SYSTEM_MODEL_OPTIONS_FRAGMENT = graphql`
+  fragment UpdateSystemModel_OptionsFragment on RootQueryType {
+    tenantInfo {
+      defaultLocale
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -51,31 +79,17 @@ const FormRow = ({
   </Form.Group>
 );
 
-type SystemModelData = {
-  name: string;
-  handle: string;
-  description: string | null;
-  hardwareType: {
-    name: string;
-  };
-  partNumbers: string[];
-  pictureUrl: string | null;
-};
-
-type SystemModelChanges = {
+type SystemModelChanges = Partial<{
   name: string;
   handle: string;
   description: {
     locale: string;
     text: string;
   };
-  hardwareType: {
-    name: string;
-  };
   partNumbers: string[];
-  pictureFile?: File;
-  pictureUrl?: string | null;
-};
+  pictureFile: File;
+  pictureUrl: string | null;
+}>;
 
 type PartNumber = { value: string };
 
@@ -113,7 +127,9 @@ const systemModelSchema = yup
   })
   .required();
 
-const transformInputData = (data: SystemModelData): FormData => ({
+const transformInputData = (
+  data: UpdateSystemModel_SystemModelFragment$data,
+): FormData => ({
   ...data,
   description: data.description || "",
   hardwareType: data.hardwareType.name,
@@ -124,46 +140,62 @@ const transformInputData = (data: SystemModelData): FormData => ({
 });
 
 const transformOutputData = (
+  systemModel: UpdateSystemModel_SystemModelFragment$data,
   locale: string,
   data: FormData,
 ): SystemModelChanges => {
-  const systemModel: SystemModelChanges = {
-    name: data.name,
-    handle: data.handle,
-    hardwareType: {
-      name: data.hardwareType,
-    },
-    partNumbers: data.partNumbers.map((pn) => pn.value),
-    description: {
+  const diff: SystemModelChanges = {};
+  if (systemModel.name !== data.name) {
+    diff.name = data.name;
+  }
+  if (systemModel.handle !== data.handle) {
+    diff.handle = data.handle;
+  }
+  if (data.pictureFile) {
+    diff.pictureFile = data.pictureFile[0];
+  } else if (systemModel.pictureUrl !== null && data.pictureFile === null) {
+    diff.pictureUrl = null;
+  }
+  if (systemModel.description !== null || data.description !== "") {
+    diff.description = {
       locale,
       text: data.description,
-    },
-  };
-
-  if (data.pictureFile) {
-    systemModel.pictureFile = data.pictureFile[0];
-  } else if (data.pictureFile === null) {
-    systemModel.pictureUrl = null;
+    };
   }
 
-  return systemModel;
+  const partNumbers = data.partNumbers.map((pn) => pn.value);
+  const systemModelPartNumbers = new Set(systemModel.partNumbers);
+  const formPartNumbers = new Set(partNumbers);
+  const partNumbersEqual =
+    formPartNumbers.size === systemModelPartNumbers.size &&
+    [...formPartNumbers].every((pn) => systemModelPartNumbers.has(pn));
+  if (!partNumbersEqual) {
+    diff.partNumbers = partNumbers;
+  }
+
+  return diff;
 };
 
 type Props = {
-  initialData: SystemModelData;
-  locale: string;
+  systemModelRef: UpdateSystemModel_SystemModelFragment$key;
+  optionsRef: UpdateSystemModel_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: SystemModelChanges) => void;
   onDelete: () => void;
 };
 
 const UpdateSystemModelForm = ({
-  initialData,
-  locale,
+  systemModelRef,
+  optionsRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: Props) => {
+  const systemModel = useFragment(UPDATE_SYSTEM_MODEL_FRAGMENT, systemModelRef);
+  const {
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(UPDATE_SYSTEM_MODEL_OPTIONS_FRAGMENT, optionsRef);
+
   const {
     control,
     register,
@@ -174,7 +206,7 @@ const UpdateSystemModelForm = ({
     watch,
   } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: transformInputData(initialData),
+    defaultValues: transformInputData(systemModel),
     resolver: yupResolver(systemModelSchema),
   });
 
@@ -184,7 +216,7 @@ const UpdateSystemModelForm = ({
   });
 
   const onFormSubmit = (data: FormData) =>
-    onSubmit(transformOutputData(locale, data));
+    onSubmit(transformOutputData(systemModel, locale, data));
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -202,8 +234,8 @@ const UpdateSystemModelForm = ({
   );
 
   useEffect(() => {
-    reset(transformInputData(initialData));
-  }, [initialData, reset]);
+    reset(transformInputData(systemModel));
+  }, [systemModel, reset]);
 
   const pictureFile = watch("pictureFile");
   const picture =
@@ -211,7 +243,7 @@ const UpdateSystemModelForm = ({
       ? URL.createObjectURL(pictureFile[0]) // picture is the new file
       : pictureFile === null
       ? null // picture is removed
-      : initialData.pictureUrl; // picture is unchanged
+      : systemModel.pictureUrl; // picture is unchanged
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -226,7 +258,7 @@ const UpdateSystemModelForm = ({
                     onClick={() => setValue("pictureFile", null)}
                   />
                 )}
-                <Figure alt={initialData.name} src={picture || undefined} />
+                <Figure alt={systemModel.name} src={picture || undefined} />
               </div>
               <Form.Group controlId="pictureFile">
                 <Form.Control
@@ -384,6 +416,6 @@ const UpdateSystemModelForm = ({
   );
 };
 
-export type { SystemModelData, SystemModelChanges };
+export type { SystemModelChanges };
 
 export default UpdateSystemModelForm;

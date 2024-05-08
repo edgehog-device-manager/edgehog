@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -31,6 +32,19 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { hardwareTypeHandleSchema, messages, yup } from "forms";
+
+import type {
+  UpdateHardwareType_HardwareTypeFragment$key,
+  UpdateHardwareType_HardwareTypeFragment$data,
+} from "api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
+
+const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
+  fragment UpdateHardwareType_HardwareTypeFragment on HardwareType {
+    name
+    handle
+    partNumbers
+  }
+`;
 
 const FormRow = ({
   id,
@@ -86,7 +100,9 @@ const hardwareTypeSchema = yup
   })
   .required();
 
-const transformInputData = (data: HardwareTypeData): FormData => ({
+const transformInputData = (
+  data: UpdateHardwareType_HardwareTypeFragment$data,
+): FormData => ({
   ...data,
   partNumbers:
     data.partNumbers.length > 0
@@ -100,26 +116,31 @@ const transformOutputData = (data: FormData): HardwareTypeData => ({
 });
 
 type Props = {
-  initialData: HardwareTypeData;
+  hardwareTypeRef: UpdateHardwareType_HardwareTypeFragment$key;
   isLoading?: boolean;
   onSubmit: (data: HardwareTypeData) => void;
   onDelete: () => void;
 };
 
 const UpdateHardwareTypeForm = ({
-  initialData,
+  hardwareTypeRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: Props) => {
+  const hardwareType = useFragment(
+    UPDATE_HARDWARE_TYPE_FRAGMENT,
+    hardwareTypeRef,
+  );
   const {
     control,
     register,
     handleSubmit,
     formState: { errors, isDirty },
+    reset,
   } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: initialData && transformInputData(initialData),
+    defaultValues: transformInputData(hardwareType),
     resolver: yupResolver(hardwareTypeSchema),
   });
 
@@ -143,6 +164,11 @@ const UpdateHardwareTypeForm = ({
       }
     },
     [partNumbers],
+  );
+
+  useEffect(
+    () => reset(transformInputData(hardwareType)),
+    [hardwareType, reset],
   );
 
   const canSubmit = !isLoading && isDirty;

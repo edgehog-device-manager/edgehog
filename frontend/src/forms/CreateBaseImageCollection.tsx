@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,6 +31,17 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageCollectionHandleSchema, yup } from "forms";
+
+import type { CreateBaseImageCollection_OptionsFragment$key } from "api/__generated__/CreateBaseImageCollection_OptionsFragment.graphql";
+
+const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
+  fragment CreateBaseImageCollection_OptionsFragment on RootQueryType {
+    systemModels {
+      id
+      name
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -68,23 +80,22 @@ const initialData: BaseImageCollectionData = {
   systemModelId: "",
 };
 
-type SystemModelOption = {
-  id: string;
-  name: string;
-};
-
 type Props = {
-  systemModels: SystemModelOption[];
+  optionsRef: CreateBaseImageCollection_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionData) => void;
 };
 
 const CreateBaseImageCollectionForm = ({
-  systemModels,
+  optionsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
   const intl = useIntl();
+  const { systemModels } = useFragment(
+    CREATE_BASE_IMAGE_COLLECTION_FRAGMENT,
+    optionsRef,
+  );
   const {
     register,
     handleSubmit,
@@ -149,9 +160,9 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select a System Model",
               })}
             </option>
-            {systemModels.map((systemModelOption) => (
-              <option key={systemModelOption.id} value={systemModelOption.id}>
-                {systemModelOption.name}
+            {systemModels.map((systemModel) => (
+              <option key={systemModel.id} value={systemModel.id}>
+                {systemModel.name}
               </option>
             ))}
           </Form.Select>

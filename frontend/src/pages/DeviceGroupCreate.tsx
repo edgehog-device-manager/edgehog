@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -36,9 +36,6 @@ const CREATE_DEVICE_GROUP_MUTATION = graphql`
     createDeviceGroup(input: $input) {
       deviceGroup {
         id
-        name
-        handle
-        selector
         devices {
           id
         }
@@ -61,20 +58,18 @@ const DeviceGroupCreatePage = () => {
       createDeviceGroup({
         variables: { input: deviceGroup },
         onCompleted(data, errors) {
+          if (data.createDeviceGroup) {
+            const deviceGroupId = data.createDeviceGroup.deviceGroup.id;
+            return navigate({
+              route: Route.deviceGroupsEdit,
+              params: { deviceGroupId },
+            });
+          }
           if (errors) {
             const errorFeedback = errors
               .map((error) => error.message)
               .join(". \n");
             return setErrorFeedback(errorFeedback);
-          }
-          const deviceGroupId = data.createDeviceGroup?.deviceGroup.id;
-          if (deviceGroupId) {
-            navigate({
-              route: Route.deviceGroupsEdit,
-              params: { deviceGroupId },
-            });
-          } else {
-            navigate({ route: Route.deviceGroups });
           }
         },
         onError() {

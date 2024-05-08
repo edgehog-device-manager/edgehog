@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,6 +31,30 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageStartingVersionRequirementSchema, yup } from "forms";
+
+import type { UpdateBaseImage_BaseImageFragment$key } from "api/__generated__/UpdateBaseImage_BaseImageFragment.graphql";
+import type { UpdateBaseImage_OptionsFragment$key } from "api/__generated__/UpdateBaseImage_OptionsFragment.graphql";
+
+const UPDATE_BASE_IMAGE_FRAGMENT = graphql`
+  fragment UpdateBaseImage_BaseImageFragment on BaseImage {
+    version
+    url
+    startingVersionRequirement
+    releaseDisplayName
+    description
+    baseImageCollection {
+      name
+    }
+  }
+`;
+
+const UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT = graphql`
+  fragment UpdateBaseImage_OptionsFragment on RootQueryType {
+    tenantInfo {
+      defaultLocale
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -47,17 +72,6 @@ const FormRow = ({
     <Col sm={9}>{children}</Col>
   </Form.Group>
 );
-
-type BaseImageData = {
-  baseImageCollection: {
-    name: string;
-  };
-  version: string;
-  url: string;
-  startingVersionRequirement: string | null;
-  releaseDisplayName: string | null;
-  description: string | null;
-};
 
 type FormData = {
   baseImageCollection: string;
@@ -103,20 +117,25 @@ const transformOutputData = (
 });
 
 type UpdateBaseImageProps = {
-  baseImage: BaseImageData;
-  locale: string;
+  baseImageRef: UpdateBaseImage_BaseImageFragment$key;
+  optionsRef: UpdateBaseImage_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageChanges) => void;
   onDelete: () => void;
 };
 
 const UpdateBaseImage = ({
-  baseImage,
-  locale,
+  baseImageRef,
+  optionsRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: UpdateBaseImageProps) => {
+  const baseImage = useFragment(UPDATE_BASE_IMAGE_FRAGMENT, baseImageRef);
+  const {
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT, optionsRef);
+
   const defaultValues = useMemo(
     () => ({
       baseImageCollection: baseImage.baseImageCollection.name,
@@ -270,6 +289,6 @@ const UpdateBaseImage = ({
   );
 };
 
-export type { BaseImageData, BaseImageChanges };
+export type { BaseImageChanges };
 
 export default UpdateBaseImage;

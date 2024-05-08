@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -35,6 +36,27 @@ import {
   baseImageStartingVersionRequirementSchema,
   yup,
 } from "forms";
+
+import type {
+  CreateBaseImage_BaseImageCollectionFragment$key,
+  CreateBaseImage_BaseImageCollectionFragment$data,
+} from "api/__generated__/CreateBaseImage_BaseImageCollectionFragment.graphql";
+import type { CreateBaseImage_OptionsFragment$key } from "api/__generated__/CreateBaseImage_OptionsFragment.graphql";
+
+const CREATE_BASE_IMAGE_FRAGMENT = graphql`
+  fragment CreateBaseImage_BaseImageCollectionFragment on BaseImageCollection {
+    id
+    name
+  }
+`;
+
+const CREATE_BASE_IMAGE_OPTIONS_FRAGMENT = graphql`
+  fragment CreateBaseImage_OptionsFragment on RootQueryType {
+    tenantInfo {
+      defaultLocale
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -89,7 +111,7 @@ const baseImageSchema = yup
   .required();
 
 const transformInputData = (
-  baseImageCollection: BaseImageCollection,
+  baseImageCollection: CreateBaseImage_BaseImageCollectionFragment$data,
 ): FormData => ({
   baseImageCollection: baseImageCollection.name,
   file: null,
@@ -104,7 +126,7 @@ type FormOutput = FormData & {
 };
 
 const transformOutputData = (
-  baseImageCollection: BaseImageCollection,
+  baseImageCollection: CreateBaseImage_BaseImageCollectionFragment$data,
   locale: string,
   data: FormOutput,
 ): BaseImageData => ({
@@ -122,31 +144,34 @@ const transformOutputData = (
   },
 });
 
-type BaseImageCollection = {
-  id: string;
-  name: string;
-};
-
 type Props = {
-  baseImageCollection: BaseImageCollection;
-  locale: string;
+  baseImageCollectionRef: CreateBaseImage_BaseImageCollectionFragment$key;
+  optionsRef: CreateBaseImage_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageData) => void;
 };
 
 const CreateBaseImageForm = ({
-  baseImageCollection,
-  locale,
+  baseImageCollectionRef,
+  optionsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
+  const baseImageCollectionData = useFragment(
+    CREATE_BASE_IMAGE_FRAGMENT,
+    baseImageCollectionRef,
+  );
+  const {
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(CREATE_BASE_IMAGE_OPTIONS_FRAGMENT, optionsRef);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: transformInputData(baseImageCollection),
+    defaultValues: transformInputData(baseImageCollectionData),
     resolver: yupResolver(baseImageSchema),
   });
 
@@ -156,7 +181,9 @@ const CreateBaseImageForm = ({
         ...data,
         file: data.file,
       };
-      onSubmit(transformOutputData(baseImageCollection, locale, baseImageData));
+      onSubmit(
+        transformOutputData(baseImageCollectionData, locale, baseImageData),
+      );
     }
   };
 

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useCallback } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -80,7 +80,12 @@ const DevicesPage = () => {
   const [getDeviceGroupsQuery, getDeviceGroups] =
     useQueryLoader<DeviceGroups_getDeviceGroups_Query>(GET_DEVICE_GROUPS_QUERY);
 
-  useEffect(() => getDeviceGroups({}), [getDeviceGroups]);
+  const fetchDeviceGroups = useCallback(
+    () => getDeviceGroups({}, { fetchPolicy: "store-and-network" }),
+    [getDeviceGroups],
+  );
+
+  useEffect(fetchDeviceGroups, [fetchDeviceGroups]);
 
   return (
     <Suspense
@@ -96,7 +101,7 @@ const DevicesPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => getDeviceGroups({})}
+        onReset={fetchDeviceGroups}
       >
         {getDeviceGroupsQuery && (
           <DeviceGroupsContent getDeviceGroupsQuery={getDeviceGroupsQuery} />

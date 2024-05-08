@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -26,20 +26,11 @@ import {
   useMutation,
   usePreloadedQuery,
   useQueryLoader,
+  useRefetchableFragment,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 
-import type {
-  UpdateChannel_getUpdateChannel_Query,
-  UpdateChannel_getUpdateChannel_Query$data,
-} from "api/__generated__/UpdateChannel_getUpdateChannel_Query.graphql";
-import type {
-  UpdateChannel_getDeviceGroups_Query,
-  UpdateChannel_getDeviceGroups_Query$data,
-} from "api/__generated__/UpdateChannel_getDeviceGroups_Query.graphql";
-import type { UpdateChannel_updateUpdateChannel_Mutation } from "api/__generated__/UpdateChannel_updateUpdateChannel_Mutation.graphql";
-import type { UpdateChannel_deleteUpdateChannel_Mutation } from "api/__generated__/UpdateChannel_deleteUpdateChannel_Mutation.graphql";
 import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
@@ -50,34 +41,31 @@ import Spinner from "components/Spinner";
 import UpdateUpdateChannelForm from "forms/UpdateUpdateChannel";
 import type { UpdateChannelData } from "forms/UpdateUpdateChannel";
 
-const GET_UPDATE_CHANNEL_QUERY = graphql`
-  query UpdateChannel_getUpdateChannel_Query($id: ID!) {
-    updateChannel(id: $id) {
-      id
-      name
-      handle
-      targetGroups {
-        id
-        name
-        updateChannel {
-          id
-          name
-        }
-      }
-    }
+import type {
+  UpdateChannel_getUpdateChannel_Query,
+  UpdateChannel_getUpdateChannel_Query$data,
+} from "api/__generated__/UpdateChannel_getUpdateChannel_Query.graphql";
+import type { UpdateChannel_OptionsFragment$key } from "api/__generated__/UpdateChannel_OptionsFragment.graphql";
+import type { UpdateChannel_refetchOptions_Query } from "api/__generated__/UpdateChannel_refetchOptions_Query.graphql";
+import type { UpdateChannel_updateUpdateChannel_Mutation } from "api/__generated__/UpdateChannel_updateUpdateChannel_Mutation.graphql";
+import type { UpdateChannel_deleteUpdateChannel_Mutation } from "api/__generated__/UpdateChannel_deleteUpdateChannel_Mutation.graphql";
+
+const UPDATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
+  fragment UpdateChannel_OptionsFragment on RootQueryType
+  @refetchable(queryName: "UpdateChannel_refetchOptions_Query") {
+    ...UpdateUpdateChannel_OptionsFragment
   }
 `;
 
-const GET_DEVICE_GROUPS_QUERY = graphql`
-  query UpdateChannel_getDeviceGroups_Query {
-    deviceGroups {
+const GET_UPDATE_CHANNEL_QUERY = graphql`
+  query UpdateChannel_getUpdateChannel_Query($updateChannelId: ID!) {
+    updateChannel(id: $updateChannelId) {
       id
       name
-      updateChannel {
-        id
-        name
-      }
+      handle
+      ...UpdateUpdateChannel_UpdateChannelFragment
     }
+    ...UpdateChannel_OptionsFragment
   }
 `;
 
@@ -90,6 +78,7 @@ const UPDATE_UPDATE_CHANNEL_MUTATION = graphql`
         id
         name
         handle
+        ...UpdateUpdateChannel_UpdateChannelFragment
         targetGroups {
           id
           name
@@ -115,20 +104,24 @@ const DELETE_UPDATE_CHANNEL_MUTATION = graphql`
 `;
 
 type UpdateChannelContentProps = {
+  queryRef: UpdateChannel_OptionsFragment$key;
   updateChannel: NonNullable<
     UpdateChannel_getUpdateChannel_Query$data["updateChannel"]
   >;
-  deviceGroups: UpdateChannel_getDeviceGroups_Query$data["deviceGroups"];
-  refreshDeviceGroups: () => void;
 };
 
 const UpdateChannelContent = ({
+  queryRef,
   updateChannel,
-  deviceGroups,
-  refreshDeviceGroups,
 }: UpdateChannelContentProps) => {
-  const updateChannelId = updateChannel.id;
   const navigate = useNavigate();
+
+  const updateChannelId = updateChannel.id;
+  const [updateChannelOptions, refetchOptions] = useRefetchableFragment<
+    UpdateChannel_refetchOptions_Query,
+    UpdateChannel_OptionsFragment$key
+  >(UPDATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT, queryRef);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
@@ -142,12 +135,13 @@ const UpdateChannelContent = ({
     );
 
   const handleDeleteUpdateChannel = useCallback(() => {
-    const input = {
-      updateChannelId,
-    };
+    const input = { updateChannelId };
     deleteUpdateChannel({
       variables: { input },
       onCompleted(data, errors) {
+        if (data.deleteUpdateChannel) {
+          return navigate({ route: Route.updateChannels });
+        }
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)
@@ -155,7 +149,6 @@ const UpdateChannelContent = ({
           setErrorFeedback(errorFeedback);
           return setShowDeleteModal(false);
         }
-        navigate({ route: Route.updateChannels });
       },
       onError() {
         setErrorFeedback(
@@ -219,14 +212,16 @@ const UpdateChannelContent = ({
       updateUpdateChannel({
         variables: { input },
         onCompleted(data, errors) {
+          if (data.updateUpdateChannel) {
+            setErrorFeedback(null);
+            refetchOptions({}, { fetchPolicy: "store-and-network" });
+          }
           if (errors) {
             const errorFeedback = errors
               .map((error) => error.message)
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          setErrorFeedback(null);
-          refreshDeviceGroups();
         },
         onError() {
           setErrorFeedback(
@@ -238,7 +233,7 @@ const UpdateChannelContent = ({
         },
       });
     },
-    [updateUpdateChannel, updateChannelId, refreshDeviceGroups],
+    [updateUpdateChannel, updateChannelId, refetchOptions],
   );
 
   return (
@@ -255,8 +250,8 @@ const UpdateChannelContent = ({
         </Alert>
         <div className="mb-3">
           <UpdateUpdateChannelForm
-            updateChannel={updateChannel}
-            targetGroups={deviceGroups}
+            updateChannelRef={updateChannel}
+            optionsRef={updateChannelOptions}
             onSubmit={handleUpdateUpdateChannel}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingUpdateChannel}
@@ -296,25 +291,17 @@ const UpdateChannelContent = ({
 
 type UpdateChannelWrapperProps = {
   getUpdateChannelQuery: PreloadedQuery<UpdateChannel_getUpdateChannel_Query>;
-  getDeviceGroupsQuery: PreloadedQuery<UpdateChannel_getDeviceGroups_Query>;
-  refreshDeviceGroups: () => void;
 };
 
 const UpdateChannelWrapper = ({
   getUpdateChannelQuery,
-  getDeviceGroupsQuery,
-  refreshDeviceGroups,
 }: UpdateChannelWrapperProps) => {
-  const { updateChannel } = usePreloadedQuery(
+  const queryData = usePreloadedQuery(
     GET_UPDATE_CHANNEL_QUERY,
     getUpdateChannelQuery,
   );
-  const { deviceGroups } = usePreloadedQuery(
-    GET_DEVICE_GROUPS_QUERY,
-    getDeviceGroupsQuery,
-  );
 
-  if (!updateChannel) {
+  if (!queryData.updateChannel) {
     return (
       <Result.NotFound
         title={
@@ -336,9 +323,8 @@ const UpdateChannelWrapper = ({
 
   return (
     <UpdateChannelContent
-      updateChannel={updateChannel}
-      deviceGroups={deviceGroups}
-      refreshDeviceGroups={refreshDeviceGroups}
+      updateChannel={queryData.updateChannel}
+      queryRef={queryData}
     />
   );
 };
@@ -351,20 +337,13 @@ const UpdateChannelPage = () => {
       GET_UPDATE_CHANNEL_QUERY,
     );
 
-  const [getDeviceGroupsQuery, getDeviceGroups] =
-    useQueryLoader<UpdateChannel_getDeviceGroups_Query>(
-      GET_DEVICE_GROUPS_QUERY,
-    );
-
-  const refreshDeviceGroups = useCallback(
-    () => getDeviceGroups({}, { fetchPolicy: "store-and-network" }),
-    [getDeviceGroups],
+  const fetchUpdateChannel = useCallback(
+    () =>
+      getUpdateChannel({ updateChannelId }, { fetchPolicy: "network-only" }),
+    [getUpdateChannel, updateChannelId],
   );
 
-  useEffect(() => {
-    getUpdateChannel({ id: updateChannelId }, { fetchPolicy: "network-only" });
-    refreshDeviceGroups();
-  }, [getUpdateChannel, updateChannelId, refreshDeviceGroups]);
+  useEffect(fetchUpdateChannel, [fetchUpdateChannel]);
 
   return (
     <Suspense
@@ -380,20 +359,10 @@ const UpdateChannelPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => {
-          getUpdateChannel(
-            { id: updateChannelId },
-            { fetchPolicy: "network-only" },
-          );
-          refreshDeviceGroups();
-        }}
+        onReset={fetchUpdateChannel}
       >
-        {getUpdateChannelQuery && getDeviceGroupsQuery && (
-          <UpdateChannelWrapper
-            getUpdateChannelQuery={getUpdateChannelQuery}
-            getDeviceGroupsQuery={getDeviceGroupsQuery}
-            refreshDeviceGroups={refreshDeviceGroups}
-          />
+        {getUpdateChannelQuery && (
+          <UpdateChannelWrapper getUpdateChannelQuery={getUpdateChannelQuery} />
         )}
       </ErrorBoundary>
     </Suspense>
