@@ -97,7 +97,8 @@ config :edgehog, :ash_domains, [
   Edgehog.Labeling,
   Edgehog.OSManagement,
   Edgehog.Tenants,
-  Edgehog.Triggers
+  Edgehog.Triggers,
+  Edgehog.UpdateCampaigns
 ]
 
 config :ash, :default_belongs_to_type, :integer

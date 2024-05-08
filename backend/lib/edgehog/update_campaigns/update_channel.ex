@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,40 +19,69 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateChannel do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Edgehog.MultitenantResource,
+    domain: Edgehog.UpdateCampaigns,
+    extensions: [
+      AshGraphql.Resource
+    ]
 
-  alias Edgehog.Groups
+  resource do
+    description """
+    Represents an UpdateChannel.
 
-  schema "update_channels" do
-    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
-    field :handle, :string
-    field :name, :string
-    has_many :target_groups, Groups.DeviceGroup
-
-    field :target_group_ids, {:array, :id}, virtual: true
-
-    timestamps()
+    An UpdateChannel represents a set of device groups that can be targeted in \
+    an UpdateCampaign.
+    """
   end
 
-  @doc false
-  def create_changeset(update_channel, attrs) do
-    update_channel
-    |> changeset(attrs)
-    |> validate_required([:target_group_ids])
+  graphql do
+    type :update_channel
   end
 
-  @doc false
-  def changeset(update_channel, attrs) do
-    update_channel
-    |> cast(attrs, [:name, :handle, :target_group_ids])
-    |> validate_required([:name, :handle])
-    |> validate_length(:target_group_ids, min: 1)
-    |> unique_constraint([:handle, :tenant_id])
-    |> unique_constraint([:name, :tenant_id])
-    |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
-      message:
-        "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"
-    )
+  validations do
+    validate Edgehog.Validations.slug(:handle) do
+      where changing(:handle)
+    end
+  end
+
+  attributes do
+    integer_primary_key :id
+
+    attribute :handle, :string do
+      description """
+      The identifier of the update channel.
+
+      It should start with a lower case ASCII letter and only contain \
+      lower case ASCII letters, digits and the hyphen - symbol.
+      """
+
+      public? true
+      allow_nil? false
+    end
+
+    attribute :name, :string do
+      description "The display name of the update channel."
+      public? true
+      allow_nil? false
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  identities do
+    # These have to be named this way to match the existing unique indexes
+    # we already have. Ash uses identities to add a `unique_constraint` to the
+    # Ecto changeset, so names have to match. There's no need to explicitly add
+    # :tenant_id in the fields because identity in a multitenant resource are
+    # automatically scoped to a specific :tenant_id
+    # TODO: change index names when we generate migrations at the end of the porting
+    identity :handle_tenant_id, [:handle]
+    identity :name_tenant_id, [:name]
+  end
+
+  postgres do
+    table "update_channels"
+    repo Edgehog.Repo
   end
 end
