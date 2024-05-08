@@ -102,3 +102,4 @@ config :goth,
 
 config :ash, :disable_async?, true
 config :ash, :missed_notifications, :ignore
+config :ash, warn_on_transaction_hooks?: false

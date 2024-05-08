@@ -23,6 +23,10 @@ defmodule Edgehog.Repo do
 
   require Ecto.Query
 
+  def installed_extensions do
+    ["ash-functions"]
+  end
+
   def fetch(queryable, id, opts \\ []) do
     {error, opts} = Keyword.pop_first(opts, :error, :not_found)
 
