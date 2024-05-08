@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -32,10 +32,7 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageCollectionHandleSchema, yup } from "forms";
 
-import type {
-  UpdateBaseImageCollection_SystemModelFragment$key,
-  UpdateBaseImageCollection_SystemModelFragment$data,
-} from "api/__generated__/UpdateBaseImageCollection_SystemModelFragment.graphql";
+import type { UpdateBaseImageCollection_SystemModelFragment$key } from "api/__generated__/UpdateBaseImageCollection_SystemModelFragment.graphql";
 
 const UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   fragment UpdateBaseImageCollection_SystemModelFragment on BaseImageCollection {
@@ -83,13 +80,6 @@ const baseImageCollectionSchema = yup
   })
   .required();
 
-const transformInputData = (
-  data: UpdateBaseImageCollection_SystemModelFragment$data,
-): BaseImageCollectionData => ({
-  ...data,
-  systemModel: data.systemModel?.name || "",
-});
-
 const transformOutputData = ({
   name,
   handle,
@@ -116,6 +106,14 @@ const UpdateBaseImageCollection = ({
     baseImageCollectionRef,
   );
 
+  const { name, handle } = baseImageCollection;
+  const systemModel = baseImageCollection.systemModel?.name || "";
+
+  const defaultValues = useMemo(
+    () => ({ name, handle, systemModel }),
+    [name, handle, systemModel],
+  );
+
   const {
     register,
     reset,
@@ -123,19 +121,21 @@ const UpdateBaseImageCollection = ({
     formState: { errors, isDirty },
   } = useForm<BaseImageCollectionData>({
     mode: "onTouched",
-    defaultValues: transformInputData(baseImageCollection),
+    defaultValues,
     resolver: yupResolver(baseImageCollectionSchema),
   });
+
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (prevDefaultValues !== defaultValues) {
+    reset(defaultValues);
+    setPrevDefaultValues(defaultValues);
+  }
 
   const onFormSubmit = (data: BaseImageCollectionData) =>
     onSubmit(transformOutputData(data));
 
-  useEffect(
-    () => reset(transformInputData(baseImageCollection)),
-    [baseImageCollection, reset],
-  );
-
   const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -144,7 +144,7 @@ const UpdateBaseImageCollection = ({
           id="base-image-collection-form-name"
           label={
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.nameLabel"
+              id="forms.UpdateBaseImageCollection.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -160,7 +160,7 @@ const UpdateBaseImageCollection = ({
           id="base-image-collection-form-handle"
           label={
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.handleLabel"
+              id="forms.UpdateBaseImageCollection.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -176,29 +176,42 @@ const UpdateBaseImageCollection = ({
           id="base-image-collection-form-system-model"
           label={
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.systemModelLabel"
+              id="forms.UpdateBaseImageCollection.systemModelLabel"
               defaultMessage="System Model"
             />
           }
         >
           <Form.Control {...register("systemModel")} plaintext readOnly />
         </FormRow>
-
-        <div className="d-flex justify-content-end align-items-center gap-2">
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
           <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.submitButton"
+              id="forms.UpdateBaseImageCollection.submitButton"
               defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateBaseImageCollection.resetButton"
+              defaultMessage="Reset"
             />
           </Button>
           <Button variant="danger" onClick={onDelete}>
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.deleteButton"
+              id="forms.UpdateBaseImageCollection.deleteButton"
               defaultMessage="Delete"
             />
           </Button>
-        </div>
+        </Stack>
       </Stack>
     </form>
   );

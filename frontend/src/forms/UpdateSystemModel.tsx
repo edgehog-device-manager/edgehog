@@ -217,6 +217,8 @@ const UpdateSystemModelForm = ({
 
   const onFormSubmit = (data: FormData) =>
     onSubmit(transformOutputData(systemModel, locale, data));
+  const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -275,7 +277,7 @@ const UpdateSystemModelForm = ({
                 id="system-model-form-name"
                 label={
                   <FormattedMessage
-                    id="components.UpdateSystemModelForm.nameLabel"
+                    id="forms.UpdateSystemModel.nameLabel"
                     defaultMessage="Name"
                   />
                 }
@@ -291,7 +293,7 @@ const UpdateSystemModelForm = ({
                 id="system-model-form-handle"
                 label={
                   <FormattedMessage
-                    id="components.UpdateSystemModelForm.handleLabel"
+                    id="forms.UpdateSystemModel.handleLabel"
                     defaultMessage="Handle"
                   />
                 }
@@ -311,7 +313,7 @@ const UpdateSystemModelForm = ({
                 label={
                   <>
                     <FormattedMessage
-                      id="components.CreateSystemModelForm.descriptionLabel"
+                      id="forms.UpdateSystemModel.descriptionLabel"
                       defaultMessage="Description"
                     />
                     <span className="small text-muted"> ({locale})</span>
@@ -324,7 +326,7 @@ const UpdateSystemModelForm = ({
                 id="system-model-form-hardware-type"
                 label={
                   <FormattedMessage
-                    id="components.UpdateSystemModelForm.hardwareTypeLabel"
+                    id="forms.UpdateSystemModel.hardwareTypeLabel"
                     defaultMessage="Hardware Type"
                   />
                 }
@@ -339,7 +341,7 @@ const UpdateSystemModelForm = ({
                 id="system-model-form-part-numbers"
                 label={
                   <FormattedMessage
-                    id="components.UpdateSystemModelForm.partNumbersLabel"
+                    id="forms.UpdateSystemModel.partNumbersLabel"
                     defaultMessage="Part Numbers"
                   />
                 }
@@ -363,6 +365,7 @@ const UpdateSystemModelForm = ({
                       <Button
                         className="mb-auto"
                         variant="danger"
+                        disabled={isLoading}
                         onClick={() => handleDeletePartNumber(index)}
                       >
                         <Icon icon="delete" />
@@ -372,10 +375,11 @@ const UpdateSystemModelForm = ({
                   <Button
                     className="me-auto"
                     variant="secondary"
+                    disabled={isLoading}
                     onClick={handleAddPartNumber}
                   >
                     <FormattedMessage
-                      id="components.UpdateSystemModelForm.addPartNumberButton"
+                      id="forms.UpdateSystemModel.addPartNumberButton"
                       defaultMessage="Add part number"
                     />
                   </Button>
@@ -384,33 +388,35 @@ const UpdateSystemModelForm = ({
             </Stack>
           </Col>
         </Row>
-        <div className="d-flex justify-content-end align-items-center">
-          <Stack direction="horizontal" gap={3}>
-            <Button
-              disabled={!isDirty}
-              variant="secondary"
-              onClick={() => reset()}
-            >
-              <FormattedMessage
-                id="components.UpdateSystemModelForm.resetButton"
-                defaultMessage="Reset"
-              />
-            </Button>
-            <Button variant="primary" type="submit" disabled={isLoading}>
-              {isLoading && <Spinner size="sm" className="me-2" />}
-              <FormattedMessage
-                id="components.UpdateSystemModelForm.submitButton"
-                defaultMessage="Update"
-              />
-            </Button>
-            <Button variant="danger" onClick={onDelete}>
-              <FormattedMessage
-                id="components.UpdateSystemModelForm.deleteButton"
-                defaultMessage="Delete"
-              />
-            </Button>
-          </Stack>
-        </div>
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
+          <Button variant="primary" type="submit" disabled={!canSubmit}>
+            {isLoading && <Spinner size="sm" className="me-2" />}
+            <FormattedMessage
+              id="forms.UpdateSystemModel.submitButton"
+              defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            disabled={!canReset}
+            variant="secondary"
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateSystemModel.resetButton"
+              defaultMessage="Reset"
+            />
+          </Button>
+          <Button variant="danger" onClick={onDelete}>
+            <FormattedMessage
+              id="forms.UpdateSystemModel.deleteButton"
+              defaultMessage="Delete"
+            />
+          </Button>
+        </Stack>
       </Stack>
     </form>
   );

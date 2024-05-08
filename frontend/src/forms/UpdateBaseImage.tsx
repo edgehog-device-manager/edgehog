@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -136,15 +136,27 @@ const UpdateBaseImage = ({
     tenantInfo: { defaultLocale: locale },
   } = useFragment(UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT, optionsRef);
 
-  const defaultValues = useMemo(
+  const baseImageCollection = baseImage.baseImageCollection.name;
+  const version = baseImage.version;
+  const startingVersionRequirement = baseImage.startingVersionRequirement || "";
+  const releaseDisplayName = baseImage.releaseDisplayName || "";
+  const description = baseImage.description || "";
+
+  const defaultValues = useMemo<FormData>(
     () => ({
-      baseImageCollection: baseImage.baseImageCollection.name,
-      version: baseImage.version,
-      startingVersionRequirement: baseImage.startingVersionRequirement || "",
-      releaseDisplayName: baseImage.releaseDisplayName || "",
-      description: baseImage.description || "",
+      baseImageCollection,
+      version,
+      startingVersionRequirement,
+      releaseDisplayName,
+      description,
     }),
-    [baseImage],
+    [
+      baseImageCollection,
+      version,
+      startingVersionRequirement,
+      releaseDisplayName,
+      description,
+    ],
   );
 
   const {
@@ -158,14 +170,17 @@ const UpdateBaseImage = ({
     resolver: yupResolver(baseImageSchema),
   });
 
-  useEffect(() => {
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (prevDefaultValues !== defaultValues) {
     reset(defaultValues);
-  }, [reset, defaultValues]);
+    setPrevDefaultValues(defaultValues);
+  }
 
   const onFormSubmit = (data: FormData) =>
     onSubmit(transformOutputData(locale, data));
 
   const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -267,23 +282,35 @@ const UpdateBaseImage = ({
         >
           <Form.Control as="textarea" {...register("description")} />
         </FormRow>
-        <div className="d-flex justify-content-end align-items-center">
-          <Stack direction="horizontal" gap={3}>
-            <Button variant="primary" type="submit" disabled={!canSubmit}>
-              {isLoading && <Spinner size="sm" className="me-2" />}
-              <FormattedMessage
-                id="forms.UpdateBaseImage.submitButton"
-                defaultMessage="Update"
-              />
-            </Button>
-            <Button variant="danger" onClick={onDelete}>
-              <FormattedMessage
-                id="forms.UpdateBaseImage.deleteButton"
-                defaultMessage="Delete"
-              />
-            </Button>
-          </Stack>
-        </div>
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
+          <Button variant="primary" type="submit" disabled={!canSubmit}>
+            {isLoading && <Spinner size="sm" className="me-2" />}
+            <FormattedMessage
+              id="forms.UpdateBaseImage.submitButton"
+              defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateBaseImage.resetButton"
+              defaultMessage="Reset"
+            />
+          </Button>
+          <Button variant="danger" onClick={onDelete}>
+            <FormattedMessage
+              id="forms.UpdateBaseImage.deleteButton"
+              defaultMessage="Delete"
+            />
+          </Button>
+        </Stack>
       </Stack>
     </form>
   );
