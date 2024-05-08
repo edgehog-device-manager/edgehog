@@ -131,7 +131,11 @@ defmodule Edgehog.Groups.DeviceGroup do
       manual ManualRelationships.Devices
     end
 
-    # TODO: update channel
+    belongs_to :update_channel, Edgehog.UpdateCampaigns.UpdateChannel do
+      description "The update channel associated with the group, if present."
+      public? true
+      attribute_public? false
+    end
   end
 
   identities do
@@ -148,5 +152,9 @@ defmodule Edgehog.Groups.DeviceGroup do
   postgres do
     table "device_groups"
     repo Edgehog.Repo
+
+    references do
+      reference :update_channel, on_delete: :nilify, match_with: [tenant_id: :tenant_id]
+    end
   end
 end
