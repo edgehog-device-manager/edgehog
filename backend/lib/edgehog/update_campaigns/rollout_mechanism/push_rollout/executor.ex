@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
+defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   # We use handle_event_function to allow for arbitrary terms in state, which is useful for states
   # like {:rollout_target, target}
   use GenStateMachine, restart: :transient, callback_mode: [:handle_event_function, :state_enter]
@@ -28,7 +28,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.Executor do
   alias __MODULE__, as: Data
   alias Edgehog.Repo
   alias Edgehog.UpdateCampaigns.Target
-  alias Edgehog.UpdateCampaigns.PushRollout.Core
+  alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
 
   defstruct [
     :available_slots,

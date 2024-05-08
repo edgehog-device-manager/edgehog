@@ -31,7 +31,7 @@ defmodule Edgehog.UpdateCampaignsTest do
   alias Edgehog.Groups
   alias Edgehog.UpdateCampaigns
   alias Edgehog.UpdateCampaigns.ExecutorRegistry
-  alias Edgehog.UpdateCampaigns.PushRollout
+  alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateCampaignStats
   alias Edgehog.UpdateCampaigns.UpdateChannel

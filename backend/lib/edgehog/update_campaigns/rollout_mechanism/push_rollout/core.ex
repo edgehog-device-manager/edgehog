@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.PushRollout.Core do
+defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   alias Edgehog.Repo
 
   alias Astarte.Client.APIError
