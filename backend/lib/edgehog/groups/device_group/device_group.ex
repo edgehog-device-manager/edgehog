@@ -67,6 +67,10 @@ defmodule Edgehog.Groups.DeviceGroup do
       accept [:name, :handle, :selector]
     end
 
+    update :update_update_channel do
+      accept [:update_channel_id]
+    end
+
     destroy :destroy do
       description "Deletes a device group."
       primary? true

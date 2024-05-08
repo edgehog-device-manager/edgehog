@@ -25,6 +25,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.UpdateCampaigns.UpdateChannel.Changes
+
   resource do
     description """
     Represents an UpdateChannel.
@@ -36,6 +38,101 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
   graphql do
     type :update_channel
+
+    queries do
+      get :update_channel, :read do
+        description "Returns a single update channel."
+      end
+
+      list :update_channels, :read do
+        description "Returns a list of update channels."
+        paginate_with nil
+      end
+    end
+
+    mutations do
+      create :create_update_channel, :create do
+        relay_id_translations input: [target_group_ids: :device_group]
+      end
+
+      update :update_update_channel, :update do
+        relay_id_translations input: [target_group_ids: :device_group]
+      end
+
+      destroy :delete_update_channel, :destroy
+    end
+  end
+
+  actions do
+    defaults [:read]
+
+    create :create do
+      description "Creates a new update channel."
+      primary? true
+
+      accept [:name, :handle]
+
+      argument :target_group_ids, {:array, :id} do
+        description """
+        The IDs of the target groups that are targeted by this update channel.
+        """
+
+        allow_nil? false
+        constraints min_length: 1
+      end
+
+      change Changes.RelateTargetGroups do
+        where present(:target_group_ids)
+      end
+    end
+
+    update :update do
+      description "Updates an update channel."
+      primary? true
+
+      accept [:name, :handle]
+
+      argument :target_group_ids, {:array, :id} do
+        description """
+        The IDs of the target groups that are targeted by this update channel.
+        """
+
+        constraints min_length: 1
+      end
+
+      # Needed because manage_relationship is not atomic
+      require_atomic? false
+
+      change Changes.UnrelateCurrentTargetGroups do
+        where present(:target_group_ids)
+      end
+
+      change Changes.RelateTargetGroups do
+        where present(:target_group_ids)
+      end
+    end
+
+    destroy :destroy do
+      description "Deletes an update channel."
+      primary? true
+
+      # Needed because Changes.UnrelateTargetGroups is not atomic
+      require_atomic? false
+
+      # TODO: here we manually unrelate the update channel from its target
+      # groups. Indeed, the database constraints on the device_groups table are
+      # configured so that the (tenant_id, update_channel_id) foreign key is
+      # set to NULL when the referenced update channel is deleted. However that
+      # would also set the tenant_id of the target group to NULL.
+      # Postgres v15.0 introduced the possibility to specify which columns of
+      # the foreign key should be set to NULL when the referenced resource is
+      # deleted; if they are not specified, they are all set to NULL as usual.
+      # Since we don't want to impose the use of Postgres v15+, for now we
+      # simply avoid triggering the ON DELETE database constraint by manually
+      # setting the correct columns to NULL before deleting the referenced
+      # update channel: i.e. without affecting the tenant_id of device groups.
+      change Changes.UnrelateCurrentTargetGroups
+    end
   end
 
   validations do
@@ -67,6 +164,13 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
+  end
+
+  relationships do
+    has_many :target_groups, Edgehog.Groups.DeviceGroup do
+      description "The device groups targeted by the update channel."
+      public? true
+    end
   end
 
   identities do
