@@ -48,7 +48,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
     latest_wifi_scan_results =
       Enum.filter(
         wifi_scan_results,
-        &(DateTime.diff(latest_scan.timestamp, &1.timestamp, :second) < 1)
+        &(DateTime.diff(latest_scan.timestamp, &1.timestamp, :second) < 5)
       )
 
     {:ok, latest_wifi_scan_results}
@@ -61,10 +61,14 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   defp geolocate_wifi([%WiFiScanResult{} | _] = wifi_scan_results) do
     wifi_access_points =
       Enum.map(wifi_scan_results, fn wifi ->
+        age =
+          wifi.timestamp && DateTime.diff(DateTime.now!("Etc/UTC"), wifi.timestamp, :millisecond)
+
         %{
           macAddress: wifi.mac_address,
           signalStrength: wifi.rssi,
-          channel: wifi.channel
+          channel: wifi.channel,
+          age: age
         }
       end)
 
