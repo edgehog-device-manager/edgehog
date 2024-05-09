@@ -25,6 +25,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.UpdateCampaigns.UpdateChannel.Calculations
   alias Edgehog.UpdateCampaigns.UpdateChannel.Changes
 
   resource do
@@ -170,6 +171,29 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     has_many :target_groups, Edgehog.Groups.DeviceGroup do
       description "The device groups targeted by the update channel."
       public? true
+    end
+  end
+
+  calculations do
+    calculate :updatable_devices, {:array, :struct} do
+      description """
+      The devices targeted by the update channel that can be updated with the \
+      provided base image.
+      Note that this only checks the compatibility between the device and the \
+      system model targeted by the base image. The starting version \
+      requirement will be checked just before the update and will potentially \
+      result in a failed operation.\
+      """
+
+      constraints items: [instance_of: Edgehog.Devices.Device]
+      allow_nil? false
+
+      argument :base_image, :struct do
+        allow_nil? false
+        constraints instance_of: Edgehog.BaseImages.BaseImage
+      end
+
+      calculation Calculations.UpdatableDevices
     end
   end
 
