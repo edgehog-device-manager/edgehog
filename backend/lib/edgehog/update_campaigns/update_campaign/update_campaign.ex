@@ -26,6 +26,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
     ]
 
   alias Edgehog.UpdateCampaigns.UpdateCampaign
+  alias Edgehog.UpdateCampaigns.UpdateCampaign.Changes
 
   resource do
     description """
@@ -38,6 +39,72 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
 
   graphql do
     type :update_campaign
+
+    queries do
+      get :update_campaign, :read do
+        description "Returns a single update campaign."
+      end
+
+      list :update_campaigns, :read do
+        description "Returns a list of update campaigns."
+        paginate_with nil
+      end
+    end
+
+    mutations do
+      create :create_update_campaign, :create do
+        relay_id_translations input: [
+                                base_image_id: :base_image,
+                                update_channel_id: :update_channel
+                              ]
+      end
+    end
+  end
+
+  actions do
+    defaults [:read]
+
+    create :create do
+      description "Creates a new update campaign."
+      primary? true
+
+      accept [:name, :rollout_mechanism]
+
+      argument :base_image_id, :id do
+        description """
+        The ID of the base image that will be distributed in the update \
+        campaign.\
+        """
+
+        allow_nil? false
+      end
+
+      argument :update_channel_id, :id do
+        description """
+        The ID of the update channel that will be targeted by the update \
+        campaign.\
+        """
+
+        allow_nil? false
+      end
+
+      change Changes.ComputeUpdateTargets
+
+      change manage_relationship(:base_image_id, :base_image, type: :append)
+      change manage_relationship(:update_channel_id, :update_channel, type: :append)
+    end
+
+    update :update do
+      description "Updates an update campaign."
+      primary? true
+
+      accept [:status, :outcome, :start_timestamp, :completion_timestamp]
+    end
+
+    destroy :destroy do
+      description "Deletes an update campaign."
+      primary? true
+    end
   end
 
   attributes do
@@ -92,6 +159,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
       public? true
       attribute_public? false
       allow_nil? false
+    end
+
+    has_many :update_targets, Edgehog.UpdateCampaigns.UpdateTarget do
+      description "The update targets belonging to the update campaign."
+      public? true
+      writable? false
     end
   end
 
