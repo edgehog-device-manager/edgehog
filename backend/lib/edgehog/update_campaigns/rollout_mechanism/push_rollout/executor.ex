@@ -27,8 +27,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
 
   alias __MODULE__, as: Data
   alias Edgehog.Repo
-  alias Edgehog.UpdateCampaigns.Target
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
+  alias Edgehog.UpdateCampaigns.UpdateTarget
 
   defstruct [
     :available_slots,
@@ -213,7 +213,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
       {:ok, :already_at_target_version} ->
         {:keep_state, new_data, internal_event({:already_updated, target})}
 
-      {:ok, %Target{} = target} ->
+      {:ok, %UpdateTarget{} = target} ->
         {:keep_state, new_data, internal_event({:rolled_out, target})}
 
       {:error, reason} ->

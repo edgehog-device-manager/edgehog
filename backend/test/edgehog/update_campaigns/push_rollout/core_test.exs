@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -193,12 +193,12 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   end
 
   describe "get_target!/1" do
-    alias Edgehog.UpdateCampaigns.Target
+    alias Edgehog.UpdateCampaigns.UpdateTarget
 
     test "returns target if existing" do
       %{id: target_id} = target_fixture()
 
-      assert %Target{id: ^target_id} = Core.get_target!(target_id)
+      assert %UpdateTarget{id: ^target_id} = Core.get_target!(target_id)
     end
 
     test "raises with non-existing target" do
@@ -207,7 +207,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   end
 
   describe "get_target_for_update_operation!/1" do
-    alias Edgehog.UpdateCampaigns.Target
+    alias Edgehog.UpdateCampaigns.UpdateTarget
     import Edgehog.BaseImagesFixtures
 
     setup do
@@ -229,7 +229,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       {:ok, target} = Core.start_target_update(target, base_image)
       target_id = target.id
 
-      assert %Target{id: ^target_id} =
+      assert %UpdateTarget{id: ^target_id} =
                Core.get_target_for_ota_operation!(target.ota_operation_id)
     end
 

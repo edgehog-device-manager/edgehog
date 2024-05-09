@@ -27,7 +27,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   alias Edgehog.OSManagement
   alias Edgehog.PubSub
   alias Edgehog.UpdateCampaigns.UpdateCampaign
-  alias Edgehog.UpdateCampaigns.Target
+  alias Edgehog.UpdateCampaigns.UpdateTarget
 
   import Ecto.Query
 
@@ -50,7 +50,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   This function assumes the passed target already has a pending request in flight.
   """
   def pending_ota_request_timeout_ms(
-        %Target{latest_attempt: latest_attempt},
+        %UpdateTarget{latest_attempt: latest_attempt},
         rollout,
         now \\ DateTime.utc_now()
       )
@@ -119,18 +119,18 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   end
 
   @doc """
-  Returns a Target given its id
+  Returns an UpdateTarget given its id
   """
   def get_target!(id) do
-    Repo.get!(Target, id)
+    Repo.get!(UpdateTarget, id)
     |> preload_defaults_for_target()
   end
 
   @doc """
-  Returns a Target given its ota_operation_id
+  Returns an UpdateTarget given its ota_operation_id
   """
   def get_target_for_ota_operation!(ota_operation_id) do
-    Repo.get_by!(Target, ota_operation_id: ota_operation_id)
+    Repo.get_by!(UpdateTarget, ota_operation_id: ota_operation_id)
     |> preload_defaults_for_target()
   end
 
@@ -271,7 +271,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Returns a list of up to `:limit` (passed in the opts) idle targets for the UpdateCampaign.
   `opts` can also contain a `:filters` key containing `[device_online: true/false]` to filter
   targets using the `online` status of their device.
-  Targets that have never been attempted or that are the least recently attempted are returned
+  UpdateTargets that have never been attempted or that are the least recently attempted are returned
   first in the list.
   """
   def list_idle_targets(update_campaign_id, opts \\ []) do
@@ -292,7 +292,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   end
 
   defp idle_targets_query(update_campaign_id) do
-    from t in Target,
+    from t in UpdateTarget,
       where: t.update_campaign_id == ^update_campaign_id and t.status == :idle
   end
 
@@ -455,7 +455,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   end
 
   defp target_count_query(update_campaign_id) do
-    from t in Target,
+    from t in UpdateTarget,
       where: t.update_campaign_id == ^update_campaign_id,
       select: count(t.id)
   end
@@ -515,7 +515,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   """
   def list_targets_with_pending_ota_operation(update_campaign_id) do
     query =
-      from t in Target,
+      from t in UpdateTarget,
         where: t.update_campaign_id == ^update_campaign_id,
         join: o in OSManagement.OTAOperation,
         on: t.ota_operation_id == o.id,

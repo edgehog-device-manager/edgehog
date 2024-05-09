@@ -35,5 +35,6 @@ defmodule Edgehog.UpdateCampaigns do
   resources do
     resource Edgehog.UpdateCampaigns.UpdateCampaign
     resource Edgehog.UpdateCampaigns.UpdateChannel
+    resource Edgehog.UpdateCampaigns.UpdateTarget
   end
 end
