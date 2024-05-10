@@ -73,7 +73,16 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
       end)
 
       assert {:ok, position} = IPBase.geolocate(device)
-      assert %Position{accuracy: nil, latitude: 45.4019498, longitude: 11.8706081} = position
+
+      assert %Position{
+               latitude: 45.4019498,
+               longitude: 11.8706081,
+               accuracy: nil,
+               altitude: nil,
+               altitude_accuracy: nil,
+               heading: nil,
+               speed: nil
+             } = position
     end
 
     test "geolocate/1 returns error without results from IPBase", %{device: device} do

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,27 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Resolvers.Geolocation do
-  alias Edgehog.Devices.Device
+defmodule Edgehog.Devices.Device.Calculations.Location do
+  use Ash.Resource.Calculation
+
   alias Edgehog.Geolocation
 
-  @doc """
-  Returns the location of the device if available
-  """
-  def fetch_device_location(%Device{} = device, _args, _context) do
-    case Geolocation.fetch_location(device) do
-      {:ok, location} -> {:ok, location}
-      _ -> {:ok, nil}
+  @impl true
+  def load(_query, _opts, _context) do
+    [:position]
+  end
+
+  @impl true
+  def calculate(devices, _opts, _context) do
+    Enum.map(devices, &get_location(&1.position))
+  end
+
+  defp get_location(nil), do: nil
+
+  defp get_location(position) do
+    case Geolocation.reverse_geocode(position) do
+      {:ok, location} -> location
+      _ -> nil
     end
   end
 end

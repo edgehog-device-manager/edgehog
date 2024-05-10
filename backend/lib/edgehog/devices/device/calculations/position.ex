@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Mocks.Geolocation.GeolocationProvider do
-  @behaviour Edgehog.Geolocation.GeolocationProvider
+defmodule Edgehog.Devices.Device.Calculations.Position do
+  use Ash.Resource.Calculation
 
-  alias Edgehog.Geolocation.Position
+  alias Edgehog.Geolocation
 
   @impl true
-  def geolocate(_device) do
-    coordinates = %Position{
-      accuracy: 12,
-      latitude: 45.4095285,
-      longitude: 11.8788231,
-      timestamp: ~U[2021-11-15 11:44:57.432516Z]
-    }
-
-    {:ok, coordinates}
+  def calculate(devices, _opts, _context) do
+    Enum.map(devices, fn device ->
+      case Geolocation.geolocate(device) do
+        {:ok, position} -> position
+        _ -> nil
+      end
+    end)
   end
 end

@@ -42,6 +42,7 @@ defmodule Edgehog.Astarte.Device.Geolocation do
         # https://github.com/astarte-platform/astarte/issues/707
         {sensor_id, sensor_data} -> parse_sensor_data(sensor_id, sensor_data)
       end)
+      |> Enum.reject(&(is_nil(&1.latitude) or is_nil(&1.longitude)))
 
     {:ok, sensors_positions}
   end

@@ -352,6 +352,20 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :hardware_info}
     end
 
+    calculate :location, Edgehog.Geolocation.Location do
+      description """
+      Describes the place where the device is located.
+
+      The field holds information about the device's address, which is
+      estimated by means of Edgehog's geolocation modules and the data
+      published by the device.
+      """
+
+      public? true
+      filterable? false
+      calculation Calculations.Location
+    end
+
     calculate :network_interfaces, {:array, Types.NetworkInterface} do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :network_interfaces}
@@ -360,6 +374,20 @@ defmodule Edgehog.Devices.Device do
     calculate :os_info, Types.OSInfo do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :os_info}
+    end
+
+    calculate :position, Edgehog.Geolocation.Position do
+      description """
+      Describes the position of a device.
+
+      The field holds information about the GPS coordinates of the device,
+      which are estimated by means of Edgehog's geolocation modules and the
+      data published by the device.
+      """
+
+      public? true
+      filterable? false
+      calculation Calculations.Position
     end
 
     calculate :runtime_info, Types.RuntimeInfo do
@@ -392,6 +420,12 @@ defmodule Edgehog.Devices.Device do
     calculate :modem_status, {:array, :struct} do
       constraints items: [instance_of: Edgehog.Astarte.Device.CellularConnection.ModemStatus]
       calculation {Calculations.AstarteInterfaceValue, value_id: :modem_status}
+    end
+
+    calculate :sensor_positions, {:array, :struct} do
+      constraints items: [instance_of: Edgehog.Astarte.Device.Geolocation.SensorPosition]
+      filterable? false
+      calculation Calculations.SensorPositions
     end
   end
 

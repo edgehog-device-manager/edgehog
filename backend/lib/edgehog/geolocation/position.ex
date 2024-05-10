@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,13 +19,73 @@
 #
 
 defmodule Edgehog.Geolocation.Position do
-  @type t :: %__MODULE__{
-          latitude: float,
-          longitude: float,
-          accuracy: number | nil,
-          timestamp: DateTime.t()
-        }
+  use Ash.Resource,
+    data_layer: :embedded,
+    extensions: [
+      AshGraphql.Resource
+    ]
 
-  @enforce_keys [:latitude, :longitude, :accuracy, :timestamp]
-  defstruct @enforce_keys
+  resource do
+    description """
+    Describes the position of a device.
+
+    The field holds information about the GPS coordinates of the device,
+    which are estimated by means of Edgehog's geolocation modules and the
+    data published by the device.
+    """
+  end
+
+  graphql do
+    type :position
+  end
+
+  attributes do
+    attribute :latitude, :float do
+      description "The latitude coordinate."
+      public? true
+      allow_nil? false
+    end
+
+    attribute :longitude, :float do
+      description "The longitude coordinate."
+      public? true
+      allow_nil? false
+    end
+
+    attribute :accuracy, :float do
+      description "The accuracy of the measurement, in meters."
+      public? true
+    end
+
+    attribute :altitude, :float do
+      description "The altitude coordinate."
+      public? true
+    end
+
+    attribute :altitude_accuracy, :float do
+      description "The accuracy of the altitude measurement, in meters."
+      public? true
+    end
+
+    attribute :heading, :float do
+      description "The measured heading."
+      public? true
+    end
+
+    attribute :speed, :float do
+      description "The measured speed."
+      public? true
+    end
+
+    attribute :timestamp, :datetime do
+      description "The date and time at which the measurement was made."
+      public? true
+      allow_nil? false
+    end
+
+    attribute :source, :string do
+      description "Describes how the position was calculated."
+      public? true
+    end
+  end
 end

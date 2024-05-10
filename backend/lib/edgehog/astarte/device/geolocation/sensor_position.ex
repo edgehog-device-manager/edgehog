@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
 defmodule Edgehog.Astarte.Device.Geolocation.SensorPosition do
   @type t :: %__MODULE__{
           sensor_id: String.t(),
-          latitude: float() | nil,
-          longitude: float() | nil,
+          latitude: float(),
+          longitude: float(),
           altitude: float() | nil,
           accuracy: float() | nil,
           altitude_accuracy: float() | nil,

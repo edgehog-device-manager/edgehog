@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,46 +21,55 @@
 defmodule Edgehog.Geolocation.Providers.DeviceGeolocation do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
-  alias Edgehog.Astarte
   alias Edgehog.Astarte.Device.Geolocation.SensorPosition
-  alias Edgehog.Devices
   alias Edgehog.Devices.Device
   alias Edgehog.Geolocation.Position
 
   @impl Edgehog.Geolocation.GeolocationProvider
-  def geolocate(%Device{device_id: device_id} = device) do
-    with {:ok, client} <- Devices.appengine_client_from_device(device),
-         {:ok, sensors_positions} <- Astarte.fetch_geolocation(client, device_id),
-         {:ok, sensors_positions} <- filter_latest_sensors_positions(sensors_positions) do
-      geolocate_sensors(sensors_positions)
+  def geolocate(%Device{} = device) do
+    with {:ok, device} <- Ash.load(device, :sensor_positions),
+         :ok <- validate_sensor_positions_exist(device.sensor_positions),
+         {:ok, sensor_positions} <- filter_latest_sensor_positions(device.sensor_positions) do
+      geolocate_sensors(sensor_positions)
     end
   end
 
-  defp filter_latest_sensors_positions([_position | _] = sensors_positions) do
-    latest_position = Enum.max_by(sensors_positions, & &1.timestamp, DateTime)
+  defp validate_sensor_positions_exist(nil), do: {:error, :sensor_positions_not_found}
+  defp validate_sensor_positions_exist(_), do: :ok
 
-    latest_sensors_positions =
+  defp filter_latest_sensor_positions([_position | _] = sensor_positions) do
+    latest_position = Enum.max_by(sensor_positions, & &1.timestamp, DateTime)
+
+    latest_sensor_positions =
       Enum.filter(
-        sensors_positions,
+        sensor_positions,
         &(DateTime.diff(latest_position.timestamp, &1.timestamp, :second) < 1)
       )
 
-    {:ok, latest_sensors_positions}
+    {:ok, latest_sensor_positions}
   end
 
-  defp filter_latest_sensors_positions(_empty_list) do
-    {:error, :sensors_positions_not_found}
+  defp filter_latest_sensor_positions(_empty_list) do
+    {:error, :sensor_positions_not_found}
   end
 
-  defp geolocate_sensors([%SensorPosition{} | _] = sensors_positions) do
+  defp geolocate_sensors([%SensorPosition{} | _] = sensor_positions) do
     # Take the position with the accuracy closest to 0. Also note that number < :nil
-    sensor_position = Enum.min_by(sensors_positions, & &1.accuracy)
+    sensor_position = Enum.min_by(sensor_positions, & &1.accuracy)
 
     position = %Position{
       latitude: sensor_position.latitude,
       longitude: sensor_position.longitude,
+      altitude: sensor_position.altitude,
       accuracy: sensor_position.accuracy,
-      timestamp: sensor_position.timestamp
+      altitude_accuracy: sensor_position.altitude_accuracy,
+      heading: sensor_position.heading,
+      speed: sensor_position.speed,
+      timestamp: sensor_position.timestamp,
+      source: """
+      Sensor position published by the device on the \
+      io.edgehog.devicemanager.Geolocation Astarte interface.\
+      """
     }
 
     {:ok, position}

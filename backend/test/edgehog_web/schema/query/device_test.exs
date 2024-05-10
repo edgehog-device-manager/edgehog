@@ -537,6 +537,142 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
   end
 
+  describe "device location/position" do
+    alias Edgehog.Geolocation.GeolocationProviderMock
+    alias Edgehog.Geolocation.GeocodingProviderMock
+    alias Edgehog.Geolocation.Location
+    alias Edgehog.Geolocation.Position
+
+    setup %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(device)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          position {
+            latitude
+            longitude
+            accuracy
+            altitude
+            altitudeAccuracy
+            heading
+            speed
+            timestamp
+          }
+          location {
+            formattedAddress
+            timestamp
+          }
+        }
+      }
+      """
+
+      %{device: device, tenant: tenant, id: id, document: document}
+    end
+
+    test "returns both position and location", ctx do
+      %{tenant: tenant, id: id, document: document, device: device} = ctx
+
+      GeolocationProviderMock
+      |> expect(:geolocate, fn _device ->
+        {:ok,
+         %Position{
+           latitude: 45.4095285,
+           longitude: 11.8788231,
+           accuracy: 12,
+           altitude: nil,
+           altitude_accuracy: nil,
+           heading: nil,
+           speed: nil,
+           timestamp: ~U[2021-11-15 11:44:57.432516Z]
+         }}
+      end)
+
+      GeocodingProviderMock
+      |> expect(:reverse_geocode, fn _position ->
+        {:ok,
+         %Location{
+           formatted_address: "4 Privet Drive, Little Whinging, Surrey, UK",
+           timestamp: ~U[2021-11-15 11:44:57.432516Z]
+         }}
+      end)
+
+      assert result =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      %{
+        "latitude" => 45.4095285,
+        "longitude" => 11.8788231,
+        "accuracy" => 12.0,
+        "altitude" => nil,
+        "altitudeAccuracy" => nil,
+        "heading" => nil,
+        "speed" => nil,
+        "timestamp" => "2021-11-15T11:44:57.432516Z"
+      } = result["position"]
+
+      assert %{
+               "formattedAddress" => "4 Privet Drive, Little Whinging, Surrey, UK",
+               "timestamp" => "2021-11-15T11:44:57.432516Z"
+             } = result["location"]
+    end
+
+    test "returns nil when it cannot geolocate the position", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+
+      GeolocationProviderMock
+      |> expect(:geolocate, fn _device -> {:error, :position_not_found} end)
+
+      assert result =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      assert is_nil(result["position"])
+      assert is_nil(result["location"])
+    end
+
+    test "returns the position even if it cannot reverse geocode it to a location", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+
+      GeolocationProviderMock
+      |> expect(:geolocate, fn _device ->
+        {:ok,
+         %Position{
+           latitude: 45.4095285,
+           longitude: 11.8788231,
+           accuracy: 12,
+           altitude: nil,
+           altitude_accuracy: nil,
+           heading: nil,
+           speed: nil,
+           timestamp: ~U[2021-11-15 11:44:57.432516Z]
+         }}
+      end)
+
+      GeocodingProviderMock
+      |> expect(:reverse_geocode, fn _position -> {:error, :location_not_found} end)
+
+      assert result =
+               device_query(document: document, tenant: tenant, id: id)
+               |> extract_result!()
+
+      assert %{
+               "latitude" => 45.4095285,
+               "longitude" => 11.8788231,
+               "accuracy" => 12.0,
+               "altitude" => nil,
+               "altitudeAccuracy" => nil,
+               "heading" => nil,
+               "speed" => nil,
+               "timestamp" => "2021-11-15T11:44:57.432516Z"
+             } = result["position"]
+
+      assert is_nil(result["location"])
+    end
+  end
+
   defp non_existing_device_id(tenant) do
     fixture = device_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
