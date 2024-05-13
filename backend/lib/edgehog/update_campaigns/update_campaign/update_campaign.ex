@@ -64,6 +64,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
   actions do
     defaults [:read]
 
+    read :read_all_resumable do
+      multitenancy :allow_global
+      pagination keyset?: true
+      filter expr(status in [:idle, :in_progress])
+    end
+
     create :create do
       description "Creates a new update campaign."
       primary? true
@@ -165,6 +171,37 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
       description "The update targets belonging to the update campaign."
       public? true
       writable? false
+    end
+  end
+
+  aggregates do
+    count :total_target_count, :update_targets do
+      description "The total number of update targets."
+      public? true
+    end
+
+    count :idle_target_count, :update_targets do
+      description "The number of update targets with an idle status."
+      public? true
+      filter expr(status == :idle)
+    end
+
+    count :in_progress_target_count, :update_targets do
+      description "The number of update targets with an in-progress status."
+      public? true
+      filter expr(status == :in_progress)
+    end
+
+    count :failed_target_count, :update_targets do
+      description "The number of update targets with a failed status."
+      public? true
+      filter expr(status == :failed)
+    end
+
+    count :successful_target_count, :update_targets do
+      description "The number of update targets with a successful status."
+      public? true
+      filter expr(status == :successful)
     end
   end
 

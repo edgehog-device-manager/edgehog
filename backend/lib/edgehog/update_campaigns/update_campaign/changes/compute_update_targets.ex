@@ -24,6 +24,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
   require Ash.Query
 
   alias Edgehog.BaseImages.BaseImage
+  alias Edgehog.UpdateCampaigns.ExecutorSupervisor
   alias Edgehog.UpdateCampaigns.UpdateChannel
   alias Edgehog.UpdateCampaigns.UpdateTarget
 
@@ -91,7 +92,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
   end
 
   defp start_campaign_executor({:ok, update_campaign} = _transaction_result) do
-    # TODO: start the Executor on the update campaign
+    _pid = ExecutorSupervisor.start_executor!(update_campaign)
 
     {:ok, update_campaign}
   end

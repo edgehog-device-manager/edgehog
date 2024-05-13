@@ -36,7 +36,7 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
   def start_executor!(update_campaign) do
     %UpdateCampaign{
       id: update_campaign_id,
-      rollout_mechanism: rollout_mechanism,
+      rollout_mechanism: %{value: rollout_mechanism},
       tenant_id: tenant_id
     } = update_campaign
 

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,17 +19,14 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
-  alias Edgehog.Repo
-
   alias Astarte.Client.APIError
-  alias Edgehog.Astarte
-  alias Edgehog.Devices
   alias Edgehog.OSManagement
+  alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.PubSub
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateTarget
 
-  import Ecto.Query
+  require Ash.Query
 
   # TODO: Some of these functions can probably be extracted in a separate module, common to all
   # rollouts. Nevertheless, since we currently only have one rollout mechanism, for the time being
@@ -37,11 +34,10 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   # structure will emerge from the requirements.
 
   @doc """
-  Gets an UpdateCampaign. Differently from `UpdateCampaigns.fetch_update_campaign/1`, this
-  doesn't preload associations, since they're not needed here.
+  Gets an UpdateCampaign.
   """
-  def get_update_campaign!(update_campaign_id) do
-    Repo.get!(UpdateCampaign, update_campaign_id)
+  def get_update_campaign!(tenant_id, update_campaign_id) do
+    Ash.get!(UpdateCampaign, update_campaign_id, tenant: tenant_id)
   end
 
   @doc """
@@ -50,11 +46,12 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   This function assumes the passed target already has a pending request in flight.
   """
   def pending_ota_request_timeout_ms(
-        %UpdateTarget{latest_attempt: latest_attempt},
+        update_target,
         rollout,
         now \\ DateTime.utc_now()
-      )
-      when is_struct(latest_attempt, DateTime) do
+      ) do
+    %UpdateTarget{latest_attempt: %DateTime{} = latest_attempt} = update_target
+
     absolute_timeout_ms = :timer.seconds(rollout.ota_request_timeout_seconds)
     elapsed_from_latest_request_ms = DateTime.diff(now, latest_attempt, :millisecond)
 
@@ -64,13 +61,10 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   @doc """
   Returns the BaseImage that belongs to a specific update_campaign_id
   """
-  def get_update_campaign_base_image!(update_campaign_id) do
-    base_image_query =
-      from uc in UpdateCampaign,
-        join: bi in assoc(uc, :base_image),
-        select: bi
-
-    Repo.get!(base_image_query, update_campaign_id)
+  def get_update_campaign_base_image!(tenant_id, update_campaign_id) do
+    UpdateCampaign
+    |> Ash.get!(update_campaign_id, load: :base_image, tenant: tenant_id)
+    |> Map.fetch!(:base_image)
   end
 
   @doc """
@@ -80,9 +74,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   once.
   """
   def update_target_latest_attempt!(target, latest_attempt) do
-    target
-    |> Ecto.Changeset.change(latest_attempt: latest_attempt)
-    |> Repo.update!()
+    Ash.update!(target, %{latest_attempt: latest_attempt})
   end
 
   @doc """
@@ -90,17 +82,24 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Returns the updated target.
   """
   def start_target_update(target, base_image) do
+    ota_operation_changeset =
+      Ash.Changeset.for_create(
+        OTAOperation,
+        :managed,
+        %{device_id: target.device_id, base_image_url: base_image.url},
+        tenant: target.tenant_id
+      )
+
     with {:ok, ota_operation} <-
-           OSManagement.create_managed_ota_operation(target.device, base_image) do
+           Ash.create(ota_operation_changeset) do
       # TODO: this is not transactional, since if for some reason the target update on the database
       # fails, we still have the OTA Operation in the database. But wrapping this in a transaction
       # would not revert the OTA Operation that was already sent to Astarte, so we leave this like
       # this for now and we'll revisit this when we add support for canceling OTA Operations
-      Ecto.Changeset.change(target,
+      Ash.update(target, %{
         status: :in_progress,
         ota_operation_id: ota_operation.id
-      )
-      |> Repo.update()
+      })
     end
   end
 
@@ -114,32 +113,35 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   @doc """
   Resends an OTARequest on Astarte for an existing OTA Operation
   """
-  def retry_target_update(target, base_image) do
-    OSManagement.send_update_request(target.device, target.ota_operation_id, base_image.url)
+  def retry_target_update(target) do
+    target
+    |> Ash.load!(:ota_operation)
+    |> Map.fetch!(:ota_operation)
+    |> OSManagement.send_update_request()
   end
 
   @doc """
   Returns an UpdateTarget given its id
   """
-  def get_target!(id) do
-    Repo.get!(UpdateTarget, id)
-    |> preload_defaults_for_target()
+  def get_target!(tenant_id, id) do
+    Ash.get!(UpdateTarget, id, tenant: tenant_id, load: default_preloads_for_target())
   end
 
   @doc """
   Returns an UpdateTarget given its ota_operation_id
   """
-  def get_target_for_ota_operation!(ota_operation_id) do
-    Repo.get_by!(UpdateTarget, ota_operation_id: ota_operation_id)
-    |> preload_defaults_for_target()
+  def get_target_for_ota_operation!(tenant_id, ota_operation_id) do
+    UpdateTarget
+    |> Ash.Query.filter(ota_operation_id == ^ota_operation_id)
+    |> Ash.Query.load(default_preloads_for_target())
+    |> Ash.read_one!(tenant: tenant_id, not_found_error?: true)
   end
 
   @doc """
-  Increases the retry count for the target and saves it to the Repo.
+  Increases the retry count for the target and saves it to the data layer.
   """
   def increase_retry_count!(target) do
-    Ecto.Changeset.change(target, retry_count: target.retry_count + 1)
-    |> Repo.update!()
+    Ash.update!(target, %{retry_count: target.retry_count + 1})
   end
 
   @doc """
@@ -155,11 +157,9 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Returns `{:ok, %Version{}}` or `{:error, reason}`.
   """
   def fetch_target_current_version(target) do
-    device = target.device
-
-    with {:ok, client} <- Devices.appengine_client_from_device(device),
-         {:ok, device_base_image} <- Astarte.fetch_base_image(client, device.device_id) do
-      parse_version(device_base_image.version)
+    with {:ok, target} <- Ash.load(target, device: [:base_image]) do
+      version = target.device.base_image && target.device.base_image.version
+      parse_version(version)
     end
   end
 
@@ -251,20 +251,26 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
 
   This set of constraints guarantees that when we make an attempt on a target that fails with
   a temporary error, given we update latest_update, we can just call
-  fetch_next_updatable_target/1 again and the next target will be returned.
+  fetch_next_updatable_target/2 again and the next target will be returned.
   """
-  def fetch_next_updatable_target(update_campaign_id) do
-    case list_idle_targets(update_campaign_id, limit: 1, filters: [device_online: true]) do
+  def fetch_next_updatable_target(tenant_id, update_campaign_id) do
+    case list_idle_targets(tenant_id, update_campaign_id,
+           limit: 1,
+           filters: [device_online: true]
+         ) do
       [target] -> {:ok, target}
       [] -> {:error, :no_updatable_targets}
     end
   end
 
   @doc """
-  Preloads the default associations for a target or a list of targets.
+  Lists the default associations that should be preloaded for a target or a list of targets.
   """
-  def preload_defaults_for_target(target_or_targets) do
-    Repo.preload(target_or_targets, [device: [realm: [:cluster]]], skip_tenant_id: true)
+  def default_preloads_for_target do
+    [
+      ota_operation: [:status],
+      device: [realm: [:cluster]]
+    ]
   end
 
   @doc """
@@ -274,33 +280,29 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   UpdateTargets that have never been attempted or that are the least recently attempted are returned
   first in the list.
   """
-  def list_idle_targets(update_campaign_id, opts \\ []) do
+  def list_idle_targets(tenant_id, update_campaign_id, opts \\ []) do
     limit = Keyword.fetch!(opts, :limit)
     filters = Keyword.get(opts, :filters, [])
 
     query = idle_targets_query(update_campaign_id)
 
-    # The ordering of the query together with the fact that we update latest_attempt each time we
-    # try a target, guarantees that this function returns targets that were never attempted first,
-    # and then the targets that were attempted least recently
-
     Enum.reduce(filters, query, &filter_targets_with/2)
-    |> limit(^limit)
-    |> order_by(asc_nulls_first: :latest_attempt)
-    |> Repo.all()
-    |> preload_defaults_for_target()
+    |> Ash.Query.load(default_preloads_for_target())
+    |> Ash.Query.sort(latest_attempt: :asc_nils_first)
+    |> Ash.Query.limit(limit)
+    |> Ash.read!(tenant: tenant_id)
   end
 
   defp idle_targets_query(update_campaign_id) do
-    from t in UpdateTarget,
-      where: t.update_campaign_id == ^update_campaign_id and t.status == :idle
+    UpdateTarget
+    |> Ash.Query.filter(update_campaign_id == ^update_campaign_id)
+    |> Ash.Query.filter(status == :idle)
   end
 
   defp filter_targets_with({:device_online, online_status}, query) do
-    from t in query,
-      join: d in Devices.Device,
-      on: t.device_id == d.id,
-      where: d.online == ^online_status
+    query
+    |> Ash.Query.load(device: [:online])
+    |> Ash.Query.filter(device.online == ^online_status)
   end
 
   @doc """
@@ -315,10 +317,10 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   @doc """
   Marks the ota_operation as timed out. This will also trigger an update publish on the PubSub.
   """
-  def mark_ota_operation_as_timed_out!(ota_operation_id) do
-    ota_operation_id
-    |> OSManagement.get_ota_operation!()
-    |> OSManagement.update_ota_operation(%{status: :failure, status_code: :request_timeout})
+  def mark_ota_operation_as_timed_out!(tenant_id, ota_operation_id) do
+    OTAOperation
+    |> Ash.get!(ota_operation_id, tenant: tenant_id)
+    |> Ash.update(%{status: :failure, status_code: :request_timeout})
     |> case do
       {:ok, ota_operation} ->
         ota_operation
@@ -332,16 +334,14 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Marks the target with the :failed state in the database.
   """
   def mark_target_as_failed!(target, now \\ DateTime.utc_now()) do
-    Ecto.Changeset.change(target, status: :failed, completion_timestamp: now)
-    |> Repo.update!()
+    Ash.update!(target, %{status: :failed, completion_timestamp: now})
   end
 
   @doc """
   Marks the target with the :successful state in the database.
   """
   def mark_target_as_successful!(target, now \\ DateTime.utc_now()) do
-    Ecto.Changeset.change(target, status: :successful, completion_timestamp: now)
-    |> Repo.update!()
+    Ash.update!(target, %{status: :successful, completion_timestamp: now})
   end
 
   @doc """
@@ -427,37 +427,28 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   @doc """
   Returns the target count for the Update Campaign
   """
-  def get_target_count(update_campaign_id) do
-    target_count_query(update_campaign_id)
-    |> Repo.one()
+  def get_target_count(tenant_id, update_campaign_id) do
+    UpdateCampaign
+    |> Ash.get!(update_campaign_id, tenant: tenant_id, load: [:total_target_count])
+    |> Map.fetch!(:total_target_count)
   end
 
   @doc """
   Returns the count of failed targets for the Update Campaign
   """
-  def get_failed_target_count(update_campaign_id) do
-    query =
-      from t in target_count_query(update_campaign_id),
-        where: t.status == :failed
-
-    Repo.one(query)
+  def get_failed_target_count(tenant_id, update_campaign_id) do
+    UpdateCampaign
+    |> Ash.get!(update_campaign_id, tenant: tenant_id, load: [:failed_target_count])
+    |> Map.fetch!(:failed_target_count)
   end
 
   @doc """
   Returns the count of in progress targets for the Update Campaign
   """
-  def get_in_progress_target_count(update_campaign_id) do
-    query =
-      from t in target_count_query(update_campaign_id),
-        where: t.status == :in_progress
-
-    Repo.one(query)
-  end
-
-  defp target_count_query(update_campaign_id) do
-    from t in UpdateTarget,
-      where: t.update_campaign_id == ^update_campaign_id,
-      select: count(t.id)
+  def get_in_progress_target_count(tenant_id, update_campaign_id) do
+    UpdateCampaign
+    |> Ash.get!(update_campaign_id, tenant: tenant_id, load: [:in_progress_target_count])
+    |> Map.fetch!(:in_progress_target_count)
   end
 
   @doc """
@@ -465,12 +456,11 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   If it returns false, all the targets have started their rollout, so the Update Campaign
   will be complete once all the replies arrive (or after the timeouts and retries)
   """
-  def has_idle_targets?(update_campaign_id) do
-    query =
-      from t in idle_targets_query(update_campaign_id),
-        select: count(t.id)
+  def has_idle_targets?(tenant_id, update_campaign_id) do
+    update_campaign =
+      Ash.get!(UpdateCampaign, update_campaign_id, tenant: tenant_id, load: [:idle_target_count])
 
-    Repo.one(query) > 0
+    update_campaign.idle_target_count > 0
   end
 
   @doc """
@@ -478,8 +468,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Also updates `start_timestamp`.
   """
   def mark_update_campaign_as_in_progress!(update_campaign, now \\ DateTime.utc_now()) do
-    Ecto.Changeset.change(update_campaign, status: :in_progress, start_timestamp: now)
-    |> Repo.update!()
+    Ash.update!(update_campaign, %{status: :in_progress, start_timestamp: now})
   end
 
   @doc """
@@ -487,12 +476,11 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Also updates `completion_timestamp`.
   """
   def mark_update_campaign_as_failed!(update_campaign, now \\ DateTime.utc_now()) do
-    Ecto.Changeset.change(update_campaign,
+    Ash.update!(update_campaign, %{
       status: :finished,
       outcome: :failure,
       completion_timestamp: now
-    )
-    |> Repo.update!()
+    })
   end
 
   @doc """
@@ -500,12 +488,11 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Also updates `completion_timestamp`.
   """
   def mark_update_campaign_as_successful!(update_campaign, now \\ DateTime.utc_now()) do
-    Ecto.Changeset.change(update_campaign,
+    Ash.update!(update_campaign, %{
       status: :finished,
       outcome: :success,
       completion_timestamp: now
-    )
-    |> Repo.update!()
+    })
   end
 
   @doc """
@@ -513,15 +500,11 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   This is useful when resuming an Update Campaign to know which targets need to setup a retry
   timeout.
   """
-  def list_targets_with_pending_ota_operation(update_campaign_id) do
-    query =
-      from t in UpdateTarget,
-        where: t.update_campaign_id == ^update_campaign_id,
-        join: o in OSManagement.OTAOperation,
-        on: t.ota_operation_id == o.id,
-        where: o.status == :pending
-
-    Repo.all(query)
-    |> preload_defaults_for_target()
+  def list_targets_with_pending_ota_operation(tenant_id, update_campaign_id) do
+    UpdateTarget
+    |> Ash.Query.load(default_preloads_for_target())
+    |> Ash.Query.filter(update_campaign_id == ^update_campaign_id)
+    |> Ash.Query.filter(not is_nil(ota_operation) and ota_operation.status == :pending)
+    |> Ash.read!(tenant: tenant_id)
   end
 end

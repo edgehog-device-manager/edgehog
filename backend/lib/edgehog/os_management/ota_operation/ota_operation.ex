@@ -65,6 +65,15 @@ defmodule Edgehog.OSManagement.OTAOperation do
       ]
     end
 
+    create :managed do
+      description "Initiates an OTA update with base image's URL"
+
+      accept [:base_image_url, :device_id]
+
+      change Changes.SendUpdateRequest
+      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_created}
+    end
+
     create :manual do
       description "Initiates an OTA update with a user provided OS image"
 
@@ -90,6 +99,18 @@ defmodule Edgehog.OSManagement.OTAOperation do
       change set_attribute(:manual?, true)
       change Changes.HandleEphemeralImageUpload
       change Changes.SendUpdateRequest
+      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_created}
+    end
+
+    update :update do
+      primary? true
+
+      accept [:status, :status_progress, :status_code, :message]
+
+      # Needed because Edgehog.Changes.PublishNotification is not atomic
+      require_atomic? false
+
+      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_updated}
     end
 
     action :send_update_request do

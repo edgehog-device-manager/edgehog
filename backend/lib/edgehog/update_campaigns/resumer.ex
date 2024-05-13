@@ -37,7 +37,7 @@ defmodule Edgehog.UpdateCampaigns.Resumer do
     # handles the case where the executor is already running (if, e.g., we crashed and we're
     # restarted again).
     Core.stream_resumable_update_campaigns()
-    |> Core.for_each_update_campaign(&ExecutorSupervisor.start_executor!/1)
+    |> Enum.each(&ExecutorSupervisor.start_executor!/1)
 
     Logger.info("Finished resuming Update Campaigns")
 

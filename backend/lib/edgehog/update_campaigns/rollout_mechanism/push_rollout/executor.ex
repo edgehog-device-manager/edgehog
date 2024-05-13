@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   require Logger
 
   alias __MODULE__, as: Data
-  alias Edgehog.Repo
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
   alias Edgehog.UpdateCampaigns.UpdateTarget
 
@@ -37,7 +36,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     :in_progress_count,
     :rollout_mechanism,
     :target_count,
-    :update_campaign_id
+    :update_campaign_id,
+    :tenant_id
   ]
 
   # Public API
@@ -55,51 +55,61 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     tenant_id = Keyword.fetch!(opts, :tenant_id)
     update_campaign_id = Keyword.fetch!(opts, :update_campaign_id)
 
-    # Make sure the process-local tenant is the right one
-    Repo.put_tenant_id(tenant_id)
+    data = %Data{
+      update_campaign_id: update_campaign_id,
+      tenant_id: tenant_id
+    }
 
     if opts[:wait_for_start_execution] do
       # Use this to manually start the executor in tests
-      {:ok, :wait_for_start_execution, update_campaign_id}
+      {:ok, :wait_for_start_execution, data}
     else
-      {:ok, :initialization, update_campaign_id, internal_event(:init_data)}
+      {:ok, :initialization, data, internal_event(:init_data)}
     end
   end
 
   # State: :wait_for_start_execution
 
   @impl GenStateMachine
-  def handle_event(:enter, _old_state, :wait_for_start_execution, _update_campaign_id) do
+  def handle_event(:enter, _old_state, :wait_for_start_execution, _data) do
     :keep_state_and_data
   end
 
-  def handle_event(:info, :start_execution, :wait_for_start_execution, update_campaign_id) do
-    {:next_state, :initialization, update_campaign_id, internal_event(:init_data)}
+  def handle_event(:info, :start_execution, :wait_for_start_execution, data) do
+    {:next_state, :initialization, data, internal_event(:init_data)}
   end
 
   # State: :initialization
 
-  def handle_event(:enter, _old_state, :initialization, update_campaign_id) do
+  def handle_event(:enter, _old_state, :initialization, data) do
+    %Data{update_campaign_id: update_campaign_id} = data
+
     Logger.info("Update Campaign #{update_campaign_id}: entering the :initialization state")
 
     :keep_state_and_data
   end
 
-  def handle_event(:internal, :init_data, :initialization, update_campaign_id) do
+  def handle_event(:internal, :init_data, :initialization, data) do
+    %Data{
+      update_campaign_id: update_campaign_id,
+      tenant_id: tenant_id
+    } = data
+
     # TODO: when we expose the possibility of updating the UpdateCampaign, specifically the rollout,
     # we should publish changes to it via PubSub, subscribing to them here, since we will allow
     # increasing max_in_progress_updates during the campaign execution, which will affect
     # available_slots.
-    update_campaign = Core.get_update_campaign!(update_campaign_id)
-    base_image = Core.get_update_campaign_base_image!(update_campaign_id)
-    target_count = Core.get_target_count(update_campaign_id)
-    rollout_mechanism = update_campaign.rollout_mechanism
+    update_campaign = Core.get_update_campaign!(tenant_id, update_campaign_id)
+    base_image = Core.get_update_campaign_base_image!(tenant_id, update_campaign_id)
+    target_count = Core.get_target_count(tenant_id, update_campaign_id)
+    rollout_mechanism = update_campaign.rollout_mechanism.value
 
     data = %Data{
       base_image: base_image,
       rollout_mechanism: rollout_mechanism,
       target_count: target_count,
-      update_campaign_id: update_campaign_id
+      update_campaign_id: update_campaign_id,
+      tenant_id: tenant_id
     }
 
     case update_campaign.status do
@@ -121,13 +131,14 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   def handle_event(:internal, :resume_campaign, :initialization, data) do
     %{
       rollout_mechanism: rollout_mechanism,
-      update_campaign_id: update_campaign_id
+      update_campaign_id: update_campaign_id,
+      tenant_id: tenant_id
     } = data
 
     # TODO: query Astarte to verify that the cached status is consistent with our local status
     # (possibly spawning a separate task that queries Astarte and updates OTA Operations)
-    failed_count = Core.get_failed_target_count(update_campaign_id)
-    in_progress_count = Core.get_in_progress_target_count(update_campaign_id)
+    failed_count = Core.get_failed_target_count(tenant_id, update_campaign_id)
+    in_progress_count = Core.get_in_progress_target_count(tenant_id, update_campaign_id)
     available_slots = Core.available_update_slots(rollout_mechanism, in_progress_count)
 
     new_data = %{
@@ -138,13 +149,13 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     }
 
     timeout_actions =
-      Core.list_targets_with_pending_ota_operation(update_campaign_id)
+      Core.list_targets_with_pending_ota_operation(tenant_id, update_campaign_id)
       |> Enum.map(fn pending_target ->
         # Side effect: receive updates for the OTA Operation so we can track it
         Core.subscribe_to_ota_operation_updates!(pending_target.ota_operation_id)
 
         # Return the retry timeout action for the pending target
-        setup_retry_timeout(pending_target, rollout_mechanism)
+        setup_retry_timeout(tenant_id, pending_target, rollout_mechanism)
       end)
 
     # Fetch the next target
@@ -176,7 +187,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, :fetch_next_target, :rollout, data) do
-    case Core.fetch_next_updatable_target(data.update_campaign_id) do
+    case Core.fetch_next_updatable_target(data.tenant_id, data.update_campaign_id) do
       {:ok, target} ->
         # Do we have an available slot?
         if slot_available?(data) do
@@ -190,7 +201,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
         # Are we finished?
         cond do
           # There are still some targets but none of them are online, wait for them
-          Core.has_idle_targets?(data.update_campaign_id) ->
+          Core.has_idle_targets?(data.tenant_id, data.update_campaign_id) ->
             {:next_state, :wait_for_target, data}
 
           # We don't have any target left to be deployed, but we have to wait for in progress
@@ -246,7 +257,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
       # Fetch the next target
       internal_event(:fetch_next_target),
       # Setup a timeout for the OTA Operation retry
-      setup_retry_timeout(target, data.rollout_mechanism)
+      setup_retry_timeout(data.tenant_id, target, data.rollout_mechanism)
     ]
 
     {:keep_state_and_data, actions}
@@ -334,7 +345,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     Logger.notice("Update campaign #{data.update_campaign_id} terminated with a failure")
 
     _ =
-      Core.get_update_campaign!(data.update_campaign_id)
+      Core.get_update_campaign!(data.tenant_id, data.update_campaign_id)
       |> Core.mark_update_campaign_as_failed!()
 
     if targets_in_progress?(data) do
@@ -362,7 +373,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     Logger.info("Update campaign #{data.update_campaign_id} terminated with a success")
 
     _ =
-      Core.get_update_campaign!(data.update_campaign_id)
+      Core.get_update_campaign!(data.tenant_id, data.update_campaign_id)
       |> Core.mark_update_campaign_as_successful!()
 
     terminate_executor(data.update_campaign_id)
@@ -374,7 +385,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
-  def handle_event(:info, {:ota_operation_updated, ota_operation}, _state, _data) do
+  def handle_event(:info, {:ota_operation_updated, ota_operation}, _state, data) do
     # Event generated from PubSub when an OTAOperation is updated
     additional_actions =
       cond do
@@ -397,7 +408,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     # We always cancel the retry timeout for every kind of update we see on an OTA Operation.
     # This ensures we don't resend the request even if we accidentally miss the acknowledge.
     # If the timeout does not exist, this is a no-op anyway.
-    actions = [cancel_retry_timeout(ota_operation.id) | additional_actions]
+    actions = [cancel_retry_timeout(data.tenant_id, ota_operation.id) | additional_actions]
 
     {:keep_state_and_data, actions}
   end
@@ -406,7 +417,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     Logger.info("Device #{ota_operation.device.device_id} updated successfully")
 
     _ =
-      Core.get_target_for_ota_operation!(ota_operation.id)
+      Core.get_target_for_ota_operation!(data.tenant_id, ota_operation.id)
       |> Core.mark_target_as_successful!()
 
     # The OTA Operation has finished, so we free up a slot
@@ -421,7 +432,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     )
 
     _ =
-      Core.get_target_for_ota_operation!(ota_operation.id)
+      Core.get_target_for_ota_operation!(data.tenant_id, ota_operation.id)
       |> Core.mark_target_as_failed!()
 
     # Since the target was occupying a slot and we're marking it as failed, free up the slot
@@ -460,7 +471,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event({:timeout, {:retry, _ota_operation_id}}, target_id, _state, data) do
-    target = Core.get_target!(target_id)
+    target = Core.get_target!(data.tenant_id, target_id)
 
     if Core.can_retry?(target, data.rollout_mechanism) do
       {:keep_state_and_data, internal_event({:retry_target, target})}
@@ -476,10 +487,10 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
       |> Core.increase_retry_count!()
       |> Core.update_target_latest_attempt!(DateTime.utc_now())
 
-    case Core.retry_target_update(target, data.base_image) do
+    case Core.retry_target_update(target) do
       :ok ->
         # Setup a timeout for the OTA Operation retry
-        action = setup_retry_timeout(target, data.rollout_mechanism)
+        action = setup_retry_timeout(data.tenant_id, target, data.rollout_mechanism)
 
         {:keep_state_and_data, action}
 
@@ -494,18 +505,18 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
         # count since the OTA Operation, differently from the case where we fail during the initial
         # rollout)
         # TODO: evaluate if this is the desired behaviour
-        action = setup_retry_timeout(target, data.rollout_mechanism)
+        action = setup_retry_timeout(data.tenant_id, target, data.rollout_mechanism)
 
         {:keep_state_and_data, action}
     end
   end
 
-  def handle_event(:internal, {:retry_threshold_exceeded, target}, _state, _data) do
+  def handle_event(:internal, {:retry_threshold_exceeded, target}, _state, data) do
     Logger.notice("Device #{target.device.device_id} update failed: no more retries left")
 
     # Just mark the OTA Operation as failed with request_timeout. The associated target will
     # be marked as failed when it receives the :ota_operation_updated message from the PubSub
-    _ = Core.mark_ota_operation_as_timed_out!(target.ota_operation_id)
+    _ = Core.mark_ota_operation_as_timed_out!(data.tenant_id, target.ota_operation_id)
 
     :keep_state_and_data
   end
@@ -541,19 +552,19 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
 
   # Action helpers
 
-  defp setup_retry_timeout(target, rollout_mechanism) do
+  defp setup_retry_timeout(tenant_id, target, rollout_mechanism) do
     # Create a generic timeout identified by the OTA Operation ID so we can cancel it if the
     # OTA Operation gets updated with an ack.
     # Note that this works correctly even if the timeout is already expired (e.g. when resuming
     # a campaign) since Core.pending_ota_request_timeout_ms will return 0 in that case, and
     # setting up a 0 timer will enqueue the timer action event immediately.
     timeout_ms = Core.pending_ota_request_timeout_ms(target, rollout_mechanism)
-    {{:timeout, {:retry, target.ota_operation_id}}, timeout_ms, target.id}
+    {{:timeout, {:retry, {tenant_id, target.ota_operation_id}}}, timeout_ms, target.id}
   end
 
-  defp cancel_retry_timeout(ota_operation_id) do
+  defp cancel_retry_timeout(tenant_id, ota_operation_id) do
     # Cancel the pending retry timer
-    {{:timeout, {:retry, ota_operation_id}}, :cancel}
+    {{:timeout, {:retry, {tenant_id, ota_operation_id}}}, :cancel}
   end
 
   defp internal_event(payload) do
