@@ -82,7 +82,6 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     update :update do
       description "Updates a base image collection."
       primary? true
-      require_atomic? false
 
       accept [:handle, :name]
     end
@@ -90,6 +89,12 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     destroy :destroy do
       description "Deletes a base image collection."
       primary? true
+    end
+  end
+
+  validations do
+    validate Validations.handle(:handle) do
+      where changing(:handle)
     end
   end
 
@@ -142,10 +147,6 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     identity :handle_tenant_id, [:handle]
     identity :name_tenant_id, [:name]
     identity :system_model_id_tenant_id, [:system_model_id]
-  end
-
-  validations do
-    validate Validations.handle(:handle)
   end
 
   postgres do

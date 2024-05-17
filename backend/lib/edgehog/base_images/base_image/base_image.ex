@@ -98,7 +98,6 @@ defmodule Edgehog.BaseImages.BaseImage do
     update :update do
       description "Updates a base image."
       primary? true
-      require_atomic? false
 
       accept [:starting_version_requirement]
     end
@@ -106,12 +105,21 @@ defmodule Edgehog.BaseImages.BaseImage do
     destroy :destroy do
       description "Deletes a base image."
       primary? true
-      require_atomic? false
 
       change Changes.HandleFileDeletion
     end
 
     destroy :destroy_fixture
+  end
+
+  validations do
+    validate {Validations.Version, attribute: :version} do
+      where changing(:version)
+    end
+
+    validate {Validations.VersionRequirement, attribute: :starting_version_requirement} do
+      where changing(:starting_version_requirement)
+    end
   end
 
   attributes do
@@ -162,11 +170,6 @@ defmodule Edgehog.BaseImages.BaseImage do
       :base_image_collection_id,
       :tenant_id
     ]
-  end
-
-  validations do
-    validate {Validations.Version, attribute: :version}
-    validate {Validations.VersionRequirement, attribute: :starting_version_requirement}
   end
 
   postgres do

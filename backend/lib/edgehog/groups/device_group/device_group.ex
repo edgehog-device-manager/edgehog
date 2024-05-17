@@ -63,7 +63,6 @@ defmodule Edgehog.Groups.DeviceGroup do
     update :update do
       description "Updates a device group."
       primary? true
-      require_atomic? false
 
       accept [:name, :handle, :selector]
     end
@@ -71,6 +70,16 @@ defmodule Edgehog.Groups.DeviceGroup do
     destroy :destroy do
       description "Deletes a device group."
       primary? true
+    end
+  end
+
+  validations do
+    validate Edgehog.Validations.slug(:handle) do
+      where changing(:handle)
+    end
+
+    validate Validations.Selector do
+      where changing(:selector)
     end
   end
 
@@ -134,11 +143,6 @@ defmodule Edgehog.Groups.DeviceGroup do
     # TODO: change index names when we generate migrations at the end of the porting
     identity :name_tenant_id, [:name]
     identity :handle_tenant_id, [:handle]
-  end
-
-  validations do
-    validate Edgehog.Validations.slug(:handle)
-    validate Validations.Selector
   end
 
   postgres do

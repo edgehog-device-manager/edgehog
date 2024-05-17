@@ -116,9 +116,9 @@ defmodule Edgehog.MixProject do
       {:observer_cli, "~> 1.7"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ash, github: "ash-project/ash", override: true},
-      {:ash_postgres, "~> 2.0-dev"},
-      {:ash_graphql, "~> 1.0-dev"},
-      {:ash_json_api, "~> 1.0-dev"},
+      {:ash_postgres, "~> 2.0"},
+      {:ash_graphql, "~> 1.0"},
+      {:ash_json_api, "~> 1.0"},
       {:picosat_elixir, "~> 0.2"}
     ]
   end

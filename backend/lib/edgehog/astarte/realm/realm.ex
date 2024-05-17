@@ -48,6 +48,16 @@ defmodule Edgehog.Astarte.Realm do
     end
   end
 
+  validations do
+    validate Validations.realm_name(:name) do
+      where changing(:name)
+    end
+
+    validate {Validations.PEMPrivateKey, attribute: :private_key} do
+      where changing(:private_key)
+    end
+  end
+
   attributes do
     integer_primary_key :id
 
@@ -83,11 +93,6 @@ defmodule Edgehog.Astarte.Realm do
   identities do
     identity :name_tenant_id, [:name, :tenant_id]
     identity :name_cluster_id, [:name, :cluster_id]
-  end
-
-  validations do
-    validate Validations.realm_name(:name)
-    validate {Validations.PEMPrivateKey, attribute: :private_key}
   end
 
   postgres do
