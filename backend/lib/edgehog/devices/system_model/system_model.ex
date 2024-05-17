@@ -104,6 +104,8 @@ defmodule Edgehog.Devices.SystemModel do
     update :update do
       description "Updates an system model."
       primary? true
+
+      # Needed because manage_relationship is not atomic
       require_atomic? false
 
       accept [:handle, :name, :picture_url]
@@ -134,7 +136,6 @@ defmodule Edgehog.Devices.SystemModel do
     destroy :destroy do
       description "Deletes a system model."
       primary? true
-      require_atomic? false
 
       change {Changes.HandlePictureDeletion, force?: true}
     end
@@ -202,7 +203,9 @@ defmodule Edgehog.Devices.SystemModel do
   end
 
   validations do
-    validate Edgehog.Validations.slug(:handle)
+    validate Edgehog.Validations.slug(:handle) do
+      where changing(:handle)
+    end
   end
 
   postgres do

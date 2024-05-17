@@ -64,7 +64,9 @@ defmodule Edgehog.Astarte.Cluster do
   end
 
   validations do
-    validate {Cluster.Validations.URL, attribute: :base_api_url}
+    validate {Cluster.Validations.URL, attribute: :base_api_url} do
+      where changing(:base_api_url)
+    end
   end
 
   postgres do

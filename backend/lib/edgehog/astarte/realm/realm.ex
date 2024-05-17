@@ -86,8 +86,13 @@ defmodule Edgehog.Astarte.Realm do
   end
 
   validations do
-    validate Validations.realm_name(:name)
-    validate {Validations.PEMPrivateKey, attribute: :private_key}
+    validate Validations.realm_name(:name) do
+      where changing(:name)
+    end
+
+    validate {Validations.PEMPrivateKey, attribute: :private_key} do
+      where changing(:private_key)
+    end
   end
 
   postgres do

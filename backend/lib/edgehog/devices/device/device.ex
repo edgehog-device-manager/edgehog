@@ -188,6 +188,8 @@ defmodule Edgehog.Devices.Device do
 
     update :add_tags do
       description "Add tags to a device."
+
+      # Needed because manage_relationship is not atomic
       require_atomic? false
 
       argument :tags, {:array, :string} do
@@ -207,6 +209,8 @@ defmodule Edgehog.Devices.Device do
 
     update :remove_tags do
       description "Remove tags from a device."
+
+      # Needed because manage_relationship is not atomic
       require_atomic? false
 
       argument :tags, {:array, :string} do

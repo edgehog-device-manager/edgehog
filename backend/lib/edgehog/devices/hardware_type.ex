@@ -87,6 +87,8 @@ defmodule Edgehog.Devices.HardwareType do
     update :update do
       description "Updates a hardware type."
       primary? true
+
+      # Needed because manage_relationship is not atomic
       require_atomic? false
 
       accept [:handle, :name]
@@ -162,7 +164,9 @@ defmodule Edgehog.Devices.HardwareType do
   end
 
   validations do
-    validate Validations.slug(:handle)
+    validate Validations.slug(:handle) do
+      where changing(:handle)
+    end
   end
 
   postgres do

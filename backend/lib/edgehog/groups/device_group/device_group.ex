@@ -63,7 +63,6 @@ defmodule Edgehog.Groups.DeviceGroup do
     update :update do
       description "Updates a device group."
       primary? true
-      require_atomic? false
 
       accept [:name, :handle, :selector]
     end
@@ -137,8 +136,13 @@ defmodule Edgehog.Groups.DeviceGroup do
   end
 
   validations do
-    validate Edgehog.Validations.slug(:handle)
-    validate Validations.Selector
+    validate Edgehog.Validations.slug(:handle) do
+      where changing(:handle)
+    end
+
+    validate Validations.Selector do
+      where changing(:selector)
+    end
   end
 
   postgres do
