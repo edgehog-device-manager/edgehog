@@ -112,6 +112,16 @@ defmodule Edgehog.BaseImages.BaseImage do
     destroy :destroy_fixture
   end
 
+  validations do
+    validate {Validations.Version, attribute: :version} do
+      where changing(:version)
+    end
+
+    validate {Validations.VersionRequirement, attribute: :starting_version_requirement} do
+      where changing(:starting_version_requirement)
+    end
+  end
+
   attributes do
     integer_primary_key :id
 
@@ -160,16 +170,6 @@ defmodule Edgehog.BaseImages.BaseImage do
       :base_image_collection_id,
       :tenant_id
     ]
-  end
-
-  validations do
-    validate {Validations.Version, attribute: :version} do
-      where changing(:version)
-    end
-
-    validate {Validations.VersionRequirement, attribute: :starting_version_requirement} do
-      where changing(:starting_version_requirement)
-    end
   end
 
   postgres do

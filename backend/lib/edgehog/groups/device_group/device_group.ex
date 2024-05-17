@@ -73,6 +73,16 @@ defmodule Edgehog.Groups.DeviceGroup do
     end
   end
 
+  validations do
+    validate Edgehog.Validations.slug(:handle) do
+      where changing(:handle)
+    end
+
+    validate Validations.Selector do
+      where changing(:selector)
+    end
+  end
+
   attributes do
     integer_primary_key :id
 
@@ -133,16 +143,6 @@ defmodule Edgehog.Groups.DeviceGroup do
     # TODO: change index names when we generate migrations at the end of the porting
     identity :name_tenant_id, [:name]
     identity :handle_tenant_id, [:handle]
-  end
-
-  validations do
-    validate Edgehog.Validations.slug(:handle) do
-      where changing(:handle)
-    end
-
-    validate Validations.Selector do
-      where changing(:selector)
-    end
   end
 
   postgres do

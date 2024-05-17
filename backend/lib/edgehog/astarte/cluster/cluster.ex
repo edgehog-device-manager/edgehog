@@ -43,6 +43,12 @@ defmodule Edgehog.Astarte.Cluster do
     end
   end
 
+  validations do
+    validate {Cluster.Validations.URL, attribute: :base_api_url} do
+      where changing(:base_api_url)
+    end
+  end
+
   attributes do
     integer_primary_key :id
 
@@ -61,12 +67,6 @@ defmodule Edgehog.Astarte.Cluster do
 
   identities do
     identity :url, [:base_api_url]
-  end
-
-  validations do
-    validate {Cluster.Validations.URL, attribute: :base_api_url} do
-      where changing(:base_api_url)
-    end
   end
 
   postgres do

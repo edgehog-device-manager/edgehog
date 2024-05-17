@@ -92,6 +92,12 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     end
   end
 
+  validations do
+    validate Validations.handle(:handle) do
+      where changing(:handle)
+    end
+  end
+
   attributes do
     integer_primary_key :id
 
@@ -141,12 +147,6 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     identity :handle_tenant_id, [:handle]
     identity :name_tenant_id, [:name]
     identity :system_model_id_tenant_id, [:system_model_id]
-  end
-
-  validations do
-    validate Validations.handle(:handle) do
-      where changing(:handle)
-    end
   end
 
   postgres do

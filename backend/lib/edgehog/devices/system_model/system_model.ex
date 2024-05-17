@@ -141,6 +141,12 @@ defmodule Edgehog.Devices.SystemModel do
     end
   end
 
+  validations do
+    validate Edgehog.Validations.slug(:handle) do
+      where changing(:handle)
+    end
+  end
+
   attributes do
     integer_primary_key :id
 
@@ -200,12 +206,6 @@ defmodule Edgehog.Devices.SystemModel do
     # TODO: change index names when we generate migrations at the end of the porting
     identity :handle_tenant_id, [:handle]
     identity :name_tenant_id, [:name]
-  end
-
-  validations do
-    validate Edgehog.Validations.slug(:handle) do
-      where changing(:handle)
-    end
   end
 
   postgres do

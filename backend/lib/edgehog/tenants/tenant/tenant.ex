@@ -113,6 +113,20 @@ defmodule Edgehog.Tenants.Tenant do
     end
   end
 
+  validations do
+    validate Validations.slug(:slug) do
+      where changing(:slug)
+    end
+
+    validate Validations.locale(:default_locale) do
+      where changing(:default_locale)
+    end
+
+    validate {Validations.PEMPublicKey, attribute: :public_key} do
+      where changing(:public_key)
+    end
+  end
+
   attributes do
     integer_primary_key :tenant_id
 
@@ -156,20 +170,6 @@ defmodule Edgehog.Tenants.Tenant do
   identities do
     identity :name, [:name]
     identity :slug, [:slug]
-  end
-
-  validations do
-    validate Validations.slug(:slug) do
-      where changing(:slug)
-    end
-
-    validate Validations.locale(:default_locale) do
-      where changing(:default_locale)
-    end
-
-    validate {Validations.PEMPublicKey, attribute: :public_key} do
-      where changing(:public_key)
-    end
   end
 
   postgres do
