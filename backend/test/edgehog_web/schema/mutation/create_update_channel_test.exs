@@ -49,6 +49,65 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
       assert target_group_data["handle"] == target_group.handle
     end
 
+    test "fails with missing name", %{tenant: tenant} do
+      error =
+        create_update_channel_mutation(name: nil, tenant: tenant)
+        |> extract_error!()
+
+      assert %{message: message} = error
+      assert message =~ ~s<In field "name": Expected type "String!", found null.>
+    end
+
+    test "fails with empty name", %{tenant: tenant} do
+      error =
+        create_update_channel_mutation(name: "", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateChannel"],
+               fields: [:name],
+               message: "is required",
+               code: "required"
+             } = error
+    end
+
+    test "fails with non-unique name", %{tenant: tenant} do
+      _ = update_channel_fixture(tenant: tenant, name: "existing-name")
+
+      error =
+        create_update_channel_mutation(name: "existing-name", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateChannel"],
+               fields: [:name],
+               message: "has already been taken",
+               code: "invalid_attribute"
+             } = error
+    end
+
+    test "fails with missing handle", %{tenant: tenant} do
+      error =
+        create_update_channel_mutation(handle: nil, tenant: tenant)
+        |> extract_error!()
+
+      assert %{message: message} = error
+      assert message =~ ~s<In field "handle": Expected type "String!", found null.>
+    end
+
+    test "fails with empty handle", %{tenant: tenant} do
+      error =
+        create_update_channel_mutation(handle: "", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateChannel"],
+               fields: [:handle],
+               message: "is required",
+               code: "required"
+             } = error
+    end
+
     test "fails with invalid handle", %{tenant: tenant} do
       error =
         create_update_channel_mutation(handle: "1nvalid Handle", tenant: tenant)
@@ -63,8 +122,64 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
              } = error
     end
 
+    test "fails with non-unique handle", %{tenant: tenant} do
+      _ = update_channel_fixture(tenant: tenant, handle: "existing-handle")
+
+      error =
+        create_update_channel_mutation(handle: "existing-handle", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateChannel"],
+               fields: [:handle],
+               message: "has already been taken",
+               code: "invalid_attribute"
+             } = error
+    end
+
+    test "fails with missing target_group_ids", %{tenant: tenant} do
+      error =
+        create_update_channel_mutation(target_group_ids: nil, tenant: tenant)
+        |> extract_error!()
+
+      assert %{message: message} = error
+      assert message =~ ~s<In field "targetGroupIds": Expected type "[ID!]!", found null.>
+    end
+
+    test "fails with empty target_group_ids", %{tenant: tenant} do
+      error =
+        create_update_channel_mutation(target_group_ids: [], tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateChannel"],
+               fields: [:target_group_ids],
+               message: "must have 1 or more items",
+               code: "invalid_argument"
+             } = error
+    end
+
     test "fails when trying to use a non-existing target group", %{tenant: tenant} do
       target_group_id = non_existing_device_group_id(tenant)
+
+      error =
+        create_update_channel_mutation(target_group_ids: [target_group_id], tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateChannel"],
+               fields: [:target_group_ids],
+               message:
+                 "some target groups were not found or are already associated with an update channel",
+               code: "invalid_argument"
+             } = error
+    end
+
+    test "fails when trying to use already assigned target groups", %{tenant: tenant} do
+      target_group = device_group_fixture(tenant: tenant)
+      _ = update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
+
+      target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
       error =
         create_update_channel_mutation(target_group_ids: [target_group_id], tenant: tenant)

@@ -57,6 +57,47 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       assert target_group_data["handle"] == target_group.handle
     end
 
+    test "fails with empty name", %{tenant: tenant, id: id} do
+      error =
+        update_update_channel_mutation(id: id, name: "", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:name],
+               code: "required",
+               message: "is required"
+             } = error
+    end
+
+    test "fails with non-unique name", %{tenant: tenant, id: id} do
+      _ = update_channel_fixture(tenant: tenant, name: "existing-name")
+
+      error =
+        update_update_channel_mutation(id: id, name: "existing-name", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:name],
+               code: "invalid_attribute",
+               message: "has already been taken"
+             } = error
+    end
+
+    test "fails with empty handle", %{tenant: tenant, id: id} do
+      error =
+        update_update_channel_mutation(id: id, handle: "", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:handle],
+               code: "required",
+               message: "is required"
+             } = error
+    end
+
     test "fails with invalid handle", %{tenant: tenant, id: id} do
       error =
         update_update_channel_mutation(
@@ -74,8 +115,59 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
              } = error
     end
 
+    test "fails with non-unique handle", %{tenant: tenant, id: id} do
+      _ = update_channel_fixture(tenant: tenant, handle: "existing-handle")
+
+      error =
+        update_update_channel_mutation(id: id, handle: "existing-handle", tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:handle],
+               code: "invalid_attribute",
+               message: "has already been taken"
+             } = error
+    end
+
+    test "fails with empty target_group_ids", %{tenant: tenant, id: id} do
+      error =
+        update_update_channel_mutation(id: id, target_group_ids: [], tenant: tenant)
+        |> extract_error!()
+
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:target_group_ids],
+               code: "invalid_argument",
+               message: "must have 1 or more items"
+             } = error
+    end
+
     test "fails when trying to use a non-existing target group id", %{tenant: tenant, id: id} do
       target_group_id = non_existing_device_group_id(tenant)
+
+      error =
+        update_update_channel_mutation(
+          id: id,
+          target_group_ids: [target_group_id],
+          tenant: tenant
+        )
+        |> extract_error!()
+
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:target_group_ids],
+               code: "invalid_argument",
+               message:
+                 "some target groups were not found or are already associated with an update channel"
+             } = error
+    end
+
+    test "fails when trying to use already assigned target groups", %{tenant: tenant, id: id} do
+      target_group = device_group_fixture(tenant: tenant)
+      _ = update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
+
+      target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
       error =
         update_update_channel_mutation(
