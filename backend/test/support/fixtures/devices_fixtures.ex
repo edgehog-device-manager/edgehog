@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,7 +89,14 @@ defmodule Edgehog.DevicesFixtures do
   Generate a %Devices.Device{} compatible with a specific %BaseImages.BaseImage{}, passed as argument.
   """
   def device_fixture_compatible_with(opts \\ []) do
-    {base_image, opts} = Keyword.pop!(opts, :base_image)
+    {base_image_id, opts} = Keyword.pop!(opts, :base_image_id)
+
+    base_image =
+      Ash.get!(Edgehog.BaseImages.BaseImage, base_image_id,
+        load: [base_image_collection: [system_model: [part_numbers: :part_number]]],
+        tenant: opts[:tenant]
+      )
+
     [%{part_number: part_number} | _] = base_image.base_image_collection.system_model.part_numbers
 
     opts

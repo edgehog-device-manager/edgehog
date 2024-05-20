@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,23 +46,25 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   @doc """
   Generate a update_channel.
   """
-  def update_channel_fixture(attrs \\ []) do
-    {target_group_ids, attrs} =
-      Keyword.pop_lazy(attrs, :target_group_ids, fn ->
-        target_group = Edgehog.GroupsFixtures.device_group_fixture()
+  def update_channel_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {target_group_ids, opts} =
+      Keyword.pop_lazy(opts, :target_group_ids, fn ->
+        target_group = Edgehog.GroupsFixtures.device_group_fixture(tenant: tenant)
         [target_group.id]
       end)
 
-    {:ok, update_channel} =
-      attrs
-      |> Enum.into(%{
+    params =
+      Enum.into(opts, %{
         handle: unique_update_channel_handle(),
         name: unique_update_channel_name(),
         target_group_ids: target_group_ids
       })
-      |> Edgehog.UpdateCampaigns.create_update_channel()
 
-    update_channel
+    Edgehog.UpdateCampaigns.UpdateChannel
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   def update_campaign_fixture(attrs \\ []) do
