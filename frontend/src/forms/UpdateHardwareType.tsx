@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -31,6 +32,16 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { hardwareTypeHandleSchema, messages, yup } from "forms";
+
+import type { UpdateHardwareType_HardwareTypeFragment$key } from "api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
+
+const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
+  fragment UpdateHardwareType_HardwareTypeFragment on HardwareType {
+    name
+    handle
+    partNumbers
+  }
+`;
 
 const FormRow = ({
   id,
@@ -86,49 +97,63 @@ const hardwareTypeSchema = yup
   })
   .required();
 
-const transformInputData = (data: HardwareTypeData): FormData => ({
-  ...data,
-  partNumbers:
-    data.partNumbers.length > 0
-      ? data.partNumbers.map((pn) => ({ value: pn }))
-      : [{ value: "" }], // default with at least one empty part number
-});
-
 const transformOutputData = (data: FormData): HardwareTypeData => ({
   ...data,
   partNumbers: data.partNumbers.map((pn) => pn.value),
 });
 
 type Props = {
-  initialData: HardwareTypeData;
+  hardwareTypeRef: UpdateHardwareType_HardwareTypeFragment$key;
   isLoading?: boolean;
   onSubmit: (data: HardwareTypeData) => void;
   onDelete: () => void;
 };
 
 const UpdateHardwareTypeForm = ({
-  initialData,
+  hardwareTypeRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: Props) => {
+  const hardwareType = useFragment(
+    UPDATE_HARDWARE_TYPE_FRAGMENT,
+    hardwareTypeRef,
+  );
+
+  const defaultValues = useMemo<FormData>(
+    () => ({
+      name: hardwareType.name,
+      handle: hardwareType.handle,
+      partNumbers:
+        hardwareType.partNumbers.length > 0
+          ? hardwareType.partNumbers.map((pn) => ({ value: pn }))
+          : [{ value: "" }], // default with at least one empty part number
+    }),
+    [hardwareType.name, hardwareType.handle, hardwareType.partNumbers],
+  );
+
   const {
     control,
     register,
     handleSubmit,
     formState: { errors, isDirty },
+    reset,
   } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: initialData && transformInputData(initialData),
+    defaultValues,
     resolver: yupResolver(hardwareTypeSchema),
   });
+
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (prevDefaultValues !== defaultValues) {
+    reset(defaultValues);
+    setPrevDefaultValues(defaultValues);
+  }
 
   const partNumbers = useFieldArray({
     control,
     name: "partNumbers",
   });
-
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -145,7 +170,9 @@ const UpdateHardwareTypeForm = ({
     [partNumbers],
   );
 
+  const canReset = isDirty && !isLoading;
   const canSubmit = !isLoading && isDirty;
+  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -154,7 +181,7 @@ const UpdateHardwareTypeForm = ({
           id="hardware-type-form-name"
           label={
             <FormattedMessage
-              id="components.UpdateHardwareTypeForm.nameLabel"
+              id="forms.UpdateHardwareType.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -170,7 +197,7 @@ const UpdateHardwareTypeForm = ({
           id="hardware-type-form-handle"
           label={
             <FormattedMessage
-              id="components.UpdateHardwareTypeForm.handleLabel"
+              id="forms.UpdateHardwareType.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -186,7 +213,7 @@ const UpdateHardwareTypeForm = ({
           id="hardware-type-form-part-numbers"
           label={
             <FormattedMessage
-              id="components.UpdateHardwareTypeForm.partNumbersLabel"
+              id="forms.UpdateHardwareType.partNumbersLabel"
               defaultMessage="Part Numbers"
             />
           }
@@ -210,6 +237,7 @@ const UpdateHardwareTypeForm = ({
                 <Button
                   className="mb-auto"
                   variant="danger"
+                  disabled={isLoading}
                   onClick={() => handleDeletePartNumber(index)}
                 >
                   <Icon icon="delete" />
@@ -219,30 +247,45 @@ const UpdateHardwareTypeForm = ({
             <Button
               className="me-auto"
               variant="secondary"
+              disabled={isLoading}
               onClick={handleAddPartNumber}
             >
               <FormattedMessage
-                id="components.UpdateHardwareTypeForm.addPartNumberButton"
+                id="forms.UpdateHardwareType.addPartNumberButton"
                 defaultMessage="Add Part Number"
               />
             </Button>
           </Stack>
         </FormRow>
-        <div className="d-flex justify-content-end align-items-center gap-2">
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
           <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.UpdateHardwareTypeForm.submitButton"
+              id="forms.UpdateHardwareType.submitButton"
               defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateHardwareType.resetButton"
+              defaultMessage="Reset"
             />
           </Button>
           <Button variant="danger" onClick={onDelete}>
             <FormattedMessage
-              id="components.UpdateHardwareTypeForm.deleteButton"
+              id="forms.UpdateHardwareType.deleteButton"
               defaultMessage="Delete"
             />
           </Button>
-        </div>
+        </Stack>
       </Stack>
     </form>
   );

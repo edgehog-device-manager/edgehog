@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,6 +31,30 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageStartingVersionRequirementSchema, yup } from "forms";
+
+import type { UpdateBaseImage_BaseImageFragment$key } from "api/__generated__/UpdateBaseImage_BaseImageFragment.graphql";
+import type { UpdateBaseImage_OptionsFragment$key } from "api/__generated__/UpdateBaseImage_OptionsFragment.graphql";
+
+const UPDATE_BASE_IMAGE_FRAGMENT = graphql`
+  fragment UpdateBaseImage_BaseImageFragment on BaseImage {
+    version
+    url
+    startingVersionRequirement
+    releaseDisplayName
+    description
+    baseImageCollection {
+      name
+    }
+  }
+`;
+
+const UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT = graphql`
+  fragment UpdateBaseImage_OptionsFragment on RootQueryType {
+    tenantInfo {
+      defaultLocale
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -47,17 +72,6 @@ const FormRow = ({
     <Col sm={9}>{children}</Col>
   </Form.Group>
 );
-
-type BaseImageData = {
-  baseImageCollection: {
-    name: string;
-  };
-  version: string;
-  url: string;
-  startingVersionRequirement: string | null;
-  releaseDisplayName: string | null;
-  description: string | null;
-};
 
 type FormData = {
   baseImageCollection: string;
@@ -103,29 +117,46 @@ const transformOutputData = (
 });
 
 type UpdateBaseImageProps = {
-  baseImage: BaseImageData;
-  locale: string;
+  baseImageRef: UpdateBaseImage_BaseImageFragment$key;
+  optionsRef: UpdateBaseImage_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageChanges) => void;
   onDelete: () => void;
 };
 
 const UpdateBaseImage = ({
-  baseImage,
-  locale,
+  baseImageRef,
+  optionsRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: UpdateBaseImageProps) => {
-  const defaultValues = useMemo(
+  const baseImage = useFragment(UPDATE_BASE_IMAGE_FRAGMENT, baseImageRef);
+  const {
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT, optionsRef);
+
+  const baseImageCollection = baseImage.baseImageCollection.name;
+  const version = baseImage.version;
+  const startingVersionRequirement = baseImage.startingVersionRequirement || "";
+  const releaseDisplayName = baseImage.releaseDisplayName || "";
+  const description = baseImage.description || "";
+
+  const defaultValues = useMemo<FormData>(
     () => ({
-      baseImageCollection: baseImage.baseImageCollection.name,
-      version: baseImage.version,
-      startingVersionRequirement: baseImage.startingVersionRequirement || "",
-      releaseDisplayName: baseImage.releaseDisplayName || "",
-      description: baseImage.description || "",
+      baseImageCollection,
+      version,
+      startingVersionRequirement,
+      releaseDisplayName,
+      description,
     }),
-    [baseImage],
+    [
+      baseImageCollection,
+      version,
+      startingVersionRequirement,
+      releaseDisplayName,
+      description,
+    ],
   );
 
   const {
@@ -139,14 +170,17 @@ const UpdateBaseImage = ({
     resolver: yupResolver(baseImageSchema),
   });
 
-  useEffect(() => {
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (prevDefaultValues !== defaultValues) {
     reset(defaultValues);
-  }, [reset, defaultValues]);
+    setPrevDefaultValues(defaultValues);
+  }
 
   const onFormSubmit = (data: FormData) =>
     onSubmit(transformOutputData(locale, data));
 
   const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -248,28 +282,40 @@ const UpdateBaseImage = ({
         >
           <Form.Control as="textarea" {...register("description")} />
         </FormRow>
-        <div className="d-flex justify-content-end align-items-center">
-          <Stack direction="horizontal" gap={3}>
-            <Button variant="primary" type="submit" disabled={!canSubmit}>
-              {isLoading && <Spinner size="sm" className="me-2" />}
-              <FormattedMessage
-                id="forms.UpdateBaseImage.submitButton"
-                defaultMessage="Update"
-              />
-            </Button>
-            <Button variant="danger" onClick={onDelete}>
-              <FormattedMessage
-                id="forms.UpdateBaseImage.deleteButton"
-                defaultMessage="Delete"
-              />
-            </Button>
-          </Stack>
-        </div>
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
+          <Button variant="primary" type="submit" disabled={!canSubmit}>
+            {isLoading && <Spinner size="sm" className="me-2" />}
+            <FormattedMessage
+              id="forms.UpdateBaseImage.submitButton"
+              defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateBaseImage.resetButton"
+              defaultMessage="Reset"
+            />
+          </Button>
+          <Button variant="danger" onClick={onDelete}>
+            <FormattedMessage
+              id="forms.UpdateBaseImage.deleteButton"
+              defaultMessage="Delete"
+            />
+          </Button>
+        </Stack>
       </Stack>
     </form>
   );
 };
 
-export type { BaseImageData, BaseImageChanges };
+export type { BaseImageChanges };
 
 export default UpdateBaseImage;

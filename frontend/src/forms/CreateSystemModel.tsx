@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 import React, { useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -33,6 +34,20 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { systemModelHandleSchema, messages, yup } from "forms";
+
+import type { CreateSystemModel_OptionsFragment$key } from "api/__generated__/CreateSystemModel_OptionsFragment.graphql";
+
+const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
+  fragment CreateSystemModel_OptionsFragment on RootQueryType {
+    hardwareTypes {
+      id
+      name
+    }
+    tenantInfo {
+      defaultLocale
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -135,25 +150,23 @@ const initialData: FormData = {
   partNumbers: [{ value: "" }],
 };
 
-type HardwareTypeOption = {
-  id: string;
-  name: string;
-};
-
 type Props = {
-  hardwareTypes: HardwareTypeOption[];
-  locale: string;
+  optionsRef: CreateSystemModel_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: SystemModelChanges) => void;
 };
 
 const CreateSystemModelForm = ({
-  hardwareTypes,
-  locale,
+  optionsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
   const intl = useIntl();
+  const {
+    hardwareTypes,
+    tenantInfo: { defaultLocale: locale },
+  } = useFragment(CREATE_SYSTEM_MODEL_FRAGMENT, optionsRef);
+
   const {
     control,
     register,
@@ -291,12 +304,9 @@ const CreateSystemModelForm = ({
                       defaultMessage: "Select a Hardware Type",
                     })}
                   </option>
-                  {hardwareTypes.map((hardwareTypeOption) => (
-                    <option
-                      key={hardwareTypeOption.id}
-                      value={hardwareTypeOption.id}
-                    >
-                      {hardwareTypeOption.name}
+                  {hardwareTypes.map((hardwareType) => (
+                    <option key={hardwareType.id} value={hardwareType.id}>
+                      {hardwareType.name}
                     </option>
                   ))}
                 </Form.Select>

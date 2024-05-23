@@ -55,7 +55,9 @@ defmodule Edgehog.Astarte.Device.CellularConnection do
     # type Object Aggregrate.
     # For details, see https://github.com/astarte-platform/astarte/issues/630
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @status_interface, limit: 1) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @status_interface,
+             query: [limit: 1]
+           ) do
       modems = parse_status_data(data)
 
       {:ok, modems}

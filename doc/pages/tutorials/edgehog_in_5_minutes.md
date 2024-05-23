@@ -1,16 +1,20 @@
 <!---
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
 
 # Edgehog in 5 minutes
 
-## Prerequisite: setup your local Astarte instance
+## Prerequisites
 
-You need a working astarte instance for edgehog to connect to. If you don't already have one, the
-easiest way is by following the [Astarte in 5 minutes](https://docs.astarte-platform.org/astarte/latest/010-astarte_in_5_minutes.html)
-guide, up until the creation of a `test` realm.
+Edgehog interacts with devices through [Astarte](https://github.com/astarte-platform/astarte).
+While it's possible to run an instance of Edgehog without the local instance of Astarte for development purposes,
+it's recommended to setup Astarte locally for full functionality.
+
+### Setup your local Astarte instance
+
+The easiest way to setup local Astarte instance is to follow the [Astarte in 5 minutes](https://docs.astarte-platform.org/astarte/latest/010-astarte_in_5_minutes.html) guide, up until the creation of a `test` realm.
 
 To make sure your astarte instance is working and up to date, try running this command:
 
@@ -28,19 +32,26 @@ To setup edgehog, you must first clone a copy of edgehog locally
 $ git clone https://github.com/edgehog-device-manager/edgehog && cd edgehog
 ```
 
-You can then run edgehog with
+> If you just want to try out Edgehog without interacting with the device, run it without the Astarte instance:
+>
+> ```sh
+> $ docker compose \
+> $   -f docker-compose.yml \
+> $   -f docker-compose.without-astarte.yml \
+> $   up -d
+> ```
+>
+> Then jump to the [populate the database section](#populate-the-database-and-log-in-to-edgehog).
+
+Run Edgehog along with a local instance of Astarte with
 
 ```sh
-$ docker-compose up -d
+$ docker compose up -d
 ```
 
 Try navigating to `http://edgehog.localhost`: you should be presented with a login screen!
 
 ## Setup the environment
-
-> If you just want to try out Edgehog, you can jump to
-> [the next section](#populate-the-database-and-log-in-to-edgehog).
-> Astarte communication will not work this way though.
 
 Open the `.env` file in your favorite text editor.
 Here you can edit docker's variables to match your current environment.
@@ -78,7 +89,7 @@ $ astartectl utils gen-keypair acme
 Run this command to populate the database
 
 ```sh
-$ docker-compose exec edgehog-backend bin/edgehog eval Edgehog.Release.seed
+$ docker compose exec edgehog-backend bin/edgehog eval Edgehog.Release.seed
 ```
 
 This will create the tenant `acme-inc` and add a sample device to it.
@@ -87,7 +98,7 @@ This will create the tenant `acme-inc` and add a sample device to it.
 > If this happens, the easiest solution is to just recreate the edgehog volumes:
 >
 > ```sh
-> $ docker-compose down -v && docker-compose up -d
+> $ docker compose down -v && docker compose up -d
 > ```
 
 Nice! Now we have our tenant but we can't access to it yet, we need a token.
@@ -152,7 +163,7 @@ you should see the new device in the appropriate section.
 As with astarte, you can clean your environment by running
 
 ```sh
-$ docker-compose down
+$ docker compose down
 ```
 
 to stop all the running edgehog containers.

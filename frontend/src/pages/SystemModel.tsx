@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -29,12 +29,13 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
-import _ from "lodash";
 
-import type { SystemModel_getSystemModel_Query } from "api/__generated__/SystemModel_getSystemModel_Query.graphql";
+import type {
+  SystemModel_getSystemModel_Query,
+  SystemModel_getSystemModel_Query$data,
+} from "api/__generated__/SystemModel_getSystemModel_Query.graphql";
 import type { SystemModel_updateSystemModel_Mutation } from "api/__generated__/SystemModel_updateSystemModel_Mutation.graphql";
 import type { SystemModel_deleteSystemModel_Mutation } from "api/__generated__/SystemModel_deleteSystemModel_Mutation.graphql";
-import type { SystemModel_getDefaultTenantLocale_Query } from "api/__generated__/SystemModel_getDefaultTenantLocale_Query.graphql";
 import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
@@ -43,33 +44,17 @@ import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import UpdateSystemModelForm from "forms/UpdateSystemModel";
-import type {
-  SystemModelChanges,
-  SystemModelData,
-} from "forms/UpdateSystemModel";
+import type { SystemModelChanges } from "forms/UpdateSystemModel";
 
 const GET_SYSTEM_MODEL_QUERY = graphql`
-  query SystemModel_getSystemModel_Query($id: ID!) {
-    systemModel(id: $id) {
+  query SystemModel_getSystemModel_Query($systemModelId: ID!) {
+    systemModel(id: $systemModelId) {
       id
       name
       handle
-      description
-      hardwareType {
-        id
-        name
-      }
-      partNumbers
-      pictureUrl
+      ...UpdateSystemModel_SystemModelFragment
     }
-  }
-`;
-
-const GET_DEFAULT_TENANT_LOCALE_QUERY = graphql`
-  query SystemModel_getDefaultTenantLocale_Query {
-    tenantInfo {
-      defaultLocale
-    }
+    ...UpdateSystemModel_OptionsFragment
   }
 `;
 
@@ -82,13 +67,7 @@ const UPDATE_SYSTEM_MODEL_MUTATION = graphql`
         id
         name
         handle
-        description
-        hardwareType {
-          id
-          name
-        }
-        partNumbers
-        pictureUrl
+        ...UpdateSystemModel_SystemModelFragment
       }
     }
   }
@@ -106,81 +85,32 @@ const DELETE_SYSTEM_MODEL_MUTATION = graphql`
   }
 `;
 
-const systemModelDiff = (a1: SystemModelData, a2: SystemModelChanges) => {
-  const diff: Partial<SystemModelChanges> = {};
-  if (a1.name !== a2.name) {
-    diff.name = a2.name;
-  }
-  if (a1.handle !== a2.handle) {
-    diff.handle = a2.handle;
-  }
-  if (!_.isEqual(a1.partNumbers, a2.partNumbers)) {
-    diff.partNumbers = a2.partNumbers;
-  }
-  // TODO: update when backend implement support for updates with empty text value
-  if (a1.description !== null || a2.description.text !== "") {
-    diff.description = a2.description;
-  }
-  if ("pictureFile" in a2 && a2.pictureFile) {
-    diff.pictureFile = a2.pictureFile;
-  } else if (!_.isEqual(a1.pictureUrl, a2.pictureUrl)) {
-    diff.pictureUrl = a2.pictureUrl;
-  }
-  return diff;
+type SystemModelContentProps = {
+  systemModel: NonNullable<
+    SystemModel_getSystemModel_Query$data["systemModel"]
+  >;
+  queryRef: SystemModel_getSystemModel_Query$data;
 };
 
-interface SystemModelContentProps {
-  getSystemModelQuery: PreloadedQuery<SystemModel_getSystemModel_Query>;
-  getDefaultTenantLocaleQuery: PreloadedQuery<SystemModel_getDefaultTenantLocale_Query>;
-}
-
 const SystemModelContent = ({
-  getSystemModelQuery,
-  getDefaultTenantLocaleQuery,
+  queryRef,
+  systemModel,
 }: SystemModelContentProps) => {
   const navigate = useNavigate();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const systemModelData = usePreloadedQuery(
-    GET_SYSTEM_MODEL_QUERY,
-    getSystemModelQuery,
-  );
-  const defaultLocaleData = usePreloadedQuery(
-    GET_DEFAULT_TENANT_LOCALE_QUERY,
-    getDefaultTenantLocaleQuery,
-  );
+  const systemModelId = systemModel.id;
 
   const [updateSystemModel, isUpdatingSystemModel] =
     useMutation<SystemModel_updateSystemModel_Mutation>(
       UPDATE_SYSTEM_MODEL_MUTATION,
     );
 
-  // TODO: handle readonly type without mapping to mutable type
-  const systemModel = useMemo(() => {
-    const systemModel = systemModelData.systemModel;
-    if (!systemModel) {
-      return null;
-    }
-    return {
-      ...systemModel,
-      hardwareType: { ...systemModel.hardwareType },
-      partNumbers: [...systemModel.partNumbers],
-    };
-  }, [systemModelData.systemModel]);
-
-  const locale = useMemo(
-    () => defaultLocaleData.tenantInfo.defaultLocale,
-    [defaultLocaleData],
-  );
-
   const handleUpdateSystemModel = useCallback(
     (systemModelChanges: SystemModelChanges) => {
-      if (!systemModel) {
-        return null;
-      }
       const input = {
         systemModelId: systemModel.id,
-        ...systemModelDiff(systemModel, systemModelChanges),
+        ...systemModelChanges,
       };
       updateSystemModel({
         variables: { input },
@@ -191,6 +121,9 @@ const SystemModelContent = ({
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
+          if (data.updateSystemModel) {
+            return setErrorFeedback(null);
+          }
         },
         onError() {
           setErrorFeedback(
@@ -199,21 +132,6 @@ const SystemModelContent = ({
               defaultMessage="Could not update the system model, please try again."
             />,
           );
-        },
-        optimisticResponse: {
-          updateSystemModel: {
-            systemModel: {
-              ...systemModel,
-              ..._.pick(input, ["name", "handle", "partNumbers"]),
-              description: input.description?.text ?? systemModel.description,
-              pictureUrl:
-                input.pictureFile instanceof File
-                  ? URL.createObjectURL(input.pictureFile)
-                  : _.isString(input.pictureUrl) || _.isNull(input.pictureUrl)
-                  ? input.pictureUrl
-                  : systemModel.pictureUrl,
-            },
-          },
         },
         updater(store, data) {
           if (!data.updateSystemModel || !input.partNumbers) {
@@ -250,23 +168,20 @@ const SystemModelContent = ({
     );
 
   const handleDeleteSystemModel = useCallback(() => {
-    if (!systemModel) {
-      return null;
-    }
-    const input = {
-      systemModelId: systemModel.id,
-    };
+    const input = { systemModelId };
     deleteSystemModel({
       variables: { input },
       onCompleted(data, errors) {
+        if (data.deleteSystemModel) {
+          return navigate({ route: Route.systemModels });
+        }
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)
             .join(". \n");
           setErrorFeedback(errorFeedback);
-          return setShowDeleteModal(false);
+          setShowDeleteModal(false);
         }
-        navigate({ route: Route.systemModels });
       },
       onError() {
         setErrorFeedback(
@@ -281,10 +196,7 @@ const SystemModelContent = ({
           return;
         }
 
-        const systemModel = store
-          .getRootField("deleteSystemModel")
-          .getLinkedRecord("systemModel");
-        const systemModelId = systemModel.getDataID();
+        const systemModelId = data.deleteSystemModel.systemModel.id;
         const root = store.getRoot();
 
         const systemModels = root.getLinkedRecords("systemModels");
@@ -307,27 +219,7 @@ const SystemModelContent = ({
         store.delete(systemModelId);
       },
     });
-  }, [deleteSystemModel, systemModel, navigate]);
-
-  if (!systemModel) {
-    return (
-      <Result.NotFound
-        title={
-          <FormattedMessage
-            id="pages.SystemModel.systemModelNotFound.title"
-            defaultMessage="System model not found."
-          />
-        }
-      >
-        <Link route={Route.systemModels}>
-          <FormattedMessage
-            id="pages.SystemModel.systemModelNotFound.message"
-            defaultMessage="Return to the system model list."
-          />
-        </Link>
-      </Result.NotFound>
-    );
-  }
+  }, [deleteSystemModel, systemModelId, navigate]);
 
   return (
     <Page>
@@ -342,8 +234,8 @@ const SystemModelContent = ({
           {errorFeedback}
         </Alert>
         <UpdateSystemModelForm
-          initialData={systemModel}
-          locale={locale}
+          systemModelRef={systemModel}
+          optionsRef={queryRef}
           onSubmit={handleUpdateSystemModel}
           onDelete={handleShowDeleteModal}
           isLoading={isUpdatingSystemModel}
@@ -380,20 +272,58 @@ const SystemModelContent = ({
   );
 };
 
+type SystemModelWrapperProps = {
+  getSystemModelQuery: PreloadedQuery<SystemModel_getSystemModel_Query>;
+};
+
+const SystemModelWrapper = ({
+  getSystemModelQuery,
+}: SystemModelWrapperProps) => {
+  const queryData = usePreloadedQuery(
+    GET_SYSTEM_MODEL_QUERY,
+    getSystemModelQuery,
+  );
+
+  if (!queryData.systemModel) {
+    return (
+      <Result.NotFound
+        title={
+          <FormattedMessage
+            id="pages.SystemModel.systemModelNotFound.title"
+            defaultMessage="System model not found."
+          />
+        }
+      >
+        <Link route={Route.systemModels}>
+          <FormattedMessage
+            id="pages.SystemModel.systemModelNotFound.message"
+            defaultMessage="Return to the system model list."
+          />
+        </Link>
+      </Result.NotFound>
+    );
+  }
+
+  return (
+    <SystemModelContent
+      systemModel={queryData.systemModel}
+      queryRef={queryData}
+    />
+  );
+};
+
 const SystemModelPage = () => {
   const { systemModelId = "" } = useParams();
 
   const [getSystemModelQuery, getSystemModel] =
     useQueryLoader<SystemModel_getSystemModel_Query>(GET_SYSTEM_MODEL_QUERY);
-  const [getDefaultTenantLocaleQuery, getDefaultTenantLocale] =
-    useQueryLoader<SystemModel_getDefaultTenantLocale_Query>(
-      GET_DEFAULT_TENANT_LOCALE_QUERY,
-    );
 
-  useEffect(() => getDefaultTenantLocale({}), [getDefaultTenantLocale]);
-  useEffect(() => {
-    getSystemModel({ id: systemModelId });
-  }, [getSystemModel, systemModelId]);
+  const fetchSystemModel = useCallback(
+    () => getSystemModel({ systemModelId }, { fetchPolicy: "network-only" }),
+    [getSystemModel, systemModelId],
+  );
+
+  useEffect(fetchSystemModel, [fetchSystemModel]);
 
   return (
     <Suspense
@@ -409,15 +339,10 @@ const SystemModelPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => {
-          getSystemModel({ id: systemModelId });
-        }}
+        onReset={fetchSystemModel}
       >
-        {getSystemModelQuery && getDefaultTenantLocaleQuery && (
-          <SystemModelContent
-            getSystemModelQuery={getSystemModelQuery}
-            getDefaultTenantLocaleQuery={getDefaultTenantLocaleQuery}
-          />
+        {getSystemModelQuery && (
+          <SystemModelWrapper getSystemModelQuery={getSystemModelQuery} />
         )}
       </ErrorBoundary>
     </Suspense>
