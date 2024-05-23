@@ -53,6 +53,12 @@
   "Device.osInfo.version": {
     "defaultMessage": "OS version"
   },
+  "Device.remoteTerminal.label": {
+    "defaultMessage": "Remote Terminal"
+  },
+  "Device.remoteTerminal.openTerminalButton": {
+    "defaultMessage": "Open"
+  },
   "Device.runtimeInfo.environment": {
     "defaultMessage": "Environment"
   },
@@ -1019,6 +1025,10 @@
   },
   "pages.Device.location.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
+  },
+  "pages.Device.openRemoteTerminalErrorFeedback": {
+    "defaultMessage": "Could not access the remote terminal, please try again.",
+    "description": "Feedback for unknown error while opening a remote terminal session"
   },
   "pages.Device.osInfoTab": {
     "defaultMessage": "Operating System"
