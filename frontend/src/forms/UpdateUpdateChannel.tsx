@@ -234,6 +234,7 @@ const UpdateUpdateChannel = ({
     onSubmit(transformOutputData(data));
 
   const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -304,12 +305,26 @@ const UpdateUpdateChannel = ({
             )}
           </Form.Control.Feedback>
         </FormRow>
-        <div className="d-flex justify-content-end align-items-center gap-2">
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
           <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
               id="forms.UpdateUpdateChannel.submitButton"
               defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateUpdateChannel.resetButton"
+              defaultMessage="Reset"
             />
           </Button>
           <Button variant="danger" onClick={onDelete}>
@@ -318,7 +333,7 @@ const UpdateUpdateChannel = ({
               defaultMessage="Delete"
             />
           </Button>
-        </div>
+        </Stack>
       </Stack>
     </form>
   );

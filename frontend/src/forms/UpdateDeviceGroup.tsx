@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,7 +31,7 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { deviceGroupHandleSchema, yup } from "forms";
-import { graphql, useFragment } from "react-relay/hooks";
+
 import type { UpdateDeviceGroup_DeviceGroupFragment$key } from "api/__generated__/UpdateDeviceGroup_DeviceGroupFragment.graphql";
 
 const UPDATE_DEVICE_GROUP_FRAGMENT = graphql`
@@ -85,20 +86,35 @@ const UpdateDeviceGroupForm = ({
   onSubmit,
   onDelete,
 }: Props) => {
-  const deviceGroupData = useFragment(
+  const { name, handle, selector } = useFragment(
     UPDATE_DEVICE_GROUP_FRAGMENT,
     deviceGroupRef,
   );
 
+  const defaultValues = useMemo(
+    () => ({ name, handle, selector }),
+    [name, handle, selector],
+  );
+
   const {
     register,
+    reset,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<DeviceGroupData>({
     mode: "onTouched",
-    defaultValues: deviceGroupData,
+    defaultValues,
     resolver: yupResolver(deviceGroupSchema),
   });
+
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (prevDefaultValues !== defaultValues) {
+    reset(defaultValues);
+    setPrevDefaultValues(defaultValues);
+  }
+
+  const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -107,7 +123,7 @@ const UpdateDeviceGroupForm = ({
           id="device-group-form-name"
           label={
             <FormattedMessage
-              id="components.UpdateDeviceGroupForm.nameLabel"
+              id="forms.UpdateDeviceGroup.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -123,7 +139,7 @@ const UpdateDeviceGroupForm = ({
           id="device-group-form-handle"
           label={
             <FormattedMessage
-              id="components.UpdateDeviceGroupForm.handleLabel"
+              id="forms.UpdateDeviceGroup.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -139,7 +155,7 @@ const UpdateDeviceGroupForm = ({
           id="device-group-form-selector"
           label={
             <FormattedMessage
-              id="components.UpdateDeviceGroupForm.selectorLabel"
+              id="forms.UpdateDeviceGroup.selectorLabel"
               defaultMessage="Selector"
             />
           }
@@ -155,21 +171,35 @@ const UpdateDeviceGroupForm = ({
             )}
           </Form.Control.Feedback>
         </FormRow>
-        <div className="d-flex justify-content-end align-items-center gap-2">
-          <Button variant="primary" type="submit" disabled={isLoading}>
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
+          <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.UpdateDeviceGroupForm.submitButton"
+              id="forms.UpdateDeviceGroup.submitButton"
               defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateDeviceGroup.resetButton"
+              defaultMessage="Reset"
             />
           </Button>
           <Button variant="danger" onClick={onDelete}>
             <FormattedMessage
-              id="components.UpdateDeviceGroupForm.deleteButton"
+              id="forms.UpdateDeviceGroup.deleteButton"
               defaultMessage="Delete"
             />
           </Button>
-        </div>
+        </Stack>
       </Stack>
     </form>
   );

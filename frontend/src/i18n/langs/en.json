@@ -464,21 +464,6 @@
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
   },
-  "components.UpdateBaseImageCollection.deleteButton": {
-    "defaultMessage": "Delete"
-  },
-  "components.UpdateBaseImageCollection.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.UpdateBaseImageCollection.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.UpdateBaseImageCollection.submitButton": {
-    "defaultMessage": "Update"
-  },
-  "components.UpdateBaseImageCollection.systemModelLabel": {
-    "defaultMessage": "System Model"
-  },
   "components.UpdateCampaignOutcome.Failure": {
     "defaultMessage": "Failure"
   },
@@ -527,63 +512,6 @@
   "components.UpdateChannelsTable.targetGroupsTitle": {
     "defaultMessage": "Target Groups",
     "description": "Title for the Target Groups column of the update channels table"
-  },
-  "components.UpdateDeviceGroupForm.deleteButton": {
-    "defaultMessage": "Delete"
-  },
-  "components.UpdateDeviceGroupForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.UpdateDeviceGroupForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.UpdateDeviceGroupForm.selectorLabel": {
-    "defaultMessage": "Selector"
-  },
-  "components.UpdateDeviceGroupForm.submitButton": {
-    "defaultMessage": "Update"
-  },
-  "components.UpdateHardwareTypeForm.addPartNumberButton": {
-    "defaultMessage": "Add Part Number"
-  },
-  "components.UpdateHardwareTypeForm.deleteButton": {
-    "defaultMessage": "Delete"
-  },
-  "components.UpdateHardwareTypeForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.UpdateHardwareTypeForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.UpdateHardwareTypeForm.partNumbersLabel": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.UpdateHardwareTypeForm.submitButton": {
-    "defaultMessage": "Update"
-  },
-  "components.UpdateSystemModelForm.addPartNumberButton": {
-    "defaultMessage": "Add part number"
-  },
-  "components.UpdateSystemModelForm.deleteButton": {
-    "defaultMessage": "Delete"
-  },
-  "components.UpdateSystemModelForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.UpdateSystemModelForm.hardwareTypeLabel": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.UpdateSystemModelForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.UpdateSystemModelForm.partNumbersLabel": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.UpdateSystemModelForm.resetButton": {
-    "defaultMessage": "Reset"
-  },
-  "components.UpdateSystemModelForm.submitButton": {
-    "defaultMessage": "Update"
   },
   "components.UpdateTargetsTable.completionTimestampTitle": {
     "defaultMessage": "Completed at",
@@ -793,6 +721,9 @@
   "forms.UpdateBaseImage.releaseDisplayNameLabel": {
     "defaultMessage": "Release Display Name"
   },
+  "forms.UpdateBaseImage.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.UpdateBaseImage.starting-version-requirementLabel": {
     "defaultMessage": "Supported starting versions"
   },
@@ -801,6 +732,24 @@
   },
   "forms.UpdateBaseImage.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "forms.UpdateBaseImageCollection.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateBaseImageCollection.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateBaseImageCollection.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateBaseImageCollection.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateBaseImageCollection.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "forms.UpdateBaseImageCollection.systemModelLabel": {
+    "defaultMessage": "System Model"
   },
   "forms.UpdateCampaignForm.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -832,6 +781,72 @@
   "forms.UpdateCampaignForm.updateChannelLabel": {
     "defaultMessage": "Update Channel"
   },
+  "forms.UpdateDeviceGroup.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateDeviceGroup.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateDeviceGroup.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateDeviceGroup.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateDeviceGroup.selectorLabel": {
+    "defaultMessage": "Selector"
+  },
+  "forms.UpdateDeviceGroup.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "forms.UpdateHardwareType.addPartNumberButton": {
+    "defaultMessage": "Add Part Number"
+  },
+  "forms.UpdateHardwareType.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateHardwareType.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateHardwareType.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateHardwareType.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "forms.UpdateHardwareType.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateHardwareType.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "forms.UpdateSystemModel.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "forms.UpdateSystemModel.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateSystemModel.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "forms.UpdateSystemModel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateSystemModel.hardwareTypeLabel": {
+    "defaultMessage": "Hardware Type"
+  },
+  "forms.UpdateSystemModel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateSystemModel.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "forms.UpdateSystemModel.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateSystemModel.submitButton": {
+    "defaultMessage": "Update"
+  },
   "forms.UpdateUpdateChannel.deleteButton": {
     "defaultMessage": "Delete"
   },
@@ -840,6 +855,9 @@
   },
   "forms.UpdateUpdateChannel.nameLabel": {
     "defaultMessage": "Name"
+  },
+  "forms.UpdateUpdateChannel.resetButton": {
+    "defaultMessage": "Reset"
   },
   "forms.UpdateUpdateChannel.submitButton": {
     "defaultMessage": "Update"
