@@ -130,13 +130,13 @@ $ cd tools && pip install -r requirements.txt
 Now you can generate the login token with
 
 ```sh
-$ ./gen-edgehog-jwt -k ../acme_private.pem
+$ ./gen-edgehog-jwt -t tenant -k ../acme_private.pem
 ```
 
 > If in the previous section you had decided not to use a custom key, use this command instead
 >
 > ```sh
-> $ ./gen-edgehog-jwt -k ../backend/priv/repo/seeds/keys/tenant_private.pem
+> $ ./gen-edgehog-jwt -t tenant -k ../backend/priv/repo/seeds/keys/tenant_private.pem
 > ```
 
 You can finally navigate to `http://edgehog.localhost` in your browser and login to the
