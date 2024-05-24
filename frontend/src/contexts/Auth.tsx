@@ -54,8 +54,9 @@ function saveAuthConfig(
 ): void {
   // If expires is undefined, closing the browser/session will delete the cookie
   const cookieOptions = {
-    secure: true,
+    secure: window.location.protocol === "https:",
     expires: persistConfig ? 365 : undefined,
+    sameSite: "strict",
   } as const;
 
   if (!authConfig) {

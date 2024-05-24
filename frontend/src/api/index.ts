@@ -32,6 +32,15 @@ const applicationMetatag: HTMLElement = document.head.querySelector(
 const backendUrl =
   applicationMetatag.dataset?.backendUrl || "http://localhost:4000";
 
+try {
+  new URL(backendUrl);
+} catch {
+  console.error(
+    `An invalid Edgehog backend API base URL has been specified.
+Please ensure that the 'BACKEND_URL' environment variable contains schema, e.g. 'https://api.edgehog.localhost'`,
+  );
+}
+
 const fetchGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense, useEffect, useCallback } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -36,13 +36,7 @@ import { Link, Route } from "Navigation";
 const GET_SYSTEM_MODELS_QUERY = graphql`
   query SystemModels_getSystemModels_Query {
     systemModels {
-      id
-      handle
-      name
-      hardwareType {
-        name
-      }
-      partNumbers
+      ...SystemModelsTable_SystemModelsFragment
     }
   }
 `;
@@ -54,19 +48,9 @@ type SystemModelsContentProps = {
 const SystemModelsContent = ({
   getSystemModelsQuery,
 }: SystemModelsContentProps) => {
-  const systemModelsData = usePreloadedQuery(
+  const { systemModels } = usePreloadedQuery(
     GET_SYSTEM_MODELS_QUERY,
     getSystemModelsQuery,
-  );
-
-  // TODO: handle readonly type without mapping to mutable type
-  const systemModels = useMemo(
-    () =>
-      systemModelsData.systemModels.map((systemModel) => ({
-        ...systemModel,
-        partNumbers: [...systemModel.partNumbers],
-      })),
-    [systemModelsData],
   );
 
   return (
@@ -102,7 +86,7 @@ const SystemModelsContent = ({
             />
           </Result.EmptyList>
         ) : (
-          <SystemModelsTable data={systemModels} />
+          <SystemModelsTable systemModelsRef={systemModels} />
         )}
       </Page.Main>
     </Page>
@@ -113,7 +97,12 @@ const SystemModelsPage = () => {
   const [getSystemModelsQuery, getSystemModels] =
     useQueryLoader<SystemModels_getSystemModels_Query>(GET_SYSTEM_MODELS_QUERY);
 
-  useEffect(() => getSystemModels({}), [getSystemModels]);
+  const fetchSystemModels = useCallback(
+    () => getSystemModels({}, { fetchPolicy: "store-and-network" }),
+    [getSystemModels],
+  );
+
+  useEffect(fetchSystemModels, [fetchSystemModels]);
 
   return (
     <Suspense
@@ -129,7 +118,7 @@ const SystemModelsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => getSystemModels({})}
+        onReset={fetchSystemModels}
       >
         {getSystemModelsQuery && (
           <SystemModelsContent getSystemModelsQuery={getSystemModelsQuery} />

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 import React, { useCallback, useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useIntl, FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -31,6 +32,44 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { updateChannelHandleSchema, yup, messages } from "forms";
+
+import type {
+  UpdateUpdateChannel_UpdateChannelFragment$key,
+  UpdateUpdateChannel_UpdateChannelFragment$data,
+} from "api/__generated__/UpdateUpdateChannel_UpdateChannelFragment.graphql";
+import type {
+  UpdateUpdateChannel_OptionsFragment$key,
+  UpdateUpdateChannel_OptionsFragment$data,
+} from "api/__generated__/UpdateUpdateChannel_OptionsFragment.graphql";
+
+const UPDATE_UPDATE_CHANNEL_FRAGMENT = graphql`
+  fragment UpdateUpdateChannel_UpdateChannelFragment on UpdateChannel {
+    id
+    name
+    handle
+    targetGroups {
+      id
+      name
+      updateChannel {
+        id
+        name
+      }
+    }
+  }
+`;
+
+const UPDATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
+  fragment UpdateUpdateChannel_OptionsFragment on RootQueryType {
+    deviceGroups {
+      id
+      name
+      updateChannel {
+        id
+        name
+      }
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -69,23 +108,14 @@ const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
   return null;
 };
 
-type TargetGroup = {
-  readonly id: string;
-  readonly name: string;
-  readonly updateChannel: {
-    readonly id: string;
-    readonly name: string;
-  } | null;
-};
+type UpdateChannel = Omit<
+  UpdateUpdateChannel_UpdateChannelFragment$data,
+  " $fragmentType"
+>;
+type TargetGroup =
+  UpdateUpdateChannel_OptionsFragment$data["deviceGroups"][number];
 
 const getTargetGroupValue = (targetGroup: TargetGroup) => targetGroup.id;
-
-type UpdateChannel = {
-  id: string;
-  name: string;
-  handle: string;
-  targetGroups: readonly TargetGroup[];
-};
 
 type UpdateChannelData = {
   name: string;
@@ -111,20 +141,30 @@ const transformOutputData = ({
 });
 
 type Props = {
-  updateChannel: UpdateChannel;
-  targetGroups: readonly TargetGroup[];
+  updateChannelRef: UpdateUpdateChannel_UpdateChannelFragment$key;
+  optionsRef: UpdateUpdateChannel_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: UpdateChannelData) => void;
   onDelete: () => void;
 };
 
 const UpdateUpdateChannel = ({
-  updateChannel,
+  updateChannelRef,
+  optionsRef,
   isLoading = false,
-  targetGroups,
   onSubmit,
   onDelete,
 }: Props) => {
+  const updateChannel = useFragment(
+    UPDATE_UPDATE_CHANNEL_FRAGMENT,
+    updateChannelRef,
+  );
+
+  const { deviceGroups: targetGroups } = useFragment(
+    UPDATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT,
+    optionsRef,
+  );
+
   const {
     register,
     handleSubmit,
@@ -137,9 +177,7 @@ const UpdateUpdateChannel = ({
     resolver: yupResolver(updateChannelSchema),
   });
 
-  useEffect(() => {
-    reset(updateChannel);
-  }, [reset, updateChannel]);
+  useEffect(() => reset(updateChannel), [reset, updateChannel]);
 
   const intl = useIntl();
 
@@ -196,6 +234,7 @@ const UpdateUpdateChannel = ({
     onSubmit(transformOutputData(data));
 
   const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -266,12 +305,26 @@ const UpdateUpdateChannel = ({
             )}
           </Form.Control.Feedback>
         </FormRow>
-        <div className="d-flex justify-content-end align-items-center gap-2">
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
           <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
               id="forms.UpdateUpdateChannel.submitButton"
               defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateUpdateChannel.resetButton"
+              defaultMessage="Reset"
             />
           </Button>
           <Button variant="danger" onClick={onDelete}>
@@ -280,7 +333,7 @@ const UpdateUpdateChannel = ({
               defaultMessage="Delete"
             />
           </Button>
-        </div>
+        </Stack>
       </Stack>
     </form>
   );

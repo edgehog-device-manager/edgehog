@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -29,9 +29,11 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
-import _ from "lodash";
 
-import type { DeviceGroup_getDeviceGroup_Query } from "api/__generated__/DeviceGroup_getDeviceGroup_Query.graphql";
+import type {
+  DeviceGroup_getDeviceGroup_Query,
+  DeviceGroup_getDeviceGroup_Query$data,
+} from "api/__generated__/DeviceGroup_getDeviceGroup_Query.graphql";
 import type { DeviceGroup_updateDeviceGroup_Mutation } from "api/__generated__/DeviceGroup_updateDeviceGroup_Mutation.graphql";
 import type { DeviceGroup_deleteDeviceGroup_Mutation } from "api/__generated__/DeviceGroup_deleteDeviceGroup_Mutation.graphql";
 import { Link, Route, useNavigate } from "Navigation";
@@ -46,12 +48,12 @@ import UpdateDeviceGroupForm from "forms/UpdateDeviceGroup";
 import type { DeviceGroupData } from "forms/UpdateDeviceGroup";
 
 const GET_DEVICE_GROUP_QUERY = graphql`
-  query DeviceGroup_getDeviceGroup_Query($id: ID!) {
-    deviceGroup(id: $id) {
+  query DeviceGroup_getDeviceGroup_Query($deviceGroupId: ID!) {
+    deviceGroup(id: $deviceGroupId) {
       id
       name
       handle
-      selector
+      ...UpdateDeviceGroup_DeviceGroupFragment
       devices {
         ...DevicesTable_DeviceFragment
       }
@@ -65,10 +67,9 @@ const UPDATE_DEVICE_GROUP_MUTATION = graphql`
   ) {
     updateDeviceGroup(input: $input) {
       deviceGroup {
-        id
         name
         handle
-        selector
+        ...UpdateDeviceGroup_DeviceGroupFragment
         devices {
           ...DevicesTable_DeviceFragment
         }
@@ -90,21 +91,17 @@ const DELETE_DEVICE_GROUP_MUTATION = graphql`
 `;
 
 interface DeviceGroupContentProps {
-  getDeviceGroupQuery: PreloadedQuery<DeviceGroup_getDeviceGroup_Query>;
+  deviceGroup: NonNullable<
+    DeviceGroup_getDeviceGroup_Query$data["deviceGroup"]
+  >;
 }
 
-const DeviceGroupContent = ({
-  getDeviceGroupQuery,
-}: DeviceGroupContentProps) => {
-  const { deviceGroupId = "" } = useParams();
+const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const deviceGroupData = usePreloadedQuery(
-    GET_DEVICE_GROUP_QUERY,
-    getDeviceGroupQuery,
-  );
+  const deviceGroupId = deviceGroup.id;
 
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
@@ -116,12 +113,13 @@ const DeviceGroupContent = ({
     );
 
   const handleDeleteDeviceGroup = useCallback(() => {
-    const input = {
-      deviceGroupId,
-    };
+    const input = { deviceGroupId };
     deleteDeviceGroup({
       variables: { input },
       onCompleted(data, errors) {
+        if (data.deleteDeviceGroup) {
+          return navigate({ route: Route.deviceGroups });
+        }
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)
@@ -129,7 +127,6 @@ const DeviceGroupContent = ({
           setErrorFeedback(errorFeedback);
           return setShowDeleteModal(false);
         }
-        navigate({ route: Route.deviceGroups });
       },
       onError() {
         setErrorFeedback(
@@ -184,12 +181,6 @@ const DeviceGroupContent = ({
       UPDATE_DEVICE_GROUP_MUTATION,
     );
 
-  // TODO: handle readonly type without mapping to mutable type
-  const deviceGroup = useMemo(
-    () => deviceGroupData.deviceGroup && { ...deviceGroupData.deviceGroup },
-    [deviceGroupData.deviceGroup],
-  );
-
   const handleUpdateDeviceGroup = useCallback(
     (deviceGroup: DeviceGroupData) => {
       const input = {
@@ -205,7 +196,9 @@ const DeviceGroupContent = ({
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          setErrorFeedback(null);
+          if (data.updateDeviceGroup) {
+            return setErrorFeedback(null);
+          }
         },
         onError() {
           setErrorFeedback(
@@ -269,26 +262,6 @@ const DeviceGroupContent = ({
     [updateDeviceGroup, deviceGroupId],
   );
 
-  if (!deviceGroup) {
-    return (
-      <Result.NotFound
-        title={
-          <FormattedMessage
-            id="pages.DeviceGroup.deviceGroupNotFound.title"
-            defaultMessage="Group not found."
-          />
-        }
-      >
-        <Link route={Route.deviceGroups}>
-          <FormattedMessage
-            id="pages.DeviceGroup.deviceGroupNotFound.message"
-            defaultMessage="Return to the group list."
-          />
-        </Link>
-      </Result.NotFound>
-    );
-  }
-
   return (
     <Page>
       <Page.Header title={deviceGroup.name} />
@@ -303,7 +276,7 @@ const DeviceGroupContent = ({
         </Alert>
         <div className="mb-3">
           <UpdateDeviceGroupForm
-            initialData={_.pick(deviceGroup, ["name", "handle", "selector"])}
+            deviceGroupRef={deviceGroup}
             onSubmit={handleUpdateDeviceGroup}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingDeviceGroup}
@@ -342,15 +315,53 @@ const DeviceGroupContent = ({
   );
 };
 
+type DeviceGroupWrapperProps = {
+  getDeviceGroupQuery: PreloadedQuery<DeviceGroup_getDeviceGroup_Query>;
+};
+
+const DeviceGroupWrapper = ({
+  getDeviceGroupQuery,
+}: DeviceGroupWrapperProps) => {
+  const { deviceGroup } = usePreloadedQuery(
+    GET_DEVICE_GROUP_QUERY,
+    getDeviceGroupQuery,
+  );
+
+  if (!deviceGroup) {
+    return (
+      <Result.NotFound
+        title={
+          <FormattedMessage
+            id="pages.DeviceGroup.deviceGroupNotFound.title"
+            defaultMessage="Group not found."
+          />
+        }
+      >
+        <Link route={Route.deviceGroups}>
+          <FormattedMessage
+            id="pages.DeviceGroup.deviceGroupNotFound.message"
+            defaultMessage="Return to the group list."
+          />
+        </Link>
+      </Result.NotFound>
+    );
+  }
+
+  return <DeviceGroupContent deviceGroup={deviceGroup} />;
+};
+
 const DeviceGroupPage = () => {
   const { deviceGroupId = "" } = useParams();
 
   const [getDeviceGroupQuery, getDeviceGroup] =
     useQueryLoader<DeviceGroup_getDeviceGroup_Query>(GET_DEVICE_GROUP_QUERY);
 
-  useEffect(() => {
-    getDeviceGroup({ id: deviceGroupId });
-  }, [getDeviceGroup, deviceGroupId]);
+  const fetchDeviceGroup = useCallback(
+    () => getDeviceGroup({ deviceGroupId }, { fetchPolicy: "network-only" }),
+    [getDeviceGroup, deviceGroupId],
+  );
+
+  useEffect(fetchDeviceGroup, [fetchDeviceGroup]);
 
   return (
     <Suspense
@@ -366,12 +377,10 @@ const DeviceGroupPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={() => {
-          getDeviceGroup({ id: deviceGroupId });
-        }}
+        onReset={fetchDeviceGroup}
       >
         {getDeviceGroupQuery && (
-          <DeviceGroupContent getDeviceGroupQuery={getDeviceGroupQuery} />
+          <DeviceGroupWrapper getDeviceGroupQuery={getDeviceGroupQuery} />
         )}
       </ErrorBoundary>
     </Suspense>

@@ -46,6 +46,9 @@ services:
       URL_HOST: edgehog-backend
       URL_PORT: 4000
       URL_SCHEME: http
+      EDGEHOG_FORWARDER_HOSTNAME: device-forwarder.edgehog.localhost
+      EDGEHOG_FORWARDER_PORT: 80
+      EDGEHOG_FORWARDER_SECURE_SESSIONS: false
     restart: on-failure
     volumes:
       - type: bind
@@ -78,6 +81,21 @@ services:
       - "traefik.http.routers.edgehog-frontend.entrypoints=web"
       - "traefik.http.routers.edgehog-frontend.service=edgehog-frontend"
       - "traefik.http.services.edgehog-frontend.loadbalancer.server.port=80"
+
+  edgehog-device-forwarder:
+    image: edgehogdevicemanager/edgehog-device-forwarder:snapshot
+    environment:
+      RELEASE_NAME: edgehog-device-forwarder
+      SECRET_KEY_BASE: fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
+      PORT: 4001
+      PHX_HOST:  device-forwarder.edgehog.localhost
+    restart: on-failure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.edgehog-device-forwarder.rule=Host(`device-forwarder.edgehog.localhost`)"
+      - "traefik.http.routers.edgehog-device-forwarder.entrypoints=web"
+      - "traefik.http.routers.edgehog-device-forwarder.service=edgehog-device-forwarder"
+      - "traefik.http.services.edgehog-device-forwarder.loadbalancer.server.port=4001"
 
   minio:
     image: minio/minio:RELEASE.2023-01-18T04-36-38Z

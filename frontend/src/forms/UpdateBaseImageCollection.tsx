@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import Button from "components/Button";
@@ -30,6 +31,18 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { baseImageCollectionHandleSchema, yup } from "forms";
+
+import type { UpdateBaseImageCollection_SystemModelFragment$key } from "api/__generated__/UpdateBaseImageCollection_SystemModelFragment.graphql";
+
+const UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
+  fragment UpdateBaseImageCollection_SystemModelFragment on BaseImageCollection {
+    name
+    handle
+    systemModel {
+      name
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -51,14 +64,6 @@ const FormRow = ({
 type BaseImageCollectionData = {
   name: string;
   handle: string;
-  systemModel: {
-    name: string;
-  } | null;
-};
-
-type FormData = {
-  name: string;
-  handle: string;
   systemModel: string;
 };
 
@@ -75,45 +80,62 @@ const baseImageCollectionSchema = yup
   })
   .required();
 
-const transformInputData = (data: BaseImageCollectionData): FormData => ({
-  ...data,
-  systemModel: data.systemModel?.name || "",
-});
-
 const transformOutputData = ({
   name,
   handle,
-}: FormData): BaseImageCollectionChanges => ({
+}: BaseImageCollectionData): BaseImageCollectionChanges => ({
   name,
   handle,
 });
 
 type Props = {
-  initialData: BaseImageCollectionData;
+  baseImageCollectionRef: UpdateBaseImageCollection_SystemModelFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionChanges) => void;
   onDelete: () => void;
 };
 
 const UpdateBaseImageCollection = ({
-  initialData,
+  baseImageCollectionRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: Props) => {
+  const baseImageCollection = useFragment(
+    UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT,
+    baseImageCollectionRef,
+  );
+
+  const { name, handle } = baseImageCollection;
+  const systemModel = baseImageCollection.systemModel?.name || "";
+
+  const defaultValues = useMemo(
+    () => ({ name, handle, systemModel }),
+    [name, handle, systemModel],
+  );
+
   const {
     register,
+    reset,
     handleSubmit,
     formState: { errors, isDirty },
-  } = useForm<FormData>({
+  } = useForm<BaseImageCollectionData>({
     mode: "onTouched",
-    defaultValues: initialData && transformInputData(initialData),
+    defaultValues,
     resolver: yupResolver(baseImageCollectionSchema),
   });
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (prevDefaultValues !== defaultValues) {
+    reset(defaultValues);
+    setPrevDefaultValues(defaultValues);
+  }
+
+  const onFormSubmit = (data: BaseImageCollectionData) =>
+    onSubmit(transformOutputData(data));
 
   const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -122,7 +144,7 @@ const UpdateBaseImageCollection = ({
           id="base-image-collection-form-name"
           label={
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.nameLabel"
+              id="forms.UpdateBaseImageCollection.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -138,7 +160,7 @@ const UpdateBaseImageCollection = ({
           id="base-image-collection-form-handle"
           label={
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.handleLabel"
+              id="forms.UpdateBaseImageCollection.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -154,34 +176,47 @@ const UpdateBaseImageCollection = ({
           id="base-image-collection-form-system-model"
           label={
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.systemModelLabel"
+              id="forms.UpdateBaseImageCollection.systemModelLabel"
               defaultMessage="System Model"
             />
           }
         >
           <Form.Control {...register("systemModel")} plaintext readOnly />
         </FormRow>
-
-        <div className="d-flex justify-content-end align-items-center gap-2">
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
           <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.submitButton"
+              id="forms.UpdateBaseImageCollection.submitButton"
               defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateBaseImageCollection.resetButton"
+              defaultMessage="Reset"
             />
           </Button>
           <Button variant="danger" onClick={onDelete}>
             <FormattedMessage
-              id="components.UpdateBaseImageCollection.deleteButton"
+              id="forms.UpdateBaseImageCollection.deleteButton"
               defaultMessage="Delete"
             />
           </Button>
-        </div>
+        </Stack>
       </Stack>
     </form>
   );
 };
 
-export type { BaseImageCollectionData, BaseImageCollectionChanges };
+export type { BaseImageCollectionChanges };
 
 export default UpdateBaseImageCollection;
