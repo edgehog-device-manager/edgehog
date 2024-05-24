@@ -61,6 +61,175 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
     end
   end
 
+  describe "baseImage localized descriptions" do
+    setup %{tenant: tenant} do
+      localized_descriptions = [
+        %{language_tag: "en-US", value: "My Base Image"},
+        %{language_tag: "it", value: "La mia Base Image"},
+        %{language_tag: "fr", value: "Mon Base Image"}
+      ]
+
+      base_image =
+        base_image_fixture(tenant: tenant, localized_descriptions: localized_descriptions)
+
+      id = AshGraphql.Resource.encode_relay_id(base_image)
+
+      document = """
+      query ($id: ID!, $preferredLanguageTags: [String!]) {
+        baseImage(id: $id) {
+          localizedDescriptions(preferredLanguageTags: $preferredLanguageTags) {
+            languageTag
+            value
+          }
+        }
+      }
+      """
+
+      %{base_image: base_image, id: id, document: document}
+    end
+
+    test "returns all localized descriptions with no preferredLanguageTags", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+
+      %{"localizedDescriptions" => localized_descriptions} =
+        base_image_query(
+          tenant: tenant,
+          id: id,
+          document: document
+        )
+        |> extract_result!()
+
+      assert length(localized_descriptions) == 3
+      assert %{"languageTag" => "en-US", "value" => "My Base Image"} in localized_descriptions
+      assert %{"languageTag" => "it", "value" => "La mia Base Image"} in localized_descriptions
+      assert %{"languageTag" => "fr", "value" => "Mon Base Image"} in localized_descriptions
+    end
+
+    test "returns filtered localized descriptions with preferredLanguageTags", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+      preferred_language_tags = ["it", "fr"]
+
+      %{"localizedDescriptions" => localized_descriptions} =
+        base_image_query(
+          tenant: tenant,
+          id: id,
+          extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
+          document: document
+        )
+        |> extract_result!()
+
+      assert length(localized_descriptions) == 2
+      assert %{"languageTag" => "it", "value" => "La mia Base Image"} in localized_descriptions
+      assert %{"languageTag" => "fr", "value" => "Mon Base Image"} in localized_descriptions
+    end
+
+    test "returns empty localized descriptions if no language tag matches exactly", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+      preferred_language_tags = ["en-GB", "de"]
+
+      %{"localizedDescriptions" => []} =
+        base_image_query(
+          tenant: tenant,
+          id: id,
+          extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
+          document: document
+        )
+        |> extract_result!()
+    end
+  end
+
+  describe "baseImage localized release display names" do
+    setup %{tenant: tenant} do
+      localized_release_display_names = [
+        %{language_tag: "en-US", value: "Initial version"},
+        %{language_tag: "it", value: "Versione iniziale"},
+        %{language_tag: "fr", value: "Version initiale"}
+      ]
+
+      base_image =
+        base_image_fixture(
+          tenant: tenant,
+          localized_release_display_names: localized_release_display_names
+        )
+
+      id = AshGraphql.Resource.encode_relay_id(base_image)
+
+      document = """
+      query ($id: ID!, $preferredLanguageTags: [String!]) {
+        baseImage(id: $id) {
+          localizedReleaseDisplayNames(preferredLanguageTags: $preferredLanguageTags) {
+            languageTag
+            value
+          }
+        }
+      }
+      """
+
+      %{base_image: base_image, id: id, document: document}
+    end
+
+    test "returns all localized release display names with no preferredLanguageTags", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+
+      %{"localizedReleaseDisplayNames" => localized_release_display_names} =
+        base_image_query(
+          tenant: tenant,
+          id: id,
+          document: document
+        )
+        |> extract_result!()
+
+      assert length(localized_release_display_names) == 3
+
+      assert %{"languageTag" => "en-US", "value" => "Initial version"} in localized_release_display_names
+
+      assert %{"languageTag" => "it", "value" => "Versione iniziale"} in localized_release_display_names
+
+      assert %{"languageTag" => "fr", "value" => "Version initiale"} in localized_release_display_names
+    end
+
+    test "returns filtered localized release display names with preferredLanguageTags", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+      preferred_language_tags = ["it", "fr"]
+
+      %{"localizedReleaseDisplayNames" => localized_release_display_names} =
+        base_image_query(
+          tenant: tenant,
+          id: id,
+          extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
+          document: document
+        )
+        |> extract_result!()
+
+      assert length(localized_release_display_names) == 2
+
+      assert %{
+               "languageTag" => "it",
+               "value" => "Versione iniziale"
+             } in localized_release_display_names
+
+      assert %{
+               "languageTag" => "fr",
+               "value" => "Version initiale"
+             } in localized_release_display_names
+    end
+
+    test "returns empty localized release display names if no language tag matches exactly",
+         ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+      preferred_language_tags = ["en-GB", "de"]
+
+      %{"localizedReleaseDisplayNames" => []} =
+        base_image_query(
+          tenant: tenant,
+          id: id,
+          extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
+          document: document
+        )
+        |> extract_result!()
+    end
+  end
+
   defp base_image_query(opts) do
     default_document = """
     query ($id: ID!) {
@@ -79,7 +248,10 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
     tenant = Keyword.fetch!(opts, :tenant)
     id = Keyword.fetch!(opts, :id)
 
-    variables = %{"id" => id}
+    variables =
+      opts
+      |> Keyword.get(:extra_variables, %{})
+      |> Map.merge(%{"id" => id})
 
     document = Keyword.get(opts, :document, default_document)
 

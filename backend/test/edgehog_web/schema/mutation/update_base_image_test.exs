@@ -53,6 +53,81 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
              } = base_image
     end
 
+    test "allows updating localized descriptions", %{tenant: tenant} do
+      initial_localized_descriptions = [
+        %{language_tag: "en", value: "Description"},
+        %{language_tag: "it", value: "Descrizione"}
+      ]
+
+      fixture =
+        base_image_fixture(
+          tenant: tenant,
+          localized_descriptions: initial_localized_descriptions
+        )
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      updated_localized_descriptions = [
+        # nil value, so it will be removed
+        %{"languageTag" => "en", "value" => nil},
+        %{"languageTag" => "it", "value" => "Nuova descrizione"},
+        %{"languageTag" => "bs", "value" => "Opis"}
+      ]
+
+      result =
+        update_base_image_mutation(
+          tenant: tenant,
+          id: id,
+          localized_descriptions: updated_localized_descriptions
+        )
+
+      assert %{"localizedDescriptions" => localized_descriptions} = extract_result!(result)
+      assert length(localized_descriptions) == 2
+      assert %{"languageTag" => "it", "value" => "Nuova descrizione"} in localized_descriptions
+      assert %{"languageTag" => "bs", "value" => "Opis"} in localized_descriptions
+    end
+
+    test "allows updating localized release display names", %{tenant: tenant} do
+      initial_localized_release_display_names = [
+        %{language_tag: "en", value: "Release display name"},
+        %{language_tag: "it", value: "Nome del rilascio"}
+      ]
+
+      fixture =
+        base_image_fixture(
+          tenant: tenant,
+          localized_release_display_names: initial_localized_release_display_names
+        )
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      updated_localized_release_display_names = [
+        # nil value, so it will be removed
+        %{"languageTag" => "en", "value" => nil},
+        %{"languageTag" => "it", "value" => "Nuovo nome del rilascio"},
+        %{"languageTag" => "bs", "value" => "Ime"}
+      ]
+
+      result =
+        update_base_image_mutation(
+          tenant: tenant,
+          id: id,
+          localized_release_display_names: updated_localized_release_display_names
+        )
+
+      assert %{"localizedReleaseDisplayNames" => localized_release_display_names} =
+               extract_result!(result)
+
+      assert length(localized_release_display_names) == 2
+
+      assert %{
+               "languageTag" => "it",
+               "value" => "Nuovo nome del rilascio"
+             } in localized_release_display_names
+
+      assert %{"languageTag" => "bs", "value" => "Ime"} in localized_release_display_names
+    end
+
     test "returns error for invalid starting version requirement", %{
       tenant: tenant,
       base_image: base_image,
@@ -94,6 +169,14 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
           id
           version
           url
+          localizedDescriptions {
+            languageTag
+            value
+          }
+          localizedReleaseDisplayNames {
+            languageTag
+            value
+          }
           startingVersionRequirement
           baseImageCollection {
             id
@@ -109,7 +192,9 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
 
     input =
       %{
-        "startingVersionRequirement" => opts[:starting_version_requirement]
+        "startingVersionRequirement" => opts[:starting_version_requirement],
+        "localizedDescriptions" => opts[:localized_descriptions],
+        "localizedReleaseDisplayNames" => opts[:localized_release_display_names]
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
       |> Enum.into(%{})

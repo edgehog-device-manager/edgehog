@@ -26,6 +26,7 @@ defmodule Edgehog.BaseImages.BaseImage do
     ]
 
   alias Edgehog.BaseImages.BaseImage.Changes
+  alias Edgehog.Localization
   alias Edgehog.Validations
 
   resource do
@@ -70,8 +71,23 @@ defmodule Edgehog.BaseImages.BaseImage do
         allow_nil? false
       end
 
+      argument :localized_descriptions, {:array, Localization.LocalizedAttribute} do
+        description "A list of descriptions in different languages."
+      end
+
+      argument :localized_release_display_names, {:array, Localization.LocalizedAttribute} do
+        description "A list of release display names in different languages."
+      end
+
       change Changes.HandleFileUpload
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_release_display_names,
+              target_attribute: :release_display_name}
     end
 
     create :create_fixture do
@@ -82,7 +98,22 @@ defmodule Edgehog.BaseImages.BaseImage do
         allow_nil? false
       end
 
+      argument :localized_descriptions, {:array, Localization.LocalizedAttribute} do
+        description "A list of descriptions in different languages."
+      end
+
+      argument :localized_release_display_names, {:array, Localization.LocalizedAttribute} do
+        description "A list of release display names in different languages."
+      end
+
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_release_display_names,
+              target_attribute: :release_display_name}
     end
 
     read :get do
@@ -99,7 +130,26 @@ defmodule Edgehog.BaseImages.BaseImage do
       description "Updates a base image."
       primary? true
 
+      # Needed because UpsertLocalizedAttribute is not atomic
+      require_atomic? false
+
+      argument :localized_descriptions, {:array, Localization.LocalizedAttributeUpdateInput} do
+        description "A list of descriptions in different languages."
+      end
+
+      argument :localized_release_display_names,
+               {:array, Localization.LocalizedAttributeUpdateInput} do
+        description "A list of release display names in different languages."
+      end
+
       accept [:starting_version_requirement]
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_release_display_names,
+              target_attribute: :release_display_name}
     end
 
     destroy :destroy do
@@ -142,8 +192,8 @@ defmodule Edgehog.BaseImages.BaseImage do
       allow_nil? false
     end
 
-    # TODO: localized description
-    # TODO: localized release_display_name
+    attribute :description, :map
+    attribute :release_display_name, :map
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
@@ -155,6 +205,25 @@ defmodule Edgehog.BaseImages.BaseImage do
       public? true
       attribute_public? false
       allow_nil? false
+    end
+  end
+
+  calculations do
+    calculate :localized_descriptions, {:array, Localization.LocalizedAttribute} do
+      public? true
+      description "A list of descriptions in different languages."
+      calculation {Localization.Calculations.LocalizedAttributes, attribute: :description}
+      argument :preferred_language_tags, {:array, :string}
+    end
+
+    calculate :localized_release_display_names, {:array, Localization.LocalizedAttribute} do
+      public? true
+      description "A list of release display names in different languages."
+
+      calculation {Localization.Calculations.LocalizedAttributes,
+                   attribute: :release_display_name}
+
+      argument :preferred_language_tags, {:array, :string}
     end
   end
 

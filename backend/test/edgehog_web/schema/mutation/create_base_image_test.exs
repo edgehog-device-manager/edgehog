@@ -59,6 +59,52 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
              } = base_image
     end
 
+    test "allows passing localized descriptions", %{tenant: tenant} do
+      localized_descriptions = [
+        %{"languageTag" => "en", "value" => "My Base Image"},
+        %{"languageTag" => "it", "value" => "La mia Base Image"}
+      ]
+
+      result =
+        create_base_image_mutation(
+          tenant: tenant,
+          localized_descriptions: localized_descriptions
+        )
+
+      assert %{"localizedDescriptions" => localized_descriptions} = extract_result!(result)
+      assert length(localized_descriptions) == 2
+      assert %{"languageTag" => "en", "value" => "My Base Image"} in localized_descriptions
+      assert %{"languageTag" => "it", "value" => "La mia Base Image"} in localized_descriptions
+    end
+
+    test "allows passing localized release display names", %{tenant: tenant} do
+      localized_release_display_names = [
+        %{"languageTag" => "en", "value" => "Initial version"},
+        %{"languageTag" => "it", "value" => "Versione iniziale"}
+      ]
+
+      result =
+        create_base_image_mutation(
+          tenant: tenant,
+          localized_release_display_names: localized_release_display_names
+        )
+
+      assert %{"localizedReleaseDisplayNames" => localized_release_display_names} =
+               extract_result!(result)
+
+      assert length(localized_release_display_names) == 2
+
+      assert %{
+               "languageTag" => "en",
+               "value" => "Initial version"
+             } in localized_release_display_names
+
+      assert %{
+               "languageTag" => "it",
+               "value" => "Versione iniziale"
+             } in localized_release_display_names
+    end
+
     test "returns error for non-existing base image collection", %{tenant: tenant} do
       base_image_collection = base_image_collection_fixture(tenant: tenant)
       base_image_collection_id = AshGraphql.Resource.encode_relay_id(base_image_collection)
@@ -193,6 +239,14 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
           id
           version
           url
+          localizedDescriptions {
+            languageTag
+            value
+          }
+          localizedReleaseDisplayNames {
+            languageTag
+            value
+          }
           startingVersionRequirement
           baseImageCollection {
             id
@@ -220,6 +274,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
     input = %{
       "baseImageCollectionId" => base_image_collection_id,
       "version" => version,
+      "localizedDescriptions" => opts[:localized_descriptions],
+      "localizedReleaseDisplayNames" => opts[:localized_release_display_names],
       "startingVersionRequirement" => opts[:starting_version_requirement],
       "file" => file && "file"
     }
