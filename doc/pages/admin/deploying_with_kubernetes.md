@@ -789,7 +789,7 @@ repo](https://github.com/edgehog-device-manager/edgehog/tree/main/tools).
 
 ```bash
 $ pip3 install pyjwt
-$ ./gen-edgehog-jwt -k <PATH-TO-TENANT-PRIVATE-KEY>
+$ ./gen-edgehog-jwt -t tenant -k <PATH-TO-TENANT-PRIVATE-KEY>
 ```
 
 Values to be replaced
