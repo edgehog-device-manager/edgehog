@@ -25,6 +25,7 @@ defmodule Edgehog.Devices.SystemModel do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Localization
   alias Edgehog.Devices.SystemModel.Changes
   alias Edgehog.Devices.SystemModel.Validations
 
@@ -87,6 +88,10 @@ defmodule Edgehog.Devices.SystemModel do
         description "A picture representing the system model that will be uploaded to a bucket."
       end
 
+      argument :localized_descriptions, {:array, Localization.LocalizedAttribute} do
+        description "A list of descriptions in different languages."
+      end
+
       validate Validations.EitherPictureUrlOrPictureFile
 
       # TODO: see issue #228, which is still relevant
@@ -99,13 +104,16 @@ defmodule Edgehog.Devices.SystemModel do
 
       change manage_relationship(:hardware_type_id, :hardware_type, type: :append)
       change Changes.HandlePictureUpload
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     update :update do
       description "Updates an system model."
       primary? true
 
-      # Needed because manage_relationship is not atomic
+      # Needed because manage_relationship and UpsertLocalizedAttribute are not atomic
       require_atomic? false
 
       accept [:handle, :name, :picture_url]
@@ -117,6 +125,15 @@ defmodule Edgehog.Devices.SystemModel do
 
       argument :picture_file, Edgehog.Types.Upload do
         description "A picture representing the system model that will be uploaded to a bucket."
+      end
+
+      argument :localized_descriptions, {:array, Localization.LocalizedAttributeUpdateInput} do
+        description """
+        A list of descriptions in different languages.
+
+        If a language already exists it is updated. If a null value is passed, the language
+        is deleted.
+        """
       end
 
       validate Validations.EitherPictureUrlOrPictureFile
@@ -131,6 +148,9 @@ defmodule Edgehog.Devices.SystemModel do
 
       change Changes.HandlePictureUpload
       change Changes.HandlePictureDeletion
+
+      change {Localization.Changes.UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     destroy :destroy do
@@ -174,7 +194,7 @@ defmodule Edgehog.Devices.SystemModel do
       description "A URL to a picture representing the system model."
     end
 
-    # TODO: localized description
+    attribute :description, :map
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
@@ -190,6 +210,15 @@ defmodule Edgehog.Devices.SystemModel do
       public? true
       description "The Hardware type associated with the System Model"
       attribute_public? false
+    end
+  end
+
+  calculations do
+    calculate :localized_descriptions, {:array, Localization.LocalizedAttribute} do
+      public? true
+      description "A list of descriptions in different languages."
+      calculation {Localization.Calculations.LocalizedAttributes, attribute: :description}
+      argument :preferred_language_tags, {:array, :string}
     end
   end
 

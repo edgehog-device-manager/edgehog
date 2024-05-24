@@ -108,6 +108,40 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       assert %{"partNumber" => "D"} in part_numbers
     end
 
+    test "allows updating localized descriptions", %{tenant: tenant} do
+      initial_localized_descriptions = [
+        %{language_tag: "en", value: "Description"},
+        %{language_tag: "it", value: "Descrizione"}
+      ]
+
+      fixture =
+        system_model_fixture(
+          tenant: tenant,
+          localized_descriptions: initial_localized_descriptions
+        )
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      updated_localized_descriptions = [
+        # nil value, so it will be removed
+        %{"languageTag" => "en", "value" => nil},
+        %{"languageTag" => "it", "value" => "Nuova descrizione"},
+        %{"languageTag" => "bs", "value" => "Opis"}
+      ]
+
+      result =
+        update_system_model_mutation(
+          tenant: tenant,
+          id: id,
+          localized_descriptions: updated_localized_descriptions
+        )
+
+      assert %{"localizedDescriptions" => localized_descriptions} = extract_result!(result)
+      assert length(localized_descriptions) == 2
+      assert %{"languageTag" => "it", "value" => "Nuova descrizione"} in localized_descriptions
+      assert %{"languageTag" => "bs", "value" => "Opis"} in localized_descriptions
+    end
+
     test "allows saving a picture url", %{tenant: tenant, id: id} do
       result =
         update_system_model_mutation(
@@ -351,6 +385,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         result {
           id
           name
+          localizedDescriptions {
+            languageTag
+            value
+          }
           handle
           pictureUrl
           partNumbers {
@@ -368,6 +406,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       %{
         "handle" => opts[:handle],
         "name" => opts[:name],
+        "localizedDescriptions" => opts[:localized_descriptions],
         "partNumbers" => opts[:part_numbers],
         "pictureUrl" => opts[:picture_url],
         "pictureFile" => opts[:picture_file] && "picture_file"
@@ -396,9 +435,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
   end
 
   defp extract_result!(result) do
-    refute :errors in Map.keys(result)
-    refute "errors" in Map.keys(result[:data])
-
     assert %{
              data: %{
                "updateSystemModel" => %{
@@ -406,6 +442,9 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
                }
              }
            } = result
+
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
 
     assert system_model != nil
 

@@ -46,10 +46,10 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
-      result = system_model_query(tenant: tenant, id: id)
+      system_model =
+        system_model_query(tenant: tenant, id: id)
+        |> extract_result!()
 
-      refute Map.has_key?(result, :errors)
-      assert %{data: %{"systemModel" => system_model}} = result
       assert system_model["name"] == fixture.name
       assert system_model["handle"] == fixture.handle
       assert system_model["pictureUrl"] == fixture.picture_url
@@ -70,12 +70,98 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
     end
   end
 
+  describe "systemModel localized descriptions" do
+    setup %{tenant: tenant} do
+      localized_descriptions = [
+        %{language_tag: "en-US", value: "My Model"},
+        %{language_tag: "it", value: "Il mio modello"},
+        %{language_tag: "fr", value: "Mon modele"}
+      ]
+
+      system_model =
+        system_model_fixture(tenant: tenant, localized_descriptions: localized_descriptions)
+
+      id = AshGraphql.Resource.encode_relay_id(system_model)
+
+      document = """
+      query ($id: ID!, $preferredLanguageTags: [String!]) {
+        systemModel(id: $id) {
+          localizedDescriptions(preferredLanguageTags: $preferredLanguageTags) {
+            languageTag
+            value
+          }
+        }
+      }
+      """
+
+      %{system_model: system_model, id: id, document: document}
+    end
+
+    test "returns all localized descriptions with no preferredLanguageTags", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+
+      %{"localizedDescriptions" => localized_descriptions} =
+        system_model_query(
+          tenant: tenant,
+          id: id,
+          document: document
+        )
+        |> extract_result!()
+
+      assert length(localized_descriptions) == 3
+      assert %{"languageTag" => "en-US", "value" => "My Model"} in localized_descriptions
+      assert %{"languageTag" => "it", "value" => "Il mio modello"} in localized_descriptions
+      assert %{"languageTag" => "fr", "value" => "Mon modele"} in localized_descriptions
+    end
+
+    test "returns filtered localized descriptions with preferredLanguageTags", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+      preferred_language_tags = ["it", "fr"]
+
+      %{"localizedDescriptions" => localized_descriptions} =
+        system_model_query(
+          tenant: tenant,
+          id: id,
+          extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
+          document: document
+        )
+        |> extract_result!()
+
+      assert length(localized_descriptions) == 2
+      assert %{"languageTag" => "it", "value" => "Il mio modello"} in localized_descriptions
+      assert %{"languageTag" => "fr", "value" => "Mon modele"} in localized_descriptions
+    end
+
+    test "returns empty localized descriptions if no language tag matches exactly", ctx do
+      %{tenant: tenant, id: id, document: document} = ctx
+      preferred_language_tags = ["en-GB", "de"]
+
+      %{"localizedDescriptions" => []} =
+        system_model_query(
+          tenant: tenant,
+          id: id,
+          extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
+          document: document
+        )
+        |> extract_result!()
+    end
+  end
+
   defp non_existing_system_model_id(tenant) do
     fixture = system_model_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
     :ok = Ash.destroy!(fixture)
 
     id
+  end
+
+  defp extract_result!(result) do
+    assert %{data: %{"systemModel" => system_model}} = result
+
+    refute :errors in Map.keys(result)
+    assert system_model != nil
+
+    system_model
   end
 
   defp system_model_query(opts) do
@@ -98,7 +184,10 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
     tenant = Keyword.fetch!(opts, :tenant)
     id = Keyword.fetch!(opts, :id)
 
-    variables = %{"id" => id}
+    variables =
+      opts
+      |> Keyword.get(:extra_variables, %{})
+      |> Map.merge(%{"id" => id})
 
     document = Keyword.get(opts, :document, default_document)
 

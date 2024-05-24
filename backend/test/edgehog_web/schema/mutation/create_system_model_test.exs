@@ -61,6 +61,24 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
       assert %{"partNumber" => "456"} in part_numbers
     end
 
+    test "allows passing localized descriptions", %{tenant: tenant} do
+      localized_descriptions = [
+        %{"languageTag" => "en", "value" => "My Model"},
+        %{"languageTag" => "it", "value" => "Il mio modello"}
+      ]
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          localized_descriptions: localized_descriptions
+        )
+
+      assert %{"localizedDescriptions" => localized_descriptions} = extract_result!(result)
+      assert length(localized_descriptions) == 2
+      assert %{"languageTag" => "en", "value" => "My Model"} in localized_descriptions
+      assert %{"languageTag" => "it", "value" => "Il mio modello"} in localized_descriptions
+    end
+
     test "allows saving a picture url", %{tenant: tenant} do
       result =
         create_system_model_mutation(
@@ -212,6 +230,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
         result {
           id
           name
+          localizedDescriptions {
+            languageTag
+            value
+          }
           handle
           pictureUrl
           partNumbers {
@@ -237,6 +259,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
       "hardwareTypeId" => hardware_type_id,
       "handle" => opts[:handle] || unique_system_model_handle(),
       "name" => opts[:name] || unique_system_model_name(),
+      "localizedDescriptions" => opts[:localized_descriptions],
       "partNumbers" => opts[:part_numbers] || [unique_system_model_part_number()],
       "pictureUrl" => opts[:picture_url],
       "pictureFile" => opts[:picture_file] && "picture_file"
