@@ -25,7 +25,6 @@ defmodule EdgehogWeb.Router do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
     plug EdgehogWeb.Auth
-    plug EdgehogWeb.Context
     plug AshGraphql.Plug
   end
 

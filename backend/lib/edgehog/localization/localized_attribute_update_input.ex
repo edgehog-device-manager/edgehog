@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,29 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema.LocalizationTypes do
-  use Absinthe.Schema.Notation
-  use Absinthe.Relay.Schema.Notation, :modern
+defmodule Edgehog.Localization.LocalizedAttributeUpdateInput do
+  @moduledoc """
+  A localized attribute that allows an empty value.
 
-  @desc """
-  Input object used to provide a localizedText as an input.
+  The empty value is used to unset a language tag in updates.
   """
-  input_object :localized_text_input do
-    @desc "The locale, expressed in the format indicated in RFC 5646 (e.g. en-US)"
-    field :locale, non_null(:string)
-    @desc "The localized text"
-    field :text, non_null(:string)
-  end
+
+  use Ash.Type.NewType,
+    subtype_of: :map,
+    constraints: [
+      fields: [
+        language_tag: [
+          type: :string,
+          allow_nil?: false
+        ],
+        value: [
+          type: :string
+        ]
+      ]
+    ]
+
+  use AshGraphql.Type
+
+  @impl true
+  def graphql_input_type(_), do: :localized_attribute_update_input
 end
