@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,107 +19,147 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
+  @moduletag :ported_to_ash
+
   describe "updateUpdateChannel mutation" do
-    setup do
-      {:ok, update_channel: update_channel_fixture()}
+    setup %{tenant: tenant} do
+      update_channel = update_channel_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(update_channel)
+
+      {:ok, update_channel: update_channel, id: id}
     end
 
-    test "updates update channel with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      update_channel: update_channel
-    } do
-      target_group = device_group_fixture()
+    test "updates update channel with valid data", %{tenant: tenant, id: id} do
+      target_group = device_group_fixture(tenant: tenant)
+      target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
-      response =
-        update_update_channel_mutation(conn, api_path,
-          update_channel_id: update_channel.id,
+      update_channel_data =
+        update_update_channel_mutation(
+          id: id,
           name: "Updated name",
           handle: "updated-handle",
-          target_group_ids: [target_group.id]
+          target_group_ids: [target_group_id],
+          tenant: tenant
         )
+        |> extract_result!()
 
-      update_channel = response["data"]["updateUpdateChannel"]["updateChannel"]
-      assert update_channel["name"] == "Updated name"
-      assert update_channel["handle"] == "updated-handle"
-      assert [response_group] = update_channel["targetGroups"]
-      assert response_group["name"] == target_group.name
-      assert response_group["handle"] == target_group.handle
+      assert update_channel_data["id"] == id
+      assert update_channel_data["name"] == "Updated name"
+      assert update_channel_data["handle"] == "updated-handle"
+      assert [target_group_data] = update_channel_data["targetGroups"]
+      assert target_group_data["id"] == target_group_id
+      assert target_group_data["name"] == target_group.name
+      assert target_group_data["handle"] == target_group.handle
     end
 
-    test "fails with invalid handle", %{
-      conn: conn,
-      api_path: api_path,
-      update_channel: update_channel
-    } do
-      response =
-        update_update_channel_mutation(conn, api_path,
-          update_channel_id: update_channel.id,
-          handle: "1nvalid Handle"
+    test "fails with invalid handle", %{tenant: tenant, id: id} do
+      error =
+        update_update_channel_mutation(
+          id: id,
+          handle: "1nvalid Handle",
+          tenant: tenant
         )
+        |> extract_error!()
 
-      assert response["data"]["updateUpdateChannel"] == nil
-      assert [%{"status_code" => 422, "message" => message}] = response["errors"]
-      assert message =~ "Handle should start with"
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:handle],
+               code: "invalid_attribute",
+               message: "should only contain lower case ASCII letters (from a to z), digits and -"
+             } = error
     end
 
-    test "fails when trying to use a non-existing target group id", %{
-      conn: conn,
-      api_path: api_path,
-      update_channel: update_channel
-    } do
-      response =
-        update_update_channel_mutation(conn, api_path,
-          update_channel_id: update_channel.id,
-          target_group_ids: ["123456"]
-        )
+    test "fails when trying to use a non-existing target group id", %{tenant: tenant, id: id} do
+      target_group_id = non_existing_device_group_id(tenant)
 
-      assert response["data"]["updateUpdateChannel"] == nil
-      assert %{"errors" => [%{"status_code" => 422, "message" => message}]} = response
-      assert message =~ "123456"
+      error =
+        update_update_channel_mutation(
+          id: id,
+          target_group_ids: [target_group_id],
+          tenant: tenant
+        )
+        |> extract_error!()
+
+      assert %{
+               path: ["updateUpdateChannel"],
+               fields: [:target_group_ids],
+               code: "invalid_argument",
+               message:
+                 "some target groups were not found or are already associated with an update channel"
+             } = error
     end
   end
 
-  @query """
-  mutation UpdateUpdateChannel($input: UpdateUpdateChannelInput!) {
-    updateUpdateChannel(input: $input) {
-      updateChannel {
-        name
-        handle
-        targetGroups {
+  defp update_update_channel_mutation(opts) do
+    default_document = """
+    mutation UpdateUpdateChannel($id: ID!, $input: UpdateUpdateChannelInput!) {
+      updateUpdateChannel(id: $id, input: $input) {
+        result {
+          id
           name
           handle
+          targetGroups {
+            id
+            name
+            handle
+          }
         }
       }
     }
-  }
-  """
-  defp update_update_channel_mutation(conn, api_path, opts) do
-    update_channel_id =
-      opts
-      |> Keyword.fetch!(:update_channel_id)
-      |> then(&Absinthe.Relay.Node.to_global_id(:update_channel, &1, EdgehogWeb.Schema))
+    """
+
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
     input =
-      opts
-      |> Keyword.update(:target_group_ids, nil, fn ids ->
-        ids
-        |> Enum.map(&Absinthe.Relay.Node.to_global_id(:device_group, &1, EdgehogWeb.Schema))
-      end)
-      |> Keyword.delete(:update_channel_id)
-      |> Enum.into(%{
-        update_channel_id: update_channel_id
-      })
+      %{
+        "handle" => opts[:handle],
+        "name" => opts[:name],
+        "targetGroupIds" => opts[:target_group_ids]
+      }
+      |> Enum.filter(fn {_k, v} -> v != nil end)
+      |> Enum.into(%{})
 
-    variables = %{input: input}
+    variables = %{"id" => id, "input" => input}
 
-    conn = post(conn, api_path, query: @query, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
 
-    json_response(conn, 200)
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_error!(result) do
+    assert is_nil(result[:data]["updateUpdateChannel"])
+    assert %{errors: [error]} = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "updateUpdateChannel" => %{
+                 "result" => update_channel
+               }
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert update_channel != nil
+
+    update_channel
+  end
+
+  defp non_existing_device_group_id(tenant) do
+    fixture = device_group_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
+
+    id
   end
 end

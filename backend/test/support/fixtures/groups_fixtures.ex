@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,9 +47,9 @@ defmodule Edgehog.GroupsFixtures do
 
     params =
       Enum.into(opts, %{
-        handle: unique_device_group_handle(),
-        name: unique_device_group_name(),
-        selector: unique_device_group_selector()
+        handle: opts[:handle] || unique_device_group_handle(),
+        name: opts[:name] || unique_device_group_name(),
+        selector: opts[:selector] || unique_device_group_selector()
       })
 
     Edgehog.Groups.DeviceGroup

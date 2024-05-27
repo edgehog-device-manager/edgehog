@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,55 +19,109 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteUpdateChannelTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.UpdateCampaigns
+  alias Edgehog.UpdateCampaigns.UpdateChannel
+
   import Edgehog.UpdateCampaignsFixtures
 
+  require Ash.Query
+
+  @moduletag :ported_to_ash
+
   describe "deleteUpdateChannel mutation" do
-    setup do
-      {:ok, update_channel: update_channel_fixture()}
+    setup %{tenant: tenant} do
+      update_channel = update_channel_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(update_channel)
+
+      {:ok, update_channel: update_channel, id: id}
     end
 
     test "deletes existing update channel", %{
-      conn: conn,
-      api_path: api_path,
-      update_channel: update_channel
+      tenant: tenant,
+      update_channel: update_channel,
+      id: id
     } do
-      response = delete_update_channel_mutation(conn, api_path, update_channel.id)
+      update_channel_data =
+        delete_update_channel_mutation(tenant: tenant, id: id)
+        |> extract_result!()
 
-      assert response["data"]["deleteUpdateChannel"]["updateChannel"]["handle"] ==
-               update_channel.handle
+      assert update_channel_data["id"] == id
+      assert update_channel_data["handle"] == update_channel.handle
 
-      assert UpdateCampaigns.fetch_update_channel(update_channel.id) == {:error, :not_found}
+      refute UpdateChannel
+             |> Ash.Query.filter(id == ^update_channel.id)
+             |> Ash.Query.set_tenant(tenant)
+             |> Ash.exists?()
     end
 
-    test "fails with non-existing update channel", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      response = delete_update_channel_mutation(conn, api_path, "123456")
-      assert %{"errors" => [%{"status_code" => 404, "code" => "not_found"}]} = response
+    test "fails with non-existing update channel", %{tenant: tenant} do
+      id = non_existing_update_channel_id(tenant)
+
+      error = delete_update_channel_mutation(tenant: tenant, id: id) |> extract_error!()
+
+      assert %{
+               path: ["deleteUpdateChannel"],
+               fields: [:id],
+               code: "not_found",
+               message: "could not be found"
+             } = error
     end
   end
 
-  @query """
-  mutation DeleteUpdateChannel($input: DeleteUpdateChannelInput!) {
-    deleteUpdateChannel(input: $input) {
-      updateChannel {
-        handle
+  defp delete_update_channel_mutation(opts) do
+    default_document = """
+    mutation DeleteUpdateChannel($id: ID!) {
+      deleteUpdateChannel(id: $id) {
+        result {
+          id
+          handle
+        }
       }
     }
-  }
-  """
-  defp delete_update_channel_mutation(conn, api_path, db_id) do
-    update_channel_id =
-      Absinthe.Relay.Node.to_global_id(:update_channel, db_id, EdgehogWeb.Schema)
+    """
 
-    variables = %{input: %{update_channel_id: update_channel_id}}
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-    conn = post(conn, api_path, query: @query, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
+    variables = %{"id" => id}
+    context = %{tenant: tenant}
 
-    json_response(conn, 200)
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"deleteUpdateChannel" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "deleteUpdateChannel" => %{
+                 "result" => update_channel
+               }
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert update_channel != nil
+
+    update_channel
+  end
+
+  defp non_existing_update_channel_id(tenant) do
+    fixture = update_channel_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+
+    :ok = Ash.destroy!(fixture, tenant: tenant)
+
+    id
   end
 end
