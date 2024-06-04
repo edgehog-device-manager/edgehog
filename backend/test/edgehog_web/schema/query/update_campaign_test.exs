@@ -150,10 +150,18 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
   end
 
   describe "updateCampaign stats" do
-    defp update_target_status!(target, status) do
-      target
-      |> Ash.Changeset.for_update(:update, %{status: status})
-      |> Ash.update!()
+    alias Edgehog.UpdateCampaigns
+
+    defp update_target_status!(target, :in_progress) do
+      UpdateCampaigns.mark_target_as_in_progress(target)
+    end
+
+    defp update_target_status!(target, :failed) do
+      UpdateCampaigns.mark_target_as_failed(target)
+    end
+
+    defp update_target_status!(target, :successful) do
+      UpdateCampaigns.mark_target_as_successful(target)
     end
 
     defp update_campaign_for_stats_fixture(tenant) do

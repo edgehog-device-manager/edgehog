@@ -22,6 +22,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   use Edgehog.DataCase, async: true
   use Edgehog.AstarteMockCase
 
+  alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor
@@ -861,8 +862,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
   defp update_ota_operation_status!(tenant, ota_operation_id, status) do
     assert {:ok, ota_operation} =
-             Ash.get!(OTAOperation, ota_operation_id, tenant: tenant)
-             |> Ash.update(%{status: status})
+             OSManagement.fetch_ota_operation!(ota_operation_id, tenant: tenant)
+             |> OSManagement.update_ota_operation_status(status)
 
     ota_operation
   end

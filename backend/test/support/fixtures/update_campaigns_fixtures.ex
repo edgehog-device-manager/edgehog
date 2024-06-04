@@ -254,10 +254,8 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     target = in_progress_target_fixture(opts)
 
     {:ok, _} =
-      OSManagement.OTAOperation
-      |> Ash.get!(target.ota_operation_id, tenant: opts[:tenant])
-      |> Ash.Changeset.for_update(:update, %{status: status})
-      |> Ash.update()
+      OSManagement.fetch_ota_operation!(target.ota_operation_id, tenant: opts[:tenant])
+      |> OSManagement.update_ota_operation_status(status)
 
     # Get the updated OTA Operation preloaded
     target = Ash.load!(target, ota_operation: :status)

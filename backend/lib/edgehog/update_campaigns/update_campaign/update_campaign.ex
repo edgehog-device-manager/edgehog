@@ -107,6 +107,35 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
       accept [:status, :outcome, :start_timestamp, :completion_timestamp]
     end
 
+    update :mark_as_in_progress do
+      argument :start_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:start_timestamp, arg(:start_timestamp))
+      change set_attribute(:status, :in_progress)
+    end
+
+    update :mark_as_failed do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :finished)
+      change set_attribute(:outcome, :failure)
+    end
+
+    update :mark_as_successful do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :finished)
+      change set_attribute(:outcome, :success)
+    end
+
     destroy :destroy do
       description "Deletes an update campaign."
       primary? true

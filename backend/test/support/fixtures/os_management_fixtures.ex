@@ -47,7 +47,7 @@ defmodule Edgehog.OSManagementFixtures do
       })
 
     Edgehog.OSManagement.OTAOperation
-    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end
 
@@ -64,13 +64,15 @@ defmodule Edgehog.OSManagementFixtures do
 
     base_image = BaseImagesFixtures.base_image_fixture(tenant: tenant)
 
-    params = %{
-      base_image_url: base_image.url,
-      device_id: device_id
-    }
+    params =
+      opts
+      |> Enum.into(%{
+        base_image_url: base_image.url,
+        device_id: device_id
+      })
 
     Edgehog.OSManagement.OTAOperation
-    |> Ash.Changeset.for_create(:managed, params, tenant: tenant)
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end
 end

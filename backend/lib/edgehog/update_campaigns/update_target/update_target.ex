@@ -25,7 +25,9 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.BaseImages.BaseImage
   alias Edgehog.UpdateCampaigns.UpdateTarget
+  alias Edgehog.UpdateCampaigns.UpdateTarget.Changes
 
   resource do
     description """
@@ -44,6 +46,48 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
   actions do
     defaults [:read]
 
+    read :read_next_updatable_target do
+      description """
+      Returns the next updatable target when updatable targets are present.
+      The next updatable target is chosen with these criteria:
+      - It must be idle.
+      - It must be online.
+      - It must either not have been attempted before or it has to be the least
+      recently attempted target, in this order of preference.
+
+      This set of constraints guarantees that when we make an attempt on a
+      target that fails with a temporary error, given we update latest_attempt,
+      we can read the next updatable target to attempt updates on other
+      targets, or retry the same target if it is the only updatable one.
+      """
+
+      get? true
+      argument :update_campaign_id, :integer, allow_nil?: false
+
+      prepare build(load: [device: :online])
+      prepare build(sort: [latest_attempt: :asc_nils_first])
+      prepare build(limit: 1)
+
+      filter expr(update_campaign_id == ^arg(:update_campaign_id))
+      filter expr(status == :idle)
+      filter expr(device.online == true)
+    end
+
+    read :read_targets_with_pending_ota_operation do
+      description """
+      Reads all the targets of an update campaign that have a pending OTA
+      operation. This is useful when resuming an update campaign to know which
+      targets need to setup a retry timeout.
+      """
+
+      argument :update_campaign_id, :integer, allow_nil?: false
+
+      prepare build(load: [ota_operation: :status])
+
+      filter expr(update_campaign_id == ^arg(:update_campaign_id))
+      filter expr(not is_nil(ota_operation) and ota_operation.status == :pending)
+    end
+
     create :create do
       description "Creates a new update target."
       primary? true
@@ -51,11 +95,54 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
       accept [:status, :update_campaign_id, :device_id]
     end
 
-    update :update do
-      description "Updates an update target."
-      primary? true
+    update :mark_as_in_progress do
+      change set_attribute(:status, :in_progress)
+    end
 
-      accept [:status, :retry_count, :latest_attempt, :completion_timestamp, :ota_operation_id]
+    update :mark_as_failed do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :failed)
+    end
+
+    update :mark_as_successful do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :successful)
+    end
+
+    update :increase_retry_count do
+      change atomic_update(:retry_count, expr(retry_count + 1))
+    end
+
+    update :update_latest_attempt do
+      accept [:latest_attempt]
+    end
+
+    update :start_update do
+      description """
+      Starts the OTA update for a target.
+      It creates an OTA Operation, associates it with the update target, and
+      sends the update request to the device.
+      The update target is transitioned to the :in_progress status.
+      """
+
+      argument :base_image, :struct do
+        constraints instance_of: BaseImage
+        allow_nil? false
+      end
+
+      # Needed because CreateManagedOTAOperation is not atomic
+      require_atomic? false
+
+      change set_attribute(:status, :in_progress)
+      change Changes.CreateManagedOTAOperation
     end
   end
 

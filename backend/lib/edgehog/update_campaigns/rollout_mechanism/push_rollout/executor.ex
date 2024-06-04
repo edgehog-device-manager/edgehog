@@ -197,7 +197,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
           {:next_state, :wait_for_available_slot, data}
         end
 
-      {:error, :no_updatable_targets} ->
+      {:error, %Ash.Error.Query.NotFound{}} ->
         # Are we finished?
         cond do
           # There are still some targets but none of them are online, wait for them

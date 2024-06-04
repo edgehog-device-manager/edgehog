@@ -30,6 +30,10 @@ defmodule Edgehog.OSManagement do
 
   resources do
     resource Edgehog.OSManagement.OTAOperation do
+      define :fetch_ota_operation, action: :read, get_by: [:id], not_found_error?: true
+      define :create_managed_ota_operation, action: :create_managed
+      define :mark_ota_operation_as_timed_out, action: :mark_as_timed_out
+      define :update_ota_operation_status, action: :update_status, args: [:status]
       define :send_update_request, args: [:ota_operation]
     end
   end

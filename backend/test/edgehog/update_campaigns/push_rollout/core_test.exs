@@ -23,6 +23,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   use Edgehog.DataCase, async: true
 
   alias Astarte.Client.APIError
+  alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
@@ -53,7 +54,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises for non-existing update campaign", %{tenant: tenant} do
-      assert_raise Ash.Error.Invalid, fn ->
+      assert_raise Ash.Error.Query.NotFound, fn ->
         Core.get_update_campaign!(tenant.tenant_id, 12_345)
       end
     end
@@ -74,7 +75,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises for non-existing update campaign", %{tenant: tenant} do
-      assert_raise Ash.Error.Invalid, fn ->
+      assert_raise Ash.Error.Query.NotFound, fn ->
         Core.get_update_campaign_base_image!(tenant.tenant_id, 12_345)
       end
     end
@@ -219,7 +220,9 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises with non-existing target", %{tenant: tenant} do
-      assert_raise Ash.Error.Invalid, fn -> Core.get_target!(tenant.tenant_id, 1_234_567) end
+      assert_raise Ash.Error.Query.NotFound, fn ->
+        Core.get_target!(tenant.tenant_id, 1_234_567)
+      end
     end
   end
 
@@ -249,7 +252,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises with non-existing linked target", %{tenant: tenant} do
-      assert_raise Ash.Error.Invalid, fn ->
+      assert_raise Ash.Error.Query.NotFound, fn ->
         Core.get_target_for_ota_operation!(tenant.tenant_id, Ecto.UUID.generate())
       end
     end
@@ -529,186 +532,67 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     assert target.completion_timestamp == completion_timestamp
   end
 
-  describe "list_idle_targets/3" do
-    test "requires limit", %{tenant: tenant} do
-      update_campaign = update_campaign_fixture(tenant: tenant)
-
-      assert_raise KeyError, fn ->
-        Core.list_idle_targets(tenant.tenant_id, update_campaign.id)
-      end
-    end
-
-    test "respects limit", %{tenant: tenant} do
-      update_campaign = update_campaign_with_targets_fixture(100, tenant: tenant)
-
-      targets = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 10)
-      assert length(targets) == 10
-    end
-
-    test "returns actual campaign targets", %{tenant: tenant} do
-      update_campaign =
-        update_campaign_with_targets_fixture(100, tenant: tenant) |> Ash.load!(:update_targets)
-
-      all_target_ids = MapSet.new(update_campaign.update_targets, & &1.id)
-
-      targets = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 10)
-      Enum.each(targets, fn target -> MapSet.member?(all_target_ids, target.id) end)
-    end
-
-    test "returns less than limit if there are not enough targets", %{tenant: tenant} do
-      update_campaign = update_campaign_with_targets_fixture(5, tenant: tenant)
-
-      targets = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 10)
-      assert length(targets) == 5
-    end
-
-    test "does not return :pending targets", %{tenant: tenant} do
-      update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
-
-      pending_target =
-        Enum.at(update_campaign.update_targets, 0)
-        |> Ash.load!(Core.default_preloads_for_target())
-        |> Core.start_target_update(update_campaign.base_image)
-
-      targets = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 2)
-      assert length(targets) == 1
-      assert pending_target not in targets
-    end
-
-    test "does not return :successful targets", %{tenant: tenant} do
-      update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
-
-      successful_target =
-        Enum.at(update_campaign.update_targets, 0)
-        |> Ash.load!(Core.default_preloads_for_target())
-        |> Core.mark_target_as_successful!()
-
-      targets = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 2)
-      assert length(targets) == 1
-      assert successful_target not in targets
-    end
-
-    test "does not return :failed targets", %{tenant: tenant} do
-      update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
-
-      failed_target =
-        Enum.at(update_campaign.update_targets, 0)
-        |> Ash.load!(Core.default_preloads_for_target())
-        |> Core.mark_target_as_failed!()
-
-      targets = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 2)
-      assert length(targets) == 1
-      assert failed_target not in targets
-    end
-
-    test "only returns online targets if filter: [device_online: true] is passed", %{
-      tenant: tenant
-    } do
-      update_campaign =
-        update_campaign_with_targets_fixture(10, tenant: tenant) |> Ash.load!(:update_targets)
-
-      {online_targets, offline_targets} = Enum.split(update_campaign.update_targets, 3)
-
-      online_targets
-      |> Ash.load!(Core.default_preloads_for_target())
-      |> Enum.each(&update_device_online_for_target!(&1, true))
-
-      online_target_ids = MapSet.new(online_targets, & &1.id)
-
-      offline_targets
-      |> Ash.load!(Core.default_preloads_for_target())
-      |> Enum.each(&update_device_online_for_target!(&1, false))
-
-      targets =
-        Core.list_idle_targets(tenant.tenant_id, update_campaign.id,
-          limit: 10,
-          filters: [device_online: true]
-        )
-
-      assert length(targets) == 3
-      Enum.each(targets, fn target -> MapSet.member?(online_target_ids, target.id) end)
-    end
-
-    test "returns targets without any attempts first", %{tenant: tenant} do
-      update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
-
-      [target_with_attempt, target_with_no_attempt] = update_campaign.update_targets
-
-      Core.update_target_latest_attempt!(target_with_attempt, DateTime.utc_now())
-
-      [target] = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 1)
-      assert target.id == target_with_no_attempt.id
-    end
-
-    test "returns targets with oldest attempt first", %{tenant: tenant} do
-      update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
-
-      [target_with_old_attempt, target_with_recent_attempt] = update_campaign.update_targets
-
-      recent_attempt_timestamp = DateTime.utc_now()
-      Core.update_target_latest_attempt!(target_with_recent_attempt, recent_attempt_timestamp)
-
-      old_attempt_timestamp = DateTime.add(recent_attempt_timestamp, -10, :hour)
-      Core.update_target_latest_attempt!(target_with_old_attempt, old_attempt_timestamp)
-
-      [target] = Core.list_idle_targets(tenant.tenant_id, update_campaign.id, limit: 1)
-      assert target.id == target_with_old_attempt.id
-    end
-  end
-
   describe "fetch_next_updatable_target/2" do
     test "does not return :pending targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
+        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
 
-      [pending_target, idle_target] = update_campaign.update_targets
+      [pending_target] = update_campaign.update_targets
 
       pending_target
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.start_target_update(update_campaign.base_image)
 
-      assert {:ok, target} =
+      assert {:error, %Ash.Error.Query.NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
-
-      assert target.id == idle_target.id
     end
 
     test "does not return :successful targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
+        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
 
-      [successful_target, idle_target] = update_campaign.update_targets
+      [successful_target] = update_campaign.update_targets
 
       successful_target
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.mark_target_as_successful!()
 
-      assert {:ok, target} =
+      assert {:error, %Ash.Error.Query.NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
+    end
 
-      assert target.id == idle_target.id
+    test "does not return :failed targets", %{tenant: tenant} do
+      update_campaign =
+        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
+
+      [failed_target] = update_campaign.update_targets
+
+      failed_target
+      |> Ash.load!(Core.default_preloads_for_target())
+      |> Core.mark_target_as_failed!()
+
+      assert {:error, %Ash.Error.Query.NotFound{}} =
+               Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
 
     test "only returns online targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
+        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
 
-      [online_target, offline_target] = update_campaign.update_targets
+      [target] = update_campaign.update_targets
 
-      online_target
-      |> Ash.load!(Core.default_preloads_for_target())
-      |> update_device_online_for_target!(true)
-
-      offline_target
+      target
       |> Ash.load!(Core.default_preloads_for_target())
       |> update_device_online_for_target!(false)
 
-      assert {:ok, target} =
+      assert {:error, %Ash.Error.Query.NotFound{}} =
+               Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
+
+      target
+      |> Ash.load!(Core.default_preloads_for_target())
+      |> update_device_online_for_target!(true)
+
+      assert {:ok, online_target} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
 
       assert target.id == online_target.id
@@ -760,7 +644,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> update_device_online_for_target!(false)
 
-      assert {:error, :no_updatable_targets} =
+      assert {:error, %Ash.Error.Query.NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
   end
@@ -772,7 +656,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       Core.subscribe_to_ota_operation_updates!(ota_operation.id)
 
       # Generate a publish on the PubSub
-      Ash.update!(ota_operation, %{status: "Acknowledged"})
+      OSManagement.update_ota_operation_status!(ota_operation, "Acknowledged")
 
       assert_receive {:ota_operation_updated, %OTAOperation{status: :acknowledged}}
     end
@@ -842,17 +726,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
   describe "ota_operation_acknowledged?/1" do
     test "returns true for OTA Operation with status acknowledged", %{tenant: tenant} do
-      {:ok, ota_operation} =
-        managed_ota_operation_fixture(tenant: tenant)
-        |> Ash.update(%{status: :acknowledged})
+      ota_operation = managed_ota_operation_fixture(status: :acknowledged, tenant: tenant)
 
       assert Core.ota_operation_acknowledged?(ota_operation) == true
     end
 
     test "returns false for OTA Operation with other status", %{tenant: tenant} do
-      {:ok, ota_operation} =
-        managed_ota_operation_fixture(tenant: tenant)
-        |> Ash.update(%{status: :downloading})
+      ota_operation = managed_ota_operation_fixture(status: :downloading, tenant: tenant)
 
       assert Core.ota_operation_acknowledged?(ota_operation) == false
     end
@@ -860,17 +740,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
   describe "ota_operation_successful?/1" do
     test "returns true for OTA Operation with status success", %{tenant: tenant} do
-      {:ok, ota_operation} =
-        managed_ota_operation_fixture(tenant: tenant)
-        |> Ash.update(%{status: :success})
+      ota_operation = managed_ota_operation_fixture(status: :success, tenant: tenant)
 
       assert Core.ota_operation_successful?(ota_operation) == true
     end
 
     test "returns false for OTA Operation with other status", %{tenant: tenant} do
-      {:ok, ota_operation} =
-        managed_ota_operation_fixture(tenant: tenant)
-        |> Ash.update(%{status: :rebooting})
+      ota_operation = managed_ota_operation_fixture(status: :rebooting, tenant: tenant)
 
       assert Core.ota_operation_successful?(ota_operation) == false
     end
@@ -878,17 +754,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
   describe "ota_operation_failed?/1" do
     test "returns true for OTA Operation with status failure", %{tenant: tenant} do
-      {:ok, ota_operation} =
-        managed_ota_operation_fixture(tenant: tenant)
-        |> Ash.update(%{status: :failure})
+      ota_operation = managed_ota_operation_fixture(status: :failure, tenant: tenant)
 
       assert Core.ota_operation_failed?(ota_operation) == true
     end
 
     test "returns false for OTA Operation with other status", %{tenant: tenant} do
-      {:ok, ota_operation} =
-        managed_ota_operation_fixture(tenant: tenant)
-        |> Ash.update(%{status: :deploying})
+      ota_operation = managed_ota_operation_fixture(status: :deploying, tenant: tenant)
 
       assert Core.ota_operation_failed?(ota_operation) == false
     end
@@ -1058,8 +930,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
                |> Core.start_target_update(update_campaign.base_image)
 
       assert {:ok, _ota_operation} =
-               Ash.get!(OTAOperation, target.ota_operation_id, tenant: tenant)
-               |> Ash.update(%{status: :acknowledged})
+               OSManagement.fetch_ota_operation!(target.ota_operation_id, tenant: tenant)
+               |> OSManagement.update_ota_operation_status(:acknowledged)
 
       assert [] ==
                Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign.id)
