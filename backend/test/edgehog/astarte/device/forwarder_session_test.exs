@@ -23,15 +23,22 @@ defmodule Edgehog.Astarte.Device.ForwarderSessionTest do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Forwarder
+
+  import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
+
+  @moduletag :ported_to_ash
 
   describe "forwarder_session" do
-    import Edgehog.AstarteFixtures
     import Tesla.Mock
 
     setup do
+      tenant = tenant_fixture()
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-      device = astarte_device_fixture(realm)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
 
       {:ok, appengine_client} =
         AppEngine.new(cluster.base_api_url, realm.name, private_key: realm.private_key)
@@ -63,14 +70,14 @@ defmodule Edgehog.Astarte.Device.ForwarderSessionTest do
                ForwarderSession.list_sessions(appengine_client, device.device_id)
 
       assert sessions == [
-               %ForwarderSession{
+               %Forwarder.Session{
                  token: "session_token_1",
                  status: :connecting,
                  secure: false,
                  forwarder_hostname: "localhost",
                  forwarder_port: 4001
                },
-               %ForwarderSession{
+               %Forwarder.Session{
                  token: "session_token_2",
                  status: :connected,
                  secure: false,

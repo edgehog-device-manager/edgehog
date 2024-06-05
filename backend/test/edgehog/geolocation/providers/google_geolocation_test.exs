@@ -22,25 +22,21 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
   use Edgehog.DataCase, async: true
   use Edgehog.AstarteMockCase
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
   import Tesla.Mock
-  alias Edgehog.Devices
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeolocation
+
+  @moduletag :ported_to_ash
 
   describe "wifi_geolocation" do
     alias Edgehog.Astarte.Device.WiFiScanResult
 
     setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      device = device_fixture(tenant: tenant_fixture())
 
-      device =
-        device_fixture(realm)
-        |> Devices.preload_astarte_resources_for_device()
-
-      {:ok, cluster: cluster, realm: realm, device: device}
+      {:ok, device: device}
     end
 
     test "geolocate/1 returns error without input AP list", %{device: device} do
@@ -89,7 +85,9 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
                altitude_accuracy: nil,
                heading: nil,
                speed: nil,
-               timestamp: ~U[2021-11-11 09:43:54.437Z]
+               timestamp: ~U[2021-11-11 09:43:54.437Z],
+               source:
+                 "GPS position estimated from the list of WiFi access points that the device detected and published on the io.edgehog.devicemanager.WiFiScanResults Astarte interface."
              } ==
                position
     end

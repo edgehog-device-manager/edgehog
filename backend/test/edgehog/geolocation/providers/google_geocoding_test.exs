@@ -26,6 +26,8 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocodingTest do
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeocoding
 
+  @moduletag :ported_to_ash
+
   describe "geocoding" do
     test "reverse_geocode/1 returns an address from coordinates" do
       timestamp = DateTime.now!("Etc/UTC")

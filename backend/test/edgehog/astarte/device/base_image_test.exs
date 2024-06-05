@@ -23,6 +23,8 @@ defmodule Edgehog.Astarte.Device.BaseImageTest do
 
   alias Edgehog.Astarte.Device.BaseImage
 
+  @moduletag :ported_to_ash
+
   describe "parse_data/1" do
     test "correctly parses Base Image data" do
       data = %{
