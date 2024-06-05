@@ -19,7 +19,10 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
-  use EdgehogWeb.GraphqlCase, async: true
+  use EdgehogWeb.GraphqlCase
+
+  alias Edgehog.PubSub
+  alias Edgehog.OSManagement.OTAOperation
 
   import Edgehog.DevicesFixtures
 
@@ -94,6 +97,24 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       assert %{code: "astarte_api_error", message: message} = extract_error!(result)
       assert message =~ "418"
       assert message =~ "I'm a teapot"
+    end
+
+    test "publishes on PubSub aftering creating the OTA operation", %{tenant: tenant} do
+      assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
+
+      Edgehog.OSManagement.EphemeralImageMock
+      |> expect(:upload, fn _, _, _ -> {:ok, "base_image_url"} end)
+
+      Edgehog.Astarte.Device.OTARequestV1Mock
+      |> expect(:update, fn _client, _astarte_device_id, _uuid, "base_image_url" ->
+        :ok
+      end)
+
+      ota_operation = create_ota_operation_mutation(tenant: tenant) |> extract_result!()
+
+      assert_receive {:ota_operation_created, %OTAOperation{} = ota_operation_event}
+
+      assert AshGraphql.Resource.encode_relay_id(ota_operation_event) == ota_operation["id"]
     end
   end
 
