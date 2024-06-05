@@ -29,9 +29,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
-  describe "process_event for device events" do
-    @describetag :ported_to_ash
+  @moduletag :ported_to_ash
 
+  describe "process_event for device events" do
     setup %{conn: conn, tenant: tenant} do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
@@ -348,10 +348,10 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   end
 
   describe "process_event/2 for OTA updates" do
-    setup do
+    setup %{tenant: tenant} do
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-      device = device_fixture(realm)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
 
       {:ok, cluster: cluster, realm: realm, device: device}
     end
@@ -361,12 +361,12 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         conn: conn,
         realm: realm,
         device: device,
-        tenant: %{slug: tenant_slug}
+        tenant: tenant
       } = context
 
-      ota_operation = manual_ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
 
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
       ota_event = %{
         device_id: device.device_id,
@@ -375,11 +375,11 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           interface: "io.edgehog.devicemanager.OTAEvent",
           path: "/event",
           value: %{
-            requestUUID: ota_operation.id,
-            status: "Downloading",
-            statusProgress: 50,
-            statusCode: nil,
-            message: "Waiting for download to finish"
+            "requestUUID" => ota_operation.id,
+            "status" => "Downloading",
+            "statusProgress" => 50,
+            "statusCode" => nil,
+            "message" => "Waiting for download to finish"
           }
         },
         timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
@@ -392,7 +392,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       assert response(conn, 200)
 
-      operation = OSManagement.get_ota_operation!(ota_operation.id)
+      operation = OSManagement.fetch_ota_operation!(ota_operation.id, tenant: tenant)
 
       assert operation.status == :downloading
       assert operation.status_code == nil
@@ -405,12 +405,12 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         conn: conn,
         realm: realm,
         device: device,
-        tenant: %{slug: tenant_slug}
+        tenant: tenant
       } = context
 
-      ota_operation = manual_ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
 
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
       ota_event = %{
         device_id: device.device_id,
@@ -419,9 +419,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           interface: "io.edgehog.devicemanager.OTAResponse",
           path: "/response",
           value: %{
-            uuid: ota_operation.id,
-            status: "Error",
-            statusCode: "OTAErrorNetwork"
+            "uuid" => ota_operation.id,
+            "status" => "Error",
+            "statusCode" => "OTAErrorNetwork"
           }
         },
         timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
@@ -434,7 +434,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       assert response(conn, 200)
 
-      operation = OSManagement.get_ota_operation!(ota_operation.id)
+      operation = OSManagement.fetch_ota_operation!(ota_operation.id, tenant: tenant)
 
       assert operation.status == :failure
       assert operation.status_code == :network_error
@@ -445,12 +445,12 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         conn: conn,
         realm: realm,
         device: device,
-        tenant: %{slug: tenant_slug}
+        tenant: tenant
       } = context
 
-      ota_operation = manual_ota_operation_fixture(device)
+      ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
 
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant_slug)
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
       ota_event = %{
         device_id: device.device_id,
@@ -459,9 +459,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           interface: "io.edgehog.devicemanager.OTAResponse",
           path: "/response",
           value: %{
-            uuid: ota_operation.id,
-            status: "Error",
-            statusCode: ""
+            "uuid" => ota_operation.id,
+            "status" => "Error",
+            "statusCode" => ""
           }
         },
         timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
@@ -474,7 +474,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       assert response(conn, 200)
 
-      operation = OSManagement.get_ota_operation!(ota_operation.id)
+      operation = OSManagement.fetch_ota_operation!(ota_operation.id, tenant: tenant)
 
       assert operation.status_code == nil
     end
