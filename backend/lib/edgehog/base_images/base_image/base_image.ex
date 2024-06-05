@@ -156,6 +156,9 @@ defmodule Edgehog.BaseImages.BaseImage do
       description "Deletes a base image."
       primary? true
 
+      # Needed because HandleFileDeletion is not atomic
+      require_atomic? false
+
       change Changes.HandleFileDeletion
     end
 
