@@ -157,6 +157,9 @@ defmodule Edgehog.Devices.SystemModel do
       description "Deletes a system model."
       primary? true
 
+      # Needed because HandlePictureDeletion is not atomic
+      require_atomic? false
+
       change {Changes.HandlePictureDeletion, force?: true}
     end
   end
