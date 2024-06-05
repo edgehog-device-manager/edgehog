@@ -23,6 +23,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
   alias Edgehog.Astarte.Realm
   alias Edgehog.Devices.Device
+  alias Edgehog.OSManagement
   alias Edgehog.Triggers.DeviceConnected
   alias Edgehog.Triggers.DeviceDisconnected
   alias Edgehog.Triggers.IncomingData
@@ -100,25 +101,52 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   end
 
   defp handle_event(
-         %IncomingData{interface: @ota_event, path: "/event"} = _event,
-         _tenant,
+         %IncomingData{interface: @ota_event, path: "/event"} = event,
+         tenant,
          _realm_id,
          _device_id,
          _timestamp
        ) do
-    # TODO: implement when we port OS Management context
-    raise "Not implemented"
+    ota_operation_id = event.value["requestUUID"]
+    status = event.value["status"]
+    status_progress = event.value["statusProgress"]
+    # Note: statusCode and message could be nil
+    status_code = event.value["statusCode"]
+    message = event.value["message"]
+
+    status_attrs = %{
+      status_progress: status_progress,
+      status_code: status_code,
+      message: message
+    }
+
+    with {:ok, ota_operation} <-
+           OSManagement.fetch_ota_operation(ota_operation_id, tenant: tenant) do
+      OSManagement.update_ota_operation_status(ota_operation, status, status_attrs)
+    end
   end
 
   defp handle_event(
-         %IncomingData{interface: @ota_response, path: "/response"} = _event,
-         _tenant,
+         %IncomingData{interface: @ota_response, path: "/response"} = event,
+         tenant,
          _realm_id,
          _device_id,
          _timestamp
        ) do
-    # TODO: implement when we port OS Management context
-    raise "Not implemented"
+    ota_operation_id = event.value["uuid"]
+    # Translate the status and status code to the new OTAEvent format
+    status = translate_ota_response_status(event.value["status"])
+    # Note: statusCode could be nil
+    status_code = translate_ota_response_status_code(event.value["statusCode"])
+
+    status_attrs = %{
+      status_code: status_code
+    }
+
+    with {:ok, ota_operation} <-
+           OSManagement.fetch_ota_operation(ota_operation_id, tenant: tenant) do
+      OSManagement.update_ota_operation_status(ota_operation, status, status_attrs)
+    end
   end
 
   defp handle_event(_unhandled_event, tenant, realm_id, device_id, _timestamp) do

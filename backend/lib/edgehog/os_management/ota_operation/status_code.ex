@@ -37,14 +37,14 @@ defmodule Edgehog.OSManagement.OTAOperation.StatusCode do
   # Ash.Type.Enum expects snake case input and lowercases everything
   # This works even with PascalCase inputs if they are a single word, but we
   # need to match explicitly multiword status codes
-  def match("RequestTimeout"), do: :request_timeout
-  def match("InvalidRequest"), do: :invalid_request
-  def match("UpdateAlreadyInProgress"), do: :update_already_in_progress
-  def match("NetworkError"), do: :network_error
-  def match("IOError"), do: :io_error
-  def match("InternalError"), do: :internal_error
-  def match("InvalidBaseImage"), do: :invalid_base_image
-  def match("SystemRollback"), do: :system_rollback
+  def match("RequestTimeout"), do: {:ok, :request_timeout}
+  def match("InvalidRequest"), do: {:ok, :invalid_request}
+  def match("UpdateAlreadyInProgress"), do: {:ok, :update_already_in_progress}
+  def match("NetworkError"), do: {:ok, :network_error}
+  def match("IOError"), do: {:ok, :io_error}
+  def match("InternalError"), do: {:ok, :internal_error}
+  def match("InvalidBaseImage"), do: {:ok, :invalid_base_image}
+  def match("SystemRollback"), do: {:ok, :system_rollback}
   # Fallback to the default (overriden) `match/1` implementation so we still accept
   # atom inputs etc
   def match(term), do: super(term)
