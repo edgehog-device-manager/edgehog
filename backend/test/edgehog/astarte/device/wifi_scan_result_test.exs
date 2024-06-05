@@ -24,14 +24,20 @@ defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.WiFiScanResult
 
+  import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
+
+  @moduletag :ported_to_ash
+
   describe "system_status" do
-    import Edgehog.AstarteFixtures
     import Tesla.Mock
 
     setup do
+      tenant = tenant_fixture()
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-      device = astarte_device_fixture(realm)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
 
       {:ok, appengine_client} =
         AppEngine.new(cluster.base_api_url, realm.name, private_key: realm.private_key)

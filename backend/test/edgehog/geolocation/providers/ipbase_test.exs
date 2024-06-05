@@ -22,24 +22,20 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
   use Edgehog.DataCase, async: true
   use Edgehog.AstarteMockCase
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
   import Tesla.Mock
   alias Edgehog.Astarte.Device.DeviceStatus
-  alias Edgehog.Devices
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.IPBase
 
+  @moduletag :ported_to_ash
+
   describe "ip_geolocation" do
     setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      device = device_fixture(tenant: tenant_fixture())
 
-      device =
-        device_fixture(realm)
-        |> Devices.preload_astarte_resources_for_device()
-
-      {:ok, cluster: cluster, realm: realm, device: device}
+      {:ok, device: device}
     end
 
     test "geolocate/1 returns error without input IP address", %{device: device} do

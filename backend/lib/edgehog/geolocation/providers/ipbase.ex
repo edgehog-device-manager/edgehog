@@ -51,7 +51,7 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
     end
   end
 
-  defp validate_device_status_exists(_nil), do: {:error, :device_status_not_found}
+  defp validate_device_status_exists(nil), do: {:error, :device_status_not_found}
   defp validate_device_status_exists(_), do: :ok
 
   defp geolocate_ip(nil, _timestamp) do

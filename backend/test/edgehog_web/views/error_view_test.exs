@@ -21,6 +21,8 @@
 defmodule EdgehogWeb.ErrorViewTest do
   use EdgehogWeb.ConnCase, async: true
 
+  @moduletag :ported_to_ash
+
   # Bring render/3 and render_to_string/3 for testing custom views
   import Phoenix.View
 
