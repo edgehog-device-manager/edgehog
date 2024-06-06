@@ -92,7 +92,16 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       assert response_rollout_mechanism["forceDowngrade"] ==
                update_campaign.rollout_mechanism.value.force_downgrade
 
-      assert [target] = update_campaign_data["updateTargets"]
+      assert %{
+               "updateTargets" => %{
+                 "edges" => [
+                   %{
+                     "node" => target
+                   }
+                 ]
+               }
+             } = update_campaign_data
+
       assert target["status"] == "IDLE"
 
       assert target["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
@@ -105,14 +114,23 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       document = """
       query {
         updateCampaigns {
-          updateTargets {
-            id
-            status
-            retryCount
-            latestAttempt
-            completionTimestamp
-            otaOperation {
-              id
+          count
+          edges {
+            node {
+              updateTargets {
+                edges {
+                  node {
+                    id
+                    status
+                    retryCount
+                    latestAttempt
+                    completionTimestamp
+                    otaOperation {
+                      id
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -122,7 +140,15 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       [update_campaign_data] =
         update_campaigns_query(document: document, tenant: tenant) |> extract_result!()
 
-      assert [update_target] = update_campaign_data["updateTargets"]
+      assert %{
+               "updateTargets" => %{
+                 "edges" => [
+                   %{
+                     "node" => update_target
+                   }
+                 ]
+               }
+             } = update_campaign_data
 
       assert update_target["id"] == AshGraphql.Resource.encode_relay_id(target)
       assert update_target["status"] == "FAILED"
@@ -139,30 +165,39 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
     default_document = """
     query {
       updateCampaigns {
-        name
-        status
-        outcome
-        rolloutMechanism {
-          ... on PushRollout {
-            maxFailurePercentage
-            maxInProgressUpdates
-            otaRequestRetries
-            otaRequestTimeoutSeconds
-            forceDowngrade
-          }
-        }
-        baseImage {
-          version
-          url
-        }
-        updateChannel {
-          name
-          handle
-        }
-        updateTargets {
-          status
-          device {
-            id
+        count
+        edges {
+          node {
+            name
+            status
+            outcome
+            rolloutMechanism {
+              ... on PushRollout {
+                maxFailurePercentage
+                maxInProgressUpdates
+                otaRequestRetries
+                otaRequestTimeoutSeconds
+                forceDowngrade
+              }
+            }
+            baseImage {
+              version
+              url
+            }
+            updateChannel {
+              name
+              handle
+            }
+            updateTargets {
+              edges {
+                node {
+                  status
+                  device {
+                    id
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -176,15 +211,12 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
   end
 
   defp extract_result!(result) do
-    assert %{
-             data: %{
-               "updateCampaigns" => update_campaigns
-             }
-           } = result
+    assert %{data: %{"updateCampaigns" => %{"count" => count, "edges" => edges}}} = result
+    refute :errors in Map.keys(result)
 
-    refute Map.get(result, :errors)
+    update_campaigns = Enum.map(edges, & &1["node"])
 
-    assert update_campaigns != nil
+    assert length(update_campaigns) == count
 
     update_campaigns
   end

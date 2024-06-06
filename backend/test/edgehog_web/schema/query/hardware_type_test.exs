@@ -25,13 +25,6 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices
-
-  alias Edgehog.Devices.{
-    HardwareType,
-    HardwareTypePartNumber
-  }
-
   describe "hardwareType query" do
     test "returns hardware type if present", %{tenant: tenant} do
       fixture =

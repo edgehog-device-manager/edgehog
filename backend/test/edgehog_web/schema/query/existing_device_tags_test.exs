@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,10 +21,7 @@
 defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
-
-  alias Edgehog.Devices
 
   @moduletag :ported_to_ash
 
@@ -78,7 +75,12 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
     document = """
     query {
       existingDeviceTags {
-        name
+        count
+        edges {
+          node {
+            name
+          }
+        }
       }
     }
     """
@@ -90,8 +92,11 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
 
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
-    assert %{data: %{"existingDeviceTags" => tags}} = result
-    assert tags != nil
+    assert %{data: %{"existingDeviceTags" => %{"count" => count, "edges" => edges}}} = result
+
+    tags = Enum.map(edges, & &1["node"])
+
+    assert length(tags) == count
 
     tags
   end

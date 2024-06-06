@@ -56,10 +56,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          systemModel {
-            id
-            partNumbers {
-              partNumber
+          count
+          edges {
+            node {
+              systemModel {
+                id
+                partNumbers {
+                  partNumber
+                }
+              }
             }
           }
         }
@@ -136,10 +141,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          baseImage {
-            name
-            version
+          count
+          edges {
+            node {
+              deviceId
+              baseImage {
+                name
+                version
+              }
+            }
           }
         }
       }
@@ -175,10 +185,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          batteryStatus {
-            levelPercentage
-            status
+          count
+          edges {
+            node {
+              deviceId
+              batteryStatus {
+                levelPercentage
+                status
+              }
+            }
           }
         }
       }
@@ -221,11 +236,16 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          cellularConnection {
-            slot
-            imei
-            mobileCountryCode
+          count
+          edges {
+            node {
+              deviceId
+              cellularConnection {
+                slot
+                imei
+                mobileCountryCode
+              }
+            }
           }
         }
       }
@@ -265,10 +285,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          hardwareInfo {
-            cpuArchitecture
-            cpuModel
+          count
+          edges {
+            node {
+              deviceId
+              hardwareInfo {
+                cpuArchitecture
+                cpuModel
+              }
+            }
           }
         }
       }
@@ -304,10 +329,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          networkInterfaces {
-            name
-            technology
+          count
+          edges {
+            node {
+              deviceId
+              networkInterfaces {
+                name
+                technology
+              }
+            }
           }
         }
       }
@@ -343,10 +373,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          osInfo {
-            name
-            version
+          count
+          edges {
+            node {
+              deviceId
+              osInfo {
+                name
+                version
+              }
+            }
           }
         }
       }
@@ -382,10 +417,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          runtimeInfo {
-            name
-            version
+          count
+          edges {
+            node {
+              deviceId
+              runtimeInfo {
+                name
+                version
+              }
+            }
           }
         }
       }
@@ -421,10 +461,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          storageUsage {
-            label
-            freeBytes
+          count
+          edges {
+            node {
+              deviceId
+              storageUsage {
+                label
+                freeBytes
+              }
+            }
           }
         }
       }
@@ -460,10 +505,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          systemStatus {
-            taskCount
-            uptimeMilliseconds
+          count
+          edges {
+            node {
+              deviceId
+              systemStatus {
+                taskCount
+                uptimeMilliseconds
+              }
+            }
           }
         }
       }
@@ -499,10 +549,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          wifiScanResults {
-            connected
-            rssi
+          count
+          edges {
+            node {
+              deviceId
+              wifiScanResults {
+                connected
+                rssi
+              }
+            }
           }
         }
       }
@@ -536,9 +591,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          deviceGroups {
-            name
+          count
+          edges {
+            node {
+              deviceId
+              deviceGroups {
+                name
+              }
+            }
           }
         }
       }
@@ -611,12 +671,17 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
       query Devices($filter: DeviceFilterInput, $sort: [DeviceSortInput]) {
         devices(filter: $filter, sort: $sort) {
-          name
-          deviceId
-          online
-          lastConnection
-          lastDisconnection
-          serialNumber
+          count
+          edges {
+            node {
+              name
+              deviceId
+              online
+              lastConnection
+              lastDisconnection
+              serialNumber
+            }
+          }
         }
       }
       """
@@ -635,8 +700,11 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
-    assert %{data: %{"devices" => devices}} = result
-    assert devices != nil
+    assert %{data: %{"devices" => %{"count" => count, "edges" => edges}}} = result
+
+    devices = Enum.map(edges, & &1["node"])
+
+    assert length(devices) == count
 
     devices
   end

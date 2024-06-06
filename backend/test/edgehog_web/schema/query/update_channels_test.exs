@@ -43,7 +43,17 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
       assert update_channel_data["id"] == AshGraphql.Resource.encode_relay_id(update_channel)
       assert update_channel_data["handle"] == update_channel.handle
       assert update_channel_data["name"] == update_channel.name
-      assert [target_group_data] = update_channel_data["targetGroups"]
+
+      assert %{
+               "targetGroups" => %{
+                 "edges" => [
+                   %{
+                     "node" => target_group_data
+                   }
+                 ]
+               }
+             } = update_channel_data
+
       assert target_group_data["id"] == AshGraphql.Resource.encode_relay_id(target_group)
       assert target_group_data["handle"] == target_group.handle
       assert target_group_data["name"] == target_group.name
@@ -54,13 +64,22 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
     default_document = """
     query {
       updateChannels {
-        id
-        handle
-        name
-        targetGroups {
-          id
-          name
-          handle
+        count
+        edges {
+          node {
+            id
+            handle
+            name
+            targetGroups {
+              edges {
+                node {
+                  id
+                  name
+                  handle
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -73,15 +92,12 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
   end
 
   defp extract_result!(result) do
-    assert %{
-             data: %{
-               "updateChannels" => update_channels
-             }
-           } = result
+    assert %{data: %{"updateChannels" => %{"count" => count, "edges" => edges}}} = result
+    refute :errors in Map.keys(result)
 
-    refute Map.get(result, :errors)
+    update_channels = Enum.map(edges, & &1["node"])
 
-    assert update_channels != nil
+    assert length(update_channels) == count
 
     update_channels
   end

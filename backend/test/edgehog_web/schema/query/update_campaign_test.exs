@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.UpdateCampaign
-
   @moduletag :ported_to_ash
 
   describe "updateCampaign query" do
@@ -92,7 +90,17 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       assert response_rollout_mechanism["forceDowngrade"] ==
                update_campaign.rollout_mechanism.value.force_downgrade
 
-      assert [target] = update_campaign_data["updateTargets"]
+      assert %{
+               "updateTargets" => %{
+                 "count" => 1,
+                 "edges" => [
+                   %{
+                     "node" => target
+                   }
+                 ]
+               }
+             } = update_campaign_data
+
       assert target["status"] == "IDLE"
 
       assert target["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
@@ -119,13 +127,18 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       query ($id: ID!) {
         updateCampaign(id: $id) {
           updateTargets {
-            id
-            status
-            retryCount
-            latestAttempt
-            completionTimestamp
-            otaOperation {
-              id
+            count
+            edges {
+              node {
+                id
+                status
+                retryCount
+                latestAttempt
+                completionTimestamp
+                otaOperation {
+                  id
+                }
+              }
             }
           }
         }
@@ -136,7 +149,16 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
         update_campaign_query(document: document, id: update_campaign_id, tenant: tenant)
         |> extract_result!()
 
-      assert [update_target] = update_campaign_data["updateTargets"]
+      assert %{
+               "updateTargets" => %{
+                 "count" => 1,
+                 "edges" => [
+                   %{
+                     "node" => update_target
+                   }
+                 ]
+               }
+             } = update_campaign_data
 
       assert update_target["id"] == AshGraphql.Resource.encode_relay_id(target)
       assert update_target["status"] == "SUCCESSFUL"
@@ -195,7 +217,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       end
 
       # Re-read the update campaign from the database so we have the targets with the updated status
-      Ash.get!(UpdateCampaign, update_campaign.id, tenant: tenant, load: :update_targets)
+      UpdateCampaigns.fetch_campaign!(update_campaign.id, tenant: tenant, load: :update_targets)
     end
 
     test "returns update campaign stats", %{tenant: tenant} do
@@ -260,9 +282,14 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
           handle
         }
         updateTargets {
-          status
-          device {
-            id
+          count
+          edges {
+            node {
+              status
+              device {
+                id
+              }
+            }
           }
         }
       }

@@ -25,14 +25,9 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices.{
-    SystemModel,
-    SystemModelPartNumber
-  }
-
   describe "systemModels query" do
     test "returns empty system models", %{tenant: tenant} do
-      assert %{data: %{"systemModels" => []}} == system_models_query(tenant: tenant)
+      assert [] == system_models_query(tenant: tenant) |> extract_result!()
     end
 
     test "returns system models if they're present", %{tenant: tenant} do
@@ -46,7 +41,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         )
         |> Ash.load!(:part_number_strings)
 
-      assert %{data: %{"systemModels" => [system_model]}} = system_models_query(tenant: tenant)
+      assert [system_model] = system_models_query(tenant: tenant) |> extract_result!()
 
       assert system_model["name"] == fixture.name
       assert system_model["handle"] == fixture.handle
@@ -73,8 +68,8 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         ]
       }
 
-      assert %{data: %{"systemModels" => system_models}} =
-               system_models_query(tenant: tenant, filter: filter)
+      assert system_models =
+               system_models_query(tenant: tenant, filter: filter) |> extract_result!()
 
       assert length(system_models) == 2
       assert "foo" in Enum.map(system_models, & &1["handle"])
@@ -91,8 +86,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         %{"field" => "HANDLE", "order" => "ASC"}
       ]
 
-      assert %{data: %{"systemModels" => system_models}} =
-               system_models_query(tenant: tenant, sort: sort)
+      assert system_models = system_models_query(tenant: tenant, sort: sort) |> extract_result!()
 
       assert [
                %{"handle" => "1"},
@@ -107,14 +101,19 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       """
       query SystemModels($filter: SystemModelFilterInput, $sort: [SystemModelSortInput]) {
         systemModels(filter: $filter, sort: $sort) {
-          name
-          handle
-          pictureUrl
-          partNumbers {
-            partNumber
-          }
-          hardwareType {
-            id
+          count
+          edges {
+            node {
+              name
+              handle
+              pictureUrl
+              partNumbers {
+                partNumber
+              }
+              hardwareType {
+                id
+              }
+            }
           }
         }
       }
@@ -123,9 +122,6 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
     document = Keyword.get(opts, :document, default_document)
 
-    filter = opts[:filter]
-    sort = opts[:sort]
-
     variables =
       %{
         "filter" => opts[:filter],
@@ -133,5 +129,16 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       }
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    assert %{data: %{"systemModels" => %{"count" => count, "edges" => edges}}} = result
+    refute :errors in Map.keys(result)
+
+    system_models = Enum.map(edges, & &1["node"])
+
+    assert length(system_models) == count
+
+    system_models
   end
 end
