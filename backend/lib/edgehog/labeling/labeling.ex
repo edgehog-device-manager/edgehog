@@ -29,7 +29,10 @@ defmodule Edgehog.Labeling do
     root_level_errors? true
 
     queries do
-      list Edgehog.Labeling.Tag, :existing_device_tags, :assigned_to_devices
+      list Edgehog.Labeling.Tag, :existing_device_tags, :read_assigned_to_devices do
+        relay? true
+        paginate_with :keyset
+      end
     end
   end
 

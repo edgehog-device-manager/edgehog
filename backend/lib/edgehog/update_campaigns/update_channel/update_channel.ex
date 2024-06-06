@@ -39,6 +39,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
   graphql do
     type :update_channel
+
+    paginate_relationship_with target_groups: :relay
   end
 
   actions do

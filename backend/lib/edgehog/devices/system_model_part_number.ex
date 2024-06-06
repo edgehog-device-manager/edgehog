@@ -27,6 +27,8 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
 
   graphql do
     type :system_model_part_number
+
+    paginate_relationship_with devices: :relay
   end
 
   actions do

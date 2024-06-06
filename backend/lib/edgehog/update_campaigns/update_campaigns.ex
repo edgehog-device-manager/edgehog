@@ -38,7 +38,8 @@ defmodule Edgehog.UpdateCampaigns do
 
       list Edgehog.UpdateCampaigns.UpdateCampaign, :update_campaigns, :read do
         description "Returns a list of update campaigns."
-        paginate_with nil
+        relay? true
+        paginate_with :keyset
       end
 
       get Edgehog.UpdateCampaigns.UpdateChannel, :update_channel, :read do
@@ -47,7 +48,8 @@ defmodule Edgehog.UpdateCampaigns do
 
       list Edgehog.UpdateCampaigns.UpdateChannel, :update_channels, :read do
         description "Returns a list of update channels."
-        paginate_with nil
+        relay? true
+        paginate_with :keyset
       end
     end
 

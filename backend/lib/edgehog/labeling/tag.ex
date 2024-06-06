@@ -48,8 +48,9 @@ defmodule Edgehog.Labeling.Tag do
       change {Edgehog.Changes.NormalizeTagName, attribute: :name}
     end
 
-    read :assigned_to_devices do
+    read :read_assigned_to_devices do
       description "Returns Tags currently assigned to some device."
+      pagination keyset?: true
       prepare build(filter: expr(exists(device_tags, true)))
     end
   end
