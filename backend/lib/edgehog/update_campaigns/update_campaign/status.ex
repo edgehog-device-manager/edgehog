@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,15 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.UpdateCampaignStats do
-  use TypedStruct
+defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Status do
+  use Ash.Type.Enum,
+    values: [
+      idle: "The update campaign has been created but is not being rolled-out yet.",
+      in_progress: "The update campaign is being rolled-out.",
+      finished: "The update campaign has finished."
+    ]
 
-  @typedoc "A struct representing Update Campaign stats"
-  typedstruct enforce: true do
-    field :total_target_count, non_neg_integer()
-    field :idle_target_count, non_neg_integer()
-    field :in_progress_target_count, non_neg_integer()
-    field :failed_target_count, non_neg_integer()
-    field :successful_target_count, non_neg_integer()
-  end
+  def graphql_type(_), do: :update_campaign_status
 end

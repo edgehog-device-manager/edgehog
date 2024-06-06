@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures
@@ -28,14 +28,16 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
 
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
+  @moduletag :ported_to_ash
+
   describe "updateCampaign query" do
-    setup do
-      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
-      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
-      base_image = base_image_fixture()
+    setup %{tenant: tenant} do
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      base_image = base_image_fixture(tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image)
+        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
         |> add_tags(["foobar"])
 
       context = %{
@@ -49,19 +51,22 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
 
     test "returns update campaign if present", ctx do
       %{
-        conn: conn,
-        api_path: api_path,
         update_channel: update_channel,
         base_image: base_image,
-        device: device
+        device: device,
+        tenant: tenant
       } = ctx
 
       update_campaign =
-        update_campaign_fixture(base_image: base_image, update_channel: update_channel)
+        update_campaign_fixture(
+          base_image_id: base_image.id,
+          update_channel_id: update_channel.id,
+          tenant: tenant
+        )
 
-      response = update_campaign_query(conn, api_path, update_campaign)
+      id = AshGraphql.Resource.encode_relay_id(update_campaign)
 
-      update_campaign_data = response["data"]["updateCampaign"]
+      update_campaign_data = update_campaign_query(tenant: tenant, id: id) |> extract_result!()
 
       assert update_campaign_data["name"] == update_campaign.name
       assert update_campaign_data["status"] == "IDLE"
@@ -73,44 +78,44 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       assert response_rollout_mechanism = update_campaign_data["rolloutMechanism"]
 
       assert response_rollout_mechanism["maxFailurePercentage"] ==
-               update_campaign.rollout_mechanism.max_failure_percentage
+               update_campaign.rollout_mechanism.value.max_failure_percentage
 
       assert response_rollout_mechanism["maxInProgressUpdates"] ==
-               update_campaign.rollout_mechanism.max_in_progress_updates
+               update_campaign.rollout_mechanism.value.max_in_progress_updates
 
       assert response_rollout_mechanism["otaRequestRetries"] ==
-               update_campaign.rollout_mechanism.ota_request_retries
+               update_campaign.rollout_mechanism.value.ota_request_retries
 
       assert response_rollout_mechanism["otaRequestTimeoutSeconds"] ==
-               update_campaign.rollout_mechanism.ota_request_timeout_seconds
+               update_campaign.rollout_mechanism.value.ota_request_timeout_seconds
 
       assert response_rollout_mechanism["forceDowngrade"] ==
-               update_campaign.rollout_mechanism.force_downgrade
+               update_campaign.rollout_mechanism.value.force_downgrade
 
       assert [target] = update_campaign_data["updateTargets"]
       assert target["status"] == "IDLE"
 
-      assert target["device"]["id"] ==
-               Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema)
+      assert target["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
     end
 
-    test "returns not found if non existing", %{conn: conn, api_path: api_path} do
-      response = update_campaign_query(conn, api_path, 1_234_567)
-      assert response["data"]["updateCampaign"] == nil
-      assert [%{"code" => "not_found", "status_code" => 404}] = response["errors"]
+    test "returns nil if non existing", %{tenant: tenant} do
+      id = non_existing_update_campaign_id(tenant)
+
+      result = update_campaign_query(tenant: tenant, id: id)
+
+      assert result == %{data: %{"updateCampaign" => nil}}
     end
 
-    test "returns all UpdateTarget fields", ctx do
-      %{
-        conn: conn,
-        api_path: api_path
-      } = ctx
-
+    test "returns all UpdateTarget fields", %{tenant: tenant} do
       now = DateTime.utc_now()
-      target = successful_target_fixture(now: now)
-      update_campaign_id = target.update_campaign_id
 
-      query = """
+      target =
+        successful_target_fixture(now: now, tenant: tenant)
+        |> Ash.load!([:update_campaign, :ota_operation])
+
+      update_campaign_id = AshGraphql.Resource.encode_relay_id(target.update_campaign)
+
+      document = """
       query ($id: ID!) {
         updateCampaign(id: $id) {
           updateTargets {
@@ -127,38 +132,44 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       }
       """
 
-      response = update_campaign_query(conn, api_path, update_campaign_id, query: query)
+      update_campaign_data =
+        update_campaign_query(document: document, id: update_campaign_id, tenant: tenant)
+        |> extract_result!()
 
-      assert [update_target] = response["data"]["updateCampaign"]["updateTargets"]
+      assert [update_target] = update_campaign_data["updateTargets"]
 
-      assert {:ok, %{id: update_target_id, type: :update_target}} =
-               update_target["id"]
-               |> Absinthe.Relay.Node.from_global_id(EdgehogWeb.Schema)
-
-      assert to_string(target.id) == update_target_id
+      assert update_target["id"] == AshGraphql.Resource.encode_relay_id(target)
       assert update_target["status"] == "SUCCESSFUL"
       assert update_target["retryCount"] == 0
       assert update_target["latestAttempt"] == DateTime.to_iso8601(now)
       assert update_target["completionTimestamp"] == DateTime.to_iso8601(now)
 
-      assert {:ok, %{id: ota_operation_id, type: :ota_operation}} =
-               update_target["otaOperation"]["id"]
-               |> Absinthe.Relay.Node.from_global_id(EdgehogWeb.Schema)
-
-      assert ota_operation_id == target.ota_operation_id
+      assert update_target["otaOperation"]["id"] ==
+               AshGraphql.Resource.encode_relay_id(target.ota_operation)
     end
   end
 
-  describe "updateCampaign stats field" do
-    defp update_target_status!(target, status) do
-      Ecto.Changeset.change(target, status: status)
-      |> Edgehog.Repo.update!()
+  describe "updateCampaign stats" do
+    alias Edgehog.UpdateCampaigns
+
+    defp update_target_status!(target, :in_progress) do
+      UpdateCampaigns.mark_target_as_in_progress(target)
     end
 
-    defp update_campaign_for_stats_fixture do
+    defp update_target_status!(target, :failed) do
+      UpdateCampaigns.mark_target_as_failed(target)
+    end
+
+    defp update_target_status!(target, :successful) do
+      UpdateCampaigns.mark_target_as_successful(target)
+    end
+
+    defp update_campaign_for_stats_fixture(tenant) do
       target_count = Enum.random(20..40)
 
-      update_campaign = update_campaign_with_targets_fixture(target_count)
+      update_campaign =
+        update_campaign_with_targets_fixture(target_count, tenant: tenant)
+        |> Ash.load!(:update_targets)
 
       # Pick some targets to be put in a different status
       in_progress_target_count = Enum.random(0..5)
@@ -184,92 +195,110 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       end
 
       # Re-read the update campaign from the database so we have the targets with the updated status
-      {:ok, update_campaign} = Edgehog.UpdateCampaigns.fetch_update_campaign(update_campaign.id)
-
-      update_campaign
+      Ash.get!(UpdateCampaign, update_campaign.id, tenant: tenant, load: :update_targets)
     end
 
-    test "returns update campaign stats", ctx do
-      %{
-        conn: conn,
-        api_path: api_path
-      } = ctx
+    test "returns update campaign stats", %{tenant: tenant} do
+      update_campaign = update_campaign_for_stats_fixture(tenant)
 
-      update_campaign = update_campaign_for_stats_fixture()
-
-      query = """
+      document = """
       query ($id: ID!) {
         updateCampaign(id: $id) {
-          stats {
-            totalTargetCount
-            idleTargetCount
-            inProgressTargetCount
-            failedTargetCount
-            successfulTargetCount
-          }
+          totalTargetCount
+          idleTargetCount
+          inProgressTargetCount
+          failedTargetCount
+          successfulTargetCount
         }
       }
       """
 
-      response = update_campaign_query(conn, api_path, update_campaign, query: query)
+      update_campaign_id = AshGraphql.Resource.encode_relay_id(update_campaign)
 
-      assert stats = response["data"]["updateCampaign"]["stats"]
+      update_campaign_data =
+        update_campaign_query(document: document, id: update_campaign_id, tenant: tenant)
+        |> extract_result!()
 
       targets = update_campaign.update_targets
 
-      assert stats["totalTargetCount"] == length(targets)
-      assert stats["idleTargetCount"] == Enum.count(targets, &(&1.status == :idle))
-      assert stats["inProgressTargetCount"] == Enum.count(targets, &(&1.status == :in_progress))
-      assert stats["failedTargetCount"] == Enum.count(targets, &(&1.status == :failed))
-      assert stats["successfulTargetCount"] == Enum.count(targets, &(&1.status == :successful))
+      assert update_campaign_data["totalTargetCount"] == length(targets)
+      assert update_campaign_data["idleTargetCount"] == Enum.count(targets, &(&1.status == :idle))
+
+      assert update_campaign_data["inProgressTargetCount"] ==
+               Enum.count(targets, &(&1.status == :in_progress))
+
+      assert update_campaign_data["failedTargetCount"] ==
+               Enum.count(targets, &(&1.status == :failed))
+
+      assert update_campaign_data["successfulTargetCount"] ==
+               Enum.count(targets, &(&1.status == :successful))
     end
   end
 
-  @query """
-  query ($id: ID!) {
-    updateCampaign(id: $id) {
-      name
-      status
-      outcome
-      rolloutMechanism {
-        ... on PushRollout {
-          maxFailurePercentage
-          maxInProgressUpdates
-          otaRequestRetries
-          otaRequestTimeoutSeconds
-          forceDowngrade
-        }
-      }
-      baseImage {
-        version
-        url
-      }
-      updateChannel {
+  defp update_campaign_query(opts) do
+    default_document = """
+    query ($id: ID!) {
+      updateCampaign(id: $id) {
         name
-        handle
-      }
-      updateTargets {
         status
-        device {
-          id
+        outcome
+        rolloutMechanism {
+          ... on PushRollout {
+            maxFailurePercentage
+            maxInProgressUpdates
+            otaRequestRetries
+            otaRequestTimeoutSeconds
+            forceDowngrade
+          }
+        }
+        baseImage {
+          version
+          url
+        }
+        updateChannel {
+          name
+          handle
+        }
+        updateTargets {
+          status
+          device {
+            id
+          }
         }
       }
     }
-  }
-  """
-  defp update_campaign_query(conn, api_path, target, opts \\ [])
+    """
 
-  defp update_campaign_query(conn, api_path, %UpdateCampaign{} = update_campaign, opts) do
-    update_campaign_query(conn, api_path, update_campaign.id, opts)
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
+
+    variables = %{"id" => id}
+
+    document = Keyword.get(opts, :document, default_document)
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 
-  defp update_campaign_query(conn, api_path, id, opts) do
-    id = Absinthe.Relay.Node.to_global_id(:update_campaign, id, EdgehogWeb.Schema)
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "updateCampaign" => update_campaign
+             }
+           } = result
 
-    variables = %{id: id}
-    query = Keyword.get(opts, :query, @query)
-    conn = get(conn, api_path, query: query, variables: variables)
+    refute Map.get(result, :errors)
 
-    json_response(conn, 200)
+    assert update_campaign != nil
+
+    update_campaign
+  end
+
+  defp non_existing_update_campaign_id(tenant) do
+    fixture = update_campaign_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+
+    :ok = Ash.destroy!(fixture)
+
+    id
   end
 end

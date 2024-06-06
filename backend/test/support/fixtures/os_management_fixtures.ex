@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ defmodule Edgehog.OSManagementFixtures do
   entities via the `Edgehog.OSManagement` context.
   """
 
+  alias Edgehog.BaseImagesFixtures
   alias Edgehog.DevicesFixtures
 
   @doc """
@@ -46,7 +47,7 @@ defmodule Edgehog.OSManagementFixtures do
       })
 
     Edgehog.OSManagement.OTAOperation
-    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end
 
@@ -54,7 +55,24 @@ defmodule Edgehog.OSManagementFixtures do
   Generate a managed ota_operation.
   """
   def managed_ota_operation_fixture(opts \\ []) do
-    # TODO: implement this when we implement update campaigns
-    raise "Not implemented"
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        DevicesFixtures.device_fixture(tenant: tenant) |> Map.fetch!(:id)
+      end)
+
+    base_image = BaseImagesFixtures.base_image_fixture(tenant: tenant)
+
+    params =
+      opts
+      |> Enum.into(%{
+        base_image_url: base_image.url,
+        device_id: device_id
+      })
+
+    Edgehog.OSManagement.OTAOperation
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
   end
 end

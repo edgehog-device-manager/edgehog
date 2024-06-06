@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,23 +18,26 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.OSManagement do
-  use Ash.Domain,
-    extensions: [
-      AshGraphql.Domain
+defmodule Edgehog.UpdateCampaigns.RolloutMechanism do
+  use Ash.Type.NewType,
+    subtype_of: :union,
+    constraints: [
+      storage: :map_with_tag,
+      types: [
+        push: [
+          tag: :type,
+          tag_value: :push,
+          type: Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout,
+          cast_tag?: true
+        ]
+      ]
     ]
 
-  graphql do
-    root_level_errors? true
-  end
+  use AshGraphql.Type
 
-  resources do
-    resource Edgehog.OSManagement.OTAOperation do
-      define :fetch_ota_operation, action: :read, get_by: [:id], not_found_error?: true
-      define :create_managed_ota_operation, action: :create_managed
-      define :mark_ota_operation_as_timed_out, action: :mark_as_timed_out
-      define :update_ota_operation_status, action: :update_status, args: [:status]
-      define :send_update_request, args: [:ota_operation]
-    end
-  end
+  @impl AshGraphql.Type
+  def graphql_type(_), do: :rollout_mechanism
+
+  @impl AshGraphql.Type
+  def graphql_unnested_unions(_constraints), do: [:push]
 end

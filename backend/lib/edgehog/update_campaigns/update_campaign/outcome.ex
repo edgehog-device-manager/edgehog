@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,23 +18,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.OSManagement do
-  use Ash.Domain,
-    extensions: [
-      AshGraphql.Domain
+defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Outcome do
+  use Ash.Type.Enum,
+    values: [
+      success: "The update campaign has finished succesfully.",
+      failure: "The update campaign has finished with a failure."
     ]
 
-  graphql do
-    root_level_errors? true
-  end
-
-  resources do
-    resource Edgehog.OSManagement.OTAOperation do
-      define :fetch_ota_operation, action: :read, get_by: [:id], not_found_error?: true
-      define :create_managed_ota_operation, action: :create_managed
-      define :mark_ota_operation_as_timed_out, action: :mark_as_timed_out
-      define :update_ota_operation_status, action: :update_status, args: [:status]
-      define :send_update_request, args: [:ota_operation]
-    end
-  end
+  def graphql_type(_), do: :update_campaign_outcome
 end

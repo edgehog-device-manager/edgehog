@@ -51,9 +51,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
   actions do
     defaults [:read, :destroy]
 
-    create :create do
-      primary? true
-
+    create :create_fixture do
       accept [
         :base_image_url,
         :status,
@@ -63,6 +61,15 @@ defmodule Edgehog.OSManagement.OTAOperation do
         :manual?,
         :device_id
       ]
+    end
+
+    create :create_managed do
+      description "Initiates an OTA update with base image's URL"
+
+      accept [:base_image_url, :device_id]
+
+      change Changes.SendUpdateRequest
+      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_created}
     end
 
     create :manual do
@@ -90,6 +97,29 @@ defmodule Edgehog.OSManagement.OTAOperation do
       change set_attribute(:manual?, true)
       change Changes.HandleEphemeralImageUpload
       change Changes.SendUpdateRequest
+      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_created}
+    end
+
+    update :mark_as_timed_out do
+      # Needed because Edgehog.Changes.PublishNotification is not atomic
+      require_atomic? false
+
+      change set_attribute(:status, :failure)
+      change set_attribute(:status_code, :request_timeout)
+      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_updated}
+
+      # TODO: cleanup base image for manual operations
+    end
+
+    update :update_status do
+      accept [:status, :status_progress, :status_code, :message]
+
+      # Needed because Edgehog.Changes.PublishNotification is not atomic
+      require_atomic? false
+
+      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_updated}
+
+      # TODO: cleanup base image for manual operations reaching a terminal status
     end
 
     action :send_update_request do

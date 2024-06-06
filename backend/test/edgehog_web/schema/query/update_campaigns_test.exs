@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,21 +19,23 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
+  @moduletag :ported_to_ash
+
   describe "updateCampaigns query" do
-    setup do
-      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
-      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
-      base_image = base_image_fixture()
+    setup %{tenant: tenant} do
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      base_image = base_image_fixture(tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image)
+        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
         |> add_tags(["foobar"])
 
       context = %{
@@ -45,26 +47,26 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       {:ok, context}
     end
 
-    test "returns empty update campaigns", %{conn: conn, api_path: api_path} do
-      response = update_campaigns_query(conn, api_path)
-      assert response["data"]["updateCampaigns"] == []
+    test "returns empty update campaigns", %{tenant: tenant} do
+      assert [] == update_campaigns_query(tenant: tenant) |> extract_result!()
     end
 
     test "returns update campaigns if present", ctx do
       %{
-        conn: conn,
-        api_path: api_path,
+        tenant: tenant,
         update_channel: update_channel,
         base_image: base_image,
         device: device
       } = ctx
 
       update_campaign =
-        update_campaign_fixture(base_image: base_image, update_channel: update_channel)
+        update_campaign_fixture(
+          base_image_id: base_image.id,
+          update_channel_id: update_channel.id,
+          tenant: tenant
+        )
 
-      response = update_campaigns_query(conn, api_path)
-
-      [update_campaign_data] = response["data"]["updateCampaigns"]
+      [update_campaign_data] = update_campaigns_query(tenant: tenant) |> extract_result!()
 
       assert update_campaign_data["name"] == update_campaign.name
       assert update_campaign_data["status"] == "IDLE"
@@ -76,37 +78,31 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       assert response_rollout_mechanism = update_campaign_data["rolloutMechanism"]
 
       assert response_rollout_mechanism["maxFailurePercentage"] ==
-               update_campaign.rollout_mechanism.max_failure_percentage
+               update_campaign.rollout_mechanism.value.max_failure_percentage
 
       assert response_rollout_mechanism["maxInProgressUpdates"] ==
-               update_campaign.rollout_mechanism.max_in_progress_updates
+               update_campaign.rollout_mechanism.value.max_in_progress_updates
 
       assert response_rollout_mechanism["otaRequestRetries"] ==
-               update_campaign.rollout_mechanism.ota_request_retries
+               update_campaign.rollout_mechanism.value.ota_request_retries
 
       assert response_rollout_mechanism["otaRequestTimeoutSeconds"] ==
-               update_campaign.rollout_mechanism.ota_request_timeout_seconds
+               update_campaign.rollout_mechanism.value.ota_request_timeout_seconds
 
       assert response_rollout_mechanism["forceDowngrade"] ==
-               update_campaign.rollout_mechanism.force_downgrade
+               update_campaign.rollout_mechanism.value.force_downgrade
 
       assert [target] = update_campaign_data["updateTargets"]
       assert target["status"] == "IDLE"
 
-      assert target["device"]["id"] ==
-               Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema)
+      assert target["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
     end
 
-    test "returns all UpdateTarget fields", ctx do
-      %{
-        conn: conn,
-        api_path: api_path
-      } = ctx
-
+    test "returns all UpdateTarget fields", %{tenant: tenant} do
       now = DateTime.utc_now()
-      target = failed_target_fixture(now: now)
+      target = failed_target_fixture(now: now, tenant: tenant) |> Ash.load!(:ota_operation)
 
-      query = """
+      document = """
       query {
         updateCampaigns {
           updateTargets {
@@ -123,65 +119,73 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       }
       """
 
-      response = update_campaigns_query(conn, api_path, query: query)
+      [update_campaign_data] =
+        update_campaigns_query(document: document, tenant: tenant) |> extract_result!()
 
-      assert [update_campaign_data] = response["data"]["updateCampaigns"]
       assert [update_target] = update_campaign_data["updateTargets"]
 
-      assert {:ok, %{id: update_target_id, type: :update_target}} =
-               update_target["id"]
-               |> Absinthe.Relay.Node.from_global_id(EdgehogWeb.Schema)
-
-      assert to_string(target.id) == update_target_id
+      assert update_target["id"] == AshGraphql.Resource.encode_relay_id(target)
       assert update_target["status"] == "FAILED"
       assert update_target["retryCount"] == 0
       assert update_target["latestAttempt"] == DateTime.to_iso8601(now)
       assert update_target["completionTimestamp"] == DateTime.to_iso8601(now)
 
-      assert {:ok, %{id: ota_operation_id, type: :ota_operation}} =
-               update_target["otaOperation"]["id"]
-               |> Absinthe.Relay.Node.from_global_id(EdgehogWeb.Schema)
-
-      assert ota_operation_id == target.ota_operation_id
+      assert update_target["otaOperation"]["id"] ==
+               AshGraphql.Resource.encode_relay_id(target.ota_operation)
     end
   end
 
-  @query """
-  query {
-    updateCampaigns {
-      name
-      status
-      outcome
-      rolloutMechanism {
-        ... on PushRollout {
-          maxFailurePercentage
-          maxInProgressUpdates
-          otaRequestRetries
-          otaRequestTimeoutSeconds
-          forceDowngrade
-        }
-      }
-      baseImage {
-        version
-        url
-      }
-      updateChannel {
+  defp update_campaigns_query(opts) do
+    default_document = """
+    query {
+      updateCampaigns {
         name
-        handle
-      }
-      updateTargets {
         status
-        device {
-          id
+        outcome
+        rolloutMechanism {
+          ... on PushRollout {
+            maxFailurePercentage
+            maxInProgressUpdates
+            otaRequestRetries
+            otaRequestTimeoutSeconds
+            forceDowngrade
+          }
+        }
+        baseImage {
+          version
+          url
+        }
+        updateChannel {
+          name
+          handle
+        }
+        updateTargets {
+          status
+          device {
+            id
+          }
         }
       }
     }
-  }
-  """
-  defp update_campaigns_query(conn, api_path, opts \\ []) do
-    query = Keyword.get(opts, :query, @query)
-    conn = get(conn, api_path, query: query)
+    """
 
-    json_response(conn, 200)
+    tenant = Keyword.fetch!(opts, :tenant)
+    document = Keyword.get(opts, :document, default_document)
+
+    Absinthe.run!(document, EdgehogWeb.Schema, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "updateCampaigns" => update_campaigns
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert update_campaigns != nil
+
+    update_campaigns
   end
 end

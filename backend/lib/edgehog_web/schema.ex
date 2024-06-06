@@ -71,7 +71,7 @@ defmodule EdgehogWeb.Schema do
       %Edgehog.UpdateCampaigns.UpdateCampaign{}, _ ->
         :update_campaign
 
-      %Edgehog.UpdateCampaigns.Target{}, _ ->
+      %Edgehog.UpdateCampaigns.UpdateTarget{}, _ ->
         :update_target
 
       _, _ ->

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,30 +19,17 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.Resumer.Core do
-  import Ecto.Query
-  alias Edgehog.Repo
   alias Edgehog.UpdateCampaigns.UpdateCampaign
+
+  require Ash.Query
 
   @doc """
   Returns a stream of all resumable update campaigns.
   """
   def stream_resumable_update_campaigns do
-    query =
-      from u in UpdateCampaign,
-        where: u.status in [:idle, :in_progress]
-
     # We stream the result so we don't have to load all the update campaigns in memory at once
-    Repo.stream(query, skip_tenant_id: true)
-  end
-
-  @doc """
-  Executes `fun` for each Update Campaign contained in `stream`.
-
-  The stream is unrolled in a transaction as required by Ecto docs.
-  """
-  def for_each_update_campaign(stream, fun) when is_function(fun, 1) do
-    {:ok, _} = Repo.transaction(fn -> Enum.each(stream, fun) end)
-
-    :ok
+    UpdateCampaign
+    |> Ash.Query.for_read(:read_all_resumable)
+    |> Ash.stream!()
   end
 end
