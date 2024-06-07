@@ -113,6 +113,5 @@ defmodule EdgehogWeb.Schema do
   end
 
   mutation do
-    import_fields :astarte_mutations
   end
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -211,22 +211,4 @@ defmodule EdgehogWeb.Resolvers.Astarte do
   defp battery_status_to_enum("Removed"), do: {:ok, :removed}
   defp battery_status_to_enum("Unknown"), do: {:ok, :unknown}
   defp battery_status_to_enum(_), do: {:error, :invalid_battery_status}
-
-  def set_led_behavior(%{device_id: id, behavior: behavior}, _resolution) do
-    device =
-      id
-      |> Devices.get_device!()
-      |> Devices.preload_astarte_resources_for_device()
-
-    with {:ok, client} <- Devices.appengine_client_from_device(device),
-         {:ok, led_behavior} <- led_behavior_from_enum(behavior),
-         :ok <- Astarte.send_led_behavior(client, device.device_id, led_behavior) do
-      {:ok, %{behavior: behavior}}
-    end
-  end
-
-  defp led_behavior_from_enum(:blink), do: {:ok, "Blink60Seconds"}
-  defp led_behavior_from_enum(:double_blink), do: {:ok, "DoubleBlink60Seconds"}
-  defp led_behavior_from_enum(:slow_blink), do: {:ok, "SlowBlink60Seconds"}
-  defp led_behavior_from_enum(_), do: {:error, "Unknown led behavior"}
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,63 +19,131 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
-  use EdgehogWeb.ConnCase, async: true
-  use Edgehog.AstarteMockCase
+  use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.AstarteFixtures
-  import Edgehog.DevicesFixtures
+  @moduletag :ported_to_ash
 
-  describe "SetLedBehavior field" do
-    setup do
-      device =
-        cluster_fixture()
-        |> realm_fixture()
-        |> device_fixture()
+  alias Edgehog.DevicesFixtures
 
-      {:ok, device: device}
+  describe "SetLedBehavior mutation" do
+    test "sets BLINK led behavior for the specified device", %{tenant: tenant} do
+      {astarte_device_id, graphql_id} = sample_device_id(tenant)
+
+      Edgehog.Astarte.Device.LedBehaviorMock
+      |> expect(:post, 1, fn _client, ^astarte_device_id, "Blink60Seconds" -> :ok end)
+
+      result = set_led_behavior_mutation(tenant: tenant, id: graphql_id, behavior: "BLINK")
+      assert %{"id" => ^graphql_id} = extract_result!(result)
     end
 
-    @query """
-    mutation SetLedBehavior($input: SetLedBehaviorInput!) {
-      setLedBehavior(input: $input) {
-        behavior
+    test "sets DOUBLE_BLINK led behavior for the specified device", %{tenant: tenant} do
+      {astarte_device_id, graphql_id} = sample_device_id(tenant)
+
+      Edgehog.Astarte.Device.LedBehaviorMock
+      |> expect(:post, 1, fn _client, ^astarte_device_id, "DoubleBlink60Seconds" -> :ok end)
+
+      result = set_led_behavior_mutation(tenant: tenant, id: graphql_id, behavior: "DOUBLE_BLINK")
+      assert %{"id" => ^graphql_id} = extract_result!(result)
+    end
+
+    test "sets SLOW_BLINK led behavior for the specified device", %{tenant: tenant} do
+      {astarte_device_id, graphql_id} = sample_device_id(tenant)
+
+      Edgehog.Astarte.Device.LedBehaviorMock
+      |> expect(:post, 1, fn _client, ^astarte_device_id, "SlowBlink60Seconds" -> :ok end)
+
+      result = set_led_behavior_mutation(tenant: tenant, id: graphql_id, behavior: "SLOW_BLINK")
+      assert %{"id" => ^graphql_id} = extract_result!(result)
+    end
+
+    test "fails with an invalid behavior", %{tenant: tenant} do
+      device = DevicesFixtures.device_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(device)
+
+      assert %{errors: [%{message: msg}]} =
+               set_led_behavior_mutation(tenant: tenant, id: id, behavior: "NOT_BLINK")
+
+      assert msg =~ "Expected type \"DeviceLedBehavior!\""
+    end
+
+    test "fails with non-existing id", %{tenant: tenant} do
+      id = non_existing_device_id(tenant)
+      result = set_led_behavior_mutation(tenant: tenant, id: id, behavior: "BLINK")
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+
+    test "does not send data to Astarte with invalid data", %{tenant: tenant} do
+      device = DevicesFixtures.device_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(device)
+
+      Edgehog.Astarte.Device.LedBehaviorMock
+      |> expect(:post, 0, fn _client, _device_id, _behavior -> raise "Error!" end)
+
+      assert %{errors: [%{message: _msg}]} =
+               set_led_behavior_mutation(tenant: tenant, id: id, behavior: "FOO")
+    end
+  end
+
+  defp set_led_behavior_mutation(opts) do
+    default_document = """
+    mutation SetDeviceLedBehavior($id: ID!, $input: SetDeviceLedBehaviorInput!) {
+      setDeviceLedBehavior(id: $id, input: $input) {
+        result {
+          id
+        }
       }
     }
     """
-    test "sets behavior with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      device: device
-    } do
-      variables = %{
-        input: %{
-          device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-          behavior: "BLINK"
-        }
-      }
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
+    {behavior, opts} = Keyword.pop!(opts, :behavior)
 
-      assert %{
-               "data" => %{
-                 "setLedBehavior" => %{
-                   "behavior" => "BLINK"
-                 }
+    input = %{"behavior" => behavior}
+
+    variables = %{"id" => id, "input" => input}
+    document = Keyword.get(opts, :document, default_document)
+    context = %{tenant: tenant}
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
+
+  defp extract_error!(result) do
+    assert %{errors: [error]} = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "setDeviceLedBehavior" => %{
+                 "result" => device
                }
-             } = json_response(conn, 200)
-    end
+             }
+           } = result
 
-    test "fails with invalid data", %{conn: conn, api_path: api_path, device: device} do
-      variables = %{
-        input: %{
-          device_id: Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema),
-          behavior: "NOT_BLINK"
-        }
-      }
+    assert device != nil
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    device
+  end
 
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
+  defp sample_device_id(tenant) do
+    device = DevicesFixtures.device_fixture(tenant: tenant)
+    graphql_id = AshGraphql.Resource.encode_relay_id(device)
+    astarte_device_id = device.device_id
+
+    {astarte_device_id, graphql_id}
+  end
+
+  defp non_existing_device_id(tenant) do
+    fixture = DevicesFixtures.device_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
+
+    id
   end
 end

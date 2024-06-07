@@ -27,6 +27,8 @@ defmodule Edgehog.Devices.Device do
 
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
+  alias Edgehog.Devices.Device.LedBehavior
+  alias Edgehog.Devices.Device.ManualActions
   alias Edgehog.Devices.Device.ManualRelationships
   alias Edgehog.Devices.Device.Types
 
@@ -53,6 +55,7 @@ defmodule Edgehog.Devices.Device do
       update :update_device, :update
       update :add_device_tags, :add_tags
       update :remove_device_tags, :remove_tags
+      update :set_device_led_behavior, :set_led_behavior
     end
   end
 
@@ -231,6 +234,12 @@ defmodule Edgehog.Devices.Device do
 
     update :from_device_status do
       accept [:online, :last_connection, :last_disconnection]
+    end
+
+    update :set_led_behavior do
+      description "Sets led behavior."
+      argument :behavior, LedBehavior, description: "The led behavior.", allow_nil?: false
+      manual ManualActions.SetLedBehavior
     end
   end
 
