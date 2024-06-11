@@ -49,7 +49,9 @@ type HardwareType = {
   id: string;
   handle: string;
   name: string;
-  partNumbers: string[];
+  partNumbers: {
+    partNumber: string;
+  }[];
 };
 
 const renderComponent = (hardwareTypes: HardwareType[] = []) => {
@@ -78,7 +80,7 @@ it("renders Hardware Type data", () => {
       id: "HW-ID",
       handle: "hw-handle",
       name: "HW name",
-      partNumbers: ["HW-PN1"],
+      partNumbers: [{ partNumber: "HW-PN1" }],
     },
   ]);
 
@@ -97,7 +99,7 @@ it("renders multiple Part Numbers separated by comma", () => {
       id: "HW-ID",
       handle: "hw-handle",
       name: "HW name",
-      partNumbers: ["HW-PN1", "HW-PN2"],
+      partNumbers: [{ partNumber: "HW-PN1" }, { partNumber: "HW-PN2" }],
     },
   ]);
 
@@ -110,7 +112,7 @@ it("renders Hardware Type data in correct columns", () => {
       id: "HW-ID",
       handle: "hw-handle",
       name: "HW name",
-      partNumbers: ["HW-PN1", "HW-PN2"],
+      partNumbers: [{ partNumber: "HW-PN1" }, { partNumber: "HW-PN2" }],
     },
   ]);
 

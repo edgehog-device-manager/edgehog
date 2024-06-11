@@ -59,10 +59,11 @@ const GET_HARDWARE_TYPE_QUERY = graphql`
 
 const UPDATE_HARDWARE_TYPE_MUTATION = graphql`
   mutation HardwareType_updateHardwareType_Mutation(
+    $hardwareTypeId: ID!
     $input: UpdateHardwareTypeInput!
   ) {
-    updateHardwareType(input: $input) {
-      hardwareType {
+    updateHardwareType(id: $hardwareTypeId, input: $input) {
+      result {
         id
         name
         handle
@@ -73,11 +74,9 @@ const UPDATE_HARDWARE_TYPE_MUTATION = graphql`
 `;
 
 const DELETE_HARDWARE_TYPE_MUTATION = graphql`
-  mutation HardwareType_deleteHardwareType_Mutation(
-    $input: DeleteHardwareTypeInput!
-  ) {
-    deleteHardwareType(input: $input) {
-      hardwareType {
+  mutation HardwareType_deleteHardwareType_Mutation($hardwareTypeId: ID!) {
+    deleteHardwareType(id: $hardwareTypeId) {
+      result {
         id
       }
     }
@@ -107,20 +106,20 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
     );
 
   const handleDeleteHardwareType = useCallback(() => {
-    const input = { hardwareTypeId };
     deleteHardwareType({
-      variables: { input },
+      variables: { hardwareTypeId },
       onCompleted(data, errors) {
-        if (data.deleteHardwareType) {
-          return navigate({ route: Route.hardwareTypes });
-        }
         if (errors) {
           const errorFeedback = errors
-            .map((error) => error.message)
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
             .join(". \n");
           setErrorFeedback(errorFeedback);
           setShowDeleteModal(false);
+          return;
         }
+        navigate({ route: Route.hardwareTypes });
       },
       onError() {
         setErrorFeedback(
@@ -132,11 +131,11 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        if (!data.deleteHardwareType) {
+        const hardwareTypeId = data?.deleteHardwareType?.result?.id;
+        if (!hardwareTypeId) {
           return;
         }
 
-        const hardwareTypeId = data.deleteHardwareType.hardwareType.id;
         const root = store.getRoot();
         const hardwareTypes = root.getLinkedRecords("hardwareTypes");
         if (hardwareTypes) {
@@ -159,22 +158,18 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
 
   const handleUpdateHardwareType = useCallback(
     (hardwareType: HardwareTypeData) => {
-      const input = {
-        hardwareTypeId,
-        ...hardwareType,
-      };
       updateHardwareType({
-        variables: { input },
+        variables: { hardwareTypeId, input: hardwareType },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          if (data.updateHardwareType) {
-            return setErrorFeedback(null);
-          }
+          setErrorFeedback(null);
         },
         onError() {
           setErrorFeedback(
