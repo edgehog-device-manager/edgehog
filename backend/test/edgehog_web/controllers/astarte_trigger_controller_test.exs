@@ -144,7 +144,40 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
              } = device
     end
 
-    test "updates an existing device, not calling Astarte", ctx do
+    test "connection events update an existing device, not calling Astarte", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
+
+      %Device{device_id: device_id} =
+        device_fixture(
+          realm_id: realm.id,
+          online: false,
+          last_connection: utc_now_second() |> DateTime.add(-50, :minute),
+          last_disconnection: utc_now_second() |> DateTime.add(-10, :minute),
+          tenant: tenant
+        )
+
+      timestamp = utc_now_second()
+      event = connection_trigger(device_id, timestamp)
+
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> expect(:get, 0, fn _client, _device_id -> flunk() end)
+
+      assert post(conn, path, event) |> response(200)
+
+      assert {:ok, device} = fetch_device(realm, device_id, tenant)
+
+      assert %Device{
+               online: true,
+               last_connection: ^timestamp
+             } = device
+    end
+
+    test "disconnection events update an existing device, not calling Astarte", ctx do
       %{
         conn: conn,
         path: path,
