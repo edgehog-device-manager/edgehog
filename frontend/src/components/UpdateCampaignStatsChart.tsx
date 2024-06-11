@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,12 +29,10 @@ import { statusMessages } from "components/UpdateTargetStatus";
 
 const UPDATE_CAMPAIGN_PROGRESS_BAR_FRAGMENT = graphql`
   fragment UpdateCampaignStatsChart_UpdateCampaignStatsChartFragment on UpdateCampaign {
-    stats {
-      idleTargetCount
-      inProgressTargetCount
-      failedTargetCount
-      successfulTargetCount
-    }
+    idleTargetCount
+    inProgressTargetCount
+    failedTargetCount
+    successfulTargetCount
   }
 `;
 
@@ -43,10 +41,12 @@ type Props = {
 };
 
 const UpdateCampaignStatsChart = ({ updateCampaignRef }: Props) => {
-  const { stats } = useFragment(
-    UPDATE_CAMPAIGN_PROGRESS_BAR_FRAGMENT,
-    updateCampaignRef,
-  );
+  const {
+    successfulTargetCount,
+    failedTargetCount,
+    inProgressTargetCount,
+    idleTargetCount,
+  } = useFragment(UPDATE_CAMPAIGN_PROGRESS_BAR_FRAGMENT, updateCampaignRef);
 
   const intl = useIntl();
   const chartOptions: ComponentProps<typeof Chart>["options"] = {
@@ -97,10 +97,10 @@ const UpdateCampaignStatsChart = ({ updateCampaignRef }: Props) => {
       options={chartOptions}
       type="donut"
       series={[
-        stats.successfulTargetCount,
-        stats.failedTargetCount,
-        stats.inProgressTargetCount,
-        stats.idleTargetCount,
+        successfulTargetCount,
+        failedTargetCount,
+        inProgressTargetCount,
+        idleTargetCount,
       ]}
       height="250px"
     />
