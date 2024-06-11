@@ -58,7 +58,7 @@ const CREATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
     $input: CreateBaseImageCollectionInput!
   ) {
     createBaseImageCollection(input: $input) {
-      baseImageCollection {
+      result {
         id
       }
     }
@@ -85,9 +85,9 @@ const BaseImageCollection = ({
       createBaseImageCollection({
         variables: { input: baseImageCollection },
         onCompleted(data, errors) {
-          if (data.createBaseImageCollection) {
-            const baseImageCollectionId =
-              data.createBaseImageCollection.baseImageCollection.id;
+          const baseImageCollectionId =
+            data.createBaseImageCollection?.result?.id;
+          if (baseImageCollectionId) {
             return navigate({
               route: Route.baseImageCollectionsEdit,
               params: { baseImageCollectionId },
@@ -95,7 +95,9 @@ const BaseImageCollection = ({
           }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
@@ -109,13 +111,13 @@ const BaseImageCollection = ({
           );
         },
         updater(store, data) {
-          if (!data.createBaseImageCollection) {
+          if (!data?.createBaseImageCollection?.result) {
             return;
           }
 
           const baseImageCollection = store
             .getRootField("createBaseImageCollection")
-            .getLinkedRecord("baseImageCollection");
+            .getLinkedRecord("result");
           const root = store.getRoot();
 
           const baseImageCollections = root.getLinkedRecords(
