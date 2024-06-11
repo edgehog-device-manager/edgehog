@@ -35,10 +35,6 @@ defmodule Edgehog.Labeling.Tag do
 
   graphql do
     type :tag
-
-    queries do
-      list :existing_device_tags, :assigned_to_devices
-    end
   end
 
   actions do

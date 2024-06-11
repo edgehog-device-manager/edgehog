@@ -30,6 +30,32 @@ defmodule Edgehog.Devices do
 
   graphql do
     root_level_errors? true
+
+    queries do
+      get Edgehog.Devices.Device, :device, :get
+      list Edgehog.Devices.Device, :devices, :list
+      get Edgehog.Devices.HardwareType, :hardware_type, :get
+      list Edgehog.Devices.HardwareType, :hardware_types, :list
+      get Edgehog.Devices.SystemModel, :system_model, :get
+      list Edgehog.Devices.SystemModel, :system_models, :list
+    end
+
+    mutations do
+      update Edgehog.Devices.Device, :update_device, :update
+      update Edgehog.Devices.Device, :add_device_tags, :add_tags
+      update Edgehog.Devices.Device, :remove_device_tags, :remove_tags
+      update Edgehog.Devices.Device, :set_device_led_behavior, :set_led_behavior
+      create Edgehog.Devices.HardwareType, :create_hardware_type, :create
+      update Edgehog.Devices.HardwareType, :update_hardware_type, :update
+      destroy Edgehog.Devices.HardwareType, :delete_hardware_type, :destroy
+
+      create Edgehog.Devices.SystemModel, :create_system_model, :create do
+        relay_id_translations input: [hardware_type_id: :hardware_type]
+      end
+
+      update Edgehog.Devices.SystemModel, :update_system_model, :update
+      destroy Edgehog.Devices.SystemModel, :delete_system_model, :destroy
+    end
   end
 
   resources do

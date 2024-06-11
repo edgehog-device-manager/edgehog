@@ -27,6 +27,17 @@ defmodule Edgehog.Groups do
 
   graphql do
     root_level_errors? true
+
+    queries do
+      get Edgehog.Groups.DeviceGroup, :device_group, :get
+      list Edgehog.Groups.DeviceGroup, :device_groups, :list
+    end
+
+    mutations do
+      create Edgehog.Groups.DeviceGroup, :create_device_group, :create
+      update Edgehog.Groups.DeviceGroup, :update_device_group, :update
+      destroy Edgehog.Groups.DeviceGroup, :delete_device_group, :destroy
+    end
   end
 
   resources do

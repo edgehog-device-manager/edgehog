@@ -27,6 +27,10 @@ defmodule Edgehog.Labeling do
 
   graphql do
     root_level_errors? true
+
+    queries do
+      list Edgehog.Labeling.Tag, :existing_device_tags, :assigned_to_devices
+    end
   end
 
   resources do

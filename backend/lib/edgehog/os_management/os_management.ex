@@ -26,6 +26,12 @@ defmodule Edgehog.OSManagement do
 
   graphql do
     root_level_errors? true
+
+    mutations do
+      create Edgehog.OSManagement.OTAOperation, :create_manual_ota_operation, :manual do
+        relay_id_translations input: [device_id: :device]
+      end
+    end
   end
 
   resources do

@@ -39,26 +39,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
 
   graphql do
     type :update_campaign
-
-    queries do
-      get :update_campaign, :read do
-        description "Returns a single update campaign."
-      end
-
-      list :update_campaigns, :read do
-        description "Returns a list of update campaigns."
-        paginate_with nil
-      end
-    end
-
-    mutations do
-      create :create_update_campaign, :create do
-        relay_id_translations input: [
-                                base_image_id: :base_image,
-                                update_channel_id: :update_channel
-                              ]
-      end
-    end
   end
 
   actions do

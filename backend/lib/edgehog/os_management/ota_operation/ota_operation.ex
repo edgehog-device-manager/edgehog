@@ -40,12 +40,6 @@ defmodule Edgehog.OSManagement.OTAOperation do
     type :ota_operation
 
     field_names inserted_at: :created_at
-
-    mutations do
-      create :create_manual_ota_operation, :manual do
-        relay_id_translations input: [device_id: :device]
-      end
-    end
   end
 
   actions do

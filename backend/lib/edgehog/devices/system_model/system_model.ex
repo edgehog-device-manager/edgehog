@@ -40,20 +40,6 @@ defmodule Edgehog.Devices.SystemModel do
 
   graphql do
     type :system_model
-
-    queries do
-      get :system_model, :get
-      list :system_models, :list
-    end
-
-    mutations do
-      create :create_system_model, :create do
-        relay_id_translations input: [hardware_type_id: :hardware_type]
-      end
-
-      update :update_system_model, :update
-      destroy :delete_system_model, :destroy
-    end
   end
 
   actions do

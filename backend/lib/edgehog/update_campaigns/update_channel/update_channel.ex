@@ -39,29 +39,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
   graphql do
     type :update_channel
-
-    queries do
-      get :update_channel, :read do
-        description "Returns a single update channel."
-      end
-
-      list :update_channels, :read do
-        description "Returns a list of update channels."
-        paginate_with nil
-      end
-    end
-
-    mutations do
-      create :create_update_channel, :create do
-        relay_id_translations input: [target_group_ids: :device_group]
-      end
-
-      update :update_update_channel, :update do
-        relay_id_translations input: [target_group_ids: :device_group]
-      end
-
-      destroy :delete_update_channel, :destroy
-    end
   end
 
   actions do

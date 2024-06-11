@@ -44,10 +44,6 @@ defmodule Edgehog.Tenants.Tenant do
     # to avoid showing it twice. We also hide the public key to be consistent with
     # the old API
     hide_fields [:tenant_id, :public_key]
-
-    queries do
-      read_one :tenant_info, :current_tenant, allow_nil?: false
-    end
   end
 
   json_api do

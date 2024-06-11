@@ -30,6 +30,45 @@ defmodule Edgehog.UpdateCampaigns do
 
   graphql do
     root_level_errors? true
+
+    queries do
+      get Edgehog.UpdateCampaigns.UpdateCampaign, :update_campaign, :read do
+        description "Returns a single update campaign."
+      end
+
+      list Edgehog.UpdateCampaigns.UpdateCampaign, :update_campaigns, :read do
+        description "Returns a list of update campaigns."
+        paginate_with nil
+      end
+
+      get Edgehog.UpdateCampaigns.UpdateChannel, :update_channel, :read do
+        description "Returns a single update channel."
+      end
+
+      list Edgehog.UpdateCampaigns.UpdateChannel, :update_channels, :read do
+        description "Returns a list of update channels."
+        paginate_with nil
+      end
+    end
+
+    mutations do
+      create Edgehog.UpdateCampaigns.UpdateCampaign, :create_update_campaign, :create do
+        relay_id_translations input: [
+                                base_image_id: :base_image,
+                                update_channel_id: :update_channel
+                              ]
+      end
+
+      create Edgehog.UpdateCampaigns.UpdateChannel, :create_update_channel, :create do
+        relay_id_translations input: [target_group_ids: :device_group]
+      end
+
+      update Edgehog.UpdateCampaigns.UpdateChannel, :update_update_channel, :update do
+        relay_id_translations input: [target_group_ids: :device_group]
+      end
+
+      destroy Edgehog.UpdateCampaigns.UpdateChannel, :delete_update_channel, :destroy
+    end
   end
 
   resources do

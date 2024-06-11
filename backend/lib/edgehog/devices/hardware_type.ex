@@ -40,17 +40,6 @@ defmodule Edgehog.Devices.HardwareType do
 
   graphql do
     type :hardware_type
-
-    queries do
-      get :hardware_type, :get
-      list :hardware_types, :list
-    end
-
-    mutations do
-      create :create_hardware_type, :create
-      update :update_hardware_type, :update
-      destroy :delete_hardware_type, :destroy
-    end
   end
 
   actions do

@@ -24,6 +24,10 @@ defmodule Edgehog.Tenants do
 
   graphql do
     root_level_errors? true
+
+    queries do
+      read_one Edgehog.Tenants.Tenant, :tenant_info, :current_tenant, allow_nil?: false
+    end
   end
 
   json_api do

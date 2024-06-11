@@ -45,18 +45,6 @@ defmodule Edgehog.Devices.Device do
 
   graphql do
     type :device
-
-    queries do
-      get :device, :get
-      list :devices, :list
-    end
-
-    mutations do
-      update :update_device, :update
-      update :add_device_tags, :add_tags
-      update :remove_device_tags, :remove_tags
-      update :set_device_led_behavior, :set_led_behavior
-    end
   end
 
   actions do

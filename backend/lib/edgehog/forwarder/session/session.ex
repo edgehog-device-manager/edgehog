@@ -37,18 +37,6 @@ defmodule Edgehog.Forwarder.Session do
 
     derive_filter? false
     derive_sort? false
-
-    queries do
-      read_one :forwarder_session, :get do
-        relay_id_translations device_id: :device
-      end
-    end
-
-    mutations do
-      action :request_forwarder_session, :request do
-        relay_id_translations input: [device_id: :device]
-      end
-    end
   end
 
   actions do

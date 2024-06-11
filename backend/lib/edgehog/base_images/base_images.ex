@@ -30,6 +30,28 @@ defmodule Edgehog.BaseImages do
 
   graphql do
     root_level_errors? true
+
+    queries do
+      get Edgehog.BaseImages.BaseImage, :base_image, :get
+      get Edgehog.BaseImages.BaseImageCollection, :base_image_collection, :get
+      list Edgehog.BaseImages.BaseImageCollection, :base_image_collections, :list
+    end
+
+    mutations do
+      create Edgehog.BaseImages.BaseImage, :create_base_image, :create do
+        relay_id_translations input: [base_image_collection_id: :base_image_collection]
+      end
+
+      update Edgehog.BaseImages.BaseImage, :update_base_image, :update
+      destroy Edgehog.BaseImages.BaseImage, :delete_base_image, :destroy
+
+      create Edgehog.BaseImages.BaseImageCollection, :create_base_image_collection, :create do
+        relay_id_translations input: [system_model_id: :system_model]
+      end
+
+      update Edgehog.BaseImages.BaseImageCollection, :update_base_image_collection, :update
+      destroy Edgehog.BaseImages.BaseImageCollection, :delete_base_image_collection, :destroy
+    end
   end
 
   resources do
