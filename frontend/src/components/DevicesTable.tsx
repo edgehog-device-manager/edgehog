@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -48,7 +48,9 @@ const DEVICES_TABLE_FRAGMENT = graphql`
         name
       }
     }
-    tags
+    tags {
+      name
+    }
   }
 `;
 
@@ -97,7 +99,7 @@ const columns = [
       <FormattedMessage id="Device.systemModel" defaultMessage="System Model" />
     ),
   }),
-  columnHelper.accessor((device) => device.systemModel?.hardwareType.name, {
+  columnHelper.accessor((device) => device.systemModel?.hardwareType?.name, {
     id: "hardwareType",
     header: () => (
       <FormattedMessage
@@ -143,7 +145,7 @@ const columns = [
     ),
     cell: ({ getValue }) => (
       <>
-        {getValue().map((tag) => (
+        {getValue().map(({ name: tag }) => (
           <Tag key={tag} className="me-2">
             {tag}
           </Tag>

@@ -126,11 +126,13 @@ const DEVICE_OS_INFO_FRAGMENT = graphql`
 const DEVICE_LOCATION_FRAGMENT = graphql`
   fragment Device_location on Device {
     capabilities
-    location {
+    position {
       latitude
       longitude
-      address
       timestamp
+    }
+    location {
+      formattedAddress
     }
   }
 `;
@@ -234,7 +236,9 @@ const GET_DEVICE_QUERY = graphql`
           name
         }
       }
-      tags
+      tags {
+        name
+      }
       deviceGroups {
         id
         name
@@ -273,7 +277,7 @@ const DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION = graphql`
     $input: CreateManualOtaOperationInput!
   ) {
     createManualOtaOperation(input: $input) {
-      otaOperation {
+      result {
         id
         baseImageUrl
         createdAt
@@ -286,12 +290,17 @@ const DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION = graphql`
 `;
 
 const UPDATE_DEVICE_MUTATION = graphql`
-  mutation Device_updateDevice_Mutation($input: UpdateDeviceInput!) {
-    updateDevice(input: $input) {
-      device {
+  mutation Device_updateDevice_Mutation(
+    $deviceId: ID!
+    $input: UpdateDeviceInput!
+  ) {
+    updateDevice(id: $deviceId, input: $input) {
+      result {
         id
         name
-        tags
+        tags {
+          name
+        }
         deviceGroups {
           id
           name
@@ -303,7 +312,9 @@ const UPDATE_DEVICE_MUTATION = graphql`
 
 const GET_TAGS_QUERY = graphql`
   query Device_getExistingDeviceTags_Query {
-    existingDeviceTags
+    existingDeviceTags {
+      name
+    }
   }
 `;
 
@@ -311,9 +322,7 @@ const REQUEST_FORWARDER_SESSION_MUTATION = graphql`
   mutation Device_requestForwarderSession_Mutation(
     $input: RequestForwarderSessionInput!
   ) {
-    requestForwarderSession(input: $input) {
-      sessionToken
-    }
+    requestForwarderSession(input: $input)
   }
 `;
 
@@ -322,7 +331,7 @@ const GET_FORWARDER_SESSION_QUERY = graphql`
     $deviceId: ID!
     $sessionToken: String!
   ) {
-    forwarderSession(deviceId: $deviceId, sessionToken: $sessionToken) {
+    forwarderSession(deviceId: $deviceId, token: $sessionToken) {
       status
       secure
       forwarderHostname
@@ -744,11 +753,11 @@ interface DeviceLocationTabProps {
 
 const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
   const intl = useIntl();
-  const { location, capabilities } = useFragment(
+  const { capabilities, position, location } = useFragment(
     DEVICE_LOCATION_FRAGMENT,
     deviceRef,
   );
-  if (!location || !capabilities.includes("GEOLOCATION")) {
+  if (!position || !capabilities.includes("GEOLOCATION")) {
     return null;
   }
   return (
@@ -767,7 +776,7 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
             values={{
               date: (
                 <FormattedDate
-                  value={new Date(location.timestamp)}
+                  value={new Date(position.timestamp)}
                   year="numeric"
                   month="long"
                   day="numeric"
@@ -779,13 +788,13 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
           />
         </p>
         <Map
-          latitude={location.latitude}
-          longitude={location.longitude}
+          latitude={position.latitude}
+          longitude={position.longitude}
           popup={
             <div>
-              <p>{location.address}</p>
+              {location && <p>{location.formattedAddress}</p>}
               <p>
-                {location.latitude}, {location.longitude}
+                {position.latitude}, {position.longitude}
               </p>
             </div>
           }
@@ -1053,7 +1062,9 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
       onCompleted(data, errors) {
         if (errors) {
           const errorFeedback = errors
-            .map((error) => error.message)
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
             .join(". \n");
           return setErrorFeedback(errorFeedback);
         }
@@ -1067,7 +1078,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
         );
       },
       updater(store, data) {
-        const otaOperationId = data.createManualOtaOperation?.otaOperation?.id;
+        const otaOperationId = data?.createManualOtaOperation?.result?.id;
         if (otaOperationId) {
           const otaOperation = store.get(otaOperationId);
           const storedDevice = store.get(deviceId);
@@ -1316,7 +1327,7 @@ const DeviceContent = ({
 
   const deviceTags = useMemo(
     () =>
-      deviceDraft.tags?.map((tag) => ({
+      deviceDraft.tags?.map(({ name: tag }) => ({
         label: tag,
         value: tag,
       })) || [],
@@ -1325,7 +1336,7 @@ const DeviceContent = ({
 
   const tags = useMemo(
     () =>
-      tagsData.existingDeviceTags.map((tag) => ({
+      tagsData.existingDeviceTags.map(({ name: tag }) => ({
         label: tag,
         value: tag,
       })),
@@ -1333,10 +1344,6 @@ const DeviceContent = ({
   );
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
-
-  const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
-    UPDATE_DEVICE_MUTATION,
-  );
 
   const [requestForwarderSession, isRequestingForwarderSession] =
     useMutation<Device_requestForwarderSession_Mutation>(
@@ -1378,33 +1385,33 @@ const DeviceContent = ({
       onCompleted(data, errors) {
         if (errors) {
           const errorFeedback = errors
-            .map((error) => error.message)
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
             .join(". \n");
           return setErrorFeedback(errorFeedback);
         }
-        if (data.requestForwarderSession) {
-          const { sessionToken } = data.requestForwarderSession;
+        const sessionToken = data.requestForwarderSession;
 
-          setIsOpeningRemoteTerminal(true);
-          timeoutPromise(
-            retryWithExponentialBackoff(() =>
-              handleOpenRemoteTerminal(sessionToken),
-            ),
-            10_000,
-          )
-            .catch(() => {
-              setRemoteTerminalErrorFeedback(
-                <FormattedMessage
-                  id="pages.Device.openRemoteTerminalErrorFeedback"
-                  defaultMessage="Could not access the remote terminal, please try again."
-                  description="Feedback for unknown error while opening a remote terminal session"
-                />,
-              );
-            })
-            .finally(() => {
-              setIsOpeningRemoteTerminal(false);
-            });
-        }
+        setIsOpeningRemoteTerminal(true);
+        timeoutPromise(
+          retryWithExponentialBackoff(() =>
+            handleOpenRemoteTerminal(sessionToken),
+          ),
+          10_000,
+        )
+          .catch(() => {
+            setRemoteTerminalErrorFeedback(
+              <FormattedMessage
+                id="pages.Device.openRemoteTerminalErrorFeedback"
+                defaultMessage="Could not access the remote terminal, please try again."
+                description="Feedback for unknown error while opening a remote terminal session"
+              />,
+            );
+          })
+          .finally(() => {
+            setIsOpeningRemoteTerminal(false);
+          });
       },
       onError() {
         setErrorFeedback(
@@ -1418,6 +1425,10 @@ const DeviceContent = ({
     });
   }, [requestForwarderSession, handleOpenRemoteTerminal, deviceId]);
 
+  const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
+    UPDATE_DEVICE_MUTATION,
+  );
+
   const handleUpdateDevice = useMemo(
     () =>
       _.debounce(
@@ -1426,12 +1437,14 @@ const DeviceContent = ({
           deviceChanges: Partial<typeof deviceDraft>,
         ) => {
           updateDevice({
-            variables: { input: { deviceId, ...deviceChanges } },
+            variables: { deviceId, input: deviceChanges },
             onCompleted(data, errors) {
               if (errors) {
                 setDeviceDraft(draft);
                 const errorFeedback = errors
-                  .map((error) => error.message)
+                  .map(({ fields, message }) =>
+                    fields.length ? `${fields.join(" ")} ${message}` : message,
+                  )
                   .join(". \n");
                 return setErrorFeedback(errorFeedback);
               }
@@ -1450,7 +1463,7 @@ const DeviceContent = ({
               );
             },
             updater(store, data) {
-              if (!data.updateDevice) {
+              if (!data?.updateDevice?.result) {
                 return;
               }
 
@@ -1462,7 +1475,7 @@ const DeviceContent = ({
 
               const device = store
                 .getRootField("updateDevice")
-                .getLinkedRecord("device");
+                .getLinkedRecord("result");
               const deviceId = device.getDataID();
 
               const linkedGroups = new Set(
@@ -1517,7 +1530,9 @@ const DeviceContent = ({
     (inputValue: string) => {
       const newTag = inputValue.trim().toLowerCase();
       handleDeviceChange({
-        tags: deviceTags.map((tag) => tag.value).concat([newTag]),
+        tags: deviceTags
+          .map(({ value }) => ({ name: value }))
+          .concat([{ name: newTag }]),
       });
     },
     [handleDeviceChange, deviceTags],
@@ -1603,7 +1618,7 @@ const DeviceContent = ({
                       options={tags}
                       onChange={(value) =>
                         handleDeviceChange({
-                          tags: value.map((tag) => tag.value),
+                          tags: value.map(({ value }) => ({ name: value })),
                         })
                       }
                       isValidNewOption={isValidNewTag}
@@ -1653,7 +1668,7 @@ const DeviceContent = ({
                       >
                         <Form.Control
                           type="text"
-                          value={device.systemModel.hardwareType.name}
+                          value={device.systemModel.hardwareType?.name}
                           readOnly
                         />
                       </FormRow>
