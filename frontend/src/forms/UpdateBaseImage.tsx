@@ -33,15 +33,24 @@ import Stack from "components/Stack";
 import { baseImageStartingVersionRequirementSchema, yup } from "forms";
 
 import type { UpdateBaseImage_BaseImageFragment$key } from "api/__generated__/UpdateBaseImage_BaseImageFragment.graphql";
-import type { UpdateBaseImage_OptionsFragment$key } from "api/__generated__/UpdateBaseImage_OptionsFragment.graphql";
+import type {
+  UpdateBaseImage_OptionsFragment$key,
+  UpdateBaseImage_OptionsFragment$data,
+} from "api/__generated__/UpdateBaseImage_OptionsFragment.graphql";
 
 const UPDATE_BASE_IMAGE_FRAGMENT = graphql`
   fragment UpdateBaseImage_BaseImageFragment on BaseImage {
     version
     url
     startingVersionRequirement
-    releaseDisplayName
-    description
+    localizedReleaseDisplayNames {
+      value
+      languageTag
+    }
+    localizedDescriptions {
+      value
+      languageTag
+    }
     baseImageCollection {
       name
     }
@@ -81,16 +90,31 @@ type FormData = {
   description: string;
 };
 
+type LocalizedAttribute = {
+  languageTag: string;
+  value: string;
+};
+
 type BaseImageChanges = {
   startingVersionRequirement: string;
-  releaseDisplayName: {
-    locale: string;
-    text: string;
-  };
-  description: {
-    locale: string;
-    text: string;
-  };
+  localizedDescriptions: LocalizedAttribute[];
+  localizedReleaseDisplayNames: LocalizedAttribute[];
+};
+
+type Locale =
+  UpdateBaseImage_OptionsFragment$data["tenantInfo"]["defaultLocale"];
+
+const getLocalizedAttributeValueByLocale = (
+  localizedAttributes: null | readonly LocalizedAttribute[],
+  locale: Locale,
+): string => {
+  if (!localizedAttributes || localizedAttributes.length === 0) {
+    return "";
+  }
+  const localizedAttribute = localizedAttributes.find(
+    ({ languageTag }) => languageTag === locale,
+  );
+  return localizedAttribute ? localizedAttribute.value : "";
 };
 
 const baseImageSchema = yup
@@ -106,14 +130,18 @@ const transformOutputData = (
   data: FormData,
 ): BaseImageChanges => ({
   startingVersionRequirement: data.startingVersionRequirement,
-  releaseDisplayName: {
-    locale,
-    text: data.releaseDisplayName,
-  },
-  description: {
-    locale,
-    text: data.description,
-  },
+  localizedDescriptions: [
+    {
+      languageTag: locale,
+      value: data.description,
+    },
+  ],
+  localizedReleaseDisplayNames: [
+    {
+      languageTag: locale,
+      value: data.releaseDisplayName,
+    },
+  ],
 });
 
 type UpdateBaseImageProps = {
@@ -139,8 +167,14 @@ const UpdateBaseImage = ({
   const baseImageCollection = baseImage.baseImageCollection.name;
   const version = baseImage.version;
   const startingVersionRequirement = baseImage.startingVersionRequirement || "";
-  const releaseDisplayName = baseImage.releaseDisplayName || "";
-  const description = baseImage.description || "";
+  const releaseDisplayName = getLocalizedAttributeValueByLocale(
+    baseImage.localizedReleaseDisplayNames,
+    locale,
+  );
+  const description = getLocalizedAttributeValueByLocale(
+    baseImage.localizedDescriptions,
+    locale,
+  );
 
   const defaultValues = useMemo<FormData>(
     () => ({

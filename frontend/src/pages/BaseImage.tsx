@@ -61,9 +61,12 @@ const GET_BASE_IMAGE_QUERY = graphql`
 `;
 
 const UPDATE_BASE_IMAGE_MUTATION = graphql`
-  mutation BaseImage_updateBaseImage_Mutation($input: UpdateBaseImageInput!) {
-    updateBaseImage(input: $input) {
-      baseImage {
+  mutation BaseImage_updateBaseImage_Mutation(
+    $baseImageId: ID!
+    $input: UpdateBaseImageInput!
+  ) {
+    updateBaseImage(id: $baseImageId, input: $input) {
+      result {
         id
         version
         baseImageCollection {
@@ -76,9 +79,9 @@ const UPDATE_BASE_IMAGE_MUTATION = graphql`
 `;
 
 const DELETE_BASE_IMAGE_MUTATION = graphql`
-  mutation BaseImage_deleteBaseImage_Mutation($input: DeleteBaseImageInput!) {
-    deleteBaseImage(input: $input) {
-      baseImage {
+  mutation BaseImage_deleteBaseImage_Mutation($baseImageId: ID!) {
+    deleteBaseImage(id: $baseImageId) {
+      result {
         id
       }
     }
@@ -106,25 +109,22 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
     useMutation<BaseImage_deleteBaseImage_Mutation>(DELETE_BASE_IMAGE_MUTATION);
 
   const handleDeleteBaseImage = useCallback(() => {
-    const input = {
-      baseImageId,
-    };
     deleteBaseImage({
-      variables: { input },
+      variables: { baseImageId },
       onCompleted(data, errors) {
-        if (data.deleteBaseImage) {
-          return navigate({
-            route: Route.baseImageCollectionsEdit,
-            params: { baseImageCollectionId },
-          });
-        }
         if (errors) {
           const errorFeedback = errors
-            .map((error) => error.message)
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
             .join(". \n");
           setErrorFeedback(errorFeedback);
           return setShowDeleteModal(false);
         }
+        navigate({
+          route: Route.baseImageCollectionsEdit,
+          params: { baseImageCollectionId },
+        });
       },
       onError() {
         setErrorFeedback(
@@ -136,7 +136,7 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        const baseImageId = data.deleteBaseImage?.baseImage.id;
+        const baseImageId = data?.deleteBaseImage?.result?.id;
         if (!baseImageId) {
           return;
         }
@@ -155,19 +155,18 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
 
   const handleUpdateBaseImage = useCallback(
     (baseImageChanges: BaseImageChanges) => {
-      const input = {
-        baseImageId: baseImage.id,
-        ...baseImageChanges,
-      };
       updateBaseImage({
-        variables: { input },
+        variables: { baseImageId, input: baseImageChanges },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
+          setErrorFeedback(null);
         },
         onError() {
           setErrorFeedback(
@@ -179,7 +178,7 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
         },
       });
     },
-    [updateBaseImage, baseImage],
+    [updateBaseImage, baseImageId],
   );
 
   return (

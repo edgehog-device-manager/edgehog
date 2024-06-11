@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,20 +29,26 @@ import type { BaseImageNameResolver$key } from "api/__generated__/BaseImageNameR
  * Base Image name
  */
 function name(baseImageKey: BaseImageNameResolver$key): string {
-  const { releaseDisplayName, version } = readFragment(
+  const { localizedReleaseDisplayNames, version } = readFragment(
     graphql`
       fragment BaseImageNameResolver on BaseImage {
         version
-        releaseDisplayName
+        localizedReleaseDisplayNames {
+          value
+        }
       }
     `,
     baseImageKey,
   );
 
-  if (releaseDisplayName === null) {
-    return version;
+  // TODO: for now, only one translation can be present so we take it directly.
+  // We can use fragment argument to filter on localizedReleaseDisplayNames on backend
+  // and runtime argument to filter by user's language preference on frontend
+  // https://relay.dev/docs/guides/relay-resolvers/#defining-resolver-field-with-combined-arguments
+  if (localizedReleaseDisplayNames?.length) {
+    return `${version} (${localizedReleaseDisplayNames[0].value})`;
   }
-  return `${version} (${releaseDisplayName})`;
+  return version;
 }
 
 export { name };

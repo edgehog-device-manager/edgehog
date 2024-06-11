@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -39,7 +39,10 @@ const BASE_IMAGES_TABLE_FRAGMENT = graphql`
       id
       version
       startingVersionRequirement
-      releaseDisplayName
+      localizedReleaseDisplayNames {
+        value
+        languageTag
+      }
     }
   }
 `;
@@ -66,7 +69,7 @@ const getColumnsDefinition = (baseImageCollectionId: string) => [
       </Link>
     ),
   }),
-  columnHelper.accessor("releaseDisplayName", {
+  columnHelper.accessor("localizedReleaseDisplayNames", {
     header: () => (
       <FormattedMessage
         id="components.BaseImagesTable.releaseDisplayNameTitle"
@@ -74,6 +77,16 @@ const getColumnsDefinition = (baseImageCollectionId: string) => [
         description="Title for the Release Name column of the base images table"
       />
     ),
+    cell: ({ getValue }) => {
+      // TODO: for now, only one translation can be present so we take it directly.
+      const localizedReleaseDisplayNames = getValue();
+      return (
+        <span>
+          {localizedReleaseDisplayNames?.length &&
+            localizedReleaseDisplayNames[0].value}
+        </span>
+      );
+    },
   }),
   columnHelper.accessor("startingVersionRequirement", {
     header: () => (
