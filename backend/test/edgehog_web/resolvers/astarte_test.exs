@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -204,29 +204,6 @@ defmodule EdgehogWeb.Resolvers.AstarteTest do
                  technology: "WiFi"
                }
              ] == network_interfaces
-    end
-
-    test "set_led_behavior/2 validates requested behavior", %{device: device} do
-      valid_behaviors = [:blink, :double_blink, :slow_blink]
-
-      for behavior <- valid_behaviors do
-        assert {:ok, %{behavior: behavior}} ==
-                 Astarte.set_led_behavior(%{device_id: device.id, behavior: behavior}, %{})
-      end
-
-      assert {:error, "Unknown led behavior"} ==
-               Astarte.set_led_behavior(%{device_id: device.id, behavior: :invalid_behavior}, %{})
-    end
-
-    test "set_led_behavior/2 calls astarte_led_behavior_module with valid device_id", %{
-      device: device
-    } do
-      astarte_device_id = device.device_id
-
-      Edgehog.Astarte.Device.LedBehaviorMock
-      |> expect(:post, 1, fn _client, ^astarte_device_id, _behavior -> :ok end)
-
-      assert {:ok, _} = Astarte.set_led_behavior(%{device_id: device.id, behavior: :blink}, %{})
     end
   end
 end
