@@ -50,7 +50,7 @@ const CREATE_UPDATE_CHANNEL_MUTATION = graphql`
     $input: CreateUpdateChannelInput!
   ) {
     createUpdateChannel(input: $input) {
-      updateChannel {
+      result {
         id
       }
     }
@@ -82,8 +82,8 @@ const UpdateChannel = ({
       createUpdateChannel({
         variables: { input: updateChannel },
         onCompleted(data, errors) {
-          if (data.createUpdateChannel) {
-            const updateChannelId = data.createUpdateChannel.updateChannel.id;
+          const updateChannelId = data?.createUpdateChannel?.result?.id;
+          if (updateChannelId) {
             return navigate({
               route: Route.updateChannelsEdit,
               params: { updateChannelId },
@@ -91,7 +91,9 @@ const UpdateChannel = ({
           }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
@@ -105,13 +107,13 @@ const UpdateChannel = ({
           );
         },
         updater(store, data) {
-          if (!data.createUpdateChannel) {
+          if (!data?.createUpdateChannel?.result) {
             return;
           }
 
           const updateChannel = store
             .getRootField("createUpdateChannel")
-            .getLinkedRecord("updateChannel");
+            .getLinkedRecord("result");
           const root = store.getRoot();
 
           const updateChannels = root.getLinkedRecords("updateChannels");
