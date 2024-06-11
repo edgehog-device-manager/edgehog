@@ -57,7 +57,7 @@ const CREATE_SYSTEM_MODEL_MUTATION = graphql`
     $input: CreateSystemModelInput!
   ) {
     createSystemModel(input: $input) {
-      systemModel {
+      result {
         id
       }
     }
@@ -82,8 +82,8 @@ const SystemModel = ({ systemModelOptions }: SystemModelProps) => {
       createSystemModel({
         variables: { input: systemModel },
         onCompleted(data, errors) {
-          if (data.createSystemModel) {
-            const systemModelId = data.createSystemModel.systemModel.id;
+          const systemModelId = data.createSystemModel?.result?.id;
+          if (systemModelId) {
             return navigate({
               route: Route.systemModelsEdit,
               params: { systemModelId },
@@ -91,7 +91,9 @@ const SystemModel = ({ systemModelOptions }: SystemModelProps) => {
           }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
@@ -105,13 +107,13 @@ const SystemModel = ({ systemModelOptions }: SystemModelProps) => {
           );
         },
         updater(store, data) {
-          if (!data.createSystemModel) {
+          if (!data?.createSystemModel?.result) {
             return;
           }
 
           const systemModel = store
             .getRootField("createSystemModel")
-            .getLinkedRecord("systemModel");
+            .getLinkedRecord("result");
           const root = store.getRoot();
 
           const systemModels = root.getLinkedRecords("systemModels");

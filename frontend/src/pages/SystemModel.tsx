@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -60,10 +60,11 @@ const GET_SYSTEM_MODEL_QUERY = graphql`
 
 const UPDATE_SYSTEM_MODEL_MUTATION = graphql`
   mutation SystemModel_updateSystemModel_Mutation(
+    $systemModelId: ID!
     $input: UpdateSystemModelInput!
   ) {
-    updateSystemModel(input: $input) {
-      systemModel {
+    updateSystemModel(id: $systemModelId, input: $input) {
+      result {
         id
         name
         handle
@@ -74,11 +75,9 @@ const UPDATE_SYSTEM_MODEL_MUTATION = graphql`
 `;
 
 const DELETE_SYSTEM_MODEL_MUTATION = graphql`
-  mutation SystemModel_deleteSystemModel_Mutation(
-    $input: DeleteSystemModelInput!
-  ) {
-    deleteSystemModel(input: $input) {
-      systemModel {
+  mutation SystemModel_deleteSystemModel_Mutation($systemModelId: ID!) {
+    deleteSystemModel(id: $systemModelId) {
+      result {
         id
       }
     }
@@ -108,22 +107,18 @@ const SystemModelContent = ({
 
   const handleUpdateSystemModel = useCallback(
     (systemModelChanges: SystemModelChanges) => {
-      const input = {
-        systemModelId: systemModel.id,
-        ...systemModelChanges,
-      };
       updateSystemModel({
-        variables: { input },
+        variables: { systemModelId, input: systemModelChanges },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          if (data.updateSystemModel) {
-            return setErrorFeedback(null);
-          }
+          setErrorFeedback(null);
         },
         onError() {
           setErrorFeedback(
@@ -134,12 +129,15 @@ const SystemModelContent = ({
           );
         },
         updater(store, data) {
-          if (!data.updateSystemModel || !input.partNumbers) {
+          if (
+            !data?.updateSystemModel?.result ||
+            !systemModelChanges.partNumbers
+          ) {
             return;
           }
           const systemModelId = store
             .getRootField("updateSystemModel")
-            .getLinkedRecord("systemModel")
+            .getLinkedRecord("result")
             .getDataID();
 
           store
@@ -154,7 +152,7 @@ const SystemModelContent = ({
         },
       });
     },
-    [updateSystemModel, systemModel],
+    [updateSystemModel, systemModelId],
   );
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -168,20 +166,20 @@ const SystemModelContent = ({
     );
 
   const handleDeleteSystemModel = useCallback(() => {
-    const input = { systemModelId };
     deleteSystemModel({
-      variables: { input },
+      variables: { systemModelId },
       onCompleted(data, errors) {
-        if (data.deleteSystemModel) {
-          return navigate({ route: Route.systemModels });
-        }
         if (errors) {
           const errorFeedback = errors
-            .map((error) => error.message)
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
             .join(". \n");
           setErrorFeedback(errorFeedback);
           setShowDeleteModal(false);
+          return;
         }
+        navigate({ route: Route.systemModels });
       },
       onError() {
         setErrorFeedback(
@@ -192,11 +190,11 @@ const SystemModelContent = ({
         );
       },
       updater(store, data) {
-        if (!data.deleteSystemModel) {
+        const systemModelId = data?.deleteSystemModel?.result?.id;
+        if (!systemModelId) {
           return;
         }
 
-        const systemModelId = data.deleteSystemModel.systemModel.id;
         const root = store.getRoot();
 
         const systemModels = root.getLinkedRecords("systemModels");

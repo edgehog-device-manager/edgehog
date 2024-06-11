@@ -69,14 +69,13 @@ const FormRow = ({
 type SystemModelChanges = {
   name: string;
   handle: string;
-  description?: {
-    locale: string;
-    text: string;
-  };
+  localizedDescriptions?: {
+    languageTag: string;
+    value: string;
+  }[];
   hardwareTypeId: string;
   partNumbers: string[];
   pictureFile?: File;
-  pictureUrl?: string | null;
 };
 
 type PartNumber = { value: string };
@@ -126,17 +125,17 @@ const transformOutputData = (
     partNumbers: data.partNumbers.map((pn) => pn.value),
   };
 
-  if (data.pictureFile) {
+  if (data.pictureFile && data.pictureFile.length) {
     systemModel.pictureFile = data.pictureFile[0];
-  } else if (data.pictureFile === null) {
-    systemModel.pictureUrl = null;
   }
 
   if (data.description) {
-    systemModel.description = {
-      locale,
-      text: data.description,
-    };
+    systemModel.localizedDescriptions = [
+      {
+        languageTag: locale,
+        value: data.description,
+      },
+    ];
   }
 
   return systemModel;
