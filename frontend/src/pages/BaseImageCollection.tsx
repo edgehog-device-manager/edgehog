@@ -118,16 +118,17 @@ const BaseImageCollectionContent = ({
     deleteBaseImageCollection({
       variables: { baseImageCollectionId },
       onCompleted(data, errors) {
-        if (errors) {
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          return setShowDeleteModal(false);
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          return navigate({ route: Route.baseImageCollections });
         }
-        navigate({ route: Route.baseImageCollections });
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
       },
       onError() {
         setErrorFeedback(

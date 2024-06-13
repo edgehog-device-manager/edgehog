@@ -115,16 +115,17 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
     deleteDeviceGroup({
       variables: { deviceGroupId },
       onCompleted(data, errors) {
-        if (errors) {
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          return setShowDeleteModal(false);
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          return navigate({ route: Route.deviceGroups });
         }
-        navigate({ route: Route.deviceGroups });
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
       },
       onError() {
         setErrorFeedback(

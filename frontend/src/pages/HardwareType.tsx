@@ -109,17 +109,17 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
     deleteHardwareType({
       variables: { hardwareTypeId },
       onCompleted(data, errors) {
-        if (errors) {
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          setShowDeleteModal(false);
-          return;
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          return navigate({ route: Route.hardwareTypes });
         }
-        navigate({ route: Route.hardwareTypes });
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
       },
       onError() {
         setErrorFeedback(
