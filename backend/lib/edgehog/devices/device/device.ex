@@ -30,6 +30,7 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Devices.Device.LedBehavior
   alias Edgehog.Devices.Device.ManualActions
   alias Edgehog.Devices.Device.ManualRelationships
+  alias Edgehog.Devices.Device.NetworkInterface
   alias Edgehog.Devices.Device.Types
 
   resource do
@@ -379,9 +380,9 @@ defmodule Edgehog.Devices.Device do
       calculation Calculations.Location
     end
 
-    calculate :network_interfaces, {:array, Types.NetworkInterface} do
+    calculate :network_interfaces, {:array, NetworkInterface} do
       public? true
-      calculation {Calculations.AstarteInterfaceValue, value_id: :network_interfaces}
+      calculation Calculations.NetworkInterfaces
     end
 
     calculate :os_info, Types.OSInfo do

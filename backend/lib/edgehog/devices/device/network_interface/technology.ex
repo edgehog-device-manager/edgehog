@@ -18,8 +18,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Devices.Device.Types.NetworkInterface do
-  use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
-    value_id: :network_interface,
-    value_struct: Edgehog.Astarte.Device.NetworkInterface
+defmodule Edgehog.Devices.Device.NetworkInterface.Technology do
+  use Ash.Type.Enum,
+    values: [
+      ethernet: "Ethernet.",
+      bluetooth: "Bluetooth.",
+      cellular: "Cellular.",
+      wifi: "WiFi."
+    ]
+
+  use AshGraphql.Type
+
+  @impl AshGraphql.Type
+  def graphql_type(_), do: :network_interface_technology
 end

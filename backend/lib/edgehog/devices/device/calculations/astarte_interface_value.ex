@@ -67,12 +67,6 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                    Edgehog.Astarte.Device.HardwareInfo
                  )
 
-  @network_interface Application.compile_env(
-                       :edgehog,
-                       :astarte_network_interface_module,
-                       Edgehog.Astarte.Device.NetworkInterface
-                     )
-
   @os_info Application.compile_env(
              :edgehog,
              :astarte_os_info_module,
@@ -108,7 +102,6 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
   defp value_id_to_fetch_fun(:hardware_info), do: &@hardware_info.get/2
   defp value_id_to_fetch_fun(:modem_properties), do: &@cellular_connection.get_modem_properties/2
   defp value_id_to_fetch_fun(:modem_status), do: &@cellular_connection.get_modem_status/2
-  defp value_id_to_fetch_fun(:network_interfaces), do: &@network_interface.get/2
   defp value_id_to_fetch_fun(:os_info), do: &@os_info.get/2
   defp value_id_to_fetch_fun(:runtime_info), do: &@runtime_info.get/2
   defp value_id_to_fetch_fun(:storage_usage), do: &@storage_usage.get/2
