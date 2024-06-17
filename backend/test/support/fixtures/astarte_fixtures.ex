@@ -83,22 +83,6 @@ defmodule Edgehog.AstarteFixtures do
   end
 
   @doc """
-  Generate an %Astarte.Device{}.
-  """
-  def astarte_device_fixture(realm, attrs \\ %{}) do
-    attrs =
-      attrs
-      |> Enum.into(%{
-        device_id: random_device_id(),
-        name: "some name"
-      })
-
-    {:ok, device} = Edgehog.Astarte.create_device(realm, attrs)
-
-    device
-  end
-
-  @doc """
   Returns an interface map with the given name and major (and optionally minor, which defaults to 1).
 
   All the other parts of the interface are fixed.

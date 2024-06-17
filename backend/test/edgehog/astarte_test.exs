@@ -24,7 +24,6 @@ defmodule Edgehog.AstarteTest do
 
   alias Astarte.Client.APIError
   alias Astarte.Client.AppEngine
-  alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Device.DeviceStatus
   alias Edgehog.Astarte.InterfaceVersion
@@ -32,52 +31,6 @@ defmodule Edgehog.AstarteTest do
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
-
-  describe "devices" do
-    alias Edgehog.Astarte.Device
-
-    setup do
-      cluster = cluster_fixture()
-
-      %{realm: realm_fixture(cluster)}
-    end
-
-    @invalid_attrs %{device_id: nil, name: nil}
-
-    test "get_device!/1 returns the device with given id", %{realm: realm} do
-      device = astarte_device_fixture(realm)
-      assert Astarte.get_device!(device.id) == device
-    end
-
-    test "create_device/1 with valid data creates a device", %{realm: realm} do
-      valid_attrs = %{device_id: "some device_id", name: "some name"}
-
-      assert {:ok, %Device{} = device} = Astarte.create_device(realm, valid_attrs)
-      assert device.device_id == "some device_id"
-      assert device.name == "some name"
-    end
-
-    test "create_device/1 with invalid data returns error changeset", %{realm: realm} do
-      assert {:error, %Ecto.Changeset{}} = Astarte.create_device(realm, @invalid_attrs)
-    end
-
-    test "change_device/1 returns a device changeset", %{realm: realm} do
-      device = astarte_device_fixture(realm)
-      assert %Ecto.Changeset{} = Astarte.change_device(device)
-    end
-
-    test "ensure_device_exists/1 creates a device if not existent", %{realm: realm} do
-      device_id = "does_not_exist"
-      {:ok, device} = Astarte.ensure_device_exists(realm, device_id)
-      assert %Device{device_id: ^device_id} = device
-    end
-
-    test "ensure_device_exists/1 does not create a device if already existent", %{realm: realm} do
-      device = astarte_device_fixture(realm)
-      {:ok, same_device} = Astarte.ensure_device_exists(realm, device.device_id)
-      assert same_device.id == device.id
-    end
-  end
 
   describe "send_ota_request_update/4" do
     setup do
