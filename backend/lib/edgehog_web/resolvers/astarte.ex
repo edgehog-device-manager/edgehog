@@ -61,15 +61,6 @@ defmodule EdgehogWeb.Resolvers.Astarte do
     end
   end
 
-  def fetch_battery_status(%Device{device_id: device_id} = device, _args, _context) do
-    with {:ok, client} <- Devices.appengine_client_from_device(device),
-         {:ok, battery_status} <- Astarte.fetch_battery_status(client, device_id) do
-      {:ok, battery_status}
-    else
-      _ -> {:ok, nil}
-    end
-  end
-
   def fetch_base_image(%Device{device_id: device_id} = device, _args, _context) do
     with {:ok, client} <- Devices.appengine_client_from_device(device),
          {:ok, base_image} <- Astarte.fetch_base_image(client, device_id) do
@@ -96,21 +87,4 @@ defmodule EdgehogWeb.Resolvers.Astarte do
       _ -> {:ok, nil}
     end
   end
-
-  def resolve_battery_status(%BatterySlot{status: nil}, _args, _res) do
-    {:ok, nil}
-  end
-
-  def resolve_battery_status(%BatterySlot{status: status}, _args, _res) do
-    battery_status_to_enum(status)
-  end
-
-  defp battery_status_to_enum("Charging"), do: {:ok, :charging}
-  defp battery_status_to_enum("Discharging"), do: {:ok, :discharging}
-  defp battery_status_to_enum("Idle"), do: {:ok, :idle}
-  defp battery_status_to_enum("EitherIdleOrCharging"), do: {:ok, :either_idle_or_charging}
-  defp battery_status_to_enum("Failure"), do: {:ok, :failure}
-  defp battery_status_to_enum("Removed"), do: {:ok, :removed}
-  defp battery_status_to_enum("Unknown"), do: {:ok, :unknown}
-  defp battery_status_to_enum(_), do: {:error, :invalid_battery_status}
 end

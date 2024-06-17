@@ -129,48 +129,6 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :timestamp, non_null(:datetime)
   end
 
-  @desc """
-  The current status of the battery.
-  """
-  enum :battery_status do
-    @desc "The battery is charging."
-    value :charging
-    @desc "The battery is discharging."
-    value :discharging
-    @desc "The battery is idle."
-    value :idle
-
-    @desc """
-    The battery is either in a charging or in an idle state, \
-    since the hardware doesn't allow to distinguish between them.
-    """
-    value :either_idle_or_charging
-    @desc "The battery is in a failed state."
-    value :failure
-    @desc "The battery is removed."
-    value :removed
-    @desc "The battery status cannot be determined."
-    value :unknown
-  end
-
-  @desc "Describes a battery slot of a device."
-  object :battery_slot do
-    @desc "The identifier of the battery slot."
-    field :slot, non_null(:string)
-
-    @desc "Battery level estimated percentage [0.0%-100.0%]"
-    field :level_percentage, :float
-
-    @desc "Battery level measurement absolute error [0.0-100.0]"
-    field :level_absolute_error, :float
-
-    @desc "The current status of the battery."
-    field :status, :battery_status do
-      resolve &Resolvers.Astarte.resolve_battery_status/3
-      middleware Middleware.ErrorHandler
-    end
-  end
-
   @desc "Describes an Edgehog runtime."
   object :runtime_info do
     @desc "The name of the Edgehog runtime."

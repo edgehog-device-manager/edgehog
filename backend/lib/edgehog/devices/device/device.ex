@@ -25,6 +25,7 @@ defmodule Edgehog.Devices.Device do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
   alias Edgehog.Devices.Device.LedBehavior
@@ -351,9 +352,9 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :base_image_info}
     end
 
-    calculate :battery_status, {:array, Types.BatterySlot} do
+    calculate :battery_status, {:array, BatterySlot} do
       public? true
-      calculation {Calculations.AstarteInterfaceValue, value_id: :battery_status}
+      calculation Calculations.BatteryStatus
     end
 
     calculate :forwarder_sessions, {:array, :struct} do
