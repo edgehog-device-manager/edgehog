@@ -30,6 +30,7 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Devices.Device.LedBehavior
   alias Edgehog.Devices.Device.ManualActions
   alias Edgehog.Devices.Device.ManualRelationships
+  alias Edgehog.Devices.Device.Modem
   alias Edgehog.Devices.Device.NetworkInterface
   alias Edgehog.Devices.Device.Types
 
@@ -340,7 +341,7 @@ defmodule Edgehog.Devices.Device do
       calculation Calculations.Capabilities
     end
 
-    calculate :cellular_connection, {:array, Types.Modem} do
+    calculate :cellular_connection, {:array, Modem} do
       public? true
       calculation Calculations.CellularConnection
     end
