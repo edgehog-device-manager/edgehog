@@ -29,17 +29,6 @@ defmodule Edgehog.Groups.DeviceGroup do
 
   graphql do
     type :device_group
-
-    queries do
-      get :device_group, :get
-      list :device_groups, :list
-    end
-
-    mutations do
-      create :create_device_group, :create
-      update :update_device_group, :update
-      destroy :delete_device_group, :destroy
-    end
   end
 
   actions do

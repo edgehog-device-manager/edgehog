@@ -36,10 +36,6 @@ defmodule Edgehog.Forwarder.Config do
 
     derive_filter? false
     derive_sort? false
-
-    queries do
-      read_one :forwarder_config, :get
-    end
   end
 
   actions do

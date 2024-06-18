@@ -38,20 +38,6 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
 
   graphql do
     type :base_image_collection
-
-    queries do
-      get :base_image_collection, :get
-      list :base_image_collections, :list
-    end
-
-    mutations do
-      create :create_base_image_collection, :create do
-        relay_id_translations input: [system_model_id: :system_model]
-      end
-
-      update :update_base_image_collection, :update
-      destroy :delete_base_image_collection, :destroy
-    end
   end
 
   actions do

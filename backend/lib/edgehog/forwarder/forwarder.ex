@@ -26,6 +26,20 @@ defmodule Edgehog.Forwarder do
 
   graphql do
     root_level_errors? true
+
+    queries do
+      read_one Edgehog.Forwarder.Config, :forwarder_config, :get
+
+      read_one Edgehog.Forwarder.Session, :forwarder_session, :get do
+        relay_id_translations device_id: :device
+      end
+    end
+
+    mutations do
+      action Edgehog.Forwarder.Session, :request_forwarder_session, :request do
+        relay_id_translations input: [device_id: :device]
+      end
+    end
   end
 
   resources do
