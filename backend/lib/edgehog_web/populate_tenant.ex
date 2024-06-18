@@ -30,7 +30,7 @@ defmodule EdgehogWeb.PopulateTenant do
   def call(conn, _opts) do
     tenant_slug = conn.path_params["tenant_slug"]
 
-    case Tenants.Tenant.fetch_by_slug(tenant_slug) do
+    case Tenants.fetch_tenant_by_slug(tenant_slug) do
       {:ok, tenant} ->
         Ash.PlugHelpers.set_tenant(conn, tenant)
 

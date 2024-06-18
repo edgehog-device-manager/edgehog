@@ -76,7 +76,7 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
 
       assert response(conn, :created)
 
-      assert tenant = Tenants.Tenant.fetch_by_slug!(tenant_slug)
+      assert tenant = Tenants.fetch_tenant_by_slug!(tenant_slug)
 
       assert %Tenants.Tenant{
                name: ^tenant_name,
@@ -118,7 +118,7 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
 
       assert response(conn, :created)
 
-      assert tenant = Tenants.Tenant.fetch_by_slug!(tenant_slug)
+      assert tenant = Tenants.fetch_tenant_by_slug!(tenant_slug)
 
       assert tenant.default_locale == "en-US"
     end

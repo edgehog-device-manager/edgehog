@@ -25,10 +25,6 @@ defmodule Edgehog.Astarte.Cluster do
 
   alias Edgehog.Astarte.Cluster
 
-  code_interface do
-    define :create
-  end
-
   actions do
     defaults [:read, :destroy]
 

@@ -49,7 +49,7 @@ defmodule Edgehog.AstarteFixtures do
       base_api_url: unique_cluster_base_api_url(),
       name: unique_cluster_name()
     })
-    |> Edgehog.Astarte.Cluster.create!()
+    |> Edgehog.Astarte.create_cluster!()
   end
 
   @private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
@@ -69,7 +69,7 @@ defmodule Edgehog.AstarteFixtures do
       name: unique_realm_name(),
       private_key: @private_key
     })
-    |> Edgehog.Astarte.Realm.create!(tenant: tenant.tenant_id)
+    |> Edgehog.Astarte.create_realm!(tenant: tenant.tenant_id)
   end
 
   @doc """

@@ -37,7 +37,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.ProvisionAstarteResources do
   end
 
   defp create_cluster(astarte_config) do
-    case Astarte.Cluster.create(%{base_api_url: astarte_config.base_api_url}) do
+    case Astarte.create_cluster(%{base_api_url: astarte_config.base_api_url}) do
       {:ok, cluster} ->
         {:ok, cluster}
 
@@ -53,7 +53,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.ProvisionAstarteResources do
       private_key: astarte_config.realm_private_key
     }
 
-    case Astarte.Realm.create(attrs, tenant: tenant) do
+    case Astarte.create_realm(attrs, tenant: tenant) do
       {:ok, realm} ->
         {:ok, realm}
 

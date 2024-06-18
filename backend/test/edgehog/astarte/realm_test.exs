@@ -37,7 +37,7 @@ defmodule Edgehog.Astarte.RealmTest do
       tenant = tenant_fixture()
       valid_attrs = %{cluster_id: cluster.id, name: "somename", private_key: @valid_private_key}
 
-      assert {:ok, %Realm{} = realm} = Realm.create(valid_attrs, tenant: tenant)
+      assert {:ok, %Realm{} = realm} = Astarte.create_realm(valid_attrs, tenant: tenant)
       assert realm.name == "somename"
       assert realm.private_key == @valid_private_key
       assert realm.tenant_id == tenant.tenant_id
@@ -91,21 +91,22 @@ defmodule Edgehog.Astarte.RealmTest do
       tenant = tenant_fixture()
       realm = realm_fixture(tenant: tenant)
 
-      assert {:ok, realm} = Realm.fetch_by_name(realm.name, tenant: tenant, load: [:cluster])
+      assert {:ok, realm} =
+               Astarte.fetch_realm_by_name(realm.name, tenant: tenant, load: [:cluster])
     end
 
     test "returns error for non-existing realm" do
       tenant = tenant_fixture()
 
       assert {:error, %Ash.Error.Query.NotFound{}} =
-               Realm.fetch_by_name("nonexisting", tenant: tenant)
+               Astarte.fetch_realm_by_name("nonexisting", tenant: tenant)
     end
   end
 
   test "destroy/1 deletes the realm" do
     tenant = tenant_fixture()
     realm = realm_fixture(tenant: tenant)
-    assert :ok = Realm.destroy(realm)
+    assert :ok = Astarte.destroy_realm(realm)
 
     assert {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{}]}} =
              Astarte.get(Realm, realm.id, tenant: tenant)
@@ -123,6 +124,6 @@ defmodule Edgehog.Astarte.RealmTest do
       name: unique_realm_name(),
       private_key: @valid_private_key
     })
-    |> Edgehog.Astarte.Realm.create(tenant: tenant)
+    |> Astarte.create_realm(tenant: tenant)
   end
 end

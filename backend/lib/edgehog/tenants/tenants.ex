@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,6 +36,12 @@ defmodule Edgehog.Tenants do
   end
 
   resources do
-    resource Edgehog.Tenants.Tenant
+    resource Edgehog.Tenants.Tenant do
+      define :create_tenant, action: :create
+      define :provision_tenant, action: :provision
+      define :fetch_tenant_by_slug, action: :by_slug, args: [:slug]
+      define :reconcile_tenant, action: :reconcile, args: [:tenant]
+      define :destroy_tenant, action: :destroy
+    end
   end
 end

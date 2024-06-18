@@ -27,7 +27,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.TriggerReconciliation do
   def change(changeset, _opts, _ctx) do
     Ash.Changeset.after_action(changeset, fn _changeset, tenant ->
       # TODO: this can probably be done with Ash notifiers, investigate that
-      Tenants.Tenant.reconcile(tenant)
+      Tenants.reconcile_tenant(tenant)
 
       {:ok, tenant}
     end)

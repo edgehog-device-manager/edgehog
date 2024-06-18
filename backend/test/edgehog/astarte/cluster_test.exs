@@ -23,6 +23,7 @@ defmodule Edgehog.Astarte.ClusterTest do
 
   @moduletag :ported_to_ash
 
+  alias Edgehog.Astarte
   alias Edgehog.Astarte.Cluster
 
   import Edgehog.AstarteFixtures
@@ -34,7 +35,7 @@ defmodule Edgehog.Astarte.ClusterTest do
     test "with valid data creates a cluster" do
       %{base_api_url: url, name: name} = @valid_attrs
 
-      assert {:ok, %Cluster{} = cluster} = Cluster.create(@valid_attrs)
+      assert {:ok, %Cluster{} = cluster} = Astarte.create_cluster(@valid_attrs)
       assert cluster.base_api_url == url
       assert cluster.name == name
     end
@@ -42,7 +43,7 @@ defmodule Edgehog.Astarte.ClusterTest do
     test "creates cluster without name" do
       %{base_api_url: url} = @valid_attrs
 
-      assert {:ok, %Cluster{} = cluster} = Cluster.create(%{base_api_url: url})
+      assert {:ok, %Cluster{} = cluster} = Astarte.create_cluster(%{base_api_url: url})
       assert cluster.base_api_url == url
       assert cluster.name == nil
     end
@@ -50,7 +51,7 @@ defmodule Edgehog.Astarte.ClusterTest do
     test "strips trailing slash from base_api_url" do
       attrs = %{base_api_url: "https://api.test.astarte.example/foo/", name: "test-trailing"}
 
-      assert {:ok, %Cluster{} = cluster} = Cluster.create(attrs)
+      assert {:ok, %Cluster{} = cluster} = Astarte.create_cluster(attrs)
       assert cluster.base_api_url == "https://api.test.astarte.example/foo"
     end
 
@@ -66,7 +67,7 @@ defmodule Edgehog.Astarte.ClusterTest do
       ]
 
       invalid_attrs_list
-      |> Enum.map(&Cluster.create/1)
+      |> Enum.map(&Astarte.create_cluster/1)
       |> Enum.each(fn result -> assert {:error, %Ash.Error.Invalid{}} = result end)
     end
 
@@ -79,7 +80,7 @@ defmodule Edgehog.Astarte.ClusterTest do
       invalid_schemas
       |> Enum.map(fn schema -> schema <> valid_host_name end)
       |> Enum.map(fn url -> %{base_api_url: url, name: valid_name} end)
-      |> Enum.map(&Cluster.create/1)
+      |> Enum.map(&Astarte.create_cluster/1)
       |> Enum.each(fn result -> assert {:error, %Ash.Error.Invalid{}} = result end)
     end
 
@@ -91,7 +92,7 @@ defmodule Edgehog.Astarte.ClusterTest do
       invalid_hosts
       |> Enum.map(fn host -> valid_schema <> host end)
       |> Enum.map(fn url -> %{base_api_url: url, name: valid_name} end)
-      |> Enum.map(&Cluster.create/1)
+      |> Enum.map(&Astarte.create_cluster/1)
       |> Enum.each(fn result -> assert {:error, %Ash.Error.Invalid{}} = result end)
     end
 
@@ -99,7 +100,7 @@ defmodule Edgehog.Astarte.ClusterTest do
       cluster = cluster_fixture()
 
       assert {:ok, upserted_cluster} =
-               Cluster.create(%{base_api_url: cluster.base_api_url, name: cluster.name})
+               Astarte.create_cluster(%{base_api_url: cluster.base_api_url, name: cluster.name})
 
       assert upserted_cluster.name == cluster.name
       assert upserted_cluster.base_api_url == cluster.base_api_url
@@ -109,7 +110,7 @@ defmodule Edgehog.Astarte.ClusterTest do
       cluster = cluster_fixture()
 
       assert {:ok, upserted_cluster} =
-               Cluster.create(%{base_api_url: cluster.base_api_url, name: "other"})
+               Astarte.create_cluster(%{base_api_url: cluster.base_api_url, name: "other"})
 
       assert upserted_cluster.name == cluster.name
     end

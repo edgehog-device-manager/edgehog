@@ -57,14 +57,6 @@ defmodule Edgehog.Tenants.Tenant do
     end
   end
 
-  code_interface do
-    define :create
-    define :provision
-    define :fetch_by_slug, action: :by_slug, args: [:slug]
-    define :reconcile, args: [:tenant]
-    define :destroy
-  end
-
   actions do
     defaults [:read, :destroy]
 

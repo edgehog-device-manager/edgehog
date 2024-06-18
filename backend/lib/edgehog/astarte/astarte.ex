@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,14 @@ defmodule Edgehog.Astarte do
   use Ash.Domain
 
   resources do
-    resource Edgehog.Astarte.Cluster
-    resource Edgehog.Astarte.Realm
+    resource Edgehog.Astarte.Cluster do
+      define :create_cluster, action: :create
+    end
+
+    resource Edgehog.Astarte.Realm do
+      define :fetch_realm_by_name, action: :by_name, args: [:name]
+      define :create_realm, action: :create
+      define :destroy_realm, action: :destroy
+    end
   end
 end
