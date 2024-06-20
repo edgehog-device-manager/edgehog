@@ -104,7 +104,7 @@ cluster =
     name: "Test Cluster",
     base_api_url: read_env_var.("SEEDS_ASTARTE_BASE_API_URL")
   }
-  |> Astarte.Cluster.create!()
+  |> Astarte.create_cluster!()
 
 {status, private_key} =
   read_key!.("SEEDS_TENANT_PRIVATE_KEY_FILE", "SEEDS_TENANT_ORIGINAL_FILE", "tenant_private")
@@ -129,7 +129,7 @@ tenant =
     slug: "acme-inc",
     public_key: public_key
   }
-  |> Tenants.Tenant.create!()
+  |> Tenants.create_tenant!()
 
 {status, realm_pk} =
   read_key!.("SEEDS_REALM_PRIVATE_KEY_FILE", "SEEDS_REALM_ORIGINAL_FILE", "realm_private")
@@ -149,6 +149,6 @@ realm =
     name: read_env_var.("SEEDS_REALM"),
     private_key: realm_pk
   }
-  |> Astarte.Realm.create!(tenant: tenant)
+  |> Astarte.create_realm!(tenant: tenant)
 
 :ok

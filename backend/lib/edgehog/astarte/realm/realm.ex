@@ -25,21 +25,11 @@ defmodule Edgehog.Astarte.Realm do
   alias Edgehog.Astarte.Realm
   alias Edgehog.Validations
 
-  code_interface do
-    define :fetch_by_name, action: :by_name, args: [:name]
-    define :create
-    define :destroy
-  end
-
   actions do
     defaults [:read, :destroy]
 
     read :global do
       multitenancy :allow_global
-    end
-
-    read :by_name do
-      get_by :name
     end
 
     create :create do

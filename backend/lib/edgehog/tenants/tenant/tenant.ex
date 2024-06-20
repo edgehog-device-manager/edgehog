@@ -57,14 +57,6 @@ defmodule Edgehog.Tenants.Tenant do
     end
   end
 
-  code_interface do
-    define :create
-    define :provision
-    define :fetch_by_slug, action: :by_slug, args: [:slug]
-    define :reconcile, args: [:tenant]
-    define :destroy
-  end
-
   actions do
     defaults [:read, :destroy]
 
@@ -72,8 +64,6 @@ defmodule Edgehog.Tenants.Tenant do
       primary? true
       accept [:name, :slug, :public_key, :default_locale]
     end
-
-    read :by_slug, get_by: :slug
 
     read :current_tenant do
       description "Retrieves the current tenant."

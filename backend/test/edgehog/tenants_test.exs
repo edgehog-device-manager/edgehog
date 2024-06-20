@@ -41,7 +41,7 @@ defmodule Edgehog.TenantsTest do
                          |> X509.PrivateKey.to_pem()
                          |> String.trim()
 
-  describe "Tenant.create/1" do
+  describe "Tenants.create_tenant/1" do
     @describetag :ported_to_ash
 
     test "with valid data creates a tenant" do
@@ -52,7 +52,7 @@ defmodule Edgehog.TenantsTest do
 
       attrs = %{name: name, slug: slug, public_key: public_key, default_locale: default_locale}
 
-      assert {:ok, tenant} = Tenant.create(attrs)
+      assert {:ok, tenant} = Tenants.create_tenant(attrs)
 
       assert %Tenant{
                name: ^name,
@@ -69,7 +69,7 @@ defmodule Edgehog.TenantsTest do
         public_key: @valid_pem_public_key
       }
 
-      assert {:ok, %Tenant{} = tenant} = Tenant.create(attrs)
+      assert {:ok, %Tenant{} = tenant} = Tenants.create_tenant(attrs)
       assert tenant.default_locale == "en-US"
     end
 
@@ -128,7 +128,7 @@ defmodule Edgehog.TenantsTest do
     end
   end
 
-  describe "Tenant.reconcile/1" do
+  describe "Tenants.reconcile_tenant/1" do
     test "triggers tenant reconciliation" do
       Edgehog.Tenants.ReconcilerMock
       |> expect(:reconcile_tenant, fn %Tenant{} = tenant ->
@@ -138,11 +138,11 @@ defmodule Edgehog.TenantsTest do
       end)
 
       tenant = tenant_fixture()
-      assert :ok = Tenant.reconcile!(tenant)
+      assert :ok = Tenants.reconcile_tenants!(tenant)
     end
   end
 
-  describe "Tenant.provision/1" do
+  describe "Tenants.provision_tenant/1" do
     @describetag :ported_to_ash
 
     test "with valid attrs creates the tenant, cluster and realm" do
@@ -166,7 +166,7 @@ defmodule Edgehog.TenantsTest do
         }
       }
 
-      assert {:ok, tenant} = Tenant.provision(attrs)
+      assert {:ok, tenant} = Tenants.provision_tenant(attrs)
 
       assert %Tenant{
                name: ^tenant_name,
@@ -194,7 +194,7 @@ defmodule Edgehog.TenantsTest do
         }
       }
 
-      assert {:ok, %Tenant{} = tenant} = Tenant.provision(attrs)
+      assert {:ok, %Tenant{} = tenant} = Tenants.provision_tenant(attrs)
       assert tenant.default_locale == "en-US"
     end
 
@@ -278,7 +278,7 @@ defmodule Edgehog.TenantsTest do
     end
   end
 
-  describe "Tenant.destroy/1" do
+  describe "Tenants.destroy_tenant/1" do
     import Edgehog.AstarteFixtures
     import Edgehog.BaseImagesFixtures
     import Edgehog.DevicesFixtures
@@ -294,8 +294,8 @@ defmodule Edgehog.TenantsTest do
 
     @tag :ported_to_ash
     test "deletes the tenant", %{tenant: tenant} do
-      assert :ok = Tenant.destroy(tenant)
-      assert_raise Ash.Error.Query.NotFound, fn -> Tenant.fetch_by_slug!(tenant.slug) end
+      assert :ok = Tenants.destroy_tenant(tenant)
+      assert_raise Ash.Error.Query.NotFound, fn -> Tenants.fetch_tenant_by_slug!(tenant.slug) end
     end
 
     test "cascading deletes associated realm", %{tenant: tenant} do
@@ -304,7 +304,7 @@ defmodule Edgehog.TenantsTest do
       realm = realm_fixture(cluster)
 
       assert {:ok, ^realm} = Astarte.fetch_realm_by_name(realm.name)
-      assert :ok = Tenant.destroy(tenant)
+      assert :ok = Tenants.destroy_tenant(tenant)
       {:error, :realm_not_found} = Astarte.fetch_realm_by_name(realm.name)
     end
 
@@ -328,7 +328,7 @@ defmodule Edgehog.TenantsTest do
       update_campaign = update_campaign_fixture()
       update_target = target_fixture()
 
-      assert :ok = Tenant.destroy(tenant)
+      assert :ok = Tenants.destroy_tenant(tenant)
 
       refute entry_exists?(Edgehog.Devices.HardwareType, hardware_type.id)
       refute entry_exists?(Edgehog.Devices.SystemModel, system_model.id)
@@ -367,7 +367,7 @@ defmodule Edgehog.TenantsTest do
         astarte_config: astarte_config
       })
 
-    Tenant.provision(attrs)
+    Tenants.provision_tenant(attrs)
   end
 
   defp create_tenant(opts) do
@@ -384,7 +384,7 @@ defmodule Edgehog.TenantsTest do
       slug: unique_tenant_slug(),
       public_key: public_key
     })
-    |> Tenant.create()
+    |> Tenants.create_tenant()
   end
 
   defp entry_exists?(schema, id) do

@@ -21,6 +21,7 @@
 defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   use Ash.Resource.Actions.Implementation
 
+  alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
@@ -50,7 +51,8 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
       |> Ash.Query.select([:id])
       |> Ash.Query.load(tenant: [:tenant_id])
 
-    with {:ok, realm} <- Realm.fetch_by_name(realm_name, query: read_query, tenant: tenant),
+    with {:ok, realm} <-
+           Astarte.fetch_realm_by_name(realm_name, query: read_query, tenant: tenant),
          {:ok, _} <- handle_event(event, realm.tenant, realm.id, device_id, timestamp) do
       :ok
     end
