@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,8 +44,13 @@ defmodule Edgehog.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Edgehog.DataCase
+      import Mox
     end
   end
+
+  import Mox
+
+  setup :verify_on_exit!
 
   setup tags do
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])

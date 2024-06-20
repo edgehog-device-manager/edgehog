@@ -30,6 +30,8 @@ defmodule Edgehog.OSManagement.OTAOperation do
   alias Edgehog.OSManagement.OTAOperation.Status
   alias Edgehog.OSManagement.OTAOperation.StatusCode
 
+  @terminal_statuses [:success, :failure]
+
   resource do
     description """
     An OTA update operation
@@ -95,25 +97,29 @@ defmodule Edgehog.OSManagement.OTAOperation do
     end
 
     update :mark_as_timed_out do
-      # Needed because Edgehog.Changes.PublishNotification is not atomic
+      # Needed because PublishNotification and HandleEphemeralImageDeletion are not atomic
       require_atomic? false
 
       change set_attribute(:status, :failure)
       change set_attribute(:status_code, :request_timeout)
       change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_updated}
 
-      # TODO: cleanup base image for manual operations
+      change Changes.HandleEphemeralImageDeletion do
+        where attribute_equals(:manual?, true)
+      end
     end
 
     update :update_status do
       accept [:status, :status_progress, :status_code, :message]
 
-      # Needed because Edgehog.Changes.PublishNotification is not atomic
+      # Needed because PublishNotification and HandleEphemeralImageDeletion are not atomic
       require_atomic? false
 
       change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_updated}
 
-      # TODO: cleanup base image for manual operations reaching a terminal status
+      change Changes.HandleEphemeralImageDeletion do
+        where [attribute_equals(:manual?, true), attribute_in(:status, @terminal_statuses)]
+      end
     end
 
     action :send_update_request do
