@@ -32,10 +32,6 @@ defmodule Edgehog.Astarte.Realm do
       multitenancy :allow_global
     end
 
-    read :by_name do
-      get_by :name
-    end
-
     create :create do
       primary? true
       accept [:name, :private_key, :cluster_id]

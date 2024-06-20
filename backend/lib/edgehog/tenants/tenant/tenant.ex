@@ -65,8 +65,6 @@ defmodule Edgehog.Tenants.Tenant do
       accept [:name, :slug, :public_key, :default_locale]
     end
 
-    read :by_slug, get_by: :slug
-
     read :current_tenant do
       description "Retrieves the current tenant."
       get? true
