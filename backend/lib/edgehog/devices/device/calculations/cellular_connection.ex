@@ -21,7 +21,7 @@
 defmodule Edgehog.Devices.Device.Calculations.CellularConnection do
   use Ash.Resource.Calculation
 
-  alias Edgehog.Devices.Device.Types.Modem
+  alias Edgehog.Devices.Device.Modem
 
   @impl true
   def load(_query, _opts, _context) do
@@ -40,7 +40,7 @@ defmodule Edgehog.Devices.Device.Calculations.CellularConnection do
     Enum.map(modem_properties, fn modem ->
       modem_status = Map.get(slot_to_status, modem.slot, %{})
 
-      %Modem{
+      attrs = %{
         slot: modem.slot,
         apn: modem.apn,
         imei: modem.imei,
@@ -54,6 +54,10 @@ defmodule Edgehog.Devices.Device.Calculations.CellularConnection do
         rssi: Map.get(modem_status, :rssi),
         technology: Map.get(modem_status, :technology)
       }
+
+      Modem
+      |> Ash.Changeset.for_create(:create, attrs, domain: Edgehog.Devices)
+      |> Ash.create!()
     end)
   end
 

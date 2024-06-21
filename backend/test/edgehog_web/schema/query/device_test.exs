@@ -27,8 +27,6 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
-  alias Edgehog.Devices
-
   describe "device query" do
     test "returns device if present", %{tenant: tenant} do
       fixture = device_fixture(tenant: tenant)
@@ -129,7 +127,13 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "Base Image info", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.BaseImageMock
       |> expect(:get, fn _client, ^device_id ->
-        {:ok, base_image_info_fixture(name: "my-image", version: "1.2.5")}
+        {:ok,
+         base_image_info_fixture(
+           name: "my-image",
+           version: "1.2.5",
+           build_id: "2022-01-01 12:00:00",
+           fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
+         )}
       end)
 
       document = """
@@ -138,6 +142,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
           baseImage {
             name
             version
+            buildId
+            fingerprint
           }
         }
       }
@@ -149,12 +155,22 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert device["baseImage"]["name"] == "my-image"
       assert device["baseImage"]["version"] == "1.2.5"
+      assert device["baseImage"]["buildId"] == "2022-01-01 12:00:00"
+
+      assert device["baseImage"]["fingerprint"] ==
+               "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
     end
 
     test "Battery Status", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.BatteryStatusMock
       |> expect(:get, fn _client, ^device_id ->
-        {:ok, battery_status_fixture(level_percentage: 29, status: "Charging")}
+        {:ok,
+         battery_status_fixture(
+           slot: "Slot 1",
+           level_percentage: 29,
+           level_absolute_error: 0.2,
+           status: "Charging"
+         )}
       end)
 
       document = """
@@ -162,7 +178,9 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         device(id: $id) {
           deviceId
           batteryStatus {
+            slot
             levelPercentage
+            levelAbsoluteError
             status
           }
         }
@@ -173,17 +191,36 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
                device_query(document: document, tenant: tenant, id: id)
                |> extract_result!()
 
+      assert battery_status["slot"] == "Slot 1"
       assert battery_status["levelPercentage"] == 29
+      assert battery_status["levelAbsoluteError"] == 0.2
       assert battery_status["status"] == "CHARGING"
     end
 
     test "Cellular Connection", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.CellularConnectionMock
       |> expect(:get_modem_properties, fn _client, ^device_id ->
-        {:ok, modem_properties_fixture(slot: "1", imei: "1234")}
+        {:ok,
+         modem_properties_fixture(
+           slot: "1",
+           apn: "company.com",
+           imei: "509504877678976",
+           imsi: "313460000000001"
+         )}
       end)
       |> expect(:get_modem_status, fn _client, ^device_id ->
-        {:ok, modem_status_fixture(slot: "1", mobile_country_code: 222)}
+        {:ok,
+         modem_status_fixture(
+           slot: "1",
+           carrier: "Carrier",
+           cell_id: 170_402_199,
+           mobile_country_code: 310,
+           mobile_network_code: 410,
+           local_area_code: 35_632,
+           registration_status: "Registered",
+           rssi: -60,
+           technology: "GSM"
+         )}
       end)
 
       document = """
@@ -192,8 +229,17 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
           deviceId
           cellularConnection {
             slot
+            apn
             imei
+            imsi
+            carrier
+            cellId
             mobileCountryCode
+            mobileNetworkCode
+            localAreaCode
+            registrationStatus
+            rssi
+            technology
           }
         }
       }
@@ -204,8 +250,17 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
                |> extract_result!()
 
       assert modem["slot"] == "1"
-      assert modem["imei"] == "1234"
-      assert modem["mobileCountryCode"] == 222
+      assert modem["apn"] == "company.com"
+      assert modem["imei"] == "509504877678976"
+      assert modem["imsi"] == "313460000000001"
+      assert modem["carrier"] == "Carrier"
+      assert modem["cellId"] == 170_402_199
+      assert modem["mobileCountryCode"] == 310
+      assert modem["mobileNetworkCode"] == 410
+      assert modem["localAreaCode"] == 35_632
+      assert modem["registrationStatus"] == "REGISTERED"
+      assert modem["rssi"] == -60
+      assert modem["technology"] == "GSM"
     end
 
     test "Hardware Info", %{tenant: tenant, id: id, device_id: device_id} do
@@ -236,7 +291,12 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "Network Interfaces", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.NetworkInterfaceMock
       |> expect(:get, fn _client, ^device_id ->
-        {:ok, network_interfaces_fixture(name: "eth0", technology: "Ethernet")}
+        {:ok,
+         network_interfaces_fixture(
+           name: "eth0",
+           mac_address: "00:aa:bb:cc:dd:ee",
+           technology: "Ethernet"
+         )}
       end)
 
       document = """
@@ -244,6 +304,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         device(id: $id) {
           networkInterfaces {
             name
+            macAddress
             technology
           }
         }
@@ -255,6 +316,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         |> extract_result!()
 
       assert network_interface["name"] == "eth0"
+      assert network_interface["macAddress"] == "00:aa:bb:cc:dd:ee"
       assert network_interface["technology"] == "ETHERNET"
     end
 
@@ -286,7 +348,13 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "Runtime info", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.RuntimeInfoMock
       |> expect(:get, fn _client, ^device_id ->
-        {:ok, runtime_info_fixture(name: "edgehog-esp32-device", version: "0.7.0")}
+        {:ok,
+         runtime_info_fixture(
+           name: "edgehog-esp32-device",
+           version: "0.7.0",
+           environment: "esp-idf v4.3",
+           url: "https://github.com/edgehog-device-manager/edgehog-esp32-device"
+         )}
       end)
 
       document = """
@@ -295,6 +363,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
           runtimeInfo {
             name
             version
+            environment
+            url
           }
         }
       }
@@ -306,12 +376,17 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert device["runtimeInfo"]["name"] == "edgehog-esp32-device"
       assert device["runtimeInfo"]["version"] == "0.7.0"
+      assert device["runtimeInfo"]["environment"] == "esp-idf v4.3"
+
+      assert device["runtimeInfo"]["url"] ==
+               "https://github.com/edgehog-device-manager/edgehog-esp32-device"
     end
 
     test "Storage Usage", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.StorageUsageMock
       |> expect(:get, fn _client, ^device_id ->
-        {:ok, storage_usage_fixture(label: "Flash", free_bytes: 345_678)}
+        {:ok,
+         storage_usage_fixture(label: "Flash", free_bytes: 345_678, total_bytes: 348_360_704)}
       end)
 
       document = """
@@ -321,6 +396,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
           storageUsage {
             label
             freeBytes
+            totalBytes
           }
         }
       }
@@ -332,20 +408,31 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       assert storage_unit["label"] == "Flash"
       assert storage_unit["freeBytes"] == 345_678
+      assert storage_unit["totalBytes"] == 348_360_704
     end
 
     test "System Status", %{tenant: tenant, id: id, device_id: device_id} do
       Edgehog.Astarte.Device.SystemStatusMock
       |> expect(:get, fn _client, ^device_id ->
-        {:ok, system_status_fixture(task_count: 193, uptime_milliseconds: 200_159)}
+        {:ok,
+         system_status_fixture(
+           boot_id: "1c0cf72f-8428-4838-8626-1a748df5b889",
+           memory_free_bytes: 166_772,
+           task_count: 193,
+           uptime_milliseconds: 200_159,
+           timestamp: ~U[2021-11-15 11:44:57.432516Z]
+         )}
       end)
 
       document = """
       query ($id: ID!) {
         device(id: $id) {
           systemStatus {
+            bootId
+            memoryFreeBytes
             taskCount
             uptimeMilliseconds
+            timestamp
           }
         }
       }
@@ -355,8 +442,11 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         device_query(document: document, tenant: tenant, id: id)
         |> extract_result!()
 
+      assert device["systemStatus"]["bootId"] == "1c0cf72f-8428-4838-8626-1a748df5b889"
+      assert device["systemStatus"]["memoryFreeBytes"] == 166_772
       assert device["systemStatus"]["taskCount"] == 193
       assert device["systemStatus"]["uptimeMilliseconds"] == 200_159
+      assert device["systemStatus"]["timestamp"] == "2021-11-15T11:44:57.432516Z"
     end
 
     test "WiFi scan results", %{tenant: tenant, id: id, device_id: device_id} do

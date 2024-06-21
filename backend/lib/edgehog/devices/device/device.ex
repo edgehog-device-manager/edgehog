@@ -25,11 +25,14 @@ defmodule Edgehog.Devices.Device do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
   alias Edgehog.Devices.Device.LedBehavior
   alias Edgehog.Devices.Device.ManualActions
   alias Edgehog.Devices.Device.ManualRelationships
+  alias Edgehog.Devices.Device.Modem
+  alias Edgehog.Devices.Device.NetworkInterface
   alias Edgehog.Devices.Device.Types
 
   resource do
@@ -327,7 +330,7 @@ defmodule Edgehog.Devices.Device do
       calculation Calculations.Capabilities
     end
 
-    calculate :cellular_connection, {:array, Types.Modem} do
+    calculate :cellular_connection, {:array, Modem} do
       public? true
       calculation Calculations.CellularConnection
     end
@@ -337,9 +340,9 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :base_image_info}
     end
 
-    calculate :battery_status, {:array, Types.BatterySlot} do
+    calculate :battery_status, {:array, BatterySlot} do
       public? true
-      calculation {Calculations.AstarteInterfaceValue, value_id: :battery_status}
+      calculation Calculations.BatteryStatus
     end
 
     calculate :forwarder_sessions, {:array, :struct} do
@@ -367,9 +370,9 @@ defmodule Edgehog.Devices.Device do
       calculation Calculations.Location
     end
 
-    calculate :network_interfaces, {:array, Types.NetworkInterface} do
+    calculate :network_interfaces, {:array, NetworkInterface} do
       public? true
-      calculation {Calculations.AstarteInterfaceValue, value_id: :network_interfaces}
+      calculation Calculations.NetworkInterfaces
     end
 
     calculate :os_info, Types.OSInfo do
