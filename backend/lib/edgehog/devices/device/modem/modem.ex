@@ -87,7 +87,7 @@ defmodule Edgehog.Devices.Device.Modem do
     attribute :slot, :string do
       description "The identifier of the modem."
       public? true
-      allow_nil? true
+      allow_nil? false
     end
 
     attribute :technology, Modem.Technology do
