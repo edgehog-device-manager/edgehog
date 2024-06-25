@@ -1,6 +1,6 @@
 {
   "artifactDirectory": "./src/api/__generated__",
-  "customScalars": {
+  "customScalarTypes": {
     "DateTime": "string",
     "Upload": "File"
   },
@@ -9,6 +9,7 @@
   },
   "eagerEsModules": true,
   "language": "typescript",
+  "typescriptExcludeUndefinedFromNullableUnion": true,
   "noFutureProofEnums": true,
   "schema": "./src/api/schema.graphql",
   "src": "./src"
