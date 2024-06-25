@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,3 +24,17 @@ RelayRuntime.RelayFeatureFlags.ENABLE_RELAY_RESOLVERS = true;
 
 export const readFragment =
   RelayRuntime.__internal.ResolverFragments.readFragment;
+
+declare module "relay-runtime" {
+  export interface PayloadError {
+    message: string;
+    locations?: Array<{
+      line: number;
+      column: number;
+    }>;
+    code: string;
+    path: string[];
+    fields: string[];
+    short_message: string;
+  }
+}

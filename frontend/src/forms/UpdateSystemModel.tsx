@@ -39,17 +39,25 @@ import type {
   UpdateSystemModel_SystemModelFragment$key,
   UpdateSystemModel_SystemModelFragment$data,
 } from "api/__generated__/UpdateSystemModel_SystemModelFragment.graphql";
-import type { UpdateSystemModel_OptionsFragment$key } from "api/__generated__/UpdateSystemModel_OptionsFragment.graphql";
+import type {
+  UpdateSystemModel_OptionsFragment$key,
+  UpdateSystemModel_OptionsFragment$data,
+} from "api/__generated__/UpdateSystemModel_OptionsFragment.graphql";
 
 const UPDATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment UpdateSystemModel_SystemModelFragment on SystemModel {
     name
     handle
-    description
+    localizedDescriptions {
+      value
+      languageTag
+    }
     hardwareType {
       name
     }
-    partNumbers
+    partNumbers {
+      partNumber
+    }
     pictureUrl
   }
 `;
@@ -82,13 +90,13 @@ const FormRow = ({
 type SystemModelChanges = Partial<{
   name: string;
   handle: string;
-  description: {
-    locale: string;
-    text: string;
-  };
+  localizedDescriptions: {
+    languageTag: string;
+    value: string;
+  }[];
   partNumbers: string[];
   pictureFile: File;
-  pictureUrl: string | null;
+  pictureUrl: null;
 }>;
 
 type PartNumber = { value: string };
@@ -100,6 +108,23 @@ type FormData = {
   hardwareType: string;
   partNumbers: PartNumber[];
   pictureFile?: FileList | null;
+};
+
+type LocalizedDescriptions =
+  UpdateSystemModel_SystemModelFragment$data["localizedDescriptions"];
+type Locale =
+  UpdateSystemModel_OptionsFragment$data["tenantInfo"]["defaultLocale"];
+const getDescriptionByLocale = (
+  localizedDescriptions: LocalizedDescriptions,
+  locale: Locale,
+): string => {
+  if (!localizedDescriptions || localizedDescriptions.length === 0) {
+    return "";
+  }
+  const localizedDescription = localizedDescriptions.find(
+    ({ languageTag }) => languageTag === locale,
+  );
+  return localizedDescription ? localizedDescription.value : "";
 };
 
 const systemModelSchema = yup
@@ -129,19 +154,25 @@ const systemModelSchema = yup
 
 const transformInputData = (
   data: UpdateSystemModel_SystemModelFragment$data,
-): FormData => ({
-  ...data,
-  description: data.description || "",
-  hardwareType: data.hardwareType.name,
-  partNumbers:
-    data.partNumbers.length > 0
-      ? data.partNumbers.map((pn) => ({ value: pn }))
-      : [{ value: "" }], // default with at least one empty part number
-});
+  locale: Locale,
+): FormData => {
+  const { localizedDescriptions, partNumbers, hardwareType, ...rest } = data;
+  const description = getDescriptionByLocale(localizedDescriptions, locale);
+
+  return {
+    ...rest,
+    description,
+    hardwareType: hardwareType?.name || "",
+    partNumbers:
+      partNumbers.length > 0
+        ? data.partNumbers.map(({ partNumber }) => ({ value: partNumber }))
+        : [{ value: "" }], // default with at least one empty part number
+  };
+};
 
 const transformOutputData = (
   systemModel: UpdateSystemModel_SystemModelFragment$data,
-  locale: string,
+  locale: Locale,
   data: FormData,
 ): SystemModelChanges => {
   const diff: SystemModelChanges = {};
@@ -156,15 +187,23 @@ const transformOutputData = (
   } else if (systemModel.pictureUrl !== null && data.pictureFile === null) {
     diff.pictureUrl = null;
   }
-  if (systemModel.description !== null || data.description !== "") {
-    diff.description = {
-      locale,
-      text: data.description,
-    };
+  const oldDescription = getDescriptionByLocale(
+    systemModel.localizedDescriptions,
+    locale,
+  );
+  if (oldDescription !== data.description) {
+    diff.localizedDescriptions = [
+      {
+        languageTag: locale,
+        value: data.description,
+      },
+    ];
   }
 
   const partNumbers = data.partNumbers.map((pn) => pn.value);
-  const systemModelPartNumbers = new Set(systemModel.partNumbers);
+  const systemModelPartNumbers = new Set(
+    systemModel.partNumbers.map(({ partNumber }) => partNumber),
+  );
   const formPartNumbers = new Set(partNumbers);
   const partNumbersEqual =
     formPartNumbers.size === systemModelPartNumbers.size &&
@@ -206,7 +245,7 @@ const UpdateSystemModelForm = ({
     watch,
   } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: transformInputData(systemModel),
+    defaultValues: transformInputData(systemModel, locale),
     resolver: yupResolver(systemModelSchema),
   });
 
@@ -236,8 +275,8 @@ const UpdateSystemModelForm = ({
   );
 
   useEffect(() => {
-    reset(transformInputData(systemModel));
-  }, [systemModel, reset]);
+    reset(transformInputData(systemModel, locale));
+  }, [reset, systemModel, locale]);
 
   const pictureFile = watch("pictureFile");
   const picture =

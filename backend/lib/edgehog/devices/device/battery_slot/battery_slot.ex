@@ -47,7 +47,7 @@ defmodule Edgehog.Devices.Device.BatterySlot do
     attribute :slot, :string do
       description "The identifier of the battery slot."
       public? true
-      allow_nil? true
+      allow_nil? false
     end
 
     attribute :status, BatterySlot.Status do

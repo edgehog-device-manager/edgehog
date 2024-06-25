@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -40,7 +40,9 @@ const SYSTEM_MODELS_TABLE_FRAGMENT = graphql`
     hardwareType {
       name
     }
-    partNumbers
+    partNumbers {
+      partNumber
+    }
   }
 `;
 
@@ -73,7 +75,8 @@ const columns = [
     ),
     cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
   }),
-  columnHelper.accessor("hardwareType.name", {
+  columnHelper.accessor((row) => row.hardwareType?.name, {
+    id: "hardwareType",
     header: () => (
       <FormattedMessage
         id="components.SystemModelsTable.hardwareType"
@@ -90,7 +93,7 @@ const columns = [
       />
     ),
     cell: ({ getValue }) =>
-      getValue().map((partNumber, index) => (
+      getValue().map(({ partNumber }, index) => (
         <React.Fragment key={partNumber}>
           {index > 0 && ", "}
           <span className="text-nowrap">{partNumber}</span>
@@ -112,7 +115,5 @@ const SystemModelsTable = ({ className, systemModelsRef }: Props) => {
   );
   return <Table className={className} columns={columns} data={systemModels} />;
 };
-
-export type { TableRecord };
 
 export default SystemModelsTable;

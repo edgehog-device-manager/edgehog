@@ -53,7 +53,9 @@ type SystemModel = {
     id: string;
     name: string;
   };
-  partNumbers: string[];
+  partNumbers: {
+    partNumber: string;
+  }[];
 };
 
 const renderComponent = (systemModels: SystemModel[] = []) => {
@@ -89,7 +91,7 @@ it("renders System Model data", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: ["SM-PN1"],
+      partNumbers: [{ partNumber: "SM-PN1" }],
     },
   ]);
 
@@ -113,7 +115,7 @@ it("renders multiple Part Numbers separated by comma", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: ["SM-PN1", "SM-PN2"],
+      partNumbers: [{ partNumber: "SM-PN1" }, { partNumber: "SM-PN2" }],
     },
   ]);
 
@@ -130,7 +132,7 @@ it("renders System Model data in correct columns", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: ["SM-PN1"],
+      partNumbers: [{ partNumber: "SM-PN1" }],
     },
   ]);
 

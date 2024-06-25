@@ -34,7 +34,7 @@ const CREATE_HARDWARE_TYPE_MUTATION = graphql`
     $input: CreateHardwareTypeInput!
   ) {
     createHardwareType(input: $input) {
-      hardwareType {
+      result {
         id
       }
     }
@@ -55,8 +55,8 @@ const HardwareTypeCreatePage = () => {
       createHardwareType({
         variables: { input: hardwareType },
         onCompleted(data, errors) {
-          if (data.createHardwareType) {
-            const hardwareTypeId = data.createHardwareType.hardwareType.id;
+          const hardwareTypeId = data.createHardwareType?.result?.id;
+          if (hardwareTypeId) {
             return navigate({
               route: Route.hardwareTypesEdit,
               params: { hardwareTypeId },
@@ -64,7 +64,9 @@ const HardwareTypeCreatePage = () => {
           }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
@@ -78,13 +80,13 @@ const HardwareTypeCreatePage = () => {
           );
         },
         updater(store, data) {
-          if (!data.createHardwareType) {
+          if (!data?.createHardwareType?.result) {
             return;
           }
 
           const hardwareType = store
             .getRootField("createHardwareType")
-            .getLinkedRecord("hardwareType");
+            .getLinkedRecord("result");
           const root = store.getRoot();
           const hardwareTypes = root.getLinkedRecords("hardwareTypes");
 

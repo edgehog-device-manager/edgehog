@@ -39,7 +39,9 @@ const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
   fragment UpdateHardwareType_HardwareTypeFragment on HardwareType {
     name
     handle
-    partNumbers
+    partNumbers {
+      partNumber
+    }
   }
 `;
 
@@ -126,7 +128,9 @@ const UpdateHardwareTypeForm = ({
       handle: hardwareType.handle,
       partNumbers:
         hardwareType.partNumbers.length > 0
-          ? hardwareType.partNumbers.map((pn) => ({ value: pn }))
+          ? hardwareType.partNumbers.map(({ partNumber }) => ({
+              value: partNumber,
+            }))
           : [{ value: "" }], // default with at least one empty part number
     }),
     [hardwareType.name, hardwareType.handle, hardwareType.partNumbers],

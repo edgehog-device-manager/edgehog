@@ -34,7 +34,7 @@ const CREATE_DEVICE_GROUP_MUTATION = graphql`
     $input: CreateDeviceGroupInput!
   ) {
     createDeviceGroup(input: $input) {
-      deviceGroup {
+      result {
         id
         devices {
           id
@@ -58,8 +58,8 @@ const DeviceGroupCreatePage = () => {
       createDeviceGroup({
         variables: { input: deviceGroup },
         onCompleted(data, errors) {
-          if (data.createDeviceGroup) {
-            const deviceGroupId = data.createDeviceGroup.deviceGroup.id;
+          const deviceGroupId = data.createDeviceGroup?.result?.id;
+          if (deviceGroupId) {
             return navigate({
               route: Route.deviceGroupsEdit,
               params: { deviceGroupId },
@@ -67,7 +67,9 @@ const DeviceGroupCreatePage = () => {
           }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
@@ -81,13 +83,13 @@ const DeviceGroupCreatePage = () => {
           );
         },
         updater(store, data) {
-          if (!data.createDeviceGroup) {
+          if (!data?.createDeviceGroup?.result?.id) {
             return;
           }
 
           const deviceGroup = store
             .getRootField("createDeviceGroup")
-            .getLinkedRecord("deviceGroup");
+            .getLinkedRecord("result");
           const root = store.getRoot();
 
           const deviceGroups = root.getLinkedRecords("deviceGroups");
