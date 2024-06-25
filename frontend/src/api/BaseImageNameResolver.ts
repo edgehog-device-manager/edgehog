@@ -23,10 +23,7 @@ import { graphql } from "relay-runtime";
 import type { BaseImageNameResolver$key } from "api/__generated__/BaseImageNameResolver.graphql";
 
 /**
- * @RelayResolver
- *
- * @onType BaseImage
- * @fieldName name
+ * @RelayResolver BaseImage.name: String
  * @rootFragment BaseImageNameResolver
  *
  * Base Image name
