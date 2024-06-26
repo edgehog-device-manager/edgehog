@@ -59,7 +59,7 @@ const Footer = ({
                   id: "components.Footer.logo",
                   defaultMessage: "Logo",
                 })}
-                src={assets.images.brand}
+                src={assets.images.logo}
               />
             </a>
             <span>

@@ -19,10 +19,12 @@
 */
 
 import brand from "assets/images/brand.png";
+import logo from "assets/images/logo.png";
 
 const assets = {
   images: {
     brand,
+    logo,
   },
 };
 
