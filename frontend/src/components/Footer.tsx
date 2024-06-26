@@ -43,7 +43,7 @@ const Footer = ({
 }: FooterProps) => {
   const intl = useIntl();
   return (
-    <footer className="pt-2 pb-1 border-top">
+    <footer className="py-2 border-top">
       <Center>
         <div>
           <Stack gap={2} direction="horizontal">
@@ -59,7 +59,8 @@ const Footer = ({
                   id: "components.Footer.logo",
                   defaultMessage: "Logo",
                 })}
-                src={assets.images.brand}
+                className="py-1"
+                src={assets.images.logo}
               />
             </a>
             <span>

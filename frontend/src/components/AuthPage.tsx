@@ -47,7 +47,11 @@ const AuthPage = ({ children }: AuthPageProps) => {
             className="d-flex flex-column justify-content-center p-4"
           >
             <Card.Body>
-              <h1 className="d-lg-none text-center mb-4">Edgehog</h1>
+              <Card.Img
+                className="d-lg-none text-center mb-4"
+                src={assets.images.brand}
+                alt="Edgehog"
+              />
               {children}
             </Card.Body>
           </Col>
