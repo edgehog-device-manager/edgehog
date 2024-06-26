@@ -124,7 +124,9 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return onError(errorFeedback);
           }
