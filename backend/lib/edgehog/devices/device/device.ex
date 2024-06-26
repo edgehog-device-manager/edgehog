@@ -48,10 +48,15 @@ defmodule Edgehog.Devices.Device do
 
   graphql do
     type :device
+
+    # TODO: add :device_groups as a relay-paginated relationship. Since it's a
+    # manual relationship, it needs to implement callbacks that define
+    # datalayer subqueries so Ash can compose and support the functionality.
+    paginate_relationship_with ota_operations: :relay, tags: :relay
   end
 
   actions do
-    defaults [:destroy]
+    defaults [:read, :destroy]
 
     create :create do
       primary? true
@@ -162,16 +167,6 @@ defmodule Edgehog.Devices.Device do
       # We also set the device to online since it sent some data. This helps resynchronizing the
       # online state for long-running devices if a device connected trigger is missed
       change set_attribute(:online, true)
-    end
-
-    read :get do
-      description "Returns a single device."
-      get? true
-    end
-
-    read :list do
-      description "Returns a list of devices."
-      primary? true
     end
 
     update :update do

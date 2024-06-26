@@ -72,12 +72,17 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
       result = base_image_collection_query(tenant: tenant, id: base_image_collection_id)
 
       assert %{
-               "baseImages" => [
-                 %{
-                   "id" => ^base_image_id,
-                   "version" => "2.0.0"
-                 }
-               ]
+               "baseImages" => %{
+                 "count" => 1,
+                 "edges" => [
+                   %{
+                     "node" => %{
+                       "id" => ^base_image_id,
+                       "version" => "2.0.0"
+                     }
+                   }
+                 ]
+               }
              } = extract_result!(result)
     end
   end
@@ -97,8 +102,13 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
         name
         handle
         baseImages {
-          id
-          version
+          count
+          edges {
+            node {
+              id
+              version
+            }
+          }
         }
         systemModel {
           id

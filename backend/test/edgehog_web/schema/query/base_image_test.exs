@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
 
   import Edgehog.BaseImagesFixtures
 
-  alias Edgehog.BaseImages.BaseImage
-
   @moduletag :ported_to_ash
 
   describe "baseImage query" do

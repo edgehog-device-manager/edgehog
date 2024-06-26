@@ -26,31 +26,31 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
 
-  alias Edgehog.Groups.DeviceGroup
-
   describe "deviceGroups query" do
     test "returns empty device groups", %{tenant: tenant} do
-      assert [] == device_groups_query(tenant: tenant) |> extract_result!()
+      assert [] = device_groups_query(tenant: tenant) |> extract_result!()
     end
 
     test "returns device groups if present", %{tenant: tenant} do
       fixture = device_group_fixture(tenant: tenant)
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
+      name = fixture.name
+      handle = fixture.handle
+      selector = fixture.selector
 
-      [result] =
-        device_groups_query(tenant: tenant, id: id)
-        |> extract_result!()
+      assert [group] = device_groups_query(tenant: tenant, id: id) |> extract_result!()
 
-      assert result["id"] == id
-      assert result["name"] == fixture.name
-      assert result["handle"] == fixture.handle
-      assert result["selector"] == fixture.selector
+      assert %{
+               "handle" => ^handle,
+               "name" => ^name,
+               "selector" => ^selector
+             } = group
     end
 
     test "returns only devices that match the selector", %{tenant: tenant} do
-      foo_group = device_group_fixture(tenant: tenant, name: "foo", selector: ~s<"foo" in tags>)
-      bar_group = device_group_fixture(tenant: tenant, name: "bar", selector: ~s<"bar" in tags>)
+      _foo_group = device_group_fixture(tenant: tenant, name: "foo", selector: ~s<"foo" in tags>)
+      _bar_group = device_group_fixture(tenant: tenant, name: "bar", selector: ~s<"bar" in tags>)
 
       foo_device =
         device_fixture(tenant: tenant)
@@ -64,30 +64,33 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
         device_fixture(tenant: tenant)
         |> add_tags(["foo", "bar"])
 
-      baz_device =
+      _baz_device =
         device_fixture(tenant: tenant)
         |> add_tags(["baz"])
 
       document = """
       query {
         deviceGroups {
-          name
-          devices {
-            id
+          count
+          edges {
+            node {
+              name
+              devices {
+                id
+              }
+            }
           }
         }
       }
       """
 
-      result =
-        device_groups_query(tenant: tenant, document: document)
-        |> extract_result!()
+      assert groups = device_groups_query(tenant: tenant, document: document) |> extract_result!()
 
-      assert length(result) == 2
+      foo_group = Enum.find(groups, &(&1["name"] == "foo"))
+      bar_group = Enum.find(groups, &(&1["name"] == "bar"))
 
       foo_device_ids =
-        result
-        |> Enum.find(result, &(&1["name"] == "foo"))
+        foo_group
         |> Map.fetch!("devices")
         |> Enum.map(& &1["id"])
 
@@ -97,8 +100,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
       assert AshGraphql.Resource.encode_relay_id(foo_bar_device) in foo_device_ids
 
       bar_device_ids =
-        result
-        |> Enum.find(result, &(&1["name"] == "bar"))
+        bar_group
         |> Map.fetch!("devices")
         |> Enum.map(& &1["id"])
 
@@ -113,10 +115,15 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
     default_document = """
     query {
       deviceGroups {
-        id
-        name
-        handle
-        selector
+        count
+        edges {
+          node {
+            id
+            name
+            handle
+            selector
+          }
+        }
       }
     }
     """
@@ -129,9 +136,12 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
   end
 
   defp extract_result!(result) do
-    assert %{data: %{"deviceGroups" => device_groups}} = result
+    assert %{data: %{"deviceGroups" => %{"count" => count, "edges" => edges}}} = result
     refute :errors in Map.keys(result)
-    assert device_groups != nil
+
+    device_groups = Enum.map(edges, & &1["node"])
+
+    assert length(device_groups) == count
 
     device_groups
   end

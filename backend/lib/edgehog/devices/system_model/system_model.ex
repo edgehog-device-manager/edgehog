@@ -43,15 +43,7 @@ defmodule Edgehog.Devices.SystemModel do
   end
 
   actions do
-    read :get do
-      description "Returns a system model."
-      get? true
-    end
-
-    read :list do
-      description "Returns a list of system models."
-      primary? true
-    end
+    defaults [:read]
 
     create :create do
       description "Creates a system model."

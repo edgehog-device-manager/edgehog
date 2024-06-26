@@ -25,7 +25,6 @@ defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
   alias Edgehog.Astarte.Device.ForwarderSession
   alias Edgehog.Astarte.Device.ForwarderSessionMock
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
   @moduletag :ported_to_ash
@@ -125,15 +124,6 @@ defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
     }
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
-  end
-
-  defp extract_error!(result) do
-    assert %{
-             data: %{"forwarderSession" => nil},
-             errors: [error]
-           } = result
-
-    error
   end
 
   defp extract_result!(result) do

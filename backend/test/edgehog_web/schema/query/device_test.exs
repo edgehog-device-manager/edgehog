@@ -92,19 +92,41 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       query ($id: ID!) {
         device(id: $id) {
           otaOperations {
-            id
-            baseImageUrl
+            count
+            edges {
+              cursor
+              node {
+                id
+                baseImageUrl
+              }
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
           }
         }
       }
       """
 
-      %{"otaOperations" => [ota_operation]} =
-        device_query(document: document, tenant: tenant, id: id)
-        |> extract_result!()
-
-      assert ota_operation["id"] == ota_operation_id
-      assert ota_operation["baseImageUrl"] == base_image_url
+      assert %{
+               "otaOperations" => %{
+                 "count" => 1,
+                 "edges" => [
+                   %{
+                     "cursor" => cursor,
+                     "node" => %{
+                       "id" => ^ota_operation_id,
+                       "baseImageUrl" => ^base_image_url
+                     }
+                   }
+                 ],
+                 "pageInfo" => %{
+                   "endCursor" => cursor,
+                   "hasNextPage" => false
+                 }
+               }
+             } = device_query(document: document, tenant: tenant, id: id) |> extract_result!()
     end
 
     test "returns nil if non existing", %{tenant: tenant} do
@@ -589,7 +611,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "is empty with no groups", ctx do
-      %{tenant: tenant, id: id, device_id: device_id, document: document} = ctx
+      %{tenant: tenant, id: id, document: document} = ctx
 
       assert %{"deviceGroups" => []} =
                device_query(document: document, tenant: tenant, id: id)
@@ -597,7 +619,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "returns matching group", ctx do
-      %{tenant: tenant, id: id, device_id: device_id, device: device, document: document} = ctx
+      %{tenant: tenant, id: id, device: device, document: document} = ctx
 
       _device_with_tag =
         device
@@ -612,7 +634,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "doesn't return non matching group", ctx do
-      %{tenant: tenant, id: id, device_id: device_id, device: device, document: document} = ctx
+      %{tenant: tenant, id: id, device: device, document: document} = ctx
 
       _device_with_tag =
         device
@@ -662,7 +684,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "returns both position and location", ctx do
-      %{tenant: tenant, id: id, document: document, device: device} = ctx
+      %{tenant: tenant, id: id, document: document} = ctx
 
       GeolocationProviderMock
       |> expect(:geolocate, fn _device ->

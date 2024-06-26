@@ -28,8 +28,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
 
   describe "baseImageCollections field" do
     test "returns empty base image collections", %{tenant: tenant} do
-      assert %{data: %{"baseImageCollections" => []}} ==
-               base_image_collections_query(tenant: tenant)
+      assert [] = base_image_collections_query(tenant: tenant) |> extract_result!()
     end
 
     test "returns base image collections if they're present", %{tenant: tenant} do
@@ -41,8 +40,8 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
           system_model_id: system_model.id
         )
 
-      assert %{data: %{"baseImageCollections" => [base_image_collection]}} =
-               base_image_collections_query(tenant: tenant)
+      assert [base_image_collection] =
+               base_image_collections_query(tenant: tenant) |> extract_result!()
 
       assert base_image_collection["name"] == fixture.name
       assert base_image_collection["handle"] == fixture.handle
@@ -57,10 +56,15 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
       """
       query BaseImageCollections($filter: BaseImageCollectionFilterInput, $sort: [BaseImageCollectionSortInput]) {
         baseImageCollections(filter: $filter, sort: $sort) {
-          name
-          handle
-          systemModel {
-            id
+          count
+          edges {
+            node {
+              name
+              handle
+              systemModel {
+                id
+              }
+            }
           }
         }
       }
@@ -76,5 +80,16 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
       }
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    assert %{data: %{"baseImageCollections" => %{"count" => count, "edges" => edges}}} = result
+    refute :errors in Map.keys(result)
+
+    base_image_collections = Enum.map(edges, & &1["node"])
+
+    assert length(base_image_collections) == count
+
+    base_image_collections
   end
 end

@@ -49,7 +49,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
       assert %{
                "id" => ^id,
                "name" => "Updated Name",
-               "handle" => "updatedhandle"
+               "handle" => "updatedhandle",
+               "baseImages" => %{
+                 "edges" => []
+               }
              } = base_image_collection
     end
 
@@ -165,6 +168,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
           id
           name
           handle
+          baseImages {
+            count
+            edges {
+              node {
+                id
+                version
+              }
+            }
+          }
         }
       }
     }

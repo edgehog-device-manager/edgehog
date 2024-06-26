@@ -32,12 +32,35 @@ defmodule Edgehog.Devices do
     root_level_errors? true
 
     queries do
-      get Edgehog.Devices.Device, :device, :get
-      list Edgehog.Devices.Device, :devices, :list
-      get Edgehog.Devices.HardwareType, :hardware_type, :get
-      list Edgehog.Devices.HardwareType, :hardware_types, :list
-      get Edgehog.Devices.SystemModel, :system_model, :get
-      list Edgehog.Devices.SystemModel, :system_models, :list
+      get Edgehog.Devices.Device, :device, :read do
+        description "Returns a single device."
+      end
+
+      list Edgehog.Devices.Device, :devices, :read do
+        description "Returns a list of devices."
+        relay? true
+        paginate_with :keyset
+      end
+
+      get Edgehog.Devices.HardwareType, :hardware_type, :read do
+        description "Returns a single hardware type."
+      end
+
+      list Edgehog.Devices.HardwareType, :hardware_types, :read do
+        description "Returns a list of hardware types."
+        relay? true
+        paginate_with :keyset
+      end
+
+      get Edgehog.Devices.SystemModel, :system_model, :read do
+        description "Returns a single system model."
+      end
+
+      list Edgehog.Devices.SystemModel, :system_models, :read do
+        description "Returns a list of system models."
+        relay? true
+        paginate_with :keyset
+      end
     end
 
     mutations do

@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.UpdateChannel
-
   @moduletag :ported_to_ash
 
   describe "updateChannel query" do
@@ -42,9 +40,19 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
 
       assert update_channel_data["handle"] == update_channel.handle
       assert update_channel_data["name"] == update_channel.name
-      assert [response_group] = update_channel_data["targetGroups"]
-      assert response_group["handle"] == target_group.handle
-      assert response_group["name"] == target_group.name
+
+      assert %{
+               "targetGroups" => %{
+                 "edges" => [
+                   %{
+                     "node" => target_group_data
+                   }
+                 ]
+               }
+             } = update_channel_data
+
+      assert target_group_data["handle"] == target_group.handle
+      assert target_group_data["name"] == target_group.name
     end
 
     test "returns nil if non existing", %{tenant: tenant} do
@@ -60,8 +68,12 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
         handle
         name
         targetGroups {
-          name
-          handle
+          edges {
+            node {
+              name
+              handle
+            }
+          }
         }
       }
     }

@@ -40,13 +40,13 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
     test "successfully removes tags", %{tenant: tenant, id: id} do
       result = remove_device_tags_mutation(tenant: tenant, id: id, tags: ["foo"])
 
-      assert %{"tags" => [%{"name" => "bar"}]} = extract_result!(result)
+      assert [%{"name" => "bar"}] = extract_result!(result)
     end
 
     test "normalizes tag names", %{tenant: tenant, id: id} do
       result = remove_device_tags_mutation(tenant: tenant, id: id, tags: ["FOO", "   bar "])
 
-      assert %{"tags" => []} = extract_result!(result)
+      assert [] = extract_result!(result)
     end
 
     test "is idempotent and works with non-existing tags", ctx do
@@ -59,7 +59,7 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
       result =
         remove_device_tags_mutation(tenant: tenant, id: id, tags: ["bar", "baz"])
 
-      assert %{"tags" => [%{"name" => "foo"}]} = extract_result!(result)
+      assert [%{"name" => "foo"}] = extract_result!(result)
     end
 
     test "fails with empty tags", %{tenant: tenant, id: id} do
@@ -84,8 +84,13 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
     mutation RemoveDeviceTags($id: ID!, $input: RemoveDeviceTagsInput!) {
       removeDeviceTags(id: $id, input: $input) {
         result {
-          tags {
-            name
+          tags(first: 10, sort: [{ field: NAME, order: ASC }]) {
+            count
+            edges {
+              node {
+                name
+              }
+            }
           }
         }
       }
@@ -121,14 +126,21 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
     assert %{
              data: %{
                "removeDeviceTags" => %{
-                 "result" => device
+                 "result" => %{
+                   "tags" => %{
+                     "count" => count,
+                     "edges" => edges
+                   }
+                 }
                }
              }
            } = result
 
-    assert device != nil
+    tags = Enum.map(edges, & &1["node"])
 
-    device
+    assert length(tags) == count
+
+    tags
   end
 
   defp non_existing_device_id(tenant) do

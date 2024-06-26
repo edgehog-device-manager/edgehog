@@ -39,6 +39,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
 
   graphql do
     type :update_campaign
+
+    paginate_relationship_with update_targets: :relay
   end
 
   actions do
