@@ -130,15 +130,16 @@ defmodule Edgehog.TenantsTest do
 
   describe "Tenants.reconcile_tenant/1" do
     test "triggers tenant reconciliation" do
+      fixture = tenant_fixture()
+
       Edgehog.Tenants.ReconcilerMock
       |> expect(:reconcile_tenant, fn %Tenant{} = tenant ->
-        assert tenant.slug == "test"
+        assert tenant.slug == fixture.slug
 
         :ok
       end)
 
-      tenant = tenant_fixture()
-      assert :ok = Tenants.reconcile_tenants!(tenant)
+      assert :ok = Tenants.reconcile_tenant!(fixture)
     end
   end
 
@@ -299,51 +300,55 @@ defmodule Edgehog.TenantsTest do
     end
 
     test "cascading deletes associated realm", %{tenant: tenant} do
-      Edgehog.Repo.put_tenant_id(tenant.tenant_id)
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
-      assert {:ok, ^realm} = Astarte.fetch_realm_by_name(realm.name)
       assert :ok = Tenants.destroy_tenant(tenant)
-      {:error, :realm_not_found} = Astarte.fetch_realm_by_name(realm.name)
+
+      {:error, %Ash.Error.Query.NotFound{}} =
+        Astarte.fetch_realm_by_name(realm.name, tenant: tenant)
     end
 
     test "cascading deletes referencing entities", %{tenant: tenant} do
-      Edgehog.Repo.put_tenant_id(tenant.tenant_id)
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
-      hardware_type = hardware_type_fixture()
-      system_model = system_model_fixture()
-      device = device_fixture(realm)
+      hardware_type = hardware_type_fixture(tenant: tenant)
+      system_model = system_model_fixture(tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
 
-      base_image_collection = base_image_collection_fixture()
-      base_image = base_image_fixture()
+      base_image_collection = base_image_collection_fixture(tenant: tenant)
+      base_image = base_image_fixture(tenant: tenant)
 
-      device_group = device_group_fixture()
+      device_group = device_group_fixture(tenant: tenant)
 
-      manual_ota_operation = manual_ota_operation_fixture(device)
+      manual_ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
 
-      update_channel = update_channel_fixture()
-      update_campaign = update_campaign_fixture()
-      update_target = target_fixture()
+      update_channel = update_channel_fixture(tenant: tenant)
+      update_campaign = update_campaign_fixture(tenant: tenant)
+      update_target = target_fixture(tenant: tenant)
 
       assert :ok = Tenants.destroy_tenant(tenant)
 
-      refute entry_exists?(Edgehog.Devices.HardwareType, hardware_type.id)
-      refute entry_exists?(Edgehog.Devices.SystemModel, system_model.id)
-      refute entry_exists?(Edgehog.Devices.Device, device.id)
+      refute entry_exists?(Edgehog.Devices.HardwareType, hardware_type.id, tenant)
+      refute entry_exists?(Edgehog.Devices.SystemModel, system_model.id, tenant)
+      refute entry_exists?(Edgehog.Devices.Device, device.id, tenant)
 
-      refute entry_exists?(Edgehog.BaseImages.BaseImageCollection, base_image_collection.id)
-      refute entry_exists?(Edgehog.BaseImages.BaseImage, base_image.id)
+      refute entry_exists?(
+               Edgehog.BaseImages.BaseImageCollection,
+               base_image_collection.id,
+               tenant
+             )
 
-      refute entry_exists?(Edgehog.Groups.DeviceGroup, device_group.id)
+      refute entry_exists?(Edgehog.BaseImages.BaseImage, base_image.id, tenant)
 
-      refute entry_exists?(Edgehog.OSManagement.OTAOperation, manual_ota_operation.id)
+      refute entry_exists?(Edgehog.Groups.DeviceGroup, device_group.id, tenant)
 
-      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateChannel, update_channel.id)
-      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateCampaign, update_campaign.id)
-      refute entry_exists?(Edgehog.UpdateCampaigns.Target, update_target.id)
+      refute entry_exists?(Edgehog.OSManagement.OTAOperation, manual_ota_operation.id, tenant)
+
+      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateChannel, update_channel.id, tenant)
+      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateCampaign, update_campaign.id, tenant)
+      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateTarget, update_target.id, tenant)
     end
   end
 
@@ -387,9 +392,10 @@ defmodule Edgehog.TenantsTest do
     |> Tenants.create_tenant()
   end
 
-  defp entry_exists?(schema, id) do
-    schema
-    |> Ecto.Query.where(id: ^id)
-    |> Repo.exists?(skip_tenant_id: true)
+  defp entry_exists?(resource, id, tenant) do
+    resource
+    |> Ash.Query.filter(id == ^id)
+    |> Ash.Query.set_tenant(tenant)
+    |> Ash.exists?()
   end
 end
