@@ -11,8 +11,7 @@
     :phoenix,
     :absinthe,
     :skogsra,
-    :nimble_parsec,
-    :typedstruct
+    :nimble_parsec
   ],
   plugins: [Spark.Formatter],
   inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],

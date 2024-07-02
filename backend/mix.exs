@@ -108,7 +108,6 @@ defmodule Edgehog.MixProject do
       {:prom_ex, "~> 1.9"},
       {:plug_heartbeat, "~> 1.0"},
       {:gen_state_machine, "~> 3.0"},
-      {:typedstruct, "~> 0.5", runtime: false},
       {:recon, "~> 2.5"},
       {:observer_cli, "~> 1.7"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
