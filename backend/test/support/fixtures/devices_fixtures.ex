@@ -156,8 +156,4 @@ defmodule Edgehog.DevicesFixtures do
     |> Ash.Changeset.for_update(:add_tags, %{tags: tags})
     |> Ash.update!()
   end
-
-  # Needed to avoid legacy tests compilation errors
-  # TODO: remove when Ash porting is complete
-  def device_fixture(_, _), do: nil
 end
