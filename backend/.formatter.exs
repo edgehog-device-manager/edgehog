@@ -13,7 +13,6 @@
     :skogsra,
     :nimble_parsec,
     :i18n_helpers,
-    :polymorphic_embed,
     :typedstruct
   ],
   plugins: [Spark.Formatter],
