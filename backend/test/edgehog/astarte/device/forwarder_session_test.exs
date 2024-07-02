@@ -29,8 +29,6 @@ defmodule Edgehog.Astarte.Device.ForwarderSessionTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "forwarder_session" do
     import Tesla.Mock
 

@@ -24,8 +24,6 @@ defmodule Edgehog.Astarte.Device.CellularConnectionTest do
   alias Edgehog.Astarte.Device.CellularConnection
   alias Edgehog.Astarte.Device.CellularConnection.{ModemProperties, ModemStatus}
 
-  @moduletag :ported_to_ash
-
   @modem1_properties_data %{
     "apn" => "company.com",
     "imei" => "509504877678976",

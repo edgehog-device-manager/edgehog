@@ -21,8 +21,6 @@
 defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  @moduletag :ported_to_ash
-
   import Edgehog.DevicesFixtures
 
   describe "hardwareTypes query" do

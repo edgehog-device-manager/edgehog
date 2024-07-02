@@ -23,8 +23,6 @@ defmodule EdgehogWeb.AuthTest do
   use EdgehogWeb.ConnCase, async: false
   alias Edgehog.Config
 
-  @moduletag :ported_to_ash
-
   @query """
   {
     tenantInfo {

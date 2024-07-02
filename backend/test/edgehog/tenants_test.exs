@@ -42,8 +42,6 @@ defmodule Edgehog.TenantsTest do
                          |> String.trim()
 
   describe "Tenants.create_tenant/1" do
-    @describetag :ported_to_ash
-
     test "with valid data creates a tenant" do
       name = unique_tenant_name()
       slug = unique_tenant_slug()
@@ -144,8 +142,6 @@ defmodule Edgehog.TenantsTest do
   end
 
   describe "Tenants.provision_tenant/1" do
-    @describetag :ported_to_ash
-
     test "with valid attrs creates the tenant, cluster and realm" do
       tenant_name = unique_tenant_name()
       tenant_slug = unique_tenant_slug()
@@ -293,7 +289,6 @@ defmodule Edgehog.TenantsTest do
       %{tenant: tenant_fixture()}
     end
 
-    @tag :ported_to_ash
     test "deletes the tenant", %{tenant: tenant} do
       assert :ok = Tenants.destroy_tenant(tenant)
       assert_raise Ash.Error.Query.NotFound, fn -> Tenants.fetch_tenant_by_slug!(tenant.slug) end

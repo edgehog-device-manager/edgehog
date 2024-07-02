@@ -28,8 +28,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
 
   require Ash.Query
 
-  @moduletag :ported_to_ash
-
   describe "deleteBaseImage mutation" do
     setup %{tenant: tenant} do
       base_image =

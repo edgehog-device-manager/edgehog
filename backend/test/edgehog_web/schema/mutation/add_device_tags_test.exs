@@ -23,8 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "addDeviceTags mutation" do
     setup %{tenant: tenant} do
       device = device_fixture(tenant: tenant)

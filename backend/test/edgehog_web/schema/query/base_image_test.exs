@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
 
   alias Edgehog.BaseImages.BaseImage
 
-  @moduletag :ported_to_ash
-
   describe "baseImage query" do
     setup %{tenant: tenant} do
       base_image =

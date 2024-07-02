@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
   import Edgehog.DevicesFixtures
   import Edgehog.BaseImagesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "baseImageCollections field" do
     test "returns empty base image collections", %{tenant: tenant} do
       assert %{data: %{"baseImageCollections" => []}} ==

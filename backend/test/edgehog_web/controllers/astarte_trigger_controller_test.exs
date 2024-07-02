@@ -29,8 +29,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
-  @moduletag :ported_to_ash
-
   describe "process_event for device events" do
     setup %{conn: conn, tenant: tenant} do
       cluster = cluster_fixture()

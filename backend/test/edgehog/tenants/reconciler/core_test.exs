@@ -22,8 +22,6 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
   use Edgehog.DataCase, async: true
   use Edgehog.AstarteMockCase
 
-  @moduletag :ported_to_ash
-
   import Edgehog.AstarteFixtures
 
   alias Astarte.Client.APIError

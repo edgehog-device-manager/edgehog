@@ -29,8 +29,6 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
   alias Edgehog.UpdateCampaigns.Resumer.Core
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
-  @moduletag :ported_to_ash
-
   describe "stream_resumable_update_campaigns/0" do
     setup do
       {:ok, tenant: tenant_fixture()}

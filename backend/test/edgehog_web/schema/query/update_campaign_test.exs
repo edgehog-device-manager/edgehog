@@ -28,8 +28,6 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
 
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
-  @moduletag :ported_to_ash
-
   describe "updateCampaign query" do
     setup %{tenant: tenant} do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)

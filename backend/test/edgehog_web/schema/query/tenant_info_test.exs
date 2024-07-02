@@ -21,8 +21,6 @@
 defmodule EdgehogWeb.Schema.Query.TenantInfoTest do
   use Edgehog.DataCase, async: true
 
-  @moduletag :ported_to_ash
-
   import Edgehog.TenantsFixtures
 
   alias Edgehog.Tenants.Tenant
