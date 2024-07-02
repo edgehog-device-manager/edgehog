@@ -12,7 +12,6 @@
     :absinthe,
     :skogsra,
     :nimble_parsec,
-    :i18n_helpers,
     :typedstruct
   ],
   plugins: [Spark.Formatter],
