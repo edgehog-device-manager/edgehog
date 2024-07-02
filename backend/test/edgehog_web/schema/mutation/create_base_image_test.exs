@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
   import Edgehog.BaseImagesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "createBaseImage mutation" do
     test "creates base image with valid data", %{tenant: tenant} do
       base_image_collection_id =

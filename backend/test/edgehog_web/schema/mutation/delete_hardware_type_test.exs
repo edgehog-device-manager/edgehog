@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "deleteHardwareType field" do
     test "deletes hardware type", %{tenant: tenant} do
       fixture = hardware_type_fixture(tenant: tenant)

@@ -27,8 +27,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
 
   import Edgehog.BaseImagesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "deleteBaseImageCollection mutation" do
     setup %{tenant: tenant} do
       base_image_collection =

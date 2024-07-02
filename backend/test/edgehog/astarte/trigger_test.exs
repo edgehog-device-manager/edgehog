@@ -21,8 +21,6 @@
 defmodule Edgehog.Astarte.TriggerTest do
   use Edgehog.DataCase, async: true
 
-  @moduletag :ported_to_ash
-
   alias Astarte.Client.APIError
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Trigger

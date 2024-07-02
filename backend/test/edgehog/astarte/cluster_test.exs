@@ -21,8 +21,6 @@
 defmodule Edgehog.Astarte.ClusterTest do
   use Edgehog.DataCase, async: true
 
-  @moduletag :ported_to_ash
-
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Cluster
 

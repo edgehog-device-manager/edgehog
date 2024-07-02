@@ -21,67 +21,73 @@
 defmodule Edgehog.Selector.AST.TagFilterTest do
   use Edgehog.DataCase, async: true
 
-  import Ecto.Query
+  require Ash.Query
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
-  alias Edgehog.Devices
+  import Edgehog.TenantsFixtures
+  alias Edgehog.Devices.Device
   alias Edgehog.Selector.AST.TagFilter
-  alias Edgehog.Repo
+  alias Edgehog.Selector.Filter
 
-  describe "to_ecto_dynamic_query/1" do
+  describe "to_ash_expr/1" do
     setup do
+      tenant = tenant_fixture()
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
       device_foo =
-        device_fixture(realm)
+        device_fixture(realm_id: realm.id, tenant: tenant)
         |> add_tags(["foo", "other", "foox"])
 
       device_bar =
-        device_fixture(realm, device_id: "7mcE8JeZQkSzjLyYuh5N9A")
+        device_fixture(realm_id: realm.id, tenant: tenant)
         |> add_tags(["bar", "foox"])
 
-      device_no_tags = device_fixture(realm, device_id: "nWwr7SZiR8CgZN_uKHsAJg")
+      device_no_tags =
+        device_fixture(realm_id: realm.id, tenant: tenant)
 
-      {:ok, device_foo: device_foo, device_bar: device_bar, device_no_tags: device_no_tags}
+      {:ok,
+       tenant: tenant,
+       device_foo: device_foo,
+       device_bar: device_bar,
+       device_no_tags: device_no_tags}
     end
 
-    test "returns dynamic query that matches devices with the tag", %{device_foo: device_foo} do
-      assert {:ok, dynamic} =
-               %TagFilter{operator: :in, tag: "foo"}
-               |> TagFilter.to_ecto_dynamic_query()
+    test "returns expression that matches devices with the tag", ctx do
+      %{tenant: tenant, device_foo: device_foo} = ctx
 
-      query =
-        from d in Devices.Device,
-          where: ^dynamic
+      expr =
+        %TagFilter{operator: :in, tag: "foo"}
+        |> Filter.to_ash_expr()
 
-      assert [device_foo] ==
-               Repo.all(query)
-               # Preload the same associations preloaded in the Astarte context
-               |> Devices.preload_defaults_for_device()
+      assert [device] =
+               Device
+               |> Ash.Query.filter(^expr)
+               |> Ash.read!(tenant: tenant, load: :tags)
+
+      assert device.id == device_foo.id
     end
 
-    test "returns dynamic query that matches devices without the tag", %{
-      device_bar: device_bar,
-      device_no_tags: device_no_tags
-    } do
-      assert {:ok, dynamic} =
-               %TagFilter{operator: :not_in, tag: "foo"}
-               |> TagFilter.to_ecto_dynamic_query()
+    test "returns dynamic query that matches devices without the tag", ctx do
+      %{
+        tenant: tenant,
+        device_bar: device_bar,
+        device_no_tags: device_no_tags
+      } = ctx
 
-      query =
-        from d in Devices.Device,
-          where: ^dynamic
+      expr =
+        %TagFilter{operator: :not_in, tag: "foo"}
+        |> Filter.to_ash_expr()
 
-      result =
-        Repo.all(query)
-        # Preload the same associations preloaded in the Astarte context
-        |> Devices.preload_defaults_for_device()
+      ids =
+        Device
+        |> Ash.Query.filter(^expr)
+        |> Ash.list!(:id, tenant: tenant)
 
-      assert is_list(result)
-      assert length(result) == 2
-      assert device_bar in result
-      assert device_no_tags in result
+      assert is_list(ids)
+      assert length(ids) == 2
+      assert device_bar.id in ids
+      assert device_no_tags.id in ids
     end
   end
 end

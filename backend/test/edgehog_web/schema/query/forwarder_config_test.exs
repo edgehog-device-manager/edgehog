@@ -21,8 +21,6 @@
 defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
   use EdgehogWeb.GraphqlCase
 
-  @moduletag :ported_to_ash
-
   describe "forwarderConfig query" do
     test "returns the forwarder config when the forwarder is configured", %{tenant: tenant} do
       original_config =

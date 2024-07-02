@@ -27,8 +27,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteUpdateChannelTest do
 
   require Ash.Query
 
-  @moduletag :ported_to_ash
-
   describe "deleteUpdateChannel mutation" do
     setup %{tenant: tenant} do
       update_channel = update_channel_fixture(tenant: tenant)

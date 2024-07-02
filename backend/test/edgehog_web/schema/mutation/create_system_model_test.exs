@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "createSystemModel mutation" do
     test "creates system model with valid data", %{tenant: tenant} do
       hardware_type_id =

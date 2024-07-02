@@ -28,8 +28,6 @@ defmodule Edgehog.Astarte.Device.SystemStatusTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "system_status" do
     import Tesla.Mock
 

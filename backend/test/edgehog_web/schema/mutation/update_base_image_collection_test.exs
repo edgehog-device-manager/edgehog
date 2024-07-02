@@ -23,8 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
 
   import Edgehog.BaseImagesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "updateBaseImageCollection field" do
     setup %{tenant: tenant} do
       base_image_collection =

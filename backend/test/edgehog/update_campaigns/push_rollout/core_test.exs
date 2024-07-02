@@ -35,8 +35,6 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   import Edgehog.TenantsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  @moduletag :ported_to_ash
-
   setup do
     %{tenant: tenant_fixture()}
   end

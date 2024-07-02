@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
 
   alias Edgehog.UpdateCampaigns.UpdateChannel
 
-  @moduletag :ported_to_ash
-
   describe "updateChannel query" do
     setup %{tenant: tenant} do
       {:ok, target_group: device_group_fixture(tenant: tenant)}

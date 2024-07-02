@@ -23,8 +23,6 @@ defmodule Edgehog.Astarte.Device.NetworkInterfaceTest do
 
   alias Edgehog.Astarte.Device.NetworkInterface
 
-  @moduletag :ported_to_ash
-
   describe "parse_data/1" do
     test "correctly parses NetworkInterface data" do
       data = %{

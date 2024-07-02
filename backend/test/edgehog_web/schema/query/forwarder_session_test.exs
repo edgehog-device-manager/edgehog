@@ -28,8 +28,6 @@ defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "forwarderSession query" do
     test "returns the forwarder session", %{tenant: tenant} do
       device = device_fixture(online: true, tenant: tenant)

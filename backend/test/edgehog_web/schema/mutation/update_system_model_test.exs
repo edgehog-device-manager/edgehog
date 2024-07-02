@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "updateSystemModel mutation" do
     setup %{tenant: tenant} do
       system_model =

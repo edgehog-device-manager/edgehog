@@ -21,8 +21,6 @@
 defmodule EdgehogWeb.Schema.Query.SystemModelTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  @moduletag :ported_to_ash
-
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Devices

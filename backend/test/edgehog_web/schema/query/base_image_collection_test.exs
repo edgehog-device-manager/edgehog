@@ -25,8 +25,6 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
   import Edgehog.DevicesFixtures
   import Edgehog.BaseImagesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "baseImageCollection field" do
     test "returns base image collection if present", %{tenant: tenant} do
       system_model = system_model_fixture(tenant: tenant)

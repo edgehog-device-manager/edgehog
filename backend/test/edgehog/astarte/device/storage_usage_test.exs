@@ -29,8 +29,6 @@ defmodule Edgehog.Astarte.Device.StorageUsageTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "storage_usage" do
     import Tesla.Mock
 

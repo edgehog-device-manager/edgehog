@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
 
   alias Edgehog.Devices
 
-  @moduletag :ported_to_ash
-
   describe "existingDeviceTags query" do
     test "returns empty tags", %{tenant: tenant} do
       assert [] == existing_device_tags_query(tenant: tenant) |> extract_result!()

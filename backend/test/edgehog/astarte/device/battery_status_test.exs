@@ -29,8 +29,6 @@ defmodule Edgehog.Astarte.Device.BatteryStatusTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "battery_status" do
     import Tesla.Mock
 

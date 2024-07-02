@@ -29,8 +29,6 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.IPBase
 
-  @moduletag :ported_to_ash
-
   describe "ip_geolocation" do
     setup do
       device = device_fixture(tenant: tenant_fixture())

@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "updateHardwareType mutation" do
     setup %{tenant: tenant} do
       hardware_type =

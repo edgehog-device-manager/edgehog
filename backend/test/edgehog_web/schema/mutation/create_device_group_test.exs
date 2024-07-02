@@ -21,8 +21,6 @@
 defmodule EdgehogWeb.Schema.Mutation.CreateDeviceGroupTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  @moduletag :ported_to_ash
-
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
 

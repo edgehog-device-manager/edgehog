@@ -27,8 +27,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "deleteSystemModel field" do
     setup %{tenant: tenant} do
       system_model =

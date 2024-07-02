@@ -27,8 +27,6 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.DeviceGeolocation
 
-  @moduletag :ported_to_ash
-
   describe "device_geolocation" do
     alias Edgehog.Astarte.Device.Geolocation.SensorPosition
 

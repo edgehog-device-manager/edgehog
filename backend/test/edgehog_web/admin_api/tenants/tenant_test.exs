@@ -22,8 +22,6 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
   use EdgehogWeb.AdminAPI.ConnCase, async: true
   use Edgehog.ReconcilerMockCase
 
-  @moduletag :ported_to_ash
-
   import Ecto.Query, only: [where: 2]
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures

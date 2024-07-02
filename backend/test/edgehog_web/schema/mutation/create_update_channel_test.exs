@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "createUpdateChannel mutation" do
     test "creates update_channel with valid data", %{tenant: tenant} do
       target_group = device_group_fixture(tenant: tenant)

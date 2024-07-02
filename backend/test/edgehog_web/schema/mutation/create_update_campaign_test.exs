@@ -29,8 +29,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
   alias Edgehog.UpdateCampaigns.ExecutorRegistry
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
-  @moduletag :ported_to_ash
-
   describe "createUpdateCampaign mutation" do
     test "creates update_campaign with valid data and at least one target", %{tenant: tenant} do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)

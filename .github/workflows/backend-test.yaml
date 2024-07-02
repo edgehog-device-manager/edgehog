@@ -173,11 +173,7 @@ jobs:
         mix deps.compile
 
     - name: Test
-      run: mix test --only ported_to_ash
-
-    # TODO: enable this back after Ash porting is complete
-    # - name: Test
-    #   run: mix coveralls.github -o coverage_results
+      run: mix coveralls.github -o coverage_results
 
   build-docker-image:
     name: Build Docker image

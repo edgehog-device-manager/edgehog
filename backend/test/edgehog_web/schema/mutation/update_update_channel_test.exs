@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "updateUpdateChannel mutation" do
     setup %{tenant: tenant} do
       update_channel = update_channel_fixture(tenant: tenant)

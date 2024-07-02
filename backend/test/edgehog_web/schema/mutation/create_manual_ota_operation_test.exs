@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "createManualOtaOperation mutation" do
     test "creates OTA operation with valid data", %{tenant: tenant} do
       device = device_fixture(tenant: tenant)

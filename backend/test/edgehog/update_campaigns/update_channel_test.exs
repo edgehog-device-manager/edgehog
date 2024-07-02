@@ -28,8 +28,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "updatable_devices calculation" do
     setup do
       %{tenant: Edgehog.TenantsFixtures.tenant_fixture()}

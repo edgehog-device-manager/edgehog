@@ -28,8 +28,6 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeolocation
 
-  @moduletag :ported_to_ash
-
   describe "wifi_geolocation" do
     alias Edgehog.Astarte.Device.WiFiScanResult
 
