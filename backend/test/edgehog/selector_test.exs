@@ -21,9 +21,11 @@
 defmodule Edgehog.SelectorTest do
   use Edgehog.DataCase, async: true
 
+  require Ash.Query
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
-  alias Edgehog.Devices
+  import Edgehog.TenantsFixtures
+  alias Edgehog.Devices.Device
   alias Edgehog.Selector
   alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
   alias Edgehog.Selector.Parser.Error
@@ -217,132 +219,99 @@ defmodule Edgehog.SelectorTest do
     end
   end
 
-  describe "to_ecto_query/1" do
+  describe "to_ash_expr/1" do
     setup do
+      tenant = tenant_fixture()
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
-      device_foo_10 =
-        device_fixture(realm)
-        |> add_tags(["foo"])
-        |> add_custom_attributes(%{baz: %{type: :integer, value: 10}})
+      device_foo_red =
+        device_fixture(realm_id: realm.id, tenant: tenant)
+        |> add_tags(["foo", "red"])
 
-      device_bar_10 =
-        device_fixture(realm)
-        |> add_tags(["bar"])
-        |> add_custom_attributes(%{baz: %{type: :integer, value: 10}})
+      device_bar_red =
+        device_fixture(realm_id: realm.id, tenant: tenant)
+        |> add_tags(["bar", "red"])
 
-      device_foo_20 =
-        device_fixture(realm)
-        |> add_tags(["foo"])
-        |> add_custom_attributes(%{baz: %{type: :integer, value: 20}})
+      device_foo_green =
+        device_fixture(realm_id: realm.id, tenant: tenant)
+        |> add_tags(["foo", "green"])
 
-      device_bar_20 =
-        device_fixture(realm)
-        |> add_tags(["bar"])
-        |> add_custom_attributes(%{baz: %{type: :integer, value: 20}})
+      device_bar_green =
+        device_fixture(realm_id: realm.id, tenant: tenant)
+        |> add_tags(["bar", "green"])
 
       {:ok,
-       device_foo_10: device_foo_10,
-       device_bar_10: device_bar_10,
-       device_foo_20: device_foo_20,
-       device_bar_20: device_bar_20}
+       tenant: tenant,
+       device_foo_red: device_foo_red,
+       device_bar_red: device_bar_red,
+       device_foo_green: device_foo_green,
+       device_bar_green: device_bar_green}
     end
 
-    test "accepts a root %TagFilter{} node and generates a query", %{
-      device_foo_10: device_foo_10,
-      device_foo_20: device_foo_20
-    } do
-      assert {:ok, %Ecto.Query{} = query} =
-               %TagFilter{operator: :in, tag: "foo"} |> Selector.to_ecto_query()
+    test "accepts a root %TagFilter{} node and generates a query", ctx do
+      %{
+        tenant: tenant,
+        device_foo_red: device_foo_red,
+        device_foo_green: device_foo_green
+      } = ctx
 
-      result =
-        Repo.all(query)
-        # Preload the same associations preloaded in the Astarte context
-        |> Devices.preload_defaults_for_device()
+      expr = %TagFilter{operator: :in, tag: "foo"} |> Selector.to_ash_expr()
 
-      assert is_list(result)
-      assert length(result) == 2
-      assert device_foo_10 in result
-      assert device_foo_20 in result
+      ids =
+        Device
+        |> Ash.Query.filter(^expr)
+        |> Ash.list!(:id, tenant: tenant)
+
+      assert is_list(ids)
+      assert length(ids) == 2
+      assert device_foo_red.id in ids
+      assert device_foo_green.id in ids
     end
 
-    test "accepts a root %AttributeFilter{} node and generates a query", %{
-      device_foo_10: device_foo_10,
-      device_bar_10: device_bar_10
-    } do
-      assert {:ok, %Ecto.Query{} = query} =
-               %AttributeFilter{
-                 namespace: "custom",
-                 key: "baz",
-                 operator: :==,
-                 type: :number,
-                 value: 10
-               }
-               |> Selector.to_ecto_query()
+    test "accepts a root %BinaryOp{} node and generates a query", ctx do
+      %{
+        tenant: tenant,
+        device_foo_red: device_foo_red
+      } = ctx
 
-      result =
-        Repo.all(query)
-        # Preload the same associations preloaded in the Astarte context
-        |> Devices.preload_defaults_for_device()
+      expr =
+        %BinaryOp{
+          operator: :and,
+          lhs: %TagFilter{operator: :in, tag: "foo"},
+          rhs: %TagFilter{operator: :in, tag: "red"}
+        }
+        |> Selector.to_ash_expr()
 
-      assert is_list(result)
-      assert length(result) == 2
-      assert device_foo_10 in result
-      assert device_bar_10 in result
+      [id] =
+        Device
+        |> Ash.Query.filter(^expr)
+        |> Ash.list!(:id, tenant: tenant)
+
+      assert device_foo_red.id == id
     end
 
-    test "accepts a root %BinaryOp{} node and generates a query", %{
-      device_foo_10: device_foo_10
-    } do
-      assert {:ok, %Ecto.Query{} = query} =
-               %BinaryOp{
-                 operator: :and,
-                 lhs: %TagFilter{operator: :in, tag: "foo"},
-                 rhs: %AttributeFilter{
-                   namespace: "custom",
-                   key: "baz",
-                   operator: :==,
-                   type: :number,
-                   value: 10
-                 }
-               }
-               |> Selector.to_ecto_query()
+    test "accepts a binary selector and generates a query", ctx do
+      %{
+        tenant: tenant,
+        device_bar_red: device_bar_red,
+        device_foo_green: device_foo_green,
+        device_bar_green: device_bar_green
+      } = ctx
 
-      assert [device_foo_10] ==
-               Repo.all(query)
-               # Preload the same associations preloaded in the Astarte context
-               |> Devices.preload_defaults_for_device()
+      assert {:ok, ast_root} = Selector.parse(~s/"bar" in tags or "green" in tags/)
+      expr = Selector.to_ash_expr(ast_root)
+
+      ids =
+        Device
+        |> Ash.Query.filter(^expr)
+        |> Ash.list!(:id, tenant: tenant)
+
+      assert is_list(ids)
+      assert length(ids) == 3
+      assert device_bar_red.id in ids
+      assert device_foo_green.id in ids
+      assert device_bar_green.id in ids
     end
-
-    test "accepts a binary selector and generates a query", %{
-      device_bar_10: device_bar_10,
-      device_foo_20: device_foo_20,
-      device_bar_20: device_bar_20
-    } do
-      assert {:ok, %Ecto.Query{} = query} =
-               Selector.to_ecto_query(~s/"bar" in tags or attributes["custom:baz"] > 15/)
-
-      result =
-        Repo.all(query)
-        # Preload the same associations preloaded in the Astarte context
-        |> Devices.preload_defaults_for_device()
-
-      assert is_list(result)
-      assert length(result) == 3
-      assert device_bar_10 in result
-      assert device_foo_20 in result
-      assert device_bar_20 in result
-    end
-  end
-
-  defp add_custom_attributes(%Devices.Device{} = device, kv_map) do
-    custom_attributes =
-      for {k, v} <- kv_map, k = to_string(k) do
-        %{namespace: :custom, key: k, typed_value: v}
-      end
-
-    {:ok, device} = Devices.update_device(device, %{custom_attributes: custom_attributes})
-    device
   end
 end

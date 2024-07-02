@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,37 +19,10 @@
 #
 
 defmodule Edgehog.Selector do
-  alias Edgehog.Devices
   alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
   alias Edgehog.Selector.Filter
   alias Edgehog.Selector.Parser
   alias Edgehog.Selector.Parser.Error
-
-  import Ecto.Query
-
-  @doc """
-  Translates a selector to an `%Ecto.Query{}` returning all the devices matched by the selector.
-
-  It accepts either a selector in binary form (in which case it first parses it) or its AST.
-
-  Returns `{:ok, %Ecto.Query{}}` or `{:error, %Parser.Error{}}`.
-  """
-  def to_ecto_query(selector) when is_binary(selector) do
-    with {:ok, ast_root} <- parse(selector) do
-      to_ecto_query(ast_root)
-    end
-  end
-
-  def to_ecto_query(%node{} = ast_root)
-      when node in [AttributeFilter, BinaryOp, TagFilter] do
-    with {:ok, where_condition} <- traverse(ast_root) do
-      query =
-        from d in Devices.Device,
-          where: ^where_condition
-
-      {:ok, query}
-    end
-  end
 
   @doc """
   Translates a selector to an `%Ash.Expr{}` matching all devices matched by the selector.
@@ -80,27 +53,5 @@ defmodule Edgehog.Selector do
       {:error, reason, _rest, _context, {line, _}, column} ->
         {:error, %Error{message: reason, line: line, column: column}}
     end
-  end
-
-  # TODO: should we impose a max depth to avoid queries containing lots of subqueries?
-  defp traverse(%BinaryOp{operator: operator, lhs: lhs, rhs: rhs}) do
-    with {:ok, lhs_condition} <- traverse(lhs),
-         {:ok, rhs_condition} <- traverse(rhs) do
-      case operator do
-        :and ->
-          {:ok, dynamic(^lhs_condition and ^rhs_condition)}
-
-        :or ->
-          {:ok, dynamic(^lhs_condition or ^rhs_condition)}
-      end
-    end
-  end
-
-  defp traverse(%AttributeFilter{} = attribute_filter) do
-    AttributeFilter.to_ecto_dynamic_query(attribute_filter)
-  end
-
-  defp traverse(%TagFilter{} = tag_filter) do
-    TagFilter.to_ecto_dynamic_query(tag_filter)
   end
 end

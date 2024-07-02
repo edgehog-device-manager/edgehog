@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,32 +26,7 @@ defmodule Edgehog.Selector.AST.TagFilter do
           operator: :in | :not_in
         }
 
-  import Ecto.Query
   import Ash.Expr
-  alias Edgehog.Labeling
-  alias Edgehog.Selector.AST.TagFilter
-
-  @doc """
-  Converts a `%TagFilter{}` to a dynamic where clause filtering `Astarte.Device`s that match the
-  given `%TagFilter{}`.
-
-  Returns `{:ok, dynamic_query}` or `{:error, %Parser.Error{}}`
-  """
-  def to_ecto_dynamic_query(%TagFilter{tag: tag, operator: operator})
-      when operator in [:in, :not_in] and is_binary(tag) do
-    query = Labeling.DeviceTag.device_ids_matching_tag(tag)
-
-    dynamic =
-      case operator do
-        :in ->
-          dynamic([d], d.id in subquery(query))
-
-        :not_in ->
-          dynamic([d], d.id not in subquery(query))
-      end
-
-    {:ok, dynamic}
-  end
 
   defimpl Edgehog.Selector.Filter do
     def to_ash_expr(tag_filter) do
