@@ -28,8 +28,6 @@ defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "requestForwarderSession mutation" do
     test "returns the token of a :connected session instead of a :connecting one", %{
       tenant: tenant

@@ -23,8 +23,6 @@ defmodule Edgehog.Astarte.Device.RuntimeInfoTest do
 
   alias Edgehog.Astarte.Device.RuntimeInfo
 
-  @moduletag :ported_to_ash
-
   describe "parse_data/1" do
     test "correctly parses RuntimeInfo data" do
       data = %{

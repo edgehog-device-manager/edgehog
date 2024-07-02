@@ -29,8 +29,6 @@ defmodule Edgehog.Astarte.Device.GeolocationTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
-  @moduletag :ported_to_ash
-
   describe "geolocation" do
     import Tesla.Mock
 

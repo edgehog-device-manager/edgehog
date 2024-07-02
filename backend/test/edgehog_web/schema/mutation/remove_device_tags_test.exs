@@ -23,8 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "removeDeviceTags mutation" do
     setup %{tenant: tenant} do
       device =

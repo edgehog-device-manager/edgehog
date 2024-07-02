@@ -21,8 +21,6 @@
 defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  @moduletag :ported_to_ash
-
   import Edgehog.GroupsFixtures
 
   alias Edgehog.Groups.DeviceGroup

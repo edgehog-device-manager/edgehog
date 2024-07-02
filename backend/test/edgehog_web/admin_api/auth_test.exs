@@ -23,8 +23,6 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
   use EdgehogWeb.AdminAPI.ConnCase, async: false
   use Edgehog.ReconcilerMockCase
 
-  @moduletag :ported_to_ash
-
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 

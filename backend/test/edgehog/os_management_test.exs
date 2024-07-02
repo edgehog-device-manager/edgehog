@@ -25,8 +25,6 @@ defmodule Edgehog.OSManagementTest do
   alias Edgehog.OSManagement
   alias Edgehog.PubSub
 
-  @moduletag :ported_to_ash
-
   describe "ota_operations" do
     alias Edgehog.OSManagement.OTAOperation
 

@@ -21,8 +21,6 @@
 defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  @moduletag :ported_to_ash
-
   alias Edgehog.DevicesFixtures
 
   describe "SetLedBehavior mutation" do

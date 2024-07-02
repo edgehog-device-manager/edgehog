@@ -23,8 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
 
   import Edgehog.BaseImagesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "updateBaseImage mutation" do
     setup %{tenant: tenant} do
       base_image = base_image_fixture(tenant: tenant)

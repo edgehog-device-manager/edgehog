@@ -26,8 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
 
   import Edgehog.DevicesFixtures
 
-  @moduletag :ported_to_ash
-
   describe "updateDevice mutation" do
     setup %{tenant: tenant} do
       device = device_fixture(tenant: tenant)
