@@ -19,7 +19,9 @@
 #
 
 defmodule Edgehog.Selector do
-  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.AST.AttributeFilter
+  alias Edgehog.Selector.AST.BinaryOp
+  alias Edgehog.Selector.AST.TagFilter
   alias Edgehog.Selector.Filter
   alias Edgehog.Selector.Parser
   alias Edgehog.Selector.Parser.Error

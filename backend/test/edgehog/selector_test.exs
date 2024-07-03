@@ -27,7 +27,9 @@ defmodule Edgehog.SelectorTest do
   import Edgehog.TenantsFixtures
   alias Edgehog.Devices.Device
   alias Edgehog.Selector
-  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.AST.AttributeFilter
+  alias Edgehog.Selector.AST.BinaryOp
+  alias Edgehog.Selector.AST.TagFilter
   alias Edgehog.Selector.Parser.Error
 
   describe "parse/1" do

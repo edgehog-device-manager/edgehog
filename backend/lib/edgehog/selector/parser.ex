@@ -21,7 +21,9 @@
 defmodule Edgehog.Selector.Parser do
   import NimbleParsec
 
-  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.AST.AttributeFilter
+  alias Edgehog.Selector.AST.BinaryOp
+  alias Edgehog.Selector.AST.TagFilter
 
   # Semi formal definition of the selector grammar
   # Literals are wrapped in single quotes

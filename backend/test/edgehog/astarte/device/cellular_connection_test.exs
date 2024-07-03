@@ -22,7 +22,8 @@ defmodule Edgehog.Astarte.Device.CellularConnectionTest do
   use ExUnit.Case
 
   alias Edgehog.Astarte.Device.CellularConnection
-  alias Edgehog.Astarte.Device.CellularConnection.{ModemProperties, ModemStatus}
+  alias Edgehog.Astarte.Device.CellularConnection.ModemProperties
+  alias Edgehog.Astarte.Device.CellularConnection.ModemStatus
 
   @modem1_properties_data %{
     "apn" => "company.com",

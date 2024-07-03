@@ -22,7 +22,8 @@ defmodule Edgehog.Astarte.Device.CellularConnection do
   @behaviour Edgehog.Astarte.Device.CellularConnection.Behaviour
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.CellularConnection.{ModemProperties, ModemStatus}
+  alias Edgehog.Astarte.Device.CellularConnection.ModemProperties
+  alias Edgehog.Astarte.Device.CellularConnection.ModemStatus
 
   @properties_interface "io.edgehog.devicemanager.CellularConnectionProperties"
   @status_interface "io.edgehog.devicemanager.CellularConnectionStatus"

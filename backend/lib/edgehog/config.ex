@@ -23,7 +23,9 @@ defmodule Edgehog.Config do
   This module handles the configuration of Edgehog
   """
   use Skogsra
-  alias Edgehog.Config.{GeocodingProviders, GeolocationProviders, JWTPublicKeyPEMType}
+  alias Edgehog.Config.GeocodingProviders
+  alias Edgehog.Config.GeolocationProviders
+  alias Edgehog.Config.JWTPublicKeyPEMType
   alias Edgehog.Geolocation
 
   @envdoc """
