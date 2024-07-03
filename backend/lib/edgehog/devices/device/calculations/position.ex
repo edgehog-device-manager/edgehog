@@ -23,7 +23,7 @@ defmodule Edgehog.Devices.Device.Calculations.Position do
 
   alias Edgehog.Geolocation
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(devices, _opts, _context) do
     Enum.map(devices, fn device ->
       case Geolocation.geolocate(device) do

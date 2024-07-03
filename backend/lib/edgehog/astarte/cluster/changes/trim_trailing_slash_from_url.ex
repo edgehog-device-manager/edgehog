@@ -21,7 +21,7 @@
 defmodule Edgehog.Astarte.Cluster.Changes.TrimTrailingSlashFromURL do
   use Ash.Resource.Change
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, _ctx) do
     case Ash.Changeset.fetch_change(changeset, :base_api_url) do
       {:ok, url} when is_binary(url) ->

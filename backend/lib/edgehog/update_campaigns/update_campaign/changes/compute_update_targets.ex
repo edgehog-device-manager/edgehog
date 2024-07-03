@@ -28,7 +28,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
   alias Edgehog.UpdateCampaigns.UpdateChannel
   alias Edgehog.UpdateCampaigns.UpdateTarget
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
 

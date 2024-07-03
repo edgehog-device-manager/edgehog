@@ -24,7 +24,7 @@ defmodule Edgehog.Devices.Device.ManualRelationships.SystemModel do
 
   alias Edgehog.Devices.SystemModel
 
-  @impl true
+  @impl Ash.Resource.ManualRelationship
   def load(devices, _opts, %{tenant: tenant}) do
     device_ids = Enum.map(devices, & &1.id)
 

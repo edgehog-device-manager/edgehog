@@ -23,12 +23,12 @@ defmodule Edgehog.Devices.Device.Calculations.CellularConnection do
 
   alias Edgehog.Devices.Device.Modem
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def load(_query, _opts, _context) do
     [:modem_status, :modem_properties]
   end
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(devices, _opts, _context) do
     Enum.map(devices, &modem_list/1)
   end

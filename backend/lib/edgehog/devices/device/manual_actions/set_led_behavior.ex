@@ -29,7 +29,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SetLedBehavior do
                   Edgehog.Astarte.Device.LedBehavior
                 )
 
-  @impl true
+  @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, _context) do
     behavior = changeset.arguments.behavior
     device = changeset.data

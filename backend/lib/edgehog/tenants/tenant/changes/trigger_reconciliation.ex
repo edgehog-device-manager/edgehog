@@ -23,7 +23,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.TriggerReconciliation do
 
   alias Edgehog.Tenants
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, _ctx) do
     Ash.Changeset.after_action(changeset, fn _changeset, tenant ->
       # TODO: this can probably be done with Ash notifiers, investigate that

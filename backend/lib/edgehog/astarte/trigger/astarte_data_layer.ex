@@ -23,17 +23,17 @@ defmodule Edgehog.Astarte.Trigger.AstarteDataLayer do
 
   alias Astarte.Client.RealmManagement
 
-  @impl true
+  @impl Edgehog.Astarte.Trigger.DataLayer
   def get(%RealmManagement{} = client, trigger_name) do
     RealmManagement.Triggers.get(client, trigger_name)
   end
 
-  @impl true
+  @impl Edgehog.Astarte.Trigger.DataLayer
   def create(%RealmManagement{} = client, trigger_json) do
     RealmManagement.Triggers.create(client, trigger_json)
   end
 
-  @impl true
+  @impl Edgehog.Astarte.Trigger.DataLayer
   def delete(%RealmManagement{} = client, trigger_name) do
     RealmManagement.Triggers.delete(client, trigger_name)
   end

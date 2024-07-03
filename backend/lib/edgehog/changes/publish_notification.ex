@@ -23,7 +23,7 @@ defmodule Edgehog.Changes.PublishNotification do
 
   alias Edgehog.PubSub
 
-  @impl true
+  @impl Ash.Resource.Change
   def init(opts) do
     if is_atom(opts[:event_type]) do
       {:ok, opts}
@@ -32,7 +32,7 @@ defmodule Edgehog.Changes.PublishNotification do
     end
   end
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, opts, _context) do
     event_type = Keyword.fetch!(opts, :event_type)
 

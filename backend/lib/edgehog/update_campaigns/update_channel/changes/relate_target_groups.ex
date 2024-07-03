@@ -24,7 +24,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
   alias Ash.Error.Changes.InvalidArgument
   alias Edgehog.Groups.DeviceGroup
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
 

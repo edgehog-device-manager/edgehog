@@ -33,7 +33,7 @@ defmodule Edgehog.Astarte.Device.OSInfo do
 
   @interface "io.edgehog.devicemanager.OSInfo"
 
-  @impl true
+  @impl Edgehog.Astarte.Device.OSInfo.Behaviour
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_properties_data(client, device_id, @interface) do

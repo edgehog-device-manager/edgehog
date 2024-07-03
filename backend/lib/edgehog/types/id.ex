@@ -22,6 +22,6 @@ defmodule Edgehog.Types.Id do
   use Ash.Type.NewType, subtype_of: :integer
   use AshGraphql.Type
 
-  @impl true
+  @impl AshGraphql.Type
   def graphql_input_type(_), do: :id
 end

@@ -27,7 +27,7 @@ defmodule Edgehog.Devices.Device.Types.AstarteInterfaceValue do
 
       use AshGraphql.Type
 
-      @impl true
+      @impl AshGraphql.Type
       def graphql_type(_), do: unquote(opts[:value_id])
     end
   end

@@ -35,7 +35,7 @@ defmodule Edgehog.Astarte.Device.BaseImage do
 
   @interface "io.edgehog.devicemanager.BaseImage"
 
-  @impl true
+  @impl Edgehog.Astarte.Device.BaseImage.Behaviour
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_properties_data(client, device_id, @interface) do

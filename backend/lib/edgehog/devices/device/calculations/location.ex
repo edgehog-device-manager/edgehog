@@ -23,12 +23,12 @@ defmodule Edgehog.Devices.Device.Calculations.Location do
 
   alias Edgehog.Geolocation
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def load(_query, _opts, _context) do
     [:position]
   end
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(devices, _opts, _context) do
     Enum.map(devices, &get_location(&1.position))
   end

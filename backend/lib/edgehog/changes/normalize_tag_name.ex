@@ -21,6 +21,7 @@
 defmodule Edgehog.Changes.NormalizeTagName do
   use Ash.Resource.Change
 
+  @impl Ash.Resource.Change
   def init(opts) do
     attribute = opts[:attribute]
     argument = opts[:argument]
@@ -40,7 +41,7 @@ defmodule Edgehog.Changes.NormalizeTagName do
     end
   end
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, opts, _ctx) do
     case fetch_tag(changeset, opts) do
       {:ok, name} when is_binary(name) ->

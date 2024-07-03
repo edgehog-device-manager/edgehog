@@ -21,7 +21,7 @@
 defmodule Edgehog.Validations.Version do
   use Ash.Resource.Validation
 
-  @impl true
+  @impl Ash.Resource.Validation
   def init(opts) do
     if is_atom(opts[:attribute]) do
       {:ok, opts}
@@ -30,7 +30,7 @@ defmodule Edgehog.Validations.Version do
     end
   end
 
-  @impl true
+  @impl Ash.Resource.Validation
   def validate(changeset, opts, _context) do
     case Ash.Changeset.fetch_argument_or_change(changeset, opts[:attribute]) do
       {:ok, nil} ->

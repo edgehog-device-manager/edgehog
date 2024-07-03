@@ -24,7 +24,7 @@ defmodule Edgehog.Devices.Device.ManualRelationships.DeviceGroups do
 
   alias Edgehog.Devices.Device
 
-  @impl true
+  @impl Ash.Resource.ManualRelationship
   def load(devices, _opts, %{query: group_query}) do
     device_ids = Enum.map(devices, & &1.id)
 

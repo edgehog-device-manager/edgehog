@@ -25,7 +25,7 @@ defmodule Edgehog.Tenants.Reconciler.Supervisor do
     Supervisor.start_link(__MODULE__, arg, name: __MODULE__)
   end
 
-  @impl true
+  @impl Supervisor
   def init(opts) do
     reconciler_args =
       reconciler_base_args()

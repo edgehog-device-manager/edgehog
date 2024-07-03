@@ -31,7 +31,7 @@ defmodule Edgehog.Application do
   alias EdgehogWeb.Endpoint
   alias EdgehogWeb.Router
 
-  @impl true
+  @impl Application
   def start(_type, _args) do
     Logger.info("Starting application version #{@version}.", tag: "edgehog_start")
 
@@ -70,7 +70,7 @@ defmodule Edgehog.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
-  @impl true
+  @impl Application
   def config_change(changed, _new, removed) do
     EdgehogWeb.Endpoint.config_change(changed, removed)
     :ok

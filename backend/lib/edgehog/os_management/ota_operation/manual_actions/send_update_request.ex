@@ -30,7 +30,7 @@ defmodule Edgehog.OSManagement.OTAOperation.ManualActions.SendUpdateRequest do
                            OTARequest.V1
                          )
 
-  @impl true
+  @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
     %{
       id: ota_operation_id,

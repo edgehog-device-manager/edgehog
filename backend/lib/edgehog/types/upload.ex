@@ -22,23 +22,23 @@ defmodule Edgehog.Types.Upload do
   use Ash.Type
   use AshGraphql.Type
 
-  @impl true
+  @impl AshGraphql.Type
   def graphql_input_type(_), do: :upload
 
-  @impl true
+  @impl Ash.Type
   def storage_type(_), do: :term
 
-  @impl true
+  @impl Ash.Type
   def cast_input(nil, _), do: {:ok, nil}
   def cast_input(%Plug.Upload{} = value, _), do: {:ok, value}
   def cast_input(_, _), do: :error
 
-  @impl true
+  @impl Ash.Type
   def cast_stored(nil, _), do: {:ok, nil}
   def cast_stored(%Plug.Upload{} = value, _), do: {:ok, value}
   def cast_stored(_, _), do: :error
 
-  @impl true
+  @impl Ash.Type
   def dump_to_native(nil, _), do: {:ok, nil}
   def dump_to_native(_, _), do: :error
 end

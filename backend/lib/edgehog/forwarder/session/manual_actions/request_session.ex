@@ -31,7 +31,7 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
                               Edgehog.Astarte.Device.ForwarderSession
                             )
 
-  @impl true
+  @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, context) do
     %{tenant: tenant} = context
     %{arguments: %{device_id: device_id}} = input
