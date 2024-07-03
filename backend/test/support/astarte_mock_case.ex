@@ -64,11 +64,6 @@ defmodule Edgehog.AstarteMockCase do
     )
 
     Mox.stub_with(
-      Edgehog.Astarte.Device.OTARequestV0Mock,
-      Edgehog.Mocks.Astarte.Device.OTARequest.V0
-    )
-
-    Mox.stub_with(
       Edgehog.Astarte.Device.OTARequestV1Mock,
       Edgehog.Mocks.Astarte.Device.OTARequest.V1
     )
