@@ -20,7 +20,6 @@
 
 defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
   use EdgehogWeb.GraphqlCase, async: true
-  use Edgehog.AstarteMockCase
 
   alias Edgehog.Astarte.Device.ForwarderSession
   alias Edgehog.Astarte.Device.ForwarderSessionMock
@@ -95,8 +94,12 @@ defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
       device = device_fixture(online: true, tenant: tenant)
       device_id = device.device_id
 
-      expect(ForwarderSessionMock, :list_sessions, fn _appengine_client, ^device_id ->
+      ForwarderSessionMock
+      |> expect(:list_sessions, fn _appengine_client, ^device_id ->
         {:ok, []}
+      end)
+      |> expect(:request_session, fn _client, ^device_id, _token, _hostname, _port, _secure ->
+        :ok
       end)
 
       result = run_query(device_id: AshGraphql.Resource.encode_relay_id(device), tenant: tenant)

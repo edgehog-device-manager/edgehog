@@ -25,7 +25,6 @@ defmodule Edgehog.Astarte.TriggerTest do
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Trigger
 
-  import Mox
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 

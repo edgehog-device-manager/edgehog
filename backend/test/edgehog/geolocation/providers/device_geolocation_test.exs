@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures

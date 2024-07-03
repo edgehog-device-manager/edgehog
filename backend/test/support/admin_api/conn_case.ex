@@ -45,6 +45,7 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import EdgehogWeb.AdminAPI.ConnCase
+      import Mox
 
       # The default endpoint for testing
       @endpoint EdgehogWeb.Endpoint

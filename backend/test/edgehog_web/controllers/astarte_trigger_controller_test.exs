@@ -20,7 +20,6 @@
 
 defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   use EdgehogWeb.ConnCase, async: true
-  use Edgehog.EphemeralImageMockCase
 
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
@@ -380,6 +379,10 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   describe "process_event/2 for OTA updates" do
     setup %{tenant: tenant} do
+      # Some events might trigger an ephemeral image deletion
+      Edgehog.OSManagement.EphemeralImageMock
+      |> stub(:delete, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
       cluster = cluster_fixture()
       realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
       device = device_fixture(realm_id: realm.id, tenant: tenant)

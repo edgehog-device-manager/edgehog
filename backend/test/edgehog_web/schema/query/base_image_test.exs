@@ -20,7 +20,6 @@
 
 defmodule EdgehogWeb.Schema.Query.BaseImageTest do
   use EdgehogWeb.GraphqlCase, async: true
-  use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.BaseImagesFixtures
 

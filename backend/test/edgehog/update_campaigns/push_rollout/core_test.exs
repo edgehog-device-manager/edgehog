@@ -19,7 +19,6 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
-  use Edgehog.AstarteMockCase
   use Edgehog.DataCase, async: true
 
   alias Astarte.Client.APIError
@@ -36,6 +35,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   import Edgehog.UpdateCampaignsFixtures
 
   setup do
+    Edgehog.Astarte.Device.OTARequestV1Mock
+    |> stub(:update, fn _client, _device_id, _uuid, _url ->
+      :ok
+    end)
+
     %{tenant: tenant_fixture()}
   end
 

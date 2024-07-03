@@ -25,7 +25,6 @@ defmodule Edgehog.Astarte.InterfaceTest do
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Interface
 
-  import Mox
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 

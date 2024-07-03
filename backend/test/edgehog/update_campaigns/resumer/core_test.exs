@@ -20,7 +20,6 @@
 
 defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
   import Edgehog.TenantsFixtures
   import Edgehog.UpdateCampaignsFixtures

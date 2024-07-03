@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Geolocation.Providers.IPBaseTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
@@ -31,6 +30,17 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
 
   describe "ip_geolocation" do
     setup do
+      Edgehog.Astarte.Device.DeviceStatusMock
+      |> stub(:get, fn _client, _device_id ->
+        device_status = %DeviceStatus{
+          last_connection: ~U[2021-11-15 10:44:57.432516Z],
+          last_disconnection: ~U[2021-11-15 10:45:57.432516Z],
+          last_seen_ip: "198.51.100.25"
+        }
+
+        {:ok, device_status}
+      end)
+
       device = device_fixture(tenant: tenant_fixture())
 
       {:ok, device: device}

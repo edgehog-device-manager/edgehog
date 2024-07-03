@@ -21,7 +21,6 @@
 defmodule Edgehog.Tenants.ReconcilerTest do
   # This can't be async: true because we're using Mox in global mode
   use Edgehog.DataCase
-  use Edgehog.AstarteMockCase
 
   alias Astarte.Client.APIError
   alias Edgehog.Tenants.Reconciler
