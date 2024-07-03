@@ -51,7 +51,7 @@ defmodule Edgehog.Devices.Device do
   end
 
   actions do
-    defaults [:destroy]
+    defaults [:read, :destroy]
 
     create :create do
       primary? true
@@ -162,16 +162,6 @@ defmodule Edgehog.Devices.Device do
       # We also set the device to online since it sent some data. This helps resynchronizing the
       # online state for long-running devices if a device connected trigger is missed
       change set_attribute(:online, true)
-    end
-
-    read :get do
-      description "Returns a single device."
-      get? true
-    end
-
-    read :list do
-      description "Returns a list of devices."
-      primary? true
     end
 
     update :update do

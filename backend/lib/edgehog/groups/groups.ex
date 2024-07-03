@@ -29,8 +29,14 @@ defmodule Edgehog.Groups do
     root_level_errors? true
 
     queries do
-      get Edgehog.Groups.DeviceGroup, :device_group, :get
-      list Edgehog.Groups.DeviceGroup, :device_groups, :list
+      get Edgehog.Groups.DeviceGroup, :device_group, :read do
+        description "Returns a single device group."
+      end
+
+      list Edgehog.Groups.DeviceGroup, :device_groups, :read do
+        description "Returns a list of device groups."
+        paginate_with nil
+      end
     end
 
     mutations do

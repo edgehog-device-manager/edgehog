@@ -43,15 +43,7 @@ defmodule Edgehog.Devices.HardwareType do
   end
 
   actions do
-    read :get do
-      description "Returns a hardware type."
-      get? true
-    end
-
-    read :list do
-      description "Returns a list of hardware types."
-      primary? true
-    end
+    defaults [:read]
 
     create :create do
       description "Creates a hardware type."

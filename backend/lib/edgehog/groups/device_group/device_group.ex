@@ -32,21 +32,13 @@ defmodule Edgehog.Groups.DeviceGroup do
   end
 
   actions do
+    defaults [:read]
+
     create :create do
       description "Creates a new device group."
       primary? true
 
       accept [:name, :handle, :selector]
-    end
-
-    read :get do
-      description "Returns a single device group."
-      get? true
-    end
-
-    read :list do
-      description "Returns the list of all device groups."
-      primary? true
     end
 
     update :update do

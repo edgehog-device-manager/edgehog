@@ -41,6 +41,8 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
   end
 
   actions do
+    defaults [:read]
+
     create :create do
       description "Creates a new base image collection."
       primary? true
@@ -53,16 +55,6 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
       end
 
       change manage_relationship(:system_model_id, :system_model, type: :append)
-    end
-
-    read :get do
-      description "Returns a single base image."
-      get? true
-    end
-
-    read :list do
-      description "Returns a list of base images."
-      primary? true
     end
 
     update :update do
