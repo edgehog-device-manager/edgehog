@@ -21,6 +21,8 @@
 defmodule Edgehog.Astarte.Realm.Calculations.RealmManagementClient do
   use Ash.Resource.Calculation
 
+  alias Astarte.Client.RealmManagement
+
   @impl true
   def load(_query, _opts, _context) do
     [cluster: [:base_api_url]]
@@ -37,7 +39,7 @@ defmodule Edgehog.Astarte.Realm.Calculations.RealmManagementClient do
         }
       } = realm
 
-      case Astarte.Client.RealmManagement.new(base_api_url, realm_name, private_key: private_key) do
+      case RealmManagement.new(base_api_url, realm_name, private_key: private_key) do
         {:ok, client} -> client
         _error -> nil
       end

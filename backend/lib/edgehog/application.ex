@@ -28,6 +28,8 @@ defmodule Edgehog.Application do
   use Application
   require Logger
   alias Edgehog.Config
+  alias EdgehogWeb.Endpoint
+  alias EdgehogWeb.Router
 
   @impl true
   def start(_type, _args) do
@@ -37,7 +39,7 @@ defmodule Edgehog.Application do
 
     # We inject this here so that the non-web part of the application doesn't depend on the web part
     tenant_to_trigger_url_fun = fn %Edgehog.Tenants.Tenant{slug: slug} ->
-      EdgehogWeb.Router.Helpers.astarte_trigger_url(EdgehogWeb.Endpoint, :process_event, slug)
+      Router.Helpers.astarte_trigger_url(Endpoint, :process_event, slug)
     end
 
     children = [
@@ -57,7 +59,7 @@ defmodule Edgehog.Application do
       {Edgehog.Tenants.Reconciler.Supervisor,
        tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start the Endpoint (http/https)
-      EdgehogWeb.Endpoint
+      Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

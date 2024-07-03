@@ -474,6 +474,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
   end
 
   describe "capabilities" do
+    alias Edgehog.Tenants.Reconciler.AstarteResources
+
     setup %{tenant: tenant} do
       fixture = device_fixture(tenant: tenant)
       device_id = fixture.device_id
@@ -487,7 +489,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       %{tenant: tenant, id: id, device_id: device_id} = ctx
 
       all_interfaces_introspection =
-        Edgehog.Tenants.Reconciler.AstarteResources.load_interfaces()
+        AstarteResources.load_interfaces()
         |> Map.new(fn
           %{
             "interface_name" => name,

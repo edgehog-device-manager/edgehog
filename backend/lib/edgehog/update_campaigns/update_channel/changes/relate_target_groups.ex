@@ -21,6 +21,7 @@
 defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
   use Ash.Resource.Change
 
+  alias Ash.Error.Changes.InvalidArgument
   alias Edgehog.Groups.DeviceGroup
 
   @impl true
@@ -48,7 +49,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
       {:ok, update_channel}
     else
       {:error,
-       Ash.Error.Changes.InvalidArgument.exception(
+       InvalidArgument.exception(
          field: :target_group_ids,
          message:
            "some target groups were not found or are already associated with an update channel"

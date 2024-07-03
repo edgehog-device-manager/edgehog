@@ -22,6 +22,7 @@ defmodule Edgehog.OSManagement.OTAOperation.ManualActions.SendUpdateRequest do
   use Ash.Resource.Actions.Implementation
 
   alias Edgehog.Astarte.Device.OTARequest
+  alias Edgehog.Error.AstarteAPIError
 
   @ota_request_v1_module Application.compile_env(
                            :edgehog,
@@ -48,7 +49,7 @@ defmodule Edgehog.OSManagement.OTAOperation.ManualActions.SendUpdateRequest do
     with {:error, %Astarte.Client.APIError{} = api_error} <-
            @ota_request_v1_module.update(client, device_id, ota_operation_id, base_image_url) do
       reason =
-        Edgehog.Error.AstarteAPIError.exception(
+        AstarteAPIError.exception(
           status: api_error.status,
           response: api_error.response
         )
