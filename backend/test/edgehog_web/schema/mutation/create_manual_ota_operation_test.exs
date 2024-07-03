@@ -21,8 +21,8 @@
 defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
   use EdgehogWeb.GraphqlCase
 
-  alias Edgehog.PubSub
   alias Edgehog.OSManagement.OTAOperation
+  alias Edgehog.PubSub
 
   import Edgehog.DevicesFixtures
 

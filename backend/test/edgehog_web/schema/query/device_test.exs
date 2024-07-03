@@ -626,8 +626,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
   end
 
   describe "device location/position" do
-    alias Edgehog.Geolocation.GeolocationProviderMock
     alias Edgehog.Geolocation.GeocodingProviderMock
+    alias Edgehog.Geolocation.GeolocationProviderMock
     alias Edgehog.Geolocation.Location
     alias Edgehog.Geolocation.Position
 

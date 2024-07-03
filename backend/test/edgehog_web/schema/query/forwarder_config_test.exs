@@ -69,7 +69,7 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
     original_config
   end
 
-  defp mock_unconfigured_forwarder() do
+  defp mock_unconfigured_forwarder do
     original_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
 
     Application.put_env(:edgehog, :edgehog_forwarder, %{

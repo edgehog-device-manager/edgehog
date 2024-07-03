@@ -24,8 +24,8 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
   import Edgehog.TenantsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
   alias Edgehog.UpdateCampaigns.Resumer.Core
+  alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
   describe "stream_resumable_update_campaigns/0" do

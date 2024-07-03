@@ -22,6 +22,7 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
   use Ash.Resource.Actions.Implementation
 
   alias Edgehog.Devices.Device
+  alias Edgehog.Forwarder
 
   @forwarder_session_module Application.compile_env(
                               :edgehog,
@@ -69,8 +70,8 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
     end
   end
 
-  defp fetch_forwarder_config() do
-    Ash.read_one(Edgehog.Forwarder.Config, not_found_error?: true)
+  defp fetch_forwarder_config do
+    Ash.read_one(Forwarder.Config, not_found_error?: true)
   end
 
   defp validate_device_connected(%Device{online: true}) do

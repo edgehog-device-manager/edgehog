@@ -27,6 +27,7 @@ defmodule Edgehog.Tenants.Tenant do
       AshJsonApi.Resource
     ]
 
+  alias Ash.Error.Invalid.TenantRequired
   alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
   alias Edgehog.Validations
@@ -75,7 +76,7 @@ defmodule Edgehog.Tenants.Tenant do
         else
           Ash.Query.add_error(
             query,
-            Ash.Error.Invalid.TenantRequired.exception(resource: query.resource)
+            TenantRequired.exception(resource: query.resource)
           )
         end
       end

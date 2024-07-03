@@ -25,9 +25,9 @@ defmodule Edgehog.Devices.SystemModel do
       AshGraphql.Resource
     ]
 
-  alias Edgehog.Localization
   alias Edgehog.Devices.SystemModel.Changes
   alias Edgehog.Devices.SystemModel.Validations
+  alias Edgehog.Localization
 
   resource do
     description """

@@ -22,9 +22,9 @@ defmodule Edgehog.Tenants.Reconciler do
   @behaviour Edgehog.Tenants.Reconciler.Behaviour
   use GenServer
 
-  alias Edgehog.Tenants.Tenant
   alias Edgehog.Tenants.Reconciler.Core
   alias Edgehog.Tenants.Reconciler.TaskSupervisor
+  alias Edgehog.Tenants.Tenant
 
   @reconcile_interval :timer.minutes(10)
 
