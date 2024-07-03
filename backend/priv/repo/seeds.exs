@@ -18,12 +18,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-alias Edgehog.{
-  Astarte,
-  BaseImages,
-  Devices,
-  Tenants
-}
+alias Edgehog.Astarte
+alias Edgehog.Tenants
 
 require Logger
 
@@ -143,12 +139,11 @@ if status == :default do
   |> Logger.warning()
 end
 
-realm =
-  %{
-    cluster_id: cluster.id,
-    name: read_env_var.("SEEDS_REALM"),
-    private_key: realm_pk
-  }
-  |> Astarte.create_realm!(tenant: tenant)
+%{
+  cluster_id: cluster.id,
+  name: read_env_var.("SEEDS_REALM"),
+  private_key: realm_pk
+}
+|> Astarte.create_realm!(tenant: tenant)
 
 :ok
