@@ -42,6 +42,8 @@ defmodule Edgehog.BaseImages.BaseImage do
   end
 
   actions do
+    defaults [:read]
+
     create :create do
       description "Create a new base image in a base image collection."
       primary? true
@@ -101,16 +103,6 @@ defmodule Edgehog.BaseImages.BaseImage do
       change {Localization.Changes.UpsertLocalizedAttribute,
               input_argument: :localized_release_display_names,
               target_attribute: :release_display_name}
-    end
-
-    read :get do
-      description "Returns a single base image."
-      get? true
-    end
-
-    read :list do
-      description "Returns a list of base images."
-      primary? true
     end
 
     update :update do

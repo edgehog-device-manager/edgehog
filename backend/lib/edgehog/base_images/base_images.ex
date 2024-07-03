@@ -32,9 +32,18 @@ defmodule Edgehog.BaseImages do
     root_level_errors? true
 
     queries do
-      get Edgehog.BaseImages.BaseImage, :base_image, :get
-      get Edgehog.BaseImages.BaseImageCollection, :base_image_collection, :get
-      list Edgehog.BaseImages.BaseImageCollection, :base_image_collections, :list
+      get Edgehog.BaseImages.BaseImage, :base_image, :read do
+        description "Returns a single base image."
+      end
+
+      get Edgehog.BaseImages.BaseImageCollection, :base_image_collection, :read do
+        description "Returns a single base image collection."
+      end
+
+      list Edgehog.BaseImages.BaseImageCollection, :base_image_collections, :read do
+        description "Returns a list of base image collections."
+        paginate_with nil
+      end
     end
 
     mutations do
