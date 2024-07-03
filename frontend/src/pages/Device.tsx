@@ -38,7 +38,7 @@ import {
   useRelayEnvironment,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
-import type { Subscription } from "relay-runtime";
+import type { PayloadError, Subscription } from "relay-runtime";
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import _ from "lodash";
@@ -59,6 +59,8 @@ import type { Device_connectionStatus$key } from "api/__generated__/Device_conne
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
 import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
+import type { Device_addDeviceTags_Mutation } from "api/__generated__/Device_addDeviceTags_Mutation.graphql";
+import type { Device_removeDeviceTags_Mutation } from "api/__generated__/Device_removeDeviceTags_Mutation.graphql";
 import type { Device_requestForwarderSession_Mutation } from "api/__generated__/Device_requestForwarderSession_Mutation.graphql";
 import type { Device_getForwarderSession_Query } from "api/__generated__/Device_getForwarderSession_Query.graphql";
 import type { Device_getExistingDeviceTags_Query } from "api/__generated__/Device_getExistingDeviceTags_Query.graphql";
@@ -237,6 +239,7 @@ const GET_DEVICE_QUERY = graphql`
         }
       }
       tags {
+        id
         name
       }
       deviceGroups {
@@ -298,7 +301,42 @@ const UPDATE_DEVICE_MUTATION = graphql`
       result {
         id
         name
+      }
+    }
+  }
+`;
+
+const ADD_DEVICE_TAGS_MUTATION = graphql`
+  mutation Device_addDeviceTags_Mutation(
+    $deviceId: ID!
+    $input: AddDeviceTagsInput!
+  ) {
+    addDeviceTags(id: $deviceId, input: $input) {
+      result {
+        id
         tags {
+          id
+          name
+        }
+        deviceGroups {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+const REMOVE_DEVICE_TAGS_MUTATION = graphql`
+  mutation Device_removeDeviceTags_Mutation(
+    $deviceId: ID!
+    $input: RemoveDeviceTagsInput!
+  ) {
+    removeDeviceTags(id: $deviceId, input: $input) {
+      result {
+        id
+        tags {
+          id
           name
         }
         deviceGroups {
@@ -1306,32 +1344,21 @@ const DeviceContent = ({
   const [remoteTerminalErrorFeedback, setRemoteTerminalErrorFeedback] =
     useState<React.ReactNode>(null);
 
-  // TODO: handle readonly type without mapping to mutable type
-  const device = useMemo(
-    () =>
-      deviceData.device && {
-        ...deviceData.device,
-        tags: deviceData.device.tags.slice(),
-      },
-    [deviceData.device],
-  );
-
   const isForwarderEnabled = useMemo(
     () => deviceData.forwarderConfig != null,
     [deviceData.forwarderConfig],
   );
 
-  const [deviceDraft, setDeviceDraft] = useState(
-    _.pick(device, ["name", "tags"]),
-  );
+  const device = deviceData.device;
+  const [deviceDraftName, setDeviceDraftName] = useState(device?.name || "");
 
   const deviceTags = useMemo(
     () =>
-      deviceDraft.tags?.map(({ name: tag }) => ({
+      device?.tags?.map(({ name: tag }) => ({
         label: tag,
         value: tag,
       })) || [],
-    [deviceDraft.tags],
+    [device?.tags],
   );
 
   const tags = useMemo(
@@ -1344,6 +1371,14 @@ const DeviceContent = ({
   );
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const handleAPIErrors = useCallback((errors: PayloadError[]) => {
+    const errorFeedback = errors
+      .map(({ fields, message }) =>
+        fields.length ? `${fields.join(" ")} ${message}` : message,
+      )
+      .join(". \n");
+    setErrorFeedback(errorFeedback);
+  }, []);
 
   const [requestForwarderSession, isRequestingForwarderSession] =
     useMutation<Device_requestForwarderSession_Mutation>(
@@ -1384,12 +1419,8 @@ const DeviceContent = ({
       variables: { input: { deviceId } },
       onCompleted(data, errors) {
         if (errors) {
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-          return setErrorFeedback(errorFeedback);
+          handleAPIErrors(errors);
+          return;
         }
         const sessionToken = data.requestForwarderSession;
 
@@ -1428,32 +1459,26 @@ const DeviceContent = ({
   const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
     UPDATE_DEVICE_MUTATION,
   );
+  const [addDeviceTags] = useMutation<Device_addDeviceTags_Mutation>(
+    ADD_DEVICE_TAGS_MUTATION,
+  );
+  const [removeDeviceTags] = useMutation<Device_removeDeviceTags_Mutation>(
+    REMOVE_DEVICE_TAGS_MUTATION,
+  );
 
-  const handleUpdateDevice = useMemo(
+  const handleUpdatDeviceName = useMemo(
     () =>
       _.debounce(
-        (
-          draft: typeof deviceDraft,
-          deviceChanges: Partial<typeof deviceDraft>,
-        ) => {
+        (newDeviceName: string) => {
           updateDevice({
-            variables: { deviceId, input: deviceChanges },
+            variables: { deviceId, input: { name: newDeviceName } },
             onCompleted(data, errors) {
               if (errors) {
-                setDeviceDraft(draft);
-                const errorFeedback = errors
-                  .map(({ fields, message }) =>
-                    fields.length ? `${fields.join(" ")} ${message}` : message,
-                  )
-                  .join(". \n");
-                return setErrorFeedback(errorFeedback);
-              }
-              if (deviceChanges.tags != null) {
-                refreshTags();
+                handleAPIErrors(errors);
+                return;
               }
             },
             onError() {
-              setDeviceDraft(draft);
               setErrorFeedback(
                 <FormattedMessage
                   id="pages.Device.updateDeviceErrorFeedback"
@@ -1462,63 +1487,22 @@ const DeviceContent = ({
                 />,
               );
             },
-            updater(store, data) {
-              if (!data?.updateDevice?.result) {
-                return;
-              }
-
-              const root = store.getRoot();
-              const deviceGroups = root.getLinkedRecords("deviceGroups");
-              if (!deviceGroups) {
-                return;
-              }
-
-              const device = store
-                .getRootField("updateDevice")
-                .getLinkedRecord("result");
-              const deviceId = device.getDataID();
-
-              const linkedGroups = new Set(
-                device
-                  .getLinkedRecords("deviceGroups")
-                  ?.map((deviceGroup) => deviceGroup.getDataID()),
-              );
-
-              deviceGroups.forEach((deviceGroup) => {
-                const devices = deviceGroup.getLinkedRecords("devices");
-                if (!devices) {
-                  return;
-                }
-
-                if (!linkedGroups.has(deviceGroup.getDataID())) {
-                  return deviceGroup.setLinkedRecords(
-                    devices.filter((device) => device.getDataID() !== deviceId),
-                    "devices",
-                  );
-                }
-
-                if (
-                  !devices.some((device) => device.getDataID() === deviceId)
-                ) {
-                  deviceGroup.setLinkedRecords([...devices, device], "devices");
-                }
-              });
-            },
           });
         },
         500,
         { leading: true },
       ),
-    [updateDevice, deviceId, refreshTags],
+    [updateDevice, deviceId],
   );
 
-  const handleDeviceChange = useCallback(
-    (deviceChanges: Partial<typeof deviceDraft>) => {
-      setDeviceDraft((draft) => ({ ...draft, ...deviceChanges }));
-      handleUpdateDevice(deviceDraft, deviceChanges);
+  const handleDeviceNameChange = useCallback(
+    (newDeviceName: string) => {
+      setDeviceDraftName(newDeviceName);
+      handleUpdatDeviceName(newDeviceName);
     },
-    [handleUpdateDevice, deviceDraft],
+    [handleUpdatDeviceName],
   );
+
   const isValidNewTag = useCallback(
     (inputValue: string) => {
       const newTag = inputValue.trim().toLowerCase();
@@ -1526,16 +1510,133 @@ const DeviceContent = ({
     },
     [deviceTags],
   );
-  const handleTagCreate = useCallback(
-    (inputValue: string) => {
-      const newTag = inputValue.trim().toLowerCase();
-      handleDeviceChange({
-        tags: deviceTags
-          .map(({ value }) => ({ name: value }))
-          .concat([{ name: newTag }]),
-      });
+
+  const handleAddDeviceTags = useCallback((tags: string[]) => {
+    addDeviceTags({
+      variables: {
+        deviceId,
+        input: { tags },
+      },
+      onCompleted(data, errors) {
+        if (errors) {
+          handleAPIErrors(errors);
+          return;
+        }
+        // TODO refresh tags only when adding unexisting tags
+        refreshTags();
+      },
+      updater(store, data) {
+        if (!data?.addDeviceTags?.result) {
+          return;
+        }
+
+        const root = store.getRoot();
+        const deviceGroups = root.getLinkedRecords("deviceGroups");
+        if (!deviceGroups) {
+          return;
+        }
+
+        const device = store
+          .getRootField("addDeviceTags")
+          .getLinkedRecord("result");
+        const deviceId = device.getDataID();
+
+        const linkedGroups = new Set(
+          device
+            .getLinkedRecords("deviceGroups")
+            ?.map((deviceGroup) => deviceGroup.getDataID()),
+        );
+
+        deviceGroups.forEach((deviceGroup) => {
+          const devices = deviceGroup.getLinkedRecords("devices");
+          if (!devices) {
+            return;
+          }
+          if (!linkedGroups.has(deviceGroup.getDataID())) {
+            return deviceGroup.setLinkedRecords(
+              devices.filter((device) => device.getDataID() !== deviceId),
+              "devices",
+            );
+          }
+          if (!devices.some((device) => device.getDataID() === deviceId)) {
+            deviceGroup.setLinkedRecords([...devices, device], "devices");
+          }
+        });
+      },
+    });
+  }, []);
+
+  const handleRemoveDeviceTags = useCallback((tags: string[]) => {
+    removeDeviceTags({
+      variables: {
+        deviceId,
+        input: { tags },
+      },
+      onCompleted(data, errors) {
+        if (errors) {
+          handleAPIErrors(errors);
+          return;
+        }
+      },
+      updater(store, data) {
+        if (!data?.removeDeviceTags?.result) {
+          return;
+        }
+
+        const root = store.getRoot();
+        const deviceGroups = root.getLinkedRecords("deviceGroups");
+        if (!deviceGroups) {
+          return;
+        }
+
+        const device = store
+          .getRootField("removeDeviceTags")
+          .getLinkedRecord("result");
+        const deviceId = device.getDataID();
+
+        const linkedGroups = new Set(
+          device
+            .getLinkedRecords("deviceGroups")
+            ?.map((deviceGroup) => deviceGroup.getDataID()),
+        );
+
+        deviceGroups.forEach((deviceGroup) => {
+          const devices = deviceGroup.getLinkedRecords("devices");
+          if (!devices) {
+            return;
+          }
+          if (!linkedGroups.has(deviceGroup.getDataID())) {
+            return deviceGroup.setLinkedRecords(
+              devices.filter((device) => device.getDataID() !== deviceId),
+              "devices",
+            );
+          }
+          if (!devices.some((device) => device.getDataID() === deviceId)) {
+            deviceGroup.setLinkedRecords([...devices, device], "devices");
+          }
+        });
+      },
+    });
+  }, []);
+
+  const handleTagsChange = useCallback(
+    (updatedTags: string[]) => {
+      const previousTags = deviceTags.map((tag) => tag.value);
+      const tagsToBeAdded = updatedTags.filter(
+        (t) => !previousTags.includes(t),
+      );
+      const tagsToBeRemoved = previousTags.filter(
+        (t) => !updatedTags.includes(t),
+      );
+
+      if (tagsToBeAdded.length > 0) {
+        handleAddDeviceTags(tagsToBeAdded);
+      }
+      if (tagsToBeRemoved.length > 0) {
+        handleRemoveDeviceTags(tagsToBeRemoved);
+      }
     },
-    [handleDeviceChange, deviceTags],
+    [deviceTags],
   );
 
   if (!device) {
@@ -1597,10 +1698,8 @@ const DeviceContent = ({
                   >
                     <Form.Control
                       type="text"
-                      value={deviceDraft.name}
-                      onChange={(e) =>
-                        handleDeviceChange({ name: e.target.value })
-                      }
+                      value={deviceDraftName}
+                      onChange={(e) => handleDeviceNameChange(e.target.value)}
                     />
                   </FormRow>
                   <FormRow
@@ -1616,13 +1715,14 @@ const DeviceContent = ({
                       creatable
                       value={deviceTags}
                       options={tags}
-                      onChange={(value) =>
-                        handleDeviceChange({
-                          tags: value.map(({ value }) => ({ name: value })),
-                        })
+                      onChange={(newTags) =>
+                        handleTagsChange(newTags.map(({ value }) => value))
                       }
                       isValidNewOption={isValidNewTag}
-                      onCreateOption={handleTagCreate}
+                      onCreateOption={(inputValue) => {
+                        const newTag = inputValue.trim().toLowerCase();
+                        handleAddDeviceTags([newTag]);
+                      }}
                     />
                   </FormRow>
                   <FormRow
