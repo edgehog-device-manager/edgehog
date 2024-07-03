@@ -21,7 +21,6 @@
 defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   alias Astarte.Client.APIError
   alias Edgehog.OSManagement
-  alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.PubSub
   alias Edgehog.UpdateCampaigns
   alias Edgehog.UpdateCampaigns.UpdateCampaign

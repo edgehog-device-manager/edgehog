@@ -22,5 +22,5 @@ defmodule Edgehog.Geolocation.GeocodingProvider do
   alias Edgehog.Geolocation.Location
   alias Edgehog.Geolocation.Position
 
-  @callback reverse_geocode(Position.t()) :: {:ok, Location.t()} | {:error, term}
+  @callback reverse_geocode(%Position{}) :: {:ok, %Location{}} | {:error, term}
 end

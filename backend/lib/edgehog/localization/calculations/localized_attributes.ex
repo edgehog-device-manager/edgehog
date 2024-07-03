@@ -21,8 +21,6 @@
 defmodule Edgehog.Localization.Calculations.LocalizedAttributes do
   use Ash.Resource.Calculation
 
-  alias Edgehog.Localization.LocalizedAttribute
-
   @impl true
   def init(opts) do
     if opts[:attribute] && is_atom(opts[:attribute]) do

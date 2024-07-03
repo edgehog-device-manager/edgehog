@@ -20,10 +20,10 @@
 
 defmodule Edgehog.Astarte.Device.ForwarderSession.Behaviour do
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Forwarder.Session
 
   @callback list_sessions(client :: AppEngine.t(), device_id :: String.t()) ::
-              {:ok, list(ForwarderSession.t())} | {:error, term()}
+              {:ok, list(%Session{})} | {:error, term()}
 
   @callback request_session(
               client :: AppEngine.t(),

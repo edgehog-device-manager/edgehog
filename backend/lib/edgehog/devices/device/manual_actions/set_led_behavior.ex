@@ -47,6 +47,9 @@ defmodule Edgehog.Devices.Device.ManualActions.SetLedBehavior do
           )
 
         {:error, reason}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

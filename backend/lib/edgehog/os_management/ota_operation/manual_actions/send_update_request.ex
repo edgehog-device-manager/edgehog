@@ -30,7 +30,7 @@ defmodule Edgehog.OSManagement.OTAOperation.ManualActions.SendUpdateRequest do
                          )
 
   @impl true
-  def run(input, _opts, context) do
+  def run(input, _opts, _context) do
     %{
       id: ota_operation_id,
       base_image_url: base_image_url,

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ defmodule Edgehog.BaseImages.Storage do
 
   @type upload :: %Plug.Upload{}
 
-  @callback store(scope :: BaseImage.t(), file :: upload()) ::
+  @callback store(scope :: %BaseImage{}, file :: upload()) ::
               {:ok, file_url :: String.t()} | {:error, reason :: any}
 
-  @callback delete(base_image :: BaseImage.t()) ::
+  @callback delete(base_image :: %BaseImage{}) ::
               :ok | {:error, reason :: any}
 end

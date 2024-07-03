@@ -25,7 +25,8 @@ defmodule Edgehog.Groups.DeviceGroup do
       AshGraphql.Resource
     ]
 
-  alias Edgehog.Groups.DeviceGroup.{Calculations, ManualRelationships, Validations}
+  alias Edgehog.Groups.DeviceGroup.ManualRelationships
+  alias Edgehog.Groups.DeviceGroup.Validations
 
   graphql do
     type :device_group
@@ -45,10 +46,16 @@ defmodule Edgehog.Groups.DeviceGroup do
       description "Updates a device group."
       primary? true
 
+      # Needed because resource's validations are not atomic
+      require_atomic? false
+
       accept [:name, :handle, :selector]
     end
 
     update :update_update_channel do
+      # Needed because resource's validations are not atomic
+      require_atomic? false
+
       accept [:update_channel_id]
     end
 
