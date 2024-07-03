@@ -28,9 +28,11 @@ defmodule Edgehog.Tenants.Reconciler.AstarteResources do
   end
 
   def load_interfaces do
-    @interfaces
-    |> Enum.map(&File.read!/1)
-    |> Enum.map(&Jason.decode!/1)
+    Enum.map(@interfaces, fn interface ->
+      interface
+      |> File.read!()
+      |> Jason.decode!()
+    end)
   end
 
   def load_trigger_templates do
