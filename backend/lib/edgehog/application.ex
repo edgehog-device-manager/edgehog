@@ -23,13 +23,13 @@ defmodule Edgehog.Application do
   # for more information on OTP Applications
   @moduledoc false
 
-  @version Mix.Project.config()[:version]
-
   use Application
-  require Logger
   alias Edgehog.Config
   alias EdgehogWeb.Endpoint
   alias EdgehogWeb.Router
+  require Logger
+
+  @version Mix.Project.config()[:version]
 
   @impl Application
   def start(_type, _args) do

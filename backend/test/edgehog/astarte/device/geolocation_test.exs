@@ -21,13 +21,13 @@
 defmodule Edgehog.Astarte.Device.GeolocationTest do
   use Edgehog.DataCase, async: true
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.Geolocation
-  alias Edgehog.Astarte.Device.Geolocation.SensorPosition
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.Geolocation
+  alias Edgehog.Astarte.Device.Geolocation.SensorPosition
 
   describe "geolocation" do
     import Tesla.Mock

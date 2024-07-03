@@ -23,10 +23,9 @@ defmodule EdgehogWeb.Auth.VerifyHeader do
   This is a wrapper around `Guardian.Plug.VerifyHeader` that allows to recover
   the JWT public key dynamically using the tenant contained in the connection
   """
-  require Logger
-
   alias Guardian.Plug.VerifyHeader, as: GuardianVerifyHeader
   alias JOSE.JWK
+  require Logger
 
   def init(opts) do
     GuardianVerifyHeader.init(opts)

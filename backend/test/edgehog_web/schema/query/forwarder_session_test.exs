@@ -21,11 +21,11 @@
 defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.Astarte.Device.ForwarderSession
-  alias Edgehog.Astarte.Device.ForwarderSessionMock
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+
+  alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Astarte.Device.ForwarderSessionMock
 
   describe "forwarderSession query" do
     test "returns the forwarder session", %{tenant: tenant} do

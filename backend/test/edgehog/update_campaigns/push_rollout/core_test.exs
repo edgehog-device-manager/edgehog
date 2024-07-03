@@ -21,6 +21,11 @@
 defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.BaseImagesFixtures
+  import Edgehog.OSManagementFixtures
+  import Edgehog.TenantsFixtures
+  import Edgehog.UpdateCampaignsFixtures
+
   alias Astarte.Client.APIError
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
@@ -28,11 +33,6 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateTarget
-
-  import Edgehog.BaseImagesFixtures
-  import Edgehog.OSManagementFixtures
-  import Edgehog.TenantsFixtures
-  import Edgehog.UpdateCampaignsFixtures
 
   setup do
     Edgehog.Astarte.Device.OTARequestV1Mock

@@ -21,10 +21,8 @@
 defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.BaseImages.BaseImage
-
   import Edgehog.BaseImagesFixtures
-
+  alias Edgehog.BaseImages.BaseImage
   require Ash.Query
 
   describe "deleteBaseImage mutation" do

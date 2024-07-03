@@ -21,10 +21,10 @@
 defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
   use EdgehogWeb.GraphqlCase, async: true
 
+  import Edgehog.DevicesFixtures
+
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
-
-  import Edgehog.DevicesFixtures
 
   describe "updateDevice mutation" do
     setup %{tenant: tenant} do

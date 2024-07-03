@@ -21,10 +21,10 @@
 defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
   use EdgehogWeb.GraphqlCase
 
+  import Edgehog.DevicesFixtures
+
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.PubSub
-
-  import Edgehog.DevicesFixtures
 
   describe "createManualOtaOperation mutation" do
     test "creates OTA operation with valid data", %{tenant: tenant} do

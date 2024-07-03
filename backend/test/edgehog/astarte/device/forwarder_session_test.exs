@@ -21,13 +21,13 @@
 defmodule Edgehog.Astarte.Device.ForwarderSessionTest do
   use Edgehog.DataCase, async: true
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.ForwarderSession
-  alias Edgehog.Forwarder
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Forwarder
 
   describe "forwarder_session" do
     import Tesla.Mock

@@ -21,10 +21,10 @@
 defmodule Edgehog.Astarte.ClusterTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.AstarteFixtures
+
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Cluster
-
-  import Edgehog.AstarteFixtures
 
   describe "create/1" do
     @valid_attrs %{base_api_url: "http://some-base-api.url", name: "some name"}

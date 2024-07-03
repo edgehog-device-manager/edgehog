@@ -19,6 +19,10 @@
 #
 
 defmodule Edgehog.Astarte.Device.BaseImage do
+  @behaviour Edgehog.Astarte.Device.BaseImage.Behaviour
+
+  alias Astarte.Client.AppEngine
+
   @type t :: %__MODULE__{
           name: String.t() | nil,
           version: String.t() | nil,
@@ -28,10 +32,6 @@ defmodule Edgehog.Astarte.Device.BaseImage do
 
   @enforce_keys [:name, :version, :build_id, :fingerprint]
   defstruct @enforce_keys
-
-  @behaviour Edgehog.Astarte.Device.BaseImage.Behaviour
-
-  alias Astarte.Client.AppEngine
 
   @interface "io.edgehog.devicemanager.BaseImage"
 

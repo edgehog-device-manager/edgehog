@@ -21,11 +21,9 @@
 defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.BaseImages.BaseImageCollection
-
-  require Ash.Query
-
   import Edgehog.BaseImagesFixtures
+  alias Edgehog.BaseImages.BaseImageCollection
+  require Ash.Query
 
   describe "deleteBaseImageCollection mutation" do
     setup %{tenant: tenant} do

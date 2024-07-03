@@ -21,13 +21,13 @@
 defmodule Edgehog.Selector.AST.TagFilterTest do
   use Edgehog.DataCase, async: true
 
-  require Ash.Query
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
   alias Edgehog.Devices.Device
   alias Edgehog.Selector.AST.TagFilter
   alias Edgehog.Selector.Filter
+  require Ash.Query
 
   describe "to_ash_expr/1" do
     setup do

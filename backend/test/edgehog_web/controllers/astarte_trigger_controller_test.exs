@@ -21,12 +21,12 @@
 defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   use EdgehogWeb.ConnCase, async: true
 
-  alias Edgehog.Devices.Device
-  alias Edgehog.OSManagement
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
+
+  alias Edgehog.Devices.Device
+  alias Edgehog.OSManagement
 
   describe "process_event for device events" do
     setup %{conn: conn, tenant: tenant} do

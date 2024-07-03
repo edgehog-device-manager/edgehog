@@ -19,6 +19,10 @@
 #
 
 defmodule Edgehog.Astarte.Device.OSInfo do
+  @behaviour Edgehog.Astarte.Device.OSInfo.Behaviour
+
+  alias Astarte.Client.AppEngine
+
   @type t :: %__MODULE__{
           name: String.t() | nil,
           version: String.t() | nil
@@ -26,10 +30,6 @@ defmodule Edgehog.Astarte.Device.OSInfo do
 
   @enforce_keys [:name, :version]
   defstruct @enforce_keys
-
-  @behaviour Edgehog.Astarte.Device.OSInfo.Behaviour
-
-  alias Astarte.Client.AppEngine
 
   @interface "io.edgehog.devicemanager.OSInfo"
 

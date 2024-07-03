@@ -19,6 +19,11 @@
 #
 
 defmodule Edgehog.Astarte.Device.HardwareInfo do
+  @behaviour Edgehog.Astarte.Device.HardwareInfo.Behaviour
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.HardwareInfo
+
   @type t :: %__MODULE__{
           cpu_architecture: String.t() | nil,
           cpu_model: String.t() | nil,
@@ -35,11 +40,6 @@ defmodule Edgehog.Astarte.Device.HardwareInfo do
     :memory_total_bytes
   ]
   defstruct @enforce_keys
-
-  @behaviour Edgehog.Astarte.Device.HardwareInfo.Behaviour
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.HardwareInfo
 
   @interface "io.edgehog.devicemanager.HardwareInfo"
 

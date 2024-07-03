@@ -24,6 +24,7 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
+  alias Edgehog.Config
 
   @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
                         |> X509.PublicKey.derive()
@@ -49,8 +50,6 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
       }
     }
   }
-
-  alias Edgehog.Config
 
   setup do
     {:ok, path: ~p"/admin-api/v1/tenants"}

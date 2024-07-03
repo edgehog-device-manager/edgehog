@@ -21,12 +21,12 @@
 defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
+  use Tesla
+
   alias Edgehog.Astarte.Device.WiFiScanResult
   alias Edgehog.Config
   alias Edgehog.Devices.Device
   alias Edgehog.Geolocation.Position
-
-  use Tesla
 
   plug Tesla.Middleware.BaseUrl, "https://www.googleapis.com/geolocation/v1/geolocate"
   plug Tesla.Middleware.JSON

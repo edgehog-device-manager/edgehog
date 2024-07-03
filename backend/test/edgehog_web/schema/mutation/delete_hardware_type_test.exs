@@ -21,10 +21,10 @@
 defmodule EdgehogWeb.Schema.Mutation.DeleteHardwareTypeTest do
   use EdgehogWeb.GraphqlCase, async: true
 
+  import Edgehog.DevicesFixtures
+
   alias Edgehog.Devices
   alias Edgehog.Devices.HardwareType
-
-  import Edgehog.DevicesFixtures
 
   describe "deleteHardwareType field" do
     test "deletes hardware type", %{tenant: tenant} do

@@ -21,10 +21,8 @@
 defmodule EdgehogWeb.Schema.Mutation.DeleteUpdateChannelTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.UpdateCampaigns.UpdateChannel
-
   import Edgehog.UpdateCampaignsFixtures
-
+  alias Edgehog.UpdateCampaigns.UpdateChannel
   require Ash.Query
 
   describe "deleteUpdateChannel mutation" do

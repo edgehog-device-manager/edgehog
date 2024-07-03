@@ -21,13 +21,13 @@
 defmodule Edgehog.Astarte.Device.BatteryStatusTest do
   use Edgehog.DataCase, async: true
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.BatteryStatus
-  alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.BatteryStatus
+  alias Edgehog.Astarte.Device.BatteryStatus.BatterySlot
 
   describe "battery_status" do
     import Tesla.Mock

@@ -19,6 +19,10 @@
 #
 
 defmodule Edgehog.Astarte.Device.RuntimeInfo do
+  @behaviour Edgehog.Astarte.Device.RuntimeInfo.Behaviour
+
+  alias Astarte.Client.AppEngine
+
   @type t :: %__MODULE__{
           name: String.t() | nil,
           version: String.t() | nil,
@@ -28,10 +32,6 @@ defmodule Edgehog.Astarte.Device.RuntimeInfo do
 
   @enforce_keys [:name, :version, :environment, :url]
   defstruct @enforce_keys
-
-  @behaviour Edgehog.Astarte.Device.RuntimeInfo.Behaviour
-
-  alias Astarte.Client.AppEngine
 
   @interface "io.edgehog.devicemanager.RuntimeInfo"
 

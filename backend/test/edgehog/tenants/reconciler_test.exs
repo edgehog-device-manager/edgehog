@@ -22,11 +22,11 @@ defmodule Edgehog.Tenants.ReconcilerTest do
   # This can't be async: true because we're using Mox in global mode
   use Edgehog.DataCase
 
-  alias Astarte.Client.APIError
-  alias Edgehog.Tenants.Reconciler
-
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
+
+  alias Astarte.Client.APIError
+  alias Edgehog.Tenants.Reconciler
 
   describe "reconcile_all" do
     setup do

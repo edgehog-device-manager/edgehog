@@ -28,9 +28,9 @@ defmodule EdgehogWeb.GraphqlCase do
     end
   end
 
-  alias Ecto.Adapters.SQL
-
   import Mox
+
+  alias Ecto.Adapters.SQL
 
   setup :verify_on_exit!
 

@@ -20,9 +20,9 @@
 
 defmodule Edgehog.Devices.Device.ManualRelationships.DeviceGroups do
   use Ash.Resource.ManualRelationship
-  require Ash.Query
 
   alias Edgehog.Devices.Device
+  require Ash.Query
 
   @impl Ash.Resource.ManualRelationship
   def load(devices, _opts, %{query: group_query}) do

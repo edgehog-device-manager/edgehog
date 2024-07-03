@@ -19,11 +19,11 @@
 #
 
 defmodule Edgehog.Selector.AST.BinaryOp do
-  defstruct [:operator, :lhs, :rhs]
-
   import Ash.Expr
 
   alias Edgehog.Selector
+
+  defstruct [:operator, :lhs, :rhs]
 
   defimpl Selector.Filter do
     def to_ash_expr(binary_op) do

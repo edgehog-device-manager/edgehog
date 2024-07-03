@@ -19,13 +19,13 @@
 #
 
 defmodule Edgehog.Astarte.Device.ForwarderSession do
-  @enforce_keys [:token, :status, :secure, :forwarder_hostname, :forwarder_port]
-  defstruct @enforce_keys
-
   @behaviour Edgehog.Astarte.Device.ForwarderSession.Behaviour
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Forwarder.Session
+
+  @enforce_keys [:token, :status, :secure, :forwarder_hostname, :forwarder_port]
+  defstruct @enforce_keys
 
   @session_request_interface "io.edgehog.devicemanager.ForwarderSessionRequest"
   @sessions_state_interface "io.edgehog.devicemanager.ForwarderSessionState"
