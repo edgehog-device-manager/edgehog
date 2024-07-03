@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte do
+  @moduledoc false
   use Ash.Domain
 
   resources do

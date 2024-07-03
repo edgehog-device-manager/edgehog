@@ -19,7 +19,9 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler do
+  @moduledoc false
   @behaviour Edgehog.Tenants.Reconciler.Behaviour
+
   use GenServer
 
   alias Edgehog.Tenants.Reconciler.Core
@@ -94,12 +96,11 @@ defmodule Edgehog.Tenants.Reconciler do
     Task.Supervisor.start_child(TaskSupervisor, fn ->
       rm_client = tenant.realm.realm_management_client
 
-      Core.list_required_interfaces()
-      |> Enum.each(&Core.reconcile_interface!(rm_client, &1))
-
+      Enum.each(Core.list_required_interfaces(), &Core.reconcile_interface!(rm_client, &1))
       trigger_url = tenant_to_trigger_url_fun.(tenant)
 
-      Core.list_required_triggers(trigger_url)
+      trigger_url
+      |> Core.list_required_triggers()
       |> Enum.each(&Core.reconcile_trigger!(rm_client, &1))
     end)
   end

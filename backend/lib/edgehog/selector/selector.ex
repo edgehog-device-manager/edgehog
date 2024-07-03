@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Selector do
+  @moduledoc false
   alias Edgehog.Selector.AST.AttributeFilter
   alias Edgehog.Selector.AST.BinaryOp
   alias Edgehog.Selector.AST.TagFilter
@@ -33,8 +34,7 @@ defmodule Edgehog.Selector do
 
   Returns `%Ash.Expr{}`.
   """
-  def to_ash_expr(%node{} = ast_root)
-      when node in [AttributeFilter, BinaryOp, TagFilter] do
+  def to_ash_expr(%node{} = ast_root) when node in [AttributeFilter, BinaryOp, TagFilter] do
     Filter.to_ash_expr(ast_root)
   end
 

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.ForwarderSession.Behaviour do
+  @moduledoc false
   alias Astarte.Client.AppEngine
   alias Edgehog.Forwarder.Session
 

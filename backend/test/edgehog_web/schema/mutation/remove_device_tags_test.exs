@@ -26,7 +26,8 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
   describe "removeDeviceTags mutation" do
     setup %{tenant: tenant} do
       device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> Ash.Changeset.for_update(:add_tags, %{tags: ["foo", "bar"]})
         |> Ash.update!()
 

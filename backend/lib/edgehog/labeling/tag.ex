@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Labeling.Tag do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Labeling,
     extensions: [

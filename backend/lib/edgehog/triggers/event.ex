@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Triggers.Event do
+  @moduledoc false
   use Ash.Type.NewType,
     subtype_of: :union,
     constraints: [

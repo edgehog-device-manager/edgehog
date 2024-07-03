@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Triggers do
+  @moduledoc false
   use Ash.Domain
 
   resources do

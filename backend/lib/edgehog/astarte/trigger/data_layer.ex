@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Trigger.DataLayer do
+  @moduledoc false
   alias Astarte.Client.RealmManagement
 
   @callback get(client :: RealmManagement.t(), trigger_name :: String.t()) ::

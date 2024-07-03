@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.MultitenantResource do
+  @moduledoc false
   alias Edgehog.Tenants.Tenant
 
   @custom_opts [:tenant_id_in_primary_key?]

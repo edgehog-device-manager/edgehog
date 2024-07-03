@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.DeviceStatus do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
 
   alias Astarte.Client.AppEngine
@@ -60,14 +61,9 @@ defmodule Edgehog.Astarte.Device.DeviceStatus do
   end
 
   defp build_introspection(interfaces_map) do
-    Enum.map(interfaces_map, fn {name, info} ->
-      {name,
-       %InterfaceVersion{
-         major: info["major"],
-         minor: info["minor"]
-       }}
+    Map.new(interfaces_map, fn {name, info} ->
+      {name, %InterfaceVersion{major: info["major"], minor: info["minor"]}}
     end)
-    |> Map.new()
   end
 
   defp parse_datetime(nil) do

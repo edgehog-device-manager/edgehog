@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.DeviceStatus.Behaviour do
+  @moduledoc false
   alias Astarte.Client.AppEngine
 
   @callback get(client :: AppEngine.t(), device_id :: String.t()) ::

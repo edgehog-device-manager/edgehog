@@ -19,12 +19,14 @@
 #
 
 defmodule Edgehog.OSManagement.OTAOperation do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.OSManagement,
     extensions: [
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Changes.PublishNotification
   alias Edgehog.OSManagement.OTAOperation.Changes
   alias Edgehog.OSManagement.OTAOperation.ManualActions
   alias Edgehog.OSManagement.OTAOperation.Status
@@ -65,7 +67,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
       accept [:base_image_url, :device_id]
 
       change Changes.SendUpdateRequest
-      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_created}
+      change {PublishNotification, event_type: :ota_operation_created}
     end
 
     create :manual do
@@ -93,7 +95,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
       change set_attribute(:manual?, true)
       change Changes.HandleEphemeralImageUpload
       change Changes.SendUpdateRequest
-      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_created}
+      change {PublishNotification, event_type: :ota_operation_created}
     end
 
     update :mark_as_timed_out do
@@ -102,7 +104,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
       change set_attribute(:status, :failure)
       change set_attribute(:status_code, :request_timeout)
-      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_updated}
+      change {PublishNotification, event_type: :ota_operation_updated}
 
       change Changes.HandleEphemeralImageDeletion do
         where attribute_equals(:manual?, true)
@@ -115,7 +117,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
       # Needed because PublishNotification and HandleEphemeralImageDeletion are not atomic
       require_atomic? false
 
-      change {Edgehog.Changes.PublishNotification, event_type: :ota_operation_updated}
+      change {PublishNotification, event_type: :ota_operation_updated}
 
       change Changes.HandleEphemeralImageDeletion do
         where [attribute_equals(:manual?, true), attribute_in(:status, @terminal_statuses)]

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Types.Id do
+  @moduledoc false
   use Ash.Type.NewType, subtype_of: :integer
   use AshGraphql.Type
 

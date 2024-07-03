@@ -19,13 +19,13 @@
 #
 
 defmodule Edgehog.OSManagement.EphemeralImage do
+  @moduledoc false
   @behaviour Edgehog.OSManagement.EphemeralImage.Behaviour
 
   alias Edgehog.OSManagement.Uploaders.EphemeralImage
 
   @impl Edgehog.OSManagement.EphemeralImage.Behaviour
-  def upload(tenant_id, ota_operation_id, %Plug.Upload{} = upload)
-      when is_binary(ota_operation_id) do
+  def upload(tenant_id, ota_operation_id, %Plug.Upload{} = upload) when is_binary(ota_operation_id) do
     scope = %{tenant_id: tenant_id, ota_operation_id: ota_operation_id}
 
     with {:ok, file_name} <- EphemeralImage.store({upload, scope}) do

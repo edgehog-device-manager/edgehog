@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.BatteryStatus do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.BatteryStatus.Behaviour
 
   alias Astarte.Client.AppEngine
@@ -30,8 +31,7 @@ defmodule Edgehog.Astarte.Device.BatteryStatus do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_datastream_data(client, device_id, @interface, query: [limit: 1]) do
       battery_slots =
-        data
-        |> Enum.map(fn
+        Enum.map(data, fn
           {label, [battery_slot]} -> parse_battery_slot(label, battery_slot)
           # TODO: handle value as single object too, as a workaround for the issue:
           # https://github.com/astarte-platform/astarte/issues/707

@@ -19,6 +19,7 @@
 #
 
 defmodule EdgehogWeb.Multipart do
+  @moduledoc false
   @multipart Plug.Parsers.MULTIPART
 
   def init(opts) do

@@ -19,6 +19,7 @@
 #
 
 defmodule EdgehogWeb.Auth.Token do
+  @moduledoc false
   use Guardian, otp_app: :edgehog
 
   # This is used only when signing tokens, and we just want to verify them

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureDeletion do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.Assets
@@ -62,11 +63,7 @@ defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureDeletion do
 
   # Otherwise, we explicitly delete the old picture only if it had a different URL. If the URL
   # is the same, the old picture just gets overwritten by the new one
-  defp maybe_delete_old_picture(
-         {:ok, %SystemModel{picture_url: new_picture_url}} = result,
-         old_picture_url,
-         _force?
-       )
+  defp maybe_delete_old_picture({:ok, %SystemModel{picture_url: new_picture_url}} = result, old_picture_url, _force?)
        when old_picture_url != new_picture_url do
     {:ok, system_model} = result
     _ = Assets.delete_system_model_picture(system_model, old_picture_url)

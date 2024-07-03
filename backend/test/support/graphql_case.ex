@@ -19,18 +19,19 @@
 #
 
 defmodule EdgehogWeb.GraphqlCase do
+  @moduledoc false
   use ExUnit.CaseTemplate
-
-  using do
-    quote do
-      import Mox
-      import EdgehogWeb.GraphqlCase
-    end
-  end
 
   import Mox
 
   alias Ecto.Adapters.SQL
+
+  using do
+    quote do
+      import EdgehogWeb.GraphqlCase
+      import Mox
+    end
+  end
 
   setup :verify_on_exit!
 
@@ -47,8 +48,7 @@ defmodule EdgehogWeb.GraphqlCase do
     upload_path = [:__absinthe_plug__, :uploads]
 
     upload_map =
-      (get_in(context, upload_path) || %{})
-      |> Map.put(upload_name, upload)
+      Map.put(get_in(context, upload_path) || %{}, upload_name, upload)
 
     put_in(context, Enum.map(upload_path, &Access.key(&1, %{})), upload_map)
   end

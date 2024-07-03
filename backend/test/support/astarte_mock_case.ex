@@ -36,14 +36,14 @@ defmodule Edgehog.AstarteMockCase do
 
   use ExUnit.CaseTemplate
 
+  import Mox
+
   using do
     quote do
-      import Mox
       import Edgehog.AstarteMockCase
+      import Mox
     end
   end
-
-  import Mox
 
   setup :verify_on_exit!
 

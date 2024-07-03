@@ -19,9 +19,11 @@
 #
 
 defmodule Edgehog.Devices.Device.ManualRelationships.SystemModel do
+  @moduledoc false
   use Ash.Resource.ManualRelationship
 
   alias Edgehog.Devices.SystemModel
+
   require Ash.Query
 
   @impl Ash.Resource.ManualRelationship
@@ -38,8 +40,7 @@ defmodule Edgehog.Devices.Device.ManualRelationships.SystemModel do
     device_id_to_system_models =
       related_system_models
       |> Enum.flat_map(fn system_model ->
-        system_model.part_numbers
-        |> Enum.flat_map(fn part_number ->
+        Enum.flat_map(system_model.part_numbers, fn part_number ->
           Enum.map(part_number.devices, &{&1.id, system_model})
         end)
       end)

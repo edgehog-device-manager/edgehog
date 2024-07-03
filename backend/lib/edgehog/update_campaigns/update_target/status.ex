@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateTarget.Status do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       idle: "The update campaign is waiting for the OTA Request to be sent.",

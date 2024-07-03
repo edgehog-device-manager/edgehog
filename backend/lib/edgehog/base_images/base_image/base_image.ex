@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.BaseImages.BaseImage do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.BaseImages,
     extensions: [
@@ -27,6 +28,8 @@ defmodule Edgehog.BaseImages.BaseImage do
 
   alias Edgehog.BaseImages.BaseImage.Changes
   alias Edgehog.Localization
+  alias Edgehog.Localization.Calculations.LocalizedAttributes
+  alias Edgehog.Localization.Changes.UpsertLocalizedAttribute
   alias Edgehog.Validations
 
   resource do
@@ -71,12 +74,10 @@ defmodule Edgehog.BaseImages.BaseImage do
       change Changes.HandleFileUpload
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names,
-              target_attribute: :release_display_name}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
     end
 
     create :create_fixture do
@@ -97,12 +98,10 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names,
-              target_attribute: :release_display_name}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
     end
 
     update :update do
@@ -123,12 +122,10 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       accept [:starting_version_requirement]
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names,
-              target_attribute: :release_display_name}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
     end
 
     destroy :destroy do
@@ -194,7 +191,7 @@ defmodule Edgehog.BaseImages.BaseImage do
     calculate :localized_descriptions, {:array, Localization.LocalizedAttribute} do
       public? true
       description "A list of descriptions in different languages."
-      calculation {Localization.Calculations.LocalizedAttributes, attribute: :description}
+      calculation {LocalizedAttributes, attribute: :description}
       argument :preferred_language_tags, {:array, :string}
     end
 
@@ -202,8 +199,7 @@ defmodule Edgehog.BaseImages.BaseImage do
       public? true
       description "A list of release display names in different languages."
 
-      calculation {Localization.Calculations.LocalizedAttributes,
-                   attribute: :release_display_name}
+      calculation {LocalizedAttributes, attribute: :release_display_name}
 
       argument :preferred_language_tags, {:array, :string}
     end

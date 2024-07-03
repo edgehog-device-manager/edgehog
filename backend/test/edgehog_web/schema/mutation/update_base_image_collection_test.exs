@@ -26,7 +26,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
   describe "updateBaseImageCollection field" do
     setup %{tenant: tenant} do
       base_image_collection =
-        base_image_collection_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> base_image_collection_fixture()
         |> Ash.load!(:system_model)
 
       id = AshGraphql.Resource.encode_relay_id(base_image_collection)
@@ -36,12 +37,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
 
     test "updates base image collection with valid data", %{tenant: tenant, id: id} do
       base_image_collection =
-        update_base_image_collection_mutation(
-          tenant: tenant,
-          id: id,
-          name: "Updated Name",
-          handle: "updatedhandle"
-        )
+        [tenant: tenant, id: id, name: "Updated Name", handle: "updatedhandle"]
+        |> update_base_image_collection_mutation()
         |> extract_result!()
 
       assert %{
@@ -59,11 +56,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
       %{handle: old_handle} = base_image_collection
 
       base_image_collection =
-        update_base_image_collection_mutation(
-          tenant: tenant,
-          id: id,
-          name: "Updated Name"
-        )
+        [tenant: tenant, id: id, name: "Updated Name"]
+        |> update_base_image_collection_mutation()
         |> extract_result!()
 
       assert %{
@@ -177,7 +171,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
         "name" => opts[:name]
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     variables = %{"id" => id, "input" => input}
 

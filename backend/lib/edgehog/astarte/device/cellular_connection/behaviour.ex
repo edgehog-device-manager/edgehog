@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.CellularConnection.Behaviour do
+  @moduledoc false
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.CellularConnection.ModemProperties
   alias Edgehog.Astarte.Device.CellularConnection.ModemStatus

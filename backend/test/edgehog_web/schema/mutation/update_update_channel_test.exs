@@ -37,13 +37,14 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
       update_channel_data =
-        update_update_channel_mutation(
+        [
           id: id,
           name: "Updated name",
           handle: "updated-handle",
           target_group_ids: [target_group_id],
           tenant: tenant
-        )
+        ]
+        |> update_update_channel_mutation()
         |> extract_result!()
 
       assert update_channel_data["id"] == id
@@ -57,7 +58,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
 
     test "fails with empty name", %{tenant: tenant, id: id} do
       error =
-        update_update_channel_mutation(id: id, name: "", tenant: tenant)
+        [id: id, name: "", tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
@@ -72,7 +74,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       _ = update_channel_fixture(tenant: tenant, name: "existing-name")
 
       error =
-        update_update_channel_mutation(id: id, name: "existing-name", tenant: tenant)
+        [id: id, name: "existing-name", tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
@@ -85,7 +88,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
 
     test "fails with empty handle", %{tenant: tenant, id: id} do
       error =
-        update_update_channel_mutation(id: id, handle: "", tenant: tenant)
+        [id: id, handle: "", tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
@@ -98,11 +102,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
 
     test "fails with invalid handle", %{tenant: tenant, id: id} do
       error =
-        update_update_channel_mutation(
-          id: id,
-          handle: "1nvalid Handle",
-          tenant: tenant
-        )
+        [id: id, handle: "1nvalid Handle", tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
@@ -117,7 +118,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       _ = update_channel_fixture(tenant: tenant, handle: "existing-handle")
 
       error =
-        update_update_channel_mutation(id: id, handle: "existing-handle", tenant: tenant)
+        [id: id, handle: "existing-handle", tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
@@ -130,7 +132,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
 
     test "fails with empty target_group_ids", %{tenant: tenant, id: id} do
       error =
-        update_update_channel_mutation(id: id, target_group_ids: [], tenant: tenant)
+        [id: id, target_group_ids: [], tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
@@ -145,19 +148,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       target_group_id = non_existing_device_group_id(tenant)
 
       error =
-        update_update_channel_mutation(
-          id: id,
-          target_group_ids: [target_group_id],
-          tenant: tenant
-        )
+        [id: id, target_group_ids: [target_group_id], tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
                path: ["updateUpdateChannel"],
                fields: [:target_group_ids],
                code: "invalid_argument",
-               message:
-                 "some target groups were not found or are already associated with an update channel"
+               message: "some target groups were not found or are already associated with an update channel"
              } = error
     end
 
@@ -168,19 +167,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
       error =
-        update_update_channel_mutation(
-          id: id,
-          target_group_ids: [target_group_id],
-          tenant: tenant
-        )
+        [id: id, target_group_ids: [target_group_id], tenant: tenant]
+        |> update_update_channel_mutation()
         |> extract_error!()
 
       assert %{
                path: ["updateUpdateChannel"],
                fields: [:target_group_ids],
                code: "invalid_argument",
-               message:
-                 "some target groups were not found or are already associated with an update channel"
+               message: "some target groups were not found or are already associated with an update channel"
              } = error
     end
   end
@@ -213,7 +208,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
         "targetGroupIds" => opts[:target_group_ids]
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     variables = %{"id" => id, "input" => input}
 

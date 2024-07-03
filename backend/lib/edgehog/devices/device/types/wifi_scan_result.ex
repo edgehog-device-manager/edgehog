@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Types.WiFiScanResult do
+  @moduledoc false
   use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
     value_id: :wifi_scan_result,
     value_struct: Edgehog.Astarte.Device.WiFiScanResult

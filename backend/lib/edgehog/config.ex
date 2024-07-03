@@ -23,10 +23,12 @@ defmodule Edgehog.Config do
   This module handles the configuration of Edgehog
   """
   use Skogsra
+
   alias Edgehog.Config.GeocodingProviders
   alias Edgehog.Config.GeolocationProviders
   alias Edgehog.Config.JWTPublicKeyPEMType
   alias Edgehog.Geolocation
+  alias Edgehog.Geolocation.Providers.GoogleGeocoding
 
   @envdoc """
   Disables admin authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
@@ -84,7 +86,7 @@ defmodule Edgehog.Config do
   app_env :preferred_geocoding_providers, :edgehog, :preferred_geocoding_providers,
     os_env: "PREFERRED_GEOCODING_PROVIDERS",
     type: GeocodingProviders,
-    default: [Geolocation.Providers.GoogleGeocoding]
+    default: [GoogleGeocoding]
 
   @doc """
   Returns true if admin authentication is disabled.
@@ -108,7 +110,7 @@ defmodule Edgehog.Config do
       Edgehog.Geolocation.Providers.GoogleGeolocation => is_nil(google_geolocation_api_key!())
     }
 
-    preferred_geolocation_providers!() |> Enum.reject(&disabled_providers[&1])
+    Enum.reject(preferred_geolocation_providers!(), &disabled_providers[&1])
   end
 
   @doc """
@@ -117,10 +119,10 @@ defmodule Edgehog.Config do
   @spec geocoding_providers!() :: list(atom())
   def geocoding_providers! do
     disabled_providers = %{
-      Geolocation.Providers.GoogleGeocoding => is_nil(google_geocoding_api_key!())
+      GoogleGeocoding => is_nil(google_geocoding_api_key!())
     }
 
-    preferred_geocoding_providers!() |> Enum.reject(&disabled_providers[&1])
+    Enum.reject(preferred_geocoding_providers!(), &disabled_providers[&1])
   end
 
   @doc """

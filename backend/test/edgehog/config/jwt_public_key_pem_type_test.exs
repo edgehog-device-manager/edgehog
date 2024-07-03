@@ -26,7 +26,8 @@ defmodule Edgehog.Config.JWTPublicKeyPEMTypeTest do
 
   @public_key_path "admin_public_key.pem"
 
-  @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
+  @valid_pem_public_key :secp256r1
+                        |> X509.PrivateKey.new_ec()
                         |> X509.PublicKey.derive()
                         |> X509.PublicKey.to_pem()
 

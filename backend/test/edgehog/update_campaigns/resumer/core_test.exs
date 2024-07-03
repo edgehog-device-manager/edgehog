@@ -34,13 +34,13 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
     end
 
     test "returns an empty stream if no UpdateCampaigns are present" do
-      assert [] = Core.stream_resumable_update_campaigns() |> Enum.to_list()
+      assert [] = Enum.to_list(Core.stream_resumable_update_campaigns())
     end
 
     test "returns an empty stream if terminated UpdateCampaigns are present", %{tenant: tenant} do
       _update_campaign = update_campaign_fixture(tenant: tenant)
 
-      assert [] = Core.stream_resumable_update_campaigns() |> Enum.to_list()
+      assert [] = Enum.to_list(Core.stream_resumable_update_campaigns())
     end
 
     test "returns update campaign in stream if :idle UpdateCampaigns are present", %{
@@ -49,7 +49,7 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
       %UpdateCampaign{id: update_campaign_id, tenant_id: tenant_id} =
         update_campaign_with_targets_fixture(20, tenant: tenant)
 
-      assert [update_campaign] = Core.stream_resumable_update_campaigns() |> Enum.to_list()
+      assert [update_campaign] = Enum.to_list(Core.stream_resumable_update_campaigns())
 
       assert update_campaign.tenant_id == tenant.tenant_id
       assert update_campaign.tenant_id == tenant_id
@@ -61,10 +61,11 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
       tenant: tenant
     } do
       %UpdateCampaign{id: update_campaign_id, tenant_id: tenant_id} =
-        update_campaign_with_targets_fixture(20, tenant: tenant)
+        20
+        |> update_campaign_with_targets_fixture(tenant: tenant)
         |> PushRollout.Core.mark_update_campaign_as_in_progress!()
 
-      assert [update_campaign] = Core.stream_resumable_update_campaigns() |> Enum.to_list()
+      assert [update_campaign] = Enum.to_list(Core.stream_resumable_update_campaigns())
 
       assert update_campaign.tenant_id == tenant.tenant_id
       assert update_campaign.tenant_id == tenant_id
@@ -81,7 +82,7 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
       %UpdateCampaign{id: other_update_campaign_id, tenant_id: other_tenant_id} =
         update_campaign_with_targets_fixture(20, tenant: other_tenant)
 
-      assert update_campaigns = Core.stream_resumable_update_campaigns() |> Enum.to_list()
+      assert update_campaigns = Enum.to_list(Core.stream_resumable_update_campaigns())
       assert length(update_campaigns) == 2
 
       minimized_campaigns =

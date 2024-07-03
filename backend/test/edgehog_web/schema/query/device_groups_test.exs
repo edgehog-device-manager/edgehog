@@ -28,7 +28,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
 
   describe "deviceGroups query" do
     test "returns empty device groups", %{tenant: tenant} do
-      assert [] == device_groups_query(tenant: tenant) |> extract_result!()
+      assert [] == [tenant: tenant] |> device_groups_query() |> extract_result!()
     end
 
     test "returns device groups if present", %{tenant: tenant} do
@@ -37,7 +37,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
       [result] =
-        device_groups_query(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> device_groups_query()
         |> extract_result!()
 
       assert result["id"] == id
@@ -51,19 +52,23 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
       bar_group = device_group_fixture(tenant: tenant, name: "bar", selector: ~s<"bar" in tags>)
 
       foo_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo"])
 
       bar_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["bar"])
 
       foo_bar_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo", "bar"])
 
       baz_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["baz"])
 
       document = """
@@ -78,7 +83,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
       """
 
       result =
-        device_groups_query(tenant: tenant, document: document)
+        [tenant: tenant, document: document]
+        |> device_groups_query()
         |> extract_result!()
 
       assert length(result) == 2

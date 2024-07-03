@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Auth.VerifyHeader do
   """
   alias Guardian.Plug.VerifyHeader, as: GuardianVerifyHeader
   alias JOSE.JWK
+
   require Logger
 
   def init(opts) do
@@ -34,7 +35,7 @@ defmodule EdgehogWeb.Auth.VerifyHeader do
   def call(conn, opts) do
     public_key = get_public_key(conn)
 
-    opts = Keyword.merge(opts, secret: public_key)
+    opts = Keyword.put(opts, :secret, public_key)
 
     GuardianVerifyHeader.call(conn, opts)
   end

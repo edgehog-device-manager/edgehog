@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.OSManagement.OTAOperation.StatusCode do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       request_timeout: "The OTA Operation timed out while sending the request to the device",

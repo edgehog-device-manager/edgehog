@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.BatteryStatus.BatterySlot do
+  @moduledoc false
   defstruct [
     :slot,
     :level_percentage,

@@ -36,7 +36,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
 
       id = AshGraphql.Resource.encode_relay_id(update_channel)
 
-      update_channel_data = update_channel_query(tenant: tenant, id: id) |> extract_result!()
+      update_channel_data =
+        [tenant: tenant, id: id] |> update_channel_query() |> extract_result!()
 
       assert update_channel_data["handle"] == update_channel.handle
       assert update_channel_data["name"] == update_channel.name

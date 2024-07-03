@@ -30,13 +30,13 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
     end
 
     test "returns empty update channels", %{tenant: tenant} do
-      assert [] == update_channels_query(tenant: tenant) |> extract_result!()
+      assert [] == [tenant: tenant] |> update_channels_query() |> extract_result!()
     end
 
     test "returns update channels if present", %{tenant: tenant, target_group: target_group} do
       update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
 
-      [update_channel_data] = update_channels_query(tenant: tenant) |> extract_result!()
+      [update_channel_data] = [tenant: tenant] |> update_channels_query() |> extract_result!()
 
       assert update_channel_data["id"] == AshGraphql.Resource.encode_relay_id(update_channel)
       assert update_channel_data["handle"] == update_channel.handle

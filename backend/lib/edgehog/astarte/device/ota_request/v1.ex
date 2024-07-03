@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.OTARequest.V1 do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.OTARequest.V1.Behaviour
 
   alias Astarte.Client.AppEngine

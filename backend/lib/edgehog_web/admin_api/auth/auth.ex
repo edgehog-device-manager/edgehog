@@ -19,6 +19,7 @@
 #
 
 defmodule EdgehogWeb.AdminAPI.Auth do
+  @moduledoc false
   alias Edgehog.Config
   alias EdgehogWeb.AdminAPI.Auth.Pipeline
 

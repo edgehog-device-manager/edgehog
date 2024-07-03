@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Cluster do
+  @moduledoc false
   use Ash.Resource,
     domain: Edgehog.Astarte,
     data_layer: AshPostgres.DataLayer

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateTarget do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.UpdateCampaigns,
     extensions: [

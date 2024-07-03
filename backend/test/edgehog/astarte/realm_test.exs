@@ -24,11 +24,13 @@ defmodule Edgehog.Astarte.RealmTest do
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 
+  alias Ash.Error.Invalid
+  alias Ash.Error.Query.NotFound
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
 
   describe "create/2" do
-    @valid_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()
+    @valid_private_key :secp256r1 |> X509.PrivateKey.new_ec() |> X509.PrivateKey.to_pem()
 
     test "with valid data creates a realm" do
       cluster = cluster_fixture()
@@ -42,12 +44,12 @@ defmodule Edgehog.Astarte.RealmTest do
     end
 
     test "with invalid name returns error" do
-      assert {:error, %Ash.Error.Invalid{errors: [error]}} = create_realm(name: "42INVALID")
+      assert {:error, %Invalid{errors: [error]}} = create_realm(name: "42INVALID")
       assert %{field: :name} = error
     end
 
     test "with invalid private key returns error" do
-      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+      assert {:error, %Invalid{errors: [error]}} =
                create_realm(private_key: "not a private key")
 
       assert %{field: :private_key} = error
@@ -58,7 +60,7 @@ defmodule Edgehog.Astarte.RealmTest do
       cluster = cluster_fixture()
       realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
-      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+      assert {:error, %Invalid{errors: [error]}} =
                create_realm(name: realm.name, tenant: tenant)
 
       assert %{field: :name, message: "has already been taken"} = error
@@ -69,7 +71,7 @@ defmodule Edgehog.Astarte.RealmTest do
       cluster = cluster_fixture()
       realm = realm_fixture(tenant: other_tenant, cluster_id: cluster.id)
 
-      assert {:error, %Ash.Error.Invalid{errors: [error]}} =
+      assert {:error, %Invalid{errors: [error]}} =
                create_realm(cluster_id: cluster.id, name: realm.name)
 
       assert %{field: :name, message: "has already been taken"} = error
@@ -96,7 +98,7 @@ defmodule Edgehog.Astarte.RealmTest do
     test "returns error for non-existing realm" do
       tenant = tenant_fixture()
 
-      assert {:error, %Ash.Error.Query.NotFound{}} =
+      assert {:error, %NotFound{}} =
                Astarte.fetch_realm_by_name("nonexisting", tenant: tenant)
     end
   end
@@ -106,7 +108,7 @@ defmodule Edgehog.Astarte.RealmTest do
     realm = realm_fixture(tenant: tenant)
     assert :ok = Astarte.destroy_realm(realm)
 
-    assert {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{}]}} =
+    assert {:error, %Invalid{errors: [%NotFound{}]}} =
              Astarte.get(Realm, realm.id, tenant: tenant)
   end
 
@@ -114,7 +116,7 @@ defmodule Edgehog.Astarte.RealmTest do
     {tenant, opts} = Keyword.pop_lazy(opts, :tenant, &Edgehog.TenantsFixtures.tenant_fixture/0)
 
     {cluster_id, opts} =
-      Keyword.pop_lazy(opts, :cluster_id, fn -> cluster_fixture() |> Map.fetch!(:id) end)
+      Keyword.pop_lazy(opts, :cluster_id, fn -> Map.fetch!(cluster_fixture(), :id) end)
 
     opts
     |> Enum.into(%{

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.Resumer.Core do
+  @moduledoc false
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
   require Ash.Query

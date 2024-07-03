@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.RuntimeInfo.Behaviour do
+  @moduledoc false
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.RuntimeInfo
 

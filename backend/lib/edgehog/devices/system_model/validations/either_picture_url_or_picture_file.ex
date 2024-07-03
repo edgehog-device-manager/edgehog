@@ -19,14 +19,17 @@
 #
 
 defmodule Edgehog.Devices.SystemModel.Validations.EitherPictureUrlOrPictureFile do
+  @moduledoc false
   use Ash.Resource.Validation
 
-  @impl Ash.Resource.Validation
+  alias Ash.Resource.Validation
+
+  @impl Validation
   def init(opts) do
     {:ok, opts}
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, _opts, _context) do
     with {:ok, url} when is_binary(url) <-
            Ash.Changeset.fetch_argument_or_change(changeset, :picture_url),

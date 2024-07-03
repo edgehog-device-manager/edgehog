@@ -64,18 +64,13 @@ defmodule Edgehog.DevicesFixtures do
 
     {realm_id, opts} =
       Keyword.pop_lazy(opts, :realm_id, fn ->
-        AstarteFixtures.realm_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> AstarteFixtures.realm_fixture() |> Map.fetch!(:id)
       end)
 
     default_device_id = AstarteFixtures.random_device_id()
 
     params =
-      opts
-      |> Enum.into(%{
-        device_id: default_device_id,
-        name: default_device_id,
-        realm_id: realm_id
-      })
+      Enum.into(opts, %{device_id: default_device_id, name: default_device_id, realm_id: realm_id})
 
     Edgehog.Devices.Device
     |> Ash.Changeset.for_create(:create, params, tenant: tenant)
@@ -108,8 +103,7 @@ defmodule Edgehog.DevicesFixtures do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
     params =
-      opts
-      |> Enum.into(%{
+      Enum.into(opts, %{
         handle: unique_hardware_type_handle(),
         name: unique_hardware_type_name(),
         part_numbers: [unique_hardware_type_part_number()]
@@ -128,7 +122,8 @@ defmodule Edgehog.DevicesFixtures do
 
     {hardware_type_id, opts} =
       Keyword.pop_lazy(opts, :hardware_type_id, fn ->
-        hardware_type_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> hardware_type_fixture()
         |> Map.fetch!(:id)
       end)
 

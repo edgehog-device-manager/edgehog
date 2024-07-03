@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Types.StorageUnit do
+  @moduledoc false
   use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
     value_id: :storage_unit,
     value_struct: Edgehog.Astarte.Device.StorageUsage.StorageUnit

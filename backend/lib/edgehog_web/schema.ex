@@ -19,10 +19,8 @@
 #
 
 defmodule EdgehogWeb.Schema do
+  @moduledoc false
   use Absinthe.Schema
-  import_types EdgehogWeb.Schema.AstarteTypes
-  import_types Absinthe.Plug.Types
-  import_types Absinthe.Type.Custom
 
   use AshGraphql,
     domains: [
@@ -36,6 +34,10 @@ defmodule EdgehogWeb.Schema do
       Edgehog.UpdateCampaigns
     ],
     relay_ids?: true
+
+  import_types EdgehogWeb.Schema.AstarteTypes
+  import_types Absinthe.Plug.Types
+  import_types Absinthe.Type.Custom
 
   query do
   end

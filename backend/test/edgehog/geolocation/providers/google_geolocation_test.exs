@@ -24,6 +24,8 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
   import Tesla.Mock
+
+  alias Edgehog.Astarte.Device.WiFiScanResultMock
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeolocation
 
@@ -37,9 +39,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
     end
 
     test "geolocate/1 returns error without input AP list", %{device: device} do
-      Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, []} end)
-
+      expect(WiFiScanResultMock, :get, fn _appengine_client, _device_id -> {:ok, []} end)
       assert GoogleGeolocation.geolocate(device) == {:error, :wifi_scan_results_not_found}
     end
 
@@ -56,8 +56,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
         }
       ]
 
-      Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
+      expect(WiFiScanResultMock, :get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
 
       response = %{
         "location" => %{
@@ -102,8 +101,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
         }
       ]
 
-      Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
+      expect(WiFiScanResultMock, :get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
 
       response = %{
         "garbage" => "error"

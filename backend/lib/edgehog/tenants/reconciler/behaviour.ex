@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler.Behaviour do
+  @moduledoc false
   alias Edgehog.Tenants.Tenant
 
   @callback reconcile_tenant(tenant :: Tenant.record()) :: :ok

@@ -36,15 +36,6 @@ if config_env() == :prod do
   database_hostname = System.fetch_env!("DATABASE_HOSTNAME")
   database_name = System.fetch_env!("DATABASE_NAME")
 
-  config :edgehog, Edgehog.Repo,
-    # ssl: true,
-    # socket_options: [:inet6],
-    username: database_username,
-    password: database_password,
-    hostname: database_hostname,
-    database: database_name,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
-
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want
@@ -70,23 +61,6 @@ if config_env() == :prod do
   url_port = System.get_env("URL_PORT", "443")
   url_scheme = System.get_env("URL_SCHEME", "https")
 
-  config :edgehog, EdgehogWeb.Endpoint,
-    http: [
-      # Enable IPv6 and bind on all interfaces.
-      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-      # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
-      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0},
-      port: String.to_integer(System.get_env("PORT") || "4000"),
-      protocol_options: [idle_timeout: 300_000]
-    ],
-    url: [
-      host: url_host,
-      scheme: url_scheme,
-      port: url_port
-    ],
-    secret_key_base: secret_key_base
-
   # TODO: while you can use access key + secret key with S3-compatible storages,
   # Waffle's default S3 adapter doesn't work well with Google Cloud Storage.
   # To use GCP, you need to supply the JSON credentials of an authorized Service
@@ -105,13 +79,9 @@ if config_env() == :prod do
 
   # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
   max_upload_size_bytes =
-    System.get_env("MAX_UPLOAD_SIZE_BYTES", to_string(4_000_000_000))
+    "MAX_UPLOAD_SIZE_BYTES"
+    |> System.get_env(to_string(4_000_000_000))
     |> String.to_integer()
-
-  # Enable uploaders only when the S3 storage has been configured
-  config :edgehog,
-    enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end),
-    max_upload_size_bytes: max_upload_size_bytes
 
   use_google_cloud_storage =
     case s3.host do
@@ -126,30 +96,61 @@ if config_env() == :prod do
       Waffle.Storage.S3
     end
 
-  config :waffle,
-    storage: s3_storage_module,
-    bucket: s3.bucket,
-    asset_host: s3.asset_host,
-    virtual_host: true
+  forwarder_secure_sessions? =
+    System.get_env("EDGEHOG_FORWARDER_SECURE_SESSIONS", "true") == "true"
 
-  config :ex_aws,
-    region: s3.region,
-    access_key_id: s3.access_key_id,
-    secret_access_key: s3.secret_access_key
+  forwarder_hostname = System.get_env("EDGEHOG_FORWARDER_HOSTNAME")
+
+  config :edgehog, Edgehog.Repo,
+    # ssl: true,
+    # socket_options: [:inet6],
+    username: database_username,
+    password: database_password,
+    hostname: database_hostname,
+    database: database_name,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+
+  config :edgehog, EdgehogWeb.Endpoint,
+    http: [
+      # Enable IPv6 and bind on all interfaces.
+      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
+      # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
+      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
+      ip: {0, 0, 0, 0, 0, 0, 0, 0},
+      port: String.to_integer(System.get_env("PORT") || "4000"),
+      protocol_options: [idle_timeout: 300_000]
+    ],
+    url: [
+      host: url_host,
+      scheme: url_scheme,
+      port: url_port
+    ],
+    secret_key_base: secret_key_base
+
+  # Enable uploaders only when the S3 storage has been configured
+  config :edgehog,
+    enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end),
+    max_upload_size_bytes: max_upload_size_bytes
 
   config :ex_aws, :s3,
     scheme: s3.scheme,
     host: s3.host,
     port: s3.port
 
+  config :ex_aws,
+    region: s3.region,
+    access_key_id: s3.access_key_id,
+    secret_access_key: s3.secret_access_key
+
   config :goth,
     disabled: !use_google_cloud_storage,
     json: s3.gcp_credentials
 
-  forwarder_secure_sessions? =
-    System.get_env("EDGEHOG_FORWARDER_SECURE_SESSIONS", "true") == "true"
-
-  forwarder_hostname = System.get_env("EDGEHOG_FORWARDER_HOSTNAME")
+  config :waffle,
+    storage: s3_storage_module,
+    bucket: s3.bucket,
+    asset_host: s3.asset_host,
+    virtual_host: true
 
   if forwarder_hostname != nil &&
        (String.starts_with?(forwarder_hostname, "http://") ||

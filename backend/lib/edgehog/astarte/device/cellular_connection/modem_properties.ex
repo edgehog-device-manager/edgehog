@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.CellularConnection.ModemProperties do
+  @moduledoc false
   @type t :: %__MODULE__{
           slot: String.t(),
           apn: String.t() | nil,

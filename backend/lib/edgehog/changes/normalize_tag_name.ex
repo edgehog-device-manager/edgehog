@@ -19,9 +19,12 @@
 #
 
 defmodule Edgehog.Changes.NormalizeTagName do
+  @moduledoc false
   use Ash.Resource.Change
 
-  @impl Ash.Resource.Change
+  alias Ash.Resource.Change
+
+  @impl Change
   def init(opts) do
     attribute = opts[:attribute]
     argument = opts[:argument]
@@ -36,12 +39,11 @@ defmodule Edgehog.Changes.NormalizeTagName do
     if ok? do
       {:ok, opts}
     else
-      {:error,
-       "You must provide either `attribute: :attribute_name` or `argument: :argument_name`."}
+      {:error, "You must provide either `attribute: :attribute_name` or `argument: :argument_name`."}
     end
   end
 
-  @impl Ash.Resource.Change
+  @impl Change
   def change(changeset, opts, _ctx) do
     case fetch_tag(changeset, opts) do
       {:ok, name} when is_binary(name) ->

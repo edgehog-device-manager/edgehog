@@ -21,9 +21,9 @@
 defmodule EdgehogWeb.AstarteTriggerController do
   use EdgehogWeb, :controller
 
-  action_fallback EdgehogWeb.FallbackController
-
   alias Edgehog.Triggers
+
+  action_fallback EdgehogWeb.FallbackController
 
   def process_event(conn, _params) do
     tenant = Ash.PlugHelpers.get_tenant(conn)

@@ -27,13 +27,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeviceGroupTest do
   describe "createDeviceGroup mutation" do
     test "creates device group with valid data", %{tenant: tenant} do
       device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo"])
 
       device_id = AshGraphql.Resource.encode_relay_id(device)
 
       _other_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["bar"])
 
       name = "Foos"
@@ -41,12 +43,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeviceGroupTest do
       selector = ~s<"foo" in tags>
 
       device_group =
-        create_device_group_mutation(
-          tenant: tenant,
-          name: name,
-          handle: handle,
-          selector: selector
-        )
+        [tenant: tenant, name: name, handle: handle, selector: selector]
+        |> create_device_group_mutation()
         |> extract_result!()
 
       assert %{
@@ -58,13 +56,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeviceGroupTest do
 
     test "fails with invalid handle", %{tenant: tenant} do
       assert %{fields: [:handle], message: "should only contain" <> _} =
-               create_device_group_mutation(tenant: tenant, handle: "123Invalid$")
+               [tenant: tenant, handle: "123Invalid$"]
+               |> create_device_group_mutation()
                |> extract_error!()
     end
 
     test "fails with invalid selector", %{tenant: tenant} do
       assert %{fields: [:selector], message: "failed to be parsed" <> _} =
-               create_device_group_mutation(tenant: tenant, selector: "not a selector")
+               [tenant: tenant, selector: "not a selector"]
+               |> create_device_group_mutation()
                |> extract_error!()
     end
   end

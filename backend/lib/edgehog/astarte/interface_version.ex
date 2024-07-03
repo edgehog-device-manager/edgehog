@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.InterfaceVersion do
+  @moduledoc false
   @enforce_keys [:major, :minor]
   defstruct @enforce_keys
 end

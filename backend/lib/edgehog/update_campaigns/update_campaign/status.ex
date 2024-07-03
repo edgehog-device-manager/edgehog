@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Status do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       idle: "The update campaign has been created but is not being rolled-out yet.",

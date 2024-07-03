@@ -27,6 +27,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
   alias Astarte.Client.APIError
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Interface
+  alias Edgehog.Astarte.Interface.MockDataLayer
 
   describe "fetch_by_name_and_major/3" do
     setup do
@@ -48,8 +49,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         major: major
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:get, fn ^client, ^interface_name, ^major ->
+      expect(MockDataLayer, :get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => interface_map_fixture(name: interface_name, major: major)}}
       end)
 
@@ -63,8 +63,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         major: major
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:get, fn ^client, ^interface_name, ^major ->
+      expect(MockDataLayer, :get, fn ^client, ^interface_name, ^major ->
         {:error, api_error(status: 404)}
       end)
 
@@ -79,8 +78,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         major: major
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:get, fn ^client, ^interface_name, ^major ->
+      expect(MockDataLayer, :get, fn ^client, ^interface_name, ^major ->
         {:error, api_error(status: 500, message: "Internal Server Error")}
       end)
 
@@ -110,11 +108,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:create, fn ^client, ^interface_map ->
-        :ok
-      end)
-
+      expect(MockDataLayer, :create, fn ^client, ^interface_map -> :ok end)
       assert :ok = Interface.create(client, interface_map)
     end
 
@@ -124,8 +118,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:create, fn ^client, ^interface_map ->
+      expect(MockDataLayer, :create, fn ^client, ^interface_map ->
         {:error, api_error(status: 422, message: "Invalid Entity")}
       end)
 
@@ -167,8 +160,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:update, fn ^client, ^interface_name, ^major, ^interface_map ->
+      expect(MockDataLayer, :update, fn ^client, ^interface_name, ^major, ^interface_map ->
         :ok
       end)
 
@@ -183,8 +175,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:update, fn ^client, ^interface_name, ^major, ^interface_map ->
+      expect(MockDataLayer, :update, fn ^client, ^interface_name, ^major, ^interface_map ->
         {:error, api_error(status: 403, message: "Forbidden")}
       end)
 

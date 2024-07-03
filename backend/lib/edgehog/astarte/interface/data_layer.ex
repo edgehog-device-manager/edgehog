@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Interface.DataLayer do
+  @moduledoc false
   alias Astarte.Client.RealmManagement
 
   @callback get(

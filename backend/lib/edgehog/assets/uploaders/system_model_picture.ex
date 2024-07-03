@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Assets.Uploaders.SystemModelPicture do
+  @moduledoc false
   use Waffle.Definition
 
   @acl :public_read

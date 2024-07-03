@@ -22,7 +22,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteUpdateChannelTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.UpdateCampaignsFixtures
+
   alias Edgehog.UpdateCampaigns.UpdateChannel
+
   require Ash.Query
 
   describe "deleteUpdateChannel mutation" do
@@ -39,7 +41,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteUpdateChannelTest do
       id: id
     } do
       update_channel_data =
-        delete_update_channel_mutation(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> delete_update_channel_mutation()
         |> extract_result!()
 
       assert update_channel_data["id"] == id
@@ -54,7 +57,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteUpdateChannelTest do
     test "fails with non-existing update channel", %{tenant: tenant} do
       id = non_existing_update_channel_id(tenant)
 
-      error = delete_update_channel_mutation(tenant: tenant, id: id) |> extract_error!()
+      error = [tenant: tenant, id: id] |> delete_update_channel_mutation() |> extract_error!()
 
       assert %{
                path: ["deleteUpdateChannel"],

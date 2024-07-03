@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.AstarteConfig do
+  @moduledoc false
   use Ash.Resource,
     data_layer: :embedded
 

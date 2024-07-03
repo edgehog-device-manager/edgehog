@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.SystemModel do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [
@@ -28,6 +29,8 @@ defmodule Edgehog.Devices.SystemModel do
   alias Edgehog.Devices.SystemModel.Changes
   alias Edgehog.Devices.SystemModel.Validations
   alias Edgehog.Localization
+  alias Edgehog.Localization.Changes.UpsertLocalizedAttribute
+  alias Edgehog.Types.Upload
 
   resource do
     description """
@@ -62,7 +65,7 @@ defmodule Edgehog.Devices.SystemModel do
         constraints min_length: 1
       end
 
-      argument :picture_file, Edgehog.Types.Upload do
+      argument :picture_file, Upload do
         description "A picture representing the system model that will be uploaded to a bucket."
       end
 
@@ -83,8 +86,7 @@ defmodule Edgehog.Devices.SystemModel do
       change manage_relationship(:hardware_type_id, :hardware_type, type: :append)
       change Changes.HandlePictureUpload
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     update :update do
@@ -101,7 +103,7 @@ defmodule Edgehog.Devices.SystemModel do
         constraints min_length: 1
       end
 
-      argument :picture_file, Edgehog.Types.Upload do
+      argument :picture_file, Upload do
         description "A picture representing the system model that will be uploaded to a bucket."
       end
 
@@ -127,8 +129,7 @@ defmodule Edgehog.Devices.SystemModel do
       change Changes.HandlePictureUpload
       change Changes.HandlePictureDeletion
 
-      change {Localization.Changes.UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     destroy :destroy do

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Modem.Technology do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       gsm: "GSM.",

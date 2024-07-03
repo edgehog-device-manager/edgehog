@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.SystemStatus do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.SystemStatus.Behaviour
 
   alias Astarte.Client.AppEngine

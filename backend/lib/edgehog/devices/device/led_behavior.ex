@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.LedBehavior do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       blink: "Blink for 60 seconds.",

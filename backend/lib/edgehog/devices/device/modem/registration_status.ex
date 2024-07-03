@@ -19,13 +19,12 @@
 #
 
 defmodule Edgehog.Devices.Device.Modem.RegistrationStatus do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
-      not_registered:
-        "Not registered, modem is not currently searching a new operator to register to.",
+      not_registered: "Not registered, modem is not currently searching a new operator to register to.",
       registered: "Registered, home network.",
-      searching_operator:
-        "Not registered, but modem is currently searching a new operator to register to.",
+      searching_operator: "Not registered, but modem is currently searching a new operator to register to.",
       registration_denied: "Registration denied.",
       unknown: "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage).",
       registered_roaming: "Registered, roaming."

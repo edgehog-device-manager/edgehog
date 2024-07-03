@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.NetworkInterface do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.NetworkInterface.Behaviour
 
   alias Astarte.Client.AppEngine

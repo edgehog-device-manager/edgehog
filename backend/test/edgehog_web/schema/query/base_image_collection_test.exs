@@ -21,8 +21,8 @@
 defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.DevicesFixtures
   import Edgehog.BaseImagesFixtures
+  import Edgehog.DevicesFixtures
 
   describe "baseImageCollection field" do
     test "returns base image collection if present", %{tenant: tenant} do
@@ -37,7 +37,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
       base_image_collection =
-        base_image_collection_query(tenant: tenant, id: id) |> extract_result!()
+        [tenant: tenant, id: id] |> base_image_collection_query() |> extract_result!()
 
       assert base_image_collection["name"] == fixture.name
       assert base_image_collection["handle"] == fixture.handle

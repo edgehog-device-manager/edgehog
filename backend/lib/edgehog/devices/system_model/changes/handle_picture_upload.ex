@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureUpload do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.Assets

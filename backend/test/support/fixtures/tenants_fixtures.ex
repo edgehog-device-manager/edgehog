@@ -39,13 +39,13 @@ defmodule Edgehog.TenantsFixtures do
   """
   def tenant_fixture(opts \\ []) do
     public_key =
-      X509.PrivateKey.new_ec(:secp256r1)
+      :secp256r1
+      |> X509.PrivateKey.new_ec()
       |> X509.PublicKey.derive()
       |> X509.PublicKey.to_pem()
 
     params =
-      opts
-      |> Enum.into(%{
+      Enum.into(opts, %{
         name: unique_tenant_name(),
         slug: unique_tenant_slug(),
         public_key: public_key

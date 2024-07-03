@@ -23,6 +23,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
   import Edgehog.DevicesFixtures
 
+  alias Edgehog.Astarte.Device.OTARequestV1Mock
+  alias Edgehog.OSManagement.EphemeralImageMock
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.PubSub
 
@@ -34,11 +36,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
       base_image_url = "https://example.com/image.bin"
 
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:upload, fn _, _, _ -> {:ok, base_image_url} end)
+      expect(EphemeralImageMock, :upload, fn _, _, _ -> {:ok, base_image_url} end)
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, ^astarte_device_id, _uuid, ^base_image_url ->
+      expect(OTARequestV1Mock, :update, fn _client, ^astarte_device_id, _uuid, ^base_image_url ->
         :ok
       end)
 
@@ -70,8 +70,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
     end
 
     test "fails if the base image upload fails", %{tenant: tenant} do
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:upload, fn _, _, _ -> {:error, :no_space_left_in_the_internet} end)
+      expect(EphemeralImageMock, :upload, fn _, _, _ ->
+        {:error, :no_space_left_in_the_internet}
+      end)
 
       result = create_ota_operation_mutation(tenant: tenant)
 
@@ -81,12 +82,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
     test "cleans up the ephemeral image if an API error is returned", %{tenant: tenant} do
       base_image_url = "https://example.com/image.bin"
 
-      Edgehog.OSManagement.EphemeralImageMock
+      EphemeralImageMock
       |> expect(:upload, fn _, _, _ -> {:ok, base_image_url} end)
       |> expect(:delete, fn _, _, _ -> :ok end)
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _, _, _, _ ->
+      expect(OTARequestV1Mock, :update, fn _, _, _, _ ->
         {:error, api_error(status: 418, message: "I'm a teapot")}
       end)
 
@@ -100,15 +100,13 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
     test "publishes on PubSub aftering creating the OTA operation", %{tenant: tenant} do
       assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
 
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:upload, fn _, _, _ -> {:ok, "base_image_url"} end)
+      expect(EphemeralImageMock, :upload, fn _, _, _ -> {:ok, "base_image_url"} end)
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, _astarte_device_id, _uuid, "base_image_url" ->
+      expect(OTARequestV1Mock, :update, fn _client, _astarte_device_id, _uuid, "base_image_url" ->
         :ok
       end)
 
-      ota_operation = create_ota_operation_mutation(tenant: tenant) |> extract_result!()
+      ota_operation = [tenant: tenant] |> create_ota_operation_mutation() |> extract_result!()
 
       assert_receive {:ota_operation_created, %OTAOperation{} = ota_operation_event}
 
@@ -138,7 +136,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
     {device_id, opts} =
       Keyword.pop_lazy(opts, :device_id, fn ->
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
@@ -157,8 +156,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
     document = Keyword.get(opts, :document, default_document)
 
     context =
-      %{tenant: tenant}
-      |> add_upload("base_image_file", base_image_file)
+      add_upload(%{tenant: tenant}, "base_image_file", base_image_file)
 
     Absinthe.run!(document, EdgehogWeb.Schema,
       variables: variables,

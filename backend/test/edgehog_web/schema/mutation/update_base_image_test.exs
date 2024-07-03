@@ -195,7 +195,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
         "localizedReleaseDisplayNames" => opts[:localized_release_display_names]
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     variables = %{"id" => id, "input" => input}
 

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.WiFiScanResult do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.WiFiScanResult.Behaviour
 
   alias Astarte.Client.AppEngine
@@ -47,11 +48,10 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
 
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface,
-             query: [limit: 1000]
-           ) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface, query: [limit: 1000]) do
       wifi_scan_results =
-        Map.get(data, "ap", [])
+        data
+        |> Map.get("ap", [])
         |> Enum.map(fn ap ->
           %WiFiScanResult{
             channel: ap["channel"],

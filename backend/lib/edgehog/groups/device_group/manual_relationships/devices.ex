@@ -19,34 +19,32 @@
 #
 
 defmodule Edgehog.Groups.DeviceGroup.ManualRelationships.Devices do
+  @moduledoc false
   use Ash.Resource.ManualRelationship
 
+  alias Ash.Resource.ManualRelationship
   alias Edgehog.Selector
+
   require Ash.Query
 
-  @impl Ash.Resource.ManualRelationship
+  @impl ManualRelationship
   def select(_opts) do
     [:selector]
   end
 
-  @impl Ash.Resource.ManualRelationship
+  @impl ManualRelationship
   def load(groups, _opts, %{query: query}) do
     # We're doing N+1 queries here, but it's probably inevitable at this point
     group_id_to_devices =
-      groups
-      |> Enum.map(fn group ->
+      Map.new(groups, fn group ->
         {:ok, ast_root} = Selector.parse(group.selector)
 
         filter = Selector.to_ash_expr(ast_root)
 
-        devices =
-          query
-          |> Ash.Query.filter(^filter)
-          |> Ash.read!()
+        devices = query |> Ash.Query.filter(^filter) |> Ash.read!()
 
         {group.id, devices}
       end)
-      |> Map.new()
 
     {:ok, group_id_to_devices}
   end

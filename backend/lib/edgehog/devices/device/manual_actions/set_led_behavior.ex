@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.ManualActions.SetLedBehavior do
+  @moduledoc false
   use Ash.Resource.ManualUpdate
 
   alias Edgehog.Error.AstarteAPIError

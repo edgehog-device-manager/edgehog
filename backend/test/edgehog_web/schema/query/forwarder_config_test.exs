@@ -30,7 +30,7 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
           secure_sessions?: true
         )
 
-      forwarder_config = run_query(tenant: tenant) |> extract_result!()
+      forwarder_config = [tenant: tenant] |> run_query() |> extract_result!()
 
       assert %{
                "hostname" => "some-hostname.com",
@@ -44,7 +44,7 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
     test "returns null when the forwarder is not configured", %{tenant: tenant} do
       original_config = mock_unconfigured_forwarder()
 
-      forwarder_config = run_query(tenant: tenant) |> extract_result!()
+      forwarder_config = [tenant: tenant] |> run_query() |> extract_result!()
 
       assert is_nil(forwarder_config)
 
@@ -52,11 +52,7 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
     end
   end
 
-  defp mock_configured_forwarder(
-         hostname: hostname,
-         port: port,
-         secure_sessions?: secure_sessions?
-       ) do
+  defp mock_configured_forwarder(hostname: hostname, port: port, secure_sessions?: secure_sessions?) do
     original_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
 
     Application.put_env(:edgehog, :edgehog_forwarder, %{

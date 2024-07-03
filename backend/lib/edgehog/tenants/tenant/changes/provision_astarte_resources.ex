@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.Tenant.Changes.ProvisionAstarteResources do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.Astarte

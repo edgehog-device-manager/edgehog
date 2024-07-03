@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.IPBase do
+  @moduledoc false
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
   use Tesla

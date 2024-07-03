@@ -59,40 +59,40 @@ config :edgehog, EdgehogWeb.Endpoint,
 # The `http:` config above can be replaced with:
 #
 #     https: [
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: "9000"
+
+config :ex_aws,
+  access_key_id: "minioadmin",
+  secret_access_key: "minioadmin"
+
+config :goth,
+  disabled: true
+
+# Do not include timestamps in development logs
 #       port: 4001,
 #       cipher_suite: :strong,
 #       keyfile: "priv/cert/selfsigned_key.pem",
 #       certfile: "priv/cert/selfsigned.pem"
+config :logger, :console, format: "[$level] $message $metadata\n"
+
+# Initialize plugs at runtime for faster development compilation
 #     ],
 #
 # If desired, both `http:` and `https:` keys can be
-# configured to run both http and https servers on
-# different ports.
-
-# Do not include timestamps in development logs
-config :logger, :console, format: "[$level] $message $metadata\n"
+config :phoenix, :plug_init_mode, :runtime
 
 # Set a higher stacktrace during development. Avoid configuring such
+# configured to run both http and https servers on
 # in production as building large stacktraces may be expensive.
-config :phoenix, :stacktrace_depth, 20
+# different ports.
 
-# Initialize plugs at runtime for faster development compilation
-config :phoenix, :plug_init_mode, :runtime
+config :phoenix, :stacktrace_depth, 20
 
 config :waffle,
   storage: Waffle.Storage.S3,
   bucket: "edgehog",
   asset_host: "http://localhost:9000/edgehog",
   virtual_host: true
-
-config :ex_aws,
-  access_key_id: "minioadmin",
-  secret_access_key: "minioadmin"
-
-config :ex_aws, :s3,
-  scheme: "http://",
-  host: "localhost",
-  port: "9000"
-
-config :goth,
-  disabled: true

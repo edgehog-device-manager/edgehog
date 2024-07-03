@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.OSManagement.EphemeralImage.Behaviour do
+  @moduledoc false
   @type upload :: %Plug.Upload{}
 
   @callback upload(tenant_id :: String.t(), ota_operation_id :: String.t(), upload()) ::

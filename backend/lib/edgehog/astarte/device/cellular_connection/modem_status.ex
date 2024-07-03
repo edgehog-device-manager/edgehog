@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.CellularConnection.ModemStatus do
+  @moduledoc false
   @type t :: %__MODULE__{
           slot: String.t(),
           carrier: String.t() | nil,

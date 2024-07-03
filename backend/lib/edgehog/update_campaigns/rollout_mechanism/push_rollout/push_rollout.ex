@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout do
+  @moduledoc false
   use Ash.Resource,
     extensions: [
       AshGraphql.Resource

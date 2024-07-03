@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Types.Capability do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       base_image: "The device provides information about its base image.",

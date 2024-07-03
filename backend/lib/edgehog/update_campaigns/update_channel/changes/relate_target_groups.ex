@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Ash.Error.Changes.InvalidArgument
@@ -41,9 +42,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
       |> Ash.Query.filter(id in ^target_group_ids)
       |> Ash.Query.filter(is_nil(update_channel_id))
       |> Ash.Query.set_tenant(tenant)
-      |> Ash.bulk_update(:update_update_channel, %{update_channel_id: update_channel.id},
-        return_records?: true
-      )
+      |> Ash.bulk_update(:update_update_channel, %{update_channel_id: update_channel.id}, return_records?: true)
 
     if status == :success and length(records) == length(target_group_ids) do
       {:ok, update_channel}
@@ -51,8 +50,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
       {:error,
        InvalidArgument.exception(
          field: :target_group_ids,
-         message:
-           "some target groups were not found or are already associated with an update channel"
+         message: "some target groups were not found or are already associated with an update channel"
        )}
     end
   end

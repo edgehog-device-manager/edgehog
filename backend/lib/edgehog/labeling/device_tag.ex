@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Labeling.DeviceTag do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Labeling,
     tenant_id_in_primary_key?: true

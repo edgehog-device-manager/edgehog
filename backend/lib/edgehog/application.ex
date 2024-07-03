@@ -24,9 +24,11 @@ defmodule Edgehog.Application do
   @moduledoc false
 
   use Application
+
   alias Edgehog.Config
   alias EdgehogWeb.Endpoint
   alias EdgehogWeb.Router
+
   require Logger
 
   @version Mix.Project.config()[:version]
@@ -56,8 +58,7 @@ defmodule Edgehog.Application do
       # Start the UpdateCampaigns supervisor
       Edgehog.UpdateCampaigns.Supervisor,
       # Start the Tenant Reconciler Supervisor
-      {Edgehog.Tenants.Reconciler.Supervisor,
-       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
+      {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start the Endpoint (http/https)
       Endpoint
     ]

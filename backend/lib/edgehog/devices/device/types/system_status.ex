@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Types.SystemStatus do
+  @moduledoc false
   use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
     value_id: :system_status,
     value_struct: Edgehog.Astarte.Device.SystemStatus

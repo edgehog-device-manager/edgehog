@@ -40,7 +40,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       base_image: fixture,
       id: id
     } do
-      base_image = base_image_query(tenant: tenant, id: id) |> extract_result!()
+      base_image = [tenant: tenant, id: id] |> base_image_query() |> extract_result!()
 
       assert base_image["id"] == id
       assert base_image["version"] == fixture.version
@@ -89,11 +89,8 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       %{tenant: tenant, id: id, document: document} = ctx
 
       %{"localizedDescriptions" => localized_descriptions} =
-        base_image_query(
-          tenant: tenant,
-          id: id,
-          document: document
-        )
+        [tenant: tenant, id: id, document: document]
+        |> base_image_query()
         |> extract_result!()
 
       assert length(localized_descriptions) == 3
@@ -107,12 +104,13 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       preferred_language_tags = ["it", "fr"]
 
       %{"localizedDescriptions" => localized_descriptions} =
-        base_image_query(
+        [
           tenant: tenant,
           id: id,
           extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
           document: document
-        )
+        ]
+        |> base_image_query()
         |> extract_result!()
 
       assert length(localized_descriptions) == 2
@@ -125,12 +123,13 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       preferred_language_tags = ["en-GB", "de"]
 
       %{"localizedDescriptions" => []} =
-        base_image_query(
+        [
           tenant: tenant,
           id: id,
           extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
           document: document
-        )
+        ]
+        |> base_image_query()
         |> extract_result!()
     end
   end
@@ -169,11 +168,8 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       %{tenant: tenant, id: id, document: document} = ctx
 
       %{"localizedReleaseDisplayNames" => localized_release_display_names} =
-        base_image_query(
-          tenant: tenant,
-          id: id,
-          document: document
-        )
+        [tenant: tenant, id: id, document: document]
+        |> base_image_query()
         |> extract_result!()
 
       assert length(localized_release_display_names) == 3
@@ -190,12 +186,13 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       preferred_language_tags = ["it", "fr"]
 
       %{"localizedReleaseDisplayNames" => localized_release_display_names} =
-        base_image_query(
+        [
           tenant: tenant,
           id: id,
           extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
           document: document
-        )
+        ]
+        |> base_image_query()
         |> extract_result!()
 
       assert length(localized_release_display_names) == 2
@@ -217,12 +214,13 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       preferred_language_tags = ["en-GB", "de"]
 
       %{"localizedReleaseDisplayNames" => []} =
-        base_image_query(
+        [
           tenant: tenant,
           id: id,
           extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
           document: document
-        )
+        ]
+        |> base_image_query()
         |> extract_result!()
     end
   end
@@ -248,7 +246,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
     variables =
       opts
       |> Keyword.get(:extra_variables, %{})
-      |> Map.merge(%{"id" => id})
+      |> Map.put("id", id)
 
     document = Keyword.get(opts, :document, default_document)
 

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler.Core do
+  @moduledoc false
   alias Astarte.Client
   alias Edgehog.Astarte.Interface
   alias Edgehog.Astarte.Trigger
@@ -32,10 +33,8 @@ defmodule Edgehog.Tenants.Reconciler.Core do
   end
 
   def list_required_triggers(trigger_url) do
-    @trigger_templates
-    |> Enum.map(fn template ->
-      EEx.eval_string(template, assigns: [trigger_url: trigger_url])
-      |> Jason.decode!()
+    Enum.map(@trigger_templates, fn template ->
+      template |> EEx.eval_string(assigns: [trigger_url: trigger_url]) |> Jason.decode!()
     end)
   end
 

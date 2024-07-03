@@ -19,9 +19,12 @@
 #
 
 defmodule Edgehog.Validations.PEMPublicKey do
+  @moduledoc false
   use Ash.Resource.Validation
 
-  @impl Ash.Resource.Validation
+  alias Ash.Resource.Validation
+
+  @impl Validation
   def init(opts) do
     if is_atom(opts[:attribute]) do
       {:ok, opts}
@@ -30,7 +33,7 @@ defmodule Edgehog.Validations.PEMPublicKey do
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, opts, _context) do
     case Ash.Changeset.fetch_argument_or_change(changeset, opts[:attribute]) do
       {:ok, nil} ->

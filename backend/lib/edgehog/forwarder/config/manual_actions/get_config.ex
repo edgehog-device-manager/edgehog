@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Forwarder.Config.ManualActions.GetConfig do
+  @moduledoc false
   use Ash.Resource.ManualRead
 
   alias Edgehog.Forwarder.Config

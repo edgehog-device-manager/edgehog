@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.Geolocation.SensorPosition do
+  @moduledoc false
   @type t :: %__MODULE__{
           sensor_id: String.t(),
           latitude: float(),

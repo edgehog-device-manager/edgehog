@@ -21,6 +21,7 @@
 defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   # We use handle_event_function to allow for arbitrary terms in state, which is useful for states
   # like {:rollout_target, target}
+  @moduledoc false
   use GenStateMachine, restart: :transient, callback_mode: [:handle_event_function, :state_enter]
 
   alias __MODULE__, as: Data
@@ -149,7 +150,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     }
 
     timeout_actions =
-      Core.list_targets_with_pending_ota_operation(tenant_id, update_campaign_id)
+      tenant_id
+      |> Core.list_targets_with_pending_ota_operation(update_campaign_id)
       |> Enum.map(fn pending_target ->
         # Side effect: receive updates for the OTA Operation so we can track it
         Core.subscribe_to_ota_operation_updates!(pending_target.ota_operation_id)
@@ -264,7 +266,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:rollout_temporary_error, target, reason}, :rollout, data) do
-    Core.error_message(reason, target.device.device_id)
+    reason
+    |> Core.error_message(target.device.device_id)
     |> Logger.notice()
 
     # Since this is a temporary error, and we failed during the initial rollout, for now we do
@@ -280,7 +283,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:rollout_failure, target, reason}, :rollout, data) do
-    Core.error_message(reason, target.device.device_id)
+    reason
+    |> Core.error_message(target.device.device_id)
     |> Logger.notice()
 
     # This is a permanent failure, so we mark the target as failed
@@ -304,9 +308,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   # State: :wait_for_available_slot
 
   def handle_event(:enter, _old_state, :wait_for_available_slot, data) do
-    Logger.info(
-      "Update Campaign #{data.update_campaign_id}: entering the :wait_for_available_slot state"
-    )
+    Logger.info("Update Campaign #{data.update_campaign_id}: entering the :wait_for_available_slot state")
 
     # Just wait here, we will exit this state when we receive some updates on successful/failed
     # OTA Operations
@@ -332,9 +334,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   # State: :wait_for_campaign_completion
 
   def handle_event(:enter, _old_state, :wait_for_campaign_completion, data) do
-    Logger.info(
-      "Update Campaign #{data.update_campaign_id}: entering the :wait_for_campaign_completion state"
-    )
+    Logger.info("Update Campaign #{data.update_campaign_id}: entering the :wait_for_campaign_completion state")
 
     :keep_state_and_data
   end
@@ -345,7 +345,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     Logger.notice("Update campaign #{data.update_campaign_id} terminated with a failure")
 
     _ =
-      Core.get_update_campaign!(data.tenant_id, data.update_campaign_id)
+      data.tenant_id
+      |> Core.get_update_campaign!(data.update_campaign_id)
       |> Core.mark_update_campaign_as_failed!()
 
     if targets_in_progress?(data) do
@@ -373,7 +374,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     Logger.info("Update campaign #{data.update_campaign_id} terminated with a success")
 
     _ =
-      Core.get_update_campaign!(data.tenant_id, data.update_campaign_id)
+      data.tenant_id
+      |> Core.get_update_campaign!(data.update_campaign_id)
       |> Core.mark_update_campaign_as_successful!()
 
     terminate_executor(data.update_campaign_id)
@@ -417,7 +419,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     Logger.info("Device #{ota_operation.device.device_id} updated successfully")
 
     _ =
-      Core.get_target_for_ota_operation!(data.tenant_id, ota_operation.id)
+      data.tenant_id
+      |> Core.get_target_for_ota_operation!(ota_operation.id)
       |> Core.mark_target_as_successful!()
 
     # The OTA Operation has finished, so we free up a slot
@@ -427,12 +430,11 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:ota_operation_failure, ota_operation}, state, data) do
-    Logger.notice(
-      "Device #{ota_operation.device.device_id} failed to update: #{ota_operation.status_code}"
-    )
+    Logger.notice("Device #{ota_operation.device.device_id} failed to update: #{ota_operation.status_code}")
 
     _ =
-      Core.get_target_for_ota_operation!(data.tenant_id, ota_operation.id)
+      data.tenant_id
+      |> Core.get_target_for_ota_operation!(ota_operation.id)
       |> Core.mark_target_as_failed!()
 
     # Since the target was occupying a slot and we're marking it as failed, free up the slot
@@ -495,7 +497,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
         {:keep_state_and_data, action}
 
       {:error, reason} ->
-        Core.error_message(reason, target.device.device_id)
+        reason
+        |> Core.error_message(target.device.device_id)
         |> Logger.notice()
 
         # We don't check if the error is temporary or not, since by definition it shouldn't be
@@ -538,12 +541,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     end
   end
 
-  defp verify_compatibility_and_update(
-         target,
-         target_current_version,
-         base_image,
-         rollout_mechanism
-       ) do
+  defp verify_compatibility_and_update(target, target_current_version, base_image, rollout_mechanism) do
     with :ok <- Core.verify_compatibility(target_current_version, base_image, rollout_mechanism) do
       target = Core.update_target_latest_attempt!(target, DateTime.utc_now())
       Core.start_target_update(target, base_image)
