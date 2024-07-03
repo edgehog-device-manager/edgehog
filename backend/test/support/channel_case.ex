@@ -48,9 +48,11 @@ defmodule EdgehogWeb.ChannelCase do
     end
   end
 
+  alias Ecto.Adapters.SQL
+
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
+    on_exit(fn -> SQL.Sandbox.stop_owner(pid) end)
     :ok
   end
 end

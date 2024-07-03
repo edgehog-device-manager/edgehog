@@ -55,9 +55,12 @@ defmodule EdgehogWeb.ConnCase do
     end
   end
 
+  alias Ecto.Adapters.SQL
+  alias EdgehogWeb.Auth.Token
+
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
+    on_exit(fn -> SQL.Sandbox.stop_owner(pid) end)
 
     conn = Phoenix.ConnTest.build_conn()
 
@@ -92,7 +95,7 @@ defmodule EdgehogWeb.ConnCase do
 
     # Generate the JWT
     {:ok, jwt, _claims} =
-      EdgehogWeb.Auth.Token.encode_and_sign("dontcare", claims,
+      Token.encode_and_sign("dontcare", claims,
         secret: jwk,
         allowed_algos: ["ES256"]
       )

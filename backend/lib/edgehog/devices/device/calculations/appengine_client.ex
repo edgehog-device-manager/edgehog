@@ -21,6 +21,8 @@
 defmodule Edgehog.Devices.Device.Calculations.AppEngineClient do
   use Ash.Resource.Calculation
 
+  alias Astarte.Client.AppEngine
+
   @impl true
   def load(_query, _opts, _context) do
     [realm: [:name, :private_key, cluster: [:base_api_url]]]
@@ -40,7 +42,7 @@ defmodule Edgehog.Devices.Device.Calculations.AppEngineClient do
       } = device
 
       # TODO: scope client claims to the device
-      case Astarte.Client.AppEngine.new(base_api_url, realm_name, private_key: private_key) do
+      case AppEngine.new(base_api_url, realm_name, private_key: private_key) do
         {:ok, client} -> client
         _error -> nil
       end

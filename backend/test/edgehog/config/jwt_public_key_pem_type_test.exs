@@ -21,8 +21,8 @@
 defmodule Edgehog.Config.JWTPublicKeyPEMTypeTest do
   use ExUnit.Case, async: true
 
-  alias JOSE.JWK
   alias Edgehog.Config.JWTPublicKeyPEMType
+  alias JOSE.JWK
 
   @public_key_path "admin_public_key.pem"
 

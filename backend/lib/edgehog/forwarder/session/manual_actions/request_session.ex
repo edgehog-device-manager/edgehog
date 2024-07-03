@@ -21,7 +21,9 @@
 defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
   use Ash.Resource.Actions.Implementation
 
+  alias Ash.Error.Changes.InvalidArgument
   alias Edgehog.Devices.Device
+  alias Edgehog.Forwarder
 
   @forwarder_session_module Application.compile_env(
                               :edgehog,
@@ -69,8 +71,8 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
     end
   end
 
-  defp fetch_forwarder_config() do
-    Ash.read_one(Edgehog.Forwarder.Config, not_found_error?: true)
+  defp fetch_forwarder_config do
+    Ash.read_one(Forwarder.Config, not_found_error?: true)
   end
 
   defp validate_device_connected(%Device{online: true}) do
@@ -79,7 +81,7 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
 
   defp validate_device_connected(%Device{online: false}) do
     {:error,
-     Ash.Error.Changes.InvalidArgument.exception(
+     InvalidArgument.exception(
        field: :device_id,
        message: "device is disconnected"
      )}

@@ -22,8 +22,8 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
   alias Edgehog.Astarte.Device.WiFiScanResult
-  alias Edgehog.Devices.Device
   alias Edgehog.Config
+  alias Edgehog.Devices.Device
   alias Edgehog.Geolocation.Position
 
   use Tesla

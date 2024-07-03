@@ -21,6 +21,7 @@
 defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   use Edgehog.DataCase, async: true
 
+  alias Ecto.Adapters.SQL
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
@@ -801,7 +802,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     Enum.each(@executor_allowed_mocks, &Mox.allow(&1, self(), pid))
 
     # Also allow the pid to use SQL Sandbox
-    Ecto.Adapters.SQL.Sandbox.allow(Repo, self(), pid)
+    SQL.Sandbox.allow(Repo, self(), pid)
 
     pid
   end
