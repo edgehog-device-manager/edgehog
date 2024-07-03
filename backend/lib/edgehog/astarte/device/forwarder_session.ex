@@ -19,18 +19,18 @@
 #
 
 defmodule Edgehog.Astarte.Device.ForwarderSession do
-  @enforce_keys [:token, :status, :secure, :forwarder_hostname, :forwarder_port]
-  defstruct @enforce_keys
-
   @behaviour Edgehog.Astarte.Device.ForwarderSession.Behaviour
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Forwarder.Session
 
+  @enforce_keys [:token, :status, :secure, :forwarder_hostname, :forwarder_port]
+  defstruct @enforce_keys
+
   @session_request_interface "io.edgehog.devicemanager.ForwarderSessionRequest"
   @sessions_state_interface "io.edgehog.devicemanager.ForwarderSessionState"
 
-  @impl true
+  @impl Edgehog.Astarte.Device.ForwarderSession.Behaviour
   def list_sessions(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_properties_data(client, device_id, @sessions_state_interface) do
@@ -40,7 +40,7 @@ defmodule Edgehog.Astarte.Device.ForwarderSession do
     end
   end
 
-  @impl true
+  @impl Edgehog.Astarte.Device.ForwarderSession.Behaviour
   def request_session(
         %AppEngine{} = client,
         device_id,

@@ -21,12 +21,12 @@
 defmodule Edgehog.Astarte.TriggerTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.AstarteFixtures
+  import Edgehog.TenantsFixtures
+
   alias Astarte.Client.APIError
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Trigger
-
-  import Edgehog.AstarteFixtures
-  import Edgehog.TenantsFixtures
 
   describe "fetch_by_name/2" do
     setup do

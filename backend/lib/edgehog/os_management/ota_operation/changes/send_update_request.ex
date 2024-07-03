@@ -23,7 +23,7 @@ defmodule Edgehog.OSManagement.OTAOperation.Changes.SendUpdateRequest do
 
   alias Edgehog.OSManagement
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     Ash.Changeset.after_action(changeset, fn _changeset, ota_operation ->
       with :ok <- OSManagement.send_update_request(ota_operation) do

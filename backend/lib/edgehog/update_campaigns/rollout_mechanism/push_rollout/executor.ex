@@ -23,11 +23,11 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   # like {:rollout_target, target}
   use GenStateMachine, restart: :transient, callback_mode: [:handle_event_function, :state_enter]
 
-  require Logger
-
   alias __MODULE__, as: Data
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
   alias Edgehog.UpdateCampaigns.UpdateTarget
+
+  require Logger
 
   defstruct [
     :available_slots,

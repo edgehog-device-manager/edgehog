@@ -24,7 +24,7 @@ defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureDeletion do
   alias Edgehog.Assets
   alias Edgehog.Devices.SystemModel
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(%Ash.Changeset{valid?: false} = changeset, _opts, _context), do: changeset
 
   def change(changeset, opts, _context) do

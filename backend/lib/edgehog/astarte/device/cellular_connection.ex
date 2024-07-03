@@ -22,12 +22,13 @@ defmodule Edgehog.Astarte.Device.CellularConnection do
   @behaviour Edgehog.Astarte.Device.CellularConnection.Behaviour
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.CellularConnection.{ModemProperties, ModemStatus}
+  alias Edgehog.Astarte.Device.CellularConnection.ModemProperties
+  alias Edgehog.Astarte.Device.CellularConnection.ModemStatus
 
   @properties_interface "io.edgehog.devicemanager.CellularConnectionProperties"
   @status_interface "io.edgehog.devicemanager.CellularConnectionStatus"
 
-  @impl true
+  @impl Edgehog.Astarte.Device.CellularConnection.Behaviour
   def get_modem_properties(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_properties_data(client, device_id, @properties_interface) do
@@ -48,7 +49,7 @@ defmodule Edgehog.Astarte.Device.CellularConnection do
     }
   end
 
-  @impl true
+  @impl Edgehog.Astarte.Device.CellularConnection.Behaviour
   def get_modem_status(%AppEngine{} = client, device_id) do
     # TODO: right now we request the whole interface at once and longinteger
     # values are returned as strings by Astarte, since the interface is of

@@ -24,19 +24,17 @@ defmodule EdgehogWeb.Schema do
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
-  @domains [
-    Edgehog.BaseImages,
-    Edgehog.Devices,
-    Edgehog.Forwarder,
-    Edgehog.Groups,
-    Edgehog.Labeling,
-    Edgehog.OSManagement,
-    Edgehog.Tenants,
-    Edgehog.UpdateCampaigns
-  ]
-
   use AshGraphql,
-    domains: @domains,
+    domains: [
+      Edgehog.BaseImages,
+      Edgehog.Devices,
+      Edgehog.Forwarder,
+      Edgehog.Groups,
+      Edgehog.Labeling,
+      Edgehog.OSManagement,
+      Edgehog.Tenants,
+      Edgehog.UpdateCampaigns
+    ],
     relay_ids?: true
 
   query do

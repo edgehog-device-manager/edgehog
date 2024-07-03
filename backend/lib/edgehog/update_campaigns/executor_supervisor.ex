@@ -21,11 +21,11 @@
 defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
   use DynamicSupervisor
 
-  require Logger
-
   alias Edgehog.UpdateCampaigns.ExecutorRegistry
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateCampaign
+
+  require Logger
 
   # Public API
 

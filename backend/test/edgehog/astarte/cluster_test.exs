@@ -21,10 +21,10 @@
 defmodule Edgehog.Astarte.ClusterTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.AstarteFixtures
+
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Cluster
-
-  import Edgehog.AstarteFixtures
 
   describe "create/1" do
     @valid_attrs %{base_api_url: "http://some-base-api.url", name: "some name"}
@@ -75,11 +75,13 @@ defmodule Edgehog.Astarte.ClusterTest do
       valid_host_name = "host.com"
       invalid_schemas = ["ftp://", ""]
 
-      invalid_schemas
-      |> Enum.map(fn schema -> schema <> valid_host_name end)
-      |> Enum.map(fn url -> %{base_api_url: url, name: valid_name} end)
-      |> Enum.map(&Astarte.create_cluster/1)
-      |> Enum.each(fn result -> assert {:error, %Ash.Error.Invalid{}} = result end)
+      Enum.each(invalid_schemas, fn schema ->
+        assert {:error, %Ash.Error.Invalid{}} =
+                 Astarte.create_cluster(%{
+                   base_api_url: schema <> valid_host_name,
+                   name: valid_name
+                 })
+      end)
     end
 
     test "with invalid URL host returns error" do
@@ -87,11 +89,10 @@ defmodule Edgehog.Astarte.ClusterTest do
       valid_schema = "http://"
       invalid_hosts = ["some url", ""]
 
-      invalid_hosts
-      |> Enum.map(fn host -> valid_schema <> host end)
-      |> Enum.map(fn url -> %{base_api_url: url, name: valid_name} end)
-      |> Enum.map(&Astarte.create_cluster/1)
-      |> Enum.each(fn result -> assert {:error, %Ash.Error.Invalid{}} = result end)
+      Enum.each(invalid_hosts, fn host ->
+        assert {:error, %Ash.Error.Invalid{}} =
+                 Astarte.create_cluster(%{base_api_url: valid_schema <> host, name: valid_name})
+      end)
     end
 
     test "succeeds when upserting with the exact same data" do

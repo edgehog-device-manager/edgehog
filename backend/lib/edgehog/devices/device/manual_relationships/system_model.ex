@@ -20,11 +20,11 @@
 
 defmodule Edgehog.Devices.Device.ManualRelationships.SystemModel do
   use Ash.Resource.ManualRelationship
-  require Ash.Query
 
   alias Edgehog.Devices.SystemModel
+  require Ash.Query
 
-  @impl true
+  @impl Ash.Resource.ManualRelationship
   def load(devices, _opts, %{tenant: tenant}) do
     device_ids = Enum.map(devices, & &1.id)
 

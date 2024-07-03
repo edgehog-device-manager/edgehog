@@ -23,12 +23,12 @@ defmodule Edgehog.Devices.Device.Calculations.Capabilities do
 
   alias Edgehog.Capabilities
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def load(_query, _opts, _context) do
     [:device_status]
   end
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(devices, _opts, _context) do
     Enum.map(devices, fn
       %{device_status: %{introspection: introspection}} when is_map(introspection) ->

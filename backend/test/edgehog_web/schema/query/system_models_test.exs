@@ -23,10 +23,8 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices.{
-    SystemModel,
-    SystemModelPartNumber
-  }
+  alias Edgehog.Devices.SystemModel
+  alias Edgehog.Devices.SystemModelPartNumber
 
   describe "systemModels query" do
     test "returns empty system models", %{tenant: tenant} do

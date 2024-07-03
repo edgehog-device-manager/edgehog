@@ -41,6 +41,6 @@ defmodule Edgehog.Localization.LocalizedAttributeUpdateInput do
 
   use AshGraphql.Type
 
-  @impl true
+  @impl AshGraphql.Type
   def graphql_input_type(_), do: :localized_attribute_update_input
 end

@@ -21,13 +21,13 @@
 defmodule Edgehog.Astarte.Device.StorageUsageTest do
   use Edgehog.DataCase, async: true
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.StorageUsage
-  alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.StorageUsage
+  alias Edgehog.Astarte.Device.StorageUsage.StorageUnit
 
   describe "storage_usage" do
     import Tesla.Mock

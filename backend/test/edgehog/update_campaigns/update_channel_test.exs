@@ -21,12 +21,12 @@
 defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
   use Edgehog.DataCase, async: true
 
-  alias Edgehog.UpdateCampaigns.UpdateChannel
-
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
+
+  alias Edgehog.UpdateCampaigns.UpdateChannel
 
   describe "updatable_devices calculation" do
     setup do

@@ -76,7 +76,7 @@ defmodule Edgehog.PromEx do
 
   alias PromEx.Plugins
 
-  @impl true
+  @impl PromEx
   def plugins do
     [
       # PromEx built in plugins
@@ -94,7 +94,7 @@ defmodule Edgehog.PromEx do
     ]
   end
 
-  @impl true
+  @impl PromEx
   def dashboard_assigns do
     [
       datasource_id: "prometheus",
@@ -102,7 +102,7 @@ defmodule Edgehog.PromEx do
     ]
   end
 
-  @impl true
+  @impl PromEx
   def dashboards do
     [
       # PromEx built in Grafana dashboards

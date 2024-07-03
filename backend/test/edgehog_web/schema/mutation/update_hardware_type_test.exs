@@ -21,10 +21,10 @@
 defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
   use EdgehogWeb.GraphqlCase, async: true
 
+  import Edgehog.DevicesFixtures
+
   alias Edgehog.Devices
   alias Edgehog.Devices.HardwareType
-
-  import Edgehog.DevicesFixtures
 
   describe "updateHardwareType mutation" do
     setup %{tenant: tenant} do

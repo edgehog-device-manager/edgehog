@@ -23,15 +23,15 @@ defmodule Edgehog.Application do
   # for more information on OTP Applications
   @moduledoc false
 
-  @version Mix.Project.config()[:version]
-
   use Application
-  require Logger
   alias Edgehog.Config
   alias EdgehogWeb.Endpoint
   alias EdgehogWeb.Router
+  require Logger
 
-  @impl true
+  @version Mix.Project.config()[:version]
+
+  @impl Application
   def start(_type, _args) do
     Logger.info("Starting application version #{@version}.", tag: "edgehog_start")
 
@@ -70,7 +70,7 @@ defmodule Edgehog.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
-  @impl true
+  @impl Application
   def config_change(changed, _new, removed) do
     EdgehogWeb.Endpoint.config_change(changed, removed)
     :ok

@@ -21,11 +21,11 @@
 defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.Astarte.Device.ForwarderSession
-  alias Edgehog.Astarte.Device.ForwarderSessionMock
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+
+  alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Astarte.Device.ForwarderSessionMock
 
   describe "requestForwarderSession mutation" do
     test "returns the token of a :connected session instead of a :connecting one", %{

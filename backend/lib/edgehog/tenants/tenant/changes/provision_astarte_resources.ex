@@ -23,7 +23,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.ProvisionAstarteResources do
 
   alias Edgehog.Astarte
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, _ctx) do
     Ash.Changeset.after_action(changeset, &provision_astarte_resources/2)
   end

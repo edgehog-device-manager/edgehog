@@ -19,14 +19,14 @@
 #
 
 defmodule Edgehog.Selector.AST.TagFilter do
-  defstruct [:tag, :operator]
+  import Ash.Expr
 
   @type t :: %__MODULE__{
           tag: String.t(),
           operator: :in | :not_in
         }
 
-  import Ash.Expr
+  defstruct [:tag, :operator]
 
   defimpl Edgehog.Selector.Filter do
     def to_ash_expr(tag_filter) do

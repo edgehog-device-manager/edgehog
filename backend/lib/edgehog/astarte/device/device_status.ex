@@ -19,6 +19,12 @@
 #
 
 defmodule Edgehog.Astarte.Device.DeviceStatus do
+  @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.DeviceStatus
+  alias Edgehog.Astarte.InterfaceVersion
+
   defstruct [
     :attributes,
     :groups,
@@ -30,13 +36,7 @@ defmodule Edgehog.Astarte.Device.DeviceStatus do
     :previous_interfaces
   ]
 
-  @behaviour Edgehog.Astarte.Device.DeviceStatus.Behaviour
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.DeviceStatus
-  alias Edgehog.Astarte.InterfaceVersion
-
-  @impl true
+  @impl Edgehog.Astarte.Device.DeviceStatus.Behaviour
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_device_status(client, device_id) do

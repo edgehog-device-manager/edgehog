@@ -21,11 +21,11 @@
 defmodule Edgehog.Astarte.RealmTest do
   use Edgehog.DataCase, async: true
 
-  alias Edgehog.Astarte
-  alias Edgehog.Astarte.Realm
-
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
+
+  alias Edgehog.Astarte
+  alias Edgehog.Astarte.Realm
 
   describe "create/2" do
     @valid_private_key X509.PrivateKey.new_ec(:secp256r1) |> X509.PrivateKey.to_pem()

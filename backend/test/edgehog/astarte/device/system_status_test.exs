@@ -21,12 +21,12 @@
 defmodule Edgehog.Astarte.Device.SystemStatusTest do
   use Edgehog.DataCase, async: true
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.SystemStatus
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.SystemStatus
 
   describe "system_status" do
     import Tesla.Mock

@@ -21,11 +21,10 @@
 defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
   use EdgehogWeb.GraphqlCase, async: true
 
+  import Edgehog.DevicesFixtures
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
   require Ash.Query
-
-  import Edgehog.DevicesFixtures
 
   describe "deleteSystemModel field" do
     setup %{tenant: tenant} do

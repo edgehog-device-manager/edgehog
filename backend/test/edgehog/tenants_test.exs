@@ -21,13 +21,13 @@
 defmodule Edgehog.TenantsTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.AstarteFixtures
+  import Edgehog.TenantsFixtures
+
   alias Edgehog.Astarte
   alias Edgehog.Tenants
   alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
-
-  import Edgehog.AstarteFixtures
-  import Edgehog.TenantsFixtures
 
   require Ash.Query
 

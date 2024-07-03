@@ -21,10 +21,10 @@
 defmodule Edgehog.Geolocation.Providers.GoogleGeocoding do
   @behaviour Edgehog.Geolocation.GeocodingProvider
 
+  use Tesla
   alias Edgehog.Config
   alias Edgehog.Geolocation.Location
   alias Edgehog.Geolocation.Position
-  use Tesla
 
   plug Tesla.Middleware.BaseUrl, "https://maps.googleapis.com/maps/api/geocode/json"
   plug Tesla.Middleware.JSON

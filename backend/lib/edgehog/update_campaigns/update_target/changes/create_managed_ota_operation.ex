@@ -23,7 +23,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget.Changes.CreateManagedOTAOperation
 
   alias Edgehog.OSManagement
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
 

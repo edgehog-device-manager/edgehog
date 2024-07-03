@@ -21,11 +21,11 @@
 defmodule Edgehog.Geolocation.Providers.IPBase do
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
+  use Tesla
+
   alias Edgehog.Config
   alias Edgehog.Devices.Device
   alias Edgehog.Geolocation.Position
-
-  use Tesla
 
   plug Tesla.Middleware.BaseUrl, "https://api.ipbase.com/v2/info"
   plug Tesla.Middleware.JSON

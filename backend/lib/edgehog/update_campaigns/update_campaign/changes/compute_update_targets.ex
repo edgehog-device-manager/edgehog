@@ -21,14 +21,14 @@
 defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
   use Ash.Resource.Change
 
-  require Ash.Query
-
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.UpdateCampaigns.ExecutorSupervisor
   alias Edgehog.UpdateCampaigns.UpdateChannel
   alias Edgehog.UpdateCampaigns.UpdateTarget
 
-  @impl true
+  require Ash.Query
+
+  @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
 

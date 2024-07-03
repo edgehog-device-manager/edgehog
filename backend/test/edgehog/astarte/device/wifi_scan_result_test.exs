@@ -21,12 +21,12 @@
 defmodule Edgehog.Astarte.Device.WiFiScanResultTest do
   use Edgehog.DataCase, async: true
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.WiFiScanResult
-
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.WiFiScanResult
 
   describe "system_status" do
     import Tesla.Mock

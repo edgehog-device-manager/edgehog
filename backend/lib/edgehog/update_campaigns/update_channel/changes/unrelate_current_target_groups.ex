@@ -25,7 +25,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.UnrelateCurrentTargetGro
 
   require Ash.Query
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
 

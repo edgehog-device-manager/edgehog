@@ -19,6 +19,11 @@
 #
 
 defmodule Edgehog.Astarte.Device.WiFiScanResult do
+  @behaviour Edgehog.Astarte.Device.WiFiScanResult.Behaviour
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.WiFiScanResult
+
   @enforce_keys [:timestamp]
   defstruct [
     :channel,
@@ -37,11 +42,6 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
           rssi: integer() | nil,
           timestamp: DateTime.t()
         }
-
-  @behaviour Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.WiFiScanResult
 
   @interface "io.edgehog.devicemanager.WiFiScanResults"
 

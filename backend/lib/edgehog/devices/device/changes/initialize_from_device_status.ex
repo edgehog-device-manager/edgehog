@@ -23,7 +23,7 @@ defmodule Edgehog.Devices.Device.Changes.InitializeFromDeviceStatus do
 
   @device_status_attributes [:last_connection, :last_disconnection, :online]
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     # After we handle a trigger, we check if any of the fields we can populate from the device
     # status is nil. If there is any, we try to initialize them from the device status.

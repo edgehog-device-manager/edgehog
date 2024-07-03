@@ -27,12 +27,12 @@ defmodule Edgehog.Devices.Device.Calculations.ForwarderSessions do
                               Edgehog.Astarte.Device.ForwarderSession
                             )
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def load(_query, _opts, _context) do
     [:device_id, :online, :appengine_client]
   end
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(devices, _opts, _context) do
     Enum.map(devices, fn device ->
       %{

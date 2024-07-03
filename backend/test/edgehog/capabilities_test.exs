@@ -80,8 +80,9 @@ defmodule Edgehog.CapabilitiesTest do
         :wifi
       ]
 
-      assert Enum.sort(expected_capabilities) ==
-               Enum.sort(Capabilities.from_introspection(device_introspection))
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
 
     test "returns a capability only if all its interfaces are supported by the device" do
@@ -120,8 +121,9 @@ defmodule Edgehog.CapabilitiesTest do
         :geolocation
       ]
 
-      assert Enum.sort(expected_capabilities) ==
-               Enum.sort(Capabilities.from_introspection(device_introspection))
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
 
     test "does not return a capability if major version mismatches" do
@@ -151,8 +153,9 @@ defmodule Edgehog.CapabilitiesTest do
         :geolocation
       ]
 
-      assert Enum.sort(expected_capabilities) ==
-               Enum.sort(Capabilities.from_introspection(device_introspection))
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
 
     test "returns software_updates capability with the newer set of interfaces" do
@@ -166,8 +169,9 @@ defmodule Edgehog.CapabilitiesTest do
         :geolocation
       ]
 
-      assert Enum.sort(expected_capabilities) ==
-               Enum.sort(Capabilities.from_introspection(device_introspection))
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
   end
 end

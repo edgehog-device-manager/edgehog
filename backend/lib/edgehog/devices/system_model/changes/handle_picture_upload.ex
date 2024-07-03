@@ -23,7 +23,7 @@ defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureUpload do
 
   alias Edgehog.Assets
 
-  @impl true
+  @impl Ash.Resource.Change
   def change(%Ash.Changeset{valid?: false} = changeset, _opts, _context), do: changeset
 
   def change(changeset, _opts, _context) do

@@ -24,12 +24,12 @@ defmodule Edgehog.Groups.DeviceGroup.ManualRelationships.Devices do
   alias Edgehog.Selector
   require Ash.Query
 
-  @impl true
+  @impl Ash.Resource.ManualRelationship
   def select(_opts) do
     [:selector]
   end
 
-  @impl true
+  @impl Ash.Resource.ManualRelationship
   def load(groups, _opts, %{query: query}) do
     # We're doing N+1 queries here, but it's probably inevitable at this point
     group_id_to_devices =

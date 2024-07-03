@@ -40,9 +40,9 @@ defmodule Edgehog.Localization.LocalizedAttribute do
 
   use AshGraphql.Type
 
-  @impl true
+  @impl AshGraphql.Type
   def graphql_type(_), do: :localized_attribute
 
-  @impl true
+  @impl AshGraphql.Type
   def graphql_input_type(_), do: :localized_attribute_input
 end

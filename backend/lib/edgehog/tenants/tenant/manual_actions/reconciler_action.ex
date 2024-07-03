@@ -25,7 +25,7 @@ defmodule Edgehog.Tenants.Tenant.ManualActions.ReconcilerAction do
 
   @reconciler_module Application.compile_env(:edgehog, :reconciler_module, Reconciler)
 
-  @impl true
+  @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
     tenant = input.arguments.tenant
 

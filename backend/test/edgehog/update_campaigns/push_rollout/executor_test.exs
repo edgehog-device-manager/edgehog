@@ -21,15 +21,15 @@
 defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.BaseImagesFixtures
+  import Edgehog.TenantsFixtures
+  import Edgehog.UpdateCampaignsFixtures
+
   alias Ecto.Adapters.SQL
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor
-
-  import Edgehog.BaseImagesFixtures
-  import Edgehog.TenantsFixtures
-  import Edgehog.UpdateCampaignsFixtures
 
   setup do
     Edgehog.Astarte.Device.OTARequestV1Mock

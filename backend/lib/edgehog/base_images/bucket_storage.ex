@@ -24,7 +24,7 @@ defmodule Edgehog.BaseImages.BucketStorage do
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.Uploaders
 
-  @impl true
+  @impl Edgehog.BaseImages.Storage
   def store(%BaseImage{} = scope, %Plug.Upload{} = upload) do
     with {:ok, file_name} <- Uploaders.BaseImage.store({upload, scope}) do
       # TODO: investigate URL signing instead of public access
@@ -33,7 +33,7 @@ defmodule Edgehog.BaseImages.BucketStorage do
     end
   end
 
-  @impl true
+  @impl Edgehog.BaseImages.Storage
   def delete(%BaseImage{} = scope) do
     %BaseImage{url: url} = scope
     Uploaders.BaseImage.delete({url, scope})

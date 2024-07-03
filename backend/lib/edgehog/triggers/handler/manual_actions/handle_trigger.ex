@@ -34,7 +34,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @ota_response "io.edgehog.devicemanager.OTAResponse"
   @system_info "io.edgehog.devicemanager.SystemInfo"
 
-  @impl true
+  @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
     realm_name = input.arguments.realm_name
     tenant = input.tenant

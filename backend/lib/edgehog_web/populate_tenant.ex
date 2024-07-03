@@ -21,9 +21,9 @@
 defmodule EdgehogWeb.PopulateTenant do
   @behaviour Plug
 
-  alias Edgehog.Tenants
-
   import Plug.Conn
+
+  alias Edgehog.Tenants
 
   def init(opts), do: opts
 

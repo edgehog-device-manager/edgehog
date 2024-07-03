@@ -23,7 +23,7 @@ defmodule Edgehog.OSManagement.EphemeralImage do
 
   alias Edgehog.OSManagement.Uploaders.EphemeralImage
 
-  @impl true
+  @impl Edgehog.OSManagement.EphemeralImage.Behaviour
   def upload(tenant_id, ota_operation_id, %Plug.Upload{} = upload)
       when is_binary(ota_operation_id) do
     scope = %{tenant_id: tenant_id, ota_operation_id: ota_operation_id}
@@ -34,7 +34,7 @@ defmodule Edgehog.OSManagement.EphemeralImage do
     end
   end
 
-  @impl true
+  @impl Edgehog.OSManagement.EphemeralImage.Behaviour
   def delete(tenant_id, ota_operation_id, url) when is_binary(ota_operation_id) do
     scope = %{tenant_id: tenant_id, ota_operation_id: ota_operation_id}
     EphemeralImage.delete({url, scope})

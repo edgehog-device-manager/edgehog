@@ -23,7 +23,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Calculations.UpdatableDevices do
 
   require Ash.Query
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(update_channels, _opts, context) do
     %{arguments: %{base_image: base_image}} = context
 

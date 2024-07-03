@@ -21,14 +21,16 @@
 defmodule Edgehog.SelectorTest do
   use Edgehog.DataCase, async: true
 
-  require Ash.Query
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
   alias Edgehog.Devices.Device
   alias Edgehog.Selector
-  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.AST.AttributeFilter
+  alias Edgehog.Selector.AST.BinaryOp
+  alias Edgehog.Selector.AST.TagFilter
   alias Edgehog.Selector.Parser.Error
+  require Ash.Query
 
   describe "parse/1" do
     test "correctly parses tag filters" do

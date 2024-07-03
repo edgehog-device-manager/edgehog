@@ -23,12 +23,12 @@ defmodule Edgehog.Astarte.Realm.Calculations.RealmManagementClient do
 
   alias Astarte.Client.RealmManagement
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def load(_query, _opts, _context) do
     [cluster: [:base_api_url]]
   end
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(realms, _opts, _context) do
     Enum.map(realms, fn realm ->
       %{
