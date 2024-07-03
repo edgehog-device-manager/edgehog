@@ -80,7 +80,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        Edgehog.BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
+        BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
       end)
 
     {rollout_mechanism_opts, opts} = Keyword.pop(opts, :rollout_mechanism, [])
@@ -114,7 +114,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        Edgehog.BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
+        BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
       end)
 
     tag = "foo"
@@ -150,7 +150,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        Edgehog.BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
+        BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
       end)
 
     {tag, opts} = Keyword.pop(opts, :tag, "foo")
@@ -247,7 +247,6 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   defp terminated_target_fixture(opts, status) do
     alias Edgehog.OSManagement
     alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
-    alias Edgehog.UpdateCampaigns
 
     now = Keyword.get(opts, :now, DateTime.utc_now())
 

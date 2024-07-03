@@ -22,7 +22,6 @@ defmodule Edgehog.Tenants.Reconciler do
   @behaviour Edgehog.Tenants.Reconciler.Behaviour
   use GenServer
 
-  alias Edgehog.Tenants
   alias Edgehog.Tenants.Tenant
   alias Edgehog.Tenants.Reconciler.Core
   alias Edgehog.Tenants.Reconciler.TaskSupervisor

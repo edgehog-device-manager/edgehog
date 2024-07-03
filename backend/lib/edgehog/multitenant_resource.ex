@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ defmodule Edgehog.MultitenantResource do
           )
 
       relationships do
-        belongs_to :tenant, Edgehog.Tenants.Tenant do
+        belongs_to :tenant, Tenant do
           allow_nil? false
           destination_attribute :tenant_id
           primary_key? unquote(Keyword.get(opts, :tenant_id_in_primary_key?, false))

@@ -22,9 +22,6 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation, :modern
 
-  alias EdgehogWeb.Middleware
-  alias EdgehogWeb.Resolvers
-
   @desc """
   Describes hardware-related info of a device.
 

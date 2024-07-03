@@ -22,7 +22,6 @@ defmodule Edgehog.Devices.Device.ManualRelationships.SystemModel do
   use Ash.Resource.ManualRelationship
   require Ash.Query
 
-  alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
 
   @impl true

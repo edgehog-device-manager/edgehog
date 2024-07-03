@@ -25,9 +25,6 @@ defmodule Edgehog.DevicesFixtures do
   """
 
   alias Edgehog.AstarteFixtures
-  alias Edgehog.Devices
-  alias Edgehog.Devices.Device
-  alias Edgehog.Repo
 
   @doc """
   Generate a unique hardware_type handle.

@@ -33,7 +33,7 @@ defmodule Edgehog.Devices.Device.Calculations.DeviceStatus do
   end
 
   @impl true
-  def calculate(devices, opts, _context) do
+  def calculate(devices, _opts, _context) do
     Enum.map(devices, fn device ->
       %{
         device_id: device_id,
