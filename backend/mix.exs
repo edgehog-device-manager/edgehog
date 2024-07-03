@@ -107,11 +107,7 @@ defmodule Edgehog.MixProject do
       {:pretty_log, "~> 0.1"},
       {:prom_ex, "~> 1.9"},
       {:plug_heartbeat, "~> 1.0"},
-      {:polymorphic_embed, "~> 3.0"},
       {:gen_state_machine, "~> 3.0"},
-      {:typedstruct, "~> 0.5", runtime: false},
-      # TODO: point to upstream once all relevant PRs are merged
-      {:i18n_helpers, github: "secomind/i18n_helpers"},
       {:recon, "~> 2.5"},
       {:observer_cli, "~> 1.7"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},

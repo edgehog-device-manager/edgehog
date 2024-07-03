@@ -63,10 +63,7 @@ defmodule Edgehog.Error do
 
   defp handle(%Ecto.Changeset{} = changeset) do
     changeset
-    |> PolymorphicEmbed.traverse_errors(fn
-      # We use PolymorphicEmbed.traverse_errors/1 instead of Ecto.Changeset.traverse_errors/1
-      # since this also correctly traverses polymorphic embeds errors
-
+    |> Ecto.Changeset.traverse_errors(fn
       {message, opts} when is_binary(message) ->
         Regex.replace(~r"%{(\w+)}", message, fn _, key ->
           opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
