@@ -20,7 +20,6 @@
 
 defmodule Edgehog.TenantsTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.ReconcilerMockCase
 
   alias Edgehog.Astarte
   alias Edgehog.Tenants
@@ -142,6 +141,13 @@ defmodule Edgehog.TenantsTest do
   end
 
   describe "Tenants.provision_tenant/1" do
+    setup do
+      Edgehog.Tenants.ReconcilerMock
+      |> stub(:reconcile_tenant, fn _tenant -> :ok end)
+
+      :ok
+    end
+
     test "with valid attrs creates the tenant, cluster and realm" do
       tenant_name = unique_tenant_name()
       tenant_slug = unique_tenant_slug()

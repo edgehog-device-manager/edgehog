@@ -46,6 +46,7 @@ defmodule EdgehogWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import EdgehogWeb.ConnCase
+      import Mox
 
       alias EdgehogWeb.Router.Helpers, as: Routes
 

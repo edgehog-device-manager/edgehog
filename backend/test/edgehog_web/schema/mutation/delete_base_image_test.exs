@@ -20,7 +20,6 @@
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
   use EdgehogWeb.GraphqlCase, async: true
-  use Edgehog.BaseImagesStorageMockCase
 
   alias Edgehog.BaseImages.BaseImage
 
@@ -39,6 +38,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
     end
 
     test "deletes existing base image", %{tenant: tenant, id: id, base_image: fixture} do
+      Edgehog.BaseImages.StorageMock
+      |> expect(:delete, fn _ -> :ok end)
+
       base_image =
         delete_base_image_mutation(tenant: tenant, id: id)
         |> extract_result!()
@@ -67,7 +69,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
     end
 
     test "fails with non-existing base image", %{tenant: tenant, base_image: base_image, id: id} do
-      :ok = Ash.destroy!(base_image)
+      :ok = Ash.destroy!(base_image, action: :destroy_fixture)
 
       result = delete_base_image_mutation(tenant: tenant, id: id)
 

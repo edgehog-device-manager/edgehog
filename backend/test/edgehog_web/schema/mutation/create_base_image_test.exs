@@ -20,11 +20,18 @@
 
 defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
   use EdgehogWeb.GraphqlCase, async: true
-  use Edgehog.BaseImagesStorageMockCase
 
   import Edgehog.BaseImagesFixtures
 
   describe "createBaseImage mutation" do
+    setup do
+      Edgehog.BaseImages.StorageMock
+      |> stub(:store, fn _, _ -> {:ok, "https://example.com/ota.bin"} end)
+      |> stub(:delete, fn _ -> :ok end)
+
+      :ok
+    end
+
     test "creates base image with valid data", %{tenant: tenant} do
       base_image_collection_id =
         base_image_collection_fixture(tenant: tenant)

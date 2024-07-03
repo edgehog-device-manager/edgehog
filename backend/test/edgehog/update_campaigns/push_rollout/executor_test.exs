@@ -20,7 +20,6 @@
 
 defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
@@ -32,6 +31,26 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   import Edgehog.UpdateCampaignsFixtures
 
   setup do
+    Edgehog.Astarte.Device.OTARequestV1Mock
+    |> stub(:update, fn _client, _device_id, _uuid, _url ->
+      :ok
+    end)
+    |> stub(:cancel, fn _client, _device_id, _uuid ->
+      :ok
+    end)
+
+    Edgehog.Astarte.Device.BaseImageMock
+    |> stub(:get, fn _client, _device_id ->
+      base_image = %Edgehog.Astarte.Device.BaseImage{
+        name: "esp-idf",
+        version: "0.1.0",
+        build_id: "2022-01-01 12:00:00",
+        fingerprint: "b14c1457dc10469418b4154fef29a90e1ffb4dddd308bf0f2456d436963ef5b3"
+      }
+
+      {:ok, base_image}
+    end)
+
     %{tenant: tenant_fixture()}
   end
 

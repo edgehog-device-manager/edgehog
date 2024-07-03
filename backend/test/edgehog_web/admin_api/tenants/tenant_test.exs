@@ -20,9 +20,7 @@
 
 defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
   use EdgehogWeb.AdminAPI.ConnCase, async: true
-  use Edgehog.ReconcilerMockCase
 
-  import Ecto.Query, only: [where: 2]
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 
@@ -41,6 +39,9 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
 
   describe "POST /admin-api/v1/tenants" do
     setup do
+      Edgehog.Tenants.ReconcilerMock
+      |> stub(:reconcile_tenant, fn _tenant -> :ok end)
+
       {:ok, path: ~p"/admin-api/v1/tenants"}
     end
 

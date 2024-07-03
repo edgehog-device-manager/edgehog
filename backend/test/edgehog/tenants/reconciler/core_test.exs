@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Tenants.Reconciler.CoreTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
   import Edgehog.AstarteFixtures
 

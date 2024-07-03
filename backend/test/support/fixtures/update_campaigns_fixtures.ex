@@ -24,6 +24,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   entities via the `Edgehog.UpdateCampaigns` context.
   """
 
+  alias Edgehog.AstarteFixtures
   alias Edgehog.BaseImagesFixtures
   alias Edgehog.DevicesFixtures
   alias Edgehog.GroupsFixtures
@@ -196,11 +197,10 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     {now, opts} = Keyword.pop(opts, :now, DateTime.utc_now())
 
-    # Stub Astarte Base Image for loading [device: :base_image] on target
-    Mox.stub_with(
-      Edgehog.Astarte.Device.BaseImageMock,
-      Edgehog.Mocks.Astarte.Device.BaseImage
-    )
+    # Expect Astarte Base Image for loading [device: :base_image] on target
+    Mox.stub(Edgehog.Astarte.Device.BaseImageMock, :get, fn _client, _device_id ->
+      {:ok, AstarteFixtures.base_image_info_fixture()}
+    end)
 
     # A little dance to create a target_fixture which has an associated OTA Operation
     target =
@@ -209,15 +209,15 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     base_image = Core.get_update_campaign_base_image!(opts[:tenant], target.update_campaign_id)
 
-    # Stub Astarte Device Status and OTA Request
-    Mox.stub_with(
-      Edgehog.Astarte.Device.DeviceStatusMock,
-      Edgehog.Mocks.Astarte.Device.DeviceStatus
-    )
+    # Expect Astarte Device Status and OTA Request
+    Mox.stub(Edgehog.Astarte.Device.DeviceStatusMock, :get, fn _client, _device_id ->
+      {:ok, AstarteFixtures.device_status_fixture()}
+    end)
 
-    Mox.stub_with(
+    Mox.stub(
       Edgehog.Astarte.Device.OTARequestV1Mock,
-      Edgehog.Mocks.Astarte.Device.OTARequest.V1
+      :update,
+      fn _client, _device_id, _uuid, _url -> :ok end
     )
 
     {:ok, target} =

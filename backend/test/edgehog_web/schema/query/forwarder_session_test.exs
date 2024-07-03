@@ -20,7 +20,6 @@
 
 defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
   use EdgehogWeb.GraphqlCase, async: true
-  use Edgehog.AstarteMockCase
 
   alias Edgehog.Astarte.Device.ForwarderSession
   alias Edgehog.Astarte.Device.ForwarderSessionMock

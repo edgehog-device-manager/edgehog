@@ -21,7 +21,6 @@
 defmodule EdgehogWeb.AdminAPI.AuthTest do
   # This can't be async: true since it modifies the Application env
   use EdgehogWeb.AdminAPI.ConnCase, async: false
-  use Edgehog.ReconcilerMockCase
 
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
@@ -61,6 +60,9 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
     @describetag :unconfigured
 
     setup do
+      Edgehog.Tenants.ReconcilerMock
+      |> stub(:reconcile_tenant, fn _tenant -> :ok end)
+
       Config.put_disable_admin_authentication(true)
 
       on_exit(fn ->
@@ -163,6 +165,9 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
       path: path,
       admin_private_key: admin_private_key
     } do
+      Edgehog.Tenants.ReconcilerMock
+      |> stub(:reconcile_tenant, fn _tenant -> :ok end)
+
       conn =
         conn
         |> authenticate_connection(admin_private_key, %{e_ara: "*"})
