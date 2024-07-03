@@ -100,6 +100,7 @@
           ## Readability Checks
           #
           {Credo.Check.Readability.AliasOrder, []},
+          {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Readability.FunctionNames, []},
           {Credo.Check.Readability.LargeNumbers, []},
           {Credo.Check.Readability.MaxLineLength, [priority: :low, max_length: 120]},
@@ -186,7 +187,6 @@
           {Credo.Check.Consistency.UnusedVariableNames, []},
           {Credo.Check.Design.DuplicatedCode, []},
           {Credo.Check.Readability.AliasAs, []},
-          {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Readability.ImplTrue, []},
           {Credo.Check.Readability.NestedFunctionCalls, []},
           {Credo.Check.Readability.SinglePipe, []},

@@ -258,9 +258,9 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Marks the ota_operation as timed out. This will also trigger an update publish on the PubSub.
   """
   def mark_ota_operation_as_timed_out!(tenant_id, ota_operation_id) do
-    OSManagement.fetch_ota_operation!(ota_operation_id, tenant: tenant_id)
-    |> OSManagement.mark_ota_operation_as_timed_out()
-    |> case do
+    ota_operation = OSManagement.fetch_ota_operation!(ota_operation_id, tenant: tenant_id)
+
+    case OSManagement.mark_ota_operation_as_timed_out(ota_operation) do
       {:ok, ota_operation} ->
         ota_operation
 
