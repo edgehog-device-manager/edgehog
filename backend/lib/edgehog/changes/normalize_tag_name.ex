@@ -29,7 +29,7 @@ defmodule Edgehog.Changes.NormalizeTagName do
     ok? =
       case {attribute, argument} do
         {nil, nil} -> false
-        {attribute, argument} when not is_nil(attribute) and not is_nil(argument) -> false
+        {attribute, argument} when attribute != nil and argument != nil -> false
         _ -> true
       end
 

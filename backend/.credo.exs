@@ -145,6 +145,7 @@
           {Credo.Check.Refactor.MapMap, []},
           {Credo.Check.Refactor.NegatedConditionsInUnless, []},
           {Credo.Check.Refactor.NegatedConditionsWithElse, []},
+          {Credo.Check.Refactor.NegatedIsNil, []},
           {Credo.Check.Refactor.Nesting, []},
           {Credo.Check.Refactor.RejectFilter, []},
           {Credo.Check.Refactor.UnlessWithElse, []},
@@ -196,7 +197,6 @@
           {Credo.Check.Refactor.ABCSize, []},
           {Credo.Check.Refactor.AppendSingleItem, []},
           {Credo.Check.Refactor.ModuleDependencies, []},
-          {Credo.Check.Refactor.NegatedIsNil, []},
           {Credo.Check.Refactor.PipeChainStart, []},
           {Credo.Check.Refactor.VariableRebinding, []},
           {Credo.Check.Warning.LazyLogging, []}
