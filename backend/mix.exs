@@ -116,7 +116,9 @@ defmodule Edgehog.MixProject do
       {:ash_graphql, "~> 1.0"},
       {:ash_json_api, "~> 1.0"},
       {:picosat_elixir, "~> 0.2"},
-      {:styler, "~> 1.0.0-rc.1", only: [:dev, :test], runtime: false}
+      {:styler, "~> 1.0.0-rc.1", only: [:dev, :test], runtime: false},
+      {:open_api_spex, "~> 3.16"},
+      {:ymlr, "~> 2.0"}
     ]
   end
 
