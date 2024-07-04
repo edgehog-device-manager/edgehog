@@ -22,8 +22,10 @@ To interact with Edgehog, several options are available:
 - Edgehog's dashboard interface: it provides a built-in UI that can be used for managing Devices,
   Hardware Types, and System Models. It is meant to be a graphical, user-friendly tool to manage
   those entities.
-- [Edgehog's GraphQL APIs](graphql-api-docs/): they are meant as a machine-friendly way to perform
-  operations on Edgehog's entities and for integrating 3rd party applications.
+- [Edgehog's Admin REST APIs](admin-rest-api/): they are meant as a machine-friendly way to
+  perform provisioning operations and manage Edgehog's tenants.
+- [Edgehog's Tenant GraphQL APIs](tenant-graphql-api/): they are meant to perform operations on a
+  specific tenant's entities and for integrating 3rd party applications.
 
 ## Publishing Device data
 

@@ -28,7 +28,8 @@ defmodule EdgehogWeb.AdminAPI.Auth do
   end
 
   def call(conn, opts) do
-    if Config.admin_authentication_disabled?() do
+    if Config.admin_authentication_disabled?() ||
+         conn.path_info == ["admin-api", "v1", "open_api"] do
       conn
     else
       Pipeline.call(conn, opts)
