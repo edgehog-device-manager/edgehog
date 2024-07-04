@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Assets.SystemModelPicture do
+  @moduledoc false
   @behaviour Edgehog.Assets.Store.Behaviour
 
   alias Edgehog.Assets.Uploaders.SystemModelPicture

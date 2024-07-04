@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.BatterySlot.Status do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       charging: "The battery is charging.",

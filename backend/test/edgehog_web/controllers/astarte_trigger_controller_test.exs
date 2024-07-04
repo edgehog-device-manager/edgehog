@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
+  alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
 
@@ -37,8 +38,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_fixture(
           realm_id: realm.id,
           online: false,
-          last_connection: utc_now_second() |> DateTime.add(-50, :minute),
-          last_disconnection: utc_now_second() |> DateTime.add(-10, :minute),
+          last_connection: DateTime.add(utc_now_second(), -50, :minute),
+          last_disconnection: DateTime.add(utc_now_second(), -10, :minute),
           tenant: tenant
         )
 
@@ -62,20 +63,18 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       astarte_disconnection_timestamp = DateTime.add(timestamp, -1, :hour)
 
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _client, ^device_id ->
+      expect(DeviceStatusMock, :get, fn _client, ^device_id ->
         device_status =
-          [
+          device_status_fixture(
             online: true,
             last_connection: timestamp,
             last_disconnection: astarte_disconnection_timestamp
-          ]
-          |> device_status_fixture()
+          )
 
         {:ok, device_status}
       end)
 
-      assert post(conn, path, event) |> response(200)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, device} = fetch_device(realm, device_id, tenant)
 
@@ -101,13 +100,11 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       astarte_disconnection_timestamp = DateTime.add(timestamp, 1, :second)
 
       # We simulate the fact that the device has already disconnected
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _client, ^device_id ->
-        {:ok,
-         device_status_fixture(online: false, last_disconnection: astarte_disconnection_timestamp)}
+      expect(DeviceStatusMock, :get, fn _client, ^device_id ->
+        {:ok, device_status_fixture(online: false, last_disconnection: astarte_disconnection_timestamp)}
       end)
 
-      assert post(conn, path, event) |> response(200)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, %Device{online: false, last_disconnection: ^astarte_disconnection_timestamp}} =
                fetch_device(realm, device_id, tenant)
@@ -125,12 +122,11 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       timestamp = utc_now_second()
       event = connection_trigger(device_id, timestamp)
 
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _client, ^device_id ->
+      expect(DeviceStatusMock, :get, fn _client, ^device_id ->
         {:error, api_error(status: 500, message: "Internal Server Error")}
       end)
 
-      assert post(conn, path, event) |> response(200)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, device} = fetch_device(realm, device_id, tenant)
 
@@ -153,18 +149,16 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_fixture(
           realm_id: realm.id,
           online: false,
-          last_connection: utc_now_second() |> DateTime.add(-50, :minute),
-          last_disconnection: utc_now_second() |> DateTime.add(-10, :minute),
+          last_connection: DateTime.add(utc_now_second(), -50, :minute),
+          last_disconnection: DateTime.add(utc_now_second(), -10, :minute),
           tenant: tenant
         )
 
       timestamp = utc_now_second()
       event = connection_trigger(device_id, timestamp)
 
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, 0, fn _client, _device_id -> flunk() end)
-
-      assert post(conn, path, event) |> response(200)
+      expect(DeviceStatusMock, :get, 0, fn _client, _device_id -> flunk() end)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, device} = fetch_device(realm, device_id, tenant)
 
@@ -186,18 +180,16 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_fixture(
           realm_id: realm.id,
           online: true,
-          last_connection: utc_now_second() |> DateTime.add(-10, :minute),
-          last_disconnection: utc_now_second() |> DateTime.add(-50, :minute),
+          last_connection: DateTime.add(utc_now_second(), -10, :minute),
+          last_disconnection: DateTime.add(utc_now_second(), -50, :minute),
           tenant: tenant
         )
 
       timestamp = utc_now_second()
       event = disconnection_trigger(device_id, timestamp)
 
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, 0, fn _client, _device_id -> flunk() end)
-
-      assert post(conn, path, event) |> response(200)
+      expect(DeviceStatusMock, :get, 0, fn _client, _device_id -> flunk() end)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, device} = fetch_device(realm, device_id, tenant)
 
@@ -217,11 +209,10 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       device_id = random_device_id()
       event = unknown_trigger(device_id)
-      connection_timestamp = utc_now_second() |> DateTime.add(-10, :minute)
+      connection_timestamp = DateTime.add(utc_now_second(), -10, :minute)
       disconnection_timestamp = DateTime.add(connection_timestamp, -40, :minute)
 
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _client, ^device_id ->
+      expect(DeviceStatusMock, :get, fn _client, ^device_id ->
         device_status =
           device_status_fixture(
             online: true,
@@ -232,7 +223,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         {:ok, device_status}
       end)
 
-      assert post(conn, path, event) |> response(200)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, device} = fetch_device(realm, device_id, tenant)
 
@@ -253,7 +244,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       } = ctx
 
       event = serial_number_trigger(device_id, "12345")
-      assert post(conn, path, event) |> response(200)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, %Device{online: true, serial_number: "12345"}} =
                fetch_device(realm, device_id, tenant)
@@ -273,7 +264,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       event = part_number_trigger(device_id, part_number)
 
-      assert post(conn, path, event) |> response(200)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, device} = fetch_device(realm, device_id, tenant, [:system_model])
       assert device.online == true
@@ -295,7 +286,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       part_number = "PN12345"
       event = part_number_trigger(device_id, part_number)
 
-      assert post(conn, path, event) |> response(200)
+      assert conn |> post(path, event) |> response(200)
 
       assert {:ok, device} =
                fetch_device(realm, device_id, tenant, [:system_model, :system_model_part_number])
@@ -344,7 +335,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       path = Routes.astarte_trigger_path(conn, :process_event, "notexists")
       event = connection_trigger(random_device_id(), utc_now_second())
 
-      assert post(conn, path, event) |> response(403)
+      assert conn |> post(path, event) |> response(403)
     end
 
     test "trigger with invalid event values returns error", ctx do
@@ -357,10 +348,10 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       unprocessable_event = %{
         device_id: device_id,
         event: %{type: "unknown"},
-        timestamp: DateTime.utc_now() |> DateTime.to_unix()
+        timestamp: DateTime.to_unix(DateTime.utc_now())
       }
 
-      assert post(conn, path, unprocessable_event) |> response(422)
+      assert conn |> post(path, unprocessable_event) |> response(422)
     end
 
     test "with different tenant does not find realm and returns error", ctx do
@@ -373,15 +364,16 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       path = Routes.astarte_trigger_path(conn, :process_event, other_tenant.slug)
       event = connection_trigger(device_id, utc_now_second())
 
-      assert post(conn, path, event) |> response(404)
+      assert conn |> post(path, event) |> response(404)
     end
   end
 
   describe "process_event/2 for OTA updates" do
     setup %{tenant: tenant} do
       # Some events might trigger an ephemeral image deletion
-      Edgehog.OSManagement.EphemeralImageMock
-      |> stub(:delete, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+      stub(Edgehog.OSManagement.EphemeralImageMock, :delete, fn _tenant_id, _ota_operation_id, _url ->
+        :ok
+      end)
 
       cluster = cluster_fixture()
       realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
@@ -416,7 +408,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
             "message" => "Waiting for download to finish"
           }
         },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
 
       conn =
@@ -458,7 +450,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
             "statusCode" => "OTAErrorNetwork"
           }
         },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
 
       conn =
@@ -498,7 +490,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
             "statusCode" => ""
           }
         },
-        timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
 
       conn =
@@ -515,13 +507,11 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   end
 
   defp fetch_device(realm, device_id, tenant, load \\ []) do
-    Device
-    |> Ash.get(%{realm_id: realm.id, device_id: device_id}, tenant: tenant, load: load)
+    Ash.get(Device, %{realm_id: realm.id, device_id: device_id}, tenant: tenant, load: load)
   end
 
   defp utc_now_second do
-    DateTime.utc_now()
-    |> DateTime.truncate(:second)
+    DateTime.truncate(DateTime.utc_now(), :second)
   end
 
   defp connection_trigger(device_id, timestamp) do
@@ -556,7 +546,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         path: "/partNumber",
         value: part_number
       },
-      timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      timestamp: DateTime.to_iso8601(DateTime.utc_now())
     }
   end
 
@@ -569,7 +559,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         path: "/serialNumber",
         value: serial_number
       },
-      timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      timestamp: DateTime.to_iso8601(DateTime.utc_now())
     }
   end
 
@@ -582,7 +572,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         path: "/foo",
         value: 42
       },
-      timestamp: DateTime.utc_now() |> DateTime.to_iso8601()
+      timestamp: DateTime.to_iso8601(DateTime.utc_now())
     }
   end
 

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Modem do
+  @moduledoc false
   use Ash.Resource,
     data_layer: :embedded,
     extensions: [AshGraphql.Resource]

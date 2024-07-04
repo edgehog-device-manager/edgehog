@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.BaseImages.BaseImage.Changes.HandleFileDeletion do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.BaseImages.BucketStorage

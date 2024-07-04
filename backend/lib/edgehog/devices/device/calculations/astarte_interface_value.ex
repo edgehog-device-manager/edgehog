@@ -19,14 +19,17 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
+  @moduledoc false
   use Ash.Resource.Calculation
 
-  @impl Ash.Resource.Calculation
+  alias Ash.Resource.Calculation
+
+  @impl Calculation
   def load(_query, _opts, _context) do
     [:device_id, :appengine_client]
   end
 
-  @impl Ash.Resource.Calculation
+  @impl Calculation
   def calculate(devices, opts, _context) do
     Enum.map(devices, fn device ->
       %{

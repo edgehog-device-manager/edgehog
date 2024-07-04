@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Forwarder.Session.Status do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       connected: "The device is connected to the forwarder.",

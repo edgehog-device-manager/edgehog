@@ -21,17 +21,22 @@
 defmodule Edgehog.OSManagementTest do
   use Edgehog.DataCase, async: true
 
+  alias Ash.Error.Invalid
+  alias Astarte.Client.APIError
+  alias Edgehog.Astarte.Device.OTARequestV1Mock
   alias Edgehog.Devices
+  alias Edgehog.Error.AstarteAPIError
   alias Edgehog.OSManagement
+  alias Edgehog.OSManagement.EphemeralImageMock
   alias Edgehog.PubSub
 
   describe "ota_operations" do
-    alias Edgehog.OSManagement.OTAOperation
-
     import Edgehog.BaseImagesFixtures
     import Edgehog.DevicesFixtures
     import Edgehog.OSManagementFixtures
     import Edgehog.TenantsFixtures
+
+    alias Edgehog.OSManagement.OTAOperation
 
     setup do
       tenant = tenant_fixture()
@@ -48,8 +53,7 @@ defmodule Edgehog.OSManagementTest do
     } do
       base_image = base_image_fixture(tenant: tenant)
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, device_id, _uuid, url ->
+      expect(OTARequestV1Mock, :update, fn _client, device_id, _uuid, url ->
         assert device_id == device.device_id
         assert url == base_image.url
         :ok
@@ -75,10 +79,7 @@ defmodule Edgehog.OSManagementTest do
 
       assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, _device_id, _uuid, _url ->
-        :ok
-      end)
+      expect(OTARequestV1Mock, :update, fn _client, _device_id, _uuid, _url -> :ok end)
 
       assert {:ok, %OTAOperation{} = ota_operation} =
                OSManagement.create_managed_ota_operation(
@@ -95,18 +96,17 @@ defmodule Edgehog.OSManagementTest do
     } do
       base_image = base_image_fixture(tenant: tenant)
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, _device_id, _uuid, _url ->
-        {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
+      expect(OTARequestV1Mock, :update, fn _client, _device_id, _uuid, _url ->
+        {:error, %APIError{status: 503, response: "Cannot push to device"}}
       end)
 
-      assert {:error, %Ash.Error.Invalid{errors: errors}} =
+      assert {:error, %Invalid{errors: errors}} =
                OSManagement.create_managed_ota_operation(
                  %{device_id: device.id, base_image_url: base_image.url},
                  tenant: tenant
                )
 
-      assert [%Edgehog.Error.AstarteAPIError{status: 503, response: "Cannot push to device"}] =
+      assert [%AstarteAPIError{status: 503, response: "Cannot push to device"}] =
                errors
     end
 
@@ -126,8 +126,7 @@ defmodule Edgehog.OSManagementTest do
       device_id = device.device_id
       ota_operation_id = ota_operation.id
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, ^device_id, ^ota_operation_id, ^base_image_url ->
+      expect(OTARequestV1Mock, :update, fn _client, ^device_id, ^ota_operation_id, ^base_image_url ->
         :ok
       end)
 
@@ -139,15 +138,14 @@ defmodule Edgehog.OSManagementTest do
     } do
       ota_operation = manual_ota_operation_fixture(tenant: tenant)
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, _device_id, _uuid, _fake_url ->
-        {:error, %Astarte.Client.APIError{status: 503, response: "Cannot push to device"}}
+      expect(OTARequestV1Mock, :update, fn _client, _device_id, _uuid, _fake_url ->
+        {:error, %APIError{status: 503, response: "Cannot push to device"}}
       end)
 
-      assert {:error, %Ash.Error.Invalid{errors: errors}} =
+      assert {:error, %Invalid{errors: errors}} =
                OSManagement.send_update_request(ota_operation)
 
-      assert [%Edgehog.Error.AstarteAPIError{status: 503, response: "Cannot push to device"}] =
+      assert [%AstarteAPIError{status: 503, response: "Cannot push to device"}] =
                errors
     end
 
@@ -166,8 +164,7 @@ defmodule Edgehog.OSManagementTest do
          %{tenant: tenant} do
       ota_operation = manual_ota_operation_fixture(tenant: tenant)
 
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:delete, fn tenant_id, ota_operation_id, url ->
+      expect(EphemeralImageMock, :delete, fn tenant_id, ota_operation_id, url ->
         assert tenant_id == ota_operation.tenant_id
         assert ota_operation_id == ota_operation.id
         assert url == ota_operation.base_image_url
@@ -188,8 +185,7 @@ defmodule Edgehog.OSManagementTest do
          %{tenant: tenant} do
       ota_operation = manual_ota_operation_fixture(tenant: tenant)
 
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:delete, fn tenant_id, ota_operation_id, url ->
+      expect(EphemeralImageMock, :delete, fn tenant_id, ota_operation_id, url ->
         assert tenant_id == ota_operation.tenant_id
         assert ota_operation_id == ota_operation.id
         assert url == ota_operation.base_image_url
@@ -210,8 +206,7 @@ defmodule Edgehog.OSManagementTest do
          %{tenant: tenant} do
       ota_operation = manual_ota_operation_fixture(tenant: tenant)
 
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:delete, 0, fn _tenant_id, _ota_operation_id, _url ->
+      expect(EphemeralImageMock, :delete, 0, fn _tenant_id, _ota_operation_id, _url ->
         :unreachable
       end)
 
@@ -225,8 +220,7 @@ defmodule Edgehog.OSManagementTest do
          %{tenant: tenant} do
       ota_operation = managed_ota_operation_fixture(tenant: tenant)
 
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+      expect(EphemeralImageMock, :delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
 
       assert {:ok, %OTAOperation{} = ota_operation} =
                OSManagement.update_ota_operation_status(ota_operation, :success)
@@ -238,8 +232,7 @@ defmodule Edgehog.OSManagementTest do
          %{tenant: tenant} do
       ota_operation = managed_ota_operation_fixture(tenant: tenant)
 
-      Edgehog.OSManagement.EphemeralImageMock
-      |> expect(:delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+      expect(EphemeralImageMock, :delete, 0, fn _tenant_id, _ota_operation_id, _url -> :ok end)
 
       assert {:ok, %OTAOperation{} = ota_operation} =
                OSManagement.update_ota_operation_status(ota_operation, :failure)

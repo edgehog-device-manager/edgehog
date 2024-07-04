@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
+  @moduledoc false
   use Ash.Resource.Actions.Implementation
 
   alias Edgehog.Astarte

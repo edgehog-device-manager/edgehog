@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.OSManagement.OTAOperation.ManualActions.SendUpdateRequest do
+  @moduledoc false
   use Ash.Resource.Actions.Implementation
 
   alias Edgehog.Astarte.Device.OTARequest

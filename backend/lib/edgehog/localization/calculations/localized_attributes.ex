@@ -19,9 +19,12 @@
 #
 
 defmodule Edgehog.Localization.Calculations.LocalizedAttributes do
+  @moduledoc false
   use Ash.Resource.Calculation
 
-  @impl Ash.Resource.Calculation
+  alias Ash.Resource.Calculation
+
+  @impl Calculation
   def init(opts) do
     if opts[:attribute] && is_atom(opts[:attribute]) do
       {:ok, opts}
@@ -30,13 +33,12 @@ defmodule Edgehog.Localization.Calculations.LocalizedAttributes do
     end
   end
 
-  @impl Ash.Resource.Calculation
+  @impl Calculation
   def load(_query, opts, _context) do
-    opts[:attribute]
-    |> List.wrap()
+    List.wrap(opts[:attribute])
   end
 
-  @impl Ash.Resource.Calculation
+  @impl Calculation
   def calculate(records, opts, context) do
     language_select_fun =
       case Map.fetch(context.arguments, :preferred_language_tags) do

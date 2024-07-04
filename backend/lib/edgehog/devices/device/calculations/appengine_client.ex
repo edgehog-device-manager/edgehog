@@ -19,16 +19,18 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.AppEngineClient do
+  @moduledoc false
   use Ash.Resource.Calculation
 
+  alias Ash.Resource.Calculation
   alias Astarte.Client.AppEngine
 
-  @impl Ash.Resource.Calculation
+  @impl Calculation
   def load(_query, _opts, _context) do
     [realm: [:name, :private_key, cluster: [:base_api_url]]]
   end
 
-  @impl Ash.Resource.Calculation
+  @impl Calculation
   def calculate(devices, _opts, _context) do
     Enum.map(devices, fn device ->
       %{

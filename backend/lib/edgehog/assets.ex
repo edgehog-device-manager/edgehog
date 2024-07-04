@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Assets do
+  @moduledoc false
   alias Edgehog.Assets.SystemModelPicture
 
   @assets_system_model_picture_module Application.compile_env(

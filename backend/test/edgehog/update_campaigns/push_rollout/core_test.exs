@@ -26,7 +26,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   import Edgehog.TenantsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
+  alias Ash.Error.Invalid
+  alias Ash.Error.Query.NotFound
   alias Astarte.Client.APIError
+  alias Edgehog.Astarte.Device.BaseImage
+  alias Edgehog.Astarte.Device.BaseImageMock
+  alias Edgehog.Astarte.Device.OTARequestV1Mock
+  alias Edgehog.Error.AstarteAPIError
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
@@ -35,11 +41,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   alias Edgehog.UpdateCampaigns.UpdateTarget
 
   setup do
-    Edgehog.Astarte.Device.OTARequestV1Mock
-    |> stub(:update, fn _client, _device_id, _uuid, _url ->
-      :ok
-    end)
-
+    stub(OTARequestV1Mock, :update, fn _client, _device_id, _uuid, _url -> :ok end)
     %{tenant: tenant_fixture()}
   end
 
@@ -56,7 +58,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises for non-existing update campaign", %{tenant: tenant} do
-      assert_raise Ash.Error.Query.NotFound, fn ->
+      assert_raise NotFound, fn ->
         Core.get_update_campaign!(tenant.tenant_id, 12_345)
       end
     end
@@ -77,7 +79,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises for non-existing update campaign", %{tenant: tenant} do
-      assert_raise Ash.Error.Query.NotFound, fn ->
+      assert_raise NotFound, fn ->
         Core.get_update_campaign_base_image!(tenant.tenant_id, 12_345)
       end
     end
@@ -87,7 +89,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     latest_attempt = ~U[2023-06-06 16:19:44.404358Z]
 
     target =
-      target_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> target_fixture()
       |> Core.update_target_latest_attempt!(latest_attempt)
 
     assert target.latest_attempt == latest_attempt
@@ -112,8 +115,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       latest_attempt = DateTime.utc_now()
 
       target =
-        ctx.target
-        |> Core.update_target_latest_attempt!(latest_attempt)
+        Core.update_target_latest_attempt!(ctx.target, latest_attempt)
 
       rollout_mechanism = push_rollout_fixture(ota_request_timeout_seconds: 5)
       time_of_check = DateTime.add(latest_attempt, 3, :second)
@@ -125,8 +127,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       latest_attempt = DateTime.utc_now()
 
       target =
-        ctx.target
-        |> Core.update_target_latest_attempt!(latest_attempt)
+        Core.update_target_latest_attempt!(ctx.target, latest_attempt)
 
       rollout_mechanism = push_rollout_fixture(ota_request_timeout_seconds: 5)
       time_of_check = DateTime.add(latest_attempt, 10, :second)
@@ -167,7 +168,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   describe "retry_target_update/1" do
     setup %{tenant: tenant} do
       target =
-        in_progress_target_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> in_progress_target_fixture()
         |> Ash.load!(Core.default_preloads_for_target())
 
       base_image = base_image_fixture(tenant: tenant)
@@ -181,8 +183,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
         target: target
       } = ctx
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, device_id, _uuid, url ->
+      expect(OTARequestV1Mock, :update, fn _client, device_id, _uuid, url ->
         assert device_id == target.device.device_id
         assert url == base_image.url
         :ok
@@ -197,8 +198,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
         target: target
       } = ctx
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, device_id, _uuid, url ->
+      expect(OTARequestV1Mock, :update, fn _client, device_id, _uuid, url ->
         assert device_id == target.device.device_id
         assert url == base_image.url
         {:error, %APIError{status: 500, response: "Internal server error"}}
@@ -206,9 +206,9 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
       assert {:error, reason} = Core.retry_target_update(target)
 
-      assert %Ash.Error.Invalid{
+      assert %Invalid{
                errors: [
-                 %Edgehog.Error.AstarteAPIError{status: 500, response: "Internal server error"}
+                 %AstarteAPIError{status: 500, response: "Internal server error"}
                ]
              } = reason
     end
@@ -222,7 +222,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises with non-existing target", %{tenant: tenant} do
-      assert_raise Ash.Error.Query.NotFound, fn ->
+      assert_raise NotFound, fn ->
         Core.get_target!(tenant.tenant_id, 1_234_567)
       end
     end
@@ -231,7 +231,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   describe "get_target_for_ota_operation!/2" do
     setup %{tenant: tenant} do
       target =
-        target_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> target_fixture()
         |> Ash.load!(Core.default_preloads_for_target())
 
       base_image = base_image_fixture(tenant: tenant)
@@ -254,7 +255,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises with non-existing linked target", %{tenant: tenant} do
-      assert_raise Ash.Error.Query.NotFound, fn ->
+      assert_raise NotFound, fn ->
         Core.get_target_for_ota_operation!(tenant.tenant_id, Ecto.UUID.generate())
       end
     end
@@ -263,7 +264,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   describe "start_target_update/2" do
     setup %{tenant: tenant} do
       target =
-        target_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> target_fixture()
         |> Ash.load!(Core.default_preloads_for_target())
 
       base_image = base_image_fixture(tenant: tenant)
@@ -277,8 +279,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
         target: target
       } = ctx
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, device_id, _uuid, url ->
+      expect(OTARequestV1Mock, :update, fn _client, device_id, _uuid, url ->
         assert device_id == target.device.device_id
         assert url == base_image.url
         :ok
@@ -295,8 +296,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
         target: target
       } = ctx
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, fn _client, device_id, _uuid, url ->
+      expect(OTARequestV1Mock, :update, fn _client, device_id, _uuid, url ->
         assert device_id == target.device.device_id
         assert url == base_image.url
         {:error, %APIError{status: 500, response: "Internal server error"}}
@@ -304,9 +304,9 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
       assert {:error, reason} = Core.start_target_update(target, base_image)
 
-      assert %Ash.Error.Invalid{
+      assert %Invalid{
                errors: [
-                 %Edgehog.Error.AstarteAPIError{status: 500, response: "Internal server error"}
+                 %AstarteAPIError{status: 500, response: "Internal server error"}
                ]
              } = reason
 
@@ -331,7 +331,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   describe "fetch_target_current_version/1" do
     setup %{tenant: tenant} do
       target =
-        target_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> target_fixture()
         |> Ash.load!(Core.default_preloads_for_target())
 
       %{target: target}
@@ -340,11 +341,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     test "returns the version if Astarte API replies with a success", ctx do
       %{target: target} = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, fn _client, device_id ->
+      expect(BaseImageMock, :get, fn _client, device_id ->
         assert device_id == target.device.device_id
 
-        base_image = %Edgehog.Astarte.Device.BaseImage{
+        base_image = %BaseImage{
           name: "esp-idf",
           version: "4.3.1",
           build_id: "2022-01-01 12:00:00",
@@ -361,8 +361,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     test "returns error if the Astarte API replies with an error", ctx do
       %{target: target} = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, fn _client, _device_id ->
+      expect(BaseImageMock, :get, fn _client, _device_id ->
         {:error, %APIError{status: 500, response: "Internal server error"}}
       end)
 
@@ -372,9 +371,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     test "returns error if the returned version is invalid", ctx do
       %{target: target} = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, fn _client, _device_id ->
-        base_image = %Edgehog.Astarte.Device.BaseImage{
+      expect(BaseImageMock, :get, fn _client, _device_id ->
+        base_image = %BaseImage{
           name: "esp-idf",
           version: "3.not-a-valid-semver",
           build_id: "2022-01-01 12:00:00",
@@ -390,9 +388,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     test "returns error if the returned version is empty", ctx do
       %{target: target} = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, fn _client, _device_id ->
-        base_image = %Edgehog.Astarte.Device.BaseImage{
+      expect(BaseImageMock, :get, fn _client, _device_id ->
+        base_image = %BaseImage{
           name: "esp-idf",
           version: nil,
           build_id: "2022-01-01 12:00:00",
@@ -501,7 +498,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     base_image = base_image_fixture(tenant: tenant)
 
     {:ok, target} =
-      target_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> target_fixture()
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.start_target_update(base_image)
 
@@ -516,7 +514,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     completion_timestamp = ~U[2023-06-08 13:59:52.928623Z]
 
     target =
-      target_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> target_fixture()
       |> Core.mark_target_as_failed!(completion_timestamp)
 
     assert target.status == :failed
@@ -527,7 +526,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     completion_timestamp = ~U[2023-06-08 13:59:52.928623Z]
 
     target =
-      target_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> target_fixture()
       |> Core.mark_target_as_successful!(completion_timestamp)
 
     assert target.status == :successful
@@ -537,7 +537,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   describe "fetch_next_updatable_target/2" do
     test "does not return :pending targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
+        1 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [pending_target] = update_campaign.update_targets
 
@@ -545,13 +545,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.start_target_update(update_campaign.base_image)
 
-      assert {:error, %Ash.Error.Query.NotFound{}} =
+      assert {:error, %NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
 
     test "does not return :successful targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
+        1 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [successful_target] = update_campaign.update_targets
 
@@ -559,13 +559,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.mark_target_as_successful!()
 
-      assert {:error, %Ash.Error.Query.NotFound{}} =
+      assert {:error, %NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
 
     test "does not return :failed targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
+        1 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [failed_target] = update_campaign.update_targets
 
@@ -573,13 +573,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.mark_target_as_failed!()
 
-      assert {:error, %Ash.Error.Query.NotFound{}} =
+      assert {:error, %NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
 
     test "only returns online targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
+        1 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [target] = update_campaign.update_targets
 
@@ -587,7 +587,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> update_device_online_for_target!(false)
 
-      assert {:error, %Ash.Error.Query.NotFound{}} =
+      assert {:error, %NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
 
       target
@@ -602,7 +602,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "returns targets without any attempts first", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
+        2 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [target_with_attempt, target_with_no_attempt] = update_campaign.update_targets
 
@@ -616,7 +616,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "returns targets with oldest attempt first", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
+        2 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [target_with_old_attempt, target_with_recent_attempt] = update_campaign.update_targets
 
@@ -634,7 +634,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "returns {:error, :no_updatable_targets} with no updatable targets", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(2, tenant: tenant) |> Ash.load!(:update_targets)
+        2 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [successful_target, offline_target] = update_campaign.update_targets
 
@@ -646,7 +646,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> update_device_online_for_target!(false)
 
-      assert {:error, %Ash.Error.Query.NotFound{}} =
+      assert {:error, %NotFound{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
   end
@@ -802,10 +802,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
   test "get_failed_target_count/2", %{tenant: tenant} do
     update_campaign =
-      update_campaign_with_targets_fixture(10, tenant: tenant) |> Ash.load!(:update_targets)
+      10 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
     # Call start_update/2 to mark targets as in_progress
-    Enum.take(update_campaign.update_targets, 7)
+    update_campaign.update_targets
+    |> Enum.take(7)
     |> Enum.each(&Core.mark_target_as_failed!/1)
 
     assert Core.get_failed_target_count(tenant.tenant_id, update_campaign.id) == 7
@@ -813,10 +814,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
   test "get_in_progress_target_count/2", %{tenant: tenant} do
     update_campaign =
-      update_campaign_with_targets_fixture(24, tenant: tenant) |> Ash.load!(:update_targets)
+      24 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
     # Call start_update/2 to mark targets as in_progress
-    Enum.take(update_campaign.update_targets, 11)
+    update_campaign.update_targets
+    |> Enum.take(11)
     |> Ash.load!(Core.default_preloads_for_target())
     |> Enum.each(&Core.start_target_update(&1, update_campaign.base_image))
 
@@ -826,9 +828,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   describe "has_idle_targets?/2" do
     test "returns true for campaigns with a least one idle target", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(5, tenant: tenant) |> Ash.load!(:update_targets)
+        5 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
-      Enum.take(update_campaign.update_targets, 4)
+      update_campaign.update_targets
+      |> Enum.take(4)
       |> Enum.each(&Core.mark_target_as_successful!/1)
 
       assert Core.has_idle_targets?(tenant.tenant_id, update_campaign.id) == true
@@ -836,7 +839,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "returns false if all targets are in_progress", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(3, tenant: tenant) |> Ash.load!(:update_targets)
+        3 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       # Call start_update/2 to mark targets as in_progress
       update_campaign.update_targets
@@ -848,7 +851,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "returns false if all targets are successful", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(3, tenant: tenant) |> Ash.load!(:update_targets)
+        3 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       Enum.each(update_campaign.update_targets, &Core.mark_target_as_successful!/1)
 
@@ -857,7 +860,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "returns false if all targets are failed", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(3, tenant: tenant) |> Ash.load!(:update_targets)
+        3 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       Enum.each(update_campaign.update_targets, &Core.mark_target_as_failed!/1)
 
@@ -865,7 +868,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "returns false if campaign has no targets", %{tenant: tenant} do
-      update_campaign = update_campaign_fixture(tenant: tenant) |> Ash.load!(:update_targets)
+      update_campaign =
+        [tenant: tenant] |> update_campaign_fixture() |> Ash.load!(:update_targets)
 
       assert update_campaign.update_targets == []
       assert Core.has_idle_targets?(tenant.tenant_id, update_campaign.id) == false
@@ -876,7 +880,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     now = DateTime.utc_now()
 
     assert %UpdateCampaign{status: :in_progress, start_timestamp: ^now} =
-             update_campaign_with_targets_fixture(3, tenant: tenant)
+             3
+             |> update_campaign_with_targets_fixture(tenant: tenant)
              |> Core.mark_update_campaign_as_in_progress!(now)
   end
 
@@ -884,7 +889,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     now = DateTime.utc_now()
 
     assert %UpdateCampaign{status: :finished, outcome: :failure, completion_timestamp: ^now} =
-             update_campaign_with_targets_fixture(3, tenant: tenant)
+             3
+             |> update_campaign_with_targets_fixture(tenant: tenant)
              |> Core.mark_update_campaign_as_failed!(now)
   end
 
@@ -892,14 +898,15 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     now = DateTime.utc_now()
 
     assert %UpdateCampaign{status: :finished, outcome: :success, completion_timestamp: ^now} =
-             update_campaign_with_targets_fixture(3, tenant: tenant)
+             3
+             |> update_campaign_with_targets_fixture(tenant: tenant)
              |> Core.mark_update_campaign_as_successful!(now)
   end
 
   describe "list_targets_with_pending_ota_operation/1" do
     test "returns empty list if no target has pending ota operations", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(5, tenant: tenant) |> Ash.load!(:update_targets)
+        5 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       assert [] ==
                Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign.id)
@@ -907,7 +914,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "returns target if it has a pending OTA Operation", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(5, tenant: tenant) |> Ash.load!(:update_targets)
+        5 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       assert {:ok, target} =
                update_campaign.update_targets
@@ -923,7 +930,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
     test "does not return target if its OTA Operation is in a different state", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(5, tenant: tenant) |> Ash.load!(:update_targets)
+        5 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       assert {:ok, target} =
                update_campaign.update_targets
@@ -932,7 +939,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
                |> Core.start_target_update(update_campaign.base_image)
 
       assert {:ok, _ota_operation} =
-               OSManagement.fetch_ota_operation!(target.ota_operation_id, tenant: tenant)
+               target.ota_operation_id
+               |> OSManagement.fetch_ota_operation!(tenant: tenant)
                |> OSManagement.update_ota_operation_status(:acknowledged)
 
       assert [] ==
@@ -955,7 +963,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   defp update_device_online_for_target!(target, online) do
     target = Ash.load!(target, :device)
 
-    Ash.Changeset.for_update(target.device, :from_device_status, %{online: online})
+    target.device
+    |> Ash.Changeset.for_update(:from_device_status, %{online: online})
     |> Ash.update!()
   end
 

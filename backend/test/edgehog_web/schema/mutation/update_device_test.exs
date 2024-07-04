@@ -66,7 +66,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
     input =
       %{"name" => opts[:name]}
       |> Enum.filter(fn {_k, v} -> v != nil end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     variables = %{"id" => id, "input" => input}
     document = Keyword.get(opts, :document, default_document)

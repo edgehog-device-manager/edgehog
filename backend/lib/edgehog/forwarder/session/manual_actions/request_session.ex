@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
+  @moduledoc false
   use Ash.Resource.Actions.Implementation
 
   alias Ash.Error.Changes.InvalidArgument

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.StorageUsage do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.StorageUsage.Behaviour
 
   alias Astarte.Client.AppEngine
@@ -34,8 +35,7 @@ defmodule Edgehog.Astarte.Device.StorageUsage do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_datastream_data(client, device_id, @interface, query: [limit: 1]) do
       storage_units =
-        data
-        |> Enum.map(fn
+        Enum.map(data, fn
           {label, [storage_unit]} -> parse_storage_unit(label, storage_unit)
           # TODO: handle value as single object too, as a workaround for the issue:
           # https://github.com/astarte-platform/astarte/issues/707

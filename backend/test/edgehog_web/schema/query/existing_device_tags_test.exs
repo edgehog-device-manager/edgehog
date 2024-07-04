@@ -28,15 +28,16 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
 
   describe "existingDeviceTags query" do
     test "returns empty tags", %{tenant: tenant} do
-      assert [] == existing_device_tags_query(tenant: tenant) |> extract_result!()
+      assert [] == [tenant: tenant] |> existing_device_tags_query() |> extract_result!()
     end
 
     test "returns tags if they're present", %{tenant: tenant} do
-      device_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> device_fixture()
       |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "bar"])
       |> Ash.update!()
 
-      assert tags = existing_device_tags_query(tenant: tenant) |> extract_result!()
+      assert tags = [tenant: tenant] |> existing_device_tags_query() |> extract_result!()
       assert length(tags) == 2
       tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
       assert "foo" in tag_names
@@ -44,26 +45,29 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
     end
 
     test "returns only tags currently assigned to some device", %{tenant: tenant} do
-      device_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> device_fixture()
       |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "bar"])
       |> Ash.update!()
       |> Ash.Changeset.for_update(:remove_tags, tags: ["foo"])
       |> Ash.update!()
 
       assert [%{"name" => "bar"}] ==
-               existing_device_tags_query(tenant: tenant) |> extract_result!()
+               [tenant: tenant] |> existing_device_tags_query() |> extract_result!()
     end
 
     test "does not return duplicates if a tag is assigned multiple times", %{tenant: tenant} do
-      device_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> device_fixture()
       |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "bar"])
       |> Ash.update!()
 
-      device_fixture(tenant: tenant)
+      [tenant: tenant]
+      |> device_fixture()
       |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "baz"])
       |> Ash.update!()
 
-      assert tags = existing_device_tags_query(tenant: tenant) |> extract_result!()
+      assert tags = [tenant: tenant] |> existing_device_tags_query() |> extract_result!()
       assert length(tags) == 3
       tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
       assert "foo" in tag_names

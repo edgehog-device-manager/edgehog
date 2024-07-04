@@ -23,13 +23,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
   import Edgehog.DevicesFixtures
 
+  alias Edgehog.Assets.SystemModelPictureMock
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
 
   describe "updateSystemModel mutation" do
     setup %{tenant: tenant} do
       system_model =
-        system_model_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> system_model_fixture()
         |> Ash.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(system_model)
@@ -154,8 +156,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
     test "allows uploading a picture file", %{tenant: tenant, id: id} do
       picture_url = "https://example.com/image.jpg"
 
-      Edgehog.Assets.SystemModelPictureMock
-      |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
+      expect(SystemModelPictureMock, :upload, fn _, _ -> {:ok, picture_url} end)
 
       result =
         update_system_model_mutation(
@@ -178,7 +179,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
       new_picture_url = "https://example.com/new_image.jpg"
 
-      Edgehog.Assets.SystemModelPictureMock
+      SystemModelPictureMock
       |> expect(:delete, fn _, ^old_picture_url -> {:error, :cannot_delete} end)
       |> expect(:upload, fn _, _ -> {:ok, new_picture_url} end)
 
@@ -200,7 +201,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
       id = AshGraphql.Resource.encode_relay_id(system_model)
 
-      Edgehog.Assets.SystemModelPictureMock
+      SystemModelPictureMock
       |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
       |> expect(:delete, 0, fn _, _ -> :ok end)
 
@@ -218,7 +219,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       duplicate = system_model_fixture(tenant: tenant)
       picture_url = "https://example.com/image.jpg"
 
-      Edgehog.Assets.SystemModelPictureMock
+      SystemModelPictureMock
       |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
       |> expect(:delete, fn _, ^picture_url -> :ok end)
 
@@ -249,7 +250,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
     end
 
     test "returns error when fails to update picture_file", %{tenant: tenant, id: id} do
-      Edgehog.Assets.SystemModelPictureMock
+      SystemModelPictureMock
       |> expect(:upload, fn _, _ -> {:error, :no_space_left} end)
       |> expect(:delete, 0, fn _, _ -> :ok end)
 
@@ -371,8 +372,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       _ = extract_result!(result)
 
       assert nil ==
-               Edgehog.Devices.SystemModelPartNumber
-               |> Ash.get!(old_system_model_part_number_id, tenant: tenant, error?: false)
+               Ash.get!(Edgehog.Devices.SystemModelPartNumber, old_system_model_part_number_id,
+                 tenant: tenant,
+                 error?: false
+               )
     end
   end
 
@@ -410,15 +413,14 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
         "pictureFile" => opts[:picture_file] && "picture_file"
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     variables = %{"id" => id, "input" => input}
 
     document = Keyword.get(opts, :document, default_document)
 
     context =
-      %{tenant: tenant}
-      |> add_upload("picture_file", opts[:picture_file])
+      add_upload(%{tenant: tenant}, "picture_file", opts[:picture_file])
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
   end

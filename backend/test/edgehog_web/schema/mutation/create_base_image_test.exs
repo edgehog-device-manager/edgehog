@@ -23,9 +23,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
   import Edgehog.BaseImagesFixtures
 
+  alias Edgehog.BaseImages.StorageMock
+
   describe "createBaseImage mutation" do
     setup do
-      Edgehog.BaseImages.StorageMock
+      StorageMock
       |> stub(:store, fn _, _ -> {:ok, "https://example.com/ota.bin"} end)
       |> stub(:delete, fn _ -> :ok end)
 
@@ -34,13 +36,13 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
     test "creates base image with valid data", %{tenant: tenant} do
       base_image_collection_id =
-        base_image_collection_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> base_image_collection_fixture()
         |> AshGraphql.Resource.encode_relay_id()
 
       file_url = "https://example.com/ota.bin"
 
-      Edgehog.BaseImages.StorageMock
-      |> expect(:store, fn _, _ -> {:ok, file_url} end)
+      expect(StorageMock, :store, fn _, _ -> {:ok, file_url} end)
 
       result =
         create_base_image_mutation(
@@ -133,7 +135,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
       assert String.contains?(
                message,
-               "In field \"version\": Expected type \"String!\", found null."
+               ~s(In field "version": Expected type "String!", found null.)
              )
     end
 
@@ -193,18 +195,14 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
     end
 
     test "doesn't upload the base image to the storage with invalid data", %{tenant: tenant} do
-      Edgehog.BaseImages.StorageMock
-      |> expect(:store, 0, fn _, _ -> {:error, :unreachable} end)
-
+      expect(StorageMock, :store, 0, fn _, _ -> {:error, :unreachable} end)
       result = create_base_image_mutation(tenant: tenant, version: "invalid")
 
       assert %{message: "is not a valid version"} = extract_error!(result)
     end
 
     test "returns error if the upload to the storage fails", %{tenant: tenant} do
-      Edgehog.BaseImages.StorageMock
-      |> expect(:store, fn _, _ -> {:error, :bucket_is_full} end)
-
+      expect(StorageMock, :store, fn _, _ -> {:error, :bucket_is_full} end)
       result = create_base_image_mutation(tenant: tenant)
 
       assert %{
@@ -214,8 +212,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
     end
 
     test "attempts to delete the uploaded file when the mutation fails", %{tenant: tenant} do
-      Edgehog.BaseImages.StorageMock
-      |> expect(:delete, fn _ -> :ok end)
+      expect(StorageMock, :delete, fn _ -> :ok end)
 
       # Simulate a mutation that fail because of unique constraints on :version
       # so that data validation succeeds but the database transaction fails.
@@ -265,7 +262,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
     {base_image_collection_id, opts} =
       Keyword.pop_lazy(opts, :base_image_collection_id, fn ->
-        base_image_collection_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> base_image_collection_fixture()
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
@@ -290,8 +288,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
     document = Keyword.get(opts, :document, default_document)
 
     context =
-      %{tenant: tenant}
-      |> add_upload("file", file)
+      add_upload(%{tenant: tenant}, "file", file)
 
     Absinthe.run!(document, EdgehogWeb.Schema,
       variables: variables,

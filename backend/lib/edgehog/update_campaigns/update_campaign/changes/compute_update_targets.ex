@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.BaseImages.BaseImage

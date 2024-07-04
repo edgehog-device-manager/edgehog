@@ -45,8 +45,8 @@ defmodule Edgehog.Tenants.ReconcilerTest do
 
     test "reconciles interfaces and triggers for all tenants" do
       # Multiply by 2 since we have 2 tenants
-      interface_count = (Reconciler.Core.list_required_interfaces() |> length()) * 2
-      trigger_count = (Reconciler.Core.list_required_triggers("foo") |> length()) * 2
+      interface_count = length(Reconciler.Core.list_required_interfaces()) * 2
+      trigger_count = ("foo" |> Reconciler.Core.list_required_triggers() |> length()) * 2
 
       test_pid = self()
       ref = make_ref()
@@ -74,14 +74,10 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # Trigger reconciliation
       send(Reconciler, :reconcile_all)
 
-      1..interface_count
-      |> Enum.each(fn _ -> assert_receive {:interface_reconciled, ^ref} end)
-
+      Enum.each(1..interface_count, fn _ -> assert_receive {:interface_reconciled, ^ref} end)
       refute_receive {:interface_reconciled, ^ref}
 
-      1..trigger_count
-      |> Enum.each(fn _ -> assert_receive {:trigger_reconciled, ^ref} end)
-
+      Enum.each(1..trigger_count, fn _ -> assert_receive {:trigger_reconciled, ^ref} end)
       refute_receive {:trigger_reconciled, ^ref}
     end
   end
@@ -100,8 +96,8 @@ defmodule Edgehog.Tenants.ReconcilerTest do
     end
 
     test "reconciles interfaces and triggers", %{tenant: tenant} do
-      interface_count = Reconciler.Core.list_required_interfaces() |> length()
-      trigger_count = Reconciler.Core.list_required_triggers("foo") |> length()
+      interface_count = length(Reconciler.Core.list_required_interfaces())
+      trigger_count = "foo" |> Reconciler.Core.list_required_triggers() |> length()
 
       test_pid = self()
       ref = make_ref()
@@ -128,14 +124,10 @@ defmodule Edgehog.Tenants.ReconcilerTest do
 
       assert :ok = Reconciler.reconcile_tenant(tenant)
 
-      1..interface_count
-      |> Enum.each(fn _ -> assert_receive {:interface_reconciled, ^ref} end)
-
+      Enum.each(1..interface_count, fn _ -> assert_receive {:interface_reconciled, ^ref} end)
       refute_receive {:interface_reconciled, ^ref}
 
-      1..trigger_count
-      |> Enum.each(fn _ -> assert_receive {:trigger_reconciled, ^ref} end)
-
+      Enum.each(1..trigger_count, fn _ -> assert_receive {:trigger_reconciled, ^ref} end)
       refute_receive {:trigger_reconciled, ^ref}
     end
   end

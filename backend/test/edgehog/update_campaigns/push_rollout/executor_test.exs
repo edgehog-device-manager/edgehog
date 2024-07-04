@@ -26,13 +26,16 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   import Edgehog.UpdateCampaignsFixtures
 
   alias Ecto.Adapters.SQL
+  alias Edgehog.Astarte.Device.BaseImage
+  alias Edgehog.Astarte.Device.BaseImageMock
+  alias Edgehog.Astarte.Device.OTARequestV1Mock
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor
 
   setup do
-    Edgehog.Astarte.Device.OTARequestV1Mock
+    OTARequestV1Mock
     |> stub(:update, fn _client, _device_id, _uuid, _url ->
       :ok
     end)
@@ -40,9 +43,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       :ok
     end)
 
-    Edgehog.Astarte.Device.BaseImageMock
-    |> stub(:get, fn _client, _device_id ->
-      base_image = %Edgehog.Astarte.Device.BaseImage{
+    stub(BaseImageMock, :get, fn _client, _device_id ->
+      base_image = %BaseImage{
         name: "esp-idf",
         version: "0.1.0",
         build_id: "2022-01-01 12:00:00",
@@ -66,7 +68,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
     test "when campaign is already marked as failed", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
+        1 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [target] = update_campaign.update_targets
       _ = Core.mark_target_as_failed!(target)
@@ -79,7 +81,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
     test "when campaign is already marked as successful", %{tenant: tenant} do
       update_campaign =
-        update_campaign_with_targets_fixture(1, tenant: tenant) |> Ash.load!(:update_targets)
+        1 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       [target] = update_campaign.update_targets
       _ = Core.mark_target_as_successful!(target)
@@ -155,7 +157,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       target_count = Enum.random(2..20)
 
       update_campaign =
-        update_campaign_with_targets_fixture(target_count,
+        target_count
+        |> update_campaign_with_targets_fixture(
           rollout_mechanism: [max_in_progress_updates: target_count],
           tenant: tenant
         )
@@ -169,8 +172,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       # Set an expectation for each target on the OTARequest mock and send back a message
       # to wait for all devices
       Enum.each(target_device_ids, fn device_id ->
-        Edgehog.Astarte.Device.OTARequestV1Mock
-        |> expect(:update, fn _client, ^device_id, _uuid, ^base_image_url ->
+        expect(OTARequestV1Mock, :update, fn _client, ^device_id, _uuid, ^base_image_url ->
           send_sync(parent, {ref, device_id})
           :ok
         end)
@@ -203,7 +205,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       pid = start_executor!(update_campaign)
 
       # Wait for max_in_progress_updates sync messages
-      repeat(ref, max_in_progress_updates)
+      ref
+      |> repeat(max_in_progress_updates)
       |> wait_for_sync!()
 
       # Expect the Executor to arrive at :wait_for_available_slot
@@ -217,7 +220,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       online_count = target_count - offline_count
 
       update_campaign =
-        update_campaign_with_targets_fixture(target_count, tenant: tenant)
+        target_count
+        |> update_campaign_with_targets_fixture(tenant: tenant)
         |> Ash.load!(:update_targets)
 
       {offline_targets, online_targets} =
@@ -256,13 +260,12 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
       parent = self()
 
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, max_updates, fn _client, _device_id, ota_operation_id, _url ->
-        # Since we don't know _which_ target will receive the request, we send it back from here
+      expect(OTARequestV1Mock, :update, max_updates, fn _client, _device_id, ota_operation_id, _url ->
         send(parent, {:updated_target, ota_operation_id})
         :ok
       end)
 
+      # Since we don't know _which_ target will receive the request, we send it back from here
       pid = start_executor!(update_campaign)
 
       # Wait for the Executor to arrive at :wait_for_available_slot
@@ -315,8 +318,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         } = ctx
 
         # Expect no calls to the mock
-        Edgehog.Astarte.Device.OTARequestV1Mock
-        |> expect(:update, 0, fn _client, _device_id, _uuid, _base_image_url ->
+        expect(OTARequestV1Mock, :update, 0, fn _client, _device_id, _uuid, _base_image_url ->
           :ok
         end)
 
@@ -396,12 +398,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         tenant: tenant
       } = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, target_count, fn _client, _device_id ->
-        # Reply like the target already has the correct base image version
+      expect(BaseImageMock, :get, target_count, fn _client, _device_id ->
         {:ok, astarte_base_image_with_version(base_image_version)}
       end)
 
+      # Reply like the target already has the correct base image version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -418,12 +419,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         tenant: tenant
       } = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, target_count, fn _client, _device_id ->
-        # Reply like the target already has an higher version
+      expect(BaseImageMock, :get, target_count, fn _client, _device_id ->
         {:ok, astarte_base_image_with_version(higher_base_image_version)}
       end)
 
+      # Reply like the target already has an higher version
       start_execution(pid)
 
       # Wait for the Executor to arrive at :wait_for_campaign_completion
@@ -451,7 +451,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       wait_for_state(pid, :wait_for_campaign_completion)
 
       ota_operation_ids =
-        Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign_id)
+        tenant.tenant_id
+        |> Core.list_targets_with_pending_ota_operation(update_campaign_id)
         |> Enum.map(& &1.ota_operation_id)
 
       failing_target_count = max_failed_targets_for_success(target_count, max_failure_percentage)
@@ -497,12 +498,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       incompatible_base_image_version = "1.4.2"
 
       # Stub BaseImage with a compatible base image by default
-      Edgehog.Astarte.Device.BaseImageMock
-      |> stub(:get, fn _client, _device_id ->
-        # Reply like the target already has an incompatible version
+      stub(BaseImageMock, :get, fn _client, _device_id ->
         {:ok, astarte_base_image_with_version("2.0.0")}
       end)
 
+      # Reply like the target already has an incompatible version
       update_campaign =
         update_campaign_with_targets_fixture(target_count,
           base_image_id: base_image.id,
@@ -544,7 +544,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       wait_for_state(pid, :wait_for_campaign_completion)
 
       {failing_targets, remaining_targets} =
-        Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign_id)
+        tenant.tenant_id
+        |> Core.list_targets_with_pending_ota_operation(update_campaign_id)
         |> Enum.split(failing_target_count)
 
       # Produce failing_target_count failures
@@ -585,8 +586,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       } = ctx
 
       # Expect failing_target_count calls to the mock and return a non-temporary error
-      Edgehog.Astarte.Device.OTARequestV1Mock
-      |> expect(:update, failing_target_count, fn _client, _device_id, _uuid, _base_image_url ->
+      expect(OTARequestV1Mock, :update, failing_target_count, fn _client, _device_id, _uuid, _base_image_url ->
         status = Enum.random(400..499)
         {:error, %Astarte.Client.APIError{status: status, response: "F"}}
       end)
@@ -608,12 +608,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         tenant: tenant
       } = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, failing_target_count, fn _client, _device_id ->
-        # Reply like the target already has an higher version
+      expect(BaseImageMock, :get, failing_target_count, fn _client, _device_id ->
         {:ok, astarte_base_image_with_version(higher_base_image_version)}
       end)
 
+      # Reply like the target already has an higher version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -630,12 +629,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         tenant: tenant
       } = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, failing_target_count, fn _client, _device_id ->
-        # Reply like the target already has an incompatible version
+      expect(BaseImageMock, :get, failing_target_count, fn _client, _device_id ->
         {:ok, astarte_base_image_with_version(incompatible_base_image_version)}
       end)
 
+      # Reply like the target already has an incompatible version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -651,12 +649,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
         tenant: tenant
       } = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, failing_target_count, fn _client, _device_id ->
-        # Reply like the target already has an incompatible version
+      expect(BaseImageMock, :get, failing_target_count, fn _client, _device_id ->
         {:ok, astarte_base_image_with_version(nil)}
       end)
 
+      # Reply like the target already has an incompatible version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -746,8 +743,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     loop_until_state!(executor_pid, state, start_time, timeout)
   end
 
-  defp loop_until_state!(executor_pid, state, _start_time, remaining_time)
-       when remaining_time <= 0 do
+  defp loop_until_state!(executor_pid, state, _start_time, remaining_time) when remaining_time <= 0 do
     {actual_state, _data} = :sys.get_state(executor_pid)
     flunk("State #{state} not reached, last state: #{actual_state}")
   end
@@ -765,9 +761,9 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   end
 
   @executor_allowed_mocks [
-    Edgehog.Astarte.Device.BaseImageMock,
+    BaseImageMock,
     Edgehog.Astarte.Device.DeviceStatusMock,
-    Edgehog.Astarte.Device.OTARequestV1Mock
+    OTARequestV1Mock
   ]
 
   defp start_and_monitor_executor!(update_campaign, opts \\ []) do
@@ -783,7 +779,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   defp start_executor!(update_campaign, opts \\ []) do
     args = executor_args(update_campaign)
 
-    start_supervised!({Executor, args})
+    {Executor, args}
+    |> start_supervised!()
     |> allow_test_resources()
     |> maybe_start_execution(opts)
   end
@@ -825,7 +822,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   end
 
   defp mark_all_pending_ota_operations_with_status(tenant, update_campaign_id, status) do
-    Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign_id)
+    tenant.tenant_id
+    |> Core.list_targets_with_pending_ota_operation(update_campaign_id)
     |> Enum.each(fn target ->
       update_ota_operation_status!(tenant, target.ota_operation_id, status)
     end)
@@ -838,13 +836,12 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
     ref = make_ref()
 
     # Expect count calls to the mock
-    Edgehog.Astarte.Device.OTARequestV1Mock
-    |> expect(:update, count, fn _client, _device_id, _uuid, _url ->
-      # Send the sync
+    expect(OTARequestV1Mock, :update, count, fn _client, _device_id, _uuid, _url ->
       send_sync(parent, ref)
       :ok
     end)
 
+    # Send the sync
     ref
   end
 
@@ -880,7 +877,8 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
   defp update_ota_operation_status!(tenant, ota_operation_id, status) do
     assert {:ok, ota_operation} =
-             OSManagement.fetch_ota_operation!(ota_operation_id, tenant: tenant)
+             ota_operation_id
+             |> OSManagement.fetch_ota_operation!(tenant: tenant)
              |> OSManagement.update_ota_operation_status(status)
 
     ota_operation
@@ -888,12 +886,13 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
   defp repeat(value, n) do
     # Repeats value for n times and returns a list of them
-    Stream.repeatedly(fn -> value end)
+    fn -> value end
+    |> Stream.repeatedly()
     |> Enum.take(n)
   end
 
   defp astarte_base_image_with_version(version) do
-    %Edgehog.Astarte.Device.BaseImage{
+    %BaseImage{
       name: "esp-idf",
       version: version,
       build_id: "foo",

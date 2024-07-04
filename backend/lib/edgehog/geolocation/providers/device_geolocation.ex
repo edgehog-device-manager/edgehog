@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.DeviceGeolocation do
+  @moduledoc false
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
   alias Edgehog.Astarte.Device.Geolocation.SensorPosition

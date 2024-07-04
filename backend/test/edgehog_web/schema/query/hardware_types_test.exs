@@ -30,7 +30,8 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
 
     test "returns hardware types if they're present", %{tenant: tenant} do
       fixture =
-        hardware_type_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> hardware_type_fixture()
         |> Ash.load!(:part_number_strings)
 
       assert %{data: %{"hardwareTypes" => [hardware_type]}} = hardware_types_query(tenant: tenant)

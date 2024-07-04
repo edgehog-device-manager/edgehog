@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Trigger do
+  @moduledoc false
   alias Astarte.Client.APIError
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Trigger.AstarteDataLayer

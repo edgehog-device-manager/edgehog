@@ -33,7 +33,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       base_image = base_image_fixture(tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foobar"])
 
       context = %{
@@ -46,7 +47,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
     end
 
     test "returns empty update campaigns", %{tenant: tenant} do
-      assert [] == update_campaigns_query(tenant: tenant) |> extract_result!()
+      assert [] == [tenant: tenant] |> update_campaigns_query() |> extract_result!()
     end
 
     test "returns update campaigns if present", ctx do
@@ -64,7 +65,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
           tenant: tenant
         )
 
-      [update_campaign_data] = update_campaigns_query(tenant: tenant) |> extract_result!()
+      [update_campaign_data] = [tenant: tenant] |> update_campaigns_query() |> extract_result!()
 
       assert update_campaign_data["name"] == update_campaign.name
       assert update_campaign_data["status"] == "IDLE"
@@ -98,7 +99,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
 
     test "returns all UpdateTarget fields", %{tenant: tenant} do
       now = DateTime.utc_now()
-      target = failed_target_fixture(now: now, tenant: tenant) |> Ash.load!(:ota_operation)
+      target = [now: now, tenant: tenant] |> failed_target_fixture() |> Ash.load!(:ota_operation)
 
       document = """
       query {
@@ -118,7 +119,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       """
 
       [update_campaign_data] =
-        update_campaigns_query(document: document, tenant: tenant) |> extract_result!()
+        [document: document, tenant: tenant] |> update_campaigns_query() |> extract_result!()
 
       assert [update_target] = update_campaign_data["updateTargets"]
 

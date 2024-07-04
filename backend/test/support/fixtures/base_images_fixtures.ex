@@ -44,12 +44,11 @@ defmodule Edgehog.BaseImagesFixtures do
 
     {system_model_id, opts} =
       Keyword.pop_lazy(opts, :system_model_id, fn ->
-        DevicesFixtures.system_model_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> DevicesFixtures.system_model_fixture() |> Map.fetch!(:id)
       end)
 
     params =
-      opts
-      |> Enum.into(%{
+      Enum.into(opts, %{
         handle: unique_base_image_collection_handle(),
         name: unique_base_image_collection_name(),
         system_model_id: system_model_id
@@ -73,12 +72,11 @@ defmodule Edgehog.BaseImagesFixtures do
 
     {base_image_collection_id, opts} =
       Keyword.pop_lazy(opts, :base_image_collection_id, fn ->
-        base_image_collection_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> base_image_collection_fixture() |> Map.fetch!(:id)
       end)
 
     params =
-      opts
-      |> Enum.into(%{
+      Enum.into(opts, %{
         version: unique_base_image_version(),
         url: "https://example.com/ota.bin",
         base_image_collection_id: base_image_collection_id

@@ -36,19 +36,21 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       base_image = base_image_fixture(tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foobar"])
 
       base_image_id = AshGraphql.Resource.encode_relay_id(base_image)
       update_channel_id = AshGraphql.Resource.encode_relay_id(update_channel)
 
       update_campaign_data =
-        create_update_campaign_mutation(
+        [
           name: "My Update Campaign",
           base_image_id: base_image_id,
           update_channel_id: update_channel_id,
           tenant: tenant
-        )
+        ]
+        |> create_update_campaign_mutation()
         |> extract_result!()
 
       assert update_campaign_data["name"] == "My Update Campaign"
@@ -72,7 +74,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     test "creates finished update_campaign with valid data and no targets", %{tenant: tenant} do
       update_campaign_data =
-        create_update_campaign_mutation(name: "My Update Campaign", tenant: tenant)
+        [name: "My Update Campaign", tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_result!()
 
       assert update_campaign_data["name"] == "My Update Campaign"
@@ -94,7 +97,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       }
 
       update_campaign_data =
-        create_update_campaign_mutation(rollout_mechanism: rollout_mechanism, tenant: tenant)
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_result!()
 
       assert rollout_mechanism_data = update_campaign_data["rolloutMechanism"]
@@ -115,7 +119,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       }
 
       update_campaign_data =
-        create_update_campaign_mutation(rollout_mechanism: rollout_mechanism, tenant: tenant)
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_result!()
 
       assert rollout_mechanism_data = update_campaign_data["rolloutMechanism"]
@@ -130,7 +135,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       base_image_id = non_existing_base_image_id(tenant)
 
       error =
-        create_update_campaign_mutation(base_image_id: base_image_id, tenant: tenant)
+        [base_image_id: base_image_id, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -145,7 +151,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       update_channel_id = non_existing_update_channel_id(tenant)
 
       error =
-        create_update_campaign_mutation(update_channel_id: update_channel_id, tenant: tenant)
+        [update_channel_id: update_channel_id, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -158,7 +165,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     test "fails with missing name", %{tenant: tenant} do
       error =
-        create_update_campaign_mutation(name: nil, tenant: tenant)
+        [name: nil, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{message: message} = error
@@ -167,7 +175,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     test "fails with empty name", %{tenant: tenant} do
       error =
-        create_update_campaign_mutation(name: "", tenant: tenant)
+        [name: "", tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -180,7 +189,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     test "fails with missing rollout mechanism", %{tenant: tenant} do
       error =
-        create_update_campaign_mutation(rollout_mechanism: nil, tenant: tenant)
+        [rollout_mechanism: nil, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{message: message} = error
@@ -191,7 +201,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     test "fails with empty rollout mechanism", %{tenant: tenant} do
       error =
-        create_update_campaign_mutation(rollout_mechanism: %{}, tenant: tenant)
+        [rollout_mechanism: %{}, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -211,7 +222,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       }
 
       error =
-        create_update_campaign_mutation(rollout_mechanism: rollout_mechanism, tenant: tenant)
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -230,7 +242,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       }
 
       error =
-        create_update_campaign_mutation(rollout_mechanism: rollout_mechanism, tenant: tenant)
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -251,7 +264,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       }
 
       error =
-        create_update_campaign_mutation(rollout_mechanism: rollout_mechanism, tenant: tenant)
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -273,7 +287,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       }
 
       error =
-        create_update_campaign_mutation(rollout_mechanism: rollout_mechanism, tenant: tenant)
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -295,7 +310,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       }
 
       error =
-        create_update_campaign_mutation(rollout_mechanism: rollout_mechanism, tenant: tenant)
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
@@ -353,13 +369,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     {update_channel_id, opts} =
       Keyword.pop_lazy(opts, :update_channel_id, fn ->
-        update_channel_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> update_channel_fixture()
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        base_image_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> base_image_fixture()
         |> AshGraphql.Resource.encode_relay_id()
       end)
 

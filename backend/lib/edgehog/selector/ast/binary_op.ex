@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Selector.AST.BinaryOp do
+  @moduledoc false
   import Ash.Expr
 
   alias Edgehog.Selector

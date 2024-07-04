@@ -22,7 +22,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
+
   alias Edgehog.BaseImages.BaseImageCollection
+
   require Ash.Query
 
   describe "deleteBaseImageCollection mutation" do
@@ -41,7 +43,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
       base_image_collection: fixture
     } do
       base_image_collection =
-        delete_base_image_collection_mutation(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> delete_base_image_collection_mutation()
         |> extract_result!()
 
       assert base_image_collection["handle"] == fixture.handle

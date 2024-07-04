@@ -19,23 +19,26 @@
 #
 
 defmodule Edgehog.OSManagement do
+  @moduledoc false
   use Ash.Domain,
     extensions: [
       AshGraphql.Domain
     ]
 
+  alias Edgehog.OSManagement.OTAOperation
+
   graphql do
     root_level_errors? true
 
     mutations do
-      create Edgehog.OSManagement.OTAOperation, :create_manual_ota_operation, :manual do
+      create OTAOperation, :create_manual_ota_operation, :manual do
         relay_id_translations input: [device_id: :device]
       end
     end
   end
 
   resources do
-    resource Edgehog.OSManagement.OTAOperation do
+    resource OTAOperation do
       define :fetch_ota_operation, action: :read, get_by: [:id], not_found_error?: true
       define :create_managed_ota_operation, action: :create_managed
       define :mark_ota_operation_as_timed_out, action: :mark_as_timed_out

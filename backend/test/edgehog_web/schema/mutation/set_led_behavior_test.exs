@@ -21,14 +21,16 @@
 defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
   use EdgehogWeb.GraphqlCase, async: true
 
+  alias Edgehog.Astarte.Device.LedBehaviorMock
   alias Edgehog.DevicesFixtures
 
   describe "SetLedBehavior mutation" do
     test "sets BLINK led behavior for the specified device", %{tenant: tenant} do
       {astarte_device_id, graphql_id} = sample_device_id(tenant)
 
-      Edgehog.Astarte.Device.LedBehaviorMock
-      |> expect(:post, 1, fn _client, ^astarte_device_id, "Blink60Seconds" -> :ok end)
+      expect(LedBehaviorMock, :post, 1, fn _client, ^astarte_device_id, "Blink60Seconds" ->
+        :ok
+      end)
 
       result = set_led_behavior_mutation(tenant: tenant, id: graphql_id, behavior: "BLINK")
       assert %{"id" => ^graphql_id} = extract_result!(result)
@@ -37,8 +39,9 @@ defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
     test "sets DOUBLE_BLINK led behavior for the specified device", %{tenant: tenant} do
       {astarte_device_id, graphql_id} = sample_device_id(tenant)
 
-      Edgehog.Astarte.Device.LedBehaviorMock
-      |> expect(:post, 1, fn _client, ^astarte_device_id, "DoubleBlink60Seconds" -> :ok end)
+      expect(LedBehaviorMock, :post, 1, fn _client, ^astarte_device_id, "DoubleBlink60Seconds" ->
+        :ok
+      end)
 
       result = set_led_behavior_mutation(tenant: tenant, id: graphql_id, behavior: "DOUBLE_BLINK")
       assert %{"id" => ^graphql_id} = extract_result!(result)
@@ -47,8 +50,9 @@ defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
     test "sets SLOW_BLINK led behavior for the specified device", %{tenant: tenant} do
       {astarte_device_id, graphql_id} = sample_device_id(tenant)
 
-      Edgehog.Astarte.Device.LedBehaviorMock
-      |> expect(:post, 1, fn _client, ^astarte_device_id, "SlowBlink60Seconds" -> :ok end)
+      expect(LedBehaviorMock, :post, 1, fn _client, ^astarte_device_id, "SlowBlink60Seconds" ->
+        :ok
+      end)
 
       result = set_led_behavior_mutation(tenant: tenant, id: graphql_id, behavior: "SLOW_BLINK")
       assert %{"id" => ^graphql_id} = extract_result!(result)
@@ -74,8 +78,7 @@ defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
       device = DevicesFixtures.device_fixture(tenant: tenant)
       id = AshGraphql.Resource.encode_relay_id(device)
 
-      Edgehog.Astarte.Device.LedBehaviorMock
-      |> expect(:post, 0, fn _client, _device_id, _behavior -> raise "Error!" end)
+      expect(LedBehaviorMock, :post, 0, fn _client, _device_id, _behavior -> raise "Error!" end)
 
       assert %{errors: [%{message: _msg}]} =
                set_led_behavior_mutation(tenant: tenant, id: id, behavior: "FOO")

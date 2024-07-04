@@ -32,12 +32,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageCollectionTest do
       system_model_handle = system_model.handle
 
       base_image_collection =
-        create_base_image_collection_mutation(
-          tenant: tenant,
-          system_model_id: system_model_id,
-          name: "Foobar",
-          handle: "foobar"
-        )
+        [tenant: tenant, system_model_id: system_model_id, name: "Foobar", handle: "foobar"]
+        |> create_base_image_collection_mutation()
         |> extract_result!()
 
       assert %{
@@ -172,7 +168,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageCollectionTest do
 
     {system_model_id, opts} =
       Keyword.pop_lazy(opts, :system_model_id, fn ->
-        system_model_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> system_model_fixture()
         |> AshGraphql.Resource.encode_relay_id()
       end)
 

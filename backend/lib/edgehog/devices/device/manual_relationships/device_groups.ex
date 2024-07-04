@@ -19,9 +19,11 @@
 #
 
 defmodule Edgehog.Devices.Device.ManualRelationships.DeviceGroups do
+  @moduledoc false
   use Ash.Resource.ManualRelationship
 
   alias Edgehog.Devices.Device
+
   require Ash.Query
 
   @impl Ash.Resource.ManualRelationship

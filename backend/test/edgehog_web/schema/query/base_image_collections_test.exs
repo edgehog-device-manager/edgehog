@@ -21,8 +21,8 @@
 defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.DevicesFixtures
   import Edgehog.BaseImagesFixtures
+  import Edgehog.DevicesFixtures
 
   describe "baseImageCollections field" do
     test "returns empty base image collections", %{tenant: tenant} do

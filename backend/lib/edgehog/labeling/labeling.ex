@@ -25,11 +25,13 @@ defmodule Edgehog.Labeling do
 
   use Ash.Domain, extensions: [AshGraphql.Domain]
 
+  alias Edgehog.Labeling.Tag
+
   graphql do
     root_level_errors? true
 
     queries do
-      list Edgehog.Labeling.Tag, :existing_device_tags, :read_assigned_to_devices do
+      list Tag, :existing_device_tags, :read_assigned_to_devices do
         paginate_with nil
       end
     end
@@ -37,6 +39,6 @@ defmodule Edgehog.Labeling do
 
   resources do
     resource Edgehog.Labeling.DeviceTag
-    resource Edgehog.Labeling.Tag
+    resource Tag
   end
 end

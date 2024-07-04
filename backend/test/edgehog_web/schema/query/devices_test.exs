@@ -26,13 +26,13 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
   describe "devices query" do
     test "returns empty devices", %{tenant: tenant} do
-      assert [] == devices_query(tenant: tenant) |> extract_result!()
+      assert [] == [tenant: tenant] |> devices_query() |> extract_result!()
     end
 
     test "returns devices if they're present", %{tenant: tenant} do
       fixture = device_fixture(tenant: tenant)
 
-      assert [device] = devices_query(tenant: tenant) |> extract_result!()
+      assert [device] = [tenant: tenant] |> devices_query() |> extract_result!()
 
       assert device["name"] == fixture.name
       assert device["deviceId"] == fixture.device_id
@@ -65,7 +65,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert Enum.count(devices, fn device ->
@@ -87,7 +88,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       filter = %{"online" => %{"eq" => true}}
 
       devices =
-        devices_query(tenant: tenant, filter: filter)
+        [tenant: tenant, filter: filter]
+        |> devices_query()
         |> extract_result!()
 
       assert length(devices) == 2
@@ -104,7 +106,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       sort = %{"field" => "NAME", "order" => "DESC"}
 
       assert [%{"name" => "c"}, %{"name" => "b"}, %{"name" => "a"}] =
-               devices_query(tenant: tenant, sort: sort)
+               [tenant: tenant, sort: sort]
+               |> devices_query()
                |> extract_result!()
     end
   end
@@ -122,8 +125,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "Base Image info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.BaseImageMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.BaseImageMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, base_image_info_fixture(name: "foo", version: "1.0.0")}
 
@@ -144,7 +146,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -161,8 +164,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "Battery Status", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.BatteryStatusMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.BatteryStatusMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, battery_status_fixture(level_percentage: 29.0, status: "Charging")}
 
@@ -183,7 +185,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -230,7 +233,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -251,8 +255,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "Hardware Info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.HardwareInfoMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.HardwareInfoMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, hardware_info_fixture(cpu_architecture: "arm", cpu_model: "ARMv7")}
 
@@ -273,7 +276,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -290,8 +294,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "Network Interfaces", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.NetworkInterfaceMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.NetworkInterfaceMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, network_interfaces_fixture(name: "eth0", technology: "Ethernet")}
 
@@ -312,7 +315,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -329,8 +333,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "OS info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.OSInfoMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.OSInfoMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, os_info_fixture(name: "foo_1", version: "1.0.0")}
 
@@ -351,7 +354,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -368,8 +372,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "Runtime info", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.RuntimeInfoMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.RuntimeInfoMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, runtime_info_fixture(name: "edgehog-esp32-device", version: "0.7.0")}
 
@@ -390,7 +393,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -407,8 +411,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "Storage Usage", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.StorageUsageMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.StorageUsageMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, storage_usage_fixture(label: "Disk 0", free_bytes: 1_000_000)}
 
@@ -429,7 +432,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -446,8 +450,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "System Status", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.SystemStatusMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.SystemStatusMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, system_status_fixture(task_count: 193, uptime_milliseconds: 200_159)}
 
@@ -468,7 +471,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -485,8 +489,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
     test "queries WiFi scan results", ctx do
       %{tenant: tenant, device_id_1: device_id_1, device_id_2: device_id_2} = ctx
 
-      Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, 2, fn
+      expect(Edgehog.Astarte.Device.WiFiScanResultMock, :get, 2, fn
         _client, ^device_id_1 ->
           {:ok, wifi_scan_results_fixture(connected: true, rssi: -40)}
 
@@ -507,7 +510,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       assert %{
@@ -556,7 +560,8 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       %{tenant: tenant, document: document} = ctx
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       Enum.each(devices, &assert(&1["deviceGroups"] == []))
@@ -573,19 +578,18 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       } = ctx
 
       _device_1_with_tags =
-        device_1
-        |> add_tags(["foo", "bar"])
+        add_tags(device_1, ["foo", "bar"])
 
       _device_2_with_tags =
-        device_2
-        |> add_tags(["bar", "baz"])
+        add_tags(device_2, ["bar", "baz"])
 
       _ = device_group_fixture(tenant: tenant, name: "foos", selector: ~s<"foo" in tags>)
       _ = device_group_fixture(tenant: tenant, name: "bars", selector: ~s<"bar" in tags>)
       _ = device_group_fixture(tenant: tenant, name: "bazs", selector: ~s<"baz" in tags>)
 
       devices =
-        devices_query(document: document, tenant: tenant)
+        [document: document, tenant: tenant]
+        |> devices_query()
         |> extract_result!()
 
       device_1_groups =

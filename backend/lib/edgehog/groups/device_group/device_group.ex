@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Groups.DeviceGroup do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Groups,
     extensions: [

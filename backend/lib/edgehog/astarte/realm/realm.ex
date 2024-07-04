@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Realm do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Astarte
 

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Cluster.Changes.TrimTrailingSlashFromURL do
+  @moduledoc false
   use Ash.Resource.Change
 
   @impl Ash.Resource.Change

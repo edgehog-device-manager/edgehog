@@ -28,61 +28,65 @@ defmodule Edgehog.Devices do
       AshGraphql.Domain
     ]
 
+  alias Edgehog.Devices.Device
+  alias Edgehog.Devices.HardwareType
+  alias Edgehog.Devices.SystemModel
+
   graphql do
     root_level_errors? true
 
     queries do
-      get Edgehog.Devices.Device, :device, :read do
+      get Device, :device, :read do
         description "Returns a single device."
       end
 
-      list Edgehog.Devices.Device, :devices, :read do
+      list Device, :devices, :read do
         description "Returns a list of devices."
         paginate_with nil
       end
 
-      get Edgehog.Devices.HardwareType, :hardware_type, :read do
+      get HardwareType, :hardware_type, :read do
         description "Returns a single hardware type."
       end
 
-      list Edgehog.Devices.HardwareType, :hardware_types, :read do
+      list HardwareType, :hardware_types, :read do
         description "Returns a list of hardware types."
         paginate_with nil
       end
 
-      get Edgehog.Devices.SystemModel, :system_model, :read do
+      get SystemModel, :system_model, :read do
         description "Returns a single system model."
       end
 
-      list Edgehog.Devices.SystemModel, :system_models, :read do
+      list SystemModel, :system_models, :read do
         description "Returns a list of system models."
         paginate_with nil
       end
     end
 
     mutations do
-      update Edgehog.Devices.Device, :update_device, :update
-      update Edgehog.Devices.Device, :add_device_tags, :add_tags
-      update Edgehog.Devices.Device, :remove_device_tags, :remove_tags
-      update Edgehog.Devices.Device, :set_device_led_behavior, :set_led_behavior
-      create Edgehog.Devices.HardwareType, :create_hardware_type, :create
-      update Edgehog.Devices.HardwareType, :update_hardware_type, :update
-      destroy Edgehog.Devices.HardwareType, :delete_hardware_type, :destroy
+      update Device, :update_device, :update
+      update Device, :add_device_tags, :add_tags
+      update Device, :remove_device_tags, :remove_tags
+      update Device, :set_device_led_behavior, :set_led_behavior
+      create HardwareType, :create_hardware_type, :create
+      update HardwareType, :update_hardware_type, :update
+      destroy HardwareType, :delete_hardware_type, :destroy
 
-      create Edgehog.Devices.SystemModel, :create_system_model, :create do
+      create SystemModel, :create_system_model, :create do
         relay_id_translations input: [hardware_type_id: :hardware_type]
       end
 
-      update Edgehog.Devices.SystemModel, :update_system_model, :update
-      destroy Edgehog.Devices.SystemModel, :delete_system_model, :destroy
+      update SystemModel, :update_system_model, :update
+      destroy SystemModel, :delete_system_model, :destroy
     end
   end
 
   resources do
-    resource Edgehog.Devices.Device
-    resource Edgehog.Devices.HardwareType
+    resource Device
+    resource HardwareType
     resource Edgehog.Devices.HardwareTypePartNumber
-    resource Edgehog.Devices.SystemModel
+    resource SystemModel
     resource Edgehog.Devices.SystemModelPartNumber
   end
 end

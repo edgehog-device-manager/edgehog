@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Selector.AST.AttributeFilter do
+  @moduledoc false
   defstruct [:namespace, :key, :operator, :type, :value]
 
   @type t :: %__MODULE__{

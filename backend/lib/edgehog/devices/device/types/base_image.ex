@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Types.BaseImage do
+  @moduledoc false
   use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
     value_id: :base_image_info,
     value_struct: Edgehog.Astarte.Device.BaseImage

@@ -32,17 +32,19 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       hardware_type = hardware_type_fixture(tenant: tenant)
 
       fixture =
-        system_model_fixture(
+        [
           tenant: tenant,
           hardware_type_id: hardware_type.id,
           picture_url: "https://example.com/image.jpg"
-        )
+        ]
+        |> system_model_fixture()
         |> Ash.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
       system_model =
-        system_model_query(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> system_model_query()
         |> extract_result!()
 
       assert system_model["name"] == fixture.name
@@ -96,11 +98,8 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       %{tenant: tenant, id: id, document: document} = ctx
 
       %{"localizedDescriptions" => localized_descriptions} =
-        system_model_query(
-          tenant: tenant,
-          id: id,
-          document: document
-        )
+        [tenant: tenant, id: id, document: document]
+        |> system_model_query()
         |> extract_result!()
 
       assert length(localized_descriptions) == 3
@@ -114,12 +113,13 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       preferred_language_tags = ["it", "fr"]
 
       %{"localizedDescriptions" => localized_descriptions} =
-        system_model_query(
+        [
           tenant: tenant,
           id: id,
           extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
           document: document
-        )
+        ]
+        |> system_model_query()
         |> extract_result!()
 
       assert length(localized_descriptions) == 2
@@ -132,12 +132,13 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       preferred_language_tags = ["en-GB", "de"]
 
       %{"localizedDescriptions" => []} =
-        system_model_query(
+        [
           tenant: tenant,
           id: id,
           extra_variables: %{"preferredLanguageTags" => preferred_language_tags},
           document: document
-        )
+        ]
+        |> system_model_query()
         |> extract_result!()
     end
   end
@@ -182,7 +183,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
     variables =
       opts
       |> Keyword.get(:extra_variables, %{})
-      |> Map.merge(%{"id" => id})
+      |> Map.put("id", id)
 
     document = Keyword.get(opts, :document, default_document)
 

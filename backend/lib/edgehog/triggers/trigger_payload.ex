@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Triggers.TriggerPayload do
+  @moduledoc false
   use Ash.Resource,
     data_layer: :embedded
 

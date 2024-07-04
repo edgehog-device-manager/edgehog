@@ -24,14 +24,15 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
   import Tesla.Mock
+
   alias Edgehog.Astarte.Device.DeviceStatus
+  alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.IPBase
 
   describe "ip_geolocation" do
     setup do
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> stub(:get, fn _client, _device_id ->
+      stub(DeviceStatusMock, :get, fn _client, _device_id ->
         device_status = %DeviceStatus{
           last_connection: ~U[2021-11-15 10:44:57.432516Z],
           last_disconnection: ~U[2021-11-15 10:45:57.432516Z],
@@ -47,8 +48,7 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
     end
 
     test "geolocate/1 returns error without input IP address", %{device: device} do
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _appengine_client, _device_id ->
+      expect(DeviceStatusMock, :get, fn _appengine_client, _device_id ->
         {:ok,
          %DeviceStatus{
            last_connection: nil,

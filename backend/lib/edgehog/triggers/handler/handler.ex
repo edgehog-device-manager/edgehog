@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Triggers.Handler do
+  @moduledoc false
   use Ash.Resource,
     domain: Edgehog.Triggers
 

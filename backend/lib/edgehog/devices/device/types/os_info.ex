@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Types.OSInfo do
+  @moduledoc false
   use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
     value_id: :os_info,
     value_struct: Edgehog.Astarte.Device.OSInfo

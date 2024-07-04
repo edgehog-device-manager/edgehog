@@ -35,7 +35,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       base_image = base_image_fixture(tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foobar"])
 
       context = %{
@@ -64,7 +65,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
 
       id = AshGraphql.Resource.encode_relay_id(update_campaign)
 
-      update_campaign_data = update_campaign_query(tenant: tenant, id: id) |> extract_result!()
+      update_campaign_data =
+        [tenant: tenant, id: id] |> update_campaign_query() |> extract_result!()
 
       assert update_campaign_data["name"] == update_campaign.name
       assert update_campaign_data["status"] == "IDLE"
@@ -108,7 +110,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       now = DateTime.utc_now()
 
       target =
-        successful_target_fixture(now: now, tenant: tenant)
+        [now: now, tenant: tenant]
+        |> successful_target_fixture()
         |> Ash.load!([:update_campaign, :ota_operation])
 
       update_campaign_id = AshGraphql.Resource.encode_relay_id(target.update_campaign)
@@ -131,7 +134,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       """
 
       update_campaign_data =
-        update_campaign_query(document: document, id: update_campaign_id, tenant: tenant)
+        [document: document, id: update_campaign_id, tenant: tenant]
+        |> update_campaign_query()
         |> extract_result!()
 
       assert [update_target] = update_campaign_data["updateTargets"]
@@ -166,7 +170,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       target_count = Enum.random(20..40)
 
       update_campaign =
-        update_campaign_with_targets_fixture(target_count, tenant: tenant)
+        target_count
+        |> update_campaign_with_targets_fixture(tenant: tenant)
         |> Ash.load!(:update_targets)
 
       # Pick some targets to be put in a different status
@@ -214,7 +219,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       update_campaign_id = AshGraphql.Resource.encode_relay_id(update_campaign)
 
       update_campaign_data =
-        update_campaign_query(document: document, id: update_campaign_id, tenant: tenant)
+        [document: document, id: update_campaign_id, tenant: tenant]
+        |> update_campaign_query()
         |> extract_result!()
 
       targets = update_campaign.update_targets

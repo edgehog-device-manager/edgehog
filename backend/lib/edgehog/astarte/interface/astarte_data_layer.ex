@@ -19,21 +19,23 @@
 #
 
 defmodule Edgehog.Astarte.Interface.AstarteDataLayer do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Interface.DataLayer
 
   alias Astarte.Client.RealmManagement
+  alias Edgehog.Astarte.Interface.DataLayer
 
-  @impl Edgehog.Astarte.Interface.DataLayer
+  @impl DataLayer
   def get(%RealmManagement{} = client, interface_name, interface_major) do
     RealmManagement.Interfaces.get(client, interface_name, interface_major)
   end
 
-  @impl Edgehog.Astarte.Interface.DataLayer
+  @impl DataLayer
   def create(%RealmManagement{} = client, interface_json) do
     RealmManagement.Interfaces.create(client, interface_json)
   end
 
-  @impl Edgehog.Astarte.Interface.DataLayer
+  @impl DataLayer
   def update(%RealmManagement{} = client, interface_name, interface_major, interface_json) do
     RealmManagement.Interfaces.update(client, interface_name, interface_major, interface_json)
   end

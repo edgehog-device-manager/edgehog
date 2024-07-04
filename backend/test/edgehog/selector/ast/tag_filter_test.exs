@@ -24,9 +24,11 @@ defmodule Edgehog.Selector.AST.TagFilterTest do
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
   alias Edgehog.Devices.Device
   alias Edgehog.Selector.AST.TagFilter
   alias Edgehog.Selector.Filter
+
   require Ash.Query
 
   describe "to_ash_expr/1" do
@@ -36,29 +38,26 @@ defmodule Edgehog.Selector.AST.TagFilterTest do
       realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
       device_foo =
-        device_fixture(realm_id: realm.id, tenant: tenant)
+        [realm_id: realm.id, tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo", "other", "foox"])
 
       device_bar =
-        device_fixture(realm_id: realm.id, tenant: tenant)
+        [realm_id: realm.id, tenant: tenant]
+        |> device_fixture()
         |> add_tags(["bar", "foox"])
 
       device_no_tags =
         device_fixture(realm_id: realm.id, tenant: tenant)
 
-      {:ok,
-       tenant: tenant,
-       device_foo: device_foo,
-       device_bar: device_bar,
-       device_no_tags: device_no_tags}
+      {:ok, tenant: tenant, device_foo: device_foo, device_bar: device_bar, device_no_tags: device_no_tags}
     end
 
     test "returns expression that matches devices with the tag", ctx do
       %{tenant: tenant, device_foo: device_foo} = ctx
 
       expr =
-        %TagFilter{operator: :in, tag: "foo"}
-        |> Filter.to_ash_expr()
+        Filter.to_ash_expr(%TagFilter{operator: :in, tag: "foo"})
 
       assert [device] =
                Device
@@ -76,8 +75,7 @@ defmodule Edgehog.Selector.AST.TagFilterTest do
       } = ctx
 
       expr =
-        %TagFilter{operator: :not_in, tag: "foo"}
-        |> Filter.to_ash_expr()
+        Filter.to_ash_expr(%TagFilter{operator: :not_in, tag: "foo"})
 
       ids =
         Device

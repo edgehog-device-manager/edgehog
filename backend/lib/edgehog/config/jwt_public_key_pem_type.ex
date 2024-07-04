@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Config.JWTPublicKeyPEMType do
+  @moduledoc false
   use Skogsra.Type
 
   alias JOSE.JWK

@@ -36,21 +36,21 @@ defmodule Edgehog.DataCase do
 
   use ExUnit.CaseTemplate
 
+  import Mox
+
+  alias Ecto.Adapters.SQL
+
   using do
     quote do
-      alias Edgehog.Repo
-
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
       import Edgehog.DataCase
       import Mox
+
+      alias Edgehog.Repo
     end
   end
-
-  import Mox
-
-  alias Ecto.Adapters.SQL
 
   setup :verify_on_exit!
 

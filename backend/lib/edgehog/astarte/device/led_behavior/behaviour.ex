@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.LedBehavior.Behaviour do
+  @moduledoc false
   alias Astarte.Client.AppEngine
 
   @callback post(client :: AppEngine.t(), device_id :: String.t(), behavior :: String.t()) ::

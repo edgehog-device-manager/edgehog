@@ -19,14 +19,17 @@
 #
 
 defmodule Edgehog.Tenants do
+  @moduledoc false
   use Ash.Domain,
     extensions: [AshGraphql.Domain, AshJsonApi.Domain]
+
+  alias Edgehog.Tenants.Tenant
 
   graphql do
     root_level_errors? true
 
     queries do
-      read_one Edgehog.Tenants.Tenant, :tenant_info, :current_tenant, allow_nil?: false
+      read_one Tenant, :tenant_info, :current_tenant, allow_nil?: false
     end
   end
 
@@ -36,7 +39,7 @@ defmodule Edgehog.Tenants do
   end
 
   resources do
-    resource Edgehog.Tenants.Tenant do
+    resource Tenant do
       define :create_tenant, action: :create
       define :provision_tenant, action: :provision
       define :fetch_tenant_by_slug, action: :read, get_by: :slug, not_found_error?: true

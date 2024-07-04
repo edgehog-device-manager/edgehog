@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Groups.DeviceGroup.Validations.Selector do
+  @moduledoc false
   use Ash.Resource.Validation
 
   alias Edgehog.Selector

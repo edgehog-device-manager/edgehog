@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.ForwarderSession do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.ForwarderSession.Behaviour
 
   alias Astarte.Client.AppEngine
@@ -49,8 +50,8 @@ defmodule Edgehog.Astarte.Device.ForwarderSession do
         forwarder_port,
         forwarder_secure_sessions?
       )
-      when is_binary(session_token) and is_binary(forwarder_hostname) and
-             is_integer(forwarder_port) and is_boolean(forwarder_secure_sessions?) do
+      when is_binary(session_token) and is_binary(forwarder_hostname) and is_integer(forwarder_port) and
+             is_boolean(forwarder_secure_sessions?) do
     data = %{
       session_token: session_token,
       host: forwarder_hostname,

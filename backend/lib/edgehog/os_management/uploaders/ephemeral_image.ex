@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.OSManagement.Uploaders.EphemeralImage do
+  @moduledoc false
   use Waffle.Definition
 
   @async false

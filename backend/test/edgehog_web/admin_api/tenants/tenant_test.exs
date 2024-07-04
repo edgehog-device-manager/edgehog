@@ -28,20 +28,20 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
   alias Edgehog.Repo
   alias Edgehog.Tenants
 
-  @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
+  @valid_pem_public_key :secp256r1
+                        |> X509.PrivateKey.new_ec()
                         |> X509.PublicKey.derive()
                         |> X509.PublicKey.to_pem()
                         |> String.trim()
 
-  @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1)
+  @valid_pem_private_key :secp256r1
+                         |> X509.PrivateKey.new_ec()
                          |> X509.PrivateKey.to_pem()
                          |> String.trim()
 
   describe "POST /admin-api/v1/tenants" do
     setup do
-      Edgehog.Tenants.ReconcilerMock
-      |> stub(:reconcile_tenant, fn _tenant -> :ok end)
-
+      stub(Edgehog.Tenants.ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
       {:ok, path: ~p"/admin-api/v1/tenants"}
     end
 

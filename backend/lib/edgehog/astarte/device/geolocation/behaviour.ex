@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.Geolocation.Behaviour do
+  @moduledoc false
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.Geolocation.SensorPosition
 

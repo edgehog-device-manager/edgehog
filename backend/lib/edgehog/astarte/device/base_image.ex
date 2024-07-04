@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.BaseImage do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.BaseImage.Behaviour
 
   alias Astarte.Client.AppEngine

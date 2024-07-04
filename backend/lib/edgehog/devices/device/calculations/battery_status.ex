@@ -19,7 +19,10 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.BatteryStatus do
+  @moduledoc false
   use Ash.Resource.Calculation
+
+  alias Ash.Resource.Calculation
 
   @battery_status Application.compile_env(
                     :edgehog,
@@ -27,12 +30,12 @@ defmodule Edgehog.Devices.Device.Calculations.BatteryStatus do
                     Edgehog.Astarte.Device.BatteryStatus
                   )
 
-  @impl Ash.Resource.Calculation
+  @impl Calculation
   def load(_query, _opts, _context) do
     [:device_id, :appengine_client]
   end
 
-  @impl Ash.Resource.Calculation
+  @impl Calculation
   def calculate(devices, _opts, _context) do
     Enum.map(devices, fn device ->
       %{

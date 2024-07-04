@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Geolocation.Location do
+  @moduledoc false
   use Ash.Resource,
     data_layer: :embedded,
     extensions: [

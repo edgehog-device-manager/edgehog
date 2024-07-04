@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.UnrelateCurrentTargetGroups do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.Groups.DeviceGroup

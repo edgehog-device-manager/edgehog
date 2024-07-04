@@ -19,6 +19,7 @@
 #
 
 defmodule EdgehogWeb.Auth.Pipeline do
+  @moduledoc false
   use Plug.Builder
 
   plug Guardian.Plug.Pipeline,

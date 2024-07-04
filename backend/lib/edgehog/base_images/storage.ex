@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.BaseImages.Storage do
+  @moduledoc false
   alias Edgehog.BaseImages.BaseImage
 
   @type upload :: %Plug.Upload{}

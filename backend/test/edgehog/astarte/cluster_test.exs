@@ -23,6 +23,7 @@ defmodule Edgehog.Astarte.ClusterTest do
 
   import Edgehog.AstarteFixtures
 
+  alias Ash.Error.Invalid
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Cluster
 
@@ -66,7 +67,7 @@ defmodule Edgehog.Astarte.ClusterTest do
 
       invalid_attrs_list
       |> Enum.map(&Astarte.create_cluster/1)
-      |> Enum.each(fn result -> assert {:error, %Ash.Error.Invalid{}} = result end)
+      |> Enum.each(fn result -> assert {:error, %Invalid{}} = result end)
     end
 
     test "with invalid URL schema returns error" do
@@ -76,7 +77,7 @@ defmodule Edgehog.Astarte.ClusterTest do
       invalid_schemas = ["ftp://", ""]
 
       Enum.each(invalid_schemas, fn schema ->
-        assert {:error, %Ash.Error.Invalid{}} =
+        assert {:error, %Invalid{}} =
                  Astarte.create_cluster(%{
                    base_api_url: schema <> valid_host_name,
                    name: valid_name
@@ -90,7 +91,7 @@ defmodule Edgehog.Astarte.ClusterTest do
       invalid_hosts = ["some url", ""]
 
       Enum.each(invalid_hosts, fn host ->
-        assert {:error, %Ash.Error.Invalid{}} =
+        assert {:error, %Invalid{}} =
                  Astarte.create_cluster(%{base_api_url: valid_schema <> host, name: valid_name})
       end)
     end

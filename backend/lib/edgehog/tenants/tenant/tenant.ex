@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.Tenant do
+  @moduledoc false
   use Ash.Resource,
     domain: Edgehog.Tenants,
     data_layer: AshPostgres.DataLayer,

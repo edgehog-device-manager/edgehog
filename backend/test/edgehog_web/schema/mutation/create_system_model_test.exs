@@ -23,13 +23,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
 
   import Edgehog.DevicesFixtures
 
+  alias Edgehog.Assets.SystemModelPictureMock
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
 
   describe "createSystemModel mutation" do
     test "creates system model with valid data", %{tenant: tenant} do
       hardware_type_id =
-        hardware_type_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> hardware_type_fixture()
         |> AshGraphql.Resource.encode_relay_id()
 
       result =
@@ -90,10 +92,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
     test "allows uploading a picture file", %{tenant: tenant} do
       picture_url = "https://example.com/image.jpg"
 
-      Edgehog.Assets.SystemModelPictureMock
-      |> expect(:upload, fn _, _ ->
-        {:ok, picture_url}
-      end)
+      expect(SystemModelPictureMock, :upload, fn _, _ -> {:ok, picture_url} end)
 
       result =
         create_system_model_mutation(
@@ -123,7 +122,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
 
       picture_url = "https://example.com/image.jpg"
 
-      Edgehog.Assets.SystemModelPictureMock
+      SystemModelPictureMock
       |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
       |> expect(:delete, fn _, ^picture_url -> :ok end)
 
@@ -249,7 +248,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
 
     {hardware_type_id, opts} =
       Keyword.pop_lazy(opts, :hardware_type_id, fn ->
-        hardware_type_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> hardware_type_fixture()
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
@@ -268,8 +268,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
     document = Keyword.get(opts, :document, default_document)
 
     context =
-      %{tenant: tenant}
-      |> add_upload("picture_file", opts[:picture_file])
+      add_upload(%{tenant: tenant}, "picture_file", opts[:picture_file])
 
     Absinthe.run!(document, EdgehogWeb.Schema,
       variables: variables,

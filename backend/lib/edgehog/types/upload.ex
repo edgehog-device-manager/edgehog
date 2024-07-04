@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Types.Upload do
+  @moduledoc false
   use Ash.Type
   use AshGraphql.Type
 

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.OSManagement.OTAOperation.Changes.SendUpdateRequest do
+  @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.OSManagement

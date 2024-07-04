@@ -24,12 +24,14 @@ defmodule Edgehog.SelectorTest do
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
+
   alias Edgehog.Devices.Device
   alias Edgehog.Selector
   alias Edgehog.Selector.AST.AttributeFilter
   alias Edgehog.Selector.AST.BinaryOp
   alias Edgehog.Selector.AST.TagFilter
   alias Edgehog.Selector.Parser.Error
+
   require Ash.Query
 
   describe "parse/1" do
@@ -89,9 +91,7 @@ defmodule Edgehog.SelectorTest do
                 type: :datetime,
                 value: "2022-06-29T16:46:15.00Z"
               }} ==
-               Selector.parse(
-                 ~s/attributes["baz:production_date"] >= datetime("2022-06-29T16:46:15.00Z")/
-               )
+               Selector.parse(~s/attributes["baz:production_date"] >= datetime("2022-06-29T16:46:15.00Z")/)
 
       assert {:ok,
               %AttributeFilter{
@@ -110,9 +110,7 @@ defmodule Edgehog.SelectorTest do
                 type: :binaryblob,
                 value: "ZmlybXdhcmU="
               }} ==
-               Selector.parse(
-                 ~s/attributes["custom:firmware_blob"] == binaryblob("ZmlybXdhcmU=")/
-               )
+               Selector.parse(~s/attributes["custom:firmware_blob"] == binaryblob("ZmlybXdhcmU=")/)
     end
 
     test "correctly parses binary operations" do
@@ -188,9 +186,7 @@ defmodule Edgehog.SelectorTest do
                   rhs: %TagFilter{operator: :in, tag: "fuu"}
                 }
               }} ==
-               Selector.parse(
-                 ~s/"foo" in tags or "bar" not in tags and "baz" in tags or "fuu" in tags/
-               )
+               Selector.parse(~s/"foo" in tags or "bar" not in tags and "baz" in tags or "fuu" in tags/)
 
       assert {:ok,
               %BinaryOp{
@@ -206,9 +202,7 @@ defmodule Edgehog.SelectorTest do
                   rhs: %TagFilter{operator: :in, tag: "fuu"}
                 }
               }} ==
-               Selector.parse(
-                 ~s/("foo" in tags or "bar" not in tags) and ("baz" in tags or "fuu" in tags)/
-               )
+               Selector.parse(~s/("foo" in tags or "bar" not in tags) and ("baz" in tags or "fuu" in tags)/)
     end
 
     test "returns error with syntax errors" do
@@ -228,19 +222,23 @@ defmodule Edgehog.SelectorTest do
       realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
       device_foo_red =
-        device_fixture(realm_id: realm.id, tenant: tenant)
+        [realm_id: realm.id, tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo", "red"])
 
       device_bar_red =
-        device_fixture(realm_id: realm.id, tenant: tenant)
+        [realm_id: realm.id, tenant: tenant]
+        |> device_fixture()
         |> add_tags(["bar", "red"])
 
       device_foo_green =
-        device_fixture(realm_id: realm.id, tenant: tenant)
+        [realm_id: realm.id, tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo", "green"])
 
       device_bar_green =
-        device_fixture(realm_id: realm.id, tenant: tenant)
+        [realm_id: realm.id, tenant: tenant]
+        |> device_fixture()
         |> add_tags(["bar", "green"])
 
       {:ok,
@@ -258,7 +256,7 @@ defmodule Edgehog.SelectorTest do
         device_foo_green: device_foo_green
       } = ctx
 
-      expr = %TagFilter{operator: :in, tag: "foo"} |> Selector.to_ash_expr()
+      expr = Selector.to_ash_expr(%TagFilter{operator: :in, tag: "foo"})
 
       ids =
         Device
@@ -278,12 +276,11 @@ defmodule Edgehog.SelectorTest do
       } = ctx
 
       expr =
-        %BinaryOp{
+        Selector.to_ash_expr(%BinaryOp{
           operator: :and,
           lhs: %TagFilter{operator: :in, tag: "foo"},
           rhs: %TagFilter{operator: :in, tag: "red"}
-        }
-        |> Selector.to_ash_expr()
+        })
 
       [id] =
         Device

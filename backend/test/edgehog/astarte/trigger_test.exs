@@ -27,6 +27,7 @@ defmodule Edgehog.Astarte.TriggerTest do
   alias Astarte.Client.APIError
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Trigger
+  alias Edgehog.Astarte.Trigger.MockDataLayer
 
   describe "fetch_by_name/2" do
     setup do
@@ -46,8 +47,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_name: trigger_name
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:get, fn ^client, ^trigger_name ->
+      expect(MockDataLayer, :get, fn ^client, ^trigger_name ->
         {:ok, %{"data" => trigger_map_fixture(name: trigger_name)}}
       end)
 
@@ -60,8 +60,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_name: trigger_name
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:get, fn ^client, ^trigger_name ->
+      expect(MockDataLayer, :get, fn ^client, ^trigger_name ->
         {:error, api_error(status: 404)}
       end)
 
@@ -75,8 +74,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_name: trigger_name
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:get, fn ^client, ^trigger_name ->
+      expect(MockDataLayer, :get, fn ^client, ^trigger_name ->
         {:error, api_error(status: 500)}
       end)
 
@@ -89,8 +87,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_name: trigger_name
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:get, fn ^client, ^trigger_name ->
+      expect(MockDataLayer, :get, fn ^client, ^trigger_name ->
         {:error, api_error(status: 502, message: "Bad Gateway")}
       end)
 
@@ -119,11 +116,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_map: trigger_map
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:create, fn ^client, ^trigger_map ->
-        :ok
-      end)
-
+      expect(MockDataLayer, :create, fn ^client, ^trigger_map -> :ok end)
       assert :ok = Trigger.create(client, trigger_map)
     end
 
@@ -133,8 +126,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_map: trigger_map
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:create, fn ^client, ^trigger_map ->
+      expect(MockDataLayer, :create, fn ^client, ^trigger_map ->
         {:error, api_error(status: 422, message: "Invalid Entity")}
       end)
 
@@ -163,11 +155,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_name: trigger_name
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:delete, fn ^client, ^trigger_name ->
-        :ok
-      end)
-
+      expect(MockDataLayer, :delete, fn ^client, ^trigger_name -> :ok end)
       assert :ok = Trigger.delete(client, trigger_name)
     end
 
@@ -177,8 +165,7 @@ defmodule Edgehog.Astarte.TriggerTest do
         trigger_name: trigger_name
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:delete, fn ^client, ^trigger_name ->
+      expect(MockDataLayer, :delete, fn ^client, ^trigger_name ->
         {:error, api_error(status: 403, message: "Forbidden")}
       end)
 

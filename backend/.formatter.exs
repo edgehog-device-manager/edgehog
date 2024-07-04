@@ -13,7 +13,7 @@
     :skogsra,
     :nimble_parsec
   ],
-  plugins: [Spark.Formatter],
+  plugins: [Spark.Formatter, Styler],
   inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],
   subdirectories: ["priv/*/migrations"]
 ]

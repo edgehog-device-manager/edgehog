@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.Tenant.ManualActions.ReconcilerAction do
+  @moduledoc false
   use Ash.Resource.Actions.Implementation
 
   alias Edgehog.Tenants.Reconciler

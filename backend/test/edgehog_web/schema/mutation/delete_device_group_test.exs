@@ -24,6 +24,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
   import Edgehog.GroupsFixtures
 
   alias Edgehog.Groups.DeviceGroup
+
   require Ash.Query
 
   describe "deleteDeviceGroup query" do
@@ -38,7 +39,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
 
     test "deletes a device group", %{tenant: tenant, id: id, device_group: fixture} do
       device_group =
-        delete_device_group_mutation(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> delete_device_group_mutation()
         |> extract_result!()
 
       assert device_group["handle"] == fixture.handle

@@ -35,11 +35,12 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       hardware_type = hardware_type_fixture(tenant: tenant)
 
       fixture =
-        system_model_fixture(
+        [
           tenant: tenant,
           hardware_type_id: hardware_type.id,
           picture_url: "https://example.com/image.jpg"
-        )
+        ]
+        |> system_model_fixture()
         |> Ash.load!(:part_number_strings)
 
       assert %{data: %{"systemModels" => [system_model]}} = system_models_query(tenant: tenant)

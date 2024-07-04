@@ -19,31 +19,35 @@
 #
 
 defmodule Edgehog.Forwarder do
+  @moduledoc false
   use Ash.Domain,
     extensions: [
       AshGraphql.Domain
     ]
 
+  alias Edgehog.Forwarder.Config
+  alias Edgehog.Forwarder.Session
+
   graphql do
     root_level_errors? true
 
     queries do
-      read_one Edgehog.Forwarder.Config, :forwarder_config, :get
+      read_one Config, :forwarder_config, :get
 
-      read_one Edgehog.Forwarder.Session, :forwarder_session, :get do
+      read_one Session, :forwarder_session, :get do
         relay_id_translations device_id: :device
       end
     end
 
     mutations do
-      action Edgehog.Forwarder.Session, :request_forwarder_session, :request do
+      action Session, :request_forwarder_session, :request do
         relay_id_translations input: [device_id: :device]
       end
     end
   end
 
   resources do
-    resource Edgehog.Forwarder.Config
-    resource Edgehog.Forwarder.Session
+    resource Config
+    resource Session
   end
 end

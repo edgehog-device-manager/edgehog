@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
+  @moduledoc false
   use DynamicSupervisor
 
   alias Edgehog.UpdateCampaigns.ExecutorRegistry
@@ -50,7 +51,8 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
     ]
 
     child_spec =
-      executor_child_spec(rollout_mechanism, base_args)
+      rollout_mechanism
+      |> executor_child_spec(base_args)
       |> Supervisor.child_spec(id: executor_id)
 
     case DynamicSupervisor.start_child(__MODULE__, child_spec) do

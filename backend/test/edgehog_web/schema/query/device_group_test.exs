@@ -39,7 +39,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
       result =
-        device_group_query(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> device_group_query()
         |> extract_result!()
 
       assert result["name"] == fixture.name
@@ -55,15 +56,18 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
       foo_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo"])
 
       foo_bar_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foo", "bar"])
 
       baz_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["baz"])
 
       document = """
@@ -77,7 +81,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
       """
 
       assert %{"devices" => devices} =
-               device_group_query(tenant: tenant, id: id, document: document)
+               [tenant: tenant, id: id, document: document]
+               |> device_group_query()
                |> extract_result!()
 
       assert length(devices) == 2

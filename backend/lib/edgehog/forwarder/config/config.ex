@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Forwarder.Config do
+  @moduledoc false
   use Ash.Resource,
     domain: Edgehog.Forwarder,
     extensions: [

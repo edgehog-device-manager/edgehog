@@ -26,6 +26,7 @@ defmodule Edgehog.OSManagementFixtures do
 
   alias Edgehog.BaseImagesFixtures
   alias Edgehog.DevicesFixtures
+  alias Edgehog.OSManagement.OTAOperation
 
   @doc """
   Generate a manual ota_operation.
@@ -35,18 +36,17 @@ defmodule Edgehog.OSManagementFixtures do
 
     {device_id, opts} =
       Keyword.pop_lazy(opts, :device_id, fn ->
-        DevicesFixtures.device_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> DevicesFixtures.device_fixture() |> Map.fetch!(:id)
       end)
 
     params =
-      opts
-      |> Enum.into(%{
+      Enum.into(opts, %{
         manual?: true,
         base_image_url: "https://my.bucket.example/ota.bin",
         device_id: device_id
       })
 
-    Edgehog.OSManagement.OTAOperation
+    OTAOperation
     |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end
@@ -59,19 +59,15 @@ defmodule Edgehog.OSManagementFixtures do
 
     {device_id, opts} =
       Keyword.pop_lazy(opts, :device_id, fn ->
-        DevicesFixtures.device_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> DevicesFixtures.device_fixture() |> Map.fetch!(:id)
       end)
 
     base_image = BaseImagesFixtures.base_image_fixture(tenant: tenant)
 
     params =
-      opts
-      |> Enum.into(%{
-        base_image_url: base_image.url,
-        device_id: device_id
-      })
+      Enum.into(opts, %{base_image_url: base_image.url, device_id: device_id})
 
-    Edgehog.OSManagement.OTAOperation
+    OTAOperation
     |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end

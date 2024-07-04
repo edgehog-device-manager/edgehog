@@ -19,12 +19,14 @@
 #
 
 defmodule Edgehog.Devices.Device do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Changes.NormalizeTagName
   alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
@@ -181,7 +183,7 @@ defmodule Edgehog.Devices.Device do
         constraints min_length: 1, items: [min_length: 1]
       end
 
-      change {Edgehog.Changes.NormalizeTagName, argument: :tags}
+      change {NormalizeTagName, argument: :tags}
 
       change manage_relationship(:tags,
                on_lookup: :relate,
@@ -202,7 +204,7 @@ defmodule Edgehog.Devices.Device do
         constraints min_length: 1, items: [min_length: 1]
       end
 
-      change {Edgehog.Changes.NormalizeTagName, argument: :tags}
+      change {NormalizeTagName, argument: :tags}
 
       change manage_relationship(:tags,
                on_match: :unrelate,

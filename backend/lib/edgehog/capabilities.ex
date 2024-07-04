@@ -190,7 +190,8 @@ defmodule Edgehog.Capabilities do
       end)
 
     # TODO add checks on device privacy settings and geolocation providers
-    MapSet.put(capabilities, :geolocation)
+    capabilities
+    |> MapSet.put(:geolocation)
     |> MapSet.to_list()
   end
 

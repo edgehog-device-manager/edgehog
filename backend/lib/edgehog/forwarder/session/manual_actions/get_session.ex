@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Forwarder.Session.ManualActions.GetSession do
+  @moduledoc false
   use Ash.Resource.ManualRead
 
   alias Edgehog.Devices.Device
@@ -42,8 +43,7 @@ defmodule Edgehog.Forwarder.Session.ManualActions.GetSession do
     end
   end
 
-  defp get_session_by_token(sessions, session_token)
-       when is_list(sessions) and is_binary(session_token) do
+  defp get_session_by_token(sessions, session_token) when is_list(sessions) and is_binary(session_token) do
     case Enum.find(sessions, &(&1.token == session_token)) do
       nil ->
         nil

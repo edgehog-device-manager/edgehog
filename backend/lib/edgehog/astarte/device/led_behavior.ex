@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.LedBehavior do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.LedBehavior.Behaviour
 
   alias Astarte.Client.AppEngine

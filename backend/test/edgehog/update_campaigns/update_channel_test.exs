@@ -37,7 +37,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
       base_image = base_image_fixture(tenant: tenant)
 
       update_channel =
-        update_channel_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> update_channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
       assert update_channel.updatable_devices == []
@@ -48,17 +49,20 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foobar"])
 
       _other_device =
-        device_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> device_fixture()
         |> add_tags(["foobar"])
 
       device_id = device.id
 
       update_channel =
-        update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+        [target_group_ids: [target_group.id], tenant: tenant]
+        |> update_channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
       assert [%{id: ^device_id}] = update_channel.updatable_devices
@@ -71,17 +75,20 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foobar"])
 
       _other_device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["not-foobar"])
 
       device_id = device.id
 
       update_channel =
-        update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+        [target_group_ids: [target_group.id], tenant: tenant]
+        |> update_channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
       assert [%{id: ^device_id}] = update_channel.updatable_devices
@@ -93,15 +100,18 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
       bar_group = device_group_fixture(selector: ~s<"bar" in tags>, tenant: tenant)
 
       foo_device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foo"])
 
       bar_device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["bar"])
 
       update_channel =
-        update_channel_fixture(target_group_ids: [foo_group.id, bar_group.id], tenant: tenant)
+        [target_group_ids: [foo_group.id, bar_group.id], tenant: tenant]
+        |> update_channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
       updatable_device_ids = Enum.map(update_channel.updatable_devices, & &1.id)
@@ -116,13 +126,15 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
       bar_group = device_group_fixture(selector: ~s<"bar" in tags>, tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image_id: base_image.id, tenant: tenant)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foo", "bar"])
 
       device_id = device.id
 
       update_channel =
-        update_channel_fixture(target_group_ids: [foo_group.id, bar_group.id], tenant: tenant)
+        [target_group_ids: [foo_group.id, bar_group.id], tenant: tenant]
+        |> update_channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
       assert [%{id: ^device_id}] = update_channel.updatable_devices

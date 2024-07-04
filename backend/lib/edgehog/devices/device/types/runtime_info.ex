@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Types.RuntimeInfo do
+  @moduledoc false
   use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
     value_id: :runtime_info,
     value_struct: Edgehog.Astarte.Device.RuntimeInfo

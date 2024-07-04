@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Selector.AST.TagFilter do
+  @moduledoc false
   import Ash.Expr
 
   @type t :: %__MODULE__{

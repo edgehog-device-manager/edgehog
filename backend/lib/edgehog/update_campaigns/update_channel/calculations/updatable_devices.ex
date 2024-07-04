@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateChannel.Calculations.UpdatableDevices do
+  @moduledoc false
   use Ash.Resource.Calculation
 
   require Ash.Query

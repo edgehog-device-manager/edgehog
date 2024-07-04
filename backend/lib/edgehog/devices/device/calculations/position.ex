@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.Calculations.Position do
+  @moduledoc false
   use Ash.Resource.Calculation
 
   alias Edgehog.Geolocation

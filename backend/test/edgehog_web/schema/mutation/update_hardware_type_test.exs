@@ -29,7 +29,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
   describe "updateHardwareType mutation" do
     setup %{tenant: tenant} do
       hardware_type =
-        hardware_type_fixture(tenant: tenant)
+        [tenant: tenant]
+        |> hardware_type_fixture()
         |> Ash.load!(:part_number_strings)
 
       id = AshGraphql.Resource.encode_relay_id(hardware_type)
@@ -225,7 +226,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
         "partNumbers" => opts[:part_numbers]
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
-      |> Enum.into(%{})
+      |> Map.new()
 
     variables = %{"id" => id, "input" => input}
 

@@ -37,23 +37,24 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL
+  alias EdgehogWeb.Auth.Token
+
   using do
     quote do
       use EdgehogWeb, :verified_routes
 
-      # Import conveniences for testing with connections
-      import Plug.Conn
-      import Phoenix.ConnTest
       import EdgehogWeb.AdminAPI.ConnCase
       import Mox
+      import Phoenix.ConnTest
+
+      # Import conveniences for testing with connections
+      import Plug.Conn
 
       # The default endpoint for testing
       @endpoint EdgehogWeb.Endpoint
     end
   end
-
-  alias Ecto.Adapters.SQL
-  alias EdgehogWeb.Auth.Token
 
   setup tags do
     pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])

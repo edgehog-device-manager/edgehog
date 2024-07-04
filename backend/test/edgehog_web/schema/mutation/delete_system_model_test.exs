@@ -22,8 +22,10 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.DevicesFixtures
+
   alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
+
   require Ash.Query
 
   describe "deleteSystemModel field" do
@@ -38,7 +40,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
 
     test "deletes a system model", %{tenant: tenant, id: id, system_model: fixture} do
       system_model =
-        delete_system_model_mutation(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> delete_system_model_mutation()
         |> extract_result!()
 
       assert system_model["handle"] == fixture.handle
@@ -56,11 +59,13 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
-      Edgehog.Assets.SystemModelPictureMock
-      |> expect(:delete, fn _, ^picture_url -> {:error, :cannot_delete} end)
+      expect(Edgehog.Assets.SystemModelPictureMock, :delete, fn _, ^picture_url ->
+        {:error, :cannot_delete}
+      end)
 
       _ =
-        delete_system_model_mutation(tenant: tenant, id: id)
+        [tenant: tenant, id: id]
+        |> delete_system_model_mutation()
         |> extract_result!()
     end
 

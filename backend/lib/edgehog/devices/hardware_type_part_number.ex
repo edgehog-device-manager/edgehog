@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.HardwareTypePartNumber do
+  @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [

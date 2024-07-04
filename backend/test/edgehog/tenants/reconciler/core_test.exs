@@ -176,8 +176,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
-      |> expect(:get, fn _client, _interface_name, _major ->
+      expect(Edgehog.Astarte.Interface.MockDataLayer, :get, fn _client, _interface_name, _major ->
         {:error, api_error(status: 500)}
       end)
 
@@ -285,8 +284,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         trigger_map: trigger_map
       } = ctx
 
-      Edgehog.Astarte.Trigger.MockDataLayer
-      |> expect(:get, fn _client, _trigger_name ->
+      expect(Edgehog.Astarte.Trigger.MockDataLayer, :get, fn _client, _trigger_name ->
         {:error, api_error(status: 502)}
       end)
 

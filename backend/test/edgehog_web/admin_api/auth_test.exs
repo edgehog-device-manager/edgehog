@@ -24,14 +24,18 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
-  alias Edgehog.Config
 
-  @valid_pem_public_key X509.PrivateKey.new_ec(:secp256r1)
+  alias Edgehog.Config
+  alias Edgehog.Tenants.ReconcilerMock
+
+  @valid_pem_public_key :secp256r1
+                        |> X509.PrivateKey.new_ec()
                         |> X509.PublicKey.derive()
                         |> X509.PublicKey.to_pem()
                         |> String.trim()
 
-  @valid_pem_private_key X509.PrivateKey.new_ec(:secp256r1)
+  @valid_pem_private_key :secp256r1
+                         |> X509.PrivateKey.new_ec()
                          |> X509.PrivateKey.to_pem()
                          |> String.trim()
 
@@ -59,9 +63,7 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
     @describetag :unconfigured
 
     setup do
-      Edgehog.Tenants.ReconcilerMock
-      |> stub(:reconcile_tenant, fn _tenant -> :ok end)
-
+      stub(ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
       Config.put_disable_admin_authentication(true)
 
       on_exit(fn ->
@@ -164,8 +166,7 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
       path: path,
       admin_private_key: admin_private_key
     } do
-      Edgehog.Tenants.ReconcilerMock
-      |> stub(:reconcile_tenant, fn _tenant -> :ok end)
+      stub(ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
 
       conn =
         conn

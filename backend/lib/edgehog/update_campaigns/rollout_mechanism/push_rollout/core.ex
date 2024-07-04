@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
+  @moduledoc false
   alias Astarte.Client.APIError
   alias Edgehog.OSManagement
   alias Edgehog.PubSub
@@ -45,11 +46,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   the target. It returns 0 if the moment to resend the request is already passed.
   This function assumes the passed target already has a pending request in flight.
   """
-  def pending_ota_request_timeout_ms(
-        update_target,
-        rollout,
-        now \\ DateTime.utc_now()
-      ) do
+  def pending_ota_request_timeout_ms(update_target, rollout, now \\ DateTime.utc_now()) do
     %UpdateTarget{latest_attempt: %DateTime{} = latest_attempt} = update_target
 
     absolute_timeout_ms = :timer.seconds(rollout.ota_request_timeout_seconds)
@@ -62,7 +59,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Returns the BaseImage that belongs to a specific update_campaign_id
   """
   def get_update_campaign_base_image!(tenant_id, update_campaign_id) do
-    UpdateCampaigns.fetch_campaign!(update_campaign_id, load: :base_image, tenant: tenant_id)
+    update_campaign_id
+    |> UpdateCampaigns.fetch_campaign!(load: :base_image, tenant: tenant_id)
     |> Map.fetch!(:base_image)
   end
 
@@ -172,7 +170,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   """
   def verify_compatibility(target_current_version, base_image, rollout) do
     force_downgrade = rollout.force_downgrade
-    base_image_version = base_image.version |> Version.parse!()
+    base_image_version = Version.parse!(base_image.version)
     starting_version_requirement = base_image.starting_version_requirement
 
     with :ok <- verify_downgrade(target_current_version, base_image_version, force_downgrade) do

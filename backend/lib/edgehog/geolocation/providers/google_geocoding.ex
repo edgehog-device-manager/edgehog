@@ -19,9 +19,11 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.GoogleGeocoding do
+  @moduledoc false
   @behaviour Edgehog.Geolocation.GeocodingProvider
 
   use Tesla
+
   alias Edgehog.Config
   alias Edgehog.Geolocation.Location
   alias Edgehog.Geolocation.Position

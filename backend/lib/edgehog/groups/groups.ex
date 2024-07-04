@@ -25,28 +25,30 @@ defmodule Edgehog.Groups do
 
   use Ash.Domain, extensions: [AshGraphql.Domain]
 
+  alias Edgehog.Groups.DeviceGroup
+
   graphql do
     root_level_errors? true
 
     queries do
-      get Edgehog.Groups.DeviceGroup, :device_group, :read do
+      get DeviceGroup, :device_group, :read do
         description "Returns a single device group."
       end
 
-      list Edgehog.Groups.DeviceGroup, :device_groups, :read do
+      list DeviceGroup, :device_groups, :read do
         description "Returns a list of device groups."
         paginate_with nil
       end
     end
 
     mutations do
-      create Edgehog.Groups.DeviceGroup, :create_device_group, :create
-      update Edgehog.Groups.DeviceGroup, :update_device_group, :update
-      destroy Edgehog.Groups.DeviceGroup, :delete_device_group, :destroy
+      create DeviceGroup, :create_device_group, :create
+      update DeviceGroup, :update_device_group, :update
+      destroy DeviceGroup, :delete_device_group, :destroy
     end
   end
 
   resources do
-    resource Edgehog.Groups.DeviceGroup
+    resource DeviceGroup
   end
 end

@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Outcome do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       success: "The update campaign has finished succesfully.",

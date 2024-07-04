@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Devices.Device.NetworkInterface.Technology do
+  @moduledoc false
   use Ash.Type.Enum,
     values: [
       ethernet: "Ethernet.",

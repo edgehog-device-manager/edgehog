@@ -29,7 +29,8 @@ default_var =
 
     fn var ->
       # paths in the .env are relative to ../
-      Map.fetch!(defaults, var)
+      defaults
+      |> Map.fetch!(var)
       |> String.replace_prefix("./", "../")
     end
   else
@@ -52,7 +53,8 @@ end
 read_file_from_env_var! = fn file_var, original_file_name_var ->
   {file_name, original_file_name} = file_names_from_env_vars.(file_var, original_file_name_var)
 
-  File.read(file_name)
+  file_name
+  |> File.read()
   |> case do
     {:ok, content} ->
       content
@@ -70,7 +72,8 @@ read_key! = fn key_file_var, original_key_file_var, default_key_file_name ->
 
   # from_pem! + to_pem is used to remove indentation and comments
   default_key =
-    :code.priv_dir(:edgehog)
+    :edgehog
+    |> :code.priv_dir()
     |> to_string()
     |> Path.join("repo/seeds/keys/#{default_key_file_name}.pem")
     |> File.read!()
@@ -96,11 +99,10 @@ read_key! = fn key_file_var, original_key_file_var, default_key_file_name ->
 end
 
 cluster =
-  %{
+  Astarte.create_cluster!(%{
     name: "Test Cluster",
     base_api_url: read_env_var.("SEEDS_ASTARTE_BASE_API_URL")
-  }
-  |> Astarte.create_cluster!()
+  })
 
 {status, private_key} =
   read_key!.("SEEDS_TENANT_PRIVATE_KEY_FILE", "SEEDS_TENANT_ORIGINAL_FILE", "tenant_private")
@@ -115,17 +117,13 @@ if status == :default do
 end
 
 public_key =
-  X509.PrivateKey.from_pem!(private_key)
+  private_key
+  |> X509.PrivateKey.from_pem!()
   |> X509.PublicKey.derive()
   |> X509.PublicKey.to_pem()
 
 tenant =
-  %{
-    name: "ACME Inc",
-    slug: "acme-inc",
-    public_key: public_key
-  }
-  |> Tenants.create_tenant!()
+  Tenants.create_tenant!(%{name: "ACME Inc", slug: "acme-inc", public_key: public_key})
 
 {status, realm_pk} =
   read_key!.("SEEDS_REALM_PRIVATE_KEY_FILE", "SEEDS_REALM_ORIGINAL_FILE", "realm_private")
@@ -139,11 +137,9 @@ if status == :default do
   |> Logger.warning()
 end
 
-%{
-  cluster_id: cluster.id,
-  name: read_env_var.("SEEDS_REALM"),
-  private_key: realm_pk
-}
-|> Astarte.create_realm!(tenant: tenant)
+Astarte.create_realm!(
+  %{cluster_id: cluster.id, name: read_env_var.("SEEDS_REALM"), private_key: realm_pk},
+  tenant: tenant
+)
 
 :ok

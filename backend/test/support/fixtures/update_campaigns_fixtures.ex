@@ -75,12 +75,12 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     {update_channel_id, opts} =
       Keyword.pop_lazy(opts, :update_channel_id, fn ->
-        update_channel_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> update_channel_fixture() |> Map.fetch!(:id)
       end)
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> BaseImagesFixtures.base_image_fixture() |> Map.fetch!(:id)
       end)
 
     {rollout_mechanism_opts, opts} = Keyword.pop(opts, :rollout_mechanism, [])
@@ -108,13 +108,12 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   @doc """
   Generates an update campaign with N targets
   """
-  def update_campaign_with_targets_fixture(target_count, opts \\ [])
-      when is_integer(target_count) and target_count > 0 do
+  def update_campaign_with_targets_fixture(target_count, opts \\ []) when is_integer(target_count) and target_count > 0 do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> BaseImagesFixtures.base_image_fixture() |> Map.fetch!(:id)
       end)
 
     tag = "foo"
@@ -125,11 +124,8 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     for _ <- 1..target_count do
       # Create devices as online by default
       _ =
-        DevicesFixtures.device_fixture_compatible_with(
-          base_image_id: base_image_id,
-          online: true,
-          tenant: tenant
-        )
+        [base_image_id: base_image_id, online: true, tenant: tenant]
+        |> DevicesFixtures.device_fixture_compatible_with()
         |> DevicesFixtures.add_tags([tag])
     end
 
@@ -150,20 +146,23 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        BaseImagesFixtures.base_image_fixture(tenant: tenant) |> Map.fetch!(:id)
+        [tenant: tenant] |> BaseImagesFixtures.base_image_fixture() |> Map.fetch!(:id)
       end)
 
     {tag, opts} = Keyword.pop(opts, :tag, "foo")
 
     {group_id, opts} =
       Keyword.pop_lazy(opts, :device_group_id, fn ->
-        GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>, tenant: tenant)
+        [selector: ~s<"#{tag}" in tags>, tenant: tenant]
+        |> GroupsFixtures.device_group_fixture()
         |> Map.fetch!(:id)
       end)
 
     {update_channel_id, opts} =
       Keyword.pop_lazy(opts, :update_channel_id, fn ->
-        update_channel_fixture(target_group_ids: [group_id], tenant: tenant) |> Map.fetch!(:id)
+        [target_group_ids: [group_id], tenant: tenant]
+        |> update_channel_fixture()
+        |> Map.fetch!(:id)
       end)
 
     _ =
@@ -204,7 +203,8 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     # A little dance to create a target_fixture which has an associated OTA Operation
     target =
-      target_fixture(opts)
+      opts
+      |> target_fixture()
       |> Ash.load!(Core.default_preloads_for_target())
 
     base_image = Core.get_update_campaign_base_image!(opts[:tenant], target.update_campaign_id)
@@ -253,7 +253,8 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     target = in_progress_target_fixture(opts)
 
     {:ok, _} =
-      OSManagement.fetch_ota_operation!(target.ota_operation_id, tenant: opts[:tenant])
+      target.ota_operation_id
+      |> OSManagement.fetch_ota_operation!(tenant: opts[:tenant])
       |> OSManagement.update_ota_operation_status(status)
 
     # Get the updated OTA Operation preloaded

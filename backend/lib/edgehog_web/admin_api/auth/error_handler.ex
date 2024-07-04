@@ -19,9 +19,11 @@
 #
 
 defmodule EdgehogWeb.AdminAPI.Auth.ErrorHandler do
+  @moduledoc false
   @behaviour Guardian.Plug.ErrorHandler
 
   import Plug.Conn
+
   require Logger
 
   @impl Guardian.Plug.ErrorHandler
