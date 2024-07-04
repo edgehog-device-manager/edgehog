@@ -38,10 +38,15 @@ defmodule EdgehogWeb.Router do
     plug EdgehogWeb.AdminAPI.Auth
   end
 
-  scope "/admin-api/v1", EdgehogWeb.AdminAPI do
+  scope "/admin-api/v1" do
+    forward "/swagger",
+            OpenApiSpex.Plug.SwaggerUI,
+            path: "/admin-api/v1/open_api",
+            default_model_expand_depth: 4
+
     pipe_through :admin_api
 
-    forward "/", Router
+    forward "/", EdgehogWeb.AdminAPI
   end
 
   forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema

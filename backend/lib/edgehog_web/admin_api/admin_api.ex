@@ -18,7 +18,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.AdminAPI.Router do
+defmodule EdgehogWeb.AdminAPI do
   use AshJsonApi.Router,
-    domains: [Edgehog.Tenants]
+    domains: [Edgehog.Tenants],
+    open_api: "/open_api"
 end
