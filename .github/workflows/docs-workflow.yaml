@@ -95,6 +95,23 @@ jobs:
       working-directory: ./edgehog/backend
       run: npx spectaql .spectaql-config.yaml -t graphql-api-docs
 
+    # This section builds the Admin REST API docs
+    - name: Extract Admin Schema
+      working-directory: ./edgehog/backend
+      run: mix openapi.spec.yaml --spec EdgehogWeb.AdminAPI
+    - name: Checkout Swagger UI
+      uses: actions/checkout@v2
+      with:
+        repository: swagger-api/swagger-ui
+        path: ./edgehog/backend/swagger-ui
+        ref: 'v5.17.14'
+    - name: Copy all Swagger UI files
+      working-directory: ./edgehog/backend
+      run: |
+        cp -r swagger-ui/dist/ admin-rest-api/
+        cp openapi.yaml admin-rest-api/
+        cp ../doc/swagger-ui-index.html admin-rest-api/index.html
+
     # Copy docs over to the docs repository
     - name: Copy Docs, preserving Device SDK docs
       run: |
@@ -109,6 +126,8 @@ jobs:
         cp edgehog/doc/versions.js docs/
         # Copy GraphQL docs
         cp -r ./edgehog/backend/graphql-api-docs docs/$DOCS_DIRNAME/
+        # Copy Admin REST API docs
+        cp -r ./edgehog/backend/admin-rest-api docs/$DOCS_DIRNAME/
     - name: Commit files
       working-directory: ./docs
       run: |
