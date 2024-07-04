@@ -93,7 +93,7 @@ jobs:
       run: npm install -g spectaql
     - name: Build SpectaQL Docs
       working-directory: ./edgehog/backend
-      run: npx spectaql .spectaql-config.yaml -t graphql-api-docs
+      run: npx spectaql .spectaql-config.yaml -t tenant-graphql-api
 
     # This section builds the Admin REST API docs
     - name: Extract Admin Schema
@@ -125,7 +125,7 @@ jobs:
         # Copy version dropdown config
         cp edgehog/doc/versions.js docs/
         # Copy GraphQL docs
-        cp -r ./edgehog/backend/graphql-api-docs docs/$DOCS_DIRNAME/
+        cp -r ./edgehog/backend/tenant-graphql-api docs/$DOCS_DIRNAME/
         # Copy Admin REST API docs
         cp -r ./edgehog/backend/admin-rest-api docs/$DOCS_DIRNAME/
     - name: Commit files
