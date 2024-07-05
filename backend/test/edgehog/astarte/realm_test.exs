@@ -91,7 +91,7 @@ defmodule Edgehog.Astarte.RealmTest do
       tenant = tenant_fixture()
       realm = realm_fixture(tenant: tenant)
 
-      assert {:ok, realm} =
+      assert {:ok, _realm} =
                Astarte.fetch_realm_by_name(realm.name, tenant: tenant, load: [:cluster])
     end
 
@@ -109,10 +109,10 @@ defmodule Edgehog.Astarte.RealmTest do
     assert :ok = Astarte.destroy_realm(realm)
 
     assert {:error, %Invalid{errors: [%NotFound{}]}} =
-             Astarte.get(Realm, realm.id, tenant: tenant)
+             Ash.get(Realm, realm.id, tenant: tenant)
   end
 
-  defp create_realm(opts \\ []) do
+  defp create_realm(opts) do
     {tenant, opts} = Keyword.pop_lazy(opts, :tenant, &Edgehog.TenantsFixtures.tenant_fixture/0)
 
     {cluster_id, opts} =

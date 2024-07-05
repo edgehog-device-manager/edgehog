@@ -24,7 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Assets.SystemModelPictureMock
-  alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
 
   describe "createSystemModel mutation" do

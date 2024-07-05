@@ -23,7 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices
   alias Edgehog.Devices.HardwareType
 
   describe "updateHardwareType mutation" do
@@ -40,7 +39,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
     test "successfully updates with valid data", %{
       tenant: tenant,
-      hardware_type: hardware_type,
       id: id
     } do
       result =
@@ -89,8 +87,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
       end)
     end
 
-    test "manages part numbers correctly", %{tenant: tenant, hardware_type: hardware_type, id: id} do
-      fixture = hardware_type_fixture(tenant: tenant, part_numbers: ["A", "B", "C"])
+    test "manages part numbers correctly", %{tenant: tenant, id: id} do
+      hardware_type_fixture(tenant: tenant, part_numbers: ["A", "B", "C"])
 
       result =
         update_hardware_type_mutation(
@@ -109,7 +107,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
     test "returns error for invalid handle", %{
       tenant: tenant,
-      hardware_type: hardware_type,
       id: id
     } do
       result =
@@ -125,7 +122,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
     test "returns error for empty part_numbers", %{
       tenant: tenant,
-      hardware_type: hardware_type,
       id: id
     } do
       result =
@@ -141,7 +137,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
     test "returns error for duplicate name", %{
       tenant: tenant,
-      hardware_type: hardware_type,
       id: id
     } do
       fixture = hardware_type_fixture(tenant: tenant)
@@ -159,7 +154,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
     test "returns error for duplicate handle", %{
       tenant: tenant,
-      hardware_type: hardware_type,
       id: id
     } do
       fixture = hardware_type_fixture(tenant: tenant)
@@ -177,7 +171,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
     test "reassociates an existing HardwareTypePartNumber", %{
       tenant: tenant,
-      hardware_type: hardware_type,
       id: id
     } do
       # TODO: see issue #228, this documents the current behaviour

@@ -592,7 +592,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "is empty with no groups", ctx do
-      %{tenant: tenant, id: id, device_id: device_id, document: document} = ctx
+      %{tenant: tenant, id: id, document: document} = ctx
 
       assert %{"deviceGroups" => []} =
                [document: document, tenant: tenant, id: id]
@@ -601,7 +601,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "returns matching group", ctx do
-      %{tenant: tenant, id: id, device_id: device_id, device: device, document: document} = ctx
+      %{tenant: tenant, id: id, device: device, document: document} = ctx
 
       _device_with_tag =
         add_tags(device, ["foo"])
@@ -616,7 +616,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "doesn't return non matching group", ctx do
-      %{tenant: tenant, id: id, device_id: device_id, device: device, document: document} = ctx
+      %{tenant: tenant, id: id, device: device, document: document} = ctx
 
       _device_with_tag =
         add_tags(device, ["foo"])
@@ -666,7 +666,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "returns both position and location", ctx do
-      %{tenant: tenant, id: id, document: document, device: device} = ctx
+      %{tenant: tenant, id: id, document: document} = ctx
 
       expect(GeolocationProviderMock, :geolocate, fn _device ->
         {:ok,

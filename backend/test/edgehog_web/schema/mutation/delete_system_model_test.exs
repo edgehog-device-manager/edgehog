@@ -23,7 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
 
   require Ash.Query

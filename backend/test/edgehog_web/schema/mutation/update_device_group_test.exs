@@ -23,8 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceGroupTest do
 
   import Edgehog.GroupsFixtures
 
-  alias Edgehog.Groups.DeviceGroup
-
   describe "updateDeviceGroup query" do
     setup %{tenant: tenant} do
       device_group = device_group_fixture(tenant: tenant)
@@ -35,7 +33,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceGroupTest do
 
     test "successfully updates with valid data", %{
       tenant: tenant,
-      device_group: device_group,
       id: id
     } do
       result =
@@ -100,7 +97,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceGroupTest do
 
     test "returns error for duplicate name", %{
       tenant: tenant,
-      device_group: device_group,
       id: id
     } do
       fixture = device_group_fixture(tenant: tenant)
@@ -117,7 +113,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceGroupTest do
 
     test "returns error for duplicate handle", %{
       tenant: tenant,
-      device_group: device_group,
       id: id
     } do
       fixture = device_group_fixture(tenant: tenant)

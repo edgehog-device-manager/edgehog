@@ -23,9 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices
-  alias Edgehog.Devices.SystemModel
-
   describe "updateDevice mutation" do
     setup %{tenant: tenant} do
       device = device_fixture(tenant: tenant)
@@ -35,7 +32,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
       %{device: device, id: id}
     end
 
-    test "successfully updates with valid data", %{tenant: tenant, device: device, id: id} do
+    test "successfully updates with valid data", %{tenant: tenant, id: id} do
       result = update_device_mutation(tenant: tenant, id: id, name: "Updated Name")
       assert %{"name" => "Updated Name"} = extract_result!(result)
     end

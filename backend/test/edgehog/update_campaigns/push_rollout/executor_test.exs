@@ -30,7 +30,6 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   alias Edgehog.Astarte.Device.BaseImageMock
   alias Edgehog.Astarte.Device.OTARequestV1Mock
   alias Edgehog.OSManagement
-  alias Edgehog.OSManagement.OTAOperation
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor
 

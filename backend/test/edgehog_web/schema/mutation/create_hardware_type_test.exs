@@ -23,7 +23,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices
   alias Edgehog.Devices.HardwareType
 
   describe "createHardwareType mutation" do

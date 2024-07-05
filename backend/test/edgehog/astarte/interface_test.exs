@@ -22,10 +22,8 @@ defmodule Edgehog.Astarte.InterfaceTest do
   use Edgehog.DataCase, async: true
 
   import Edgehog.AstarteFixtures
-  import Edgehog.TenantsFixtures
 
   alias Astarte.Client.APIError
-  alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Interface
   alias Edgehog.Astarte.Interface.MockDataLayer
 

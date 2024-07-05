@@ -23,8 +23,6 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
 
   import Edgehog.BaseImagesFixtures
 
-  alias Edgehog.BaseImages.BaseImage
-
   describe "baseImage query" do
     setup %{tenant: tenant} do
       base_image =

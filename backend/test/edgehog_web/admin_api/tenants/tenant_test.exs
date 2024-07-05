@@ -25,7 +25,6 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
   import Edgehog.TenantsFixtures
 
   alias Edgehog.Astarte
-  alias Edgehog.Repo
   alias Edgehog.Tenants
 
   @valid_pem_public_key :secp256r1

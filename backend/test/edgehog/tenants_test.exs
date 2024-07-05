@@ -29,7 +29,6 @@ defmodule Edgehog.TenantsTest do
   alias Ash.Error.Query.NotFound
   alias Edgehog.Astarte
   alias Edgehog.Tenants
-  alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.ReconcilerMock
   alias Edgehog.Tenants.Tenant
 
@@ -111,7 +110,7 @@ defmodule Edgehog.TenantsTest do
     end
 
     test "with invalid default locale returns error" do
-      assert {:error, %Invalid{errors: [error]} = changeset} =
+      assert {:error, %Invalid{errors: [error]} = _changeset} =
                create_tenant(default_locale: "not_a_locale")
 
       assert %{field: :default_locale, message: "is not a valid locale"} = error
