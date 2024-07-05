@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.0-dev] - Unreleased
 ### Added
 - Allow generating admin JWT using `gen-edgehog-jwt`.
+### Changed
+- Change logo and brand images with the latest brand revision.
 
 ## [0.8.0] - 2024-03-29
 ### Changed
