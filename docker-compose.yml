@@ -29,7 +29,7 @@ services:
       - postgresql-data:/var/lib/postgresql/data
 
   edgehog-backend:
-    image: edgehogdevicemanager/edgehog-backend:snapshot
+    image: edgehogdevicemanager/edgehog-backend:0.9.0-rc.0
     build:
       context: backend
     env_file: .env
@@ -69,7 +69,7 @@ services:
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: edgehogdevicemanager/edgehog-frontend:snapshot
+    image: edgehogdevicemanager/edgehog-frontend:0.9.0-rc.0
     build:
       context: frontend
     environment:
@@ -83,7 +83,7 @@ services:
       - "traefik.http.services.edgehog-frontend.loadbalancer.server.port=80"
 
   edgehog-device-forwarder:
-    image: edgehogdevicemanager/edgehog-device-forwarder:snapshot
+    image: edgehogdevicemanager/edgehog-device-forwarder:0.1.0
     environment:
       RELEASE_NAME: edgehog-device-forwarder
       SECRET_KEY_BASE: fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
