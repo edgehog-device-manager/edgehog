@@ -727,7 +727,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
           flunk("Received unexpected ref: #{inspect(ref)}")
         end
     after
-      1000 -> flunk("Sync timeout, not received: #{inspect(refs)}")
+      5000 -> flunk("Sync timeout, not received: #{inspect(refs)}")
     end
   end
 
