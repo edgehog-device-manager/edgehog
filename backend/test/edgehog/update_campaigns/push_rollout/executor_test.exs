@@ -168,13 +168,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       base_image_url = update_campaign.base_image.url
       target_device_ids = Enum.map(update_campaign.update_targets, & &1.device.device_id)
 
-      # Set an expectation for each target on the OTARequest mock and send back a message
-      # to wait for all devices
-      Enum.each(target_device_ids, fn device_id ->
-        expect(OTARequestV1Mock, :update, fn _client, ^device_id, _uuid, ^base_image_url ->
-          send_sync(parent, {ref, device_id})
-          :ok
-        end)
+      # Expect target_count update calls and send back a message for each device
+      expect(OTARequestV1Mock, :update, target_count, fn _client, device_id, _uuid, ^base_image_url ->
+        send_sync(parent, {ref, device_id})
+        :ok
       end)
 
       pid = start_executor!(update_campaign)
