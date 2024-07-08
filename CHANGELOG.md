@@ -4,11 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0-dev] - Unreleased
+## [0.9.0-rc.0] - 2024-07-08
 ### Added
 - Allow generating admin JWT using `gen-edgehog-jwt`.
 ### Changed
 - Change logo and brand images with the latest brand revision.
+- BREAKING: The Admin API is now JSON-API compliant, which implies a slightly different format,
+  check out the newly added OpenAPI document.
+- BREAKING: This release includes some breaking changes in the GraphQL API, make sure to check out
+  the GraphQL schema if you were using the APIs directly. Note that we _could_ add more breaking
+  changes before the final release.
 
 ## [0.8.0] - 2024-03-29
 ### Changed
