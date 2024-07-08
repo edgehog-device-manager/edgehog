@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -23,17 +23,20 @@ import { MockPayloadGenerator } from "relay-test-utils";
 import assets from "assets";
 
 const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
-  SystemModel() {
+  SystemModel(_, generateId) {
+    const id = generateId();
     return {
+      id: btoa(`SystemModel:${id}`),
       handle: "esp32-dev-kit-c",
       name: "ESP32-DevKitC",
       partNumbers: ["AM_0000001"],
       pictureUrl: assets.images.brand,
     };
   },
-  BaseImage() {
+  BaseImage(_, generateId) {
+    const id = generateId();
     return {
-      id: btoa("BaseImage:1"),
+      id: btoa(`BaseImage:${id}`),
       description: "Base Image Description",
       releaseDisplayName: "release-1",
       startingVersionRequirement: null,
@@ -43,10 +46,9 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
   },
   BaseImageCollection(_, generateId) {
     const id = generateId();
-    const handle = `base-image-collection-id-${id}`;
     return {
-      id: handle,
-      handle,
+      id: btoa(`BaseImageCollection:${id}`),
+      handle: `base-image-collection-${id}`,
       name: `Base Image Collection ${id}`,
     };
   },
@@ -58,10 +60,11 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       status: "CHARGING",
     };
   },
-  Device() {
+  Device(_, generateId) {
+    const id = generateId();
     return {
+      id: btoa(`Device:${id}`),
       deviceId: "DqL4H107S42WBEHmDrvPLQ",
-      id: "1",
       name: "Thingie",
       capabilities: [
         "HARDWARE_INFO",
@@ -81,8 +84,9 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
     };
   },
   DeviceGroup(_, generateId) {
+    const id = generateId();
     return {
-      id: `device-group-id-${generateId()}`,
+      id: btoa(`DeviceGroup:${id}`),
       name: "Tags: foo",
       handle: "tags-foo",
       selector: '"foo" in tags',
@@ -97,8 +101,10 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       memoryTotalBytes: 409600,
     };
   },
-  HardwareType() {
+  HardwareType(_, generateId) {
+    const id = generateId();
     return {
+      id: btoa(`HardwareType:${id}`),
       handle: "esp32",
       name: "ESP32",
       partNumbers: ["HT_0000001"],
@@ -175,9 +181,10 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-15T11:44:57.432Z",
     };
   },
-  UpdateChannel() {
+  UpdateChannel(_, generateId) {
+    const id = generateId();
     return {
-      id: btoa("UpdateChannel:1"),
+      id: btoa(`UpdateChannel:${id}`),
       name: "Foo devices",
       handle: "update-channel-foo",
     };
