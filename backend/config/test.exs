@@ -47,7 +47,7 @@ config :edgehog, EdgehogWeb.Endpoint,
   secret_key_base: "cJMfZ0TGL4Dy0e4kzSn5SrODWbgzWJ7E0rfWMKWvrtdiUjuYDrOQstMY/36V2ccd",
   server: false
 
-# Storage mocks for tests
+# Mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
 config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
@@ -56,7 +56,6 @@ config :edgehog,
        :astarte_cellular_connection_module,
        Edgehog.Astarte.Device.CellularConnectionMock
 
-# Astarte mocks for tests
 config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
 config :edgehog, :astarte_forwarder_session_module, Edgehog.Astarte.Device.ForwarderSessionMock
 config :edgehog, :astarte_geolocation_module, Edgehog.Astarte.Device.GeolocationMock
@@ -80,9 +79,10 @@ config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock
 
 # Enable s3 storage since we're using mocks for it
 config :edgehog, enable_s3_storage?: true
+
+# Geolocation mocks for tests
 config :edgehog, google_geocoding_api_key: "test_api_key"
 config :edgehog, google_geolocation_api_key: "test_api_key"
-# Geolocation mocks for tests
 config :edgehog, ipbase_api_key: "test_api_key"
 
 config :edgehog,

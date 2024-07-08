@@ -260,11 +260,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       parent = self()
 
       expect(OTARequestV1Mock, :update, max_updates, fn _client, _device_id, ota_operation_id, _url ->
+        # Since we don't know _which_ target will receive the request, we send it back from here
         send(parent, {:updated_target, ota_operation_id})
         :ok
       end)
 
-      # Since we don't know _which_ target will receive the request, we send it back from here
       pid = start_executor!(update_campaign)
 
       # Wait for the Executor to arrive at :wait_for_available_slot
@@ -398,10 +398,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       } = ctx
 
       expect(BaseImageMock, :get, target_count, fn _client, _device_id ->
+        # Reply like the target already has the correct base image version
         {:ok, astarte_base_image_with_version(base_image_version)}
       end)
 
-      # Reply like the target already has the correct base image version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -419,10 +419,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       } = ctx
 
       expect(BaseImageMock, :get, target_count, fn _client, _device_id ->
+        # Reply like the target already has an higher version
         {:ok, astarte_base_image_with_version(higher_base_image_version)}
       end)
 
-      # Reply like the target already has an higher version
       start_execution(pid)
 
       # Wait for the Executor to arrive at :wait_for_campaign_completion
@@ -498,10 +498,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
       # Stub BaseImage with a compatible base image by default
       stub(BaseImageMock, :get, fn _client, _device_id ->
+        # Reply like the target already has an incompatible version
         {:ok, astarte_base_image_with_version("2.0.0")}
       end)
 
-      # Reply like the target already has an incompatible version
       update_campaign =
         update_campaign_with_targets_fixture(target_count,
           base_image_id: base_image.id,
@@ -608,10 +608,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       } = ctx
 
       expect(BaseImageMock, :get, failing_target_count, fn _client, _device_id ->
+        # Reply like the target already has an higher version
         {:ok, astarte_base_image_with_version(higher_base_image_version)}
       end)
 
-      # Reply like the target already has an higher version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -629,10 +629,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       } = ctx
 
       expect(BaseImageMock, :get, failing_target_count, fn _client, _device_id ->
+        # Reply like the target already has an incompatible version
         {:ok, astarte_base_image_with_version(incompatible_base_image_version)}
       end)
 
-      # Reply like the target already has an incompatible version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -649,10 +649,10 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       } = ctx
 
       expect(BaseImageMock, :get, failing_target_count, fn _client, _device_id ->
+        # Reply like the target already has an incompatible version
         {:ok, astarte_base_image_with_version(nil)}
       end)
 
-      # Reply like the target already has an incompatible version
       start_execution(pid)
 
       assert_normal_exit(pid, ref)
@@ -836,11 +836,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
     # Expect count calls to the mock
     expect(OTARequestV1Mock, :update, count, fn _client, _device_id, _uuid, _url ->
+      # Send the sync
       send_sync(parent, ref)
       :ok
     end)
 
-    # Send the sync
     ref
   end
 
