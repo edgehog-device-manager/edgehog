@@ -48,7 +48,7 @@ const SidebarItem = ({
   return (
     <NavLink
       as={Link}
-      className={`w-100 d-flex align-items-center ${
+      className={`px-3 py-2 w-100 d-flex align-items-center ${
         isActive ? "text-light bg-primary" : "text-dark"
       }`}
       {...linkProps}
