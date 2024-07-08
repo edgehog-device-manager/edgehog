@@ -22,10 +22,8 @@ defmodule Edgehog.Astarte.TriggerTest do
   use Edgehog.DataCase, async: true
 
   import Edgehog.AstarteFixtures
-  import Edgehog.TenantsFixtures
 
   alias Astarte.Client.APIError
-  alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.Trigger
   alias Edgehog.Astarte.Trigger.MockDataLayer
 

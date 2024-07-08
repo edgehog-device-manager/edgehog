@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.UpdateChannel
-
   describe "updateChannel query" do
     setup %{tenant: tenant} do
       {:ok, target_group: device_group_fixture(tenant: tenant)}

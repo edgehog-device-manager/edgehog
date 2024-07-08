@@ -24,7 +24,6 @@ defmodule Edgehog.OSManagementTest do
   alias Ash.Error.Invalid
   alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.OTARequestV1Mock
-  alias Edgehog.Devices
   alias Edgehog.Error.AstarteAPIError
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.EphemeralImageMock
@@ -44,8 +43,6 @@ defmodule Edgehog.OSManagementTest do
 
       %{tenant: tenant, device: device}
     end
-
-    @invalid_attrs %{base_image_url: nil, status: "invalid status"}
 
     test "create_managed_ota_operation/2 with valid data creates an ota_operation", %{
       device: device,

@@ -23,9 +23,6 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices.SystemModel
-  alias Edgehog.Devices.SystemModelPartNumber
-
   describe "systemModels query" do
     test "returns empty system models", %{tenant: tenant} do
       assert %{data: %{"systemModels" => []}} == system_models_query(tenant: tenant)
@@ -119,9 +116,6 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
     {tenant, opts} = Keyword.pop!(opts, :tenant)
     document = Keyword.get(opts, :document, default_document)
-
-    filter = opts[:filter]
-    sort = opts[:sort]
 
     variables =
       %{

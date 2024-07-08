@@ -33,7 +33,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
 
     test "updates base image with valid data", %{
       tenant: tenant,
-      base_image: base_image,
       id: id
     } do
       result =
@@ -128,7 +127,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageTest do
 
     test "returns error for invalid starting version requirement", %{
       tenant: tenant,
-      base_image: base_image,
       id: id
     } do
       result =

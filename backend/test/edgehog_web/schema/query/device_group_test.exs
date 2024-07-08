@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
 
-  alias Edgehog.Groups.DeviceGroup
-
   describe "deviceGroup query" do
     test "returns nil for non existing device group", %{tenant: tenant} do
       id = non_existing_device_group_id(tenant)

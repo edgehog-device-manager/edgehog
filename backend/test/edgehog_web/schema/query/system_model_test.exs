@@ -23,10 +23,6 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices
-  alias Edgehog.Devices.SystemModel
-  alias Edgehog.Devices.SystemModelPartNumber
-
   describe "systemModel query" do
     test "returns system model if present", %{tenant: tenant} do
       hardware_type = hardware_type_fixture(tenant: tenant)

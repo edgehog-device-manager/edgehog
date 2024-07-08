@@ -21,10 +21,7 @@
 defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
-
-  alias Edgehog.Devices
 
   describe "existingDeviceTags query" do
     test "returns empty tags", %{tenant: tenant} do

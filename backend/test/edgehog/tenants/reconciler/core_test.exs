@@ -24,7 +24,6 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
   import Edgehog.AstarteFixtures
 
   alias Astarte.Client.APIError
-  alias Astarte.Client.RealmManagement
   alias Edgehog.Tenants.Reconciler.Core
 
   @astarte_resources_dir "priv/astarte_resources"

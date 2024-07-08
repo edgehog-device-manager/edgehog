@@ -24,7 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Assets.SystemModelPictureMock
-  alias Edgehog.Devices
   alias Edgehog.Devices.SystemModel
 
   describe "updateSystemModel mutation" do
@@ -41,7 +40,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     test "successfully updates with valid data", %{
       tenant: tenant,
-      system_model: system_model,
       id: id
     } do
       result =
@@ -90,8 +88,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       end)
     end
 
-    test "manages part numbers correctly", %{tenant: tenant, system_model: system_model, id: id} do
-      fixture = system_model_fixture(tenant: tenant, part_numbers: ["A", "B", "C"])
+    test "manages part numbers correctly", %{tenant: tenant, id: id} do
+      system_model_fixture(tenant: tenant, part_numbers: ["A", "B", "C"])
 
       result =
         update_system_model_mutation(
@@ -281,7 +279,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     test "returns error for empty part_numbers", %{
       tenant: tenant,
-      system_model: system_model,
       id: id
     } do
       result =
@@ -297,7 +294,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     test "returns error for duplicate name", %{
       tenant: tenant,
-      system_model: system_model,
       id: id
     } do
       fixture = system_model_fixture(tenant: tenant)
@@ -315,7 +311,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     test "returns error for duplicate handle", %{
       tenant: tenant,
-      system_model: system_model,
       id: id
     } do
       fixture = system_model_fixture(tenant: tenant)
@@ -333,7 +328,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
     test "reassociates an existing SystemModelPartNumber", %{
       tenant: tenant,
-      system_model: system_model,
       id: id
     } do
       # TODO: see issue #228, this documents the current behaviour

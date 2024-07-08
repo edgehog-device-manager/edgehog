@@ -21,7 +21,6 @@
 defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Astarte.Device.ForwarderSession

@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
 
-  alias Edgehog.Groups.DeviceGroup
-
   describe "deviceGroups query" do
     test "returns empty device groups", %{tenant: tenant} do
       assert [] == [tenant: tenant] |> device_groups_query() |> extract_result!()
@@ -48,8 +46,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
     end
 
     test "returns only devices that match the selector", %{tenant: tenant} do
-      foo_group = device_group_fixture(tenant: tenant, name: "foo", selector: ~s<"foo" in tags>)
-      bar_group = device_group_fixture(tenant: tenant, name: "bar", selector: ~s<"bar" in tags>)
+      device_group_fixture(tenant: tenant, name: "foo", selector: ~s<"foo" in tags>)
+      device_group_fixture(tenant: tenant, name: "bar", selector: ~s<"bar" in tags>)
 
       foo_device =
         [tenant: tenant]
@@ -66,10 +64,9 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
         |> device_fixture()
         |> add_tags(["foo", "bar"])
 
-      baz_device =
-        [tenant: tenant]
-        |> device_fixture()
-        |> add_tags(["baz"])
+      [tenant: tenant]
+      |> device_fixture()
+      |> add_tags(["baz"])
 
       document = """
       query {

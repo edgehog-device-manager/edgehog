@@ -26,8 +26,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.UpdateChannel
-
   describe "updatable_devices calculation" do
     setup do
       %{tenant: Edgehog.TenantsFixtures.tenant_fixture()}
