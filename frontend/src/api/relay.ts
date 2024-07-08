@@ -33,7 +33,7 @@ declare module "relay-runtime" {
       column: number;
     }>;
     code: string;
-    path: string[];
+    path?: Array<string | number>;
     fields: string[];
     short_message: string;
   }

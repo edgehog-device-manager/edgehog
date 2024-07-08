@@ -54,6 +54,7 @@ type SystemModel = {
     name: string;
   };
   partNumbers: {
+    id: string;
     partNumber: string;
   }[];
 };
@@ -91,7 +92,7 @@ it("renders System Model data", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: [{ partNumber: "SM-PN1" }],
+      partNumbers: [{ id: "SM-PN1", partNumber: "SM-PN1" }],
     },
   ]);
 
@@ -115,7 +116,10 @@ it("renders multiple Part Numbers separated by comma", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: [{ partNumber: "SM-PN1" }, { partNumber: "SM-PN2" }],
+      partNumbers: [
+        { id: "SM-PN1", partNumber: "SM-PN1" },
+        { id: "SM-PN2", partNumber: "SM-PN2" },
+      ],
     },
   ]);
 
@@ -132,7 +136,7 @@ it("renders System Model data in correct columns", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: [{ partNumber: "SM-PN1" }],
+      partNumbers: [{ id: "SM-PN1", partNumber: "SM-PN1" }],
     },
   ]);
 
