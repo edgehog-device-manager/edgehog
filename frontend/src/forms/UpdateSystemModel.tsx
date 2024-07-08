@@ -283,8 +283,8 @@ const UpdateSystemModelForm = ({
     pictureFile instanceof FileList && pictureFile.length > 0
       ? URL.createObjectURL(pictureFile[0]) // picture is the new file
       : pictureFile === null
-      ? null // picture is removed
-      : systemModel.pictureUrl; // picture is unchanged
+        ? null // picture is removed
+        : systemModel.pictureUrl; // picture is unchanged
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>

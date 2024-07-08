@@ -61,9 +61,10 @@ const matchPaths = (routes: Route | Route[], path: string) => {
 };
 
 type RouteKeys = keyof typeof Route;
-type RouteWithParams<T extends string> = T extends ParamParseKey<T>
-  ? { route: T }
-  : { route: T; params: { [P in ParamParseKey<T>]: string } };
+type RouteWithParams<T extends string> =
+  T extends ParamParseKey<T>
+    ? { route: T }
+    : { route: T; params: { [P in ParamParseKey<T>]: string } };
 
 type ParametricRoute = {
   [K in RouteKeys]: RouteWithParams<(typeof Route)[K]>;

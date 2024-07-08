@@ -109,7 +109,7 @@
     "eslint-plugin-relay": "^1.8.3",
     "eslint-plugin-testing-library": "^6.2.2",
     "jsdom": "^24.1.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.3.2",
     "react-select-event": "^5.5.1",
     "relay-test-utils": "^17.0.0",
     "vitest": "^1.6.0"
