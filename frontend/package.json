@@ -50,7 +50,7 @@
     "relay-runtime": "^17.0.0",
     "sass": "^1.77.6",
     "semver": "^7.3.8",
-    "typescript": "^5.2.2",
+    "typescript": "^5.5.3",
     "vite": "^5.3.3",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-relay-lite": "^0.8.1",
