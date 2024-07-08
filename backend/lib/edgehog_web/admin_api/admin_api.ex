@@ -23,50 +23,8 @@ defmodule EdgehogWeb.AdminAPI do
 
   use AshJsonApi.Router,
     domains: [Edgehog.Tenants],
-    open_api: "/open_api"
-
-  alias OpenApiSpex.Components
-  alias OpenApiSpex.Info
-  alias OpenApiSpex.OpenApi
-  alias OpenApiSpex.SecurityScheme
-  alias OpenApiSpex.Server
-
-  @domains [Edgehog.Tenants]
-
-  # Taken from ash_json_api/controllers/open_api.ex
-  # TODO: this is needed to extract the YAML file by running
-  # `mix openapi.spec.yaml --spec EdgehogWeb.AdminAPI`.
-  # Ideally, AshJsonApi should support file generation out of the box.
-  # See issue: https://github.com/ash-project/ash_json_api/issues/129
-  def spec do
-    %OpenApi{
-      info: %Info{
-        title: "Edgehog Admin API",
-        version: "1"
-      },
-      servers: [
-        Server.from_endpoint(EdgehogWeb.Endpoint)
-      ],
-      paths: AshJsonApi.OpenApi.paths(@domains),
-      tags: AshJsonApi.OpenApi.tags(@domains),
-      components: %Components{
-        responses: AshJsonApi.OpenApi.responses(),
-        schemas: AshJsonApi.OpenApi.schemas(@domains),
-        securitySchemes: %{
-          "api_key" => %SecurityScheme{
-            type: "apiKey",
-            description: "API Key provided in the Authorization header",
-            name: "api_key",
-            in: "header"
-          }
-        }
-      },
-      security: [
-        %{
-          # API Key security applies to all operations
-          "api_key" => []
-        }
-      ]
-    }
-  end
+    open_api: "/open_api",
+    open_api_title: "Edgehog Admin API",
+    open_api_version: "1",
+    phoenix_endpoint: EdgehogWeb.Endpoint
 end
