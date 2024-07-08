@@ -31,12 +31,11 @@ import Config
 # before starting your production server.
 config :edgehog, EdgehogWeb.Endpoint, url: [host: "example.com", port: 80]
 
+# Configure Logfmt
 config :logger, :console, format: {PrettyLog.LogfmtFormatter, :format}
 
 # Do not print debug messages in production
 config :logger, level: :info
-
-# Configure Logfmt
 
 # ## SSL Support
 #

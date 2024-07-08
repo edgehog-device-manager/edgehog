@@ -59,6 +59,16 @@ config :edgehog, EdgehogWeb.Endpoint,
 # The `http:` config above can be replaced with:
 #
 #     https: [
+#       port: 4001,
+#       cipher_suite: :strong,
+#       keyfile: "priv/cert/selfsigned_key.pem",
+#       certfile: "priv/cert/selfsigned.pem"
+#     ],
+#
+# If desired, both `http:` and `https:` keys can be
+# configured to run both http and https servers on
+# different ports.
+
 config :ex_aws, :s3,
   scheme: "http://",
   host: "localhost",
@@ -72,23 +82,13 @@ config :goth,
   disabled: true
 
 # Do not include timestamps in development logs
-#       port: 4001,
-#       cipher_suite: :strong,
-#       keyfile: "priv/cert/selfsigned_key.pem",
-#       certfile: "priv/cert/selfsigned.pem"
 config :logger, :console, format: "[$level] $message $metadata\n"
 
 # Initialize plugs at runtime for faster development compilation
-#     ],
-#
-# If desired, both `http:` and `https:` keys can be
 config :phoenix, :plug_init_mode, :runtime
 
 # Set a higher stacktrace during development. Avoid configuring such
-# configured to run both http and https servers on
 # in production as building large stacktraces may be expensive.
-# different ports.
-
 config :phoenix, :stacktrace_depth, 20
 
 config :waffle,
