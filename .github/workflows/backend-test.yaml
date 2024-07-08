@@ -85,7 +85,7 @@ jobs:
       run: mix format --check-formatted
 
     - name: Run Credo code analysis
-      run: mix credo
+      run: mix credo --strict
 
     - name: Check for unused dependencies
       run: mix do deps.get, deps.unlock --check-unused
@@ -172,7 +172,7 @@ jobs:
         mix deps.compile
 
     - name: Test
-      run: mix coveralls.github -o coverage_results
+      run: mix coveralls.github -o coverage_results --warnings-as-errors
 
   build-docker-image:
     name: Build Docker image

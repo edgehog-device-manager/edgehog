@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ const CREATE_UPDATE_CAMPAIGN_MUTATION = graphql`
     $input: CreateUpdateCampaignInput!
   ) {
     createUpdateCampaign(input: $input) {
-      updateCampaign {
+      result {
         id
       }
     }
@@ -87,9 +87,8 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
       createUpdateCampaign({
         variables: { input: updateCampaign },
         onCompleted(data, errors) {
-          if (data.createUpdateCampaign) {
-            const updateCampaignId =
-              data.createUpdateCampaign.updateCampaign.id;
+          if (data.createUpdateCampaign?.result) {
+            const updateCampaignId = data.createUpdateCampaign.result.id;
             navigate({
               route: Route.updateCampaignsEdit,
               params: { updateCampaignId },
@@ -97,7 +96,9 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
           }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
@@ -111,13 +112,13 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
           );
         },
         updater(store, data) {
-          if (!data.createUpdateCampaign) {
+          if (!data?.createUpdateCampaign?.result) {
             return;
           }
 
           const updateCampaign = store
             .getRootField("createUpdateCampaign")
-            .getLinkedRecord("updateCampaign");
+            .getLinkedRecord("result");
           const root = store.getRoot();
 
           const updateCampaigns = root.getLinkedRecords("updateCampaigns");

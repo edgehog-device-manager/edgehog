@@ -23,7 +23,7 @@ import { defineMessages, FormattedMessage, FormattedNumber } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  BatteryStatus,
+  BatterySlotStatus,
   BatteryTable_batteryStatus$data,
   BatteryTable_batteryStatus$key,
 } from "api/__generated__/BatteryTable_batteryStatus.graphql";
@@ -44,7 +44,7 @@ const BATTERY_TABLE_FRAGMENT = graphql`
   }
 `;
 
-const statusMessages = defineMessages<BatteryStatus>({
+const statusMessages = defineMessages<BatterySlotStatus>({
   CHARGING: {
     id: "components.BatteryTable.status.Charging",
     defaultMessage: "Charging",

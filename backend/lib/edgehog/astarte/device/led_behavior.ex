@@ -19,13 +19,14 @@
 #
 
 defmodule Edgehog.Astarte.Device.LedBehavior do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.LedBehavior.Behaviour
 
   alias Astarte.Client.AppEngine
 
   @interface "io.edgehog.devicemanager.LedBehavior"
 
-  @impl true
+  @impl Edgehog.Astarte.Device.LedBehavior.Behaviour
   def post(%AppEngine{} = client, device_id, behavior) do
     AppEngine.Devices.send_datastream(
       client,

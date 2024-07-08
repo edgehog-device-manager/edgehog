@@ -25,7 +25,7 @@ defmodule EdgehogWeb.Router do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
     plug EdgehogWeb.Auth
-    plug EdgehogWeb.Context
+    plug AshGraphql.Plug
   end
 
   pipeline :triggers do
@@ -38,11 +38,15 @@ defmodule EdgehogWeb.Router do
     plug EdgehogWeb.AdminAPI.Auth
   end
 
-  scope "/admin-api/v1", EdgehogWeb.AdminAPI do
+  scope "/admin-api/v1" do
+    forward "/swagger",
+            OpenApiSpex.Plug.SwaggerUI,
+            path: "/admin-api/v1/open_api",
+            default_model_expand_depth: 4
+
     pipe_through :admin_api
 
-    post "/tenants", TenantsController, :create
-    delete "/tenants/:tenant_slug", TenantsController, :delete_by_slug
+    forward "/", EdgehogWeb.AdminAPI
   end
 
   forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema

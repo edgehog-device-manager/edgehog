@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,21 +19,134 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceGroupTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.GroupsFixtures
 
-  alias Edgehog.Groups.DeviceGroup
+  describe "updateDeviceGroup query" do
+    setup %{tenant: tenant} do
+      device_group = device_group_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(device_group)
 
-  describe "updateDeviceGroup field" do
-    setup do
-      {:ok, device_group: device_group_fixture()}
+      {:ok, device_group: device_group, id: id}
     end
 
-    @query """
-    mutation UpdateDeviceGroup($input: UpdateDeviceGroupInput!) {
-      updateDeviceGroup(input: $input) {
-        deviceGroup {
+    test "successfully updates with valid data", %{
+      tenant: tenant,
+      id: id
+    } do
+      result =
+        update_device_group_mutation(
+          tenant: tenant,
+          id: id,
+          name: "Updated Name",
+          handle: "updatedhandle",
+          selector: ~s<"updated" in tags>
+        )
+
+      device_group = extract_result!(result)
+
+      assert %{
+               "id" => _id,
+               "name" => "Updated Name",
+               "handle" => "updatedhandle",
+               "selector" => ~s<"updated" in tags>
+             } = device_group
+    end
+
+    test "supports partial updates", %{tenant: tenant, device_group: device_group, id: id} do
+      %{handle: old_handle, selector: old_selector} = device_group
+
+      result =
+        update_device_group_mutation(
+          tenant: tenant,
+          id: id,
+          name: "Only Name Update"
+        )
+
+      device_group = extract_result!(result)
+
+      assert %{
+               "name" => "Only Name Update",
+               "handle" => ^old_handle,
+               "selector" => ^old_selector
+             } = device_group
+    end
+
+    test "returns error for invalid handle", %{tenant: tenant, id: id} do
+      result =
+        update_device_group_mutation(
+          tenant: tenant,
+          id: id,
+          handle: "123Invalid$"
+        )
+
+      assert %{fields: [:handle], message: "should only contain" <> _} = extract_error!(result)
+    end
+
+    test "returns error for invalid selector", %{tenant: tenant, id: id} do
+      result =
+        update_device_group_mutation(
+          tenant: tenant,
+          id: id,
+          selector: "foobaz"
+        )
+
+      assert %{fields: [:selector], message: "failed to be parsed" <> _} = extract_error!(result)
+    end
+
+    test "returns error for duplicate name", %{
+      tenant: tenant,
+      id: id
+    } do
+      fixture = device_group_fixture(tenant: tenant)
+
+      result =
+        update_device_group_mutation(
+          tenant: tenant,
+          id: id,
+          name: fixture.name
+        )
+
+      assert %{fields: [:name], message: "has already been taken"} = extract_error!(result)
+    end
+
+    test "returns error for duplicate handle", %{
+      tenant: tenant,
+      id: id
+    } do
+      fixture = device_group_fixture(tenant: tenant)
+
+      result =
+        update_device_group_mutation(
+          tenant: tenant,
+          id: id,
+          handle: fixture.handle
+        )
+
+      assert %{fields: [:handle], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "returns error for non-existing device group", %{tenant: tenant} do
+      id = non_existing_device_group_id(tenant)
+
+      result =
+        update_device_group_mutation(
+          tenant: tenant,
+          id: id,
+          name: "Updated"
+        )
+
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+  end
+
+  defp update_device_group_mutation(opts) do
+    default_document = """
+    mutation UpdateDeviceGroup($id: ID!, $input: UpdateDeviceGroupInput!) {
+      updateDeviceGroup(id: $id, input: $input) {
+        result {
           id
           name
           handle
@@ -42,113 +155,57 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceGroupTest do
       }
     }
     """
-    test "updates device group with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      device_group: device_group
-    } do
-      name = "Updated"
-      handle = "updated"
-      selector = ~s<"updated" in tags>
 
-      id = Absinthe.Relay.Node.to_global_id(:device_group, device_group.id, EdgehogWeb.Schema)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-      variables = %{
-        input: %{
-          device_group_id: id,
-          name: name,
-          handle: handle,
-          selector: selector
-        }
+    input =
+      %{
+        "name" => opts[:name],
+        "handle" => opts[:handle],
+        "selector" => opts[:selector]
       }
+      |> Enum.filter(fn {_k, v} -> v != nil end)
+      |> Map.new()
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    variables = %{"id" => id, "input" => input}
+    document = Keyword.get(opts, :document, default_document)
+    context = %{tenant: tenant}
 
-      assert %{
-               "data" => %{
-                 "updateDeviceGroup" => %{
-                   "deviceGroup" => %{
-                     "id" => ^id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "selector" => ^selector
-                   }
-                 }
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"updateDeviceGroup" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "updateDeviceGroup" => %{
+                 "result" => device_group
                }
-             } = assert(json_response(conn, 200))
-    end
+             }
+           } = result
 
-    test "updates device group with partial data", %{
-      conn: conn,
-      api_path: api_path,
-      device_group: device_group
-    } do
-      %DeviceGroup{name: initial_name, handle: initial_handle} = device_group
+    assert device_group != nil
 
-      selector = ~s<"updated" in tags>
+    device_group
+  end
 
-      id = Absinthe.Relay.Node.to_global_id(:device_group, device_group.id, EdgehogWeb.Schema)
+  defp non_existing_device_group_id(tenant) do
+    fixture = device_group_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
 
-      variables = %{
-        input: %{
-          device_group_id: id,
-          selector: selector
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "updateDeviceGroup" => %{
-                   "deviceGroup" => %{
-                     "id" => ^id,
-                     "name" => ^initial_name,
-                     "handle" => ^initial_handle,
-                     "selector" => ^selector
-                   }
-                 }
-               }
-             } = assert(json_response(conn, 200))
-    end
-
-    test "fails with invalid data", %{conn: conn, api_path: api_path, device_group: device_group} do
-      id = Absinthe.Relay.Node.to_global_id(:device_group, device_group.id, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          device_group_id: id,
-          name: nil,
-          handle: nil,
-          selector: "invalid"
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
-
-    test "fails with non existing id", %{conn: conn, api_path: api_path} do
-      name = "Updated"
-      handle = "updated"
-      selector = ~s<"updated" in tags>
-
-      id = Absinthe.Relay.Node.to_global_id(:device_group, 1_234_539, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          device_group_id: id,
-          name: name,
-          handle: handle,
-          selector: selector
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
-               assert(json_response(conn, 200))
-    end
+    id
   end
 end

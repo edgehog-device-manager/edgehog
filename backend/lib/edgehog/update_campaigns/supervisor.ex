@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.Supervisor do
+  @moduledoc false
   use Supervisor
 
   alias Edgehog.UpdateCampaigns.ExecutorRegistry
@@ -38,7 +39,8 @@ defmodule Edgehog.UpdateCampaigns.Supervisor do
 
   @impl Supervisor
   def init(_init_arg) do
-    children(@mix_env)
+    @mix_env
+    |> children()
     |> Supervisor.init(strategy: :rest_for_one)
   end
 

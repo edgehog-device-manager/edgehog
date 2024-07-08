@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.Device.StorageUsage.StorageUnit do
+  @moduledoc false
   @enforce_keys [:label]
   defstruct [
     :label,

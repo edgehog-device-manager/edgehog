@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,26 +19,66 @@
 #
 
 defmodule Edgehog.Devices.SystemModelPartNumber do
-  use Ecto.Schema
-  use I18nHelpers.Ecto.TranslatableFields
-  import Ecto.Changeset
+  @moduledoc false
+  use Edgehog.MultitenantResource,
+    domain: Edgehog.Devices,
+    extensions: [
+      AshGraphql.Resource
+    ]
 
-  alias Edgehog.Astarte.Device
-  alias Edgehog.Devices.SystemModel
-
-  schema "system_model_part_numbers" do
-    field :part_number, :string
-    field :tenant_id, :id
-    translatable_belongs_to :system_model, SystemModel
-    translatable_has_many :devices, Device, foreign_key: :part_number, references: :part_number
-
-    timestamps()
+  graphql do
+    type :system_model_part_number
   end
 
-  @doc false
-  def changeset(system_model_part_number, attrs) do
-    system_model_part_number
-    |> cast(attrs, [:part_number])
-    |> validate_required([:part_number])
+  actions do
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      accept [:part_number]
+    end
+
+    update :update do
+      primary? true
+      accept [:part_number]
+    end
+  end
+
+  attributes do
+    integer_primary_key :id
+
+    attribute :part_number, :string do
+      public? true
+      description "The part number identifier."
+      allow_nil? false
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :system_model, Edgehog.Devices.SystemModel do
+      public? true
+      attribute_public? false
+    end
+
+    has_many :devices, Edgehog.Devices.Device do
+      source_attribute :part_number
+      destination_attribute :part_number
+    end
+  end
+
+  identities do
+    identity :part_number_tenant_id, [:part_number]
+  end
+
+  postgres do
+    table "system_model_part_numbers"
+    repo Edgehog.Repo
+
+    references do
+      reference :system_model, on_delete: :delete
+    end
   end
 end

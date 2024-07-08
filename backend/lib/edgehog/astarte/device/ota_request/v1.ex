@@ -19,19 +19,20 @@
 #
 
 defmodule Edgehog.Astarte.Device.OTARequest.V1 do
+  @moduledoc false
   @behaviour Edgehog.Astarte.Device.OTARequest.V1.Behaviour
 
   alias Astarte.Client.AppEngine
 
   @interface "io.edgehog.devicemanager.OTARequest"
 
-  @impl true
+  @impl Edgehog.Astarte.Device.OTARequest.V1.Behaviour
   def update(%AppEngine{} = client, device_id, uuid, url) do
     data = %{operation: "Update", uuid: uuid, url: url}
     AppEngine.Devices.send_datastream(client, device_id, @interface, "/request", data)
   end
 
-  @impl true
+  @impl Edgehog.Astarte.Device.OTARequest.V1.Behaviour
   def cancel(%AppEngine{} = client, device_id, uuid) do
     data = %{operation: "Cancel", uuid: uuid}
     AppEngine.Devices.send_datastream(client, device_id, @interface, "/request", data)

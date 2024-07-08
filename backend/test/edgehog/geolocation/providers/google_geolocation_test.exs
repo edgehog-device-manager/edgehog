@@ -20,12 +20,12 @@
 
 defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
   import Tesla.Mock
-  alias Edgehog.Devices
+
+  alias Edgehog.Astarte.Device.WiFiScanResultMock
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeolocation
 
@@ -33,20 +33,13 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
     alias Edgehog.Astarte.Device.WiFiScanResult
 
     setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      device = device_fixture(tenant: tenant_fixture())
 
-      device =
-        device_fixture(realm)
-        |> Devices.preload_astarte_resources_for_device()
-
-      {:ok, cluster: cluster, realm: realm, device: device}
+      {:ok, device: device}
     end
 
     test "geolocate/1 returns error without input AP list", %{device: device} do
-      Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, []} end)
-
+      expect(WiFiScanResultMock, :get, fn _appengine_client, _device_id -> {:ok, []} end)
       assert GoogleGeolocation.geolocate(device) == {:error, :wifi_scan_results_not_found}
     end
 
@@ -63,8 +56,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
         }
       ]
 
-      Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
+      expect(WiFiScanResultMock, :get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
 
       response = %{
         "location" => %{
@@ -82,10 +74,16 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
       assert {:ok, position} = GoogleGeolocation.geolocate(device)
 
       assert %Position{
-               accuracy: 12,
                latitude: 45.4095285,
                longitude: 11.8788231,
-               timestamp: ~U[2021-11-11 09:43:54.437Z]
+               accuracy: 12,
+               altitude: nil,
+               altitude_accuracy: nil,
+               heading: nil,
+               speed: nil,
+               timestamp: ~U[2021-11-11 09:43:54.437Z],
+               source:
+                 "GPS position estimated from the list of WiFi access points that the device detected and published on the io.edgehog.devicemanager.WiFiScanResults Astarte interface."
              } ==
                position
     end
@@ -103,8 +101,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocationTest do
         }
       ]
 
-      Edgehog.Astarte.Device.WiFiScanResultMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
+      expect(WiFiScanResultMock, :get, fn _appengine_client, _device_id -> {:ok, wifi_scans} end)
 
       response = %{
         "garbage" => "error"

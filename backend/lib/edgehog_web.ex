@@ -42,8 +42,9 @@ defmodule EdgehogWeb do
     quote do
       use Phoenix.Controller, namespace: EdgehogWeb
 
-      import Plug.Conn
       import EdgehogWeb.Gettext
+      import Plug.Conn
+
       alias EdgehogWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
@@ -69,25 +70,26 @@ defmodule EdgehogWeb do
     quote do
       use Phoenix.Router
 
-      import Plug.Conn
       import Phoenix.Controller
+      import Plug.Conn
     end
   end
 
   def channel do
     quote do
       use Phoenix.Channel
+
       import EdgehogWeb.Gettext
     end
   end
 
   defp view_helpers do
     quote do
+      import EdgehogWeb.ErrorHelpers
+      import EdgehogWeb.Gettext
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
-      import EdgehogWeb.ErrorHelpers
-      import EdgehogWeb.Gettext
       alias EdgehogWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())

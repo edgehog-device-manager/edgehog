@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,156 +19,110 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices.{
-    SystemModel,
-    SystemModelPartNumber
-  }
+  describe "systemModels query" do
+    test "returns empty system models", %{tenant: tenant} do
+      assert %{data: %{"systemModels" => []}} == system_models_query(tenant: tenant)
+    end
 
-  describe "systemModels field" do
-    @query """
-    {
-      systemModels {
-        name
-        handle
-        partNumbers
-        hardwareType {
-          name
-        }
-        description
+    test "returns system models if they're present", %{tenant: tenant} do
+      hardware_type = hardware_type_fixture(tenant: tenant)
+
+      fixture =
+        [
+          tenant: tenant,
+          hardware_type_id: hardware_type.id,
+          picture_url: "https://example.com/image.jpg"
+        ]
+        |> system_model_fixture()
+        |> Ash.load!(:part_number_strings)
+
+      assert %{data: %{"systemModels" => [system_model]}} = system_models_query(tenant: tenant)
+
+      assert system_model["name"] == fixture.name
+      assert system_model["handle"] == fixture.handle
+      assert system_model["pictureUrl"] == fixture.picture_url
+      assert length(system_model["partNumbers"]) == length(fixture.part_number_strings)
+
+      Enum.each(fixture.part_number_strings, fn pn ->
+        assert(%{"partNumber" => pn} in system_model["partNumbers"])
+      end)
+
+      assert system_model["hardwareType"]["id"] ==
+               AshGraphql.Resource.encode_relay_id(hardware_type)
+    end
+
+    test "allows filtering", %{tenant: tenant} do
+      _ = system_model_fixture(tenant: tenant, handle: "foo")
+      _ = system_model_fixture(tenant: tenant, handle: "bar", part_numbers: ["123-bar"])
+      _ = system_model_fixture(tenant: tenant, handle: "baz")
+
+      filter = %{
+        "or" => [
+          %{"handle" => %{"eq" => "foo"}},
+          %{"partNumbers" => %{"partNumber" => %{"eq" => "123-bar"}}}
+        ]
       }
-    }
-    """
-    test "returns empty system models", %{conn: conn, api_path: api_path} do
-      conn = get(conn, api_path, query: @query)
 
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "systemModels" => []
-               }
-             }
+      assert %{data: %{"systemModels" => system_models}} =
+               system_models_query(tenant: tenant, filter: filter)
+
+      assert length(system_models) == 2
+      assert "foo" in Enum.map(system_models, & &1["handle"])
+      assert "bar" in Enum.map(system_models, & &1["handle"])
+      refute "baz" in Enum.map(system_models, & &1["handle"])
     end
 
-    test "returns system models if they're present", %{conn: conn, api_path: api_path} do
-      hardware_type = hardware_type_fixture()
+    test "allows sorting", %{tenant: tenant} do
+      _ = system_model_fixture(tenant: tenant, handle: "3")
+      _ = system_model_fixture(tenant: tenant, handle: "2")
+      _ = system_model_fixture(tenant: tenant, handle: "1")
 
-      %SystemModel{
-        name: name,
-        handle: handle,
-        part_numbers: [%SystemModelPartNumber{part_number: part_number}]
-      } = system_model_fixture(hardware_type: hardware_type)
+      sort = [
+        %{"field" => "HANDLE", "order" => "ASC"}
+      ]
 
-      conn = get(conn, api_path, query: @query)
+      assert %{data: %{"systemModels" => system_models}} =
+               system_models_query(tenant: tenant, sort: sort)
 
-      assert %{
-               "data" => %{
-                 "systemModels" => [system_model]
-               }
-             } = json_response(conn, 200)
-
-      assert system_model["name"] == name
-      assert system_model["handle"] == handle
-      assert system_model["partNumbers"] == [part_number]
-      assert system_model["hardwareType"]["name"] == hardware_type.name
+      assert [
+               %{"handle" => "1"},
+               %{"handle" => "2"},
+               %{"handle" => "3"}
+             ] = system_models
     end
+  end
 
-    test "returns the default locale description", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
+  defp system_models_query(opts) do
+    default_document =
+      """
+      query SystemModels($filter: SystemModelFilterInput, $sort: [SystemModelSortInput]) {
+        systemModels(filter: $filter, sort: $sort) {
+          name
+          handle
+          pictureUrl
+          partNumbers {
+            partNumber
+          }
+          hardwareType {
+            id
+          }
+        }
+      }
+      """
 
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    document = Keyword.get(opts, :document, default_document)
 
-      _system_model = system_model_fixture(description: description)
+    variables =
+      %{
+        "filter" => opts[:filter],
+        "sort" => opts[:sort] || []
+      }
 
-      conn = get(conn, api_path, query: @query)
-
-      assert %{
-               "data" => %{
-                 "systemModels" => [system_model]
-               }
-             } = json_response(conn, 200)
-
-      assert system_model["description"] == "A system model"
-    end
-
-    test "returns an explicit locale description", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
-
-      _system_model = system_model_fixture(description: description)
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "it-IT")
-        |> get(api_path, query: @query)
-
-      assert %{
-               "data" => %{
-                 "systemModels" => [system_model]
-               }
-             } = json_response(conn, 200)
-
-      assert system_model["description"] == "Un modello di sistema"
-    end
-
-    test "returns description in the tenant's default locale for non existing locale", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
-
-      _system_model = system_model_fixture(description: description)
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "fr-FR")
-        |> get(api_path, query: @query)
-
-      assert %{
-               "data" => %{
-                 "systemModels" => [system_model]
-               }
-             } = json_response(conn, 200)
-
-      assert system_model["description"] == "A system model"
-    end
-
-    test "returns no description when both user and tenant's locale are missing", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      description = %{"it-IT" => "Un modello di sistema"}
-
-      _system_model = system_model_fixture(description: description)
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "fr-FR")
-        |> get(api_path, query: @query)
-
-      assert %{
-               "data" => %{
-                 "systemModels" => [
-                   %{
-                     "description" => nil
-                   }
-                 ]
-               }
-             } = json_response(conn, 200)
-    end
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 end

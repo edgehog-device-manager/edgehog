@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Assets.Store.Behaviour do
+  @moduledoc false
   @type upload :: %Plug.Upload{}
 
   @callback upload(scope :: any, upload()) ::

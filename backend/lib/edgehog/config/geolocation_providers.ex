@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Config.GeolocationProviders do
+  @moduledoc false
   use Skogsra.Type
 
   @providers %{

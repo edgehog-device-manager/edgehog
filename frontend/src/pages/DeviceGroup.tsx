@@ -63,10 +63,11 @@ const GET_DEVICE_GROUP_QUERY = graphql`
 
 const UPDATE_DEVICE_GROUP_MUTATION = graphql`
   mutation DeviceGroup_updateDeviceGroup_Mutation(
+    $deviceGroupId: ID!
     $input: UpdateDeviceGroupInput!
   ) {
-    updateDeviceGroup(input: $input) {
-      deviceGroup {
+    updateDeviceGroup(id: $deviceGroupId, input: $input) {
+      result {
         name
         handle
         ...UpdateDeviceGroup_DeviceGroupFragment
@@ -79,11 +80,9 @@ const UPDATE_DEVICE_GROUP_MUTATION = graphql`
 `;
 
 const DELETE_DEVICE_GROUP_MUTATION = graphql`
-  mutation DeviceGroup_deleteDeviceGroup_Mutation(
-    $input: DeleteDeviceGroupInput!
-  ) {
-    deleteDeviceGroup(input: $input) {
-      deviceGroup {
+  mutation DeviceGroup_deleteDeviceGroup_Mutation($deviceGroupId: ID!) {
+    deleteDeviceGroup(id: $deviceGroupId) {
+      result {
         id
       }
     }
@@ -113,20 +112,20 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
     );
 
   const handleDeleteDeviceGroup = useCallback(() => {
-    const input = { deviceGroupId };
     deleteDeviceGroup({
-      variables: { input },
+      variables: { deviceGroupId },
       onCompleted(data, errors) {
-        if (data.deleteDeviceGroup) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({ route: Route.deviceGroups });
         }
-        if (errors) {
-          const errorFeedback = errors
-            .map((error) => error.message)
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          return setShowDeleteModal(false);
-        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
       },
       onError() {
         setErrorFeedback(
@@ -138,13 +137,13 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        if (!data.deleteDeviceGroup) {
+        if (!data?.deleteDeviceGroup?.result?.id) {
           return;
         }
 
         const deviceGroup = store
           .getRootField("deleteDeviceGroup")
-          .getLinkedRecord("deviceGroup");
+          .getLinkedRecord("result");
         const deviceGroupId = deviceGroup.getDataID();
         const root = store.getRoot();
 
@@ -183,22 +182,18 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
 
   const handleUpdateDeviceGroup = useCallback(
     (deviceGroup: DeviceGroupData) => {
-      const input = {
-        deviceGroupId,
-        ...deviceGroup,
-      };
       updateDeviceGroup({
-        variables: { input },
+        variables: { deviceGroupId, input: deviceGroup },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          if (data.updateDeviceGroup) {
-            return setErrorFeedback(null);
-          }
+          setErrorFeedback(null);
         },
         onError() {
           setErrorFeedback(
@@ -209,7 +204,7 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
           );
         },
         updater(store, data) {
-          if (!data.updateDeviceGroup) {
+          if (!data?.updateDeviceGroup?.result) {
             return;
           }
 
@@ -221,7 +216,7 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
 
           const deviceGroup = store
             .getRootField("updateDeviceGroup")
-            .getLinkedRecord("deviceGroup");
+            .getLinkedRecord("result");
           const deviceGroupId = deviceGroup.getDataID();
 
           const linkedDevices = new Set(

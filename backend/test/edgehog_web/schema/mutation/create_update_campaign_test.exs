@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,179 +19,446 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
+  alias Edgehog.UpdateCampaigns.ExecutorRegistry
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
+
   describe "createUpdateCampaign mutation" do
-    test "creates update_campaign with valid data and at least one target", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      target_group = device_group_fixture(selector: ~s<"foobar" in tags>)
-      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
-      base_image = base_image_fixture()
+    test "creates update_campaign with valid data and at least one target", %{tenant: tenant} do
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      base_image = base_image_fixture(tenant: tenant)
 
       device =
-        device_fixture_compatible_with(base_image)
+        [base_image_id: base_image.id, tenant: tenant]
+        |> device_fixture_compatible_with()
         |> add_tags(["foobar"])
 
+      base_image_id = AshGraphql.Resource.encode_relay_id(base_image)
+      update_channel_id = AshGraphql.Resource.encode_relay_id(update_channel)
+
+      update_campaign_data =
+        [
+          name: "My Update Campaign",
+          base_image_id: base_image_id,
+          update_channel_id: update_channel_id,
+          tenant: tenant
+        ]
+        |> create_update_campaign_mutation()
+        |> extract_result!()
+
+      assert update_campaign_data["name"] == "My Update Campaign"
+      assert update_campaign_data["status"] == "IDLE"
+      assert update_campaign_data["outcome"] == nil
+      assert update_campaign_data["baseImage"]["id"] == base_image_id
+      assert update_campaign_data["baseImage"]["version"] == base_image.version
+      assert update_campaign_data["baseImage"]["url"] == base_image.url
+      assert update_campaign_data["updateChannel"]["id"] == update_channel_id
+      assert update_campaign_data["updateChannel"]["name"] == update_channel.name
+      assert update_campaign_data["updateChannel"]["handle"] == update_channel.handle
+      assert [target_data] = update_campaign_data["updateTargets"]
+      assert target_data["status"] == "IDLE"
+      assert target_data["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
+
+      # Check that the executor got started
+      update_campaign = fetch_update_campaign_from_graphql_id!(tenant, update_campaign_data["id"])
+      assert {:ok, pid} = fetch_update_campaign_executor_pid(tenant, update_campaign)
+      assert {:wait_for_start_execution, _data} = :sys.get_state(pid)
+    end
+
+    test "creates finished update_campaign with valid data and no targets", %{tenant: tenant} do
+      update_campaign_data =
+        [name: "My Update Campaign", tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_result!()
+
+      assert update_campaign_data["name"] == "My Update Campaign"
+      assert update_campaign_data["status"] == "FINISHED"
+      assert update_campaign_data["outcome"] == "SUCCESS"
+      assert update_campaign_data["updateTargets"] == []
+
+      # Check that no executor got started
+      update_campaign = fetch_update_campaign_from_graphql_id!(tenant, update_campaign_data["id"])
+      assert :error = fetch_update_campaign_executor_pid(tenant, update_campaign)
+    end
+
+    test "creates update campaign with default values for rollout mechanism", %{tenant: tenant} do
       rollout_mechanism = %{
-        push: %{
-          max_failure_percentage: 5.0,
-          max_in_progress_updates: 5,
-          ota_request_retries: 10,
-          ota_request_timeout_seconds: 120,
-          force_downgrade: true
+        "push" => %{
+          "maxFailurePercentage" => 0.0,
+          "maxInProgressUpdates" => 1
         }
       }
 
-      response =
-        create_update_campaign_mutation(conn, api_path,
-          name: "My Update Campaign",
-          base_image_id: base_image.id,
-          update_channel_id: update_channel.id,
-          rollout_mechanism: rollout_mechanism
-        )
+      update_campaign_data =
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_result!()
 
-      update_campaign = response["data"]["createUpdateCampaign"]["updateCampaign"]
-      assert update_campaign["name"] == "My Update Campaign"
-      assert update_campaign["status"] == "IDLE"
-      assert update_campaign["outcome"] == nil
-      assert update_campaign["baseImage"]["version"] == base_image.version
-      assert update_campaign["baseImage"]["url"] == base_image.url
-      assert update_campaign["updateChannel"]["name"] == update_channel.name
-      assert update_campaign["updateChannel"]["handle"] == update_channel.handle
-      assert response_rollout_mechanism = update_campaign["rolloutMechanism"]
-      assert response_rollout_mechanism["maxFailurePercentage"] == 5.0
-      assert response_rollout_mechanism["maxInProgressUpdates"] == 5
-      assert response_rollout_mechanism["otaRequestRetries"] == 10
-      assert response_rollout_mechanism["otaRequestTimeoutSeconds"] == 120
-      assert response_rollout_mechanism["forceDowngrade"] == true
-      assert [target] = update_campaign["updateTargets"]
-      assert target["status"] == "IDLE"
-
-      assert target["device"]["id"] ==
-               Absinthe.Relay.Node.to_global_id(:device, device.id, EdgehogWeb.Schema)
+      assert rollout_mechanism_data = update_campaign_data["rolloutMechanism"]
+      assert rollout_mechanism_data["otaRequestRetries"] == 3
+      assert rollout_mechanism_data["otaRequestTimeoutSeconds"] == 300
+      assert rollout_mechanism_data["forceDowngrade"] == false
     end
 
-    test "creates finished update_campaign with valid data and no targets", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      response = create_update_campaign_mutation(conn, api_path, name: "My Update Campaign")
+    test "creates update campaign with specified values for rollout mechanism", %{tenant: tenant} do
+      rollout_mechanism = %{
+        "push" => %{
+          "maxFailurePercentage" => 5.0,
+          "maxInProgressUpdates" => 5,
+          "otaRequestRetries" => 10,
+          "otaRequestTimeoutSeconds" => 120,
+          "forceDowngrade" => true
+        }
+      }
 
-      update_campaign = response["data"]["createUpdateCampaign"]["updateCampaign"]
-      assert update_campaign["name"] == "My Update Campaign"
-      assert update_campaign["status"] == "FINISHED"
-      assert update_campaign["outcome"] == "SUCCESS"
-      assert update_campaign["updateTargets"] == []
+      update_campaign_data =
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_result!()
+
+      assert rollout_mechanism_data = update_campaign_data["rolloutMechanism"]
+      assert rollout_mechanism_data["maxFailurePercentage"] == 5.0
+      assert rollout_mechanism_data["maxInProgressUpdates"] == 5
+      assert rollout_mechanism_data["otaRequestRetries"] == 10
+      assert rollout_mechanism_data["otaRequestTimeoutSeconds"] == 120
+      assert rollout_mechanism_data["forceDowngrade"] == true
     end
 
-    test "fails when trying to use a non-existing base image", %{conn: conn, api_path: api_path} do
-      response = create_update_campaign_mutation(conn, api_path, base_image_id: "123456")
+    test "fails when trying to use a non-existing base image", %{tenant: tenant} do
+      base_image_id = non_existing_base_image_id(tenant)
 
-      assert response["data"]["createUpdateCampaign"] == nil
-      assert [%{"status_code" => 404, "code" => "not_found"}] = response["errors"]
+      error =
+        [base_image_id: base_image_id, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateCampaign"],
+               fields: [:base_image_id],
+               message: "could not be found",
+               code: "invalid_attribute"
+             } = error
     end
 
-    test "fails when trying to use a non-existing update channel", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      response = create_update_campaign_mutation(conn, api_path, update_channel_id: "123456")
+    test "fails when trying to use a non-existing update channel", %{tenant: tenant} do
+      update_channel_id = non_existing_update_channel_id(tenant)
 
-      assert response["data"]["createUpdateCampaign"] == nil
-      assert [%{"status_code" => 404, "code" => "not_found"}] = response["errors"]
+      error =
+        [update_channel_id: update_channel_id, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateCampaign"],
+               fields: [:update_channel_id],
+               message: "could not be found",
+               code: "invalid_attribute"
+             } = error
     end
 
-    test "fails when using an invalid rollout mechanism", %{conn: conn, api_path: api_path} do
-      response =
-        create_update_campaign_mutation(conn, api_path,
-          rollout_mechanism: %{
-            push: %{max_failure_percentage: -10.0, max_in_progress_updates: 5}
-          }
-        )
+    test "fails with missing name", %{tenant: tenant} do
+      error =
+        [name: nil, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
 
-      assert response["data"]["createUpdateCampaign"] == nil
-      assert [%{"status_code" => 422, "message" => message}] = response["errors"]
-      assert message =~ "must be greater than or equal to 0"
+      assert %{message: message} = error
+      assert message =~ ~s<In field "name": Expected type "String!", found null.>
+    end
+
+    test "fails with empty name", %{tenant: tenant} do
+      error =
+        [name: "", tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateCampaign"],
+               fields: [:name],
+               message: "is required",
+               code: "required"
+             } = error
+    end
+
+    test "fails with missing rollout mechanism", %{tenant: tenant} do
+      error =
+        [rollout_mechanism: nil, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{message: message} = error
+
+      assert message =~
+               ~s<In field "rolloutMechanism": Expected type "RolloutMechanismInput!", found null.>
+    end
+
+    test "fails with empty rollout mechanism", %{tenant: tenant} do
+      error =
+        [rollout_mechanism: %{}, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               path: ["createUpdateCampaign"],
+               fields: [:rollout_mechanism],
+               message: "is required",
+               code: "required"
+             } = error
+    end
+
+    test "fails when using an invalid max_failure_percentage", %{tenant: tenant} do
+      rollout_mechanism = %{
+        "push" => %{
+          "maxFailurePercentage" => -10.0,
+          "maxInProgressUpdates" => 1
+        }
+      }
+
+      error =
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               # TODO: Ash doesn't report the full nested path
+               path: ["createUpdateCampaign"],
+               fields: [:max_failure_percentage],
+               message: "must be more than or equal to 0.0",
+               code: "invalid_attribute"
+             } = error
+
+      rollout_mechanism = %{
+        "push" => %{
+          "maxFailurePercentage" => 110.0,
+          "maxInProgressUpdates" => 1
+        }
+      }
+
+      error =
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               # TODO: Ash doesn't report the full nested path
+               path: ["createUpdateCampaign"],
+               fields: [:max_failure_percentage],
+               message: "must be less than or equal to 100.0",
+               code: "invalid_attribute"
+             } = error
+    end
+
+    test "fails when using an invalid max_in_progress_updates", %{tenant: tenant} do
+      rollout_mechanism = %{
+        "push" => %{
+          "maxInProgressUpdates" => -1,
+          "maxFailurePercentage" => 0.0
+        }
+      }
+
+      error =
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               # TODO: Ash doesn't report the full nested path
+               path: ["createUpdateCampaign"],
+               fields: [:max_in_progress_updates],
+               message: "must be more than or equal to 1",
+               code: "invalid_attribute"
+             } = error
+    end
+
+    test "fails when using an invalid ota_request_retries", %{tenant: tenant} do
+      rollout_mechanism = %{
+        "push" => %{
+          "otaRequestRetries" => -1,
+          "maxFailurePercentage" => 0.0,
+          "maxInProgressUpdates" => 1
+        }
+      }
+
+      error =
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               # TODO: Ash doesn't report the full nested path
+               path: ["createUpdateCampaign"],
+               fields: [:ota_request_retries],
+               message: "must be more than or equal to 0",
+               code: "invalid_attribute"
+             } = error
+    end
+
+    test "fails when using an invalid ota_request_timeout_seconds", %{tenant: tenant} do
+      rollout_mechanism = %{
+        "push" => %{
+          "otaRequestTimeoutSeconds" => -1,
+          "maxFailurePercentage" => 0.0,
+          "maxInProgressUpdates" => 1
+        }
+      }
+
+      error =
+        [rollout_mechanism: rollout_mechanism, tenant: tenant]
+        |> create_update_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               # TODO: Ash doesn't report the full nested path
+               path: ["createUpdateCampaign"],
+               fields: [:ota_request_timeout_seconds],
+               message: "must be more than or equal to 30",
+               code: "invalid_attribute"
+             } = error
     end
   end
 
-  @query """
-  mutation CreateUpdateCampaign($input: CreateUpdateCampaignInput!) {
-    createUpdateCampaign(input: $input) {
-      updateCampaign {
-        name
-        status
-        outcome
-        rolloutMechanism {
-          ... on PushRollout {
-            maxFailurePercentage
-            maxInProgressUpdates
-            otaRequestRetries
-            otaRequestTimeoutSeconds
-            forceDowngrade
-          }
-        }
-        baseImage {
-          version
-          url
-        }
-        updateChannel {
+  defp create_update_campaign_mutation(opts) do
+    default_document = """
+    mutation CreateUpdateCampaign($input: CreateUpdateCampaignInput!) {
+      createUpdateCampaign(input: $input) {
+        result {
+          id
           name
-          handle
-        }
-        updateTargets {
           status
-          device {
+          outcome
+          rolloutMechanism {
+            ... on PushRollout {
+              maxFailurePercentage
+              maxInProgressUpdates
+              otaRequestRetries
+              otaRequestTimeoutSeconds
+              forceDowngrade
+            }
+          }
+          baseImage {
             id
+            version
+            url
+          }
+          updateChannel {
+            id
+            name
+            handle
+          }
+          updateTargets {
+            status
+            device {
+              id
+            }
           }
         }
       }
     }
-  }
-  """
-  defp create_update_campaign_mutation(conn, api_path, opts) do
+    """
+
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {name, opts} = Keyword.pop_lazy(opts, :name, fn -> unique_update_campaign_name() end)
+
     {update_channel_id, opts} =
       Keyword.pop_lazy(opts, :update_channel_id, fn ->
-        update_channel_fixture()
-        |> Map.get(:id)
+        [tenant: tenant]
+        |> update_channel_fixture()
+        |> AshGraphql.Resource.encode_relay_id()
       end)
-
-    update_channel_id =
-      Absinthe.Relay.Node.to_global_id(:update_channel, update_channel_id, EdgehogWeb.Schema)
 
     {base_image_id, opts} =
       Keyword.pop_lazy(opts, :base_image_id, fn ->
-        base_image_fixture()
-        |> Map.get(:id)
+        [tenant: tenant]
+        |> base_image_fixture()
+        |> AshGraphql.Resource.encode_relay_id()
       end)
-
-    base_image_id =
-      Absinthe.Relay.Node.to_global_id(:base_image, base_image_id, EdgehogWeb.Schema)
 
     {rollout_mechanism, opts} =
       Keyword.pop_lazy(opts, :rollout_mechanism, fn ->
-        %{push: %{max_failure_percentage: 10.0, max_in_progress_updates: 10}}
+        %{
+          "push" => %{
+            "maxFailurePercentage" => 10.0,
+            "maxInProgressUpdates" => 10
+          }
+        }
       end)
 
-    input =
-      Enum.into(opts, %{
-        name: unique_update_campaign_name(),
-        base_image_id: base_image_id,
-        update_channel_id: update_channel_id,
-        rollout_mechanism: rollout_mechanism
-      })
+    input = %{
+      "name" => name,
+      "baseImageId" => base_image_id,
+      "updateChannelId" => update_channel_id,
+      "rolloutMechanism" => rollout_mechanism
+    }
 
-    variables = %{input: input}
+    variables = %{"input" => input}
 
-    conn = post(conn, api_path, query: @query, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
 
-    json_response(conn, 200)
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_error!(result) do
+    assert is_nil(result[:data]["createUpdateCampaign"])
+    assert %{errors: [error]} = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "createUpdateCampaign" => %{
+                 "result" => update_campaign
+               }
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert update_campaign != nil
+
+    update_campaign
+  end
+
+  defp non_existing_update_channel_id(tenant) do
+    fixture = update_channel_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+
+    :ok = Ash.destroy!(fixture, tenant: tenant)
+
+    id
+  end
+
+  defp non_existing_base_image_id(tenant) do
+    fixture = base_image_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+
+    :ok = Ash.destroy!(fixture, action: :destroy_fixture)
+
+    id
+  end
+
+  defp fetch_update_campaign_from_graphql_id!(tenant, id) do
+    assert {:ok, %{type: :update_campaign, id: decoded_id}} =
+             AshGraphql.Resource.decode_relay_id(id)
+
+    Ash.get!(UpdateCampaign, decoded_id, tenant: tenant)
+  end
+
+  defp fetch_update_campaign_executor_pid(tenant, update_campaign) do
+    key = {tenant.tenant_id, update_campaign.id}
+
+    case Registry.lookup(ExecutorRegistry, key) do
+      [] -> :error
+      [{pid, _}] -> {:ok, pid}
+    end
   end
 end

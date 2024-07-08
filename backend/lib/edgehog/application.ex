@@ -23,13 +23,17 @@ defmodule Edgehog.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  use Application
+
+  alias Edgehog.Config
+  alias EdgehogWeb.Endpoint
+  alias EdgehogWeb.Router
+
+  require Logger
+
   @version Mix.Project.config()[:version]
 
-  use Application
-  require Logger
-  alias Edgehog.Config
-
-  @impl true
+  @impl Application
   def start(_type, _args) do
     Logger.info("Starting application version #{@version}.", tag: "edgehog_start")
 
@@ -37,7 +41,7 @@ defmodule Edgehog.Application do
 
     # We inject this here so that the non-web part of the application doesn't depend on the web part
     tenant_to_trigger_url_fun = fn %Edgehog.Tenants.Tenant{slug: slug} ->
-      EdgehogWeb.Router.Helpers.astarte_trigger_url(EdgehogWeb.Endpoint, :process_event, slug)
+      Router.Helpers.astarte_trigger_url(Endpoint, :process_event, slug)
     end
 
     children = [
@@ -54,12 +58,9 @@ defmodule Edgehog.Application do
       # Start the UpdateCampaigns supervisor
       Edgehog.UpdateCampaigns.Supervisor,
       # Start the Tenant Reconciler Supervisor
-      {Edgehog.Tenants.Reconciler.Supervisor,
-       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
-      # Start Supervisor for Provisioning Cleanup Tasks
-      {Task.Supervisor, name: Edgehog.Provisioning.CleanupSupervisor},
+      {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start the Endpoint (http/https)
-      EdgehogWeb.Endpoint
+      Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -70,7 +71,7 @@ defmodule Edgehog.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
-  @impl true
+  @impl Application
   def config_change(changed, _new, removed) do
     EdgehogWeb.Endpoint.config_change(changed, removed)
     :ok

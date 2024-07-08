@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,126 +19,113 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
-  import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.Devices
-  alias Edgehog.Groups.DeviceGroup
-
-  describe "deviceGroup field" do
-    setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-
-      {:ok, device_foo} =
-        device_fixture(realm)
-        |> Devices.update_device(%{tags: ["foo"]})
-
-      {:ok, device_bar} =
-        device_fixture(realm, name: "Device Bar", device_id: "eTezXt3hST2bPEw0Inq56A")
-        |> Devices.update_device(%{tags: ["bar"]})
-
-      {:ok, realm: realm, device_foo: device_foo, device_bar: device_bar}
+  describe "deviceGroup query" do
+    test "returns nil for non existing device group", %{tenant: tenant} do
+      id = non_existing_device_group_id(tenant)
+      result = device_group_query(tenant: tenant, id: id)
+      assert %{data: %{"deviceGroup" => nil}} = result
     end
 
-    @query """
+    test "returns device group if it's present", %{tenant: tenant} do
+      fixture = device_group_fixture(tenant: tenant)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      result =
+        [tenant: tenant, id: id]
+        |> device_group_query()
+        |> extract_result!()
+
+      assert result["name"] == fixture.name
+      assert result["handle"] == fixture.handle
+      assert result["selector"] == fixture.selector
+    end
+
+    test "returns only devices that match the selector", %{tenant: tenant} do
+      selector = ~s<("foo" in tags and "bar" not in tags) or "baz" in tags>
+
+      fixture = device_group_fixture(tenant: tenant, selector: selector)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      foo_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["foo"])
+
+      foo_bar_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["foo", "bar"])
+
+      baz_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["baz"])
+
+      document = """
+      query ($id: ID!) {
+        deviceGroup(id: $id) {
+          devices {
+            id
+          }
+        }
+      }
+      """
+
+      assert %{"devices" => devices} =
+               [tenant: tenant, id: id, document: document]
+               |> device_group_query()
+               |> extract_result!()
+
+      assert length(devices) == 2
+      device_ids = Enum.map(devices, &Map.get(&1, "id"))
+
+      assert AshGraphql.Resource.encode_relay_id(foo_device) in device_ids
+      assert AshGraphql.Resource.encode_relay_id(baz_device) in device_ids
+      refute AshGraphql.Resource.encode_relay_id(foo_bar_device) in device_ids
+    end
+  end
+
+  defp non_existing_device_group_id(tenant) do
+    fixture = device_group_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
+
+    id
+  end
+
+  defp device_group_query(opts) do
+    default_document = """
     query ($id: ID!) {
       deviceGroup(id: $id) {
         name
         handle
         selector
-        devices {
-          id
-          name
-          deviceId
-        }
       }
     }
     """
-    test "returns not found for unexisting device group", %{conn: conn, api_path: api_path} do
-      variables = %{
-        id: Absinthe.Relay.Node.to_global_id(:device_group, 303_040, EdgehogWeb.Schema)
-      }
 
-      conn = get(conn, api_path, query: @query, variables: variables)
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
 
-      assert %{
-               "data" => %{
-                 "deviceGroup" => nil
-               },
-               "errors" => [
-                 %{"path" => ["deviceGroup"], "status_code" => 404, "code" => "not_found"}
-               ]
-             } = json_response(conn, 200)
-    end
+    variables = %{"id" => id}
 
-    test "returns device group if it's present", %{
-      conn: conn,
-      api_path: api_path,
-      device_foo: device_foo
-    } do
-      %DeviceGroup{id: dg_id} =
-        device_group_fixture(name: "Foos", handle: "foos", selector: ~s<"foo" in tags>)
+    document = Keyword.get(opts, :document, default_document)
 
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:device_group, dg_id, EdgehogWeb.Schema)}
-      conn = get(conn, api_path, query: @query, variables: variables)
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
 
-      assert %{
-               "data" => %{
-                 "deviceGroup" => device_group
-               }
-             } = json_response(conn, 200)
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    assert %{data: %{"deviceGroup" => device_group}} = result
+    assert device_group != nil
 
-      assert device_group["name"] == "Foos"
-      assert device_group["handle"] == "foos"
-      assert device_group["selector"] == ~s<"foo" in tags>
-      assert [device] = device_group["devices"]
-      assert device["name"] == device_foo.name
-      assert device["deviceId"] == device_foo.device_id
-
-      assert {:ok, %{id: d_id, type: :device}} =
-               Absinthe.Relay.Node.from_global_id(device["id"], EdgehogWeb.Schema)
-
-      assert d_id == to_string(device_foo.id)
-    end
-
-    @update_channel_query """
-    query ($id: ID!) {
-      deviceGroup(id: $id) {
-        updateChannel {
-          id
-          handle
-          name
-        }
-      }
-    }
-    """
-    test "allows querying updateChannel if present", %{conn: conn, api_path: api_path} do
-      %DeviceGroup{id: dg_id} = device_group_fixture()
-      update_channel = update_channel_fixture(target_group_ids: [dg_id])
-
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:device_group, dg_id, EdgehogWeb.Schema)}
-      conn = get(conn, api_path, query: @update_channel_query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "deviceGroup" => device_group
-               }
-             } = json_response(conn, 200)
-
-      assert device_group["updateChannel"]["id"] ==
-               Absinthe.Relay.Node.to_global_id(
-                 :update_channel,
-                 update_channel.id,
-                 EdgehogWeb.Schema
-               )
-
-      assert device_group["updateChannel"]["handle"] == update_channel.handle
-      assert device_group["updateChannel"]["name"] == update_channel.name
-    end
+    device_group
   end
 end

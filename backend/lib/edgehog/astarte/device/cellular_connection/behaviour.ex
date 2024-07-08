@@ -19,8 +19,10 @@
 #
 
 defmodule Edgehog.Astarte.Device.CellularConnection.Behaviour do
+  @moduledoc false
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.CellularConnection.{ModemProperties, ModemStatus}
+  alias Edgehog.Astarte.Device.CellularConnection.ModemProperties
+  alias Edgehog.Astarte.Device.CellularConnection.ModemStatus
 
   @callback get_modem_properties(client :: AppEngine.t(), device_id :: String.t()) ::
               {:ok, list(ModemProperties.t())} | {:error, term()}

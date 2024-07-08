@@ -38,14 +38,19 @@ defmodule EdgehogWeb.ConnCase do
   use ExUnit.CaseTemplate
   use EdgehogWeb, :verified_routes
 
+  alias Ecto.Adapters.SQL
+  alias EdgehogWeb.Auth.Token
+
   using do
     quote do
       use EdgehogWeb, :verified_routes
 
+      import EdgehogWeb.ConnCase
+      import Mox
+      import Phoenix.ConnTest
+
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
-      import EdgehogWeb.ConnCase
 
       alias EdgehogWeb.Router.Helpers, as: Routes
 
@@ -55,8 +60,8 @@ defmodule EdgehogWeb.ConnCase do
   end
 
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
+    on_exit(fn -> SQL.Sandbox.stop_owner(pid) end)
 
     conn = Phoenix.ConnTest.build_conn()
 
@@ -68,18 +73,8 @@ defmodule EdgehogWeb.ConnCase do
       |> X509.PublicKey.derive()
       |> X509.PublicKey.to_pem()
 
-    # Create a tenant fixture and populate the tenant id, so that fixtures that run
-    # before the web part use the same tenant
+    # Create a tenant fixture
     tenant = Edgehog.TenantsFixtures.tenant_fixture(public_key: tenant_public_key)
-    _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-
-    conn =
-      if tags[:unauthenticated] do
-        # Just return the conn
-        conn
-      else
-        authenticate_connection(conn, tenant_private_key)
-      end
 
     # Populate the API path since it's tenant-specific
     api_path = ~p"/tenants/#{tenant.slug}/api"
@@ -101,7 +96,7 @@ defmodule EdgehogWeb.ConnCase do
 
     # Generate the JWT
     {:ok, jwt, _claims} =
-      EdgehogWeb.Auth.Token.encode_and_sign("dontcare", claims,
+      Token.encode_and_sign("dontcare", claims,
         secret: jwk,
         allowed_algos: ["ES256"]
       )

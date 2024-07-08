@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,71 +19,160 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateHardwareTypeTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.Devices
+  import Edgehog.DevicesFixtures
+
   alias Edgehog.Devices.HardwareType
 
-  describe "createHardwareType field" do
-    @query """
+  describe "createHardwareType mutation" do
+    test "creates hardware type with valid data", %{tenant: tenant} do
+      result =
+        create_hardware_type_mutation(
+          tenant: tenant,
+          name: "Foobar",
+          handle: "foobar",
+          part_numbers: ["123", "456"]
+        )
+
+      hardware_type = extract_result!(result)
+
+      assert %{
+               "id" => _,
+               "name" => "Foobar",
+               "handle" => "foobar",
+               "partNumbers" => part_numbers
+             } = hardware_type
+
+      assert length(part_numbers) == 2
+      assert %{"partNumber" => "123"} in part_numbers
+      assert %{"partNumber" => "456"} in part_numbers
+    end
+
+    test "returns error for invalid handle", %{tenant: tenant} do
+      result =
+        create_hardware_type_mutation(
+          tenant: tenant,
+          handle: "123Invalid$"
+        )
+
+      assert %{fields: [:handle], message: "should only contain" <> _} =
+               extract_error!(result)
+    end
+
+    test "returns error for empty part_numbers", %{tenant: tenant} do
+      result =
+        create_hardware_type_mutation(
+          tenant: tenant,
+          part_numbers: []
+        )
+
+      assert %{fields: [:part_numbers], message: "must have 1 or more items"} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate name", %{tenant: tenant} do
+      fixture = hardware_type_fixture(tenant: tenant)
+
+      result =
+        create_hardware_type_mutation(
+          tenant: tenant,
+          name: fixture.name
+        )
+
+      assert %{fields: [:name], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate handle", %{tenant: tenant} do
+      fixture = hardware_type_fixture(tenant: tenant)
+
+      result =
+        create_hardware_type_mutation(
+          tenant: tenant,
+          handle: fixture.handle
+        )
+
+      assert %{fields: [:handle], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "reassociates an existing HardwareTypePartNumber", %{tenant: tenant} do
+      # TODO: see issue #228, this documents the current behaviour
+
+      fixture = hardware_type_fixture(tenant: tenant, part_numbers: ["foo", "bar"])
+
+      result =
+        create_hardware_type_mutation(
+          tenant: tenant,
+          part_numbers: ["foo"]
+        )
+
+      _ = extract_result!(result)
+
+      assert %HardwareType{part_number_strings: ["bar"]} =
+               HardwareType
+               |> Ash.get!(fixture.id, tenant: tenant)
+               |> Ash.load!(:part_number_strings)
+    end
+  end
+
+  defp create_hardware_type_mutation(opts) do
+    default_document = """
     mutation CreateHardwareType($input: CreateHardwareTypeInput!) {
       createHardwareType(input: $input) {
-        hardwareType {
+        result {
           id
           name
           handle
-          partNumbers
+          partNumbers {
+            partNumber
+          }
         }
       }
     }
     """
-    test "creates hardware type with valid data", %{conn: conn, api_path: api_path} do
-      name = "Foobar"
-      handle = "foobar"
-      part_number = "12345/X"
 
-      variables = %{
-        input: %{
-          name: name,
-          handle: handle,
-          part_numbers: [part_number]
-        }
-      }
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    input = %{
+      "handle" => opts[:handle] || unique_hardware_type_handle(),
+      "name" => opts[:name] || unique_hardware_type_name(),
+      "partNumbers" => opts[:part_numbers] || [unique_hardware_type_part_number()]
+    }
 
-      assert %{
-               "data" => %{
-                 "createHardwareType" => %{
-                   "hardwareType" => %{
-                     "id" => id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "partNumbers" => [^part_number]
-                   }
-                 }
+    variables = %{"input" => input}
+
+    document = Keyword.get(opts, :document, default_document)
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{
+               "createHardwareType" => nil
+             },
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "createHardwareType" => %{
+                 "result" => hardware_type
                }
-             } = assert(json_response(conn, 200))
+             }
+           } = result
 
-      {:ok, %{type: :hardware_type, id: db_id}} =
-        Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
+    assert hardware_type != nil
 
-      assert {:ok, %HardwareType{name: ^name, handle: ^handle}} =
-               Devices.fetch_hardware_type(db_id)
-    end
-
-    test "fails with invalid data", %{conn: conn, api_path: api_path} do
-      variables = %{
-        input: %{
-          name: nil,
-          handle: nil,
-          part_numbers: []
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
+    hardware_type
   end
 end

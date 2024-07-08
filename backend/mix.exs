@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ defmodule Edgehog.MixProject do
     [
       app: :edgehog,
       version: "0.9.0-dev",
-      elixir: "~> 1.15",
+      elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -81,7 +81,8 @@ defmodule Edgehog.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:absinthe, "~> 1.6"},
+      # TODO: needed for Elixir 1.17 warnings, go back to stable once it's released
+      {:absinthe, github: "absinthe-graphql/absinthe", override: true},
       {:absinthe_plug, "~> 1.5"},
       {:absinthe_relay, "~> 1.5"},
       {:dataloader, "~> 1.0"},
@@ -107,14 +108,18 @@ defmodule Edgehog.MixProject do
       {:pretty_log, "~> 0.1"},
       {:prom_ex, "~> 1.9"},
       {:plug_heartbeat, "~> 1.0"},
-      {:polymorphic_embed, "~> 3.0"},
       {:gen_state_machine, "~> 3.0"},
-      {:typedstruct, "~> 0.5", runtime: false},
-      # TODO: point to upstream once all relevant PRs are merged
-      {:i18n_helpers, github: "secomind/i18n_helpers"},
       {:recon, "~> 2.5"},
       {:observer_cli, "~> 1.7"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:ash, "~> 3.0"},
+      {:ash_postgres, "~> 2.0"},
+      {:ash_graphql, "~> 1.0"},
+      {:ash_json_api, "~> 1.3"},
+      {:picosat_elixir, "~> 0.2"},
+      {:styler, "~> 1.0.0-rc.1", only: [:dev, :test], runtime: false},
+      {:open_api_spex, "~> 3.16"},
+      {:ymlr, "~> 2.0"}
     ]
   end
 
@@ -129,7 +134,9 @@ defmodule Edgehog.MixProject do
       setup: ["deps.get", "ecto.setup"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      # Workaround for https://github.com/ash-project/spark/issues/78
+      format: ["compile", "format"]
     ]
   end
 end

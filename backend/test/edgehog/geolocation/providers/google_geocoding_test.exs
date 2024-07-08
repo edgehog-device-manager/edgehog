@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,12 +22,15 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocodingTest do
   use Edgehog.DataCase, async: true
 
   import Tesla.Mock
-  alias Edgehog.Geolocation.Coordinates
+
+  alias Edgehog.Geolocation.Location
+  alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.GoogleGeocoding
 
   describe "geocoding" do
     test "reverse_geocode/1 returns an address from coordinates" do
-      coords = %Coordinates{latitude: 40.714224, longitude: -73.961452}
+      timestamp = DateTime.now!("Etc/UTC")
+      position = %Position{latitude: 40.714224, longitude: -73.961452, timestamp: timestamp}
 
       response = %{
         "results" => [
@@ -42,12 +45,17 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocodingTest do
           json(response)
       end)
 
-      assert {:ok, address} = GoogleGeocoding.reverse_geocode(coords)
-      assert address == "4 Privet Drive, Little Whinging, Surrey, UK"
+      assert {:ok, location} = GoogleGeocoding.reverse_geocode(position)
+
+      assert %Location{
+               formatted_address: "4 Privet Drive, Little Whinging, Surrey, UK",
+               timestamp: ^timestamp
+             } = location
     end
 
     test "reverse_geocode/1 returns error without results from Google" do
-      coords = %Coordinates{latitude: 40.714224, longitude: -73.961452}
+      timestamp = DateTime.now!("Etc/UTC")
+      position = %Position{latitude: 40.714224, longitude: -73.961452, timestamp: timestamp}
 
       response = %{
         "garbage" => "error"
@@ -58,7 +66,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocodingTest do
           json(response)
       end)
 
-      assert {:error, :address_not_found} == GoogleGeocoding.reverse_geocode(coords)
+      assert {:error, :location_not_found} == GoogleGeocoding.reverse_geocode(position)
     end
   end
 end

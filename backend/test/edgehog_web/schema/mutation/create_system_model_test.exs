@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,181 +19,285 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
-  use EdgehogWeb.ConnCase, async: true
-
-  alias Edgehog.Devices
-  alias Edgehog.Devices.SystemModel
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.DevicesFixtures
 
-  describe "createSystemModel field" do
-    setup do
-      {:ok, hardware_type: hardware_type_fixture()}
+  alias Edgehog.Assets.SystemModelPictureMock
+  alias Edgehog.Devices.SystemModel
+
+  describe "createSystemModel mutation" do
+    test "creates system model with valid data", %{tenant: tenant} do
+      hardware_type_id =
+        [tenant: tenant]
+        |> hardware_type_fixture()
+        |> AshGraphql.Resource.encode_relay_id()
+
+      result =
+        create_system_model_mutation(
+          hardware_type_id: hardware_type_id,
+          tenant: tenant,
+          name: "Foobar",
+          handle: "foobar",
+          part_numbers: ["123", "456"]
+        )
+
+      system_model = extract_result!(result)
+
+      assert %{
+               "id" => _,
+               "name" => "Foobar",
+               "handle" => "foobar",
+               "pictureUrl" => nil,
+               "partNumbers" => part_numbers,
+               "hardwareType" => %{
+                 "id" => ^hardware_type_id
+               }
+             } = system_model
+
+      assert length(part_numbers) == 2
+      assert %{"partNumber" => "123"} in part_numbers
+      assert %{"partNumber" => "456"} in part_numbers
     end
 
-    @query """
+    test "allows passing localized descriptions", %{tenant: tenant} do
+      localized_descriptions = [
+        %{"languageTag" => "en", "value" => "My Model"},
+        %{"languageTag" => "it", "value" => "Il mio modello"}
+      ]
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          localized_descriptions: localized_descriptions
+        )
+
+      assert %{"localizedDescriptions" => localized_descriptions} = extract_result!(result)
+      assert length(localized_descriptions) == 2
+      assert %{"languageTag" => "en", "value" => "My Model"} in localized_descriptions
+      assert %{"languageTag" => "it", "value" => "Il mio modello"} in localized_descriptions
+    end
+
+    test "allows saving a picture url", %{tenant: tenant} do
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          picture_url: "https://example.com/image.jpg"
+        )
+
+      assert %{"pictureUrl" => "https://example.com/image.jpg"} = extract_result!(result)
+    end
+
+    test "allows uploading a picture file", %{tenant: tenant} do
+      picture_url = "https://example.com/image.jpg"
+
+      expect(SystemModelPictureMock, :upload, fn _, _ -> {:ok, picture_url} end)
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{"pictureUrl" => ^picture_url} = extract_result!(result)
+    end
+
+    test "returns error when passing both picture_file and picture_url", %{tenant: tenant} do
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          picture_url: "https://example.com/image.jpg",
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert %{
+               fields: [:picture_url],
+               message: "is mutually exclusive with picture_file"
+             } = extract_error!(result)
+    end
+
+    test "cleans up the image for a failed create", %{tenant: tenant} do
+      duplicate = system_model_fixture(tenant: tenant)
+
+      picture_url = "https://example.com/image.jpg"
+
+      SystemModelPictureMock
+      |> expect(:upload, fn _, _ -> {:ok, picture_url} end)
+      |> expect(:delete, fn _, ^picture_url -> :ok end)
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          handle: duplicate.handle,
+          picture_file: %Plug.Upload{path: "/tmp/image.jpg", filename: "image.jpg"}
+        )
+
+      assert extract_error!(result)
+    end
+
+    test "returns error for non-existing hardware type", %{tenant: tenant} do
+      hardware_type = hardware_type_fixture(tenant: tenant)
+      hardware_type_id = AshGraphql.Resource.encode_relay_id(hardware_type)
+      _ = Ash.destroy!(hardware_type)
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          hardware_type_id: hardware_type_id
+        )
+
+      # TODO: wrong fields returned by AshGraphql
+      assert %{fields: [:id], message: "could not be found" <> _} =
+               extract_error!(result)
+    end
+
+    test "returns error for invalid handle", %{tenant: tenant} do
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          handle: "123Invalid$"
+        )
+
+      assert %{fields: [:handle], message: "should only contain" <> _} =
+               extract_error!(result)
+    end
+
+    test "returns error for empty part_numbers", %{tenant: tenant} do
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          part_numbers: []
+        )
+
+      assert %{fields: [:part_numbers], message: "must have 1 or more items"} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate name", %{tenant: tenant} do
+      fixture = system_model_fixture(tenant: tenant)
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          name: fixture.name
+        )
+
+      assert %{fields: [:name], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate handle", %{tenant: tenant} do
+      fixture = system_model_fixture(tenant: tenant)
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          handle: fixture.handle
+        )
+
+      assert %{fields: [:handle], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "reassociates an existing SystemModelPartNumber", %{tenant: tenant} do
+      # TODO: see issue #228, this documents the current behaviour
+
+      fixture = system_model_fixture(tenant: tenant, part_numbers: ["foo", "bar"])
+
+      result =
+        create_system_model_mutation(
+          tenant: tenant,
+          part_numbers: ["foo"]
+        )
+
+      _ = extract_result!(result)
+
+      assert %SystemModel{part_number_strings: ["bar"]} =
+               SystemModel
+               |> Ash.get!(fixture.id, tenant: tenant)
+               |> Ash.load!(:part_number_strings)
+    end
+  end
+
+  defp create_system_model_mutation(opts) do
+    default_document = """
     mutation CreateSystemModel($input: CreateSystemModelInput!) {
       createSystemModel(input: $input) {
-        systemModel {
+        result {
           id
           name
-          handle
-          partNumbers
-          hardwareType {
-            name
+          localizedDescriptions {
+            languageTag
+            value
           }
-          description
+          handle
+          pictureUrl
+          partNumbers {
+            partNumber
+          }
+          hardwareType {
+            id
+          }
         }
       }
     }
     """
-    test "creates system model with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      hardware_type: hardware_type
-    } do
-      name = "Foobar"
-      handle = "foobar"
-      part_number = "12345/X"
 
-      hardware_type_name = hardware_type.name
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-      hardware_type_id =
-        Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
+    {hardware_type_id, opts} =
+      Keyword.pop_lazy(opts, :hardware_type_id, fn ->
+        [tenant: tenant]
+        |> hardware_type_fixture()
+        |> AshGraphql.Resource.encode_relay_id()
+      end)
 
-      variables = %{
-        input: %{
-          name: name,
-          handle: handle,
-          part_numbers: [part_number],
-          hardware_type_id: hardware_type_id
-        }
-      }
+    input = %{
+      "hardwareTypeId" => hardware_type_id,
+      "handle" => opts[:handle] || unique_system_model_handle(),
+      "name" => opts[:name] || unique_system_model_name(),
+      "localizedDescriptions" => opts[:localized_descriptions],
+      "partNumbers" => opts[:part_numbers] || [unique_system_model_part_number()],
+      "pictureUrl" => opts[:picture_url],
+      "pictureFile" => opts[:picture_file] && "picture_file"
+    }
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    variables = %{"input" => input}
 
-      assert %{
-               "data" => %{
-                 "createSystemModel" => %{
-                   "systemModel" => %{
-                     "id" => id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "partNumbers" => [^part_number],
-                     "hardwareType" => %{
-                       "name" => ^hardware_type_name
-                     },
-                     "description" => nil
-                   }
-                 }
+    document = Keyword.get(opts, :document, default_document)
+
+    context =
+      add_upload(%{tenant: tenant}, "picture_file", opts[:picture_file])
+
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: context
+    )
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"createSystemModel" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "createSystemModel" => %{
+                 "result" => system_model
                }
-             } = assert(json_response(conn, 200))
+             }
+           } = result
 
-      {:ok, %{type: :system_model, id: db_id}} =
-        Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
+    assert system_model != nil
 
-      assert {:ok, %SystemModel{name: ^name, handle: ^handle}} = Devices.fetch_system_model(db_id)
-    end
-
-    test "fails with invalid data", %{conn: conn, api_path: api_path} do
-      variables = %{
-        input: %{
-          system_model: %{
-            name: nil,
-            handle: nil,
-            part_numbers: []
-          }
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
-
-    test "allows settings a description for the default locale", %{
-      conn: conn,
-      api_path: api_path,
-      hardware_type: hardware_type,
-      tenant: tenant
-    } do
-      name = "Foobar"
-      handle = "foobar"
-      part_number = "12345/X"
-
-      hardware_type_name = hardware_type.name
-
-      hardware_type_id =
-        Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
-
-      default_locale = tenant.default_locale
-
-      variables = %{
-        input: %{
-          name: name,
-          handle: handle,
-          part_numbers: [part_number],
-          hardware_type_id: hardware_type_id,
-          description: %{
-            locale: default_locale,
-            text: "A system model"
-          }
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "createSystemModel" => %{
-                   "systemModel" => %{
-                     "id" => id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "partNumbers" => [^part_number],
-                     "hardwareType" => %{
-                       "name" => ^hardware_type_name
-                     },
-                     "description" => "A system model"
-                   }
-                 }
-               }
-             } = assert(json_response(conn, 200))
-
-      {:ok, %{type: :system_model, id: db_id}} =
-        Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
-
-      assert {:ok, %SystemModel{name: ^name, handle: ^handle}} = Devices.fetch_system_model(db_id)
-    end
-
-    test "fails when trying to set a description for non default locale", %{
-      conn: conn,
-      api_path: api_path,
-      hardware_type: hardware_type
-    } do
-      name = "Foobar"
-      handle = "foobar"
-      part_number = "12345/X"
-
-      hardware_type_id =
-        Absinthe.Relay.Node.to_global_id(:hardware_type, hardware_type.id, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          name: name,
-          handle: handle,
-          part_numbers: [part_number],
-          hardware_type_id: hardware_type_id,
-          description: %{
-            locale: "it-IT",
-            text: "Un dispositivo"
-          }
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"code" => "not_default_locale"}]} = assert(json_response(conn, 200))
-    end
+    system_model
   end
 end

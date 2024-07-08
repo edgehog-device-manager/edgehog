@@ -21,18 +21,22 @@
 defmodule Edgehog.Astarte.Device.GeolocationTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
+
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.Geolocation
   alias Edgehog.Astarte.Device.Geolocation.SensorPosition
 
   describe "geolocation" do
-    import Edgehog.AstarteFixtures
     import Tesla.Mock
 
     setup do
+      tenant = tenant_fixture()
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-      device = astarte_device_fixture(realm)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
 
       {:ok, appengine_client} =
         AppEngine.new(cluster.base_api_url, realm.name, private_key: realm.private_key)

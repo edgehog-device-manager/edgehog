@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,9 +24,12 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   entities via the `Edgehog.UpdateCampaigns` context.
   """
 
+  alias Edgehog.AstarteFixtures
   alias Edgehog.BaseImagesFixtures
   alias Edgehog.DevicesFixtures
   alias Edgehog.GroupsFixtures
+
+  require Ash.Query
 
   @doc """
   Generate a unique update_channel handle.
@@ -46,105 +49,141 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   @doc """
   Generate a update_channel.
   """
-  def update_channel_fixture(attrs \\ []) do
-    {target_group_ids, attrs} =
-      Keyword.pop_lazy(attrs, :target_group_ids, fn ->
-        target_group = Edgehog.GroupsFixtures.device_group_fixture()
+  def update_channel_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {target_group_ids, opts} =
+      Keyword.pop_lazy(opts, :target_group_ids, fn ->
+        target_group = Edgehog.GroupsFixtures.device_group_fixture(tenant: tenant)
         [target_group.id]
       end)
 
-    {:ok, update_channel} =
-      attrs
-      |> Enum.into(%{
+    params =
+      Enum.into(opts, %{
         handle: unique_update_channel_handle(),
         name: unique_update_channel_name(),
         target_group_ids: target_group_ids
       })
-      |> Edgehog.UpdateCampaigns.create_update_channel()
 
-    update_channel
+    Edgehog.UpdateCampaigns.UpdateChannel
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
-  def update_campaign_fixture(attrs \\ []) do
-    {update_channel, attrs} = Keyword.pop_lazy(attrs, :update_channel, &update_channel_fixture/0)
+  def update_campaign_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    {base_image, attrs} =
-      Keyword.pop_lazy(attrs, :base_image, &Edgehog.BaseImagesFixtures.base_image_fixture/0)
+    {update_channel_id, opts} =
+      Keyword.pop_lazy(opts, :update_channel_id, fn ->
+        [tenant: tenant] |> update_channel_fixture() |> Map.fetch!(:id)
+      end)
 
-    {rollout_mechanism_attrs, attrs} = Keyword.pop(attrs, :rollout_mechanism, [])
+    {base_image_id, opts} =
+      Keyword.pop_lazy(opts, :base_image_id, fn ->
+        [tenant: tenant] |> BaseImagesFixtures.base_image_fixture() |> Map.fetch!(:id)
+      end)
 
-    rollout_mechanism_attrs =
-      Enum.into(rollout_mechanism_attrs, %{
+    {rollout_mechanism_opts, opts} = Keyword.pop(opts, :rollout_mechanism, [])
+
+    rollout_mechanism_opts =
+      Enum.into(rollout_mechanism_opts, %{
         type: "push",
         max_failure_percentage: 50.0,
         max_in_progress_updates: 100
       })
 
-    attrs =
-      Enum.into(attrs, %{
+    params =
+      Enum.into(opts, %{
         name: unique_update_campaign_name(),
-        rollout_mechanism: rollout_mechanism_attrs
+        rollout_mechanism: rollout_mechanism_opts,
+        base_image_id: base_image_id,
+        update_channel_id: update_channel_id
       })
 
-    {:ok, update_campaign} =
-      Edgehog.UpdateCampaigns.create_update_campaign(update_channel, base_image, attrs)
-
-    update_campaign
+    Edgehog.UpdateCampaigns.UpdateCampaign
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
   Generates an update campaign with N targets
   """
-  def update_campaign_with_targets_fixture(target_count, attrs \\ [])
-      when is_integer(target_count) and target_count > 0 do
-    # Initializes an update campaign with N targets
-    {base_image, attrs} =
-      Keyword.pop_lazy(attrs, :base_image, &BaseImagesFixtures.base_image_fixture/0)
+  def update_campaign_with_targets_fixture(target_count, opts \\ []) when is_integer(target_count) and target_count > 0 do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {base_image_id, opts} =
+      Keyword.pop_lazy(opts, :base_image_id, fn ->
+        [tenant: tenant] |> BaseImagesFixtures.base_image_fixture() |> Map.fetch!(:id)
+      end)
 
     tag = "foo"
-    group = GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>)
+    group = GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>, tenant: tenant)
 
-    update_channel = update_channel_fixture(target_group_ids: [group.id])
+    update_channel = update_channel_fixture(target_group_ids: [group.id], tenant: tenant)
 
     for _ <- 1..target_count do
       # Create devices as online by default
       _ =
-        DevicesFixtures.device_fixture_compatible_with(base_image, online: true)
+        [base_image_id: base_image_id, online: true, tenant: tenant]
+        |> DevicesFixtures.device_fixture_compatible_with()
         |> DevicesFixtures.add_tags([tag])
     end
 
-    attrs
-    |> Keyword.merge(base_image: base_image, update_channel: update_channel)
+    opts
+    |> Keyword.merge(
+      base_image_id: base_image_id,
+      update_channel_id: update_channel.id,
+      tenant: tenant
+    )
     |> update_campaign_fixture()
   end
 
   @doc """
   Generates an idle update target
   """
-  def target_fixture(attrs \\ []) do
-    {base_image, attrs} =
-      Keyword.pop_lazy(attrs, :base_image, &Edgehog.BaseImagesFixtures.base_image_fixture/0)
+  def target_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    {tag, attrs} = Keyword.pop(attrs, :tag, "foo")
-
-    {group, attrs} =
-      Keyword.pop_lazy(attrs, :device_group, fn ->
-        GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>)
+    {base_image_id, opts} =
+      Keyword.pop_lazy(opts, :base_image_id, fn ->
+        [tenant: tenant] |> BaseImagesFixtures.base_image_fixture() |> Map.fetch!(:id)
       end)
 
-    {update_channel, attrs} =
-      Keyword.pop_lazy(attrs, :update_channel, fn ->
-        update_channel_fixture(target_group_ids: [group.id])
+    {tag, opts} = Keyword.pop(opts, :tag, "foo")
+
+    {group_id, opts} =
+      Keyword.pop_lazy(opts, :device_group_id, fn ->
+        [selector: ~s<"#{tag}" in tags>, tenant: tenant]
+        |> GroupsFixtures.device_group_fixture()
+        |> Map.fetch!(:id)
+      end)
+
+    {update_channel_id, opts} =
+      Keyword.pop_lazy(opts, :update_channel_id, fn ->
+        [target_group_ids: [group_id], tenant: tenant]
+        |> update_channel_fixture()
+        |> Map.fetch!(:id)
       end)
 
     _ =
-      DevicesFixtures.device_fixture_compatible_with(base_image, attrs)
+      opts
+      |> Keyword.merge(base_image_id: base_image_id, online: true, tenant: tenant)
+      |> DevicesFixtures.device_fixture_compatible_with()
       |> DevicesFixtures.add_tags([tag])
 
     update_campaign =
-      update_campaign_fixture(base_image: base_image, update_channel: update_channel)
+      update_campaign_fixture(
+        base_image_id: base_image_id,
+        update_channel_id: update_channel_id,
+        tenant: tenant
+      )
 
-    [target] = update_campaign.update_targets
+    update_campaign_id = update_campaign.id
+
+    target =
+      Edgehog.UpdateCampaigns.UpdateTarget
+      |> Ash.Query.filter(update_campaign_id == ^update_campaign_id)
+      |> Ash.read_one!(tenant: tenant, not_found_error?: true)
 
     target
   end
@@ -153,26 +192,32 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   Generates an update target with an associated OTA Operation
   """
   def in_progress_target_fixture(opts \\ []) do
-    alias Edgehog.UpdateCampaigns.PushRollout.Core
+    alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
 
-    now = Keyword.get(opts, :now, DateTime.utc_now())
+    {now, opts} = Keyword.pop(opts, :now, DateTime.utc_now())
+
+    # Expect Astarte Base Image for loading [device: :base_image] on target
+    Mox.stub(Edgehog.Astarte.Device.BaseImageMock, :get, fn _client, _device_id ->
+      {:ok, AstarteFixtures.base_image_info_fixture()}
+    end)
 
     # A little dance to create a target_fixture which has an associated OTA Operation
     target =
-      target_fixture(opts)
-      |> Core.preload_defaults_for_target()
+      opts
+      |> target_fixture()
+      |> Ash.load!(Core.default_preloads_for_target())
 
-    base_image = Core.get_update_campaign_base_image!(target.update_campaign_id)
+    base_image = Core.get_update_campaign_base_image!(opts[:tenant], target.update_campaign_id)
 
-    # Stub Astarte Device Status and OTA Request
-    Mox.stub_with(
-      Edgehog.Astarte.Device.DeviceStatusMock,
-      Edgehog.Mocks.Astarte.Device.DeviceStatus
-    )
+    # Expect Astarte Device Status and OTA Request
+    Mox.stub(Edgehog.Astarte.Device.DeviceStatusMock, :get, fn _client, _device_id ->
+      {:ok, AstarteFixtures.device_status_fixture()}
+    end)
 
-    Mox.stub_with(
+    Mox.stub(
       Edgehog.Astarte.Device.OTARequestV1Mock,
-      Edgehog.Mocks.Astarte.Device.OTARequest.V1
+      :update,
+      fn _client, _device_id, _uuid, _url -> :ok end
     )
 
     {:ok, target} =
@@ -201,8 +246,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
   defp terminated_target_fixture(opts, status) do
     alias Edgehog.OSManagement
-    alias Edgehog.UpdateCampaigns.PushRollout.Core
-    alias Edgehog.UpdateCampaigns
+    alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core
 
     now = Keyword.get(opts, :now, DateTime.utc_now())
 
@@ -210,11 +254,11 @@ defmodule Edgehog.UpdateCampaignsFixtures do
 
     {:ok, _} =
       target.ota_operation_id
-      |> OSManagement.get_ota_operation!()
-      |> OSManagement.update_ota_operation(%{status: status})
+      |> OSManagement.fetch_ota_operation!(tenant: opts[:tenant])
+      |> OSManagement.update_ota_operation_status(status)
 
-    # Fetch the target again so we get the updated OTA Operation preloaded
-    {:ok, target} = UpdateCampaigns.fetch_target(target.id)
+    # Get the updated OTA Operation preloaded
+    target = Ash.load!(target, ota_operation: :status)
 
     case status do
       :failure ->

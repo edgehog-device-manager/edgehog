@@ -19,5 +19,6 @@
 #
 
 defmodule Edgehog.Selector.Parser.Error do
+  @moduledoc false
   defstruct [:message, :line, :column]
 end

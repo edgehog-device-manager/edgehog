@@ -19,17 +19,21 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler.Supervisor do
+  @moduledoc false
   use Supervisor
 
   def start_link(arg) do
     Supervisor.start_link(__MODULE__, arg, name: __MODULE__)
   end
 
-  @impl true
+  @impl Supervisor
   def init(opts) do
     reconciler_args =
-      reconciler_base_args()
-      |> Keyword.put(:tenant_to_trigger_url_fun, Keyword.fetch!(opts, :tenant_to_trigger_url_fun))
+      Keyword.put(
+        reconciler_base_args(),
+        :tenant_to_trigger_url_fun,
+        Keyword.fetch!(opts, :tenant_to_trigger_url_fun)
+      )
 
     children = [
       {Task.Supervisor, name: Edgehog.Tenants.Reconciler.TaskSupervisor},

@@ -19,23 +19,10 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
-  use EdgehogWeb.ConnCase
+  use EdgehogWeb.GraphqlCase
 
   describe "forwarderConfig query" do
-    @query """
-    query {
-      forwarderConfig {
-        hostname
-        port
-        secureSessions
-      }
-    }
-    """
-
-    test "returns the forwarder config when the forwarder is configured", %{
-      conn: conn,
-      api_path: api_path
-    } do
+    test "returns the forwarder config when the forwarder is configured", %{tenant: tenant} do
       original_config =
         mock_configured_forwarder(
           hostname: "some-hostname.com",
@@ -43,44 +30,29 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
           secure_sessions?: true
         )
 
-      result = run_query(conn, api_path)
+      forwarder_config = [tenant: tenant] |> run_query() |> extract_result!()
 
       assert %{
-               "data" => %{
-                 "forwarderConfig" => %{
-                   "hostname" => "some-hostname.com",
-                   "port" => 4001,
-                   "secureSessions" => true
-                 }
-               }
-             } = result
+               "hostname" => "some-hostname.com",
+               "port" => 4001,
+               "secureSessions" => true
+             } = forwarder_config
 
       restore_forwarder_config(original_config)
     end
 
-    test "returns null when the forwarder is not configured", %{
-      conn: conn,
-      api_path: api_path
-    } do
+    test "returns null when the forwarder is not configured", %{tenant: tenant} do
       original_config = mock_unconfigured_forwarder()
 
-      result = run_query(conn, api_path)
+      forwarder_config = [tenant: tenant] |> run_query() |> extract_result!()
 
-      assert %{
-               "data" => %{
-                 "forwarderConfig" => nil
-               }
-             } = result
+      assert is_nil(forwarder_config)
 
       restore_forwarder_config(original_config)
     end
   end
 
-  defp mock_configured_forwarder(
-         hostname: hostname,
-         port: port,
-         secure_sessions?: secure_sessions?
-       ) do
+  defp mock_configured_forwarder(hostname: hostname, port: port, secure_sessions?: secure_sessions?) do
     original_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
 
     Application.put_env(:edgehog, :edgehog_forwarder, %{
@@ -93,7 +65,7 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
     original_config
   end
 
-  defp mock_unconfigured_forwarder() do
+  defp mock_unconfigured_forwarder do
     original_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
 
     Application.put_env(:edgehog, :edgehog_forwarder, %{
@@ -110,9 +82,31 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
     Application.put_env(:edgehog, :edgehog_forwarder, config)
   end
 
-  defp run_query(conn, api_path) do
-    conn
-    |> get(api_path, query: @query, variables: %{})
-    |> json_response(200)
+  defp run_query(opts) do
+    document = """
+    query {
+      forwarderConfig {
+        hostname
+        port
+        secureSessions
+      }
+    }
+    """
+
+    tenant = Keyword.fetch!(opts, :tenant)
+
+    Absinthe.run!(document, EdgehogWeb.Schema, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "forwarderConfig" => forwarder_config
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    forwarder_config
   end
 end

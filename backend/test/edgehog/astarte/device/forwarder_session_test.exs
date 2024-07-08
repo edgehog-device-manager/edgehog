@@ -21,17 +21,22 @@
 defmodule Edgehog.Astarte.Device.ForwarderSessionTest do
   use Edgehog.DataCase, async: true
 
+  import Edgehog.AstarteFixtures
+  import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
+
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Forwarder
 
   describe "forwarder_session" do
-    import Edgehog.AstarteFixtures
     import Tesla.Mock
 
     setup do
+      tenant = tenant_fixture()
       cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
-      device = astarte_device_fixture(realm)
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
 
       {:ok, appengine_client} =
         AppEngine.new(cluster.base_api_url, realm.name, private_key: realm.private_key)
@@ -63,14 +68,14 @@ defmodule Edgehog.Astarte.Device.ForwarderSessionTest do
                ForwarderSession.list_sessions(appengine_client, device.device_id)
 
       assert sessions == [
-               %ForwarderSession{
+               %Forwarder.Session{
                  token: "session_token_1",
                  status: :connecting,
                  secure: false,
                  forwarder_hostname: "localhost",
                  forwarder_port: 4001
                },
-               %ForwarderSession{
+               %Forwarder.Session{
                  token: "session_token_2",
                  status: :connected,
                  secure: false,
@@ -78,63 +83,6 @@ defmodule Edgehog.Astarte.Device.ForwarderSessionTest do
                  forwarder_port: 4001
                }
              ]
-    end
-
-    test "fetch_session/3 correctly parses session state data", %{
-      device: device,
-      appengine_client: appengine_client
-    } do
-      response = %{
-        "data" => %{
-          "session_token_1" => %{
-            "status" => "Connecting"
-          },
-          "session_token_2" => %{
-            "status" => "Connected"
-          }
-        }
-      }
-
-      mock(fn
-        %{method: :get, url: _api_url} ->
-          json(response)
-      end)
-
-      assert {:ok, session} =
-               ForwarderSession.fetch_session(
-                 appengine_client,
-                 device.device_id,
-                 "session_token_1"
-               )
-
-      assert session == %ForwarderSession{
-               token: "session_token_1",
-               status: :connecting,
-               secure: false,
-               forwarder_hostname: "localhost",
-               forwarder_port: 4001
-             }
-    end
-
-    test "fetch_session/3 returns an error if the session was not found", %{
-      device: device,
-      appengine_client: appengine_client
-    } do
-      response = %{
-        "data" => %{}
-      }
-
-      mock(fn
-        %{method: :get, url: _api_url} ->
-          json(response)
-      end)
-
-      assert {:error, :forwarder_session_not_found} =
-               ForwarderSession.fetch_session(
-                 appengine_client,
-                 device.device_id,
-                 "session_token"
-               )
     end
   end
 end

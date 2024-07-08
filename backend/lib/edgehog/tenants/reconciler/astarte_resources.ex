@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler.AstarteResources do
+  @moduledoc false
   @interfaces Path.wildcard("priv/astarte_resources/interfaces/*.json")
   @trigger_templates Path.wildcard("priv/astarte_resources/trigger_templates/*.json.eex")
 
@@ -28,13 +29,14 @@ defmodule Edgehog.Tenants.Reconciler.AstarteResources do
   end
 
   def load_interfaces do
-    @interfaces
-    |> Enum.map(&File.read!/1)
-    |> Enum.map(&Jason.decode!/1)
+    Enum.map(@interfaces, fn interface ->
+      interface
+      |> File.read!()
+      |> Jason.decode!()
+    end)
   end
 
   def load_trigger_templates do
-    @trigger_templates
-    |> Enum.map(&File.read!/1)
+    Enum.map(@trigger_templates, &File.read!/1)
   end
 end

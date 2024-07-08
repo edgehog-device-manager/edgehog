@@ -26,12 +26,12 @@ Mox.defmock(Edgehog.Astarte.Device.BaseImageMock,
   for: Edgehog.Astarte.Device.BaseImage.Behaviour
 )
 
-Mox.defmock(Edgehog.Astarte.Device.OSInfoMock,
-  for: Edgehog.Astarte.Device.OSInfo.Behaviour
+Mox.defmock(Edgehog.Astarte.Device.HardwareInfoMock,
+  for: Edgehog.Astarte.Device.HardwareInfo.Behaviour
 )
 
-Mox.defmock(Edgehog.Astarte.Device.OTARequestV0Mock,
-  for: Edgehog.Astarte.Device.OTARequest.V0.Behaviour
+Mox.defmock(Edgehog.Astarte.Device.OSInfoMock,
+  for: Edgehog.Astarte.Device.OSInfo.Behaviour
 )
 
 Mox.defmock(Edgehog.Astarte.Device.OTARequestV1Mock,
@@ -78,19 +78,13 @@ Mox.defmock(Edgehog.Astarte.Device.ForwarderSessionMock,
   for: Edgehog.Astarte.Device.ForwarderSession.Behaviour
 )
 
-Mox.defmock(Edgehog.Astarte.Realm.InterfacesMock,
-  for: Edgehog.Astarte.Realm.Interfaces.Behaviour
+Mox.defmock(Edgehog.Astarte.Interface.MockDataLayer,
+  for: Edgehog.Astarte.Interface.DataLayer
 )
 
-Mox.defmock(Edgehog.Astarte.Realm.TriggersMock,
-  for: Edgehog.Astarte.Realm.Triggers.Behaviour
+Mox.defmock(Edgehog.Astarte.Trigger.MockDataLayer,
+  for: Edgehog.Astarte.Trigger.DataLayer
 )
-
-Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
-  for: Edgehog.Geolocation.GeolocationProvider
-)
-
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock, for: Edgehog.Geolocation.GeocodingProvider)
 
 Mox.defmock(Edgehog.Assets.SystemModelPictureMock, for: Edgehog.Assets.Store.Behaviour)
 

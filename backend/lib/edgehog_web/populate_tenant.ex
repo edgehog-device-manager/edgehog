@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@
 #
 
 defmodule EdgehogWeb.PopulateTenant do
+  @moduledoc false
   @behaviour Plug
 
-  alias Edgehog.Tenants
-
   import Plug.Conn
+
+  alias Edgehog.Tenants
 
   def init(opts), do: opts
 
@@ -32,10 +33,9 @@ defmodule EdgehogWeb.PopulateTenant do
 
     case Tenants.fetch_tenant_by_slug(tenant_slug) do
       {:ok, tenant} ->
-        _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-        Plug.Conn.assign(conn, :current_tenant, tenant)
+        Ash.PlugHelpers.set_tenant(conn, tenant)
 
-      {:error, :not_found} ->
+      {:error, %Ash.Error.Query.NotFound{}} ->
         conn
         |> put_status(:forbidden)
         |> Phoenix.Controller.put_view(EdgehogWeb.ErrorView)

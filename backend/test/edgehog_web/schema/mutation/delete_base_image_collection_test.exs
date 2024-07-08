@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,146 +19,104 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
+
+  import Edgehog.BaseImagesFixtures
 
   alias Edgehog.BaseImages.BaseImageCollection
 
-  describe "deleteBaseImageCollection field" do
-    import Edgehog.DevicesFixtures
-    import Edgehog.BaseImagesFixtures
+  require Ash.Query
 
-    @query """
-    mutation DeleteBaseImageCollection($input: DeleteBaseImageCollectionInput!) {
-      deleteBaseImageCollection(input: $input) {
-        baseImageCollection {
+  describe "deleteBaseImageCollection mutation" do
+    setup %{tenant: tenant} do
+      base_image_collection =
+        base_image_collection_fixture(tenant: tenant)
+
+      id = AshGraphql.Resource.encode_relay_id(base_image_collection)
+
+      %{base_image_collection: base_image_collection, id: id}
+    end
+
+    test "deletes the base image collection", %{
+      tenant: tenant,
+      id: id,
+      base_image_collection: fixture
+    } do
+      base_image_collection =
+        [tenant: tenant, id: id]
+        |> delete_base_image_collection_mutation()
+        |> extract_result!()
+
+      assert base_image_collection["handle"] == fixture.handle
+
+      refute BaseImageCollection
+             |> Ash.Query.filter(id == ^fixture.id)
+             |> Ash.Query.set_tenant(tenant)
+             |> Ash.exists?()
+    end
+
+    test "fails with non-existing id", %{tenant: tenant} do
+      id = non_existing_base_image_collection_id(tenant)
+
+      result = delete_base_image_collection_mutation(tenant: tenant, id: id)
+
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+  end
+
+  defp delete_base_image_collection_mutation(opts) do
+    default_document = """
+    mutation DeleteBaseImageCollection($id: ID!) {
+      deleteBaseImageCollection(id: $id) {
+        result {
           id
           name
           handle
-          systemModel {
-            description
-          }
         }
       }
     }
     """
 
-    test "deletes the base image collection", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_description_locale = tenant.default_locale
-      default_description_text = "A system model"
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-      description = %{
-        default_description_locale => default_description_text,
-        "it-IT" => "Un modello di sistema"
-      }
+    document = Keyword.get(opts, :document, default_document)
+    variables = %{"id" => id}
+    context = %{tenant: tenant}
 
-      system_model = system_model_fixture(description: description)
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
 
-      name = "Ultimate Firmware"
-      handle = "ultimate-firmware"
+  defp extract_error!(result) do
+    assert %{
+             data: %{"deleteBaseImageCollection" => nil},
+             errors: [error]
+           } = result
 
-      %BaseImageCollection{id: id} =
-        base_image_collection_fixture(
-          name: name,
-          handle: handle,
-          system_model: system_model
-        )
+    error
+  end
 
-      id = Absinthe.Relay.Node.to_global_id(:base_image_collection, id, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          base_image_collection_id: id
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "deleteBaseImageCollection" => %{
-                   "baseImageCollection" => %{
-                     "id" => ^id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "systemModel" => %{
-                       "description" => ^default_description_text
-                     }
-                   }
-                 }
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "deleteBaseImageCollection" => %{
+                 "result" => base_image_collection
                }
-             } = json_response(conn, 200)
-    end
+             }
+           } = result
 
-    test "returns the explicit locale description of the system model", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
+    refute Map.get(result, :errors)
 
-      description = %{
-        default_locale => "A system model",
-        "it-IT" => "Un modello di sistema"
-      }
+    assert base_image_collection != nil
 
-      system_model = system_model_fixture(description: description)
+    base_image_collection
+  end
 
-      name = "Ultimate Firmware"
-      handle = "ultimate-firmware"
+  defp non_existing_base_image_collection_id(tenant) do
+    fixture = base_image_collection_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
 
-      %BaseImageCollection{id: id} =
-        base_image_collection_fixture(
-          name: name,
-          handle: handle,
-          system_model: system_model
-        )
-
-      id = Absinthe.Relay.Node.to_global_id(:base_image_collection, id, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          base_image_collection_id: id
-        }
-      }
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "it-IT")
-        |> post(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "deleteBaseImageCollection" => %{
-                   "baseImageCollection" => %{
-                     "id" => ^id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "systemModel" => %{
-                       "description" => "Un modello di sistema"
-                     }
-                   }
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "fails with non-existing id", %{conn: conn, api_path: api_path} do
-      id = Absinthe.Relay.Node.to_global_id(:base_image_collection, 10_000_000, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          base_image_collection_id: id
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
-               json_response(conn, 200)
-    end
+    id
   end
 end

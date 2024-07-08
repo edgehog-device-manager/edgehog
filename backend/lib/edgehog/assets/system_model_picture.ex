@@ -19,10 +19,11 @@
 #
 
 defmodule Edgehog.Assets.SystemModelPicture do
+  @moduledoc false
+  @behaviour Edgehog.Assets.Store.Behaviour
+
   alias Edgehog.Assets.Uploaders.SystemModelPicture
   alias Edgehog.Devices.SystemModel
-
-  @behaviour Edgehog.Assets.Store.Behaviour
 
   def upload(%SystemModel{} = scope, %Plug.Upload{} = upload) do
     with {:ok, file_name} <- SystemModelPicture.store({upload, scope}) do

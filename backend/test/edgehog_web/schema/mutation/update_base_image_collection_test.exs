@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,22 +19,141 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.BaseImages
-  alias Edgehog.BaseImages.BaseImageCollection
+  import Edgehog.BaseImagesFixtures
 
   describe "updateBaseImageCollection field" do
-    import Edgehog.BaseImagesFixtures
+    setup %{tenant: tenant} do
+      base_image_collection =
+        [tenant: tenant]
+        |> base_image_collection_fixture()
+        |> Ash.load!(:system_model)
 
-    setup do
-      {:ok, base_image_collection: base_image_collection_fixture()}
+      id = AshGraphql.Resource.encode_relay_id(base_image_collection)
+
+      %{base_image_collection: base_image_collection, id: id}
     end
 
-    @query """
-    mutation UpdateBaseImageCollection($input: UpdateBaseImageCollectionInput!) {
-      updateBaseImageCollection(input: $input) {
-        baseImageCollection {
+    test "updates base image collection with valid data", %{tenant: tenant, id: id} do
+      base_image_collection =
+        [tenant: tenant, id: id, name: "Updated Name", handle: "updatedhandle"]
+        |> update_base_image_collection_mutation()
+        |> extract_result!()
+
+      assert %{
+               "id" => ^id,
+               "name" => "Updated Name",
+               "handle" => "updatedhandle"
+             } = base_image_collection
+    end
+
+    test "supports partial updates", %{
+      tenant: tenant,
+      base_image_collection: base_image_collection,
+      id: id
+    } do
+      %{handle: old_handle} = base_image_collection
+
+      base_image_collection =
+        [tenant: tenant, id: id, name: "Updated Name"]
+        |> update_base_image_collection_mutation()
+        |> extract_result!()
+
+      assert %{
+               "name" => "Updated Name",
+               "handle" => ^old_handle
+             } = base_image_collection
+    end
+
+    test "returns error for invalid handle", %{tenant: tenant, id: id} do
+      result =
+        update_base_image_collection_mutation(
+          tenant: tenant,
+          id: id,
+          handle: "123Invalid$"
+        )
+
+      assert %{fields: [:handle], message: "should start with" <> _} =
+               extract_error!(result)
+    end
+
+    test "returns error for empty handle", %{tenant: tenant, id: id} do
+      result =
+        update_base_image_collection_mutation(
+          tenant: tenant,
+          id: id,
+          handle: ""
+        )
+
+      assert %{fields: [:handle], message: "is required"} =
+               extract_error!(result)
+    end
+
+    test "returns error for empty name", %{tenant: tenant, id: id} do
+      result =
+        update_base_image_collection_mutation(
+          tenant: tenant,
+          id: id,
+          name: ""
+        )
+
+      assert %{fields: [:name], message: "is required"} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate name", %{tenant: tenant, id: id} do
+      fixture = base_image_collection_fixture(tenant: tenant)
+
+      result =
+        update_base_image_collection_mutation(
+          tenant: tenant,
+          id: id,
+          name: fixture.name
+        )
+
+      assert %{fields: [:name], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "returns error for duplicate handle", %{tenant: tenant, id: id} do
+      fixture = base_image_collection_fixture(tenant: tenant)
+
+      result =
+        update_base_image_collection_mutation(
+          tenant: tenant,
+          id: id,
+          handle: fixture.handle
+        )
+
+      assert %{fields: [:handle], message: "has already been taken"} =
+               extract_error!(result)
+    end
+
+    test "fails with non-existing id", %{
+      tenant: tenant,
+      base_image_collection: base_image_collection,
+      id: id
+    } do
+      _ = Ash.destroy!(base_image_collection)
+
+      result =
+        update_base_image_collection_mutation(
+          tenant: tenant,
+          id: id,
+          name: "Updated Name"
+        )
+
+      assert %{fields: [:id], message: "could not be found" <> _} =
+               extract_error!(result)
+    end
+  end
+
+  defp update_base_image_collection_mutation(opts) do
+    default_document = """
+    mutation UpdateBaseImageCollection($id: ID!, $input: UpdateBaseImageCollectionInput!) {
+      updateBaseImageCollection(id: $id, input: $input) {
+        result {
           id
           name
           handle
@@ -42,127 +161,49 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
       }
     }
     """
-    test "updates base image collection with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
-    } do
-      name = "Foobaz"
-      handle = "foobaz"
 
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-      variables = %{
-        input: %{
-          base_image_collection_id: id,
-          name: name,
-          handle: handle
-        }
+    input =
+      %{
+        "handle" => opts[:handle],
+        "name" => opts[:name]
       }
+      |> Enum.filter(fn {_k, v} -> v != nil end)
+      |> Map.new()
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    variables = %{"id" => id, "input" => input}
 
-      assert %{
-               "data" => %{
-                 "updateBaseImageCollection" => %{
-                   "baseImageCollection" => %{
-                     "id" => ^id,
-                     "name" => ^name,
-                     "handle" => ^handle
-                   }
-                 }
+    document = Keyword.get(opts, :document, default_document)
+
+    context = %{tenant: tenant}
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"updateBaseImageCollection" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "updateBaseImageCollection" => %{
+                 "result" => base_image_collection
                }
-             } = assert(json_response(conn, 200))
+             }
+           } = result
 
-      assert {:ok, %BaseImageCollection{name: ^name, handle: ^handle}} =
-               BaseImages.fetch_base_image_collection(base_image_collection.id)
-    end
+    refute Map.get(result, :errors)
 
-    test "fails with invalid data", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
-    } do
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
+    assert base_image_collection != nil
 
-      variables = %{
-        input: %{
-          base_image_collection_id: id,
-          name: nil,
-          handle: nil
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
-
-    test "updates base image collection with partial data", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
-    } do
-      name = "Foobarbaz"
-
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
-
-      variables = %{
-        input: %{
-          base_image_collection_id: id,
-          name: name
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "updateBaseImageCollection" => %{
-                   "baseImageCollection" => %{
-                     "name" => ^name
-                   }
-                 }
-               }
-             } = assert(json_response(conn, 200))
-
-      assert {:ok, %BaseImageCollection{name: ^name}} =
-               BaseImages.fetch_base_image_collection(base_image_collection.id)
-    end
-
-    test "fails with non-existing id", %{conn: conn, api_path: api_path} do
-      name = "Foobaz"
-      handle = "foobaz"
-
-      id = Absinthe.Relay.Node.to_global_id(:base_image_collection, 10_000_000, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          base_image_collection_id: id,
-          name: name,
-          handle: handle
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
-               assert(json_response(conn, 200))
-    end
+    base_image_collection
   end
 end

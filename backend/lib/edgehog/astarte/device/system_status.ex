@@ -19,6 +19,12 @@
 #
 
 defmodule Edgehog.Astarte.Device.SystemStatus do
+  @moduledoc false
+  @behaviour Edgehog.Astarte.Device.SystemStatus.Behaviour
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.SystemStatus
+
   @enforce_keys [:timestamp]
   defstruct [
     :boot_id,
@@ -35,11 +41,6 @@ defmodule Edgehog.Astarte.Device.SystemStatus do
           uptime_milliseconds: integer() | nil,
           timestamp: DateTime.t()
         }
-
-  @behaviour Edgehog.Astarte.Device.SystemStatus.Behaviour
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.SystemStatus
 
   @interface "io.edgehog.devicemanager.SystemStatus"
 

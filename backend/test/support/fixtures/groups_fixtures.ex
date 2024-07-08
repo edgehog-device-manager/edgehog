@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,16 +42,18 @@ defmodule Edgehog.GroupsFixtures do
   @doc """
   Generate a device_group.
   """
-  def device_group_fixture(attrs \\ %{}) do
-    {:ok, device_group} =
-      attrs
-      |> Enum.into(%{
-        handle: unique_device_group_handle(),
-        name: unique_device_group_name(),
-        selector: unique_device_group_selector()
-      })
-      |> Edgehog.Groups.create_device_group()
+  def device_group_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    device_group
+    params =
+      Enum.into(opts, %{
+        handle: opts[:handle] || unique_device_group_handle(),
+        name: opts[:name] || unique_device_group_name(),
+        selector: opts[:selector] || unique_device_group_selector()
+      })
+
+    Edgehog.Groups.DeviceGroup
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 end

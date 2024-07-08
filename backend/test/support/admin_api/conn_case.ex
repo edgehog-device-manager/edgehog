@@ -37,14 +37,19 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL
+  alias EdgehogWeb.Auth.Token
+
   using do
     quote do
+      use EdgehogWeb, :verified_routes
+
+      import EdgehogWeb.AdminAPI.ConnCase
+      import Mox
+      import Phoenix.ConnTest
+
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
-      import EdgehogWeb.AdminAPI.ConnCase
-
-      alias EdgehogWeb.Router.Helpers, as: Routes
 
       # The default endpoint for testing
       @endpoint EdgehogWeb.Endpoint
@@ -52,10 +57,13 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
   end
 
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
+    on_exit(fn -> SQL.Sandbox.stop_owner(pid) end)
 
-    conn = Phoenix.ConnTest.build_conn()
+    conn =
+      Phoenix.ConnTest.build_conn()
+      |> Plug.Conn.put_req_header("content-type", "application/vnd.api+json")
+      |> Plug.Conn.put_req_header("accept", "application/vnd.api+json")
 
     cond do
       tags[:unconfigured] ->
@@ -100,7 +108,7 @@ defmodule EdgehogWeb.AdminAPI.ConnCase do
 
     # Generate the JWT
     {:ok, jwt, _claims} =
-      EdgehogWeb.Auth.Token.encode_and_sign("dontcare", claims,
+      Token.encode_and_sign("dontcare", claims,
         secret: jwk,
         allowed_algos: ["ES256"]
       )

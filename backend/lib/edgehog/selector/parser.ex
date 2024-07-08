@@ -19,9 +19,12 @@
 #
 
 defmodule Edgehog.Selector.Parser do
+  @moduledoc false
   import NimbleParsec
 
-  alias Edgehog.Selector.AST.{AttributeFilter, BinaryOp, TagFilter}
+  alias Edgehog.Selector.AST.AttributeFilter
+  alias Edgehog.Selector.AST.BinaryOp
+  alias Edgehog.Selector.AST.TagFilter
 
   # Semi formal definition of the selector grammar
   # Literals are wrapped in single quotes
@@ -54,13 +57,15 @@ defmodule Edgehog.Selector.Parser do
   blankspace = ignore(ascii_string([?\s, ?\n, ?\r, ?\t], min: 1))
 
   in_operator =
-    ascii_char([?i, ?I])
+    [?i, ?I]
+    |> ascii_char()
     |> ascii_char([?n, ?N])
     |> label("IN")
     |> replace(:in)
 
   not_in_operator =
-    ascii_char([?n, ?N])
+    [?n, ?N]
+    |> ascii_char()
     |> ascii_char([?o, ?O])
     |> ascii_char([?t, ?T])
     |> concat(blankspace)
@@ -70,14 +75,16 @@ defmodule Edgehog.Selector.Parser do
     |> replace(:not_in)
 
   and_operator =
-    ascii_char([?a, ?A])
+    [?a, ?A]
+    |> ascii_char()
     |> ascii_char([?n, ?N])
     |> ascii_char([?d, ?D])
     |> label("AND")
     |> replace(:and)
 
   or_operator =
-    ascii_char([?o, ?O])
+    [?o, ?O]
+    |> ascii_char()
     |> ascii_char([?r, ?R])
     |> label("OR")
     |> replace(:or)
@@ -88,7 +95,9 @@ defmodule Edgehog.Selector.Parser do
   key = ascii_string([?a..?z, ?-, ?_], min: 1)
 
   attribute =
-    ignore(string("attributes[\""))
+    "attributes[\""
+    |> string()
+    |> ignore()
     |> concat(namespace)
     |> ignore(ascii_char([?:]))
     |> concat(key)
@@ -97,41 +106,52 @@ defmodule Edgehog.Selector.Parser do
 
   # Order is important here, e.g. >= must come before >, otherwise the latter will always match first
   attribute_operator =
-    choice([
-      string("==") |> replace(:==),
-      string("!=") |> replace(:!=),
-      string(">=") |> replace(:>=),
-      string(">") |> replace(:>),
-      string("<=") |> replace(:<=),
-      string("<") |> replace(:<)
-    ])
+    [
+      "==" |> string() |> replace(:==),
+      "!=" |> string() |> replace(:!=),
+      ">=" |> string() |> replace(:>=),
+      ">" |> string() |> replace(:>),
+      "<=" |> string() |> replace(:<=),
+      "<" |> string() |> replace(:<)
+    ]
+    |> choice()
     |> label("operator")
 
   datetime_value =
-    ignore(string("datetime(\""))
+    "datetime(\""
+    |> string()
+    |> ignore()
     |> ascii_string([not: ?"], min: 1)
     |> ignore(string("\")"))
     |> label("datetime(ISO8601) value")
     |> unwrap_and_tag(:datetime)
 
   now_value =
-    ignore(string("now()"))
+    "now()"
+    |> string()
+    |> ignore()
     |> label("now()")
     |> replace(:now)
     # :now is typed as :datetime
     |> unwrap_and_tag(:datetime)
 
   binaryblob_value =
-    ignore(string("binaryblob(\""))
+    "binaryblob(\""
+    |> string()
+    |> ignore()
     |> ascii_string([not: ?"], min: 1)
     |> ignore(string("\")"))
     |> label("binaryblob(base64) value")
     |> unwrap_and_tag(:binaryblob)
 
   double_quoted_string =
-    ignore(ascii_char([?"]))
+    [?"]
+    |> ascii_char()
+    |> ignore()
     |> repeat(
-      lookahead_not(ascii_char([?"]))
+      [?"]
+      |> ascii_char()
+      |> lookahead_not()
       |> choice([
         ~S(\") |> string() |> replace(?"),
         utf8_char([])
@@ -141,33 +161,38 @@ defmodule Edgehog.Selector.Parser do
     |> reduce({Kernel, :to_string, []})
 
   string_value =
-    double_quoted_string
-    |> unwrap_and_tag(:string)
+    unwrap_and_tag(double_quoted_string, :string)
 
   boolean_value =
-    choice([
-      string("true") |> replace(true),
-      string("false") |> replace(false)
-    ])
+    [
+      "true" |> string() |> replace(true),
+      "false" |> string() |> replace(false)
+    ]
+    |> choice()
     |> label("boolean value")
     |> unwrap_and_tag(:boolean)
 
   positive_integer = integer(min: 1)
 
   negative_integer =
-    ignore(ascii_char([?-]))
+    [?-]
+    |> ascii_char()
+    |> ignore()
     |> integer(min: 1)
     |> map({Kernel, :-, []})
 
   integer_value =
-    choice([
+    [
       negative_integer,
       positive_integer
-    ])
+    ]
+    |> choice()
     |> lookahead_not(ascii_char([?.]))
 
   float_value =
-    optional(ascii_char([?-]))
+    [?-]
+    |> ascii_char()
+    |> optional()
     |> ascii_string([?0..?9], min: 1)
     |> ignore(ascii_char([?.]))
     |> ascii_string([?0..?9], min: 1)
@@ -178,22 +203,24 @@ defmodule Edgehog.Selector.Parser do
   # `== 42` even if the value is `42.0` and viceversa (and numeric attribute values are all converted
   # to PostgreSQL decimal anyway)
   number_value =
-    choice([
+    [
       integer_value,
       float_value
-    ])
+    ]
+    |> choice()
     |> label("number value")
     |> unwrap_and_tag(:number)
 
   attribute_value =
-    choice([
+    [
       datetime_value,
       now_value,
       binaryblob_value,
       string_value,
       boolean_value,
       number_value
-    ])
+    ]
+    |> choice()
     |> label("attribute value")
 
   attribute_filter =
@@ -224,18 +251,21 @@ defmodule Edgehog.Selector.Parser do
     ])
 
   factor =
-    choice([
-      ignore(ascii_char([?(]))
+    [
+      [?(]
+      |> ascii_char()
+      |> ignore()
       |> optional(blankspace)
       |> concat(parsec(:expression))
       |> optional(blankspace)
       |> ignore(ascii_char([?)])),
       filter
-    ])
+    ]
+    |> choice()
     |> label("factor")
 
   defcombinatorp :term,
-                 choice([
+                 [
                    factor
                    |> concat(blankspace)
                    |> ignore(and_operator)
@@ -243,23 +273,27 @@ defmodule Edgehog.Selector.Parser do
                    |> concat(parsec(:term))
                    |> post_traverse(:finalize_and),
                    factor
-                 ])
+                 ]
+                 |> choice()
                  |> label("term")
 
   defcombinatorp :expression,
-                 choice([
-                   parsec(:term)
+                 [
+                   :term
+                   |> parsec()
                    |> concat(blankspace)
                    |> ignore(or_operator)
                    |> concat(blankspace)
                    |> concat(parsec(:expression))
                    |> post_traverse(:finalize_or),
                    parsec(:term)
-                 ])
+                 ]
+                 |> choice()
                  |> label("expression")
 
   selector =
-    optional(blankspace)
+    blankspace
+    |> optional()
     |> parsec(:expression)
     |> optional(blankspace)
     |> eos()
@@ -271,13 +305,7 @@ defmodule Edgehog.Selector.Parser do
     {rest, [node], context}
   end
 
-  defp finalize_attribute_filter(
-         rest,
-         [{type, value}, operator, key, namespace],
-         context,
-         _line,
-         _column
-       ) do
+  defp finalize_attribute_filter(rest, [{type, value}, operator, key, namespace], context, _line, _column) do
     # This function just passes the parsed value as-is without performing any other checks (e.g. if
     # the operator is valid for that value, if the datetime is a valid ISO8601 etc.).
     # All these semantic checks will be performed when traversing the tree (see

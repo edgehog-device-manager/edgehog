@@ -19,5 +19,22 @@
 #
 
 defmodule Edgehog.Selector.AST.BinaryOp do
+  @moduledoc false
+  import Ash.Expr
+
+  alias Edgehog.Selector
+
   defstruct [:operator, :lhs, :rhs]
+
+  defimpl Selector.Filter do
+    def to_ash_expr(binary_op) do
+      lhs = Selector.Filter.to_ash_expr(binary_op.lhs)
+      rhs = Selector.Filter.to_ash_expr(binary_op.rhs)
+
+      case binary_op.operator do
+        :and -> expr(^lhs and ^rhs)
+        :or -> expr(^lhs or ^rhs)
+      end
+    end
+  end
 end

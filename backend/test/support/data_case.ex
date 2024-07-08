@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,31 +36,27 @@ defmodule Edgehog.DataCase do
 
   use ExUnit.CaseTemplate
 
+  import Mox
+
+  alias Ecto.Adapters.SQL
+
   using do
     quote do
-      alias Edgehog.Repo
-
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
       import Edgehog.DataCase
+      import Mox
+
+      alias Edgehog.Repo
     end
   end
 
+  setup :verify_on_exit!
+
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
-
-    if tags[:no_tenant_fixtures] do
-      :ok
-    else
-      # Create a tenant fixture and populate the tenant id, since we don't have the web part that
-      # does it for us here
-      tenant = Edgehog.TenantsFixtures.tenant_fixture()
-      _ = Edgehog.Repo.put_tenant_id(tenant.tenant_id)
-
-      {:ok, tenant: tenant}
-    end
+    pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
+    on_exit(fn -> SQL.Sandbox.stop_owner(pid) end)
   end
 
   @doc """
@@ -72,10 +68,7 @@ defmodule Edgehog.DataCase do
 
   """
   def errors_on(changeset) do
-    PolymorphicEmbed.traverse_errors(changeset, fn {message, opts} ->
-      # We use PolymorphicEmbed.traverse_errors/1 instead of Ecto.Changeset.traverse_errors/1
-      # since this also correctly traverses polymorphic embeds errors
-
+    Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->
         opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
       end)

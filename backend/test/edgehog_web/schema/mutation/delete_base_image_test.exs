@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,60 +19,111 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
-  use EdgehogWeb.ConnCase, async: true
-  use Edgehog.BaseImagesStorageMockCase
+  use EdgehogWeb.GraphqlCase, async: true
 
-  alias Edgehog.BaseImages
   import Edgehog.BaseImagesFixtures
 
+  alias Edgehog.BaseImages.BaseImage
+  alias Edgehog.BaseImages.StorageMock
+
+  require Ash.Query
+
   describe "deleteBaseImage mutation" do
-    setup do
-      {:ok, base_image: base_image_fixture()}
+    setup %{tenant: tenant} do
+      base_image =
+        base_image_fixture(tenant: tenant)
+
+      id = AshGraphql.Resource.encode_relay_id(base_image)
+
+      %{base_image: base_image, id: id}
     end
 
-    test "deletes existing base image", %{
-      conn: conn,
-      api_path: api_path,
-      base_image: base_image
-    } do
-      response = delete_base_image_mutation(conn, api_path, base_image.id)
-      assert response["data"]["deleteBaseImage"]["baseImage"]["version"] == base_image.version
-      assert BaseImages.fetch_base_image(base_image.id) == {:error, :not_found}
+    test "deletes existing base image", %{tenant: tenant, id: id, base_image: fixture} do
+      expect(StorageMock, :delete, fn _ -> :ok end)
+
+      base_image =
+        [tenant: tenant, id: id]
+        |> delete_base_image_mutation()
+        |> extract_result!()
+
+      assert base_image["version"] == fixture.version
+
+      refute BaseImage
+             |> Ash.Query.filter(id == ^fixture.id)
+             |> Ash.Query.set_tenant(tenant)
+             |> Ash.exists?()
     end
 
-    test "fails with non-existing base image", %{
-      conn: conn,
-      api_path: api_path
-    } do
-      response = delete_base_image_mutation(conn, api_path, "123456")
-      assert %{"errors" => [%{"status_code" => 404, "code" => "not_found"}]} = response
+    test "tries to delete the file, but ignores failure", %{tenant: tenant} do
+      file_url = "https://example.com/ota.bin"
+
+      fixture = base_image_fixture(tenant: tenant, url: file_url)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      expect(StorageMock, :delete, fn _ -> {:error, :cannot_delete} end)
+
+      %{"id" => ^id} =
+        [tenant: tenant, id: id]
+        |> delete_base_image_mutation()
+        |> extract_result!()
+    end
+
+    test "fails with non-existing base image", %{tenant: tenant, base_image: base_image, id: id} do
+      :ok = Ash.destroy!(base_image, action: :destroy_fixture)
+
+      result = delete_base_image_mutation(tenant: tenant, id: id)
+
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
     end
   end
 
-  @query """
-  mutation DeleteBaseImage($input: DeleteBaseImageInput!) {
-    deleteBaseImage(input: $input) {
-      baseImage {
-        id
-        version
-        url
-        startingVersionRequirement
-        description
-        releaseDisplayName
-        baseImageCollection {
-          handle
+  defp delete_base_image_mutation(opts) do
+    default_document = """
+    mutation DeleteBaseImage($id: ID!) {
+      deleteBaseImage(id: $id) {
+        result {
+          id
+          version
+          url
+          startingVersionRequirement
         }
       }
     }
-  }
-  """
-  defp delete_base_image_mutation(conn, api_path, db_id) do
-    base_image_id = Absinthe.Relay.Node.to_global_id(:base_image, db_id, EdgehogWeb.Schema)
+    """
 
-    variables = %{input: %{base_image_id: base_image_id}}
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-    conn = post(conn, api_path, query: @query, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
+    variables = %{"id" => id}
+    context = %{tenant: tenant}
 
-    json_response(conn, 200)
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"deleteBaseImage" => nil},
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "deleteBaseImage" => %{
+                 "result" => base_image
+               }
+             }
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert base_image != nil
+
+    base_image
   end
 end

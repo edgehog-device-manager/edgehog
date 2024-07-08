@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,39 +19,140 @@
 #
 
 defmodule Edgehog.Devices.HardwareType do
-  use Ecto.Schema
-  use I18nHelpers.Ecto.TranslatableFields
-  import Ecto.Changeset
+  @moduledoc false
+  use Edgehog.MultitenantResource,
+    domain: Edgehog.Devices,
+    extensions: [
+      AshGraphql.Resource
+    ]
 
-  alias Edgehog.Devices.HardwareTypePartNumber
-  alias Edgehog.Devices.SystemModel
+  alias Edgehog.Validations
 
-  schema "hardware_types" do
-    field :handle, :string
-    field :name, :string
-    field :tenant_id, :id
-    has_many :part_numbers, HardwareTypePartNumber, on_replace: :delete
-    translatable_has_many :system_models, SystemModel
+  resource do
+    description """
+    Denotes a type of hardware that devices can have.
 
-    timestamps()
+    It refers to the physical components embedded in a device.
+    This can represent, e.g., multiple revisions of a PCB (each with a
+    different part number) which are functionally equivalent from the device
+    point of view.
+    """
   end
 
-  @doc false
-  def changeset(hardware_type, attrs) do
-    hardware_type
-    |> cast(attrs, [:name, :handle])
-    |> validate_required([:name, :handle])
-    |> unique_constraint([:name, :tenant_id])
-    |> unique_constraint([:handle, :tenant_id])
-    |> validate_format(:handle, ~r/^[a-z][a-z\d\-]*$/,
-      message: "should only contain lower case ASCII letters (from a to z), digits and -"
-    )
+  graphql do
+    type :hardware_type
   end
 
-  @doc false
-  def delete_changeset(hardware_type) do
-    hardware_type
-    |> change()
-    |> no_assoc_constraint(:system_models)
+  actions do
+    defaults [:read]
+
+    create :create do
+      description "Creates a hardware type."
+      primary? true
+
+      accept [:handle, :name]
+
+      argument :part_numbers, {:array, :string} do
+        allow_nil? false
+        constraints min_length: 1
+      end
+
+      # TODO: see issue #228, which is still relevant
+      change manage_relationship(:part_numbers,
+               on_lookup: :relate,
+               on_no_match: :create,
+               value_is_key: :part_number,
+               use_identities: [:part_number_tenant_id]
+             )
+    end
+
+    update :update do
+      description "Updates a hardware type."
+      primary? true
+
+      # Needed because manage_relationship is not atomic
+      require_atomic? false
+
+      accept [:handle, :name]
+
+      argument :part_numbers, {:array, :string} do
+        description "The list of part numbers associated with the hardware type."
+        constraints min_length: 1
+      end
+
+      change manage_relationship(:part_numbers,
+               on_lookup: :relate,
+               on_no_match: :create,
+               on_missing: :unrelate,
+               value_is_key: :part_number,
+               use_identities: [:part_number_tenant_id]
+             )
+    end
+
+    destroy :destroy do
+      description "Deletes a hardware type."
+      primary? true
+    end
+  end
+
+  validations do
+    validate Validations.slug(:handle) do
+      where changing(:handle)
+    end
+  end
+
+  attributes do
+    integer_primary_key :id
+
+    attribute :handle, :string do
+      public? true
+
+      description """
+      The identifier of the hardware type.
+
+      It should start with a lower case ASCII letter and only contain \
+      lower case ASCII letters, digits and the hyphen - symbol.
+      """
+
+      allow_nil? false
+    end
+
+    attribute :name, :string do
+      public? true
+      description "The display name of the hardware type."
+      allow_nil? false
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    has_many :part_numbers, Edgehog.Devices.HardwareTypePartNumber do
+      public? true
+      description "The list of part numbers associated with the hardware type."
+    end
+
+    # TODO: :system_model
+  end
+
+  aggregates do
+    list :part_number_strings, :part_numbers, :part_number
+  end
+
+  identities do
+    # These have to be named this way to match the existing unique indexes
+    # we already have. Ash uses identities to add a `unique_constraint` to the
+    # Ecto changeset, so names have to match. There's no need to explicitly add
+    # :tenant_id in the fields because identity in a multitenant resource are
+    # automatically scoped to a specific :tenant_id
+    # TODO: change index names when we generate migrations at the end of the porting
+    identity :handle_tenant_id, [:handle]
+    identity :name_tenant_id, [:name]
+  end
+
+  postgres do
+    table "hardware_types"
+    repo Edgehog.Repo
   end
 end

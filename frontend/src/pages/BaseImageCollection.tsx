@@ -64,10 +64,11 @@ const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
 
 const UPDATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
   mutation BaseImageCollection_updateBaseImageCollection_Mutation(
+    $baseImageCollectionId: ID!
     $input: UpdateBaseImageCollectionInput!
   ) {
-    updateBaseImageCollection(input: $input) {
-      baseImageCollection {
+    updateBaseImageCollection(id: $baseImageCollectionId, input: $input) {
+      result {
         id
         name
         handle
@@ -80,10 +81,10 @@ const UPDATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
 
 const DELETE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
   mutation BaseImageCollection_deleteBaseImageCollection_Mutation(
-    $input: DeleteBaseImageCollectionInput!
+    $baseImageCollectionId: ID!
   ) {
-    deleteBaseImageCollection(input: $input) {
-      baseImageCollection {
+    deleteBaseImageCollection(id: $baseImageCollectionId) {
+      result {
         id
       }
     }
@@ -114,20 +115,20 @@ const BaseImageCollectionContent = ({
     );
 
   const handleDeleteBaseImageCollection = useCallback(() => {
-    const input = { baseImageCollectionId };
     deleteBaseImageCollection({
-      variables: { input },
+      variables: { baseImageCollectionId },
       onCompleted(data, errors) {
-        if (data.deleteBaseImageCollection) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({ route: Route.baseImageCollections });
         }
-        if (errors) {
-          const errorFeedback = errors
-            .map((error) => error.message)
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          return setShowDeleteModal(false);
-        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
       },
       onError() {
         setErrorFeedback(
@@ -139,16 +140,13 @@ const BaseImageCollectionContent = ({
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        if (!data.deleteBaseImageCollection) {
+        const baseImageCollectionId =
+          data?.deleteBaseImageCollection?.result?.id;
+        if (!baseImageCollectionId) {
           return;
         }
 
-        const baseImageCollection = store
-          .getRootField("deleteBaseImageCollection")
-          .getLinkedRecord("baseImageCollection");
-        const baseImageCollectionId = baseImageCollection.getDataID();
         const root = store.getRoot();
-
         const baseImageCollections = root.getLinkedRecords(
           "baseImageCollections",
         );
@@ -174,22 +172,18 @@ const BaseImageCollectionContent = ({
 
   const handleUpdateBaseImageCollection = useCallback(
     (baseImageCollection: BaseImageCollectionChanges) => {
-      const input = {
-        baseImageCollectionId,
-        ...baseImageCollection,
-      };
       updateBaseImageCollection({
-        variables: { input },
+        variables: { baseImageCollectionId, input: baseImageCollection },
         onCompleted(data, errors) {
-          if (data.updateBaseImageCollection) {
-            setErrorFeedback(null);
-          }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
+          setErrorFeedback(null);
         },
         onError() {
           setErrorFeedback(

@@ -19,8 +19,10 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler.Core do
+  @moduledoc false
   alias Astarte.Client
-  alias Edgehog.Astarte
+  alias Edgehog.Astarte.Interface
+  alias Edgehog.Astarte.Trigger
   alias Edgehog.Tenants.Reconciler.AstarteResources
 
   @interfaces AstarteResources.load_interfaces()
@@ -31,10 +33,8 @@ defmodule Edgehog.Tenants.Reconciler.Core do
   end
 
   def list_required_triggers(trigger_url) do
-    @trigger_templates
-    |> Enum.map(fn template ->
-      EEx.eval_string(template, assigns: [trigger_url: trigger_url])
-      |> Jason.decode!()
+    Enum.map(@trigger_templates, fn template ->
+      template |> EEx.eval_string(assigns: [trigger_url: trigger_url]) |> Jason.decode!()
     end)
   end
 
@@ -45,7 +45,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
       "version_minor" => required_minor
     } = required_interface
 
-    case Astarte.fetch_interface(client, interface_name, required_major) do
+    case Interface.fetch_by_name_and_major(client, interface_name, required_major) do
       {:ok, %{"version_major" => ^required_major, "version_minor" => existing_minor}} ->
         if required_minor > existing_minor do
           update_interface!(client, interface_name, required_major, required_interface)
@@ -66,7 +66,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
       "name" => trigger_name
     } = required_trigger
 
-    case Astarte.fetch_trigger(client, trigger_name) do
+    case Trigger.fetch_by_name(client, trigger_name) do
       {:ok, existing_trigger} ->
         if trigger_matches?(existing_trigger, required_trigger) do
           :ok
@@ -82,24 +82,16 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end
   end
 
-  def cleanup_trigger(%Client.RealmManagement{} = client, trigger) do
-    %{
-      "name" => trigger_name
-    } = trigger
-
-    Astarte.delete_trigger(client, trigger_name)
-  end
-
   defp update_interface!(rm_client, name, major, interface_json) do
     # TODO: crash with a nicer exception instead of MatchError
-    :ok = Astarte.update_interface(rm_client, name, major, interface_json)
+    :ok = Interface.update(rm_client, name, major, interface_json)
 
     :ok
   end
 
   defp install_interface!(rm_client, interface_json) do
     # TODO: crash with a nicer exception instead of MatchError
-    :ok = Astarte.create_interface(rm_client, interface_json)
+    :ok = Interface.create(rm_client, interface_json)
 
     :ok
   end
@@ -108,7 +100,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     # Triggers don't have a way to update them, to we delete it and install it again
 
     # TODO: crash with a nicer exception instead of MatchError
-    :ok = Astarte.delete_trigger(rm_client, name)
+    :ok = Trigger.delete(rm_client, name)
     :ok = install_trigger!(rm_client, trigger_json)
 
     :ok
@@ -116,7 +108,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
 
   defp install_trigger!(rm_client, trigger_json) do
     # TODO: crash with a nicer exception instead of MatchError
-    :ok = Astarte.create_trigger(rm_client, trigger_json)
+    :ok = Trigger.create(rm_client, trigger_json)
 
     :ok
   end

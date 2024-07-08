@@ -19,12 +19,14 @@
 #
 
 defmodule EdgehogWeb.Auth.ErrorHandler do
+  @moduledoc false
   @behaviour Guardian.Plug.ErrorHandler
 
   import Plug.Conn
+
   require Logger
 
-  @impl true
+  @impl Guardian.Plug.ErrorHandler
   # This is called when no JWT token is present
   def auth_error(conn, {:unauthenticated, reason}, _opts) do
     _ = Logger.info("Refusing unauthenticated request: #{inspect(reason)}.")

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,24 +19,61 @@
 #
 
 defmodule Edgehog.Devices.HardwareTypePartNumber do
-  use Ecto.Schema
-  import Ecto.Changeset
+  @moduledoc false
+  use Edgehog.MultitenantResource,
+    domain: Edgehog.Devices,
+    extensions: [
+      AshGraphql.Resource
+    ]
 
-  alias Edgehog.Devices.HardwareType
-
-  schema "hardware_type_part_numbers" do
-    field :part_number, :string
-    field :tenant_id, :id
-    belongs_to :hardware_type, HardwareType
-
-    timestamps()
+  graphql do
+    type :hardware_type_part_number
   end
 
-  @doc false
-  def changeset(hardware_type_part_number, attrs) do
-    hardware_type_part_number
-    |> cast(attrs, [:part_number])
-    |> validate_required([:part_number])
-    |> unique_constraint([:part_number, :tenant_id])
+  actions do
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      accept [:part_number]
+    end
+
+    update :update do
+      primary? true
+      accept [:part_number]
+    end
+  end
+
+  attributes do
+    integer_primary_key :id
+
+    attribute :part_number, :string do
+      public? true
+      description "The part number identifier."
+      allow_nil? false
+    end
+
+    create_timestamp :inserted_at
+    update_timestamp :updated_at
+  end
+
+  relationships do
+    belongs_to :hardware_type, Edgehog.Devices.HardwareType do
+      public? true
+      attribute_public? false
+    end
+  end
+
+  identities do
+    identity :part_number_tenant_id, [:part_number]
+  end
+
+  postgres do
+    table "hardware_type_part_numbers"
+    repo Edgehog.Repo
+
+    references do
+      reference :hardware_type, on_delete: :delete
+    end
   end
 end

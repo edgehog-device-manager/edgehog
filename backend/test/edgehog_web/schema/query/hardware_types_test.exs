@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,53 +19,96 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices.{
-    HardwareType,
-    HardwareTypePartNumber
-  }
+  describe "hardwareTypes query" do
+    test "returns empty hardware types", %{tenant: tenant} do
+      assert %{data: %{"hardwareTypes" => []}} == hardware_types_query(tenant: tenant)
+    end
 
-  describe "hardwareTypes field" do
-    @query """
-    {
-      hardwareTypes {
-        name
-        handle
-        partNumbers
+    test "returns hardware types if they're present", %{tenant: tenant} do
+      fixture =
+        [tenant: tenant]
+        |> hardware_type_fixture()
+        |> Ash.load!(:part_number_strings)
+
+      assert %{data: %{"hardwareTypes" => [hardware_type]}} = hardware_types_query(tenant: tenant)
+
+      assert hardware_type["name"] == fixture.name
+      assert hardware_type["handle"] == fixture.handle
+      assert length(hardware_type["partNumbers"]) == length(fixture.part_number_strings)
+
+      Enum.each(fixture.part_number_strings, fn pn ->
+        assert(%{"partNumber" => pn} in hardware_type["partNumbers"])
+      end)
+    end
+
+    test "allows filtering", %{tenant: tenant} do
+      _ = hardware_type_fixture(tenant: tenant, handle: "foo")
+      _ = hardware_type_fixture(tenant: tenant, handle: "bar", part_numbers: ["123-bar"])
+      _ = hardware_type_fixture(tenant: tenant, handle: "baz")
+
+      filter = %{
+        "or" => [
+          %{"handle" => %{"eq" => "foo"}},
+          %{"partNumbers" => %{"partNumber" => %{"eq" => "123-bar"}}}
+        ]
       }
-    }
-    """
-    test "returns empty hardware types", %{conn: conn, api_path: api_path} do
-      conn = get(conn, api_path, query: @query)
 
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "hardwareTypes" => []
-               }
-             }
+      assert %{data: %{"hardwareTypes" => hardware_types}} =
+               hardware_types_query(tenant: tenant, filter: filter)
+
+      assert length(hardware_types) == 2
+      assert "foo" in Enum.map(hardware_types, & &1["handle"])
+      assert "bar" in Enum.map(hardware_types, & &1["handle"])
+      refute "baz" in Enum.map(hardware_types, & &1["handle"])
     end
 
-    test "returns hardware types if they're present", %{conn: conn, api_path: api_path} do
-      %HardwareType{
-        name: name,
-        handle: handle,
-        part_numbers: [%HardwareTypePartNumber{part_number: part_number}]
-      } = hardware_type_fixture()
+    test "allows sorting", %{tenant: tenant} do
+      _ = hardware_type_fixture(tenant: tenant, handle: "3")
+      _ = hardware_type_fixture(tenant: tenant, handle: "2")
+      _ = hardware_type_fixture(tenant: tenant, handle: "1")
 
-      conn = get(conn, api_path, query: @query)
+      sort = [
+        %{"field" => "HANDLE", "order" => "ASC"}
+      ]
 
-      assert %{
-               "data" => %{
-                 "hardwareTypes" => [hardware_type]
-               }
-             } = json_response(conn, 200)
+      assert %{data: %{"hardwareTypes" => hardware_types}} =
+               hardware_types_query(tenant: tenant, sort: sort)
 
-      assert hardware_type["name"] == name
-      assert hardware_type["handle"] == handle
-      assert hardware_type["partNumbers"] == [part_number]
+      assert [
+               %{"handle" => "1"},
+               %{"handle" => "2"},
+               %{"handle" => "3"}
+             ] = hardware_types
     end
+  end
+
+  defp hardware_types_query(opts) do
+    default_document =
+      """
+      query HardwareTypes($filter: HardwareTypeFilterInput, $sort: [HardwareTypeSortInput]) {
+        hardwareTypes(filter: $filter, sort: $sort) {
+          name
+          handle
+          partNumbers {
+            partNumber
+          }
+        }
+      }
+      """
+
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    document = Keyword.get(opts, :document, default_document)
+
+    variables =
+      %{
+        "filter" => opts[:filter],
+        "sort" => opts[:sort] || []
+      }
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 end

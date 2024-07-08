@@ -71,10 +71,11 @@ const GET_UPDATE_CHANNEL_QUERY = graphql`
 
 const UPDATE_UPDATE_CHANNEL_MUTATION = graphql`
   mutation UpdateChannel_updateUpdateChannel_Mutation(
+    $updateChannelId: ID!
     $input: UpdateUpdateChannelInput!
   ) {
-    updateUpdateChannel(input: $input) {
-      updateChannel {
+    updateUpdateChannel(id: $updateChannelId, input: $input) {
+      result {
         id
         name
         handle
@@ -89,11 +90,9 @@ const UPDATE_UPDATE_CHANNEL_MUTATION = graphql`
 `;
 
 const DELETE_UPDATE_CHANNEL_MUTATION = graphql`
-  mutation UpdateChannel_deleteUpdateChannel_Mutation(
-    $input: DeleteUpdateChannelInput!
-  ) {
-    deleteUpdateChannel(input: $input) {
-      updateChannel {
+  mutation UpdateChannel_deleteUpdateChannel_Mutation($updateChannelId: ID!) {
+    deleteUpdateChannel(id: $updateChannelId) {
+      result {
         id
         targetGroups {
           id
@@ -135,20 +134,20 @@ const UpdateChannelContent = ({
     );
 
   const handleDeleteUpdateChannel = useCallback(() => {
-    const input = { updateChannelId };
     deleteUpdateChannel({
-      variables: { input },
+      variables: { updateChannelId },
       onCompleted(data, errors) {
-        if (data.deleteUpdateChannel) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({ route: Route.updateChannels });
         }
-        if (errors) {
-          const errorFeedback = errors
-            .map((error) => error.message)
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          return setShowDeleteModal(false);
-        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
       },
       onError() {
         setErrorFeedback(
@@ -160,12 +159,12 @@ const UpdateChannelContent = ({
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        if (!data.deleteUpdateChannel) {
+        if (!data?.deleteUpdateChannel?.result?.id) {
           return;
         }
         const updateChannel = store
           .getRootField("deleteUpdateChannel")
-          .getLinkedRecord("updateChannel");
+          .getLinkedRecord("result");
         const updateChannelId = updateChannel.getDataID();
         const root = store.getRoot();
 
@@ -205,20 +204,19 @@ const UpdateChannelContent = ({
 
   const handleUpdateUpdateChannel = useCallback(
     (updateChannel: UpdateChannelData) => {
-      const input = {
-        updateChannelId,
-        ...updateChannel,
-      };
       updateUpdateChannel({
-        variables: { input },
+        variables: { updateChannelId, input: updateChannel },
         onCompleted(data, errors) {
-          if (data.updateUpdateChannel) {
+          if (data.updateUpdateChannel?.result) {
             setErrorFeedback(null);
             refetchOptions({}, { fetchPolicy: "store-and-network" });
+            return;
           }
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }

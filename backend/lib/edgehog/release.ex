@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Release do
+  @moduledoc false
   @app :edgehog
 
   def migrate do

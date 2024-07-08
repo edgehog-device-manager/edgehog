@@ -20,31 +20,35 @@
 
 defmodule Edgehog.Geolocation.Providers.IPBaseTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.TenantsFixtures
   import Tesla.Mock
+
   alias Edgehog.Astarte.Device.DeviceStatus
-  alias Edgehog.Devices
+  alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.IPBase
 
   describe "ip_geolocation" do
     setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      stub(DeviceStatusMock, :get, fn _client, _device_id ->
+        device_status = %DeviceStatus{
+          last_connection: ~U[2021-11-15 10:44:57.432516Z],
+          last_disconnection: ~U[2021-11-15 10:45:57.432516Z],
+          last_seen_ip: "198.51.100.25"
+        }
 
-      device =
-        device_fixture(realm)
-        |> Devices.preload_astarte_resources_for_device()
+        {:ok, device_status}
+      end)
 
-      {:ok, cluster: cluster, realm: realm, device: device}
+      device = device_fixture(tenant: tenant_fixture())
+
+      {:ok, device: device}
     end
 
     test "geolocate/1 returns error without input IP address", %{device: device} do
-      Edgehog.Astarte.Device.DeviceStatusMock
-      |> expect(:get, fn _appengine_client, _device_id ->
+      expect(DeviceStatusMock, :get, fn _appengine_client, _device_id ->
         {:ok,
          %DeviceStatus{
            last_connection: nil,
@@ -73,7 +77,16 @@ defmodule Edgehog.Geolocation.Providers.IPBaseTest do
       end)
 
       assert {:ok, position} = IPBase.geolocate(device)
-      assert %Position{accuracy: nil, latitude: 45.4019498, longitude: 11.8706081} = position
+
+      assert %Position{
+               latitude: 45.4019498,
+               longitude: 11.8706081,
+               accuracy: nil,
+               altitude: nil,
+               altitude_accuracy: nil,
+               heading: nil,
+               speed: nil
+             } = position
     end
 
     test "geolocate/1 returns error without results from IPBase", %{device: device} do

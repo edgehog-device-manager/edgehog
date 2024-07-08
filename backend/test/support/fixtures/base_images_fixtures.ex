@@ -40,19 +40,23 @@ defmodule Edgehog.BaseImagesFixtures do
   Generate a base_image_collection.
   """
   def base_image_collection_fixture(opts \\ []) do
-    {system_model, opts} =
-      Keyword.pop_lazy(opts, :system_model, &DevicesFixtures.system_model_fixture/0)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    attrs =
+    {system_model_id, opts} =
+      Keyword.pop_lazy(opts, :system_model_id, fn ->
+        [tenant: tenant] |> DevicesFixtures.system_model_fixture() |> Map.fetch!(:id)
+      end)
+
+    params =
       Enum.into(opts, %{
         handle: unique_base_image_collection_handle(),
-        name: unique_base_image_collection_name()
+        name: unique_base_image_collection_name(),
+        system_model_id: system_model_id
       })
 
-    {:ok, base_image_collection} =
-      Edgehog.BaseImages.create_base_image_collection(system_model, attrs)
-
-    base_image_collection
+    Edgehog.BaseImages.BaseImageCollection
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
@@ -64,20 +68,22 @@ defmodule Edgehog.BaseImagesFixtures do
   Generate a base_image.
   """
   def base_image_fixture(opts \\ []) do
-    {base_image_collection, opts} =
-      Keyword.pop_lazy(opts, :base_image_collection, &base_image_collection_fixture/0)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    # Stub StorageMock since create_base_image will call it
-    Mox.stub_with(Edgehog.BaseImages.StorageMock, Edgehog.Mocks.BaseImages.Storage)
+    {base_image_collection_id, opts} =
+      Keyword.pop_lazy(opts, :base_image_collection_id, fn ->
+        [tenant: tenant] |> base_image_collection_fixture() |> Map.fetch!(:id)
+      end)
 
-    attrs =
+    params =
       Enum.into(opts, %{
         version: unique_base_image_version(),
-        file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
+        url: "https://example.com/ota.bin",
+        base_image_collection_id: base_image_collection_id
       })
 
-    {:ok, base_image} = Edgehog.BaseImages.create_base_image(base_image_collection, attrs)
-
-    base_image
+    Edgehog.BaseImages.BaseImage
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
   end
 end

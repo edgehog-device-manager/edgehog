@@ -21,24 +21,40 @@
 defmodule EdgehogWeb.FallbackController do
   use EdgehogWeb, :controller
 
-  def call(conn, {:error, :missing_astarte_realm_header}) do
-    conn
-    |> put_status(:bad_request)
-    |> put_view(EdgehogWeb.ErrorView)
-    |> render(:"400")
+  require Logger
+
+  def call(conn, {:error, %Ash.Error.Invalid{} = error}) do
+    cond do
+      missing_realm?(error) ->
+        conn
+        |> put_status(:bad_request)
+        |> put_view(EdgehogWeb.ErrorView)
+        |> render(:"400")
+
+      realm_not_found?(error) ->
+        conn
+        |> put_status(:not_found)
+        |> put_view(EdgehogWeb.ErrorView)
+        |> render(:"404")
+
+      true ->
+        Logger.notice("Error while handling trigger: #{inspect(error)}")
+
+        conn
+        |> put_status(422)
+        |> put_view(EdgehogWeb.ErrorView)
+        |> render(:"422")
+    end
   end
 
-  def call(conn, {:error, :realm_not_found}) do
-    conn
-    |> put_status(:not_found)
-    |> put_view(EdgehogWeb.ErrorView)
-    |> render(:"404")
+  defp missing_realm?(error) do
+    Enum.any?(error.errors, &match?(%Ash.Error.Changes.Required{field: :realm_name}, &1))
   end
 
-  def call(conn, {:error, :cannot_process_device_event}) do
-    conn
-    |> put_status(422)
-    |> put_view(EdgehogWeb.ErrorView)
-    |> render(:"422")
+  defp realm_not_found?(error) do
+    Enum.any?(
+      error.errors,
+      &match?(%Ash.Error.Query.NotFound{resource: Edgehog.Astarte.Realm}, &1)
+    )
   end
 end

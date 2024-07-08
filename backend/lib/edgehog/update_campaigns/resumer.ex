@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.Resumer do
+  @moduledoc false
   use Task, restart: :transient
 
   alias Edgehog.UpdateCampaigns.ExecutorSupervisor
@@ -36,9 +37,7 @@ defmodule Edgehog.UpdateCampaigns.Resumer do
     # For each resumable update campaign, we start its executor. `start_executor!/1` already
     # handles the case where the executor is already running (if, e.g., we crashed and we're
     # restarted again).
-    Core.stream_resumable_update_campaigns()
-    |> Core.for_each_update_campaign(&ExecutorSupervisor.start_executor!/1)
-
+    Enum.each(Core.stream_resumable_update_campaigns(), &ExecutorSupervisor.start_executor!/1)
     Logger.info("Finished resuming Update Campaigns")
 
     :ok

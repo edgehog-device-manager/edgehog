@@ -19,122 +19,112 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateDeviceGroupTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.GroupsFixtures
 
-  alias Edgehog.Devices
-  alias Edgehog.Groups
-  alias Edgehog.Groups.DeviceGroup
+  describe "createDeviceGroup mutation" do
+    test "creates device group with valid data", %{tenant: tenant} do
+      device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["foo"])
 
-  describe "createDeviceGroup field" do
-    setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      device_id = AshGraphql.Resource.encode_relay_id(device)
 
-      {:ok, device_answer} =
-        device_fixture(realm)
-        |> Devices.update_device(%{
-          custom_attributes: [
-            %{
-              namespace: "custom",
-              key: "answer",
-              typed_value: %{type: :integer, value: 42}
-            }
-          ]
-        })
+      _other_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["bar"])
 
-      {:ok, device_no_answer} =
-        device_fixture(realm, name: "No Answer", device_id: "eTezXt3hST2bPEw0Inq56A")
-        |> Devices.update_device(%{
-          custom_attributes: [
-            %{
-              namespace: "custom",
-              key: "answer",
-              typed_value: %{type: :integer, value: 0}
-            }
-          ]
-        })
+      name = "Foos"
+      handle = "foos"
+      selector = ~s<"foo" in tags>
 
-      {:ok, realm: realm, device_answer: device_answer, device_no_answer: device_no_answer}
+      device_group =
+        [tenant: tenant, name: name, handle: handle, selector: selector]
+        |> create_device_group_mutation()
+        |> extract_result!()
+
+      assert %{
+               "name" => ^name,
+               "handle" => ^handle,
+               "devices" => [%{"id" => ^device_id}]
+             } = device_group
     end
 
-    @query """
+    test "fails with invalid handle", %{tenant: tenant} do
+      assert %{fields: [:handle], message: "should only contain" <> _} =
+               [tenant: tenant, handle: "123Invalid$"]
+               |> create_device_group_mutation()
+               |> extract_error!()
+    end
+
+    test "fails with invalid selector", %{tenant: tenant} do
+      assert %{fields: [:selector], message: "failed to be parsed" <> _} =
+               [tenant: tenant, selector: "not a selector"]
+               |> create_device_group_mutation()
+               |> extract_error!()
+    end
+  end
+
+  defp create_device_group_mutation(opts) do
+    default_document = """
     mutation CreateDeviceGroup($input: CreateDeviceGroupInput!) {
       createDeviceGroup(input: $input) {
-        deviceGroup {
+        result {
           id
           name
           handle
           selector
           devices {
             id
-            name
-            deviceId
           }
         }
       }
     }
     """
-    test "creates device group with valid data", %{
-      conn: conn,
-      api_path: api_path,
-      device_answer: device_answer
-    } do
-      name = "With Answer"
-      handle = "with-answer"
-      selector = ~s<attributes["custom:answer"] == 42>
 
-      variables = %{
-        input: %{
-          name: name,
-          handle: handle,
-          selector: selector
-        }
-      }
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-      conn = post(conn, api_path, query: @query, variables: variables)
+    input = %{
+      "handle" => opts[:handle] || unique_device_group_handle(),
+      "name" => opts[:name] || unique_device_group_name(),
+      "selector" => opts[:selector] || unique_device_group_selector()
+    }
 
-      assert %{
-               "data" => %{
-                 "createDeviceGroup" => %{
-                   "deviceGroup" => %{
-                     "id" => id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "devices" => [device]
-                   }
-                 }
+    variables = %{"input" => input}
+
+    document = Keyword.get(opts, :document, default_document)
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{
+               "createDeviceGroup" => nil
+             },
+             errors: [error]
+           } = result
+
+    error
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "createDeviceGroup" => %{
+                 "result" => device_group
                }
-             } = assert(json_response(conn, 200))
+             }
+           } = result
 
-      {:ok, %{type: :device_group, id: db_id}} =
-        Absinthe.Relay.Node.from_global_id(id, EdgehogWeb.Schema)
+    refute :errors in Map.keys(result)
 
-      assert {:ok, %DeviceGroup{name: ^name, handle: ^handle}} = Groups.fetch_device_group(db_id)
+    assert device_group != nil
 
-      assert device["name"] == device_answer.name
-      assert device["deviceId"] == device_answer.device_id
-
-      assert {:ok, %{id: d_id, type: :device}} =
-               Absinthe.Relay.Node.from_global_id(device["id"], EdgehogWeb.Schema)
-
-      assert d_id == to_string(device_answer.id)
-    end
-
-    test "fails with invalid data", %{conn: conn, api_path: api_path} do
-      variables = %{
-        input: %{
-          name: nil,
-          handle: nil,
-          selector: "invalid"
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => _} = assert(json_response(conn, 200))
-    end
+    device_group
   end
 end

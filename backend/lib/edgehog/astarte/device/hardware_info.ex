@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,16 +19,28 @@
 #
 
 defmodule Edgehog.Astarte.Device.HardwareInfo do
-  defstruct [
+  @moduledoc false
+  @behaviour Edgehog.Astarte.Device.HardwareInfo.Behaviour
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.HardwareInfo
+
+  @type t :: %__MODULE__{
+          cpu_architecture: String.t() | nil,
+          cpu_model: String.t() | nil,
+          cpu_model_name: String.t() | nil,
+          cpu_vendor: String.t() | nil,
+          memory_total_bytes: non_neg_integer() | nil
+        }
+
+  @enforce_keys [
     :cpu_architecture,
     :cpu_model,
     :cpu_model_name,
     :cpu_vendor,
     :memory_total_bytes
   ]
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.HardwareInfo
+  defstruct @enforce_keys
 
   @interface "io.edgehog.devicemanager.HardwareInfo"
 

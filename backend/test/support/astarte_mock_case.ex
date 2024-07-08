@@ -36,14 +36,14 @@ defmodule Edgehog.AstarteMockCase do
 
   use ExUnit.CaseTemplate
 
+  import Mox
+
   using do
     quote do
-      import Mox
       import Edgehog.AstarteMockCase
+      import Mox
     end
   end
-
-  import Mox
 
   setup :verify_on_exit!
 
@@ -61,11 +61,6 @@ defmodule Edgehog.AstarteMockCase do
     Mox.stub_with(
       Edgehog.Astarte.Device.OSInfoMock,
       Edgehog.Mocks.Astarte.Device.OSInfo
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Device.OTARequestV0Mock,
-      Edgehog.Mocks.Astarte.Device.OTARequest.V0
     )
 
     Mox.stub_with(
@@ -116,16 +111,6 @@ defmodule Edgehog.AstarteMockCase do
     Mox.stub_with(
       Edgehog.Astarte.Device.LedBehaviorMock,
       Edgehog.Mocks.Astarte.Device.LedBehavior
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Realm.InterfacesMock,
-      Edgehog.Mocks.Astarte.Realm.Interfaces
-    )
-
-    Mox.stub_with(
-      Edgehog.Astarte.Realm.TriggersMock,
-      Edgehog.Mocks.Astarte.Realm.Triggers
     )
 
     Mox.stub_with(

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,15 +19,14 @@
 #
 
 defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
+  @moduledoc false
   use DynamicSupervisor
 
-  require Logger
+  alias Edgehog.UpdateCampaigns.ExecutorRegistry
+  alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
+  alias Edgehog.UpdateCampaigns.UpdateCampaign
 
-  alias Edgehog.UpdateCampaigns.{
-    ExecutorRegistry,
-    PushRollout,
-    UpdateCampaign
-  }
+  require Logger
 
   # Public API
 
@@ -38,7 +37,7 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
   def start_executor!(update_campaign) do
     %UpdateCampaign{
       id: update_campaign_id,
-      rollout_mechanism: rollout_mechanism,
+      rollout_mechanism: %{value: rollout_mechanism},
       tenant_id: tenant_id
     } = update_campaign
 
@@ -52,7 +51,8 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
     ]
 
     child_spec =
-      executor_child_spec(rollout_mechanism, base_args)
+      rollout_mechanism
+      |> executor_child_spec(base_args)
       |> Supervisor.child_spec(id: executor_id)
 
     case DynamicSupervisor.start_child(__MODULE__, child_spec) do

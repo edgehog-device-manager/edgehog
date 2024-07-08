@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,271 +19,112 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.BaseImageCollectionTest do
-  use EdgehogWeb.ConnCase, async: true
-  use Edgehog.BaseImagesStorageMockCase
+  use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.DevicesFixtures
   import Edgehog.BaseImagesFixtures
-
-  alias Edgehog.BaseImages.BaseImageCollection
+  import Edgehog.DevicesFixtures
 
   describe "baseImageCollection field" do
-    setup do
-      {:ok, base_image_collection: base_image_collection_fixture()}
+    test "returns base image collection if present", %{tenant: tenant} do
+      system_model = system_model_fixture(tenant: tenant)
+
+      fixture =
+        base_image_collection_fixture(
+          tenant: tenant,
+          system_model_id: system_model.id
+        )
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      base_image_collection =
+        [tenant: tenant, id: id] |> base_image_collection_query() |> extract_result!()
+
+      assert base_image_collection["name"] == fixture.name
+      assert base_image_collection["handle"] == fixture.handle
+
+      assert base_image_collection["systemModel"]["id"] ==
+               AshGraphql.Resource.encode_relay_id(system_model)
     end
 
-    @query """
+    test "returns nil if non existing", %{tenant: tenant} do
+      id = non_existing_base_image_collection_id(tenant)
+      result = base_image_collection_query(tenant: tenant, id: id)
+      assert result == %{data: %{"baseImageCollection" => nil}}
+    end
+
+    test "returns associated base images", %{tenant: tenant} do
+      _other_base_image = base_image_fixture(tenant: tenant, version: "1.0.0")
+      base_image_collection = base_image_collection_fixture(tenant: tenant)
+
+      base_image =
+        base_image_fixture(
+          tenant: tenant,
+          version: "2.0.0",
+          base_image_collection_id: base_image_collection.id
+        )
+
+      base_image_collection_id = AshGraphql.Resource.encode_relay_id(base_image_collection)
+      base_image_id = AshGraphql.Resource.encode_relay_id(base_image)
+
+      result = base_image_collection_query(tenant: tenant, id: base_image_collection_id)
+
+      assert %{
+               "baseImages" => [
+                 %{
+                   "id" => ^base_image_id,
+                   "version" => "2.0.0"
+                 }
+               ]
+             } = extract_result!(result)
+    end
+  end
+
+  defp non_existing_base_image_collection_id(tenant) do
+    fixture = base_image_collection_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
+
+    id
+  end
+
+  defp base_image_collection_query(opts) do
+    default_document = """
     query ($id: ID!) {
       baseImageCollection(id: $id) {
         name
         handle
-        systemModel {
-          description
-        }
-      }
-    }
-    """
-    test "returns base image collection if present", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
-    } do
-      %BaseImageCollection{
-        id: id,
-        name: name,
-        handle: handle
-      } = base_image_collection
-
-      id = Absinthe.Relay.Node.to_global_id(:base_image_collection, id, EdgehogWeb.Schema)
-
-      variables = %{id: id}
-
-      conn = get(conn, api_path, query: @query, variables: variables)
-
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "baseImageCollection" => %{
-                   "name" => name,
-                   "handle" => handle,
-                   "systemModel" => %{
-                     "description" => nil
-                   }
-                 }
-               }
-             }
-    end
-
-    test "returns not found if non existing", %{conn: conn, api_path: api_path} do
-      id = Absinthe.Relay.Node.to_global_id(:base_image_collection, 1_234_567, EdgehogWeb.Schema)
-
-      variables = %{id: id}
-
-      conn = get(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{"baseImageCollection" => nil},
-               "errors" => [%{"code" => "not_found", "status_code" => 404}]
-             } = json_response(conn, 200)
-    end
-
-    test "returns the default locale description for system model", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{
-        default_locale => "A base image collection",
-        "it-IT" => "Un modello di sistema"
-      }
-
-      system_model = system_model_fixture(description: description)
-
-      base_image_collection = base_image_collection_fixture(system_model: system_model)
-
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
-
-      variables = %{id: id}
-
-      conn = get(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "baseImageCollection" => %{
-                   "systemModel" => %{
-                     "description" => "A base image collection"
-                   }
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "returns the explicit locale system model description", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{
-        default_locale => "A base image collection",
-        "it-IT" => "Un modello di sistema"
-      }
-
-      system_model = system_model_fixture(description: description)
-
-      base_image_collection = base_image_collection_fixture(system_model: system_model)
-
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
-
-      variables = %{id: id}
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "it-IT")
-        |> get(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "baseImageCollection" => %{
-                   "systemModel" => %{
-                     "description" => "Un modello di sistema"
-                   }
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "returns description in the tenant's default locale for non existing locale", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
-
-      description = %{
-        default_locale => "A base image collection",
-        "it-IT" => "Un modello di sistema"
-      }
-
-      system_model = system_model_fixture(description: description)
-
-      base_image_collection = base_image_collection_fixture(system_model: system_model)
-
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
-
-      variables = %{id: id}
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "fr-FR")
-        |> get(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "baseImageCollection" => %{
-                   "systemModel" => %{
-                     "description" => "A base image collection"
-                   }
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "returns no system model description when both user and tenant's locale are missing",
-         %{
-           conn: conn,
-           api_path: api_path
-         } do
-      description = %{
-        "it-IT" => "Un modello di sistema"
-      }
-
-      system_model = system_model_fixture(description: description)
-
-      base_image_collection = base_image_collection_fixture(system_model: system_model)
-
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
-
-      variables = %{id: id}
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "fr-FR")
-        |> get(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "baseImageCollection" => %{
-                   "systemModel" => %{
-                     "description" => nil
-                   }
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    @query_with_base_images """
-    query ($id: ID!) {
-      baseImageCollection(id: $id) {
         baseImages {
+          id
           version
-          url
+        }
+        systemModel {
+          id
         }
       }
     }
     """
-    test "returns associated base images", %{
-      conn: conn,
-      api_path: api_path,
-      base_image_collection: base_image_collection
-    } do
-      base_image = base_image_fixture(base_image_collection: base_image_collection)
 
-      id =
-        Absinthe.Relay.Node.to_global_id(
-          :base_image_collection,
-          base_image_collection.id,
-          EdgehogWeb.Schema
-        )
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
 
-      variables = %{id: id}
+    variables = %{"id" => id}
 
-      conn = get(conn, api_path, query: @query_with_base_images, variables: variables)
+    document = Keyword.get(opts, :document, default_document)
 
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "baseImageCollection" => %{
-                   "baseImages" => [
-                     %{
-                       "version" => base_image.version,
-                       "url" => base_image.url
-                     }
-                   ]
-                 }
-               }
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "baseImageCollection" => base_image_collection
              }
-    end
+           } = result
+
+    refute Map.get(result, :errors)
+
+    assert base_image_collection != nil
+
+    base_image_collection
   end
 end

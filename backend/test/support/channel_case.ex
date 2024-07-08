@@ -37,11 +37,13 @@ defmodule EdgehogWeb.ChannelCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL
+
   using do
     quote do
+      import EdgehogWeb.ChannelCase
       # Import conveniences for testing with channels
       import Phoenix.ChannelTest
-      import EdgehogWeb.ChannelCase
 
       # The default endpoint for testing
       @endpoint EdgehogWeb.Endpoint
@@ -49,8 +51,8 @@ defmodule EdgehogWeb.ChannelCase do
   end
 
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
+    on_exit(fn -> SQL.Sandbox.stop_owner(pid) end)
     :ok
   end
 end

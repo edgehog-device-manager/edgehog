@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,123 +19,119 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
+
+  import Edgehog.DevicesFixtures
 
   alias Edgehog.Devices.SystemModel
 
-  describe "deleteSystemModel field" do
-    import Edgehog.DevicesFixtures
+  require Ash.Query
 
-    @query """
-    mutation DeleteSystemModel($input: DeleteSystemModelInput!) {
-      deleteSystemModel(input: $input) {
-        systemModel {
+  describe "deleteSystemModel field" do
+    setup %{tenant: tenant} do
+      system_model =
+        system_model_fixture(tenant: tenant)
+
+      id = AshGraphql.Resource.encode_relay_id(system_model)
+
+      %{system_model: system_model, id: id}
+    end
+
+    test "deletes a system model", %{tenant: tenant, id: id, system_model: fixture} do
+      system_model =
+        [tenant: tenant, id: id]
+        |> delete_system_model_mutation()
+        |> extract_result!()
+
+      assert system_model["handle"] == fixture.handle
+
+      refute SystemModel
+             |> Ash.Query.filter(id == ^fixture.id)
+             |> Ash.Query.set_tenant(tenant)
+             |> Ash.exists?()
+    end
+
+    test "tries to delete the picture if there's one, but ignores failure", %{tenant: tenant} do
+      picture_url = "https://example.com/image.jpg"
+
+      fixture = system_model_fixture(tenant: tenant, picture_url: picture_url)
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      expect(Edgehog.Assets.SystemModelPictureMock, :delete, fn _, ^picture_url ->
+        {:error, :cannot_delete}
+      end)
+
+      _ =
+        [tenant: tenant, id: id]
+        |> delete_system_model_mutation()
+        |> extract_result!()
+    end
+
+    test "fails with non-existing id", %{tenant: tenant} do
+      id = non_existing_system_model_id(tenant)
+
+      result = delete_system_model_mutation(tenant: tenant, id: id)
+
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+  end
+
+  defp delete_system_model_mutation(opts) do
+    default_document = """
+    mutation DeleteSystemModel($id: ID!) {
+      deleteSystemModel(id: $id) {
+        result {
           id
           name
           handle
-          partNumbers
-          description
+          pictureUrl
         }
       }
     }
     """
 
-    test "deletes system model", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      name = "Foobaz"
-      handle = "foobaz"
-      part_number = "12345/Z"
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {id, opts} = Keyword.pop!(opts, :id)
 
-      default_description_locale = tenant.default_locale
-      default_description_text = "A system model"
+    document = Keyword.get(opts, :document, default_document)
+    variables = %{"id" => id}
+    context = %{tenant: tenant}
 
-      description = %{
-        default_description_locale => default_description_text,
-        "it-IT" => "Un modello di sistema"
-      }
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
+  end
 
-      %SystemModel{id: id} =
-        system_model_fixture(
-          description: description,
-          name: name,
-          handle: handle,
-          part_numbers: [part_number]
-        )
+  defp extract_error!(result) do
+    assert %{
+             data: %{"deleteSystemModel" => nil},
+             errors: [error]
+           } = result
 
-      id = Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)
+    error
+  end
 
-      variables = %{
-        input: %{
-          system_model_id: id
-        }
-      }
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
 
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "deleteSystemModel" => %{
-                   "systemModel" => %{
-                     "id" => ^id,
-                     "name" => ^name,
-                     "handle" => ^handle,
-                     "partNumbers" => [^part_number],
-                     "description" => ^default_description_text
-                   }
-                 }
+    assert %{
+             data: %{
+               "deleteSystemModel" => %{
+                 "result" => system_model
                }
-             } = json_response(conn, 200)
-    end
+             }
+           } = result
 
-    test "returns the explicit locale description", %{
-      conn: conn,
-      api_path: api_path,
-      tenant: tenant
-    } do
-      default_locale = tenant.default_locale
+    assert system_model != nil
 
-      description = %{default_locale => "A system model", "it-IT" => "Un modello di sistema"}
+    system_model
+  end
 
-      %SystemModel{id: id} = system_model_fixture(description: description)
+  defp non_existing_system_model_id(tenant) do
+    fixture = system_model_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
 
-      variables = %{
-        input: %{
-          system_model_id: Absinthe.Relay.Node.to_global_id(:system_model, id, EdgehogWeb.Schema)
-        }
-      }
-
-      conn =
-        conn
-        |> put_req_header("accept-language", "it-IT")
-        |> post(api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{
-                 "deleteSystemModel" => %{
-                   "systemModel" => %{
-                     "description" => "Un modello di sistema"
-                   }
-                 }
-               }
-             } = json_response(conn, 200)
-    end
-
-    test "fails with non-existing id", %{conn: conn, api_path: api_path} do
-      id = Absinthe.Relay.Node.to_global_id(:system_model, 10_000_000, EdgehogWeb.Schema)
-
-      variables = %{
-        input: %{
-          system_model_id: id
-        }
-      }
-
-      conn = post(conn, api_path, query: @query, variables: variables)
-
-      assert %{"errors" => [%{"code" => "not_found", "status_code" => 404}]} =
-               json_response(conn, 200)
-    end
+    id
   end
 end

@@ -19,6 +19,12 @@
 #
 
 defmodule Edgehog.Astarte.Device.WiFiScanResult do
+  @moduledoc false
+  @behaviour Edgehog.Astarte.Device.WiFiScanResult.Behaviour
+
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.WiFiScanResult
+
   @enforce_keys [:timestamp]
   defstruct [
     :channel,
@@ -38,20 +44,14 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
           timestamp: DateTime.t()
         }
 
-  @behaviour Edgehog.Astarte.Device.WiFiScanResult.Behaviour
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.WiFiScanResult
-
   @interface "io.edgehog.devicemanager.WiFiScanResults"
 
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface,
-             query: [limit: 1000]
-           ) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface, query: [limit: 1000]) do
       wifi_scan_results =
-        Map.get(data, "ap", [])
+        data
+        |> Map.get("ap", [])
         |> Enum.map(fn ap ->
           %WiFiScanResult{
             channel: ap["channel"],

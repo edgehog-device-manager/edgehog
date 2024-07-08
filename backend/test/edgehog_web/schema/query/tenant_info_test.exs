@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,35 +19,43 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.TenantInfoTest do
-  use EdgehogWeb.ConnCase, async: true
+  use Edgehog.DataCase, async: true
+
+  import Edgehog.TenantsFixtures
 
   alias Edgehog.Tenants.Tenant
 
   describe "tenantInfo query" do
-    @query """
-    {
-      tenantInfo {
-        name
-        slug
-        defaultLocale
+    test "returns the tenant info" do
+      tenant = tenant_fixture()
+      %Tenant{tenant_id: id, name: name, slug: slug, default_locale: default_locale} = tenant
+
+      doc = """
+      query {
+        tenantInfo {
+          id
+          name
+          slug
+          defaultLocale
+        }
       }
-    }
-    """
-
-    test "returns the tenant info", %{conn: conn, api_path: api_path, tenant: tenant} do
-      conn = get(conn, api_path, query: @query)
-
-      %Tenant{name: name, slug: slug, default_locale: default_locale} = tenant
+      """
 
       assert %{
-               "data" => %{
+               data: %{
                  "tenantInfo" => %{
+                   "id" => graphql_id,
                    "name" => ^name,
                    "slug" => ^slug,
                    "defaultLocale" => ^default_locale
                  }
                }
-             } = json_response(conn, 200)
+             } = Absinthe.run!(doc, EdgehogWeb.Schema, context: %{tenant: tenant})
+
+      assert {:ok, %{type: :tenant_info, id: decoded_id}} =
+               AshGraphql.Resource.decode_relay_id(graphql_id)
+
+      assert decoded_id == to_string(id)
     end
   end
 end

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ const HARDWARE_TYPES_TABLE_FRAGMENT = graphql`
     id
     handle
     name
-    partNumbers
+    partNumbers {
+      partNumber
+    }
   }
 `;
 
@@ -79,7 +81,7 @@ const columns = [
       />
     ),
     cell: ({ getValue }) =>
-      getValue().map((partNumber, index) => (
+      getValue().map(({ partNumber }, index) => (
         <React.Fragment key={partNumber}>
           {index > 0 && ", "}
           <span className="text-nowrap">{partNumber}</span>
@@ -101,7 +103,5 @@ const HardwareTypesTable = ({ className, hardwareTypesRef }: Props) => {
 
   return <Table className={className} columns={columns} data={hardwareTypes} />;
 };
-
-export type { TableRecord };
 
 export default HardwareTypesTable;

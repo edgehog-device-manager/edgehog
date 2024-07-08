@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,65 +19,81 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.UpdateChannelTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.UpdateChannel
-
   describe "updateChannel query" do
-    setup do
-      {:ok, target_group: device_group_fixture()}
+    setup %{tenant: tenant} do
+      {:ok, target_group: device_group_fixture(tenant: tenant)}
     end
 
-    test "returns update channel if present", %{
-      conn: conn,
-      api_path: api_path,
-      target_group: target_group
-    } do
-      update_channel = update_channel_fixture(target_group_ids: [target_group.id])
-      response = update_channel_query(conn, api_path, update_channel)
+    test "returns update channel if present", %{tenant: tenant, target_group: target_group} do
+      update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
 
-      assert response["data"]["updateChannel"]["handle"] == update_channel.handle
-      assert response["data"]["updateChannel"]["name"] == update_channel.name
-      assert [response_group] = response["data"]["updateChannel"]["targetGroups"]
+      id = AshGraphql.Resource.encode_relay_id(update_channel)
+
+      update_channel_data =
+        [tenant: tenant, id: id] |> update_channel_query() |> extract_result!()
+
+      assert update_channel_data["handle"] == update_channel.handle
+      assert update_channel_data["name"] == update_channel.name
+      assert [response_group] = update_channel_data["targetGroups"]
       assert response_group["handle"] == target_group.handle
       assert response_group["name"] == target_group.name
     end
 
-    test "returns not found if non existing", %{conn: conn, api_path: api_path} do
-      response = update_channel_query(conn, api_path, 1_234_567)
-      assert response["data"]["updateChannel"] == nil
-      assert [%{"code" => "not_found", "status_code" => 404}] = response["errors"]
+    test "returns nil if non existing", %{tenant: tenant} do
+      id = non_existing_update_channel_id(tenant)
+      assert %{data: %{"updateChannel" => nil}} == update_channel_query(tenant: tenant, id: id)
     end
   end
 
-  @query """
-  query ($id: ID!) {
-    updateChannel(id: $id) {
-      handle
-      name
-      targetGroups {
-        name
+  defp update_channel_query(opts) do
+    default_document = """
+    query ($id: ID!) {
+      updateChannel(id: $id) {
         handle
+        name
+        targetGroups {
+          name
+          handle
+        }
       }
     }
-  }
-  """
-  defp update_channel_query(conn, api_path, target, opts \\ [])
+    """
 
-  defp update_channel_query(conn, api_path, %UpdateChannel{} = target_group, opts) do
-    update_channel_query(conn, api_path, target_group.id, opts)
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
+
+    variables = %{"id" => id}
+
+    document = Keyword.get(opts, :document, default_document)
+
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 
-  defp update_channel_query(conn, api_path, id, opts) do
-    id = Absinthe.Relay.Node.to_global_id(:update_channel, id, EdgehogWeb.Schema)
+  defp extract_result!(result) do
+    assert %{
+             data: %{
+               "updateChannel" => update_channel
+             }
+           } = result
 
-    variables = %{id: id}
-    query = Keyword.get(opts, :query, @query)
-    conn = get(conn, api_path, query: query, variables: variables)
+    refute Map.get(result, :errors)
 
-    json_response(conn, 200)
+    assert update_channel != nil
+
+    update_channel
+  end
+
+  defp non_existing_update_channel_id(tenant) do
+    fixture = update_channel_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+
+    :ok = Ash.destroy!(fixture)
+
+    id
   end
 end

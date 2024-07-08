@@ -19,13 +19,14 @@
 #
 
 defmodule Edgehog.Tenants.Reconciler do
+  @moduledoc false
   @behaviour Edgehog.Tenants.Reconciler.Behaviour
+
   use GenServer
 
-  alias Edgehog.Tenants
-  alias Edgehog.Tenants.Tenant
   alias Edgehog.Tenants.Reconciler.Core
   alias Edgehog.Tenants.Reconciler.TaskSupervisor
+  alias Edgehog.Tenants.Tenant
 
   @reconcile_interval :timer.minutes(10)
 
@@ -36,11 +37,6 @@ defmodule Edgehog.Tenants.Reconciler do
   @impl Edgehog.Tenants.Reconciler.Behaviour
   def reconcile_tenant(%Tenant{} = tenant) do
     GenServer.cast(__MODULE__, {:reconcile_tenant, tenant})
-  end
-
-  @impl Edgehog.Tenants.Reconciler.Behaviour
-  def cleanup_tenant(%Tenant{} = tenant) do
-    GenServer.cast(__MODULE__, {:cleanup_tenant, tenant})
   end
 
   @impl GenServer
@@ -71,8 +67,13 @@ defmodule Edgehog.Tenants.Reconciler do
       schedule_reconciliation(@reconcile_interval)
     end
 
-    Tenants.list_tenants()
-    |> Tenants.preload_astarte_resources_for_tenant()
+    global_realm_query =
+      Edgehog.Astarte.Realm
+      |> Ash.Query.for_read(:global)
+      |> Ash.Query.load(:realm_management_client)
+
+    Tenant
+    |> Ash.read!(load: [realm: global_realm_query])
     |> Enum.each(&start_reconciliation_task(&1, tenant_to_trigger_url_fun))
 
     {:noreply, state}
@@ -85,40 +86,21 @@ defmodule Edgehog.Tenants.Reconciler do
     } = state
 
     tenant
-    |> Tenants.preload_astarte_resources_for_tenant()
+    |> Ash.load!([realm: [:realm_management_client]], tenant: tenant)
     |> start_reconciliation_task(tenant_to_trigger_url_fun)
-
-    {:noreply, state}
-  end
-
-  @impl GenServer
-  def handle_cast({:cleanup_tenant, tenant}, state) do
-    %{
-      tenant_to_trigger_url_fun: tenant_to_trigger_url_fun
-    } = state
-
-    Task.Supervisor.start_child(TaskSupervisor, fn ->
-      {:ok, rm_client} = Tenants.realm_management_client_from_tenant(tenant)
-
-      trigger_url = tenant_to_trigger_url_fun.(tenant)
-
-      Core.list_required_triggers(trigger_url)
-      |> Enum.each(&Core.cleanup_trigger(rm_client, &1))
-    end)
 
     {:noreply, state}
   end
 
   defp start_reconciliation_task(%Tenant{} = tenant, tenant_to_trigger_url_fun) do
     Task.Supervisor.start_child(TaskSupervisor, fn ->
-      {:ok, rm_client} = Tenants.realm_management_client_from_tenant(tenant)
+      rm_client = tenant.realm.realm_management_client
 
-      Core.list_required_interfaces()
-      |> Enum.each(&Core.reconcile_interface!(rm_client, &1))
-
+      Enum.each(Core.list_required_interfaces(), &Core.reconcile_interface!(rm_client, &1))
       trigger_url = tenant_to_trigger_url_fun.(tenant)
 
-      Core.list_required_triggers(trigger_url)
+      trigger_url
+      |> Core.list_required_triggers()
       |> Enum.each(&Core.reconcile_trigger!(rm_client, &1))
     end)
   end

@@ -59,7 +59,7 @@ const CREATE_BASE_IMAGE_MUTATION = graphql`
     $input: CreateBaseImageInput!
   ) {
     createBaseImage(input: $input) {
-      baseImage {
+      result {
         id
       }
     }
@@ -92,7 +92,7 @@ const BaseImageCreateContent = ({
       createBaseImage({
         variables: { input: baseImage },
         onCompleted(data, errors) {
-          if (data.createBaseImage) {
+          if (data.createBaseImage?.result) {
             return navigate({
               route: Route.baseImageCollectionsEdit,
               params: { baseImageCollectionId },
@@ -101,7 +101,9 @@ const BaseImageCreateContent = ({
 
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
@@ -115,13 +117,13 @@ const BaseImageCreateContent = ({
           );
         },
         updater(store, data) {
-          if (!data.createBaseImage) {
+          if (!data?.createBaseImage?.result) {
             return;
           }
 
           const baseImage = store
             .getRootField("createBaseImage")
-            .getLinkedRecord("baseImage");
+            .getLinkedRecord("result");
           const baseImageCollection = store
             .getRoot()
             .getLinkedRecord("baseImageCollection", {

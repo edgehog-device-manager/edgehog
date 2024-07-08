@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -36,10 +36,13 @@ import type { LedBehaviorDropdown_setLedBehavior_Mutation } from "api/__generate
 
 const SET_LED_BEHAVIOR_MUTATION = graphql`
   mutation LedBehaviorDropdown_setLedBehavior_Mutation(
-    $input: SetLedBehaviorInput!
+    $deviceId: ID!
+    $input: SetDeviceLedBehaviorInput!
   ) {
-    setLedBehavior(input: $input) {
-      behavior
+    setDeviceLedBehavior(id: $deviceId, input: $input) {
+      result {
+        __typename
+      }
     }
   }
 `;
@@ -113,22 +116,21 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
 
       setLedBehavior({
         variables: {
+          deviceId,
           input: {
-            deviceId,
             behavior: ledBehavior,
           },
         },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
-              .map((error) => error.message)
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
               .join(". \n");
             return onError(errorFeedback);
           }
-          const maybeBehavior = data.setLedBehavior?.behavior;
-          if (isSupportedLedBehavior(maybeBehavior)) {
-            setCurrentBehavior(maybeBehavior);
-          }
+          setCurrentBehavior(ledBehavior);
         },
         onError() {
           onError(

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,51 +25,50 @@ defmodule Edgehog.OSManagementFixtures do
   """
 
   alias Edgehog.BaseImagesFixtures
+  alias Edgehog.DevicesFixtures
+  alias Edgehog.OSManagement.OTAOperation
 
   @doc """
   Generate a manual ota_operation.
   """
-  def manual_ota_operation_fixture(device) do
-    fake_image = %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
+  def manual_ota_operation_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    # Stub mocks since create_manual_ota_operation will call
-    # EphemeralImageMock.upload/3 to upload image
-    Mox.stub_with(
-      Edgehog.OSManagement.EphemeralImageMock,
-      Edgehog.Mocks.OSManagement.EphemeralImage
-    )
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        [tenant: tenant] |> DevicesFixtures.device_fixture() |> Map.fetch!(:id)
+      end)
 
-    # DeviceStatusMock.get/2 to fetch device_introspection
-    Mox.stub_with(
-      Edgehog.Astarte.Device.DeviceStatusMock,
-      Edgehog.Mocks.Astarte.Device.DeviceStatus
-    )
+    params =
+      Enum.into(opts, %{
+        manual?: true,
+        base_image_url: "https://my.bucket.example/ota.bin",
+        device_id: device_id
+      })
 
-    # OTARequestV1Mock.update/4 to send OTA request
-    Mox.stub_with(
-      Edgehog.Astarte.Device.OTARequestV1Mock,
-      Edgehog.Mocks.Astarte.Device.OTARequest.V1
-    )
-
-    {:ok, ota_operation} =
-      device
-      |> Edgehog.Devices.preload_astarte_resources_for_device()
-      |> Edgehog.OSManagement.create_manual_ota_operation(fake_image)
-
-    ota_operation
+    OTAOperation
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
   Generate a managed ota_operation.
   """
-  def managed_ota_operation_fixture(device) do
-    base_image = BaseImagesFixtures.base_image_fixture()
+  def managed_ota_operation_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    {:ok, ota_operation} =
-      device
-      |> Edgehog.Devices.preload_astarte_resources_for_device()
-      |> Edgehog.OSManagement.create_managed_ota_operation(base_image)
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        [tenant: tenant] |> DevicesFixtures.device_fixture() |> Map.fetch!(:id)
+      end)
 
-    ota_operation
+    base_image = BaseImagesFixtures.base_image_fixture(tenant: tenant)
+
+    params =
+      Enum.into(opts, %{base_image_url: base_image.url, device_id: device_id})
+
+    OTAOperation
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
   end
 end

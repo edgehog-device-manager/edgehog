@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.Astarte.InterfaceID do
+  @moduledoc false
   @enforce_keys [:name, :major, :minor]
   defstruct @enforce_keys
 end

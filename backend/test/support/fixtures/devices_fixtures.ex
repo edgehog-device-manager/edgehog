@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,9 +25,6 @@ defmodule Edgehog.DevicesFixtures do
   """
 
   alias Edgehog.AstarteFixtures
-  alias Edgehog.Devices
-  alias Edgehog.Devices.Device
-  alias Edgehog.Repo
 
   @doc """
   Generate a unique hardware_type handle.
@@ -62,86 +59,93 @@ defmodule Edgehog.DevicesFixtures do
   @doc """
   Generate a %Devices.Device{}.
   """
-  def device_fixture(realm, attrs \\ %{}) do
-    # The Devices context does not (currently) have a create functions since devices are always
-    # created by Astarte, so we directly call Repo functions passing attrs as-is and preloading
-    # what gets usually preloaded in %Devices.Device{}
-    attrs = Enum.into(attrs, %{})
+  def device_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    %Device{
-      realm_id: realm.id,
-      device_id: AstarteFixtures.random_device_id(),
-      name: "some name"
-    }
-    |> Map.merge(attrs)
-    |> Repo.insert!()
-    |> Edgehog.Devices.preload_defaults_for_device()
+    {realm_id, opts} =
+      Keyword.pop_lazy(opts, :realm_id, fn ->
+        [tenant: tenant] |> AstarteFixtures.realm_fixture() |> Map.fetch!(:id)
+      end)
+
+    default_device_id = AstarteFixtures.random_device_id()
+
+    params =
+      Enum.into(opts, %{device_id: default_device_id, name: default_device_id, realm_id: realm_id})
+
+    Edgehog.Devices.Device
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
   Generate a %Devices.Device{} compatible with a specific %BaseImages.BaseImage{}, passed as argument.
   """
-  def device_fixture_compatible_with(base_image, attrs \\ []) do
+  def device_fixture_compatible_with(opts \\ []) do
+    {base_image_id, opts} = Keyword.pop!(opts, :base_image_id)
+
+    base_image =
+      Ash.get!(Edgehog.BaseImages.BaseImage, base_image_id,
+        load: [base_image_collection: [system_model: [part_numbers: :part_number]]],
+        tenant: opts[:tenant]
+      )
+
     [%{part_number: part_number} | _] = base_image.base_image_collection.system_model.part_numbers
 
-    device =
-      attrs
-      |> Enum.into(%{})
-      |> Map.put(:part_number, part_number)
-      |> astarte_device_fixture()
-
-    # Retrieve the updated device from the Devices context
-    Devices.get_device!(device.id)
+    opts
+    |> Keyword.put(:part_number, part_number)
+    |> device_fixture()
   end
 
   @doc """
   Generate a hardware_type.
   """
-  def hardware_type_fixture(attrs \\ %{}) do
-    {:ok, hardware_type} =
-      attrs
-      |> Enum.into(%{
+  def hardware_type_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
         handle: unique_hardware_type_handle(),
         name: unique_hardware_type_name(),
         part_numbers: [unique_hardware_type_part_number()]
       })
-      |> Edgehog.Devices.create_hardware_type()
 
-    hardware_type
+    Edgehog.Devices.HardwareType
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
   Generate a system_model.
   """
   def system_model_fixture(opts \\ []) do
-    {hardware_type, opts} = Keyword.pop_lazy(opts, :hardware_type, &hardware_type_fixture/0)
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    attrs =
+    {hardware_type_id, opts} =
+      Keyword.pop_lazy(opts, :hardware_type_id, fn ->
+        [tenant: tenant]
+        |> hardware_type_fixture()
+        |> Map.fetch!(:id)
+      end)
+
+    params =
       Enum.into(opts, %{
         handle: unique_system_model_handle(),
         name: unique_system_model_name(),
-        part_numbers: [unique_system_model_part_number()]
+        part_numbers: [unique_system_model_part_number()],
+        hardware_type_id: hardware_type_id
       })
 
-    {:ok, system_model} = Edgehog.Devices.create_system_model(hardware_type, attrs)
-
-    system_model
+    Edgehog.Devices.SystemModel
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
   Adds tags to a %Devices.Device{}
   """
   def add_tags(device, tags) do
-    {:ok, device} = Devices.update_device(device, %{tags: tags})
     device
-  end
-
-  defp astarte_device_fixture(attrs) do
-    # Helper to avoid having to manually create the cluster and realm
-    # TODO: this will be eliminated once we have proper lazy fixtures (see issue #267)
-
-    AstarteFixtures.cluster_fixture()
-    |> AstarteFixtures.realm_fixture()
-    |> AstarteFixtures.astarte_device_fixture(attrs)
+    |> Ash.Changeset.for_update(:add_tags, %{tags: tags})
+    |> Ash.update!()
   end
 end

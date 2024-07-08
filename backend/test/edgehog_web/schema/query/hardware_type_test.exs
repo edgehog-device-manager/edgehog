@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,57 +19,67 @@
 #
 
 defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Devices.{
-    HardwareType,
-    HardwareTypePartNumber
-  }
+  describe "hardwareType query" do
+    test "returns hardware type if present", %{tenant: tenant} do
+      fixture =
+        [tenant: tenant]
+        |> hardware_type_fixture()
+        |> Ash.load!(:part_number_strings)
 
-  describe "hardwareType field" do
-    @query """
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+
+      result = hardware_type_query(tenant: tenant, id: id)
+
+      refute Map.has_key?(result, :errors)
+      assert %{data: %{"hardwareType" => hardware_type}} = result
+      assert hardware_type["name"] == fixture.name
+      assert hardware_type["handle"] == fixture.handle
+      assert length(hardware_type["partNumbers"]) == length(fixture.part_number_strings)
+
+      Enum.each(fixture.part_number_strings, fn pn ->
+        assert(%{"partNumber" => pn} in hardware_type["partNumbers"])
+      end)
+    end
+
+    test "returns nil if non existing", %{tenant: tenant} do
+      id = non_existing_hardware_type_id(tenant)
+      result = hardware_type_query(tenant: tenant, id: id)
+      assert %{data: %{"hardwareType" => nil}} = result
+    end
+  end
+
+  defp non_existing_hardware_type_id(tenant) do
+    fixture = hardware_type_fixture(tenant: tenant)
+    id = AshGraphql.Resource.encode_relay_id(fixture)
+    :ok = Ash.destroy!(fixture)
+
+    id
+  end
+
+  defp hardware_type_query(opts) do
+    default_document = """
     query ($id: ID!) {
       hardwareType(id: $id) {
         name
         handle
-        partNumbers
+        partNumbers {
+          partNumber
+        }
       }
     }
     """
-    test "returns hardware type if present", %{conn: conn, api_path: api_path} do
-      %HardwareType{
-        id: id,
-        name: name,
-        handle: handle,
-        part_numbers: [%HardwareTypePartNumber{part_number: part_number}]
-      } = hardware_type_fixture()
 
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:hardware_type, id, EdgehogWeb.Schema)}
+    tenant = Keyword.fetch!(opts, :tenant)
+    id = Keyword.fetch!(opts, :id)
 
-      conn = get(conn, api_path, query: @query, variables: variables)
+    variables = %{"id" => id}
 
-      assert json_response(conn, 200) == %{
-               "data" => %{
-                 "hardwareType" => %{
-                   "name" => name,
-                   "handle" => handle,
-                   "partNumbers" => [part_number]
-                 }
-               }
-             }
-    end
+    document = Keyword.get(opts, :document, default_document)
 
-    test "raises if non existing", %{conn: conn, api_path: api_path} do
-      variables = %{id: Absinthe.Relay.Node.to_global_id(:hardware_type, 1, EdgehogWeb.Schema)}
-
-      conn = get(conn, api_path, query: @query, variables: variables)
-
-      assert %{
-               "data" => %{"hardwareType" => nil},
-               "errors" => [%{"code" => "not_found", "status_code" => 404}]
-             } = json_response(conn, 200)
-    end
+    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 end

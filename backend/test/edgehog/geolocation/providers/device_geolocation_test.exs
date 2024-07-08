@@ -20,11 +20,11 @@
 
 defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
   use Edgehog.DataCase, async: true
-  use Edgehog.AstarteMockCase
 
-  import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
-  alias Edgehog.Devices
+  import Edgehog.TenantsFixtures
+
+  alias Edgehog.Astarte.Device.GeolocationMock
   alias Edgehog.Geolocation.Position
   alias Edgehog.Geolocation.Providers.DeviceGeolocation
 
@@ -32,21 +32,14 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
     alias Edgehog.Astarte.Device.Geolocation.SensorPosition
 
     setup do
-      cluster = cluster_fixture()
-      realm = realm_fixture(cluster)
+      device = device_fixture(tenant: tenant_fixture())
 
-      device =
-        device_fixture(realm)
-        |> Devices.preload_astarte_resources_for_device()
-
-      {:ok, cluster: cluster, realm: realm, device: device}
+      {:ok, device: device}
     end
 
     test "geolocate/1 returns error without input SensorPosition list", %{device: device} do
-      Edgehog.Astarte.Device.GeolocationMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, []} end)
-
-      assert DeviceGeolocation.geolocate(device) == {:error, :sensors_positions_not_found}
+      expect(GeolocationMock, :get, fn _appengine_client, _device_id -> {:ok, []} end)
+      assert DeviceGeolocation.geolocate(device) == {:error, :sensor_positions_not_found}
     end
 
     test "geolocate/1 returns position from SensorPosition list", %{device: device} do
@@ -64,24 +57,32 @@ defmodule Edgehog.Geolocation.Providers.DeviceGeolocationTest do
         }
       ]
 
-      Edgehog.Astarte.Device.GeolocationMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:ok, sensors_positions} end)
+      expect(GeolocationMock, :get, fn _appengine_client, _device_id ->
+        {:ok, sensors_positions}
+      end)
 
       assert {:ok, position} = DeviceGeolocation.geolocate(device)
 
       assert %Position{
-               accuracy: 0,
                latitude: 45.4095285,
                longitude: 11.8788231,
-               timestamp: ~U[2021-11-30 10:45:00.575Z]
+               accuracy: 0,
+               altitude: nil,
+               altitude_accuracy: nil,
+               heading: nil,
+               speed: nil,
+               timestamp: ~U[2021-11-30 10:45:00.575Z],
+               source:
+                 "Sensor position published by the device on the io.edgehog.devicemanager.Geolocation Astarte interface."
              } == position
     end
 
     test "geolocate/1 returns error if fetching from the device fails", %{device: device} do
-      Edgehog.Astarte.Device.GeolocationMock
-      |> expect(:get, fn _appengine_client, _device_id -> {:error, :some_astarte_error} end)
+      expect(GeolocationMock, :get, fn _appengine_client, _device_id ->
+        {:error, :some_astarte_error}
+      end)
 
-      assert {:error, :some_astarte_error} == DeviceGeolocation.geolocate(device)
+      assert {:error, :sensor_positions_not_found} == DeviceGeolocation.geolocate(device)
     end
   end
 end

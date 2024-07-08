@@ -19,6 +19,11 @@
 #
 
 defmodule Edgehog.Astarte.Device.NetworkInterface do
+  @moduledoc false
+  @behaviour Edgehog.Astarte.Device.NetworkInterface.Behaviour
+
+  alias Astarte.Client.AppEngine
+
   @type t :: %__MODULE__{
           name: String.t(),
           mac_address: String.t() | nil,
@@ -28,13 +33,9 @@ defmodule Edgehog.Astarte.Device.NetworkInterface do
   @enforce_keys [:name, :mac_address, :technology]
   defstruct @enforce_keys
 
-  @behaviour Edgehog.Astarte.Device.NetworkInterface.Behaviour
-
-  alias Astarte.Client.AppEngine
-
   @interface "io.edgehog.devicemanager.NetworkInterfaceProperties"
 
-  @impl true
+  @impl Edgehog.Astarte.Device.NetworkInterface.Behaviour
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_properties_data(client, device_id, @interface) do

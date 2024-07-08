@@ -11,5 +11,5 @@ fundamental operations such as performing update campaigns, getting device statu
 geolocation and much more. It is based on [Astarte](https://github.com/astarte-platform/astarte).
 
 This documentation provides information on daily operations for Edgehog users and integrators. It
-goes through fundamental operations such as performing updates, [querying APIs](graphql-api-docs/),
+goes through fundamental operations such as performing updates, [querying APIs](tenant-graphql-api/),
 integrating 3rd party applications, etc.

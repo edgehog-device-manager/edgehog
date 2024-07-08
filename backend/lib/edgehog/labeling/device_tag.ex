@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,31 +19,58 @@
 #
 
 defmodule Edgehog.Labeling.DeviceTag do
-  use Ecto.Schema
-  import Ecto.Query
-  alias Edgehog.Labeling.DeviceTag
-  alias Edgehog.Labeling.Tag
+  @moduledoc false
+  use Edgehog.MultitenantResource,
+    domain: Edgehog.Labeling,
+    tenant_id_in_primary_key?: true
 
-  @primary_key false
-  schema "devices_tags" do
-    field :tenant_id, :integer, autogenerate: {Edgehog.Repo, :get_tenant_id, []}
-    field :tag_id, :id, primary_key: true
-    field :device_id, :id, primary_key: true
+  actions do
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      upsert? true
+
+      accept [:tag_id, :device_id]
+    end
+
+    update :update do
+      primary? true
+
+      accept [:tag_id, :device_id]
+    end
   end
 
-  def device_ids_matching_tag(tag) when is_binary(tag) do
-    from dt in DeviceTag,
-      join: t in Tag,
-      on: dt.tag_id == t.id,
-      where: t.name == ^tag,
-      select: dt.device_id
+  relationships do
+    belongs_to :tag, Edgehog.Labeling.Tag do
+      allow_nil? false
+      primary_key? true
+    end
+
+    belongs_to :device, Edgehog.Devices.Device do
+      allow_nil? false
+      primary_key? true
+    end
   end
 
-  def device_ids_ilike_tag(tag) when is_binary(tag) do
-    from dt in DeviceTag,
-      join: t in Tag,
-      on: dt.tag_id == t.id,
-      where: ilike(t.name, ^"%#{tag}%"),
-      select: dt.device_id
+  identities do
+    # These have to be named this way to match the existing unique indexes
+    # we already have. Ash uses identities to add a `unique_constraint` to the
+    # Ecto changeset, so names have to match. There's no need to explicitly add
+    # :tenant_id in the fields because identity in a multitenant resource are
+    # automatically scoped to a specific :tenant_id
+    # TODO: change index names when we generate migrations at the end of the porting
+    identity :tag_id_tenant_id, [:tag_id]
+    identity :device_id_tenant_id, [:device_id]
+  end
+
+  postgres do
+    table "devices_tags"
+    repo Edgehog.Repo
+
+    references do
+      reference :device, on_delete: :delete
+      reference :tag, on_delete: :delete
+    end
   end
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2022 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,28 +19,30 @@
 #
 
 defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
+  @moduledoc false
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
-  alias Edgehog.Astarte
-  alias Edgehog.Astarte.Device.WiFiScanResult
-  alias Edgehog.Devices
-  alias Edgehog.Devices.Device
-  alias Edgehog.Config
-  alias Edgehog.Geolocation.Position
-
   use Tesla
+
+  alias Edgehog.Astarte.Device.WiFiScanResult
+  alias Edgehog.Config
+  alias Edgehog.Devices.Device
+  alias Edgehog.Geolocation.Position
 
   plug Tesla.Middleware.BaseUrl, "https://www.googleapis.com/geolocation/v1/geolocate"
   plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
-  def geolocate(%Device{device_id: device_id} = device) do
-    with {:ok, client} <- Devices.appengine_client_from_device(device),
-         {:ok, wifi_scan_results} <- Astarte.fetch_wifi_scan_results(client, device_id),
-         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(wifi_scan_results) do
+  def geolocate(%Device{} = device) do
+    with {:ok, device} <- Ash.load(device, :wifi_scan_results),
+         :ok <- validate_wifi_scan_results_exist(device.wifi_scan_results),
+         {:ok, wifi_scan_results} <- filter_latest_wifi_scan_results(device.wifi_scan_results) do
       geolocate_wifi(wifi_scan_results)
     end
   end
+
+  defp validate_wifi_scan_results_exist(nil), do: {:error, :wifi_scan_results_not_found}
+  defp validate_wifi_scan_results_exist(_), do: :ok
 
   defp filter_latest_wifi_scan_results([_scan | _] = wifi_scan_results) do
     latest_scan = Enum.max_by(wifi_scan_results, & &1.timestamp, DateTime)
@@ -48,7 +50,7 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
     latest_wifi_scan_results =
       Enum.filter(
         wifi_scan_results,
-        &(DateTime.diff(latest_scan.timestamp, &1.timestamp, :second) < 1)
+        &(DateTime.diff(latest_scan.timestamp, &1.timestamp, :second) < 5)
       )
 
     {:ok, latest_wifi_scan_results}
@@ -61,10 +63,14 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   defp geolocate_wifi([%WiFiScanResult{} | _] = wifi_scan_results) do
     wifi_access_points =
       Enum.map(wifi_scan_results, fn wifi ->
+        age =
+          wifi.timestamp && DateTime.diff(DateTime.now!("Etc/UTC"), wifi.timestamp, :millisecond)
+
         %{
           macAddress: wifi.mac_address,
           signalStrength: wifi.rssi,
-          channel: wifi.channel
+          channel: wifi.channel,
+          age: age
         }
       end)
 
@@ -83,7 +89,16 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
         latitude: latitude,
         longitude: longitude,
         accuracy: body["accuracy"],
-        timestamp: timestamp
+        altitude: nil,
+        altitude_accuracy: nil,
+        heading: nil,
+        speed: nil,
+        timestamp: timestamp,
+        source: """
+        GPS position estimated from the list of WiFi access points that the \
+        device detected and published on the \
+        io.edgehog.devicemanager.WiFiScanResults Astarte interface.\
+        """
       }
 
       {:ok, position}

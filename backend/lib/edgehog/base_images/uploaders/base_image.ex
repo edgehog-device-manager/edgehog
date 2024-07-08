@@ -19,6 +19,7 @@
 #
 
 defmodule Edgehog.BaseImages.Uploaders.BaseImage do
+  @moduledoc false
   use Waffle.Definition
 
   @async false
