@@ -25,7 +25,7 @@ defmodule Edgehog.MixProject do
     [
       app: :edgehog,
       version: "0.9.0-dev",
-      elixir: "~> 1.16",
+      elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -81,7 +81,8 @@ defmodule Edgehog.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:absinthe, "~> 1.6"},
+      # TODO: needed for Elixir 1.17 warnings, go back to stable once it's released
+      {:absinthe, github: "absinthe-graphql/absinthe", override: true},
       {:absinthe_plug, "~> 1.5"},
       {:absinthe_relay, "~> 1.5"},
       {:dataloader, "~> 1.0"},
