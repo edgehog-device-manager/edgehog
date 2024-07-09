@@ -80,14 +80,14 @@ type BaseImageData = {
   file: File;
   version: string;
   startingVersionRequirement: string;
-  releaseDisplayName: {
-    locale: string;
-    text: string;
-  };
-  description: {
-    locale: string;
-    text: string;
-  };
+  localizedReleaseDisplayNames?: {
+    languageTag: string;
+    value: string;
+  }[];
+  localizedDescriptions?: {
+    languageTag: string;
+    value: string;
+  }[];
 };
 
 type FormData = {
@@ -129,20 +129,34 @@ const transformOutputData = (
   baseImageCollection: CreateBaseImage_BaseImageCollectionFragment$data,
   locale: string,
   data: FormOutput,
-): BaseImageData => ({
-  baseImageCollectionId: baseImageCollection.id,
-  file: data.file[0],
-  version: data.version,
-  startingVersionRequirement: data.startingVersionRequirement,
-  releaseDisplayName: {
-    locale,
-    text: data.releaseDisplayName,
-  },
-  description: {
-    locale,
-    text: data.description,
-  },
-});
+): BaseImageData => {
+  const baseImage: BaseImageData = {
+    baseImageCollectionId: baseImageCollection.id,
+    file: data.file[0],
+    version: data.version,
+    startingVersionRequirement: data.startingVersionRequirement,
+  };
+
+  if (data.releaseDisplayName) {
+    baseImage.localizedReleaseDisplayNames = [
+      {
+        languageTag: locale,
+        value: data.releaseDisplayName,
+      },
+    ];
+  }
+
+  if (data.description) {
+    baseImage.localizedDescriptions = [
+      {
+        languageTag: locale,
+        value: data.description,
+      },
+    ];
+  }
+
+  return baseImage;
+};
 
 type Props = {
   baseImageCollectionRef: CreateBaseImage_BaseImageCollectionFragment$key;
