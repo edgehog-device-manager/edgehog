@@ -48,7 +48,7 @@ services:
       URL_SCHEME: http
       EDGEHOG_FORWARDER_HOSTNAME: device-forwarder.edgehog.localhost
       EDGEHOG_FORWARDER_PORT: 80
-      EDGEHOG_FORWARDER_SECURE_SESSIONS: false
+      EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
     restart: on-failure
     volumes:
       - type: bind
