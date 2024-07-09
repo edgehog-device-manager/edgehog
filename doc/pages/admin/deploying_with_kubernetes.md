@@ -20,7 +20,7 @@ below in the guide.*
 - An Ingress Controller deployed in the cluster (the guide contains examples for the NGINX Ingress
   Controller)
 - An Astarte instance, with an existing realm and its private key
-- A PostgreSQL database
+- A PostgreSQL v13+ database
 - S3-compatible storage with its credentials
 - The `jq` utility installed in the system
 - (Optional) A Google Geolocation API Key
