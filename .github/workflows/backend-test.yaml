@@ -125,10 +125,13 @@ jobs:
 
   test-coverage:
     name: Build and Test
+    strategy:
+      matrix:
+        postgres: [13, 14, 15, 16]
     runs-on: ubuntu-22.04
     services:
       postgres:
-        image: postgres:14
+        image: postgres:${{ matrix.postgres }}
         env:
           POSTGRES_PASSWORD: postgres
         ports:
