@@ -398,6 +398,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
           [internal_event({:ota_operation_failure, ota_operation})]
 
         Core.ota_operation_acknowledged?(ota_operation) ->
+          ota_operation = Ash.load!(ota_operation, :device)
           # Handle this explicitly so we log a message
           Logger.info("Device #{ota_operation.device.device_id} acknowledged the update")
           []
@@ -416,6 +417,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:ota_operation_success, ota_operation}, _state, data) do
+    ota_operation = Ash.load!(ota_operation, :device)
+
     Logger.info("Device #{ota_operation.device.device_id} updated successfully")
 
     _ =
@@ -430,6 +433,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:ota_operation_failure, ota_operation}, state, data) do
+    ota_operation = Ash.load!(ota_operation, :device)
+
     Logger.notice("Device #{ota_operation.device.device_id} failed to update: #{ota_operation.status_code}")
 
     _ =
