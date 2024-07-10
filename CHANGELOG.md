@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Wrong input params used in GraphQL mutation when creating a base image, leading to a rejected operation ([#574](https://github.com/edgehog-device-manager/edgehog/pull/574)).
 - Fix docker-compose local build.
+- Fix OTA operation events not being handled, leading to a successful OTA operation while the device was still pending.
 
 ## [0.9.0-rc.0] - 2024-07-08
 ### Added
