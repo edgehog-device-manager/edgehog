@@ -81,8 +81,7 @@ defmodule Edgehog.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      # TODO: needed for Elixir 1.17 warnings, go back to stable once it's released
-      {:absinthe, github: "absinthe-graphql/absinthe", override: true},
+      {:absinthe, "~> 1.7"},
       {:absinthe_plug, "~> 1.5"},
       {:absinthe_relay, "~> 1.5"},
       {:dataloader, "~> 1.0"},
