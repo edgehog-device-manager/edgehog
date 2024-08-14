@@ -51,6 +51,7 @@ enum Route {
   updateCampaigns = "/update-campaigns",
   updateCampaignsNew = "/update-campaigns/new",
   updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
+  auth = "/auth",
   login = "/login",
   logout = "/logout",
 }
@@ -108,6 +109,7 @@ const generatePath = (route: ParametricRoute): string => {
     case Route.updateCampaignsNew:
     case Route.login:
     case Route.logout:
+    case Route.auth:
       return route.route;
   }
 };

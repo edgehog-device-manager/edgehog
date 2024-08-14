@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import UpdateCampaignCreate from "pages/UpdateCampaignCreate";
 import UpdateCampaigns from "pages/UpdateCampaigns";
 import Login from "pages/Login";
 import Logout from "pages/Logout";
+import AttemptLogin from "pages/AttemptLogin";
 
 import { version, repository, bugs } from "../package.json";
 
@@ -58,11 +59,13 @@ type RouterRule = {
 };
 
 const publicRoutes: RouterRule[] = [
+  { path: Route.auth, element: <AttemptLogin /> },
   { path: Route.login, element: <Login /> },
   { path: "*", element: <Navigate to={Route.login} /> },
 ];
 
 const authenticatedRoutes: RouterRule[] = [
+  { path: Route.auth, element: <AttemptLogin /> },
   { path: Route.devices, element: <Devices /> },
   { path: Route.devicesEdit, element: <Device /> },
   { path: Route.deviceGroups, element: <DeviceGroups /> },
