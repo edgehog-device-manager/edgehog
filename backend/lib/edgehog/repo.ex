@@ -27,6 +27,10 @@ defmodule Edgehog.Repo do
     ["ash-functions"]
   end
 
+  def min_pg_version do
+    %Version{major: 13, minor: 0, patch: 0}
+  end
+
   def fetch(queryable, id, opts \\ []) do
     {error, opts} = Keyword.pop_first(opts, :error, :not_found)
 

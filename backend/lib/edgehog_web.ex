@@ -40,9 +40,9 @@ defmodule EdgehogWeb do
 
   def controller do
     quote do
+      use Gettext, backend: EdgehogWeb.Gettext
       use Phoenix.Controller, namespace: EdgehogWeb
 
-      import EdgehogWeb.Gettext
       import Plug.Conn
 
       alias EdgehogWeb.Router.Helpers, as: Routes
@@ -77,16 +77,16 @@ defmodule EdgehogWeb do
 
   def channel do
     quote do
+      use Gettext, backend: EdgehogWeb.Gettext
       use Phoenix.Channel
-
-      import EdgehogWeb.Gettext
     end
   end
 
   defp view_helpers do
     quote do
+      use Gettext, backend: EdgehogWeb.Gettext
+
       import EdgehogWeb.ErrorHelpers
-      import EdgehogWeb.Gettext
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
