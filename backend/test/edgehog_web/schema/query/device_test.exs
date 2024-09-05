@@ -668,10 +668,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "returns both position and location", ctx do
       %{tenant: tenant, id: id, document: document} = ctx
 
-      # TODO: expect 2 calls here due to https://github.com/ash-project/ash/issues/1282
-      # because position doesn't get reused by the location calculation
-      # When/if it's optimized again, just remove the 2
-      expect(GeolocationProviderMock, :geolocate, 2, fn _device ->
+      expect(GeolocationProviderMock, :geolocate, fn _device ->
         {:ok,
          %Position{
            latitude: 45.4095285,
@@ -718,10 +715,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "returns nil when it cannot geolocate the position", ctx do
       %{tenant: tenant, id: id, document: document} = ctx
 
-      # TODO: expect 2 calls here due to https://github.com/ash-project/ash/issues/1282
-      # because position doesn't get reused by the location calculation
-      # When/if it's optimized again, just remove the 2
-      expect(GeolocationProviderMock, :geolocate, 2, fn _device ->
+      expect(GeolocationProviderMock, :geolocate, fn _device ->
         {:error, :position_not_found}
       end)
 
@@ -737,10 +731,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "returns the position even if it cannot reverse geocode it to a location", ctx do
       %{tenant: tenant, id: id, document: document} = ctx
 
-      # TODO: expect 2 calls here due to https://github.com/ash-project/ash/issues/1282
-      # because position doesn't get reused by the location calculation
-      # When/if it's optimized again, just remove the 2
-      expect(GeolocationProviderMock, :geolocate, 2, fn _device ->
+      expect(GeolocationProviderMock, :geolocate, fn _device ->
         {:ok,
          %Position{
            latitude: 45.4095285,
