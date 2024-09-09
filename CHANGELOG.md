@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.0] - Unreleased
 ### Fixed
 - Correctly scope Base Image uploads to their Base Image Collection bucket.
+- Show a better error when trying to delete a Base Image or Update Channel connected to an existing
+  Update Campaign.
 
 ## [0.9.0-rc.1] - 2024-07-10
 ### Fixed

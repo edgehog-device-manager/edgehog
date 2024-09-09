@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
 
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.StorageMock
+  alias Edgehog.UpdateCampaignsFixtures
 
   require Ash.Query
 
@@ -75,6 +76,21 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
       result = delete_base_image_mutation(tenant: tenant, id: id)
 
       assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+    end
+
+    test "fails if the image is used in an Update Campaign", %{
+      tenant: tenant,
+      base_image: base_image,
+      id: id
+    } do
+      UpdateCampaignsFixtures.update_campaign_fixture(
+        tenant: tenant,
+        base_image_id: base_image.id
+      )
+
+      result = delete_base_image_mutation(tenant: tenant, id: id)
+
+      assert %{fields: [:id], message: "would leave records behind"} = extract_error!(result)
     end
   end
 

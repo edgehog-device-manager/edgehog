@@ -185,6 +185,11 @@ defmodule Edgehog.BaseImages.BaseImage do
       attribute_public? false
       allow_nil? false
     end
+
+    # This is needed to ensure foreign key references are applied when deleting
+    # base images so we can render a nice looking error instead of crashing, see
+    # https://github.com/ash-project/ash_postgres/blob/0ccb35a713b9097c4aac6fde996dbb4d1c00cccb/lib/data_layer.ex#L2370
+    has_many :update_campaigns, Edgehog.UpdateCampaigns.UpdateCampaign
   end
 
   calculations do

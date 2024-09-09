@@ -66,6 +66,21 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteUpdateChannelTest do
                message: "could not be found"
              } = error
     end
+
+    test "fails if the channel is used in an Update Campaign", %{
+      tenant: tenant,
+      update_channel: update_channel,
+      id: id
+    } do
+      update_campaign_fixture(
+        tenant: tenant,
+        update_channel_id: update_channel.id
+      )
+
+      result = delete_update_channel_mutation(tenant: tenant, id: id)
+
+      assert %{fields: [:id], message: "would leave records behind"} = extract_error!(result)
+    end
   end
 
   defp delete_update_channel_mutation(opts) do
