@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Correctly scope Base Image uploads to their Base Image Collection bucket.
 - Show a better error when trying to delete a Base Image or Update Channel connected to an existing
   Update Campaign.
+### Added
+- Support redirection to a specific page after successful authentication
 
 ## [0.9.0-rc.1] - 2024-07-10
 ### Fixed
@@ -19,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.9.0-rc.0] - 2024-07-08
 ### Added
 - Allow generating admin JWT using `gen-edgehog-jwt`.
-- Support redirection to a specific page after successful authentication
 ### Changed
 - Change logo and brand images with the latest brand revision.
 - BREAKING: The Admin API is now JSON-API compliant, which implies a slightly different format,
