@@ -166,5 +166,69 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
                "title" => "InvalidBody"
              } = error
     end
+
+    test "renders error for invalid astarte_config realm private key", %{conn: conn, path: path} do
+      params = build_params(realm_private_key: "invalid")
+      conn = post(conn, path, params)
+
+      assert %{"errors" => [error]} = json_response(conn, 400)
+
+      assert %{
+               "code" => "invalid_attribute",
+               "detail" => "is not a valid PEM private key",
+               "source" => %{"pointer" => "/data/attributes/astarte_config/realm_private_key"},
+               "status" => "400",
+               "title" => "InvalidAttribute"
+             } = error
+    end
+
+    test "renders error for invalid astarte_config realm name", %{conn: conn, path: path} do
+      params = build_params(realm_name: "Invalid!")
+      conn = post(conn, path, params)
+
+      assert %{"errors" => [error]} = json_response(conn, 400)
+
+      assert %{
+               "code" => "invalid_attribute",
+               "detail" => "should only contain" <> _,
+               "source" => %{"pointer" => "/data/attributes/astarte_config/realm_name"},
+               "status" => "400",
+               "title" => "InvalidAttribute"
+             } = error
+    end
+
+    test "renders error for invalid astarte_config cluster URL", %{conn: conn, path: path} do
+      params = build_params(base_api_url: "invalid")
+      conn = post(conn, path, params)
+
+      assert %{"errors" => [error]} = json_response(conn, 400)
+
+      assert %{
+               "code" => "invalid_attribute",
+               "detail" => "is not a valid URL",
+               "source" => %{"pointer" => "/data/attributes/astarte_config/base_api_url"},
+               "status" => "400",
+               "title" => "InvalidAttribute"
+             } = error
+    end
+  end
+
+  defp build_params(opts) do
+    %{
+      data: %{
+        type: "tenant",
+        attributes: %{
+          name: Keyword.get(opts, :tenant_name, unique_tenant_name()),
+          slug: Keyword.get(opts, :tenant_slug, unique_tenant_slug()),
+          public_key: Keyword.get(opts, :tenant_public_key, @valid_pem_public_key),
+          default_locale: Keyword.get(opts, :tenant_default_locale, "it-IT"),
+          astarte_config: %{
+            base_api_url: Keyword.get(opts, :base_api_url, unique_cluster_base_api_url()),
+            realm_name: Keyword.get(opts, :realm_name, unique_realm_name()),
+            realm_private_key: Keyword.get(opts, :realm_private_key, @valid_pem_private_key)
+          }
+        }
+      }
+    }
   end
 end
