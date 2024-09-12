@@ -59,13 +59,12 @@ type RouterRule = {
 };
 
 const publicRoutes: RouterRule[] = [
-  { path: Route.auth, element: <AttemptLogin /> },
   { path: Route.login, element: <Login /> },
   { path: "*", element: <Navigate to={Route.login} /> },
 ];
 
 const authenticatedRoutes: RouterRule[] = [
-  { path: Route.auth, element: <AttemptLogin /> },
+  { path: Route.login, element: <AttemptLogin /> },
   { path: Route.devices, element: <Devices /> },
   { path: Route.devicesEdit, element: <Device /> },
   { path: Route.deviceGroups, element: <DeviceGroups /> },

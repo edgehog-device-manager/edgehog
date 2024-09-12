@@ -21,6 +21,7 @@
 import { useEffect } from "react";
 import { Spinner } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
+import { commitLocalUpdate, useRelayEnvironment } from "react-relay/hooks";
 
 import { Route } from "Navigation";
 import { AuthConfig, useAuth } from "../contexts/Auth";
@@ -31,24 +32,35 @@ const AttemptLogin = () => {
   const searchParams = new URLSearchParams(search);
   const tenantSlug = searchParams.get("tenantSlug") || "";
   const authToken = searchParams.get("authToken") || "";
-  const redirectTo = searchParams.get("redirectTo") || "";
+  const redirectTo = searchParams.get("redirectTo") || "/";
   const navigate = useNavigate();
+  const relayEnvironment = useRelayEnvironment();
 
   useEffect(() => {
+    if (!tenantSlug || !authToken) {
+      // Without new credentials, just go to `redirectTo` or default
+      // authenticated route
+      return navigate(redirectTo, { replace: true });
+    }
     const authConfig: AuthConfig = {
       tenantSlug: tenantSlug,
       authToken: authToken,
     };
+    commitLocalUpdate(relayEnvironment, (store) => store.invalidateStore());
     auth
       .login(authConfig, false)
       .then((isValidLogin) => {
         if (isValidLogin) {
           navigate(redirectTo, { replace: true });
         } else {
+          // Logout if credentials were not valid
+          auth.logout();
           navigate(Route.login, { replace: true });
         }
       })
       .catch(() => {
+        // Logout on generic login error
+        auth.logout();
         navigate(Route.login, { replace: true });
       });
   }, []);

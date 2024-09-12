@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ enum Route {
   updateCampaigns = "/update-campaigns",
   updateCampaignsNew = "/update-campaigns/new",
   updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
-  auth = "/auth",
   login = "/login",
   logout = "/logout",
 }
@@ -109,7 +108,6 @@ const generatePath = (route: ParametricRoute): string => {
     case Route.updateCampaignsNew:
     case Route.login:
     case Route.logout:
-    case Route.auth:
       return route.route;
   }
 };
