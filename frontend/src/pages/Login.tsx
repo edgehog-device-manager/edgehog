@@ -63,7 +63,7 @@ const LoginPage = () => {
       const persistConfig = formData.keepMeLoggedIn;
       auth.login(authConfig, persistConfig).then((success) => {
         if (success) {
-          navigate(redirectTo);
+          navigate(redirectTo, { replace: true });
         } else {
           setErrorFeedback(
             <FormattedMessage
