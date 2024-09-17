@@ -59,13 +59,12 @@ type RouterRule = {
 };
 
 const publicRoutes: RouterRule[] = [
-  { path: Route.auth, element: <AttemptLogin /> },
   { path: Route.login, element: <Login /> },
-  { path: "*", element: <Navigate to={Route.login} /> },
+  { path: "*", element: <Navigate to={Route.login} replace /> },
 ];
 
 const authenticatedRoutes: RouterRule[] = [
-  { path: Route.auth, element: <AttemptLogin /> },
+  { path: Route.login, element: <AttemptLogin /> },
   { path: Route.devices, element: <Devices /> },
   { path: Route.devicesEdit, element: <Device /> },
   { path: Route.deviceGroups, element: <DeviceGroups /> },
@@ -92,7 +91,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.updateCampaignsNew, element: <UpdateCampaignCreate /> },
   { path: Route.updateCampaignsEdit, element: <UpdateCampaign /> },
   { path: Route.logout, element: <Logout /> },
-  { path: "*", element: <Navigate to={Route.devices} /> },
+  { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];
 
 function App() {
