@@ -28,7 +28,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
   describe "createBaseImage mutation" do
     setup do
       StorageMock
-      |> stub(:store, fn _, _, _ -> {:ok, "https://example.com/ota.bin"} end)
+      |> stub(:store, fn _, _, _, _ -> {:ok, "https://example.com/ota.bin"} end)
       |> stub(:delete, fn _ -> :ok end)
 
       :ok
@@ -37,10 +37,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
     test "creates base image with valid data", %{tenant: tenant} do
       base_image_collection = base_image_collection_fixture(tenant: tenant)
       base_image_collection_id = AshGraphql.Resource.encode_relay_id(base_image_collection)
+      base_image_version = "2.0.0"
 
       file_url = "https://example.com/ota.bin"
 
-      expect(StorageMock, :store, fn tenant_id, base_image_collection_id, _upload ->
+      expect(StorageMock, :store, fn tenant_id, base_image_collection_id, ^base_image_version, _upload ->
         assert tenant_id == tenant.tenant_id
         # This is the DB id
         assert base_image_collection_id == base_image_collection.id
@@ -52,7 +53,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
         create_base_image_mutation(
           tenant: tenant,
           base_image_collection_id: base_image_collection_id,
-          version: "2.0.0",
+          version: base_image_version,
           starting_version_requirement: "~> 1.0",
           file: %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
         )
@@ -61,7 +62,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
       assert %{
                "id" => _,
-               "version" => "2.0.0",
+               "version" => ^base_image_version,
                "startingVersionRequirement" => "~> 1.0",
                "url" => ^file_url,
                "baseImageCollection" => %{
@@ -199,14 +200,14 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
     end
 
     test "doesn't upload the base image to the storage with invalid data", %{tenant: tenant} do
-      expect(StorageMock, :store, 0, fn _, _, _ -> {:error, :unreachable} end)
+      expect(StorageMock, :store, 0, fn _, _, _, _ -> {:error, :unreachable} end)
       result = create_base_image_mutation(tenant: tenant, version: "invalid")
 
       assert %{message: "is not a valid version"} = extract_error!(result)
     end
 
     test "returns error if the upload to the storage fails", %{tenant: tenant} do
-      expect(StorageMock, :store, fn _, _, _ -> {:error, :bucket_is_full} end)
+      expect(StorageMock, :store, fn _, _, _, _ -> {:error, :bucket_is_full} end)
       result = create_base_image_mutation(tenant: tenant)
 
       assert %{

@@ -48,10 +48,12 @@ defmodule Edgehog.BaseImages.BaseImage.Changes.HandleFileUpload do
   defp upload_file(changeset, file) do
     tenant_id = changeset.to_tenant
 
+    {:ok, base_image} = Ash.Changeset.apply_attributes(changeset)
+
     {:ok, base_image_collection_id} =
       Ash.Changeset.fetch_argument(changeset, :base_image_collection_id)
 
-    case @storage_module.store(tenant_id, base_image_collection_id, file) do
+    case @storage_module.store(tenant_id, base_image_collection_id, base_image.version, file) do
       {:ok, file_url} ->
         changeset
         |> Ash.Changeset.force_change_attribute(:url, file_url)

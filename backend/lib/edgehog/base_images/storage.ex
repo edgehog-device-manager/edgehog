@@ -26,7 +26,8 @@ defmodule Edgehog.BaseImages.Storage do
 
   @callback store(
               tenant_id :: String.t() | integer(),
-              base_image_id :: String.t() | integer(),
+              base_image_collection_id :: String.t() | integer(),
+              base_image_version :: String.t(),
               file :: upload()
             ) ::
               {:ok, file_url :: String.t()} | {:error, reason :: any}
