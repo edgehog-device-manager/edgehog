@@ -45,6 +45,6 @@ defmodule Edgehog.BaseImages.Uploaders.BaseImage do
   end
 
   def filename(_version, {_file, scope}) do
-    scope.version
+    scope.base_image_version
   end
 end
