@@ -4,11 +4,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0-dev] - Unreleased
+## [0.9.0] - Unreleased
+### Fixed
+- Correctly support automatic login attempts on the frontend regardless of existing auth sessions ([#596](https://github.com/edgehog-device-manager/edgehog/pull/596)).
+- Fix file upload for creating base images that was failing due to a regression that left out the `version` parameter, needed for uploading the file ([#600](https://github.com/edgehog-device-manager/edgehog/pull/600)).
+
+## [0.9.0-rc.2] - 2024-09-11
+### Fixed
+- Correctly scope Base Image uploads to their Base Image Collection bucket.
+- Show a better error when trying to delete a Base Image or Update Channel connected to an existing
+  Update Campaign.
+### Added
+- Support redirection to a specific page after successful authentication
+
+## [0.9.0-rc.1] - 2024-07-10
+### Fixed
+- Wrong input params used in GraphQL mutation when creating a base image, leading to a rejected operation ([#574](https://github.com/edgehog-device-manager/edgehog/pull/574)).
+- Fix docker-compose local build.
+- Fix OTA operation events not being handled, leading to a successful OTA operation while the device was still pending.
+
+## [0.9.0-rc.0] - 2024-07-08
 ### Added
 - Allow generating admin JWT using `gen-edgehog-jwt`.
 ### Changed
 - Change logo and brand images with the latest brand revision.
+- BREAKING: The Admin API is now JSON-API compliant, which implies a slightly different format,
+  check out the newly added OpenAPI document.
+- BREAKING: This release includes some breaking changes in the GraphQL API, make sure to check out
+  the GraphQL schema if you were using the APIs directly. Note that we _could_ add more breaking
+  changes before the final release.
 
 ## [0.8.0] - 2024-03-29
 ### Changed

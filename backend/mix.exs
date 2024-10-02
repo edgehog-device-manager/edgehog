@@ -24,7 +24,7 @@ defmodule Edgehog.MixProject do
   def project do
     [
       app: :edgehog,
-      version: "0.9.0-dev",
+      version: "0.9.0-rc.2",
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -81,13 +81,12 @@ defmodule Edgehog.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      # TODO: needed for Elixir 1.17 warnings, go back to stable once it's released
-      {:absinthe, github: "absinthe-graphql/absinthe", override: true},
+      {:absinthe, "~> 1.7"},
       {:absinthe_plug, "~> 1.5"},
       {:absinthe_relay, "~> 1.5"},
       {:dataloader, "~> 1.0"},
       {:astarte_client, github: "astarte-platform/astarte-client-elixir"},
-      {:cors_plug, "~> 2.0"},
+      {:cors_plug, "~> 3.0"},
       {:x509, "~> 0.8"},
       {:mox, "~> 1.0"},
       {:tesla, "~> 1.4"},
@@ -119,7 +118,7 @@ defmodule Edgehog.MixProject do
       {:picosat_elixir, "~> 0.2"},
       {:styler, "~> 1.0.0-rc.1", only: [:dev, :test], runtime: false},
       {:open_api_spex, "~> 3.16"},
-      {:ymlr, "~> 2.0"}
+      {:ymlr, "~> 5.1"}
     ]
   end
 

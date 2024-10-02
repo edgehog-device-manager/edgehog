@@ -715,7 +715,9 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     test "returns nil when it cannot geolocate the position", ctx do
       %{tenant: tenant, id: id, document: document} = ctx
 
-      expect(GeolocationProviderMock, :geolocate, fn _device -> {:error, :position_not_found} end)
+      expect(GeolocationProviderMock, :geolocate, fn _device ->
+        {:error, :position_not_found}
+      end)
 
       assert result =
                [document: document, tenant: tenant, id: id]

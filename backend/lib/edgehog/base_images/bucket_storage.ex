@@ -27,7 +27,13 @@ defmodule Edgehog.BaseImages.BucketStorage do
   alias Edgehog.BaseImages.Uploaders
 
   @impl Storage
-  def store(%BaseImage{} = scope, %Plug.Upload{} = upload) do
+  def store(tenant_id, base_image_collection_id, base_image_version, %Plug.Upload{} = upload) do
+    scope = %{
+      tenant_id: tenant_id,
+      base_image_collection_id: base_image_collection_id,
+      base_image_version: base_image_version
+    }
+
     with {:ok, file_name} <- Uploaders.BaseImage.store({upload, scope}) do
       # TODO: investigate URL signing instead of public access
       file_url = Uploaders.BaseImage.url({file_name, scope})

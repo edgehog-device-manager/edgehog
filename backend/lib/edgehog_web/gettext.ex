@@ -40,5 +40,5 @@ defmodule EdgehogWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :edgehog
+  use Gettext.Backend, otp_app: :edgehog
 end

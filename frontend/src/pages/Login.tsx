@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 import Alert from "react-bootstrap/Alert";
 import Form from "react-bootstrap/Form";
 import _ from "lodash";
@@ -30,7 +30,6 @@ import Button from "components/Button";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { useAuth } from "contexts/Auth";
-import { useNavigate, Route } from "Navigation";
 
 interface FormData {
   tenantSlug: string;
@@ -48,6 +47,7 @@ const LoginPage = () => {
   const location = useLocation();
   const urlSearchParams = new URLSearchParams(location.search);
   const initialFormData = getInitialFormData(urlSearchParams);
+  const redirectTo = urlSearchParams.get("redirectTo") || "";
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [validated, setValidated] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
@@ -63,7 +63,7 @@ const LoginPage = () => {
       const persistConfig = formData.keepMeLoggedIn;
       auth.login(authConfig, persistConfig).then((success) => {
         if (success) {
-          navigate(Route.devices);
+          navigate(redirectTo, { replace: true });
         } else {
           setErrorFeedback(
             <FormattedMessage
@@ -75,7 +75,7 @@ const LoginPage = () => {
         }
       });
     },
-    [auth, navigate],
+    [auth, navigate, redirectTo],
   );
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(

@@ -353,7 +353,7 @@ spec:
           value: <EDGEHOG-FORWARDER-PORT>
         - name: EDGEHOG_FORWARDER_SECURE_SESSIONS
           value: <EDGEHOG-FORWARDER-SECURE-SESSIONS>
-        image: edgehogdevicemanager/edgehog-backend:snapshot
+        image: edgehogdevicemanager/edgehog-backend:0.9.0-rc.2
         imagePullPolicy: Always
         name: edgehog-backend
         ports:
@@ -414,7 +414,7 @@ spec:
       - env:
         - name: BACKEND_URL
           value: <BACKEND-HOST>
-        image: edgehogdevicemanager/edgehog-frontend:snapshot
+        image: edgehogdevicemanager/edgehog-frontend:0.9.0-rc.2
         imagePullPolicy: Always
         name: edgehog-frontend
         ports:
@@ -697,7 +697,7 @@ Values to be replaced
 - `BACKEND-HOST`: the backend host.
 - `DEVICE-FORWARDER-HOST`: the device forwarder host.
 - `MAX-UPLOAD-SIZE`: the maximum upload size that you defined in the [Edgehog backend
-  deployment](https://edgehog-device-manager.github.io/docs/snapshot/deploying_with_kubernetes.html#deployments).
+  deployment](https://edgehog-device-manager.github.io/docs/0.9/deploying_with_kubernetes.html#deployments).
   Note that NGINX accepts also size suffixes, so you can put, e.g., `4G` for 4 gigabytes. Also note
   that, differently from the value in the Deployment, this is required because NGINX default is 1
   megabyte.
