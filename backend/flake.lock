@@ -2,19 +2,20 @@
   "nodes": {
     "elixir-utils": {
       "inputs": {
-        "flake-utils": [
-          "flake-utils"
+        "flake-parts": [
+          "flake-parts"
         ],
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "systems": "systems"
       },
       "locked": {
-        "lastModified": 1703156846,
-        "narHash": "sha256-VnYe8pWHMiltpjwcD2vSw3/+VObxF9c0q553yw6jIbw=",
+        "lastModified": 1726159645,
+        "narHash": "sha256-nRrcjFbQ913WCkgbphC8CyG8zLjPaMhLRjD/SojbkrE=",
         "owner": "noaccOS",
         "repo": "elixir-utils",
-        "rev": "875e52710e28f154cda0a27300485b29dadd3615",
+        "rev": "9b79c2e60f287a656ae38c44c26c666399585725",
         "type": "github"
       },
       "original": {
@@ -39,31 +40,33 @@
         "type": "github"
       }
     },
-    "flake-utils": {
+    "flake-parts": {
       "inputs": {
-        "systems": "systems"
+        "nixpkgs-lib": [
+          "nixpkgs"
+        ]
       },
       "locked": {
-        "lastModified": 1701680307,
-        "narHash": "sha256-kAuep2h5ajznlPMD9rnQyffWG8EM/C73lejGofXvdM8=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "4022d587cbbfd70fe950c1e2083a02621806a725",
+        "lastModified": 1727826117,
+        "narHash": "sha256-K5ZLCyfO/Zj9mPFldf3iwS6oZStJcU4tSpiXTMYaaL0=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "3d04084d54bedc3d6b8b736c70ef449225c361b1",
         "type": "github"
       },
       "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1703105089,
-        "narHash": "sha256-1F7hDLj58OQCADRtG2DRKpmJ8QVza0M0NK/kfLWLs3k=",
+        "lastModified": 1727777050,
+        "narHash": "sha256-5jw7zwOcWOpxTO6NCzmFZfq0klNGA+ktw+Yb3n35eUQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2b9c57d33e3d5be6262e124fc66e3a8bc650b93d",
+        "rev": "d78d09350ac7dfe503cf48cbc59764aef4157b9a",
         "type": "github"
       },
       "original": {
@@ -76,7 +79,7 @@
       "inputs": {
         "elixir-utils": "elixir-utils",
         "flake-compat": "flake-compat",
-        "flake-utils": "flake-utils",
+        "flake-parts": "flake-parts",
         "nixpkgs": "nixpkgs"
       }
     },

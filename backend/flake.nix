@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,21 +22,45 @@
   description = "Open Source software focused on the management of the whole life-cycle of IoT devices";
   inputs = {
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
-    elixir-utils = { url = github:noaccOS/elixir-utils; inputs.nixpkgs.follows = "nixpkgs"; inputs.flake-utils.follows = "flake-utils"; };
-    flake-utils.url = github:numtide/flake-utils;
+    elixir-utils = {
+      url = "github:noaccOS/elixir-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
     flake-compat = {
-      url = github:edolstra/flake-compat;
+      url = "github:edolstra/flake-compat";
       flake = false;
     };
   };
-  outputs = { self, nixpkgs, elixir-utils, flake-utils, ... }:
+  outputs =
     {
-      overlays.tools = elixir-utils.lib.asdfOverlay { src = ../.; wxSupport = false; };
-    } //
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = import nixpkgs { inherit system; overlays = [ self.overlays.tools ]; };
-      in {
-        devShells.default = pkgs.elixirDevShell;
-        formatter = pkgs.nixpkgs-fmt;
-      });
+      self,
+      elixir-utils,
+      flake-parts,
+      ...
+    }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      flake.overlays.tools = elixir-utils.lib.asdfOverlay {
+        src = ../.;
+        wxSupport = false;
+      };
+
+      systems = elixir-utils.lib.defaultSystems;
+
+      perSystem =
+        { pkgs, system, ... }:
+        {
+          _module.args.pkgs = import self.inputs.nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.tools ];
+          };
+
+          devShells.default = pkgs.elixirDevShell;
+          formatter = pkgs.nixfmt-rfc-style;
+        };
+    };
 }
