@@ -161,6 +161,15 @@ if config_env() == :prod do
     """
   end
 
+  if url_host != nil &&
+       (String.starts_with?(url_host, "http://") ||
+          String.starts_with?(url_host, "https://")) do
+    raise """
+    environment variable URL_HOST must be a valid host, without the
+    http:// or https:// scheme.
+    """
+  end
+
   forwarder_port = System.get_env("EDGEHOG_FORWARDER_PORT")
 
   forwarder_port =
