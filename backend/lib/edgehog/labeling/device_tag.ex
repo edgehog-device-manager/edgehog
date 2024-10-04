@@ -53,24 +53,22 @@ defmodule Edgehog.Labeling.DeviceTag do
     end
   end
 
-  identities do
-    # These have to be named this way to match the existing unique indexes
-    # we already have. Ash uses identities to add a `unique_constraint` to the
-    # Ecto changeset, so names have to match. There's no need to explicitly add
-    # :tenant_id in the fields because identity in a multitenant resource are
-    # automatically scoped to a specific :tenant_id
-    # TODO: change index names when we generate migrations at the end of the porting
-    identity :tag_id_tenant_id, [:tag_id]
-    identity :device_id_tenant_id, [:device_id]
-  end
-
   postgres do
     table "devices_tags"
     repo Edgehog.Repo
 
     references do
-      reference :device, on_delete: :delete
-      reference :tag, on_delete: :delete
+      reference :device,
+        index?: true,
+        on_delete: :delete,
+        match_type: :full,
+        match_with: [tenant_id: :tenant_id]
+
+      reference :tag,
+        index?: true,
+        on_delete: :restrict,
+        match_type: :full,
+        match_with: [tenant_id: :tenant_id]
     end
   end
 end

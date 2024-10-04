@@ -216,6 +216,10 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
     end
   end
 
+  identities do
+    identity :unique_device_for_campaign, [:update_campaign_id, :device_id]
+  end
+
   postgres do
     table "update_campaign_targets"
     repo Edgehog.Repo
@@ -234,6 +238,11 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
       reference :ota_operation,
         on_delete: :nothing,
         match_with: [tenant_id: :tenant_id]
+    end
+
+    custom_indexes do
+      index [:device_id], all_tenants?: true, unique: false
+      index [:update_campaign_id], all_tenants?: true, unique: false
     end
   end
 end

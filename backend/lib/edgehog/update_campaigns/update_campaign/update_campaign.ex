@@ -230,5 +230,10 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
     end
+
+    custom_indexes do
+      index [:base_image_id], unique: false
+      index [:update_channel_id], unique: false
+    end
   end
 end

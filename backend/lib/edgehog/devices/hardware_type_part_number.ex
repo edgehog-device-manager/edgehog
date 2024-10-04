@@ -65,7 +65,7 @@ defmodule Edgehog.Devices.HardwareTypePartNumber do
   end
 
   identities do
-    identity :part_number_tenant_id, [:part_number]
+    identity :part_number, [:part_number]
   end
 
   postgres do
@@ -73,7 +73,15 @@ defmodule Edgehog.Devices.HardwareTypePartNumber do
     repo Edgehog.Repo
 
     references do
-      reference :hardware_type, on_delete: :delete
+      reference :hardware_type,
+        on_delete: :delete,
+        # hardware_type_id can be null, so match_type is :simple, not :full
+        match_type: :simple,
+        match_with: [tenant_id: :tenant_id]
+    end
+
+    custom_indexes do
+      index [:hardware_type_id], all_tenants?: true, unique: false
     end
   end
 end

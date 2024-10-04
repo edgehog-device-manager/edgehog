@@ -211,21 +211,19 @@ defmodule Edgehog.BaseImages.BaseImage do
   end
 
   identities do
-    # These have to be named this way to match the existing unique indexes
-    # we already have. Ash uses identities to add a `unique_constraint` to the
-    # Ecto changeset, so names have to match. There's no need to explicitly add
-    # :tenant_id in the fields because identity in a multitenant resource are
-    # automatically scoped to a specific :tenant_id
-    # TODO: change index names when we generate migrations at the end of the porting
-    identity :version_base_image_collection_id_tenant_id, [
-      :version,
-      :base_image_collection_id,
-      :tenant_id
-    ]
+    identity :unique_base_image_collection_version, [:version, :base_image_collection_id]
   end
 
   postgres do
     table "base_images"
     repo Edgehog.Repo
+
+    references do
+      reference :base_image_collection,
+        index?: true,
+        on_delete: :nothing,
+        match_with: [tenant_id: :tenant_id],
+        match_type: :full
+    end
   end
 end
