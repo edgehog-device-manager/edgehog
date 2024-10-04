@@ -205,13 +205,10 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
     references do
       reference :device,
+        index?: true,
         on_delete: :nothing,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
-    end
-
-    custom_indexes do
-      index [:device_id], all_tenants?: true, unique: false
     end
   end
 end

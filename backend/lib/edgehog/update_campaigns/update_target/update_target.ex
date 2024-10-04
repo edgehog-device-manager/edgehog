@@ -226,11 +226,13 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
 
     references do
       reference :update_campaign,
+        index?: true,
         on_delete: :delete,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
 
       reference :device,
+        index?: true,
         on_delete: :nothing,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
@@ -238,11 +240,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
       reference :ota_operation,
         on_delete: :nothing,
         match_with: [tenant_id: :tenant_id]
-    end
-
-    custom_indexes do
-      index [:device_id], all_tenants?: true, unique: false
-      index [:update_campaign_id], all_tenants?: true, unique: false
     end
   end
 end

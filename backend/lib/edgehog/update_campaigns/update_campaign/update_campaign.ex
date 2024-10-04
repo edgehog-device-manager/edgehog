@@ -221,19 +221,16 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
 
     references do
       reference :base_image,
+        index?: true,
         on_delete: :nothing,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
 
       reference :update_channel,
+        index?: true,
         on_delete: :nothing,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
-    end
-
-    custom_indexes do
-      index [:base_image_id], unique: false
-      index [:update_channel_id], unique: false
     end
   end
 end

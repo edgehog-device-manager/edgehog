@@ -435,6 +435,7 @@ defmodule Edgehog.Devices.Device do
 
     references do
       reference :realm,
+        index?: true,
         on_delete: :nothing,
         match_with: [tenant_id: :tenant_id],
         match_type: :full
@@ -443,10 +444,6 @@ defmodule Edgehog.Devices.Device do
       # to be able to declare its part number even _before_ we add the relative system model to
       # Edgehog
       reference :system_model_part_number, ignore?: true
-    end
-
-    custom_indexes do
-      index [:realm_id], all_tenants?: true, unique: false
     end
   end
 end

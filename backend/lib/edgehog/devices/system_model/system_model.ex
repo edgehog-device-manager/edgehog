@@ -219,13 +219,10 @@ defmodule Edgehog.Devices.SystemModel do
 
     references do
       reference :hardware_type,
+        index?: true,
         on_delete: :nothing,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
-    end
-
-    custom_indexes do
-      index [:hardware_type_id], all_tenants?: true, unique: false
     end
   end
 end

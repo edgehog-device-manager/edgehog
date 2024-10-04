@@ -79,14 +79,11 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
 
     references do
       reference :system_model,
+        index?: true,
         on_delete: :delete,
         # system_model_id can be null, so match_type is :simple, not :full
         match_type: :simple,
         match_with: [tenant_id: :tenant_id]
-    end
-
-    custom_indexes do
-      index [:system_model_id], all_tenants?: true, unique: false
     end
   end
 end
