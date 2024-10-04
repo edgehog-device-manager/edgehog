@@ -216,17 +216,23 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget do
     end
   end
 
+  identities do
+    identity :unique_device_for_campaign, [:update_campaign_id, :device_id]
+  end
+
   postgres do
     table "update_campaign_targets"
     repo Edgehog.Repo
 
     references do
       reference :update_campaign,
+        index?: true,
         on_delete: :delete,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
 
       reference :device,
+        index?: true,
         on_delete: :nothing,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]

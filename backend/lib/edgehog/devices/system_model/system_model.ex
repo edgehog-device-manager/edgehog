@@ -80,7 +80,7 @@ defmodule Edgehog.Devices.SystemModel do
                on_lookup: :relate,
                on_no_match: :create,
                value_is_key: :part_number,
-               use_identities: [:part_number_tenant_id]
+               use_identities: [:part_number]
              )
 
       change manage_relationship(:hardware_type_id, :hardware_type, type: :append)
@@ -123,7 +123,7 @@ defmodule Edgehog.Devices.SystemModel do
                on_no_match: :create,
                on_missing: :destroy,
                value_is_key: :part_number,
-               use_identities: [:part_number_tenant_id]
+               use_identities: [:part_number]
              )
 
       change Changes.HandlePictureUpload
@@ -209,18 +209,20 @@ defmodule Edgehog.Devices.SystemModel do
   end
 
   identities do
-    # These have to be named this way to match the existing unique indexes
-    # we already have. Ash uses identities to add a `unique_constraint` to the
-    # Ecto changeset, so names have to match. There's no need to explicitly add
-    # :tenant_id in the fields because identity in a multitenant resource are
-    # automatically scoped to a specific :tenant_id
-    # TODO: change index names when we generate migrations at the end of the porting
-    identity :handle_tenant_id, [:handle]
-    identity :name_tenant_id, [:name]
+    identity :handle, [:handle]
+    identity :name, [:name]
   end
 
   postgres do
     table "system_models"
     repo Edgehog.Repo
+
+    references do
+      reference :hardware_type,
+        index?: true,
+        on_delete: :nothing,
+        match_type: :full,
+        match_with: [tenant_id: :tenant_id]
+    end
   end
 end

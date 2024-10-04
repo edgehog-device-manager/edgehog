@@ -8,6 +8,7 @@
     :ash_json_api,
     :ash_postgres,
     :ecto,
+    :ecto_sql,
     :phoenix,
     :absinthe,
     :skogsra,

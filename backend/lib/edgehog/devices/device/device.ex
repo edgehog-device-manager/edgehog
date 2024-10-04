@@ -71,7 +71,7 @@ defmodule Edgehog.Devices.Device do
 
     create :from_device_connected_event do
       upsert? true
-      upsert_identity :device_id_realm_id_tenant_id
+      upsert_identity :unique_realm_device_id
       upsert_fields [:online, :last_connection, :updated_at]
 
       accept [:realm_id]
@@ -91,7 +91,7 @@ defmodule Edgehog.Devices.Device do
 
     create :from_device_disconnected_event do
       upsert? true
-      upsert_identity :device_id_realm_id_tenant_id
+      upsert_identity :unique_realm_device_id
       upsert_fields [:online, :last_disconnection, :updated_at]
 
       accept [:realm_id]
@@ -111,7 +111,7 @@ defmodule Edgehog.Devices.Device do
 
     create :from_serial_number_event do
       upsert? true
-      upsert_identity :device_id_realm_id_tenant_id
+      upsert_identity :unique_realm_device_id
       upsert_fields [:online, :serial_number, :updated_at]
 
       accept [:serial_number, :realm_id]
@@ -130,7 +130,7 @@ defmodule Edgehog.Devices.Device do
 
     create :from_part_number_event do
       upsert? true
-      upsert_identity :device_id_realm_id_tenant_id
+      upsert_identity :unique_realm_device_id
       upsert_fields [:online, :part_number, :updated_at]
 
       accept [:part_number, :realm_id]
@@ -149,7 +149,7 @@ defmodule Edgehog.Devices.Device do
 
     create :from_unhandled_event do
       upsert? true
-      upsert_identity :device_id_realm_id_tenant_id
+      upsert_identity :unique_realm_device_id
       upsert_fields [:online, :updated_at]
 
       accept [:realm_id]
@@ -189,7 +189,7 @@ defmodule Edgehog.Devices.Device do
                on_lookup: :relate,
                on_no_match: :create,
                value_is_key: :name,
-               use_identities: [:name_tenant_id]
+               use_identities: [:name]
              )
     end
 
@@ -211,7 +211,7 @@ defmodule Edgehog.Devices.Device do
                on_no_match: :ignore,
                on_missing: :ignore,
                value_is_key: :name,
-               use_identities: [:name_tenant_id]
+               use_identities: [:name]
              )
     end
 
@@ -426,17 +426,24 @@ defmodule Edgehog.Devices.Device do
   end
 
   identities do
-    # These have to be named this way to match the existing unique indexes
-    # we already have. Ash uses identities to add a `unique_constraint` to the
-    # Ecto changeset, so names have to match. There's no need to explicitly add
-    # :tenant_id in the fields because identity in a multitenant resource are
-    # automatically scoped to a specific :tenant_id
-    # TODO: change index names when we generate migrations at the end of the porting
-    identity :device_id_realm_id_tenant_id, [:device_id, :realm_id]
+    identity :unique_realm_device_id, [:device_id, :realm_id]
   end
 
   postgres do
     table "devices"
     repo Edgehog.Repo
+
+    references do
+      reference :realm,
+        index?: true,
+        on_delete: :nothing,
+        match_with: [tenant_id: :tenant_id],
+        match_type: :full
+
+      # We don't generate a foreign key for the system model part number since we want the device
+      # to be able to declare its part number even _before_ we add the relative system model to
+      # Edgehog
+      reference :system_model_part_number, ignore?: true
+    end
   end
 end

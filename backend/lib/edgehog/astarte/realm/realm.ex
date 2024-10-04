@@ -82,12 +82,16 @@ defmodule Edgehog.Astarte.Realm do
   end
 
   identities do
-    identity :name_tenant_id, [:name, :tenant_id]
-    identity :name_cluster_id, [:name, :cluster_id]
+    identity :name, [:name]
+    identity :unique_name_for_cluster, [:name, :cluster_id], all_tenants?: true
   end
 
   postgres do
     table "realms"
     repo Edgehog.Repo
+
+    custom_indexes do
+      index [:cluster_id], all_tenants?: true
+    end
   end
 end

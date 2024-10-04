@@ -70,7 +70,7 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
   end
 
   identities do
-    identity :part_number_tenant_id, [:part_number]
+    identity :part_number, [:part_number]
   end
 
   postgres do
@@ -78,7 +78,12 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
     repo Edgehog.Repo
 
     references do
-      reference :system_model, on_delete: :delete
+      reference :system_model,
+        index?: true,
+        on_delete: :delete,
+        # system_model_id can be null, so match_type is :simple, not :full
+        match_type: :simple,
+        match_with: [tenant_id: :tenant_id]
     end
   end
 end

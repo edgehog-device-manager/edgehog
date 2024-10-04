@@ -202,5 +202,13 @@ defmodule Edgehog.OSManagement.OTAOperation do
   postgres do
     table "ota_operations"
     repo Edgehog.Repo
+
+    references do
+      reference :device,
+        index?: true,
+        on_delete: :nothing,
+        match_type: :full,
+        match_with: [tenant_id: :tenant_id]
+    end
   end
 end
