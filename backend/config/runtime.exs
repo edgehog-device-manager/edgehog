@@ -20,6 +20,7 @@
 
 import Config
 
+alias Azurex.Blob.Config
 alias Waffle.Storage.Google.CloudStorage
 alias Waffle.Storage.S3
 
@@ -57,11 +58,19 @@ s3 = %{
   port: System.get_env("S3_PORT", default_s3.port)
 }
 
+allowed_storage_types = ["s3", "azure"]
+
+storage_type = "STORAGE_TYPE" |> System.get_env("s3") |> String.downcase(:ascii)
+
+unless storage_type in allowed_storage_types do
+  raise "Invalid storage type provided: #{inspect(storage_type)}. Allowed values are #{inspect(allowed_storage_types)}."
+end
+
 storage_module =
-  if s3.host == "storage.googleapis.com" do
-    CloudStorage
-  else
-    S3
+  cond do
+    storage_type == "azure" -> Edgehog.AzureStorage
+    s3.host == "storage.googleapis.com" -> CloudStorage
+    true -> S3
   end
 
 # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
@@ -69,6 +78,25 @@ max_upload_size_bytes =
   "MAX_UPLOAD_SIZE_BYTES"
   |> System.get_env(to_string(4_000_000_000))
   |> String.to_integer()
+
+azure_zone_str =
+  case to_string(s3.region) do
+    "" -> ""
+    zone -> "." <> zone
+  end
+
+# default azure url is always https: https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview#standard-endpoints
+default_api_url =
+  "https://" <> to_string(s3.access_key_id) <> azure_zone_str <> ".blob.core.windows.net"
+
+preconfigured_api_url = Application.compile_env(:azurex, [Config, :api_url], default_api_url)
+azure_api_url = System.get_env("AZURE_API_URL", preconfigured_api_url)
+
+config :azurex, Config,
+  api_url: azure_api_url,
+  default_container: s3.bucket,
+  storage_account_name: s3.access_key_id,
+  storage_account_key: s3.secret_access_key
 
 config :ex_aws, :s3,
   scheme: s3.scheme,
