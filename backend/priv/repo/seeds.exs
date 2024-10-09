@@ -31,6 +31,7 @@ default_var =
       # paths in the .env are relative to ../
       defaults
       |> Map.fetch!(var)
+      |> String.replace_prefix("../", "../../")
       |> String.replace_prefix("./", "../")
     end
   else
