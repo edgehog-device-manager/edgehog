@@ -20,8 +20,10 @@
 
 import Config
 
+alias Azurex.Blob.Config
 alias Waffle.Storage.Google.CloudStorage
 alias Waffle.Storage.S3
+
 if System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME") do
   config :edgehog, EdgehogWeb.Endpoint, server: true
 end
@@ -44,10 +46,62 @@ if config_env() in [:prod, :test] do
     port: System.get_env("S3_PORT")
   }
 
+  azure =
+    case System.fetch_env("AZURE_CONNECTION_STRING") do
+      {:ok, connection_string} ->
+        connection_string_values = Azurex.Blob.Config.parse_connection_string(connection_string)
+
+        %{
+          api_url: connection_string_values["BlobEndpoint"],
+          storage_account_name: connection_string_values["AccountName"],
+          storage_account_key: connection_string_values["AccountKey"],
+          region: nil,
+          container: System.get_env("AZURE_CONTAINER")
+        }
+
+      :error ->
+        %{
+          api_url: System.get_env("AZURE_BLOB_ENDPOINT"),
+          storage_account_name: System.get_env("AZURE_STORAGE_ACCOUNT_NAME"),
+          storage_account_key: System.get_env("AZURE_STORAGE_ACCOUNT_KEY"),
+          region: System.get_env("AZURE_REGION"),
+          container: System.get_env("AZURE_CONTAINER")
+        }
+    end
+
+  allowed_storage_types = ["s3", "azure"]
+  storage_type = "STORAGE_TYPE" |> System.get_env("s3") |> String.downcase(:ascii)
+
+  unless storage_type in allowed_storage_types do
+    raise "Invalid storage type provided: #{inspect(storage_type)}. Allowed values are #{inspect(allowed_storage_types)}."
+  end
+
+  if storage_type == "azure" && azure.api_url == nil && azure.storage_account_name == nil do
+    raise """
+    When using Azure Blob Storage, either the blob endpoint (AZURE_BLOB_ENDPOINT) \
+    or the account name (AZURE_STORAGE_ACCOUNT_NAME) must be specified.
+    """
+  end
+
   storage_module =
     cond do
+      storage_type == "azure" -> Edgehog.AzureStorage
       s3.host == "storage.googleapis.com" -> CloudStorage
       true -> S3
+    end
+
+  azure_api_url =
+    with nil <- azure.api_url do
+      azure_zone_url_str =
+        case to_string(azure.region) do
+          "" -> ""
+          zone -> "." <> zone
+        end
+
+      account_name = to_string(azure.storage_account_name)
+
+      # https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview#standard-endpoints
+      "https://" <> account_name <> azure_zone_url_str <> ".blob.core.windows.net"
     end
 
   # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
@@ -62,18 +116,35 @@ if config_env() in [:prod, :test] do
     waffle_virtual_host?: waffle_virtual_host?,
     edgehog_enable_s3_storage?: edgehog_enable_s3_storage?
   } =
+    case storage_module do
+      Edgehog.AzureStorage ->
+        %{
+          waffle_bucket: azure.container,
+          waffle_asset_host: azure_api_url,
+          waffle_virtual_host?: false,
+          edgehog_enable_s3_storage?: azure |> Map.values() |> Enum.any?(&(!is_nil(&1)))
+        }
+
+      _ ->
         %{
           waffle_bucket: s3.bucket,
           waffle_asset_host: s3.asset_host,
           waffle_virtual_host?: true,
           edgehog_enable_s3_storage?: s3 |> Map.values() |> Enum.any?(&(!is_nil(&1)))
         }
+    end
 
   edgehog_enable_s3_storage? =
     case config_env() do
       :test -> true
       :prod -> edgehog_enable_s3_storage?
     end
+
+  config :azurex, Config,
+    api_url: azure_api_url,
+    default_container: azure.container,
+    storage_account_name: azure.storage_account_name,
+    storage_account_key: azure.storage_account_key
 
   # Enable uploaders only when the S3 storage has been configured
   config :edgehog,
