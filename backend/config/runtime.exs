@@ -20,9 +20,75 @@
 
 import Config
 
+alias Waffle.Storage.Google.CloudStorage
+alias Waffle.Storage.S3
+
 if System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME") do
   config :edgehog, EdgehogWeb.Endpoint, server: true
 end
+
+# Configuration from the current Application environment.
+# Allows defaulting to values configured in config/{env}.exs
+default_s3 = %{
+  access_key_id: Application.compile_env(:ex_aws, :access_key_id),
+  secret_access_key: Application.compile_env(:ex_aws, :secret_access_key),
+  gcp_credentials: nil,
+  region: Application.compile_env(:ex_aws, :region),
+  bucket: Application.compile_env(:waffle, :bucket),
+  asset_host: Application.compile_env(:waffle, :asset_host),
+  scheme: Application.compile_env(:ex_aws, [:s3, :scheme]),
+  host: Application.compile_env(:ex_aws, [:s3, :host]),
+  port: Application.compile_env(:ex_aws, [:s3, :port])
+}
+
+# TODO: while you can use access key + secret key with S3-compatible storages,
+# Waffle's default S3 adapter doesn't work well with Google Cloud Storage.
+# To use GCP, you need to supply the JSON credentials of an authorized Service
+# Account instead, which are used by the GCP adapter for Waffle.
+s3 = %{
+  access_key_id: System.get_env("S3_ACCESS_KEY_ID", default_s3.access_key_id),
+  secret_access_key: System.get_env("S3_SECRET_ACCESS_KEY", default_s3.secret_access_key),
+  gcp_credentials: System.get_env("S3_GCP_CREDENTIALS", default_s3.gcp_credentials),
+  region: System.get_env("S3_REGION", default_s3.region),
+  bucket: System.get_env("S3_BUCKET", default_s3.bucket),
+  asset_host: System.get_env("S3_ASSET_HOST", default_s3.asset_host),
+  scheme: System.get_env("S3_SCHEME", default_s3.scheme),
+  host: System.get_env("S3_HOST", default_s3.host),
+  port: System.get_env("S3_PORT", default_s3.port)
+}
+
+storage_module =
+  if s3.host == "storage.googleapis.com" do
+    CloudStorage
+  else
+    S3
+  end
+
+# The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
+max_upload_size_bytes =
+  "MAX_UPLOAD_SIZE_BYTES"
+  |> System.get_env(to_string(4_000_000_000))
+  |> String.to_integer()
+
+config :ex_aws, :s3,
+  scheme: s3.scheme,
+  host: s3.host,
+  port: s3.port
+
+config :ex_aws,
+  region: s3.region,
+  access_key_id: s3.access_key_id,
+  secret_access_key: s3.secret_access_key
+
+config :goth,
+  disabled: storage_module != CloudStorage,
+  json: s3.gcp_credentials
+
+config :waffle,
+  storage: storage_module,
+  bucket: s3.bucket,
+  asset_host: s3.asset_host,
+  virtual_host: true
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -61,41 +127,6 @@ if config_env() == :prod do
   url_port = System.get_env("URL_PORT", "443")
   url_scheme = System.get_env("URL_SCHEME", "https")
 
-  # TODO: while you can use access key + secret key with S3-compatible storages,
-  # Waffle's default S3 adapter doesn't work well with Google Cloud Storage.
-  # To use GCP, you need to supply the JSON credentials of an authorized Service
-  # Account instead, which are used by the GCP adapter for Waffle.
-  s3 = %{
-    access_key_id: System.get_env("S3_ACCESS_KEY_ID"),
-    secret_access_key: System.get_env("S3_SECRET_ACCESS_KEY"),
-    gcp_credentials: System.get_env("S3_GCP_CREDENTIALS"),
-    region: System.get_env("S3_REGION"),
-    bucket: System.get_env("S3_BUCKET"),
-    asset_host: System.get_env("S3_ASSET_HOST"),
-    scheme: System.get_env("S3_SCHEME"),
-    host: System.get_env("S3_HOST"),
-    port: System.get_env("S3_PORT")
-  }
-
-  # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
-  max_upload_size_bytes =
-    "MAX_UPLOAD_SIZE_BYTES"
-    |> System.get_env(to_string(4_000_000_000))
-    |> String.to_integer()
-
-  use_google_cloud_storage =
-    case s3.host do
-      "storage.googleapis.com" -> true
-      _ -> false
-    end
-
-  s3_storage_module =
-    if use_google_cloud_storage do
-      Waffle.Storage.Google.CloudStorage
-    else
-      Waffle.Storage.S3
-    end
-
   forwarder_secure_sessions? =
     System.get_env("EDGEHOG_FORWARDER_SECURE_SESSIONS", "true") == "true"
 
@@ -128,29 +159,10 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 
   # Enable uploaders only when the S3 storage has been configured
+  # We only check for this in release because we don't want to disable the storage in tests
   config :edgehog,
     enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end),
     max_upload_size_bytes: max_upload_size_bytes
-
-  config :ex_aws, :s3,
-    scheme: s3.scheme,
-    host: s3.host,
-    port: s3.port
-
-  config :ex_aws,
-    region: s3.region,
-    access_key_id: s3.access_key_id,
-    secret_access_key: s3.secret_access_key
-
-  config :goth,
-    disabled: !use_google_cloud_storage,
-    json: s3.gcp_credentials
-
-  config :waffle,
-    storage: s3_storage_module,
-    bucket: s3.bucket,
-    asset_host: s3.asset_host,
-    virtual_host: true
 
   if forwarder_hostname != nil &&
        (String.starts_with?(forwarder_hostname, "http://") ||
