@@ -95,6 +95,7 @@ defmodule Edgehog.MixProject do
       {:envar, "~> 1.1"},
       {:ex_aws, "~> 2.2"},
       {:ex_aws_s3, "~> 2.0"},
+      {:azurex, "~> 1.1"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6"},
       {:waffle_gcs, "~> 0.2"},
