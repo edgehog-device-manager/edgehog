@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,31 +18,33 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema do
+defmodule Edgehog.Containers.Image do
   @moduledoc false
-  use Absinthe.Schema
+  use Edgehog.MultitenantResource,
+    domain: Edgehog.Containers
 
-  use AshGraphql,
-    domains: [
-      Edgehog.BaseImages,
-      Edgehog.Containers,
-      Edgehog.Devices,
-      Edgehog.Forwarder,
-      Edgehog.Groups,
-      Edgehog.Labeling,
-      Edgehog.OSManagement,
-      Edgehog.Tenants,
-      Edgehog.UpdateCampaigns
-    ],
-    relay_ids?: true
-
-  import_types EdgehogWeb.Schema.AstarteTypes
-  import_types Absinthe.Plug.Types
-  import_types Absinthe.Type.Custom
-
-  query do
+  actions do
+    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
   end
 
-  mutation do
+  attributes do
+    uuid_v7_primary_key :id
+
+    attribute :reference, :string do
+      allow_nil? false
+    end
+
+    timestamps()
+  end
+
+  relationships do
+    belongs_to :credentials, Edgehog.Containers.ImageCredentials do
+      source_attribute :image_credentials_id
+      attribute_type :uuid
+    end
+  end
+
+  postgres do
+    table "images"
   end
 end
