@@ -71,6 +71,10 @@ defmodule Edgehog.Containers.ImageCredentials do
     update_timestamp :updated_at
   end
 
+  relationships do
+    has_many :images, Edgehog.Containers.Image
+  end
+
   identities do
     identity :name, [:name]
   end
