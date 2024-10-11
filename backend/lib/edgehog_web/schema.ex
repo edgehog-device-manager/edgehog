@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema do
   use AshGraphql,
     domains: [
       Edgehog.BaseImages,
+      Edgehog.Containers,
       Edgehog.Devices,
       Edgehog.Forwarder,
       Edgehog.Groups,

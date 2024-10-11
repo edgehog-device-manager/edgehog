@@ -94,6 +94,7 @@ config :edgehog, EdgehogWeb.Endpoint,
 config :edgehog, :ash_domains, [
   Edgehog.Astarte,
   Edgehog.BaseImages,
+  Edgehog.Containers,
   Edgehog.Devices,
   Edgehog.Forwarder,
   Edgehog.Groups,
