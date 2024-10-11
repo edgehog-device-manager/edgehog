@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-ExUnit.start()
+ExUnit.start(exclude: [:integration_storage])
 Ecto.Adapters.SQL.Sandbox.mode(Edgehog.Repo, :manual)
 
 Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
