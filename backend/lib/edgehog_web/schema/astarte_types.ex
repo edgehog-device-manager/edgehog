@@ -150,4 +150,13 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The URL that uniquely identifies the Edgehog runtime implementation."
     field :url, :string
   end
+
+  @desc "Describe the available images on the device."
+  object :image_status do
+    @desc "The image id."
+    field :id, :string
+
+    @desc "Wether the container is pulled or not."
+    field :pulled, :boolean
+  end
 end

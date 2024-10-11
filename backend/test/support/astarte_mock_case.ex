@@ -123,6 +123,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Device.ForwarderSession
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableImagesMock,
+      Edgehog.Mocks.Astarte.Device.AvailableImages
+    )
+
     :ok
   end
 end

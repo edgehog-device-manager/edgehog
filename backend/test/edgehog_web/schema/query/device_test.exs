@@ -504,6 +504,35 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert wifi_scan_result["channel"] == 7
       assert wifi_scan_result["essid"] == "MyAP"
     end
+
+    test "Queries available images on the device with their status", %{
+      tenant: tenant,
+      id: id,
+      device_id: device_id
+    } do
+      expect(Edgehog.Astarte.Device.AvailableImagesMock, :get, fn _client, ^device_id ->
+        {:ok, available_images_fixture()}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableImages {
+            id
+            pulled
+          }
+        }
+      }
+      """
+
+      assert %{"availableImages" => [first_image, second_image]} =
+               [document: document, tenant: tenant, id: id]
+               |> device_query()
+               |> extract_result!()
+
+      assert first_image["pulled"]
+      refute second_image["pulled"]
+    end
   end
 
   describe "capabilities" do

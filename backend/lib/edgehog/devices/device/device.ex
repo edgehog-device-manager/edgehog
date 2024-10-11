@@ -310,6 +310,11 @@ defmodule Edgehog.Devices.Device do
       filterable? false
     end
 
+    calculate :available_images, {:array, Types.ImageStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_images}
+    end
+
     calculate :device_status, :struct, Calculations.DeviceStatus do
       constraints instance_of: Astarte.Device.DeviceStatus
       filterable? false

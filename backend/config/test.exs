@@ -54,6 +54,7 @@ config :edgehog,
        :astarte_available_containers_module,
        Edgehog.Astarte.Device.AvailableContainersMock
 
+config :edgehog, :astarte_available_images_module, Edgehog.Astarte.Device.AvailableImagesMock
 config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
 

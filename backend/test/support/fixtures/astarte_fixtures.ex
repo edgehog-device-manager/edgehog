@@ -24,6 +24,8 @@ defmodule Edgehog.AstarteFixtures do
   entities via the `Edgehog.Astarte` context.
   """
 
+  alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
+
   @doc """
   Generate a unique cluster name.
   """
@@ -139,6 +141,25 @@ defmodule Edgehog.AstarteFixtures do
           status: "Running"
         },
         opts
+      )
+    ]
+  end
+
+  def available_images_fixture({first, second} \\ {[], []}) do
+    [
+      struct!(
+        %ImageStatus{
+          id: "uniqueid1",
+          pulled: true
+        },
+        first
+      ),
+      struct!(
+        %ImageStatus{
+          id: "uniqueid2",
+          pulled: false
+        },
+        second
       )
     ]
   end
