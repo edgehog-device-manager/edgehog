@@ -49,6 +49,11 @@ config :edgehog, EdgehogWeb.Endpoint,
 
 # Mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
+
+config :edgehog,
+       :astarte_available_containers_module,
+       Edgehog.Astarte.Device.AvailableContainersMock
+
 config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
 

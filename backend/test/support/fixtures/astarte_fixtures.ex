@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -129,6 +129,18 @@ defmodule Edgehog.AstarteFixtures do
         }
       ]
     }
+  end
+
+  def available_containers_fixture(opts \\ []) do
+    [
+      struct!(
+        %Edgehog.Astarte.Device.AvailableContainers.ContainerStatus{
+          id: "72cd35b1-f69b-46e6-a5fb-c3d4741b4c36",
+          status: "Running"
+        },
+        opts
+      )
+    ]
   end
 
   def base_image_info_fixture(opts \\ []) do

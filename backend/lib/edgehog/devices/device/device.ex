@@ -332,6 +332,11 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :base_image_info}
     end
 
+    calculate :available_containers, {:array, Types.ContainerStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_containers}
+    end
+
     calculate :battery_status, {:array, BatterySlot} do
       public? true
       calculation Calculations.BatteryStatus

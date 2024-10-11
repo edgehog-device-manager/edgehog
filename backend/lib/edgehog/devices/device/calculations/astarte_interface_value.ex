@@ -46,6 +46,12 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
     end)
   end
 
+  @available_containers Application.compile_env(
+                          :edgehog,
+                          :astarte_available_containers_module,
+                          Edgehog.Astarte.Device.AvailableContainers
+                        )
+
   @base_image Application.compile_env(
                 :edgehog,
                 :astarte_base_image_module,
@@ -94,6 +100,7 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                       Edgehog.Astarte.Device.WiFiScanResult
                     )
 
+  defp value_id_to_fetch_fun(:available_containers), do: &@available_containers.get/2
   defp value_id_to_fetch_fun(:base_image_info), do: &@base_image.get/2
   defp value_id_to_fetch_fun(:hardware_info), do: &@hardware_info.get/2
   defp value_id_to_fetch_fun(:modem_properties), do: &@cellular_connection.get_modem_properties/2

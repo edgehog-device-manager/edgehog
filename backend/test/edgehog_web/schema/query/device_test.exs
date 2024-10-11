@@ -324,6 +324,34 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert network_interface["technology"] == "ETHERNET"
     end
 
+    test "Available containers", %{tenant: tenant, id: id, device_id: device_id} do
+      container_id = Ash.UUID.generate()
+      status = "Stopped"
+
+      expect(Edgehog.Astarte.Device.AvailableContainersMock, :get, fn _client, ^device_id ->
+        {:ok, available_containers_fixture(id: container_id, status: status)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableContainers {
+            id
+            status
+          }
+        }
+      }
+      """
+
+      %{"availableContainers" => [container]} =
+        [document: document, tenant: tenant, id: id]
+        |> device_query()
+        |> extract_result!()
+
+      assert container["id"] == container_id
+      assert container["status"] == status
+    end
+
     test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       expect(Edgehog.Astarte.Device.OSInfoMock, :get, fn _client, ^device_id ->
         {:ok, os_info_fixture(name: "foo", version: "3.0.0")}
