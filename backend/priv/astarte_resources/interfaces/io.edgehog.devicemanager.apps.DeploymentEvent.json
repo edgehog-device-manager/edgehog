@@ -1,0 +1,25 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.DeploymentEvent",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "device",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/%{release_id}/status",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Deployment status",
+      "doc": "Possible values: [Idle, Starting, Started, Stopping, Stopped, Error]"
+    },
+    {
+      "endpoint": "/%{release_id}/message",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Optional message for the event"
+    }
+  ]
+}

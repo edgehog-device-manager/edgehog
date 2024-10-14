@@ -31,6 +31,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Triggers.IncomingData
   alias Edgehog.Triggers.TriggerPayload
 
+  @deployment_event "io.edgehog.devicemanager.apps.DeploymentEvent"
   @ota_event "io.edgehog.devicemanager.OTAEvent"
   @ota_response "io.edgehog.devicemanager.OTAResponse"
   @system_info "io.edgehog.devicemanager.SystemInfo"
@@ -101,6 +102,21 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     Device
     |> Ash.Changeset.for_create(:from_part_number_event, params)
     |> Ash.create(tenant: tenant)
+  end
+
+  defp handle_event(%IncomingData{interface: @deployment_event} = event, tenant, _realm_id, _device_id, _timestamp) do
+    "/" <> deployment_id = event.path
+    status = event.value["status"]
+    message = event.value["message"]
+
+    status_attrs = %{status: status, mesage: message}
+
+    # TODO: update deployment status
+    _ = deployment_id
+    _ = status_attrs
+    _ = tenant
+
+    {:ok, nil}
   end
 
   defp handle_event(
