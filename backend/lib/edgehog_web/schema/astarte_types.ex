@@ -159,4 +159,13 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "Wether the container is pulled or not."
     field :pulled, :boolean
   end
+
+  @desc "Describes the status of a deployment on a device."
+  object :deployment_status do
+    @desc "The deployment id."
+    field :id, :string
+
+    @desc "The deployment status, can be :idle, :starting, :started, :stopping, :stopped or :error"
+    field :status, :string
+  end
 end

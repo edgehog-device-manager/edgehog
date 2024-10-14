@@ -332,6 +332,11 @@ defmodule Edgehog.Devices.Device do
       calculation Calculations.CellularConnection
     end
 
+    calculate :available_deployments, {:array, Types.DeploymentStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_deployments}
+    end
+
     calculate :base_image, Types.BaseImage do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :base_image_info}
