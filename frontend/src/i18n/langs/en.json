@@ -434,6 +434,15 @@
   "components.Sidebar.updateChannelsLabel": {
     "defaultMessage": "Update Channels"
   },
+  "components.Sidebar.applicationsLabel": {
+    "defaultMessage": "Applications"
+  },
+  "components.Sidebar.applications.accountsLabel": {
+    "defaultMessage": "Accounts"
+  },
+  "components.Sidebar.applications.managementLabel": {
+    "defaultMessage": "Management"
+  },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
   },
@@ -478,6 +487,12 @@
   },
   "components.UpdateCampaignStatus.InProgress": {
     "defaultMessage": "In progress"
+  },
+  "components.ApplicationAccountsTable.labelTitle": {
+    "defaultMessage": "Label"
+  },
+  "components.ApplicationAccountsTable.usernameTitle": {
+    "defaultMessage": "Username"
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
@@ -1258,6 +1273,18 @@
   },
   "pages.UpdateCampaigns.title": {
     "defaultMessage": "Update Campaigns"
+  },
+  "pages.ApplicationAccountCreate.title": {
+    "defaultMessage": "Application Account Create"
+  },
+  "pages.ApplicationAccount.createButton": {
+    "defaultMessage": "Create Account"
+  },
+  "pages.ApplicationAccounts.title": {
+    "defaultMessage": "Application Accounts"
+  },
+  "pages.ApplicationManagement.title": {
+    "defaultMessage": "Application Management"
   },
   "pages.UpdateChannel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Update Channel <bold>{updateChannel}</bold>.",
