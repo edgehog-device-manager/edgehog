@@ -127,6 +127,15 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :timestamp, non_null(:datetime)
   end
 
+  @desc "Describes the status of a container on a device."
+  object :container_status do
+    @desc "The identifier of the container."
+    field :id, :string
+
+    @desc "The status of the container."
+    field :status, :string
+  end
+
   @desc "Describes an Edgehog runtime."
   object :runtime_info do
     @desc "The name of the Edgehog runtime."

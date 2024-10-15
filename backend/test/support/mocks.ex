@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,6 +40,10 @@ Mox.defmock(Edgehog.Astarte.Device.OTARequestV1Mock,
 
 Mox.defmock(Edgehog.Astarte.Device.StorageUsageMock,
   for: Edgehog.Astarte.Device.StorageUsage.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableContainersMock,
+  for: Edgehog.Astarte.Device.AvailableContainers.Behaviour
 )
 
 Mox.defmock(Edgehog.Astarte.Device.SystemStatusMock,
