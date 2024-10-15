@@ -75,6 +75,10 @@ defmodule Edgehog.Containers.ImageCredentials do
     has_many :images, Edgehog.Containers.Image
   end
 
+  calculations do
+    calculate :base64_json, :string, Base64JsonEncoding
+  end
+
   identities do
     identity :name, [:name]
   end
