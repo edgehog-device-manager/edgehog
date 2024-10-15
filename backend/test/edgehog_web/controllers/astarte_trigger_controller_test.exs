@@ -368,6 +368,53 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
     end
   end
 
+  describe "process_event for deployment updates" do
+    setup %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
+
+      {:ok, cluster: cluster, realm: realm, device: device}
+    end
+
+    test "updates the deployment status", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant
+      } = context
+
+      # TODO: deployment fixture
+      deployment = %{id: Ash.UUID.generate()}
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+          path: "/" <> deployment.id,
+          value: %{
+            "status" => "Started",
+            "message" => ""
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, deployment_event)
+
+      assert response(conn, 200)
+
+      # TODO: assert state has changed
+    end
+  end
+
   describe "process_event/2 for OTA updates" do
     setup %{tenant: tenant} do
       # Some events might trigger an ephemeral image deletion
