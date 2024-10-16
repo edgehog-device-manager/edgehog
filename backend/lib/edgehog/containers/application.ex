@@ -38,6 +38,10 @@ defmodule Edgehog.Containers.Application do
     timestamps()
   end
 
+  relationships do
+    has_many :releases, Edgehog.Containers.Release
+  end
+
   identities do
     identity :name, [:name]
   end
