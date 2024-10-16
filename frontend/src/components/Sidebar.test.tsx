@@ -18,8 +18,8 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { it, expect } from "vitest";
 import { screen } from "@testing-library/react";
+import { expect, it } from "vitest";
 
 import { renderWithProviders } from "setupTests";
 import Sidebar from "./Sidebar";
@@ -32,6 +32,8 @@ const sidebarLinks = [
   ["Base Image Collections", "/base-image-collections"],
   ["System Models", "/system-models"],
   ["Hardware Types", "/hardware-types"],
+  ["Credentials", "/image-credentials"],
+  ["Management", "/application-management"],
 ];
 
 it.each(sidebarLinks)("has link to %s", (name, href) => {

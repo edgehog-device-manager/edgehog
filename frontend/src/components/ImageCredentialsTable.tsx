@@ -29,15 +29,6 @@ import { ImageCredential } from "types/ImageCredential";
 
 const { imageCredentialsEdit } = Route;
 
-const IMAGE_CREDENTIALS_FRAGMENT = graphql`
-  fragment ImageCredentialsTable_imageCredentials_Fragment on ImageCredentials
-  @relay(plural: true) {
-    id
-    label
-    username
-  }
-`;
-
 const columnHelper = createColumnHelper<ImageCredential>();
 const columns = [
   columnHelper.accessor("label", {
@@ -71,6 +62,14 @@ const ImageCredentialsTable: FunctionComponent<Props> = ({
   listImageCredentialsRef,
   ...props
 }) => {
+  const IMAGE_CREDENTIALS_FRAGMENT = graphql`
+    fragment ImageCredentialsTable_imageCredentials_Fragment on ImageCredentials
+    @relay(plural: true) {
+      id
+      label
+      username
+    }
+  `;
   const imageCredentials = useFragment(
     IMAGE_CREDENTIALS_FRAGMENT,
     listImageCredentialsRef,
