@@ -18,39 +18,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image do
+defmodule Edgehog.Containers.Container.EnvJsonEncoding do
   @moduledoc false
-  use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+  use Ash.Resource.Calculation
 
-  alias Edgehog.Containers.ImageCredentials
+  alias AshGraphql.Types.JSONString
 
-  actions do
-    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
-  end
-
-  attributes do
-    uuid_primary_key :id
-
-    attribute :reference, :string do
-      allow_nil? false
-    end
-
-    timestamps()
-  end
-
-  relationships do
-    belongs_to :credentials, ImageCredentials do
-      source_attribute :image_credentials_id
-      attribute_type :uuid
-    end
-  end
-
-  identities do
-    identity :reference, [:reference]
-  end
-
-  postgres do
-    table "images"
+  @impl true
+  def calculate(records, _opts, _context) do
+    Enum.map(records, fn record ->
+      env = Map.get(record, :env)
+      JSONString.encode(env)
+    end)
   end
 end

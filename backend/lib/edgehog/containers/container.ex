@@ -18,39 +18,57 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image do
+defmodule Edgehog.Containers.Container do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
-  alias Edgehog.Containers.ImageCredentials
+  alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Container.EnvJsonEncoding
 
   actions do
-    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
+    defaults [:read, :destroy, :create, :update]
   end
+
+  calculations do
+    calculate :env_json, :string, EnvJsonEncoding
+  end
+  
 
   attributes do
     uuid_primary_key :id
 
-    attribute :reference, :string do
-      allow_nil? false
+    attribute :restart_policy, :restart_policy do
+      public? true
+      default nil
+    end
+
+    attribute :hostname, :string do
+      public? true
+      default ""
+    end
+
+    attribute :env, :map do
+      public? true
+      default %{}
+    end
+
+    attribute :privileged, :boolean do
+      public? true
+      default false
     end
 
     timestamps()
   end
 
   relationships do
-    belongs_to :credentials, ImageCredentials do
-      source_attribute :image_credentials_id
+    belongs_to :image, Image do
+      source_attribute :image_id
       attribute_type :uuid
     end
   end
 
-  identities do
-    identity :reference, [:reference]
-  end
-
   postgres do
-    table "images"
+    table "containers"
   end
 end
