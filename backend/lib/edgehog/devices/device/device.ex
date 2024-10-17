@@ -27,6 +27,8 @@ defmodule Edgehog.Devices.Device do
     ]
 
   alias Edgehog.Changes.NormalizeTagName
+  alias Edgehog.Containers.Image
+  alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
@@ -223,6 +225,24 @@ defmodule Edgehog.Devices.Device do
       description "Sets led behavior."
       argument :behavior, LedBehavior, description: "The led behavior.", allow_nil?: false
       manual ManualActions.SetLedBehavior
+    end
+
+    update :send_create_image do
+      description "Sends a create image request to the device."
+
+      argument :image, :struct do
+        constraints instance_of: Image
+        description "The image the device will pull."
+        allow_nil? false
+      end
+
+      argument :credentials, :struct do
+        constraints instance_of: ImageCredentials
+        description "The credentials to use."
+        allow_nil? true
+      end
+
+      manual ManualActions.SendCreateImageRequest
     end
   end
 
