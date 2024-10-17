@@ -533,6 +533,34 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert first_image["pulled"]
       refute second_image["pulled"]
     end
+
+    test "can read available deployments on the device", %{
+      tenant: tenant,
+      id: id,
+      device_id: device_id
+    } do
+      expect(Edgehog.Astarte.Device.AvailableDeploymentsMock, :get, fn _client, ^device_id ->
+        {:ok, available_deployments_fixture()}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableDeployments {
+            id
+            status
+          }
+        }
+      }
+      """
+
+      assert %{"availableDeployments" => [deployment]} =
+               [document: document, tenant: tenant, id: id]
+               |> device_query()
+               |> extract_result!()
+
+      assert deployment["status"] == "Idle"
+    end
   end
 
   describe "capabilities" do

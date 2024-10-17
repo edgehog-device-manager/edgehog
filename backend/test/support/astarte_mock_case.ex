@@ -128,6 +128,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Device.AvailableImages
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableDeploymentsMock,
+      Edgehog.Mocks.Astarte.Device.AvailableDeployments
+    )
+
     :ok
   end
 end

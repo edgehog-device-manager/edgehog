@@ -56,6 +56,11 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                       :astarte_available_images_module,
                       Edgehog.Astarte.Device.AvailableImages
                     )
+  @available_deployments Application.compile_env(
+                           :edgehog,
+                           :astarte_available_deployments_module,
+                           Edgehog.Astarte.Device.AvailableDeployments
+                         )
 
   @base_image Application.compile_env(
                 :edgehog,
@@ -106,6 +111,7 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                     )
 
   defp value_id_to_fetch_fun(:available_containers), do: &@available_containers.get/2
+  defp value_id_to_fetch_fun(:available_deployments), do: &@available_deployments.get/2
   defp value_id_to_fetch_fun(:available_images), do: &@available_images.get/2
   defp value_id_to_fetch_fun(:base_image_info), do: &@base_image.get/2
   defp value_id_to_fetch_fun(:hardware_info), do: &@hardware_info.get/2

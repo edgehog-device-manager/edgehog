@@ -103,3 +103,7 @@ Mox.defmock(Edgehog.Tenants.ReconcilerMock, for: Edgehog.Tenants.Reconciler.Beha
 Mox.defmock(Edgehog.Astarte.Device.AvailableImagesMock,
   for: Edgehog.Astarte.Device.AvailableImages.Behaviour
 )
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableDeploymentsMock,
+  for: Edgehog.Astarte.Device.AvailableDeployments.Behaviour
+)

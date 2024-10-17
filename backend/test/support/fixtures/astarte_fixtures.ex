@@ -164,6 +164,18 @@ defmodule Edgehog.AstarteFixtures do
     ]
   end
 
+  def available_deployments_fixture(opts \\ []) do
+    [
+      struct!(
+        %Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus{
+          id: "1",
+          status: "Idle"
+        },
+        opts
+      )
+    ]
+  end
+
   def base_image_info_fixture(opts \\ []) do
     struct!(
       %Edgehog.Astarte.Device.BaseImage{
