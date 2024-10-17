@@ -47,6 +47,11 @@ defmodule Edgehog.Containers.Release do
 
   relationships do
     belongs_to :application, Edgehog.Containers.Application, attribute_type: :uuid
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Deployment
+      join_relationship :deployments
+    end
   end
 
   identities do
