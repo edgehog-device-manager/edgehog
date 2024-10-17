@@ -302,6 +302,11 @@ defmodule Edgehog.Devices.Device do
       description "The existing OTA operations for this device"
       writable? false
     end
+
+    many_to_many :releases, Edgehog.Containers.Release do
+      through Edgehog.Containers.Deployment
+      join_relationship :deployments
+    end
   end
 
   calculations do

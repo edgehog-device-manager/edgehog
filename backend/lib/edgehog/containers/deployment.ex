@@ -18,35 +18,34 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Application do
+defmodule Edgehog.Containers.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
   actions do
-    defaults [:read, :destroy, create: [:name, :description], update: [:name, :description]]
+    defaults [:read, :destroy, create: [:device_id, :release_id]]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :name, :string do
-      allow_nil? false
-    end
-
-    attribute :description, :string
     timestamps()
   end
 
   relationships do
-    has_many :releases, Edgehog.Containers.Release
+    belongs_to :device, Edgehog.Devices.Device
+
+    belongs_to :release, Edgehog.Containers.Release do
+      attribute_type :uuid
+    end
   end
 
   identities do
-    identity :name, [:name]
+    identity :release_instance, [:device_id, :release_id]
   end
 
   postgres do
-    table "applications"
+    table "deployments"
   end
 end
