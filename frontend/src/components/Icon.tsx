@@ -18,27 +18,28 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import {
   faAngleDown,
   faAngleUp,
   faArrowDown,
   faArrowUp,
   faBug,
+  faCheck,
   faCircle,
+  faCloud,
   faCompactDisc,
+  faDatabase,
   faPlus,
+  faRocket,
   faSearch,
   faSwatchbook,
   faTabletAlt,
+  faTimes,
   faTrash,
   faUser,
-  faCheck,
-  faTimes,
-  faDatabase,
-  faCloud,
 } from "@fortawesome/free-solid-svg-icons";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const icons = {
   arrowDown: faArrowDown,
@@ -59,6 +60,7 @@ const icons = {
   check: faCheck,
   close: faTimes,
   otaUpdates: faCloud,
+  applications: faRocket,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;
