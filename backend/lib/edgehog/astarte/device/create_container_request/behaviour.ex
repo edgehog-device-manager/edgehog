@@ -18,39 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image do
+defmodule Edgehog.Astarte.Device.CreateContainerRequest.Behaviour do
   @moduledoc false
-  use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.CreateContainerRequest.RequestData
 
-  alias Edgehog.Containers.ImageCredentials
-
-  actions do
-    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
-  end
-
-  attributes do
-    uuid_primary_key :id
-
-    attribute :reference, :string do
-      allow_nil? false
-    end
-
-    timestamps()
-  end
-
-  relationships do
-    belongs_to :credentials, ImageCredentials do
-      source_attribute :image_credentials_id
-      attribute_type :uuid
-    end
-  end
-
-  identities do
-    identity :reference, [:reference]
-  end
-
-  postgres do
-    table "images"
-  end
+  @callback send_create_container_request(
+              client :: AppEngine.t(),
+              device_id :: String.t(),
+              request_data :: RequestData.t()
+            ) :: :ok | {:error, term()}
 end

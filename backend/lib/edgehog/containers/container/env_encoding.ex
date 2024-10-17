@@ -18,39 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image do
+defmodule Edgehog.Containers.Container.EnvEncoding do
   @moduledoc false
-  use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+  use Ash.Resource.Calculation
 
-  alias Edgehog.Containers.ImageCredentials
-
-  actions do
-    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
+  @impl Ash.Resource.Calculation
+  def calculate(records, _opts, _context) do
+    Enum.map(records, &encode_env(&1.env))
   end
 
-  attributes do
-    uuid_primary_key :id
-
-    attribute :reference, :string do
-      allow_nil? false
-    end
-
-    timestamps()
-  end
-
-  relationships do
-    belongs_to :credentials, ImageCredentials do
-      source_attribute :image_credentials_id
-      attribute_type :uuid
-    end
-  end
-
-  identities do
-    identity :reference, [:reference]
-  end
-
-  postgres do
-    table "images"
+  defp encode_env(%{} = env) do
+    Enum.map(env, fn {key, value} ->
+      String.upcase(key) <> "=" <> value
+    end)
   end
 end
