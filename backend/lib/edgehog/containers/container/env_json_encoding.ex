@@ -24,11 +24,8 @@ defmodule Edgehog.Containers.Container.EnvJsonEncoding do
 
   alias AshGraphql.Types.JSONString
 
-  @impl true
+  @impl Ash.Resource.Calculation
   def calculate(records, _opts, _context) do
-    Enum.map(records, fn record ->
-      env = Map.get(record, :env)
-      JSONString.encode(env)
-    end)
+    Enum.map(records, &JSONString.encode(&1.env))
   end
 end

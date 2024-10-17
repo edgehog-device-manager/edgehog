@@ -23,38 +23,33 @@ defmodule Edgehog.Containers.Container do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
-  alias Edgehog.Containers.Image
   alias Edgehog.Containers.Container.EnvJsonEncoding
+  alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Types.RestartPolicy
 
   actions do
-    defaults [:read, :destroy, :create, :update]
+    defaults [
+      :read,
+      :destroy,
+      create: [:restart_policy, :hostname, :env, :privileged],
+      update: [:restart_policy, :hostname, :env, :privileged]
+    ]
   end
-
-  calculations do
-    calculate :env_json, :string, EnvJsonEncoding
-  end
-  
 
   attributes do
     uuid_primary_key :id
 
-    attribute :restart_policy, :restart_policy do
-      public? true
-      default nil
-    end
+    attribute :restart_policy, RestartPolicy
 
     attribute :hostname, :string do
-      public? true
       default ""
     end
 
     attribute :env, :map do
-      public? true
       default %{}
     end
 
     attribute :privileged, :boolean do
-      public? true
       default false
     end
 
@@ -66,6 +61,10 @@ defmodule Edgehog.Containers.Container do
       source_attribute :image_id
       attribute_type :uuid
     end
+  end
+
+  calculations do
+    calculate :env_json, :string, EnvJsonEncoding
   end
 
   postgres do

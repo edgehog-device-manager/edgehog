@@ -58,10 +58,7 @@ resource_section_order = [
   :postgres
 ]
 
-config :ash, :custom_types,
-  id: Edgehog.Types.Id,
-  restart_policy: Edgehog.Containers.Types.RestartPolicy
-
+config :ash, :custom_types, id: Edgehog.Types.Id
 config :ash, :default_belongs_to_type, :integer
 
 # Configures the mailer
