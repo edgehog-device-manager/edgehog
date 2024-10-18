@@ -18,47 +18,34 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Release do
+defmodule Edgehog.Containers.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
-  alias Edgehog.Validations
-
   actions do
-    defaults [:read, :destroy, create: [:application_id, :version]]
-  end
-
-  validations do
-    validate {Validations.Version, attribute: :version} do
-      where changing(:version)
-    end
+    defaults [:read, :destroy, create: [:device_id, :release_id]]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :version, :string do
-      allow_nil? false
-    end
-
     timestamps()
   end
 
   relationships do
-    belongs_to :application, Edgehog.Containers.Application, attribute_type: :uuid
+    belongs_to :device, Edgehog.Devices.Device
 
-    many_to_many :devices, Edgehog.Devices.Device do
-      through Edgehog.Containers.Deployment
-      join_relationship :deployments
+    belongs_to :release, Edgehog.Containers.Release do
+      attribute_type :uuid
     end
   end
 
   identities do
-    identity :application_version, [:application_id, :version]
+    identity :release_instance, [:device_id, :release_id]
   end
 
   postgres do
-    table "application_releases"
+    table "application_deployments"
   end
 end
