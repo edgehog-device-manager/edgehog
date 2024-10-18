@@ -27,6 +27,7 @@ defmodule Edgehog.Devices.Device do
     ]
 
   alias Edgehog.Changes.NormalizeTagName
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Devices.Device.BatterySlot
@@ -193,6 +194,18 @@ defmodule Edgehog.Devices.Device do
                value_is_key: :name,
                use_identities: [:name]
              )
+    end
+
+    update :send_create_deployment_request do
+      description "Send a create deployment request to the device."
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The Deployment the device has to instanciate."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateDeployment
     end
 
     update :remove_tags do
