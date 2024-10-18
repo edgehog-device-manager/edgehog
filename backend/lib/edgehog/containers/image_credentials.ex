@@ -45,14 +45,14 @@ defmodule Edgehog.Containers.ImageCredentials do
 
     create :create do
       primary? true
-      accept [:name, :username, :password]
+      accept [:label, :username, :password]
     end
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :name, :string do
+    attribute :label, :string do
       allow_nil? false
       public? true
     end
@@ -80,7 +80,7 @@ defmodule Edgehog.Containers.ImageCredentials do
   end
 
   identities do
-    identity :name, [:name]
+    identity :label, [:label]
   end
 
   postgres do
