@@ -42,7 +42,10 @@ defmodule Edgehog.Containers do
     end
 
     mutations do
-      create ImageCredentials, :create_image_credentials, :create
+      create ImageCredentials, :create_image_credentials, :create do
+        description "Create image credentials."
+      end
+
       destroy ImageCredentials, :delete_image_credentials, :destroy
     end
   end
