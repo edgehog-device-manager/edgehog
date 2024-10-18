@@ -49,6 +49,7 @@ defmodule Edgehog.Containers do
 
   resources do
     resource Edgehog.Containers.Application
+    resource Edgehog.Containers.Container
     resource Edgehog.Containers.Image
     resource Edgehog.Containers.ImageCredentials
   end

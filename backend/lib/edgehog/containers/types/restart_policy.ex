@@ -18,39 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image do
+defmodule Edgehog.Containers.Types.RestartPolicy do
   @moduledoc false
-  use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
-
-  alias Edgehog.Containers.ImageCredentials
-
-  actions do
-    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
-  end
-
-  attributes do
-    uuid_primary_key :id
-
-    attribute :reference, :string do
-      allow_nil? false
-    end
-
-    timestamps()
-  end
-
-  relationships do
-    belongs_to :credentials, ImageCredentials do
-      source_attribute :image_credentials_id
-      attribute_type :uuid
-    end
-  end
-
-  identities do
-    identity :reference, [:reference]
-  end
-
-  postgres do
-    table "images"
-  end
+  use Ash.Type.Enum, values: [:no, :always, :unless_stopped, :on_failure]
 end
