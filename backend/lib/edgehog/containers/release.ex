@@ -52,6 +52,8 @@ defmodule Edgehog.Containers.Release do
       through Edgehog.Containers.Deployment
       join_relationship :deployments
     end
+
+    has_many :containers, Edgehog.Containers.Container
   end
 
   identities do

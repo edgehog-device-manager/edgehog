@@ -61,6 +61,11 @@ defmodule Edgehog.Containers.Container do
       source_attribute :image_id
       attribute_type :uuid
     end
+
+    belongs_to :release, Edgehog.Containers.Release do
+      source_attribute :release_id
+      attribute_type :uuid
+    end
   end
 
   calculations do
