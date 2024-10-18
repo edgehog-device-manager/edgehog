@@ -23,7 +23,7 @@ defmodule Edgehog.Containers.Container do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
-  alias Edgehog.Containers.Container.EnvJsonEncoding
+  alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Types.RestartPolicy
 
@@ -42,7 +42,9 @@ defmodule Edgehog.Containers.Container do
     attribute :restart_policy, RestartPolicy
 
     attribute :hostname, :string do
+      constraints allow_empty?: true
       default ""
+      allow_nil? false
     end
 
     attribute :env, :map do
@@ -64,7 +66,7 @@ defmodule Edgehog.Containers.Container do
   end
 
   calculations do
-    calculate :env_json, :string, EnvJsonEncoding
+    calculate :env_encoding, :vector, EnvEncoding
   end
 
   postgres do
