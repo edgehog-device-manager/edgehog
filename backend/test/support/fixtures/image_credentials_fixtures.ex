@@ -27,7 +27,7 @@ defmodule Edgehog.ImageCredentialsFixtures do
   @doc """
   Generate a unique image_credentials name.
   """
-  def unique_image_credentials_name, do: "some-name#{System.unique_integer([:positive])}"
+  def unique_image_credentials_label, do: "some-label#{System.unique_integer([:positive])}"
 
   @doc """
   Generate a unique image_credentials username.
@@ -47,7 +47,7 @@ defmodule Edgehog.ImageCredentialsFixtures do
 
     params =
       Enum.into(opts, %{
-        name: unique_image_credentials_name(),
+        label: unique_image_credentials_label(),
         username: unique_image_credentials_username(),
         password: unique_image_credentials_password()
       })

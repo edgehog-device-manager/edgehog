@@ -26,28 +26,28 @@ defmodule EdgehogWeb.Schema.Mutation.CreateImageCredentialsTest do
 
   describe "createImageCredentials mutation" do
     test "create image credentials with valid data", %{tenant: tenant} do
-      name = "valid_name"
+      label = "valid_label"
       username = "valid_username"
       password = "valid_password"
 
       image_credentials =
-        [tenant: tenant, name: name, username: username, password: password]
+        [tenant: tenant, label: label, username: username, password: password]
         |> create_image_credentials_mutation()
         |> extract_result!()
 
-      assert image_credentials["name"] == name
+      assert image_credentials["label"] == label
       assert image_credentials["username"] == username
     end
 
-    test "fails with invalid name", %{tenant: tenant} do
+    test "fails with invalid label", %{tenant: tenant} do
       fixture = image_credentials_fixture(tenant: tenant)
 
       image_credentials_error =
-        [tenant: tenant, name: fixture.name]
+        [tenant: tenant, label: fixture.label]
         |> create_image_credentials_mutation()
         |> extract_error!()
 
-      assert %{fields: [:name]} = image_credentials_error
+      assert %{fields: [:label]} = image_credentials_error
     end
   end
 
@@ -56,7 +56,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateImageCredentialsTest do
     mutation CreateImageCredentials($input: CreateImageCredentialsInput!) {
       createImageCredentials(input: $input) {
         result {
-          name
+          label
           username
         }
       }
@@ -66,7 +66,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateImageCredentialsTest do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
     input = %{
-      "name" => opts[:name] || unique_image_credentials_name(),
+      "label" => opts[:label] || unique_image_credentials_label(),
       "username" => opts[:username] || unique_image_credentials_username(),
       "password" => opts[:password] || unique_image_credentials_password()
     }
