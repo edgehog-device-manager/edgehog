@@ -43,7 +43,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteImageCredentialsTest do
         |> delete_image_credentials_mutation()
         |> extract_result!()
 
-      assert delete_image_credentials["name"] == image_credentials.name
+      assert delete_image_credentials["label"] == image_credentials.label
       assert delete_image_credentials["username"] == image_credentials.username
     end
 
@@ -64,7 +64,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteImageCredentialsTest do
     mutation DeleteImageCredentials($id: ID!) {
       deleteImageCredentials(id: $id) {
         result {
-          name
+          label
           username
         }
       }

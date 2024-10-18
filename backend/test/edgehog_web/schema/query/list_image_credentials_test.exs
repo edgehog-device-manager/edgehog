@@ -39,10 +39,10 @@ defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
       assert %{"listImageCredentials" => image_credentials} = data
       assert length(image_credentials) == 3
 
-      names = Enum.map(image_credentials, & &1["name"])
+      labels = Enum.map(image_credentials, & &1["label"])
 
       for fix <- [fixture1, fixture2, fixture3] do
-        assert fix.name in names
+        assert fix.label in labels
       end
     end
   end
@@ -52,7 +52,7 @@ defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
       """
       query {
         listImageCredentials {
-          name
+          label
           username
         }
       }
