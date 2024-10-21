@@ -59,6 +59,11 @@ defmodule Edgehog.AstarteMockCase do
     )
 
     Mox.stub_with(
+      Edgehog.Astarte.Device.DeploymentCommandMock,
+      Edgehog.Astarte.Device.DeploymentCommand
+    )
+
+    Mox.stub_with(
       Edgehog.Astarte.Device.BaseImageMock,
       Edgehog.Mocks.Astarte.Device.BaseImage
     )

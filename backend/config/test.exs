@@ -66,6 +66,7 @@ config :edgehog,
        :astarte_cellular_connection_module,
        Edgehog.Astarte.Device.CellularConnectionMock
 
+config :edgehog, :astarte_deployment_command_module, Edgehog.Astarte.Device.DeploymentCommandMock
 config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
 config :edgehog, :astarte_forwarder_session_module, Edgehog.Astarte.Device.ForwarderSessionMock
 config :edgehog, :astarte_geolocation_module, Edgehog.Astarte.Device.GeolocationMock

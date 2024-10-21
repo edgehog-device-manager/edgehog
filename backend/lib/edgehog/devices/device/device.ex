@@ -29,6 +29,7 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Changes.NormalizeTagName
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.ImageCredentials
+  alias Edgehog.Containers.Release
   alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
@@ -254,6 +255,19 @@ defmodule Edgehog.Devices.Device do
         allow_nil?: false
 
       manual ManualActions.SendCreateContainer
+    end
+
+    update :send_release_command do
+      description "Sends a command for the given application release."
+
+      argument :release, :struct do
+        constraints instance_of: Release
+        description "The release target of the command."
+      end
+
+      argument :command, Edgehog.Devices.Device.DeploymentCommand
+
+      manual Edgehog.Devices.Device.ManualActions.SendApplicationCommand
     end
   end
 
