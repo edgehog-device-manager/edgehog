@@ -57,5 +57,6 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Image
     resource Edgehog.Containers.ImageCredentials
     resource Edgehog.Containers.Release
+    resource Edgehog.Containers.ReleaseContainers
   end
 end
