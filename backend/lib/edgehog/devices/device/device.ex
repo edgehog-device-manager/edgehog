@@ -300,6 +300,32 @@ defmodule Edgehog.Devices.Device do
 
       manual Edgehog.Devices.Device.ManualActions.SendApplicationCommand
     end
+
+    update :update_application do
+      description "Updates an application to a newer release."
+
+      argument :from, :struct do
+        constraints instance_of: Release
+        allow_nil? false
+
+        description """
+        The release to be upgraded. Should be currently installed.
+        This argument is needed because there might be multiple versions of a single application installed on the device.
+        """
+      end
+
+      argument :to, :struct do
+        constraints instance_of: Release
+        allow_nil? false
+        description "The new release of the application"
+      end
+
+      validate {Edgehog.Containers.Validations.SameApplication, [release_a: :from, release_b: :to]}
+
+      validate {Edgehog.Containers.Validations.IsUpgrade, [from: :from, to: :to]}
+
+      manual Edgehog.Devices.Device.ManualActions.UpdateApplication
+    end
   end
 
   attributes do
