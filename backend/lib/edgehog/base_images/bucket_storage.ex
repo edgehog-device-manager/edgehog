@@ -42,8 +42,20 @@ defmodule Edgehog.BaseImages.BucketStorage do
   end
 
   @impl Storage
-  def delete(%BaseImage{} = scope) do
-    %BaseImage{url: url} = scope
+  def delete(%BaseImage{} = base_image) do
+    %BaseImage{
+      url: url,
+      tenant_id: tenant_id,
+      version: base_image_version,
+      base_image_collection_id: base_image_collection_id
+    } = base_image
+
+    scope = %{
+      tenant_id: tenant_id,
+      base_image_collection_id: base_image_collection_id,
+      base_image_version: base_image_version
+    }
+
     Uploaders.BaseImage.delete({url, scope})
   end
 end
