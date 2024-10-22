@@ -18,14 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Container.EnvJsonEncoding do
+defmodule Edgehog.Astarte.Device.CreateContainerRequest.Behaviour do
   @moduledoc false
-  use Ash.Resource.Calculation
+  alias Astarte.Client.AppEngine
+  alias Edgehog.Astarte.Device.CreateContainerRequest.RequestData
 
-  alias AshGraphql.Types.JSONString
-
-  @impl Ash.Resource.Calculation
-  def calculate(records, _opts, _context) do
-    Enum.map(records, &JSONString.encode(&1.env))
-  end
+  @callback send_create_container_request(
+              client :: AppEngine.t(),
+              device_id :: String.t(),
+              request_data :: RequestData.t()
+            ) :: :ok | {:error, term()}
 end

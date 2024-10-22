@@ -244,6 +244,17 @@ defmodule Edgehog.Devices.Device do
 
       manual ManualActions.SendCreateImageRequest
     end
+
+    update :send_create_container_request do
+      description "Sends a create container request to the device."
+
+      argument :container, :struct,
+        constraints: [instance_of: Edgehog.Containers.Container],
+        description: "The Container the device has to initiate.",
+        allow_nil?: false
+
+      manual ManualActions.SendCreateContainer
+    end
   end
 
   attributes do
