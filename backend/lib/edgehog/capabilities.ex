@@ -66,6 +66,73 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
+    container_management: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.AvailableContainers",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.AvailableDeployments",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.AvailableImages",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.AvailableNetworks",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.AvailableVolumes",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.CreateContainerRequest",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.CreateDeploymentRequest",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.CreateImageRequest",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.CreateNetworkRequest",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.CreateVolumeRequest",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.DeploymentCommand",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.DeploymentEvent",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.DeploymentUpdate",
+        major: 0,
+        minor: 1
+      }
+    ],
     hardware_info: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.HardwareInfo",

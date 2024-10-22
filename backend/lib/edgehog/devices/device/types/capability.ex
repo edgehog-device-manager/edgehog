@@ -26,6 +26,7 @@ defmodule Edgehog.Devices.Device.Types.Capability do
       battery_status: "The device provides information about its battery status.",
       cellular_connection: "The device provides information about its cellular connection.",
       commands: "The device supports commands, for example the rebooting command.",
+      container_management: "The device supports running applications using containers.",
       geolocation: "The device can be geolocated.",
       hardware_info: "The device provides information about its hardware.",
       led_behaviors: "The device can be asked to blink its LED in a specific pattern.",
