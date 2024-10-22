@@ -729,7 +729,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   end
 
   defp wait_for_sync!(ref) do
-    assert_receive {:sync, ^ref}
+    assert_receive {:sync, ^ref}, 1000
   end
 
   # Waits for the Executor to reach a specific state in the state machine
