@@ -83,7 +83,18 @@ defmodule Edgehog.Devices do
   end
 
   resources do
-    resource Device
+    resource Device do
+      define :fetch_device, action: :read, get_by: [:id]
+
+      define :send_create_image_request,
+        action: :send_create_image,
+        args: [:image, {:optional, :credentials}]
+
+      define :send_create_container_request,
+        action: :send_create_container_request,
+        args: [:container]
+    end
+
     resource HardwareType
     resource Edgehog.Devices.HardwareTypePartNumber
     resource SystemModel
