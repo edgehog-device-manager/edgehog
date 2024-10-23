@@ -24,12 +24,33 @@ defmodule Edgehog.Containers.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Deployment.Changes
+  alias Edgehog.Containers.Release
+
   graphql do
     type :deployment
   end
 
   actions do
     defaults [:read, :destroy, create: [:device_id, :release_id]]
+
+    create :deploy do
+      description """
+      Starts the deployment of a release on a device.
+      It starts an Executor, handling the communication with the device.
+      """
+
+      accept [:release_id, :device_id]
+
+      change Changes.CreateDeploymentOnDevice
+    end
+
+    action :send_deploy_request do
+      argument :deployment, :struct do
+        constraints instance_of: __MODULE__
+        allow_nil? false
+      end
+    end
   end
 
   attributes do
@@ -43,7 +64,7 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
-    belongs_to :release, Edgehog.Containers.Release do
+    belongs_to :release, Release do
       attribute_type :uuid
       public? true
     end

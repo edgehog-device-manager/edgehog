@@ -22,8 +22,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
   @moduledoc false
   use Ash.Resource.ManualUpdate
 
-  require Ash.Query
-
   @send_create_image_request_behaviour Application.compile_env(
                                          :edgehog,
                                          :astarte_create_image_request_module,

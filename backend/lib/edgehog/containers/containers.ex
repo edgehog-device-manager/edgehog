@@ -52,11 +52,26 @@ defmodule Edgehog.Containers do
 
   resources do
     resource Edgehog.Containers.Application
-    resource Edgehog.Containers.Container
-    resource Edgehog.Containers.Deployment
-    resource Edgehog.Containers.Image
+
+    resource Edgehog.Containers.Container do
+      define :fetch_container, action: :read, get_by: [:id]
+    end
+
+    resource Edgehog.Containers.Deployment do
+      define :deploy, action: :deploy, args: [:release_id, :device_id]
+      define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
+    end
+
+    resource Edgehog.Containers.Image do
+      define :fetch_image, action: :read, get_by: [:id]
+    end
+
     resource Edgehog.Containers.ImageCredentials
-    resource Edgehog.Containers.Release
+
+    resource Edgehog.Containers.Release do
+      define :fetch_release, action: :read, get_by: [:id]
+    end
+
     resource Edgehog.Containers.ReleaseContainers
   end
 end
