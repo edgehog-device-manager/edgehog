@@ -23,8 +23,31 @@ defmodule Edgehog.Containers.Deployment do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
+  alias Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice
+  alias Edgehog.Containers.Release
+  alias Edgehog.Devices.Device
+
   actions do
     defaults [:read, :destroy, create: [:device_id, :release_id]]
+
+    create :deploy do
+      description """
+      Starts the deployment of a release on a device.
+      It starts an Executor, handling the communication with the device.
+      """
+
+      argument :release, :struct do
+        constraints instance_of: Release
+        allow_nil? false
+      end
+
+      argument :device, :struct do
+        constraints instance_of: Device
+        allow_nil? false
+      end
+
+      change CreateDeploymentOnDevice
+    end
   end
 
   attributes do
@@ -34,9 +57,9 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   relationships do
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device, Device
 
-    belongs_to :release, Edgehog.Containers.Release do
+    belongs_to :release, Release do
       attribute_type :uuid
     end
   end
