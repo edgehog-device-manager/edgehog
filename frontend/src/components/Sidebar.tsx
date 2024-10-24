@@ -19,12 +19,12 @@
 */
 
 import React, { useCallback, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
 import Accordion from "react-bootstrap/Accordion";
-import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
 import NavLink from "react-bootstrap/NavLink";
+import { FormattedMessage } from "react-intl";
+import { useLocation } from "react-router-dom";
 
 import Icon from "components/Icon";
 import { Link, matchPaths, ParametricRoute, Route } from "Navigation";
@@ -203,6 +203,30 @@ const Sidebar = () => (
           Route.hardwareTypesNew,
           Route.hardwareTypesEdit,
         ]}
+      />
+    </SidebarItemGroup>
+    <SidebarItemGroup
+      label={
+        <FormattedMessage
+          id="components.Sidebar.applicationsLabel"
+          defaultMessage="Applications"
+        />
+      }
+      icon="applications"
+    >
+      <SidebarItem
+        label={
+          <FormattedMessage id="components.Sidebar.applications.credentialsLabel" />
+        }
+        route={Route.imageCredentials}
+        activeRoutes={[Route.imageCredentials, Route.imageCredentialsNew]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage id="components.Sidebar.applications.managementLabel" />
+        }
+        route={Route.applicationManagement}
+        activeRoutes={[Route.applicationManagement, Route.updateChannelsNew]}
       />
     </SidebarItemGroup>
   </Navbar>

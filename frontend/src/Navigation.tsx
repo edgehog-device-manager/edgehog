@@ -19,14 +19,14 @@
 */
 
 import { useCallback } from "react";
+import type { ParamParseKey } from "react-router";
 import {
-  generatePath as routerGeneratePath,
   matchPath,
+  generatePath as routerGeneratePath,
   useNavigate as useRouterNavigate,
 } from "react-router";
-import type { ParamParseKey } from "react-router";
-import { Link as RouterLink } from "react-router-dom";
 import type { LinkProps as RouterLinkProps } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 
 enum Route {
   devices = "/devices",
@@ -51,6 +51,10 @@ enum Route {
   updateCampaigns = "/update-campaigns",
   updateCampaignsNew = "/update-campaigns/new",
   updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
+  imageCredentials = "/image-credentials",
+  imageCredentialsEdit = "/image-credentials/:imageCredentialId/edit",
+  imageCredentialsNew = "/image-credentials/new",
+  applicationManagement = "/application-management",
   login = "/login",
   logout = "/logout",
 }
@@ -92,6 +96,8 @@ const generatePath = (route: ParametricRoute): string => {
       return routerGeneratePath(route.route, route.params);
     case Route.updateCampaignsEdit:
       return routerGeneratePath(route.route, route.params);
+    case Route.imageCredentialsEdit:
+      return routerGeneratePath(route.route, route.params);
 
     case Route.devices:
     case Route.deviceGroups:
@@ -106,9 +112,14 @@ const generatePath = (route: ParametricRoute): string => {
     case Route.updateChannelsNew:
     case Route.updateCampaigns:
     case Route.updateCampaignsNew:
+    case Route.imageCredentials:
+    case Route.imageCredentialsNew:
+    case Route.applicationManagement:
     case Route.login:
     case Route.logout:
       return route.route;
+    default:
+      return "";
   }
 };
 
@@ -134,5 +145,5 @@ const useNavigate = () => {
   return navigate;
 };
 
-export { Link, Route, matchPaths, useNavigate };
+export { Link, matchPaths, Route, useNavigate };
 export type { LinkProps, ParametricRoute };
