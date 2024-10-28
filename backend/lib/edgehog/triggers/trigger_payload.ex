@@ -25,6 +25,16 @@ defmodule Edgehog.Triggers.TriggerPayload do
 
   alias Edgehog.Triggers.Event
 
+  actions do
+    defaults [:read, :update, :destroy]
+
+    create :create do
+      primary? true
+      accept [:device_id, :timestamp, :event]
+      skip_unknown_inputs :*
+    end
+  end
+
   attributes do
     # TODO: add Device ID validation
     attribute :device_id, :string do
