@@ -26,6 +26,8 @@ defmodule Edgehog.Containers.ImageCredentials do
       AshGraphql.Resource
     ]
 
+  alias Edgehog.Containers.ImageCredentials.Base64JsonEncoding
+
   resource do
     description """
     Contains the credentials used to pull an image from a device.
