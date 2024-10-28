@@ -29,7 +29,6 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Changes.NormalizeTagName
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
-  alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Containers.Release
   alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
@@ -248,12 +247,6 @@ defmodule Edgehog.Devices.Device do
         constraints instance_of: Image
         description "The image the device will pull."
         allow_nil? false
-      end
-
-      argument :credentials, :struct do
-        constraints instance_of: ImageCredentials
-        description "The credentials to use."
-        allow_nil? true
       end
 
       manual ManualActions.SendCreateImageRequest
