@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   use EdgehogWeb.ConnCase, async: true
 
   import Edgehog.AstarteFixtures
+  import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
@@ -417,8 +418,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         tenant: tenant
       } = context
 
-      # TODO: deployment fixture
-      deployment = %{id: Ash.UUID.generate()}
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id)
 
       deployment_event = %{
         device_id: device.device_id,
@@ -441,9 +441,12 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> put_req_header("astarte-realm", realm.name)
         |> post(path, deployment_event)
 
+      # Deployment must be reloaded from the db
+      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+
       assert response(conn, 200)
 
-      # TODO: assert state has changed
+      assert deployment.status == :started
     end
   end
 
