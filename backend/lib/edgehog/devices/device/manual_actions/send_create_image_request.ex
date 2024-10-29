@@ -22,6 +22,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
   @moduledoc false
   use Ash.Resource.ManualUpdate
 
+  alias Edgehog.Astarte.Device.CreateImageRequest.RequestData
+
   @send_create_image_request_behaviour Application.compile_env(
                                          :edgehog,
                                          :astarte_create_image_request_module,
@@ -37,17 +39,20 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
          {:ok, device} <- Ash.load(device, :appengine_client) do
       credentials = image.credentials.base64_json
 
-      data = %{
-        image_id: image.id,
+      data = %RequestData{
+        id: image.id,
         reference: image.reference,
-        credentials: credentials
+        registryAuth: credentials
       }
 
-      @send_create_image_request_behaviour.send_create_image_request(
-        device.appengine_client,
-        device.device_id,
-        data
-      )
+      with :ok <-
+             @send_create_image_request_behaviour.send_create_image_request(
+               device.appengine_client,
+               device.device_id,
+               data
+             ) do
+        {:ok, device}
+      end
     end
   end
 end

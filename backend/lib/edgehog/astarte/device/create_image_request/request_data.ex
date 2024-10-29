@@ -22,14 +22,14 @@ defmodule Edgehog.Astarte.Device.CreateImageRequest.RequestData do
   @moduledoc false
 
   defstruct [
-    :image_id,
+    :id,
     :reference,
-    :registry_auth
+    :registryAuth
   ]
 
   @type t() :: %__MODULE__{
-          image_id: String.t(),
+          id: String.t(),
           reference: String.t(),
-          registry_auth: String.t()
+          registryAuth: String.t()
         }
 end

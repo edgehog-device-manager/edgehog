@@ -28,6 +28,8 @@ defmodule Edgehog.Astarte.Device.CreateImageRequest do
 
   @impl Edgehog.Astarte.Device.CreateImageRequest.Behaviour
   def send_create_image_request(%AppEngine{} = client, device_id, request_data) do
+    request_data = Map.from_struct(request_data)
+
     AppEngine.Devices.send_datastream(
       client,
       device_id,
