@@ -21,7 +21,12 @@
 defmodule Edgehog.Containers.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
+
+  graphql do
+    type :deployment
+  end
 
   actions do
     defaults [:read, :destroy, create: [:device_id, :release_id]]
@@ -34,10 +39,13 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   relationships do
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device, Edgehog.Devices.Device do
+      public? true
+    end
 
     belongs_to :release, Edgehog.Containers.Release do
       attribute_type :uuid
+      public? true
     end
   end
 
