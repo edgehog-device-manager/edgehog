@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Deployment do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Deployment.Changes
+  alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
 
   graphql do
@@ -50,6 +51,8 @@ defmodule Edgehog.Containers.Deployment do
         constraints instance_of: __MODULE__
         allow_nil? false
       end
+
+      run ManualActions.SendDeployRequest
     end
   end
 
