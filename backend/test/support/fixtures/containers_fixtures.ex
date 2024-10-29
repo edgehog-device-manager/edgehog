@@ -28,6 +28,16 @@ defmodule Edgehog.ContainersFixtures do
   alias Edgehog.Containers.Release
 
   @doc """
+  Generate a unique application name.
+  """
+  def unique_application_name, do: "application#{System.unique_integer()}"
+
+  @doc """
+  Generate a unique application release version.
+  """
+  def unique_release_version, do: "0.0.#{System.unique_integer([:positive])}"
+
+  @doc """
   Generate a unique image_credentials name.
   """
   def unique_image_credentials_label, do: "some-label#{System.unique_integer([:positive])}"
@@ -65,6 +75,38 @@ defmodule Edgehog.ContainersFixtures do
   end
 
   @doc """
+  Generate an %Application{}.
+  """
+  def application_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        name: unique_application_name()
+      })
+
+    Ash.create!(Application, params, tenant: tenant)
+  end
+
+  @doc """
+  Generate a %Release{}.
+  """
+  def release_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {application_id, opts} =
+      Keyword.pop_lazy(opts, :application_id, fn -> application_fixture(tenant: tenant).id end)
+
+    params =
+      Enum.into(opts, %{
+        application_id: application_id,
+        version: unique_release_version()
+      })
+
+    Ash.create!(Release, params, tenant: tenant)
+  end
+
+  @doc """
   Generate a %Deployment{}.
   """
   def deployment_fixture(opts \\ []) do
@@ -75,19 +117,8 @@ defmodule Edgehog.ContainersFixtures do
         Edgehog.DevicesFixtures.device_fixture(tenant: tenant).id
       end)
 
-    # TODO: use release fixture once implemented
-    default_release_id = fn ->
-      name = "app-#{System.unique_integer()}"
-      version = "0.0.#{System.unique_integer([:positive])}"
-
-      app = Ash.create!(Application, %{name: name}, tenant: tenant)
-      release = Ash.create!(Release, %{application_id: app.id, version: version}, tenant: tenant)
-
-      release.id
-    end
-
     {release_id, opts} =
-      Keyword.pop_lazy(opts, :release_id, default_release_id)
+      Keyword.pop_lazy(opts, :release_id, fn -> release_fixture(tenant: tenant).id end)
 
     params =
       Enum.into(opts, %{

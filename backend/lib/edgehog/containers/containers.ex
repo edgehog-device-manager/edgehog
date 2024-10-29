@@ -25,6 +25,7 @@ defmodule Edgehog.Containers do
       AshGraphql.Domain
     ]
 
+  alias Edgehog.Containers.Application
   alias Edgehog.Containers.ImageCredentials
 
   graphql do
@@ -38,6 +39,10 @@ defmodule Edgehog.Containers do
       list ImageCredentials, :list_image_credentials, :read do
         description "Returns all available image credentials."
         paginate_with nil
+      end
+
+      get Application, :application, :read do
+        description "Returns the desired application."
       end
     end
 
