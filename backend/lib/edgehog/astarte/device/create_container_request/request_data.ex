@@ -20,31 +20,35 @@
 
 defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
   @moduledoc false
+
+  # TODO the interface for now has the :image key, this is a device
+  # problem, once solved it should be removed
+
   defstruct [
-    :container_id,
-    :image_id,
-    :networks_ids,
-    :volume_ids,
+    :id,
+    :imageId,
+    :networkIds,
+    :volumeIds,
     :hostname,
-    :restart_policy,
+    :restartPolicy,
     :env,
     :binds,
     :networks,
-    :port_bindings,
+    :portBindings,
     :privileged
   ]
 
   @type t() :: %__MODULE__{
-          container_id: String.t(),
-          image_id: String.t(),
-          networks_ids: list(String.t()),
-          volume_ids: list(String.t()),
+          id: String.t(),
+          imageId: String.t(),
+          networkIds: list(String.t()),
+          volumeIds: list(String.t()),
           hostname: String.t(),
-          restart_policy: String.t(),
+          restartPolicy: String.t(),
           env: list(tuple()),
           binds: list(String.t()),
           networks: list(String.t()),
-          port_bindings: list(String.t()),
+          portBindings: list(String.t()),
           privileged: String.t()
         }
 end
