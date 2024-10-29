@@ -22,7 +22,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteImageCredentialsTest do
   @moduledoc false
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.ImageCredentialsFixtures
+  import Edgehog.ContainersFixtures
 
   describe "deleteImageCredentials mutation" do
     setup %{tenant: tenant} do

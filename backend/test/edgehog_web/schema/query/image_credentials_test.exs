@@ -21,7 +21,7 @@
 defmodule EdgehogWeb.Schema.Query.ImageCredentialsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.ImageCredentialsFixtures
+  import Edgehog.ContainersFixtures
 
   describe "image credentials queries" do
     test "returns image credentials if present", %{tenant: tenant} do
