@@ -168,6 +168,38 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
              } = device
     end
 
+    test "accepts trigger payload without `trigger_name` key (Astarte < 1.2.0)", ctx do
+      %{conn: conn, path: path} = ctx
+
+      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:ok, device_status_fixture()} end)
+
+      device_id = random_device_id()
+      timestamp = utc_now_second()
+
+      astarte_pre_1_2_0_event =
+        device_id
+        |> connection_trigger(timestamp)
+        |> Map.delete(:trigger_name)
+
+      assert conn |> post(path, astarte_pre_1_2_0_event) |> response(200)
+    end
+
+    test "accepts arbitrary additional keys in the trigger payload", ctx do
+      %{conn: conn, path: path} = ctx
+
+      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:ok, device_status_fixture()} end)
+
+      device_id = random_device_id()
+      timestamp = utc_now_second()
+
+      extra_key_event =
+        device_id
+        |> connection_trigger(timestamp)
+        |> Map.put(:random, "key")
+
+      assert conn |> post(path, extra_key_event) |> response(200)
+    end
+
     test "disconnection events update an existing device, not calling Astarte", ctx do
       %{
         conn: conn,
@@ -442,6 +474,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
       ota_event = %{
+        trigger_name: "edgehog-ota-event",
         device_id: device.device_id,
         event: %{
           type: "incoming_data",
@@ -526,6 +559,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
       ota_event = %{
+        trigger_name: "edgehog-ota-event",
         device_id: device.device_id,
         event: %{
           type: "incoming_data",
@@ -563,6 +597,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   defp connection_trigger(device_id, timestamp) do
     %{
+      trigger_name: "edgehog-connection",
       device_id: device_id,
       event: %{
         type: "device_connected",
@@ -574,6 +609,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   defp disconnection_trigger(device_id, timestamp) do
     %{
+      trigger_name: "edgehog-disconnection",
       device_id: device_id,
       event: %{
         type: "device_disconnected"
@@ -586,6 +622,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   defp part_number_trigger(device_id, part_number) do
     %{
+      trigger_name: "edgehog-system-info",
       device_id: device_id,
       event: %{
         type: "incoming_data",
@@ -599,6 +636,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   defp serial_number_trigger(device_id, serial_number) do
     %{
+      trigger_name: "edgehog-system-info",
       device_id: device_id,
       event: %{
         type: "incoming_data",
@@ -612,6 +650,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   defp unknown_trigger(device_id) do
     %{
+      trigger_name: "other-trigger",
       device_id: device_id,
       event: %{
         type: "incoming_data",
