@@ -23,6 +23,9 @@ defmodule Edgehog.ContainersFixtures do
   This module defines test helpers for creating 
   entities via the `Edgehog.Containers` context.
   """
+  alias Edgehog.Containers.Application
+  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release
 
   @doc """
   Generate a unique image_credentials name.
@@ -59,5 +62,37 @@ defmodule Edgehog.ContainersFixtures do
       tenant: tenant
     )
     |> Ash.create!()
+  end
+
+  @doc """
+  Generate a %Deployment{}.
+  """
+  def deployment_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn -> Edgehog.DevicesFixtures.device_fixture().id end)
+
+    # TODO: use release fixture once implemented
+    default_release_id = fn ->
+      name = "app-#{System.unique_integer()}"
+      version = "0.0.#{System.unique_integer([:positive])}"
+
+      app = Ash.create!(Application, %{name: name}, tenant: tenant)
+      release = Ash.create!(Release, %{application_id: app.id, version: version}, tenant: tenant)
+
+      release.id
+    end
+
+    {release_id, opts} =
+      Keyword.pop_lazy(opts, :release_id, default_release_id)
+
+    params =
+      Enum.into(opts, %{
+        device_id: device_id,
+        release_id: release_id
+      })
+
+    Ash.create!(Deployment, params, tenant: tenant)
   end
 end
