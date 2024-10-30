@@ -29,7 +29,7 @@ defmodule EdgehogWeb.Schema.Query.ImageCredentialsTest do
 
       data = [tenant: tenant] |> list_image_credentials() |> extract_result!()
 
-      assert %{"listImageCredentials" => [image_credentials]} = data
+      assert %{"listImageCredentials" => %{"results" => [image_credentials]}} = data
       assert image_credentials["label"] == fixture.label
       assert image_credentials["username"] == fixture.username
     end
@@ -51,9 +51,11 @@ defmodule EdgehogWeb.Schema.Query.ImageCredentialsTest do
     default_document =
       """
       query {
-      listImageCredentials {
-          label
-          username
+        listImageCredentials {
+          results {
+            label
+            username
+          }
         }
       }
       """

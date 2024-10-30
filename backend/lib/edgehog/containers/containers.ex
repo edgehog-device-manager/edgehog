@@ -42,7 +42,6 @@ defmodule Edgehog.Containers do
 
       list ImageCredentials, :list_image_credentials, :read do
         description "Returns all available image credentials."
-        paginate_with nil
       end
 
       get Application, :application, :read do

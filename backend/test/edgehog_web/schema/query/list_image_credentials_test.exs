@@ -26,7 +26,7 @@ defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
   describe "image credentials queries" do
     test "no image credentials at startup", %{tenant: tenant} do
       data = [tenant: tenant] |> list_image_credentials() |> extract_result!()
-      assert %{"listImageCredentials" => []} = data
+      assert %{"listImageCredentials" => %{"results" => []}} = data
     end
 
     test "returns all image credentials when present", %{tenant: tenant} do
@@ -36,7 +36,7 @@ defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
 
       data = [tenant: tenant] |> list_image_credentials() |> extract_result!()
 
-      assert %{"listImageCredentials" => image_credentials} = data
+      assert %{"listImageCredentials" => %{"results" => image_credentials}} = data
       assert length(image_credentials) == 3
 
       labels = Enum.map(image_credentials, & &1["label"])
@@ -52,8 +52,10 @@ defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
       """
       query {
         listImageCredentials {
-          label
-          username
+          results {
+            label
+            username
+          }
         }
       }
       """

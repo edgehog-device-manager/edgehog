@@ -24,6 +24,12 @@ defmodule EdgehogWeb.Schema.Query.ListApplicationsTest do
   import Edgehog.ContainersFixtures
 
   describe "applications queries" do
+    test "returns empty list when there are no applications", %{tenant: tenant} do
+      data = [tenant: tenant] |> list_applications() |> extract_result!()
+
+      assert %{"applications" => %{"results" => []}} = data
+    end
+
     test "returns all the available applications", %{tenant: tenant} do
       app1 = application_fixture(name: "application 1", tenant: tenant)
       app2 = application_fixture(name: "application 2", tenant: tenant)
@@ -32,11 +38,10 @@ defmodule EdgehogWeb.Schema.Query.ListApplicationsTest do
 
       assert %{"applications" => %{"results" => applications}} = data
 
-      names = Enum.map(applications, & &1["name"])
+      names = applications |> Enum.map(& &1["name"]) |> Enum.sort()
+      expected_names = [app1, app2] |> Enum.map(& &1.name) |> Enum.sort()
 
-      for app <- [app1, app2] do
-        assert app.name in names
-      end
+      assert names == expected_names
     end
   end
 
