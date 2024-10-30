@@ -110,6 +110,46 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert ota_operation["baseImageUrl"] == base_image_url
     end
 
+    test "queries associated application deployments", %{tenant: tenant} do
+      fixture = device_fixture(tenant: tenant)
+
+      deployments = [
+        Edgehog.ContainersFixtures.deployment_fixture(device_id: fixture.id, tenant: tenant),
+        Edgehog.ContainersFixtures.deployment_fixture(device_id: fixture.id, tenant: tenant)
+      ]
+
+      deployments = Enum.sort_by(deployments, & &1.release_id)
+
+      _extra_deployment = Edgehog.ContainersFixtures.deployment_fixture(tenant: tenant)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          applicationDeployments {
+            edges {
+              node {
+                releaseId
+              }
+            } 
+          }
+        }
+      }
+      """
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+      device = [document: document, tenant: tenant, id: id] |> device_query() |> extract_result!()
+
+      results =
+        device
+        |> get_in(["applicationDeployments", "edges"])
+        |> Enum.map(& &1["node"])
+        |> Enum.sort_by(& &1["releaseId"])
+
+      for {deployment, result} <- Enum.zip(deployments, results) do
+        assert result["releaseId"] == deployment.release_id
+      end
+    end
+
     test "returns nil if non existing", %{tenant: tenant} do
       id = non_existing_device_id(tenant)
       result = device_query(tenant: tenant, id: id)

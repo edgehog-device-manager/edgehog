@@ -53,6 +53,7 @@ defmodule Edgehog.Devices.Device do
 
   graphql do
     type :device
+    paginate_relationship_with application_deployments: :relay
   end
 
   actions do
@@ -352,6 +353,10 @@ defmodule Edgehog.Devices.Device do
       public? true
       description "The existing OTA operations for this device"
       writable? false
+    end
+
+    has_many :application_deployments, Edgehog.Containers.Deployment do
+      public? true
     end
 
     many_to_many :application_releases, Edgehog.Containers.Release do

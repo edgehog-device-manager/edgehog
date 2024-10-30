@@ -71,7 +71,9 @@ defmodule Edgehog.ContainersFixtures do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
     {device_id, opts} =
-      Keyword.pop_lazy(opts, :device_id, fn -> Edgehog.DevicesFixtures.device_fixture().id end)
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        Edgehog.DevicesFixtures.device_fixture(tenant: tenant).id
+      end)
 
     # TODO: use release fixture once implemented
     default_release_id = fn ->
