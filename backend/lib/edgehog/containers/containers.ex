@@ -57,6 +57,10 @@ defmodule Edgehog.Containers do
 
       destroy ImageCredentials, :delete_image_credentials, :destroy
 
+      create Deployment, :deploy_release, :deploy do
+        description "Deploy the application on a device"
+      end
+
       update Deployment, :start_deployment, :start
       update Deployment, :stop_deployment, :stop
     end
