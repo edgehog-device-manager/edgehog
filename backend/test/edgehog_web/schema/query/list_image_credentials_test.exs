@@ -21,7 +21,7 @@
 defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.ImageCredentialsFixtures
+  import Edgehog.ContainersFixtures
 
   describe "image credentials queries" do
     test "no image credentials at startup", %{tenant: tenant} do

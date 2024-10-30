@@ -22,7 +22,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateImageCredentialsTest do
   @moduledoc false
   use EdgehogWeb.GraphqlCase, async: true
 
-  import Edgehog.ImageCredentialsFixtures
+  import Edgehog.ContainersFixtures
 
   describe "createImageCredentials mutation" do
     test "create image credentials with valid data", %{tenant: tenant} do
