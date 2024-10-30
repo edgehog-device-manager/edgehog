@@ -39,10 +39,12 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
          {:ok, device} <- Ash.load(device, :appengine_client) do
       env_encoding = container.env_encoding
       restart_policy = to_correct_string(container.restart_policy)
+      image = container.image
 
       data = %RequestData{
         id: container.id,
         imageId: container.image_id,
+        image: image.reference,
         networkIds: [],
         volumeIds: [],
         hostname: container.hostname,
