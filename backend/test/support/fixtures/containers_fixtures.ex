@@ -28,6 +28,7 @@ defmodule Edgehog.ContainersFixtures do
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.ReleaseContainers
 
   @doc """
   Generate a unique application name.
@@ -129,13 +130,25 @@ defmodule Edgehog.ContainersFixtures do
     {application_id, opts} =
       Keyword.pop_lazy(opts, :application_id, fn -> application_fixture(tenant: tenant).id end)
 
+    # number of containers to associate with the release
+    {containers, opts} = Keyword.pop(opts, :containers, 0)
+
     params =
       Enum.into(opts, %{
         application_id: application_id,
         version: unique_release_version()
       })
 
-    Ash.create!(Release, params, tenant: tenant)
+    release = Ash.create!(Release, params, tenant: tenant)
+
+    for _ <- 1..containers//1 do
+      container = container_fixture(tenant: tenant)
+      params = %{container_id: container.id, release_id: release.id}
+
+      Ash.create!(ReleaseContainers, params, tenant: tenant)
+    end
+
+    release
   end
 
   @doc """
