@@ -36,7 +36,7 @@ defmodule Edgehog.Astarte.Device.CreateDeploymentRequest do
         client,
         device_id,
         @interface,
-        "/release",
+        "/deployment",
         request_data
       )
 

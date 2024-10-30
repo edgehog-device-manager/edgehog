@@ -43,7 +43,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateDeployment do
       containers_ids = Enum.map(containers, & &1.id)
 
       data = %RequestData{
-        id: release.id,
+        id: deployment.id,
         containers: containers_ids
       }
 

@@ -37,8 +37,9 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
       images = containers |> Enum.map(& &1.image) |> Enum.uniq()
 
       with :ok <- send_create_image_requests(device, images),
-           :ok <- send_create_container_requests(device, containers) do
-        Devices.send_create_deployment_request(device, deployment)
+           :ok <- send_create_container_requests(device, containers),
+           {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
+        {:ok, deployment}
       end
     end
   end
@@ -46,7 +47,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
   defp send_create_image_requests(device, images) do
     Enum.reduce_while(images, :ok, fn image, _acc ->
       case Devices.send_create_image_request(device, image) do
-        {:ok, _image} -> {:cont, :ok}
+        {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
@@ -55,7 +56,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
   defp send_create_container_requests(device, containers) do
     Enum.reduce_while(containers, :ok, fn container, _acc ->
       case Devices.send_create_container_request(device, container) do
-        {:ok, _container} -> {:cont, :ok}
+        {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
