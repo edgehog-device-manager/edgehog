@@ -36,22 +36,24 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateDeployment do
     device = changeset.data
 
     with {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
-         {:ok, deployment} <- Ash.load(deployment, release: [:containers]) do
+         {:ok, deployment} <- Ash.load(deployment, release: [:containers]),
+         {:ok, device} <- Ash.load(device, :appengine_client) do
       release = deployment.release
       containers = release.containers
       containers_ids = Enum.map(containers, & &1.id)
 
       data = %RequestData{
-        id: release.id,
+        id: deployment.id,
         containers: containers_ids
       }
 
-      with {:ok, device} <- Ash.load(device, :appengine_client) do
-        @send_create_deployment_request_behaviour.send_create_deployment_request(
-          device.appengine_client,
-          device.device_id,
-          data
-        )
+      with :ok <-
+             @send_create_deployment_request_behaviour.send_create_deployment_request(
+               device.appengine_client,
+               device.device_id,
+               data
+             ) do
+        {:ok, device}
       end
     end
   end

@@ -34,33 +34,40 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
   def update(changeset, _opts, _context) do
     device = changeset.data
 
-    with {:ok, container} <- Ash.load(changeset.container, :env_encoding) do
+    with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
+         {:ok, container} <- Ash.load(container, [:env_encoding, :image]),
+         {:ok, device} <- Ash.load(device, :appengine_client) do
       env_encoding = container.env_encoding
       restart_policy = to_correct_string(container.restart_policy)
+      image = container.image
 
       data = %RequestData{
-        container_id: container.id,
-        image_id: container.image_id,
-        networks_ids: [],
-        volume_ids: [],
+        id: container.id,
+        imageId: container.image_id,
+        image: image.reference,
+        networkIds: [],
+        volumeIds: [],
         hostname: container.hostname,
-        restart_policy: restart_policy,
+        restartPolicy: restart_policy,
         env: env_encoding,
         binds: [],
         networks: [],
-        port_bindings: [],
+        portBindings: [],
         privileged: container.privileged
       }
 
-      with {:ok, device} <- Ash.load(device, :appengine_client) do
-        @send_create_container_request_behaviour.send_create_container_request(
-          device.appengine_client,
-          device.device_id,
-          data
-        )
+      with :ok <-
+             @send_create_container_request_behaviour.send_create_container_request(
+               device.appengine_client,
+               device.device_id,
+               data
+             ) do
+        {:ok, device}
       end
     end
   end
 
-  defp to_correct_string(atom), do: String.replace(atom, "_", "-")
+  defp to_correct_string(atom) do
+    atom |> to_string() |> String.replace("_", "-")
+  end
 end

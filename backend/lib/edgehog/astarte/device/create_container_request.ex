@@ -29,7 +29,7 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest do
 
   @impl Edgehog.Astarte.Device.CreateContainerRequest.Behaviour
   def send_create_container_request(%AppEngine{} = client, device_id, request_data) do
-    request_data_map = Map.from_struct(request_data)
+    request_data = Map.from_struct(request_data)
 
     api_call =
       AppEngine.Devices.send_datastream(
@@ -37,7 +37,7 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest do
         device_id,
         @interface,
         "/container",
-        request_data_map
+        request_data
       )
 
     with {:error, api_error} <- api_call do

@@ -29,12 +29,14 @@ defmodule Edgehog.Astarte.Device.CreateDeploymentRequest do
 
   @impl Edgehog.Astarte.Device.CreateDeploymentRequest.Behaviour
   def send_create_deployment_request(%AppEngine{} = client, device_id, request_data) do
+    request_data = Map.from_struct(request_data)
+
     api_call =
       AppEngine.Devices.send_datastream(
         client,
         device_id,
         @interface,
-        "/release",
+        "/deployment",
         request_data
       )
 

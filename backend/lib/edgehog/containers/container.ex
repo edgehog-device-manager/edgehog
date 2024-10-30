@@ -31,8 +31,8 @@ defmodule Edgehog.Containers.Container do
     defaults [
       :read,
       :destroy,
-      create: [:restart_policy, :hostname, :env, :privileged],
-      update: [:restart_policy, :hostname, :env, :privileged]
+      create: [:restart_policy, :hostname, :env, :privileged, :image_id],
+      update: [:restart_policy, :hostname, :env, :privileged, :image_id]
     ]
   end
 
