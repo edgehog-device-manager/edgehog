@@ -21,7 +21,13 @@
 defmodule Edgehog.Containers.Application do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
+
+  graphql do
+    type :application
+    paginate_relationship_with releases: :relay
+  end
 
   actions do
     defaults [:read, :destroy, create: [:name, :description], update: [:name, :description]]
@@ -32,14 +38,20 @@ defmodule Edgehog.Containers.Application do
 
     attribute :name, :string do
       allow_nil? false
+      public? true
     end
 
-    attribute :description, :string
+    attribute :description, :string do
+      public? true
+    end
+
     timestamps()
   end
 
   relationships do
-    has_many :releases, Edgehog.Containers.Release
+    has_many :releases, Edgehog.Containers.Release do
+      public? true
+    end
   end
 
   identities do

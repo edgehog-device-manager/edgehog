@@ -21,9 +21,14 @@
 defmodule Edgehog.Containers.Release do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Validations
+
+  graphql do
+    type :release
+  end
 
   actions do
     defaults [:read, :destroy, create: [:application_id, :version]]
@@ -40,13 +45,17 @@ defmodule Edgehog.Containers.Release do
 
     attribute :version, :string do
       allow_nil? false
+      public? true
     end
 
     timestamps()
   end
 
   relationships do
-    belongs_to :application, Edgehog.Containers.Application, attribute_type: :uuid
+    belongs_to :application, Edgehog.Containers.Application do
+      attribute_type :uuid
+      public? true
+    end
 
     many_to_many :devices, Edgehog.Devices.Device do
       through Edgehog.Containers.Deployment
