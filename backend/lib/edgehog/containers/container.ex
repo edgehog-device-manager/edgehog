@@ -62,6 +62,7 @@ defmodule Edgehog.Containers.Container do
     belongs_to :image, Image do
       source_attribute :image_id
       attribute_type :uuid
+      allow_nil? false
     end
 
     many_to_many :releases, Edgehog.Containers.Release do
