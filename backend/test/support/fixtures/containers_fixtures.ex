@@ -24,13 +24,20 @@ defmodule Edgehog.ContainersFixtures do
   entities via the `Edgehog.Containers` context.
   """
   alias Edgehog.Containers.Application
+  alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
 
   @doc """
   Generate a unique application name.
   """
   def unique_application_name, do: "application#{System.unique_integer()}"
+
+  @doc """
+  Generate a unique image reference.
+  """
+  def unique_image_reference, do: "image#{System.unique_integer()}"
 
   @doc """
   Generate a unique application release version.
@@ -72,6 +79,31 @@ defmodule Edgehog.ContainersFixtures do
       tenant: tenant
     )
     |> Ash.create!()
+  end
+
+  def image_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        reference: unique_image_reference()
+      })
+
+    Ash.create!(Image, params, tenant: tenant)
+  end
+
+  def container_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {image_id, opts} =
+      Keyword.pop_lazy(opts, :image_id, fn -> image_fixture(tenant: tenant).id end)
+
+    params =
+      Enum.into(opts, %{
+        image_id: image_id
+      })
+
+    Ash.create!(Container, params, tenant: tenant)
   end
 
   @doc """
