@@ -98,6 +98,10 @@ defmodule Edgehog.Devices do
         action: :send_create_deployment_request,
         args: [:deployment]
 
+      define :send_release_command,
+        action: :send_release_command,
+        args: [:release, :command]
+
       define_calculation :available_images
       define_calculation :available_containers
     end

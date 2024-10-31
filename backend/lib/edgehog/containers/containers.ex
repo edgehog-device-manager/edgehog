@@ -26,6 +26,7 @@ defmodule Edgehog.Containers do
     ]
 
   alias Edgehog.Containers.Application
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.ImageCredentials
 
   graphql do
@@ -55,6 +56,9 @@ defmodule Edgehog.Containers do
       end
 
       destroy ImageCredentials, :delete_image_credentials, :destroy
+
+      update Deployment, :start_deployment, :start
+      update Deployment, :stop_deployment, :stop
     end
   end
 
