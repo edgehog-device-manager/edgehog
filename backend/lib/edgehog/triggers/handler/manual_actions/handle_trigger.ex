@@ -24,6 +24,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
+  alias Edgehog.Containers
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
   alias Edgehog.Triggers.DeviceConnected
@@ -31,6 +32,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Triggers.IncomingData
   alias Edgehog.Triggers.TriggerPayload
 
+  @available_deployments "io.edgehog.devicemanager.apps.AvailableDeployments"
   @deployment_event "io.edgehog.devicemanager.apps.DeploymentEvent"
   @ota_event "io.edgehog.devicemanager.OTAEvent"
   @ota_response "io.edgehog.devicemanager.OTAResponse"
@@ -107,16 +109,19 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   defp handle_event(%IncomingData{interface: @deployment_event} = event, tenant, _realm_id, _device_id, _timestamp) do
     "/" <> deployment_id = event.path
     status = event.value["status"]
-    message = event.value["message"]
 
-    status_attrs = %{status: status, mesage: message}
+    with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
+      Containers.deployment_set_status(deployment, status, tenant: tenant)
+    end
+  end
 
-    # TODO: update deployment status
-    _ = deployment_id
-    _ = status_attrs
-    _ = tenant
+  defp handle_event(%IncomingData{interface: @available_deployments} = event, tenant, _realm_id, _device_id, _timestamp) do
+    "/" <> deployment_id = event.path
+    status = event.value["status"]
 
-    {:ok, nil}
+    with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
+      Containers.deployment_set_status(deployment, status, tenant: tenant)
+    end
   end
 
   defp handle_event(

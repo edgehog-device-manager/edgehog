@@ -68,6 +68,8 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Deployment do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
       define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
+      define :fetch_deployment, action: :read, get_by: [:id]
+      define :deployment_set_status, action: :set_status, args: [:status]
     end
 
     resource Edgehog.Containers.Image do

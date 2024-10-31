@@ -27,6 +27,7 @@ defmodule Edgehog.Containers.Deployment do
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Types.DeploymentStatus
 
   graphql do
     type :deployment
@@ -54,10 +55,16 @@ defmodule Edgehog.Containers.Deployment do
 
       run ManualActions.SendDeployRequest
     end
+
+    update :set_status do
+      accept [:status]
+    end
   end
 
   attributes do
     uuid_primary_key :id
+
+    attribute :status, DeploymentStatus
 
     timestamps()
   end
