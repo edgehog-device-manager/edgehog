@@ -18,43 +18,41 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
+defmodule EdgehogWeb.Schema.Query.ListApplicationsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.ContainersFixtures
 
-  describe "image credentials queries" do
-    test "no image credentials at startup", %{tenant: tenant} do
-      data = [tenant: tenant] |> list_image_credentials() |> extract_result!()
-      assert %{"listImageCredentials" => %{"results" => []}} = data
+  describe "applications queries" do
+    test "returns empty list when there are no applications", %{tenant: tenant} do
+      data = [tenant: tenant] |> list_applications() |> extract_result!()
+
+      assert %{"applications" => %{"results" => []}} = data
     end
 
-    test "returns all image credentials when present", %{tenant: tenant} do
-      fixture1 = image_credentials_fixture(tenant: tenant)
-      fixture2 = image_credentials_fixture(tenant: tenant)
-      fixture3 = image_credentials_fixture(tenant: tenant)
+    test "returns all the available applications", %{tenant: tenant} do
+      app1 = application_fixture(name: "application 1", tenant: tenant)
+      app2 = application_fixture(name: "application 2", tenant: tenant)
 
-      data = [tenant: tenant] |> list_image_credentials() |> extract_result!()
+      data = [tenant: tenant] |> list_applications() |> extract_result!()
 
-      assert %{"listImageCredentials" => %{"results" => image_credentials}} = data
-      assert length(image_credentials) == 3
+      assert %{"applications" => %{"results" => applications}} = data
 
-      labels = Enum.map(image_credentials, & &1["label"])
+      names = applications |> Enum.map(& &1["name"]) |> Enum.sort()
+      expected_names = [app1, app2] |> Enum.map(& &1.name) |> Enum.sort()
 
-      for fix <- [fixture1, fixture2, fixture3] do
-        assert fix.label in labels
-      end
+      assert names == expected_names
     end
   end
 
-  defp list_image_credentials(opts) do
+  defp list_applications(opts) do
     default_document =
       """
       query {
-        listImageCredentials {
+        applications {
           results {
-            label
-            username
+            name
+            description
           }
         }
       }
@@ -66,7 +64,7 @@ defmodule EdgehogWeb.Schema.Query.ListImageCredentialsTest do
     Absinthe.run!(document, EdgehogWeb.Schema, context: %{tenant: tenant})
   end
 
-  def extract_result!(result) do
+  defp extract_result!(result) do
     refute :errors in Map.keys(result)
     assert %{data: data} = result
     assert data != nil

@@ -32,13 +32,16 @@ defmodule Edgehog.Containers do
     root_level_errors? true
 
     queries do
+      list Application, :applications, :read do
+        description "Returns all the available applications."
+      end
+
       get ImageCredentials, :image_credentials, :read do
         description "Returns the desired image credentials."
       end
 
       list ImageCredentials, :list_image_credentials, :read do
         description "Returns all available image credentials."
-        paginate_with nil
       end
 
       get Application, :application, :read do
