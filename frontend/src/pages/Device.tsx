@@ -36,6 +36,7 @@ import {
   useMutation,
   fetchQuery,
   useRelayEnvironment,
+  useRefetchableFragment,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import type { PayloadError, Subscription } from "relay-runtime";
@@ -55,6 +56,8 @@ import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiSc
 import type { Device_networkInterfaces$key } from "api/__generated__/Device_networkInterfaces.graphql";
 import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
 import type { Device_cellularConnection$key } from "api/__generated__/Device_cellularConnection.graphql";
+import type { Device_deployedApplications$key } from "api/__generated__/Device_deployedApplications.graphql";
+import type { Device_deployedApplications_RefetchQuery } from "api/__generated__/Device_deployedApplications_RefetchQuery.graphql";
 import type { Device_connectionStatus$key } from "api/__generated__/Device_connectionStatus.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
@@ -65,12 +68,14 @@ import type { Device_requestForwarderSession_Mutation } from "api/__generated__/
 import type { Device_getForwarderSession_Query } from "api/__generated__/Device_getForwarderSession_Query.graphql";
 import type { Device_getExistingDeviceTags_Query } from "api/__generated__/Device_getExistingDeviceTags_Query.graphql";
 import { Link, Route } from "Navigation";
+import AddAvailableApplications from "components/AddAvailableApplications";
 import Alert from "components/Alert";
 import Button from "components/Button";
 import CellularConnectionTabs from "components/CellularConnectionTabs";
 import Center from "components/Center";
 import ConnectionStatus from "components/ConnectionStatus";
 import Col from "components/Col";
+import DeployedApplicationsTable from "components/DeployedApplicationsTable";
 import Figure from "components/Figure";
 import Form from "components/Form";
 import LastSeen from "components/LastSeen";
@@ -259,7 +264,16 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_cellularConnection
       ...Device_networkInterfaces
       ...Device_connectionStatus
+      ...Device_deployedApplications
     }
+  }
+`;
+
+const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
+  fragment Device_deployedApplications on Device
+  @refetchable(queryName: "Device_deployedApplications_RefetchQuery") {
+    id
+    ...DeployedApplicationsTable_deployedApplications
   }
 `;
 
@@ -518,6 +532,70 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
             </FormRow>
           )}
         </Stack>
+      </div>
+    </Tab>
+  );
+};
+
+interface ApplicationsTabProps {
+  deviceRef: Device_deployedApplications$key;
+}
+
+const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const intl = useIntl();
+
+  const [device, refetch] = useRefetchableFragment<
+    Device_deployedApplications_RefetchQuery,
+    Device_deployedApplications$key
+  >(DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT, deviceRef);
+
+  const deviceId = device.id;
+
+  const handleRefetch = useCallback(() => {
+    refetch({ id: deviceId }, { fetchPolicy: "network-only" });
+  }, [refetch, deviceId]);
+
+  return (
+    <Tab
+      eventKey="applications-tab"
+      title={intl.formatMessage({
+        id: "pages.Device.ApplicationsTab",
+        defaultMessage: "Applications",
+      })}
+    >
+      <Alert
+        className="mt-3"
+        show={!!errorFeedback}
+        variant="danger"
+        onClose={() => setErrorFeedback(null)}
+        dismissible
+      >
+        {errorFeedback}
+      </Alert>
+      <div className="mt-3">
+        <h5>
+          <FormattedMessage
+            id="pages.Device.ApplicationsTab.InstallNewApp"
+            defaultMessage="Add Available Applications"
+          />
+        </h5>
+        <AddAvailableApplications
+          deviceId={deviceId}
+          setErrorFeedback={setErrorFeedback}
+          onDeployComplete={handleRefetch}
+        />
+        <h5 className="mt-4">
+          <FormattedMessage
+            id="pages.Device.ApplicationsTab.DeployedApplications"
+            defaultMessage="Deployed Applications"
+          />
+        </h5>
+        <DeployedApplicationsTable
+          deviceRef={device}
+          setErrorFeedback={setErrorFeedback}
+          onDeploymentChange={handleRefetch}
+        />
       </div>
     </Tab>
   );
@@ -1872,6 +1950,7 @@ const DeviceContent = ({
               "device-network-interfaces-tab",
               "device-wifi-scan-results-tab",
               "device-software-update-tab",
+              "applications-tab",
             ]}
           >
             <DeviceHardwareInfoTab deviceRef={device} />
@@ -1886,6 +1965,7 @@ const DeviceContent = ({
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
             <SoftwareUpdateTab deviceRef={device} />
+            <ApplicationsTab deviceRef={device} />
           </Tabs>
         </Stack>
       </Page.Main>
