@@ -30,18 +30,24 @@ defmodule Edgehog.Containers.Network do
   attributes do
     uuid_primary_key :id
 
-    attribute :driver, :string
+    attribute :driver, :string do
+      default "bridge"
+      allow_nil? false
+    end
 
     attribute :check_duplicate, :boolean do
       default false
+      allow_nil? false
     end
 
     attribute :internal, :boolean do
       default false
+      allow_nil? false
     end
 
     attribute :enable_ipv6, :boolean do
       default false
+      allow_nil? false
     end
 
     timestamps()
