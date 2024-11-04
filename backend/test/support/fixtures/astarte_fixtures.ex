@@ -176,6 +176,18 @@ defmodule Edgehog.AstarteFixtures do
     ]
   end
 
+  def available_volumes_fixture(opts \\ []) do
+    [
+      struct!(
+        %Edgehog.Astarte.Device.AvailableVolumes.VolumeStatus{
+          id: "6df83684-4e72-4aee-afab-4d08a3fcbc73",
+          created: true
+        },
+        opts
+      )
+    ]
+  end
+
   def base_image_info_fixture(opts \\ []) do
     struct!(
       %Edgehog.Astarte.Device.BaseImage{

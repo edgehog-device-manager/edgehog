@@ -123,3 +123,7 @@ Mox.defmock(Edgehog.Astarte.Device.AvailableImagesMock,
 Mox.defmock(Edgehog.Astarte.Device.AvailableDeploymentsMock,
   for: Edgehog.Astarte.Device.AvailableDeployments.Behaviour
 )
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableVolumesMock,
+  for: Edgehog.Astarte.Device.AvailableVolumes.Behaviour
+)

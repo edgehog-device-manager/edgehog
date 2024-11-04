@@ -392,6 +392,32 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert container["status"] == status
     end
 
+    test "Available volumes", %{tenant: tenant, id: id, device_id: device_id} do
+      volume_id = Ash.UUID.generate()
+      created = true
+
+      expect(Edgehog.Astarte.Device.AvailableVolumesMock, :get, fn _client, ^device_id ->
+        {:ok, available_volumes_fixture(id: volume_id, created: created)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableVolumes {
+            id
+            created
+          }
+        }
+      }
+      """
+
+      %{"availableVolumes" => [volume]} =
+        [document: document, tenant: tenant, id: id] |> device_query() |> extract_result!()
+
+      assert volume["id"] == volume_id
+      assert volume["created"] == created
+    end
+
     test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       expect(Edgehog.Astarte.Device.OSInfoMock, :get, fn _client, ^device_id ->
         {:ok, os_info_fixture(name: "foo", version: "3.0.0")}
