@@ -277,6 +277,17 @@ defmodule Edgehog.Devices.Device do
       manual ManualActions.SendCreateContainer
     end
 
+    update :send_create_network_request do
+      description "Sends a create network request to the device."
+
+      argument :network, :struct,
+        constraints: [instance_of: Edgehog.Containers.Network],
+        description: "The Network the device has to create.",
+        allow_nil?: false
+
+      manual ManualActions.SendCreateNetwork
+    end
+
     update :send_release_command do
       description "Sends a command for the given application release."
 
