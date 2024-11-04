@@ -168,4 +168,13 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The deployment status, can be :idle, :starting, :started, :stopping, :stopped or :error"
     field :status, :string
   end
+
+  @desc "Describes the status of a volume on a device."
+  object :volume_status do
+    @desc "The volume id."
+    field :id, :string
+
+    @desc "The volume status, wheather it was created or not."
+    field :created, :boolean
+  end
 end
