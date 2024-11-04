@@ -24,7 +24,9 @@ defmodule Edgehog.AstarteFixtures do
   entities via the `Edgehog.Astarte` context.
   """
 
+  alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
   alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
+  alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
 
   @doc """
   Generate a unique cluster name.
@@ -167,7 +169,7 @@ defmodule Edgehog.AstarteFixtures do
   def available_deployments_fixture(opts \\ []) do
     [
       struct!(
-        %Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus{
+        %DeploymentStatus{
           id: "1",
           status: "Idle"
         },
@@ -181,6 +183,18 @@ defmodule Edgehog.AstarteFixtures do
       struct!(
         %Edgehog.Astarte.Device.AvailableVolumes.VolumeStatus{
           id: "6df83684-4e72-4aee-afab-4d08a3fcbc73",
+          created: true
+        },
+        opts
+      )
+    ]
+  end
+
+  def available_networks_fixture(opts \\ []) do
+    [
+      struct!(
+        %NetworkStatus{
+          id: "1",
           created: true
         },
         opts
