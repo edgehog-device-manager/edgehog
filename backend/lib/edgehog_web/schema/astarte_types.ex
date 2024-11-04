@@ -156,7 +156,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The image id."
     field :id, :string
 
-    @desc "Wether the container is pulled or not."
+    @desc "Whether the image is pulled or not."
     field :pulled, :boolean
   end
 
