@@ -24,13 +24,21 @@ defmodule Edgehog.ContainersFixtures do
   entities via the `Edgehog.Containers` context.
   """
   alias Edgehog.Containers.Application
+  alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.ReleaseContainers
 
   @doc """
   Generate a unique application name.
   """
   def unique_application_name, do: "application#{System.unique_integer()}"
+
+  @doc """
+  Generate a unique image reference.
+  """
+  def unique_image_reference, do: "image#{System.unique_integer()}"
 
   @doc """
   Generate a unique application release version.
@@ -74,6 +82,31 @@ defmodule Edgehog.ContainersFixtures do
     |> Ash.create!()
   end
 
+  def image_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        reference: unique_image_reference()
+      })
+
+    Ash.create!(Image, params, tenant: tenant)
+  end
+
+  def container_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {image_id, opts} =
+      Keyword.pop_lazy(opts, :image_id, fn -> image_fixture(tenant: tenant).id end)
+
+    params =
+      Enum.into(opts, %{
+        image_id: image_id
+      })
+
+    Ash.create!(Container, params, tenant: tenant)
+  end
+
   @doc """
   Generate an %Application{}.
   """
@@ -97,13 +130,25 @@ defmodule Edgehog.ContainersFixtures do
     {application_id, opts} =
       Keyword.pop_lazy(opts, :application_id, fn -> application_fixture(tenant: tenant).id end)
 
+    # number of containers to associate with the release
+    {containers, opts} = Keyword.pop(opts, :containers, 0)
+
     params =
       Enum.into(opts, %{
         application_id: application_id,
         version: unique_release_version()
       })
 
-    Ash.create!(Release, params, tenant: tenant)
+    release = Ash.create!(Release, params, tenant: tenant)
+
+    for _ <- 1..containers//1 do
+      container = container_fixture(tenant: tenant)
+      params = %{container_id: container.id, release_id: release.id}
+
+      Ash.create!(ReleaseContainers, params, tenant: tenant)
+    end
+
+    release
   end
 
   @doc """

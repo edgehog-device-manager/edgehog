@@ -37,7 +37,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
     with {:ok, image} <- Ash.Changeset.fetch_argument(changeset, :image),
          {:ok, image} <- Ash.load(image, credentials: [:base64_json]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
-      credentials = image.credentials.base64_json
+      credentials = image.credentials.base64_json |> get_in() |> to_string()
 
       data = %RequestData{
         id: image.id,

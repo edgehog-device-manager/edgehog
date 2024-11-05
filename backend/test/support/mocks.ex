@@ -50,6 +50,18 @@ Mox.defmock(Edgehog.Astarte.Device.AvailableContainersMock,
   for: Edgehog.Astarte.Device.AvailableContainers.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.CreateContainerRequestMock,
+  for: Edgehog.Astarte.Device.CreateContainerRequest.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateDeploymentRequestMock,
+  for: Edgehog.Astarte.Device.CreateDeploymentRequest.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateImageRequestMock,
+  for: Edgehog.Astarte.Device.CreateImageRequest.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.SystemStatusMock,
   for: Edgehog.Astarte.Device.SystemStatus.Behaviour
 )
