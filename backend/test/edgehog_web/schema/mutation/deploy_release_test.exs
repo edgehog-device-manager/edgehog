@@ -27,17 +27,25 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
   alias Edgehog.Astarte.Device.CreateContainerRequestMock
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.CreateImageRequestMock
+  alias Edgehog.Astarte.Device.CreateNetworkRequestMock
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
     # one image per container
     images = containers
+    # one network per container
+    networks = containers
     device = device_fixture(tenant: tenant)
     release = release_fixture(tenant: tenant, containers: containers)
 
     expect(CreateImageRequestMock, :send_create_image_request, images, fn _, _, _ -> :ok end)
 
-    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, _ ->
+    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
+      assert data.networks != []
+      :ok
+    end)
+
+    expect(CreateNetworkRequestMock, :send_create_network_request, networks, fn _, _, _ ->
       :ok
     end)
 
