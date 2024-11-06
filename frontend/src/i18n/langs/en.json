@@ -86,6 +86,24 @@
   "Device.tags": {
     "defaultMessage": "Tags"
   },
+  "components.AddAvailableApplications.deployButton": {
+    "defaultMessage": "Deploy"
+  },
+  "components.AddAvailableApplications.deployErrorFeedback": {
+    "defaultMessage": "Could not deploy the Application, please try again."
+  },
+  "components.AddAvailableApplications.selectAnApplication": {
+    "defaultMessage": "Select an application"
+  },
+  "components.AddAvailableApplications.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "components.AddAvailableApplications.selectARelease": {
+    "defaultMessage": "Select a release"
+  },
+  "components.AddAvailableApplications.selectRelease": {
+    "defaultMessage": "Select Release"
+  },
   "components.BaseImageCollectionsTable.handleTitle": {
     "defaultMessage": "Handle",
     "description": "Title for the Handle column of the base image collections table"
@@ -280,6 +298,42 @@
   "components.DeleteModal.confirmPrompt": {
     "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
     "description": "Description of the action to perform to confirm the deletion modal"
+  },
+  "components.DeployedApplicationsTable.action": {
+    "defaultMessage": "Action"
+  },
+  "components.DeployedApplicationsTable.applicationName": {
+    "defaultMessage": "Application Name"
+  },
+  "components.DeployedApplicationsTable.error": {
+    "defaultMessage": "Error"
+  },
+  "components.DeployedApplicationsTable.noDeployedApplications": {
+    "defaultMessage": "No deployed applications"
+  },
+  "components.DeployedApplicationsTable.releaseVersion": {
+    "defaultMessage": "Release Version"
+  },
+  "components.DeployedApplicationsTable.startErrorFeedback": {
+    "defaultMessage": "Could not Start the Deployed Application, please try again."
+  },
+  "components.DeployedApplicationsTable.started": {
+    "defaultMessage": "Started"
+  },
+  "components.DeployedApplicationsTable.starting": {
+    "defaultMessage": "Starting"
+  },
+  "components.DeployedApplicationsTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.DeployedApplicationsTable.stopErrorFeedback": {
+    "defaultMessage": "Could not Stop the Deployed Application, please try again."
+  },
+  "components.DeployedApplicationsTable.stopped": {
+    "defaultMessage": "Stopped"
+  },
+  "components.DeployedApplicationsTable.stopping": {
+    "defaultMessage": "Stopping"
   },
   "components.DeviceGroupsTable.handleTitle": {
     "defaultMessage": "Handle",
@@ -995,6 +1049,15 @@
   },
   "pages.BaseImageCreate.title": {
     "defaultMessage": "Create Base Image"
+  },
+  "pages.Device.ApplicationsTab": {
+    "defaultMessage": "Applications"
+  },
+  "pages.Device.ApplicationsTab.DeployedApplications": {
+    "defaultMessage": "Deployed Applications"
+  },
+  "pages.Device.ApplicationsTab.InstallNewApp": {
+    "defaultMessage": "Add Available Applications"
   },
   "pages.Device.BatteryStatusTab": {
     "defaultMessage": "Battery"
