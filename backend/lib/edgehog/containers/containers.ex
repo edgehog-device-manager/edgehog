@@ -92,5 +92,6 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.ReleaseContainers
     resource Edgehog.Containers.Network
+    resource Edgehog.Containers.Volume
   end
 end
