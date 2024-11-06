@@ -30,6 +30,7 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
@@ -207,6 +208,18 @@ defmodule Edgehog.Devices.Device do
       end
 
       manual ManualActions.SendCreateDeployment
+    end
+
+    update :send_create_volume_request do
+      description "Send a create volume request to the device."
+
+      argument :volume, :struct do
+        constraints instance_of: Volume
+        description "The new volume for the device."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateVolume
     end
 
     update :remove_tags do
