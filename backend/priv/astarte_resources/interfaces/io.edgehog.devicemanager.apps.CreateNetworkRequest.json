@@ -1,0 +1,50 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.CreateNetworkRequest",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/network/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Create Network Request id",
+      "doc": "Unique id for the container network."
+    },
+    {
+      "endpoint": "/network/driver",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Network dirver",
+      "doc": "Name of the network driver plugin to use."
+    },
+    {
+      "endpoint": "/network/checkDuplicate",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Check duplicate networks",
+      "doc": "Check for networks with duplicate names."
+    },
+    {
+      "endpoint": "/network/internal",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Internal network",
+      "doc": "Restrict external access to the network."
+    },
+    {
+      "endpoint": "/network/enableIpv6",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Enable IPv6",
+      "doc": "Enable IPv6 on the network."
+    }
+  ]
+}
