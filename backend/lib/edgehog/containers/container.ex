@@ -68,6 +68,10 @@ defmodule Edgehog.Containers.Container do
     many_to_many :releases, Edgehog.Containers.Release do
       through Edgehog.Containers.ReleaseContainers
     end
+
+    many_to_many :networks, Edgehog.Containers.Network do
+      through Edgehog.Containers.ContainerNetwork
+    end
   end
 
   calculations do

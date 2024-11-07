@@ -23,25 +23,48 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
 
   use Ash.Resource.Actions.Implementation
 
+  alias Edgehog.Containers.Network
   alias Edgehog.Devices
 
   @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
     deployment = input.arguments.deployment
 
-    with {:ok, deployment} <- Ash.load(deployment, device: [], release: [containers: [:image]]) do
+    with {:ok, deployment} <-
+           Ash.load(deployment, device: [], release: [containers: [:image, :networks]]) do
       device = deployment.device
 
       release = deployment.release
       containers = release.containers
       images = containers |> Enum.map(& &1.image) |> Enum.uniq()
 
+      # send one network for each container, so that each container is isolated
+      networks =
+        containers
+        |> Enum.filter(&(&1.networks == []))
+        |> Enum.map(fn container ->
+          Network
+          |> Ash.Changeset.for_create(:create, %{driver: "bridge"})
+          |> Ash.Changeset.manage_relationship(:containers, [container], type: :create)
+          |> Ash.create!(tenant: deployment.tenant_id)
+        end)
+
       with :ok <- send_create_image_requests(device, images),
            :ok <- send_create_container_requests(device, containers),
+           :ok <- send_create_network_requests(device, networks),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
         {:ok, deployment}
       end
     end
+  end
+
+  defp send_create_network_requests(device, networks) do
+    Enum.reduce_while(networks, :ok, fn network, _acc ->
+      case Devices.send_create_network_request(device, network) do
+        {:ok, _device} -> {:cont, :ok}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
   end
 
   defp send_create_image_requests(device, images) do
