@@ -143,6 +143,11 @@ defmodule Edgehog.AstarteMockCase do
       Edgehog.Mocks.Astarte.Device.AvailableVolumes
     )
 
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableNetworksMock,
+      Edgehog.Mocks.Astarte.Device.AvailableNetworks
+    )
+
     :ok
   end
 end

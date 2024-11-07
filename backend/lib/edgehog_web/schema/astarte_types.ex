@@ -177,4 +177,13 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The volume status, wheather it was created or not."
     field :created, :boolean
   end
+
+  @desc "Describe the available networks on the device."
+  object :network_status do
+    @desc "The network id."
+    field :id, :string
+
+    @desc "Whether the network has been created."
+    field :created, :boolean
+  end
 end
