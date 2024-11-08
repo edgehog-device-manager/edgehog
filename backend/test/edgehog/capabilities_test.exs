@@ -57,7 +57,41 @@ defmodule Edgehog.CapabilitiesTest do
         "io.edgehog.devicemanager.SystemInfo" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.SystemStatus" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.config.Telemetry" => %InterfaceVersion{major: 0, minor: 1},
-        "io.edgehog.devicemanager.WiFiScanResults" => %InterfaceVersion{major: 0, minor: 1}
+        "io.edgehog.devicemanager.WiFiScanResults" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableContainers" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableDeployments" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableImages" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.CreateContainerRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeploymentRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateImageRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.DeploymentCommand" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentUpdate" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableNetworks" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableVolumes" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.CreateNetworkRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
       }
 
       expected_capabilities = [
@@ -65,6 +99,7 @@ defmodule Edgehog.CapabilitiesTest do
         :battery_status,
         :cellular_connection,
         :commands,
+        :container_management,
         :geolocation,
         :hardware_info,
         :led_behaviors,
