@@ -59,6 +59,7 @@ defmodule Edgehog.Containers do
 
       create Deployment, :deploy_release, :deploy do
         description "Deploy the application on a device"
+        relay_id_translations input: [release_id: :release, device_id: :device]
       end
 
       update Deployment, :start_deployment, :start
