@@ -7,15 +7,15 @@
   "aggregation": "object",
   "mappings": [
     {
-      "endpoint": "/%{release_id}/status",
+      "endpoint": "/%{deployment_id}/status",
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
       "description": "Deployment status",
-      "doc": "Possible values: [Idle, Starting, Started, Stopping, Stopped, Error]"
+      "doc": "Possible values: [Starting, Stopping, Updating, Error]"
     },
     {
-      "endpoint": "/%{release_id}/message",
+      "endpoint": "/%{deployment_id}/message",
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,

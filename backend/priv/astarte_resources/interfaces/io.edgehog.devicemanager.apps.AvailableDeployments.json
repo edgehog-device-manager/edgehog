@@ -7,10 +7,10 @@
   "mappings": [
     {
       "allow_unset": true,
-      "endpoint": "/%{release_id}/status",
+      "endpoint": "/%{deployment_id}/status",
       "type": "string",
       "description": "Status of the deployment",
-      "doc": "Possible values: [Idle, Starting, Started, Stopping, Stopped, Error]"
+      "doc": "Possible values: [Stopped, Started]"
     }
   ]
 }

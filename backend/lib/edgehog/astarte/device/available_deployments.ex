@@ -40,11 +40,8 @@ defmodule Edgehog.Astarte.Device.AvailableDeployments do
   defp parse_available_deployment({deployment_id, parameters}) do
     status =
       case parameters["status"] do
-        "Idle" -> :idle
-        "Starting" -> :starting
-        "Stopping" -> :stopping
         "Stopped" -> :stopped
-        "Error" -> :error
+        "Started" -> :started
       end
 
     %DeploymentStatus{

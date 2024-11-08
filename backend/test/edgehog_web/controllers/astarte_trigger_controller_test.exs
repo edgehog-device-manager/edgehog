@@ -427,7 +427,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
           path: "/" <> deployment.id,
           value: %{
-            "status" => "Started",
+            "status" => "Starting",
             "message" => ""
           }
         },
@@ -446,7 +446,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       assert response(conn, 200)
 
-      assert deployment.status == :started
+      assert deployment.status == :starting
     end
   end
 

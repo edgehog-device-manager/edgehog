@@ -171,7 +171,7 @@ defmodule Edgehog.AstarteFixtures do
       struct!(
         %DeploymentStatus{
           id: "1",
-          status: "Idle"
+          status: "Stopped"
         },
         opts
       )
