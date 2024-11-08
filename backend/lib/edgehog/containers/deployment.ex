@@ -80,7 +80,9 @@ defmodule Edgehog.Containers.Deployment do
   attributes do
     uuid_primary_key :id
 
-    attribute :status, DeploymentStatus
+    attribute :status, DeploymentStatus do
+      public? true
+    end
 
     timestamps()
   end
