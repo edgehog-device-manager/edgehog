@@ -116,11 +116,16 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   end
 
   defp handle_event(%IncomingData{interface: @available_deployments} = event, tenant, _realm_id, _device_id, _timestamp) do
-    "/" <> deployment_id = event.path
-    status = event.value["status"]
+    case String.split(event.path, "/") do
+      ["", deployment_id, "status"] ->
+        status = event.value
 
-    with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      Containers.deployment_set_status(deployment, status, tenant: tenant)
+        with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
+          Containers.deployment_set_status(deployment, status, tenant: tenant)
+        end
+
+      _ ->
+        {:error, :unsupported_event_path}
     end
   end
 
