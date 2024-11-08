@@ -1,0 +1,24 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.DeploymentUpdate",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/deployment/from",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Id of the deployment to update from"
+    },
+    {
+      "endpoint": "/deployment/to",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Id of the deployment to update to"
+    }
+  ]
+}
