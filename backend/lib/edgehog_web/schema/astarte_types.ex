@@ -165,7 +165,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The deployment id."
     field :id, :string
 
-    @desc "The deployment status, can be :idle, :starting, :started, :stopping, :stopped or :error"
+    @desc "The deployment status, can be :stopped or :started"
     field :status, :string
   end
 

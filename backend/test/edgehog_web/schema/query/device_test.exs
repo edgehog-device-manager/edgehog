@@ -653,7 +653,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
                |> device_query()
                |> extract_result!()
 
-      assert deployment["status"] == "Idle"
+      assert deployment["status"] == "Stopped"
     end
   end
 

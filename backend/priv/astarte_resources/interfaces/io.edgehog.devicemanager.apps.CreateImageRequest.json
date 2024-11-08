@@ -1,0 +1,36 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.CreateImageRequest",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "description": "Request to pull and create a container image.",
+  "doc": "The ttl of this datastream is short to keep the sensitive fields private.",
+  "mappings": [
+    {
+      "endpoint": "/image/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 600,
+      "description": "Create Image Request id",
+      "doc": "Unique id for the container image."
+    },
+    {
+      "endpoint": "/image/reference",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 600,
+      "description": "Image reference to be pulled",
+      "doc": "Name of the image to pull. It should be in the form [regitry-host[:port]/][image-repo/]image-name[:(tag|digest)]"
+    },
+    {
+      "endpoint": "/image/registryAuth",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 600,
+      "description": "Image registry authentication header",
+      "doc": "Optional base64url-encoded JSON for the auth configuration to the registry. An empty string means the image is public and doesn't require authentication. See https://docs.docker.com/reference/api/engine/version/v1.43/#section/Authentication for more information."
+    }
+  ]
+}
