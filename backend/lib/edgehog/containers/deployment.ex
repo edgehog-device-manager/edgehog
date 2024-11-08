@@ -87,6 +87,7 @@ defmodule Edgehog.Containers.Deployment do
 
   relationships do
     belongs_to :device, Edgehog.Devices.Device do
+      attribute_type :id
       public? true
     end
 
