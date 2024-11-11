@@ -28,6 +28,7 @@ defmodule Edgehog.Containers do
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.ImageCredentials
+  alias Edgehog.Containers.Release
 
   graphql do
     root_level_errors? true
@@ -47,6 +48,10 @@ defmodule Edgehog.Containers do
 
       get Application, :application, :read do
         description "Returns the desired application."
+      end
+
+      get Release, :release, :read do
+        description "Returns the desired release."
       end
     end
 
