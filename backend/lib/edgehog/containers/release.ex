@@ -64,6 +64,7 @@ defmodule Edgehog.Containers.Release do
 
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ReleaseContainers
+      public? true
     end
   end
 

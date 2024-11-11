@@ -21,7 +21,12 @@
 defmodule Edgehog.Containers.Network do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
+
+  graphql do
+    type :network
+  end
 
   actions do
     defaults [:read, :destroy, create: [:driver, :check_duplicate, :internal, :enable_ipv6]]
@@ -33,21 +38,25 @@ defmodule Edgehog.Containers.Network do
     attribute :driver, :string do
       default "bridge"
       allow_nil? false
+      public? true
     end
 
     attribute :check_duplicate, :boolean do
       default false
       allow_nil? false
+      public? true
     end
 
     attribute :internal, :boolean do
       default false
       allow_nil? false
+      public? true
     end
 
     attribute :enable_ipv6, :boolean do
       default false
       allow_nil? false
+      public? true
     end
 
     timestamps()

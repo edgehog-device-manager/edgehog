@@ -21,9 +21,14 @@
 defmodule Edgehog.Containers.Image do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.ImageCredentials
+
+  graphql do
+    type :image
+  end
 
   actions do
     defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
@@ -34,6 +39,7 @@ defmodule Edgehog.Containers.Image do
 
     attribute :reference, :string do
       allow_nil? false
+      public? true
     end
 
     timestamps()
@@ -43,6 +49,7 @@ defmodule Edgehog.Containers.Image do
     belongs_to :credentials, ImageCredentials do
       source_attribute :image_credentials_id
       attribute_type :uuid
+      public? true
     end
   end
 

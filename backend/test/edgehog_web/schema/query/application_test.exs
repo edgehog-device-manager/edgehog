@@ -77,13 +77,12 @@ defmodule EdgehogWeb.Schema.Query.ApplicationsTest do
     document = Keyword.get(opts, :document, default_document)
 
     id = Keyword.fetch!(opts, :id)
-    variables = dbg(%{"id" => id})
+    variables = %{"id" => id}
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 
   def extract_result!(result) do
-    dbg(result)
     refute :errors in Map.keys(result)
     assert %{data: data} = result
     assert data != nil

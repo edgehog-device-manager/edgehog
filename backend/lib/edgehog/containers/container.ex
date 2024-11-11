@@ -21,11 +21,17 @@
 defmodule Edgehog.Containers.Container do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Types.RestartPolicy
+
+  graphql do
+    type :container
+    paginate_relationship_with networks: :relay
+  end
 
   actions do
     defaults [
@@ -39,20 +45,25 @@ defmodule Edgehog.Containers.Container do
   attributes do
     uuid_primary_key :id
 
-    attribute :restart_policy, RestartPolicy
+    attribute :restart_policy, RestartPolicy do
+      public? true
+    end
 
     attribute :hostname, :string do
       constraints allow_empty?: true
       default ""
       allow_nil? false
+      public? true
     end
 
     attribute :env, :map do
       default %{}
+      public? true
     end
 
     attribute :privileged, :boolean do
       default false
+      public? true
     end
 
     timestamps()
@@ -63,6 +74,7 @@ defmodule Edgehog.Containers.Container do
       source_attribute :image_id
       attribute_type :uuid
       allow_nil? false
+      public? true
     end
 
     many_to_many :releases, Edgehog.Containers.Release do
@@ -71,6 +83,7 @@ defmodule Edgehog.Containers.Container do
 
     many_to_many :networks, Edgehog.Containers.Network do
       through Edgehog.Containers.ContainerNetwork
+      public? true
     end
   end
 
