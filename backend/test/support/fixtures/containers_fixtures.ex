@@ -113,7 +113,7 @@ defmodule Edgehog.ContainersFixtures do
         image_id: image_id
       })
 
-    Ash.create!(Container, params, tenant: tenant)
+    Container |> Ash.Changeset.for_create(:create, params, tenant: tenant) |> Ash.create!()
   end
 
   @doc """

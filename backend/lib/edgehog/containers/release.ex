@@ -32,7 +32,22 @@ defmodule Edgehog.Containers.Release do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:application_id, :version]]
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+
+      accept [:application_id, :version]
+
+      argument :containers, {:array, :map}
+
+      # TODO this should be a manual change, checking for existing containers,
+      # for now each new release creates brand new containers
+      change manage_relationship(:containers,
+               on_no_match: {:create, :create_with_nested},
+               on_match: :ignore
+             )
+    end
   end
 
   validations do

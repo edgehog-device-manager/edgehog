@@ -30,7 +30,16 @@ defmodule Edgehog.Containers.Application do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:name, :description], update: [:name, :description]]
+    defaults [:read, :destroy, update: [:name, :description]]
+
+    create :create do
+      primary? true
+      accept [:name, :description]
+
+      argument :initial_release, :map
+
+      change manage_relationship(:initial_release, :releases, type: :create)
+    end
   end
 
   attributes do
