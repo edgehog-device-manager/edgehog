@@ -52,7 +52,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         env: env_encoding,
         binds: [],
         networks: Enum.map(container.networks, & &1.id),
-        portBindings: [],
+        portBindings: container.port_bindings,
         privileged: container.privileged
       }
 
