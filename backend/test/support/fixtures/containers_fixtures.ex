@@ -27,6 +27,7 @@ defmodule Edgehog.ContainersFixtures do
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.ReleaseContainers
 
@@ -80,6 +81,14 @@ defmodule Edgehog.ContainersFixtures do
       tenant: tenant
     )
     |> Ash.create!()
+  end
+
+  def network_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params = Map.new(opts)
+
+    Ash.create!(Network, params, tenant: tenant)
   end
 
   def image_fixture(opts \\ []) do

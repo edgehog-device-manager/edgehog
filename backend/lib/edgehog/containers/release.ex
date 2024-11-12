@@ -28,6 +28,7 @@ defmodule Edgehog.Containers.Release do
 
   graphql do
     type :release
+    paginate_relationship_with containers: :relay
   end
 
   actions do
@@ -64,6 +65,7 @@ defmodule Edgehog.Containers.Release do
 
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ReleaseContainers
+      public? true
     end
   end
 
