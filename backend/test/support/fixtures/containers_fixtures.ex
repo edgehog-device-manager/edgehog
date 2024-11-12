@@ -37,6 +37,16 @@ defmodule Edgehog.ContainersFixtures do
   def unique_application_name, do: "application#{System.unique_integer()}"
 
   @doc """
+  Generate a unique application description.
+  """
+  def unique_application_description, do: "application_description#{System.unique_integer()}"
+
+  @doc """
+  Generate a unique container hostname.
+  """
+  def unique_container_hostname, do: "hostname#{System.unique_integer()}"
+
+  @doc """
   Generate a unique image reference.
   """
   def unique_image_reference, do: "image#{System.unique_integer()}"
@@ -113,7 +123,7 @@ defmodule Edgehog.ContainersFixtures do
         image_id: image_id
       })
 
-    Container |> Ash.Changeset.for_create(:create, params, tenant: tenant) |> Ash.create!()
+    Ash.create!(Container, params, tenant: tenant)
   end
 
   @doc """
