@@ -287,6 +287,9 @@ enum DeviceCapability {
   "The device supports commands, for example the rebooting command."
   COMMANDS
 
+  "The device supports running applications using containers."
+  CONTAINER_MANAGEMENT
+
   "The device can be geolocated."
   GEOLOCATION
 
@@ -411,10 +414,19 @@ enum NetworkInterfaceTechnology {
 }
 
 enum ApplicationDeploymentStatus {
+  "The deployment process entered an error state."
   ERROR
+
+  "The deployment is running."
   STARTED
+
+  "The deployment is starting."
   STARTING
+
+  "The deployment has stopped."
   STOPPED
+
+  "The deploymen is stopping."
   STOPPING
 }
 
@@ -817,45 +829,69 @@ type MutationError {
   fields: [String!]
 }
 
-enum ApplicationReleaseSortField {
+enum NetworkSortField {
   ID
-  VERSION
-  APPLICATION_ID
+  DRIVER
+  CHECK_DUPLICATE
+  INTERNAL
+  ENABLE_IPV6
 }
 
-":application_release connection"
-type ApplicationReleaseConnection {
+":network connection"
+type NetworkConnection {
   "Total count on all pages"
   count: Int
 
   "Page information"
   pageInfo: PageInfo!
 
-  ":application_release edges"
-  edges: [ApplicationReleaseEdge!]
+  ":network edges"
+  edges: [NetworkEdge!]
 }
 
-":application_release edge"
-type ApplicationReleaseEdge {
+":network edge"
+type NetworkEdge {
   "Cursor"
   cursor: String!
 
-  ":application_release node"
-  node: ApplicationRelease!
+  ":network node"
+  node: Network!
 }
 
-input ApplicationReleaseFilterApplicationId {
+input NetworkFilterEnableIpv6 {
   isNil: Boolean
-  eq: ID
-  notEq: ID
-  in: [ID]
-  lessThan: ID
-  greaterThan: ID
-  lessThanOrEqual: ID
-  greaterThanOrEqual: ID
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
 }
 
-input ApplicationReleaseFilterVersion {
+input NetworkFilterInternal {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input NetworkFilterCheckDuplicate {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input NetworkFilterDriver {
   isNil: Boolean
   eq: String
   notEq: String
@@ -868,7 +904,7 @@ input ApplicationReleaseFilterVersion {
   ilike: String
 }
 
-input ApplicationReleaseFilterId {
+input NetworkFilterId {
   isNil: Boolean
   eq: ID
   notEq: ID
@@ -879,26 +915,132 @@ input ApplicationReleaseFilterId {
   greaterThanOrEqual: ID
 }
 
-input ApplicationReleaseFilterInput {
-  and: [ApplicationReleaseFilterInput!]
-  or: [ApplicationReleaseFilterInput!]
-  not: [ApplicationReleaseFilterInput!]
-  id: ApplicationReleaseFilterId
-  version: ApplicationReleaseFilterVersion
-  applicationId: ApplicationReleaseFilterApplicationId
-  application: ApplicationFilterInput
+input NetworkFilterInput {
+  and: [NetworkFilterInput!]
+  or: [NetworkFilterInput!]
+  not: [NetworkFilterInput!]
+  id: NetworkFilterId
+  driver: NetworkFilterDriver
+  checkDuplicate: NetworkFilterCheckDuplicate
+  internal: NetworkFilterInternal
+  enableIpv6: NetworkFilterEnableIpv6
 }
 
-input ApplicationReleaseSortInput {
+input NetworkSortInput {
   order: SortOrder
-  field: ApplicationReleaseSortField!
+  field: NetworkSortField!
 }
 
-type ApplicationRelease {
+type Network {
+  id: ID!
+  driver: String!
+  checkDuplicate: Boolean!
+  internal: Boolean!
+  enableIpv6: Boolean!
+}
+
+enum ReleaseSortField {
+  ID
+  VERSION
+  APPLICATION_ID
+}
+
+":release connection"
+type ReleaseConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":release edges"
+  edges: [ReleaseEdge!]
+}
+
+":release edge"
+type ReleaseEdge {
+  "Cursor"
+  cursor: String!
+
+  ":release node"
+  node: Release!
+}
+
+input ReleaseFilterApplicationId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ReleaseFilterVersion {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ReleaseFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ReleaseFilterInput {
+  and: [ReleaseFilterInput!]
+  or: [ReleaseFilterInput!]
+  not: [ReleaseFilterInput!]
+  id: ReleaseFilterId
+  version: ReleaseFilterVersion
+  applicationId: ReleaseFilterApplicationId
+  application: ApplicationFilterInput
+  containers: ContainerFilterInput
+}
+
+input ReleaseSortInput {
+  order: SortOrder
+  field: ReleaseSortField!
+}
+
+type Release implements Node {
   id: ID!
   version: String!
   applicationId: ID
   application: Application
+  containers(
+    "How to sort the records in the response"
+    sort: [ContainerSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerConnection!
 }
 
 "The result of the :delete_image_credentials mutation"
@@ -1010,67 +1152,7 @@ type ImageCredentials implements Node {
   username: String!
 }
 
-"The result of the :stop_deployment mutation"
-type StopDeploymentResult {
-  "The successful result of the mutation"
-  result: ApplicationDeployment
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
-"The result of the :start_deployment mutation"
-type StartDeploymentResult {
-  "The successful result of the mutation"
-  result: ApplicationDeployment
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
-"The result of the :deploy_release mutation"
-type DeployReleaseResult {
-  "The successful result of the mutation"
-  result: ApplicationDeployment
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
-input DeployReleaseInput {
-  deviceId: ID
-  releaseId: ID
-}
-
-enum ApplicationDeploymentSortField {
-  ID
-  STATUS
-  DEVICE_ID
-  RELEASE_ID
-}
-
-":application_deployment connection"
-type ApplicationDeploymentConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":application_deployment edges"
-  edges: [ApplicationDeploymentEdge!]
-}
-
-":application_deployment edge"
-type ApplicationDeploymentEdge {
-  "Cursor"
-  cursor: String!
-
-  ":application_deployment node"
-  node: ApplicationDeployment!
-}
-
-input ApplicationDeploymentFilterReleaseId {
+input ImageFilterImageCredentialsId {
   isNil: Boolean
   eq: ID
   notEq: ID
@@ -1081,29 +1163,20 @@ input ApplicationDeploymentFilterReleaseId {
   greaterThanOrEqual: ID
 }
 
-input ApplicationDeploymentFilterDeviceId {
+input ImageFilterReference {
   isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
 }
 
-input ApplicationDeploymentFilterStatus {
-  isNil: Boolean
-  eq: ApplicationDeploymentStatus
-  notEq: ApplicationDeploymentStatus
-  in: [ApplicationDeploymentStatus]
-  lessThan: ApplicationDeploymentStatus
-  greaterThan: ApplicationDeploymentStatus
-  lessThanOrEqual: ApplicationDeploymentStatus
-  greaterThanOrEqual: ApplicationDeploymentStatus
-}
-
-input ApplicationDeploymentFilterId {
+input ImageFilterId {
   isNil: Boolean
   eq: ID
   notEq: ID
@@ -1114,30 +1187,298 @@ input ApplicationDeploymentFilterId {
   greaterThanOrEqual: ID
 }
 
-input ApplicationDeploymentFilterInput {
-  and: [ApplicationDeploymentFilterInput!]
-  or: [ApplicationDeploymentFilterInput!]
-  not: [ApplicationDeploymentFilterInput!]
-  id: ApplicationDeploymentFilterId
-  status: ApplicationDeploymentFilterStatus
-  deviceId: ApplicationDeploymentFilterDeviceId
-  releaseId: ApplicationDeploymentFilterReleaseId
+input ImageFilterInput {
+  and: [ImageFilterInput!]
+  or: [ImageFilterInput!]
+  not: [ImageFilterInput!]
+  id: ImageFilterId
+  reference: ImageFilterReference
+  imageCredentialsId: ImageFilterImageCredentialsId
+  credentials: ImageCredentialsFilterInput
+}
+
+type Image {
+  id: ID!
+  reference: String!
+  imageCredentialsId: ID
+  credentials: ImageCredentials
+}
+
+"The result of the :stop_deployment mutation"
+type StopDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :start_deployment mutation"
+type StartDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :deploy_release mutation"
+type DeployReleaseResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input DeployReleaseInput {
+  deviceId: ID
+  releaseId: ID
+}
+
+enum DeploymentSortField {
+  ID
+  STATUS
+  DEVICE_ID
+  RELEASE_ID
+}
+
+":deployment connection"
+type DeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":deployment edges"
+  edges: [DeploymentEdge!]
+}
+
+":deployment edge"
+type DeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":deployment node"
+  node: Deployment!
+}
+
+input DeploymentFilterReleaseId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentFilterDeviceId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentFilterStatus {
+  isNil: Boolean
+  eq: ApplicationDeploymentStatus
+  notEq: ApplicationDeploymentStatus
+  in: [ApplicationDeploymentStatus]
+  lessThan: ApplicationDeploymentStatus
+  greaterThan: ApplicationDeploymentStatus
+  lessThanOrEqual: ApplicationDeploymentStatus
+  greaterThanOrEqual: ApplicationDeploymentStatus
+}
+
+input DeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentFilterInput {
+  and: [DeploymentFilterInput!]
+  or: [DeploymentFilterInput!]
+  not: [DeploymentFilterInput!]
+  id: DeploymentFilterId
+  status: DeploymentFilterStatus
+  deviceId: DeploymentFilterDeviceId
+  releaseId: DeploymentFilterReleaseId
   device: DeviceFilterInput
-  release: ApplicationReleaseFilterInput
+  release: ReleaseFilterInput
 }
 
-input ApplicationDeploymentSortInput {
+input DeploymentSortInput {
   order: SortOrder
-  field: ApplicationDeploymentSortField!
+  field: DeploymentSortField!
 }
 
-type ApplicationDeployment {
+type Deployment {
   id: ID!
   status: ApplicationDeploymentStatus
   deviceId: Int
   releaseId: ID
   device: Device
-  release: ApplicationRelease
+  release: Release
+}
+
+enum ContainerSortField {
+  ID
+  RESTART_POLICY
+  HOSTNAME
+  ENV
+  PRIVILEGED
+  IMAGE_ID
+}
+
+":container connection"
+type ContainerConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container edges"
+  edges: [ContainerEdge!]
+}
+
+":container edge"
+type ContainerEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container node"
+  node: Container!
+}
+
+input ContainerFilterImageId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerFilterPrivileged {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input ContainerFilterEnv {
+  isNil: Boolean
+  eq: JsonString
+  notEq: JsonString
+  in: [JsonString]
+  lessThan: JsonString
+  greaterThan: JsonString
+  lessThanOrEqual: JsonString
+  greaterThanOrEqual: JsonString
+}
+
+input ContainerFilterHostname {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterRestartPolicy {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input ContainerFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerFilterInput {
+  and: [ContainerFilterInput!]
+  or: [ContainerFilterInput!]
+  not: [ContainerFilterInput!]
+  id: ContainerFilterId
+  restartPolicy: ContainerFilterRestartPolicy
+  hostname: ContainerFilterHostname
+  env: ContainerFilterEnv
+  privileged: ContainerFilterPrivileged
+  imageId: ContainerFilterImageId
+  image: ImageFilterInput
+  networks: NetworkFilterInput
+}
+
+input ContainerSortInput {
+  order: SortOrder
+  field: ContainerSortField!
+}
+
+type Container {
+  id: ID!
+  restartPolicy: String
+  portBindings: [String!]!
+  hostname: String!
+  env: JsonString
+  privileged: Boolean
+  imageId: ID!
+  image: Image!
+  networks(
+    "How to sort the records in the response"
+    sort: [NetworkSortInput]
+
+    "A filter to limit the results"
+    filter: NetworkFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): NetworkConnection!
 }
 
 enum ApplicationSortField {
@@ -1205,7 +1546,7 @@ input ApplicationFilterInput {
   id: ApplicationFilterId
   name: ApplicationFilterName
   description: ApplicationFilterDescription
-  releases: ApplicationReleaseFilterInput
+  releases: ReleaseFilterInput
 }
 
 input ApplicationSortInput {
@@ -1219,10 +1560,10 @@ type Application implements Node {
   description: String
   releases(
     "How to sort the records in the response"
-    sort: [ApplicationReleaseSortInput]
+    sort: [ReleaseSortInput]
 
     "A filter to limit the results"
-    filter: ApplicationReleaseFilterInput
+    filter: ReleaseFilterInput
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -1235,7 +1576,7 @@ type Application implements Node {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): ApplicationReleaseConnection!
+  ): ReleaseConnection!
 }
 
 enum SystemModelPartNumberSortField {
@@ -1922,7 +2263,7 @@ input DeviceFilterInput {
   "The existing OTA operations for this device"
   otaOperations: OtaOperationFilterInput
 
-  applicationDeployments: ApplicationDeploymentFilterInput
+  applicationDeployments: DeploymentFilterInput
 }
 
 input DeviceSortInput {
@@ -2008,10 +2349,10 @@ type Device implements Node {
 
   applicationDeployments(
     "How to sort the records in the response"
-    sort: [ApplicationDeploymentSortInput]
+    sort: [DeploymentSortInput]
 
     "A filter to limit the results"
-    filter: ApplicationDeploymentFilterInput
+    filter: DeploymentFilterInput
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -2024,9 +2365,13 @@ type Device implements Node {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): ApplicationDeploymentConnection!
+  ): DeploymentConnection!
 
   availableImages: [ImageStatus!]
+
+  availableVolumes: [VolumeStatus!]
+
+  availableNetworks: [NetworkStatus!]
 
   "The capabilities that the device can support."
   capabilities: [DeviceCapability!]!
@@ -3188,10 +3533,7 @@ type RootQueryType {
     filter: SystemModelFilterInput
   ): [SystemModel!]!
 
-  "Returns the desired application."
-  application("The id of the record" id: ID!): Application
-
-  "Returns all available applications."
+  "Returns all the available applications."
   applications(
     "How to sort the records in the response"
     sort: [ApplicationSortInput]
@@ -3211,6 +3553,9 @@ type RootQueryType {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): KeysetPageOfApplication
+
+  "Returns the desired application."
+  application("The id of the record" id: ID!): Application
 
   "Returns the desired image credentials."
   imageCredentials("The id of the record" id: ID!): ImageCredentials
@@ -3235,6 +3580,9 @@ type RootQueryType {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): KeysetPageOfImageCredentials
+
+  "Returns the desired release."
+  release("The id of the record" id: ID!): Release
 
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
@@ -3340,11 +3688,13 @@ type RootMutationType {
   "Deletes a system model."
   deleteSystemModel(id: ID!): DeleteSystemModelResult
 
-  "Deploy the application on  a device"
+  "Deploy the application on a device"
   deployRelease(input: DeployReleaseInput): DeployReleaseResult
 
+  "Sends a :start command to the release on the device."
   startDeployment(id: ID!): StartDeploymentResult
 
+  "Sends a :stop command to the release on the device."
   stopDeployment(id: ID!): StopDeploymentResult
 
   "Create image credentials."
@@ -3377,6 +3727,13 @@ type RootMutationType {
   "Deletes a base image collection."
   deleteBaseImageCollection(id: ID!): DeleteBaseImageCollectionResult
 }
+
+"""
+The `Json` scalar type represents arbitrary json string data, represented as UTF-8
+character sequences. The Json type is most often used to represent a free-form
+human-readable json string.
+"""
+scalar JsonString
 
 """
 The `Json` scalar type represents arbitrary json string data, represented as UTF-8
@@ -3522,7 +3879,7 @@ type ImageStatus {
   "The image id."
   id: String
 
-  "Wether the container is pulled or not."
+  "Whether the image is pulled or not."
   pulled: Boolean
 }
 
@@ -3531,6 +3888,24 @@ type DeploymentStatus {
   "The deployment id."
   id: String
 
-  "The deployment status, can be :idle, :starting, :started, :stopping, :stopped or :error"
+  "The deployment status, can be :stopped or :started"
   status: String
+}
+
+"Describes the status of a volume on a device."
+type VolumeStatus {
+  "The volume id."
+  id: String
+
+  "The volume status, wheather it was created or not."
+  created: Boolean
+}
+
+"Describe the available networks on the device."
+type NetworkStatus {
+  "The network id."
+  id: String
+
+  "Whether the network has been created."
+  created: Boolean
 }
