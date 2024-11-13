@@ -50,6 +50,9 @@ import UpdateCampaigns from "pages/UpdateCampaigns";
 import Login from "pages/Login";
 import Logout from "pages/Logout";
 import AttemptLogin from "pages/AttemptLogin";
+import Applications from "pages/Applications";
+import Application from "pages/Application";
+import Release from "pages/Release";
 
 import { version, repository, bugs } from "../package.json";
 
@@ -90,6 +93,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.updateCampaigns, element: <UpdateCampaigns /> },
   { path: Route.updateCampaignsNew, element: <UpdateCampaignCreate /> },
   { path: Route.updateCampaignsEdit, element: <UpdateCampaign /> },
+  { path: Route.applications, element: <Applications /> },
+  { path: Route.application, element: <Application /> },
+  { path: Route.release, element: <Release /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

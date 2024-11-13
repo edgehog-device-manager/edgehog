@@ -205,6 +205,26 @@ const Sidebar = () => (
         ]}
       />
     </SidebarItemGroup>
+    <SidebarItemGroup
+      label={
+        <FormattedMessage
+          id="components.Sidebar.applicationsLabel"
+          defaultMessage="Applications"
+        />
+      }
+      icon="applications"
+    >
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.applicationsLabel"
+            defaultMessage="Applications"
+          />
+        }
+        route={Route.applications}
+        activeRoutes={[Route.applications, Route.application, Route.release]}
+      />
+    </SidebarItemGroup>
   </Navbar>
 );
 
