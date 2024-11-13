@@ -40,6 +40,18 @@ defmodule Edgehog.Containers.Container do
       create: [:port_bindings, :restart_policy, :hostname, :env, :privileged, :image_id],
       update: [:port_bindings, :restart_policy, :hostname, :env, :privileged, :image_id]
     ]
+
+    create :create_with_nested do
+      accept [:restart_policy, :hostname, :env, :privileged]
+
+      argument :image, :map
+
+      change manage_relationship(:image,
+               on_no_match: :create,
+               on_lookup: :relate,
+               on_match: :ignore
+             )
+    end
   end
 
   attributes do

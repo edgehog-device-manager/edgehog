@@ -56,6 +56,14 @@ defmodule Edgehog.Containers do
     end
 
     mutations do
+      create Application, :create_application, :create do
+        description "Create a new application."
+      end
+
+      create Release, :create_release, :create do
+        description "Create a new release."
+      end
+
       create ImageCredentials, :create_image_credentials, :create do
         description "Create image credentials."
       end
