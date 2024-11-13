@@ -37,8 +37,8 @@ defmodule Edgehog.Containers.Container do
     defaults [
       :read,
       :destroy,
-      create: [:restart_policy, :hostname, :env, :privileged, :image_id],
-      update: [:restart_policy, :hostname, :env, :privileged, :image_id]
+      create: [:port_bindings, :restart_policy, :hostname, :env, :privileged, :image_id],
+      update: [:port_bindings, :restart_policy, :hostname, :env, :privileged, :image_id]
     ]
   end
 
@@ -46,6 +46,12 @@ defmodule Edgehog.Containers.Container do
     uuid_primary_key :id
 
     attribute :restart_policy, RestartPolicy do
+      public? true
+    end
+
+    attribute :port_bindings, {:array, :string} do
+      default []
+      allow_nil? false
       public? true
     end
 
