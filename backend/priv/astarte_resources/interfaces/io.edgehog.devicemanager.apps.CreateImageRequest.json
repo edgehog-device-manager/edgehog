@@ -13,6 +13,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 600,
+      "reliability": "guaranteed",
       "description": "Create Image Request id",
       "doc": "Unique id for the container image."
     },
@@ -21,6 +22,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 600,
+      "reliability": "guaranteed",
       "description": "Image reference to be pulled",
       "doc": "Name of the image to pull. It should be in the form [regitry-host[:port]/][image-repo/]image-name[:(tag|digest)]"
     },
@@ -29,6 +31,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 600,
+      "reliability": "guaranteed",
       "description": "Image registry authentication header",
       "doc": "Optional base64url-encoded JSON for the auth configuration to the registry. An empty string means the image is public and doesn't require authentication. See https://docs.docker.com/reference/api/engine/version/v1.43/#section/Authentication for more information."
     }

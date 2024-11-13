@@ -40,9 +40,9 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateNetwork do
       data = %RequestData{
         id: network.id,
         driver: network.driver,
-        checkDuplicate: network.check_duplicate,
         internal: network.internal,
-        enableIpv6: network.enable_ipv6
+        enableIpv6: network.enable_ipv6,
+        options: network.options
       }
 
       with :ok <-

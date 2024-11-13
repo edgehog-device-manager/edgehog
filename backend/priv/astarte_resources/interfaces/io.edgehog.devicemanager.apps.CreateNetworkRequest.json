@@ -11,6 +11,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Create Network Request id",
       "doc": "Unique id for the container network."
     },
@@ -19,22 +20,16 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
-      "description": "Network dirver",
+      "reliability": "guaranteed",
+      "description": "Network driver",
       "doc": "Name of the network driver plugin to use."
-    },
-    {
-      "endpoint": "/network/checkDuplicate",
-      "type": "boolean",
-      "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
-      "description": "Check duplicate networks",
-      "doc": "Check for networks with duplicate names."
     },
     {
       "endpoint": "/network/internal",
       "type": "boolean",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Internal network",
       "doc": "Restrict external access to the network."
     },
@@ -43,8 +38,18 @@
       "type": "boolean",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Enable IPv6",
       "doc": "Enable IPv6 on the network."
+    },
+    {
+      "endpoint": "/network/options",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Network driver options",
+      "doc": "An array of key=value options to set for the driver."
     }
   ]
 }

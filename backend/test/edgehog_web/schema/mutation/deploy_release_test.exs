@@ -41,7 +41,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     expect(CreateImageRequestMock, :send_create_image_request, images, fn _, _, _ -> :ok end)
 
     expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
-      assert data.networks != []
+      assert data.networkIds != []
       :ok
     end)
 

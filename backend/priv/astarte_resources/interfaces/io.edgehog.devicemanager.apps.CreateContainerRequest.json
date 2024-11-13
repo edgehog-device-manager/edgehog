@@ -11,6 +11,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Create Container Request id",
       "doc": "Unique id for the container."
     },
@@ -19,6 +20,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container image id",
       "doc": "The id of the image to use when creating the container."
     },
@@ -27,6 +29,7 @@
       "type": "stringarray",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container network ids",
       "doc": "The ids of the network to connect with the container."
     },
@@ -35,6 +38,7 @@
       "type": "stringarray",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container volume ids",
       "doc": "The ids of the volumes to mount on the container."
     },
@@ -43,6 +47,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container image",
       "doc": "TODO: this will be remove (by only sending the image_id), when it will be supported on the device."
     },
@@ -51,6 +56,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container hostname",
       "doc": "The hostname to use for the container, as a valid RFC 1123 hostname."
     },
@@ -59,6 +65,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container restart policy",
       "doc": "The behavior to apply when the container exits. Possible values are: ['', 'no', 'always' 'unless-stopped', 'on-failure']"
     },
@@ -67,6 +74,7 @@
       "type": "stringarray",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container environment",
       "doc": "Array of KEY=value environment variables"
     },
@@ -75,22 +83,25 @@
       "type": "stringarray",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container binds",
-      "doc": "Array of binds"
+      "doc": "A list of volume bindings for this container. Each volume binding is a string in one of these forms: host-src:container-dest[:options], or volume-name:container-dest[:options]. The container-dest must be an absolute path."
     },
     {
-      "endpoint": "/container/networks",
-      "type": "stringarray",
+      "endpoint": "/container/networkMode",
+      "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
-      "description": "Network configuration name",
-      "doc": "Name or id of an existing container network, inside the container runtime, to connect to."
+      "reliability": "guaranteed",
+      "description": "Network mode used for this container.",
+      "doc": "Supported standard values are: bridge, host, none, and container:<name|id>. Any other value is taken as a custom network's name to which this container should connect to. If you are using a different container engine than docker, there could be other values."
     },
     {
       "endpoint": "/container/portBindings",
       "type": "stringarray",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Container port bindings",
       "doc": "Array of ip:[host_port:]container_port[/protocol] | [hostPort:]containerPort[/protocol]. Protocol is TCP by default"
     },
@@ -99,6 +110,7 @@
       "type": "boolean",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
       "description": "Run privileged",
       "doc": "Runs the exec process with extended privileges."
     }

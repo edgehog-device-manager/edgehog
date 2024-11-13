@@ -24,16 +24,16 @@ defmodule Edgehog.Astarte.Device.CreateNetworkRequest.RequestData do
   defstruct [
     :id,
     :driver,
-    :checkDuplicate,
     :internal,
-    :enableIpv6
+    :enableIpv6,
+    :options
   ]
 
   @type t() :: %__MODULE__{
           id: String.t(),
           driver: String.t(),
-          checkDuplicate: boolean(),
           internal: boolean(),
-          enableIpv6: boolean()
+          enableIpv6: boolean(),
+          options: [String.t()]
         }
 end
