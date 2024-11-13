@@ -36,7 +36,7 @@ defmodule Edgehog.Astarte.Device.CreateNetworkRequest do
         client,
         device_id,
         @interface,
-        "/container",
+        "/network",
         request_data
       )
 

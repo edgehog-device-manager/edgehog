@@ -45,13 +45,13 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         id: container.id,
         imageId: container.image_id,
         image: image.reference,
-        networkIds: [],
         volumeIds: [],
         hostname: container.hostname,
         restartPolicy: restart_policy,
         env: env_encoding,
         binds: [],
-        networks: Enum.map(container.networks, & &1.id),
+        networkIds: Enum.map(container.networks, & &1.id),
+        networkMode: container.network_mode,
         portBindings: container.port_bindings,
         privileged: container.privileged
       }

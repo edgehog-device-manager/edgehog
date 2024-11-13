@@ -37,8 +37,24 @@ defmodule Edgehog.Containers.Container do
     defaults [
       :read,
       :destroy,
-      create: [:port_bindings, :restart_policy, :hostname, :env, :privileged, :image_id],
-      update: [:port_bindings, :restart_policy, :hostname, :env, :privileged, :image_id]
+      create: [
+        :port_bindings,
+        :restart_policy,
+        :hostname,
+        :network_mode,
+        :env,
+        :privileged,
+        :image_id
+      ],
+      update: [
+        :port_bindings,
+        :restart_policy,
+        :hostname,
+        :network_mode,
+        :env,
+        :privileged,
+        :image_id
+      ]
     ]
 
     create :create_with_nested do
@@ -82,6 +98,12 @@ defmodule Edgehog.Containers.Container do
     attribute :privileged, :boolean do
       default false
       public? true
+    end
+
+    attribute :network_mode, :string do
+      default "bridge"
+      public? true
+      allow_nil? false
     end
 
     timestamps()

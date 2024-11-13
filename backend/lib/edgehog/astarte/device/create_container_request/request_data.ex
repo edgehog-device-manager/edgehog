@@ -29,12 +29,12 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
     :imageId,
     :image,
     :networkIds,
-    :volumeIds,
     :hostname,
     :restartPolicy,
     :env,
     :binds,
-    :networks,
+    :volumeIds,
+    :networkMode,
     :portBindings,
     :privileged
   ]
@@ -43,13 +43,13 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
           id: String.t(),
           imageId: String.t(),
           image: String.t(),
-          networkIds: list(String.t()),
           volumeIds: list(String.t()),
           hostname: String.t(),
           restartPolicy: String.t(),
           env: list(tuple()),
           binds: list(String.t()),
-          networks: list(String.t()),
+          networkIds: list(String.t()),
+          networkMode: String.t(),
           portBindings: list(String.t()),
           privileged: String.t()
         }

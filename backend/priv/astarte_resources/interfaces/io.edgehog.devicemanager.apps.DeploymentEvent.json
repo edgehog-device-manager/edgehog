@@ -12,7 +12,7 @@
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
       "description": "Deployment status",
-      "doc": "Possible values: [Starting, Stopping, Updating, Error]"
+      "doc": "Possible values: [Starting, Stopping, Updating, Deleting, Error]"
     },
     {
       "endpoint": "/%{deployment_id}/message",

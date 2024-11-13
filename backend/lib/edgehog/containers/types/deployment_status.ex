@@ -22,6 +22,7 @@ defmodule Edgehog.Containers.Types.DeploymentStatus do
   @moduledoc false
   use Ash.Type.Enum,
     values: [
+      deleting: "The deployment is being deleted",
       error: "The deployment process entered an error state.",
       started: "The deployment is running.",
       starting: "The deployment is starting.",

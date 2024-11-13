@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Network do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:driver, :check_duplicate, :internal, :enable_ipv6]]
+    defaults [:read, :destroy, create: [:driver, :internal, :enable_ipv6, :options]]
   end
 
   attributes do
@@ -37,12 +37,6 @@ defmodule Edgehog.Containers.Network do
 
     attribute :driver, :string do
       default "bridge"
-      allow_nil? false
-      public? true
-    end
-
-    attribute :check_duplicate, :boolean do
-      default false
       allow_nil? false
       public? true
     end
@@ -56,6 +50,12 @@ defmodule Edgehog.Containers.Network do
     attribute :enable_ipv6, :boolean do
       default false
       allow_nil? false
+      public? true
+    end
+
+    attribute :options, {:array, :string} do
+      allow_nil? false
+      default []
       public? true
     end
 
