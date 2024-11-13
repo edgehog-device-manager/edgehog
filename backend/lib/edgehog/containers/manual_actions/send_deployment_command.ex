@@ -27,7 +27,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeploymentCommand do
   @impl Ash.Resource.ManualUpdate
   def update(changeset, opts, context) do
     deployment = changeset.data
-    {:ok, command} = Keyword.pop!(opts, :command)
+    command = Keyword.fetch!(opts, :command)
     %{tenant: tenant} = context
 
     with {:ok, deployment} <- Ash.load(deployment, [:device, :release]),
