@@ -104,6 +104,10 @@
   "components.AddAvailableApplications.selectRelease": {
     "defaultMessage": "Select Release"
   },
+  "components.ApplicationsTable.nameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Name column of the applications table"
+  },
   "components.BaseImageCollectionsTable.handleTitle": {
     "defaultMessage": "Handle",
     "description": "Title for the Handle column of the base image collections table"
@@ -221,6 +225,26 @@
   },
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
+  },
+  "components.ContainersTable.credentialsLabel": {
+    "defaultMessage": "Credentials Label",
+    "description": "Title for the Credentials Label column of the container table"
+  },
+  "components.ContainersTable.credentialsUsername": {
+    "defaultMessage": "Credentials Username",
+    "description": "Title for the Credentials Username column of the container table"
+  },
+  "components.ContainersTable.imageReference": {
+    "defaultMessage": "Image Reference",
+    "description": "Title for the Image Reference column of the container table"
+  },
+  "components.ContainersTable.networks": {
+    "defaultMessage": "Networks",
+    "description": "Title for the Networks column of the container table"
+  },
+  "components.ContainersTable.portBindings": {
+    "defaultMessage": "Port Bindings",
+    "description": "Title for the Port Bindings column of the container table"
   },
   "components.CreateBaseImageCollectionForm.handleLabel": {
     "defaultMessage": "Handle"
@@ -457,9 +481,19 @@
   "components.Page.loadingError.retryButton": {
     "defaultMessage": "Try Again"
   },
+  "components.ReleaseTable.versionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the releases table"
+  },
   "components.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
+  },
+  "components.Sidebar.applications.applicationsLabel": {
+    "defaultMessage": "Applications"
+  },
+  "components.Sidebar.applicationsLabel": {
+    "defaultMessage": "Applications"
   },
   "components.Sidebar.baseImageCollectionsLabel": {
     "defaultMessage": "Base Image Collections"
@@ -968,6 +1002,18 @@
   "modem.technology.UTRAN_HSUPA": {
     "defaultMessage": "UTRAN with HSUPA"
   },
+  "pages.Application.description": {
+    "defaultMessage": "Description"
+  },
+  "pages.Application.applicationNotFound.title": {
+    "defaultMessage": "Application not found."
+  },
+  "pages.Application.applicationNotFound.message": {
+    "defaultMessage": "Return to the applications list."
+  },
+  "pages.Applications.title": {
+    "defaultMessage": "Applications"
+  },
   "pages.BaseImage.baseImageNotFound.message": {
     "defaultMessage": "Return to the Base Image Collection."
   },
@@ -1238,6 +1284,12 @@
   },
   "pages.Logout.title": {
     "defaultMessage": "Logout"
+  },
+  "pages.Release.releaseNotFound.title": {
+    "defaultMessage": "Release not found."
+  },
+  "pages.Release.releaseNotFound.message": {
+    "defaultMessage": "Return to the applications list."
   },
   "pages.SystemModel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>.",
