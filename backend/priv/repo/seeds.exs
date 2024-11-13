@@ -19,9 +19,18 @@
 #
 
 alias Edgehog.Astarte
+alias Edgehog.Containers.ContainerNetwork
+alias Edgehog.Containers.ReleaseContainers
+alias Edgehog.ContainersFixtures
+alias Edgehog.DevicesFixtures
 alias Edgehog.Tenants
 
 require Logger
+
+Code.require_file("test/support/fixtures/tenants_fixtures.ex")
+Code.require_file("test/support/fixtures/astarte_fixtures.ex")
+Code.require_file("test/support/fixtures/devices_fixtures.ex")
+Code.require_file("test/support/fixtures/containers_fixtures.ex")
 
 default_var =
   if File.exists?("../.env") do
@@ -142,5 +151,82 @@ Astarte.create_realm!(
   %{cluster_id: cluster.id, name: read_env_var.("SEEDS_REALM"), private_key: realm_pk},
   tenant: tenant
 )
+
+# Feature Application Management
+
+# Create an application with a detailed description
+app_1 =
+  Edgehog.ContainersFixtures.application_fixture(
+    name: "Application 1",
+    description:
+      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+    tenant: tenant
+  )
+
+# Create another application without a description and no releases
+_app_2 = ContainersFixtures.application_fixture(name: "Application 2", tenant: tenant)
+
+# Create releases for the first application
+app_1_release_v1 =
+  ContainersFixtures.release_fixture(application_id: app_1.id, version: "1.0.0", tenant: tenant)
+
+_app_1_release_v2 =
+  ContainersFixtures.release_fixture(application_id: app_1.id, version: "1.1.0", tenant: tenant)
+
+# Create image credentials and an image
+image_credentials = ContainersFixtures.image_credentials_fixture(tenant: tenant)
+
+image_1 =
+  ContainersFixtures.image_fixture(
+    reference: "nginx",
+    image_credentials_id: image_credentials.id,
+    tenant: tenant
+  )
+
+# Create containers with port bindings
+container_1 =
+  ContainersFixtures.container_fixture(
+    image_id: image_1.id,
+    port_bindings: ["8080:80"],
+    tenant: tenant
+  )
+
+# Create another container without port bindings
+container_2 =
+  ContainersFixtures.container_fixture(
+    image_id: image_1.id,
+    tenant: tenant
+  )
+
+# Create networks
+network_1 = ContainersFixtures.network_fixture(tenant: tenant)
+
+# Associate containers with releases
+release_containers_params_1 = %{container_id: container_1.id, release_id: app_1_release_v1.id}
+Ash.create!(ReleaseContainers, release_containers_params_1, tenant: tenant)
+release_containers_params_2 = %{container_id: container_2.id, release_id: app_1_release_v1.id}
+Ash.create!(ReleaseContainers, release_containers_params_2, tenant: tenant)
+
+# Associate containers with networks
+container_network_params_1 = %{container_id: container_1.id, network_id: network_1.id}
+Ash.create!(ContainerNetwork, container_network_params_1, tenant: tenant)
+
+# Create a device (Note: This is just for demonstration purposes, as the Device is not actually connected to Astarte)
+device = DevicesFixtures.device_fixture(tenant: tenant)
+
+# Create another application
+app_3 = ContainersFixtures.application_fixture(name: "Application 3", tenant: tenant)
+
+# Create a release for the third application
+app_3_release_v1 =
+  ContainersFixtures.release_fixture(application_id: app_3.id, version: "1.1.0", tenant: tenant)
+
+# Create a deployment for the device with the third application's release
+_deployment =
+  ContainersFixtures.deployment_fixture(
+    device_id: device.id,
+    release_id: app_3_release_v1.id,
+    tenant: tenant
+  )
 
 :ok
