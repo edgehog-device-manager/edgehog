@@ -51,6 +51,9 @@ enum Route {
   updateCampaigns = "/update-campaigns",
   updateCampaignsNew = "/update-campaigns/new",
   updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
+  applications = "/applications",
+  application = "/applications/:applicationId",
+  release = "/release/:releaseId",
   login = "/login",
   logout = "/logout",
 }
@@ -92,6 +95,10 @@ const generatePath = (route: ParametricRoute): string => {
       return routerGeneratePath(route.route, route.params);
     case Route.updateCampaignsEdit:
       return routerGeneratePath(route.route, route.params);
+    case Route.application:
+      return routerGeneratePath(route.route, route.params);
+    case Route.release:
+      return routerGeneratePath(route.route, route.params);
 
     case Route.devices:
     case Route.deviceGroups:
@@ -108,6 +115,7 @@ const generatePath = (route: ParametricRoute): string => {
     case Route.updateCampaignsNew:
     case Route.login:
     case Route.logout:
+    case Route.applications:
       return route.route;
   }
 };
