@@ -309,7 +309,7 @@ const DeployedApplicationsTable = ({
         />
       ),
       cell: ({ getValue }) => (
-        <DeploymentStatusComponent status={getValue() || "ERROR"} />
+        <DeploymentStatusComponent status={getValue() || "STOPPED"} />
       ),
     }),
     columnHelper.accessor((row) => row, {
@@ -322,7 +322,7 @@ const DeployedApplicationsTable = ({
       ),
       cell: ({ getValue }) => (
         <ActionButtons
-          status={getValue().status || "ERROR"}
+          status={getValue().status || "STOPPED"}
           onStart={() => handleStartDeployedApplication(getValue().id)}
           onStop={() => handleStopDeployedApplication(getValue().id)}
         />
