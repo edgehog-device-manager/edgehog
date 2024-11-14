@@ -222,7 +222,12 @@ const Sidebar = () => (
           />
         }
         route={Route.applications}
-        activeRoutes={[Route.applications, Route.application, Route.release]}
+        activeRoutes={[
+          Route.applications,
+          Route.applicationNew,
+          Route.application,
+          Route.release,
+        ]}
       />
     </SidebarItemGroup>
   </Navbar>
