@@ -23,17 +23,22 @@ defmodule Edgehog.Containers.Validations.IsUpgrade do
 
   use Ash.Resource.Validation
 
-  @impl Ash.Resource.Validation
-  def validate(changeset, opts, _context) do
-    from = Ash.Changeset.get_argument(changeset, opts[:from])
-    to = Ash.Changeset.get_argument(changeset, opts[:to])
+  alias Edgehog.Containers.Release
 
-    with {:ok, from_version} <- parse_version(from),
-         {:ok, to_version} <- parse_version(to) do
-      if Version.compare(to_version, from_version) == :gt do
+  @impl Ash.Resource.Validation
+  def validate(changeset, _opts, _context) do
+    initial_release = Ash.Changeset.get_data(changeset, :release_id)
+    tenant = Ash.Changeset.get_data(changeset, :tenant_id)
+
+    with {:ok, current} <- Ash.get(Release, initial_release, reuse_values?: true, tenant: tenant),
+         {:ok, target_id} <- Ash.Changeset.fetch_argument(changeset, :target),
+         {:ok, target} <- Ash.get(Release, target_id, reuse_values?: true, tenant: tenant),
+         {:ok, current_version} <- parse_version(current),
+         {:ok, target_version} <- parse_version(target) do
+      if Version.compare(target_version, current_version) == :gt do
         :ok
       else
-        {:error, field: opts[:to], message: "must be a newer release than from"}
+        {:error, field: :target, message: "must be a newer release than the currently installed version"}
       end
     end
   end

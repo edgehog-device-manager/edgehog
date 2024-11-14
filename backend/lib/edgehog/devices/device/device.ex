@@ -305,7 +305,7 @@ defmodule Edgehog.Devices.Device do
       description "Updates an application to a newer release."
 
       argument :from, :struct do
-        constraints instance_of: Release
+        constraints instance_of: Deployment
         allow_nil? false
 
         description """
@@ -315,14 +315,10 @@ defmodule Edgehog.Devices.Device do
       end
 
       argument :to, :struct do
-        constraints instance_of: Release
+        constraints instance_of: Deployment
         allow_nil? false
         description "The new release of the application"
       end
-
-      validate {Edgehog.Containers.Validations.SameApplication, [release_a: :from, release_b: :to]}
-
-      validate {Edgehog.Containers.Validations.IsUpgrade, [from: :from, to: :to]}
 
       manual Edgehog.Devices.Device.ManualActions.UpdateApplication
     end

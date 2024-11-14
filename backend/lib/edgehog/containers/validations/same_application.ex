@@ -20,17 +20,22 @@
 
 defmodule Edgehog.Containers.Validations.SameApplication do
   @moduledoc false
-
   use Ash.Resource.Validation
 
+  alias Edgehog.Containers.Release
+
   @impl Ash.Resource.Validation
-  def validate(changeset, opts, _context) do
-    with {:ok, release_a} <- Ash.Changeset.fetch_argument(changeset, opts[:release_a]),
-         {:ok, release_b} <- Ash.Changeset.fetch_argument(changeset, opts[:release_b]) do
-      if release_a.application_id == release_b.application_id do
+  def validate(changeset, _opts, _context) do
+    initial_release = Ash.Changeset.get_data(changeset, :release_id)
+    tenant = Ash.Changeset.get_data(changeset, :tenant_id)
+
+    with {:ok, current} <- Ash.get(Release, initial_release, reuse_values?: true, tenant: tenant),
+         {:ok, target_id} <- Ash.Changeset.fetch_argument(changeset, :target),
+         {:ok, target} <- Ash.get(Release, target_id, reuse_values?: true, tenant: tenant) do
+      if current.application_id == target.application_id do
         :ok
       else
-        {:error, field: opts[:release_b], message: "must belong to the same application as from"}
+        {:error, field: :target, message: "must belong to the same application as the currently installed release."}
       end
     end
   end

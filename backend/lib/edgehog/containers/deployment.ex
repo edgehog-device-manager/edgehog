@@ -28,6 +28,8 @@ defmodule Edgehog.Containers.Deployment do
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Types.DeploymentStatus
+  alias Edgehog.Containers.Validations.IsUpgrade
+  alias Edgehog.Containers.Validations.SameApplication
 
   graphql do
     type :deployment
@@ -84,6 +86,17 @@ defmodule Edgehog.Containers.Deployment do
       end
 
       run ManualActions.SendDeployRequest
+    end
+
+    update :upgrade_release do
+      argument :target, :uuid do
+        allow_nil? false
+      end
+
+      validate SameApplication
+      validate IsUpgrade
+
+      manual ManualActions.SendDeploymentUpgrade
     end
 
     update :set_status do
