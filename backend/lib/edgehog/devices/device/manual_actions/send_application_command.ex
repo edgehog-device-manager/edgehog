@@ -55,6 +55,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendApplicationCommand do
     case command do
       :start -> {:ok, "Start"}
       :stop -> {:ok, "Stop"}
+      :delete -> {:ok, "Delete"}
       _ -> {:error, "Unknown deployment command"}
     end
   end

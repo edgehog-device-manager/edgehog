@@ -22,6 +22,7 @@ defmodule Edgehog.Devices.Device.DeploymentCommand do
   @moduledoc false
   use Ash.Type.Enum,
     values: [
+      delete: "Delete the deployment.",
       start: "Start the deployment.",
       stop: "Stop the deployment."
     ]
