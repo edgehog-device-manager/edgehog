@@ -27,6 +27,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.OSManagementFixtures
 
   alias Edgehog.Astarte.Device.DeviceStatusMock
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
 
@@ -447,6 +448,36 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert response(conn, 200)
 
       assert deployment.status == :starting
+    end
+
+    test "unset AvailableDeployments deletes an existing deployment", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id)
+
+      assert {:ok, deployment} = Ash.get(Deployment, deployment.id, tenant: tenant)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableDeployments",
+          path: "/" <> deployment.id <> "/status",
+          value: nil
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn =
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, deployment_event)
+
+      assert response(conn, 200)
+
+      refute {:ok, deployment} == Ash.get(Deployment, deployment.id, tenant: tenant)
     end
   end
 
