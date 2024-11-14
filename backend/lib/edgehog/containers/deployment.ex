@@ -42,7 +42,13 @@ defmodule Edgehog.Containers.Deployment do
       It starts an Executor, handling the communication with the device.
       """
 
-      accept [:release_id, :device_id]
+      accept [:release_id]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      change manage_relationship(:device_id, :device, type: :append)
 
       change Changes.CreateDeploymentOnDevice
     end
