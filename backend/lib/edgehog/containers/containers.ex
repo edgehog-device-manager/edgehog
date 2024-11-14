@@ -77,6 +77,7 @@ defmodule Edgehog.Containers do
 
       update Deployment, :start_deployment, :start
       update Deployment, :stop_deployment, :stop
+      update Deployment, :delete_deployment, :delete
     end
   end
 
@@ -92,6 +93,7 @@ defmodule Edgehog.Containers do
       define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
       define :fetch_deployment, action: :read, get_by: [:id]
       define :deployment_set_status, action: :set_status, args: [:status]
+      define :delete_deployment, action: :destroy
     end
 
     resource Edgehog.Containers.Image do
