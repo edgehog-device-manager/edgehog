@@ -54,7 +54,11 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
       :ok
     end)
 
-    [tenant: tenant, release_id: release.id, device_id: device.id]
+    [
+      tenant: tenant,
+      release_id: AshGraphql.Resource.encode_relay_id(release),
+      device_id: AshGraphql.Resource.encode_relay_id(device)
+    ]
     |> deploy_release_mutation()
     |> extract_result!()
   end
