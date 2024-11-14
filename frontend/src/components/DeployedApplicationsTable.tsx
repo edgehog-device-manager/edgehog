@@ -31,6 +31,7 @@ import type { DeployedApplicationsTable_startDeployment_Mutation } from "api/__g
 import type { DeployedApplicationsTable_stopDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
 
 import Icon from "components/Icon";
+import { Link, Route } from "Navigation";
 import Table, { createColumnHelper } from "components/Table";
 
 // We use graphql fields below in columns configuration
@@ -43,8 +44,10 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
           id
           status
           release {
+            id
             version
             application {
+              id
               name
             }
           }
@@ -199,7 +202,9 @@ const DeployedApplicationsTable = ({
   const deployments =
     data.applicationDeployments?.edges?.map((edge) => ({
       id: edge.node.id,
+      applicationId: edge.node.release?.application?.id || "Unknown",
       applicationName: edge.node.release?.application?.name || "Unknown",
+      releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
       status: edge.node.status,
     })) || [];
@@ -271,7 +276,14 @@ const DeployedApplicationsTable = ({
           defaultMessage="Application Name"
         />
       ),
-      cell: ({ getValue }) => <span>{getValue()}</span>,
+      cell: ({ row, getValue }) => (
+        <Link
+          route={Route.application}
+          params={{ applicationId: row.original.applicationId }}
+        >
+          {getValue()}
+        </Link>
+      ),
     }),
     columnHelper.accessor("releaseVersion", {
       header: () => (
@@ -280,7 +292,14 @@ const DeployedApplicationsTable = ({
           defaultMessage="Release Version"
         />
       ),
-      cell: ({ getValue }) => <span>{getValue()}</span>,
+      cell: ({ row, getValue }) => (
+        <Link
+          route={Route.release}
+          params={{ releaseId: row.original.releaseId }}
+        >
+          {getValue()}
+        </Link>
+      ),
     }),
     columnHelper.accessor("status", {
       header: () => (
