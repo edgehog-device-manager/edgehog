@@ -3,6 +3,12 @@ schema {
   query: RootQueryType
 }
 
+input ContainerCreateWithNestedImageInput {
+  id: ID
+  reference: String!
+  imageCredentialsId: ID
+}
+
 input UpdateCampaignRolloutMechanismPushInput {
   "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
   forceDowngrade: Boolean
@@ -414,6 +420,9 @@ enum NetworkInterfaceTechnology {
 }
 
 enum ApplicationDeploymentStatus {
+  "The deployment is being deleted"
+  DELETING
+
   "The deployment process entered an error state."
   ERROR
 
@@ -829,10 +838,22 @@ type MutationError {
   fields: [String!]
 }
 
+input ApplicationCreateInitialReleaseInput {
+  version: String!
+  containers: [ReleaseCreateContainersInput!]
+}
+
+input ReleaseCreateContainersInput {
+  env: JsonString
+  image: ContainerCreateWithNestedImageInput
+  hostname: String
+  privileged: Boolean
+  restartPolicy: String
+}
+
 enum NetworkSortField {
   ID
   DRIVER
-  CHECK_DUPLICATE
   INTERNAL
   ENABLE_IPV6
 }
@@ -880,17 +901,6 @@ input NetworkFilterInternal {
   greaterThanOrEqual: Boolean
 }
 
-input NetworkFilterCheckDuplicate {
-  isNil: Boolean
-  eq: Boolean
-  notEq: Boolean
-  in: [Boolean!]
-  lessThan: Boolean
-  greaterThan: Boolean
-  lessThanOrEqual: Boolean
-  greaterThanOrEqual: Boolean
-}
-
 input NetworkFilterDriver {
   isNil: Boolean
   eq: String
@@ -921,7 +931,6 @@ input NetworkFilterInput {
   not: [NetworkFilterInput!]
   id: NetworkFilterId
   driver: NetworkFilterDriver
-  checkDuplicate: NetworkFilterCheckDuplicate
   internal: NetworkFilterInternal
   enableIpv6: NetworkFilterEnableIpv6
 }
@@ -934,9 +943,24 @@ input NetworkSortInput {
 type Network {
   id: ID!
   driver: String!
-  checkDuplicate: Boolean!
   internal: Boolean!
   enableIpv6: Boolean!
+  options: [String!]!
+}
+
+"The result of the :create_release mutation"
+type CreateReleaseResult {
+  "The successful result of the mutation"
+  result: Release
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateReleaseInput {
+  version: String!
+  applicationId: ID
+  containers: [ReleaseCreateContainersInput!]
 }
 
 enum ReleaseSortField {
@@ -1232,8 +1256,8 @@ type DeployReleaseResult {
 }
 
 input DeployReleaseInput {
-  deviceId: ID
   releaseId: ID
+  deviceId: ID!
 }
 
 enum DeploymentSortField {
@@ -1277,13 +1301,13 @@ input DeploymentFilterReleaseId {
 
 input DeploymentFilterDeviceId {
   isNil: Boolean
-  eq: ID
-  notEq: ID
-  in: [ID]
-  lessThan: ID
-  greaterThan: ID
-  lessThanOrEqual: ID
-  greaterThanOrEqual: ID
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
 }
 
 input DeploymentFilterStatus {
@@ -1340,6 +1364,7 @@ enum ContainerSortField {
   HOSTNAME
   ENV
   PRIVILEGED
+  NETWORK_MODE
   IMAGE_ID
 }
 
@@ -1373,6 +1398,19 @@ input ContainerFilterImageId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+}
+
+input ContainerFilterNetworkMode {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
 }
 
 input ContainerFilterPrivileged {
@@ -1441,6 +1479,7 @@ input ContainerFilterInput {
   hostname: ContainerFilterHostname
   env: ContainerFilterEnv
   privileged: ContainerFilterPrivileged
+  networkMode: ContainerFilterNetworkMode
   imageId: ContainerFilterImageId
   image: ImageFilterInput
   networks: NetworkFilterInput
@@ -1458,6 +1497,7 @@ type Container {
   hostname: String!
   env: JsonString
   privileged: Boolean
+  networkMode: String!
   imageId: ID!
   image: Image!
   networks(
@@ -1479,6 +1519,21 @@ type Container {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): NetworkConnection!
+}
+
+"The result of the :create_application mutation"
+type CreateApplicationResult {
+  "The successful result of the mutation"
+  result: Application
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateApplicationInput {
+  name: String!
+  description: String
+  initialRelease: ApplicationCreateInitialReleaseInput
 }
 
 enum ApplicationSortField {
@@ -3688,8 +3743,11 @@ type RootMutationType {
   "Deletes a system model."
   deleteSystemModel(id: ID!): DeleteSystemModelResult
 
+  "Create a new application."
+  createApplication(input: CreateApplicationInput!): CreateApplicationResult
+
   "Deploy the application on a device"
-  deployRelease(input: DeployReleaseInput): DeployReleaseResult
+  deployRelease(input: DeployReleaseInput!): DeployReleaseResult
 
   "Sends a :start command to the release on the device."
   startDeployment(id: ID!): StartDeploymentResult
@@ -3703,6 +3761,9 @@ type RootMutationType {
   ): CreateImageCredentialsResult
 
   deleteImageCredentials(id: ID!): DeleteImageCredentialsResult
+
+  "Create a new release."
+  createRelease(input: CreateReleaseInput!): CreateReleaseResult
 
   "Create a new base image in a base image collection."
   createBaseImage(input: CreateBaseImageInput!): CreateBaseImageResult
