@@ -19,18 +19,19 @@
 #
 
 alias Edgehog.Astarte
+alias Edgehog.Containers.Application
+alias Edgehog.Containers.Container
 alias Edgehog.Containers.ContainerNetwork
+alias Edgehog.Containers.Deployment
+alias Edgehog.Containers.Image
+alias Edgehog.Containers.ImageCredentials
+alias Edgehog.Containers.Network
+alias Edgehog.Containers.Release
 alias Edgehog.Containers.ReleaseContainers
-alias Edgehog.ContainersFixtures
-alias Edgehog.DevicesFixtures
+alias Edgehog.Devices.Device
 alias Edgehog.Tenants
 
 require Logger
-
-Code.require_file("test/support/fixtures/tenants_fixtures.ex")
-Code.require_file("test/support/fixtures/astarte_fixtures.ex")
-Code.require_file("test/support/fixtures/devices_fixtures.ex")
-Code.require_file("test/support/fixtures/containers_fixtures.ex")
 
 default_var =
   if File.exists?("../.env") do
@@ -147,85 +148,180 @@ if status == :default do
   |> Logger.warning()
 end
 
-Astarte.create_realm!(
-  %{cluster_id: cluster.id, name: read_env_var.("SEEDS_REALM"), private_key: realm_pk},
-  tenant: tenant
-)
+realm =
+  Astarte.create_realm!(
+    %{cluster_id: cluster.id, name: read_env_var.("SEEDS_REALM"), private_key: realm_pk},
+    tenant: tenant
+  )
 
 # Feature Application Management
 
-# Create an application with a detailed description
-app_1 =
-  Edgehog.ContainersFixtures.application_fixture(
-    name: "Application 1",
-    description:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+app_without_releases =
+  Ash.create!(
+    Application,
+    %{
+      name: "App without releases",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+    },
     tenant: tenant
   )
 
-# Create another application without a description and no releases
-_app_2 = ContainersFixtures.application_fixture(name: "Application 2", tenant: tenant)
-
-# Create releases for the first application
-app_1_release_v1 =
-  ContainersFixtures.release_fixture(application_id: app_1.id, version: "1.0.0", tenant: tenant)
-
-_app_1_release_v2 =
-  ContainersFixtures.release_fixture(application_id: app_1.id, version: "1.1.0", tenant: tenant)
-
-# Create image credentials and an image
-image_credentials = ContainersFixtures.image_credentials_fixture(tenant: tenant)
-
-image_1 =
-  ContainersFixtures.image_fixture(
-    reference: "nginx",
-    image_credentials_id: image_credentials.id,
+app_with_multiple_releases =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with multiple releases",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: []
+      }
+    },
     tenant: tenant
   )
 
-# Create containers with port bindings
-container_1 =
-  ContainersFixtures.container_fixture(
-    image_id: image_1.id,
-    port_bindings: ["8080:80"],
+Ash.create!(
+  Release,
+  %{
+    application_id: app_with_multiple_releases.id,
+    version: "1.0.1",
+    containers: []
+  },
+  tenant: tenant
+)
+
+app_nginx =
+  Ash.create!(
+    Application,
+    %{
+      name: "Nginx",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx"},
+            restart_policy: :unless_stopped,
+            hostname: "",
+            env: %{},
+            privileged: false,
+            network_mode: "bridge",
+            port_bindings: []
+          }
+        ]
+      }
+    },
     tenant: tenant
   )
 
-# Create another container without port bindings
-container_2 =
-  ContainersFixtures.container_fixture(
-    image_id: image_1.id,
+app_nginx_8080 =
+  Ash.create!(
+    Application,
+    %{
+      name: "Nginx bound on port 8080",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx"},
+            restart_policy: :unless_stopped,
+            hostname: "",
+            env: %{},
+            privileged: false,
+            network_mode: "bridge",
+            port_bindings: ["8080:80"]
+          }
+        ]
+      }
+    },
     tenant: tenant
   )
 
-# Create networks
-network_1 = ContainersFixtures.network_fixture(tenant: tenant)
+app_nginx_8081 =
+  Ash.create!(
+    Application,
+    %{
+      name: "Nginx bound on port 8081",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx"},
+            restart_policy: :unless_stopped,
+            hostname: "",
+            env: %{},
+            privileged: false,
+            network_mode: "bridge",
+            port_bindings: ["8081:80"]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
 
-# Associate containers with releases
-release_containers_params_1 = %{container_id: container_1.id, release_id: app_1_release_v1.id}
-Ash.create!(ReleaseContainers, release_containers_params_1, tenant: tenant)
-release_containers_params_2 = %{container_id: container_2.id, release_id: app_1_release_v1.id}
-Ash.create!(ReleaseContainers, release_containers_params_2, tenant: tenant)
+image_credentials =
+  Ash.create!(
+    ImageCredentials,
+    %{label: "Credentials", username: "username", password: "password"},
+    tenant: tenant
+  )
 
-# Associate containers with networks
-container_network_params_1 = %{container_id: container_1.id, network_id: network_1.id}
-Ash.create!(ContainerNetwork, container_network_params_1, tenant: tenant)
+app_with_credentials =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with credentials",
+      description:
+        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "httpd", image_credentials_id: image_credentials.id},
+            restart_policy: :unless_stopped,
+            hostname: "",
+            env: %{},
+            privileged: false,
+            network_mode: "bridge",
+            port_bindings: []
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
 
 # Create a device (Note: This is just for demonstration purposes, as the Device is not actually connected to Astarte)
-device = DevicesFixtures.device_fixture(tenant: tenant)
+device =
+  Ash.create!(
+    Device,
+    %{
+      device_id: "9El7OzYqRVmLs0CGMB1J8g",
+      name: "Test Device",
+      online: false,
+      realm_id: realm.id
+    },
+    tenant: tenant
+  )
 
-# Create another application
-app_3 = ContainersFixtures.application_fixture(name: "Application 3", tenant: tenant)
+[app_nginx_release] = Ash.load!(app_nginx, :releases).releases
 
-# Create a release for the third application
-app_3_release_v1 =
-  ContainersFixtures.release_fixture(application_id: app_3.id, version: "1.1.0", tenant: tenant)
-
-# Create a deployment for the device with the third application's release
+# Create a deployment for the device with an empty application
 _deployment =
-  ContainersFixtures.deployment_fixture(
-    device_id: device.id,
-    release_id: app_3_release_v1.id,
+  Ash.create!(
+    Deployment,
+    %{
+      device_id: device.id,
+      release_id: app_nginx_release.id
+    },
     tenant: tenant
   )
 
