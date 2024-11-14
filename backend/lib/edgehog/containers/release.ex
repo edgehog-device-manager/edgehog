@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Release do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes
   alias Edgehog.Validations
 
   graphql do
@@ -47,6 +48,8 @@ defmodule Edgehog.Containers.Release do
                on_no_match: {:create, :create_with_nested},
                on_match: :ignore
              )
+
+      change Changes.CreateDefaultNetwork
     end
   end
 

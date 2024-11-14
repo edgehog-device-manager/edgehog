@@ -33,8 +33,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     containers = 3
     # one image per container
     images = containers
-    # one network per container
-    networks = containers
+    # one network for the release
+    networks = 1
     device = device_fixture(tenant: tenant)
     release = release_fixture(tenant: tenant, containers: containers)
 

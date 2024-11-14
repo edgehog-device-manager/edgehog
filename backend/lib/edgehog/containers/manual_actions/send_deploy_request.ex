@@ -23,7 +23,6 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
 
   use Ash.Resource.Actions.Implementation
 
-  alias Edgehog.Containers.Network
   alias Edgehog.Devices
 
   @impl Ash.Resource.Actions.Implementation
@@ -38,16 +37,10 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
       containers = release.containers
       images = containers |> Enum.map(& &1.image) |> Enum.uniq()
 
-      # send one network for each container, so that each container is isolated
       networks =
         containers
-        |> Enum.filter(&(&1.networks == []))
-        |> Enum.map(fn container ->
-          Network
-          |> Ash.Changeset.for_create(:create, %{driver: "bridge"})
-          |> Ash.Changeset.manage_relationship(:containers, [container], type: :create)
-          |> Ash.create!(tenant: deployment.tenant_id)
-        end)
+        |> Enum.flat_map(& &1.networks)
+        |> Enum.uniq_by(& &1.id)
 
       with :ok <- send_create_image_requests(device, images),
            :ok <- send_create_container_requests(device, containers),
