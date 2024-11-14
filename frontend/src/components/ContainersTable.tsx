@@ -47,6 +47,7 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
           edges {
             node {
               driver
+              internal
             }
           }
         }
@@ -95,7 +96,14 @@ const columns = [
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor(
-    (row) => row.networks.edges?.map((edge) => edge.node.driver).join(", "),
+    (row) =>
+      row.networks.edges
+        ?.map((edge) =>
+          `${edge.node.driver} ${
+            edge.node.internal ? "(internal)" : ""
+          }`.trim(),
+        )
+        .join(", "),
     {
       id: "networks",
       header: () => (
