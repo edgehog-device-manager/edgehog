@@ -102,12 +102,29 @@ defmodule Edgehog.Containers.Deployment do
     update :set_status do
       accept [:status, :message]
     end
+
+    update :update_status do
+      change Changes.CheckImages
+      change Changes.CheckNetworks
+      change Changes.CheckContainers
+      change Changes.CheckDeployments
+
+      require_atomic? false
+    end
+
+    read :filter_by_release do
+      argument :release_id, :uuid
+
+      filter expr(release_id == ^arg(:release_id))
+    end
   end
 
   attributes do
     uuid_primary_key :id
 
     attribute :status, DeploymentStatus do
+      allow_nil? false
+      default :created
       public? true
     end
 

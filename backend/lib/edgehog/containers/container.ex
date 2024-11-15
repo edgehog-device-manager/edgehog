@@ -69,6 +69,12 @@ defmodule Edgehog.Containers.Container do
                use_identities: [:reference]
              )
     end
+
+    read :filter_by_image do
+      argument :image_id, :uuid
+
+      filter expr(image_id == ^arg(:image_id))
+    end
   end
 
   attributes do

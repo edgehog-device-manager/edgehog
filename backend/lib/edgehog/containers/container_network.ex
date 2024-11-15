@@ -26,6 +26,12 @@ defmodule Edgehog.Containers.ContainerNetwork do
 
   actions do
     defaults [:read, :destroy, create: [:container_id, :network_id]]
+
+    read :containers_by_network do
+      argument :network_id, :uuid
+
+      filter expr(network_id == ^arg(:network_id))
+    end
   end
 
   relationships do

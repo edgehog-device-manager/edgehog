@@ -23,11 +23,13 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
 
   use Ash.Resource.Actions.Implementation
 
+  alias Edgehog.Containers
   alias Edgehog.Devices
 
   @impl Ash.Resource.Actions.Implementation
-  def run(input, _opts, _context) do
+  def run(input, _opts, context) do
     deployment = input.arguments.deployment
+    %{tenant: tenant} = context
 
     with {:ok, deployment} <-
            Ash.load(deployment, device: [], release: [containers: [:image, :networks]]) do
@@ -46,7 +48,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
            :ok <- send_create_container_requests(device, containers),
            :ok <- send_create_network_requests(device, networks),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
-        {:ok, deployment}
+        Containers.deployment_set_status(deployment, :sent, nil, tenant: tenant)
       end
     end
   end

@@ -27,7 +27,16 @@ defmodule Edgehog.Containers.Types.DeploymentStatus do
       started: "The deployment is running.",
       starting: "The deployment is starting.",
       stopped: "The deployment has stopped.",
-      stopping: "The deploymen is stopping."
+      stopping: "The deploymen is stopping.",
+      created: "The deployment has been received by the backend and will be sent to the device.",
+      sent: "All the necessary resources have been sent to the device.",
+      ready: "The deployment is ready on the device. All necessary resources are available.",
+      # TODO: these are internal states that should not be exposed.
+      # Remove when reimplementing the deployment and its status as a state machine
+      pulled_images: "The device is currently pulling the necessary images for the deployment.",
+      created_networks: "The device is setting up the networks necessary for the deployment.",
+      created_containers: "The device is setting up the containers necessary for the deployment.",
+      created_deployment: "The device is setting up the release of the the deployment."
     ]
 
   def graphql_type(_), do: :application_deployment_status

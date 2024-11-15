@@ -91,6 +91,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Container do
       define :fetch_container, action: :read, get_by: [:id]
+      define :containers_with_image, action: :filter_by_image, args: [:image_id]
     end
 
     resource Edgehog.Containers.Deployment do
@@ -100,6 +101,8 @@ defmodule Edgehog.Containers do
       define :deployment_set_status, action: :set_status, args: [:status, :message]
 
       define :delete_deployment, action: :destroy
+      define :deployment_update_status, action: :update_status
+      define :deployments_with_release, action: :filter_by_release, args: [:release_id]
     end
 
     resource Edgehog.Containers.Image do
@@ -112,12 +115,22 @@ defmodule Edgehog.Containers do
       define :fetch_release, action: :read, get_by: [:id]
     end
 
-    resource Edgehog.Containers.ReleaseContainers
+    resource Edgehog.Containers.ReleaseContainers do
+      define :releases_with_container,
+        action: :releases_by_container,
+        args: [:container_id]
+    end
+
     resource Edgehog.Containers.Network
     resource Edgehog.Containers.Volume
-    resource Edgehog.Containers.ContainerNetwork
 
     resource Edgehog.Containers.DeploymentReadyAction
     resource Edgehog.Containers.DeploymentReadyAction.Upgrade
+
+    resource Edgehog.Containers.ContainerNetwork do
+      define :containers_with_network,
+        action: :containers_by_network,
+        args: [:network_id]
+    end
   end
 end
