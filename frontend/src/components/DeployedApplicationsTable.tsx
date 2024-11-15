@@ -90,6 +90,7 @@ const statusColors: Record<ApplicationDeploymentStatus, string> = {
   STOPPING: "text-muted",
   STOPPED: "text-secondary",
   ERROR: "text-danger",
+  DELETING: "text-warning",
 };
 
 // Define status messages for localization
@@ -113,6 +114,10 @@ const statusMessages = defineMessages<ApplicationDeploymentStatus>({
   ERROR: {
     id: "components.DeployedApplicationsTable.error",
     defaultMessage: "Error",
+  },
+  DELETING: {
+    id: "components.DeployedApplicationsTable.deleting",
+    defaultMessage: "Deleting",
   },
 });
 
