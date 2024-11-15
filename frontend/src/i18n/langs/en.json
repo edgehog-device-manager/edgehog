@@ -246,6 +246,15 @@
     "defaultMessage": "Port Bindings",
     "description": "Title for the Port Bindings column of the container table"
   },
+  "components.CreateApplication.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "components.CreateApplication.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.CreateApplication.submitButton": {
+    "defaultMessage": "Create"
+  },
   "components.CreateBaseImageCollectionForm.handleLabel": {
     "defaultMessage": "Handle"
   },
@@ -328,6 +337,9 @@
   },
   "components.DeployedApplicationsTable.applicationName": {
     "defaultMessage": "Application Name"
+  },
+  "components.DeployedApplicationsTable.deleting": {
+    "defaultMessage": "Deleting"
   },
   "components.DeployedApplicationsTable.error": {
     "defaultMessage": "Error"
@@ -1011,8 +1023,17 @@
   "pages.Application.applicationNotFound.message": {
     "defaultMessage": "Return to the applications list."
   },
+  "pages.Applications.createButton": {
+    "defaultMessage": "Create Application"
+  },
   "pages.Applications.title": {
     "defaultMessage": "Applications"
+  },
+  "pages.ApplicationCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the application, please try again."
+  },
+  "pages.ApplicationCreate.title": {
+    "defaultMessage": "Create Application"
   },
   "pages.BaseImage.baseImageNotFound.message": {
     "defaultMessage": "Return to the Base Image Collection."

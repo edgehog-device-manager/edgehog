@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Applications page**: Displays a list of all existing applications, with navigation to individual Application pages.
   - **Application page**: Shows the details of a selected application, including its name, description and a list of releases, with navigation to individual Release pages.
   - **Release page**: Provides details of a specific release, including a list of containers and configurations, such as image reference, image credentials (label, username), networks, and port bindings.
+- Added `ApplicationCreate` page to enable users to create a new application with fields for application name and description.
 
 ## [0.9.1] - 2024-10-28
 ### Fixed

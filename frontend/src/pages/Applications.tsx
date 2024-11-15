@@ -30,6 +30,8 @@ import Page from "components/Page";
 import Center from "components/Center";
 import Spinner from "components/Spinner";
 import ApplicationsTable from "components/ApplicationsTable";
+import Button from "components/Button";
+import { Link, Route } from "Navigation";
 
 const GET_APPLICATIONS_QUERY = graphql`
   query Applications_getApplications_Query {
@@ -62,7 +64,14 @@ const ApplicationsContent = ({
             defaultMessage="Applications"
           />
         }
-      />
+      >
+        <Button as={Link} route={Route.applicationNew}>
+          <FormattedMessage
+            id="pages.Applications.createButton"
+            defaultMessage="Create Application"
+          />
+        </Button>
+      </Page.Header>
       <Page.Main>
         <ApplicationsTable applicationsRef={applications?.results ?? []} />
       </Page.Main>

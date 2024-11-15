@@ -51,6 +51,7 @@ import Login from "pages/Login";
 import Logout from "pages/Logout";
 import AttemptLogin from "pages/AttemptLogin";
 import Applications from "pages/Applications";
+import ApplicationCreatePage from "pages/ApplicationCreate";
 import Application from "pages/Application";
 import Release from "pages/Release";
 
@@ -94,6 +95,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.updateCampaignsNew, element: <UpdateCampaignCreate /> },
   { path: Route.updateCampaignsEdit, element: <UpdateCampaign /> },
   { path: Route.applications, element: <Applications /> },
+  { path: Route.applicationNew, element: <ApplicationCreatePage /> },
   { path: Route.application, element: <Application /> },
   { path: Route.release, element: <Release /> },
   { path: Route.logout, element: <Logout /> },
