@@ -121,7 +121,11 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         status = event.value
 
         with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-          Containers.deployment_set_status(deployment, status, tenant: tenant)
+          if status == nil do
+            Containers.delete_deployment(deployment)
+          else
+            Containers.deployment_set_status(deployment, status, tenant: tenant)
+          end
         end
 
       _ ->

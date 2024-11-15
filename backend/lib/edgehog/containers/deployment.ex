@@ -69,6 +69,14 @@ defmodule Edgehog.Containers.Deployment do
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
 
+    update :delete do
+      description """
+      Sends a :delete command to the release on the device.
+      """
+
+      manual {ManualActions.SendDeploymentCommand, command: :delete}
+    end
+
     action :send_deploy_request do
       argument :deployment, :struct do
         constraints instance_of: __MODULE__

@@ -23,6 +23,7 @@ defmodule Edgehog.ContainersFixtures do
   This module defines test helpers for creating 
   entities via the `Edgehog.Containers` context.
   """
+  alias Edgehog.AstarteFixtures
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
@@ -171,7 +172,10 @@ defmodule Edgehog.ContainersFixtures do
 
     {device_id, opts} =
       Keyword.pop_lazy(opts, :device_id, fn ->
-        Edgehog.DevicesFixtures.device_fixture(tenant: tenant).id
+        {realm_id, _opts} =
+          Keyword.pop(opts, :realm_id, AstarteFixtures.realm_fixture(tenant: tenant).id)
+
+        Edgehog.DevicesFixtures.device_fixture(realm_id: realm_id, tenant: tenant).id
       end)
 
     {release_id, opts} =
