@@ -45,7 +45,7 @@
     }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
       flake.overlays.tools = elixir-utils.lib.asdfOverlay {
-        src = ../.;
+        toolVersions = ../.tool-versions ;
         wxSupport = false;
       };
 
