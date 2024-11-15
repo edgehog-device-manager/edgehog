@@ -203,7 +203,7 @@ app_nginx =
         version: "1.0.0",
         containers: [
           %{
-            image: %{reference: "nginx"},
+            image: %{reference: "nginx:latest"},
             restart_policy: :unless_stopped,
             hostname: "",
             env: %{},
@@ -228,7 +228,7 @@ app_nginx_8080 =
         version: "1.0.0",
         containers: [
           %{
-            image: %{reference: "nginx"},
+            image: %{reference: "nginx:latest"},
             restart_policy: :unless_stopped,
             hostname: "",
             env: %{},
@@ -253,7 +253,7 @@ app_nginx_8081 =
         version: "1.0.0",
         containers: [
           %{
-            image: %{reference: "nginx"},
+            image: %{reference: "nginx:latest"},
             restart_policy: :unless_stopped,
             hostname: "",
             env: %{},
@@ -285,7 +285,7 @@ app_with_credentials =
         version: "1.0.0",
         containers: [
           %{
-            image: %{reference: "httpd", image_credentials_id: image_credentials.id},
+            image: %{reference: "httpd:latest", image_credentials_id: image_credentials.id},
             restart_policy: :unless_stopped,
             hostname: "",
             env: %{},
