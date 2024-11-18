@@ -54,6 +54,7 @@ import Applications from "pages/Applications";
 import ApplicationCreatePage from "pages/ApplicationCreate";
 import Application from "pages/Application";
 import Release from "pages/Release";
+import ReleaseCreatePage from "pages/ReleaseCreate";
 
 import { version, repository, bugs } from "../package.json";
 
@@ -98,6 +99,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.applicationNew, element: <ApplicationCreatePage /> },
   { path: Route.application, element: <Application /> },
   { path: Route.release, element: <Release /> },
+  { path: Route.releaseNew, element: <ReleaseCreatePage /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

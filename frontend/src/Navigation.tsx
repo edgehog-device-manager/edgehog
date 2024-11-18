@@ -55,6 +55,7 @@ enum Route {
   applicationNew = "/applications/new",
   application = "/applications/:applicationId",
   release = "/release/:releaseId",
+  releaseNew = "/applications/:applicationId/release/new",
   login = "/login",
   logout = "/logout",
 }
@@ -99,6 +100,8 @@ const generatePath = (route: ParametricRoute): string => {
     case Route.application:
       return routerGeneratePath(route.route, route.params);
     case Route.release:
+      return routerGeneratePath(route.route, route.params);
+    case Route.releaseNew:
       return routerGeneratePath(route.route, route.params);
 
     case Route.devices:

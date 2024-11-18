@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -74,6 +74,15 @@ const messages = defineMessages({
     id: "validation.number.integer",
     defaultMessage: "{label} must be an integer.",
   },
+  envInvalidJson: {
+    id: "validation.env.invalidJson",
+    defaultMessage: "Must be a valid JSON string.",
+  },
+  portBindingsFormat: {
+    id: "validation.portBindings.format",
+    defaultMessage:
+      "Port Bindings must be comma-separated values like '8080:80, 443:443'.",
+  },
 });
 
 yup.setLocale({
@@ -133,6 +142,37 @@ const numberSchema = yup
   .number()
   .typeError((values) => ({ messageId: messages.number.id, values }));
 
+const isValidJson = (value: string) => {
+  try {
+    JSON.parse(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const envSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json",
+    message: messages.envInvalidJson.id,
+    test: (value) => (value ? isValidJson(value) : true),
+  });
+
+const portBindingsSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim().replace(/\s*,\s*/g, ", "))
+  .test({
+    name: "is-valid-port-bindings",
+    message: messages.portBindingsFormat.id,
+    test: (value) =>
+      !value ||
+      value.split(", ").every((v) => /^[0-9]+:[0-9]+$/.test(v.trim())),
+  });
+
 export {
   deviceGroupHandleSchema,
   systemModelHandleSchema,
@@ -143,6 +183,8 @@ export {
   baseImageStartingVersionRequirementSchema,
   updateChannelHandleSchema,
   numberSchema,
+  envSchema,
+  portBindingsSchema,
   messages,
   yup,
 };
