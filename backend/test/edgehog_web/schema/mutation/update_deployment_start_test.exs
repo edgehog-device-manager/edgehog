@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStart do
+defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStartTest do
   @moduledoc false
   use EdgehogWeb.GraphqlCase, async: true
 
@@ -37,10 +37,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStart do
       |> extract_result!()
     end
 
-    test "start on a non existing deployment complains" do
+    test "start on a non existing deployment complains", %{tenant: tenant} do
       deployment = deployment_fixture(tenant: tenant)
 
-      deployment = deployment |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
+      deployment |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
 
       [tenant: tenant, deployment: deployment]
       |> send_start_deployment_mutation()
@@ -50,8 +50,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStart do
 
   defp send_start_deployment_mutation(opts) do
     default_document = """
-    mutation StartDeployment($input: ID!) {
-      startDeployment(id: $input) {
+    mutation StartDeployment($id: ID!) {
+      startDeployment(id: $id) {
         result {
           id
         }
@@ -62,19 +62,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStart do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
     {deployment, opts} = Keyword.pop!(opts, :deployment)
 
-    {device_id, opts} =
-      Keyword.pop_lazy(opts, :device_id, fn ->
-        [tenant: tenant]
-        |> device_fixture()
-        |> AshGraphql.Resource.encode_relay_id()
-      end)
-
-    input = %{
-      "id" => deployment.id
-    }
-
     variables = %{
-      "input" => input
+      "id" => AshGraphql.Resource.encode_relay_id(deployment)
     }
 
     document = Keyword.get(opts, :document, default_document)
@@ -100,7 +89,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStart do
   defp extract_error!(result) do
     assert %{
              data: %{
-               "startDeployment" => %{"result" => nil}
+               "startDeployment" => nil
              },
              errors: [error]
            } = result
