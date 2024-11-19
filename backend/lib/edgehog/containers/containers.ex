@@ -110,5 +110,8 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Network
     resource Edgehog.Containers.Volume
     resource Edgehog.Containers.ContainerNetwork
+
+    resource Edgehog.Containers.DeploymentReadyAction
+    resource Edgehog.Containers.DeploymentReadyAction.Upgrade
   end
 end
