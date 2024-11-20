@@ -79,6 +79,10 @@ defmodule Edgehog.Containers do
       update Deployment, :start_deployment, :start
       update Deployment, :stop_deployment, :stop
       update Deployment, :delete_deployment, :delete
+
+      update Deployment, :upgrade_deployment, :upgrade_release do
+        relay_id_translations input: [target: :release]
+      end
     end
   end
 
@@ -111,5 +115,8 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Network
     resource Edgehog.Containers.Volume
     resource Edgehog.Containers.ContainerNetwork
+
+    resource Edgehog.Containers.DeploymentReadyAction
+    resource Edgehog.Containers.DeploymentReadyAction.Upgrade
   end
 end

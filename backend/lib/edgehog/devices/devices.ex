@@ -106,6 +106,8 @@ defmodule Edgehog.Devices do
         action: :send_release_command,
         args: [:release, :command]
 
+      define :update_application, action: :update_application, args: [:from, :to]
+
       define_calculation :available_images
       define_calculation :available_containers
     end

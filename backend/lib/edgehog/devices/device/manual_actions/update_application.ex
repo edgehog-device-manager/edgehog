@@ -23,7 +23,6 @@ defmodule Edgehog.Devices.Device.ManualActions.UpdateApplication do
   use Ash.Resource.ManualUpdate
 
   alias Edgehog.Astarte.Device.DeploymentUpdate.RequestData
-  alias Edgehog.Containers.Deployment
 
   @deployment_update Application.compile_env(
                        :edgehog,
@@ -37,16 +36,10 @@ defmodule Edgehog.Devices.Device.ManualActions.UpdateApplication do
 
     with {:ok, from} <- Ash.Changeset.fetch_argument(changeset, :from),
          {:ok, to} <- Ash.Changeset.fetch_argument(changeset, :to),
-         {:ok, from} <- fetch_deployment(device, from),
-         {:ok, to} <- fetch_deployment(device, to),
          {:ok, device} <- Ash.load(device, :appengine_client),
          data = %RequestData{from: from.id, to: to.id},
          :ok <- @deployment_update.update(device.appengine_client, device.device_id, data) do
       {:ok, device}
     end
-  end
-
-  defp fetch_deployment(device, release) do
-    Ash.get(Deployment, %{device_id: device.id, release_id: release.id}, tenant: device.tenant_id)
   end
 end
