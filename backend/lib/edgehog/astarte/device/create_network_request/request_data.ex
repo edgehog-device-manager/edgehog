@@ -23,6 +23,7 @@ defmodule Edgehog.Astarte.Device.CreateNetworkRequest.RequestData do
 
   defstruct [
     :id,
+    :deploymentId,
     :driver,
     :internal,
     :enableIpv6,
@@ -31,6 +32,7 @@ defmodule Edgehog.Astarte.Device.CreateNetworkRequest.RequestData do
 
   @type t() :: %__MODULE__{
           id: String.t(),
+          deploymentId: String.t(),
           driver: String.t(),
           internal: boolean(),
           enableIpv6: boolean(),

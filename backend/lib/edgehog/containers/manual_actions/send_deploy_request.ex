@@ -42,36 +42,36 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
         |> Enum.flat_map(& &1.networks)
         |> Enum.uniq_by(& &1.id)
 
-      with :ok <- send_create_image_requests(device, images),
-           :ok <- send_create_container_requests(device, containers),
-           :ok <- send_create_network_requests(device, networks),
+      with :ok <- send_create_image_requests(device, deployment, images),
+           :ok <- send_create_container_requests(device, deployment, containers),
+           :ok <- send_create_network_requests(device, deployment, networks),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
         {:ok, deployment}
       end
     end
   end
 
-  defp send_create_network_requests(device, networks) do
+  defp send_create_network_requests(device, deployment, networks) do
     Enum.reduce_while(networks, :ok, fn network, _acc ->
-      case Devices.send_create_network_request(device, network) do
+      case Devices.send_create_network_request(device, network, deployment) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
   end
 
-  defp send_create_image_requests(device, images) do
+  defp send_create_image_requests(device, deployment, images) do
     Enum.reduce_while(images, :ok, fn image, _acc ->
-      case Devices.send_create_image_request(device, image) do
+      case Devices.send_create_image_request(device, image, deployment) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
   end
 
-  defp send_create_container_requests(device, containers) do
+  defp send_create_container_requests(device, deployment, containers) do
     Enum.reduce_while(containers, :ok, fn container, _acc ->
-      case Devices.send_create_container_request(device, container) do
+      case Devices.send_create_container_request(device, container, deployment) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end

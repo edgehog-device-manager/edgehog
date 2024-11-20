@@ -263,6 +263,12 @@ defmodule Edgehog.Devices.Device do
         allow_nil? false
       end
 
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment which contains the image."
+        allow_nil? false
+      end
+
       manual ManualActions.SendCreateImageRequest
     end
 
@@ -275,6 +281,12 @@ defmodule Edgehog.Devices.Device do
         allow_nil? false
       end
 
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment which contains the container."
+        allow_nil? false
+      end
+
       manual ManualActions.SendCreateContainer
     end
 
@@ -284,6 +296,12 @@ defmodule Edgehog.Devices.Device do
       argument :network, :struct do
         constraints instance_of: Edgehog.Containers.Network
         description "The Network the device has to create."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment which contains the network."
         allow_nil? false
       end
 
