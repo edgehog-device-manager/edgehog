@@ -38,6 +38,10 @@ defmodule Edgehog.Containers.DeploymentReadyAction do
       change manage_relationship(:deployment, on_no_match: {:create, :deploy}, on_match: :ignore)
       change ManualActions.DeploymentReadyActionAddRelationship
     end
+
+    update :run do
+      manual ManualActions.RunReadyAction
+    end
   end
 
   attributes do

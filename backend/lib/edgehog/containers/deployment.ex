@@ -79,6 +79,14 @@ defmodule Edgehog.Containers.Deployment do
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
 
+    update :run_ready_actions do
+      description """
+      Executes deployment callbacks
+      """
+
+      manual ManualActions.RunReadyActions
+    end
+
     action :send_deploy_request do
       argument :deployment, :struct do
         constraints instance_of: __MODULE__
@@ -142,6 +150,10 @@ defmodule Edgehog.Containers.Deployment do
 
     belongs_to :release, Release do
       attribute_type :uuid
+      public? true
+    end
+
+    has_many :ready_actions, Edgehog.Containers.DeploymentReadyAction do
       public? true
     end
   end

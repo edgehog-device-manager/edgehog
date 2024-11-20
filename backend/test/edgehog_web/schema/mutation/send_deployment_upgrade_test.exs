@@ -24,7 +24,18 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
   import Edgehog.ContainersFixtures
 
+  alias Edgehog.Astarte.Device.AvailableContainers.ContainerStatus
+  alias Edgehog.Astarte.Device.AvailableContainersMock
+  alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
+  alias Edgehog.Astarte.Device.AvailableDeploymentsMock
+  alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
+  alias Edgehog.Astarte.Device.AvailableImagesMock
+  alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
+  alias Edgehog.Astarte.Device.AvailableNetworksMock
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
+  alias Edgehog.Astarte.Device.DeploymentUpdateMock
+  alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment
 
   describe "sendDeploymentUpgrade" do
     setup %{tenant: tenant} do
@@ -48,7 +59,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       }
     end
 
-    test "correctly sends the deployment upgrade with valid data", args do
+    test "correctly sends the deployment request with valid data", args do
       %{deployment_0_0_1: deployment_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
 
@@ -64,6 +75,26 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       assert Edgehog.Containers.DeploymentReadyAction
              |> Ash.read_first!(tenant: tenant)
              |> Map.fetch!(:deployment_id) == deployment_id
+    end
+
+    test "sends the deployment upgrade once the new deployment reaches :ready state", args do
+      %{deployment_0_0_1: deployment_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
+        args
+
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
+      expect(DeploymentUpdateMock, :update, fn _, _, _ -> :ok end)
+
+      result =
+        [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
+        |> send_deployment_upgrade_mutation()
+        |> extract_result!()
+
+      {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+      deployment = Ash.get!(Deployment, deployment_id, tenant: tenant)
+      set_resource_expectations([deployment_0_0_1, deployment])
+
+      Containers.deployment_update_status!(deployment)
     end
 
     test "fails if the deployments do not belong to the same application", args do
@@ -141,5 +172,38 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
            } = result
 
     error
+  end
+
+  defp set_resource_expectations(deployments) do
+    deployments =
+      Enum.map(deployments, &Ash.load!(&1, release: [containers: [:image, :networks]]))
+
+    containers =
+      deployments
+      |> Enum.map(& &1.release)
+      |> Enum.flat_map(& &1.containers)
+      |> Enum.uniq_by(& &1.id)
+
+    available_containers = Enum.map(containers, &%ContainerStatus{id: &1.id, status: "Created"})
+
+    available_images =
+      containers
+      |> Enum.flat_map(& &1.image)
+      |> Enum.map(&%ImageStatus{id: &1.id, pulled: false})
+      |> Enum.uniq()
+
+    available_networks =
+      containers
+      |> Enum.flat_map(& &1.network)
+      |> Enum.map(&%NetworkStatus{id: &1.id, created: false})
+      |> Enum.uniq()
+
+    available_deployments =
+      Enum.map(deployments, &%DeploymentStatus{id: &1.id, status: :stopped})
+
+    expect(AvailableImagesMock, :get, fn _, _ -> {:ok, available_images} end)
+    expect(AvailableNetworksMock, :get, fn _, _ -> {:ok, available_networks} end)
+    expect(AvailableContainersMock, :get, fn _, _ -> {:ok, available_containers} end)
+    expect(AvailableDeploymentsMock, :get, fn _, _ -> {:ok, available_deployments} end)
   end
 end
