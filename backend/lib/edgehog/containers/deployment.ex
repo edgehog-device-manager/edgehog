@@ -87,7 +87,7 @@ defmodule Edgehog.Containers.Deployment do
     end
 
     update :set_status do
-      accept [:status]
+      accept [:status, :message]
     end
   end
 
@@ -95,6 +95,10 @@ defmodule Edgehog.Containers.Deployment do
     uuid_primary_key :id
 
     attribute :status, DeploymentStatus do
+      public? true
+    end
+
+    attribute :message, :string do
       public? true
     end
 
