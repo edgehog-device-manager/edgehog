@@ -254,12 +254,12 @@ defmodule Edgehog.Devices.Device do
       manual ManualActions.SetLedBehavior
     end
 
-    update :send_create_image do
+    update :send_create_image_request do
       description "Sends a create image request to the device."
 
       argument :image, :struct do
         constraints instance_of: Image
-        description "The image the device will pull."
+        description "The image the device will create."
         allow_nil? false
       end
 
@@ -269,10 +269,11 @@ defmodule Edgehog.Devices.Device do
     update :send_create_container_request do
       description "Sends a create container request to the device."
 
-      argument :container, :struct,
-        constraints: [instance_of: Edgehog.Containers.Container],
-        description: "The Container the device has to initiate.",
-        allow_nil?: false
+      argument :container, :struct do
+        constraints instance_of: Edgehog.Containers.Container
+        description "The Container the device has to create."
+        allow_nil? false
+      end
 
       manual ManualActions.SendCreateContainer
     end
@@ -280,10 +281,11 @@ defmodule Edgehog.Devices.Device do
     update :send_create_network_request do
       description "Sends a create network request to the device."
 
-      argument :network, :struct,
-        constraints: [instance_of: Edgehog.Containers.Network],
-        description: "The Network the device has to create.",
-        allow_nil?: false
+      argument :network, :struct do
+        constraints instance_of: Edgehog.Containers.Network
+        description "The Network the device has to create."
+        allow_nil? false
+      end
 
       manual ManualActions.SendCreateNetwork
     end
