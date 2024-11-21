@@ -108,10 +108,14 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
   defp handle_event(%IncomingData{interface: @deployment_event} = event, tenant, _realm_id, _device_id, _timestamp) do
     "/" <> deployment_id = event.path
-    status = event.value["status"]
+
+    %{
+      "status" => status,
+      "message" => message
+    } = event.value
 
     with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      Containers.deployment_set_status(deployment, status, tenant: tenant)
+      Containers.deployment_set_status(deployment, status, message, tenant: tenant)
     end
   end
 

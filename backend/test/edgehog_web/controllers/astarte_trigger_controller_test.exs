@@ -428,6 +428,33 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
           path: "/" <> deployment.id,
           value: %{
+            "status" => "Error",
+            "message" => "error message"
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      # Deployment must be reloaded from the db
+      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+
+      assert deployment.status == :error
+      assert deployment.message == "error message"
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+          path: "/" <> deployment.id,
+          value: %{
             "status" => "Starting",
             "message" => ""
           }
@@ -437,17 +464,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
-      conn =
-        conn
-        |> put_req_header("astarte-realm", realm.name)
-        |> post(path, deployment_event)
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
 
-      # Deployment must be reloaded from the db
       deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
 
-      assert response(conn, 200)
-
       assert deployment.status == :starting
+      assert deployment.message == nil
     end
 
     test "unset AvailableDeployments deletes an existing deployment", context do

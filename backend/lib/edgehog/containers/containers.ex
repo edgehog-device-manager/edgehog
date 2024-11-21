@@ -97,7 +97,8 @@ defmodule Edgehog.Containers do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
       define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
       define :fetch_deployment, action: :read, get_by: [:id]
-      define :deployment_set_status, action: :set_status, args: [:status]
+      define :deployment_set_status, action: :set_status, args: [:status, :message]
+
       define :delete_deployment, action: :destroy
     end
 
