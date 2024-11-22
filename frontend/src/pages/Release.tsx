@@ -42,6 +42,9 @@ const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!) {
     release(id: $releaseId) {
       version
+      application {
+        name
+      }
       containers {
         ...ContainersTable_ContainerFragment
       }
@@ -58,7 +61,9 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
 
   return (
     <Page>
-      <Page.Header title={release.version} />
+      <Page.Header
+        title={`${release.application?.name ?? ""} (v${release.version})`}
+      />
       <Page.Main>
         <Alert
           show={!!errorFeedback}
