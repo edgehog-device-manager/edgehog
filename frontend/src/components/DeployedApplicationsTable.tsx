@@ -83,18 +83,23 @@ const STOP_DEPLOYMENT_MUTATION = graphql`
   }
 `;
 
+type ExtendedApplicationDeploymentStatus =
+  | ApplicationDeploymentStatus
+  | "DEPLOYING";
+
 // Define colors for each ApplicationDeploymentStatus
-const statusColors: Record<ApplicationDeploymentStatus, string> = {
-  STARTING: "text-muted",
+const statusColors: Record<ExtendedApplicationDeploymentStatus, string> = {
+  STARTING: "text-success",
   STARTED: "text-success",
-  STOPPING: "text-muted",
+  STOPPING: "text-warning",
   STOPPED: "text-secondary",
   ERROR: "text-danger",
-  DELETING: "text-warning",
+  DELETING: "text-danger",
+  DEPLOYING: "text-muted",
 };
 
 // Define status messages for localization
-const statusMessages = defineMessages<ApplicationDeploymentStatus>({
+const statusMessages = defineMessages<ExtendedApplicationDeploymentStatus>({
   STARTING: {
     id: "components.DeployedApplicationsTable.starting",
     defaultMessage: "Starting",
@@ -119,26 +124,32 @@ const statusMessages = defineMessages<ApplicationDeploymentStatus>({
     id: "components.DeployedApplicationsTable.deleting",
     defaultMessage: "Deleting",
   },
+  DEPLOYING: {
+    id: "components.DeployedApplicationsTable.deploying",
+    defaultMessage: "Deploying",
+  },
 });
 
 // Component to render the status with an icon and optional spin
 const DeploymentStatusComponent = ({
   status,
 }: {
-  status: ApplicationDeploymentStatus;
+  status: ExtendedApplicationDeploymentStatus;
 }) => (
   <div className="d-flex align-items-center">
     <Icon
       icon={
-        status === "STARTING" || status === "STOPPING" ? "spinner" : "circle"
+        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(status)
+          ? "spinner"
+          : "circle"
       }
       className={`me-2 ${statusColors[status]} ${
-        status === "STARTING" || status === "STOPPING" ? "fa-spin" : ""
+        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(status)
+          ? "fa-spin"
+          : ""
       }`}
     />
-    <span>
-      <FormattedMessage id={statusMessages[status].id} />
-    </span>
+    <FormattedMessage id={statusMessages[status].id} />
   </div>
 );
 
@@ -148,7 +159,7 @@ const ActionButtons = ({
   onStart,
   onStop,
 }: {
-  status: ApplicationDeploymentStatus;
+  status: ExtendedApplicationDeploymentStatus;
   onStart: () => void;
   onStop: () => void;
 }) => (
@@ -170,7 +181,9 @@ const ActionButtons = ({
     ) : (
       <button className="btn p-0 border-0 bg-transparent" disabled>
         <Icon
-          icon={status === "STARTING" ? "play" : "stop"}
+          icon={
+            status === "STARTING" || status === "DEPLOYING" ? "play" : "stop"
+          }
           className="text-muted"
         />
       </button>
@@ -211,7 +224,7 @@ const DeployedApplicationsTable = ({
       applicationName: edge.node.release?.application?.name || "Unknown",
       releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
-      status: edge.node.status,
+      status: edge.node.status || "DEPLOYING",
     })) || [];
 
   const handleStartDeployedApplication = useCallback(
@@ -314,7 +327,9 @@ const DeployedApplicationsTable = ({
         />
       ),
       cell: ({ getValue }) => (
-        <DeploymentStatusComponent status={getValue() || "STOPPED"} />
+        <DeploymentStatusComponent
+          status={getValue() as ExtendedApplicationDeploymentStatus}
+        />
       ),
     }),
     columnHelper.accessor((row) => row, {
@@ -327,7 +342,7 @@ const DeployedApplicationsTable = ({
       ),
       cell: ({ getValue }) => (
         <ActionButtons
-          status={getValue().status || "STOPPED"}
+          status={getValue().status as ExtendedApplicationDeploymentStatus}
           onStart={() => handleStartDeployedApplication(getValue().id)}
           onStop={() => handleStopDeployedApplication(getValue().id)}
         />

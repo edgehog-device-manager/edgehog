@@ -341,6 +341,9 @@
   "components.DeployedApplicationsTable.deleting": {
     "defaultMessage": "Deleting"
   },
+  "components.DeployedApplicationsTable.deploying": {
+    "defaultMessage": "Deploying"
+  },
   "components.DeployedApplicationsTable.error": {
     "defaultMessage": "Error"
   },
