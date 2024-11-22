@@ -27,9 +27,9 @@ defmodule Edgehog.Devices.Device do
     ]
 
   alias Edgehog.Changes.NormalizeTagName
-  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
@@ -254,7 +254,7 @@ defmodule Edgehog.Devices.Device do
       manual ManualActions.SetLedBehavior
     end
 
-    update :send_create_image do
+    update :send_create_image_request do
       description "Sends a create image request to the device."
 
       argument :image, :struct do

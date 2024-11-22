@@ -51,6 +51,11 @@ defmodule Edgehog.Containers.Image do
       attribute_type :uuid
       public? true
     end
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Image.Deployment
+      join_relationship :image_deployments
+    end
   end
 
   identities do

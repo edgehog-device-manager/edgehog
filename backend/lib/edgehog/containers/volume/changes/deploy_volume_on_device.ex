@@ -18,34 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Release.Deployment.Changes.CreateDeploymentOnDevice do
+defmodule Edgehog.Containers.Volume.Changes.DeployVolumeOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
   alias Edgehog.Devices
 
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
-
+  def change(changeset, _opts, _context) do
     Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      with {:ok, deployment} <- Ash.load(deployment, [:device, release: [:containers]]),
-           :ok <- deploy_containers(deployment, tenant),
-           {:ok, _device} <- Devices.send_create_deployment_request(deployment.device, deployment) do
+      with {:ok, deployment} <- Ash.load(deployment, [:device, :volume]),
+           {:ok, _device} <-
+             Devices.send_create_volume_request(deployment.device, deployment.volume) do
         {:ok, deployment}
-      end
-    end)
-  end
-
-  def deploy_containers(deployment, tenant) do
-    containers = deployment.release.containers
-    device = deployment.device
-
-    Enum.reduce_while(containers, :ok, fn container, _acc ->
-      case Containers.deploy_container(container.id, device.id, tenant: tenant) do
-        {:ok, _container_deployment} -> {:cont, :ok}
-        error -> {:halt, error}
       end
     end)
   end

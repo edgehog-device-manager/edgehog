@@ -87,7 +87,7 @@ defmodule Edgehog.Devices do
       define :fetch_device, action: :read, get_by: [:id]
 
       define :send_create_image_request,
-        action: :send_create_image,
+        action: :send_create_image_request,
         args: [:image]
 
       define :send_create_container_request,
@@ -101,6 +101,10 @@ defmodule Edgehog.Devices do
       define :send_create_deployment_request,
         action: :send_create_deployment_request,
         args: [:deployment]
+
+      define :send_create_volume_request,
+        action: :send_create_volume_request,
+        args: [:volume]
 
       define :send_release_command,
         action: :send_release_command,
