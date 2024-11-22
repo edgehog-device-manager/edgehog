@@ -50,6 +50,13 @@ defmodule Edgehog.Containers.Volume do
     timestamps()
   end
 
+  relationships do
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Volume.Deployment
+      join_relationship :volume_deployments
+    end
+  end
+
   calculations do
     calculate :options_encoding, {:array, :string}, OptionsCalculation
   end

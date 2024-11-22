@@ -25,9 +25,8 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
   import Edgehog.ContainersFixtures
 
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
-  alias Edgehog.Astarte.Device.DeploymentUpdateMock
   alias Edgehog.Containers
-  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release
 
   describe "sendDeploymentUpgrade" do
     setup %{tenant: tenant} do
@@ -64,17 +63,20 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
       {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
 
-      assert Edgehog.Containers.Release.Deployment.ReadyAction
+      assert Release.Deployment.ReadyAction
              |> Ash.read_first!(tenant: tenant)
              |> Map.fetch!(:deployment_id) == deployment_id
     end
 
     test "sends the deployment upgrade once the new deployment reaches :ready state", args do
-      %{deployment_0_0_1: deployment_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
-        args
+      %{
+        deployment_0_0_1: deployment_0_0_1,
+        release_0_0_2: release_0_0_2,
+        tenant: tenant
+        # conn: conn
+      } = args
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
-      expect(DeploymentUpdateMock, :update, fn _, _, _ -> :ok end)
 
       result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
@@ -83,10 +85,20 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
       {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
 
-      deployment = Ash.get!(Deployment, deployment_id, tenant: tenant)
-      set_resource_expectations([deployment_0_0_1, deployment])
+      deployment = Ash.get!(Release.Deployment, deployment_id, tenant: tenant)
 
-      Containers.deployment_update_status!(deployment)
+      expect(Edgehog.Astarte.Device.DeploymentUpdateMock, :update, 1, fn _, _, update_data ->
+        %{from: from, to: to} = update_data
+        assert from == deployment_0_0_1.id
+        assert to == deployment.id
+
+        :ok
+      end)
+
+      assert :sent = deployment.state
+
+      # Setting a container stopped for the first time should trigger the ready actions
+      Containers.release_deployment_stopped(deployment, tenant: tenant)
     end
 
     test "fails if the deployments do not belong to the same application", args do

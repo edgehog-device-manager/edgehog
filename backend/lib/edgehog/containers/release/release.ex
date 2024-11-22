@@ -78,7 +78,7 @@ defmodule Edgehog.Containers.Release do
 
     many_to_many :devices, Edgehog.Devices.Device do
       through Edgehog.Containers.Release.Deployment
-      join_relationship :deployments
+      join_relationship :release_deployments
     end
 
     many_to_many :containers, Edgehog.Containers.Container do

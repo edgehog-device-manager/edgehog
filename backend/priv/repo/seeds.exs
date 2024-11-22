@@ -22,11 +22,11 @@ alias Edgehog.Astarte
 alias Edgehog.Containers.Application
 alias Edgehog.Containers.Container
 alias Edgehog.Containers.ContainerNetwork
-alias Edgehog.Containers.Release.Deployment
 alias Edgehog.Containers.Image
 alias Edgehog.Containers.ImageCredentials
 alias Edgehog.Containers.Network
 alias Edgehog.Containers.Release
+alias Edgehog.Containers.Release.Deployment
 alias Edgehog.Containers.ReleaseContainers
 alias Edgehog.Devices.Device
 alias Edgehog.Tenants

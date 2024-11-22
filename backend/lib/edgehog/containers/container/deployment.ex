@@ -24,21 +24,71 @@ defmodule Edgehog.Containers.Container.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Container.Calculations
+  alias Edgehog.Containers.Container.Changes
+
   graphql do
     type :container_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:status], update: [:status]]
+    defaults [:read, :destroy]
+
+    create :deploy do
+      description """
+      Deploys an image on a device, the status according to device triggers.
+      """
+
+      accept [:container_id]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      change set_attribute(:state, :created)
+      change manage_relationship(:device_id, :device, type: :append)
+      change Changes.DeployContainerOnDevice
+    end
+
+    update :sent do
+      change set_attribute(:state, :sent)
+    end
+
+    update :received do
+      change set_attribute(:state, :received)
+    end
+
+    update :created do
+      change set_attribute(:state, :device_created)
+    end
+
+    update :stopped do
+      change set_attribute(:state, :stopped)
+    end
+
+    update :running do
+      change set_attribute(:state, :running)
+    end
+
+    update :errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change set_attribute(:state, :error)
+    end
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :status, Edgehog.Containers.Container.Status do
-      allow_nil? false
-      public? true
-    end
+    attribute :last_message, :string
+
+    attribute :state, :atom,
+      constraints: [
+        one_of: [:created, :sent, :received, :device_created, :stopped, :running, :error]
+      ]
 
     timestamps()
   end
@@ -52,11 +102,20 @@ defmodule Edgehog.Containers.Container.Deployment do
     belongs_to :device, Edgehog.Devices.Device
   end
 
+  calculations do
+    calculate :ready?, :boolean, Calculations.ContainerReady
+  end
+
   identities do
     identity :container_instance, [:container_id, :device_id]
   end
 
   postgres do
-    table "application_container_deployments"
+    table "container_deployments"
+
+    references do
+      reference :container, on_delete: :delete
+      reference :device, on_delete: :delete
+    end
   end
 end

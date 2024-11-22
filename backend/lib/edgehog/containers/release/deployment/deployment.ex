@@ -26,9 +26,9 @@ defmodule Edgehog.Containers.Release.Deployment do
 
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment.Calculations
   alias Edgehog.Containers.Release.Deployment.Changes
   alias Edgehog.Containers.Release.Deployment.ReadyAction
-  alias Edgehog.Containers.Types.DeploymentStatus
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
   alias Edgehog.Devices.Device
@@ -38,7 +38,7 @@ defmodule Edgehog.Containers.Release.Deployment do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:device_id, :release_id, :status, :message]]
+    defaults [:read, :destroy, create: [:device_id, :release_id, :last_message, :state]]
 
     create :deploy do
       description """
@@ -52,8 +52,8 @@ defmodule Edgehog.Containers.Release.Deployment do
         allow_nil? false
       end
 
+      change set_attribute(:state, :created)
       change manage_relationship(:device_id, :device, type: :append)
-
       change Changes.CreateDeploymentOnDevice
     end
 
@@ -70,6 +70,7 @@ defmodule Edgehog.Containers.Release.Deployment do
       Sends a :stop command to the release on the device.
       """
 
+      change set_attribute(:state, :stopping)
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
 
@@ -81,21 +82,44 @@ defmodule Edgehog.Containers.Release.Deployment do
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
 
+    update :sent do
+      change set_attribute(:state, :sent)
+    end
+
+    update :started do
+      change set_attribute(:state, :started)
+    end
+
+    update :stopped do
+      change set_attribute(:state, :stopped)
+      require_atomic? false
+
+      change Changes.RunReadyActions
+    end
+
+    update :starting do
+      change set_attribute(:state, :starting)
+    end
+
+    update :stopping do
+      change set_attribute(:state, :stopping)
+    end
+
+    update :error do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change set_attribute(:state, :error)
+    end
+
     update :run_ready_actions do
       description """
       Executes deployment callbacks
       """
 
       manual ManualActions.RunReadyActions
-    end
-
-    action :send_deploy_request do
-      argument :deployment, :struct do
-        constraints instance_of: __MODULE__
-        allow_nil? false
-      end
-
-      run ManualActions.SendDeployRequest
     end
 
     update :upgrade_release do
@@ -109,19 +133,6 @@ defmodule Edgehog.Containers.Release.Deployment do
       manual ManualActions.SendDeploymentUpgrade
     end
 
-    update :set_status do
-      accept [:status, :message]
-    end
-
-    update :update_status do
-      change Changes.CheckImages
-      change Changes.CheckNetworks
-      change Changes.CheckContainers
-      change Changes.CheckDeployments
-
-      require_atomic? false
-    end
-
     read :filter_by_release do
       argument :release_id, :uuid
 
@@ -132,15 +143,12 @@ defmodule Edgehog.Containers.Release.Deployment do
   attributes do
     uuid_primary_key :id
 
-    attribute :status, DeploymentStatus do
-      allow_nil? false
-      default :created
-      public? true
-    end
+    attribute :last_message, :string
 
-    attribute :message, :string do
-      public? true
-    end
+    attribute :state, :atom,
+      constraints: [
+        one_of: [:created, :sent, :starting, :started, :stopping, :stopped, :deleting, :error]
+      ]
 
     timestamps()
   end
@@ -160,8 +168,8 @@ defmodule Edgehog.Containers.Release.Deployment do
     end
   end
 
-  identities do
-    identity :release_instance, [:device_id, :release_id]
+  calculations do
+    calculate :ready?, :boolean, Calculations.ReleaseReady
   end
 
   postgres do
@@ -169,6 +177,11 @@ defmodule Edgehog.Containers.Release.Deployment do
 
     references do
       reference :device, on_delete: :delete
+      reference :release, on_delete: :delete
     end
+  end
+
+  identities do
+    identity :release_instance, [:device_id, :release_id]
   end
 end

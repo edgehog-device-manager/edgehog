@@ -28,7 +28,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStartTest do
 
   describe "startDeployment mutation tests" do
     test "start on an existing deployment", %{tenant: tenant} do
-      deployment = deployment_fixture(tenant: tenant)
+      deployment = deployment_fixture(tenant: tenant, state: :stopped)
 
       expect(DeploymentCommandMock, :send_deployment_command, 1, fn _, _, _ -> :ok end)
 

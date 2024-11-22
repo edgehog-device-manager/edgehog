@@ -23,21 +23,13 @@ defmodule Edgehog.ContainersFixtures do
   This module defines test helpers for creating 
   entities via the `Edgehog.Containers` context.
   """
-  alias Edgehog.Astarte.Device.AvailableContainers.ContainerStatus
-  alias Edgehog.Astarte.Device.AvailableContainersMock
-  alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
-  alias Edgehog.Astarte.Device.AvailableDeploymentsMock
-  alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
-  alias Edgehog.Astarte.Device.AvailableImagesMock
-  alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
-  alias Edgehog.Astarte.Device.AvailableNetworksMock
   alias Edgehog.AstarteFixtures
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment
 
   @doc """
   Generate a unique application name.
@@ -217,46 +209,5 @@ defmodule Edgehog.ContainersFixtures do
       })
 
     Ash.create!(Deployment, params, tenant: tenant)
-  end
-
-  def set_resource_expectations(deployments, new_deployments \\ 1) do
-    deployments =
-      Enum.map(deployments, &Ash.load!(&1, release: [containers: [:image, :networks]]))
-
-    containers =
-      deployments
-      |> Enum.map(& &1.release)
-      |> Enum.flat_map(& &1.containers)
-      |> Enum.uniq_by(& &1.id)
-
-    available_containers = Enum.map(containers, &%ContainerStatus{id: &1.id, status: "Created"})
-
-    available_images =
-      containers
-      |> Enum.map(&%ImageStatus{id: &1.image_id, pulled: false})
-      |> Enum.uniq()
-
-    available_networks =
-      containers
-      |> Enum.flat_map(& &1.networks)
-      |> Enum.map(&%NetworkStatus{id: &1.id, created: false})
-      |> Enum.uniq()
-
-    available_deployments =
-      Enum.map(deployments, &%DeploymentStatus{id: &1.id, status: :stopped})
-
-    Mox.expect(AvailableImagesMock, :get, new_deployments, fn _, _ -> {:ok, available_images} end)
-
-    Mox.expect(AvailableNetworksMock, :get, new_deployments, fn _, _ ->
-      {:ok, available_networks}
-    end)
-
-    Mox.expect(AvailableContainersMock, :get, new_deployments, fn _, _ ->
-      {:ok, available_containers}
-    end)
-
-    Mox.expect(AvailableDeploymentsMock, :get, new_deployments, fn _, _ ->
-      {:ok, available_deployments}
-    end)
   end
 end

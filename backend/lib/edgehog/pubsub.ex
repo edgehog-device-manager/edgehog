@@ -25,7 +25,7 @@ defmodule Edgehog.PubSub do
 
   alias Edgehog.OSManagement.OTAOperation
 
-  @type event :: :ota_operation_created | :ota_operation_updated
+  @type event :: :ota_operation_created | :ota_operation_updated | :release_deployment_available
 
   @doc """
   Publish an event to the PubSub. Raises if any of the publish fails.
@@ -51,6 +51,10 @@ defmodule Edgehog.PubSub do
     broadcast_many!(topics, payload)
   end
 
+  def publish!(event, payload) do
+    broadcast_many!([topic_for_subject(event)], payload)
+  end
+
   defp broadcast_many!(topics, payload) do
     Enum.each(topics, fn topic ->
       Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, payload)
@@ -73,4 +77,5 @@ defmodule Edgehog.PubSub do
   defp topic_for_subject(%OTAOperation{id: id}), do: "ota_operations:#{id}"
   defp topic_for_subject({:ota_operation, id}), do: "ota_operations:#{id}"
   defp topic_for_subject(:ota_operations), do: "ota_operations:*"
+  defp topic_for_subject(subject) when is_atom(subject), do: Atom.to_string(subject)
 end

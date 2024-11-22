@@ -24,21 +24,62 @@ defmodule Edgehog.Containers.Volume.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Volume.Changes
+
   graphql do
     type :volume_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:created], update: [:created]]
+    defaults [:read, :destroy, :create]
+
+    create :deploy do
+      description """
+      Deploys an image on a device, the status according to device triggers.
+      """
+
+      accept [:volume_id]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      change set_attribute(:state, :created)
+      change manage_relationship(:device_id, :device, type: :append)
+      change Changes.DeployVolumeOnDevice
+    end
+
+    update :sent do
+      change set_attribute(:state, :sent)
+    end
+
+    update :available do
+      change set_attribute(:state, :available)
+    end
+
+    update :unavailable do
+      change set_attribute(:state, :unavailable)
+    end
+
+    update :errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change set_attribute(:state, :error)
+    end
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :created, :boolean do
-      allow_nil? false
-      public? true
-    end
+    attribute :last_message, :string
+
+    attribute :state, :atom,
+      constraints: [
+        one_of: [:created, :sent, :available, :unavailable, :error]
+      ]
 
     timestamps()
   end
@@ -50,6 +91,10 @@ defmodule Edgehog.Containers.Volume.Deployment do
     end
 
     belongs_to :device, Edgehog.Devices.Device
+  end
+
+  calculations do
+    calculate :ready?, :boolean, expr(state not in [:created, :sent, :error])
   end
 
   identities do
