@@ -27,7 +27,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.DeploymentUpdateMock
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   describe "sendDeploymentUpgrade" do
     setup %{tenant: tenant} do
@@ -64,7 +64,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
       {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
 
-      assert Edgehog.Containers.DeploymentReadyAction
+      assert Edgehog.Containers.Release.Deployment.ReadyAction
              |> Ash.read_first!(tenant: tenant)
              |> Map.fetch!(:deployment_id) == deployment_id
     end
