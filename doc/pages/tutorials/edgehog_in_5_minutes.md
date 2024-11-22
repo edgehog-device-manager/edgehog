@@ -104,39 +104,23 @@ This will create the tenant `acme-inc` and add a sample device to it.
 Nice! Now we have our tenant but we can't access to it yet, we need a token.
 Luckily Edgehog includes a scripts to generate one!
 
-First you'll need to make sure to have python version 3 installed.
+First you'll need to make sure to have Elixir installed in your system.
+If you're using the [asdf](https://asdf-vm.com/) version manager, you can install Elixir by running:
 
 ```sh
-$ python3 --version
-Python 3.x.y
-```
-
-> While not mandatory, it is advised to use a python virtual environment to make sure your
-> globally installed python packages don't mess with this script's dependencies and vice versa.
-> Doing this is pretty straightforward, but you may need to install the `python3-venv` package if
-> you are using a Debian/Ubuntu-based system.
->
-> ```sh
-> $ python3 -m venv pyenv
-> $ source pyenv/bin/activate
-> ```
-
-Then, navigate to the `tools/` subdirectory and install the required dependencies
-
-```sh
-$ cd tools && pip install -r requirements.txt
+$ asdf install
 ```
 
 Now you can generate the login token with
 
 ```sh
-$ ./gen-edgehog-jwt -t tenant -k ../acme_private.pem
+$ ./tools/gen-edgehog-jwt -t tenant -k ./acme_private.pem
 ```
 
 > If in the previous section you had decided not to use a custom key, use this command instead
 >
 > ```sh
-> $ ./gen-edgehog-jwt -t tenant -k ../backend/priv/repo/seeds/keys/tenant_private.pem
+> $ ./tools/gen-edgehog-jwt -t tenant -k ./backend/priv/repo/seeds/keys/tenant_private.pem
 > ```
 
 You can finally navigate to `http://edgehog.localhost` in your browser and login to the
