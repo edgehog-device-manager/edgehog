@@ -23,8 +23,6 @@ defmodule Edgehog.Containers.ManualActions.SendDeploymentUpgrade do
 
   use Ash.Resource.ManualUpdate
 
-  alias Edgehog.Containers.DeploymentReadyAction
-
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, _context) do
     tenant = changeset.tenant
