@@ -26,14 +26,14 @@ defmodule Edgehog.Containers do
     ]
 
   alias Edgehog.Containers.Application
-  alias Edgehog.Containers.Release
-  alias Edgehog.Containers.ReleaseContainers
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.ContainerNetwork
-  alias Edgehog.Containers.Network
-  alias Edgehog.Containers.Volume
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.ImageCredentials
+  alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Release
+  alias Edgehog.Containers.ReleaseContainers
+  alias Edgehog.Containers.Volume
 
   graphql do
     root_level_errors? true
@@ -76,16 +76,16 @@ defmodule Edgehog.Containers do
 
       destroy ImageCredentials, :delete_image_credentials, :destroy
 
-      create Deployment, :deploy_release, :deploy do
+      create Release.Deployment, :deploy_release, :deploy do
         description "Deploy the application on a device"
         relay_id_translations input: [release_id: :release, device_id: :device]
       end
 
-      update Deployment, :start_deployment, :start
-      update Deployment, :stop_deployment, :stop
-      update Deployment, :delete_deployment, :delete
+      update Release.Deployment, :start_deployment, :start
+      update Release.Deployment, :stop_deployment, :stop
+      update Release.Deployment, :delete_deployment, :delete
 
-      update Deployment, :upgrade_deployment, :upgrade_release do
+      update Release.Deployment, :upgrade_deployment, :upgrade_release do
         relay_id_translations input: [target: :release]
       end
     end
@@ -98,7 +98,14 @@ defmodule Edgehog.Containers do
       define :fetch_container, action: :read, get_by: [:id]
       define :containers_with_image, action: :filter_by_image, args: [:image_id]
     end
-    resource Container.Deployment
+
+    resource Container.Deployment do
+      define :deploy_container, action: :deploy, args: [:container_id, :device_id]
+    end
+
+    resource Release do
+      define :fetch_release, action: :read, get_by: [:id]
+    end
 
     resource Release.Deployment do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
@@ -112,48 +119,42 @@ defmodule Edgehog.Containers do
       define :run_ready_actions, action: :run_ready_actions
     end
 
+    resource Release.Deployment.ReadyAction do
+      define :run_ready_action, action: :run
+    end
+
+    resource Release.Deployment.ReadyAction.Upgrade
+
     resource Image do
       define :fetch_image, action: :read, get_by: [:id]
     end
-    resource Image.Deployment
+
+    resource Image.Deployment do
+      define :deploy_image, action: :deploy, args: [:image_id, :device_id]
+    end
 
     resource ImageCredentials
 
-    resource Release do
-      define :fetch_release, action: :read, get_by: [:id]
-    end
-    resource Release.Deployment
-
-    resource Edgehog.Containers.ReleaseContainers do
+    resource ReleaseContainers do
       define :releases_with_container,
         action: :releases_by_container,
         args: [:container_id]
     end
-    resource Edgehog.Containers.Network
-    resource Edgehog.Containers.Network.Deployment
-    resource Edgehog.Containers.Volume
-    resource Edgehog.Containers.Volume.Deployment
-    resource Edgehog.Containers.ContainerNetwork
-
-    resource Network
-    resource Network.Deployment
 
     resource Volume
-    resource Volume.Deployment
+    resource Volume.Deployment do
+      define :deploy_volume, action: :deploy, args: [:volume_id, :device_id]
+    end
 
-    resource Release.Deployment.ReadyAction
-    resource Release.Deployment.ReadyAction.Upgrade
+    resource Network
+    resource Network.Deployment do
+      define :deploy_network, action: :deploy, args: [:network_id, :device_id]
+    end
 
     resource ContainerNetwork do
       define :containers_with_network,
         action: :containers_by_network,
         args: [:network_id]
     end
-
-    resource Release.Deployment.ReadyAction do
-      define :run_ready_action, action: :run
-    end
-
-    resource Release.Deployment.ReadyAction.Upgrade
   end
 end

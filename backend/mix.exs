@@ -118,7 +118,7 @@ defmodule Edgehog.MixProject do
       {:picosat_elixir, "~> 0.2"},
       {:styler, "~> 1.0.0-rc.1", only: [:dev, :test], runtime: false},
       {:open_api_spex, "~> 3.16"},
-      {:ymlr, "~> 5.1"}
+      {:ymlr, "~> 5.1"},
     ]
   end
 

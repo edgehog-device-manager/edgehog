@@ -66,6 +66,11 @@ defmodule Edgehog.Containers.Network do
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ContainerNetwork
     end
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Network.Deployment
+      join_relationship :network_deployments
+    end
   end
 
   postgres do
