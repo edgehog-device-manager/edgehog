@@ -124,11 +124,16 @@ defmodule Edgehog.Containers do
     end
     resource Release.Deployment
 
-    resource ReleaseContainers do
+    resource Edgehog.Containers.ReleaseContainers do
       define :releases_with_container,
         action: :releases_by_container,
         args: [:container_id]
     end
+    resource Edgehog.Containers.Network
+    resource Edgehog.Containers.Network.Deployment
+    resource Edgehog.Containers.Volume
+    resource Edgehog.Containers.Volume.Deployment
+    resource Edgehog.Containers.ContainerNetwork
 
     resource Network
     resource Network.Deployment
