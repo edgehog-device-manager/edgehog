@@ -20,10 +20,9 @@
 
 defmodule Edgehog.Containers.ManualActions.SendDeploymentUpgrade do
   @moduledoc false
-
   use Ash.Resource.ManualUpdate
 
-  alias Edgehog.Containers.DeploymentReadyAction
+  alias Edgehog.Containers.Release
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, _context) do
@@ -33,7 +32,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeploymentUpgrade do
     target_id = Ash.Changeset.get_argument(changeset, :target)
 
     with {:ok, action} <-
-           DeploymentReadyAction
+           Release.Deployment.ReadyAction
            |> Ash.Changeset.for_create(
              :create_deployment,
              %{

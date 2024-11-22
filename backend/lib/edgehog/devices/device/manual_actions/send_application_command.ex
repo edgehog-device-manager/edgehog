@@ -23,7 +23,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendApplicationCommand do
   use Ash.Resource.ManualUpdate
 
   alias Edgehog.Astarte.Device.DeploymentCommand.RequestData
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   @deployment_command Application.compile_env(
                         :edgehog,

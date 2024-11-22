@@ -18,35 +18,34 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CheckDeployments do
+defmodule Edgehog.Containers.Release.Deployment.Changes.CheckNetworks do
   @moduledoc false
   use Ash.Resource.Change
-
-  alias Edgehog.Containers
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
-    with {:ok, :created_containers} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
-         {:ok, deployment} <- Ash.load(deployment, device: :available_deployments) do
-      available_deployment =
-        Enum.find(deployment.device.available_deployments, &(&1.id == deployment.id))
+    with {:ok, :created_images} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
+         {:ok, deployment} <-
+           Ash.load(deployment, device: :available_networks, release: [containers: [:networks]]) do
+      available_network_ids =
+        Enum.map(deployment.device.available_networks, & &1.id)
 
-      if available_deployment do
-        changeset
-        |> Ash.Changeset.change_attribute(:status, available_deployment.status)
-        |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->
-          with {:ok, deployment} <- transaction_result do
-            Containers.run_ready_actions(deployment)
-          end
-        end)
+      missing_networks =
+        deployment.release.containers
+        |> Enum.flat_map(& &1.networks)
+        |> Enum.map(& &1.id)
+        |> Enum.uniq()
+        |> Enum.reject(&(&1 in available_network_ids))
+
+      if missing_networks == [] do
+        Ash.Changeset.change_attribute(changeset, :status, :created_networks)
       else
         changeset
       end
     else
-      _ ->
-        changeset
+      _ -> changeset
     end
   end
 end
