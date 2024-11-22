@@ -18,9 +18,9 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { useCallback } from "react";
 import { defineMessages, FormattedMessage } from "react-intl";
 import { graphql, useFragment, useMutation } from "react-relay/hooks";
-import { useCallback } from "react";
 
 import type {
   ApplicationDeploymentStatus,
@@ -31,8 +31,10 @@ import type { DeployedApplicationsTable_startDeployment_Mutation } from "api/__g
 import type { DeployedApplicationsTable_stopDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
 
 import Icon from "components/Icon";
-import { Link, Route } from "Navigation";
 import Table, { createColumnHelper } from "components/Table";
+import { Link, Route } from "Navigation";
+import Tag from "./Tag";
+import Button from "./Button";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -49,6 +51,15 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
             application {
               id
               name
+              # TODO sorting by created_id
+              releases(sort: { field: VERSION }) {
+                edges {
+                  node {
+                    id
+                    version
+                  }
+                }
+              }
             }
           }
         }
@@ -82,6 +93,19 @@ const STOP_DEPLOYMENT_MUTATION = graphql`
     }
   }
 `;
+
+// const UPGRADE_DEPLOYMENT_MUTATION = graphql`
+//   mutation DeployedApplicationsTable_upgradeDeployment_Mutation($id: ID!, $target: ID!) {
+//     upgradeDeployment(id: $id, target: $target) {
+//       result {
+//         id
+//       }
+//       errors {
+//         message
+//       }
+//     }
+//   }
+// `;
 
 // Define colors for each ApplicationDeploymentStatus
 const statusColors: Record<ApplicationDeploymentStatus, string> = {
@@ -154,26 +178,26 @@ const ActionButtons = ({
 }) => (
   <div>
     {status === "STOPPED" || status === "ERROR" ? (
-      <button
+      <Button
         onClick={onStart}
         className="btn p-0 text-success border-0 bg-transparent"
       >
         <Icon icon="play" className="text-success" />
-      </button>
+      </Button>
     ) : status === "STARTED" ? (
-      <button
+      <Button
         onClick={onStop}
         className="btn p-0 text-danger border-0 bg-transparent"
       >
         <Icon icon="stop" className="text-danger" />
-      </button>
+      </Button>
     ) : (
-      <button className="btn p-0 border-0 bg-transparent" disabled>
+      <Button className="btn p-0 border-0 bg-transparent" disabled>
         <Icon
           icon={status === "STARTING" ? "play" : "stop"}
           className="text-muted"
         />
-      </button>
+      </Button>
     )}
   </div>
 );
@@ -194,7 +218,7 @@ const DeployedApplicationsTable = ({
   onDeploymentChange,
 }: DeploymentTableProps) => {
   const data = useFragment(DEPLOYED_APPLICATIONS_TABLE_FRAGMENT, deviceRef);
-
+  console.log("data", data);
   const [startDeployment] =
     useMutation<DeployedApplicationsTable_startDeployment_Mutation>(
       START_DEPLOYMENT_MUTATION,
@@ -215,7 +239,7 @@ const DeployedApplicationsTable = ({
     })) || [];
 
   const handleStartDeployedApplication = useCallback(
-    (deploymentId: string) => {
+    async (deploymentId: string) => {
       startDeployment({
         variables: { id: deploymentId },
         onCompleted: (data, errors) => {
@@ -244,7 +268,7 @@ const DeployedApplicationsTable = ({
   );
 
   const handleStopDeployedApplication = useCallback(
-    (deploymentId: string) => {
+    async (deploymentId: string) => {
       stopDeployment({
         variables: { id: deploymentId },
         onCompleted: (data, errors) => {
@@ -270,6 +294,31 @@ const DeployedApplicationsTable = ({
       });
     },
     [stopDeployment, setErrorFeedback, onDeploymentChange],
+  );
+
+  const handleUpgradeDeployedRelease = useCallback(
+    async (deploymentId: string) => {
+      try {
+        await handleStopDeployedApplication(deploymentId);
+        // TODO upgrade
+        await handleStartDeployedApplication(deploymentId);
+        onDeploymentChange(); // Trigger data refresh
+        setErrorFeedback(null);
+      } catch (error) {
+        setErrorFeedback(
+          <FormattedMessage
+            id="XXXXXXX"
+            defaultMessage="Could not Upgrade the Deployed Application, please try again."
+          />,
+        );
+      }
+    },
+    [
+      handleStopDeployedApplication,
+      handleStartDeployedApplication,
+      onDeploymentChange,
+      setErrorFeedback,
+    ],
   );
 
   const columnHelper = createColumnHelper<(typeof deployments)[0]>();
@@ -298,12 +347,24 @@ const DeployedApplicationsTable = ({
         />
       ),
       cell: ({ row, getValue }) => (
-        <Link
-          route={Route.release}
-          params={{ releaseId: row.original.releaseId }}
-        >
-          {getValue()}
-        </Link>
+        <span>
+          <span className="d-inline-block">
+            <Link
+              route={Route.release}
+              params={{ releaseId: row.original.releaseId }}
+            >
+              {getValue()}
+            </Link>
+          </span>
+          <span className="d-inline-block mx-1">
+            <Button
+              as={Tag}
+              onClick={() => handleUpgradeDeployedRelease(row.original.id)}
+            >
+              Upgrade
+            </Button>
+          </span>
+        </span>
       ),
     }),
     columnHelper.accessor("status", {

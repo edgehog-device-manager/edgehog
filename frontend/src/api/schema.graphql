@@ -847,6 +847,8 @@ input ReleaseCreateContainersInput {
   env: JsonString
   image: ContainerCreateWithNestedImageInput
   hostname: String
+  networkMode: String
+  portBindings: [String!]
   privileged: Boolean
   restartPolicy: String
 }
@@ -1226,6 +1228,15 @@ type Image {
   reference: String!
   imageCredentialsId: ID
   credentials: ImageCredentials
+}
+
+"The result of the :delete_deployment mutation"
+type DeleteDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
 }
 
 "The result of the :stop_deployment mutation"
@@ -3754,6 +3765,9 @@ type RootMutationType {
 
   "Sends a :stop command to the release on the device."
   stopDeployment(id: ID!): StopDeploymentResult
+
+  "Sends a :delete command to the release on the device."
+  deleteDeployment(id: ID!): DeleteDeploymentResult
 
   "Create image credentials."
   createImageCredentials(
