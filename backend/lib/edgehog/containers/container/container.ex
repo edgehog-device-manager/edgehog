@@ -132,6 +132,11 @@ defmodule Edgehog.Containers.Container do
       through Edgehog.Containers.ContainerNetwork
       public? true
     end
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Container.Deployment
+      join_relationship :container_deployments
+    end
   end
 
   calculations do

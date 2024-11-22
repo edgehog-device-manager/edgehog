@@ -22,13 +22,12 @@ defmodule Edgehog.Containers.Release.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource, AshStateMachine]
 
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Release.Deployment.Changes
   alias Edgehog.Containers.Release.Deployment.ReadyAction
-  alias Edgehog.Containers.Types.DeploymentStatus
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
   alias Edgehog.Devices.Device
@@ -38,7 +37,7 @@ defmodule Edgehog.Containers.Release.Deployment do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:device_id, :release_id, :status, :message]]
+    defaults [:read, :destroy, create: [:device_id, :release_id, :message]]
 
     create :deploy do
       description """
@@ -81,6 +80,14 @@ defmodule Edgehog.Containers.Release.Deployment do
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
 
+    update :set_started do
+      change transition_state(:started)
+    end
+
+    update :set_stopped do
+      change transition_state(:stopped)
+    end
+
     update :run_ready_actions do
       description """
       Executes deployment callbacks
@@ -109,19 +116,6 @@ defmodule Edgehog.Containers.Release.Deployment do
       manual ManualActions.SendDeploymentUpgrade
     end
 
-    update :set_status do
-      accept [:status, :message]
-    end
-
-    update :update_status do
-      change Changes.CheckImages
-      change Changes.CheckNetworks
-      change Changes.CheckContainers
-      change Changes.CheckDeployments
-
-      require_atomic? false
-    end
-
     read :filter_by_release do
       argument :release_id, :uuid
 
@@ -131,16 +125,6 @@ defmodule Edgehog.Containers.Release.Deployment do
 
   attributes do
     uuid_primary_key :id
-
-    attribute :status, DeploymentStatus do
-      allow_nil? false
-      default :created
-      public? true
-    end
-
-    attribute :message, :string do
-      public? true
-    end
 
     timestamps()
   end
@@ -169,6 +153,19 @@ defmodule Edgehog.Containers.Release.Deployment do
 
     references do
       reference :device, on_delete: :delete
+      reference :release, on_delete: :delete
+    end
+  end
+
+  state_machine do
+    initial_states [:created]
+    default_initial_state :created
+
+    transitions do
+      transition :deploy, from: :created, to: [:sent, :error]
+      transition :start, from: :stopped, to: [:started, :error]
+      transition :stop, from: :started, to: [:stopped, :error]
+      transition :
     end
   end
 end

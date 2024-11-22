@@ -24,12 +24,32 @@ defmodule Edgehog.Containers.Network.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Network.Changes
+  alias Edgehog.Devices.Device
+
   graphql do
     type :network_deployment
   end
 
   actions do
     defaults [:read, :destroy, create: [:created], update: [:created]]
+
+    create :deploy do
+      description """
+      Deploys an image on a device, the status according to device triggers.
+      """
+
+      accept [:network_id]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      change manage_relationship(:device_id, :device, type: :append)
+
+      change Changes.DeployNetworkOnDevice
+    end
   end
 
   attributes do
@@ -44,15 +64,20 @@ defmodule Edgehog.Containers.Network.Deployment do
   end
 
   relationships do
-    belongs_to :container, Edgehog.Containers.Network do
+    belongs_to :network, Network do
       attribute_type :uuid
       public? true
     end
 
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device, Device
   end
 
   postgres do
-    table "application_network_deployments"
+    table "network_deployments"
+
+    references do
+      reference :network, on_delete: :delete
+      reference :device, on_delete: :delete
+    end
   end
 end

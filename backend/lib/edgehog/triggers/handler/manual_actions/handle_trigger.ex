@@ -22,6 +22,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @moduledoc false
   use Ash.Resource.Actions.Implementation
 
+  alias Edgehog.PubSub
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
   alias Edgehog.Containers
@@ -118,71 +119,30 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     |> Ash.create(tenant: tenant)
   end
 
-  defp handle_event(%IncomingData{interface: @available_images} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(%IncomingData{interface: @available_images} = event, _tenant, _realm_id, _device_id, _timestamp) do
     case String.split(event.path, "/") do
       ["", image_id, "pulled"] ->
-        containers = Containers.containers_with_image!(image_id, tenant: tenant)
-
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1.id, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+        PubSub.publish!({:available_image, image_id}, event.value)
 
       _ ->
         {:error, :invalid_event_path}
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_networks} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(%IncomingData{interface: @available_networks} = event, _tenant, _realm_id, _device_id, _timestamp) do
     case String.split(event.path, "/") do
-      ["", network_id, "pulled"] ->
-        containers =
-          network_id
-          |> Containers.containers_with_network!(tenant: tenant, load: :container)
-          |> Enum.map(& &1.container_id)
-          |> Enum.uniq()
-
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+      ["", network_id, "created"] ->
+        PubSub.publish!({:available_network, network_id}, event.value)
 
       _ ->
         {:error, :invalid_event_path}
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_containers} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(%IncomingData{interface: @available_containers} = event, _tenant, _realm_id, _device_id, _timestamp) do
     case String.split(event.path, "/") do
       ["", container_id, "status"] ->
-        releases =
-          container_id
-          |> Containers.releases_with_container!(tenant: tenant, load: :release)
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+        PubSub.publish!({:available_container, container_id}, event.value)
 
       _ ->
         {:error, :invalid_event_path}
@@ -219,23 +179,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_deployments} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(%IncomingData{interface: @available_deployments} = event, _tenant, _realm_id, _device_id, _timestamp) do
     case String.split(event.path, "/") do
       ["", deployment_id, "status"] ->
-        status = event.value
-
-        with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-          cond do
-            status == nil ->
-              Containers.delete_deployment(deployment)
-
-            deployment.status in @initial_statuses ->
-              Containers.deployment_update_status(deployment, tenant: tenant)
-
-            true ->
-              Containers.deployment_set_status(deployment, status, deployment.message, tenant: tenant)
-          end
-        end
+        PubSub.publish!({:available_deployment, deployment_id}, event.value)
 
       _ ->
         {:error, :unsupported_event_path}

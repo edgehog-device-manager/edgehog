@@ -24,12 +24,30 @@ defmodule Edgehog.Containers.Container.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Container.Changes
+
   graphql do
     type :container_deployment
   end
 
   actions do
     defaults [:read, :destroy, create: [:status], update: [:status]]
+
+    create :deploy do
+      description """
+      Deploys an image on a device, the status according to device triggers.
+      """
+
+      accept [:container_id]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      change manage_relationship(:device_id, :device, type: :append)
+
+      change Changes.DeployContainerOnDevice
+    end
   end
 
   attributes do
@@ -53,6 +71,11 @@ defmodule Edgehog.Containers.Container.Deployment do
   end
 
   postgres do
-    table "application_container_deployments"
+    table "container_deployments"
+
+    references do
+      reference :container, on_delete: :delete
+      reference :device, on_delete: :delete
+    end
   end
 end

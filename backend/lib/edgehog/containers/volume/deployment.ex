@@ -30,6 +30,22 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
   actions do
     defaults [:read, :destroy, create: [:created], update: [:created]]
+
+    create :deploy do
+      description """
+      Deploys an image on a device, the status according to device triggers.
+      """
+
+      accept [:volume_id]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      change manage_relationship(:device_id, :device, type: :append)
+
+      change Changes.DeployVolumeOnDevice
+    end
   end
 
   attributes do
