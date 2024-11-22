@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
+defmodule Edgehog.Containers.Release.Deployment.Changes.CheckImages do
   @moduledoc false
   use Ash.Resource.Change
 
@@ -26,21 +26,25 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
-    with {:ok, :created_networks} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
+    with :sent <- deployment.status,
          {:ok, deployment} <-
-           Ash.load(deployment, device: :available_containers, release: [:containers]) do
-      available_container_ids = Enum.map(deployment.device.available_containers, & &1.id)
+           Ash.load(deployment, device: :available_images, release: [containers: [:image]]) do
+      available_images_ids =
+        Enum.map(deployment.device.available_images, & &1.id)
 
-      missing_containers =
-        Enum.reject(deployment.release.containers, &(&1.id in available_container_ids))
+      missing_images =
+        deployment.release.containers
+        |> Enum.map(& &1.image.id)
+        |> Enum.reject(&(&1 in available_images_ids))
 
-      if missing_containers == [] do
-        Ash.Changeset.change_attribute(changeset, :status, :created_containers)
+      if missing_images == [] do
+        Ash.Changeset.change_attribute(changeset, :status, :created_images)
       else
         changeset
       end
     else
-      _ -> changeset
+      _ ->
+        changeset
     end
   end
 end

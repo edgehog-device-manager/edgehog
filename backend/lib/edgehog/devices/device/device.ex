@@ -27,7 +27,7 @@ defmodule Edgehog.Devices.Device do
     ]
 
   alias Edgehog.Changes.NormalizeTagName
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Volume
@@ -401,12 +401,12 @@ defmodule Edgehog.Devices.Device do
       writable? false
     end
 
-    has_many :application_deployments, Edgehog.Containers.Deployment do
+    has_many :application_deployments, Edgehog.Containers.Release.Deployment do
       public? true
     end
 
     many_to_many :application_releases, Edgehog.Containers.Release do
-      through Edgehog.Containers.Deployment
+      through Edgehog.Containers.Release.Deployment
       join_relationship :application_deployments
     end
   end

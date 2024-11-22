@@ -18,21 +18,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment do
+defmodule Edgehog.Containers.Release.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment.Changes
+  alias Edgehog.Containers.Release.Deployment.ReadyAction
   alias Edgehog.Containers.Types.DeploymentStatus
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
+  alias Edgehog.Devices.Device
 
   graphql do
-    type :deployment
+    type :release_deployment
   end
 
   actions do
@@ -144,7 +146,7 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   relationships do
-    belongs_to :device, Edgehog.Devices.Device do
+    belongs_to :device, Device do
       public? true
     end
 
@@ -153,7 +155,7 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
-    has_many :ready_actions, Edgehog.Containers.DeploymentReadyAction do
+    has_many :ready_actions, ReadyAction do
       public? true
     end
   end
@@ -163,7 +165,7 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   postgres do
-    table "application_deployments"
+    table "release_deployments"
 
     references do
       reference :device, on_delete: :delete

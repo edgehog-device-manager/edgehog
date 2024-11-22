@@ -27,7 +27,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.OSManagementFixtures
 
   alias Edgehog.Astarte.Device.DeviceStatusMock
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
 
@@ -443,7 +443,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Edgehog.Containers.Release.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Edgehog.Containers.Release.Deployment, deployment.id, tenant: tenant)
 
       assert deployment.status == :error
       assert deployment.message == "error message"
@@ -469,7 +470,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> post(path, deployment_event)
       |> response(200)
 
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Edgehog.Containers.Release.Deployment, deployment.id, tenant: tenant)
 
       assert deployment.status == :starting
       assert deployment.message == nil
@@ -507,7 +508,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Edgehog.Containers.Release.Deployment, deployment.id, tenant: tenant)
 
       assert deployment.status == :started
       assert deployment.message == nil
@@ -545,7 +546,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Edgehog.Containers.Release.Deployment, deployment.id, tenant: tenant)
 
       assert deployment.status == :stopped
       assert deployment.message == nil
