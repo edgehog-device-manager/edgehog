@@ -264,16 +264,24 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_cellularConnection
       ...Device_networkInterfaces
       ...Device_connectionStatus
-      ...Device_deployedApplications
     }
+    ...Device_deployedApplications
   }
 `;
 
+// TODO: the fragment is defined on the RootQueryType so it can specify
+// which query to run, otherwise Relay would automatically use the `node`
+// query when refetching the fragment. However, the backend doesn't currently
+// support loading relationships (the device's deployments) through the `node`
+// query.
+// See also: https://github.com/ash-project/ash_graphql/issues/99
 const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
-  fragment Device_deployedApplications on Device
+  fragment Device_deployedApplications on RootQueryType
   @refetchable(queryName: "Device_deployedApplications_RefetchQuery") {
-    id
-    ...DeployedApplicationsTable_deployedApplications
+    device(id: $id) {
+      id
+      ...DeployedApplicationsTable_deployedApplications
+    }
   }
 `;
 
@@ -545,16 +553,18 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const intl = useIntl();
 
-  const [device, refetch] = useRefetchableFragment<
+  const [{ device }, refetch] = useRefetchableFragment<
     Device_deployedApplications_RefetchQuery,
     Device_deployedApplications$key
   >(DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT, deviceRef);
 
-  const deviceId = device.id;
-
   const handleRefetch = useCallback(() => {
-    refetch({ id: deviceId }, { fetchPolicy: "network-only" });
-  }, [refetch, deviceId]);
+    refetch({ id: device?.id }, { fetchPolicy: "store-and-network" });
+  }, [refetch, device?.id]);
+
+  if (!device) {
+    return null;
+  }
 
   return (
     <Tab
@@ -581,7 +591,7 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
           />
         </h5>
         <AddAvailableApplications
-          deviceId={deviceId}
+          deviceId={device.id}
           setErrorFeedback={setErrorFeedback}
           onDeployComplete={handleRefetch}
         />
@@ -1965,7 +1975,7 @@ const DeviceContent = ({
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
             <SoftwareUpdateTab deviceRef={device} />
-            <ApplicationsTab deviceRef={device} />
+            <ApplicationsTab deviceRef={deviceData} />
           </Tabs>
         </Stack>
       </Page.Main>
