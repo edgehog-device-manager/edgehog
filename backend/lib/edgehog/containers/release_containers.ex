@@ -26,6 +26,12 @@ defmodule Edgehog.Containers.ReleaseContainers do
 
   actions do
     defaults [:read, :destroy, create: [:release_id, :container_id]]
+
+    read :releases_by_container do
+      argument :container_id, :uuid
+
+      filter expr(container_id == ^arg(:container_id))
+    end
   end
 
   attributes do
