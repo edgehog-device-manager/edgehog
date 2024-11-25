@@ -115,7 +115,18 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     } = event.value
 
     with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      Containers.deployment_set_status(deployment, status, message, tenant: tenant)
+      case {deployment.status, status} do
+        {:started, "Starting"} ->
+          # Skip Starting if already Started
+          {:ok, deployment}
+
+        {:stopped, "Stopping"} ->
+          # Skip Stopping if already Stopped
+          {:ok, deployment}
+
+        _ ->
+          Containers.deployment_set_status(deployment, status, message, tenant: tenant)
+      end
     end
   end
 
