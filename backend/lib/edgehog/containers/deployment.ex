@@ -164,5 +164,9 @@ defmodule Edgehog.Containers.Deployment do
 
   postgres do
     table "application_deployments"
+
+    references do
+      reference :device, on_delete: :delete
+    end
   end
 end
