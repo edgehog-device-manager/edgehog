@@ -36,7 +36,7 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:device_id, :release_id]]
+    defaults [:read, :destroy, create: [:device_id, :release_id, :status, :message]]
 
     create :deploy do
       description """
