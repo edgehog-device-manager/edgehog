@@ -25,19 +25,22 @@ defmodule Edgehog.Containers.ManualActions.DeploymentReadyActionAddRelationship 
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
-    case Ash.Changeset.fetch_argument(changeset, :action_arguments) do
-      {:ok, arguments} ->
-        case Ash.Changeset.fetch_change(changeset, :action_type) do
-          {:ok, action_type} ->
+    case Ash.Changeset.fetch_change(changeset, :action_type) do
+      {:ok, action_type} ->
+        case Ash.Changeset.fetch_argument(changeset, :action_arguments) do
+          {:ok, arguments} ->
             # The relationship has the same name as the action type
             Ash.Changeset.manage_relationship(changeset, action_type, arguments, type: :create)
 
           :error ->
-            Ash.Changeset.add_error(changeset, field: :action_type, message: "must not be nil")
+            Ash.Changeset.add_error(changeset,
+              field: :action_arguments,
+              message: "is required for an action of type #{inspect(action_type)}"
+            )
         end
 
       :error ->
-        changeset
+        Ash.Changeset.add_error(changeset, field: :action_type, message: "must not be nil")
     end
   end
 end
