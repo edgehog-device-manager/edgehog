@@ -22,6 +22,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployments do
   @moduledoc false
   use Ash.Resource.Change
 
+  alias Edgehog.Containers
   alias Edgehog.Devices
 
   @impl Ash.Resource.Change
@@ -37,7 +38,13 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployments do
         Enum.map(available_deployments, & &1.id)
 
       if deployment.id in available_deployments do
-        Ash.Changeset.change_attribute(changeset, :status, :ready)
+        changeset
+        |> Ash.Changeset.change_attribute(:status, :ready)
+        |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->
+          with {:ok, deployment} <- transaction_result do
+            Containers.run_ready_actions(deployment)
+          end
+        end)
       else
         changeset
       end

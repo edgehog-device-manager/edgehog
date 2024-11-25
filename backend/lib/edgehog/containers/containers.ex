@@ -27,6 +27,8 @@ defmodule Edgehog.Containers do
 
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.DeploymentReadyAction
+  alias Edgehog.Containers.DeploymentReadyAction.Upgrade
   alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Containers.Release
 
@@ -103,6 +105,7 @@ defmodule Edgehog.Containers do
       define :delete_deployment, action: :destroy
       define :deployment_update_status, action: :update_status
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
+      define :run_ready_actions, action: :run_ready_actions
     end
 
     resource Edgehog.Containers.Image do
@@ -124,13 +127,19 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Network
     resource Edgehog.Containers.Volume
 
-    resource Edgehog.Containers.DeploymentReadyAction
-    resource Edgehog.Containers.DeploymentReadyAction.Upgrade
+    resource DeploymentReadyAction
+    resource Upgrade
 
     resource Edgehog.Containers.ContainerNetwork do
       define :containers_with_network,
         action: :containers_by_network,
         args: [:network_id]
     end
+
+    resource DeploymentReadyAction do
+      define :run_ready_action, action: :run
+    end
+
+    resource Upgrade
   end
 end
