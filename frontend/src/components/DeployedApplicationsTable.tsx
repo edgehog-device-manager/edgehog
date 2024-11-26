@@ -249,7 +249,7 @@ const DeployedApplicationsTable = ({
           onError: () => {
             setErrorFeedback(
               <FormattedMessage
-                id="components.AddAvailableApplications.startErrorFeedback"
+                id="components.DeployedApplicationsTable.startErrorFeedback"
                 defaultMessage="Could not Start the Deployed Application, please try again."
               />,
             );
@@ -287,7 +287,7 @@ const DeployedApplicationsTable = ({
           onError: () => {
             setErrorFeedback(
               <FormattedMessage
-                id="components.AddAvailableApplications.stopErrorFeedback"
+                id="components.DeployedApplicationsTable.stopErrorFeedback"
                 defaultMessage="Could not Stop the Deployed Application, please try again."
               />,
             );
