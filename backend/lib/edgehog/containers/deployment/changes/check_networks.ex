@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckNetworks do
     %{tenant: tenant} = context
     deployment = changeset.data
 
-    with {:ok, :pulled_images} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
+    with {:ok, :created_images} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
          {:ok, deployment} <-
            Ash.load(deployment, [:device, release: [containers: [:networks]]], reuse_values?: true),
          {:ok, available_networks} <-

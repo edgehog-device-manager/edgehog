@@ -41,6 +41,15 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @ota_response "io.edgehog.devicemanager.OTAResponse"
   @system_info "io.edgehog.devicemanager.SystemInfo"
 
+  @initial_statuses [
+    :created,
+    :sent,
+    :created_images,
+    :created_networks,
+    :created_containers,
+    :created_deployment
+  ]
+
   @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
     realm_name = input.arguments.realm_name
@@ -198,8 +207,14 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
           # Skip Stopping if already Stopped
           {:ok, deployment}
 
-        _ ->
+        {_, "Error"} ->
+          # Errors have precedence
           Containers.deployment_set_status(deployment, status, message, tenant: tenant)
+
+        _ ->
+          if deployment.status in @initial_statuses,
+            do: Containers.deployment_update_status(deployment, tenant: tenant),
+            else: Containers.deployment_set_status(deployment, status, message, tenant: tenant)
       end
     end
   end
@@ -210,10 +225,15 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         status = event.value
 
         with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-          if status == nil do
-            Containers.delete_deployment(deployment)
-          else
-            Containers.deployment_set_status(deployment, status, deployment.message, tenant: tenant)
+          cond do
+            status == nil ->
+              Containers.delete_deployment(deployment)
+
+            deployment.status in @initial_statuses ->
+              Containers.deployment_update_status(deployment, tenant: tenant)
+
+            true ->
+              Containers.deployment_set_status(deployment, status, deployment.message, tenant: tenant)
           end
         end
 

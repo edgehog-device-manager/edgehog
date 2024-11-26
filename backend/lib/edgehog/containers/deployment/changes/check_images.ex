@@ -43,7 +43,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckImages do
         |> Enum.reject(&(&1 in available_images_ids))
 
       if missing_images == [] do
-        Ash.Changeset.change_attribute(changeset, :status, :pulled_images)
+        Ash.Changeset.change_attribute(changeset, :status, :created_images)
       else
         changeset
       end
