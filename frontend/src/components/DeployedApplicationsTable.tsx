@@ -83,12 +83,37 @@ const STOP_DEPLOYMENT_MUTATION = graphql`
   }
 `;
 
-type ExtendedApplicationDeploymentStatus =
-  | ApplicationDeploymentStatus
-  | "DEPLOYING";
+type DeploymentStatus =
+  | "DEPLOYING"
+  | "STARTING"
+  | "STARTED"
+  | "STOPPING"
+  | "STOPPED"
+  | "ERROR"
+  | "DELETING";
 
-// Define colors for each ApplicationDeploymentStatus
-const statusColors: Record<ExtendedApplicationDeploymentStatus, string> = {
+const parseDeploymentStatus = (
+  apiStatus?: ApplicationDeploymentStatus,
+): DeploymentStatus => {
+  switch (apiStatus) {
+    case "STARTED":
+      return "STARTED";
+    case "STARTING":
+      return "STARTING";
+    case "STOPPED":
+      return "STOPPED";
+    case "STOPPING":
+      return "STOPPING";
+    case "ERROR":
+      return "ERROR";
+    case "DELETING":
+      return "DELETING";
+    default:
+      return "DEPLOYING";
+  }
+};
+
+const statusColors: Record<DeploymentStatus, string> = {
   STARTING: "text-success",
   STARTED: "text-success",
   STOPPING: "text-warning",
@@ -99,7 +124,7 @@ const statusColors: Record<ExtendedApplicationDeploymentStatus, string> = {
 };
 
 // Define status messages for localization
-const statusMessages = defineMessages<ExtendedApplicationDeploymentStatus>({
+const statusMessages = defineMessages<DeploymentStatus>({
   STARTING: {
     id: "components.DeployedApplicationsTable.starting",
     defaultMessage: "Starting",
@@ -134,7 +159,7 @@ const statusMessages = defineMessages<ExtendedApplicationDeploymentStatus>({
 const DeploymentStatusComponent = ({
   status,
 }: {
-  status: ExtendedApplicationDeploymentStatus;
+  status: DeploymentStatus;
 }) => (
   <div className="d-flex align-items-center">
     <Icon
@@ -159,7 +184,7 @@ const ActionButtons = ({
   onStart,
   onStop,
 }: {
-  status: ExtendedApplicationDeploymentStatus;
+  status: DeploymentStatus;
   onStart: () => void;
   onStop: () => void;
 }) => (
@@ -226,7 +251,7 @@ const DeployedApplicationsTable = ({
       applicationName: edge.node.release?.application?.name || "Unknown",
       releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
-      status: edge.node.status || "DEPLOYING",
+      status: parseDeploymentStatus(edge.node.status),
     })) || [];
 
   const handleStartDeployedApplication = useCallback(
@@ -346,11 +371,7 @@ const DeployedApplicationsTable = ({
           defaultMessage="Status"
         />
       ),
-      cell: ({ getValue }) => (
-        <DeploymentStatusComponent
-          status={getValue() as ExtendedApplicationDeploymentStatus}
-        />
-      ),
+      cell: ({ getValue }) => <DeploymentStatusComponent status={getValue()} />,
     }),
     columnHelper.accessor((row) => row, {
       id: "action",
@@ -362,7 +383,7 @@ const DeployedApplicationsTable = ({
       ),
       cell: ({ getValue }) => (
         <ActionButtons
-          status={getValue().status as ExtendedApplicationDeploymentStatus}
+          status={getValue().status}
           onStart={() => handleStartDeployedApplication(getValue().id)}
           onStop={() => handleStopDeployedApplication(getValue().id)}
         />
