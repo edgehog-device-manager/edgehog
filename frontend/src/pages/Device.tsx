@@ -280,6 +280,7 @@ const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
   @refetchable(queryName: "Device_deployedApplications_RefetchQuery") {
     device(id: $id) {
       id
+      online
       ...DeployedApplicationsTable_deployedApplications
     }
   }
@@ -558,6 +559,8 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
     Device_deployedApplications$key
   >(DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT, deviceRef);
 
+  const isOnline = useMemo(() => device?.online ?? false, [device]);
+
   const handleRefetch = useCallback(() => {
     refetch({ id: device?.id }, { fetchPolicy: "store-and-network" });
   }, [refetch, device?.id]);
@@ -592,6 +595,7 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
         </h5>
         <AddAvailableApplications
           deviceId={device.id}
+          isOnline={isOnline}
           setErrorFeedback={setErrorFeedback}
           onDeployComplete={handleRefetch}
         />
@@ -603,6 +607,7 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
         </h5>
         <DeployedApplicationsTable
           deviceRef={device}
+          isOnline={isOnline}
           setErrorFeedback={setErrorFeedback}
           onDeploymentChange={handleRefetch}
         />

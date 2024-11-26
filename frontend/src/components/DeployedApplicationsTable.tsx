@@ -194,6 +194,7 @@ const ActionButtons = ({
 type DeploymentTableProps = {
   className?: string;
   deviceRef: DeployedApplicationsTable_deployedApplications$key;
+  isOnline: boolean;
   hideSearch?: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
   onDeploymentChange: () => void;
@@ -202,6 +203,7 @@ type DeploymentTableProps = {
 const DeployedApplicationsTable = ({
   className,
   deviceRef,
+  isOnline,
   hideSearch = false,
   setErrorFeedback,
   onDeploymentChange,
@@ -229,60 +231,78 @@ const DeployedApplicationsTable = ({
 
   const handleStartDeployedApplication = useCallback(
     (deploymentId: string) => {
-      startDeployment({
-        variables: { id: deploymentId },
-        onCompleted: (data, errors) => {
-          if (errors) {
-            const errorFeedback = errors
-              .map(({ fields, message }) =>
-                fields.length ? `${fields.join(" ")} ${message}` : message,
-              )
-              .join(". \n");
-            return setErrorFeedback(errorFeedback);
-          }
-          onDeploymentChange(); // Trigger data refresh
-          setErrorFeedback(null);
-        },
-        onError: () => {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.AddAvailableApplications.startErrorFeedback"
-              defaultMessage="Could not Start the Deployed Application, please try again."
-            />,
-          );
-        },
-      });
+      if (isOnline) {
+        startDeployment({
+          variables: { id: deploymentId },
+          onCompleted: (data, errors) => {
+            if (errors) {
+              const errorFeedback = errors
+                .map(({ fields, message }) =>
+                  fields.length ? `${fields.join(" ")} ${message}` : message,
+                )
+                .join(". \n");
+              return setErrorFeedback(errorFeedback);
+            }
+            onDeploymentChange(); // Trigger data refresh
+            setErrorFeedback(null);
+          },
+          onError: () => {
+            setErrorFeedback(
+              <FormattedMessage
+                id="components.AddAvailableApplications.startErrorFeedback"
+                defaultMessage="Could not Start the Deployed Application, please try again."
+              />,
+            );
+          },
+        });
+      } else {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.DeployedApplicationsTable.startErrorOffline"
+            defaultMessage="The device is disconnected. You cannot start an application while it is offline."
+          />,
+        );
+      }
     },
-    [startDeployment, setErrorFeedback, onDeploymentChange],
+    [isOnline, startDeployment, setErrorFeedback, onDeploymentChange],
   );
 
   const handleStopDeployedApplication = useCallback(
     (deploymentId: string) => {
-      stopDeployment({
-        variables: { id: deploymentId },
-        onCompleted: (data, errors) => {
-          if (errors) {
-            const errorFeedback = errors
-              .map(({ fields, message }) =>
-                fields.length ? `${fields.join(" ")} ${message}` : message,
-              )
-              .join(". \n");
-            return setErrorFeedback(errorFeedback);
-          }
-          onDeploymentChange(); // Trigger data refresh
-          setErrorFeedback(null);
-        },
-        onError: () => {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.AddAvailableApplications.stopErrorFeedback"
-              defaultMessage="Could not Stop the Deployed Application, please try again."
-            />,
-          );
-        },
-      });
+      if (isOnline) {
+        stopDeployment({
+          variables: { id: deploymentId },
+          onCompleted: (data, errors) => {
+            if (errors) {
+              const errorFeedback = errors
+                .map(({ fields, message }) =>
+                  fields.length ? `${fields.join(" ")} ${message}` : message,
+                )
+                .join(". \n");
+              return setErrorFeedback(errorFeedback);
+            }
+            onDeploymentChange(); // Trigger data refresh
+            setErrorFeedback(null);
+          },
+          onError: () => {
+            setErrorFeedback(
+              <FormattedMessage
+                id="components.AddAvailableApplications.stopErrorFeedback"
+                defaultMessage="Could not Stop the Deployed Application, please try again."
+              />,
+            );
+          },
+        });
+      } else {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.DeployedApplicationsTable.stopErrorOffline"
+            defaultMessage="The device is disconnected. You cannot stop an application while it is offline."
+          />,
+        );
+      }
     },
-    [stopDeployment, setErrorFeedback, onDeploymentChange],
+    [isOnline, stopDeployment, setErrorFeedback, onDeploymentChange],
   );
 
   const columnHelper = createColumnHelper<(typeof deployments)[0]>();

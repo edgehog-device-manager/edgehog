@@ -63,12 +63,14 @@ const DEPLOY_RELEASE_MUTATION = graphql`
 
 type AddAvailableApplicationsProps = {
   deviceId: string;
+  isOnline: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
   onDeployComplete: () => void;
 };
 
 const AddAvailableApplications = ({
   deviceId,
+  isOnline,
   setErrorFeedback,
   onDeployComplete,
 }: AddAvailableApplicationsProps) => {
@@ -88,8 +90,17 @@ const AddAvailableApplications = ({
     );
 
   const handleAppChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedApp(e.target.value);
-    setSelectedRelease(null); // Reset release when app changes
+    if (isOnline) {
+      setSelectedApp(e.target.value);
+      setSelectedRelease(null); // Reset release when app changes
+    } else {
+      setErrorFeedback(
+        <FormattedMessage
+          id="components.AddAvailableApplications.deviceOfflineError"
+          defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
+        />,
+      );
+    }
   };
 
   const handleReleaseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -198,7 +209,7 @@ const AddAvailableApplications = ({
         <Button
           variant="primary"
           onClick={handleDeploy}
-          disabled={!selectedRelease || isDeploying} // Disable until a release is selected or deploying
+          disabled={!isOnline || !selectedRelease || isDeploying}
         >
           <FormattedMessage
             id="components.AddAvailableApplications.deployButton"
