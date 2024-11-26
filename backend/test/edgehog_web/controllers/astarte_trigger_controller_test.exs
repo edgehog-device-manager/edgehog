@@ -26,14 +26,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
 
-  alias Edgehog.Astarte.Device.AvailableContainers.ContainerStatus
-  alias Edgehog.Astarte.Device.AvailableContainersMock
-  alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
-  alias Edgehog.Astarte.Device.AvailableDeploymentsMock
-  alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
-  alias Edgehog.Astarte.Device.AvailableImagesMock
-  alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
-  alias Edgehog.Astarte.Device.AvailableNetworksMock
   alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.Containers.Deployment
   alias Edgehog.Devices.Device
@@ -588,7 +580,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
 
-      set_resource_expectations(deployment)
+      set_resource_expectations([deployment])
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
@@ -628,7 +620,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
 
-      set_resource_expectations(deployment)
+      set_resource_expectations([deployment])
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
@@ -664,7 +656,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
 
-      set_resource_expectations(deployment)
+      set_resource_expectations([deployment])
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
@@ -905,33 +897,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       },
       timestamp: DateTime.to_iso8601(DateTime.utc_now())
     }
-  end
-
-  defp set_resource_expectations(deployment) do
-    deployment = Ash.load!(deployment, release: [containers: [:image, :networks]])
-
-    containers =
-      Enum.uniq_by(deployment.release.containers, & &1.id)
-
-    available_containers = Enum.map(containers, &%ContainerStatus{id: &1.id, status: "Created"})
-
-    available_images =
-      containers
-      |> Enum.map(&%ImageStatus{id: &1.image.id, pulled: true})
-      |> Enum.uniq()
-
-    available_networks =
-      containers
-      |> Enum.flat_map(& &1.networks)
-      |> Enum.uniq_by(& &1.id)
-      |> Enum.map(&%NetworkStatus{id: &1.id, created: true})
-
-    available_deployments = [%DeploymentStatus{id: deployment.id, status: :stopped}]
-
-    expect(AvailableImagesMock, :get, fn _, _ -> {:ok, available_images} end)
-    expect(AvailableNetworksMock, :get, fn _, _ -> {:ok, available_networks} end)
-    expect(AvailableContainersMock, :get, fn _, _ -> {:ok, available_containers} end)
-    expect(AvailableDeploymentsMock, :get, fn _, _ -> {:ok, available_deployments} end)
   end
 
   defp unknown_trigger(device_id) do

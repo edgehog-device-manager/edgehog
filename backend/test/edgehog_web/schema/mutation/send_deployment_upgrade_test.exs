@@ -24,14 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Astarte.Device.AvailableContainers.ContainerStatus
-  alias Edgehog.Astarte.Device.AvailableContainersMock
-  alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
-  alias Edgehog.Astarte.Device.AvailableDeploymentsMock
-  alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
-  alias Edgehog.Astarte.Device.AvailableImagesMock
-  alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
-  alias Edgehog.Astarte.Device.AvailableNetworksMock
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.DeploymentUpdateMock
   alias Edgehog.Containers
@@ -172,38 +164,5 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
            } = result
 
     error
-  end
-
-  defp set_resource_expectations(deployments) do
-    deployments =
-      Enum.map(deployments, &Ash.load!(&1, release: [containers: [:image, :networks]]))
-
-    containers =
-      deployments
-      |> Enum.map(& &1.release)
-      |> Enum.flat_map(& &1.containers)
-      |> Enum.uniq_by(& &1.id)
-
-    available_containers = Enum.map(containers, &%ContainerStatus{id: &1.id, status: "Created"})
-
-    available_images =
-      containers
-      |> Enum.flat_map(& &1.image)
-      |> Enum.map(&%ImageStatus{id: &1.id, pulled: false})
-      |> Enum.uniq()
-
-    available_networks =
-      containers
-      |> Enum.flat_map(& &1.network)
-      |> Enum.map(&%NetworkStatus{id: &1.id, created: false})
-      |> Enum.uniq()
-
-    available_deployments =
-      Enum.map(deployments, &%DeploymentStatus{id: &1.id, status: :stopped})
-
-    expect(AvailableImagesMock, :get, fn _, _ -> {:ok, available_images} end)
-    expect(AvailableNetworksMock, :get, fn _, _ -> {:ok, available_networks} end)
-    expect(AvailableContainersMock, :get, fn _, _ -> {:ok, available_containers} end)
-    expect(AvailableDeploymentsMock, :get, fn _, _ -> {:ok, available_deployments} end)
   end
 end
