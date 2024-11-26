@@ -92,6 +92,9 @@
   "components.AddAvailableApplications.deployErrorFeedback": {
     "defaultMessage": "Could not deploy the Application, please try again."
   },
+  "components.AddAvailableApplications.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
+  },
   "components.AddAvailableApplications.selectAnApplication": {
     "defaultMessage": "Select an application"
   },
@@ -356,6 +359,9 @@
   "components.DeployedApplicationsTable.startErrorFeedback": {
     "defaultMessage": "Could not Start the Deployed Application, please try again."
   },
+  "components.DeployedApplicationsTable.startErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot start an application while it is offline."
+  },
   "components.DeployedApplicationsTable.started": {
     "defaultMessage": "Started"
   },
@@ -367,6 +373,9 @@
   },
   "components.DeployedApplicationsTable.stopErrorFeedback": {
     "defaultMessage": "Could not Stop the Deployed Application, please try again."
+  },
+  "components.DeployedApplicationsTable.stopErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
   },
   "components.DeployedApplicationsTable.stopped": {
     "defaultMessage": "Stopped"
