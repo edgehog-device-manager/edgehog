@@ -562,6 +562,13 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
     refetch({ id: device?.id }, { fetchPolicy: "store-and-network" });
   }, [refetch, device?.id]);
 
+  useEffect(() => {
+    const intervalId = setInterval(handleRefetch, 5000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
   if (!device) {
     return null;
   }
