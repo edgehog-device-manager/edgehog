@@ -23,23 +23,19 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployments do
   use Ash.Resource.Change
 
   alias Edgehog.Containers
-  alias Edgehog.Devices
 
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
+  def change(changeset, _opts, _context) do
     deployment = changeset.data
 
     with {:ok, :created_containers} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
-         {:ok, deployment} <- Ash.load(deployment, :device),
-         {:ok, available_deployments_statuses} <-
-           Devices.available_deployments(deployment.device, tenant: tenant) do
-      deployment_status =
-        Enum.find(available_deployments_statuses, &(&1.id == deployment.id))
+         {:ok, deployment} <- Ash.load(deployment, device: :available_deployments) do
+      available_deployment =
+        Enum.find(deployment.device.available_deployments, &(&1.id == deployment.id))
 
-      if deployment_status do
+      if available_deployment do
         changeset
-        |> Ash.Changeset.change_attribute(:status, deployment_status.status)
+        |> Ash.Changeset.change_attribute(:status, available_deployment.status)
         |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->
           with {:ok, deployment} <- transaction_result do
             Containers.run_ready_actions(deployment)

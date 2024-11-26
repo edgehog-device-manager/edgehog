@@ -22,27 +22,22 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckNetworks do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Devices
-
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
+  def change(changeset, _opts, _context) do
     deployment = changeset.data
 
     with {:ok, :created_images} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
          {:ok, deployment} <-
-           Ash.load(deployment, [:device, release: [containers: [:networks]]], reuse_values?: true),
-         {:ok, available_networks} <-
-           Devices.available_networks(deployment.device, tenant: tenant) do
-      available_networks =
-        Enum.map(available_networks, & &1.id)
+           Ash.load(deployment, device: :available_networks, release: [containers: [:networks]]) do
+      available_network_ids =
+        Enum.map(deployment.device.available_networks, & &1.id)
 
       missing_networks =
         deployment.release.containers
         |> Enum.flat_map(& &1.networks)
         |> Enum.map(& &1.id)
         |> Enum.uniq()
-        |> Enum.reject(&(&1 in available_networks))
+        |> Enum.reject(&(&1 in available_network_ids))
 
       if missing_networks == [] do
         Ash.Changeset.change_attribute(changeset, :status, :created_networks)
