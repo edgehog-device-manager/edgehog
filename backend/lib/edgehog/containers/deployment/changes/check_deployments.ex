@@ -32,14 +32,14 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployments do
 
     with {:ok, :created_containers} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
          {:ok, deployment} <- Ash.load(deployment, :device),
-         {:ok, available_deployments} <-
+         {:ok, available_deployments_statuses} <-
            Devices.available_deployments(deployment.device, tenant: tenant) do
-      available_deployments =
-        Enum.map(available_deployments, & &1.id)
+      deployment_status =
+        Enum.find(available_deployments_statuses, &(&1.id == deployment.id))
 
-      if deployment.id in available_deployments do
+      if deployment_status do
         changeset
-        |> Ash.Changeset.change_attribute(:status, :ready)
+        |> Ash.Changeset.change_attribute(:status, deployment_status.status)
         |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->
           with {:ok, deployment} <- transaction_result do
             Containers.run_ready_actions(deployment)

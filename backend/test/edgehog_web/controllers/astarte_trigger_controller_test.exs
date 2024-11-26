@@ -598,7 +598,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.status == :ready
+      assert deployment.status == :stopped
     end
 
     test "AvailableContainers triggers update deployment status", context do
@@ -638,7 +638,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.status == :ready
+      assert deployment.status == :stopped
     end
 
     test "AvailableDeployments triggers update deployment status", context do
