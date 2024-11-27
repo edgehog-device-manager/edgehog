@@ -54,7 +54,7 @@ enum Route {
   applications = "/applications",
   applicationNew = "/applications/new",
   application = "/applications/:applicationId",
-  release = "/release/:releaseId",
+  release = "/applications/:applicationId/release/:releaseId",
   releaseNew = "/applications/:applicationId/release/new",
   login = "/login",
   logout = "/logout",
