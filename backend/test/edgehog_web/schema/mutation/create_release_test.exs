@@ -39,6 +39,38 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       assert release["version"] == version
       assert release["application"]["id"] == application_id
     end
+
+    test "create release with invalid application throws error", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+      :ok = Ash.destroy!(application, tenant: tenant)
+
+      version = "0.0.1"
+
+      error =
+        [tenant: tenant, application_id: application_id, version: version]
+        |> create_release()
+        |> extract_error!()
+
+      assert [:application_id] = error.fields
+      assert "does not exist" == error.message
+    end
+
+    test "create release with already available version throws error version already taken", %{
+      tenant: tenant
+    } do
+      version = "0.0.1"
+      release = [tenant: tenant, version: version] |> release_fixture() |> Ash.load!(:application)
+      application_id = AshGraphql.Resource.encode_relay_id(release.application)
+
+      error =
+        [tenant: tenant, application_id: application_id, version: version]
+        |> create_release()
+        |> extract_error!()
+
+      assert [:version] = error.fields
+      assert "has already been taken" == error.message
+    end
   end
 
   def create_release(opts) do
@@ -87,5 +119,14 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
     assert release != nil
 
     release
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"createRelease" => nil},
+             errors: [error]
+           } = result
+
+    error
   end
 end
