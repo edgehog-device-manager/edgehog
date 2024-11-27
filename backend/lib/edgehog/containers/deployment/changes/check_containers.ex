@@ -22,22 +22,17 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Devices
-
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
+  def change(changeset, _opts, _context) do
     deployment = changeset.data
 
     with {:ok, :created_networks} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
          {:ok, deployment} <-
-           Ash.load(deployment, [:device, release: [:containers]], reuse_values?: true),
-         {:ok, available_containers} <-
-           Devices.available_containers(deployment.device, tenant: tenant) do
-      available_containers = Enum.map(available_containers, & &1.id)
+           Ash.load(deployment, device: :available_containers, release: [:containers]) do
+      available_container_ids = Enum.map(deployment.device.available_containers, & &1.id)
 
       missing_containers =
-        Enum.reject(deployment.release.containers, &(&1.id in available_containers))
+        Enum.reject(deployment.release.containers, &(&1.id in available_container_ids))
 
       if missing_containers == [] do
         Ash.Changeset.change_attribute(changeset, :status, :created_containers)

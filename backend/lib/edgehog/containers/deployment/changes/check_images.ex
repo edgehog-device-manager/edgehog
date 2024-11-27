@@ -22,20 +22,15 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckImages do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Devices
-
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
+  def change(changeset, _opts, _context) do
     deployment = changeset.data
 
     with :sent <- deployment.status,
          {:ok, deployment} <-
-           Ash.load(deployment, [:device, release: [containers: [:image]]], reuse_values?: true),
-         {:ok, available_images_statuses} <-
-           Devices.available_images(deployment.device, tenant: tenant) do
+           Ash.load(deployment, device: :available_images, release: [containers: [:image]]) do
       available_images_ids =
-        Enum.map(available_images_statuses, & &1.id)
+        Enum.map(deployment.device.available_images, & &1.id)
 
       missing_images =
         deployment.release.containers

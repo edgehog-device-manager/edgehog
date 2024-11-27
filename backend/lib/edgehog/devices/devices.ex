@@ -107,11 +107,6 @@ defmodule Edgehog.Devices do
         args: [:release, :command]
 
       define :update_application, action: :update_application, args: [:from, :to]
-
-      define_calculation :available_images, args: [:_record]
-      define_calculation :available_containers, args: [:_record]
-      define_calculation :available_networks, args: [:_record]
-      define_calculation :available_deployments, args: [:_record]
     end
 
     resource HardwareType
