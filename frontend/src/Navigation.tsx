@@ -27,6 +27,8 @@ import {
 import type { ParamParseKey } from "react-router";
 import { Link as RouterLink } from "react-router-dom";
 import type { LinkProps as RouterLinkProps } from "react-router-dom";
+import { defineMessages } from "react-intl";
+import type { MessageDescriptor } from "react-intl";
 
 enum Route {
   devices = "/devices",
@@ -65,6 +67,10 @@ const matchPaths = (routes: Route | Route[], path: string) => {
   return r.some((route: Route) => matchPath(route, path) != null);
 };
 
+const matchingRoute = (path: string) => {
+  return Object.values(Route).find((route) => matchPath(route, path) != null);
+};
+
 type RouteKeys = keyof typeof Route;
 type RouteWithParams<T extends string> =
   T extends ParamParseKey<T>
@@ -75,35 +81,14 @@ type ParametricRoute = {
   [K in RouteKeys]: RouteWithParams<(typeof Route)[K]>;
 }[RouteKeys];
 
-type LinkProps = Omit<RouterLinkProps, "to"> & ParametricRoute;
+const matchingParametricRoute = (path: string): ParametricRoute | null => {
+  const route = matchingRoute(path);
+  if (!route) {
+    return null;
+  }
 
-const generatePath = (route: ParametricRoute): string => {
-  switch (route.route) {
-    case Route.devicesEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.deviceGroupsEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.systemModelsEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.hardwareTypesEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.baseImageCollectionsEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.baseImagesNew:
-      return routerGeneratePath(route.route, route.params);
-    case Route.baseImagesEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.updateChannelsEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.updateCampaignsEdit:
-      return routerGeneratePath(route.route, route.params);
-    case Route.application:
-      return routerGeneratePath(route.route, route.params);
-    case Route.release:
-      return routerGeneratePath(route.route, route.params);
-    case Route.releaseNew:
-      return routerGeneratePath(route.route, route.params);
-
+  const params = matchPath(route, path)?.params;
+  switch (route) {
     case Route.devices:
     case Route.deviceGroups:
     case Route.deviceGroupsNew:
@@ -117,12 +102,136 @@ const generatePath = (route: ParametricRoute): string => {
     case Route.updateChannelsNew:
     case Route.updateCampaigns:
     case Route.updateCampaignsNew:
-    case Route.login:
-    case Route.logout:
     case Route.applications:
     case Route.applicationNew:
-      return route.route;
+    case Route.login:
+    case Route.logout:
+      return { route } as ParametricRoute;
+
+    case Route.devicesEdit:
+      return params && typeof params["deviceId"] === "string"
+        ? {
+            route,
+            params: { deviceId: params.deviceId },
+          }
+        : null;
+
+    case Route.deviceGroupsEdit:
+      return params && typeof params["deviceGroupId"] === "string"
+        ? {
+            route,
+            params: { deviceGroupId: params.deviceGroupId },
+          }
+        : null;
+
+    case Route.systemModelsEdit:
+      return params && typeof params["systemModelId"] === "string"
+        ? {
+            route,
+            params: { systemModelId: params.systemModelId },
+          }
+        : null;
+
+    case Route.hardwareTypesEdit:
+      return params && typeof params["hardwareTypeId"] === "string"
+        ? {
+            route,
+            params: { hardwareTypeId: params.hardwareTypeId },
+          }
+        : null;
+
+    case Route.baseImagesNew:
+      return params && typeof params["baseImageCollectionId"] === "string"
+        ? {
+            route,
+            params: { baseImageCollectionId: params.baseImageCollectionId },
+          }
+        : null;
+
+    case Route.baseImageCollectionsEdit:
+      return params && typeof params["baseImageCollectionId"] === "string"
+        ? {
+            route,
+            params: { baseImageCollectionId: params.baseImageCollectionId },
+          }
+        : null;
+
+    case Route.baseImagesEdit:
+      return params &&
+        typeof params["baseImageCollectionId"] === "string" &&
+        typeof params["baseImageId"] === "string"
+        ? {
+            route,
+            params: {
+              baseImageCollectionId: params.baseImageCollectionId,
+              baseImageId: params.baseImageId,
+            },
+          }
+        : null;
+
+    case Route.updateChannelsEdit:
+      return params && typeof params["updateChannelId"] === "string"
+        ? {
+            route,
+            params: { updateChannelId: params.updateChannelId },
+          }
+        : null;
+
+    case Route.updateCampaignsEdit:
+      return params && typeof params["updateCampaignId"] === "string"
+        ? {
+            route,
+            params: { updateCampaignId: params.updateCampaignId },
+          }
+        : null;
+
+    case Route.application:
+      return params && typeof params["applicationId"] === "string"
+        ? {
+            route,
+            params: { applicationId: params.applicationId },
+          }
+        : null;
+
+    case Route.release:
+      return params &&
+        typeof params["applicationId"] === "string" &&
+        typeof params["releaseId"] === "string"
+        ? {
+            route,
+            params: {
+              applicationId: params.applicationId,
+              releaseId: params.releaseId,
+            },
+          }
+        : null;
+
+    case Route.releaseNew:
+      return params && typeof params["applicationId"] === "string"
+        ? {
+            route,
+            params: {
+              applicationId: params.applicationId,
+            },
+          }
+        : null;
   }
+};
+
+type LinkProps = Omit<RouterLinkProps, "to"> & ParametricRoute;
+
+type RouteParams<Path extends string> = Parameters<
+  typeof routerGeneratePath<Path>
+>[1];
+
+const generatePath = (route: ParametricRoute): string => {
+  if ("params" in route && route.params) {
+    return routerGeneratePath(
+      route.route,
+      route.params as RouteParams<typeof route.route>,
+    );
+  }
+  return route.route;
 };
 
 const Link = (props: LinkProps) => {
@@ -147,5 +256,132 @@ const useNavigate = () => {
   return navigate;
 };
 
-export { Link, Route, matchPaths, useNavigate };
+const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
+  [Route.devices]: {
+    id: "navigation.routeTitle.Devices",
+    defaultMessage: "Devices",
+  },
+  [Route.devicesEdit]: {
+    id: "navigation.routeTitle.DevicesEdit",
+    defaultMessage: "Device Details",
+  },
+  [Route.deviceGroups]: {
+    id: "navigation.routeTitle.DeviceGroups",
+    defaultMessage: "Groups",
+  },
+  [Route.deviceGroupsEdit]: {
+    id: "navigation.routeTitle.DeviceGroupsEdit",
+    defaultMessage: "Group Details",
+  },
+  [Route.deviceGroupsNew]: {
+    id: "navigation.routeTitle.DeviceGroupsNew",
+    defaultMessage: "Create Group",
+  },
+  [Route.systemModels]: {
+    id: "navigation.routeTitle.SystemModels",
+    defaultMessage: "System Models",
+  },
+  [Route.systemModelsNew]: {
+    id: "navigation.routeTitle.SystemModelsNew",
+    defaultMessage: "Create System Model",
+  },
+  [Route.systemModelsEdit]: {
+    id: "navigation.routeTitle.SystemModelsEdit",
+    defaultMessage: "System Model Details",
+  },
+  [Route.hardwareTypes]: {
+    id: "navigation.routeTitle.HardwareTypes",
+    defaultMessage: "Hardware Types",
+  },
+  [Route.hardwareTypesNew]: {
+    id: "navigation.routeTitle.HardwareTypesNew",
+    defaultMessage: "Create Hardware Type",
+  },
+  [Route.hardwareTypesEdit]: {
+    id: "navigation.routeTitle.HardwareTypesEdit",
+    defaultMessage: "Hardware Type Details",
+  },
+  [Route.baseImageCollections]: {
+    id: "navigation.routeTitle.BaseImageCollections",
+    defaultMessage: "Base Image Collections",
+  },
+  [Route.baseImageCollectionsNew]: {
+    id: "navigation.routeTitle.BaseImageCollectionsNew",
+    defaultMessage: "Create Base Image Collection",
+  },
+  [Route.baseImageCollectionsEdit]: {
+    id: "navigation.routeTitle.BaseImageCollectionsEdit",
+    defaultMessage: "Base Image Collection Details",
+  },
+  [Route.baseImagesNew]: {
+    id: "navigation.routeTitle.BaseImagesNew",
+    defaultMessage: "Create Base Image",
+  },
+  [Route.baseImagesEdit]: {
+    id: "navigation.routeTitle.BaseImagesEdit",
+    defaultMessage: "Base Image Details",
+  },
+  [Route.updateChannels]: {
+    id: "navigation.routeTitle.UpdateChannels",
+    defaultMessage: "Update Channels",
+  },
+  [Route.updateChannelsNew]: {
+    id: "navigation.routeTitle.UpdateChannelsNew",
+    defaultMessage: "Create Update Channel",
+  },
+  [Route.updateChannelsEdit]: {
+    id: "navigation.routeTitle.UpdateChannelsEdit",
+    defaultMessage: "Update Channel Details",
+  },
+  [Route.updateCampaigns]: {
+    id: "navigation.routeTitle.UpdateCampaigns",
+    defaultMessage: "Update Campaigns",
+  },
+  [Route.updateCampaignsNew]: {
+    id: "navigation.routeTitle.UpdateCampaignsNew",
+    defaultMessage: "Create Update Campaign",
+  },
+  [Route.updateCampaignsEdit]: {
+    id: "navigation.routeTitle.UpdateCampaignsEdit",
+    defaultMessage: "Update Campaign Details",
+  },
+  [Route.applications]: {
+    id: "navigation.routeTitle.Applications",
+    defaultMessage: "Applications",
+  },
+  [Route.applicationNew]: {
+    id: "navigation.routeTitle.ApplicationNew",
+    defaultMessage: "Create Application",
+  },
+  [Route.application]: {
+    id: "navigation.routeTitle.Application",
+    defaultMessage: "Application",
+  },
+  [Route.release]: {
+    id: "navigation.routeTitle.Release",
+    defaultMessage: "Release",
+  },
+  [Route.releaseNew]: {
+    id: "navigation.routeTitle.ReleaseNew",
+    defaultMessage: "Create Release",
+  },
+  [Route.login]: {
+    id: "navigation.routeTitle.Login",
+    defaultMessage: "Login",
+  },
+  [Route.logout]: {
+    id: "navigation.routeTitle.Logout",
+    defaultMessage: "Logout",
+  },
+});
+
+export {
+  Link,
+  Route,
+  matchPaths,
+  matchingRoute,
+  matchingParametricRoute,
+  routeTitles,
+  useNavigate,
+};
 export type { LinkProps, ParametricRoute };
