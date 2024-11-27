@@ -88,7 +88,7 @@ defmodule Edgehog.Containers.Release do
   end
 
   identities do
-    identity :application_version, [:application_id, :version]
+    identity :application_version, [:version, :application_id]
   end
 
   postgres do
