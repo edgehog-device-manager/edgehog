@@ -30,6 +30,8 @@ defmodule Edgehog.Astarte.Device.DeploymentUpdate do
 
   @impl Edgehog.Astarte.Device.DeploymentUpdate.Behaviour
   def update(client, device_id, data) do
+    data = Map.from_struct(data)
+
     api_call =
       AppEngine.Devices.send_datastream(client, device_id, @interface, "/deployment", data)
 
