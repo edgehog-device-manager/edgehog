@@ -65,12 +65,14 @@ defmodule Edgehog.Containers.DeploymentReadyAction do
       attribute_type :uuid
     end
 
-    belongs_to :upgrade_deployment, Edgehog.Containers.DeploymentReadyAction.Upgrade do
-      attribute_type :uuid
-    end
+    has_one :upgrade_deployment, Edgehog.Containers.DeploymentReadyAction.Upgrade
   end
 
   postgres do
     table "deployment_ready_actions"
+
+    references do
+      reference :deployment, on_delete: :delete
+    end
   end
 end

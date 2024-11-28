@@ -36,9 +36,18 @@ defmodule Edgehog.Containers.DeploymentReadyAction.Upgrade do
       allow_nil? false
       attribute_type :uuid
     end
+
+    belongs_to :deployment_ready_action, Edgehog.Containers.DeploymentReadyAction do
+      allow_nil? false
+      attribute_type :uuid
+    end
   end
 
   postgres do
     table "deployment_ready_action_upgrades"
+
+    references do
+      reference :deployment_ready_action, on_delete: :delete
+    end
   end
 end
