@@ -45,5 +45,9 @@ defmodule Edgehog.Containers.DeploymentReadyAction.Upgrade do
 
   postgres do
     table "deployment_ready_action_upgrades"
+
+    references do
+      reference :deployment_ready_action, on_delete: :delete
+    end
   end
 end

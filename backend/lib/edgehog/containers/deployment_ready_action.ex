@@ -70,5 +70,9 @@ defmodule Edgehog.Containers.DeploymentReadyAction do
 
   postgres do
     table "deployment_ready_actions"
+
+    references do
+      reference :deployment, on_delete: :delete
+    end
   end
 end
