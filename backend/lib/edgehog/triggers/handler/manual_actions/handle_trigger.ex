@@ -143,7 +143,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
   defp handle_event(%IncomingData{interface: @available_networks} = event, tenant, _realm_id, _device_id, _timestamp) do
     case String.split(event.path, "/") do
-      ["", network_id, "pulled"] ->
+      ["", network_id, "created"] ->
         containers =
           network_id
           |> Containers.containers_with_network!(tenant: tenant, load: :container)
