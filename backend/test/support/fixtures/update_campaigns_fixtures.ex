@@ -108,7 +108,8 @@ defmodule Edgehog.UpdateCampaignsFixtures do
   @doc """
   Generates an update campaign with N targets
   """
-  def update_campaign_with_targets_fixture(target_count, opts \\ []) when is_integer(target_count) and target_count > 0 do
+  def update_campaign_with_targets_fixture(target_count, opts \\ [])
+      when is_integer(target_count) and target_count > 0 do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
     {base_image_id, opts} =
