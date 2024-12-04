@@ -119,6 +119,7 @@ defmodule Edgehog.MixProject do
       {:styler, "~> 1.0.0-rc.1", only: [:dev, :test], runtime: false},
       {:open_api_spex, "~> 3.16"},
       {:ymlr, "~> 5.1"},
+      {:ash_state_machine, "~> 0.2.7"}
     ]
   end
 

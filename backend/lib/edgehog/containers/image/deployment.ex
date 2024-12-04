@@ -22,16 +22,27 @@ defmodule Edgehog.Containers.Image.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource, AshStateMachine]
 
   alias Edgehog.Containers.Image.Changes
+
+  state_machine do
+    initial_states([:created, :sent])
+    default_initial_state(:created)
+
+    transitions do
+      transition(:unpulled, from: [:sent, :pulled], to: [:unpulled])
+      transition(:pulled, from: :unpulled, to: [:pulled])
+      transition(:errored, from: [:*], to: [:error])
+    end
+  end
 
   graphql do
     type :image_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:pulled], update: [:pulled]]
+    defaults [:read, :destroy]
 
     create :deploy do
       description """
@@ -44,19 +55,34 @@ defmodule Edgehog.Containers.Image.Deployment do
         allow_nil? false
       end
 
+      change transition_state(:created)
       change manage_relationship(:device_id, :device, type: :append)
-
       change Changes.DeployImageOnDevice
+      change transition_state(:sent)
+    end
+
+    update :unpulled do
+      change transition_state(:unpulled)
+    end
+
+    update :pulled do
+      change transition_state(:pulled)
+    end
+
+    update :errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change transition_state(:error)
     end
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :pulled, :boolean do
-      allow_nil? false
-      public? true
-    end
+    attribute :last_message, :string
 
     timestamps()
   end

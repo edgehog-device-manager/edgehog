@@ -32,12 +32,25 @@ defmodule Edgehog.Containers.Release.Deployment do
   alias Edgehog.Containers.Validations.SameApplication
   alias Edgehog.Devices.Device
 
+  state_machine do
+    initial_states([:created, :sent])
+    default_initial_state(:created)
+
+    transitions do
+      transition(:start, from: :stopped, to: [:start_requested])
+      transition(:stop, from: :started, to: [:stop_requested])
+      transition(:started, from: :start_requested, to: [:started])
+      transition(:stopped, from: [:stop_requested, :sent], to: [:stopped])
+      transition(:errored, from: :*, to: [:error])
+    end
+  end
+
   graphql do
     type :release_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:device_id, :release_id, :message]]
+    defaults [:read, :destroy, create: [:device_id, :release_id, :last_message, :state]]
 
     create :deploy do
       description """
@@ -51,9 +64,10 @@ defmodule Edgehog.Containers.Release.Deployment do
         allow_nil? false
       end
 
+      # change transition_state(:created)
       change manage_relationship(:device_id, :device, type: :append)
-
       change Changes.CreateDeploymentOnDevice
+      # change transition_state(:sent)
     end
 
     update :start do
@@ -61,6 +75,7 @@ defmodule Edgehog.Containers.Release.Deployment do
       Sends a :start command to the release on the device.
       """
 
+      change transition_state(:start_requested)
       manual {ManualActions.SendDeploymentCommand, command: :start}
     end
 
@@ -69,6 +84,7 @@ defmodule Edgehog.Containers.Release.Deployment do
       Sends a :stop command to the release on the device.
       """
 
+      change transition_state(:stop_requested)
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
 
@@ -80,12 +96,21 @@ defmodule Edgehog.Containers.Release.Deployment do
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
 
-    update :set_started do
+    update :started do
       change transition_state(:started)
     end
 
-    update :set_stopped do
+    update :stopped do
       change transition_state(:stopped)
+    end
+
+    update :errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change transition_state(:errored)
     end
 
     update :run_ready_actions do

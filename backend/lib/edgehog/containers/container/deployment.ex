@@ -22,16 +22,29 @@ defmodule Edgehog.Containers.Container.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource, AshStateMachine]
 
   alias Edgehog.Containers.Container.Changes
+
+  state_machine do
+    initial_states([:init, :sent])
+    default_initial_state(:init)
+
+    transitions do
+      transition(:received, from: :sent, to: :received)
+      transition(:created, from: :received, to: :created)
+      transition(:stopped, from: :created, to: :stopped)
+      transition(:running, from: :stopped, to: :running)
+      transition(:errored, from: :*, to: :error)
+    end
+  end
 
   graphql do
     type :container_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:status], update: [:status]]
+    defaults [:read, :destroy]
 
     create :deploy do
       description """
@@ -45,18 +58,38 @@ defmodule Edgehog.Containers.Container.Deployment do
       end
 
       change manage_relationship(:device_id, :device, type: :append)
-
       change Changes.DeployContainerOnDevice
+      change transition_state(:sent)
+    end
+
+    update :received do
+      change transition_state(:received)
+    end
+
+    update :created do
+      change transition_state(:created)
+    end
+
+    update :stopped do
+      change transition_state(:stopped)
+    end
+
+    update :running do
+      change transition_state(:running)
+    end
+
+    update :errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change transition_state(:error)
     end
   end
 
   attributes do
     uuid_primary_key :id
-
-    attribute :status, Edgehog.Containers.Container.Status do
-      allow_nil? false
-      public? true
-    end
 
     timestamps()
   end

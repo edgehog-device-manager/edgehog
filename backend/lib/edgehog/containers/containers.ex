@@ -101,6 +101,12 @@ defmodule Edgehog.Containers do
 
     resource Container.Deployment do
       define :deploy_container, action: :deploy, args: [:container_id, :device_id]
+      define :fetch_container_deployment, action: :read, get_by_identity: :container_instance
+      define :container_deployment_received, action: :received
+      define :container_deployment_created, action: :created
+      define :container_deployment_stopped, action: :stopped
+      define :container_deployment_running, action: :running
+      define :container_deployment_errored, action: :errored, args: [:message]
     end
 
     resource Release do
@@ -109,14 +115,15 @@ defmodule Edgehog.Containers do
 
     resource Release.Deployment do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
-      define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
       define :fetch_deployment, action: :read, get_by: [:id]
-      define :deployment_set_status, action: :set_status, args: [:status, :message]
 
       define :delete_deployment, action: :destroy
-      define :deployment_update_status, action: :update_status
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
       define :run_ready_actions, action: :run_ready_actions
+
+      define :release_deployment_started, action: :started
+      define :release_deployment_stopped, action: :stopped
+      define :release_deployment_error, action: :stopped, args: [:message]
     end
 
     resource Release.Deployment.ReadyAction do
@@ -131,6 +138,10 @@ defmodule Edgehog.Containers do
 
     resource Image.Deployment do
       define :deploy_image, action: :deploy, args: [:image_id, :device_id]
+      define :fetch_image_deployment, action: :read, get_by_identity: :image_instance
+      define :image_deployment_unpulled, action: :unpulled
+      define :image_deployment_pulled, action: :pulled
+      define :image_deployment_errored, action: :errored, args: [:message]
     end
 
     resource ImageCredentials
@@ -142,13 +153,23 @@ defmodule Edgehog.Containers do
     end
 
     resource Volume
+
     resource Volume.Deployment do
       define :deploy_volume, action: :deploy, args: [:volume_id, :device_id]
+      define :fetch_volume_deployment, action: :read, get_by_identity: :volume_instance
+      define :volume_deployment_available, action: :available
+      define :volume_deployment_unavailable, action: :unavailable
+      define :volume_deployment_errored, action: :errored, args: [:message]
     end
 
     resource Network
+
     resource Network.Deployment do
       define :deploy_network, action: :deploy, args: [:network_id, :device_id]
+      define :fetch_network_deployment, action: :read, get_by_identity: :network_instance
+      define :network_deployment_available, action: :available
+      define :network_deployment_unavailable, action: :unavailable
+      define :network_deployment_errored, action: :errored, args: [:message]
     end
 
     resource ContainerNetwork do
