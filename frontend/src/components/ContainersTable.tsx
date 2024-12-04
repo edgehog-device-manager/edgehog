@@ -46,6 +46,7 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
         networks {
           edges {
             node {
+              id
               driver
               internal
             }
@@ -97,13 +98,11 @@ const columns = [
   }),
   columnHelper.accessor(
     (row) =>
-      row.networks.edges
-        ?.map((edge) =>
-          `${edge.node.driver} ${
-            edge.node.internal ? "(internal)" : ""
-          }`.trim(),
-        )
-        .join(", "),
+      row.networks.edges?.map((edge) => ({
+        id: atob(edge.node.id).split(":")[1], // Decode and extract ID
+        driver: edge.node.driver,
+        internal: edge.node.internal,
+      })),
     {
       id: "networks",
       header: () => (
@@ -113,7 +112,24 @@ const columns = [
           description="Title for the Networks column of the container table"
         />
       ),
-      cell: ({ getValue }) => getValue(),
+      cell: ({ getValue }) => {
+        const networks = getValue();
+        if (!networks || networks.length === 0) {
+          return "";
+        }
+
+        return (
+          <div>
+            <ul>
+              {networks.map((network, index) => (
+                <li key={index}>
+                  {`${network.id} (${network.driver}${network.internal ? ", internal" : ""})`}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      },
     },
   ),
   columnHelper.accessor("portBindings", {
@@ -130,7 +146,16 @@ const columns = [
       if (!portBindings || portBindings.length === 0) {
         return "";
       }
-      return portBindings.join(", ");
+
+      return (
+        <div>
+          <ul>
+            {portBindings.map((portBinding, index) => (
+              <li key={index}>{portBinding}</li>
+            ))}
+          </ul>
+        </div>
+      );
     },
   }),
 ];
