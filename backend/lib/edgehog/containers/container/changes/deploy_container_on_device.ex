@@ -33,9 +33,6 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
       with {:ok, deployment} <-
              Ash.load(deployment, [:device, container: [:image, :networks]]),
            {:ok, _image_deployment} <- deploy_image(deployment, tenant),
-           :ok <- deploy_networks(deployment, tenant),
-           # TODO: plug volumes in
-           # :ok <- deploy_volumes(deployment, tenant),
            {:ok, _device} <-
              Devices.send_create_container_request(deployment.device, deployment.container, tenant: tenant) do
         {:ok, deployment}
@@ -48,29 +45,5 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
     device = deployment.device
 
     Containers.deploy_image(image.id, device.id, tenant: tenant)
-  end
-
-  def deploy_networks(deployment, tenant) do
-    device = deployment.device
-    networks = deployment.container.networks
-
-    Enum.reduce_while(networks, :ok, fn network, _acc ->
-      case Containers.deploy_network(network.id, device.id, tenant: tenant) do
-        {:ok, _network_deployment} -> {:cont, :ok}
-        error -> {:halt, error}
-      end
-    end)
-  end
-
-  def deploy_volumes(deployment, tenant) do
-    volumes = deployment.container.volumes
-    device = deployment.device
-
-    Enum.reduce_while(volumes, :ok, fn volume, _acc ->
-      case Containers.deploy_volume(volume.id, device.id, tenant: tenant) do
-        {:ok, _volume_deployment} -> {:cont, :ok}
-        error -> {:halt, error}
-      end
-    end)
   end
 end

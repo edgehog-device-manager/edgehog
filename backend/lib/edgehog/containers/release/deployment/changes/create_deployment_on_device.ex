@@ -31,8 +31,9 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.CreateDeploymentOnDevice
 
     Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
       with {:ok, deployment} <-
-             Ash.load(deployment, [:device, release: [containers: [:networks]]]),
+             Ash.load(deployment, [:device, release: [:containers, :networks]]),
            :ok <- deploy_containers(deployment, tenant),
+           :ok <- deploy_networks(deployment, tenant),
            {:ok, _device} <- Devices.send_create_deployment_request(deployment.device, deployment) do
         {:ok, deployment}
       end
@@ -40,12 +41,24 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.CreateDeploymentOnDevice
   end
 
   def deploy_containers(deployment, tenant) do
-    containers = dbg(deployment.release.containers)
+    containers = deployment.release.containers
     device = deployment.device
 
     Enum.reduce_while(containers, :ok, fn container, _acc ->
       case Containers.deploy_container(container.id, device.id, tenant: tenant) do
         {:ok, _container_deployment} -> {:cont, :ok}
+        error -> {:halt, error}
+      end
+    end)
+  end
+
+  def deploy_networks(deployment, tenant) do
+    containers = deployment.release.networks
+    device = deployment.device
+
+    Enum.reduce_while(containers, :ok, fn network, _acc ->
+      case Containers.deploy_network(network.id, device.id, tenant: tenant) do
+        {:ok, _network_deployment} -> {:cont, :ok}
         error -> {:halt, error}
       end
     end)
