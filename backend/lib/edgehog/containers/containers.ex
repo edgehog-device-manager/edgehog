@@ -33,6 +33,7 @@ defmodule Edgehog.Containers do
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.ReleaseContainers
+  alias Edgehog.Containers.ReleaseNetworks
   alias Edgehog.Containers.Volume
 
   graphql do
@@ -177,5 +178,7 @@ defmodule Edgehog.Containers do
         action: :containers_by_network,
         args: [:network_id]
     end
+
+    resource ReleaseNetworks
   end
 end

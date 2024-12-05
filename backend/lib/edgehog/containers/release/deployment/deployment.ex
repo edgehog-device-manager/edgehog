@@ -64,10 +64,10 @@ defmodule Edgehog.Containers.Release.Deployment do
         allow_nil? false
       end
 
-      # change transition_state(:created)
+      change transition_state(:created)
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.CreateDeploymentOnDevice
-      # change transition_state(:sent)
+      change transition_state(:sent)
     end
 
     update :start do

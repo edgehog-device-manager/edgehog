@@ -57,7 +57,6 @@ defmodule Edgehog.Containers.Network.Deployment do
         allow_nil? false
       end
 
-      change transition_state(:created)
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.DeployNetworkOnDevice
       change transition_state(:sent)
