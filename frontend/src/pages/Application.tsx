@@ -38,6 +38,7 @@ import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import ReleasesTable from "components/ReleasesTable";
+import Button from "components/Button";
 
 const GET_APPLICATION_QUERY = graphql`
   query Application_getApplication_Query($applicationId: ID!) {
@@ -60,9 +61,22 @@ interface ApplicationContentProps {
 const ApplicationContent = ({ application }: ApplicationContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
+  const { applicationId = "" } = useParams();
+
   return (
     <Page>
-      <Page.Header title={application.name} />
+      <Page.Header title={application.name}>
+        <Button
+          as={Link}
+          route={Route.releaseNew}
+          params={{ applicationId: applicationId }}
+        >
+          <FormattedMessage
+            id="pages.Application.createButton"
+            defaultMessage="Create Release"
+          />
+        </Button>
+      </Page.Header>
       <Page.Main>
         <Alert
           show={!!errorFeedback}

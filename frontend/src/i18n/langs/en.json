@@ -95,14 +95,14 @@
   "components.AddAvailableApplications.deviceOfflineError": {
     "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
   },
+  "components.AddAvailableApplications.selectARelease": {
+    "defaultMessage": "Select a release"
+  },
   "components.AddAvailableApplications.selectAnApplication": {
     "defaultMessage": "Select an application"
   },
   "components.AddAvailableApplications.selectApplication": {
     "defaultMessage": "Select Application"
-  },
-  "components.AddAvailableApplications.selectARelease": {
-    "defaultMessage": "Select a release"
   },
   "components.AddAvailableApplications.selectRelease": {
     "defaultMessage": "Select Release"
@@ -299,6 +299,48 @@
   },
   "components.CreateHardwareTypeForm.submitButton": {
     "defaultMessage": "Create"
+  },
+  "components.CreateRelease.addContainerButton": {
+    "defaultMessage": "Add Container"
+  },
+  "components.CreateRelease.containersTitle": {
+    "defaultMessage": "Containers"
+  },
+  "components.CreateRelease.envLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "components.CreateRelease.hostnameLabel": {
+    "defaultMessage": "Hostname"
+  },
+  "components.CreateRelease.imageReferenceLabel": {
+    "defaultMessage": "Image Reference"
+  },
+  "components.CreateRelease.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "components.CreateRelease.noContainersFeedback": {
+    "defaultMessage": "The release does not include any container."
+  },
+  "components.CreateRelease.portBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "components.CreateRelease.privilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "components.CreateRelease.removeContainerButton": {
+    "defaultMessage": "Remove Container"
+  },
+  "components.CreateRelease.restartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "components.CreateRelease.restartPolicyOption": {
+    "defaultMessage": "Select a Restart Policy"
+  },
+  "components.CreateRelease.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "components.CreateRelease.versionLabel": {
+    "defaultMessage": "Version"
   },
   "components.CreateSystemModelForm.addPartNumberButton": {
     "defaultMessage": "Add part number"
@@ -1026,26 +1068,29 @@
   "modem.technology.UTRAN_HSUPA": {
     "defaultMessage": "UTRAN with HSUPA"
   },
-  "pages.Application.description": {
-    "defaultMessage": "Description"
+  "pages.Application.applicationNotFound.message": {
+    "defaultMessage": "Return to the applications list."
   },
   "pages.Application.applicationNotFound.title": {
     "defaultMessage": "Application not found."
   },
-  "pages.Application.applicationNotFound.message": {
-    "defaultMessage": "Return to the applications list."
+  "pages.Application.createButton": {
+    "defaultMessage": "Create Release"
   },
-  "pages.Applications.createButton": {
-    "defaultMessage": "Create Application"
-  },
-  "pages.Applications.title": {
-    "defaultMessage": "Applications"
+  "pages.Application.description": {
+    "defaultMessage": "Description"
   },
   "pages.ApplicationCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the application, please try again."
   },
   "pages.ApplicationCreate.title": {
     "defaultMessage": "Create Application"
+  },
+  "pages.Applications.createButton": {
+    "defaultMessage": "Create Application"
+  },
+  "pages.Applications.title": {
+    "defaultMessage": "Applications"
   },
   "pages.BaseImage.baseImageNotFound.message": {
     "defaultMessage": "Return to the Base Image Collection."
@@ -1318,11 +1363,17 @@
   "pages.Logout.title": {
     "defaultMessage": "Logout"
   },
+  "pages.Release.releaseNotFound.message": {
+    "defaultMessage": "Return to the applications list."
+  },
   "pages.Release.releaseNotFound.title": {
     "defaultMessage": "Release not found."
   },
-  "pages.Release.releaseNotFound.message": {
-    "defaultMessage": "Return to the applications list."
+  "pages.ReleaseCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the release, please try again."
+  },
+  "pages.ReleaseCreate.title": {
+    "defaultMessage": "Create Release"
   },
   "pages.SystemModel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>.",
@@ -1451,6 +1502,9 @@
   "validation.baseImageVersion.format": {
     "defaultMessage": "The version must follow the Semantic Versioning spec"
   },
+  "validation.env.invalidJson": {
+    "defaultMessage": "Must be a valid JSON string."
+  },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
   },
@@ -1468,6 +1522,9 @@
   },
   "validation.number.positive": {
     "defaultMessage": "{label} must be a positive number."
+  },
+  "validation.portBindings.format": {
+    "defaultMessage": "Port Bindings must be comma-separated values like '8080:80, 443:443'."
   },
   "validation.required": {
     "defaultMessage": "Required."

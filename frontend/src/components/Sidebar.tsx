@@ -227,6 +227,7 @@ const Sidebar = () => (
           Route.applicationNew,
           Route.application,
           Route.release,
+          Route.releaseNew,
         ]}
       />
     </SidebarItemGroup>
