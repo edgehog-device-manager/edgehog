@@ -31,25 +31,28 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
 
     Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
       with {:ok, deployment} <-
-             Ash.load(deployment, device: [], container: [:image, :networks, :volumes]),
+             Ash.load(deployment, [:device, container: [:image, :networks]]),
            {:ok, _image_deployment} <- deploy_image(deployment, tenant),
            :ok <- deploy_networks(deployment, tenant),
-           :ok <- deploy_volumes(deployment, tenant),
+           # TODO: plug volumes in
+           # :ok <- deploy_volumes(deployment, tenant),
            {:ok, _device} <-
-             Devices.send_create_container_request(deployment.device, deployment.contianer, tenant: tenant) do
+             Devices.send_create_container_request(deployment.device, deployment.container, tenant: tenant) do
         {:ok, deployment}
       end
     end)
   end
 
   def deploy_image(deployment, tenant) do
-    image = deployment.image
-    Containers.deploy_image(image, tenant)
+    image = deployment.container.image
+    device = deployment.device
+
+    Containers.deploy_image(image.id, device.id, tenant: tenant)
   end
 
   def deploy_networks(deployment, tenant) do
-    networks = deployment.container.networks
     device = deployment.device
+    networks = deployment.container.networks
 
     Enum.reduce_while(networks, :ok, fn network, _acc ->
       case Containers.deploy_network(network.id, device.id, tenant: tenant) do
