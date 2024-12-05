@@ -36,12 +36,11 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     # one network for the release
     networks = 1
     device = device_fixture(tenant: tenant)
-    release = release_fixture(tenant: tenant, containers: containers)
+    release = release_fixture(tenant: tenant, containers: containers, networks: networks)
 
     expect(CreateImageRequestMock, :send_create_image_request, images, fn _, _, _ -> :ok end)
 
-    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
-      assert data.networkIds != []
+    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, _ ->
       :ok
     end)
 

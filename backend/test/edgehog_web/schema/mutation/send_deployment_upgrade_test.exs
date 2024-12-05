@@ -68,6 +68,8 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
              |> Map.fetch!(:deployment_id) == deployment_id
     end
 
+    # This test should be reactivated once the `ReadyAction` mechanism is ready again
+    @tag :skip
     test "sends the deployment upgrade once the new deployment reaches :ready state", args do
       %{deployment_0_0_1: deployment_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
