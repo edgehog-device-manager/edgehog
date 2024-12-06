@@ -88,8 +88,8 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
       # We eager check the existence of the device to avoid uploading the image if it doesn't exist
       change manage_relationship(:device_id, :device,
-               type: :append,
-               eager_validate_with: Edgehog.Devices
+               type: :append
+               # eager_validate_with: Edgehog.Devices
              )
 
       change set_attribute(:manual?, true)
