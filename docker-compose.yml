@@ -18,7 +18,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-version: "3.8"
 services:
   postgresql:
     image: postgres:16.3
@@ -46,7 +45,7 @@ services:
       URL_HOST: edgehog-backend
       URL_PORT: 4000
       URL_SCHEME: http
-      EDGEHOG_FORWARDER_HOSTNAME: device-forwarder.edgehog.localhost
+      EDGEHOG_FORWARDER_HOSTNAME: device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
       EDGEHOG_FORWARDER_PORT: 80
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
     restart: on-failure
@@ -63,7 +62,7 @@ services:
       - minio-init
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.edgehog-backend.rule=Host(`api.edgehog.localhost`)"
+      - "traefik.http.routers.edgehog-backend.rule=Host(`api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-backend.entrypoints=web"
       - "traefik.http.routers.edgehog-backend.service=edgehog-backend"
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
@@ -73,11 +72,11 @@ services:
     build:
       context: frontend
     environment:
-      BACKEND_URL: http://api.edgehog.localhost/
+      BACKEND_URL: http://api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}/
     restart: on-failure
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.edgehog-frontend.rule=Host(`edgehog.localhost`)"
+      - "traefik.http.routers.edgehog-frontend.rule=Host(`${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-frontend.entrypoints=web"
       - "traefik.http.routers.edgehog-frontend.service=edgehog-frontend"
       - "traefik.http.services.edgehog-frontend.loadbalancer.server.port=80"
@@ -88,11 +87,11 @@ services:
       RELEASE_NAME: edgehog-device-forwarder
       SECRET_KEY_BASE: fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
       PORT: 4001
-      PHX_HOST:  device-forwarder.edgehog.localhost
+      PHX_HOST:  device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
     restart: on-failure
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.edgehog-device-forwarder.rule=Host(`device-forwarder.edgehog.localhost`)"
+      - "traefik.http.routers.edgehog-device-forwarder.rule=Host(`device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-device-forwarder.entrypoints=web"
       - "traefik.http.routers.edgehog-device-forwarder.service=edgehog-device-forwarder"
       - "traefik.http.services.edgehog-device-forwarder.loadbalancer.server.port=4001"
@@ -107,11 +106,11 @@ services:
     command: server --console-address ":9001" /data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.edgehog-minio-storage.rule=Host(`minio-storage.edgehog.localhost`)"
+      - "traefik.http.routers.edgehog-minio-storage.rule=Host(`minio-storage.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-minio-storage.entrypoints=web"
       - "traefik.http.routers.edgehog-minio-storage.service=edgehog-minio-storage"
       - "traefik.http.services.edgehog-minio-storage.loadbalancer.server.port=9000"
-      - "traefik.http.routers.edgehog-minio-console.rule=Host(`minio.edgehog.localhost`)"
+      - "traefik.http.routers.edgehog-minio-console.rule=Host(`minio.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-minio-console.entrypoints=web"
       - "traefik.http.routers.edgehog-minio-console.service=edgehog-minio-console"
       - "traefik.http.services.edgehog-minio-console.loadbalancer.server.port=9001"
