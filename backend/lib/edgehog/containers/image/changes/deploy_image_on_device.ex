@@ -18,19 +18,20 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
+defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
+  alias Edgehog.Devices
 
   @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
-    # After the transaction has been executed, i.e. all checks have passed
-    # and the deployment is in the data layer, start the deployment with
-    # the result.
+  def change(changeset, _opts, context) do
+    %{tenant: tenant} = context
+
     Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      with :ok <- Containers.send_deploy_request(deployment) do
+      with {:ok, deployment} <- Ash.load(deployment, [:device, :image]),
+           {:ok, _device} <-
+             Devices.send_create_image_request(deployment.device, deployment.image, tenant: tenant) do
         {:ok, deployment}
       end
     end)

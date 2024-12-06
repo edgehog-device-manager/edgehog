@@ -18,25 +18,39 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment do
+defmodule Edgehog.Containers.Release.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource, AshStateMachine]
 
-  alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
-  alias Edgehog.Containers.Types.DeploymentStatus
+  alias Edgehog.Containers.Release.Deployment.Changes
+  alias Edgehog.Containers.Release.Deployment.ReadyAction
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
+  alias Edgehog.Devices.Device
+
+  state_machine do
+    initial_states([:created, :sent])
+    default_initial_state(:created)
+
+    transitions do
+      transition(:start, from: :stopped, to: [:start_requested])
+      transition(:stop, from: :started, to: [:stop_requested])
+      transition(:started, from: :start_requested, to: [:started])
+      transition(:stopped, from: [:stop_requested, :sent], to: [:stopped])
+      transition(:errored, from: :*, to: [:error])
+    end
+  end
 
   graphql do
-    type :deployment
+    type :release_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:device_id, :release_id, :status, :message]]
+    defaults [:read, :destroy, create: [:device_id, :release_id, :last_message, :state]]
 
     create :deploy do
       description """
@@ -50,9 +64,10 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
+      change transition_state(:created)
       change manage_relationship(:device_id, :device, type: :append)
-
       change Changes.CreateDeploymentOnDevice
+      change transition_state(:sent)
     end
 
     update :start do
@@ -60,6 +75,7 @@ defmodule Edgehog.Containers.Deployment do
       Sends a :start command to the release on the device.
       """
 
+      change transition_state(:start_requested)
       manual {ManualActions.SendDeploymentCommand, command: :start}
     end
 
@@ -68,6 +84,7 @@ defmodule Edgehog.Containers.Deployment do
       Sends a :stop command to the release on the device.
       """
 
+      change transition_state(:stop_requested)
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
 
@@ -79,21 +96,29 @@ defmodule Edgehog.Containers.Deployment do
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
 
+    update :started do
+      change transition_state(:started)
+    end
+
+    update :stopped do
+      change transition_state(:stopped)
+    end
+
+    update :errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change transition_state(:errored)
+    end
+
     update :run_ready_actions do
       description """
       Executes deployment callbacks
       """
 
       manual ManualActions.RunReadyActions
-    end
-
-    action :send_deploy_request do
-      argument :deployment, :struct do
-        constraints instance_of: __MODULE__
-        allow_nil? false
-      end
-
-      run ManualActions.SendDeployRequest
     end
 
     update :upgrade_release do
@@ -107,19 +132,6 @@ defmodule Edgehog.Containers.Deployment do
       manual ManualActions.SendDeploymentUpgrade
     end
 
-    update :set_status do
-      accept [:status, :message]
-    end
-
-    update :update_status do
-      change Changes.CheckImages
-      change Changes.CheckNetworks
-      change Changes.CheckContainers
-      change Changes.CheckDeployments
-
-      require_atomic? false
-    end
-
     read :filter_by_release do
       argument :release_id, :uuid
 
@@ -130,21 +142,13 @@ defmodule Edgehog.Containers.Deployment do
   attributes do
     uuid_primary_key :id
 
-    attribute :status, DeploymentStatus do
-      allow_nil? false
-      default :created
-      public? true
-    end
-
-    attribute :message, :string do
-      public? true
-    end
+    attribute :last_message, :string
 
     timestamps()
   end
 
   relationships do
-    belongs_to :device, Edgehog.Devices.Device do
+    belongs_to :device, Device do
       public? true
     end
 
@@ -153,20 +157,21 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
-    has_many :ready_actions, Edgehog.Containers.DeploymentReadyAction do
+    has_many :ready_actions, ReadyAction do
       public? true
+    end
+  end
+
+  postgres do
+    table "release_deployments"
+
+    references do
+      reference :device, on_delete: :delete
+      reference :release, on_delete: :delete
     end
   end
 
   identities do
     identity :release_instance, [:device_id, :release_id]
-  end
-
-  postgres do
-    table "application_deployments"
-
-    references do
-      reference :device, on_delete: :delete
-    end
   end
 end

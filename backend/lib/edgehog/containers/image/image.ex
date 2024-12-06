@@ -18,44 +18,27 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Network do
+defmodule Edgehog.Containers.Image do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.ImageCredentials
+
   graphql do
-    type :network
+    type :image
   end
 
   actions do
-    defaults [:read, :destroy, create: [:driver, :internal, :enable_ipv6, :options]]
+    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :driver, :string do
-      default "bridge"
+    attribute :reference, :string do
       allow_nil? false
-      public? true
-    end
-
-    attribute :internal, :boolean do
-      default false
-      allow_nil? false
-      public? true
-    end
-
-    attribute :enable_ipv6, :boolean do
-      default false
-      allow_nil? false
-      public? true
-    end
-
-    attribute :options, {:array, :string} do
-      allow_nil? false
-      default []
       public? true
     end
 
@@ -63,12 +46,23 @@ defmodule Edgehog.Containers.Network do
   end
 
   relationships do
-    many_to_many :containers, Edgehog.Containers.Container do
-      through Edgehog.Containers.ContainerNetwork
+    belongs_to :credentials, ImageCredentials do
+      source_attribute :image_credentials_id
+      attribute_type :uuid
+      public? true
+    end
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Image.Deployment
+      join_relationship :image_deployments
     end
   end
 
+  identities do
+    identity :reference, [:reference]
+  end
+
   postgres do
-    table "networks"
+    table "images"
   end
 end

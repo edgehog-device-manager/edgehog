@@ -18,33 +18,20 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CheckImages do
+defmodule Edgehog.Containers.Network.Changes.DeployNetworkOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
+  alias Edgehog.Devices
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
-    deployment = changeset.data
-
-    with :sent <- deployment.status,
-         {:ok, deployment} <-
-           Ash.load(deployment, device: :available_images, release: [containers: [:image]]) do
-      available_images_ids =
-        Enum.map(deployment.device.available_images, & &1.id)
-
-      missing_images =
-        deployment.release.containers
-        |> Enum.map(& &1.image.id)
-        |> Enum.reject(&(&1 in available_images_ids))
-
-      if missing_images == [] do
-        Ash.Changeset.change_attribute(changeset, :status, :created_images)
-      else
-        changeset
+    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
+      with {:ok, deployment} <- Ash.load(deployment, [:device, :network]),
+           {:ok, _device} <-
+             Devices.send_create_network_request(deployment.device, deployment.network) do
+        {:ok, deployment}
       end
-    else
-      _ ->
-        changeset
-    end
+    end)
   end
 end
