@@ -377,14 +377,26 @@
     "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
     "description": "Description of the action to perform to confirm the deletion modal"
   },
-  "components.DeployedApplicationsTable.action": {
-    "defaultMessage": "Action"
+  "components.DeployedApplicationsTable.actions": {
+    "defaultMessage": "Actions"
   },
   "components.DeployedApplicationsTable.applicationName": {
     "defaultMessage": "Application Name"
   },
+  "components.DeployedApplicationsTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
+  },
+  "components.DeployedApplicationsTable.deleteModal.note": {
+    "defaultMessage": "Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
+  },
+  "components.DeployedApplicationsTable.deleteModal.title": {
+    "defaultMessage": "Delete Deployment"
+  },
   "components.DeployedApplicationsTable.deleting": {
     "defaultMessage": "Deleting"
+  },
+  "components.DeployedApplicationsTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the deployment, please try again."
   },
   "components.DeployedApplicationsTable.deploying": {
     "defaultMessage": "Deploying"

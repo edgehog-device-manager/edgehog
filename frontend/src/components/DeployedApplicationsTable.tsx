@@ -20,7 +20,7 @@
 
 import { defineMessages, FormattedMessage } from "react-intl";
 import { graphql, useFragment, useMutation } from "react-relay/hooks";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import type {
   ApplicationDeploymentStatus,
@@ -29,10 +29,13 @@ import type {
 
 import type { DeployedApplicationsTable_startDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_startDeployment_Mutation.graphql";
 import type { DeployedApplicationsTable_stopDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
+import type { DeployedApplicationsTable_deleteDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_deleteDeployment_Mutation.graphql";
 
 import Icon from "components/Icon";
 import { Link, Route } from "Navigation";
 import Table, { createColumnHelper } from "components/Table";
+import Button from "./Button";
+import DeleteModal from "./DeleteModal";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -78,6 +81,16 @@ const STOP_DEPLOYMENT_MUTATION = graphql`
       }
       errors {
         message
+      }
+    }
+  }
+`;
+
+const DELETE_DEPLOYMENT_MUTATION = graphql`
+  mutation DeployedApplicationsTable_deleteDeployment_Mutation($id: ID!) {
+    deleteDeployment(id: $id) {
+      result {
+        id
       }
     }
   }
@@ -190,28 +203,28 @@ const ActionButtons = ({
 }) => (
   <div>
     {status === "STOPPED" || status === "ERROR" ? (
-      <button
+      <Button
         onClick={onStart}
         className="btn p-0 text-success border-0 bg-transparent"
       >
         <Icon icon="play" className="text-success" />
-      </button>
+      </Button>
     ) : status === "STARTED" ? (
-      <button
+      <Button
         onClick={onStop}
         className="btn p-0 text-danger border-0 bg-transparent"
       >
         <Icon icon="stop" className="text-danger" />
-      </button>
+      </Button>
     ) : (
-      <button className="btn p-0 border-0 bg-transparent" disabled>
+      <Button className="btn p-0 border-0 bg-transparent" disabled>
         <Icon
           icon={
             status === "STARTING" || status === "DEPLOYING" ? "play" : "stop"
           }
           className="text-muted"
         />
-      </button>
+      </Button>
     )}
   </div>
 );
@@ -235,6 +248,11 @@ const DeployedApplicationsTable = ({
 }: DeploymentTableProps) => {
   const data = useFragment(DEPLOYED_APPLICATIONS_TABLE_FRAGMENT, deviceRef);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedDeployment, setSelectedDeployment] = useState<
+    (typeof deployments)[0] | null
+  >(null);
+
   const [startDeployment] =
     useMutation<DeployedApplicationsTable_startDeployment_Mutation>(
       START_DEPLOYMENT_MUTATION,
@@ -243,6 +261,15 @@ const DeployedApplicationsTable = ({
     useMutation<DeployedApplicationsTable_stopDeployment_Mutation>(
       STOP_DEPLOYMENT_MUTATION,
     );
+
+  const [deleteDeployment, isDeletingDeployment] =
+    useMutation<DeployedApplicationsTable_deleteDeployment_Mutation>(
+      DELETE_DEPLOYMENT_MUTATION,
+    );
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
 
   const deployments =
     data.applicationDeployments?.edges?.map((edge) => ({
@@ -330,6 +357,43 @@ const DeployedApplicationsTable = ({
     [isOnline, stopDeployment, setErrorFeedback, onDeploymentChange],
   );
 
+  const handleDeleteDeployedApplication = useCallback(
+    (deploymentId: string) => {
+      deleteDeployment({
+        variables: { id: deploymentId },
+        onCompleted(data, errors) {
+          if (
+            !errors ||
+            errors.length === 0 ||
+            errors[0].code === "not_found"
+          ) {
+            setErrorFeedback(null);
+            setShowDeleteModal(false);
+            return;
+          }
+
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+          setErrorFeedback(errorFeedback);
+          setShowDeleteModal(false);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.deletionErrorFeedback"
+              defaultMessage="Could not delete the deployment, please try again."
+            />,
+          );
+          setShowDeleteModal(false);
+        },
+      });
+    },
+    [deleteDeployment, setErrorFeedback],
+  );
+
   const columnHelper = createColumnHelper<(typeof deployments)[0]>();
   const columns = [
     columnHelper.accessor("applicationName", {
@@ -380,16 +444,28 @@ const DeployedApplicationsTable = ({
       id: "action",
       header: () => (
         <FormattedMessage
-          id="components.DeployedApplicationsTable.action"
-          defaultMessage="Action"
+          id="components.DeployedApplicationsTable.actions"
+          defaultMessage="Actions"
         />
       ),
       cell: ({ getValue }) => (
-        <ActionButtons
-          status={getValue().status}
-          onStart={() => handleStartDeployedApplication(getValue().id)}
-          onStop={() => handleStopDeployedApplication(getValue().id)}
-        />
+        <div className="d-flex align-items-center">
+          <ActionButtons
+            status={getValue().status}
+            onStart={() => handleStartDeployedApplication(getValue().id)}
+            onStop={() => handleStopDeployedApplication(getValue().id)}
+          />
+          <Button
+            disabled={getValue().status === "DELETING"}
+            className="btn p-0 border-0 bg-transparent ms-4"
+            onClick={() => {
+              setSelectedDeployment(getValue());
+              handleShowDeleteModal();
+            }}
+          >
+            <Icon className="text-danger" icon={"delete"} />
+          </Button>
+        </div>
       ),
     }),
   ];
@@ -406,12 +482,46 @@ const DeployedApplicationsTable = ({
   }
 
   return (
-    <Table
-      className={className}
-      columns={columns}
-      data={deployments}
-      hideSearch={hideSearch}
-    />
+    <div>
+      <Table
+        className={className}
+        columns={columns}
+        data={deployments}
+        hideSearch={hideSearch}
+      />
+
+      {showDeleteModal && (
+        <DeleteModal
+          confirmText={selectedDeployment?.applicationName || ""}
+          onCancel={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            if (selectedDeployment?.id) {
+              handleDeleteDeployedApplication(selectedDeployment.id);
+            }
+          }}
+          isDeleting={isDeletingDeployment}
+          title={
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.deleteModal.title"
+              defaultMessage="Delete Deployment"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.deleteModal.description"
+              defaultMessage="This action cannot be undone. This will permanently delete the deployment."
+            />
+          </p>
+          <p className="text-muted small">
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.deleteModal.note"
+              defaultMessage="Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
+            />
+          </p>
+        </DeleteModal>
+      )}
+    </div>
   );
 };
 
