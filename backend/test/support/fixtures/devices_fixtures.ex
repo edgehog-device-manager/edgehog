@@ -25,6 +25,7 @@ defmodule Edgehog.DevicesFixtures do
   """
 
   alias Edgehog.AstarteFixtures
+  alias Edgehog.Tenants.Tenant
 
   @doc """
   Generate a unique hardware_type handle.
@@ -64,7 +65,11 @@ defmodule Edgehog.DevicesFixtures do
 
     {realm_id, opts} =
       Keyword.pop_lazy(opts, :realm_id, fn ->
-        [tenant: tenant] |> AstarteFixtures.realm_fixture() |> Map.fetch!(:id)
+        tenant = Ash.get!(Tenant, tenant, tenant: tenant, load: :realm)
+
+        if tenant.realm == nil,
+          do: AstarteFixtures.realm_fixture(tenant: tenant).id,
+          else: tenant.realm.id
       end)
 
     default_device_id = AstarteFixtures.random_device_id()
