@@ -1068,6 +1068,93 @@
   "modem.technology.UTRAN_HSUPA": {
     "defaultMessage": "UTRAN with HSUPA"
   },
+  "navigation.routeTitle.Application": {
+    "defaultMessage": "Application"
+  },
+  "navigation.routeTitle.ApplicationNew": {
+    "defaultMessage": "Create Application"
+  },
+  "navigation.routeTitle.Applications": {
+    "defaultMessage": "Applications"
+  },
+  "navigation.routeTitle.BaseImageCollections": {
+    "defaultMessage": "Base Image Collections"
+  },
+  "navigation.routeTitle.BaseImageCollectionsEdit": {
+    "defaultMessage": "Base Image Collection Details"
+  },
+  "navigation.routeTitle.BaseImageCollectionsNew": {
+    "defaultMessage": "Create Base Image Collection"
+  },
+  "navigation.routeTitle.BaseImagesEdit": {
+    "defaultMessage": "Base Image Details"
+  },
+  "navigation.routeTitle.BaseImagesNew": {
+    "defaultMessage": "Create Base Image"
+  },
+  "navigation.routeTitle.DeviceGroups": {
+    "defaultMessage": "Groups"
+  },
+  "navigation.routeTitle.DeviceGroupsEdit": {
+    "defaultMessage": "Group Details"
+  },
+  "navigation.routeTitle.DeviceGroupsNew": {
+    "defaultMessage": "Create Group"
+  },
+  "navigation.routeTitle.Devices": {
+    "defaultMessage": "Devices"
+  },
+  "navigation.routeTitle.DevicesEdit": {
+    "defaultMessage": "Device Details"
+  },
+  "navigation.routeTitle.HardwareTypes": {
+    "defaultMessage": "Hardware Types"
+  },
+  "navigation.routeTitle.HardwareTypesEdit": {
+    "defaultMessage": "Hardware Type Details"
+  },
+  "navigation.routeTitle.HardwareTypesNew": {
+    "defaultMessage": "Create Hardware Type"
+  },
+  "navigation.routeTitle.Login": {
+    "defaultMessage": "Login"
+  },
+  "navigation.routeTitle.Logout": {
+    "defaultMessage": "Logout"
+  },
+  "navigation.routeTitle.Release": {
+    "defaultMessage": "Release"
+  },
+  "navigation.routeTitle.ReleaseNew": {
+    "defaultMessage": "Create Release"
+  },
+  "navigation.routeTitle.SystemModels": {
+    "defaultMessage": "System Models"
+  },
+  "navigation.routeTitle.SystemModelsEdit": {
+    "defaultMessage": "System Model Details"
+  },
+  "navigation.routeTitle.SystemModelsNew": {
+    "defaultMessage": "Create System Model"
+  },
+  "navigation.routeTitle.UpdateCampaigns": {
+    "defaultMessage": "Update Campaigns"
+  },
+  "navigation.routeTitle.UpdateCampaignsEdit": {
+    "defaultMessage": "Update Campaign Details"
+  },
+  "navigation.routeTitle.UpdateCampaignsNew": {
+    "defaultMessage": "Create Update Campaign"
+  },
+  "navigation.routeTitle.UpdateChannels": {
+    "defaultMessage": "Update Channels"
+  },
+  "navigation.routeTitle.UpdateChannelsEdit": {
+    "defaultMessage": "Update Channel Details"
+  },
+  "navigation.routeTitle.UpdateChannelsNew": {
+    "defaultMessage": "Create Update Channel"
+  },
   "pages.Application.applicationNotFound.message": {
     "defaultMessage": "Return to the applications list."
   },

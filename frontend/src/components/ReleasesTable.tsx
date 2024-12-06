@@ -37,6 +37,9 @@ const RELEASES_TABLE_FRAGMENT = graphql`
       node {
         id
         version
+        application {
+          id
+        }
       }
     }
   }
@@ -57,7 +60,13 @@ const columns = [
       />
     ),
     cell: ({ row, getValue }) => (
-      <Link route={Route.release} params={{ releaseId: row.original.id }}>
+      <Link
+        route={Route.release}
+        params={{
+          applicationId: row.original.application?.id ?? "",
+          releaseId: row.original.id,
+        }}
+      >
         {getValue()}
       </Link>
     ),

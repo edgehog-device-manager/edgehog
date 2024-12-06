@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -39,18 +39,11 @@ describe("Page", () => {
 });
 
 describe("Header", () => {
-  it("renders title correctly", () => {
+  it("renders BreadcrumbItems component", () => {
     renderWithProviders(<Page.Header title="Header Title" />);
 
-    const pageTitle = screen.getByRole("heading", { name: "Header Title" });
-    expect(pageTitle).toBeVisible();
-  });
-
-  it("does not render the heading without title property", () => {
-    renderWithProviders(<Page.Header />);
-
-    const pageTitle = screen.queryByRole("heading");
-    expect(pageTitle).not.toBeInTheDocument();
+    const breadcrumb = screen.getByRole("navigation");
+    expect(breadcrumb).toBeVisible();
   });
 
   it("renders children correctly", () => {
@@ -86,7 +79,7 @@ describe("LoadingError", () => {
   it("does not render 'Try Again' button without onRetry property", () => {
     renderWithProviders(<Page.LoadingError />);
 
-    const tryAgainButton = screen.queryByRole("button", { name: "Try again" });
+    const tryAgainButton = screen.queryByRole("button", { name: "Try Again" });
     expect(tryAgainButton).not.toBeInTheDocument();
   });
 

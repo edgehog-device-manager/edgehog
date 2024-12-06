@@ -358,7 +358,10 @@ const DeployedApplicationsTable = ({
       cell: ({ row, getValue }) => (
         <Link
           route={Route.release}
-          params={{ releaseId: row.original.releaseId }}
+          params={{
+            applicationId: row.original.applicationId,
+            releaseId: row.original.releaseId,
+          }}
         >
           {getValue()}
         </Link>
