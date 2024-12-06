@@ -111,9 +111,7 @@ defmodule Edgehog.MixProject do
       {:recon, "~> 2.5"},
       {:observer_cli, "~> 1.7"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      # TODO: restore when solved: https://github.com/ash-project/ash/issues/1647
-      # {:ash, "~> 3.0"},
-      {:ash, "3.4.37"},
+      {:ash, "~> 3.0"},
       {:ash_postgres, "~> 2.0"},
       {:ash_graphql, "~> 1.0"},
       {:ash_json_api, "~> 1.3"},
