@@ -35,6 +35,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
     device = changeset.data
 
     with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
+         {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
          {:ok, container} <- Ash.load(container, [:env_encoding, :image, :networks]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
       env_encoding = container.env_encoding
@@ -45,6 +46,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         id: container.id,
         imageId: container.image_id,
         image: image.reference,
+        deploymentId: deployment.id,
         volumeIds: [],
         hostname: container.hostname,
         restartPolicy: restart_policy,
