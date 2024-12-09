@@ -786,10 +786,10 @@ At this point your Edgehog instance is ready to use. The last step is generating
 your Edgehog frontend instance. You can do so using the `gen-edgehog-jwt` tool contained in the
 `tools` directory of the [Edgehog
 repo](https://github.com/edgehog-device-manager/edgehog/tree/main/tools).
+The tool requires Elixir in your system, which you can install with `asdf install` using the [asdf](https://asdf-vm.com/) version manager.
 
 ```bash
-$ pip3 install pyjwt
-$ ./gen-edgehog-jwt -t tenant -k <PATH-TO-TENANT-PRIVATE-KEY>
+$ ./tools/gen-edgehog-jwt -t tenant -k <PATH-TO-TENANT-PRIVATE-KEY>
 ```
 
 Values to be replaced
