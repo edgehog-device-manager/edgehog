@@ -191,6 +191,15 @@ defmodule Edgehog.OSManagement.OTAOperation do
       attribute_public? false
       allow_nil? false
     end
+
+    has_one :update_target, Edgehog.UpdateCampaigns.UpdateTarget do
+      description """
+      The update target of an update campaing that created the managed
+      ota operation, if any.
+      """
+
+      public? true
+    end
   end
 
   calculations do
