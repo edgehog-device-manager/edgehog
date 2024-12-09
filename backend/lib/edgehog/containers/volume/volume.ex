@@ -18,36 +18,48 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.DeploymentReadyAction.Upgrade do
+defmodule Edgehog.Containers.Volume do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
   actions do
-    defaults [:read, :destroy, create: [:upgrade_target_id]]
+    defaults [
+      :read,
+      :destroy,
+      create: [:driver, :options],
+      update: [:driver, :options]
+    ]
   end
 
   attributes do
     uuid_primary_key :id
+
+    attribute :driver, :string do
+      default "local"
+      allow_nil? false
+    end
+
+    attribute :options, :map do
+      default %{}
+      allow_nil? false
+    end
+
+    timestamps()
   end
 
   relationships do
-    belongs_to :upgrade_target, Edgehog.Containers.Deployment do
-      allow_nil? false
-      attribute_type :uuid
-    end
-
-    belongs_to :deployment_ready_action, Edgehog.Containers.DeploymentReadyAction do
-      allow_nil? false
-      attribute_type :uuid
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Volume.Deployment
+      join_relationship :volume_deployments
     end
   end
 
-  postgres do
-    table "deployment_ready_action_upgrades"
+  calculations do
+    calculate :options_encoding, {:array, :string}, OptionsCalculation
+  end
 
-    references do
-      reference :deployment_ready_action, on_delete: :delete
-    end
+  postgres do
+    table "volumes"
   end
 end
