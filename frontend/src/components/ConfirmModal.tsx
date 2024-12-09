@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ const ConfirmModal = ({
   return (
     <div onKeyDown={handleKeyDown} {...restProps}>
       <Modal show centered size={size} onHide={handleHide}>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton onClick={onCancel}>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>{children}</Modal.Body>
