@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Managed OTA operations expose the update target that created them in graphql ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356).
 
+## [0.9.3] - Unreleased
+### Fixed
+- Base Image deletion in S3 storage
+
 ## [0.9.2] - 2024-12-09
 ### Changed
 - Update the docker-compose configuration to allow both physical and virtual devices
