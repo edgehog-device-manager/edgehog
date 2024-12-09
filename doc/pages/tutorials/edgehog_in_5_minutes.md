@@ -149,7 +149,7 @@ its interfaces and triggers with astarte. Without waiting, we can force it to ex
 the reconciler using:
 
 ```sh
-$ docker compose exec edgehog-backend bin/edgehog rpc "Edgehog.Tenants.list_tenants |> Enum.each(&Edgehog.Tenants.reconcile_tenant/1)"
+$ docker compose exec edgehog-backend bin/edgehog rpc "Edgehog.Tenants.Tenant |> Ash.read!() |> Enum.each(&Edgehog.Tenants.reconcile_tenant/1)"
 ```
 
 If you now connect a device to astarte and open or reload the edgehog web page,
