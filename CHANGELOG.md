@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2024-12-09
+### Changed
+- Update the docker-compose configuration to allow both physical and virtual devices
+  to connect to Edgehog, provided that the devices and the host are on the same LAN.
+
 ## [0.9.1] - 2024-10-28
 ### Fixed
 - Allow receiving `trigger_name` key in trigger payload, which is sent by Astarte >= 1.2.0.
