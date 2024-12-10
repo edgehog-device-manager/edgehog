@@ -111,9 +111,11 @@ defmodule Edgehog.MixProject do
       {:recon, "~> 2.5"},
       {:observer_cli, "~> 1.7"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:ash, "~> 3.0"},
+      {:ash, "~> 3.0", override: true},
       {:ash_postgres, "~> 2.0"},
-      {:ash_graphql, "~> 1.0"},
+      # Restore tag when https://github.com/ash-project/ash_graphql/pull/246 appears in a tag
+      # {:ash_graphql, "~> 1.0"},
+      {:ash_graphql, github: "ash-project/ash_graphql"},
       {:ash_json_api, "~> 1.3"},
       {:picosat_elixir, "~> 0.2"},
       {:styler, "~> 1.0.0-rc.1", only: [:dev, :test], runtime: false},
