@@ -145,7 +145,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     end
 
     test "fails when trying to use a non-existing target group id", %{tenant: tenant, id: id} do
-      target_group_id = non_existing_device_group_id(tenant)
+      {target_group_id, original_target_group_id} = non_existing_device_group_id(tenant)
 
       error =
         [id: id, target_group_ids: [target_group_id], tenant: tenant]
@@ -156,13 +156,17 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
                path: ["updateUpdateChannel"],
                fields: [:target_group_ids],
                code: "invalid_argument",
-               message: "some target groups were not found or are already associated with an update channel"
+               message: "some target groups were not found: " <> missing
              } = error
+
+      assert missing == "[#{original_target_group_id}]"
     end
 
     test "fails when trying to use already assigned target groups", %{tenant: tenant, id: id} do
       target_group = device_group_fixture(tenant: tenant)
-      _ = update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
+
+      _ =
+        update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
 
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
@@ -175,8 +179,12 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
                path: ["updateUpdateChannel"],
                fields: [:target_group_ids],
                code: "invalid_argument",
-               message: "some target groups were not found or are already associated with an update channel"
+               message:
+                 "some target groups are already associated with an update channel: " <>
+                   ret_update_channel_id
              } = error
+
+      assert ret_update_channel_id == "[#{target_group.id}]"
     end
   end
 
@@ -245,6 +253,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     id = AshGraphql.Resource.encode_relay_id(fixture)
     :ok = Ash.destroy!(fixture)
 
-    id
+    {id, fixture.id}
   end
 end

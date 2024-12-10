@@ -28,6 +28,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
   alias Edgehog.UpdateCampaigns.UpdateChannel.Calculations
   alias Edgehog.UpdateCampaigns.UpdateChannel.Changes
+  alias Edgehog.UpdateCampaigns.UpdateChannel.Validations
 
   resource do
     description """
@@ -63,6 +64,14 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
       change Changes.RelateTargetGroups do
         where present(:target_group_ids)
       end
+
+      validate Validations.TargetGroupsAreAvailable do
+        where present(:target_group_ids)
+      end
+
+      validate Validations.TargetGroupsAreUnrelated do
+        where present(:target_group_ids)
+      end
     end
 
     update :update do
@@ -87,6 +96,14 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
       end
 
       change Changes.RelateTargetGroups do
+        where present(:target_group_ids)
+      end
+
+      validate Validations.TargetGroupsAreAvailable do
+        where present(:target_group_ids)
+      end
+
+      validate Validations.TargetGroupsAreUnrelated do
         where present(:target_group_ids)
       end
     end
