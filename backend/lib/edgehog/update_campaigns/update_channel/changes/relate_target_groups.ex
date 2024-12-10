@@ -22,36 +22,13 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Ash.Error.Changes.InvalidArgument
-  alias Edgehog.Groups.DeviceGroup
-
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
-
+  def change(changeset, _opts, _context) do
     {:ok, target_group_ids} = Ash.Changeset.fetch_argument(changeset, :target_group_ids)
 
-    Ash.Changeset.after_action(changeset, fn _changeset, update_channel ->
-      relate_target_groups(tenant, update_channel, target_group_ids)
-    end)
-  end
-
-  defp relate_target_groups(tenant, update_channel, target_group_ids) do
-    %Ash.BulkResult{status: status, records: records} =
-      DeviceGroup
-      |> Ash.Query.filter(id in ^target_group_ids)
-      |> Ash.Query.filter(is_nil(update_channel_id))
-      |> Ash.Query.set_tenant(tenant)
-      |> Ash.bulk_update(:update_update_channel, %{update_channel_id: update_channel.id}, return_records?: true)
-
-    if status == :success and length(records) == length(target_group_ids) do
-      {:ok, update_channel}
-    else
-      {:error,
-       InvalidArgument.exception(
-         field: :target_group_ids,
-         message: "some target groups were not found or are already associated with an update channel"
-       )}
-    end
+    Ash.Changeset.manage_relationship(changeset, :target_groups, target_group_ids,
+      on_lookup: :relate,
+      on_no_match: :error
+    )
   end
 end
