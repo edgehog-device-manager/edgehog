@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -58,6 +58,14 @@ defmodule Edgehog.Groups.DeviceGroup do
       require_atomic? false
 
       accept [:update_channel_id]
+    end
+
+    update :assign_update_channel do
+      accept [:update_channel_id]
+
+      require_atomic? false
+
+      validate Validations.UpdateChannelAbsent
     end
 
     destroy :destroy do

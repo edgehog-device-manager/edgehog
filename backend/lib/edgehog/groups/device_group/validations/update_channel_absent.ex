@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024-2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
+defmodule Edgehog.Groups.DeviceGroup.Validations.UpdateChannelAbsent do
   @moduledoc false
-  use Ash.Resource.Change
+  use Ash.Resource.Validation
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
-    {:ok, target_group_ids} = Ash.Changeset.fetch_argument(changeset, :target_group_ids)
+  @impl Ash.Resource.Validation
+  def validate(changeset, _opts, _context) do
+    device_group = changeset.data
 
-    Ash.Changeset.manage_relationship(changeset, :target_groups, target_group_ids,
-      on_lookup: {:relate, :assign_update_channel},
-      on_no_match: :error
-    )
+    if device_group.update_channel_id do
+      {:error,
+       field: :update_channel_id,
+       message: "The update channel is already set for the device group \"#{device_group.name}\"",
+       short_message: "Update channel already set"}
+    else
+      :ok
+    end
   end
 end
