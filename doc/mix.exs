@@ -28,7 +28,7 @@ defmodule Doc.MixProject do
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      name: "Edgehog",
+      name: "Clea Edgehog",
       homepage_url: "http://edgehog.io",
       docs: docs()
     ]
@@ -66,7 +66,7 @@ defmodule Doc.MixProject do
       "pages/user/hardware_types.md",
       "pages/user/system_models.md",
       "pages/user/devices.md",
-      "pages/user/device_sdks_runtime.md",
+      "pages/user/devices_and_runtime.md",
       "pages/user/attribute_value_sources.md",
       "pages/user/groups.md",
       "pages/user/batch_operations.md",
