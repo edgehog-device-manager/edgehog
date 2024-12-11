@@ -28,7 +28,7 @@ defmodule Doc.MixProject do
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      name: "Edgehog",
+      name: "Clea Edgehog",
       homepage_url: "http://edgehog.io",
       docs: docs()
     ]
