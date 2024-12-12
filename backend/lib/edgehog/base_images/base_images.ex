@@ -67,7 +67,10 @@ defmodule Edgehog.BaseImages do
   end
 
   resources do
-    resource BaseImage
+    resource BaseImage do
+      define :delete_base_image, action: :destroy
+    end
+
     resource BaseImageCollection
   end
 end
