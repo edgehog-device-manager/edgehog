@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ defmodule Edgehog.TenantsTest do
   alias Ash.Error.Invalid
   alias Ash.Error.Query.NotFound
   alias Edgehog.Astarte
+  alias Edgehog.BaseImages.StorageMock
+  alias Edgehog.OSManagement.EphemeralImageMock
   alias Edgehog.Tenants
   alias Edgehog.Tenants.ReconcilerMock
   alias Edgehog.Tenants.Tenant
@@ -326,8 +328,21 @@ defmodule Edgehog.TenantsTest do
       manual_ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
 
       update_channel = update_channel_fixture(tenant: tenant)
-      update_campaign = update_campaign_fixture(tenant: tenant)
-      update_target = target_fixture(tenant: tenant)
+      update_campaign = update_campaign_fixture(base_image_id: base_image.id, tenant: tenant)
+      update_target = target_fixture(base_image_id: base_image.id, tenant: tenant)
+
+      expect(StorageMock, :delete, fn to_delete ->
+        assert to_delete.id == base_image.id
+        :ok
+      end)
+
+      expect(EphemeralImageMock, :delete, fn tenant_id, ota_operation_id, url ->
+        assert tenant_id == manual_ota_operation.tenant_id
+        assert ota_operation_id == manual_ota_operation.id
+        assert url == manual_ota_operation.base_image_url
+
+        :ok
+      end)
 
       assert :ok = Tenants.destroy_tenant(tenant)
 

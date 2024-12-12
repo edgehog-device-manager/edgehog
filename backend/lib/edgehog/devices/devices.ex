@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -86,7 +86,11 @@ defmodule Edgehog.Devices do
     resource Device
     resource HardwareType
     resource Edgehog.Devices.HardwareTypePartNumber
-    resource SystemModel
+
+    resource SystemModel do
+      define :delete_system_model, action: :destroy
+    end
+
     resource Edgehog.Devices.SystemModelPartNumber
   end
 end

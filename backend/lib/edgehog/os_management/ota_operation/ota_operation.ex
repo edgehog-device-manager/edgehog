@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
 
     create :create_fixture do
       accept [
@@ -96,6 +96,14 @@ defmodule Edgehog.OSManagement.OTAOperation do
       change Changes.HandleEphemeralImageUpload
       change Changes.SendUpdateRequest
       change {PublishNotification, event_type: :ota_operation_created}
+    end
+
+    destroy :destroy do
+      require_atomic? false
+
+      change Changes.HandleEphemeralImageDeletion do
+        where attribute_equals(:manual?, true)
+      end
     end
 
     update :mark_as_timed_out do
