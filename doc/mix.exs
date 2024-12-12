@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ defmodule Doc.MixProject do
       main: "intro_user",
       logo: "images/logo-favicon.png",
       extras: extras(),
-      assets: "images/",
+      assets: %{"images/" => "assets", "assets/" => "assets"},
       api_reference: false,
       groups_for_extras: [
         "User Guide": ~r"/user/",
@@ -55,9 +55,19 @@ defmodule Doc.MixProject do
         Tutorials: ~r"/tutorials/"
       ],
       groups_for_modules: [],
-      javascript_config_path: "../versions.js"
+      javascript_config_path: "../versions.js",
+      before_closing_head_tag: &before_closing_head_tag/1,
     ]
   end
+
+  defp before_closing_head_tag(:html) do
+    """
+      <link rel="icon" href="assets/logo.png" />
+      <link rel="stylesheet" href="assets/doc.css" />
+    """
+  end
+
+  defp before_closing_head_tag(:epub), do: ""
 
   defp extras do
     [
