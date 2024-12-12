@@ -154,15 +154,17 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
 
       assert %{
                path: ["updateUpdateChannel"],
-               fields: [:target_group_ids],
-               code: "invalid_argument",
-               message: "some target groups were not found or are already associated with an update channel"
+               fields: [:id],
+               code: "not_found",
+               message: "could not be found"
              } = error
     end
 
     test "fails when trying to use already assigned target groups", %{tenant: tenant, id: id} do
       target_group = device_group_fixture(tenant: tenant)
-      _ = update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
+
+      _ =
+        update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
 
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
@@ -173,10 +175,12 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
 
       assert %{
                path: ["updateUpdateChannel"],
-               fields: [:target_group_ids],
-               code: "invalid_argument",
-               message: "some target groups were not found or are already associated with an update channel"
+               fields: [:update_channel_id],
+               code: "invalid_attribute",
+               message: "The update channel is already set for the device group " <> name
              } = error
+
+      assert name == "\"#{target_group.name}\""
     end
   end
 
