@@ -55,9 +55,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
         description """
         The IDs of the target groups that are targeted by this update channel.
         """
-
-        allow_nil? false
-        constraints min_length: 1
       end
 
       change Changes.RelateTargetGroups do
@@ -75,16 +72,13 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
         description """
         The IDs of the target groups that are targeted by this update channel.
         """
-
-        constraints min_length: 1
       end
 
       # Needed because manage_relationship is not atomic
       require_atomic? false
 
-      change Changes.UnrelateCurrentTargetGroups do
-        where present(:target_group_ids)
-      end
+      # Always unrelate target groups
+      change Changes.UnrelateCurrentTargetGroups
 
       change Changes.RelateTargetGroups do
         where present(:target_group_ids)
