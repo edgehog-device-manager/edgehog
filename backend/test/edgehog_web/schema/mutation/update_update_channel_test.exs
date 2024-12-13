@@ -130,18 +130,13 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
              } = error
     end
 
-    test "fails with empty target_group_ids", %{tenant: tenant, id: id} do
-      error =
+    test "updates update_channel with empty target_group_ids", %{tenant: tenant, id: id} do
+      result =
         [id: id, target_group_ids: [], tenant: tenant]
         |> update_update_channel_mutation()
-        |> extract_error!()
+        |> extract_result!()
 
-      assert %{
-               path: ["updateUpdateChannel"],
-               fields: [:target_group_ids],
-               code: "invalid_argument",
-               message: "must have 1 or more items"
-             } = error
+      assert result["id"] == id
     end
 
     test "fails when trying to use a non-existing target group id", %{tenant: tenant, id: id} do
