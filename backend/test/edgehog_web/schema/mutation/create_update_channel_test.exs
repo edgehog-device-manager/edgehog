@@ -49,6 +49,34 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
       assert target_group_data["handle"] == target_group.handle
     end
 
+    test "creates update_channel with nil target_group_ids", %{tenant: tenant} do
+      name = unique_update_channel_name()
+      handle = unique_update_channel_handle()
+
+      result =
+        [target_group_ids: nil, tenant: tenant, name: name, handle: handle]
+        |> create_update_channel_mutation()
+        |> extract_result!()
+
+      assert result["name"] == name
+      assert result["handle"] == handle
+      assert result["targetGroups"] == []
+    end
+
+    test "creates update_channel with empty target_group_ids", %{tenant: tenant} do
+      name = unique_update_channel_name()
+      handle = unique_update_channel_handle()
+
+      result =
+        [target_group_ids: [], tenant: tenant, name: name, handle: handle]
+        |> create_update_channel_mutation()
+        |> extract_result!()
+
+      assert result["name"] == name
+      assert result["handle"] == handle
+      assert result["targetGroups"] == []
+    end
+
     test "fails with missing name", %{tenant: tenant} do
       error =
         [name: nil, tenant: tenant]
@@ -140,30 +168,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
                fields: [:handle],
                message: "has already been taken",
                code: "invalid_attribute"
-             } = error
-    end
-
-    test "fails with missing target_group_ids", %{tenant: tenant} do
-      error =
-        [target_group_ids: nil, tenant: tenant]
-        |> create_update_channel_mutation()
-        |> extract_error!()
-
-      assert %{message: message} = error
-      assert message =~ ~s<In field "targetGroupIds": Expected type "[ID!]!", found null.>
-    end
-
-    test "fails with empty target_group_ids", %{tenant: tenant} do
-      error =
-        [target_group_ids: [], tenant: tenant]
-        |> create_update_channel_mutation()
-        |> extract_error!()
-
-      assert %{
-               path: ["createUpdateChannel"],
-               fields: [:target_group_ids],
-               message: "must have 1 or more items",
-               code: "invalid_argument"
              } = error
     end
 
