@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env elixir
 #
 # This file is part of Edgehog.
 #
@@ -19,42 +19,92 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-import argparse
-import datetime
-import jwt
+Mix.install([ 
+  {:jason, "~> 1.4"},
+  {:jose, "~> 1.11"}
+])
 
-default_claim_payload = "*"
+defmodule JwtGenerator do
+  @moduledoc """
+  Generate a valid JWT for Edgehog
+  """
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate a valid JWT for Edgehog")
-    parser.add_argument("-k", "--private-key", type=str, required=True, help="Path to the private key file for signing "\
-        "the Authorization token.")
-    parser.add_argument("-e", "--expiry", type=int, required=False, default=86400, help="Expiry of the token in seconds. "\
-        "If 0, the token never expires. Defaults to 24 hours.")
-    parser.add_argument("-t", "--token-type", required=True, choices=["tenant", "admin"], help="The type of token to "\
-        "generate. `tenant` generates a token for the Tenant GraphQL API, `admin` generates a token for the Admin REST API.")
-    args = parser.parse_args()
-    args_map = vars(args)
+  @default_claim_payload "*"
 
-    with open(args_map["private_key"], "r") as pk:
-        private_key_pem = pk.read()
+  def main(args) do
+    options = parse_args(args)
 
-        now = datetime.datetime.utcnow()
-        claims = {"iat": now}
-        if args_map["token_type"] == "tenant":
-            # Currently claims can have any payload, we just pass "*"
-            claims["e_tga"] = default_claim_payload
-        else:
-            # Currently claims can have any payload, we just pass "*"
-            claims["e_ara"] = default_claim_payload
-        expiry = args_map["expiry"]
-        if expiry > 0:
-            claims["exp"] = now + datetime.timedelta(seconds=expiry)
+    private_key_pem = File.read!(options[:private_key])
+    now = DateTime.utc_now()
+    claims = generate_claims(options[:token_type], options[:expiry], now)
 
-        algo = None
-        if "-----BEGIN RSA PRIVATE KEY-----" in private_key_pem:
-            algo = "RS256"
-        elif "-----BEGIN EC PRIVATE KEY-----" in private_key_pem:
-            algo = "ES256"
+    algo =
+      cond do
+        String.contains?(private_key_pem, "-----BEGIN RSA PRIVATE KEY-----") -> "RS256"
+        String.contains?(private_key_pem, "-----BEGIN EC PRIVATE KEY-----") -> "ES256"
+        true -> raise "Unsupported private key format"
+      end
 
-        print(jwt.encode(claims, private_key_pem, algorithm=algo))
+    jwt = sign_token(claims, private_key_pem, algo)
+    IO.puts(jwt)
+  end
+
+  defp parse_args(args) do
+    {parsed, _, _} =
+      OptionParser.parse(args,
+        switches: [
+          private_key: :string,
+          expiry: :integer,
+          token_type: :string
+        ],
+        aliases: [k: :private_key, e: :expiry, t: :token_type]
+      )
+
+    parsed_map = Enum.into(parsed, %{})
+
+    cond do
+      is_nil(parsed_map[:private_key]) ->
+        raise ArgumentError, "Private key is required. Use -k or --private-key to specify the key."
+
+      is_nil(parsed_map[:token_type]) ->
+        raise ArgumentError, "Token type is required. Use -t or --token-type to specify 'tenant' or 'admin'."
+
+      true ->
+        Map.put_new(parsed_map, :expiry, 86_400)
+    end
+  end
+
+  defp generate_claims("tenant", expiry, now) do
+    claims = %{"iat" => DateTime.to_unix(now), "e_tga" => @default_claim_payload}
+    add_expiry(claims, expiry, now)
+  end
+
+  defp generate_claims("admin", expiry, now) do
+    claims = %{"iat" => DateTime.to_unix(now), "e_ara" => @default_claim_payload}
+    add_expiry(claims, expiry, now)
+  end
+
+  defp generate_claims(_, _, _) do
+    raise ArgumentError, "Invalid token type. Must be 'tenant' or 'admin'."
+  end
+
+  defp add_expiry(claims, expiry, now) when expiry > 0 do
+    Map.put(claims, "exp", DateTime.to_unix(DateTime.add(now, expiry)))
+  end
+
+  defp add_expiry(claims, _, _) do
+    claims
+  end
+
+  defp sign_token(claims, private_key, algo) do
+    jwk = JOSE.JWK.from_pem(private_key)
+  
+    headers = %{"alg" => algo}
+
+    {_, jwt} = JOSE.JWT.sign(jwk, headers, claims) |> JOSE.JWS.compact()
+
+    jwt
+  end
+end
+
+JwtGenerator.main(System.argv())
