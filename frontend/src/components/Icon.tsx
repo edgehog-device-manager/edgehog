@@ -22,6 +22,7 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import {
   faAngleDown,
   faAngleUp,
+  faArrowAltCircleUp,
   faArrowDown,
   faArrowUp,
   faBug,
@@ -67,6 +68,7 @@ const icons = {
   close: faTimes,
   otaUpdates: faCloud,
   applications: faRocket,
+  upgrade: faArrowAltCircleUp,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;

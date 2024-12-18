@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { defineMessages, FormattedMessage } from "react-intl";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useMutation } from "react-relay/hooks";
 import { useCallback, useState } from "react";
+import semver from "semver";
 
 import type {
   ApplicationDeploymentStatus,
@@ -30,12 +31,15 @@ import type {
 import type { DeployedApplicationsTable_startDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_startDeployment_Mutation.graphql";
 import type { DeployedApplicationsTable_stopDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
 import type { DeployedApplicationsTable_deleteDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_deleteDeployment_Mutation.graphql";
+import type { DeployedApplicationsTable_upgradeDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_upgradeDeployment_Mutation.graphql";
 
 import Icon from "components/Icon";
 import { Link, Route } from "Navigation";
 import Table, { createColumnHelper } from "components/Table";
 import Button from "./Button";
+import ConfirmModal from "./ConfirmModal";
 import DeleteModal from "./DeleteModal";
+import Form from "components/Form";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -52,6 +56,14 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
             application {
               id
               name
+              releases {
+                edges {
+                  node {
+                    id
+                    version
+                  }
+                }
+              }
             }
           }
         }
@@ -89,6 +101,19 @@ const STOP_DEPLOYMENT_MUTATION = graphql`
 const DELETE_DEPLOYMENT_MUTATION = graphql`
   mutation DeployedApplicationsTable_deleteDeployment_Mutation($id: ID!) {
     deleteDeployment(id: $id) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
+const UPGRADE_DEPLOYMENT_MUTATION = graphql`
+  mutation DeployedApplicationsTable_upgradeDeployment_Mutation(
+    $id: ID!
+    $input: UpgradeDeploymentInput!
+  ) {
+    upgradeDeployment(id: $id, input: $input) {
       result {
         id
       }
@@ -238,6 +263,11 @@ type DeploymentTableProps = {
   onDeploymentChange: () => void;
 };
 
+type UpgradeTargetRelease = {
+  id: string;
+  version: string;
+};
+
 const DeployedApplicationsTable = ({
   className,
   deviceRef,
@@ -247,8 +277,14 @@ const DeployedApplicationsTable = ({
   onDeploymentChange,
 }: DeploymentTableProps) => {
   const data = useFragment(DEPLOYED_APPLICATIONS_TABLE_FRAGMENT, deviceRef);
+  const intl = useIntl();
+
+  const [upgradeTargetRelease, setUpgradeTargetRelease] =
+    useState<UpgradeTargetRelease | null>(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
   const [selectedDeployment, setSelectedDeployment] = useState<
     (typeof deployments)[0] | null
   >(null);
@@ -267,9 +303,18 @@ const DeployedApplicationsTable = ({
       DELETE_DEPLOYMENT_MUTATION,
     );
 
+  const [upgradeDeployment] =
+    useMutation<DeployedApplicationsTable_upgradeDeployment_Mutation>(
+      UPGRADE_DEPLOYMENT_MUTATION,
+    );
+
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
   }, [setShowDeleteModal]);
+
+  const handleShowUpgradeModal = useCallback(() => {
+    setShowUpgradeModal(true);
+  }, [setShowUpgradeModal]);
 
   const deployments =
     data.applicationDeployments?.edges?.map((edge) => ({
@@ -279,6 +324,13 @@ const DeployedApplicationsTable = ({
       releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
       status: parseDeploymentStatus(edge.node.status),
+      upgradeTargetReleases:
+        edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
+          semver.gt(
+            releaseEdge.node.version,
+            edge.node.release?.version || "0.0.0",
+          ),
+        ),
     })) || [];
 
   const handleStartDeployedApplication = useCallback(
@@ -394,6 +446,55 @@ const DeployedApplicationsTable = ({
     [deleteDeployment, setErrorFeedback],
   );
 
+  const handleUpgradeDeployedRelease = useCallback(
+    (deploymentId: string, upgradeTargetReleaseId: string) => {
+      if (!isOnline) {
+        return setErrorFeedback(
+          <FormattedMessage
+            id="components.DeployedApplicationsTable.upgradeErrorOffline"
+            defaultMessage="The device is disconnected. You cannot upgrade an application while it is offline."
+          />,
+        );
+      }
+
+      upgradeDeployment({
+        variables: {
+          id: deploymentId,
+          input: { target: upgradeTargetReleaseId },
+        },
+        onCompleted(data, errors) {
+          if (
+            !errors ||
+            errors.length === 0 ||
+            errors[0].code === "not_found"
+          ) {
+            setErrorFeedback(null);
+            setShowUpgradeModal(false);
+            return;
+          }
+
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+          setErrorFeedback(errorFeedback);
+          setShowUpgradeModal(false);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.upgradeErrorFeedback"
+              defaultMessage="Could not upgrade the deployment, please try again."
+            />,
+          );
+          setShowUpgradeModal(false);
+        },
+      });
+    },
+    [upgradeDeployment, setErrorFeedback, isOnline],
+  );
+
   const columnHelper = createColumnHelper<(typeof deployments)[0]>();
   const columns = [
     columnHelper.accessor("applicationName", {
@@ -448,13 +549,25 @@ const DeployedApplicationsTable = ({
           defaultMessage="Actions"
         />
       ),
-      cell: ({ getValue }) => (
+      cell: ({ row, getValue }) => (
         <div className="d-flex align-items-center">
           <ActionButtons
             status={getValue().status}
             onStart={() => handleStartDeployedApplication(getValue().id)}
             onStop={() => handleStopDeployedApplication(getValue().id)}
           />
+
+          <Button
+            onClick={() => {
+              setSelectedDeployment(row.original);
+              handleShowUpgradeModal();
+            }}
+            disabled={getValue().status === "DELETING"}
+            className="btn p-0 border-0 bg-transparent ms-4"
+          >
+            <Icon icon="upgrade" className="text-primary" />
+          </Button>
+
           <Button
             disabled={getValue().status === "DELETING"}
             className="btn p-0 border-0 bg-transparent ms-4"
@@ -520,6 +633,88 @@ const DeployedApplicationsTable = ({
             />
           </p>
         </DeleteModal>
+      )}
+      {showUpgradeModal && (
+        <ConfirmModal
+          confirmLabel={
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.confirmLabel"
+              defaultMessage="Confirm"
+            />
+          }
+          disabled={!selectedDeployment || !upgradeTargetRelease}
+          onCancel={() => {
+            setShowUpgradeModal(false);
+            setUpgradeTargetRelease(null);
+          }}
+          onConfirm={() => {
+            if (selectedDeployment && upgradeTargetRelease) {
+              handleUpgradeDeployedRelease(
+                selectedDeployment.id,
+                upgradeTargetRelease.id,
+              );
+            }
+            setShowUpgradeModal(false);
+            setUpgradeTargetRelease(null);
+          }}
+          title={
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.confirmModal.title"
+              defaultMessage="Upgrade Deployment"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.DeployedApplicationsTable.confirmModal.description"
+              defaultMessage="Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+              values={{
+                application: selectedDeployment?.applicationName,
+                currentVersion: selectedDeployment?.releaseVersion,
+                bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+              }}
+            />
+          </p>
+
+          <Form.Select
+            defaultValue=""
+            onChange={(e) => {
+              const selectedRelease =
+                selectedDeployment?.upgradeTargetReleases?.find(
+                  (release) => release.node.id === e.target.value,
+                );
+              if (selectedRelease) {
+                setUpgradeTargetRelease({
+                  id: selectedRelease.node.id,
+                  version: selectedRelease.node.version,
+                });
+              }
+            }}
+          >
+            {selectedDeployment?.upgradeTargetReleases?.length ? (
+              <>
+                <option value="" disabled>
+                  {intl.formatMessage({
+                    id: "components.DeployedApplicationsTable.selectOption",
+                    defaultMessage: "Select a Release Version",
+                  })}
+                </option>
+                {selectedDeployment.upgradeTargetReleases.map(({ node }) => (
+                  <option key={node.id} value={node.id}>
+                    {node.version}
+                  </option>
+                ))}
+              </>
+            ) : (
+              <option value="" disabled>
+                {intl.formatMessage({
+                  id: "components.DeployedApplicationsTable.noReleasesAvailable",
+                  defaultMessage: "No Release Versions Available",
+                })}
+              </option>
+            )}
+          </Form.Select>
+        </ConfirmModal>
       )}
     </div>
   );

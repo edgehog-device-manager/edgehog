@@ -383,6 +383,15 @@
   "components.DeployedApplicationsTable.applicationName": {
     "defaultMessage": "Application Name"
   },
+  "components.DeployedApplicationsTable.confirmLabel": {
+    "defaultMessage": "Confirm"
+  },
+  "components.DeployedApplicationsTable.confirmModal.description": {
+    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+  },
+  "components.DeployedApplicationsTable.confirmModal.title": {
+    "defaultMessage": "Upgrade Deployment"
+  },
   "components.DeployedApplicationsTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
   },
@@ -407,8 +416,14 @@
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },
+  "components.DeployedApplicationsTable.noReleasesAvailable": {
+    "defaultMessage": "No Release Versions Available"
+  },
   "components.DeployedApplicationsTable.releaseVersion": {
     "defaultMessage": "Release Version"
+  },
+  "components.DeployedApplicationsTable.selectOption": {
+    "defaultMessage": "Select a Release Version"
   },
   "components.DeployedApplicationsTable.startErrorFeedback": {
     "defaultMessage": "Could not Start the Deployed Application, please try again."
@@ -436,6 +451,12 @@
   },
   "components.DeployedApplicationsTable.stopping": {
     "defaultMessage": "Stopping"
+  },
+  "components.DeployedApplicationsTable.upgradeErrorFeedback": {
+    "defaultMessage": "Could not upgrade the deployment, please try again."
+  },
+  "components.DeployedApplicationsTable.upgradeErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
   "components.DeviceGroupsTable.handleTitle": {
     "defaultMessage": "Handle",
