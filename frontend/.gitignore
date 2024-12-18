@@ -27,3 +27,5 @@ yarn-error.log*
 translations.generated.json
 src/i18n/langs-compiled
 src/api/__generated__
+
+.DS_Store
