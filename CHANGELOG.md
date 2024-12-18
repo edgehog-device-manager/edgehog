@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Release page**: Provides details of a specific release, including a list of containers and configurations, such as image reference, image credentials (label, username), networks, and port bindings.
 - Added `ApplicationCreate` page to enable users to create a new application with fields for application name and description.
 - Added `ReleaseCreate` page to enable users to create a new release for an application with fields for release Version and a list of Containers.
+- Add upgrade deployment functionality with version selection ([#703](https://github.com/edgehog-device-manager/edgehog/issues/703))
 
 ## [0.9.1] - 2024-10-28
 ### Fixed
