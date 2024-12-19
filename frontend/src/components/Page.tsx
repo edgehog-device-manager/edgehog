@@ -19,8 +19,8 @@
 */
 
 import React, { useMemo } from "react";
-import { FormattedMessage } from "react-intl";
 import Breadcrumb from "react-bootstrap/Breadcrumb";
+import { FormattedMessage } from "react-intl";
 import { useLocation } from "react-router-dom";
 
 import Button from "components/Button";
@@ -90,6 +90,7 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.updateChannels:
       case Route.updateCampaigns:
       case Route.applications:
+      case Route.imageCredentials:
       case Route.login:
       case Route.logout:
         return [currentRoute];
@@ -150,6 +151,9 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
           },
           currentRoute,
         ];
+      case Route.imageCredentialsEdit:
+      case Route.imageCredentialsNew:
+        return [{ route: Route.imageCredentials }, currentRoute];
 
       default:
         return [];

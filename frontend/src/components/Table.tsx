@@ -56,7 +56,7 @@ const SortDirectionIndicator = ({
   </span>
 );
 
-type TableProps<T extends RowData> = {
+export type TableProps<T extends RowData> = {
   columns: ColumnDef<T, any>[];
   data: readonly T[];
   className?: string;
