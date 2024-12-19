@@ -180,6 +180,19 @@ Values to be replaced
 - `ACCESS-KEY-ID`: the access key ID for your S3 storage.
 - `SECRET-ACCESS-KEY`: the secret access key for your S3 storage.
 
+#### Azure Blob Credentials
+
+To get started, follow the 
+[documentation](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal#create-a-container)
+to create a container.
+
+Then, you can create a secret containing your connection string:
+
+```bash
+$ kubectl create secret generic -n edgehog edgehog-azure-credentials \
+  --from-literal="connection-string=<CONNECTION-STRING>"
+```
+
 #### Google Geolocation API Key (optional)
 
 Activate the Geolocation API for your project in GCP and
@@ -353,6 +366,30 @@ spec:
           value: <EDGEHOG-FORWARDER-PORT>
         - name: EDGEHOG_FORWARDER_SECURE_SESSIONS
           value: <EDGEHOG-FORWARDER-SECURE-SESSIONS>
+
+        # If you're using Azure instead, use the following configuration instead of the S3
+        # configuration above
+        # - name: STORAGE_TYPE
+        #   value: azure
+        # - name: AZURE_CONNECTION_STRING
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: edgehog-azure-credentials
+        #       key: connection-string 
+        # - name: AZURE_CONTAINER
+        #   value: <AZURE_CONTAINER>
+
+        # You can also use standalone values instead of a connection string
+        # - name: AZURE_REGION
+        #   value: <AZURE_REGION>
+        # - name: AZURE_STORAGE_ACCOUNT_NAME
+        #   value: <AZURE_STORAGE_ACCOUNT_NAME>
+        # - name: AZURE_STORAGE_ACCOUNT_KEY
+        #   value: <AZURE_STORAGE_ACCOUNT_KEY>
+        # - name: AZURE_BLOB_ENDPOINT
+        #   value: <AZURE_BLOB_ENDPOINT>
+
+
         image: edgehogdevicemanager/edgehog-backend:0.9.2
         imagePullPolicy: Always
         name: edgehog-backend

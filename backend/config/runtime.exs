@@ -20,8 +20,156 @@
 
 import Config
 
+alias Azurex.Blob.Config
+alias Waffle.Storage.Google.CloudStorage
+alias Waffle.Storage.S3
+
 if System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME") do
   config :edgehog, EdgehogWeb.Endpoint, server: true
+end
+
+# We need s3 storage configuration both in production and in integration tests
+if config_env() in [:prod, :test] do
+  # TODO: while you can use access key + secret key with S3-compatible storages,
+  # Waffle's default S3 adapter doesn't work well with Google Cloud Storage.
+  # To use GCP, you need to supply the JSON credentials of an authorized Service
+  # Account instead, which are used by the GCP adapter for Waffle.
+  s3 = %{
+    access_key_id: System.get_env("S3_ACCESS_KEY_ID"),
+    secret_access_key: System.get_env("S3_SECRET_ACCESS_KEY"),
+    gcp_credentials: System.get_env("S3_GCP_CREDENTIALS"),
+    region: System.get_env("S3_REGION"),
+    bucket: System.get_env("S3_BUCKET"),
+    asset_host: System.get_env("S3_ASSET_HOST"),
+    scheme: System.get_env("S3_SCHEME"),
+    host: System.get_env("S3_HOST"),
+    port: System.get_env("S3_PORT")
+  }
+
+  azure =
+    case System.fetch_env("AZURE_CONNECTION_STRING") do
+      {:ok, connection_string} ->
+        connection_string_values = Azurex.Blob.Config.parse_connection_string(connection_string)
+
+        %{
+          api_url: connection_string_values["BlobEndpoint"],
+          storage_account_name: connection_string_values["AccountName"],
+          storage_account_key: connection_string_values["AccountKey"],
+          region: nil,
+          container: System.get_env("AZURE_CONTAINER")
+        }
+
+      :error ->
+        %{
+          api_url: System.get_env("AZURE_BLOB_ENDPOINT"),
+          storage_account_name: System.get_env("AZURE_STORAGE_ACCOUNT_NAME"),
+          storage_account_key: System.get_env("AZURE_STORAGE_ACCOUNT_KEY"),
+          region: System.get_env("AZURE_REGION"),
+          container: System.get_env("AZURE_CONTAINER")
+        }
+    end
+
+  allowed_storage_types = ["s3", "azure"]
+  storage_type = "STORAGE_TYPE" |> System.get_env("s3") |> String.downcase(:ascii)
+
+  unless storage_type in allowed_storage_types do
+    raise "Invalid storage type provided: #{inspect(storage_type)}. Allowed values are #{inspect(allowed_storage_types)}."
+  end
+
+  if storage_type == "azure" && azure.api_url == nil && azure.storage_account_name == nil do
+    raise """
+    When using Azure Blob Storage, either the blob endpoint (AZURE_BLOB_ENDPOINT) \
+    or the account name (AZURE_STORAGE_ACCOUNT_NAME) must be specified.
+    """
+  end
+
+  storage_module =
+    cond do
+      storage_type == "azure" -> Edgehog.AzureStorage
+      s3.host == "storage.googleapis.com" -> CloudStorage
+      true -> S3
+    end
+
+  azure_api_url =
+    with nil <- azure.api_url do
+      azure_zone_url_str =
+        case to_string(azure.region) do
+          "" -> ""
+          zone -> "." <> zone
+        end
+
+      account_name = to_string(azure.storage_account_name)
+
+      # https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview#standard-endpoints
+      "https://" <> account_name <> azure_zone_url_str <> ".blob.core.windows.net"
+    end
+
+  # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
+  max_upload_size_bytes =
+    "MAX_UPLOAD_SIZE_BYTES"
+    |> System.get_env(to_string(4_000_000_000))
+    |> String.to_integer()
+
+  %{
+    waffle_bucket: waffle_bucket,
+    waffle_asset_host: waffle_asset_host,
+    waffle_virtual_host?: waffle_virtual_host?,
+    edgehog_enable_s3_storage?: edgehog_enable_s3_storage?
+  } =
+    case storage_module do
+      Edgehog.AzureStorage ->
+        %{
+          waffle_bucket: azure.container,
+          waffle_asset_host: azure_api_url,
+          waffle_virtual_host?: false,
+          edgehog_enable_s3_storage?: azure |> Map.values() |> Enum.any?(&(!is_nil(&1)))
+        }
+
+      _ ->
+        %{
+          waffle_bucket: s3.bucket,
+          waffle_asset_host: s3.asset_host,
+          waffle_virtual_host?: true,
+          edgehog_enable_s3_storage?: s3 |> Map.values() |> Enum.any?(&(!is_nil(&1)))
+        }
+    end
+
+  edgehog_enable_s3_storage? =
+    case config_env() do
+      :test -> true
+      :prod -> edgehog_enable_s3_storage?
+    end
+
+  config :azurex, Config,
+    api_url: azure_api_url,
+    default_container: azure.container,
+    storage_account_name: azure.storage_account_name,
+    storage_account_key: azure.storage_account_key
+
+  # Enable uploaders only when the S3 storage has been configured
+  config :edgehog,
+    enable_s3_storage?: edgehog_enable_s3_storage?,
+    max_upload_size_bytes: max_upload_size_bytes
+
+  config :ex_aws, :s3,
+    scheme: s3.scheme,
+    host: s3.host,
+    port: s3.port
+
+  config :ex_aws,
+    region: s3.region,
+    access_key_id: s3.access_key_id,
+    secret_access_key: s3.secret_access_key
+
+  config :goth,
+    disabled: storage_module != CloudStorage,
+    json: s3.gcp_credentials
+
+  config :waffle,
+    storage: storage_module,
+    asset_host: waffle_asset_host,
+    bucket: waffle_bucket,
+    virtual_host: waffle_virtual_host?
 end
 
 # config/runtime.exs is executed for all environments, including
@@ -61,41 +209,6 @@ if config_env() == :prod do
   url_port = System.get_env("URL_PORT", "443")
   url_scheme = System.get_env("URL_SCHEME", "https")
 
-  # TODO: while you can use access key + secret key with S3-compatible storages,
-  # Waffle's default S3 adapter doesn't work well with Google Cloud Storage.
-  # To use GCP, you need to supply the JSON credentials of an authorized Service
-  # Account instead, which are used by the GCP adapter for Waffle.
-  s3 = %{
-    access_key_id: System.get_env("S3_ACCESS_KEY_ID"),
-    secret_access_key: System.get_env("S3_SECRET_ACCESS_KEY"),
-    gcp_credentials: System.get_env("S3_GCP_CREDENTIALS"),
-    region: System.get_env("S3_REGION"),
-    bucket: System.get_env("S3_BUCKET"),
-    asset_host: System.get_env("S3_ASSET_HOST"),
-    scheme: System.get_env("S3_SCHEME"),
-    host: System.get_env("S3_HOST"),
-    port: System.get_env("S3_PORT")
-  }
-
-  # The maximum upload size, particularly relevant for OTA updates. Default to 4 GB.
-  max_upload_size_bytes =
-    "MAX_UPLOAD_SIZE_BYTES"
-    |> System.get_env(to_string(4_000_000_000))
-    |> String.to_integer()
-
-  use_google_cloud_storage =
-    case s3.host do
-      "storage.googleapis.com" -> true
-      _ -> false
-    end
-
-  s3_storage_module =
-    if use_google_cloud_storage do
-      Waffle.Storage.Google.CloudStorage
-    else
-      Waffle.Storage.S3
-    end
-
   forwarder_secure_sessions? =
     System.get_env("EDGEHOG_FORWARDER_SECURE_SESSIONS", "true") == "true"
 
@@ -126,31 +239,6 @@ if config_env() == :prod do
       port: url_port
     ],
     secret_key_base: secret_key_base
-
-  # Enable uploaders only when the S3 storage has been configured
-  config :edgehog,
-    enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end),
-    max_upload_size_bytes: max_upload_size_bytes
-
-  config :ex_aws, :s3,
-    scheme: s3.scheme,
-    host: s3.host,
-    port: s3.port
-
-  config :ex_aws,
-    region: s3.region,
-    access_key_id: s3.access_key_id,
-    secret_access_key: s3.secret_access_key
-
-  config :goth,
-    disabled: !use_google_cloud_storage,
-    json: s3.gcp_credentials
-
-  config :waffle,
-    storage: s3_storage_module,
-    bucket: s3.bucket,
-    asset_host: s3.asset_host,
-    virtual_host: true
 
   if forwarder_hostname != nil &&
        (String.starts_with?(forwarder_hostname, "http://") ||

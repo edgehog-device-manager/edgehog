@@ -185,6 +185,163 @@ jobs:
       if: matrix.postgres != env.postgres_version_uploading_to_coveralls
       run: mix test
 
+  integration-minio:
+    name: Integration tests using MinIO
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+        - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      minio:
+        image: bitnami/minio:latest
+        env:
+          MINIO_ROOT_USER: "minioadmin"
+          MINIO_ROOT_PASSWORD: "minioadmin"
+        ports:
+        - 9000:9000
+        options: >-
+         --name minio
+         --health-interval 10s
+         --health-timeout 5s
+         --health-retries 5
+         --health-cmd "curl http://localhost:9000/minio/health/live"
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        show-progress: false
+
+    - name: Bucket setup
+      run: |
+        wget https://dl.min.io/client/mc/release/linux-amd64/mc
+        chmod +x ./mc
+        ./mc alias set minio http://localhost:9000 minioadmin minioadmin;
+        ./mc mb minio/edgehog;
+        ./mc anonymous set download minio/edgehog;
+
+    - name: Install OTP and Elixir
+      uses: erlef/setup-beam@v1
+      id: beam
+      with:
+        version-file: .tool-versions
+        version-type: strict
+
+    - name: Cache dependencies
+      id: cache-deps
+      uses: actions/cache@v3
+      with:
+        path: |
+          backend/deps
+          backend/_build
+        key: "${{ runner.os }}-\
+              otp-${{ steps.beam.outputs.otp-version }}-\
+              elixir-${{ steps.beam.outputs.elixir-version }}-\
+              ${{ hashFiles('backend/mix.lock') }}"
+
+    - name: Install and compile dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        mix deps.get --only test
+        mix deps.compile
+
+    - name: Test
+      env:
+        STORAGE_TYPE: s3
+        S3_ACCESS_KEY_ID: minioadmin
+        S3_SECRET_ACCESS_KEY: minioadmin
+        S3_REGION: local
+        S3_SCHEME: http://
+        S3_HOST: localhost
+        S3_PORT: 9000
+        S3_BUCKET: edgehog
+        S3_ASSET_HOST: http://localhost:9000/edgehog
+      run: mix test --only integration_storage
+
+  integration-azurite:
+    name: Integration tests using Azurite
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+        - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+        - "10000:10000"
+        - "10001:10001"
+        - "10002:10002"
+        options: >-
+         --health-cmd "nc -z 127.0.0.1 10000"
+         --health-interval 10s
+         --health-timeout 5s
+         --health-retries 5
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        show-progress: false
+
+    - name: Storage setup
+      env:
+        AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;"
+      run: |
+        # install az-cli
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+        # setup container
+        az storage container create --name edgehog --connection-string $AZURE_STORAGE_CONNECTION_STRING
+        az storage container set-permission --name edgehog --public-access blob --connection-string $AZURE_STORAGE_CONNECTION_STRING
+
+    - name: Install OTP and Elixir
+      uses: erlef/setup-beam@v1
+      id: beam
+      with:
+        version-file: .tool-versions
+        version-type: strict
+
+    - name: Cache dependencies
+      id: cache-deps
+      uses: actions/cache@v3
+      with:
+        path: |
+          backend/deps
+          backend/_build
+        key: "${{ runner.os }}-\
+              otp-${{ steps.beam.outputs.otp-version }}-\
+              elixir-${{ steps.beam.outputs.elixir-version }}-\
+              ${{ hashFiles('backend/mix.lock') }}"
+
+    - name: Install and compile dependencies
+      if: steps.cache-deps.outputs.cache-hit != 'true'
+      run: |
+        mix deps.get --only test
+        mix deps.compile
+
+    - name: Test
+      env:
+        STORAGE_TYPE: azure
+        AZURE_BLOB_ENDPOINT: "http://localhost:10000/devstoreaccount1"
+        AZURE_CONTAINER: "edgehog"
+        AZURE_STORAGE_ACCOUNT_KEY: "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+        AZURE_STORAGE_ACCOUNT_NAME: "devstoreaccount1"
+      run: mix test --only integration_storage
+
   build-docker-image:
     name: Build Docker image
     runs-on: ubuntu-latest
