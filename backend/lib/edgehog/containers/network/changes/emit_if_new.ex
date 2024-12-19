@@ -18,21 +18,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image.Deployment.Changes.DeployImageOnDevice do
+defmodule Edgehog.Containers.Network.Changes.EmitIfNew do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Devices
+  alias Edgehog.PubSub
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
-
-    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      with {:ok, deployment} <- Ash.load(deployment, [:device, :image]),
-           {:ok, _device} <-
-             Devices.send_create_image_request(deployment.device, deployment.image, tenant: tenant) do
-        {:ok, deployment}
+  def change(changeset, _opts, _context) do
+    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+      with {:ok, deployment} <- result do
+        PubSub.publish!(:available_network, deployment)
       end
     end)
   end

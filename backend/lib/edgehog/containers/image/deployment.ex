@@ -24,7 +24,7 @@ defmodule Edgehog.Containers.Image.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource, AshStateMachine]
 
-  alias Edgehog.Containers.Image.Changes
+  alias Edgehog.Containers.Image.Deployment.Changes
 
   state_machine do
     initial_states([:created, :sent])
@@ -58,6 +58,9 @@ defmodule Edgehog.Containers.Image.Deployment do
       change transition_state(:created)
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.DeployImageOnDevice
+    end
+
+    update :sent do
       change transition_state(:sent)
     end
 

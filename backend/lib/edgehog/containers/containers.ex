@@ -140,6 +140,7 @@ defmodule Edgehog.Containers do
     resource Image.Deployment do
       define :deploy_image, action: :deploy, args: [:image_id, :device_id]
       define :fetch_image_deployment, action: :read, get_by_identity: :image_instance
+      define :image_deployment_sent, action: :sent
       define :image_deployment_unpulled, action: :unpulled
       define :image_deployment_pulled, action: :pulled
       define :image_deployment_errored, action: :errored, args: [:message]
@@ -168,6 +169,7 @@ defmodule Edgehog.Containers do
     resource Network.Deployment do
       define :deploy_network, action: :deploy, args: [:network_id, :device_id]
       define :fetch_network_deployment, action: :read, get_by_identity: :network_instance
+      define :network_deployment_sent, action: :sent
       define :network_deployment_available, action: :available
       define :network_deployment_unavailable, action: :unavailable
       define :network_deployment_errored, action: :errored, args: [:message]

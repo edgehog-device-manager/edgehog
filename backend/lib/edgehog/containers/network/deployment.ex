@@ -59,6 +59,9 @@ defmodule Edgehog.Containers.Network.Deployment do
 
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.DeployNetworkOnDevice
+    end
+
+    update :sent do
       change transition_state(:sent)
     end
 

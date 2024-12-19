@@ -32,7 +32,7 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
     Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
       with {:ok, deployment} <-
              Ash.load(deployment, [:device, container: [:image, :networks]]),
-           {:ok, _image_deployment} <- deploy_image(deployment, tenant),
+           {:ok, image_deployment} <- deploy_image(deployment, tenant),
            {:ok, _device} <-
              Devices.send_create_container_request(deployment.device, deployment.container, tenant: tenant) do
         {:ok, deployment}

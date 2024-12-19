@@ -23,6 +23,7 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.CreateDeploymentOnDevice
   use Ash.Resource.Change
 
   alias Edgehog.Containers
+  alias Edgehog.Containers.Release.Deployment.CheckerSupervisor
   alias Edgehog.Devices
 
   @impl Ash.Resource.Change
@@ -32,9 +33,17 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.CreateDeploymentOnDevice
     Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
       with {:ok, deployment} <-
              Ash.load(deployment, [:device, release: [:containers, :networks]]),
-           :ok <- deploy_containers(deployment, tenant),
-           :ok <- deploy_networks(deployment, tenant),
+           {:ok, containers, images} <- deploy_containers(deployment, tenant),
+           {:ok, networks} <- deploy_networks(deployment, tenant),
            {:ok, _device} <- Devices.send_create_deployment_request(deployment.device, deployment) do
+        data = %{
+          deployment: deployment,
+          containers: containers,
+          images: images,
+          networks: networks
+        }
+
+        CheckerSupervisor.start_checker!(data)
         {:ok, deployment}
       end
     end)
@@ -44,10 +53,15 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.CreateDeploymentOnDevice
     containers = deployment.release.containers
     device = deployment.device
 
-    Enum.reduce_while(containers, :ok, fn container, _acc ->
+    Enum.reduce_while(containers, {:ok, [], []}, fn container, {:ok, containers_deployments, image_deployments} ->
       case Containers.deploy_container(container.id, device.id, tenant: tenant) do
-        {:ok, _container_deployment} -> {:cont, :ok}
-        error -> {:halt, error}
+        {:ok, container_deployment} ->
+          new_containers = [container_deployment | containers_deployments]
+          new_images = [image_deployment.resource | image_deployments]
+          {:cont, {:ok, new_containers, new_images}}
+
+        error ->
+          {:halt, error}
       end
     end)
   end
@@ -56,9 +70,9 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.CreateDeploymentOnDevice
     containers = deployment.release.networks
     device = deployment.device
 
-    Enum.reduce_while(containers, :ok, fn network, _acc ->
+    Enum.reduce_while(containers, {:ok, []}, fn network, {:ok, deployments} ->
       case Containers.deploy_network(network.id, device.id, tenant: tenant) do
-        {:ok, _network_deployment} -> {:cont, :ok}
+        {:ok, network_deployment} -> {:cont, {:ok, [network_deployment | deployments]}}
         error -> {:halt, error}
       end
     end)
