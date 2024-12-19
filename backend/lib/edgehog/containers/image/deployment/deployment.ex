@@ -18,29 +18,27 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Network.Deployment do
+defmodule Edgehog.Containers.Image.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource, AshStateMachine]
 
-  alias Edgehog.Containers.Network
-  alias Edgehog.Containers.Network.Changes
-  alias Edgehog.Devices.Device
+  alias Edgehog.Containers.Image.Deployment.ExecutorSupervisor
 
   state_machine do
-    initial_states([:init, :sent])
-    default_initial_state(:init)
+    initial_states([:created, :sent])
+    default_initial_state(:created)
 
     transitions do
-      transition(:available, from: [:sent, :unavailable], to: :available)
-      transition(:unavailable, from: [:sent, :available], to: :unavailable)
-      transition(:errored, from: [:*], to: :error)
+      transition(:unpulled, from: [:sent, :pulled], to: [:unpulled])
+      transition(:pulled, from: :unpulled, to: [:pulled])
+      transition(:errored, from: [:*], to: [:error])
     end
   end
 
   graphql do
-    type :network_deployment
+    type :image_deployment
   end
 
   actions do
@@ -51,23 +49,33 @@ defmodule Edgehog.Containers.Network.Deployment do
       Deploys an image on a device, the status according to device triggers.
       """
 
-      accept [:network_id]
+      accept [:image_id]
 
       argument :device_id, :id do
         allow_nil? false
       end
 
+      change transition_state(:created)
       change manage_relationship(:device_id, :device, type: :append)
-      change Changes.DeployNetworkOnDevice
+
+      change after_transaction(fn _changeset, result, _context ->
+               with {:ok, deployment} <- result do
+                 # Start the executor for the deployment only if the transaction succeeds
+                 ExecutorSupervisor.start_executor!(deployment)
+               end
+             end)
+    end
+
+    update :sent do
       change transition_state(:sent)
     end
 
-    update :available do
-      change transition_state(:available)
+    update :unpulled do
+      change transition_state(:unpulled)
     end
 
-    update :unavailable do
-      change transition_state(:unavailable)
+    update :pulled do
+      change transition_state(:pulled)
     end
 
     update :errored do
@@ -89,23 +97,23 @@ defmodule Edgehog.Containers.Network.Deployment do
   end
 
   relationships do
-    belongs_to :network, Network do
+    belongs_to :image, Edgehog.Containers.Image do
       attribute_type :uuid
       public? true
     end
 
-    belongs_to :device, Device
+    belongs_to :device, Edgehog.Devices.Device
   end
 
   identities do
-    identity :network_instance, [:network_id, :device_id]
+    identity :image_instance, [:image_id, :device_id]
   end
 
   postgres do
-    table "network_deployments"
+    table "image_deployments"
 
     references do
-      reference :network, on_delete: :delete
+      reference :image, on_delete: :delete
       reference :device, on_delete: :delete
     end
   end

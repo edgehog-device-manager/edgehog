@@ -18,22 +18,35 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
+defmodule Edgehog.Containers.Image.Deployment.Supervisor do
   @moduledoc false
-  use Ash.Resource.Change
+  use Supervisor
 
-  alias Edgehog.Devices
+  alias Edgehog.Containers.Image.Deployment.ExecutorRegistry
+  alias Edgehog.Containers.Image.Deployment.ExecutorSupervisor
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
+  @base_children [
+    {Registry, name: ExecutorRegistry, keys: :unique},
+    ExecutorSupervisor
+  ]
 
-    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      with {:ok, deployment} <- Ash.load(deployment, [:device, :image]),
-           {:ok, _device} <-
-             Devices.send_create_image_request(deployment.device, deployment.image, tenant: tenant) do
-        {:ok, deployment}
-      end
-    end)
+  @mix_env Mix.env()
+
+  def start_link(init_arg) do
+    Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  end
+
+  @impl Supervisor
+  def init(_init_arg) do
+    @mix_env
+    |> children()
+    |> Supervisor.init(strategy: :rest_for_one)
+  end
+
+  @dialyzer {:nowarn_function, children: 1}
+
+  # This could be easy for testing
+  defp children(_env) do
+    @base_children
   end
 end
