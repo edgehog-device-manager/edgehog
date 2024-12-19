@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.DeploymentReadyAction do
+defmodule Edgehog.Containers.Release.Deployment.ReadyAction do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
@@ -60,12 +60,12 @@ defmodule Edgehog.Containers.DeploymentReadyAction do
   end
 
   relationships do
-    belongs_to :deployment, Edgehog.Containers.Deployment do
+    belongs_to :deployment, Edgehog.Containers.Release.Deployment do
       allow_nil? false
       attribute_type :uuid
     end
 
-    has_one :upgrade_deployment, Edgehog.Containers.DeploymentReadyAction.Upgrade
+    has_one :upgrade_deployment, Edgehog.Containers.Release.Deployment.ReadyAction.Upgrade
   end
 
   postgres do

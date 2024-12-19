@@ -24,12 +24,11 @@ defmodule Edgehog.Containers.Release do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Changes
   alias Edgehog.Validations
 
   graphql do
     type :release
-    paginate_relationship_with containers: :relay
+    paginate_relationship_with containers: :relay, networks: :relay
   end
 
   actions do
@@ -41,6 +40,7 @@ defmodule Edgehog.Containers.Release do
       accept [:application_id, :version]
 
       argument :containers, {:array, :map}
+      argument :networks, {:array, :map}
 
       # TODO this should be a manual change, checking for existing containers,
       # for now each new release creates brand new containers
@@ -49,7 +49,12 @@ defmodule Edgehog.Containers.Release do
                on_match: :ignore
              )
 
-      change Changes.CreateDefaultNetwork
+      change manage_relationship(:networks,
+               on_no_match: :create,
+               on_match: :ignore,
+               on_lookup: :relate,
+               use_identities: [:_primary_key, :label]
+             )
     end
   end
 
@@ -77,12 +82,19 @@ defmodule Edgehog.Containers.Release do
     end
 
     many_to_many :devices, Edgehog.Devices.Device do
-      through Edgehog.Containers.Deployment
-      join_relationship :deployments
+      through Edgehog.Containers.Release.Deployment
+      join_relationship :release_deployments
     end
 
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ReleaseContainers
+      join_relationship :release_containers
+      public? true
+    end
+
+    many_to_many :networks, Edgehog.Containers.Network do
+      through Edgehog.Containers.ReleaseNetworks
+      join_relationship :release_networks
       public? true
     end
   end

@@ -18,46 +18,42 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image do
+defmodule Edgehog.Containers.ReleaseNetworks do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
-
-  alias Edgehog.Containers.ImageCredentials
-
-  graphql do
-    type :image
-  end
+    tenant_id_in_primary_key?: true
 
   actions do
-    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
+    defaults [:read, :destroy, create: [:release_id, :network_id]]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :reference, :string do
-      allow_nil? false
-      public? true
-    end
-
     timestamps()
   end
 
   relationships do
-    belongs_to :credentials, ImageCredentials do
-      source_attribute :image_credentials_id
+    belongs_to :release, Edgehog.Containers.Release do
+      primary_key? true
+      allow_nil? false
       attribute_type :uuid
-      public? true
+    end
+
+    belongs_to :network, Edgehog.Containers.Network do
+      primary_key? true
+      allow_nil? false
+      attribute_type :uuid
     end
   end
 
-  identities do
-    identity :reference, [:reference]
-  end
-
   postgres do
-    table "images"
+    table "application_release_networks"
+
+    references do
+      reference :network, on_delete: :delete
+      reference :release, on_delete: :delete
+    end
   end
 end

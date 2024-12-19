@@ -18,41 +18,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Volume do
+defmodule Edgehog.Containers.Container.Status do
   @moduledoc false
-  use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+  use Ash.Type.Enum, values: [:received, :created, :running, :stopped]
 
-  actions do
-    defaults [
-      :read,
-      :destroy,
-      create: [:driver, :options],
-      update: [:driver, :options]
-    ]
-  end
-
-  attributes do
-    uuid_primary_key :id
-
-    attribute :driver, :string do
-      default "local"
-      allow_nil? false
-    end
-
-    attribute :options, :map do
-      default %{}
-      allow_nil? false
-    end
-
-    timestamps()
-  end
-
-  calculations do
-    calculate :options_encoding, {:array, :string}, OptionsCalculation
-  end
-
-  postgres do
-    table "volumes"
-  end
+  def graphql_type(_), do: :application_container_status
 end
