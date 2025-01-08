@@ -94,20 +94,44 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       query ($id: ID!) {
         device(id: $id) {
           otaOperations {
-            id
-            baseImageUrl
+            count
+            edges {
+              cursor
+              node {
+                id
+                baseImageUrl
+              }
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
           }
         }
       }
       """
 
-      %{"otaOperations" => [ota_operation]} =
-        [document: document, tenant: tenant, id: id]
-        |> device_query()
-        |> extract_result!()
-
-      assert ota_operation["id"] == ota_operation_id
-      assert ota_operation["baseImageUrl"] == base_image_url
+      assert %{
+               "otaOperations" => %{
+                 "count" => 1,
+                 "edges" => [
+                   %{
+                     "cursor" => cursor,
+                     "node" => %{
+                       "id" => ^ota_operation_id,
+                       "baseImageUrl" => ^base_image_url
+                     }
+                   }
+                 ],
+                 "pageInfo" => %{
+                   "endCursor" => cursor,
+                   "hasNextPage" => false
+                 }
+               }
+             } =
+               [document: document, tenant: tenant, id: id]
+               |> device_query()
+               |> extract_result!()
     end
 
     test "returns nil if non existing", %{tenant: tenant} do
@@ -574,8 +598,6 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     setup %{tenant: tenant} do
       fixture = device_fixture(tenant: tenant)
 
-      device_id = fixture.device_id
-
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
       document = """
@@ -588,7 +610,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       }
       """
 
-      %{device: fixture, device_id: device_id, tenant: tenant, id: id, document: document}
+      %{device: fixture, tenant: tenant, id: id, document: document}
     end
 
     test "is empty with no groups", ctx do
