@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -226,7 +226,7 @@ const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
 `;
 
 const GET_DEVICE_QUERY = graphql`
-  query Device_getDevice_Query($id: ID!) {
+  query Device_getDevice_Query($id: ID!, $first: Int, $after: String) {
     forwarderConfig {
       __typename
     }
@@ -562,7 +562,10 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
   const isOnline = useMemo(() => device?.online ?? false, [device]);
 
   const handleRefetch = useCallback(() => {
-    refetch({ id: device?.id }, { fetchPolicy: "store-and-network" });
+    refetch(
+      { id: device?.id, first: 10_000 },
+      { fetchPolicy: "store-and-network" },
+    );
   }, [refetch, device?.id]);
 
   useEffect(() => {
@@ -2010,7 +2013,7 @@ const DevicePage = () => {
   );
 
   useEffect(() => {
-    getDevice({ id: deviceId });
+    getDevice({ id: deviceId, first: 10_000 });
     refreshTags();
   }, [getDevice, deviceId, refreshTags]);
 

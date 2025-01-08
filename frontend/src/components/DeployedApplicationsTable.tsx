@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@
 */
 
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment, useMutation } from "react-relay/hooks";
+import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
 import { useCallback, useState } from "react";
 import semver from "semver";
 
+import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
 import type {
   ApplicationDeploymentStatus,
   DeployedApplicationsTable_deployedApplications$key,
@@ -44,8 +45,10 @@ import Form from "components/Form";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
-  fragment DeployedApplicationsTable_deployedApplications on Device {
-    applicationDeployments {
+  fragment DeployedApplicationsTable_deployedApplications on Device
+  @refetchable(queryName: "DeployedApplicationsTable_PaginationQuery") {
+    applicationDeployments(first: $first, after: $after)
+      @connection(key: "DeployedApplicationsTable_applicationDeployments") {
       edges {
         node {
           id
@@ -276,7 +279,11 @@ const DeployedApplicationsTable = ({
   setErrorFeedback,
   onDeploymentChange,
 }: DeploymentTableProps) => {
-  const data = useFragment(DEPLOYED_APPLICATIONS_TABLE_FRAGMENT, deviceRef);
+  const { data } = usePaginationFragment<
+    DeployedApplicationsTable_PaginationQuery,
+    DeployedApplicationsTable_deployedApplications$key
+  >(DEPLOYED_APPLICATIONS_TABLE_FRAGMENT, deviceRef);
+
   const intl = useIntl();
 
   const [upgradeTargetRelease, setUpgradeTargetRelease] =
