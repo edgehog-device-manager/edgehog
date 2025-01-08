@@ -179,10 +179,13 @@ end
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-  database_username = System.fetch_env!("DATABASE_USERNAME")
-  database_password = System.fetch_env!("DATABASE_PASSWORD")
-  database_hostname = System.fetch_env!("DATABASE_HOSTNAME")
-  database_name = System.fetch_env!("DATABASE_NAME")
+  database = %{
+    username: System.fetch_env!("DATABASE_USERNAME"),
+    password: System.fetch_env!("DATABASE_PASSWORD"),
+    hostname: System.fetch_env!("DATABASE_HOSTNAME"),
+    name: System.fetch_env!("DATABASE_NAME"),
+    ssl: Config.database_ssl_config()
+  }
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
@@ -215,13 +218,13 @@ if config_env() == :prod do
   forwarder_hostname = System.get_env("EDGEHOG_FORWARDER_HOSTNAME")
 
   config :edgehog, Edgehog.Repo,
-    # ssl: true,
     # socket_options: [:inet6],
-    username: database_username,
-    password: database_password,
-    hostname: database_hostname,
-    database: database_name,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+    username: database.username,
+    password: database.password,
+    hostname: database.hostname,
+    database: database.name,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    ssl: database.ssl
 
   config :edgehog, EdgehogWeb.Endpoint,
     http: [
