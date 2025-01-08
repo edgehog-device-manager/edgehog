@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
+import type { ContainersTable_PaginationQuery } from "api/__generated__/ContainersTable_PaginationQuery.graphql";
 import type {
   ContainersTable_ContainerFragment$data,
   ContainersTable_ContainerFragment$key,
@@ -31,24 +32,28 @@ import Table, { createColumnHelper } from "components/Table";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const CONTAINERS_TABLE_FRAGMENT = graphql`
-  fragment ContainersTable_ContainerFragment on ContainerConnection {
-    edges {
-      node {
-        id
-        portBindings
-        image {
-          reference
-          credentials {
-            label
-            username
+  fragment ContainersTable_ContainerFragment on Release
+  @refetchable(queryName: "ContainersTable_PaginationQuery") {
+    containers(first: $first, after: $after)
+      @connection(key: "ContainersTable_containers") {
+      edges {
+        node {
+          id
+          portBindings
+          image {
+            reference
+            credentials {
+              label
+              username
+            }
           }
-        }
-        networks {
-          edges {
-            node {
-              id
-              driver
-              internal
+          networks {
+            edges {
+              node {
+                id
+                driver
+                internal
+              }
             }
           }
         }
@@ -58,7 +63,7 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
 `;
 
 type TableRecord = NonNullable<
-  ContainersTable_ContainerFragment$data["edges"]
+  ContainersTable_ContainerFragment$data["containers"]["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
@@ -171,14 +176,18 @@ const ContainersTable = ({
   containersRef,
   hideSearch = false,
 }: ContainersTableProps) => {
-  const containers = useFragment(CONTAINERS_TABLE_FRAGMENT, containersRef);
-  const data = containers.edges?.map((edge) => edge.node) || [];
+  const { data } = usePaginationFragment<
+    ContainersTable_PaginationQuery,
+    ContainersTable_ContainerFragment$key
+  >(CONTAINERS_TABLE_FRAGMENT, containersRef);
+
+  const tableData = data.containers.edges?.map((edge) => edge.node) ?? [];
 
   return (
     <Table
       className={className}
       columns={columns}
-      data={data}
+      data={tableData}
       hideSearch={hideSearch}
     />
   );

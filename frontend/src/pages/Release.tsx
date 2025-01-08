@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -39,15 +39,13 @@ import Spinner from "components/Spinner";
 import ContainersTable from "components/ContainersTable";
 
 const GET_RELEASE_QUERY = graphql`
-  query Release_getRelease_Query($releaseId: ID!) {
+  query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
     release(id: $releaseId) {
       version
       application {
         name
       }
-      containers {
-        ...ContainersTable_ContainerFragment
-      }
+      ...ContainersTable_ContainerFragment
     }
   }
 `;
@@ -73,7 +71,7 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <ContainersTable containersRef={release.containers} />
+        <ContainersTable containersRef={release} />
       </Page.Main>
     </Page>
   );
@@ -116,7 +114,8 @@ const ReleasePage = () => {
     useQueryLoader<Release_getRelease_Query>(GET_RELEASE_QUERY);
 
   const fetchRelease = useCallback(
-    () => getRelease({ releaseId }, { fetchPolicy: "network-only" }),
+    () =>
+      getRelease({ releaseId, first: 10_000 }, { fetchPolicy: "network-only" }),
     [getRelease, releaseId],
   );
 

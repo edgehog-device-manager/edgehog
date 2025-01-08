@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -41,13 +41,15 @@ import ReleasesTable from "components/ReleasesTable";
 import Button from "components/Button";
 
 const GET_APPLICATION_QUERY = graphql`
-  query Application_getApplication_Query($applicationId: ID!) {
+  query Application_getApplication_Query(
+    $applicationId: ID!
+    $first: Int
+    $after: String
+  ) {
     application(id: $applicationId) {
       name
       description
-      releases(first: 10000) {
-        ...ReleasesTable_ReleaseFragment
-      }
+      ...ReleasesTable_ReleaseFragment
     }
   }
 `;
@@ -102,7 +104,7 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
             />
           </Col>
         </Form.Group>
-        <ReleasesTable releasesRef={application.releases} hideSearch />
+        <ReleasesTable releasesRef={application} hideSearch />
       </Page.Main>
     </Page>
   );
@@ -150,7 +152,11 @@ const ApplicationPage = () => {
     useQueryLoader<Application_getApplication_Query>(GET_APPLICATION_QUERY);
 
   const fetchApplication = useCallback(
-    () => getApplication({ applicationId }, { fetchPolicy: "network-only" }),
+    () =>
+      getApplication(
+        { applicationId, first: 10_000 },
+        { fetchPolicy: "network-only" },
+      ),
     [getApplication, applicationId],
   );
 
