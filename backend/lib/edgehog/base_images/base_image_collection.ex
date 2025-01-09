@@ -39,6 +39,8 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
 
   graphql do
     type :base_image_collection
+
+    paginate_relationship_with base_images: :relay
   end
 
   actions do
