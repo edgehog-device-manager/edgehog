@@ -369,6 +369,18 @@
   "components.CreateSystemModelForm.submitButton": {
     "defaultMessage": "Create"
   },
+  "components.CreateImageCredentialForm.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.CreateImageCredentialForm.usernameLabel": {
+    "defaultMessage": "Username"
+  },
+  "components.CreateImageCredentialForm.passwordLabel": {
+    "defaultMessage": "Password"
+  },
+  "components.CreateImageCredentialForm.submitButton": {
+    "defaultMessage": "Create"
+  },
   "components.DeleteModal.confirmButton": {
     "defaultMessage": "Delete",
     "description": "Title for the button to confirm a deletion modal"
@@ -591,9 +603,6 @@
   "components.Sidebar.applications.applicationsLabel": {
     "defaultMessage": "Applications"
   },
-  "components.Sidebar.applicationsLabel": {
-    "defaultMessage": "Applications"
-  },
   "components.Sidebar.baseImageCollectionsLabel": {
     "defaultMessage": "Base Image Collections"
   },
@@ -620,6 +629,12 @@
   },
   "components.Sidebar.updateChannelsLabel": {
     "defaultMessage": "Update Channels"
+  },
+  "components.Sidebar.applications.credentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "components.Sidebar.applications.managementLabel": {
+    "defaultMessage": "Management"
   },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
@@ -665,6 +680,12 @@
   },
   "components.UpdateCampaignStatus.InProgress": {
     "defaultMessage": "In progress"
+  },
+  "components.ImageCredentialsTable.labelTitle": {
+    "defaultMessage": "Label"
+  },
+  "components.ImageCredentialsTable.usernameTitle": {
+    "defaultMessage": "Username"
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
@@ -1007,6 +1028,15 @@
   "forms.UpdateHardwareType.submitButton": {
     "defaultMessage": "Update"
   },
+  "forms.UpdateImageCredential.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "forms.UpdateImageCredential.usernameLabel": {
+    "defaultMessage": "Username"
+  },
+  "forms.UpdateImageCredential.deleteButton": {
+    "defaultMessage": "Delete"
+  },
   "forms.UpdateSystemModel.addPartNumberButton": {
     "defaultMessage": "Add part number"
   },
@@ -1187,6 +1217,15 @@
   },
   "navigation.routeTitle.UpdateChannelsNew": {
     "defaultMessage": "Create Update Channel"
+  },
+  "navigation.routeTitle.ImageCredentials": {
+    "defaultMessage": "Image Credentials"
+  },
+  "navigation.routeTitle.ImageCredentialNew": {
+    "defaultMessage": "Create Image Credentials"
+  },
+  "navigation.routeTitle.ImageCredentialEdit": {
+    "defaultMessage": "Image Credential Details"
   },
   "pages.Application.applicationNotFound.message": {
     "defaultMessage": "Return to the applications list."
@@ -1578,6 +1617,32 @@
   "pages.UpdateCampaigns.title": {
     "defaultMessage": "Update Campaigns"
   },
+  "pages.ImageCredentials.createButton": {
+    "defaultMessage": "Create Credentials"
+  },
+  "pages.ImageCredentials.title": {
+    "defaultMessage": "Image Credentials"
+  },
+  "pages.ImageCredentialCreate.title": {
+    "defaultMessage": "Create Image Credentials"
+  },
+  "pages.ImageCredential.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Image Crendentials <bold>{imageCredentials}</bold>.",
+    "description": "Description for the confirmation modal to delete a Image Crendentials"
+  },
+  "pages.ImageCredential.deleteModal.title": {
+    "defaultMessage": "Delete Image Crendentials",
+    "description": "Title for the confirmation modal to delete a Image Crendentials"
+  },
+  "pages.ImageCredential.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the image credentials, please try again."
+  },
+  "pages.ImageCredential.imageCredentialNotFound.message": {
+    "defaultMessage": "Return to the image credentials list."
+  },
+  "pages.ImageCredential.imageCredentialNotFound.title": {
+    "defaultMessage": "Image credentials not found."
+  },
   "pages.UpdateChannel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Update Channel <bold>{updateChannel}</bold>.",
     "description": "Description for the confirmation modal to delete a Update Channel"
@@ -1651,5 +1716,8 @@
   },
   "validation.unique": {
     "defaultMessage": "Duplicate value."
+  },
+  "validation.password.stronger": {
+    "defaultMessage": "Password must be stronger (length 8-12, at least 1 number, 1 special)."
   }
 }

@@ -19,16 +19,16 @@
 */
 
 import { useCallback } from "react";
+import type { MessageDescriptor } from "react-intl";
+import { defineMessages } from "react-intl";
+import type { ParamParseKey } from "react-router";
 import {
-  generatePath as routerGeneratePath,
   matchPath,
+  generatePath as routerGeneratePath,
   useNavigate as useRouterNavigate,
 } from "react-router";
-import type { ParamParseKey } from "react-router";
-import { Link as RouterLink } from "react-router-dom";
 import type { LinkProps as RouterLinkProps } from "react-router-dom";
-import { defineMessages } from "react-intl";
-import type { MessageDescriptor } from "react-intl";
+import { Link as RouterLink } from "react-router-dom";
 
 enum Route {
   devices = "/devices",
@@ -58,6 +58,9 @@ enum Route {
   application = "/applications/:applicationId",
   release = "/applications/:applicationId/release/:releaseId",
   releaseNew = "/applications/:applicationId/release/new",
+  imageCredentials = "/image-credentials",
+  imageCredentialsEdit = "/image-credentials/:imageCredentialId/edit",
+  imageCredentialsNew = "/image-credentials/new",
   login = "/login",
   logout = "/logout",
 }
@@ -81,7 +84,9 @@ type ParametricRoute = {
   [K in RouteKeys]: RouteWithParams<(typeof Route)[K]>;
 }[RouteKeys];
 
-const matchingParametricRoute = (path: string): ParametricRoute | null => {
+const matchingParametricRoute = (
+  path: string,
+): ParametricRoute | null | undefined => {
   const route = matchingRoute(path);
   if (!route) {
     return null;
@@ -104,6 +109,8 @@ const matchingParametricRoute = (path: string): ParametricRoute | null => {
     case Route.updateCampaignsNew:
     case Route.applications:
     case Route.applicationNew:
+    case Route.imageCredentials:
+    case Route.imageCredentialsNew:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -213,6 +220,13 @@ const matchingParametricRoute = (path: string): ParametricRoute | null => {
             params: {
               applicationId: params.applicationId,
             },
+          }
+        : null;
+    case Route.imageCredentialsEdit:
+      return params && typeof params["imageCredentialId"] === "string"
+        ? {
+            route,
+            params: { imageCredentialId: params.imageCredentialId },
           }
         : null;
   }
@@ -365,6 +379,18 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
     id: "navigation.routeTitle.ReleaseNew",
     defaultMessage: "Create Release",
   },
+  [Route.imageCredentials]: {
+    id: "navigation.routeTitle.ImageCredentials",
+    defaultMessage: "Image Credentials",
+  },
+  [Route.imageCredentialsNew]: {
+    id: "navigation.routeTitle.ImageCredentialNew",
+    defaultMessage: "Create Image Credentials",
+  },
+  [Route.imageCredentialsEdit]: {
+    id: "navigation.routeTitle.ImageCredentialEdit",
+    defaultMessage: "Image Credentials Details",
+  },
   [Route.login]: {
     id: "navigation.routeTitle.Login",
     defaultMessage: "Login",
@@ -377,10 +403,10 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
 
 export {
   Link,
-  Route,
-  matchPaths,
-  matchingRoute,
   matchingParametricRoute,
+  matchingRoute,
+  matchPaths,
+  Route,
   routeTitles,
   useNavigate,
 };

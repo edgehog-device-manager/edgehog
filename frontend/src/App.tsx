@@ -25,38 +25,41 @@ import Sidebar from "components/Sidebar";
 import Topbar from "components/Topbar";
 import { useAuth } from "contexts/Auth";
 import { Route } from "Navigation";
-import Device from "pages/Device";
-import Devices from "pages/Devices";
-import DeviceGroup from "pages/DeviceGroup";
-import DeviceGroups from "pages/DeviceGroups";
-import DeviceGroupsNew from "pages/DeviceGroupCreate";
-import SystemModel from "pages/SystemModel";
-import SystemModelCreate from "pages/SystemModelCreate";
-import SystemModels from "pages/SystemModels";
-import HardwareType from "pages/HardwareType";
-import HardwareTypeCreate from "pages/HardwareTypeCreate";
-import HardwareTypes from "pages/HardwareTypes";
+import Application from "pages/Application";
+import ApplicationCreatePage from "pages/ApplicationCreate";
+import Applications from "pages/Applications";
+import AttemptLogin from "pages/AttemptLogin";
+import BaseImage from "pages/BaseImage";
 import BaseImageCollection from "pages/BaseImageCollection";
 import BaseImageCollectionCreate from "pages/BaseImageCollectionCreate";
 import BaseImageCollections from "pages/BaseImageCollections";
-import BaseImage from "pages/BaseImage";
 import BaseImageCreate from "pages/BaseImageCreate";
-import UpdateChannel from "pages/UpdateChannel";
-import UpdateChannelCreate from "pages/UpdateChannelCreate";
-import UpdateChannels from "pages/UpdateChannels";
+import Device from "pages/Device";
+import DeviceGroup from "pages/DeviceGroup";
+import DeviceGroupsNew from "pages/DeviceGroupCreate";
+import DeviceGroups from "pages/DeviceGroups";
+import Devices from "pages/Devices";
+import HardwareType from "pages/HardwareType";
+import HardwareTypeCreate from "pages/HardwareTypeCreate";
+import HardwareTypes from "pages/HardwareTypes";
+import ImageCredential from "pages/ImageCredential";
+import ImageCredentialCreate from "pages/ImageCredentialCreate";
+import ImageCredentials from "pages/ImageCredentials";
+import Login from "pages/Login";
+import Logout from "pages/Logout";
+import Release from "pages/Release";
+import ReleaseCreatePage from "pages/ReleaseCreate";
+import SystemModel from "pages/SystemModel";
+import SystemModelCreate from "pages/SystemModelCreate";
+import SystemModels from "pages/SystemModels";
 import UpdateCampaign from "pages/UpdateCampaign";
 import UpdateCampaignCreate from "pages/UpdateCampaignCreate";
 import UpdateCampaigns from "pages/UpdateCampaigns";
-import Login from "pages/Login";
-import Logout from "pages/Logout";
-import AttemptLogin from "pages/AttemptLogin";
-import Applications from "pages/Applications";
-import ApplicationCreatePage from "pages/ApplicationCreate";
-import Application from "pages/Application";
-import Release from "pages/Release";
-import ReleaseCreatePage from "pages/ReleaseCreate";
+import UpdateChannelsEdit from "pages/UpdateChannel";
+import UpdateChannelsCreate from "pages/UpdateChannelCreate";
+import UpdateChannels from "pages/UpdateChannels";
 
-import { version, repository, bugs } from "../package.json";
+import { bugs, repository, version } from "../package.json";
 
 type RouterRule = {
   path: string;
@@ -89,9 +92,12 @@ const authenticatedRoutes: RouterRule[] = [
   },
   { path: Route.baseImagesEdit, element: <BaseImage /> },
   { path: Route.baseImagesNew, element: <BaseImageCreate /> },
+  { path: Route.imageCredentials, element: <ImageCredentials /> },
+  { path: Route.imageCredentialsEdit, element: <ImageCredential /> },
+  { path: Route.imageCredentialsNew, element: <ImageCredentialCreate /> },
   { path: Route.updateChannels, element: <UpdateChannels /> },
-  { path: Route.updateChannelsEdit, element: <UpdateChannel /> },
-  { path: Route.updateChannelsNew, element: <UpdateChannelCreate /> },
+  { path: Route.updateChannelsEdit, element: <UpdateChannelsEdit /> },
+  { path: Route.updateChannelsNew, element: <UpdateChannelsCreate /> },
   { path: Route.updateCampaigns, element: <UpdateCampaigns /> },
   { path: Route.updateCampaignsNew, element: <UpdateCampaignCreate /> },
   { path: Route.updateCampaignsEdit, element: <UpdateCampaign /> },

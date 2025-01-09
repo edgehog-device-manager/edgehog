@@ -55,7 +55,7 @@
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-relay-lite": "^0.8.1",
     "vite-tsconfig-paths": "^4.3.2",
-    "yup": "^0.32.11"
+    "yup": "^1.4.0"
   },
   "scripts": {
     "init": "npm run relay:compile && npm run i18n:compile",
