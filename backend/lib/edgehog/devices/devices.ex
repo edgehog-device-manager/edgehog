@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Devices do
   @moduledoc """
@@ -60,7 +58,8 @@ defmodule Edgehog.Devices do
 
       list SystemModel, :system_models, :read do
         description "Returns a list of system models."
-        paginate_with nil
+        relay? true
+        paginate_with :keyset
       end
     end
 

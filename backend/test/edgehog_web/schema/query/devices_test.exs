@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Query.DevicesTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -57,27 +55,36 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
           systemModel {
             id
             partNumbers {
-              partNumber
+              edges {
+                node {
+                  partNumber
+                }
+              }
             }
           }
         }
       }
       """
 
-      devices =
+      system_models =
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> Enum.flat_map(fn device ->
+          system_model = get_in(device, ["systemModel", "partNumbers", "edges"])
 
-      assert Enum.count(devices, fn device ->
-               %{"partNumber" => part_number_1} in (device["systemModel"]["partNumbers"] || [])
+          if system_model,
+            do: system_model,
+            else: []
+        end)
+
+      assert Enum.count(system_models, fn element ->
+               element == %{"node" => %{"partNumber" => part_number_1}}
              end) == 1
 
-      assert Enum.count(devices, fn device ->
-               %{"partNumber" => part_number_2} in (device["systemModel"]["partNumbers"] || [])
+      assert Enum.count(system_models, fn element ->
+               element == %{"node" => %{"partNumber" => part_number_2}}
              end) == 2
-
-      assert Enum.count(devices, fn device -> device["systemModel"] == nil end) == 1
     end
 
     test "allows filtering", %{tenant: tenant} do
