@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -57,9 +55,13 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
                "id" => _id,
                "name" => "Updated Name",
                "handle" => "updatedhandle",
-               "partNumbers" => [
-                 %{"partNumber" => "updated-1234"}
-               ]
+               "partNumbers" => %{
+                 "edges" => [
+                   %{
+                     "node" => %{"partNumber" => "updated-1234"}
+                   }
+                 ]
+               }
              } = system_model
     end
 
@@ -78,13 +80,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
       assert %{
                "name" => "Only Name Update",
                "handle" => ^old_handle,
-               "partNumbers" => part_numbers
+               "partNumbers" => %{
+                 "edges" => part_numbers
+               }
              } = system_model
 
       assert length(part_numbers) == length(old_part_numbers)
 
       Enum.each(old_part_numbers, fn pn ->
-        assert %{"partNumber" => pn} in part_numbers
+        assert %{"node" => %{"partNumber" => pn}} in part_numbers
       end)
     end
 
@@ -100,10 +104,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
 
       system_model = extract_result!(result)
 
-      assert %{"partNumbers" => part_numbers} = system_model
+      assert %{"partNumbers" => %{"edges" => part_numbers}} = system_model
       assert length(part_numbers) == 2
-      assert %{"partNumber" => "B"} in part_numbers
-      assert %{"partNumber" => "D"} in part_numbers
+      assert %{"node" => %{"partNumber" => "B"}} in part_numbers
+      assert %{"node" => %{"partNumber" => "D"}} in part_numbers
     end
 
     test "allows updating localized descriptions", %{tenant: tenant} do
@@ -387,7 +391,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
           handle
           pictureUrl
           partNumbers {
-            partNumber
+            edges {
+              node {
+                partNumber
+              }
+            }
           }
         }
       }

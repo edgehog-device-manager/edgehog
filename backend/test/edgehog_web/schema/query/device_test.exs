@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Query.DeviceTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -58,7 +56,11 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
           systemModel {
             id
             partNumbers {
-              partNumber
+              edges {
+                node {
+                  partNumber
+                }
+              }
             }
           }
         }
@@ -71,7 +73,10 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         |> extract_result!()
 
       assert device["systemModel"]["id"] == system_model_id
-      assert device["systemModel"]["partNumbers"] == [%{"partNumber" => part_number}]
+
+      assert device["systemModel"]["partNumbers"]["edges"] == [
+               %{"node" => %{"partNumber" => part_number}}
+             ]
     end
 
     test "queries associated OTA operations", %{tenant: tenant} do

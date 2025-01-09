@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -25,7 +23,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
   describe "systemModels query" do
     test "returns empty system models", %{tenant: tenant} do
-      assert %{data: %{"systemModels" => []}} == system_models_query(tenant: tenant)
+      assert [] == [tenant: tenant] |> system_models_query() |> extract_result!()
     end
 
     test "returns system models if they're present", %{tenant: tenant} do
@@ -40,15 +38,15 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         |> system_model_fixture()
         |> Ash.load!(:part_number_strings)
 
-      assert %{data: %{"systemModels" => [system_model]}} = system_models_query(tenant: tenant)
+      assert [system_model] = [tenant: tenant] |> system_models_query() |> extract_result!()
 
       assert system_model["name"] == fixture.name
       assert system_model["handle"] == fixture.handle
       assert system_model["pictureUrl"] == fixture.picture_url
-      assert length(system_model["partNumbers"]) == length(fixture.part_number_strings)
+      assert length(system_model["partNumbers"]["edges"]) == length(fixture.part_number_strings)
 
       Enum.each(fixture.part_number_strings, fn pn ->
-        assert(%{"partNumber" => pn} in system_model["partNumbers"])
+        assert(%{"node" => %{"partNumber" => pn}} in system_model["partNumbers"]["edges"])
       end)
 
       assert system_model["hardwareType"]["id"] ==
@@ -63,12 +61,14 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       filter = %{
         "or" => [
           %{"handle" => %{"eq" => "foo"}},
-          %{"partNumbers" => %{"partNumber" => %{"eq" => "123-bar"}}}
+          %{
+            "partNumbers" => %{"partNumber" => %{"eq" => "123-bar"}}
+          }
         ]
       }
 
-      assert %{data: %{"systemModels" => system_models}} =
-               system_models_query(tenant: tenant, filter: filter)
+      assert system_models =
+               [tenant: tenant, filter: filter] |> system_models_query() |> extract_result!()
 
       assert length(system_models) == 2
       assert "foo" in Enum.map(system_models, & &1["handle"])
@@ -85,8 +85,8 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
         %{"field" => "HANDLE", "order" => "ASC"}
       ]
 
-      assert %{data: %{"systemModels" => system_models}} =
-               system_models_query(tenant: tenant, sort: sort)
+      assert system_models =
+               [tenant: tenant, sort: sort] |> system_models_query() |> extract_result!()
 
       assert [
                %{"handle" => "1"},
@@ -101,14 +101,23 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       """
       query SystemModels($filter: SystemModelFilterInput, $sort: [SystemModelSortInput]) {
         systemModels(filter: $filter, sort: $sort) {
-          name
-          handle
-          pictureUrl
-          partNumbers {
-            partNumber
-          }
-          hardwareType {
-            id
+          count
+          edges {
+            node {
+              name
+              handle
+              pictureUrl
+              partNumbers {
+                edges {
+                  node {
+                    partNumber
+                  }
+                }
+              }
+              hardwareType {
+                id
+              }
+            }
           }
         }
       }
@@ -124,5 +133,16 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
       }
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    assert %{data: %{"systemModels" => %{"count" => count, "edges" => edges}}} = result
+    refute :errors in Map.keys(result)
+
+    system_models = Enum.map(edges, & &1["node"])
+
+    assert length(system_models) == count
+
+    system_models
   end
 end
