@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ defmodule Edgehog.Groups.DeviceGroup do
 
   graphql do
     type :device_group
+
+    # TODO: paginate `device` relationship with relay
   end
 
   actions do
