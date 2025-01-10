@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
         [tenant: tenant, id: id]
         |> device_groups_query()
         |> extract_result!()
+        |> Enum.map(&Map.fetch!(&1, "node"))
 
       assert result["id"] == id
       assert result["name"] == fixture.name
@@ -71,9 +72,13 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
       document = """
       query {
         deviceGroups {
-          name
-          devices {
-            id
+          edges {
+            node {
+              name
+              devices {
+                id
+              }
+            }
           }
         }
       }
@@ -88,7 +93,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
 
       foo_device_ids =
         result
-        |> Enum.find(result, &(&1["name"] == "foo"))
+        |> Enum.find(result, &(&1["node"]["name"] == "foo"))
+        |> Map.fetch!("node")
         |> Map.fetch!("devices")
         |> Enum.map(& &1["id"])
 
@@ -99,7 +105,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
 
       bar_device_ids =
         result
-        |> Enum.find(result, &(&1["name"] == "bar"))
+        |> Enum.find(result, &(&1["node"]["name"] == "bar"))
+        |> Map.fetch!("node")
         |> Map.fetch!("devices")
         |> Enum.map(& &1["id"])
 
@@ -114,10 +121,14 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
     default_document = """
     query {
       deviceGroups {
-        id
-        name
-        handle
-        selector
+        edges {
+          node {
+            id
+            name
+            handle
+            selector
+          }
+        }
       }
     }
     """
@@ -130,7 +141,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupsTest do
   end
 
   defp extract_result!(result) do
-    assert %{data: %{"deviceGroups" => device_groups}} = result
+    assert %{data: %{"deviceGroups" => %{"edges" => device_groups}}} = result
     refute :errors in Map.keys(result)
     assert device_groups != nil
 
