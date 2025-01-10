@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       assert response_rollout_mechanism["forceDowngrade"] ==
                update_campaign.rollout_mechanism.value.force_downgrade
 
-      assert [target] = update_campaign_data["updateTargets"]
+      assert [target] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
       assert target["status"] == "IDLE"
 
       assert target["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
@@ -120,13 +120,17 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
       query ($id: ID!) {
         updateCampaign(id: $id) {
           updateTargets {
-            id
-            status
-            retryCount
-            latestAttempt
-            completionTimestamp
-            otaOperation {
-              id
+            edges {
+              node {
+                id
+                status
+                retryCount
+                latestAttempt
+                completionTimestamp
+                otaOperation {
+                  id
+                }
+              }
             }
           }
         }
@@ -138,7 +142,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
         |> update_campaign_query()
         |> extract_result!()
 
-      assert [update_target] = update_campaign_data["updateTargets"]
+      assert [update_target] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
 
       assert update_target["id"] == AshGraphql.Resource.encode_relay_id(target)
       assert update_target["status"] == "SUCCESSFUL"
@@ -264,9 +268,13 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
           handle
         }
         updateTargets {
-          status
-          device {
-            id
+          edges {
+            node {
+              status
+              device {
+                id
+              }
+            }
           }
         }
       }
@@ -304,5 +312,9 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
     :ok = Ash.destroy!(fixture)
 
     id
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end
