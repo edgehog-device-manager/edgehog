@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +50,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       assert update_channel_data["id"] == id
       assert update_channel_data["name"] == "Updated name"
       assert update_channel_data["handle"] == "updated-handle"
-      assert [target_group_data] = update_channel_data["targetGroups"]
+
+      assert [target_group_data] =
+               extract_nodes!(update_channel_data["targetGroups"]["edges"])
+
       assert target_group_data["id"] == target_group_id
       assert target_group_data["name"] == target_group.name
       assert target_group_data["handle"] == target_group.handle
@@ -189,9 +192,13 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
           name
           handle
           targetGroups {
-            id
-            name
-            handle
+            edges {
+              node {
+                id
+                name
+                handle
+              }
+            }
           }
         }
       }
@@ -246,5 +253,9 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     :ok = Ash.destroy!(fixture)
 
     id
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end

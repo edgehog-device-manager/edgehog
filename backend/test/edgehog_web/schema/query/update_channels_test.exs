@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,12 +36,16 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
     test "returns update channels if present", %{tenant: tenant, target_group: target_group} do
       update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
 
-      [update_channel_data] = [tenant: tenant] |> update_channels_query() |> extract_result!()
+      [update_channel_data] =
+        [tenant: tenant] |> update_channels_query() |> extract_result!() |> extract_nodes!()
 
       assert update_channel_data["id"] == AshGraphql.Resource.encode_relay_id(update_channel)
       assert update_channel_data["handle"] == update_channel.handle
       assert update_channel_data["name"] == update_channel.name
-      assert [target_group_data] = update_channel_data["targetGroups"]
+
+      assert [target_group_data] =
+               extract_nodes!(update_channel_data["targetGroups"]["edges"])
+
       assert target_group_data["id"] == AshGraphql.Resource.encode_relay_id(target_group)
       assert target_group_data["handle"] == target_group.handle
       assert target_group_data["name"] == target_group.name
@@ -52,13 +56,21 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
     default_document = """
     query {
       updateChannels {
-        id
-        handle
-        name
-        targetGroups {
-          id
-          name
-          handle
+        edges {
+          node {
+            id
+            handle
+            name
+            targetGroups {
+              edges {
+                node {
+                  id
+                  name
+                  handle
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -73,7 +85,9 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
   defp extract_result!(result) do
     assert %{
              data: %{
-               "updateChannels" => update_channels
+               "updateChannels" => %{
+                 "edges" => update_channels
+               }
              }
            } = result
 
@@ -82,5 +96,9 @@ defmodule EdgehogWeb.Schema.Query.UpdateChannelsTest do
     assert update_channels != nil
 
     update_channels
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end
