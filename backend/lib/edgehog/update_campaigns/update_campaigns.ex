@@ -51,7 +51,8 @@ defmodule Edgehog.UpdateCampaigns do
 
       list UpdateChannel, :update_channels, :read do
         description "Returns a list of update channels."
-        paginate_with nil
+        paginate_with :keyset
+        relay? true
       end
     end
 
