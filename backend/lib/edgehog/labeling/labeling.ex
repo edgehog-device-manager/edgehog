@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ defmodule Edgehog.Labeling do
 
     queries do
       list Tag, :existing_device_tags, :read_assigned_to_devices do
-        paginate_with nil
+        description "Returns the list of device tags associated to some device group."
+        relay? true
+        paginate_with :keyset
       end
     end
   end
