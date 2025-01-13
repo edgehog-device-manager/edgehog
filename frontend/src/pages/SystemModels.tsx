@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -34,10 +34,11 @@ import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
 const GET_SYSTEM_MODELS_QUERY = graphql`
-  query SystemModels_getSystemModels_Query {
-    systemModels {
-      ...SystemModelsTable_SystemModelsFragment
+  query SystemModels_getSystemModels_Query($first: Int, $after: String) {
+    systemModels(first: $first, after: $after) {
+      count
     }
+    ...SystemModelsTable_SystemModelsFragment
   }
 `;
 
@@ -48,7 +49,7 @@ type SystemModelsContentProps = {
 const SystemModelsContent = ({
   getSystemModelsQuery,
 }: SystemModelsContentProps) => {
-  const { systemModels } = usePreloadedQuery(
+  const systemModels = usePreloadedQuery(
     GET_SYSTEM_MODELS_QUERY,
     getSystemModelsQuery,
   );
@@ -71,7 +72,7 @@ const SystemModelsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        {systemModels.length === 0 ? (
+        {systemModels.systemModels?.count === 0 ? (
           <Result.EmptyList
             title={
               <FormattedMessage
@@ -98,7 +99,8 @@ const SystemModelsPage = () => {
     useQueryLoader<SystemModels_getSystemModels_Query>(GET_SYSTEM_MODELS_QUERY);
 
   const fetchSystemModels = useCallback(
-    () => getSystemModels({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getSystemModels({ first: 10_000 }, { fetchPolicy: "store-and-network" }),
     [getSystemModels],
   );
 

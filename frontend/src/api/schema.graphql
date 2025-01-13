@@ -485,6 +485,27 @@ enum BaseImageCollectionSortField {
   HANDLE
 }
 
+":base_image_collection connection"
+type BaseImageCollectionConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":base_image_collection edges"
+  edges: [BaseImageCollectionEdge!]
+}
+
+":base_image_collection edge"
+type BaseImageCollectionEdge {
+  "Cursor"
+  cursor: String!
+
+  ":base_image_collection node"
+  node: BaseImageCollection!
+}
+
 input BaseImageCollectionFilterHandle {
   isNil: Boolean
   eq: String
@@ -582,12 +603,18 @@ type BaseImageCollection implements Node {
     "A filter to limit the results"
     filter: BaseImageFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [BaseImage!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): BaseImageConnection!
 }
 
 "The result of the :delete_base_image mutation"
@@ -653,6 +680,27 @@ enum BaseImageSortField {
   VERSION
   STARTING_VERSION_REQUIREMENT
   URL
+}
+
+":base_image connection"
+type BaseImageConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":base_image edges"
+  edges: [BaseImageEdge!]
+}
+
+":base_image edge"
+type BaseImageEdge {
+  "Cursor"
+  cursor: String!
+
+  ":base_image node"
+  node: BaseImage!
 }
 
 input BaseImageFilterUrl {
@@ -814,6 +862,27 @@ enum SystemModelPartNumberSortField {
   PART_NUMBER
 }
 
+":system_model_part_number connection"
+type SystemModelPartNumberConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":system_model_part_number edges"
+  edges: [SystemModelPartNumberEdge!]
+}
+
+":system_model_part_number edge"
+type SystemModelPartNumberEdge {
+  "Cursor"
+  cursor: String!
+
+  ":system_model_part_number node"
+  node: SystemModelPartNumber!
+}
+
 input SystemModelPartNumberFilterPartNumber {
   isNil: Boolean
   eq: String
@@ -957,6 +1026,27 @@ enum SystemModelSortField {
   PICTURE_URL
 }
 
+":system_model connection"
+type SystemModelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":system_model edges"
+  edges: [SystemModelEdge!]
+}
+
+":system_model edge"
+type SystemModelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":system_model node"
+  node: SystemModel!
+}
+
 input SystemModelFilterPictureUrl {
   isNil: Boolean
   eq: String
@@ -1071,12 +1161,18 @@ type SystemModel implements Node {
     "A filter to limit the results"
     filter: SystemModelPartNumberFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [SystemModelPartNumber!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): SystemModelPartNumberConnection!
 
   "The Hardware type associated with the System Model"
   hardwareType: HardwareType
@@ -2795,7 +2891,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: SystemModelFilterInput
-  ): [SystemModel!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): SystemModelConnection
 
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
@@ -2813,7 +2921,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: BaseImageCollectionFilterInput
-  ): [BaseImageCollection!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): BaseImageCollectionConnection
 }
 
 type RootMutationType {
