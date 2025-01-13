@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -37,8 +37,12 @@ import type { CreateBaseImageCollection_OptionsFragment$key } from "api/__genera
 const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   fragment CreateBaseImageCollection_OptionsFragment on RootQueryType {
     systemModels {
-      id
-      name
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
   }
 `;
@@ -160,7 +164,7 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select a System Model",
               })}
             </option>
-            {systemModels.map((systemModel) => (
+            {systemModels?.edges?.map(({ node: systemModel }) => (
               <option key={systemModel.id} value={systemModel.id}>
                 {systemModel.name}
               </option>

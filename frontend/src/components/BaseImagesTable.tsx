@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@
 
 import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
+import type { BaseImagesTable_PaginationQuery } from "api/__generated__/BaseImagesTable_PaginationQuery.graphql";
 import type {
   BaseImagesTable_BaseImagesFragment$data,
   BaseImagesTable_BaseImagesFragment$key,
@@ -33,22 +34,29 @@ import { Link, Route } from "Navigation";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const BASE_IMAGES_TABLE_FRAGMENT = graphql`
-  fragment BaseImagesTable_BaseImagesFragment on BaseImageCollection {
+  fragment BaseImagesTable_BaseImagesFragment on BaseImageCollection
+  @refetchable(queryName: "BaseImagesTable_PaginationQuery") {
     id
-    baseImages {
-      id
-      version
-      startingVersionRequirement
-      localizedReleaseDisplayNames {
-        value
-        languageTag
+    baseImages(first: $first, after: $after)
+      @connection(key: "BaseImagesTable_baseImages") {
+      edges {
+        node {
+          id
+          version
+          startingVersionRequirement
+          localizedReleaseDisplayNames {
+            value
+            languageTag
+          }
+        }
       }
     }
   }
 `;
 
-type TableRecord =
-  BaseImagesTable_BaseImagesFragment$data["baseImages"][number];
+type TableRecord = NonNullable<
+  NonNullable<BaseImagesTable_BaseImagesFragment$data["baseImages"]>["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const getColumnsDefinition = (baseImageCollectionId: string) => [
@@ -110,21 +118,20 @@ const BaseImagesTable = ({
   baseImageCollectionRef,
   hideSearch = false,
 }: Props) => {
-  const baseImageCollection = useFragment(
-    BASE_IMAGES_TABLE_FRAGMENT,
-    baseImageCollectionRef,
-  );
+  const { data } = usePaginationFragment<
+    BaseImagesTable_PaginationQuery,
+    BaseImagesTable_BaseImagesFragment$key
+  >(BASE_IMAGES_TABLE_FRAGMENT, baseImageCollectionRef);
 
-  const columns = useMemo(
-    () => getColumnsDefinition(baseImageCollection.id),
-    [baseImageCollection.id],
-  );
+  const tableData = data.baseImages?.edges?.map((edge) => edge.node) ?? [];
+
+  const columns = useMemo(() => getColumnsDefinition(data.id), [data.id]);
 
   return (
     <Table
       className={className}
       columns={columns}
-      data={baseImageCollection.baseImages}
+      data={tableData}
       hideSearch={hideSearch}
     />
   );

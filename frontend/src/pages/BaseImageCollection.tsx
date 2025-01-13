@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ import type { BaseImageCollectionChanges } from "forms/UpdateBaseImageCollection
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCollection_getBaseImageCollection_Query(
     $baseImageCollectionId: ID!
+    $first: Int
+    $after: String
   ) {
     baseImageCollection(id: $baseImageCollectionId) {
       id
@@ -65,6 +67,8 @@ const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
 const UPDATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
   mutation BaseImageCollection_updateBaseImageCollection_Mutation(
     $baseImageCollectionId: ID!
+    $first: Int
+    $after: String
     $input: UpdateBaseImageCollectionInput!
   ) {
     updateBaseImageCollection(id: $baseImageCollectionId, input: $input) {
@@ -173,7 +177,11 @@ const BaseImageCollectionContent = ({
   const handleUpdateBaseImageCollection = useCallback(
     (baseImageCollection: BaseImageCollectionChanges) => {
       updateBaseImageCollection({
-        variables: { baseImageCollectionId, input: baseImageCollection },
+        variables: {
+          baseImageCollectionId,
+          input: baseImageCollection,
+          first: 10_000,
+        },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
@@ -322,7 +330,7 @@ const BaseImageCollectionPage = () => {
   const fetchBaseImageCollection = useCallback(
     () =>
       getBaseImageCollection(
-        { baseImageCollectionId },
+        { baseImageCollectionId, first: 10_000 },
         { fetchPolicy: "network-only" },
       ),
     [getBaseImageCollection, baseImageCollectionId],

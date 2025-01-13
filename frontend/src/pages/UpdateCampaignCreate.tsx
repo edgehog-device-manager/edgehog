@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ const GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   query UpdateCampaignCreate_getOptions_Query {
     baseImageCollections {
       __typename
+      count
     }
     updateChannels {
       __typename
@@ -214,7 +215,7 @@ const UpdateCampaignWrapper = ({
   );
   const { baseImageCollections, updateChannels } = updateCampaignOptions;
 
-  if (baseImageCollections.length === 0) {
+  if (baseImageCollections?.count === 0) {
     return <NoBaseImageCollections />;
   }
   if (updateChannels.length === 0) {
