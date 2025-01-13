@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
   describe "createUpdateChannel mutation" do
     test "creates update_channel with valid data", %{tenant: tenant} do
       target_group = device_group_fixture(tenant: tenant)
+      assert target_group.update_channel_id == nil
 
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
@@ -177,14 +178,19 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
       assert %{
                path: ["createUpdateChannel"],
                fields: [:target_group_ids],
-               message: "some target groups were not found or are already associated with an update channel",
-               code: "invalid_argument"
+               message: "One or more target groups could not be found",
+               code: "not_found"
              } = error
     end
 
     test "fails when trying to use already assigned target groups", %{tenant: tenant} do
       target_group = device_group_fixture(tenant: tenant)
-      _ = update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
+
+      _ =
+        update_channel_fixture(
+          tenant: tenant,
+          target_group_ids: [target_group.id]
+        )
 
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
@@ -195,10 +201,12 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
 
       assert %{
                path: ["createUpdateChannel"],
-               fields: [:target_group_ids],
-               message: "some target groups were not found or are already associated with an update channel",
-               code: "invalid_argument"
+               fields: [:update_channel_id],
+               message: "The update channel is already set for the device group " <> name,
+               code: "invalid_attribute"
              } = error
+
+      assert name == ~s["#{target_group.name}"]
     end
   end
 
