@@ -761,6 +761,27 @@ type BaseImage implements Node {
   ): [LocalizedAttribute!]
 }
 
+"A relay page info"
+type PageInfo {
+  "When paginating backwards, are there more items?"
+  hasPreviousPage: Boolean!
+
+  "When paginating forwards, are there more items?"
+  hasNextPage: Boolean!
+
+  "When paginating backwards, the cursor to continue"
+  startCursor: String
+
+  "When paginating forwards, the cursor to continue"
+  endCursor: String
+}
+
+"A relay node"
+interface Node {
+  "A unique identifier"
+  id: ID!
+}
+
 enum SortOrder {
   DESC
   DESC_NULLS_FIRST
@@ -1517,12 +1538,18 @@ type Device implements Node {
     "A filter to limit the results"
     filter: TagFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [Tag!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): TagConnection!
 
   "The groups the device belongs to."
   deviceGroups(
@@ -1547,12 +1574,18 @@ type Device implements Node {
     "A filter to limit the results"
     filter: OtaOperationFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [OtaOperation!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): OtaOperationConnection!
 
   "The capabilities that the device can support."
   capabilities: [DeviceCapability!]!
@@ -1840,6 +1873,27 @@ enum TagSortField {
   NAME
 }
 
+":tag connection"
+type TagConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":tag edges"
+  edges: [TagEdge!]
+}
+
+":tag edge"
+type TagEdge {
+  "Cursor"
+  cursor: String!
+
+  ":tag node"
+  node: Tag!
+}
+
 input TagFilterName {
   isNil: Boolean
   eq: String
@@ -1909,6 +1963,27 @@ enum OtaOperationSortField {
   MESSAGE
   CREATED_AT
   UPDATED_AT
+}
+
+":ota_operation connection"
+type OtaOperationConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":ota_operation edges"
+  edges: [OtaOperationEdge!]
+}
+
+":ota_operation edge"
+type OtaOperationEdge {
+  "Cursor"
+  cursor: String!
+
+  ":ota_operation node"
+  node: OtaOperation!
 }
 
 input OtaOperationFilterUpdatedAt {
@@ -2035,6 +2110,12 @@ input OtaOperationFilterInput {
 
   "The device targeted from the operation"
   device: DeviceFilterInput
+
+  """
+  The update target of an update campaing that created the managed
+  ota operation, if any.
+  """
+  updateTarget: UpdateTargetFilterInput
 }
 
 input OtaOperationSortInput {
@@ -2069,6 +2150,12 @@ type OtaOperation {
 
   "The device targeted from the operation"
   device: Device!
+
+  """
+  The update target of an update campaing that created the managed
+  ota operation, if any.
+  """
+  updateTarget: UpdateTarget
 }
 
 type TenantInfo {
@@ -2616,14 +2703,7 @@ type UpdateCampaign implements Node {
   successfulTargetCount: Int!
 }
 
-interface Node {
-  "The ID of the object."
-  id: ID!
-}
-
 type RootQueryType {
-  node("The ID of an object." id: ID!): Node
-
   "Returns a single update campaign."
   updateCampaign("The id of the record" id: ID!): UpdateCampaign
 
@@ -2663,7 +2743,7 @@ type RootQueryType {
   "Returns a single device group."
   deviceGroup("The id of the record" id: ID!): DeviceGroup
 
-  "Returns the list of all device groups."
+  "Returns a list of device groups."
   deviceGroups(
     "How to sort the records in the response"
     sort: [DeviceGroupSortInput]
@@ -2693,7 +2773,7 @@ type RootQueryType {
     filter: DeviceFilterInput
   ): [Device!]!
 
-  "Returns a hardware type."
+  "Returns a single hardware type."
   hardwareType("The id of the record" id: ID!): HardwareType
 
   "Returns a list of hardware types."
@@ -2705,7 +2785,7 @@ type RootQueryType {
     filter: HardwareTypeFilterInput
   ): [HardwareType!]!
 
-  "Returns a system model."
+  "Returns a single system model."
   systemModel("The id of the record" id: ID!): SystemModel
 
   "Returns a list of system models."
@@ -2717,13 +2797,16 @@ type RootQueryType {
     filter: SystemModelFilterInput
   ): [SystemModel!]!
 
+  "Retrieves a Node from its global id"
+  node("The Node unique identifier" id: ID!): Node!
+
   "Returns a single base image."
   baseImage("The id of the record" id: ID!): BaseImage
 
-  "Returns a single base image."
+  "Returns a single base image collection."
   baseImageCollection("The id of the record" id: ID!): BaseImageCollection
 
-  "Returns a list of base images."
+  "Returns a list of base image collections."
   baseImageCollections(
     "How to sort the records in the response"
     sort: [BaseImageCollectionSortInput]

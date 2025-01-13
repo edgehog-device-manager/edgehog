@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -49,7 +49,11 @@ const DEVICES_TABLE_FRAGMENT = graphql`
       }
     }
     tags {
-      name
+      edges {
+        node {
+          name
+        }
+      }
     }
   }
 `;
@@ -145,7 +149,7 @@ const columns = [
     ),
     cell: ({ getValue }) => (
       <>
-        {getValue().map(({ name: tag }) => (
+        {getValue().edges?.map(({ node: { name: tag } }) => (
           <Tag key={tag} className="me-2">
             {tag}
           </Tag>
