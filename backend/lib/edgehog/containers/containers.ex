@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ defmodule Edgehog.Containers do
       AshGraphql.Domain
     ]
 
+  import Edgehog.Features
+
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeploymentReadyAction
@@ -35,55 +37,57 @@ defmodule Edgehog.Containers do
   graphql do
     root_level_errors? true
 
-    queries do
-      list Application, :applications, :read do
-        description "Returns all the available applications."
+    if feature_available?(:containers) do
+      queries do
+        list Application, :applications, :read do
+          description "Returns all the available applications."
+        end
+
+        get ImageCredentials, :image_credentials, :read do
+          description "Returns the desired image credentials."
+        end
+
+        list ImageCredentials, :list_image_credentials, :read do
+          description "Returns all available image credentials."
+        end
+
+        get Application, :application, :read do
+          description "Returns the desired application."
+        end
+
+        get Release, :release, :read do
+          description "Returns the desired release."
+        end
       end
 
-      get ImageCredentials, :image_credentials, :read do
-        description "Returns the desired image credentials."
-      end
+      mutations do
+        create Application, :create_application, :create do
+          description "Create a new application."
+        end
 
-      list ImageCredentials, :list_image_credentials, :read do
-        description "Returns all available image credentials."
-      end
+        create Release, :create_release, :create do
+          description "Create a new release."
+          relay_id_translations input: [application_id: :application]
+        end
 
-      get Application, :application, :read do
-        description "Returns the desired application."
-      end
+        create ImageCredentials, :create_image_credentials, :create do
+          description "Create image credentials."
+        end
 
-      get Release, :release, :read do
-        description "Returns the desired release."
-      end
-    end
+        destroy ImageCredentials, :delete_image_credentials, :destroy
 
-    mutations do
-      create Application, :create_application, :create do
-        description "Create a new application."
-      end
+        create Deployment, :deploy_release, :deploy do
+          description "Deploy the application on a device"
+          relay_id_translations input: [release_id: :release, device_id: :device]
+        end
 
-      create Release, :create_release, :create do
-        description "Create a new release."
-        relay_id_translations input: [application_id: :application]
-      end
+        update Deployment, :start_deployment, :start
+        update Deployment, :stop_deployment, :stop
+        update Deployment, :delete_deployment, :delete
 
-      create ImageCredentials, :create_image_credentials, :create do
-        description "Create image credentials."
-      end
-
-      destroy ImageCredentials, :delete_image_credentials, :destroy
-
-      create Deployment, :deploy_release, :deploy do
-        description "Deploy the application on a device"
-        relay_id_translations input: [release_id: :release, device_id: :device]
-      end
-
-      update Deployment, :start_deployment, :start
-      update Deployment, :stop_deployment, :stop
-      update Deployment, :delete_deployment, :delete
-
-      update Deployment, :upgrade_deployment, :upgrade_release do
-        relay_id_translations input: [target: :release]
+        update Deployment, :upgrade_deployment, :upgrade_release do
+          relay_id_translations input: [target: :release]
+        end
       end
     end
   end
