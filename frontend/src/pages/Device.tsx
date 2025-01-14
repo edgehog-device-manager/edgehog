@@ -375,7 +375,11 @@ const REMOVE_DEVICE_TAGS_MUTATION = graphql`
 const GET_TAGS_QUERY = graphql`
   query Device_getExistingDeviceTags_Query {
     existingDeviceTags {
-      name
+      edges {
+        node {
+          name
+        }
+      }
     }
   }
 `;
@@ -1392,7 +1396,7 @@ const DeviceContent = ({
 
   const tags = useMemo(
     () =>
-      tagsData.existingDeviceTags.map(({ name: tag }) => ({
+      tagsData.existingDeviceTags?.edges?.map(({ node: { name: tag } }) => ({
         label: tag,
         value: tag,
       })),

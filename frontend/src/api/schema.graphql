@@ -2875,14 +2875,26 @@ type RootQueryType {
   "Retrieves the current tenant."
   tenantInfo: TenantInfo!
 
-  "Returns Tags currently assigned to some device."
+  "Returns the list of device tags associated to some device group."
   existingDeviceTags(
     "How to sort the records in the response"
     sort: [TagSortInput]
 
     "A filter to limit the results"
     filter: TagFilterInput
-  ): [Tag!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): TagConnection
 
   "Returns a single device group."
   deviceGroup("The id of the record" id: ID!): DeviceGroup
