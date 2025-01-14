@@ -40,7 +40,8 @@ defmodule Edgehog.Devices do
 
       list Device, :devices, :read do
         description "Returns a list of devices."
-        paginate_with nil
+        paginate_with :keyset
+        relay? true
       end
 
       get HardwareType, :hardware_type, :read do
