@@ -1186,6 +1186,27 @@ enum HardwareTypePartNumberSortField {
   PART_NUMBER
 }
 
+":hardware_type_part_number connection"
+type HardwareTypePartNumberConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":hardware_type_part_number edges"
+  edges: [HardwareTypePartNumberEdge!]
+}
+
+":hardware_type_part_number edge"
+type HardwareTypePartNumberEdge {
+  "Cursor"
+  cursor: String!
+
+  ":hardware_type_part_number node"
+  node: HardwareTypePartNumber!
+}
+
 input HardwareTypePartNumberFilterPartNumber {
   isNil: Boolean
   eq: String
@@ -1301,6 +1322,27 @@ enum HardwareTypeSortField {
   NAME
 }
 
+":hardware_type connection"
+type HardwareTypeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":hardware_type edges"
+  edges: [HardwareTypeEdge!]
+}
+
+":hardware_type edge"
+type HardwareTypeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":hardware_type node"
+  node: HardwareType!
+}
+
 input HardwareTypeFilterName {
   isNil: Boolean
   eq: String
@@ -1395,12 +1437,18 @@ type HardwareType implements Node {
     "A filter to limit the results"
     filter: HardwareTypePartNumberFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [HardwareTypePartNumber!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): HardwareTypePartNumberConnection!
 }
 
 "The result of the :set_device_led_behavior mutation"
@@ -2879,7 +2927,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: HardwareTypeFilterInput
-  ): [HardwareType!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): HardwareTypeConnection
 
   "Returns a single system model."
   systemModel("The id of the record" id: ID!): SystemModel
