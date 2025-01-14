@@ -24,13 +24,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
   describe "devices query" do
     test "returns empty devices", %{tenant: tenant} do
-      assert [] == [tenant: tenant] |> devices_query() |> extract_result!()
+      assert [] == [tenant: tenant] |> devices_query() |> extract_result!() |> extract_nodes!()
     end
 
     test "returns devices if they're present", %{tenant: tenant} do
       fixture = device_fixture(tenant: tenant)
 
-      assert [device] = [tenant: tenant] |> devices_query() |> extract_result!()
+      assert [device] =
+               [tenant: tenant] |> devices_query() |> extract_result!() |> extract_nodes!()
 
       assert device["name"] == fixture.name
       assert device["deviceId"] == fixture.device_id
@@ -52,12 +53,16 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          systemModel {
-            id
-            partNumbers {
-              edges {
-                node {
-                  partNumber
+          edges {
+            node {
+              systemModel {
+                id
+                partNumbers {
+                  edges {
+                    node {
+                      partNumber
+                    }
+                  }
                 }
               }
             }
@@ -70,6 +75,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
         |> Enum.flat_map(fn device ->
           system_model = get_in(device, ["systemModel", "partNumbers", "edges"])
 
@@ -98,6 +104,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [tenant: tenant, filter: filter]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert length(devices) == 2
       assert "online-1" in Enum.map(devices, & &1["name"])
@@ -116,6 +123,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
                [tenant: tenant, sort: sort]
                |> devices_query()
                |> extract_result!()
+               |> extract_nodes!()
     end
   end
 
@@ -143,10 +151,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          baseImage {
-            name
-            version
+          edges {
+            node {
+              deviceId
+              baseImage {
+                name
+                version
+              }
+            }
           }
         }
       }
@@ -156,6 +168,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -182,10 +195,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          batteryStatus {
-            levelPercentage
-            status
+          edges {
+            node {
+              deviceId
+              batteryStatus {
+                levelPercentage
+                status
+              }
+            }
           }
         }
       }
@@ -195,6 +212,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -229,11 +247,15 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          cellularConnection {
-            slot
-            imei
-            mobileCountryCode
+          edges {
+            node {
+              deviceId
+              cellularConnection {
+                slot
+                imei
+                mobileCountryCode
+              }
+            }
           }
         }
       }
@@ -243,6 +265,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -273,10 +296,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          hardwareInfo {
-            cpuArchitecture
-            cpuModel
+          edges {
+            node {
+              deviceId
+              hardwareInfo {
+                cpuArchitecture
+                cpuModel
+              }
+            }
           }
         }
       }
@@ -286,6 +313,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -312,10 +340,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          networkInterfaces {
-            name
-            technology
+          edges {
+            node {
+              deviceId
+              networkInterfaces {
+                name
+                technology
+              }
+            }
           }
         }
       }
@@ -325,6 +357,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -351,10 +384,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          osInfo {
-            name
-            version
+          edges {
+            node {
+              deviceId
+              osInfo {
+                name
+                version
+              }
+            }
           }
         }
       }
@@ -364,6 +401,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -390,10 +428,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          runtimeInfo {
-            name
-            version
+          edges {
+            node {
+              deviceId
+              runtimeInfo {
+                name
+                version
+              }
+            }
           }
         }
       }
@@ -403,6 +445,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -429,10 +472,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          storageUsage {
-            label
-            freeBytes
+          edges {
+            node {
+              deviceId
+              storageUsage {
+                label
+                freeBytes
+              }
+            }
           }
         }
       }
@@ -442,6 +489,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -468,10 +516,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          systemStatus {
-            taskCount
-            uptimeMilliseconds
+          edges {
+            node {
+              deviceId
+              systemStatus {
+                taskCount
+                uptimeMilliseconds
+              }
+            }
           }
         }
       }
@@ -481,6 +533,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -507,10 +560,14 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          wifiScanResults {
-            connected
-            rssi
+          edges {
+            node {
+              deviceId
+              wifiScanResults {
+                connected
+                rssi
+              }
+            }
           }
         }
       }
@@ -520,6 +577,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       assert %{
                "deviceId" => device_id_1,
@@ -545,9 +603,13 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       document = """
       query {
         devices {
-          deviceId
-          deviceGroups {
-            name
+          edges {
+            node {
+              deviceId
+              deviceGroups {
+                name
+              }
+            }
           }
         }
       }
@@ -570,6 +632,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       Enum.each(devices, &assert(&1["deviceGroups"] == []))
     end
@@ -598,6 +661,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
         [document: document, tenant: tenant]
         |> devices_query()
         |> extract_result!()
+        |> extract_nodes!()
 
       device_1_groups =
         Enum.find_value(devices, &(&1["deviceId"] == device_id_1 && &1["deviceGroups"]))
@@ -620,12 +684,16 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
       """
       query Devices($filter: DeviceFilterInput, $sort: [DeviceSortInput]) {
         devices(filter: $filter, sort: $sort) {
-          name
-          deviceId
-          online
-          lastConnection
-          lastDisconnection
-          serialNumber
+          edges {
+            node {
+              name
+              deviceId
+              online
+              lastConnection
+              lastDisconnection
+              serialNumber
+            }
+          }
         }
       }
       """
@@ -644,9 +712,13 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
-    assert %{data: %{"devices" => devices}} = result
+    assert %{data: %{"devices" => %{"edges" => devices}}} = result
     assert devices != nil
 
     devices
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end
