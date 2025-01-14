@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { HardwareTypes_getHardwareTypes_Query } from "api/__generated__/HardwareTypes_getHardwareTypes_Query.graphql";
+
 import Button from "components/Button";
 import Center from "components/Center";
 import HardwareTypesTable from "components/HardwareTypesTable";
@@ -34,10 +35,11 @@ import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
 const GET_HARDWARE_TYPES_QUERY = graphql`
-  query HardwareTypes_getHardwareTypes_Query {
-    hardwareTypes {
-      ...HardwareTypesTable_HardwareTypesFragment
+  query HardwareTypes_getHardwareTypes_Query($first: Int, $after: String) {
+    hardwareTypes(first: $first, after: $after) {
+      count
     }
+    ...HardwareTypesTable_HardwareTypesFragment
   }
 `;
 
@@ -48,7 +50,7 @@ interface HardwareTypesContentProps {
 const HardwareTypesContent = ({
   getHardwareTypesQuery,
 }: HardwareTypesContentProps) => {
-  const { hardwareTypes } = usePreloadedQuery(
+  const hardwareTypes = usePreloadedQuery(
     GET_HARDWARE_TYPES_QUERY,
     getHardwareTypesQuery,
   );
@@ -71,7 +73,7 @@ const HardwareTypesContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        {hardwareTypes.length === 0 ? (
+        {hardwareTypes.hardwareTypes?.count === 0 ? (
           <Result.EmptyList
             title={
               <FormattedMessage
@@ -100,7 +102,8 @@ const HardwareTypesPage = () => {
     );
 
   const fetchHardwareTypes = useCallback(
-    () => getHardwareTypes({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getHardwareTypes({ first: 10_000 }, { fetchPolicy: "store-and-network" }),
     [getHardwareTypes],
   );
 

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,30 +20,47 @@
 
 import React from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
-import Table, { createColumnHelper } from "components/Table";
-import { Link, Route } from "Navigation";
+import type { HardwareTypesTable_PaginationQuery } from "api/__generated__/HardwareTypesTable_PaginationQuery.graphql";
 import type {
   HardwareTypesTable_HardwareTypesFragment$key,
   HardwareTypesTable_HardwareTypesFragment$data,
 } from "api/__generated__/HardwareTypesTable_HardwareTypesFragment.graphql";
 
+import Table, { createColumnHelper } from "components/Table";
+import { Link, Route } from "Navigation";
+
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const HARDWARE_TYPES_TABLE_FRAGMENT = graphql`
-  fragment HardwareTypesTable_HardwareTypesFragment on HardwareType
-  @relay(plural: true) {
-    id
-    handle
-    name
-    partNumbers {
-      partNumber
+  fragment HardwareTypesTable_HardwareTypesFragment on RootQueryType
+  @refetchable(queryName: "HardwareTypesTable_PaginationQuery") {
+    hardwareTypes(first: $first, after: $after)
+      @connection(key: "HardwareTypesTable_hardwareTypes") {
+      edges {
+        node {
+          id
+          handle
+          name
+          partNumbers {
+            edges {
+              node {
+                partNumber
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;
 
-type TableRecord = HardwareTypesTable_HardwareTypesFragment$data[number];
+type TableRecord = NonNullable<
+  NonNullable<
+    HardwareTypesTable_HardwareTypesFragment$data["hardwareTypes"]
+  >["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
@@ -81,7 +98,7 @@ const columns = [
       />
     ),
     cell: ({ getValue }) =>
-      getValue().map(({ partNumber }, index) => (
+      getValue().edges?.map(({ node: { partNumber } }, index) => (
         <React.Fragment key={partNumber}>
           {index > 0 && ", "}
           <span className="text-nowrap">{partNumber}</span>
@@ -96,12 +113,14 @@ type Props = {
 };
 
 const HardwareTypesTable = ({ className, hardwareTypesRef }: Props) => {
-  const hardwareTypes = useFragment(
-    HARDWARE_TYPES_TABLE_FRAGMENT,
-    hardwareTypesRef,
-  );
+  const { data } = usePaginationFragment<
+    HardwareTypesTable_PaginationQuery,
+    HardwareTypesTable_HardwareTypesFragment$key
+  >(HARDWARE_TYPES_TABLE_FRAGMENT, hardwareTypesRef);
 
-  return <Table className={className} columns={columns} data={hardwareTypes} />;
+  const tableData = data.hardwareTypes?.edges?.map((edge) => edge.node) ?? [];
+
+  return <Table className={className} columns={columns} data={tableData} />;
 };
 
 export default HardwareTypesTable;
