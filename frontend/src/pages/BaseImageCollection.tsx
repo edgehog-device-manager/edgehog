@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -151,17 +152,14 @@ const BaseImageCollectionContent = ({
         }
 
         const root = store.getRoot();
-        const baseImageCollections = root.getLinkedRecords(
-          "baseImageCollections",
+
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "BaseImageCollectionsTable_baseImageCollections",
         );
-        if (baseImageCollections) {
-          root.setLinkedRecords(
-            baseImageCollections.filter(
-              (baseImageCollection) =>
-                baseImageCollection.getDataID() !== baseImageCollectionId,
-            ),
-            "baseImageCollections",
-          );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, baseImageCollectionId);
         }
 
         store.delete(baseImageCollectionId);
