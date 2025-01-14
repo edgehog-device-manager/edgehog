@@ -44,6 +44,7 @@ defmodule Edgehog.OSManagement do
       define :mark_ota_operation_as_timed_out, action: :mark_as_timed_out
       define :update_ota_operation_status, action: :update_status, args: [:status]
       define :send_update_request, args: [:ota_operation]
+      define :delete_ota_operation, action: :destroy
     end
   end
 end

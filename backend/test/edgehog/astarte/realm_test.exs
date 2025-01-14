@@ -55,6 +55,17 @@ defmodule Edgehog.Astarte.RealmTest do
       assert %{field: :private_key} = error
     end
 
+    test "create_realm/2 does not allow creating multiple realms for the same tenant" do
+      tenant = tenant_fixture()
+      cluster = cluster_fixture()
+      _realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+
+      assert {:error, %Invalid{errors: [error]}} =
+               create_realm(tenant: tenant)
+
+      assert %{field: :tenant_id, message: "has already been taken"} = error
+    end
+
     test "with a duplicate name in the same tenant returns error" do
       tenant = tenant_fixture()
       cluster = cluster_fixture()

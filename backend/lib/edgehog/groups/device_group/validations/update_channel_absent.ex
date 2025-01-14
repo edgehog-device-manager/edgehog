@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-ExUnit.start(exclude: [:integration_storage])
-Ecto.Adapters.SQL.Sandbox.mode(Edgehog.Repo, :manual)
+defmodule Edgehog.Groups.DeviceGroup.Validations.UpdateChannelAbsent do
+  @moduledoc false
+  use Ash.Resource.Validation
 
-Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
-  for: Edgehog.Geolocation.GeolocationProvider
-)
+  @impl Ash.Resource.Validation
+  def validate(changeset, _opts, _context) do
+    device_group = changeset.data
 
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock,
-  for: Edgehog.Geolocation.GeocodingProvider
-)
+    if device_group.update_channel_id do
+      {:error,
+       field: :update_channel_id,
+       message: "The update channel is already set for the device group \"#{device_group.name}\"",
+       short_message: "Update channel already set"}
+    else
+      :ok
+    end
+  end
+end

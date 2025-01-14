@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
   describe "createUpdateChannel mutation" do
     test "creates update_channel with valid data", %{tenant: tenant} do
       target_group = device_group_fixture(tenant: tenant)
+      assert target_group.update_channel_id == nil
 
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
@@ -46,6 +47,34 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
       assert target_group_data["id"] == target_group_id
       assert target_group_data["name"] == target_group.name
       assert target_group_data["handle"] == target_group.handle
+    end
+
+    test "creates update_channel with nil target_group_ids", %{tenant: tenant} do
+      name = unique_update_channel_name()
+      handle = unique_update_channel_handle()
+
+      result =
+        [target_group_ids: nil, tenant: tenant, name: name, handle: handle]
+        |> create_update_channel_mutation()
+        |> extract_result!()
+
+      assert result["name"] == name
+      assert result["handle"] == handle
+      assert result["targetGroups"] == []
+    end
+
+    test "creates update_channel with empty target_group_ids", %{tenant: tenant} do
+      name = unique_update_channel_name()
+      handle = unique_update_channel_handle()
+
+      result =
+        [target_group_ids: [], tenant: tenant, name: name, handle: handle]
+        |> create_update_channel_mutation()
+        |> extract_result!()
+
+      assert result["name"] == name
+      assert result["handle"] == handle
+      assert result["targetGroups"] == []
     end
 
     test "fails with missing name", %{tenant: tenant} do
@@ -142,30 +171,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
              } = error
     end
 
-    test "fails with missing target_group_ids", %{tenant: tenant} do
-      error =
-        [target_group_ids: nil, tenant: tenant]
-        |> create_update_channel_mutation()
-        |> extract_error!()
-
-      assert %{message: message} = error
-      assert message =~ ~s<In field "targetGroupIds": Expected type "[ID!]!", found null.>
-    end
-
-    test "fails with empty target_group_ids", %{tenant: tenant} do
-      error =
-        [target_group_ids: [], tenant: tenant]
-        |> create_update_channel_mutation()
-        |> extract_error!()
-
-      assert %{
-               path: ["createUpdateChannel"],
-               fields: [:target_group_ids],
-               message: "must have 1 or more items",
-               code: "invalid_argument"
-             } = error
-    end
-
     test "fails when trying to use a non-existing target group", %{tenant: tenant} do
       target_group_id = non_existing_device_group_id(tenant)
 
@@ -177,14 +182,19 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
       assert %{
                path: ["createUpdateChannel"],
                fields: [:target_group_ids],
-               message: "some target groups were not found or are already associated with an update channel",
-               code: "invalid_argument"
+               message: "One or more target groups could not be found",
+               code: "not_found"
              } = error
     end
 
     test "fails when trying to use already assigned target groups", %{tenant: tenant} do
       target_group = device_group_fixture(tenant: tenant)
-      _ = update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
+
+      _ =
+        update_channel_fixture(
+          tenant: tenant,
+          target_group_ids: [target_group.id]
+        )
 
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
@@ -195,10 +205,12 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateChannelTest do
 
       assert %{
                path: ["createUpdateChannel"],
-               fields: [:target_group_ids],
-               message: "some target groups were not found or are already associated with an update channel",
-               code: "invalid_argument"
+               fields: [:update_channel_id],
+               message: "The update channel is already set for the device group " <> name,
+               code: "invalid_attribute"
              } = error
+
+      assert name == ~s["#{target_group.name}"]
     end
   end
 
