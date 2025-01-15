@@ -19,8 +19,9 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
+import type { UpdateChannelsTable_PaginationQuery } from "api/__generated__/UpdateChannelsTable_PaginationQuery.graphql";
 import type {
   UpdateChannelsTable_UpdateChannelFragment$data,
   UpdateChannelsTable_UpdateChannelFragment$key,
@@ -33,22 +34,33 @@ import { Link, Route } from "Navigation";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
-  fragment UpdateChannelsTable_UpdateChannelFragment on UpdateChannel
-  @relay(plural: true) {
-    id
-    name
-    handle
-    targetGroups {
+  fragment UpdateChannelsTable_UpdateChannelFragment on RootQueryType
+  @refetchable(queryName: "UpdateChannelsTable_PaginationQuery") {
+    updateChannels(first: $first, after: $after)
+      @connection(key: "UpdateChannelsTable_updateChannels") {
       edges {
         node {
+          id
           name
+          handle
+          targetGroups {
+            edges {
+              node {
+                name
+              }
+            }
+          }
         }
       }
     }
   }
 `;
 
-type TableRecord = UpdateChannelsTable_UpdateChannelFragment$data[0];
+type TableRecord = NonNullable<
+  NonNullable<
+    UpdateChannelsTable_UpdateChannelFragment$data["updateChannels"]
+  >["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
@@ -105,14 +117,14 @@ type Props = {
 };
 
 const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
-  const updateChannels = useFragment(
-    DEVICE_GROUPS_TABLE_FRAGMENT,
-    updateChannelsRef,
-  );
+  const { data } = usePaginationFragment<
+    UpdateChannelsTable_PaginationQuery,
+    UpdateChannelsTable_UpdateChannelFragment$key
+  >(DEVICE_GROUPS_TABLE_FRAGMENT, updateChannelsRef);
 
-  return (
-    <Table className={className} columns={columns} data={updateChannels} />
-  );
+  const tableData = data.updateChannels?.edges?.map((edge) => edge.node) ?? [];
+
+  return <Table className={className} columns={columns} data={tableData} />;
 };
 
 export default UpdateChannelsTable;

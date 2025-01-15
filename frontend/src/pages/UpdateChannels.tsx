@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { UpdateChannels_getUpdateChannels_Query } from "api/__generated__/UpdateChannels_getUpdateChannels_Query.graphql";
+
 import Button from "components/Button";
 import Center from "components/Center";
 import UpdateChannelsTable from "components/UpdateChannelsTable";
@@ -33,10 +34,8 @@ import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
 const GET_UPDATE_CHANNELS_QUERY = graphql`
-  query UpdateChannels_getUpdateChannels_Query {
-    updateChannels {
-      ...UpdateChannelsTable_UpdateChannelFragment
-    }
+  query UpdateChannels_getUpdateChannels_Query($first: Int, $after: String) {
+    ...UpdateChannelsTable_UpdateChannelFragment
   }
 `;
 
@@ -47,7 +46,7 @@ type UpdateChannelsContentProps = {
 const UpdateChannelsContent = ({
   getUpdateChannelsQuery,
 }: UpdateChannelsContentProps) => {
-  const { updateChannels } = usePreloadedQuery(
+  const updateChannels = usePreloadedQuery(
     GET_UPDATE_CHANNELS_QUERY,
     getUpdateChannelsQuery,
   );
@@ -83,7 +82,11 @@ const UpdateChannelsPage = () => {
     );
 
   const fetchUpdateChannels = useCallback(
-    () => getUpdateChannels({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getUpdateChannels(
+        { first: 10_000 },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getUpdateChannels],
   );
 
