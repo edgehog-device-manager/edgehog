@@ -21,9 +21,14 @@
 defmodule Edgehog.Containers.Volume do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Volume.Calculations
+
+  graphql do
+    type :volume
+  end
 
   actions do
     defaults [
