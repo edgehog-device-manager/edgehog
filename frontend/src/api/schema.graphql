@@ -1885,6 +1885,27 @@ enum DeviceGroupSortField {
   SELECTOR
 }
 
+":device_group connection"
+type DeviceGroupConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_group edges"
+  edges: [DeviceGroupEdge!]
+}
+
+":device_group edge"
+type DeviceGroupEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_group node"
+  node: DeviceGroup!
+}
+
 input DeviceGroupFilterSelector {
   isNil: Boolean
   eq: String
@@ -2598,12 +2619,18 @@ type UpdateChannel implements Node {
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [DeviceGroup!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceGroupConnection!
 }
 
 "The result of the :create_update_campaign mutation"
@@ -2906,7 +2933,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
-  ): [DeviceGroup!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceGroupConnection
 
   """
   Fetches the forwarder config, if available.

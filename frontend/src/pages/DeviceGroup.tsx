@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -137,24 +138,23 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        if (!data?.deleteDeviceGroup?.result?.id) {
+        const deviceGroupId = data?.deleteDeviceGroup?.result?.id;
+        if (!deviceGroupId) {
           return;
         }
 
         const deviceGroup = store
           .getRootField("deleteDeviceGroup")
           .getLinkedRecord("result");
-        const deviceGroupId = deviceGroup.getDataID();
         const root = store.getRoot();
 
-        const deviceGroups = root.getLinkedRecords("deviceGroups");
-        if (deviceGroups) {
-          root.setLinkedRecords(
-            deviceGroups.filter(
-              (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId,
-            ),
-            "deviceGroups",
-          );
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "DeviceGroupsTable_deviceGroups",
+        );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, deviceGroupId);
         }
 
         const devices = deviceGroup.getLinkedRecords("devices");
