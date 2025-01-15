@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ defmodule Edgehog.Containers.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    authorizers: [Ash.Policy.Authorizer]
 
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.ManualActions
@@ -158,15 +159,15 @@ defmodule Edgehog.Containers.Deployment do
     end
   end
 
-  identities do
-    identity :release_instance, [:device_id, :release_id]
-  end
-
   postgres do
     table "application_deployments"
 
     references do
       reference :device, on_delete: :delete
     end
+  end
+
+  identities do
+    identity :release_instance, [:device_id, :release_id]
   end
 end

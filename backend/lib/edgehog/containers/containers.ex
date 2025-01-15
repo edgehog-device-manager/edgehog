@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ defmodule Edgehog.Containers do
   @moduledoc false
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain
+      AshGraphql.Domain,
+      Ash.Policy.Authorizer
     ]
 
   alias Edgehog.Containers.Application
@@ -141,5 +142,11 @@ defmodule Edgehog.Containers do
     end
 
     resource Upgrade
+  end
+
+  policies do
+    policy always() do
+      authorize_if {Edgehog.Policies.ActorHasFeatureFlag, flag: :containers}
+    end
   end
 end
