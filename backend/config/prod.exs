@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import Config
 # which you should run after static files are built and
 # before starting your production server.
 config :edgehog, EdgehogWeb.Endpoint, url: [host: "example.com", port: 80]
+config :edgehog, :features, containers: false
 
 # Configure Logfmt
 config :logger, :console, format: {PrettyLog.LogfmtFormatter, :format}

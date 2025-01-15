@@ -62,13 +62,13 @@ defmodule Edgehog.Containers.Network do
     timestamps()
   end
 
+  postgres do
+    table "networks"
+  end
+
   relationships do
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ContainerNetwork
     end
-  end
-
-  postgres do
-    table "networks"
   end
 end
