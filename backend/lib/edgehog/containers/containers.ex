@@ -22,7 +22,8 @@ defmodule Edgehog.Containers do
   @moduledoc false
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain
+      AshGraphql.Domain,
+      Ash.Policy.Authorizer
     ]
 
   alias Edgehog.Containers.Application
@@ -201,5 +202,11 @@ defmodule Edgehog.Containers do
     end
 
     resource Upgrade
+  end
+
+  policies do
+    policy always() do
+      authorize_if {Edgehog.Policies.ActorHasFeatureFlag, flag: :containers}
+    end
   end
 end
