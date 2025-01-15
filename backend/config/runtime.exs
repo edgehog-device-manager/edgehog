@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 import Config
 
-alias Azurex.Blob.Config
+alias Edgehog.Config
 alias Waffle.Storage.Google.CloudStorage
 alias Waffle.Storage.S3
 
@@ -140,7 +140,7 @@ if config_env() in [:prod, :test] do
       :prod -> edgehog_enable_s3_storage?
     end
 
-  config :azurex, Config,
+  config :azurex, Azurex.Blob.Config,
     api_url: azure_api_url,
     default_container: azure.container,
     storage_account_name: azure.storage_account_name,
