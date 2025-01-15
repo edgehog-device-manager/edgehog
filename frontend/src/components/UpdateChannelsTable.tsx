@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -39,7 +39,11 @@ const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
     name
     handle
     targetGroups {
-      name
+      edges {
+        node {
+          name
+        }
+      }
     }
   }
 `;
@@ -85,7 +89,7 @@ const columns = [
     ),
     cell: ({ getValue }) => (
       <>
-        {getValue().map((group) => (
+        {getValue().edges?.map(({ node: group }) => (
           <Tag key={group.name} className="me-2">
             {group.name}
           </Tag>

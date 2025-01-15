@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2024 SECO Mind Srl
+  Copyright 2022-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { DeviceGroups_getDeviceGroups_Query } from "api/__generated__/DeviceGroups_getDeviceGroups_Query.graphql";
+
 import Button from "components/Button";
 import Center from "components/Center";
 import DeviceGroupsTable from "components/DeviceGroupsTable";
@@ -33,10 +34,8 @@ import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
 const GET_DEVICE_GROUPS_QUERY = graphql`
-  query DeviceGroups_getDeviceGroups_Query {
-    deviceGroups {
-      ...DeviceGroupsTable_DeviceGroupFragment
-    }
+  query DeviceGroups_getDeviceGroups_Query($first: Int, $after: String) {
+    ...DeviceGroupsTable_DeviceGroupFragment
   }
 `;
 
@@ -47,7 +46,7 @@ interface DeviceGroupsContentProps {
 const DeviceGroupsContent = ({
   getDeviceGroupsQuery,
 }: DeviceGroupsContentProps) => {
-  const { deviceGroups } = usePreloadedQuery(
+  const deviceGroups = usePreloadedQuery(
     GET_DEVICE_GROUPS_QUERY,
     getDeviceGroupsQuery,
   );
@@ -81,7 +80,8 @@ const DevicesPage = () => {
     useQueryLoader<DeviceGroups_getDeviceGroups_Query>(GET_DEVICE_GROUPS_QUERY);
 
   const fetchDeviceGroups = useCallback(
-    () => getDeviceGroups({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getDeviceGroups({ first: 10_000 }, { fetchPolicy: "store-and-network" }),
     [getDeviceGroups],
   );
 
