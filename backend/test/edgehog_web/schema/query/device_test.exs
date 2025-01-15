@@ -111,7 +111,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
 
     test "queries associated application deployments", %{tenant: tenant} do
-      fixture = device_fixture(tenant: tenant)
+      fixture = [tenant: tenant] |> device_fixture() |> Ash.load!(:realm, tenant: tenant)
 
       deployments = [
         Edgehog.ContainersFixtures.deployment_fixture(device_id: fixture.id, tenant: tenant),
@@ -120,7 +120,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
       deployments = Enum.sort_by(deployments, & &1.release_id)
 
-      _extra_deployment = Edgehog.ContainersFixtures.deployment_fixture(tenant: tenant)
+      _extra_deployment =
+        Edgehog.ContainersFixtures.deployment_fixture(realm_id: fixture.realm.id, tenant: tenant)
 
       document = """
       query ($id: ID!) {

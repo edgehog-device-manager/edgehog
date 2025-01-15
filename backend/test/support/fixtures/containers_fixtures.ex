@@ -178,11 +178,19 @@ defmodule Edgehog.ContainersFixtures do
   def deployment_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
+    {realm_id, opts} =
+      case opts[:device_id] do
+        nil ->
+          Keyword.pop_lazy(opts, :realm_id, fn ->
+            AstarteFixtures.realm_fixture(tenant: tenant).id
+          end)
+
+        _ ->
+          {nil, opts}
+      end
+
     {device_id, opts} =
       Keyword.pop_lazy(opts, :device_id, fn ->
-        {realm_id, _opts} =
-          Keyword.pop(opts, :realm_id, AstarteFixtures.realm_fixture(tenant: tenant).id)
-
         Edgehog.DevicesFixtures.device_fixture(realm_id: realm_id, tenant: tenant).id
       end)
 
