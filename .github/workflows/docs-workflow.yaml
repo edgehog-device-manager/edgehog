@@ -115,11 +115,9 @@ jobs:
     # Copy docs over to the docs repository
     - name: Copy Docs, preserving Device SDK docs
       run: |
-        export DOCS_DIRNAME="$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/main/snapshot/g' | sed 's/release-//g')"
+        export DOCS_DIRNAME="$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/main/snapshot/g' | sed 's/release-//g')"
         rm -rf docs/$DOCS_DIRNAME
         mkdir docs/$DOCS_DIRNAME
-        # Restore Device SDK docs. Don't fail if they're not there.
-        cd docs && git restore $DOCS_DIRNAME/device-sdks || true && cd ..
         # Copy doc pages
         cp -r edgehog/doc/doc/* docs/$DOCS_DIRNAME/
         # Copy version dropdown config
@@ -128,6 +126,15 @@ jobs:
         cp -r ./edgehog/backend/tenant-graphql-api docs/$DOCS_DIRNAME/
         # Copy Admin REST API docs
         cp -r ./edgehog/backend/admin-rest-api docs/$DOCS_DIRNAME/
+
+    # Upload as an artifact the generated HTML
+    - name: Upload HTML documentation
+      uses: actions/upload-artifact@v4
+      with:
+        name: docs_html
+        path: ./docs
+
+    # Commit and push changes to the docs repository
     - name: Commit files
       working-directory: ./docs
       run: |

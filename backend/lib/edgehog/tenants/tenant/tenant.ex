@@ -31,6 +31,7 @@ defmodule Edgehog.Tenants.Tenant do
   alias Ash.Error.Invalid.TenantRequired
   alias Edgehog.Tenants.AstarteConfig
   alias Edgehog.Tenants.Tenant
+  alias Edgehog.Tenants.Tenant.Changes
   alias Edgehog.Validations
 
   require Ash.Query
@@ -60,7 +61,7 @@ defmodule Edgehog.Tenants.Tenant do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
 
     create :create do
       primary? true
@@ -98,6 +99,13 @@ defmodule Edgehog.Tenants.Tenant do
       end
 
       run Tenant.ManualActions.ReconcilerAction
+    end
+
+    destroy :destroy do
+      description "Destroy tenant handling resource cleanup."
+
+      require_atomic? false
+      change Changes.HandleCleanup
     end
   end
 

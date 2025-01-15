@@ -84,6 +84,7 @@ defmodule Edgehog.Astarte.Realm do
   identities do
     identity :name, [:name]
     identity :unique_name_for_cluster, [:name, :cluster_id], all_tenants?: true
+    identity :one_realm_per_tenant, [:tenant_id]
   end
 
   postgres do

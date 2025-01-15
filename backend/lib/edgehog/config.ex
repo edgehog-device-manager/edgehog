@@ -43,6 +43,30 @@ defmodule Edgehog.Config do
     os_env: "ADMIN_JWT_PUBLIC_KEY_PATH",
     type: JWTPublicKeyPEMType
 
+  @envdoc "Whether edgehog should use a tls connection with the database or not."
+  app_env :database_enable_ssl, :edgehog, :database_enable_ssl,
+    os_env: "DATABASE_ENABLE_SSL",
+    type: :boolean,
+    default: false
+
+  @envdoc "The certificate file to use to verify the ssl connection with the database."
+  app_env :database_ssl_cacertfile, :edgehog, :database_ssl_cacertfile,
+    os_env: "DATABASE_SSL_CACERTFILE",
+    type: :binary,
+    default: ""
+
+  @envdoc "Whether to use the os certificates to communicate with the database over ssl."
+  app_env :database_use_os_certs, :edgehog, :database_use_os_certs,
+    os_env: "DATABASE_USE_OS_CERTS",
+    type: :boolean,
+    default: false
+
+  @envdoc "Whether to verify the ssl connection with the database or not."
+  app_env :database_ssl_verify, :edgehog, :database_ssl_verify,
+    os_env: "DATABASE_SSL_VERIFY",
+    type: :boolean,
+    default: false
+
   @envdoc """
   Disables tenant authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
   """
@@ -93,6 +117,67 @@ defmodule Edgehog.Config do
   """
   @spec admin_authentication_disabled?() :: boolean()
   def admin_authentication_disabled?, do: disable_admin_authentication!()
+
+  @doc """
+  Returns true if edgehog should use an ssl connection with the database.
+  """
+  @spec database_enable_ssl?() :: boolean()
+  def database_enable_ssl?, do: database_enable_ssl!()
+
+  @doc """
+  Reutrns whether to verify the ssl connection witht he database or not.
+  """
+  @spec database_ssl_verify?() :: boolean()
+  def database_ssl_verify?, do: database_ssl_verify!()
+
+  @doc """
+  Returns true if edgehog should use the operative system certificates.
+  """
+  @spec database_use_os_certs?() :: boolean()
+  def database_use_os_certs?, do: database_use_os_certs!()
+
+  defp database_ssl_cert_config do
+    use_os_certs = database_use_os_certs?()
+
+    certfile = System.get_env("DATABASE_SSL_CACERTFILE")
+
+    case {certfile, use_os_certs} do
+      {nil, false} ->
+        raise """
+        invalid database SSL configuration:
+        either set DATABASE_USE_OS_CERTS true to use system's certificates
+        or provide a CA certificate file with DATABASE_SSL_CACERTFILE.
+        The latter will take precedence.
+        """
+
+      {nil, true} ->
+        {:cacerts, :public_key.cacerts_get()}
+
+      {file, _} ->
+        # Assuming `file` is a file path
+        {:cacertfile, file}
+    end
+  end
+
+  @doc """
+  Returns the Ecto configuration for the ssl connection to the database.
+  """
+  @spec database_ssl_config_opts() :: list(term())
+  def database_ssl_config_opts do
+    if database_ssl_verify?(),
+      do: [{:verify, :verify_peer}, database_ssl_cert_config()],
+      else: [verify: :verify_none]
+  end
+
+  @doc """
+  Returns the database configuration for the database connection.
+  """
+  @spec database_ssl_config() :: false | list(term())
+  def database_ssl_config do
+    if database_enable_ssl?(),
+      do: database_ssl_config_opts(),
+      else: false
+  end
 
   @doc """
   Returns true if tenant authentication is disabled.

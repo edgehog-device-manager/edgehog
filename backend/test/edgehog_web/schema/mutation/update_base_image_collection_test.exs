@@ -86,7 +86,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateBaseImageCollectionTest do
           handle: ""
         )
 
-      assert %{fields: [:handle], message: "should start with" <> _} =
+      assert %{fields: [:handle], message: "is required"} =
                extract_error!(result)
     end
 
