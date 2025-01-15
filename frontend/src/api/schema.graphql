@@ -2528,6 +2528,27 @@ enum UpdateChannelSortField {
   NAME
 }
 
+":update_channel connection"
+type UpdateChannelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":update_channel edges"
+  edges: [UpdateChannelEdge!]
+}
+
+":update_channel edge"
+type UpdateChannelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":update_channel node"
+  node: UpdateChannel!
+}
+
 input UpdateChannelFilterName {
   isNil: Boolean
   eq: String
@@ -2897,7 +2918,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: UpdateChannelFilterInput
-  ): [UpdateChannel!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): UpdateChannelConnection
 
   "Retrieves the current tenant."
   tenantInfo: TenantInfo!

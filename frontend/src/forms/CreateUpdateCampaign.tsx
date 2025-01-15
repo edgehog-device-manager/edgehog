@@ -47,8 +47,12 @@ const UPDATE_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
       }
     }
     updateChannels {
-      id
-      name
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
   }
 `;
@@ -314,7 +318,7 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select an Update Channel",
               })}
             </option>
-            {updateChannels.map((updateChannel) => (
+            {updateChannels?.edges?.map(({ node: updateChannel }) => (
               <option key={updateChannel.id} value={updateChannel.id}>
                 {updateChannel.name}
               </option>

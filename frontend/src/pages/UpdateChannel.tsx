@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -177,14 +178,13 @@ const UpdateChannelContent = ({
 
         const root = store.getRoot();
 
-        const updateChannels = root.getLinkedRecords("updateChannels");
-        if (updateChannels) {
-          root.setLinkedRecords(
-            updateChannels.filter(
-              (updateChannel) => updateChannel.getDataID() !== updateChannelId,
-            ),
-            "updateChannels",
-          );
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "UpdateChannelsTable_updateChannels",
+        );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, updateChannelId);
         }
 
         const targetGroupIds = new Set(

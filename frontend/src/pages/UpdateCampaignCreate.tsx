@@ -35,6 +35,7 @@ import type {
   UpdateCampaignCreate_getOptions_Query$data,
 } from "api/__generated__/UpdateCampaignCreate_getOptions_Query.graphql";
 import type { UpdateCampaignCreate_createUpdateCampaign_Mutation } from "api/__generated__/UpdateCampaignCreate_createUpdateCampaign_Mutation.graphql";
+
 import Alert from "components/Alert";
 import Button from "components/Button";
 import Center from "components/Center";
@@ -53,6 +54,7 @@ const GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY = graphql`
     }
     updateChannels {
       __typename
+      count
     }
     ...CreateUpdateCampaign_OptionsFragment
   }
@@ -218,7 +220,7 @@ const UpdateCampaignWrapper = ({
   if (baseImageCollections?.count === 0) {
     return <NoBaseImageCollections />;
   }
-  if (updateChannels.length === 0) {
+  if (updateChannels?.count === 0) {
     return <NoUpdateChannels />;
   }
 
