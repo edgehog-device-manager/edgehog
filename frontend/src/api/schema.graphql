@@ -2344,6 +2344,27 @@ enum UpdateTargetSortField {
   COMPLETION_TIMESTAMP
 }
 
+":update_target connection"
+type UpdateTargetConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":update_target edges"
+  edges: [UpdateTargetEdge!]
+}
+
+":update_target edge"
+type UpdateTargetEdge {
+  "Cursor"
+  cursor: String!
+
+  ":update_target node"
+  node: UpdateTarget!
+}
+
 input UpdateTargetFilterCompletionTimestamp {
   isNil: Boolean
   eq: DateTime
@@ -2689,6 +2710,27 @@ enum UpdateCampaignSortField {
   SUCCESSFUL_TARGET_COUNT
 }
 
+":update_campaign connection"
+type UpdateCampaignConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":update_campaign edges"
+  edges: [UpdateCampaignEdge!]
+}
+
+":update_campaign edge"
+type UpdateCampaignEdge {
+  "Cursor"
+  cursor: String!
+
+  ":update_campaign node"
+  node: UpdateCampaign!
+}
+
 input UpdateCampaignFilterSuccessfulTargetCount {
   isNil: Boolean
   eq: Int
@@ -2872,12 +2914,18 @@ type UpdateCampaign implements Node {
     "A filter to limit the results"
     filter: UpdateTargetFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [UpdateTarget!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): UpdateTargetConnection!
 
   "The total number of update targets."
   totalTargetCount: Int!
@@ -2906,7 +2954,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: UpdateCampaignFilterInput
-  ): [UpdateCampaign!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): UpdateCampaignConnection
 
   "Returns a single update channel."
   updateChannel("The id of the record" id: ID!): UpdateChannel

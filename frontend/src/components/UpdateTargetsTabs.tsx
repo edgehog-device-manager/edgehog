@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -37,8 +37,12 @@ import UpdateTargetStatus from "components/UpdateTargetStatus";
 const UPDATE_TARGETS_TABS_FRAGMENT = graphql`
   fragment UpdateTargetsTabs_UpdateTargetsFragment on UpdateCampaign {
     updateTargets {
-      status
-      ...UpdateTargetsTable_UpdateTargetsFragment
+      edges {
+        node {
+          status
+          ...UpdateTargetsTable_UpdateTargetsFragment
+        }
+      }
     }
   }
 `;
@@ -88,7 +92,10 @@ const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
     updateCampaignRef,
   );
   const visibleTargets = useMemo(
-    () => updateTargets.filter(({ status }) => status === activeTab),
+    () =>
+      updateTargets.edges
+        ?.filter(({ node }) => node.status === activeTab)
+        .map(({ node }) => node) || [],
     [activeTab, updateTargets],
   );
   const hiddenColumns = useMemo(() => getHiddenColumns(activeTab), [activeTab]);
