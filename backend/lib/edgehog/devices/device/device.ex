@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Changes.NormalizeTagName
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device.BatterySlot
@@ -274,6 +275,11 @@ defmodule Edgehog.Devices.Device do
         description: "The Container the device has to initiate.",
         allow_nil?: false
 
+      argument :networks, {:array, :struct} do
+        constraints items: [instance_of: Network]
+        description "The networks attached to the Container"
+      end
+
       manual ManualActions.SendCreateContainer
     end
 
@@ -281,7 +287,7 @@ defmodule Edgehog.Devices.Device do
       description "Sends a create network request to the device."
 
       argument :network, :struct,
-        constraints: [instance_of: Edgehog.Containers.Network],
+        constraints: [instance_of: Network],
         description: "The Network the device has to create.",
         allow_nil?: false
 

@@ -26,18 +26,49 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
   import Edgehog.ContainersFixtures
 
   describe "createRelease mutation" do
-    test "create release with valid application", %{tenant: tenant} do
+    test "create release with valid application and parameters", %{tenant: tenant} do
       application = application_fixture(tenant: tenant)
       application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      network = network_fixture(tenant: tenant)
+      existing_network_id = AshGraphql.Resource.encode_relay_id(network)
+
+      container_hostname = "new_container"
+      network_driver = "custom_driver"
+
+      containers = [
+        %{"hostname" => container_hostname, "image" => %{"reference" => "alpine:latest"}}
+      ]
+
+      networks = [%{"driver" => network_driver}, %{"id" => existing_network_id}]
+
       version = "0.0.1"
 
       release =
-        [tenant: tenant, application_id: application_id, version: version]
+        [
+          tenant: tenant,
+          application_id: application_id,
+          version: version,
+          containers: containers,
+          networks: networks
+        ]
         |> create_release()
         |> extract_result!()
 
       assert release["version"] == version
       assert release["application"]["id"] == application_id
+
+      {:ok, %{id: release_id}} = AshGraphql.Resource.decode_relay_id(release["id"])
+
+      release =
+        Ash.get!(Edgehog.Containers.Release, release_id,
+          tenant: tenant,
+          load: [:containers, :networks]
+        )
+
+      assert Enum.find(release.containers, &(&1.hostname == container_hostname))
+      assert Enum.find(release.networks, &(&1.driver == network_driver))
+      assert Enum.find(release.networks, &(&1.id == network.id))
     end
 
     test "create release with invalid application throws error", %{tenant: tenant} do
@@ -78,6 +109,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
     mutation CreateRelease($input: CreateReleaseInput!) {
       createRelease(input: $input) {
         result {
+          id
           version
           application {
             id
@@ -96,7 +128,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
 
     input =
       opts
-      |> Keyword.take([:application_id, :version, :containers])
+      |> Keyword.take([:application_id, :version, :containers, :networks])
       |> Enum.into(default_input, fn {key, value} -> {Atom.to_string(key), value} end)
 
     variables = %{"input" => input}

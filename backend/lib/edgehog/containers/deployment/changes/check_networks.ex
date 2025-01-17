@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,15 +28,16 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckNetworks do
 
     with {:ok, :created_images} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
          {:ok, deployment} <-
-           Ash.load(deployment, device: :available_networks, release: [containers: [:networks]]) do
+           Ash.load(deployment,
+             device: :available_networks,
+             release: [:release_networks, :containers]
+           ) do
       available_network_ids =
         Enum.map(deployment.device.available_networks, & &1.id)
 
       missing_networks =
-        deployment.release.containers
-        |> Enum.flat_map(& &1.networks)
-        |> Enum.map(& &1.id)
-        |> Enum.uniq()
+        deployment.release.release_networks
+        |> Enum.map(& &1.network_id)
         |> Enum.reject(&(&1 in available_network_ids))
 
       if missing_networks == [] do

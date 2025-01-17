@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
   alias Edgehog.Containers
+  alias Edgehog.Containers.Network
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
   alias Edgehog.Triggers.DeviceConnected
@@ -144,24 +145,20 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   defp handle_event(%IncomingData{interface: @available_networks} = event, tenant, _realm_id, _device_id, _timestamp) do
     case String.split(event.path, "/") do
       ["", network_id, "created"] ->
-        containers =
-          network_id
-          |> Containers.containers_with_network!(tenant: tenant, load: :container)
-          |> Enum.map(& &1.container_id)
-          |> Enum.uniq()
-
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
+        network =
+          Ash.get!(Network, network_id,
+            load: [releases: [:deployments]],
+            strict?: true,
+            tenant: tenant
+          )
 
         deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
+          network.releases
+          |> Enum.flat_map(& &1.deployments)
           |> Enum.uniq_by(& &1.id)
+          |> Enum.map(&Containers.deployment_update_status!/1)
 
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+        {:ok, deployments}
 
       _ ->
         {:error, :invalid_event_path}

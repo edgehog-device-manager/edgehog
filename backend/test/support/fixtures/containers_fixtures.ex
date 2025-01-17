@@ -221,7 +221,7 @@ defmodule Edgehog.ContainersFixtures do
 
   def set_resource_expectations(deployments, new_deployments \\ 1) do
     deployments =
-      Enum.map(deployments, &Ash.load!(&1, release: [containers: [:image, :networks]]))
+      Enum.map(deployments, &Ash.load!(&1, release: [:networks, containers: [:image]]))
 
     containers =
       deployments
@@ -237,8 +237,8 @@ defmodule Edgehog.ContainersFixtures do
       |> Enum.uniq()
 
     available_networks =
-      containers
-      |> Enum.flat_map(& &1.networks)
+      deployments
+      |> Enum.flat_map(& &1.release.networks)
       |> Enum.map(&%NetworkStatus{id: &1.id, created: false})
       |> Enum.uniq()
 
