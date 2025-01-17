@@ -19,6 +19,8 @@
 */
 
 import { yupResolver } from "@hookform/resolvers/yup";
+import { InputGroup } from "react-bootstrap";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
@@ -28,6 +30,7 @@ import Form from "components/Form";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import Icon from "components/Icon";
 import { yup } from "forms";
 
 const FormRow = ({
@@ -83,8 +86,15 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
     resolver: yupResolver(imageCredentialSchema),
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleFormSubmit = (data: ImageCredentialData) => {
+    setShowPassword(false);
+    onSubmit(data);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
+    <form onSubmit={handleSubmit(handleFormSubmit)} autoComplete="off">
       <Stack gap={3}>
         <FormRow
           id="image-credential-form-label"
@@ -133,20 +143,37 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
             />
           }
         >
-          <Form.Control
-            {...register("password")}
-            type="password"
-            isInvalid={!!errors.password}
-            autoComplete="off"
-            onCopy={(e) => e.preventDefault()}
-            onCut={(e) => e.preventDefault()}
-          />
-
-          <Form.Control.Feedback type="invalid">
-            {errors.password?.message && (
-              <FormattedMessage id={errors.password?.message} />
-            )}
-          </Form.Control.Feedback>
+          <InputGroup>
+            <Form.Control
+              {...register("password")}
+              type={showPassword ? "text" : "password"}
+              isInvalid={!!errors.password}
+              autoComplete="off"
+              onCopy={(e) => e.preventDefault()}
+              onCut={(e) => e.preventDefault()}
+            />
+            <Button
+              variant={"outlined"}
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                borderTopRightRadius: "0.25rem",
+                borderBottomRightRadius: "0.25rem",
+                borderTopLeftRadius: "0",
+                borderBottomLeftRadius: "0",
+                backgroundColor: "#e0e0e0",
+              }}
+            >
+              <Icon
+                icon={showPassword ? "showPassword" : "hidePassword"}
+                style={{ width: "1.4em" }}
+              />
+            </Button>
+            <Form.Control.Feedback type="invalid">
+              {errors.password?.message && (
+                <FormattedMessage id={errors.password?.message} />
+              )}
+            </Form.Control.Feedback>
+          </InputGroup>
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">
