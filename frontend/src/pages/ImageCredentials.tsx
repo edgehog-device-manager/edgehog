@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,14 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Link, Route } from "Navigation";
-import type { ImageCredentials_imageCredentials_Query } from "api/__generated__/ImageCredentials_imageCredentials_Query.graphql";
-import Button from "components/Button";
-import Center from "components/Center";
-import ImageCredentialsTable from "components/ImageCredentialsTable";
-import Page from "components/Page";
-import Spinner from "components/Spinner";
-import { FunctionComponent, Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import {
@@ -35,8 +28,14 @@ import {
   useQueryLoader,
 } from "react-relay";
 
-const { LoadingError, Header, Main } = Page;
-const { imageCredentialsNew } = Route;
+import type { ImageCredentials_imageCredentials_Query } from "api/__generated__/ImageCredentials_imageCredentials_Query.graphql";
+
+import Button from "components/Button";
+import Center from "components/Center";
+import ImageCredentialsTable from "components/ImageCredentialsTable";
+import Page from "components/Page";
+import Spinner from "components/Spinner";
+import { Link, Route } from "Navigation";
 
 const IMAGE_CREDENTIALS_QUERY = graphql`
   query ImageCredentials_imageCredentials_Query {
@@ -49,22 +48,22 @@ const IMAGE_CREDENTIALS_QUERY = graphql`
   }
 `;
 
-interface ContentProps {
-  initialQueryRef: PreloadedQuery<ImageCredentials_imageCredentials_Query>;
+interface ImageCredentialsContentProps {
+  getImageCredentialsQuery: PreloadedQuery<ImageCredentials_imageCredentials_Query>;
 }
 
-const ImageCredentialsContent: FunctionComponent<ContentProps> = ({
-  initialQueryRef,
-}) => {
+const ImageCredentialsContent = ({
+  getImageCredentialsQuery,
+}: ImageCredentialsContentProps) => {
   const { listImageCredentials } =
     usePreloadedQuery<ImageCredentials_imageCredentials_Query>(
       IMAGE_CREDENTIALS_QUERY,
-      initialQueryRef,
+      getImageCredentialsQuery,
     );
 
   return (
     <Page>
-      <Header
+      <Page.Header
         title={
           <FormattedMessage
             id="pages.ImageCredentials.title"
@@ -72,26 +71,24 @@ const ImageCredentialsContent: FunctionComponent<ContentProps> = ({
           />
         }
       >
-        <Button as={Link} route={imageCredentialsNew}>
+        <Button as={Link} route={Route.imageCredentialsNew}>
           <FormattedMessage
             id="pages.ImageCredentials.createButton"
-            description="Create a new Application Credentials"
+            defaultMessage="Create Image Credentials"
           />
         </Button>
-      </Header>
-      <Main>
+      </Page.Header>
+      <Page.Main>
         <ImageCredentialsTable
           listImageCredentialsRef={listImageCredentials!.results!}
         />
-      </Main>
+      </Page.Main>
     </Page>
   );
 };
 
-interface PageProps {}
-
-const ImageCredentialsPage: FunctionComponent<PageProps> = () => {
-  const [listImageCredentialsQuery, getImageCredentials] =
+const ImageCredentialsPage = () => {
+  const [getImageCredentialsQuery, getImageCredentials] =
     useQueryLoader<ImageCredentials_imageCredentials_Query>(
       IMAGE_CREDENTIALS_QUERY,
     );
@@ -114,14 +111,14 @@ const ImageCredentialsPage: FunctionComponent<PageProps> = () => {
       <ErrorBoundary
         FallbackComponent={({ resetErrorBoundary }) => (
           <Center data-testid="page-error">
-            <LoadingError onRetry={resetErrorBoundary} />
+            <Page.LoadingError onRetry={resetErrorBoundary} />
           </Center>
         )}
         onReset={fetchImageCredentials}
       >
-        {listImageCredentialsQuery && (
+        {getImageCredentialsQuery && (
           <ImageCredentialsContent
-            initialQueryRef={listImageCredentialsQuery}
+            getImageCredentialsQuery={getImageCredentialsQuery}
           />
         )}
       </ErrorBoundary>
