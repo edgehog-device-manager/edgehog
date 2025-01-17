@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ defmodule Edgehog.ContainersFixtures do
 
   def set_resource_expectations(deployments, new_deployments \\ 1) do
     deployments =
-      Enum.map(deployments, &Ash.load!(&1, release: [containers: [:image, :networks]]))
+      Enum.map(deployments, &Ash.load!(&1, release: [:networks, containers: [:image]]))
 
     containers =
       deployments
@@ -224,8 +224,8 @@ defmodule Edgehog.ContainersFixtures do
       |> Enum.uniq()
 
     available_networks =
-      containers
-      |> Enum.flat_map(& &1.networks)
+      deployments
+      |> Enum.flat_map(& &1.release.networks)
       |> Enum.map(&%NetworkStatus{id: &1.id, created: false})
       |> Enum.uniq()
 
