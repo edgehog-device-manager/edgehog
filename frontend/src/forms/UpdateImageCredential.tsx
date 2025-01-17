@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 */
 
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FunctionComponent, useMemo } from "react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -30,8 +30,7 @@ import Col from "components/Col";
 import Form from "components/Form";
 import Row from "components/Row";
 import Stack from "components/Stack";
-import { imageCredentialSchema } from "schema/ImageCredential";
-import { ImageCredential } from "types/ImageCredential";
+import { yup } from "forms";
 
 const IMAGE_CREDENTIAL_FRAGMENT = graphql`
   fragment UpdateImageCredential_imageCredential_Fragment on ImageCredentials {
@@ -58,22 +57,33 @@ const FormRow = ({
   </Form.Group>
 );
 
+type FormData = {
+  id: string;
+  label: string;
+  username: string;
+};
+
+const imageCredentialSchema = yup
+  .object({
+    id: yup.string().required(),
+    label: yup.string().required(),
+    username: yup.string().required(),
+  })
+  .required();
+
 interface Props {
   imageCredentialRef: UpdateImageCredential_imageCredential_Fragment$key;
   isLoading?: boolean;
   onDelete(): void;
 }
 
-const UpdateImageCredentialForm: FunctionComponent<Props> = ({
-  imageCredentialRef,
-  onDelete,
-}) => {
+const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
   const { id, label, username } = useFragment(
     IMAGE_CREDENTIAL_FRAGMENT,
     imageCredentialRef,
   );
 
-  const defaultValues = useMemo<ImageCredential>(
+  const defaultValues = useMemo<FormData>(
     () => ({
       id,
       label,
@@ -85,7 +95,7 @@ const UpdateImageCredentialForm: FunctionComponent<Props> = ({
   const {
     register,
     formState: { errors },
-  } = useForm<ImageCredential>({
+  } = useForm<FormData>({
     mode: "onTouched",
     defaultValues,
     resolver: yupResolver(imageCredentialSchema),
