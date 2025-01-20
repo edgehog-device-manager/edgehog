@@ -127,9 +127,6 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Network
     resource Edgehog.Containers.Volume
 
-    resource DeploymentReadyAction
-    resource Upgrade
-
     resource Edgehog.Containers.ContainerNetwork do
       define :containers_with_network,
         action: :containers_by_network,
