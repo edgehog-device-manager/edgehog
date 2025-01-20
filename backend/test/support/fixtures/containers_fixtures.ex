@@ -34,10 +34,10 @@ defmodule Edgehog.ContainersFixtures do
   alias Edgehog.AstarteFixtures
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment
 
   @doc """
   Generate a unique application name.
@@ -104,7 +104,10 @@ defmodule Edgehog.ContainersFixtures do
   def network_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    params = Map.new(opts)
+    params =
+      Enum.into(opts, %{
+        label: "network#{System.unique_integer()}"
+      })
 
     Ash.create!(Network, params, tenant: tenant)
   end
@@ -162,11 +165,16 @@ defmodule Edgehog.ContainersFixtures do
 
     containers = Enum.map(1..containers//1, fn _ -> container_fixture(tenant: tenant) end)
 
+    {networks, opts} = Keyword.pop(opts, :networks, 0)
+
+    networks = Enum.map(1..networks//1, fn _ -> network_fixture(tenant: tenant) end)
+
     params =
       Enum.into(opts, %{
         application_id: application_id,
         version: unique_release_version(),
-        containers: containers
+        containers: containers,
+        networks: networks
       })
 
     Ash.create!(Release, params, tenant: tenant)
