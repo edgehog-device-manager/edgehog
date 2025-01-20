@@ -21,7 +21,6 @@
 alias Edgehog.Astarte
 alias Edgehog.Containers.Application
 alias Edgehog.Containers.Container
-alias Edgehog.Containers.ContainerNetwork
 alias Edgehog.Containers.Deployment
 alias Edgehog.Containers.Image
 alias Edgehog.Containers.ImageCredentials

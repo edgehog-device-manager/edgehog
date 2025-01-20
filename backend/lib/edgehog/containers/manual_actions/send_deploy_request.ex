@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,20 +32,17 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
     %{tenant: tenant} = context
 
     with {:ok, deployment} <-
-           Ash.load(deployment, device: [], release: [containers: [:image, :networks]]) do
+           Ash.load(deployment, device: [], release: [:networks, containers: [:image]]) do
       device = deployment.device
 
       release = deployment.release
       containers = release.containers
       images = containers |> Enum.map(& &1.image) |> Enum.uniq()
 
-      networks =
-        containers
-        |> Enum.flat_map(& &1.networks)
-        |> Enum.uniq_by(& &1.id)
+      networks = Enum.uniq_by(release.networks, & &1.id)
 
       with :ok <- send_create_image_requests(device, images),
-           :ok <- send_create_container_requests(device, containers),
+           :ok <- send_create_container_requests(device, containers, networks),
            :ok <- send_create_network_requests(device, networks),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
         Containers.deployment_set_status(deployment, :sent, nil, tenant: tenant)
@@ -71,9 +68,9 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
     end)
   end
 
-  defp send_create_container_requests(device, containers) do
+  defp send_create_container_requests(device, containers, networks) do
     Enum.reduce_while(containers, :ok, fn container, _acc ->
-      case Devices.send_create_container_request(device, container) do
+      case Devices.send_create_container_request(device, container, networks) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end

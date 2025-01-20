@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ defmodule Edgehog.Containers do
 
       create Release, :create_release, :create do
         description "Create a new release."
-        relay_id_translations input: [application_id: :application]
+        relay_id_translations input: [application_id: :application, networks: [id: :network]]
       end
 
       create ImageCredentials, :create_image_credentials, :create do
@@ -130,11 +130,7 @@ defmodule Edgehog.Containers do
     resource DeploymentReadyAction
     resource Upgrade
 
-    resource Edgehog.Containers.ContainerNetwork do
-      define :containers_with_network,
-        action: :containers_by_network,
-        args: [:network_id]
-    end
+    resource Edgehog.Containers.ReleaseNetworks
 
     resource DeploymentReadyAction do
       define :run_ready_action, action: :run
