@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Container.EnvEncoding do
 
   defp encode_env(%{} = env) do
     Enum.map(env, fn {key, value} ->
-      String.upcase(key) <> "=" <> value
+      key <> "=" <> value
     end)
   end
 end
