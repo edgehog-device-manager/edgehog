@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
     %{tenant: tenant} = context
 
     with {:ok, deployment} <-
-           Ash.load(deployment, device: [], release: [containers: [:image, :networks]]) do
+           Ash.load(deployment, device: [], release: [containers: [:image, :networks, :volumes]]) do
       device = deployment.device
 
       release = deployment.release
@@ -44,7 +44,13 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
         |> Enum.flat_map(& &1.networks)
         |> Enum.uniq_by(& &1.id)
 
+      volumes =
+        containers
+        |> Enum.flat_map(& &1.volumes)
+        |> Enum.uniq_by(& &1.id)
+
       with :ok <- send_create_image_requests(device, images),
+           :ok <- send_create_volume_requests(device, volumes),
            :ok <- send_create_container_requests(device, containers),
            :ok <- send_create_network_requests(device, networks),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
@@ -65,6 +71,15 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
   defp send_create_image_requests(device, images) do
     Enum.reduce_while(images, :ok, fn image, _acc ->
       case Devices.send_create_image_request(device, image) do
+        {:ok, _device} -> {:cont, :ok}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+  end
+
+  defp send_create_volume_requests(device, volumes) do
+    Enum.reduce_while(volumes, :ok, fn volume, _acc ->
+      case Devices.send_create_volume_request(device, volume) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end

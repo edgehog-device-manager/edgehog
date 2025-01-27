@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -126,12 +126,22 @@ defmodule Edgehog.ContainersFixtures do
     {image_id, opts} =
       Keyword.pop_lazy(opts, :image_id, fn -> image_fixture(tenant: tenant).id end)
 
+    # number of volumes to associate with the container
+    {volumes, opts} = Keyword.pop(opts, :volumes, 0)
+
+    {volume_target, opts} = Keyword.pop(opts, :volume_target, "/fixture/target")
+    volume_params = %{target: volume_target}
+    volumes = Enum.map(1..volumes//1, fn _ -> volume_params end)
+
     params =
       Enum.into(opts, %{
-        image_id: image_id
+        image_id: image_id,
+        volumes: volumes
       })
 
-    Ash.create!(Container, params, tenant: tenant)
+    Container
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
   end
 
   @doc """
@@ -160,7 +170,10 @@ defmodule Edgehog.ContainersFixtures do
     # number of containers to associate with the release
     {containers, opts} = Keyword.pop(opts, :containers, 0)
 
-    containers = Enum.map(1..containers//1, fn _ -> container_fixture(tenant: tenant) end)
+    {container_params, opts} = Keyword.pop(opts, :container_params, [])
+    container_params = Keyword.put(container_params, :tenant, tenant)
+
+    containers = Enum.map(1..containers//1, fn _ -> container_fixture(container_params) end)
 
     params =
       Enum.into(opts, %{

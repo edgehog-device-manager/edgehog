@@ -49,6 +49,10 @@ defmodule Edgehog.Containers.ContainerVolume do
     end
   end
 
+  calculations do
+    calculate :binding, :string, expr(volume_id <> ":" <> target)
+  end
+
   postgres do
     table "container_volumes"
     repo Edgehog.Repo

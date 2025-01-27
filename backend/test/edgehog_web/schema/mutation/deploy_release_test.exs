@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,20 +28,55 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.CreateImageRequestMock
   alias Edgehog.Astarte.Device.CreateNetworkRequestMock
+  alias Edgehog.Astarte.Device.CreateVolumeRequestMock
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
     # one image per container
     images = containers
+
     # one network for the release
     networks = 1
+
+    # one volume per container
+    volumes_per_container = 1
+    volumes = volumes_per_container * containers
+    volume_target = "/var/local/fixture#{System.unique_integer([:positive])}"
+
+    container_params = [volumes: volumes_per_container, volume_target: volume_target]
+
     device = device_fixture(tenant: tenant)
-    release = release_fixture(tenant: tenant, containers: containers)
+
+    release =
+      release_fixture(tenant: tenant, containers: containers, container_params: container_params)
 
     expect(CreateImageRequestMock, :send_create_image_request, images, fn _, _, _ -> :ok end)
 
+    expect(CreateVolumeRequestMock, :send_create_volume_request, volumes, fn _, _, _ -> :ok end)
+
     expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
       assert data.networkIds != []
+
+      assert Enum.count(data.volumeIds) == volumes_per_container
+
+      binds_by_source =
+        data.binds
+        |> Enum.map(&String.split(&1, ":"))
+        |> Enum.group_by(&hd/1, fn bind ->
+          {target, options} =
+            case bind do
+              [_source, target] -> {target, []}
+              [_source, target, options] -> {target, options}
+            end
+
+          %{target: target, options: options}
+        end)
+
+      for id <- data.volumeIds do
+        volume_binds = Map.fetch!(binds_by_source, id)
+        assert Enum.find(volume_binds, fn %{target: target} -> target == volume_target end)
+      end
+
       :ok
     end)
 
