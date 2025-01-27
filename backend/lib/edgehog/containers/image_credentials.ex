@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,9 +22,8 @@ defmodule Edgehog.Containers.ImageCredentials do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [
-      AshGraphql.Resource
-    ]
+    extensions: [AshGraphql.Resource],
+    authorizers: [Ash.Policy.Authorizer]
 
   alias Edgehog.Containers.ImageCredentials.Base64JsonEncoding
 
@@ -81,12 +80,12 @@ defmodule Edgehog.Containers.ImageCredentials do
     calculate :base64_json, :string, Base64JsonEncoding
   end
 
-  identities do
-    identity :label, [:label]
-  end
-
   postgres do
     table "image_credentials"
     repo Edgehog.Repo
+  end
+
+  identities do
+    identity :label, [:label]
   end
 end

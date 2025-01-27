@@ -127,6 +127,9 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  # Enable / disable features at runtime
+  config :edgehog, :features, containers: false
+
   # Enable uploaders only when the S3 storage has been configured
   config :edgehog,
     enable_s3_storage?: Enum.any?(s3, fn {_, v} -> v != nil end),

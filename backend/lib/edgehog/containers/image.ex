@@ -53,11 +53,11 @@ defmodule Edgehog.Containers.Image do
     end
   end
 
-  identities do
-    identity :reference, [:reference]
-  end
-
   postgres do
     table "images"
+  end
+
+  identities do
+    identity :reference, [:reference]
   end
 end

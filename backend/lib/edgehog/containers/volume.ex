@@ -21,7 +21,12 @@
 defmodule Edgehog.Containers.Volume do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
+    domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource]
+
+  graphql do
+    type :volume
+  end
 
   actions do
     defaults [
@@ -48,11 +53,11 @@ defmodule Edgehog.Containers.Volume do
     timestamps()
   end
 
-  calculations do
-    calculate :options_encoding, {:array, :string}, OptionsCalculation
-  end
-
   postgres do
     table "volumes"
+  end
+
+  calculations do
+    calculate :options_encoding, {:array, :string}, OptionsCalculation
   end
 end
