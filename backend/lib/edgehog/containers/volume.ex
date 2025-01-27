@@ -23,6 +23,8 @@ defmodule Edgehog.Containers.Volume do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
+  alias Edgehog.Containers.Volume.OptionsCalculation
+
   actions do
     defaults [
       :read,
