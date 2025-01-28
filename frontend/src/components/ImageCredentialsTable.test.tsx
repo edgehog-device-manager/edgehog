@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import { expect, it } from "vitest";
 
 import type { ImageCredentialsTable_imageCredentials_Test_Query } from "api/__generated__/ImageCredentialsTable_imageCredentials_Test_Query.graphql";
 import { graphql, useLazyLoadQuery } from "react-relay/hooks";
-import { ImageCredential } from "types/ImageCredential";
 import ImageCredentialsTable from "./ImageCredentialsTable";
 
 const IMAGE_CREDENTIALS_TEST_QUERY = graphql`
@@ -40,8 +39,14 @@ const IMAGE_CREDENTIALS_TEST_QUERY = graphql`
   }
 `;
 
+type ImageCredentialData = {
+  id: string;
+  label: string;
+  username: string;
+};
+
 interface Data {
-  results: Array<ImageCredential>;
+  results: Array<ImageCredentialData>;
 }
 
 const data: Data = {

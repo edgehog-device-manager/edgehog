@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,29 +18,31 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Link, Route } from "Navigation";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
-import type { ImageCredentialsTable_imageCredentials_Fragment$key } from "api/__generated__/ImageCredentialsTable_imageCredentials_Fragment.graphql";
+import type {
+  ImageCredentialsTable_imageCredentials_Fragment$key,
+  ImageCredentialsTable_imageCredentials_Fragment$data,
+} from "api/__generated__/ImageCredentialsTable_imageCredentials_Fragment.graphql";
+
 import Table, { createColumnHelper } from "components/Table";
-import { FunctionComponent, HTMLProps } from "react";
-import { ImageCredential } from "types/ImageCredential";
+import { Link, Route } from "Navigation";
 
-const { imageCredentialsEdit } = Route;
-
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
 const IMAGE_CREDENTIALS_FRAGMENT = graphql`
   fragment ImageCredentialsTable_imageCredentials_Fragment on ImageCredentials
   @relay(plural: true) {
     id
-    # eslint-disable-next-line relay/unused-fields
     label
-    # eslint-disable-next-line relay/unused-fields
     username
   }
 `;
 
-const columnHelper = createColumnHelper<ImageCredential>();
+type TableRecord = ImageCredentialsTable_imageCredentials_Fragment$data[0];
+
+const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
   columnHelper.accessor("label", {
     header: () => (
@@ -55,7 +57,7 @@ const columns = [
       },
       getValue,
     }) => (
-      <Link route={imageCredentialsEdit} params={{ imageCredentialId }}>
+      <Link route={Route.imageCredentialsEdit} params={{ imageCredentialId }}>
         {getValue()}
       </Link>
     ),
@@ -71,20 +73,30 @@ const columns = [
   }),
 ];
 
-interface Props extends Pick<HTMLProps<HTMLDivElement>, "className"> {
+type ImageCredentialsTableProps = {
+  className?: string;
   listImageCredentialsRef: ImageCredentialsTable_imageCredentials_Fragment$key;
-}
+  hideSearch?: boolean;
+};
 
-const ImageCredentialsTable: FunctionComponent<Props> = ({
+const ImageCredentialsTable = ({
+  className,
   listImageCredentialsRef,
-  ...props
-}) => {
+  hideSearch = false,
+}: ImageCredentialsTableProps) => {
   const imageCredentials = useFragment(
     IMAGE_CREDENTIALS_FRAGMENT,
     listImageCredentialsRef,
   );
 
-  return <Table {...props} columns={columns} data={imageCredentials} />;
+  return (
+    <Table
+      className={className}
+      columns={columns}
+      data={imageCredentials}
+      hideSearch={hideSearch}
+    />
+  );
 };
 
 export default ImageCredentialsTable;
