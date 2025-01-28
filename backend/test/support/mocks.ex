@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,6 +68,10 @@ Mox.defmock(Edgehog.Astarte.Device.CreateNetworkRequestMock,
 
 Mox.defmock(Edgehog.Astarte.Device.CreateImageRequestMock,
   for: Edgehog.Astarte.Device.CreateImageRequest.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateVolumeRequestMock,
+  for: Edgehog.Astarte.Device.CreateVolumeRequest.Behaviour
 )
 
 Mox.defmock(Edgehog.Astarte.Device.SystemStatusMock,

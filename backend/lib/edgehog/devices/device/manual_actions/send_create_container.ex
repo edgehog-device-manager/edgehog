@@ -35,21 +35,25 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
     device = changeset.data
 
     with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
-         {:ok, container} <- Ash.load(container, [:env_encoding, :image, :networks]),
+         {:ok, container} <-
+           Ash.load(container, [:env_encoding, :image, :networks, container_volumes: [:binding]]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
       env_encoding = container.env_encoding
       restart_policy = to_correct_string(container.restart_policy)
       image = container.image
 
+      volume_ids = Enum.map(container.container_volumes, & &1.volume_id)
+      volume_binds = Enum.map(container.container_volumes, & &1.binding)
+
       data = %RequestData{
         id: container.id,
         imageId: container.image_id,
         image: image.reference,
-        volumeIds: [],
+        volumeIds: volume_ids,
         hostname: container.hostname,
         restartPolicy: restart_policy,
         env: env_encoding,
-        binds: [],
+        binds: volume_binds,
         networkIds: Enum.map(container.networks, & &1.id),
         networkMode: container.network_mode,
         portBindings: container.port_bindings,

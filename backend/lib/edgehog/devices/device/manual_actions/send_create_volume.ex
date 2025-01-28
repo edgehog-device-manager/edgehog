@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateVolume do
 
   @send_create_volume_request_behaviour Application.compile_env(
                                           :edgehog,
-                                          :astarte_creater_volume_request_module,
+                                          :astarte_create_volume_request_module,
                                           Edgehog.Astarte.Device.CreateVolumeRequest
                                         )
 

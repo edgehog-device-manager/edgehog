@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -97,6 +97,10 @@ defmodule Edgehog.Devices do
       define :send_create_network_request,
         action: :send_create_network_request,
         args: [:network]
+
+      define :send_create_volume_request,
+        action: :send_create_volume_request,
+        args: [:volume]
 
       define :send_create_deployment_request,
         action: :send_create_deployment_request,

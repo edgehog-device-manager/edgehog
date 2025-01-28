@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,6 +70,25 @@ defmodule Edgehog.Containers.Container do
              )
     end
 
+    create :create_fixture do
+      accept [
+        :port_bindings,
+        :restart_policy,
+        :hostname,
+        :network_mode,
+        :env,
+        :privileged,
+        :image_id
+      ]
+
+      argument :volumes, {:array, :map}
+
+      change manage_relationship(:volumes,
+               on_no_match: {:create, :create, :create, [:target]},
+               on_lookup: {:relate, :create}
+             )
+    end
+
     read :filter_by_image do
       argument :image_id, :uuid
 
@@ -126,6 +145,11 @@ defmodule Edgehog.Containers.Container do
 
     many_to_many :releases, Edgehog.Containers.Release do
       through Edgehog.Containers.ReleaseContainers
+    end
+
+    many_to_many :volumes, Edgehog.Containers.Volume do
+      through Edgehog.Containers.ContainerVolume
+      join_relationship :container_volumes
     end
 
     many_to_many :networks, Edgehog.Containers.Network do

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,43 +18,43 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Volume do
+defmodule Edgehog.Containers.ContainerVolume do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers
-
-  alias Edgehog.Containers.Volume.OptionsCalculation
+    domain: Edgehog.Containers,
+    tenant_id_in_primary_key?: true
 
   actions do
-    defaults [
-      :read,
-      :destroy,
-      create: [:driver, :options],
-      update: [:driver, :options]
-    ]
+    defaults [:read, :destroy, create: [:target, :container_id, :volume_id]]
   end
 
   attributes do
-    uuid_primary_key :id
-
-    attribute :driver, :string do
-      default "local"
+    attribute :target, :string do
       allow_nil? false
+      public? true
+    end
+  end
+
+  relationships do
+    belongs_to :container, Edgehog.Containers.Container do
+      primary_key? true
+      allow_nil? false
+      attribute_type :uuid
     end
 
-    attribute :options, :map do
-      default %{}
+    belongs_to :volume, Edgehog.Containers.Volume do
+      primary_key? true
       allow_nil? false
+      attribute_type :uuid
     end
-
-    timestamps()
   end
 
   calculations do
-    calculate :options_encoding, {:array, :string}, OptionsCalculation
+    calculate :binding, :string, expr(volume_id <> ":" <> target)
   end
 
   postgres do
-    table "volumes"
+    table "container_volumes"
+    repo Edgehog.Repo
   end
 end
