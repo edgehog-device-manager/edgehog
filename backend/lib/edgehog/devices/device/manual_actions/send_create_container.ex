@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
 
     with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
          {:ok, container} <-
-           Ash.load(container, [:env_encoding, :image, :networks, container_volumes: [:binding]]),
+           Ash.load(container, [:env_encoding, :image, container_volumes: [:binding]]),
+         {:ok, networks} <- Ash.Changeset.fetch_argument(changeset, :networks),
          {:ok, device} <- Ash.load(device, :appengine_client) do
       env_encoding = container.env_encoding
       restart_policy = to_correct_string(container.restart_policy)
@@ -54,7 +55,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         restartPolicy: restart_policy,
         env: env_encoding,
         binds: volume_binds,
-        networkIds: Enum.map(container.networks, & &1.id),
+        networkIds: Enum.map(networks, & &1.id),
         networkMode: container.network_mode,
         portBindings: container.port_bindings,
         privileged: container.privileged
