@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,13 +36,14 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateNetwork do
     device = changeset.data
 
     with {:ok, network} <- Ash.Changeset.fetch_argument(changeset, :network),
+         {:ok, network} <- Ash.load(network, :options_encoding),
          {:ok, device} <- Ash.load(device, :appengine_client) do
       data = %RequestData{
         id: network.id,
         driver: network.driver,
         internal: network.internal,
         enableIpv6: network.enable_ipv6,
-        options: network.options
+        options: network.options_encoding
       }
 
       with :ok <-
