@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,24 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.ContainerNetwork do
+defmodule Edgehog.Containers.ReleaseNetworks do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     tenant_id_in_primary_key?: true
 
   actions do
-    defaults [:read, :destroy, create: [:container_id, :network_id]]
-
-    read :containers_by_network do
-      argument :network_id, :uuid
-
-      filter expr(network_id == ^arg(:network_id))
-    end
+    defaults [:read, :destroy, create: [:release_id, :network_id]]
   end
 
   relationships do
-    belongs_to :container, Edgehog.Containers.Container do
+    belongs_to :release, Edgehog.Containers.Release do
       primary_key? true
       allow_nil? false
       attribute_type :uuid
@@ -49,6 +43,6 @@ defmodule Edgehog.Containers.ContainerNetwork do
   end
 
   postgres do
-    table "container_networks"
+    table "application_release_networks"
   end
 end

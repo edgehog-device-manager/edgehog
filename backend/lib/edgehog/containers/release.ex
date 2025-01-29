@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Release do
 
   graphql do
     type :release
-    paginate_relationship_with containers: :relay
+    paginate_relationship_with networks: :relay, containers: :relay
   end
 
   actions do
@@ -41,6 +41,7 @@ defmodule Edgehog.Containers.Release do
       accept [:application_id, :version]
 
       argument :containers, {:array, :map}
+      argument :networks, {:array, :map}
 
       # TODO this should be a manual change, checking for existing containers,
       # for now each new release creates brand new containers
@@ -48,6 +49,8 @@ defmodule Edgehog.Containers.Release do
                on_no_match: {:create, :create_with_nested},
                on_match: :ignore
              )
+
+      change manage_relationship(:networks, on_lookup: :relate, on_no_match: :create)
 
       change Changes.CreateDefaultNetwork
     end
@@ -83,6 +86,12 @@ defmodule Edgehog.Containers.Release do
 
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ReleaseContainers
+      public? true
+    end
+
+    many_to_many :networks, Edgehog.Containers.Network do
+      through Edgehog.Containers.ReleaseNetworks
+      join_relationship :release_networks
       public? true
     end
   end

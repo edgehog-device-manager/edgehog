@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
   import Edgehog.ContainersFixtures
 
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
+  alias Edgehog.Astarte.Device.CreateNetworkRequestMock
   alias Edgehog.Astarte.Device.DeploymentUpdateMock
   alias Edgehog.Containers
   alias Edgehog.Containers.Deployment
@@ -56,6 +57,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         args
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
+      expect(CreateNetworkRequestMock, :send_create_network_request, fn _, _, _ -> :ok end)
 
       result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
@@ -74,6 +76,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         args
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
+      expect(CreateNetworkRequestMock, :send_create_network_request, fn _, _, _ -> :ok end)
       expect(DeploymentUpdateMock, :update, fn _, _, _ -> :ok end)
 
       result =

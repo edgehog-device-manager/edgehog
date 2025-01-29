@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Containers.ContainerNetwork
   alias Edgehog.Containers.ReleaseContainers
+  alias Edgehog.Containers.ReleaseNetworks
 
-  test "can access containers and netowkrs trough relationship", %{tenant: tenant} do
+  test "can access containers and networks trough relationship", %{tenant: tenant} do
     app = application_fixture(tenant: tenant)
     release = release_fixture(application_id: app.id, tenant: tenant)
 
@@ -36,8 +36,8 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
     params = %{container_id: container.id, release_id: release.id}
     Ash.create!(ReleaseContainers, params, tenant: tenant)
 
-    params = %{container_id: container.id, network_id: network.id}
-    Ash.create!(ContainerNetwork, params, tenant: tenant)
+    params = %{release_id: release.id, network_id: network.id}
+    Ash.create!(ReleaseNetworks, params, tenant: tenant)
 
     id = AshGraphql.Resource.encode_relay_id(release)
 
@@ -53,10 +53,13 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
 
     assert container_result["id"] == AshGraphql.Resource.encode_relay_id(container)
 
-    network_result =
-      container_result |> get_in(["networks", "edges"]) |> Enum.map(& &1["node"]) |> hd()
+    network_result_ids =
+      release
+      |> get_in(["release", "networks", "edges"])
+      |> Enum.map(& &1["node"]["id"])
 
-    assert network_result["id"] == AshGraphql.Resource.encode_relay_id(network)
+    custom_network_id = AshGraphql.Resource.encode_relay_id(network)
+    assert custom_network_id in network_result_ids
   end
 
   defp get_release(opts) do
@@ -65,17 +68,17 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
       query ($id: ID!) {
         release(id: $id) {
           id
+          networks {
+            edges {
+              node {
+                id
+              }
+            }
+          }
           containers {
             edges {
               node {
                 id
-                networks {
-                  edges {
-                    node {
-                      id
-                    }
-                  }
-                }
               }
             }
           }
