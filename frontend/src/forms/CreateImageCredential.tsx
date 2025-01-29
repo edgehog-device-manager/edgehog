@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
 */
 
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FunctionComponent, PropsWithChildren, ReactNode } from "react";
+import { InputGroup } from "react-bootstrap";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
@@ -29,21 +30,19 @@ import Form from "components/Form";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
-import { createImageCredentialSchema } from "schema/ImageCredential";
-import type { CreateImageCredential } from "types/ImageCredential";
-import "./CreateImageCredential.scss";
+import Icon from "components/Icon";
+import { yup } from "forms";
 
-interface FormRowProps extends PropsWithChildren {
-  controlId: string;
-  label: ReactNode;
-}
-
-const FormRow: FunctionComponent<FormRowProps> = ({
-  controlId,
+const FormRow = ({
+  id,
   label,
   children,
+}: {
+  id: string;
+  label: React.ReactNode;
+  children: React.ReactNode;
 }) => (
-  <Form.Group as={Row} controlId={controlId}>
+  <Form.Group as={Row} controlId={id}>
     <Form.Label column sm={3}>
       {label}
     </Form.Label>
@@ -51,44 +50,54 @@ const FormRow: FunctionComponent<FormRowProps> = ({
   </Form.Group>
 );
 
+type ImageCredentialData = {
+  label: string;
+  username: string;
+  password: string;
+};
+
+const imageCredentialSchema = yup
+  .object({
+    label: yup.string().required(),
+    username: yup.string().required(),
+    password: yup.string().required(),
+  })
+  .required();
+
+const initialData: ImageCredentialData = {
+  label: "",
+  username: "",
+  password: "",
+};
+
 interface Props {
   isLoading?: boolean;
-  onSubmit: (data: CreateImageCredential) => void;
+  onSubmit: (data: ImageCredentialData) => void;
 }
 
-const CreateImageCredentialForm: FunctionComponent<Props> = ({
-  isLoading = false,
-  onSubmit,
-}) => {
+const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<CreateImageCredential>({
+  } = useForm<ImageCredentialData>({
     mode: "onTouched",
-    defaultValues: {},
-    resolver: yupResolver(createImageCredentialSchema),
+    defaultValues: initialData,
+    resolver: yupResolver(imageCredentialSchema),
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleFormSubmit = (data: ImageCredentialData) => {
+    setShowPassword(false);
+    onSubmit(data);
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-      <input
-        id="username"
-        type="text"
-        name="fakeusernameremembered"
-        autoComplete="username"
-        style={{ display: "none" }}
-      />
-      <input
-        id="password"
-        type="password"
-        name="fakepasswordremembered"
-        autoComplete="new-password"
-        style={{ display: "none" }}
-      />
+    <form onSubmit={handleSubmit(handleFormSubmit)} autoComplete="off">
       <Stack gap={3}>
         <FormRow
-          controlId="image-credential-form-label"
+          id="image-credential-form-label"
           label={
             <FormattedMessage
               id="components.CreateImageCredentialForm.labelLabel"
@@ -105,7 +114,7 @@ const CreateImageCredentialForm: FunctionComponent<Props> = ({
         </FormRow>
 
         <FormRow
-          controlId="image-credential-form-username"
+          id="image-credential-form-username"
           label={
             <FormattedMessage
               id="components.CreateImageCredentialForm.usernameLabel"
@@ -126,7 +135,7 @@ const CreateImageCredentialForm: FunctionComponent<Props> = ({
         </FormRow>
 
         <FormRow
-          controlId="image-credential-form-password"
+          id="image-credential-form-password"
           label={
             <FormattedMessage
               id="components.CreateImageCredentialForm.passwordLabel"
@@ -134,20 +143,37 @@ const CreateImageCredentialForm: FunctionComponent<Props> = ({
             />
           }
         >
-          <Form.Control
-            {...register("password")}
-            className="security"
-            isInvalid={!!errors.password}
-            autoComplete="new-password"
-            onCopy={(e) => e.preventDefault()}
-            onCut={(e) => e.preventDefault()}
-          />
-
-          <Form.Control.Feedback type="invalid">
-            {errors.password?.message && (
-              <FormattedMessage id={errors.password?.message} />
-            )}
-          </Form.Control.Feedback>
+          <InputGroup>
+            <Form.Control
+              {...register("password")}
+              type={showPassword ? "text" : "password"}
+              isInvalid={!!errors.password}
+              autoComplete="off"
+              onCopy={(e) => e.preventDefault()}
+              onCut={(e) => e.preventDefault()}
+            />
+            <Button
+              variant={"outlined"}
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                borderTopRightRadius: "0.25rem",
+                borderBottomRightRadius: "0.25rem",
+                borderTopLeftRadius: "0",
+                borderBottomLeftRadius: "0",
+                backgroundColor: "#e0e0e0",
+              }}
+            >
+              <Icon
+                icon={showPassword ? "showPassword" : "hidePassword"}
+                style={{ width: "1.4em" }}
+              />
+            </Button>
+            <Form.Control.Feedback type="invalid">
+              {errors.password?.message && (
+                <FormattedMessage id={errors.password?.message} />
+              )}
+            </Form.Control.Feedback>
+          </InputGroup>
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">
@@ -164,4 +190,6 @@ const CreateImageCredentialForm: FunctionComponent<Props> = ({
   );
 };
 
-export default CreateImageCredentialForm;
+export type { ImageCredentialData };
+
+export default CreateImageCredential;

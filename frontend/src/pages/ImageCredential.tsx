@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,26 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import type { ImageCredential_deleteImageCredentialDelete_Mutation } from "api/__generated__/ImageCredential_deleteImageCredentialDelete_Mutation.graphql";
-import {
-  ImageCredential_imageCredential_Query,
-  ImageCredential_imageCredential_Query$data,
-} from "api/__generated__/ImageCredential_imageCredential_Query.graphql";
-import Center from "components/Center";
-import DeleteModal from "components/DeleteModal";
-import Page from "components/Page";
-import Result from "components/Result";
-import Spinner from "components/Spinner";
-import UpdateImageCredentialForm from "forms/UpdateImageCredential";
-import { Link, Route, useNavigate } from "Navigation";
-import {
-  FunctionComponent,
-  ReactNode,
-  Suspense,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { ReactNode, Suspense, useCallback, useEffect, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
@@ -50,9 +31,19 @@ import {
 } from "react-relay";
 import { useParams } from "react-router-dom";
 
-const { imageCredentials: imageCredentialsRoute } = Route;
-const { Header, Main, LoadingError } = Page;
-const { NotFound } = Result;
+import type { ImageCredential_deleteImageCredentialDelete_Mutation } from "api/__generated__/ImageCredential_deleteImageCredentialDelete_Mutation.graphql";
+import {
+  ImageCredential_imageCredential_Query,
+  ImageCredential_imageCredential_Query$data,
+} from "api/__generated__/ImageCredential_imageCredential_Query.graphql";
+
+import Center from "components/Center";
+import DeleteModal from "components/DeleteModal";
+import Page from "components/Page";
+import Result from "components/Result";
+import Spinner from "components/Spinner";
+import UpdateImageCredentialForm from "forms/UpdateImageCredential";
+import { Link, Route, useNavigate } from "Navigation";
 
 const IMAGE_CREDENTIAL_QUERY = graphql`
   query ImageCredential_imageCredential_Query($imageCredentialId: ID!) {
@@ -82,15 +73,14 @@ interface ImageCredentialContentProps {
   >;
 }
 
-const ImageCredentialContent: FunctionComponent<
-  ImageCredentialContentProps
-> = ({
-  imageCredential: { id: imageCredentialId, label },
+const ImageCredentialContent = ({
   imageCredential,
-}) => {
+}: ImageCredentialContentProps) => {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<ReactNode>(null);
+
+  const { imageCredentialId = "" } = useParams();
 
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
@@ -106,7 +96,7 @@ const ImageCredentialContent: FunctionComponent<
       variables: { imageCredentialId },
       onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
-          return navigate({ route: imageCredentialsRoute });
+          return navigate({ route: Route.imageCredentials });
         }
 
         const errorFeedback = errors
@@ -121,7 +111,7 @@ const ImageCredentialContent: FunctionComponent<
         setErrorFeedback(
           <FormattedMessage
             id="pages.ImageCredential.deletionErrorFeedback"
-            defaultMessage="Could not delete the image credentials, please try again."
+            defaultMessage="Could not delete the Image Credentials, please try again."
           />,
         );
         setShowDeleteModal(false);
@@ -131,8 +121,8 @@ const ImageCredentialContent: FunctionComponent<
 
   return (
     <Page>
-      <Header title={label} />
-      <Main>
+      <Page.Header title={imageCredential.label} />
+      <Page.Main>
         <Alert
           show={!!errorFeedback}
           variant="danger"
@@ -161,6 +151,7 @@ const ImageCredentialContent: FunctionComponent<
             <p>
               <FormattedMessage
                 id="pages.ImageCredential.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the Image Credentials <bold>{imageCredentials}</bold>."
                 values={{
                   imageCredentials: imageCredential.label,
                   bold: (chunks) => <strong>{chunks}</strong>,
@@ -169,7 +160,7 @@ const ImageCredentialContent: FunctionComponent<
             </p>
           </DeleteModal>
         )}
-      </Main>
+      </Page.Main>
     </Page>
   );
 };
@@ -178,9 +169,9 @@ interface ImageCredentialWrapperProps {
   imageCredentialQuery: PreloadedQuery<ImageCredential_imageCredential_Query>;
 }
 
-const ImageCredentialWrapper: FunctionComponent<
-  ImageCredentialWrapperProps
-> = ({ imageCredentialQuery }) => {
+const ImageCredentialWrapper = ({
+  imageCredentialQuery,
+}: ImageCredentialWrapperProps) => {
   const { imageCredentials } = usePreloadedQuery(
     IMAGE_CREDENTIAL_QUERY,
     imageCredentialQuery,
@@ -188,30 +179,28 @@ const ImageCredentialWrapper: FunctionComponent<
 
   if (!imageCredentials) {
     return (
-      <NotFound
+      <Result.NotFound
         title={
           <FormattedMessage
             id="pages.ImageCredential.imageCredentialNotFound.title"
-            defaultMessage="Image credentials not found."
+            defaultMessage="Image Credentials not found."
           />
         }
       >
-        <Link route={imageCredentialsRoute}>
+        <Link route={Route.imageCredentials}>
           <FormattedMessage
             id="pages.ImageCredential.imageCredentialNotFound.message"
-            defaultMessage="Return to the image credentials list."
+            defaultMessage="Return to the Image Credentials list."
           />
         </Link>
-      </NotFound>
+      </Result.NotFound>
     );
   }
 
   return <ImageCredentialContent imageCredential={imageCredentials} />;
 };
 
-interface Props {}
-
-const ImageCredentialPage: FunctionComponent<Props> = () => {
+const ImageCredentialPage = () => {
   const { imageCredentialId = "" } = useParams();
 
   const [imageCredentialQuery, getImageCredential] =
@@ -236,7 +225,7 @@ const ImageCredentialPage: FunctionComponent<Props> = () => {
       <ErrorBoundary
         FallbackComponent={({ resetErrorBoundary }) => (
           <Center data-testid="page-error">
-            <LoadingError onRetry={resetErrorBoundary} />
+            <Page.LoadingError onRetry={resetErrorBoundary} />
           </Center>
         )}
         onReset={fetchImageCredential}
