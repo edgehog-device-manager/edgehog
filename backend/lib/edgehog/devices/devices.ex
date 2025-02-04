@@ -85,9 +85,10 @@ defmodule Edgehog.Devices do
   resources do
     resource Device do
       define :fetch_device, action: :read, get_by: [:id]
+      define :fetch_device_by_identity, action: :read, get_by_identity: :unique_realm_device_id
 
       define :send_create_image_request,
-        action: :send_create_image,
+        action: :send_create_image_request,
         args: [:image]
 
       define :send_create_container_request,
@@ -98,13 +99,13 @@ defmodule Edgehog.Devices do
         action: :send_create_network_request,
         args: [:network]
 
-      define :send_create_volume_request,
-        action: :send_create_volume_request,
-        args: [:volume]
-
       define :send_create_deployment_request,
         action: :send_create_deployment_request,
         args: [:deployment]
+
+      define :send_create_volume_request,
+        action: :send_create_volume_request,
+        args: [:volume]
 
       define :send_release_command,
         action: :send_release_command,

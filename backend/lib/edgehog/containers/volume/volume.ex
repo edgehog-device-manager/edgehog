@@ -18,46 +18,50 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image do
+defmodule Edgehog.Containers.Volume do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    domain: Edgehog.Containers
 
-  alias Edgehog.Containers.ImageCredentials
-
-  graphql do
-    type :image
-  end
+  alias Edgehog.Containers.Volume.OptionsCalculation
 
   actions do
-    defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
+    defaults [
+      :read,
+      :destroy,
+      create: [:driver, :options],
+      update: [:driver, :options]
+    ]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :reference, :string do
+    attribute :driver, :string do
+      default "local"
       allow_nil? false
-      public? true
+    end
+
+    attribute :options, :map do
+      default %{}
+      allow_nil? false
     end
 
     timestamps()
   end
 
   relationships do
-    belongs_to :credentials, ImageCredentials do
-      source_attribute :image_credentials_id
-      attribute_type :uuid
-      public? true
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Volume.Deployment
+      join_relationship :volume_deployments
     end
   end
 
-  identities do
-    identity :reference, [:reference]
+  calculations do
+    calculate :options_encoding, {:array, :string}, OptionsCalculation
   end
 
   postgres do
-    table "images"
+    table "volumes"
   end
 end
