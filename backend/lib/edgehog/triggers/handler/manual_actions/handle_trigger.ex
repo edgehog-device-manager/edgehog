@@ -37,6 +37,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @available_deployments "io.edgehog.devicemanager.apps.AvailableDeployments"
   @available_images "io.edgehog.devicemanager.apps.AvailableImages"
   @available_networks "io.edgehog.devicemanager.apps.AvailableNetworks"
+  @available_volumes "io.edgehog.devicemanager.apps.AvailableVolumes"
   @deployment_event "io.edgehog.devicemanager.apps.DeploymentEvent"
   @ota_event "io.edgehog.devicemanager.OTAEvent"
   @ota_response "io.edgehog.devicemanager.OTAResponse"
@@ -168,6 +169,42 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         containers =
           network_id
           |> Containers.containers_with_network!(tenant: tenant, load: :container)
+          |> Enum.map(& &1.container_id)
+          |> Enum.uniq()
+
+        releases =
+          containers
+          |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
+          |> Enum.map(& &1.release_id)
+          |> Enum.uniq()
+
+        deployments =
+          releases
+          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
+          |> Enum.uniq_by(& &1.id)
+
+        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+
+      _ ->
+        {:error, :invalid_event_path}
+    end
+  end
+
+  defp handle_event(%IncomingData{interface: @available_volumes} = event, tenant, realm_id, device_id, _timestamp) do
+    device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
+
+    case String.split(event.path, "/") do
+      ["", volume_id, "created"] ->
+        volume_deployment =
+          Containers.fetch_volume_deployment!(volume_id, device.id, tenant: tenant)
+
+        if event.value,
+          do: Containers.mark_volume_deployment_as_available(volume_deployment, tenant: tenant),
+          else: Containers.mark_volume_deployment_as_unavailable(volume_deployment, tenant: tenant)
+
+        containers =
+          volume_id
+          |> Containers.containers_with_volume!(tenant: tenant, load: :container)
           |> Enum.map(& &1.container_id)
           |> Enum.uniq()
 

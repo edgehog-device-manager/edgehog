@@ -18,18 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
+defmodule Edgehog.Containers.Volume.Calculations.OptionsEncoding do
   @moduledoc false
-  use Ash.Resource.Change
+  use Ash.Resource.Calculation
 
-  alias Edgehog.Containers
+  @impl Ash.Resource.Calculation
+  def calculate(records, _opts, _context) do
+    Enum.map(records, &encode_options(&1.options))
+  end
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
-    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      with :ok <- Containers.send_deploy_request(deployment, tenant: deployment.tenant_id) do
-        {:ok, deployment}
-      end
+  defp encode_options(options) do
+    Enum.map(options, fn {key, value} ->
+      key <> "=" <> value
     end)
   end
 end

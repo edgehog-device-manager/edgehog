@@ -157,6 +157,15 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Volume
 
+    resource Edgehog.Containers.Volume.Deployment do
+      define :deploy_volume, action: :deploy, args: [:volume, :device]
+      define :fetch_volume_deployment, action: :read, get_by_identity: :volume_instance
+      define :mark_volume_deployment_as_sent, action: :mark_as_sent
+      define :mark_volume_deployment_as_available, action: :mark_as_available
+      define :mark_volume_deployment_as_unavailable, action: :mark_as_unavailable
+      define :mark_volume_deployment_as_errored, action: :mark_as_errored, args: [:message]
+    end
+
     resource DeploymentReadyAction
     resource Upgrade
 
@@ -166,7 +175,11 @@ defmodule Edgehog.Containers do
         args: [:network_id]
     end
 
-    resource Edgehog.Containers.ContainerVolume
+    resource Edgehog.Containers.ContainerVolume do
+      define :containers_with_volume,
+        action: :containers_by_volume,
+        args: [:volume_id]
+    end
 
     resource DeploymentReadyAction do
       define :run_ready_action, action: :run
