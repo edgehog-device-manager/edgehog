@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Network.OptionsCalculation do
+defmodule Edgehog.Containers.Network.Calculations.OptionsEncoding do
   @moduledoc false
   use Ash.Resource.Calculation
 

@@ -24,7 +24,7 @@ defmodule Edgehog.Containers.Network do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Network.OptionsCalculation
+  alias Edgehog.Containers.Network.Calculations
 
   graphql do
     type :network
@@ -71,7 +71,7 @@ defmodule Edgehog.Containers.Network do
   end
 
   calculations do
-    calculate :options_encoding, {:array, :string}, OptionsCalculation
+    calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
   end
 
   postgres do
