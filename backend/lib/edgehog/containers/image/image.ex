@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ defmodule Edgehog.Containers.Image do
 
   graphql do
     type :image
+    paginate_relationship_with devices: :relay
   end
 
   actions do
@@ -49,6 +50,12 @@ defmodule Edgehog.Containers.Image do
     belongs_to :credentials, ImageCredentials do
       source_attribute :image_credentials_id
       attribute_type :uuid
+      public? true
+    end
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Image.Deployment
+      join_relationship :image_deployments
       public? true
     end
   end

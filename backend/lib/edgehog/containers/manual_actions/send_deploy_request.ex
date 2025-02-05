@@ -49,7 +49,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
         |> Enum.flat_map(& &1.volumes)
         |> Enum.uniq_by(& &1.id)
 
-      with :ok <- send_create_image_requests(device, images),
+      with :ok <- deploy_images(device, images),
            :ok <- send_create_volume_requests(device, volumes),
            :ok <- deploy_networks(device, networks),
            :ok <- deploy_containers(device, containers),
@@ -80,13 +80,31 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
     end
   end
 
-  defp send_create_image_requests(device, images) do
+  defp deploy_images(device, images) do
+    images =
+      images
+      |> Enum.reject(&image_deployed?(&1, device))
+      |> Enum.uniq_by(& &1.id)
+
     Enum.reduce_while(images, :ok, fn image, _acc ->
-      case Devices.send_create_image_request(device, image) do
-        {:ok, _device} -> {:cont, :ok}
-        {:error, reason} -> {:halt, {:error, reason}}
+      case Containers.deploy_image(image, device, tenant: image.tenant_id) do
+        {:ok, _image_deployment} ->
+          {:cont, :ok}
+
+        {:error, reason} ->
+          {:halt, {:error, reason}}
       end
     end)
+  end
+
+  defp image_deployed?(image, device) do
+    case Containers.fetch_image_deployment(image.id, device.id, tenant: image.tenant_id) do
+      {:ok, _deployment} ->
+        true
+
+      _ ->
+        false
+    end
   end
 
   defp send_create_volume_requests(device, volumes) do

@@ -561,6 +561,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       [container] = release.containers
       [network] = container.networks
+      image = container.image
 
       container_deployment_fixture(
         container_id: container.id,
@@ -582,6 +583,14 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         realm_id: realm.id,
         device_id: device.id,
         state: :available,
+        tenant: tenant
+      )
+
+      image_deployment_fixture(
+        image_id: image.id,
+        realm_id: realm.id,
+        device_id: device.id,
+        state: :sent,
         tenant: tenant
       )
 
@@ -619,6 +628,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       [container] = release.containers
       [network] = container.networks
+      image = container.image
 
       container_deployment_fixture(
         container_id: container.id,
@@ -638,6 +648,14 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         realm_id: realm.id,
         device_id: device.id,
         state: :available,
+        tenant: tenant
+      )
+
+      image_deployment_fixture(
+        image_id: image.id,
+        realm_id: realm.id,
+        device_id: device.id,
+        state: :unpulled,
         tenant: tenant
       )
 
@@ -676,6 +694,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       [container] = release.containers
       [network] = container.networks
 
+      [container] = release.containers
+      image = Ash.load!(container, :image, tenant: tenant).image
+
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id]
         |> deployment_fixture()
@@ -695,6 +716,14 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_id: device.id,
         tenant: tenant,
         state: :device_created
+      )
+
+      image_deployment_fixture(
+        image_id: image.id,
+        realm_id: realm.id,
+        device_id: device.id,
+        state: :unpulled,
+        tenant: tenant
       )
 
       deployment_event = %{

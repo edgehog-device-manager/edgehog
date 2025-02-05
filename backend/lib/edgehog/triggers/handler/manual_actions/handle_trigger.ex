@@ -119,9 +119,20 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     |> Ash.create(tenant: tenant)
   end
 
-  defp handle_event(%IncomingData{interface: @available_images} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(%IncomingData{interface: @available_images} = event, tenant, realm_id, device_id, _timestamp) do
+    device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
+
     case String.split(event.path, "/") do
       ["", image_id, "pulled"] ->
+        image_deployment =
+          Containers.fetch_image_deployment!(image_id, device.id, tenant: tenant)
+
+        if event.value do
+          Containers.mark_image_deployment_as_pulled!(image_deployment, tenant: tenant)
+        else
+          Containers.mark_image_deployment_as_unpulled!(image_deployment, tenant: tenant)
+        end
+
         containers = Containers.containers_with_image!(image_id, tenant: tenant)
 
         releases =
