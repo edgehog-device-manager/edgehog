@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
   alias Edgehog.Containers
+  alias Edgehog.Devices
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
   alias Edgehog.Triggers.DeviceConnected
@@ -141,9 +142,18 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_networks} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(%IncomingData{interface: @available_networks} = event, tenant, realm_id, device_id, _timestamp) do
+    device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
+
     case String.split(event.path, "/") do
       ["", network_id, "created"] ->
+        network_deployment =
+          Containers.fetch_network_deployment(network_id, device.id, tenant: tenant)
+
+        if event.value,
+          do: Containers.mark_network_deployment_as_available(network_deployment, tenant: tenant),
+          else: Containers.mark_network_deployment_as_unavailable(network_deployment, tenant: tenant)
+
         containers =
           network_id
           |> Containers.containers_with_network!(tenant: tenant, load: :container)

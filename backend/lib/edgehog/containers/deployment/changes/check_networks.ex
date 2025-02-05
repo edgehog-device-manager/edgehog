@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,28 +22,32 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckNetworks do
   @moduledoc false
   use Ash.Resource.Change
 
+  alias Edgehog.Containers
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
     with {:ok, :created_images} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
          {:ok, deployment} <-
-           Ash.load(deployment, device: :available_networks, release: [containers: [:networks]]) do
-      available_network_ids =
-        Enum.map(deployment.device.available_networks, & &1.id)
+           Ash.load(deployment, device: [], release: [containers: [:networks]]) do
+      device = deployment.device
 
-      missing_networks =
+      networks_ready? =
         deployment.release.containers
         |> Enum.flat_map(& &1.networks)
-        |> Enum.map(& &1.id)
-        |> Enum.uniq()
-        |> Enum.reject(&(&1 in available_network_ids))
+        |> Enum.uniq_by(& &1.id)
+        |> Enum.map(
+          &Containers.fetch_network_deployment!(&1.id, device.id,
+            tenant: &1.tenant_id,
+            load: [:ready?]
+          )
+        )
+        |> Enum.all?(& &1.ready?)
 
-      if missing_networks == [] do
-        Ash.Changeset.change_attribute(changeset, :status, :created_networks)
-      else
-        changeset
-      end
+      if networks_ready?,
+        do: Ash.Changeset.change_attribute(changeset, :status, :created_networks),
+        else: changeset
     else
       _ -> changeset
     end

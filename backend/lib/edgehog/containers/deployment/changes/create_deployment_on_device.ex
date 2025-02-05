@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,9 +26,6 @@ defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
-    # After the transaction has been executed, i.e. all checks have passed
-    # and the deployment is in the data layer, start the deployment with
-    # the result.
     Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
       with :ok <- Containers.send_deploy_request(deployment) do
         {:ok, deployment}

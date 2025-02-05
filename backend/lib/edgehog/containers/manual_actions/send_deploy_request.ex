@@ -52,20 +52,32 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
       with :ok <- send_create_image_requests(device, images),
            :ok <- send_create_volume_requests(device, volumes),
            :ok <- send_create_container_requests(device, containers),
-           :ok <- send_create_network_requests(device, networks),
+           :ok <- deploy_networks(device, networks),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
         Containers.deployment_set_status(deployment, :sent, nil, tenant: tenant)
       end
     end
   end
 
-  defp send_create_network_requests(device, networks) do
+  defp deploy_networks(device, networks) do
+    networks =
+      networks
+      |> Enum.reject(&network_deployed?(&1, device))
+      |> Enum.uniq_by(& &1.id)
+
     Enum.reduce_while(networks, :ok, fn network, _acc ->
-      case Devices.send_create_network_request(device, network) do
-        {:ok, _device} -> {:cont, :ok}
+      case Containers.deploy_network(network, device, tenant: network.tenant_id) do
+        {:ok, _network_deployment} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
+  end
+
+  defp network_deployed?(network, device) do
+    case Containers.fetch_network_deployment(network.id, device.id, tenant: network.tenant_id) do
+      {:ok, _network_deployment} -> true
+      _ -> false
+    end
   end
 
   defp send_create_image_requests(device, images) do
