@@ -29,8 +29,6 @@ defmodule Edgehog.ContainersFixtures do
   alias Edgehog.Astarte.Device.AvailableDeploymentsMock
   alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
   alias Edgehog.Astarte.Device.AvailableImagesMock
-  alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
-  alias Edgehog.Astarte.Device.AvailableNetworksMock
   alias Edgehog.AstarteFixtures
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Container
@@ -219,6 +217,37 @@ defmodule Edgehog.ContainersFixtures do
     Ash.create!(Deployment, params, tenant: tenant)
   end
 
+  def network_deployment_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {realm_id, opts} =
+      case opts[:device_id] do
+        nil ->
+          Keyword.pop_lazy(opts, :realm_id, fn ->
+            AstarteFixtures.realm_fixture(tenant: tenant).id
+          end)
+
+        _ ->
+          {nil, Keyword.delete(opts, :realm_id)}
+      end
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        Edgehog.DevicesFixtures.device_fixture(realm_id: realm_id, tenant: tenant).id
+      end)
+
+    {network_id, opts} =
+      Keyword.pop_lazy(opts, :network_id, fn -> network_fixture(tenant: tenant).id end)
+
+    params =
+      Enum.into(opts, %{
+        device_id: device_id,
+        network_id: network_id
+      })
+
+    Ash.create!(Network.Deployment, params, tenant: tenant)
+  end
+
   def set_resource_expectations(deployments, new_deployments \\ 1) do
     deployments =
       Enum.map(deployments, &Ash.load!(&1, release: [containers: [:image, :networks]]))
@@ -236,20 +265,10 @@ defmodule Edgehog.ContainersFixtures do
       |> Enum.map(&%ImageStatus{id: &1.image_id, pulled: false})
       |> Enum.uniq()
 
-    available_networks =
-      containers
-      |> Enum.flat_map(& &1.networks)
-      |> Enum.map(&%NetworkStatus{id: &1.id, created: false})
-      |> Enum.uniq()
-
     available_deployments =
       Enum.map(deployments, &%DeploymentStatus{id: &1.id, status: :stopped})
 
     Mox.expect(AvailableImagesMock, :get, new_deployments, fn _, _ -> {:ok, available_images} end)
-
-    Mox.expect(AvailableNetworksMock, :get, new_deployments, fn _, _ ->
-      {:ok, available_networks}
-    end)
 
     Mox.expect(AvailableContainersMock, :get, new_deployments, fn _, _ ->
       {:ok, available_containers}

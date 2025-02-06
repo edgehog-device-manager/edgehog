@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -560,6 +560,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> Ash.load!(containers: [:image, :networks])
 
       [container] = release.containers
+      [network] = container.networks
 
       deployment =
         deployment_fixture(
@@ -568,6 +569,14 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           release_id: release.id,
           status: :sent
         )
+
+      network_deployment_fixture(
+        network_id: network.id,
+        realm_id: realm.id,
+        device_id: device.id,
+        state: :available,
+        tenant: tenant
+      )
 
       deployment_event = %{
         device_id: device.device_id,
@@ -602,12 +611,21 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> Ash.load!(containers: [:image, :networks])
 
       [container] = release.containers
+      [network] = container.networks
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id]
         |> deployment_fixture()
         |> Ash.Changeset.for_update(:set_status, %{status: :sent}, tenant: tenant)
         |> Ash.update!()
+
+      network_deployment_fixture(
+        network_id: network.id,
+        realm_id: realm.id,
+        device_id: device.id,
+        state: :available,
+        tenant: tenant
+      )
 
       deployment_event = %{
         device_id: device.device_id,
@@ -637,13 +655,26 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        release_fixture(containers: 1, tenant: tenant)
+        [containers: 1, tenant: tenant]
+        |> release_fixture()
+        |> Ash.load!(containers: [:networks])
+
+      [container] = release.containers
+      [network] = container.networks
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id]
         |> deployment_fixture()
         |> Ash.Changeset.for_update(:set_status, %{status: :sent}, tenant: tenant)
         |> Ash.update!()
+
+      network_deployment_fixture(
+        network_id: network.id,
+        realm_id: realm.id,
+        device_id: device.id,
+        state: :available,
+        tenant: tenant
+      )
 
       deployment_event = %{
         device_id: device.device_id,

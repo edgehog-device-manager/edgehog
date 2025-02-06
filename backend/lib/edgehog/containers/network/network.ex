@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ defmodule Edgehog.Containers.Network do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Network.OptionsCalculation
+  alias Edgehog.Containers.Network.Calculations
 
   graphql do
     type :network
@@ -68,10 +68,15 @@ defmodule Edgehog.Containers.Network do
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ContainerNetwork
     end
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Network.Deployment
+      join_relationship :network_deployments
+    end
   end
 
   calculations do
-    calculate :options_encoding, {:array, :string}, OptionsCalculation
+    calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
   end
 
   postgres do

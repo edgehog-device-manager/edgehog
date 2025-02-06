@@ -125,6 +125,16 @@ defmodule Edgehog.Containers do
     end
 
     resource Edgehog.Containers.Network
+
+    resource Edgehog.Containers.Network.Deployment do
+      define :deploy_network, action: :deploy, args: [:network, :device]
+      define :fetch_network_deployment, action: :read, get_by_identity: :network_instance
+      define :mark_network_deployment_as_sent, action: :mark_as_sent
+      define :mark_network_deployment_as_available, action: :mark_as_available
+      define :mark_network_deployment_as_unavailable, action: :mark_as_unavailable
+      define :mark_network_deployment_as_errored, action: :mark_as_errored, args: [:message]
+    end
+
     resource Edgehog.Containers.Volume
 
     resource DeploymentReadyAction
