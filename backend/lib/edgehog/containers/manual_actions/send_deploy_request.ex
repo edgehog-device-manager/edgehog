@@ -51,8 +51,8 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
 
       with :ok <- send_create_image_requests(device, images),
            :ok <- send_create_volume_requests(device, volumes),
-           :ok <- send_create_container_requests(device, containers),
            :ok <- deploy_networks(device, networks),
+           :ok <- deploy_containers(device, containers),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
         Containers.deployment_set_status(deployment, :sent, nil, tenant: tenant)
       end
@@ -98,12 +98,24 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
     end)
   end
 
-  defp send_create_container_requests(device, containers) do
+  defp deploy_containers(device, containers) do
+    containers =
+      containers
+      |> Enum.uniq_by(& &1.id)
+      |> Enum.reject(&container_deployed?(&1, device))
+
     Enum.reduce_while(containers, :ok, fn container, _acc ->
-      case Devices.send_create_container_request(device, container) do
+      case Containers.deploy_container(container, device, tenant: container.tenant_id) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
+  end
+
+  defp container_deployed?(container, device) do
+    case Containers.fetch_container_deployment(container.id, device.id, tenant: container.tenant_id) do
+      {:ok, _container_deployment} -> true
+      _ -> false
+    end
   end
 end

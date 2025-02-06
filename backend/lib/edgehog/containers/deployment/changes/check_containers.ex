@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,23 +22,32 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
   @moduledoc false
   use Ash.Resource.Change
 
+  alias Edgehog.Containers
+
   @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
+  def change(changeset, _opts, context) do
     deployment = changeset.data
+    %{tenant: tenant} = context
 
     with {:ok, :created_networks} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
          {:ok, deployment} <-
-           Ash.load(deployment, device: :available_containers, release: [:containers]) do
-      available_container_ids = Enum.map(deployment.device.available_containers, & &1.id)
+           Ash.load(deployment, device: [], release: [:containers]) do
+      device = deployment.device
 
-      missing_containers =
-        Enum.reject(deployment.release.containers, &(&1.id in available_container_ids))
+      containers_ready? =
+        deployment.release.containers
+        |> Enum.uniq_by(& &1.id)
+        |> Enum.map(
+          &Containers.fetch_container_deployment!(&1.id, device.id,
+            tenant: tenant,
+            load: [:ready?]
+          )
+        )
+        |> Enum.all?(& &1.ready?)
 
-      if missing_containers == [] do
-        Ash.Changeset.change_attribute(changeset, :status, :created_containers)
-      else
-        changeset
-      end
+      if containers_ready?,
+        do: Ash.Changeset.change_attribute(changeset, :status, :created_containers),
+        else: changeset
     else
       _ -> changeset
     end

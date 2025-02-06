@@ -96,6 +96,17 @@ defmodule Edgehog.Containers do
       define :containers_with_image, action: :filter_by_image, args: [:image_id]
     end
 
+    resource Edgehog.Containers.Container.Deployment do
+      define :deploy_container, action: :deploy, args: [:container, :device]
+      define :fetch_container_deployment, action: :read, get_by_identity: :container_instance
+      define :mark_container_deployment_as_sent, action: :mark_as_sent
+      define :mark_container_deployment_as_received, action: :mark_as_received
+      define :mark_container_deployment_as_created, action: :mark_as_created
+      define :mark_container_deployment_as_stopped, action: :mark_as_stopped
+      define :mark_container_deployment_as_running, action: :mark_as_running
+      define :mark_container_deployment_as_errored, action: :mark_as_errored, args: [:message]
+    end
+
     resource Edgehog.Containers.Deployment do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
       define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
