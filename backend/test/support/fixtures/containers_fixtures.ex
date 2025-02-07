@@ -23,8 +23,6 @@ defmodule Edgehog.ContainersFixtures do
   This module defines test helpers for creating 
   entities via the `Edgehog.Containers` context.
   """
-  alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
-  alias Edgehog.Astarte.Device.AvailableDeploymentsMock
   alias Edgehog.AstarteFixtures
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Container
@@ -364,17 +362,5 @@ defmodule Edgehog.ContainersFixtures do
       })
 
     Ash.create!(Network.Deployment, params, tenant: tenant)
-  end
-
-  def set_resource_expectations(deployments, new_deployments \\ 1) do
-    deployments =
-      Enum.map(deployments, &Ash.load!(&1, release: [containers: [:image, :networks]]))
-
-    available_deployments =
-      Enum.map(deployments, &%DeploymentStatus{id: &1.id, status: :stopped})
-
-    Mox.expect(AvailableDeploymentsMock, :get, new_deployments, fn _, _ ->
-      {:ok, available_deployments}
-    end)
   end
 end

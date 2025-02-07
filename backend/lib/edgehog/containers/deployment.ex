@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,9 +25,10 @@ defmodule Edgehog.Containers.Deployment do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Deployment.Changes
+  alias Edgehog.Containers.Deployment.Types.DeploymentState
+  alias Edgehog.Containers.Deployment.Types.ResourcesState
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
-  alias Edgehog.Containers.Types.DeploymentStatus
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
 
@@ -36,7 +37,11 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:device_id, :release_id, :status, :message]]
+    defaults [
+      :read,
+      :destroy,
+      create: [:device_id, :release_id, :state, :last_error_message, :resources_state]
+    ]
 
     create :deploy do
       description """
@@ -107,16 +112,49 @@ defmodule Edgehog.Containers.Deployment do
       manual ManualActions.SendDeploymentUpgrade
     end
 
-    update :set_status do
-      accept [:status, :message]
+    update :mark_as_sent do
+      change set_attribute(:state, :sent)
     end
 
-    update :update_status do
+    update :mark_as_started do
+      change set_attribute(:state, :started)
+    end
+
+    update :mark_as_starting do
+      require_atomic? false
+
+      change Changes.MarkAsStarting
+    end
+
+    update :mark_as_stopped do
+      change set_attribute(:state, :stopped)
+    end
+
+    update :mark_as_stopping do
+      require_atomic? false
+
+      change Changes.MarkAsStopping
+    end
+
+    update :mark_as_errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_error_message, arg(:message))
+      change set_attribute(:state, :error)
+    end
+
+    update :mark_as_deleting do
+      change set_attribute(:state, :deleting)
+    end
+
+    update :update_resources_state do
       change Changes.CheckImages
       change Changes.CheckNetworks
       change Changes.CheckVolumes
       change Changes.CheckContainers
-      change Changes.CheckDeployments
+      change Changes.CheckDeployment
 
       require_atomic? false
     end
@@ -131,13 +169,17 @@ defmodule Edgehog.Containers.Deployment do
   attributes do
     uuid_primary_key :id
 
-    attribute :status, DeploymentStatus do
-      allow_nil? false
+    attribute :resources_state, ResourcesState do
+      default :initial
+      public? true
+    end
+
+    attribute :state, DeploymentState do
       default :created
       public? true
     end
 
-    attribute :message, :string do
+    attribute :last_error_message, :string do
       public? true
     end
 
@@ -157,6 +199,11 @@ defmodule Edgehog.Containers.Deployment do
     has_many :ready_actions, Edgehog.Containers.DeploymentReadyAction do
       public? true
     end
+  end
+
+  calculations do
+    calculate :ready?, :boolean, expr(state in [:started, :starting, :stopped, :stopping])
+    calculate :resources_ready?, :boolean, expr(resources_state == :ready)
   end
 
   identities do

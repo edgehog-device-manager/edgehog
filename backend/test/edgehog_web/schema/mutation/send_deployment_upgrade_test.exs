@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.DeploymentUpdateMock
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
 
   describe "sendDeploymentUpgrade" do
     setup %{tenant: tenant} do
@@ -73,7 +72,11 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         args
 
       deployment_0_0_1 =
-        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
+        deployment_fixture(
+          release_id: release_0_0_1.id,
+          resources_state: :ready,
+          tenant: tenant
+        )
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
       expect(DeploymentUpdateMock, :update, fn _, _, _ -> :ok end)
@@ -85,10 +88,13 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
       {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
 
-      deployment = Ash.get!(Deployment, deployment_id, tenant: tenant)
-      set_resource_expectations([deployment_0_0_1, deployment])
+      deployment =
+        deployment_id
+        |> Containers.fetch_deployment!(tenant: tenant)
+        |> Containers.mark_deployment_as_stopped!(tenant: tenant)
+        |> Ash.load!(release: [containers: [:image, :volumes, :networks]], device: [])
 
-      Containers.deployment_update_status!(deployment)
+      Containers.deployment_update_resources_state!(deployment)
     end
 
     test "fails if the deployments do not belong to the same application", args do

@@ -115,12 +115,18 @@ defmodule Edgehog.Containers do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
       define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
       define :fetch_deployment, action: :read, get_by: [:id]
-      define :deployment_set_status, action: :set_status, args: [:status, :message]
-
       define :delete_deployment, action: :destroy
-      define :deployment_update_status, action: :update_status
+      define :deployment_update_resources_state, action: :update_resources_state
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
       define :run_ready_actions, action: :run_ready_actions
+
+      define :mark_deployment_as_sent, action: :mark_as_sent
+      define :mark_deployment_as_deleting, action: :mark_as_deleting
+      define :mark_deployment_as_errored, action: :mark_as_errored, args: [:message]
+      define :mark_deployment_as_started, action: :mark_as_started
+      define :mark_deployment_as_starting, action: :mark_as_starting
+      define :mark_deployment_as_stopped, action: :mark_as_stopped
+      define :mark_deployment_as_stopping, action: :mark_as_stopping
     end
 
     resource Edgehog.Containers.Image do

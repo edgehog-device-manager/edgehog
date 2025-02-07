@@ -54,7 +54,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
            :ok <- deploy_networks(device, networks),
            :ok <- deploy_containers(device, containers),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
-        Containers.deployment_set_status(deployment, :sent, nil, tenant: tenant)
+        Containers.mark_deployment_as_sent(deployment, tenant: tenant)
       end
     end
   end
