@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -93,6 +93,18 @@ const Table = <T extends RowData>({
     [hiddenColumns],
   );
 
+  useEffect(() => {
+    setPagination((prev) => {
+      const totalPages = Math.ceil(data.length / maxPageRows);
+      return {
+        ...prev,
+        pageSize: maxPageRows,
+        pageIndex:
+          totalPages > 0 ? Math.min(prev.pageIndex, totalPages - 1) : 0,
+      };
+    });
+  }, [maxPageRows, data.length]);
+
   const table = useReactTable<T>({
     data: data as T[], // TODO: remove when react-table narrows data type to readonly array
     columns,
@@ -102,7 +114,12 @@ const Table = <T extends RowData>({
       sorting,
     },
     globalFilterFn: searchFunction ?? "auto",
-    onPaginationChange: setPagination,
+    onPaginationChange: (newPagination) => {
+      setPagination((prev) => ({
+        ...prev,
+        ...newPagination,
+      }));
+    },
     onSortingChange: setSorting,
 
     getCoreRowModel: getCoreRowModel(),
@@ -160,7 +177,12 @@ const Table = <T extends RowData>({
       <TablePagination
         totalPages={table.getPageCount()}
         activePage={pagination.pageIndex}
-        onPageChange={table.setPageIndex}
+        onPageChange={(page) =>
+          setPagination((prev) => ({
+            ...prev,
+            pageIndex: page,
+          }))
+        }
       />
     </div>
   );

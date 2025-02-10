@@ -22,29 +22,17 @@ defmodule Edgehog.UpdateCampaigns.UpdateTarget.Changes.CreateManagedOTAOperation
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.OSManagement
-
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    %{tenant: tenant} = context
-
+  def change(changeset, _opts, _context) do
     {:ok, base_image} = Ash.Changeset.fetch_argument(changeset, :base_image)
-
     device_id = Ash.Changeset.get_attribute(changeset, :device_id)
+    ota = %{device_id: device_id, base_image_url: base_image.url}
 
-    Ash.Changeset.before_action(changeset, fn changeset ->
-      # TODO: this is not transactional, since if for some reason the database
-      # operations fail, we would still have revert the OTA Operation that was
-      # already sent to Astarte by create_managed_ota_operation!/2.
-      # So we leave this like this for now and we'll revisit this when we add
-      # support for canceling OTA Operations.
-      ota_operation =
-        OSManagement.create_managed_ota_operation!(
-          %{device_id: device_id, base_image_url: base_image.url},
-          tenant: tenant
-        )
-
-      Ash.Changeset.change_attribute(changeset, :ota_operation_id, ota_operation.id)
-    end)
+    # TODO: this is not transactional, since if for some reason the database
+    # operations fail, we would still have revert the OTA Operation that was
+    # already sent to Astarte by create_managed_ota_operation!/2.
+    # So we leave this like this for now and we'll revisit this when we add
+    # support for canceling OTA Operations.
+    Ash.Changeset.manage_relationship(changeset, :ota_operation, ota, on_no_match: {:create, :create_managed})
   end
 end

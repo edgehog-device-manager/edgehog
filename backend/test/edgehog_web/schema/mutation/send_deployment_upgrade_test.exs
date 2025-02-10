@@ -41,19 +41,18 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
           tenant: tenant
         )
 
-      deployment_0_0_1 =
-        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
-
       %{
-        deployment_0_0_1: deployment_0_0_1,
         release_0_0_1: release_0_0_1,
         release_0_0_2: release_0_0_2
       }
     end
 
     test "correctly sends the deployment request with valid data", args do
-      %{deployment_0_0_1: deployment_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
+      %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
+
+      deployment_0_0_1 =
+        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
 
@@ -70,8 +69,11 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
     end
 
     test "sends the deployment upgrade once the new deployment reaches :ready state", args do
-      %{deployment_0_0_1: deployment_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
+      %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
+
+      deployment_0_0_1 =
+        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
       expect(DeploymentUpdateMock, :update, fn _, _, _ -> :ok end)
@@ -90,8 +92,11 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
     end
 
     test "fails if the deployments do not belong to the same application", args do
-      %{deployment_0_0_1: deployment_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
+      %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
+
+      deployment_0_0_1 =
+        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
 
       release_0_0_2_b = release_fixture(version: release_0_0_2.version, tenant: tenant)
 

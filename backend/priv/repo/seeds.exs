@@ -139,6 +139,12 @@ tenant =
 {status, realm_pk} =
   read_key!.("SEEDS_REALM_PRIVATE_KEY_FILE", "SEEDS_REALM_ORIGINAL_FILE", "realm_private")
 
+realm =
+  Astarte.create_realm!(
+    %{cluster_id: cluster.id, name: read_env_var.("SEEDS_REALM"), private_key: realm_pk},
+    tenant: tenant
+  )
+
 if status == :default do
   """
   You are using the default realm private key. \
@@ -146,13 +152,9 @@ if status == :default do
   """
   |> String.trim_trailing("\n")
   |> Logger.warning()
+else
+  Edgehog.Tenants.reconcile_tenant(tenant)
 end
-
-realm =
-  Astarte.create_realm!(
-    %{cluster_id: cluster.id, name: read_env_var.("SEEDS_REALM"), private_key: realm_pk},
-    tenant: tenant
-  )
 
 # Feature Application Management
 

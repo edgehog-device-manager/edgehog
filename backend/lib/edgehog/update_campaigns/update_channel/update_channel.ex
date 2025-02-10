@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
   alias Edgehog.UpdateCampaigns.UpdateChannel.Calculations
   alias Edgehog.UpdateCampaigns.UpdateChannel.Changes
+  alias Edgehog.UpdateCampaigns.UpdateChannel.ErrorHandler
 
   resource do
     description """
@@ -40,6 +41,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
   graphql do
     type :update_channel
+
+    error_handler {ErrorHandler, :handle_error, []}
   end
 
   actions do
@@ -55,9 +58,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
         description """
         The IDs of the target groups that are targeted by this update channel.
         """
-
-        allow_nil? false
-        constraints min_length: 1
       end
 
       change Changes.RelateTargetGroups do
@@ -75,8 +75,6 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
         description """
         The IDs of the target groups that are targeted by this update channel.
         """
-
-        constraints min_length: 1
       end
 
       # Needed because manage_relationship is not atomic
