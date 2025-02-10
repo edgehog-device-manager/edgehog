@@ -562,6 +562,13 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       [container] = release.containers
       [network] = container.networks
 
+      container_deployment_fixture(
+        container_id: container.id,
+        device_id: device.id,
+        tenant: tenant,
+        state: :received
+      )
+
       deployment =
         deployment_fixture(
           tenant: tenant,
@@ -612,6 +619,13 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       [container] = release.containers
       [network] = container.networks
+
+      container_deployment_fixture(
+        container_id: container.id,
+        device_id: device.id,
+        tenant: tenant,
+        state: :sent
+      )
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id]
@@ -674,6 +688,13 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         device_id: device.id,
         state: :available,
         tenant: tenant
+      )
+
+      container_deployment_fixture(
+        container_id: container.id,
+        device_id: device.id,
+        tenant: tenant,
+        state: :device_created
       )
 
       deployment_event = %{

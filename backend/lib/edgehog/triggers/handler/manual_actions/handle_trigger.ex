@@ -178,9 +178,30 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_containers} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(%IncomingData{interface: @available_containers} = event, tenant, realm_id, device_id, _timestamp) do
+    device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
+
     case String.split(event.path, "/") do
       ["", container_id, "status"] ->
+        container_deployment =
+          Containers.fetch_container_deployment!(container_id, device.id, tenant: tenant)
+
+        case event.value do
+          "Received" ->
+            Containers.mark_container_deployment_as_received!(container_deployment,
+              tenant: tenant
+            )
+
+          "Created" ->
+            Containers.mark_container_deployment_as_created!(container_deployment, tenant: tenant)
+
+          "Running" ->
+            Containers.mark_container_deployment_as_running!(container_deployment, tenant: tenant)
+
+          "Stopped" ->
+            Containers.mark_container_deployment_as_stopped!(container_deployment, tenant: tenant)
+        end
+
         releases =
           container_id
           |> Containers.releases_with_container!(tenant: tenant, load: :release)

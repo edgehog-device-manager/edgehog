@@ -30,7 +30,7 @@ defmodule Edgehog.Containers.Container do
 
   graphql do
     type :container
-    paginate_relationship_with networks: :relay
+    paginate_relationship_with networks: :relay, devices: :relay
   end
 
   actions do
@@ -154,6 +154,12 @@ defmodule Edgehog.Containers.Container do
 
     many_to_many :networks, Edgehog.Containers.Network do
       through Edgehog.Containers.ContainerNetwork
+      public? true
+    end
+
+    many_to_many :devices, Edgehog.Devices.Device do
+      through Edgehog.Containers.Container.Deployment
+      join_relationship :container_deployments
       public? true
     end
   end
