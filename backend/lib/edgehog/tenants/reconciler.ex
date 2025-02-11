@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,7 +73,8 @@ defmodule Edgehog.Tenants.Reconciler do
       |> Ash.Query.load(:realm_management_client)
 
     Tenant
-    |> Ash.read!(load: [realm: global_realm_query])
+    |> Ash.read!()
+    |> Enum.map(&Ash.load!(&1, [realm: global_realm_query], tenant: &1))
     |> Enum.each(&start_reconciliation_task(&1, tenant_to_trigger_url_fun))
 
     {:noreply, state}

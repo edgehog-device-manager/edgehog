@@ -20,6 +20,12 @@
 
 import Config
 
+config :azurex, Azurex.Blob.Config,
+  api_url: "http://localhost:10000/devstoreaccount1",
+  default_container: "edgehog",
+  storage_account_name: "devstoreaccount1",
+  storage_account_key: "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+
 # Configure your database
 config :edgehog, Edgehog.Repo,
   username: "postgres",

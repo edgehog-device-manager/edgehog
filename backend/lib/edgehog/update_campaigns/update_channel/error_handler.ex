@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024-2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,17 +18,32 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.RelateTargetGroups do
+defmodule Edgehog.UpdateCampaigns.UpdateChannel.ErrorHandler do
   @moduledoc false
-  use Ash.Resource.Change
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
-    {:ok, target_group_ids} = Ash.Changeset.fetch_argument(changeset, :target_group_ids)
+  def handle_error(error, context) do
+    %{action: action} = context
 
-    Ash.Changeset.manage_relationship(changeset, :target_groups, target_group_ids,
-      on_lookup: {:relate, :assign_update_channel},
-      on_no_match: :error
-    )
+    case action do
+      :create -> target_ids_translation(error)
+      :update -> target_ids_translation(error)
+      _ -> error
+    end
+  end
+
+  defp target_ids_translation(error) do
+    if missing_target_ids?(error) do
+      %{
+        error
+        | fields: [:target_group_ids],
+          message: "One or more target groups could not be found"
+      }
+    else
+      error
+    end
+  end
+
+  defp missing_target_ids?(error) do
+    error[:code] == "not_found"
   end
 end

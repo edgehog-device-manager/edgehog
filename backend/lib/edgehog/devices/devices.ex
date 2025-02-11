@@ -116,7 +116,11 @@ defmodule Edgehog.Devices do
 
     resource HardwareType
     resource Edgehog.Devices.HardwareTypePartNumber
-    resource SystemModel
+
+    resource SystemModel do
+      define :delete_system_model, action: :destroy
+    end
+
     resource Edgehog.Devices.SystemModelPartNumber
   end
 end

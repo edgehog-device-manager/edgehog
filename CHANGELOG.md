@@ -4,8 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10] - Unreleased
 ### Added
+- Managed OTA operations expose the update target that created them in graphql ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356).
+- Support for using Azure Storage as the persistence layer for asset uploads ([#233](https://github.com/edgehog-device-manager/edgehog/issues/233)).
+- Ecto SSL configuration is exposed trough `DATABASE_*` environment variables (see [.env](./.env))
 - Added Applications tab to Device page ([#662](https://github.com/edgehog-device-manager/edgehog/issues/662))
 - Implemented a application management feature, enabling users to view and navigate through applications and their release details ([#704](https://github.com/edgehog-device-manager/edgehog/issues/704))
   - **Applications page**: Displays a list of all existing applications, with navigation to individual Application pages.
@@ -14,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `ApplicationCreate` page to enable users to create a new application with fields for application name and description.
 - Added `ReleaseCreate` page to enable users to create a new release for an application with fields for release Version and a list of Containers.
 - Add upgrade deployment functionality with version selection ([#703](https://github.com/edgehog-device-manager/edgehog/issues/703))
+
+## [0.9.3] - Unreleased
+### Fixed
+- Base Image deletion in S3 storage
+
+## [0.9.2] - 2024-12-09
+### Changed
+- Update the docker-compose configuration to allow both physical and virtual devices
+  to connect to Edgehog, provided that the devices and the host are on the same LAN.
 
 ## [0.9.1] - 2024-10-28
 ### Fixed

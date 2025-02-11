@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ defmodule Edgehog.MixProject do
   def project do
     [
       app: :edgehog,
-      version: "0.9.1",
+      version: "0.9.2",
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -95,6 +95,7 @@ defmodule Edgehog.MixProject do
       {:envar, "~> 1.1"},
       {:ex_aws, "~> 2.2"},
       {:ex_aws_s3, "~> 2.0"},
+      {:azurex, "~> 1.1"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6"},
       {:waffle_gcs, "~> 0.2"},
