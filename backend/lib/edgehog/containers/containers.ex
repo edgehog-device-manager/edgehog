@@ -123,6 +123,15 @@ defmodule Edgehog.Containers do
       define :fetch_image, action: :read, get_by: [:id]
     end
 
+    resource Edgehog.Containers.Image.Deployment do
+      define :deploy_image, action: :deploy, args: [:image, :device]
+      define :fetch_image_deployment, action: :read, get_by_identity: :image_instance
+      define :mark_image_deployment_as_sent, action: :mark_as_sent
+      define :mark_image_deployment_as_unpulled, action: :mark_as_unpulled
+      define :mark_image_deployment_as_pulled, action: :mark_as_pulled
+      define :mark_image_deployment_as_errored, action: :mark_as_errored, args: [:message]
+    end
+
     resource Edgehog.Containers.ImageCredentials
 
     resource Edgehog.Containers.Release do

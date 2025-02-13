@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,37 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CheckImages do
+defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.Containers
+  alias Edgehog.Devices
 
   @impl Ash.Resource.Change
+  @spec change(Ash.Changeset.t(), any(), %{:tenant => any(), optional(any()) => any()}) ::
+          Ash.Changeset.t()
   def change(changeset, _opts, context) do
-    deployment = changeset.data
     %{tenant: tenant} = context
+    image = Ash.Changeset.get_argument(changeset, :image)
+    device = Ash.Changeset.get_argument(changeset, :device)
 
-    with :sent <- deployment.status,
-         {:ok, deployment} <-
-           Ash.load(deployment, device: [], release: [containers: [:image]]) do
-      device = deployment.device
-
-      images_ready? =
-        deployment.release.containers
-        |> Enum.map(& &1.image)
-        |> Enum.uniq_by(& &1.id)
-        |> Enum.map(&Containers.fetch_image_deployment!(&1.id, device.id, tenant: tenant, load: [:ready?]))
-        |> Enum.all?(& &1.ready?)
-
-      if images_ready? do
-        Ash.Changeset.change_attribute(changeset, :status, :created_images)
-      else
-        changeset
+    Ash.Changeset.after_action(changeset, fn _changeset, image_deployment ->
+      with {:ok, _device} <- Devices.send_create_image_request(device, image, tenant: tenant) do
+        Containers.mark_image_deployment_as_sent(image_deployment)
       end
-    else
-      _ ->
-        changeset
-    end
+    end)
   end
 end
