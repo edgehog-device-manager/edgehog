@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckImages do
     deployment = changeset.data
     %{tenant: tenant} = context
 
-    with :sent <- deployment.status,
+    with :initial <- deployment.resources_state,
          {:ok, deployment} <-
            Ash.load(deployment, device: [], release: [containers: [:image]]) do
       device = deployment.device
@@ -41,11 +41,9 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckImages do
         |> Enum.map(&Containers.fetch_image_deployment!(&1.id, device.id, tenant: tenant, load: [:ready?]))
         |> Enum.all?(& &1.ready?)
 
-      if images_ready? do
-        Ash.Changeset.change_attribute(changeset, :status, :created_images)
-      else
-        changeset
-      end
+      if images_ready?,
+        do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_images),
+        else: changeset
     else
       _ ->
         changeset
