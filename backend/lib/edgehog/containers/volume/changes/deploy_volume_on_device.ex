@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,18 +18,22 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Volume.OptionsCalculation do
+defmodule Edgehog.Containers.Volume.Changes.DeployVolumeOnDevice do
   @moduledoc false
-  use Ash.Resource.Calculation
+  use Ash.Resource.Change
 
-  @impl Ash.Resource.Calculation
-  def calculate(records, _opts, _context) do
-    Enum.map(records, &encode_options(&1.options))
-  end
+  alias Edgehog.Containers
+  alias Edgehog.Devices
 
-  defp encode_options(options) do
-    Enum.map(options, fn {key, value} ->
-      key <> "=" <> value
+  @impl Ash.Resource.Change
+  def change(changeset, _opts, _context) do
+    device = Ash.Changeset.get_argument(changeset, :device)
+    volume = Ash.Changeset.get_argument(changeset, :volume)
+
+    Ash.Changeset.after_action(changeset, fn _changeset, volume_deployment ->
+      with {:ok, _device} <- Devices.send_create_volume_request(device, volume) do
+        Containers.mark_volume_deployment_as_sent(volume_deployment)
+      end
     end)
   end
 end

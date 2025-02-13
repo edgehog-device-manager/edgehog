@@ -32,6 +32,7 @@ defmodule Edgehog.ContainersFixtures do
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Volume
 
   @doc """
   Generate a unique application name.
@@ -52,6 +53,11 @@ defmodule Edgehog.ContainersFixtures do
   Generate a unique image reference.
   """
   def unique_image_reference, do: "image#{System.unique_integer()}"
+
+  @doc """
+  Generate a unique volume target.
+  """
+  def unique_volume_target, do: "/fixture#{System.unique_integer()}/target"
 
   @doc """
   Generate a unique application release version.
@@ -112,6 +118,17 @@ defmodule Edgehog.ContainersFixtures do
       })
 
     Ash.create!(Image, params, tenant: tenant)
+  end
+
+  def volume_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        target: unique_volume_target()
+      })
+
+    Ash.create!(Volume, params, tenant: tenant)
   end
 
   def container_fixture(opts \\ []) do
@@ -236,7 +253,7 @@ defmodule Edgehog.ContainersFixtures do
       end)
 
     {container_id, opts} =
-      Keyword.pop_lazy(opts, :release_id, fn -> container_fixture(tenant: tenant).id end)
+      Keyword.pop_lazy(opts, :container_id, fn -> container_fixture(tenant: tenant).id end)
 
     params =
       Enum.into(opts, %{
@@ -279,6 +296,40 @@ defmodule Edgehog.ContainersFixtures do
       })
 
     Ash.create!(Image.Deployment, params, tenant: tenant)
+  end
+
+  @doc """
+  Generate a %Volume.Deployment{}
+  """
+  def volume_deployment_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {realm_id, opts} =
+      case opts[:device_id] do
+        nil ->
+          Keyword.pop_lazy(opts, :realm_id, fn ->
+            AstarteFixtures.realm_fixture(tenant: tenant).id
+          end)
+
+        _ ->
+          {nil, Keyword.delete(opts, :realm_id)}
+      end
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        Edgehog.DevicesFixtures.device_fixture(realm_id: realm_id, tenant: tenant).id
+      end)
+
+    {volume_id, opts} =
+      Keyword.pop_lazy(opts, :volume_id, fn -> volume_fixture(tenant: tenant).id end)
+
+    params =
+      Enum.into(opts, %{
+        device_id: device_id,
+        volume_id: volume_id
+      })
+
+    Ash.create!(Volume.Deployment, params, tenant: tenant)
   end
 
   @doc """

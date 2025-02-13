@@ -26,6 +26,12 @@ defmodule Edgehog.Containers.ContainerVolume do
 
   actions do
     defaults [:read, :destroy, create: [:target, :container_id, :volume_id]]
+
+    read :containers_by_volume do
+      argument :volume_id, :uuid
+
+      filter expr(volume_id == ^arg(:volume_id))
+    end
   end
 
   attributes do

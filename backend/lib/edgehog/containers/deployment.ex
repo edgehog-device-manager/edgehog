@@ -114,6 +114,7 @@ defmodule Edgehog.Containers.Deployment do
     update :update_status do
       change Changes.CheckImages
       change Changes.CheckNetworks
+      change Changes.CheckVolumes
       change Changes.CheckContainers
       change Changes.CheckDeployments
 

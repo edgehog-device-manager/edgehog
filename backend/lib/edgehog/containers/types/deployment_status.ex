@@ -34,6 +34,7 @@ defmodule Edgehog.Containers.Types.DeploymentStatus do
       # Remove when reimplementing the deployment and its status as a state machine
       created_images: "The device has received the necessary image descriptions for the deployment.",
       created_networks: "The device has received all the network descriptions necessary for the deployment.",
+      created_volumes: "The device has received all the volume descriptions necessary for the deployment.",
       created_containers: "The device has received all the container descriptions necessary for the deployment.",
       created_deployment: "The device has received the release description of the the deployment."
     ]
