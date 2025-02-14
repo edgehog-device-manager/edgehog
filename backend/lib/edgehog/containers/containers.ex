@@ -118,10 +118,11 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Deployment do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
-      define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
+      # define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
       define :fetch_deployment, action: :read, get_by: [:id]
+      define :fetch_deployment_by_identity, action: :read, get_by_identity: :release_instance
       define :delete_deployment, action: :destroy
-      define :deployment_update_resources_state, action: :update_resources_state
+      # define :deployment_update_resources_state, action: :update_resources_state
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
       define :run_ready_actions, action: :run_ready_actions
 
@@ -159,7 +160,9 @@ defmodule Edgehog.Containers do
         args: [:container_id]
     end
 
-    resource Edgehog.Containers.Network
+    resource Edgehog.Containers.Network do
+      define :fetch_network, action: :read, get_by: [:id]
+    end
 
     resource Edgehog.Containers.Network.Deployment do
       define :deploy_network, action: :deploy, args: [:network, :device]
@@ -170,7 +173,9 @@ defmodule Edgehog.Containers do
       define :mark_network_deployment_as_errored, action: :mark_as_errored, args: [:message]
     end
 
-    resource Edgehog.Containers.Volume
+    resource Edgehog.Containers.Volume do
+      define :fetch_volume, action: :read, get_by: [:id]
+    end
 
     resource Edgehog.Containers.Volume.Deployment do
       define :deploy_volume, action: :deploy, args: [:volume, :device]
