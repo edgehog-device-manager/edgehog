@@ -57,7 +57,7 @@ defmodule Edgehog.Containers.Deployment do
 
       change manage_relationship(:device_id, :device, type: :append)
 
-      change Changes.CreateDeploymentOnDevice
+      change Changes.StartDeployer
     end
 
     update :start do
@@ -90,15 +90,6 @@ defmodule Edgehog.Containers.Deployment do
       """
 
       manual ManualActions.RunReadyActions
-    end
-
-    action :send_deploy_request do
-      argument :deployment, :struct do
-        constraints instance_of: __MODULE__
-        allow_nil? false
-      end
-
-      run ManualActions.SendDeployRequest
     end
 
     update :upgrade_release do
@@ -147,16 +138,6 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_deleting do
       change set_attribute(:state, :deleting)
-    end
-
-    update :update_resources_state do
-      change Changes.CheckImages
-      change Changes.CheckNetworks
-      change Changes.CheckVolumes
-      change Changes.CheckContainers
-      change Changes.CheckDeployment
-
-      require_atomic? false
     end
 
     read :filter_by_release do

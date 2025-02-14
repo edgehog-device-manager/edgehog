@@ -18,16 +18,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
+defmodule Edgehog.Containers.Deployment.Changes.StartDeployer do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment.DeployerSupervisor
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
-    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      with :ok <- Containers.send_deploy_request(deployment, tenant: deployment.tenant_id) do
+    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+      with {:ok, deployment} <- result do
+        _pid = DeployerSupervisor.start_deployer!(deployment)
+
         {:ok, deployment}
       end
     end)
