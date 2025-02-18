@@ -57,6 +57,8 @@ defmodule Edgehog.Application do
       {Finch, name: EdgehogFinch},
       # Start the UpdateCampaigns supervisor
       Edgehog.UpdateCampaigns.Supervisor,
+      # Start the Deployer supervisor
+      Edgehog.Containers.Deployment.Supervisor,
       # Start the Tenant Reconciler Supervisor
       {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start the Endpoint (http/https)

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,18 +18,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
+defmodule Edgehog.Containers.Deployment.Changes.MarkAsStarting do
   @moduledoc false
-  use Ash.Resource.Change
 
-  alias Edgehog.Containers
+  use Ash.Resource.Change
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
-    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      with :ok <- Containers.send_deploy_request(deployment, tenant: deployment.tenant_id) do
-        {:ok, deployment}
-      end
-    end)
+    deployment = changeset.data
+
+    if deployment.state == :started,
+      do: changeset,
+      else: Ash.Changeset.change_attribute(changeset, :state, :starting)
   end
 end

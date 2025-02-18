@@ -28,6 +28,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
+  alias Edgehog.PubSub
   alias Edgehog.Triggers.DeviceConnected
   alias Edgehog.Triggers.DeviceDisconnected
   alias Edgehog.Triggers.IncomingData
@@ -42,15 +43,6 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @ota_event "io.edgehog.devicemanager.OTAEvent"
   @ota_response "io.edgehog.devicemanager.OTAResponse"
   @system_info "io.edgehog.devicemanager.SystemInfo"
-
-  @initial_statuses [
-    :created,
-    :sent,
-    :created_images,
-    :created_networks,
-    :created_containers,
-    :created_deployment
-  ]
 
   @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
@@ -134,20 +126,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
           Containers.mark_image_deployment_as_unpulled!(image_deployment, tenant: tenant)
         end
 
-        containers = Containers.containers_with_image!(image_id, tenant: tenant)
+        PubSub.publish!(:available_image,
+          image_id: image_id,
+          device_id: device.id,
+          tenant: tenant.tenant_id
+        )
 
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1.id, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+        {:ok, image_deployment}
 
       _ ->
         {:error, :invalid_event_path}
@@ -166,24 +151,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
           do: Containers.mark_network_deployment_as_available(network_deployment, tenant: tenant),
           else: Containers.mark_network_deployment_as_unavailable(network_deployment, tenant: tenant)
 
-        containers =
-          network_id
-          |> Containers.containers_with_network!(tenant: tenant, load: :container)
-          |> Enum.map(& &1.container_id)
-          |> Enum.uniq()
+        PubSub.publish!(:available_network,
+          network_id: network_id,
+          device_id: device.id,
+          tenant: tenant.tenant_id
+        )
 
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+        {:ok, network_deployment}
 
       _ ->
         {:error, :invalid_event_path}
@@ -202,24 +176,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
           do: Containers.mark_volume_deployment_as_available(volume_deployment, tenant: tenant),
           else: Containers.mark_volume_deployment_as_unavailable(volume_deployment, tenant: tenant)
 
-        containers =
-          volume_id
-          |> Containers.containers_with_volume!(tenant: tenant, load: :container)
-          |> Enum.map(& &1.container_id)
-          |> Enum.uniq()
+        PubSub.publish!(:available_volume,
+          volume_id: volume_id,
+          device_id: device.id,
+          tenant: tenant.tenant_id
+        )
 
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+        {:ok, volume_deployment}
 
       _ ->
         {:error, :invalid_event_path}
@@ -250,18 +213,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
             Containers.mark_container_deployment_as_stopped!(container_deployment, tenant: tenant)
         end
 
-        releases =
-          container_id
-          |> Containers.releases_with_container!(tenant: tenant, load: :release)
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
+        PubSub.publish!(:available_container,
+          container_id: container_id,
+          device_id: device.id,
+          tenant: tenant.tenant_id
+        )
 
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_status!/1)}
+        {:ok, container_deployment}
 
       _ ->
         {:error, :invalid_event_path}
@@ -272,28 +230,20 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     "/" <> deployment_id = event.path
 
     %{
-      "status" => status,
+      "status" => state,
       "message" => message
     } = event.value
 
     with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      case {deployment.status, status} do
-        {:started, "Starting"} ->
-          # Skip Starting if already Started
-          {:ok, deployment}
+      case state do
+        "Starting" ->
+          Containers.mark_deployment_as_starting(deployment, tenant: tenant)
 
-        {:stopped, "Stopping"} ->
-          # Skip Stopping if already Stopped
-          {:ok, deployment}
+        "Stopping" ->
+          Containers.mark_deployment_as_stopping(deployment, tenant: tenant)
 
-        {_, "Error"} ->
-          # Errors have precedence
-          Containers.deployment_set_status(deployment, status, message, tenant: tenant)
-
-        _ ->
-          if deployment.status in @initial_statuses,
-            do: Containers.deployment_update_status(deployment, tenant: tenant),
-            else: Containers.deployment_set_status(deployment, status, message, tenant: tenant)
+        "Error" ->
+          Containers.mark_deployment_as_errored(deployment, message, tenant: tenant)
       end
     end
   end
@@ -301,19 +251,16 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   defp handle_event(%IncomingData{interface: @available_deployments} = event, tenant, _realm_id, _device_id, _timestamp) do
     case String.split(event.path, "/") do
       ["", deployment_id, "status"] ->
-        status = event.value
+        state = event.value
 
-        with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-          cond do
-            status == nil ->
-              Containers.delete_deployment(deployment)
-
-            deployment.status in @initial_statuses ->
-              Containers.deployment_update_status(deployment, tenant: tenant)
-
-            true ->
-              Containers.deployment_set_status(deployment, status, deployment.message, tenant: tenant)
-          end
+        with {:ok, deployment} <-
+               Containers.fetch_deployment(deployment_id,
+                 tenant: tenant,
+                 load: [:release, :device]
+               ) do
+          if state,
+            do: mark_deployment_and_publish!(state, deployment, tenant),
+            else: Containers.delete_deployment(deployment, tenant: tenant)
         end
 
       _ ->
@@ -389,4 +336,21 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   defp translate_ota_response_status_code("OTAFailed"), do: nil
   defp translate_ota_response_status_code("OTAErrorDeploy"), do: "IOError"
   defp translate_ota_response_status_code("OTAErrorBootWrongPartition"), do: "SystemRollback"
+
+  defp mark_deployment_and_publish!(state, deployment, tenant) do
+    case state do
+      "Started" ->
+        Containers.mark_deployment_as_started(deployment, tenant: tenant)
+
+      "Stopped" ->
+        Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
+    end
+
+    PubSub.publish!(:available_deployment,
+      deployment_id: deployment.id,
+      tenant: tenant.tenant_id
+    )
+
+    {:ok, deployment}
+  end
 end
