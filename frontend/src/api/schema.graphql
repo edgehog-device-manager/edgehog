@@ -761,6 +761,12 @@ type BaseImage implements Node {
   ): [LocalizedAttribute!]
 }
 
+"A relay node"
+interface Node {
+  "A unique identifier"
+  id: ID!
+}
+
 enum SortOrder {
   DESC
   DESC_NULLS_FIRST
@@ -2035,6 +2041,12 @@ input OtaOperationFilterInput {
 
   "The device targeted from the operation"
   device: DeviceFilterInput
+
+  """
+  The update target of an update campaing that created the managed
+  ota operation, if any.
+  """
+  updateTarget: UpdateTargetFilterInput
 }
 
 input OtaOperationSortInput {
@@ -2069,6 +2081,12 @@ type OtaOperation {
 
   "The device targeted from the operation"
   device: Device!
+
+  """
+  The update target of an update campaing that created the managed
+  ota operation, if any.
+  """
+  updateTarget: UpdateTarget
 }
 
 type TenantInfo {
@@ -2267,7 +2285,7 @@ input CreateUpdateChannelInput {
   name: String!
 
   "The IDs of the target groups that are targeted by this update channel."
-  targetGroupIds: [ID!]!
+  targetGroupIds: [ID!]
 }
 
 enum UpdateChannelSortField {
@@ -2616,14 +2634,7 @@ type UpdateCampaign implements Node {
   successfulTargetCount: Int!
 }
 
-interface Node {
-  "The ID of the object."
-  id: ID!
-}
-
 type RootQueryType {
-  node("The ID of an object." id: ID!): Node
-
   "Returns a single update campaign."
   updateCampaign("The id of the record" id: ID!): UpdateCampaign
 
@@ -2663,7 +2674,7 @@ type RootQueryType {
   "Returns a single device group."
   deviceGroup("The id of the record" id: ID!): DeviceGroup
 
-  "Returns the list of all device groups."
+  "Returns a list of device groups."
   deviceGroups(
     "How to sort the records in the response"
     sort: [DeviceGroupSortInput]
@@ -2693,7 +2704,7 @@ type RootQueryType {
     filter: DeviceFilterInput
   ): [Device!]!
 
-  "Returns a hardware type."
+  "Returns a single hardware type."
   hardwareType("The id of the record" id: ID!): HardwareType
 
   "Returns a list of hardware types."
@@ -2705,7 +2716,7 @@ type RootQueryType {
     filter: HardwareTypeFilterInput
   ): [HardwareType!]!
 
-  "Returns a system model."
+  "Returns a single system model."
   systemModel("The id of the record" id: ID!): SystemModel
 
   "Returns a list of system models."
@@ -2717,13 +2728,16 @@ type RootQueryType {
     filter: SystemModelFilterInput
   ): [SystemModel!]!
 
+  "Retrieves a Node from its global id"
+  node("The Node unique identifier" id: ID!): Node!
+
   "Returns a single base image."
   baseImage("The id of the record" id: ID!): BaseImage
 
-  "Returns a single base image."
+  "Returns a single base image collection."
   baseImageCollection("The id of the record" id: ID!): BaseImageCollection
 
-  "Returns a list of base images."
+  "Returns a list of base image collections."
   baseImageCollections(
     "How to sort the records in the response"
     sort: [BaseImageCollectionSortInput]

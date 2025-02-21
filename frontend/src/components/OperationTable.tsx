@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import type {
 
 import Icon from "components/Icon";
 import Table, { createColumnHelper } from "components/Table";
+import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -39,6 +40,12 @@ const OPERATION_TABLE_FRAGMENT = graphql`
       createdAt
       status
       updatedAt
+      updateTarget {
+        updateCampaign {
+          id
+          name
+        }
+      }
     }
   }
 `;
@@ -96,6 +103,24 @@ const columns = [
       />
     ),
     cell: ({ getValue }) => <OperationStatus status={getValue()} />,
+  }),
+  columnHelper.accessor("updateTarget.updateCampaign.name", {
+    header: () => (
+      <FormattedMessage
+        id="components.OperationTable.updateCampaignNameTitle"
+        defaultMessage="Update Campaign"
+      />
+    ),
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.updateCampaignsEdit}
+        params={{
+          updateCampaignId: row.original.updateTarget?.updateCampaign.id ?? "",
+        }}
+      >
+        {getValue()}
+      </Link>
+    ),
   }),
   columnHelper.accessor("baseImageUrl", {
     header: () => (

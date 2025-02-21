@@ -394,6 +394,9 @@
   "components.OperationTable.startedAt": {
     "defaultMessage": "Started At"
   },
+  "components.OperationTable.updateCampaignNameTitle": {
+    "defaultMessage": "Update Campaign"
+  },
   "components.OperationTable.updatedAt": {
     "defaultMessage": "Updated At"
   },
