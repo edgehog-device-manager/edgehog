@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expose the associated UpdateCampaign (if any) from an OTA Operation on the Software Updates tab  ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Support for using Azure Storage as the persistence layer for asset uploads ([#233](https://github.com/edgehog-device-manager/edgehog/issues/233)).
 - Ecto SSL configuration is exposed trough `DATABASE_*` environment variables (see [.env](./.env))
+- Moved Relay setup to `contexts/Relay.tsx`, updated provider structure in `index.tsx` to wrap `RelayProvider` with `SessionProvider`, fixed authentication issues when third-party cookies are disabled by using session context ([#819](https://github.com/edgehog-device-manager/edgehog/issues/819)).
 
 ## [0.9.3] - Unreleased
 ### Fixed
