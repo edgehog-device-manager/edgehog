@@ -26,7 +26,7 @@ import ReactDOM from "react-dom";
 import { RelayEnvironmentProvider } from "react-relay/hooks";
 
 import "api/relay";
-import { AuthConfig, loadAuthConfig } from "./Auth";
+import { useSession, Session } from "./Session";
 
 const applicationMetatag: HTMLElement = document.head.querySelector(
   "[name=application-name]",
@@ -46,14 +46,14 @@ try {
 const fetchGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,
-  authConfig: AuthConfig,
+  session: Session,
 ) => {
   const userLanguage = navigator.language; // TODO allow users to overwrite this
-  const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
+  const apiUrl = new URL(`tenants/${session.tenantSlug}/api`, backendUrl);
   const response = await fetch(apiUrl.toString(), {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${authConfig.authToken}`,
+      Authorization: `Bearer ${session.authToken}`,
       "Content-Type": "application/json",
       "Accept-Language": userLanguage,
     },
@@ -67,13 +67,13 @@ const uploadGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,
   uploadables: UploadableMap,
-  authConfig: AuthConfig,
+  session: Session,
 ) => {
-  const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
+  const apiUrl = new URL(`tenants/${session.tenantSlug}/api`, backendUrl);
   const request: RequestInit = {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${authConfig.authToken}`,
+      Authorization: `Bearer ${session.authToken}`,
     },
   };
   const formData = new FormData();
@@ -129,11 +129,11 @@ const RelayProvider = ({
   children: React.ReactNode;
   environment?: any;
 }) => {
-  const authConfig = loadAuthConfig();
+  const { session } = useSession();
 
   const fetchRelay: FetchFunction = useCallback(
     (operation, variables, _cacheConfig, _uploadables) => {
-      if (!authConfig) {
+      if (!session) {
         throw new Error(
           "Auth configuration not found, a tenant needs to be selected.",
         );
@@ -144,11 +144,11 @@ const RelayProvider = ({
             operation.text,
             extracted.variables,
             extracted.uploadables,
-            authConfig,
+            session,
           )
-        : fetchGraphQL(operation.text, variables, authConfig);
+        : fetchGraphQL(operation.text, variables, session);
     },
-    [authConfig],
+    [session],
   );
 
   // TODO: remove custom scheduler when Relay starts to use React's batched updates

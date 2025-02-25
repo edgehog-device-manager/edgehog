@@ -30,6 +30,7 @@ import {
 } from "react-router-dom";
 import { createMockEnvironment, type MockEnvironment } from "relay-test-utils";
 
+import SessionProvider from "contexts/Session";
 import RelayProvider from "contexts/Relay";
 import type { FetchGraphQL } from "contexts/Relay";
 import AuthProvider from "contexts/Auth";
@@ -68,18 +69,20 @@ const renderWithProviders = (
 
   const ProvidersWrapper = (props: { children?: React.ReactNode }) => {
     return (
-      <RelayProvider environment={relayEnvironment}>
-        <AuthProvider fetchGraphQL={fetchGraphQL}>
-          <RouterProvider initialEntries={[path]}>
-            <Routes>
-              <Route
-                path={route}
-                element={<I18nProvider>{props.children}</I18nProvider>}
-              ></Route>
-            </Routes>
-          </RouterProvider>
-        </AuthProvider>
-      </RelayProvider>
+      <SessionProvider>
+        <RelayProvider environment={relayEnvironment}>
+          <AuthProvider fetchGraphQL={fetchGraphQL}>
+            <RouterProvider initialEntries={[path]}>
+              <Routes>
+                <Route
+                  path={route}
+                  element={<I18nProvider>{props.children}</I18nProvider>}
+                ></Route>
+              </Routes>
+            </RouterProvider>
+          </AuthProvider>
+        </RelayProvider>
+      </SessionProvider>
     );
   };
 

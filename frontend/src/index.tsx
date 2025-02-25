@@ -22,6 +22,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter as RouterProvider } from "react-router-dom";
 
+import SessionProvider from "contexts/Session";
 import RelayProvider, { fetchGraphQL } from "contexts/Relay";
 import AuthProvider from "contexts/Auth";
 import I18nProvider from "i18n";
@@ -30,14 +31,16 @@ import "./index.scss";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RelayProvider>
-      <AuthProvider fetchGraphQL={fetchGraphQL}>
-        <RouterProvider>
-          <I18nProvider>
-            <App />
-          </I18nProvider>
-        </RouterProvider>
-      </AuthProvider>
-    </RelayProvider>
+    <SessionProvider>
+      <RelayProvider>
+        <AuthProvider fetchGraphQL={fetchGraphQL}>
+          <RouterProvider>
+            <I18nProvider>
+              <App />
+            </I18nProvider>
+          </RouterProvider>
+        </AuthProvider>
+      </RelayProvider>
+    </SessionProvider>
   </StrictMode>,
 );
