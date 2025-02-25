@@ -29,7 +29,7 @@ import React, {
 import _ from "lodash";
 import Cookies from "js-cookie";
 
-import type { FetchGraphQL } from "api";
+import type { FetchGraphQL } from "contexts/Relay";
 import Spinner from "components/Spinner";
 
 type AuthConfig = {

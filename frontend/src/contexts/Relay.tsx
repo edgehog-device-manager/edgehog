@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,26 +18,28 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import "api/relay";
+import React, { useMemo, useCallback } from "react";
 import { Environment, Network, RecordSource, Store } from "relay-runtime";
 import type { FetchFunction, Variables, UploadableMap } from "relay-runtime";
 import type { TaskScheduler } from "relay-runtime";
 import ReactDOM from "react-dom";
+import { RelayEnvironmentProvider } from "react-relay/hooks";
 
-import { AuthConfig, loadAuthConfig } from "contexts/Auth";
+import "api/relay";
+import { AuthConfig, loadAuthConfig } from "./Auth";
 
 const applicationMetatag: HTMLElement = document.head.querySelector(
   "[name=application-name]",
 )!;
 const backendUrl =
-  applicationMetatag.dataset?.backendUrl || "http://localhost:4000";
+  applicationMetatag?.dataset?.backendUrl || "http://localhost:4000";
 
 try {
   new URL(backendUrl);
 } catch {
   console.error(
     `An invalid Edgehog backend API base URL has been specified.
-Please ensure that the 'BACKEND_URL' environment variable contains schema, e.g. 'https://api.edgehog.localhost'`,
+  Please ensure that the 'BACKEND_URL' environment variable contains schema, e.g. 'https://api.edgehog.localhost'`,
   );
 }
 
@@ -120,44 +122,67 @@ const extractUploadables = (
   return { variables, uploadables };
 };
 
-const fetchRelay: FetchFunction = async (
-  operation,
-  variables,
-  _cacheConfig,
-  _uploadables,
-) => {
+const RelayProvider = ({
+  children,
+  environment: customEnvironment,
+}: {
+  children: React.ReactNode;
+  environment?: any;
+}) => {
   const authConfig = loadAuthConfig();
-  if (!authConfig) {
-    throw new Error(
-      "Auth configuration not found, a tenant need to be selected.",
+
+  const fetchRelay: FetchFunction = useCallback(
+    (operation, variables, _cacheConfig, _uploadables) => {
+      if (!authConfig) {
+        throw new Error(
+          "Auth configuration not found, a tenant needs to be selected.",
+        );
+      }
+      const extracted = extractUploadables(variables);
+      return extracted.uploadables
+        ? uploadGraphQL(
+            operation.text,
+            extracted.variables,
+            extracted.uploadables,
+            authConfig,
+          )
+        : fetchGraphQL(operation.text, variables, authConfig);
+    },
+    [authConfig],
+  );
+
+  // TODO: remove custom scheduler when Relay starts to use React's batched updates
+  // learn more: https://github.com/facebook/relay/issues/3514#issuecomment-988303222
+  const relayScheduler: TaskScheduler = useMemo(
+    () => ({
+      cancel: () => {},
+      schedule: (task) => {
+        ReactDOM.unstable_batchedUpdates(task);
+        return "";
+      },
+    }),
+    [],
+  );
+
+  const environment = useMemo(() => {
+    return (
+      customEnvironment ||
+      new Environment({
+        network: Network.create(fetchRelay),
+        store: new Store(new RecordSource()),
+        scheduler: relayScheduler,
+      })
     );
-  }
-  const extracted = extractUploadables(variables);
-  return extracted.uploadables
-    ? uploadGraphQL(
-        operation.text,
-        extracted.variables,
-        extracted.uploadables,
-        authConfig,
-      )
-    : fetchGraphQL(operation.text, variables, authConfig);
+  }, [fetchRelay, relayScheduler, customEnvironment]);
+
+  return (
+    <RelayEnvironmentProvider environment={environment}>
+      {children}
+    </RelayEnvironmentProvider>
+  );
 };
 
-// TODO: remove custom scheduler when Relay starts to use React's batched updates
-// learn more: https://github.com/facebook/relay/issues/3514#issuecomment-988303222
-const relayScheduler: TaskScheduler = {
-  cancel: () => {},
-  schedule: (task) => {
-    ReactDOM.unstable_batchedUpdates(task);
-    return "";
-  },
-};
-
-const relayEnvironment = new Environment({
-  network: Network.create(fetchRelay),
-  store: new Store(new RecordSource()),
-  scheduler: relayScheduler,
-});
+export default RelayProvider;
 
 export type { FetchGraphQL };
-export { fetchGraphQL, relayEnvironment };
+export { fetchGraphQL };
