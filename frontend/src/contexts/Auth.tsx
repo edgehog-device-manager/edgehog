@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -26,16 +26,10 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import _ from "lodash";
-import Cookies from "js-cookie";
 
+import { useSession, Session } from "contexts/Session";
 import type { FetchGraphQL } from "api";
 import Spinner from "components/Spinner";
-
-type AuthConfig = {
-  tenantSlug: string;
-  authToken: string | null;
-};
 
 // Use a lightweight query at startup to test if authentication is valid
 const authQuery = `
@@ -46,57 +40,15 @@ const authQuery = `
   }
 `;
 
-const AUTH_CONFIG_VERSION = 1;
-
-function saveAuthConfig(
-  authConfig?: AuthConfig | null,
-  persistConfig: boolean = false,
-): void {
-  // If expires is undefined, closing the browser/session will delete the cookie
-  const cookieOptions = {
-    secure: window.location.protocol === "https:",
-    expires: persistConfig ? 365 : undefined,
-    sameSite: "strict",
-  } as const;
-
-  if (!authConfig) {
-    Cookies.remove("authConfig", cookieOptions);
-  } else {
-    Cookies.set(
-      "authConfig",
-      JSON.stringify({ ...authConfig, _version: AUTH_CONFIG_VERSION }),
-      cookieOptions,
-    );
-  }
-}
-
-function loadAuthConfig(): AuthConfig | null {
-  let authConfig: AuthConfig | null = null;
-  try {
-    authConfig = JSON.parse(Cookies.get("authConfig") || "");
-  } catch {
-    authConfig = null;
-  }
-  if (_.get(authConfig, "_version") === AUTH_CONFIG_VERSION) {
-    return _.omit(authConfig, "_version");
-  }
-  return null;
-}
-
 type AuthContextValue = {
   isAuthenticated: boolean;
-  login: (authConfig: AuthConfig, persistConfig?: boolean) => Promise<boolean>;
+  login: (session: Session, persistConfig?: boolean) => Promise<boolean>;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const hasRequiredValues = (
-  authConfig?: AuthConfig | null,
-): authConfig is AuthConfig =>
-  authConfig != null &&
-  authConfig.tenantSlug != null &&
-  authConfig.authToken != null;
+const hasRequiredValues = (session: Session): boolean => session !== null;
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -104,25 +56,22 @@ interface AuthProviderProps {
 }
 
 const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
-  const [authConfig, setAuthConfig] = useState(loadAuthConfig());
+  const { session, updateSession } = useSession();
   const [isValidatingInitialConfig, setIsValidatingInitialConfig] = useState(
-    hasRequiredValues(authConfig),
+    hasRequiredValues(session),
   );
 
-  const updateAuthConfig = useCallback(
-    (newAuthConfig: AuthConfig | null, persistConfig: boolean = false) => {
-      saveAuthConfig(newAuthConfig, persistConfig);
-      setAuthConfig(newAuthConfig);
-    },
-    [],
-  );
-
-  const validateAuthConfig = useCallback(
-    (authConfig: AuthConfig | null): Promise<boolean> => {
-      if (!hasRequiredValues(authConfig)) {
+  const validateSession = useCallback(
+    (session: Session): Promise<boolean> => {
+      if (!hasRequiredValues(session)) {
         return Promise.resolve(false);
       }
-      return fetchGraphQL(authQuery, {}, authConfig)
+      return fetchGraphQL(
+        authQuery,
+        {},
+        session!.tenantSlug,
+        session!.authToken,
+      )
         .then((response) => (response.errors ? false : true))
         .catch(() => false);
     },
@@ -130,23 +79,23 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
   );
 
   const login = useCallback(
-    async (newAuthConfig: AuthConfig, persistConfig: boolean = false) => {
-      const isValid = await validateAuthConfig(newAuthConfig);
+    async (newSession: Session, persistConfig: boolean = false) => {
+      const isValid = await validateSession(newSession);
       if (isValid) {
-        updateAuthConfig(newAuthConfig, persistConfig);
+        updateSession(newSession, persistConfig);
       }
       return isValid;
     },
-    [updateAuthConfig, validateAuthConfig],
+    [updateSession, validateSession],
   );
 
   const logout = useCallback(() => {
-    updateAuthConfig(null);
-  }, [updateAuthConfig]);
+    updateSession(null);
+  }, [updateSession]);
 
   const isAuthenticated = useMemo(
-    () => hasRequiredValues(authConfig) && !isValidatingInitialConfig,
-    [authConfig, isValidatingInitialConfig],
+    () => hasRequiredValues(session) && !isValidatingInitialConfig,
+    [session, isValidatingInitialConfig],
   );
 
   const contextValue = useMemo(
@@ -157,15 +106,12 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
   useEffect(() => {
     let mounted = true;
     if (isValidatingInitialConfig) {
-      validateAuthConfig(authConfig).then((isValid) => {
+      validateSession(session).then((isValid) => {
         if (!mounted) {
           return;
         }
         if (!isValid) {
-          updateAuthConfig(null);
-          // TODO: the initial config is invalid, meaning the authToken is
-          // probably expired. We could improve UX here by persisting just the
-          // tenantSlug for the next login, or redirect to /login?tenanSlug=...
+          updateSession(null);
         }
         setIsValidatingInitialConfig(false);
       });
@@ -173,12 +119,7 @@ const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
     return () => {
       mounted = false;
     };
-  }, [
-    authConfig,
-    isValidatingInitialConfig,
-    updateAuthConfig,
-    validateAuthConfig,
-  ]);
+  }, [session, isValidatingInitialConfig, updateSession, validateSession]);
 
   if (isValidatingInitialConfig) {
     return (
@@ -203,8 +144,5 @@ const useAuth = (): AuthContextValue => {
   return contextValue;
 };
 
-export type { AuthConfig };
-
-export { loadAuthConfig, useAuth };
-
+export { useAuth };
 export default AuthProvider;
