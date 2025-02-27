@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import type { FetchFunction, Variables, UploadableMap } from "relay-runtime";
 import type { TaskScheduler } from "relay-runtime";
 import ReactDOM from "react-dom";
 
-import { AuthConfig, loadAuthConfig } from "contexts/Auth";
+import type { Session } from "contexts/Session";
 
 const applicationMetatag: HTMLElement = document.head.querySelector(
   "[name=application-name]",
@@ -44,14 +44,14 @@ Please ensure that the 'BACKEND_URL' environment variable contains schema, e.g. 
 const fetchGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,
-  authConfig: AuthConfig,
+  session: Session,
 ) => {
   const userLanguage = navigator.language; // TODO allow users to overwrite this
-  const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
+  const apiUrl = new URL(`tenants/${session.tenantSlug}/api`, backendUrl);
   const response = await fetch(apiUrl.toString(), {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${authConfig.authToken}`,
+      Authorization: `Bearer ${session.authToken}`,
       "Content-Type": "application/json",
       "Accept-Language": userLanguage,
     },
@@ -65,13 +65,13 @@ const uploadGraphQL = async (
   query: string | null | undefined,
   variables: Record<string, unknown>,
   uploadables: UploadableMap,
-  authConfig: AuthConfig,
+  session: Session,
 ) => {
-  const apiUrl = new URL(`tenants/${authConfig.tenantSlug}/api`, backendUrl);
+  const apiUrl = new URL(`tenants/${session.tenantSlug}/api`, backendUrl);
   const request: RequestInit = {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${authConfig.authToken}`,
+      Authorization: `Bearer ${session.authToken}`,
     },
   };
   const formData = new FormData();
@@ -120,29 +120,6 @@ const extractUploadables = (
   return { variables, uploadables };
 };
 
-const fetchRelay: FetchFunction = async (
-  operation,
-  variables,
-  _cacheConfig,
-  _uploadables,
-) => {
-  const authConfig = loadAuthConfig();
-  if (!authConfig) {
-    throw new Error(
-      "Auth configuration not found, a tenant need to be selected.",
-    );
-  }
-  const extracted = extractUploadables(variables);
-  return extracted.uploadables
-    ? uploadGraphQL(
-        operation.text,
-        extracted.variables,
-        extracted.uploadables,
-        authConfig,
-      )
-    : fetchGraphQL(operation.text, variables, authConfig);
-};
-
 // TODO: remove custom scheduler when Relay starts to use React's batched updates
 // learn more: https://github.com/facebook/relay/issues/3514#issuecomment-988303222
 const relayScheduler: TaskScheduler = {
@@ -153,11 +130,39 @@ const relayScheduler: TaskScheduler = {
   },
 };
 
-const relayEnvironment = new Environment({
-  network: Network.create(fetchRelay),
-  store: new Store(new RecordSource()),
-  scheduler: relayScheduler,
-});
+const relayEnvironment = (session: Session | null) => {
+  // If the session is missing or incomplete, return a dummy environment.
+  if (!session) {
+    return new Environment({
+      network: Network.create(() => Promise.resolve({ data: {} })),
+      store: new Store(new RecordSource()),
+      scheduler: relayScheduler,
+    });
+  }
+
+  const fetchRelay: FetchFunction = async (
+    operation,
+    variables,
+    _cacheConfig,
+    _uploadables,
+  ) => {
+    const extracted = extractUploadables(variables);
+    return extracted.uploadables
+      ? await uploadGraphQL(
+          operation.text,
+          extracted.variables,
+          extracted.uploadables,
+          session,
+        )
+      : await fetchGraphQL(operation.text, variables, session);
+  };
+
+  return new Environment({
+    network: Network.create(fetchRelay),
+    store: new Store(new RecordSource()),
+    scheduler: relayScheduler,
+  });
+};
 
 export type { FetchGraphQL };
 export { fetchGraphQL, relayEnvironment };
