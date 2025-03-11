@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -59,9 +59,9 @@ const LoginPage = () => {
   const handleLogin = useCallback(
     (formData: FormData) => {
       setIsLogginIn(true);
-      const authConfig = _.pick(formData, ["tenantSlug", "authToken"]);
+      const session = _.pick(formData, ["tenantSlug", "authToken"]);
       const persistConfig = formData.keepMeLoggedIn;
-      auth.login(authConfig, persistConfig).then((success) => {
+      auth.login(session, persistConfig).then((success) => {
         if (success) {
           navigate(redirectTo, { replace: true });
         } else {

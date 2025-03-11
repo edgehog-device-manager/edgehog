@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import { createMockEnvironment } from "relay-test-utils";
 import type { MockEnvironment } from "relay-test-utils";
 
 import type { FetchGraphQL } from "api";
+import SessionProvider from "contexts/Session";
 import AuthProvider from "contexts/Auth";
 import I18nProvider from "i18n";
 
@@ -69,18 +70,20 @@ const renderWithProviders = (
 
   const ProvidersWrapper = (props: { children?: React.ReactNode }) => {
     return (
-      <RelayEnvironmentProvider environment={relayEnvironment}>
-        <AuthProvider fetchGraphQL={fetchGraphQL}>
-          <RouterProvider initialEntries={[path]}>
-            <Routes>
-              <Route
-                path={route}
-                element={<I18nProvider>{props.children}</I18nProvider>}
-              ></Route>
-            </Routes>
-          </RouterProvider>
-        </AuthProvider>
-      </RelayEnvironmentProvider>
+      <SessionProvider>
+        <RelayEnvironmentProvider environment={relayEnvironment}>
+          <AuthProvider fetchGraphQL={fetchGraphQL}>
+            <RouterProvider initialEntries={[path]}>
+              <Routes>
+                <Route
+                  path={route}
+                  element={<I18nProvider>{props.children}</I18nProvider>}
+                ></Route>
+              </Routes>
+            </RouterProvider>
+          </AuthProvider>
+        </RelayEnvironmentProvider>
+      </SessionProvider>
     );
   };
 
