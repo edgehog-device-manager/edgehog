@@ -89,6 +89,28 @@ Save the three hosts (e.g. `api.edgehog.example.com`, `edgehog.example.com`, and
 
 A series of secrets containing various credentials have to be created.
 
+#### Admin API authentication
+
+Edgehog's backend exposes an Admin Rest API used to provision and manage tenants.
+We need to seed some credentials to setup authentication for these APIs.
+
+Specifically, a cryptographic keypair is needed to emit and validate auth tokens. You can generate an EC keypair with the following OpenSSL commands
+
+```bash
+$ openssl ecparam -name prime256v1 -genkey -noout > admin_private.pem
+$ openssl ec -in admin_private.pem -pubout > admin_public.pem
+```
+
+After those commands are executed, you will have two files: `admin_private.pem` and `admin_public.pem`.
+The `admin_private.pem` key is used to generate auth tokens to access the Admin API, and it is meant to be kept private.
+The content of `admin_public.pem` will instead be used by Edgehog to validate incoming API requests.
+
+To provide Edgehog's backend with the public key, create a Kubernetes secret containing the key which will be used later on in the deployment.
+
+```bash
+kubectl create secret generic edgehog-admin-api-public-key --from-file=admin_public.pem=./admin_public.pem
+```
+
 #### Database connection
 
 This command creates the secret containing the details for the database connection:
@@ -353,6 +375,12 @@ spec:
           value: <EDGEHOG-FORWARDER-PORT>
         - name: EDGEHOG_FORWARDER_SECURE_SESSIONS
           value: <EDGEHOG-FORWARDER-SECURE-SESSIONS>
+        - name: ADMIN_JWT_PUBLIC_KEY_PATH
+          value: /keys/admin_public.pem
+        volumeMounts:
+        - name: admin-public-key
+          mountPath: /keys
+          readOnly: true
         image: edgehogdevicemanager/edgehog-backend:0.9.2
         imagePullPolicy: Always
         name: edgehog-backend
@@ -360,6 +388,13 @@ spec:
         - containerPort: 4000
           name: http
           protocol: TCP
+      volumes:
+      - name: admin-public-key
+        secret:
+          secretName: edgehog-admin-api-public-key
+          items:
+          - key: admin_public.pem
+            path: admin_public.pem
 ```
 
 Values to be replaced
