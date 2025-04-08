@@ -89,6 +89,28 @@ Save the three hosts (e.g. `api.edgehog.example.com`, `edgehog.example.com`, and
 
 A series of secrets containing various credentials have to be created.
 
+#### Admin API authentication
+
+Edgehog's backend exposes an Admin Rest API used to provision and manage tenants.
+We need to seed some credentials to setup authentication for these APIs.
+
+Specifically, a cryptographic keypair is needed to emit and validate auth tokens. You can generate an EC keypair with the following OpenSSL commands
+
+```bash
+$ openssl ecparam -name prime256v1 -genkey -noout > admin_private.pem
+$ openssl ec -in admin_private.pem -pubout > admin_public.pem
+```
+
+After those commands are executed, you will have two files: `admin_private.pem` and `admin_public.pem`.
+The `admin_private.pem` key is used to generate auth tokens to access the Admin API, and it is meant to be kept private.
+The content of `admin_public.pem` will instead be used by Edgehog to validate incoming API requests.
+
+To provide Edgehog's backend with the public key, create a Kubernetes secret containing the key which will be used later on in the deployment.
+
+```bash
+kubectl create secret generic edgehog-admin-api-public-key --from-file=admin_public.pem=./admin_public.pem
+```
+
 #### Database connection
 
 This command creates the secret containing the details for the database connection:
@@ -353,6 +375,12 @@ spec:
           value: <EDGEHOG-FORWARDER-PORT>
         - name: EDGEHOG_FORWARDER_SECURE_SESSIONS
           value: <EDGEHOG-FORWARDER-SECURE-SESSIONS>
+        - name: ADMIN_JWT_PUBLIC_KEY_PATH
+          value: /keys/admin_public.pem
+        volumeMounts:
+        - name: admin-public-key
+          mountPath: /keys
+          readOnly: true
         image: edgehogdevicemanager/edgehog-backend:0.9.2
         imagePullPolicy: Always
         name: edgehog-backend
@@ -360,6 +388,13 @@ spec:
         - containerPort: 4000
           name: http
           protocol: TCP
+      volumes:
+      - name: admin-public-key
+        secret:
+          secretName: edgehog-admin-api-public-key
+          items:
+          - key: admin_public.pem
+            path: admin_public.pem
 ```
 
 Values to be replaced
@@ -707,26 +742,86 @@ This value represents the timeout after which inactive connections are terminate
 This configuration has implications on the inactive sessions of the Device Forwarder: the forwarder has its own default timeout of 1 minute for terminating inactive WebSocket connections, and setting a lower timeout here would conflict with the forwarder's internal processes. For this reason, we leave that responsibility to the forwarder by setting a slightly higher timeout here, such as 2 minutes.
 When changing the value, one should also evaluate the implications on connections to Edgehog's frontend and backend. In addition, higher values may lead to higher risk of DoS attacks. 
 
-## Edgehog Initialization
+## Creating an Edgehog tenant
 
-These are some manual operation that have to be performed to initialize the Edgehog instance. In the
-future these operation will be automated and/or will be performed using a dedicated API.
+By now, Edgehog should already be properly initialized and we are ready to create our first tenant.
 
-### Creating a keypair
+We first need to have a backing Astarte instance with an already existing Astarte realm which will be a 1:1 match with the Edgehog tenant.
 
-A keypair is needed to emit and validate tokens to access your tenant. You can generate an EC
-keypair with the following OpenSSL commands
+Then we can create the Edgehog tenant with a couple of steps.
+
+### Creating a key pair for the tenant
+
+A cryptographic keypair is needed to emit and validate tokens to access your tenant. 
+You can generate an EC keypair with the following OpenSSL commands
 
 ```bash
-$ openssl ecparam -name prime256v1 -genkey -noout > private_key.pem
-$ openssl ec -in private_key.pem -pubout > public_key.pem
+$ openssl ecparam -name prime256v1 -genkey -noout > tenant_private.pem
+$ openssl ec -in tenant_private.pem -pubout > tenant_public.pem
 ```
 
-After those commands are executed, you will have two files: `private_key.pem` and `public_key.pem`.
-The content of `public_key.pem` will be needed in the next steps, while `private_key.pem` will be
-used to emit Edgehog tokens. Make sure to store the private key somewhere safe.
+### Creating a tenant with the Admin API
 
-### Connecting to `iex`
+The next step is generating a token to access Edgehog Admin Rest API. You can do so using the `gen-edgehog-jwt` tool contained in the
+`tools` directory of the [Edgehog
+repo](https://github.com/edgehog-device-manager/edgehog/tree/main/tools).
+Starting from the private key we generated earlier in the deployment process for the Admin API, `admin_public.pem`, this command should give you a valid auth token to access the API.
+
+```bash
+$ pip3 install pyjwt
+$ ./gen-edgehog-jwt -t admin -k <PATH-TO-ADMIN-PRIVATE-KEY>
+```
+
+Note that the token expires after 24 hours by default. If you want to have a token with a different expiry time, you can pass `-e <EXPIRY-SECONDS>` to the `gen-edgehog-jwt` command.
+
+You can test the auth token by listing the existing tenants in the Edgehog instance:
+
+```bash
+curl -X GET --location 'https://<EDGEHOG-API-HOST>/admin-api/v1/tenants' \
+--header 'Content-Type: application/vnd.api+json' \
+--header 'Authorization: Bearer <ADMIN-TOKEN>'
+```
+
+Then, to actually create the tenant:
+
+```bash
+curl -X POST --location 'https://<BACKEND-HOST>/admin-api/v1/tenants' \
+--header 'Content-Type: application/vnd.api+json' \
+--header 'Authorization: Bearer <ADMIN-TOKEN>' \
+--data '{
+  "data": {
+    "attributes": {
+      "astarte_config": {
+        "base_api_url": "<ASTARTE-BASE-API-URL>",
+        "realm_name": "<ASTARTE-REALM-NAME>",
+        "realm_private_key": <ASTARTE-REALM-PRIVATE-KEY>
+      },
+      "default_locale": "en-US",
+      "name": "<TENANT-NAME>",
+      "public_key": "<TENANT-PUBLIC-KEY>",
+      "slug": "<TENANT-SLUG>"
+    },
+    "relationships": {},
+    "type": "tenant"
+  }
+}'
+```
+
+Values to be replaced
+- `BACKEND-HOST`: the domain which exposes Edgehog API. This is the same as `BACKEND-HOST` from the Ingress definition.
+- `ADMIN-TOKEN`: the auth token generated from the admin private key to access Edgehog Admin API.
+- `TENANT-NAME`: the name of the new tenant.
+- `TENANT-SLUG`: the slug of the tenant, must contain only lowercase letters and hyphens.
+- `TENANT-PUBLIC-KEY`: the content of `tenant_public.pem` created in the previous
+  step.
+- `ASTARTE-BASE-API-URL`: the base API url of the Astarte instance (e.g.
+  https://api.astarte.example.com).
+- `ASTARTE-REALM-NAME`: the name of the Astarte realm you're using.
+- `ASTARTE-REALM-PRIVATE-KEY`: the content of the Astarte realm's private key.
+
+### Creating a tenant with an iEx session
+
+If the Admin API cannot be used for some reason, an alternative way can be to establish a live terminal session with Edgehog's backend and issue commands in the Elixir shell.
 
 Connect to the `iex` interactive shell of the Edgehog backend using
 
@@ -736,8 +831,6 @@ $ kubectl exec -it deploy/edgehog-backend -n edgehog -- /app/bin/edgehog remote
 
 All the following commands have to be executed inside that shell, in a single session (since some
 commands will reuse the result of previous commands)
-
-### Creating the tenant
 
 The following commands will create a database entry representing the tenant, with its associated
 Astarte cluster and Realm.
@@ -770,20 +863,21 @@ iex> {:ok, tenant} = Provisioning.provision_tenant(
 Values to be replaced
 - `TENANT-NAME`: the name of the new tenant.
 - `TENANT-SLUG`: the slug of the tenant, must contain only lowercase letters and hyphens.
-- `TENANT-PUBLIC-KEY`: the content of `public_key.pem` created in the [previous
+- `TENANT-PUBLIC-KEY`: the content of `tenant_public.pem` created in the [previous
   step](#creating-a-keypair). Open a multiline string with `"""`, press Enter, paste the content of
   the file in the `iex` shell and then close the multiline string with `"""` on a new line.
 - `ASTARTE-BASE-API-URL`: the base API url of the Astarte instance (e.g.
   https://api.astarte.example.com).
 - `ASTARTE-REALM-NAME`: the name of the Astarte realm you're using.
-- `ASTARTE-REALM-PRIVATE-KEY`: the content of you realm's private key. Open a multiline string with
+- `ASTARTE-REALM-PRIVATE-KEY`: the content of the Astarte realm's private key. Open a multiline string with
   `"""`, press Enter, paste the content of the file in the `iex` shell and then close the multiline
   string with `"""` on a new line.
 
-### Accessing Edgehog
+## Accessing the Edgehog tenant
 
-At this point your Edgehog instance is ready to use. The last step is generating a token to access
-your Edgehog frontend instance. You can do so using the `gen-edgehog-jwt` tool contained in the
+At this point the Edgehog instance should be ready and healthy, with an existing tenant.
+
+To access the tenant we can once more use the `gen-edgehog-jwt` tool contained in the
 `tools` directory of the [Edgehog
 repo](https://github.com/edgehog-device-manager/edgehog/tree/main/tools).
 
@@ -793,12 +887,12 @@ $ ./gen-edgehog-jwt -t tenant -k <PATH-TO-TENANT-PRIVATE-KEY>
 ```
 
 Values to be replaced
-- `PATH-TO-TENANT-PRIVATE-KEY`: path to the `private_key.pem` file created in the [previous
-  step](#creating-a-keypair).
+- `PATH-TO-TENANT-PRIVATE-KEY`: path to the `tenant_private.pem` file created in the [previous
+  step](#creating-a-key-pair-for-the-tenant).
 
 Note that the token expires after 24 hours by default. If you want to have a token with a different
 expiry time, you can pass `-e <EXPIRY-SECONDS>` to the `gen-edgehog-jwt` command.
 
 After that, you can open your frontend URL in your browser and insert your tenant slug and token to
-log into your Edgehog instance, and use to the [user guide](#intro_user) to discover all Edgehog
+log into your Edgehog instance, and use to the [user guide](intro_user.html) to discover all Edgehog
 features.
