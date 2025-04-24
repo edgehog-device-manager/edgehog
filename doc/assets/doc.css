@@ -1,0 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap");
+
+:root {
+  --defaultFontFamily: "Urbanist", -apple-system, BlinkMacSystemFont, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+
+  --sansFontFamily: "Urbanist", "Lato", sans-serif;
+}
