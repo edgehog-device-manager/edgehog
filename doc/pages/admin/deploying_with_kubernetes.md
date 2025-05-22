@@ -417,7 +417,7 @@ spec:
         - name: admin-public-key
           mountPath: /keys
           readOnly: true
-        image: edgehogdevicemanager/edgehog-backend:0.9.2
+        image: edgehogdevicemanager/edgehog-backend:0.9.3
         imagePullPolicy: Always
         name: edgehog-backend
         ports:
@@ -485,7 +485,7 @@ spec:
       - env:
         - name: BACKEND_URL
           value: <BACKEND-HOST>
-        image: edgehogdevicemanager/edgehog-frontend:0.9.2
+        image: edgehogdevicemanager/edgehog-frontend:0.9.3
         imagePullPolicy: Always
         name: edgehog-frontend
         ports:

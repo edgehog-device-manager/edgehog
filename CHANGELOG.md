@@ -11,9 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for using Azure Storage as the persistence layer for asset uploads ([#233](https://github.com/edgehog-device-manager/edgehog/issues/233)).
 - Ecto SSL configuration is exposed trough `DATABASE_*` environment variables (see [.env](./.env))
 
-## [0.9.3] - Unreleased
+## [0.9.3] - 2025-05-22
 ### Fixed
 - Base Image deletion in S3 storage
+- Update Campaign executor crashing when handling events because of `device` relationship not loaded ([#828](https://github.com/edgehog-device-manager/edgehog/pull/828)).
 
 ## [0.9.2] - 2024-12-09
 ### Changed

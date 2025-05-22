@@ -1,6 +1,6 @@
 var versionNodes = [
   {
-    version: "v0.9.2",
+    version: "v0.9.3",
     url: "https://docs.edgehog.io/0.9"
   },
   {
