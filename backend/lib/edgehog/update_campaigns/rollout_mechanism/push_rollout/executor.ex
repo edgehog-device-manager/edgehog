@@ -241,7 +241,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   def handle_event(:internal, {:already_updated, target}, :rollout, data) do
     # The target already has the same version as the target base_image, we consider this
     # a success.
-    Logger.info("Device #{target.device.device_id} was already updated.")
+    Logger.info("Device #{target.device_id} was already updated.")
     _ = Core.mark_target_as_successful!(target)
 
     # We free up the slot since the target is considered completed
@@ -267,7 +267,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
 
   def handle_event(:internal, {:rollout_temporary_error, target, reason}, :rollout, data) do
     reason
-    |> Core.error_message(target.device.device_id)
+    |> Core.error_message(target.device_id)
     |> Logger.notice()
 
     # Since this is a temporary error, and we failed during the initial rollout, for now we do
@@ -284,7 +284,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
 
   def handle_event(:internal, {:rollout_failure, target, reason}, :rollout, data) do
     reason
-    |> Core.error_message(target.device.device_id)
+    |> Core.error_message(target.device_id)
     |> Logger.notice()
 
     # This is a permanent failure, so we mark the target as failed
@@ -398,9 +398,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
           [internal_event({:ota_operation_failure, ota_operation})]
 
         Core.ota_operation_acknowledged?(ota_operation) ->
-          ota_operation = Ash.load!(ota_operation, :device)
           # Handle this explicitly so we log a message
-          Logger.info("Device #{ota_operation.device.device_id} acknowledged the update")
+          Logger.info("Device #{ota_operation.device_id} acknowledged the update")
           []
 
         true ->
@@ -417,9 +416,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:ota_operation_success, ota_operation}, _state, data) do
-    ota_operation = Ash.load!(ota_operation, :device)
-
-    Logger.info("Device #{ota_operation.device.device_id} updated successfully")
+    Logger.info("Device #{ota_operation.device_id} updated successfully")
 
     _ =
       data.tenant_id
@@ -433,9 +430,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:ota_operation_failure, ota_operation}, state, data) do
-    ota_operation = Ash.load!(ota_operation, :device)
-
-    Logger.notice("Device #{ota_operation.device.device_id} failed to update: #{ota_operation.status_code}")
+    Logger.notice("Device #{ota_operation.device_id} failed to update: #{ota_operation.status_code}")
 
     _ =
       data.tenant_id
@@ -503,7 +498,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
 
       {:error, reason} ->
         reason
-        |> Core.error_message(target.device.device_id)
+        |> Core.error_message(target.device_id)
         |> Logger.notice()
 
         # We don't check if the error is temporary or not, since by definition it shouldn't be
@@ -520,7 +515,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   end
 
   def handle_event(:internal, {:retry_threshold_exceeded, target}, _state, data) do
-    Logger.notice("Device #{target.device.device_id} update failed: no more retries left")
+    Logger.notice("Device #{target.device_id} update failed: no more retries left")
 
     # Just mark the OTA Operation as failed with request_timeout. The associated target will
     # be marked as failed when it receives the :ota_operation_updated message from the PubSub
