@@ -324,6 +324,12 @@
   "components.CreateRelease.hostnameLabel": {
     "defaultMessage": "Hostname"
   },
+  "components.CreateRelease.imageCredentialOption": {
+    "defaultMessage": "Select Image Credentials"
+  },
+  "components.CreateRelease.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
   "components.CreateRelease.imageReferenceLabel": {
     "defaultMessage": "Image Reference"
   },

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@
 import React from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
+
+import type { CreateRelease_OptionsFragment$key } from "api/__generated__/CreateRelease_OptionsFragment.graphql";
 
 import Button from "components/Button";
 import Col from "components/Col";
@@ -30,6 +33,18 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { yup, envSchema, portBindingsSchema } from "./index";
+
+const CREATE_RELEASE_FRAGMENT = graphql`
+  fragment CreateRelease_OptionsFragment on RootQueryType {
+    listImageCredentials {
+      results {
+        id
+        label
+        username
+      }
+    }
+  }
+`;
 
 const FormRow = ({
   id,
@@ -52,6 +67,7 @@ type ContainerInput = {
   env?: string;
   image: {
     reference: string;
+    imageCredentialsId?: string;
   };
   hostname?: string;
   privileged?: boolean;
@@ -75,6 +91,7 @@ const applicationSchema = yup
           env: envSchema,
           image: yup.object({
             reference: yup.string().required(),
+            imageCredentialsId: yup.string().nullable(),
           }),
           hostname: yup
             .string()
@@ -109,12 +126,22 @@ const restartPolicyOptions = [
 ];
 
 type CreateReleaseProps = {
+  optionsRef: CreateRelease_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: ReleaseData) => void;
 };
 
-const CreateRelease = ({ isLoading = false, onSubmit }: CreateReleaseProps) => {
+const CreateRelease = ({
+  optionsRef,
+  isLoading = false,
+  onSubmit,
+}: CreateReleaseProps) => {
   const intl = useIntl();
+
+  const { listImageCredentials } = useFragment(
+    CREATE_RELEASE_FRAGMENT,
+    optionsRef,
+  );
 
   const {
     register,
@@ -139,7 +166,11 @@ const CreateRelease = ({ isLoading = false, onSubmit }: CreateReleaseProps) => {
           ...data,
           containers: data.containers?.map((container) => ({
             env: container.env || undefined,
-            image: { reference: container.image.reference },
+            image: {
+              reference: container.image.reference,
+              imageCredentialsId:
+                container.image.imageCredentialsId || undefined,
+            },
             hostname: container.hostname || undefined,
             privileged: container.privileged || undefined,
             restartPolicy: container.restartPolicy || undefined,
@@ -237,6 +268,48 @@ const CreateRelease = ({ isLoading = false, onSubmit }: CreateReleaseProps) => {
                   {errors.containers?.[index]?.image?.reference?.message && (
                     <FormattedMessage
                       id={errors.containers[index].image.reference.message}
+                    />
+                  )}
+                </Form.Control.Feedback>
+              </FormRow>
+
+              <FormRow
+                id={`containers-${index}-image-credentials`}
+                label={
+                  <FormattedMessage
+                    id="components.CreateRelease.imageCredentialsLabel"
+                    defaultMessage="Image Credentials"
+                  />
+                }
+              >
+                <Form.Select
+                  {...register(
+                    `containers.${index}.image.imageCredentialsId` as const,
+                  )}
+                  isInvalid={
+                    !!errors.containers?.[index]?.image?.imageCredentialsId
+                  }
+                >
+                  <option value="" disabled>
+                    {intl.formatMessage({
+                      id: "components.CreateRelease.imageCredentialOption",
+                      defaultMessage: "Select Image Credentials",
+                    })}
+                  </option>
+                  {listImageCredentials?.results?.map((imageCredential) => (
+                    <option key={imageCredential.id} value={imageCredential.id}>
+                      {imageCredential.label} ({imageCredential.username})
+                    </option>
+                  ))}
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">
+                  {errors.containers?.[index]?.image?.imageCredentialsId
+                    ?.message && (
+                    <FormattedMessage
+                      id={
+                        errors.containers[index].image.imageCredentialsId
+                          .message
+                      }
                     />
                   )}
                 </Form.Control.Feedback>
