@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Base Image deletion in S3 storage
 
 ## [0.9.2] - 2024-12-09
+### Added
+- Add pattern matching support to device selector DSL with new `~=` and `!~=` operators
 ### Changed
 - Update the docker-compose configuration to allow both physical and virtual devices
   to connect to Edgehog, provided that the devices and the host are on the same LAN.
