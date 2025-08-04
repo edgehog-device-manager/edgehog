@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,6 +66,122 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeviceGroupTest do
                [tenant: tenant, selector: "not a selector"]
                |> create_device_group_mutation()
                |> extract_error!()
+    end
+
+    test "creates device group with glob pattern selector", %{tenant: tenant} do
+      device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["foo-123", "bar"])
+
+      device_id = AshGraphql.Resource.encode_relay_id(device)
+
+      _other_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["bar-456"])
+
+      name = "Foo Pattern"
+      handle = "foo-pattern"
+      selector = ~s<"foo-*" ~= tags>
+
+      device_group =
+        [tenant: tenant, name: name, handle: handle, selector: selector]
+        |> create_device_group_mutation()
+        |> extract_result!()
+
+      assert %{
+               "name" => ^name,
+               "handle" => ^handle,
+               "devices" => [%{"id" => ^device_id}]
+             } = device_group
+    end
+
+    test "creates device group with regex pattern selector", %{tenant: tenant} do
+      device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["tag-123", "other"])
+
+      device_id = AshGraphql.Resource.encode_relay_id(device)
+
+      _other_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["tag-abc"])
+
+      name = "Tag Regex"
+      handle = "tag-regex"
+      selector = ~s<"/tag-\\d+/" ~= tags>
+
+      device_group =
+        [tenant: tenant, name: name, handle: handle, selector: selector]
+        |> create_device_group_mutation()
+        |> extract_result!()
+
+      assert %{
+               "name" => ^name,
+               "handle" => ^handle,
+               "devices" => [%{"id" => ^device_id}]
+             } = device_group
+    end
+
+    test "creates device group with not matches pattern selector", %{tenant: tenant} do
+      device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["bar", "other"])
+
+      device_id = AshGraphql.Resource.encode_relay_id(device)
+
+      _other_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["foo-123"])
+
+      name = "Not Foo Pattern"
+      handle = "not-foo-pattern"
+      selector = ~s<"foo-*" !~= tags>
+
+      device_group =
+        [tenant: tenant, name: name, handle: handle, selector: selector]
+        |> create_device_group_mutation()
+        |> extract_result!()
+
+      assert %{
+               "name" => ^name,
+               "handle" => ^handle,
+               "devices" => [%{"id" => ^device_id}]
+             } = device_group
+    end
+
+    test "creates device group with unquoted regex pattern selector", %{tenant: tenant} do
+      device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["tag-456", "other"])
+
+      device_id = AshGraphql.Resource.encode_relay_id(device)
+
+      _other_device =
+        [tenant: tenant]
+        |> device_fixture()
+        |> add_tags(["tag-abc"])
+
+      name = "Tag Unquoted Regex"
+      handle = "tag-unquoted-regex"
+      selector = ~s</tag-\\d+/ ~= tags>
+
+      device_group =
+        [tenant: tenant, name: name, handle: handle, selector: selector]
+        |> create_device_group_mutation()
+        |> extract_result!()
+
+      assert %{
+               "name" => ^name,
+               "handle" => ^handle,
+               "devices" => [%{"id" => ^device_id}]
+             } = device_group
     end
   end
 
