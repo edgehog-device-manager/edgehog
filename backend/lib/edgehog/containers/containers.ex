@@ -30,7 +30,9 @@ defmodule Edgehog.Containers do
   alias Edgehog.Containers.DeploymentReadyAction
   alias Edgehog.Containers.DeploymentReadyAction.Upgrade
   alias Edgehog.Containers.ImageCredentials
+  alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Volume
 
   graphql do
     root_level_errors? true
@@ -76,6 +78,9 @@ defmodule Edgehog.Containers do
       end
 
       destroy ImageCredentials, :delete_image_credentials, :destroy
+
+      create Volume, :create_volume, :create
+      create Network, :create_network, :create
 
       create Deployment, :deploy_release, :deploy do
         description "Deploy the application on a device"
