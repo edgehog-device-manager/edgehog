@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
 import type { HardwareTypesTable_PaginationQuery } from "api/__generated__/HardwareTypesTable_PaginationQuery.graphql";
 import type {
@@ -28,15 +29,20 @@ import type {
   HardwareTypesTable_HardwareTypesFragment$data,
 } from "api/__generated__/HardwareTypesTable_HardwareTypesFragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "Navigation";
+
+const HARDWARE_TYPES_TO_LOAD_FIRST = 40;
+const HARDWARE_TYPES_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const HARDWARE_TYPES_TABLE_FRAGMENT = graphql`
   fragment HardwareTypesTable_HardwareTypesFragment on RootQueryType
-  @refetchable(queryName: "HardwareTypesTable_PaginationQuery") {
-    hardwareTypes(first: $first, after: $after)
+  @refetchable(queryName: "HardwareTypesTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "HardwareTypeFilterInput" }) {
+    hardwareTypes(first: $first, after: $after, filter: $filter)
       @connection(key: "HardwareTypesTable_hardwareTypes") {
       edges {
         node {
@@ -113,14 +119,88 @@ type Props = {
 };
 
 const HardwareTypesTable = ({ className, hardwareTypesRef }: Props) => {
-  const { data } = usePaginationFragment<
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
     HardwareTypesTable_PaginationQuery,
     HardwareTypesTable_HardwareTypesFragment$key
   >(HARDWARE_TYPES_TABLE_FRAGMENT, hardwareTypesRef);
 
-  const tableData = data.hardwareTypes?.edges?.map((edge) => edge.node) ?? [];
+  const [searchText, setSearchText] = useState<string | null>(null);
 
-  return <Table className={className} columns={columns} data={tableData} />;
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: HARDWARE_TYPES_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: HARDWARE_TYPES_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { handle: { ilike: `%${text}%` } },
+                  {
+                    partNumbers: {
+                      partNumber: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextHardwareTypes = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(HARDWARE_TYPES_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const hardwareTypes = useMemo(() => {
+    return (
+      paginationData.hardwareTypes?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.hardwareTypes) {
+    return null;
+  }
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={hardwareTypes}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextHardwareTypes : undefined}
+      setSearchText={setSearchText}
+    />
+  );
 };
 
 export default HardwareTypesTable;

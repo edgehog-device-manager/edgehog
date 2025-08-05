@@ -34,12 +34,18 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
+const HARDWARE_TYPES_TO_LOAD_FIRST = 40;
+
 const GET_HARDWARE_TYPES_QUERY = graphql`
-  query HardwareTypes_getHardwareTypes_Query($first: Int, $after: String) {
-    hardwareTypes(first: $first, after: $after) {
+  query HardwareTypes_getHardwareTypes_Query(
+    $first: Int
+    $after: String
+    $filter: HardwareTypeFilterInput
+  ) {
+    hardwareTypes(first: $first, after: $after, filter: $filter) {
       count
     }
-    ...HardwareTypesTable_HardwareTypesFragment
+    ...HardwareTypesTable_HardwareTypesFragment @arguments(filter: $filter)
   }
 `;
 
@@ -103,7 +109,10 @@ const HardwareTypesPage = () => {
 
   const fetchHardwareTypes = useCallback(
     () =>
-      getHardwareTypes({ first: 10_000 }, { fetchPolicy: "store-and-network" }),
+      getHardwareTypes(
+        { first: HARDWARE_TYPES_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getHardwareTypes],
   );
 
