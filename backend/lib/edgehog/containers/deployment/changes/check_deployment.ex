@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CheckDeployments do
+defmodule Edgehog.Containers.Deployment.Changes.CheckDeployment do
   @moduledoc false
   use Ash.Resource.Change
 
@@ -28,25 +28,19 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployments do
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
-    with {:ok, :created_containers} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
-         {:ok, deployment} <- Ash.load(deployment, device: :available_deployments) do
-      available_deployment =
-        Enum.find(deployment.device.available_deployments, &(&1.id == deployment.id))
-
-      if available_deployment do
-        changeset
-        |> Ash.Changeset.change_attribute(:status, available_deployment.status)
-        |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->
-          with {:ok, deployment} <- transaction_result do
-            Containers.run_ready_actions(deployment)
-          end
-        end)
-      else
-        changeset
-      end
+    with {:ok, :created_containers} <-
+           Ash.Changeset.fetch_argument_or_change(changeset, :resources_state),
+         {:ok, deployment} <- Ash.load(deployment, :ready?),
+         true <- deployment.ready? do
+      changeset
+      |> Ash.Changeset.change_attribute(:resources_state, :ready)
+      |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->
+        with {:ok, deployment} <- transaction_result do
+          Containers.run_ready_actions(deployment)
+        end
+      end)
     else
-      _ ->
-        changeset
+      _ -> changeset
     end
   end
 end

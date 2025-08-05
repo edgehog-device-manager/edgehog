@@ -28,7 +28,8 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckNetworks do
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
-    with {:ok, :created_images} <- Ash.Changeset.fetch_argument_or_change(changeset, :status),
+    with {:ok, :created_images} <-
+           Ash.Changeset.fetch_argument_or_change(changeset, :resources_state),
          {:ok, deployment} <-
            Ash.load(deployment, device: [], release: [containers: [:networks]]) do
       device = deployment.device
@@ -46,7 +47,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckNetworks do
         |> Enum.all?(& &1.ready?)
 
       if networks_ready?,
-        do: Ash.Changeset.change_attribute(changeset, :status, :created_networks),
+        do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_networks),
         else: changeset
     else
       _ -> changeset
