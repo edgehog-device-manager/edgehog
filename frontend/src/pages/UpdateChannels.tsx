@@ -33,9 +33,15 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
+const UPDATE_CHANNELS_TO_LOAD_FIRST = 40;
+
 const GET_UPDATE_CHANNELS_QUERY = graphql`
-  query UpdateChannels_getUpdateChannels_Query($first: Int, $after: String) {
-    ...UpdateChannelsTable_UpdateChannelFragment
+  query UpdateChannels_getUpdateChannels_Query(
+    $first: Int
+    $after: String
+    $filter: UpdateChannelFilterInput
+  ) {
+    ...UpdateChannelsTable_UpdateChannelFragment @arguments(filter: $filter)
   }
 `;
 
@@ -84,7 +90,7 @@ const UpdateChannelsPage = () => {
   const fetchUpdateChannels = useCallback(
     () =>
       getUpdateChannels(
-        { first: 10_000 },
+        { first: UPDATE_CHANNELS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getUpdateChannels],

@@ -18,8 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
 import type { UpdateChannelsTable_PaginationQuery } from "api/__generated__/UpdateChannelsTable_PaginationQuery.graphql";
 import type {
@@ -27,16 +29,20 @@ import type {
   UpdateChannelsTable_UpdateChannelFragment$key,
 } from "api/__generated__/UpdateChannelsTable_UpdateChannelFragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
-import Tag from "components/Tag";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "Navigation";
+import Tag from "components/Tag";
 
+const UPDATE_CHANNELS_TO_LOAD_FIRST = 40;
+const UPDATE_CHANNELS_TO_LOAD_NEXT = 10;
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
   fragment UpdateChannelsTable_UpdateChannelFragment on RootQueryType
-  @refetchable(queryName: "UpdateChannelsTable_PaginationQuery") {
-    updateChannels(first: $first, after: $after)
+  @refetchable(queryName: "UpdateChannelsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "UpdateChannelFilterInput" }) {
+    updateChannels(first: $first, after: $after, filter: $filter)
       @connection(key: "UpdateChannelsTable_updateChannels") {
       edges {
         node {
@@ -117,14 +123,87 @@ type Props = {
 };
 
 const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
-  const { data } = usePaginationFragment<
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
     UpdateChannelsTable_PaginationQuery,
     UpdateChannelsTable_UpdateChannelFragment$key
   >(DEVICE_GROUPS_TABLE_FRAGMENT, updateChannelsRef);
+  const [searchText, setSearchText] = useState<string | null>(null);
 
-  const tableData = data.updateChannels?.edges?.map((edge) => edge.node) ?? [];
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: UPDATE_CHANNELS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: UPDATE_CHANNELS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { handle: { ilike: `%${text}%` } },
+                  {
+                    targetGroups: {
+                      name: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
 
-  return <Table className={className} columns={columns} data={tableData} />;
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextUpdateChannels = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(UPDATE_CHANNELS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const updateChannels = useMemo(() => {
+    return (
+      paginationData.updateChannels?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.updateChannels) {
+    return null;
+  }
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={updateChannels}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextUpdateChannels : undefined}
+      setSearchText={setSearchText}
+    />
+  );
 };
 
 export default UpdateChannelsTable;
