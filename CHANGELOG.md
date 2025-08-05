@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update Campaign executor crashing when handling events because of `device` relationship not loaded ([#828](https://github.com/edgehog-device-manager/edgehog/pull/828)).
 
 ## [0.9.2] - 2024-12-09
+### Added
+- Add pattern matching support to device selector DSL with new `~=` and `!~=` operators
 ### Changed
 - Update the docker-compose configuration to allow both physical and virtual devices
   to connect to Edgehog, provided that the devices and the host are on the same LAN.
