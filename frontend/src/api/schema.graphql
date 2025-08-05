@@ -1515,6 +1515,27 @@ enum DeviceSortField {
   SERIAL_NUMBER
 }
 
+":device connection"
+type DeviceConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device edges"
+  edges: [DeviceEdge!]
+}
+
+":device edge"
+type DeviceEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device node"
+  node: Device!
+}
+
 input DeviceFilterSerialNumber {
   isNil: Boolean
   eq: String
@@ -3059,7 +3080,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: DeviceFilterInput
-  ): [Device!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection
 
   "Returns a single hardware type."
   hardwareType("The id of the record" id: ID!): HardwareType
