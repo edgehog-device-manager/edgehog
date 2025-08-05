@@ -64,7 +64,11 @@ defmodule Edgehog.Containers do
 
       create Release, :create_release, :create do
         description "Create a new release."
-        relay_id_translations input: [application_id: :application]
+
+        relay_id_translations input: [
+                                application_id: :application,
+                                containers: [image: [image_credentials_id: :image_credentials]]
+                              ]
       end
 
       create ImageCredentials, :create_image_credentials, :create do

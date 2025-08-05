@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,11 +18,22 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useMutation } from "react-relay/hooks";
+import { ErrorBoundary } from "react-error-boundary";
+import {
+  graphql,
+  useMutation,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
+import type { PreloadedQuery } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 
+import type {
+  ReleaseCreate_getOptions_Query,
+  ReleaseCreate_getOptions_Query$data,
+} from "api/__generated__/ReleaseCreate_getOptions_Query.graphql";
 import type { ReleaseCreate_createRelease_Mutation } from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
 import Alert from "components/Alert";
@@ -30,6 +41,14 @@ import Page from "components/Page";
 import CreateRelease from "forms/CreateRelease";
 import type { ReleaseData } from "forms/CreateRelease";
 import { Route, useNavigate } from "Navigation";
+import Spinner from "components/Spinner";
+import Center from "components/Center";
+
+const CREATE_RELEASE_PAGE_QUERY = graphql`
+  query ReleaseCreate_getOptions_Query {
+    ...CreateRelease_OptionsFragment
+  }
+`;
 
 const CREATE_RELEASE_MUTATION = graphql`
   mutation ReleaseCreate_createRelease_Mutation($input: CreateReleaseInput!) {
@@ -49,7 +68,11 @@ const CREATE_RELEASE_MUTATION = graphql`
   }
 `;
 
-const ReleaseCreatePage = () => {
+type ReleaseOptions = {
+  releaseOptions: ReleaseCreate_getOptions_Query$data;
+};
+
+const Release = ({ releaseOptions }: ReleaseOptions) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
   const { applicationId = "" } = useParams();
@@ -110,30 +133,81 @@ const ReleaseCreatePage = () => {
   );
 
   return (
-    <Page>
-      <Page.Header
-        title={
-          <FormattedMessage
-            id="pages.ReleaseCreate.title"
-            defaultMessage="Create Release"
-          />
-        }
+    <>
+      <Alert
+        show={!!errorFeedback}
+        variant="danger"
+        onClose={() => setErrorFeedback(null)}
+        dismissible
+      >
+        {errorFeedback}
+      </Alert>
+      <CreateRelease
+        optionsRef={releaseOptions}
+        onSubmit={handleCreateRelease}
+        isLoading={isCreatingRelease}
       />
-      <Page.Main>
-        <Alert
-          show={!!errorFeedback}
-          variant="danger"
-          onClose={() => setErrorFeedback(null)}
-          dismissible
-        >
-          {errorFeedback}
-        </Alert>
-        <CreateRelease
-          onSubmit={handleCreateRelease}
-          isLoading={isCreatingRelease}
-        />
-      </Page.Main>
-    </Page>
+    </>
+  );
+};
+
+type ReleaseWrapperProps = {
+  getReleaseOptionsQuery: PreloadedQuery<ReleaseCreate_getOptions_Query>;
+};
+
+const ReleaseWrapper = ({ getReleaseOptionsQuery }: ReleaseWrapperProps) => {
+  const releaseOptions = usePreloadedQuery(
+    CREATE_RELEASE_PAGE_QUERY,
+    getReleaseOptionsQuery,
+  );
+
+  return <Release releaseOptions={releaseOptions} />;
+};
+
+const ReleaseCreatePage = () => {
+  const [getReleaseOptionsQuery, getReleaseOptions] =
+    useQueryLoader<ReleaseCreate_getOptions_Query>(CREATE_RELEASE_PAGE_QUERY);
+
+  const fetchReleaseOptions = useCallback(
+    () => getReleaseOptions({}, { fetchPolicy: "network-only" }),
+    [getReleaseOptions],
+  );
+
+  useEffect(fetchReleaseOptions, [fetchReleaseOptions]);
+
+  return (
+    <Suspense
+      fallback={
+        <Center data-testid="page-loading">
+          <Spinner />
+        </Center>
+      }
+    >
+      <ErrorBoundary
+        FallbackComponent={(props) => (
+          <Center data-testid="page-error">
+            <Page.LoadingError onRetry={props.resetErrorBoundary} />
+          </Center>
+        )}
+        onReset={fetchReleaseOptions}
+      >
+        {getReleaseOptionsQuery && (
+          <Page>
+            <Page.Header
+              title={
+                <FormattedMessage
+                  id="pages.ReleaseCreate.title"
+                  defaultMessage="Create Release"
+                />
+              }
+            />
+            <Page.Main>
+              <ReleaseWrapper getReleaseOptionsQuery={getReleaseOptionsQuery} />
+            </Page.Main>
+          </Page>
+        )}
+      </ErrorBoundary>
+    </Suspense>
   );
 };
 
