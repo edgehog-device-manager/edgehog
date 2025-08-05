@@ -139,7 +139,8 @@ defmodule Edgehog.ContainersFixtures do
     {volumes, opts} = Keyword.pop(opts, :volumes, 0)
 
     {volume_target, opts} = Keyword.pop(opts, :volume_target, "/fixture/target")
-    volume_params = %{target: volume_target}
+    {volume_label, opts} = Keyword.pop(opts, :volume_label, "label#{System.unique_integer()}")
+    volume_params = %{target: volume_target, label: volume_label}
     volumes = Enum.map(1..volumes//1, fn _ -> volume_params end)
 
     params =

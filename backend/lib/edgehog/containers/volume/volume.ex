@@ -29,13 +29,18 @@ defmodule Edgehog.Containers.Volume do
     defaults [
       :read,
       :destroy,
-      create: [:driver, :options],
+      create: [:label, :driver, :options],
       update: [:driver, :options]
     ]
   end
 
   attributes do
     uuid_primary_key :id
+
+    attribute :label, :string do
+      allow_nil? false
+      public? true
+    end
 
     attribute :driver, :string do
       default "local"
@@ -59,6 +64,10 @@ defmodule Edgehog.Containers.Volume do
 
   calculations do
     calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
+  end
+
+  identities do
+    identity :label, [:label]
   end
 
   postgres do

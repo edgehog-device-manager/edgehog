@@ -31,11 +31,15 @@ defmodule Edgehog.Containers.Network do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:driver, :internal, :enable_ipv6, :options]]
+    defaults [:read, :destroy, create: [:label, :driver, :internal, :enable_ipv6, :options]]
   end
 
   attributes do
     uuid_primary_key :id
+
+    attribute :label, :string do
+      public? true
+    end
 
     attribute :driver, :string do
       default "bridge"
@@ -77,6 +81,10 @@ defmodule Edgehog.Containers.Network do
 
   calculations do
     calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
+  end
+
+  identities do
+    identity :label, [:label]
   end
 
   postgres do

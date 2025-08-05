@@ -22,9 +22,7 @@ defmodule Edgehog.Containers.ImageCredentials do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [
-      AshGraphql.Resource
-    ]
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.ImageCredentials.Base64JsonEncoding
 
