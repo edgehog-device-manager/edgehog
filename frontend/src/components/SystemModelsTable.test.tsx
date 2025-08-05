@@ -29,9 +29,12 @@ import type { SystemModelsTable_getSystemModels_Query } from "api/__generated__/
 import SystemModelsTable from "./SystemModelsTable";
 
 const GET_SYSTEM_MODELS_QUERY = graphql`
-  query SystemModelsTable_getSystemModels_Query($first: Int, $after: String)
-  @relay_test_operation {
-    ...SystemModelsTable_SystemModelsFragment
+  query SystemModelsTable_getSystemModels_Query(
+    $first: Int
+    $after: String
+    $filter: SystemModelFilterInput
+  ) @relay_test_operation {
+    ...SystemModelsTable_SystemModelsFragment @arguments(filter: $filter)
   }
 `;
 
