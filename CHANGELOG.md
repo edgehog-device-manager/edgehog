@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expose the associated UpdateCampaign (if any) from an OTA Operation on the Software Updates tab  ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Support for using Azure Storage as the persistence layer for asset uploads ([#233](https://github.com/edgehog-device-manager/edgehog/issues/233)).
 - Ecto SSL configuration is exposed trough `DATABASE_*` environment variables (see [.env](./.env))
+- Adds support for trigger delivery policies in the tenant 
+reconciler, allowing Edgehog to automatically provision and manage 
+trigger delivery policies on Astarte realms that support them (v1.1.1+).
 
 ## [0.9.3] - 2025-05-22
 ### Fixed

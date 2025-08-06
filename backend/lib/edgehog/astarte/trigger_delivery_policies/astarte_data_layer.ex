@@ -18,19 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Trigger.DataLayer do
+defmodule Edgehog.Astarte.DeliveryPolicies.AstarteDataLayer do
   @moduledoc false
+  @behaviour Edgehog.Astarte.DeliveryPolicies.DataLayer
+
   alias Astarte.Client.RealmManagement
+  alias Edgehog.Astarte.DeliveryPolicies.DataLayer
 
-  @callback get(client :: RealmManagement.t(), trigger_name :: String.t()) ::
-              {:ok, map()} | {:error, term()}
+  @impl DataLayer
+  def get(%RealmManagement{} = client, policy_name) do
+    RealmManagement.DeliveryPolicies.get(client, policy_name)
+  end
 
-  @callback list(client :: RealmManagement.t()) ::
-              {:ok, [map()]} | {:error, term()}
+  @impl DataLayer
+  def create(%RealmManagement{} = client, policy_json) do
+    RealmManagement.DeliveryPolicies.create(client, policy_json)
+  end
 
-  @callback create(client :: RealmManagement.t(), trigger_json :: map()) ::
-              :ok | {:error, term()}
-
-  @callback delete(client :: RealmManagement.t(), trigger_name :: String.t()) ::
-              :ok | {:error, term()}
+  @impl DataLayer
+  def delete(%RealmManagement{} = client, policy_name) do
+    RealmManagement.DeliveryPolicies.delete(client, policy_name)
+  end
 end

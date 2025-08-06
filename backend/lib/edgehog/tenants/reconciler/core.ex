@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,20 +21,40 @@
 defmodule Edgehog.Tenants.Reconciler.Core do
   @moduledoc false
   alias Astarte.Client
+  alias Astarte.Client.RealmManagement
+  alias Edgehog.Astarte.DeliveryPolicies
   alias Edgehog.Astarte.Interface
   alias Edgehog.Astarte.Trigger
   alias Edgehog.Tenants.Reconciler.AstarteResources
 
+  @minimum_astarte_version_with_policies_support "1.1.1"
+
   @interfaces AstarteResources.load_interfaces()
+  @delivery_policies AstarteResources.load_delivery_policies()
   @trigger_templates AstarteResources.load_trigger_templates()
 
   def list_required_interfaces do
     @interfaces
   end
 
-  def list_required_triggers(trigger_url) do
+  def list_required_delivery_policies do
+    Enum.map(@delivery_policies, fn policy ->
+      policy
+      |> EEx.eval_string()
+      |> Jason.decode!()
+    end)
+  end
+
+  def list_required_triggers(trigger_url, can_use_trigger_delivery_policy \\ false) do
     Enum.map(@trigger_templates, fn template ->
-      template |> EEx.eval_string(assigns: [trigger_url: trigger_url]) |> Jason.decode!()
+      template
+      |> EEx.eval_string(
+        assigns: [
+          trigger_url: trigger_url,
+          can_use_trigger_delivery_policy: can_use_trigger_delivery_policy
+        ]
+      )
+      |> Jason.decode!()
     end)
   end
 
@@ -58,6 +78,27 @@ defmodule Edgehog.Tenants.Reconciler.Core do
       # TODO: raise nicer exceptions instead of crashing with CaseClauseError
       {:error, :not_found} ->
         install_interface!(client, required_interface)
+    end
+  end
+
+  def reconcile_delivery_policy!(%Client.RealmManagement{} = client, required_policy) do
+    %{
+      "name" => policy_name
+    } = required_policy
+
+    case DeliveryPolicies.fetch_by_name(client, policy_name) do
+      {:ok, existing_policy} ->
+        if delivery_policy_matches?(existing_policy, required_policy) do
+          :ok
+        else
+          update_delivery_policy!(client, policy_name, required_policy)
+        end
+
+      # This intentionally doesn't match on different errors since we want to crash
+      # on them, since the tenant reconciliation is isolated in a Task
+      # TODO: raise nicer exceptions instead of crashing with CaseClauseError
+      {:error, :not_found} ->
+        install_delivery_policy!(client, required_policy)
     end
   end
 
@@ -96,8 +137,58 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     :ok
   end
 
+  defp update_delivery_policy!(rm_client, policy_name, policy_json) do
+    # Policies don't have a way to update them, so we delete it and install it again
+
+    # TODO: crash with a nicer exception instead of MatchError
+    with {:ok, triggers} <- list_triggers_that_reference_policy(rm_client, policy_name),
+         :ok <- delete_triggers(rm_client, triggers),
+         :ok <- DeliveryPolicies.delete(rm_client, policy_name) do
+      install_delivery_policy!(rm_client, policy_json)
+    end
+
+    :ok
+  end
+
+  defp install_delivery_policy!(rm_client, policy_json) do
+    # TODO: crash with a nicer exception instead of MatchError
+    :ok = DeliveryPolicies.create(rm_client, policy_json)
+
+    :ok
+  end
+
+  defp delete_triggers(rm_client, triggers) do
+    if Enum.all?(triggers, &(Trigger.delete(rm_client, &1["name"]) == :ok)) do
+      :ok
+    else
+      {:error, :could_not_delete_triggers}
+    end
+  end
+
+  defp delivery_policy_matches?(required, existing) do
+    normalize_policy(required) == normalize_policy(existing)
+  end
+
+  defp normalize_policy(policy) do
+    update_in(policy, ["retry_times"], &(&1 || 0))
+  end
+
+  defp list_triggers_that_reference_policy(rm_client, policy_name) do
+    with {:ok, %{"data" => trigger_names}} <- Trigger.list(rm_client) do
+      triggers_that_reference_policy =
+        trigger_names
+        |> Enum.map(fn trigger_name ->
+          {:ok, trigger} = Trigger.fetch_by_name(rm_client, trigger_name)
+          trigger
+        end)
+        |> Enum.filter(&(&1["policy"] == policy_name))
+
+      {:ok, triggers_that_reference_policy}
+    end
+  end
+
   defp update_trigger!(rm_client, name, trigger_json) do
-    # Triggers don't have a way to update them, to we delete it and install it again
+    # Triggers don't have a way to update them, so we delete it and install it again
 
     # TODO: crash with a nicer exception instead of MatchError
     :ok = Trigger.delete(rm_client, name)
@@ -127,6 +218,22 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     case pop_in(trigger, path) do
       {^default, no_default_trigger} -> no_default_trigger
       {_not_default, _} -> trigger
+    end
+  end
+
+  def verify_trigger_delivery_policy_support(rm_client) do
+    case RealmManagement.Version.get(rm_client) do
+      {:ok, %{"data" => version}} ->
+        case Version.compare(version, @minimum_astarte_version_with_policies_support) do
+          :lt ->
+            {:ok, false}
+
+          _ ->
+            {:ok, true}
+        end
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end

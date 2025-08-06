@@ -18,18 +18,22 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Trigger do
+defmodule Edgehog.Astarte.DeliveryPolicies do
   @moduledoc false
   alias Astarte.Client.APIError
   alias Astarte.Client.RealmManagement
-  alias Edgehog.Astarte.Trigger.AstarteDataLayer
+  alias Edgehog.Astarte.DeliveryPolicies.AstarteDataLayer
 
-  @data_layer Application.compile_env(:edgehog, :astarte_trigger_data_layer, AstarteDataLayer)
+  @data_layer Application.compile_env(
+                :edgehog,
+                :astarte_delivery_policies_data_layer,
+                AstarteDataLayer
+              )
 
-  def fetch_by_name(%RealmManagement{} = client, trigger_name) do
-    case @data_layer.get(client, trigger_name) do
-      {:ok, %{"data" => trigger_map}} ->
-        {:ok, trigger_map}
+  def fetch_by_name(%RealmManagement{} = client, policy_name) do
+    case @data_layer.get(client, policy_name) do
+      {:ok, %{"data" => policy_map}} ->
+        {:ok, policy_map}
 
       {:error, %APIError{status: 404}} ->
         # We just convert a 404 status to :not_found, and return all other errors as-is
@@ -45,7 +49,6 @@ defmodule Edgehog.Astarte.Trigger do
     end
   end
 
-  defdelegate list(client), to: @data_layer
-  defdelegate create(client, trigger_json), to: @data_layer
-  defdelegate delete(client, trigger_name), to: @data_layer
+  defdelegate create(client, policy_json), to: @data_layer
+  defdelegate delete(client, policy_name), to: @data_layer
 end
