@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,6 +55,10 @@ config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryS
 config :edgehog,
        :astarte_cellular_connection_module,
        Edgehog.Astarte.Device.CellularConnectionMock
+
+config :edgehog,
+       :astarte_delivery_policies_data_layer,
+       Edgehog.Astarte.DeliveryPolicies.MockDataLayer
 
 config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
 config :edgehog, :astarte_forwarder_session_module, Edgehog.Astarte.Device.ForwarderSessionMock

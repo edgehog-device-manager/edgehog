@@ -23,8 +23,12 @@ Files: backend/priv/astarte_resources/interfaces/*.json
 Copyright: 2023 Seco Mind Srl
 License: Apache-2.0
 
+Files: backend/priv/astarte_resources/delivery_policies/*.json.eex
+Copyright: 2025 Seco Mind Srl
+License: Apache-2.0
+
 Files: backend/priv/astarte_resources/trigger_templates/*.json.eex
-Copyright: 2023 Seco Mind Srl
+Copyright: 2023-2025 Seco Mind Srl
 License: Apache-2.0
 
 Files: backend/priv/resource_snapshots/*

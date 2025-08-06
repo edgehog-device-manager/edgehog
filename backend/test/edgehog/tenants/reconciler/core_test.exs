@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
 
   @astarte_resources_dir "priv/astarte_resources"
   @interfaces_dir "#{@astarte_resources_dir}/interfaces"
+  @delivery_policies_dir "#{@astarte_resources_dir}/delivery_policies"
   @trigger_templates_dir "#{@astarte_resources_dir}/trigger_templates"
 
   describe "list_required_interfaces/0" do
@@ -42,6 +43,23 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       for interface <- interfaces do
         interface_name = Map.fetch!(interface, "interface_name")
         assert File.exists?("#{@interfaces_dir}/#{interface_name}.json")
+      end
+    end
+  end
+
+  describe "list_required_trigger_delivery_policies/0" do
+    test "returns the list of required trigger delivery policies" do
+      policy_files =
+        Path.wildcard("#{@delivery_policies_dir}/*.json.eex")
+
+      policies = Core.list_required_delivery_policies()
+
+      assert length(policies) == length(policy_files)
+
+      for policy <- policies do
+        assert is_map(policy)
+        assert Map.has_key?(policy, "name")
+        assert is_binary(policy["name"])
       end
     end
   end
@@ -185,6 +203,116 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
     end
   end
 
+  describe "reconcile_delivery_policy!/2" do
+    setup do
+      client =
+        realm_fixture()
+        |> Ash.load!(:realm_management_client)
+        |> Map.fetch!(:realm_management_client)
+
+      policy_name = "edgehog-retry-on-server-error"
+
+      policy_map = %{
+        "name" => policy_name,
+        "retry_times" => 5,
+        "event_ttl" => 3600
+      }
+
+      ctx = %{
+        client: client,
+        policy_name: policy_name,
+        policy_map: policy_map
+      }
+
+      {:ok, ctx}
+    end
+
+    test "installs the policy if it's not present", ctx do
+      %{
+        client: client,
+        policy_name: policy_name,
+        policy_map: policy_map
+      } = ctx
+
+      Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+      |> expect(:get, fn ^client, ^policy_name ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, fn ^client, ^policy_map ->
+        :ok
+      end)
+
+      assert :ok = Core.reconcile_delivery_policy!(client, policy_map)
+    end
+
+    test "doesn't create or delete the policy if it's already the correct one", ctx do
+      %{
+        client: client,
+        policy_name: policy_name,
+        policy_map: policy_map
+      } = ctx
+
+      Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+      |> expect(:get, fn ^client, ^policy_name ->
+        {:ok, %{"data" => policy_map}}
+      end)
+      |> expect(:create, 0, fn _client, _policy_map -> :ok end)
+      |> expect(:delete, 0, fn _client, _policy_name -> :ok end)
+
+      assert :ok = Core.reconcile_delivery_policy!(client, policy_map)
+    end
+
+    test "updates the policy if it differs from the required one", ctx do
+      %{
+        client: client,
+        policy_name: policy_name,
+        policy_map: policy_map
+      } = ctx
+
+      existing_policy_map = %{
+        "name" => policy_name,
+        "retry_times" => 3,
+        "event_ttl" => 1800
+      }
+
+      # Since we can't update policies, they get deleted and recreated
+      expect(Edgehog.Astarte.DeliveryPolicies.MockDataLayer, :get, fn ^client, ^policy_name ->
+        {:ok, %{"data" => existing_policy_map}}
+      end)
+
+      # Mock the trigger listing and deletion that happens when a policy is updated
+      Edgehog.Astarte.Trigger.MockDataLayer
+      |> expect(:list, fn ^client ->
+        {:ok, %{"data" => [policy_name]}}
+      end)
+      |> expect(:get, fn ^client, ^policy_name ->
+        {:ok, %{"data" => %{"name" => policy_name, "policy" => policy_name}}}
+      end)
+      |> expect(:delete, fn ^client, ^policy_name -> :ok end)
+
+      Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+      |> expect(:delete, fn ^client, ^policy_name -> :ok end)
+      |> expect(:create, fn ^client, ^policy_map -> :ok end)
+
+      assert :ok = Core.reconcile_delivery_policy!(client, policy_map)
+    end
+
+    test "crashes on API errors", ctx do
+      %{
+        client: client,
+        policy_map: policy_map
+      } = ctx
+
+      expect(Edgehog.Astarte.DeliveryPolicies.MockDataLayer, :get, fn _client, _policy_name ->
+        {:error, api_error(status: 403, message: "Forbidden")}
+      end)
+
+      assert_raise CaseClauseError, fn ->
+        Core.reconcile_delivery_policy!(client, policy_map)
+      end
+    end
+  end
+
   describe "reconcile_trigger!/2" do
     setup do
       client =
@@ -290,6 +418,59 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       assert_raise CaseClauseError, fn ->
         Core.reconcile_trigger!(client, trigger_map)
       end
+    end
+  end
+
+  describe "verify_trigger_delivery_policy_support/1" do
+    setup do
+      client =
+        realm_fixture()
+        |> Ash.load!(:realm_management_client)
+        |> Map.fetch!(:realm_management_client)
+
+      %{client: client}
+    end
+
+    test "returns true for Astarte versions >= 1.1.1", %{client: client} do
+      # Mock the version endpoint
+      Tesla.Mock.mock_global(fn
+        %{method: :get, url: url} ->
+          if String.ends_with?(url, "/version") do
+            %Tesla.Env{status: 200, body: %{"data" => "1.2.0"}}
+          else
+            %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
+          end
+      end)
+
+      assert {:ok, true} = Core.verify_trigger_delivery_policy_support(client)
+    end
+
+    test "returns false for Astarte versions < 1.1.1", %{client: client} do
+      # Mock the version endpoint
+      Tesla.Mock.mock_global(fn
+        %{method: :get, url: url} ->
+          if String.ends_with?(url, "/version") do
+            %Tesla.Env{status: 200, body: %{"data" => "1.0.0"}}
+          else
+            %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
+          end
+      end)
+
+      assert {:ok, false} = Core.verify_trigger_delivery_policy_support(client)
+    end
+
+    test "returns error when version check fails", %{client: client} do
+      # Mock the version endpoint to fail
+      Tesla.Mock.mock_global(fn
+        %{method: :get, url: url} ->
+          if String.ends_with?(url, "/version") do
+            %Tesla.Env{status: 500, body: %{"errors" => %{"detail" => "Internal server error"}}}
+          else
+            %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
+          end
+      end)
+
+      assert {:error, _} = Core.verify_trigger_delivery_policy_support(client)
     end
   end
 

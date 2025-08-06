@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2025 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ defmodule Edgehog.Tenants.Reconciler do
   alias Edgehog.Tenants.Reconciler.Core
   alias Edgehog.Tenants.Reconciler.TaskSupervisor
   alias Edgehog.Tenants.Tenant
+
+  require Logger
 
   @reconcile_interval :timer.minutes(10)
 
@@ -100,10 +102,50 @@ defmodule Edgehog.Tenants.Reconciler do
       Enum.each(Core.list_required_interfaces(), &Core.reconcile_interface!(rm_client, &1))
       trigger_url = tenant_to_trigger_url_fun.(tenant)
 
-      trigger_url
-      |> Core.list_required_triggers()
-      |> Enum.each(&Core.reconcile_trigger!(rm_client, &1))
+      reconcile_policies_and_triggers(rm_client, trigger_url, tenant.name)
     end)
+  end
+
+  defp reconcile_policies_and_triggers(rm_client, trigger_url, tenant_name) do
+    case Core.verify_trigger_delivery_policy_support(rm_client) do
+      {:ok, supports_policies?} ->
+        handle_policy_support(rm_client, trigger_url, tenant_name, supports_policies?)
+
+      {:error, reason} ->
+        Logger.warning(
+          "Error, skipping trigger delivery policies reconciliation for tenant #{tenant_name}: #{inspect(reason)}"
+        )
+
+        reconcile_triggers_without_policies(rm_client, trigger_url)
+    end
+  end
+
+  defp handle_policy_support(rm_client, trigger_url, _tenant_name, true) do
+    Enum.each(
+      Core.list_required_delivery_policies(),
+      &Core.reconcile_delivery_policy!(rm_client, &1)
+    )
+
+    reconcile_triggers_with_policies(rm_client, trigger_url)
+  end
+
+  defp handle_policy_support(rm_client, trigger_url, tenant_name, false) do
+    Logger.warning("Skipping trigger delivery policies reconciliation for tenant #{tenant_name}.
+       Astarte version does not support policies.")
+
+    reconcile_triggers_without_policies(rm_client, trigger_url)
+  end
+
+  defp reconcile_triggers_with_policies(rm_client, trigger_url) do
+    trigger_url
+    |> Core.list_required_triggers(true)
+    |> Enum.each(&Core.reconcile_trigger!(rm_client, &1))
+  end
+
+  defp reconcile_triggers_without_policies(rm_client, trigger_url) do
+    trigger_url
+    |> Core.list_required_triggers(false)
+    |> Enum.each(&Core.reconcile_trigger!(rm_client, &1))
   end
 
   defp schedule_reconciliation(time) do

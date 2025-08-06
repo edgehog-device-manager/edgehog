@@ -1,0 +1,16 @@
+{
+    "name": "edgehog-retry-on-server-error",
+    "error_handlers": [
+        {
+            "on": "server_error",
+            "strategy": "retry"
+        },
+        {
+            "on": "client_error",
+            "strategy": "discard"
+        }
+    ],
+    "maximum_capacity": 100,
+    "retry_times": 3,
+    "event_ttl": 30
+}
