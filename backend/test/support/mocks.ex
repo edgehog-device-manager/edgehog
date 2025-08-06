@@ -114,6 +114,10 @@ Mox.defmock(Edgehog.Astarte.Interface.MockDataLayer,
   for: Edgehog.Astarte.Interface.DataLayer
 )
 
+Mox.defmock(Edgehog.Astarte.DeliveryPolicies.MockDataLayer,
+  for: Edgehog.Astarte.DeliveryPolicies.DataLayer
+)
+
 Mox.defmock(Edgehog.Astarte.Trigger.MockDataLayer,
   for: Edgehog.Astarte.Trigger.DataLayer
 )

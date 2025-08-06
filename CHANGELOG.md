@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10] - Unreleased
 ### Added
-- Managed OTA operations expose the update target that created them in graphql ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356).
+- Managed OTA operations expose the update target that created them in graphql ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
+- Expose the associated UpdateCampaign (if any) from an OTA Operation on the Software Updates tab  ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Support for using Azure Storage as the persistence layer for asset uploads ([#233](https://github.com/edgehog-device-manager/edgehog/issues/233)).
 - Ecto SSL configuration is exposed trough `DATABASE_*` environment variables (see [.env](./.env))
 - Added Applications tab to Device page ([#662](https://github.com/edgehog-device-manager/edgehog/issues/662))
@@ -17,12 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `ApplicationCreate` page to enable users to create a new application with fields for application name and description.
 - Added `ReleaseCreate` page to enable users to create a new release for an application with fields for release Version and a list of Containers.
 - Add upgrade deployment functionality with version selection ([#703](https://github.com/edgehog-device-manager/edgehog/issues/703))
+- Adds support for trigger delivery policies in the tenant 
+reconciler, allowing Edgehog to automatically provision and manage 
+trigger delivery policies on Astarte realms that support them (v1.1.1+).
 
-## [0.9.3] - Unreleased
+## [0.9.3] - 2025-05-22
 ### Fixed
 - Base Image deletion in S3 storage
+- Update Campaign executor crashing when handling events because of `device` relationship not loaded ([#828](https://github.com/edgehog-device-manager/edgehog/pull/828)).
 
 ## [0.9.2] - 2024-12-09
+### Added
+- Add pattern matching support to device selector DSL with new `~=` and `!~=` operators
 ### Changed
 - Update the docker-compose configuration to allow both physical and virtual devices
   to connect to Edgehog, provided that the devices and the host are on the same LAN.

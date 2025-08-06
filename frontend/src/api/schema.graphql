@@ -2971,6 +2971,12 @@ input OtaOperationFilterInput {
 
   "The device targeted from the operation"
   device: DeviceFilterInput
+
+  """
+  The update target of an update campaing that created the managed
+  ota operation, if any.
+  """
+  updateTarget: UpdateTargetFilterInput
 }
 
 input OtaOperationSortInput {
@@ -3005,6 +3011,12 @@ type OtaOperation {
 
   "The device targeted from the operation"
   device: Device!
+
+  """
+  The update target of an update campaing that created the managed
+  ota operation, if any.
+  """
+  updateTarget: UpdateTarget
 }
 
 type TenantInfo {
@@ -3203,7 +3215,7 @@ input CreateUpdateChannelInput {
   name: String!
 
   "The IDs of the target groups that are targeted by this update channel."
-  targetGroupIds: [ID!]!
+  targetGroupIds: [ID!]
 }
 
 enum UpdateChannelSortField {

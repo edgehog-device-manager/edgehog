@@ -88,6 +88,10 @@ config :edgehog,
        :astarte_create_volume_request_module,
        Edgehog.Astarte.Device.CreateVolumeRequestMock
 
+config :edgehog,
+       :astarte_delivery_policies_data_layer,
+       Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+
 config :edgehog, :astarte_deployment_command_module, Edgehog.Astarte.Device.DeploymentCommandMock
 config :edgehog, :astarte_deployment_update_module, Edgehog.Astarte.Device.DeploymentUpdateMock
 config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock

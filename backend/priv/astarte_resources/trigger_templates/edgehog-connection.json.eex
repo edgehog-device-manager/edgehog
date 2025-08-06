@@ -12,4 +12,7 @@
             "on": "device_connected"
         }
     ]
+    <%= if @can_use_trigger_delivery_policy do %>,
+    "policy": "edgehog-retry-on-server-error"
+    <% end %>
 }

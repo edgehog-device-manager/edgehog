@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
 
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
+  import ExUnit.CaptureLog
 
   alias Astarte.Client.APIError
   alias Edgehog.Tenants.Reconciler
@@ -35,6 +36,16 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # its pid to allow mocks call from it
       Mox.set_mox_global()
 
+      # Mock the Astarte version check to support trigger delivery policies
+      Tesla.Mock.mock_global(fn
+        %{method: :get, url: url} ->
+          if String.ends_with?(url, "/version") do
+            %Tesla.Env{status: 200, body: %{"data" => "1.2.0"}}
+          else
+            %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
+          end
+      end)
+
       tenant_1 = tenant_fixture()
       tenant_2 = tenant_fixture()
       _realm_1 = realm_fixture(tenant: tenant_1)
@@ -43,10 +54,11 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       :ok
     end
 
-    test "reconciles interfaces and triggers for all tenants" do
+    test "reconciles interfaces, trigger delivery policies and triggers for all tenants" do
       # Multiply by 2 since we have 2 tenants
       interface_count = length(Reconciler.Core.list_required_interfaces()) * 2
-      trigger_count = ("foo" |> Reconciler.Core.list_required_triggers() |> length()) * 2
+      policy_count = length(Reconciler.Core.list_required_delivery_policies()) * 2
+      trigger_count = ("foo" |> Reconciler.Core.list_required_triggers(true) |> length()) * 2
 
       test_pid = self()
       ref = make_ref()
@@ -57,6 +69,16 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       end)
       |> expect(:create, interface_count, fn _client, _interface_map ->
         send(test_pid, {:interface_reconciled, ref})
+
+        :ok
+      end)
+
+      Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+      |> expect(:get, policy_count, fn _client, _policy_name ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, policy_count, fn _client, _policy_map ->
+        send(test_pid, {:policy_reconciled, ref})
 
         :ok
       end)
@@ -74,11 +96,11 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # Trigger reconciliation
       send(Reconciler, :reconcile_all)
 
-      Enum.each(1..interface_count, fn _ -> assert_receive {:interface_reconciled, ^ref} end)
-      refute_receive {:interface_reconciled, ^ref}
+      Enum.each(1..interface_count, fn _ -> assert_receive {:interface_reconciled, ^ref}, 2000 end)
 
-      Enum.each(1..trigger_count, fn _ -> assert_receive {:trigger_reconciled, ^ref} end)
-      refute_receive {:trigger_reconciled, ^ref}
+      Enum.each(1..policy_count, fn _ -> assert_receive {:policy_reconciled, ^ref}, 2000 end)
+
+      Enum.each(1..trigger_count, fn _ -> assert_receive {:trigger_reconciled, ^ref}, 2000 end)
     end
   end
 
@@ -89,15 +111,26 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # its pid to allow mocks call from it
       Mox.set_mox_global()
 
+      # Mock the Astarte version check to support trigger delivery policies
+      Tesla.Mock.mock_global(fn
+        %{method: :get, url: url} ->
+          if String.ends_with?(url, "/version") do
+            %Tesla.Env{status: 200, body: %{"data" => "1.2.0"}}
+          else
+            %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
+          end
+      end)
+
       tenant = tenant_fixture()
       _realm = realm_fixture(tenant: tenant)
 
       %{tenant: tenant}
     end
 
-    test "reconciles interfaces and triggers", %{tenant: tenant} do
+    test "reconciles interfaces, trigger delivery policies and triggers", %{tenant: tenant} do
       interface_count = length(Reconciler.Core.list_required_interfaces())
-      trigger_count = "foo" |> Reconciler.Core.list_required_triggers() |> length()
+      policy_count = length(Reconciler.Core.list_required_delivery_policies())
+      trigger_count = "foo" |> Reconciler.Core.list_required_triggers(true) |> length()
 
       test_pid = self()
       ref = make_ref()
@@ -108,6 +141,16 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       end)
       |> expect(:create, interface_count, fn _client, _interface_map ->
         send(test_pid, {:interface_reconciled, ref})
+
+        :ok
+      end)
+
+      Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+      |> expect(:get, policy_count, fn _client, _policy_name ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, policy_count, fn _client, _policy_map ->
+        send(test_pid, {:policy_reconciled, ref})
 
         :ok
       end)
@@ -124,11 +167,68 @@ defmodule Edgehog.Tenants.ReconcilerTest do
 
       assert :ok = Reconciler.reconcile_tenant(tenant)
 
-      Enum.each(1..interface_count, fn _ -> assert_receive {:interface_reconciled, ^ref} end)
-      refute_receive {:interface_reconciled, ^ref}
+      Enum.each(1..interface_count, fn _ -> assert_receive {:interface_reconciled, ^ref}, 2000 end)
 
-      Enum.each(1..trigger_count, fn _ -> assert_receive {:trigger_reconciled, ^ref} end)
-      refute_receive {:trigger_reconciled, ^ref}
+      Enum.each(1..policy_count, fn _ -> assert_receive {:policy_reconciled, ^ref}, 2000 end)
+
+      Enum.each(1..trigger_count, fn _ -> assert_receive {:trigger_reconciled, ^ref}, 2000 end)
+    end
+
+    test "skips trigger delivery policies on older Astarte versions", %{tenant: tenant} do
+      # Mock the Astarte version check to return an old version
+      Tesla.Mock.mock_global(fn
+        %{method: :get, url: url} ->
+          if String.ends_with?(url, "/version") do
+            %Tesla.Env{status: 200, body: %{"data" => "1.0.0"}}
+          else
+            %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
+          end
+      end)
+
+      interface_count = length(Reconciler.Core.list_required_interfaces())
+      trigger_count = "foo" |> Reconciler.Core.list_required_triggers(false) |> length()
+
+      test_pid = self()
+      ref = make_ref()
+
+      Edgehog.Astarte.Interface.MockDataLayer
+      |> expect(:get, interface_count, fn _client, _interface_name, _major ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, interface_count, fn _client, _interface_map ->
+        send(test_pid, {:interface_reconciled, ref})
+
+        :ok
+      end)
+
+      # Should not call trigger delivery policies for old versions
+      Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+      |> expect(:get, 0, fn _client, _policy_name ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, 0, fn _client, _policy_map ->
+        :ok
+      end)
+
+      Edgehog.Astarte.Trigger.MockDataLayer
+      |> expect(:get, trigger_count, fn _client, _trigger_name ->
+        {:error, api_error(status: 404)}
+      end)
+      |> expect(:create, trigger_count, fn _client, _trigger_map ->
+        send(test_pid, {:trigger_reconciled, ref})
+
+        :ok
+      end)
+
+      capture_log(fn ->
+        assert :ok = Reconciler.reconcile_tenant(tenant)
+
+        Enum.each(1..interface_count, fn _ ->
+          assert_receive {:interface_reconciled, ^ref}, 2000
+        end)
+
+        Enum.each(1..trigger_count, fn _ -> assert_receive {:trigger_reconciled, ^ref}, 2000 end)
+      end)
     end
   end
 

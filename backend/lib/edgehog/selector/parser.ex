@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,12 +31,15 @@ defmodule Edgehog.Selector.Parser do
   #
   # in_op                 := 'in'       # case insensitive
   # not_in_op             := 'not in'   # case insensitive
+  # matches_op            := '~='       # case sensitive
+  # not_matches_op        := '!~='      # case sensitive
   # and_op                := 'and'      # case insensitive
   # or_op                 := 'or'       # case insensitive
   # attribute_operator    := '==' | '!=' | '>' | '>=' | '<' | '<='
   # double_quoted_string  := '"' string '"'
+  # regex_pattern         := '/' regex_content '/'
   # key                   := string
-  # tag_value             := double_quoted_string
+  # tag_value             := double_quoted_string | regex_pattern
   # attribute             := 'attributes["' namespace ':' key '"]'
   # attribute_value       := 'datetime(' double_quoted_string ')'
   #                          | 'now()'
@@ -47,7 +50,10 @@ defmodule Edgehog.Selector.Parser do
   # attribute_filter      := attribute attribute_operator attribute_value
   #                          | attribute_value in_op attribute      # TODO: not implemented
   #                          | attribute_value not_in_op attribute  # TODO: not implemented
-  # tag_filter            := tag_value in_op 'tags' | tag_value not_in_op 'tags'
+  # tag_filter            := double_quoted_string in_op 'tags'
+  #                          | double_quoted_string not_in_op 'tags'
+  #                          | (double_quoted_string | regex_pattern) matches_op 'tags'
+  #                          | (double_quoted_string | regex_pattern) not_matches_op 'tags'
   # filter                := tag_filter | attribute_filter
   # factor                := ( expression ) | filter
   # term                  := factor and_op term | factor
@@ -73,6 +79,18 @@ defmodule Edgehog.Selector.Parser do
     |> ascii_char([?n, ?N])
     |> label("NOT IN")
     |> replace(:not_in)
+
+  matches_operator =
+    "~="
+    |> string()
+    |> label("~=")
+    |> replace(:matches)
+
+  not_matches_operator =
+    "!~="
+    |> string()
+    |> label("!~=")
+    |> replace(:not_matches)
 
   and_operator =
     [?a, ?A]
@@ -160,6 +178,27 @@ defmodule Edgehog.Selector.Parser do
     |> ignore(ascii_char([?"]))
     |> reduce({Kernel, :to_string, []})
 
+  regex_pattern =
+    [?/]
+    |> ascii_char()
+    |> repeat(
+      [?/]
+      |> ascii_char()
+      |> lookahead_not()
+      |> choice([
+        ~S(\/) |> string() |> replace(?/),
+        utf8_char([])
+      ])
+    )
+    |> ascii_char([?/])
+    |> reduce({Kernel, :to_string, []})
+
+  tag_pattern =
+    choice([
+      regex_pattern,
+      double_quoted_string
+    ])
+
   string_value =
     unwrap_and_tag(double_quoted_string, :string)
 
@@ -233,14 +272,21 @@ defmodule Edgehog.Selector.Parser do
     |> label("attribute filter")
 
   tag_filter =
-    double_quoted_string
-    |> concat(blankspace)
-    |> choice([
-      in_operator,
-      not_in_operator
-    ])
-    |> concat(blankspace)
-    |> ignore(string("tags"))
+    [
+      # matches and not_matches can use both quoted strings and regex patterns
+      tag_pattern
+      |> concat(blankspace)
+      |> choice([matches_operator, not_matches_operator])
+      |> concat(blankspace)
+      |> ignore(string("tags")),
+      # in and not_in can only use quoted strings
+      double_quoted_string
+      |> concat(blankspace)
+      |> choice([in_operator, not_in_operator])
+      |> concat(blankspace)
+      |> ignore(string("tags"))
+    ]
+    |> choice()
     |> post_traverse(:finalize_tag_filter)
     |> label("tag filter")
 

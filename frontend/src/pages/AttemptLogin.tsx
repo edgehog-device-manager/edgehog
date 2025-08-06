@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { commitLocalUpdate, useRelayEnvironment } from "react-relay/hooks";
 
 import { Route } from "Navigation";
-import { AuthConfig, useAuth } from "../contexts/Auth";
+import type { Session } from "../contexts/Session";
+import { useAuth } from "../contexts/Auth";
 
 const AttemptLogin = () => {
   const auth = useAuth();
@@ -42,13 +43,13 @@ const AttemptLogin = () => {
       // authenticated route
       return navigate(redirectTo, { replace: true });
     }
-    const authConfig: AuthConfig = {
+    const session: Session = {
       tenantSlug: tenantSlug,
       authToken: authToken,
     };
     commitLocalUpdate(relayEnvironment, (store) => store.invalidateStore());
     auth
-      .login(authConfig, false)
+      .login(session, false)
       .then((isValidLogin) => {
         if (isValidLogin) {
           navigate(redirectTo, { replace: true });

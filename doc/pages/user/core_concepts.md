@@ -123,6 +123,30 @@ Created with the syntax `"<value>" in tags`, it returns `true` if `value` is inc
 tags. It's also possible to use a negative filter with `"value" not in tags`, in this case the
 filter will match all Devices which _don't_ have the tag.
 
+Additionally, Edgehog supports pattern matching on tags using the `~=` (matches) and `!~=` (not matches) operators:
+
+- `"<pattern>" ~= tags`: returns `true` if any Device tag matches the specified pattern
+- `"<pattern>" !~= tags`: returns `true` if no Device tag matches the specified pattern
+
+Pattern matching supports two types of patterns:
+
+**Glob patterns** (using quoted strings):
+
+- `*` matches any sequence of characters
+- `?` matches any single character
+- Example: `"sensor-*" ~= tags` matches tags like `sensor-temperature`, `sensor-humidity`, etc.
+- Example: `"dev?" ~= tags` matches tags like `dev1`, `dev2`, `deva`, but not `device`
+
+**Regular expressions** (using `/pattern/` syntax):
+
+- Full regex support with standard regex metacharacters
+- Can be written with or without quotes: `/pattern/` or `"/pattern/"`
+- Example: `/^sensor-\d+$/ ~= tags` matches tags like `sensor-123`, `sensor-007`
+- Example: `/temp(erature)?/ ~= tags` matches both `temp` and `temperature`
+
+Note that regex patterns (unquoted `/pattern/`) can only be used with the `~=` and `!~=` operators,
+while quoted strings work with all tag operators (`in`, `not in`, `~=`, `!~=`).
+
 ##### Attribute filter*
 
 *_Note that while Attribute filters are already supported, Attributes are going to be available in a

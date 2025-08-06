@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,11 @@ defmodule Edgehog.Astarte.Trigger.AstarteDataLayer do
   @impl DataLayer
   def get(%RealmManagement{} = client, trigger_name) do
     RealmManagement.Triggers.get(client, trigger_name)
+  end
+
+  @impl DataLayer
+  def list(%RealmManagement{} = client) do
+    RealmManagement.Triggers.list(client)
   end
 
   @impl DataLayer
