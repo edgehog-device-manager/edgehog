@@ -33,12 +33,18 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
+const SYSTEM_MODELS_TO_LOAD_FIRST = 40;
+
 const GET_SYSTEM_MODELS_QUERY = graphql`
-  query SystemModels_getSystemModels_Query($first: Int, $after: String) {
-    systemModels(first: $first, after: $after) {
+  query SystemModels_getSystemModels_Query(
+    $first: Int
+    $after: String
+    $filter: SystemModelFilterInput
+  ) {
+    systemModels(first: $first, after: $after, filter: $filter) {
       count
     }
-    ...SystemModelsTable_SystemModelsFragment
+    ...SystemModelsTable_SystemModelsFragment @arguments(filter: $filter)
   }
 `;
 
@@ -100,7 +106,10 @@ const SystemModelsPage = () => {
 
   const fetchSystemModels = useCallback(
     () =>
-      getSystemModels({ first: 10_000 }, { fetchPolicy: "store-and-network" }),
+      getSystemModels(
+        { first: SYSTEM_MODELS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getSystemModels],
   );
 

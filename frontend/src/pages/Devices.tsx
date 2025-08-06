@@ -30,9 +30,15 @@ import DevicesTable from "components/DevicesTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 
+const DEVICES_TO_LOAD_FIRST = 40;
+
 const GET_DEVICES_QUERY = graphql`
-  query Devices_getDevices_Query($first: Int, $after: String) {
-    ...DevicesTable_DeviceFragment
+  query Devices_getDevices_Query(
+    $first: Int
+    $after: String
+    $filter: DeviceFilterInput
+  ) {
+    ...DevicesTable_DeviceFragment @arguments(filter: $filter)
   }
 `;
 
@@ -62,7 +68,11 @@ const DevicesPage = () => {
     useQueryLoader<Devices_getDevices_Query>(GET_DEVICES_QUERY);
 
   const fetchDevices = useCallback(
-    () => getDevices({ first: 10_000 }, { fetchPolicy: "store-and-network" }),
+    () =>
+      getDevices(
+        { first: DEVICES_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getDevices],
   );
 

@@ -33,9 +33,15 @@ import Spinner from "components/Spinner";
 import UpdateCampaignsTable from "components/UpdateCampaignsTable";
 import { Link, Route } from "Navigation";
 
+const UPDATE_CAMPAIGNS_TO_LOAD_FIRST = 40;
+
 const GET_UPDATE_CAMPAIGNS_QUERY = graphql`
-  query UpdateCampaigns_getUpdateCampaigns_Query($first: Int, $after: String) {
-    ...UpdateCampaignsTable_UpdateCampaignFragment
+  query UpdateCampaigns_getUpdateCampaigns_Query(
+    $first: Int
+    $after: String
+    $filter: UpdateCampaignFilterInput
+  ) {
+    ...UpdateCampaignsTable_UpdateCampaignFragment @arguments(filter: $filter)
   }
 `;
 
@@ -46,7 +52,7 @@ type UpdateCampaignsContentProps = {
 const UpdateCampaignsContent = ({
   getUpdateCampaignsQuery,
 }: UpdateCampaignsContentProps) => {
-  const updateCampaigns = usePreloadedQuery(
+  const updateCampaignsData = usePreloadedQuery(
     GET_UPDATE_CAMPAIGNS_QUERY,
     getUpdateCampaignsQuery,
   );
@@ -69,7 +75,7 @@ const UpdateCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <UpdateCampaignsTable updateCampaignsRef={updateCampaigns} />
+        <UpdateCampaignsTable updateCampaignsData={updateCampaignsData} />
       </Page.Main>
     </Page>
   );
@@ -84,7 +90,7 @@ const UpdateCampaignsPage = () => {
   const fetchUpdateCampaigns = useCallback(
     () =>
       getUpdateCampaigns(
-        { first: 10_000 },
+        { first: UPDATE_CAMPAIGNS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getUpdateCampaigns],

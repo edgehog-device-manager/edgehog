@@ -18,8 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
 import type { DevicesTable_PaginationQuery } from "api/__generated__/DevicesTable_PaginationQuery.graphql";
 import type {
@@ -27,18 +29,23 @@ import type {
   DevicesTable_DeviceFragment$key,
 } from "api/__generated__/DevicesTable_DeviceFragment.graphql";
 
-import LastSeen from "components/LastSeen";
-import Table, { createColumnHelper } from "components/Table";
 import ConnectionStatus from "components/ConnectionStatus";
-import Tag from "components/Tag";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
+import LastSeen from "components/LastSeen";
 import { Link, Route } from "Navigation";
+import Tag from "components/Tag";
+
+const DEVICES_TO_LOAD_FIRST = 40;
+const DEVICES_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICES_TABLE_FRAGMENT = graphql`
   fragment DevicesTable_DeviceFragment on RootQueryType
-  @refetchable(queryName: "DevicesTable_PaginationQuery") {
-    devices(first: $first, after: $after)
+  @refetchable(queryName: "DevicesTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "DeviceFilterInput" }) {
+    devices(first: $first, after: $after, filter: $filter)
       @connection(key: "DevicesTable_devices") {
       edges {
         node {
@@ -173,23 +180,82 @@ const columns = [
 type Props = {
   className?: string;
   devicesRef: DevicesTable_DeviceFragment$key;
-  hideSearch?: boolean;
 };
 
-const DevicesTable = ({ className, devicesRef, hideSearch = false }: Props) => {
-  const { data } = usePaginationFragment<
+const DevicesTable = ({ className, devicesRef }: Props) => {
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
     DevicesTable_PaginationQuery,
     DevicesTable_DeviceFragment$key
   >(DEVICES_TABLE_FRAGMENT, devicesRef);
 
-  const tableData = data.devices?.edges?.map((edge) => edge.node) ?? [];
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: DEVICES_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: DEVICES_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { deviceId: { ilike: `%${text}%` } },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextDevices = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(DEVICES_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const devices = useMemo(() => {
+    return (
+      paginationData.devices?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.devices) {
+    return null;
+  }
 
   return (
-    <Table
+    <InfiniteTable
       className={className}
       columns={columns}
-      data={tableData}
-      hideSearch={hideSearch}
+      data={devices}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextDevices : undefined}
+      setSearchText={setSearchText}
     />
   );
 };

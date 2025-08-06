@@ -18,8 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
 import type { UpdateCampaignsTable_PaginationQuery } from "api/__generated__/UpdateCampaignsTable_PaginationQuery.graphql";
 import type {
@@ -27,17 +29,21 @@ import type {
   UpdateCampaignsTable_UpdateCampaignFragment$key,
 } from "api/__generated__/UpdateCampaignsTable_UpdateCampaignFragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
 import UpdateCampaignOutcome from "components/UpdateCampaignOutcome";
 import UpdateCampaignStatus from "components/UpdateCampaignStatus";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "Navigation";
 
+const UPDATE_CAMPAIGNS_TO_LOAD_FIRST = 40;
+const UPDATE_CAMPAIGNS_TO_LOAD_NEXT = 10;
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
   fragment UpdateCampaignsTable_UpdateCampaignFragment on RootQueryType
-  @refetchable(queryName: "UpdateCampaignsTable_PaginationQuery") {
-    updateCampaigns(first: $first, after: $after)
+  @refetchable(queryName: "UpdateCampaignsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "UpdateCampaignFilterInput" }) {
+    updateCampaigns(first: $first, after: $after, filter: $filter)
       @connection(key: "UpdateCampaignsTable_updateCampaigns") {
       edges {
         node {
@@ -140,18 +146,126 @@ const columns = [
 
 type Props = {
   className?: string;
-  updateCampaignsRef: UpdateCampaignsTable_UpdateCampaignFragment$key;
+  updateCampaignsData: UpdateCampaignsTable_UpdateCampaignFragment$key;
 };
 
-const UpdateCampaignsTable = ({ className, updateCampaignsRef }: Props) => {
-  const { data } = usePaginationFragment<
+const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
     UpdateCampaignsTable_PaginationQuery,
     UpdateCampaignsTable_UpdateCampaignFragment$key
-  >(UPDATE_CAMPAIGNS_TABLE_FRAGMENT, updateCampaignsRef);
+  >(UPDATE_CAMPAIGNS_TABLE_FRAGMENT, updateCampaignsData);
+  const [searchText, setSearchText] = useState<string | null>(null);
 
-  const tableData = data.updateCampaigns?.edges?.map((edge) => edge.node) ?? [];
+  const debounceRefetch = useMemo(() => {
+    const enumStatuses = ["FINISHED", "IDLE", "IN_PROGRESS"] as const;
+    const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
 
-  return <Table className={className} columns={columns} data={tableData} />;
+    type UpdateCampaignStatus = (typeof enumStatuses)[number];
+    type UpdateCampaignOutcome = (typeof enumOutcomes)[number];
+
+    const isEnumStatus = (value: string): value is UpdateCampaignStatus =>
+      enumStatuses.includes(value.toUpperCase() as UpdateCampaignStatus);
+
+    const isEnumOutcome = (value: string): value is UpdateCampaignOutcome =>
+      enumOutcomes.includes(value.toUpperCase() as UpdateCampaignOutcome);
+
+    return _.debounce((text: string) => {
+      if (text === "") {
+        refetch(
+          {
+            first: UPDATE_CAMPAIGNS_TO_LOAD_FIRST,
+          },
+          { fetchPolicy: "network-only" },
+        );
+      } else {
+        const likeText = `%${text}%`;
+        const normalizedText = text.toUpperCase();
+
+        const filters: any[] = [
+          { name: { ilike: likeText } },
+          {
+            baseImage: {
+              version: { ilike: likeText },
+              localizedReleaseDisplayNames: {
+                value: { ilike: likeText },
+              },
+              baseImageCollection: {
+                name: { ilike: likeText },
+              },
+            },
+          },
+          {
+            updateChannel: {
+              name: { ilike: likeText },
+            },
+          },
+        ];
+
+        if (isEnumStatus(normalizedText)) {
+          filters.push({
+            status: { eq: normalizedText as UpdateCampaignStatus },
+          });
+        }
+
+        if (isEnumOutcome(normalizedText)) {
+          filters.push({
+            outcome: { eq: normalizedText as UpdateCampaignOutcome },
+          });
+        }
+
+        refetch(
+          {
+            first: UPDATE_CAMPAIGNS_TO_LOAD_FIRST,
+            filter: {
+              or: filters,
+            },
+          },
+          { fetchPolicy: "network-only" },
+        );
+      }
+    }, 500);
+  }, [refetch]);
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextUpdateCampaigns = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(UPDATE_CAMPAIGNS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const updateCampaigns = useMemo(() => {
+    return (
+      paginationData.updateCampaigns?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.updateCampaigns) {
+    return null;
+  }
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={updateCampaigns}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextUpdateCampaigns : undefined}
+      setSearchText={setSearchText}
+    />
+  );
 };
 
 export default UpdateCampaignsTable;

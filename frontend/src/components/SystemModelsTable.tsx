@@ -18,9 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
 import type { SystemModelsTable_PaginationQuery } from "../api/__generated__/SystemModelsTable_PaginationQuery.graphql";
 import type {
@@ -28,15 +29,19 @@ import type {
   SystemModelsTable_SystemModelsFragment$data,
 } from "../api/__generated__/SystemModelsTable_SystemModelsFragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "Navigation";
 
+const SYSTEM_MODELS_TO_LOAD_FIRST = 40;
+const SYSTEM_MODELS_TO_LOAD_NEXT = 10;
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const SYSTEM_MODELS_TABLE_FRAGMENT = graphql`
   fragment SystemModelsTable_SystemModelsFragment on RootQueryType
-  @refetchable(queryName: "SystemModelsTable_PaginationQuery") {
-    systemModels(first: $first, after: $after)
+  @refetchable(queryName: "SystemModelsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "SystemModelFilterInput" }) {
+    systemModels(first: $first, after: $after, filter: $filter)
       @connection(key: "SystemModelsTable_systemModels") {
       edges {
         node {
@@ -126,14 +131,94 @@ type Props = {
 };
 
 const SystemModelsTable = ({ className, systemModelsRef }: Props) => {
-  const { data } = usePaginationFragment<
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
     SystemModelsTable_PaginationQuery,
     SystemModelsTable_SystemModelsFragment$key
   >(SYSTEM_MODELS_TABLE_FRAGMENT, systemModelsRef);
+  const [searchText, setSearchText] = useState<string | null>(null);
 
-  const tableData = data.systemModels?.edges?.map((edge) => edge.node) ?? [];
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: SYSTEM_MODELS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: SYSTEM_MODELS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { handle: { ilike: `%${text}%` } },
+                  {
+                    partNumbers: {
+                      partNumber: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                  {
+                    hardwareType: {
+                      name: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
 
-  return <Table className={className} columns={columns} data={tableData} />;
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextSystemModels = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(SYSTEM_MODELS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const hardwareTypes = useMemo(() => {
+    return (
+      paginationData.systemModels?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.systemModels) {
+    return null;
+  }
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={hardwareTypes}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextSystemModels : undefined}
+      setSearchText={setSearchText}
+    />
+  );
 };
 
 export default SystemModelsTable;

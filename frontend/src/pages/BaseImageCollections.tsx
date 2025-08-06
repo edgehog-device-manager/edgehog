@@ -33,12 +33,16 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
+const BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST = 40;
+
 const GET_BASE_IMAGE_COLLECTIONS_QUERY = graphql`
   query BaseImageCollections_getBaseImageCollections_Query(
     $first: Int
     $after: String
+    $filter: BaseImageCollectionFilterInput
   ) {
     ...BaseImageCollectionsTable_BaseImageCollectionFragment
+      @arguments(filter: $filter)
   }
 `;
 
@@ -89,7 +93,7 @@ const BaseImageCollectionsPage = () => {
   const fetchBaseImageCollections = useCallback(
     () =>
       getBaseImageCollections(
-        { first: 10_000 },
+        { first: BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getBaseImageCollections],

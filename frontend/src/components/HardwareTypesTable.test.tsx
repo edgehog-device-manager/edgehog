@@ -29,9 +29,12 @@ import type { HardwareTypesTable_getHardwareTypes_Query } from "api/__generated_
 import HardwareTypesTable from "./HardwareTypesTable";
 
 const GET_HARDWARE_TYPES_QUERY = graphql`
-  query HardwareTypesTable_getHardwareTypes_Query($first: Int, $after: String)
-  @relay_test_operation {
-    ...HardwareTypesTable_HardwareTypesFragment
+  query HardwareTypesTable_getHardwareTypes_Query(
+    $first: Int
+    $after: String
+    $filter: HardwareTypeFilterInput
+  ) @relay_test_operation {
+    ...HardwareTypesTable_HardwareTypesFragment @arguments(filter: $filter)
   }
 `;
 
