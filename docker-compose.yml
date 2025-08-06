@@ -50,12 +50,8 @@ services:
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
     restart: on-failure
     volumes:
-      - type: bind
-        source: "${SEEDS_TENANT_PRIVATE_KEY_FILE}"
-        target: /keys/tenant_private.pem
-      - type: bind
-        source: "${SEEDS_REALM_PRIVATE_KEY_FILE}"
-        target: /keys/realm_private.pem
+      - ${SEEDS_TENANT_PRIVATE_KEY_FILE}:/keys/tenant_private.pem:z
+      - ${SEEDS_REALM_PRIVATE_KEY_FILE}:/keys/realm_private.pem:z
     depends_on:
       - postgresql
       - minio
