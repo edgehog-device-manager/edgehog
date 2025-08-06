@@ -105,7 +105,9 @@ defmodule Edgehog.Containers.Container.Deployment do
       public? true
     end
 
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device, Edgehog.Devices.Device do
+      public? true
+    end
   end
 
   calculations do

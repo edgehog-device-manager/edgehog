@@ -28,6 +28,7 @@ defmodule Edgehog.Containers.Volume do
 
   graphql do
     type :volume
+    paginate_relationship_with devices: :relay
   end
 
   actions do
@@ -50,11 +51,13 @@ defmodule Edgehog.Containers.Volume do
     attribute :driver, :string do
       default "local"
       allow_nil? false
+      public? true
     end
 
     attribute :options, :map do
       default %{}
       allow_nil? false
+      public? true
     end
 
     timestamps()
@@ -64,6 +67,7 @@ defmodule Edgehog.Containers.Volume do
     many_to_many :devices, Edgehog.Devices.Device do
       through Edgehog.Containers.Volume.Deployment
       join_relationship :volume_deployments
+      public? true
     end
   end
 
