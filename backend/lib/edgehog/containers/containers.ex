@@ -57,6 +57,22 @@ defmodule Edgehog.Containers do
       get Release, :release, :read do
         description "Returns the desired release."
       end
+
+      get Volume, :volume, :read do
+        description "Returns the desired volume."
+      end
+
+      list Volume, :volumes, :read do
+        description "Returns all available volumes."
+      end
+
+      get Network, :network, :read do
+        description "Returns the desired network."
+      end
+
+      list Network, :networks, :read do
+        description "Returns all available networks."
+      end
     end
 
     mutations do
