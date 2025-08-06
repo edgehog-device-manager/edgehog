@@ -218,20 +218,17 @@ if config_env() == :prod do
   forwarder_hostname = System.get_env("EDGEHOG_FORWARDER_HOSTNAME")
 
   config :edgehog, Edgehog.Repo,
-    # socket_options: [:inet6],
+    # Enable / disable features at runtime
     username: database.username,
     password: database.password,
     hostname: database.hostname,
+    # socket_options: [:inet6],
     database: database.name,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
     ssl: database.ssl
 
   config :edgehog, EdgehogWeb.Endpoint,
     http: [
-      # Enable IPv6 and bind on all interfaces.
-      # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
-      # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
-      # for details about using IPv6 vs IPv4 and loopback vs public addresses.
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: String.to_integer(System.get_env("PORT") || "4000"),
       protocol_options: [idle_timeout: 300_000]
@@ -241,7 +238,13 @@ if config_env() == :prod do
       scheme: url_scheme,
       port: url_port
     ],
+    # Enable IPv6 and bind on all interfaces.
+    # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
+    # See the documentation on https://hexdocs.pm/plug_cowboy/Plug.Cowboy.html
+    # for details about using IPv6 vs IPv4 and loopback vs public addresses.
     secret_key_base: secret_key_base
+
+  config :edgehog, :features, containers: false
 
   if forwarder_hostname != nil &&
        (String.starts_with?(forwarder_hostname, "http://") ||
