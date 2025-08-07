@@ -16,6 +16,15 @@
       "doc": "Unique id for the container."
     },
     {
+      "endpoint": "/container/deploymentId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Reference to a Deployment using the container",
+      "doc": "The deployment in which the container is used, so the device can send deployment events to Astarte for the create request"
+    },
+    {
       "endpoint": "/container/imageId",
       "type": "string",
       "database_retention_policy": "use_ttl",
@@ -76,7 +85,7 @@
       "database_retention_ttl": 31556952,
       "reliability": "guaranteed",
       "description": "Container environment",
-      "doc": "Array of KEY=value environment variables"
+      "doc": "Array of key=value environment variables. The key cannot contain `=`."
     },
     {
       "endpoint": "/container/binds",

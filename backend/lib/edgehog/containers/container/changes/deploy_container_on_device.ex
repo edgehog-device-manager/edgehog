@@ -29,9 +29,10 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
   def change(changeset, _opts, _context) do
     device = Ash.Changeset.get_argument(changeset, :device)
     container = Ash.Changeset.get_argument(changeset, :container)
+    deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
     Ash.Changeset.after_action(changeset, fn _changeset, container_deployment ->
-      with {:ok, _device} <- Devices.send_create_container_request(device, container) do
+      with {:ok, _device} <- Devices.send_create_container_request(device, container, deployment) do
         Containers.mark_container_deployment_as_sent(container_deployment)
       end
     end)

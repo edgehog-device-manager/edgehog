@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Network.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Network.Changes
   alias Edgehog.Devices.Device
@@ -47,6 +48,11 @@ defmodule Edgehog.Containers.Network.Deployment do
 
       argument :device, :struct do
         constraints instance_of: Device
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
         allow_nil? false
       end
 

@@ -34,13 +34,15 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
   def update(changeset, _opts, _context) do
     device = changeset.data
 
-    with {:ok, image} <- Ash.Changeset.fetch_argument(changeset, :image),
+    with {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
+         {:ok, image} <- Ash.Changeset.fetch_argument(changeset, :image),
          {:ok, image} <- Ash.load(image, credentials: [:base64_json]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
       credentials = image.credentials.base64_json |> get_in() |> to_string()
 
       data = %RequestData{
         id: image.id,
+        deploymentId: deployment.id,
         reference: image.reference,
         registryAuth: credentials
       }
