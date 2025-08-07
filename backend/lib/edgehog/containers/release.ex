@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Release do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Changes
+  alias Edgehog.Containers.Release.Changes.HandleRelatedResourcesDeletion
   alias Edgehog.Validations
 
   graphql do
@@ -33,7 +34,15 @@ defmodule Edgehog.Containers.Release do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
+
+    destroy :destroy do
+      primary? true
+
+      require_atomic? false
+
+      change HandleRelatedResourcesDeletion
+    end
 
     create :create do
       primary? true
