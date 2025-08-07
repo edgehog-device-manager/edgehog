@@ -89,6 +89,10 @@ defmodule Edgehog.Containers do
                               ]
       end
 
+      destroy Release, :delete_release, :destroy do
+        description "Delete a release and its related resources (containers and images, if not used by other releases)"
+      end
+
       create ImageCredentials, :create_image_credentials, :create do
         description "Create image credentials."
       end
