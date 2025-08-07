@@ -89,6 +89,8 @@ defmodule Edgehog.Containers do
                               ]
       end
 
+      destroy Application, :delete_application, :destroy
+
       create Release, :create_release, :create do
         description "Create a new release."
 
