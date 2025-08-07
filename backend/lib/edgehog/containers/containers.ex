@@ -80,6 +80,8 @@ defmodule Edgehog.Containers do
         description "Create a new application."
       end
 
+      destroy Application, :delete_application, :destroy
+
       create Release, :create_release, :create do
         description "Create a new release."
 
@@ -87,6 +89,10 @@ defmodule Edgehog.Containers do
                                 application_id: :application,
                                 containers: [image: [image_credentials_id: :image_credentials]]
                               ]
+      end
+
+      destroy Release, :delete_release, :destroy do
+        description "Delete a release and its related resources (containers and images, if not used by other releases)"
       end
 
       create ImageCredentials, :create_image_credentials, :create do
