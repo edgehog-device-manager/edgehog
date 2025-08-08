@@ -219,6 +219,12 @@ defmodule Edgehog.Devices.Device do
         allow_nil? false
       end
 
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this volume is used"
+        allow_nil? false
+      end
+
       manual ManualActions.SendCreateVolume
     end
 
@@ -263,6 +269,12 @@ defmodule Edgehog.Devices.Device do
         allow_nil? false
       end
 
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this image is used"
+        allow_nil? false
+      end
+
       manual ManualActions.SendCreateImageRequest
     end
 
@@ -274,6 +286,12 @@ defmodule Edgehog.Devices.Device do
         description: "The Container the device has to initiate.",
         allow_nil?: false
 
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this container is used"
+        allow_nil? false
+      end
+
       manual ManualActions.SendCreateContainer
     end
 
@@ -284,6 +302,12 @@ defmodule Edgehog.Devices.Device do
         constraints: [instance_of: Edgehog.Containers.Network],
         description: "The Network the device has to create.",
         allow_nil?: false
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this network is used"
+        allow_nil? false
+      end
 
       manual ManualActions.SendCreateNetwork
     end

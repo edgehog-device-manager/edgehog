@@ -49,24 +49,24 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
         |> Enum.flat_map(& &1.volumes)
         |> Enum.uniq_by(& &1.id)
 
-      with :ok <- deploy_images(device, images),
-           :ok <- deploy_volumes(device, volumes),
-           :ok <- deploy_networks(device, networks),
-           :ok <- deploy_containers(device, containers),
+      with :ok <- deploy_images(device, images, deployment),
+           :ok <- deploy_volumes(device, volumes, deployment),
+           :ok <- deploy_networks(device, networks, deployment),
+           :ok <- deploy_containers(device, containers, deployment),
            {:ok, _device} <- Devices.send_create_deployment_request(device, deployment) do
         Containers.mark_deployment_as_sent(deployment, tenant: tenant)
       end
     end
   end
 
-  defp deploy_networks(device, networks) do
+  defp deploy_networks(device, networks, deployment) do
     networks =
       networks
       |> Enum.reject(&network_deployed?(&1, device))
       |> Enum.uniq_by(& &1.id)
 
     Enum.reduce_while(networks, :ok, fn network, _acc ->
-      case Containers.deploy_network(network, device, tenant: network.tenant_id) do
+      case Containers.deploy_network(network, device, deployment, tenant: network.tenant_id) do
         {:ok, _network_deployment} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
@@ -80,14 +80,14 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
     end
   end
 
-  defp deploy_images(device, images) do
+  defp deploy_images(device, images, deployment) do
     images =
       images
       |> Enum.reject(&image_deployed?(&1, device))
       |> Enum.uniq_by(& &1.id)
 
     Enum.reduce_while(images, :ok, fn image, _acc ->
-      case Containers.deploy_image(image, device, tenant: image.tenant_id) do
+      case Containers.deploy_image(image, device, deployment, tenant: image.tenant_id) do
         {:ok, _image_deployment} ->
           {:cont, :ok}
 
@@ -107,28 +107,28 @@ defmodule Edgehog.Containers.ManualActions.SendDeployRequest do
     end
   end
 
-  defp deploy_volumes(device, volumes) do
+  defp deploy_volumes(device, volumes, deployment) do
     volumes =
       volumes
       |> Enum.reject(&volume_deployed?(&1, device))
       |> Enum.uniq_by(& &1.id)
 
     Enum.reduce_while(volumes, :ok, fn volume, _acc ->
-      case Containers.deploy_volume(volume, device, tenant: volume.tenant_id) do
+      case Containers.deploy_volume(volume, device, deployment, tenant: volume.tenant_id) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
   end
 
-  defp deploy_containers(device, containers) do
+  defp deploy_containers(device, containers, deployment) do
     containers =
       containers
       |> Enum.uniq_by(& &1.id)
       |> Enum.reject(&container_deployed?(&1, device))
 
     Enum.reduce_while(containers, :ok, fn container, _acc ->
-      case Containers.deploy_container(container, device, tenant: container.tenant_id) do
+      case Containers.deploy_container(container, device, deployment, tenant: container.tenant_id) do
         {:ok, _device} -> {:cont, :ok}
         {:error, reason} -> {:halt, {:error, reason}}
       end

@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Container.Deployment do
 
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Container.Changes
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Devices.Device
 
   graphql do
@@ -47,6 +48,11 @@ defmodule Edgehog.Containers.Container.Deployment do
 
       argument :device, :struct do
         constraints instance_of: Device
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
         allow_nil? false
       end
 

@@ -34,11 +34,13 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateVolume do
   def update(changeset, _opts, _context) do
     device = changeset.data
 
-    with {:ok, volume} <- Ash.Changeset.fetch_argument(changeset, :volume),
+    with {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
+         {:ok, volume} <- Ash.Changeset.fetch_argument(changeset, :volume),
          {:ok, volume} <- Ash.load(volume, :options_encoding),
          {:ok, device} <- Ash.load(device, :appengine_client) do
       data = %RequestData{
         id: volume.id,
+        deploymentId: deployment.id,
         driver: volume.driver,
         options: volume.options_encoding
       }

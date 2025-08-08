@@ -122,7 +122,7 @@ defmodule Edgehog.Containers do
     end
 
     resource Edgehog.Containers.Container.Deployment do
-      define :deploy_container, action: :deploy, args: [:container, :device]
+      define :deploy_container, action: :deploy, args: [:container, :device, :deployment]
       define :fetch_container_deployment, action: :read, get_by_identity: :container_instance
       define :mark_container_deployment_as_sent, action: :mark_as_sent
       define :mark_container_deployment_as_received, action: :mark_as_received
@@ -155,7 +155,7 @@ defmodule Edgehog.Containers do
     end
 
     resource Edgehog.Containers.Image.Deployment do
-      define :deploy_image, action: :deploy, args: [:image, :device]
+      define :deploy_image, action: :deploy, args: [:image, :device, :deployment]
       define :fetch_image_deployment, action: :read, get_by_identity: :image_instance
       define :mark_image_deployment_as_sent, action: :mark_as_sent
       define :mark_image_deployment_as_unpulled, action: :mark_as_unpulled
@@ -178,7 +178,7 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Network
 
     resource Edgehog.Containers.Network.Deployment do
-      define :deploy_network, action: :deploy, args: [:network, :device]
+      define :deploy_network, action: :deploy, args: [:network, :device, :deployment]
       define :fetch_network_deployment, action: :read, get_by_identity: :network_instance
       define :mark_network_deployment_as_sent, action: :mark_as_sent
       define :mark_network_deployment_as_available, action: :mark_as_available
@@ -189,7 +189,7 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Volume
 
     resource Edgehog.Containers.Volume.Deployment do
-      define :deploy_volume, action: :deploy, args: [:volume, :device]
+      define :deploy_volume, action: :deploy, args: [:volume, :device, :deployment]
       define :fetch_volume_deployment, action: :read, get_by_identity: :volume_instance
       define :mark_volume_deployment_as_sent, action: :mark_as_sent
       define :mark_volume_deployment_as_available, action: :mark_as_available

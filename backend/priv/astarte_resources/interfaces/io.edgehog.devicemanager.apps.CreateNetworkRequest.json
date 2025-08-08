@@ -16,6 +16,15 @@
       "doc": "Unique id for the container network."
     },
     {
+      "endpoint": "/network/deploymentId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Reference to a Deployment using the network",
+      "doc": "The deployment in which the network is used, so the device can send deployment events to Astarte for the create request"
+    },
+    {
       "endpoint": "/network/driver",
       "type": "string",
       "database_retention_policy": "use_ttl",
@@ -49,7 +58,7 @@
       "database_retention_ttl": 31556952,
       "reliability": "guaranteed",
       "description": "Network driver options",
-      "doc": "An array of key=value options to set for the driver."
+      "doc": "An array of key=value options. The key cannot contain `=`. to set for the driver."
     }
   ]
 }

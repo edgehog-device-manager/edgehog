@@ -29,9 +29,10 @@ defmodule Edgehog.Containers.Network.Changes.DeployNetworkOnDevice do
   def change(changeset, _opts, _context) do
     device = Ash.Changeset.get_argument(changeset, :device)
     network = Ash.Changeset.get_argument(changeset, :network)
+    deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
     Ash.Changeset.after_action(changeset, fn _changeset, network_deployment ->
-      with {:ok, _device} <- Devices.send_create_network_request(device, network) do
+      with {:ok, _device} <- Devices.send_create_network_request(device, network, deployment) do
         Containers.mark_network_deployment_as_sent(network_deployment)
       end
     end)

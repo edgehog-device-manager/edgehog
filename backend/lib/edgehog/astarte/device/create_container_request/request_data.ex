@@ -26,6 +26,7 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
 
   defstruct [
     :id,
+    :deploymentId,
     :imageId,
     :image,
     :networkIds,
@@ -41,6 +42,7 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
 
   @type t() :: %__MODULE__{
           id: String.t(),
+          deploymentId: String.t(),
           imageId: String.t(),
           image: String.t(),
           volumeIds: list(String.t()),
