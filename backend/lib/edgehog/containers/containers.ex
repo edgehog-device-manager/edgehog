@@ -78,6 +78,8 @@ defmodule Edgehog.Containers do
     mutations do
       create Application, :create_application, :create do
         description "Create a new application."
+
+        relay_id_translations input: [system_model_id: :system_model]
       end
 
       create Release, :create_release, :create do
