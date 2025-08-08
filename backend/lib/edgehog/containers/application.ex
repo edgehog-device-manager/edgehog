@@ -37,8 +37,10 @@ defmodule Edgehog.Containers.Application do
       accept [:name, :description]
 
       argument :initial_release, :map
+      argument :system_model_id, :id
 
       change manage_relationship(:initial_release, :releases, type: :create)
+      change manage_relationship(:system_model_id, :system_model, type: :append)
     end
   end
 
@@ -61,10 +63,16 @@ defmodule Edgehog.Containers.Application do
     has_many :releases, Edgehog.Containers.Release do
       public? true
     end
+
+    belongs_to :system_model, Edgehog.Devices.SystemModel do
+      public? true
+    end
   end
 
   identities do
-    identity :name, [:name]
+    identity :name_and_system_model, [:name, :system_model_id] do
+      description "name and system model association identity"
+    end
   end
 
   postgres do
