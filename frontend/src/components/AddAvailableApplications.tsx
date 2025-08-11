@@ -52,7 +52,7 @@ const DEPLOY_RELEASE_MUTATION = graphql`
     deployRelease(input: $input) {
       result {
         id
-        status
+        state
       }
       errors {
         message

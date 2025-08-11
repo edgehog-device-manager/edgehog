@@ -410,6 +410,9 @@
   "components.DeployedApplicationsTable.confirmModal.title": {
     "defaultMessage": "Upgrade Deployment"
   },
+  "components.DeployedApplicationsTable.created": {
+    "defaultMessage": "Created"
+  },
   "components.DeployedApplicationsTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
   },
@@ -443,6 +446,9 @@
   "components.DeployedApplicationsTable.selectOption": {
     "defaultMessage": "Select a Release Version"
   },
+  "components.DeployedApplicationsTable.sent": {
+    "defaultMessage": "Sent"
+  },
   "components.DeployedApplicationsTable.startErrorFeedback": {
     "defaultMessage": "Could not Start the Deployed Application, please try again."
   },
@@ -455,8 +461,8 @@
   "components.DeployedApplicationsTable.starting": {
     "defaultMessage": "Starting"
   },
-  "components.DeployedApplicationsTable.status": {
-    "defaultMessage": "Status"
+  "components.DeployedApplicationsTable.state": {
+    "defaultMessage": "State"
   },
   "components.DeployedApplicationsTable.stopErrorFeedback": {
     "defaultMessage": "Could not Stop the Deployed Application, please try again."
