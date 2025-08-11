@@ -35,11 +35,13 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateNetwork do
   def update(changeset, _opts, _context) do
     device = changeset.data
 
-    with {:ok, network} <- Ash.Changeset.fetch_argument(changeset, :network),
+    with {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
+         {:ok, network} <- Ash.Changeset.fetch_argument(changeset, :network),
          {:ok, network} <- Ash.load(network, :options_encoding),
          {:ok, device} <- Ash.load(device, :appengine_client) do
       data = %RequestData{
         id: network.id,
+        deploymentId: deployment.id,
         driver: network.driver,
         internal: network.internal,
         enableIpv6: network.enable_ipv6,

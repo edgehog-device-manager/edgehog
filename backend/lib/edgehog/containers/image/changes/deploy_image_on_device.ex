@@ -32,9 +32,11 @@ defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
     %{tenant: tenant} = context
     image = Ash.Changeset.get_argument(changeset, :image)
     device = Ash.Changeset.get_argument(changeset, :device)
+    deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
     Ash.Changeset.after_action(changeset, fn _changeset, image_deployment ->
-      with {:ok, _device} <- Devices.send_create_image_request(device, image, tenant: tenant) do
+      with {:ok, _device} <-
+             Devices.send_create_image_request(device, image, deployment, tenant: tenant) do
         Containers.mark_image_deployment_as_sent(image_deployment)
       end
     end)

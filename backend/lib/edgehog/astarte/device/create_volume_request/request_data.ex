@@ -23,12 +23,14 @@ defmodule Edgehog.Astarte.Device.CreateVolumeRequest.RequestData do
 
   defstruct [
     :id,
+    :deploymentId,
     :driver,
     :options
   ]
 
   @type t() :: %__MODULE__{
           id: String.t(),
+          deploymentId: String.t(),
           driver: String.t(),
           options: list(String.t())
         }

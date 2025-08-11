@@ -34,7 +34,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
   def update(changeset, _opts, _context) do
     device = changeset.data
 
-    with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
+    with {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
+         {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
          {:ok, container} <-
            Ash.load(container, [:env_encoding, :image, :networks, container_volumes: [:binding]]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
@@ -47,6 +48,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
 
       data = %RequestData{
         id: container.id,
+        deploymentId: deployment.id,
         imageId: container.image_id,
         image: image.reference,
         volumeIds: volume_ids,
