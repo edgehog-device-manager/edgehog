@@ -25,6 +25,7 @@ import semver from "semver";
 
 import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
 import type {
+  ApplicationDeploymentResourcesState,
   ApplicationDeploymentState,
   DeployedApplicationsTable_deployedApplications$key,
 } from "api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
@@ -53,6 +54,7 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
         node {
           id
           state
+          resourcesState
           release {
             id
             version
@@ -135,6 +137,14 @@ type DeploymentState =
   | "ERROR"
   | "DELETING";
 
+type DeploymentResourcesState =
+  | "INITIAL"
+  | "CREATED_IMAGES"
+  | "CREATED_NETWORKS"
+  | "CREATED_VOLUMES"
+  | "CREATED_CONTAINERS"
+  | "READY";
+
 const parseDeploymentState = (
   apiState?: ApplicationDeploymentState,
 ): DeploymentState => {
@@ -160,6 +170,27 @@ const parseDeploymentState = (
   }
 };
 
+const parseDeploymentResourcesState = (
+  apiState?: ApplicationDeploymentResourcesState,
+): DeploymentResourcesState => {
+  switch (apiState) {
+    case "INITIAL":
+      return "INITIAL";
+    case "CREATED_IMAGES":
+      return "CREATED_IMAGES";
+    case "CREATED_NETWORKS":
+      return "CREATED_NETWORKS";
+    case "CREATED_VOLUMES":
+      return "CREATED_VOLUMES";
+    case "CREATED_CONTAINERS":
+      return "CREATED_CONTAINERS";
+    case "READY":
+      return "READY";
+    default:
+      return "INITIAL";
+  }
+};
+
 const stateColors: Record<DeploymentState, string> = {
   CREATED: "text-success",
   SENT: "text-success",
@@ -170,6 +201,15 @@ const stateColors: Record<DeploymentState, string> = {
   ERROR: "text-danger",
   DELETING: "text-danger",
   DEPLOYING: "text-muted",
+};
+
+const resourcesStateColors: Record<DeploymentResourcesState, string> = {
+  INITIAL: "text-muted",
+  CREATED_IMAGES: "text-muted",
+  CREATED_NETWORKS: "text-muted",
+  CREATED_VOLUMES: "text-muted",
+  CREATED_CONTAINERS: "text-muted",
+  READY: "text-success",
 };
 
 // Define deployment state messages for localization
@@ -212,6 +252,34 @@ const stateMessages = defineMessages<DeploymentState>({
   },
 });
 
+// Define deployment resources state messages for localization
+const resourcesStateMessages = defineMessages<DeploymentResourcesState>({
+  INITIAL: {
+    id: "components.DeployedApplicationsTable.initial",
+    defaultMessage: "Initial",
+  },
+  CREATED_IMAGES: {
+    id: "components.DeployedApplicationsTable.createdImages",
+    defaultMessage: "Created images",
+  },
+  CREATED_NETWORKS: {
+    id: "components.DeployedApplicationsTable.createdNetworks",
+    defaultMessage: "Created networks",
+  },
+  CREATED_VOLUMES: {
+    id: "components.DeployedApplicationsTable.createdVolumes",
+    defaultMessage: "Created volumes",
+  },
+  CREATED_CONTAINERS: {
+    id: "components.DeployedApplicationsTable.createdContainers",
+    defaultMessage: "Created containers",
+  },
+  READY: {
+    id: "components.DeployedApplicationsTable.ready",
+    defaultMessage: "Ready",
+  },
+});
+
 // Component to render the deployment state with an icon and optional spin
 const DeploymentStateComponent = ({ state }: { state: DeploymentState }) => (
   <div className="d-flex align-items-center">
@@ -228,6 +296,23 @@ const DeploymentStateComponent = ({ state }: { state: DeploymentState }) => (
       }`}
     />
     <FormattedMessage id={stateMessages[state].id} />
+  </div>
+);
+
+// Component to render the deployment resources state with an icon and optional spin
+const DeploymentResourcesStateComponent = ({
+  resourcesState,
+}: {
+  resourcesState: DeploymentResourcesState;
+}) => (
+  <div className="d-flex align-items-center">
+    <Icon
+      icon={resourcesState !== "READY" ? "spinner" : "circle"}
+      className={`me-2 ${resourcesStateColors[resourcesState]} ${
+        resourcesState !== "READY" ? "fa-spin" : ""
+      }`}
+    />
+    <FormattedMessage id={resourcesStateMessages[resourcesState].id} />
   </div>
 );
 
@@ -341,6 +426,9 @@ const DeployedApplicationsTable = ({
       releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
       state: parseDeploymentState(edge.node.state || undefined),
+      resources_state: parseDeploymentResourcesState(
+        edge.node.resourcesState || undefined,
+      ),
       upgradeTargetReleases:
         edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
           semver.gt(
@@ -557,6 +645,17 @@ const DeployedApplicationsTable = ({
         />
       ),
       cell: ({ getValue }) => <DeploymentStateComponent state={getValue()} />,
+    }),
+    columnHelper.accessor("resources_state", {
+      header: () => (
+        <FormattedMessage
+          id="components.DeployedApplicationsTable.resourcesState"
+          defaultMessage="Resources State"
+        />
+      ),
+      cell: ({ getValue }) => (
+        <DeploymentResourcesStateComponent resourcesState={getValue()} />
+      ),
     }),
     columnHelper.accessor((row) => row, {
       id: "action",
