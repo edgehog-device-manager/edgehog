@@ -419,30 +419,9 @@ enum NetworkInterfaceTechnology {
   WIFI
 }
 
-enum ApplicationDeploymentStatus {
-  "The deployment is being deleted"
-  DELETING
-
-  "The deployment process entered an error state."
-  ERROR
-
-  "The deployment is running."
-  STARTED
-
-  "The deployment is starting."
-  STARTING
-
-  "The deployment has stopped."
-  STOPPED
-
-  "The deploymen is stopping."
-  STOPPING
-
-  "The deployment has been received by the backend and will be sent to the device."
-  CREATED
-
-  "All the necessary resources have been sent to the device."
-  SENT
+enum ApplicationDeploymentResourcesState {
+  "The backend has not checked the state of the underlying resources of the deployment with the device."
+  INITIAL
 
   "The device has received the necessary image descriptions for the deployment."
   CREATED_IMAGES
@@ -450,11 +429,40 @@ enum ApplicationDeploymentStatus {
   "The device has received all the network descriptions necessary for the deployment."
   CREATED_NETWORKS
 
+  "The device has received all the volume descriptions necessary for the deployment."
+  CREATED_VOLUMES
+
   "The device has received all the container descriptions necessary for the deployment."
   CREATED_CONTAINERS
 
-  "The device has received the release description of the the deployment."
-  CREATED_DEPLOYMENT
+  "All the underlying resources needed for the deployment have been received by the device."
+  READY
+}
+
+enum ApplicationDeploymentState {
+  "The deployment has been created in the database layer, the device yet has to receive it."
+  CREATED
+
+  "The deployment description has been sent to the device."
+  SENT
+
+  "The device is deleting the deployment."
+  DELETING
+
+  "The device reported an error. Check `last_error_message` for the error message."
+  ERROR
+
+  "The deployment is started on the device."
+  STARTED
+
+  "The device is starting the deployment."
+  STARTING
+
+  "The deployment is stopped on the device."
+  STOPPED
+
+  "The device is stopping the deployment."
+  STOPPING
 }
 
 input LocalizedAttributeUpdateInput {
@@ -871,11 +879,178 @@ input ReleaseCreateContainersInput {
   restartPolicy: String
 }
 
+"The result of the :create_volume mutation"
+type CreateVolumeResult {
+  "The successful result of the mutation"
+  result: Volume
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateVolumeInput {
+  label: String!
+  driver: String
+  options: JsonString
+}
+
+enum VolumeSortField {
+  ID
+  LABEL
+  DRIVER
+  OPTIONS
+}
+
+":volume connection"
+type VolumeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":volume edges"
+  edges: [VolumeEdge!]
+}
+
+":volume edge"
+type VolumeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":volume node"
+  node: Volume!
+}
+
+"A keyset page of :volume"
+type KeysetPageOfVolume {
+  "Total count on all pages"
+  count: Int
+
+  "The records contained in the page"
+  results: [Volume!]
+
+  "The first keyset in the results"
+  startKeyset: String
+
+  "The last keyset in the results"
+  endKeyset: String
+}
+
+input VolumeFilterOptions {
+  isNil: Boolean
+  eq: JsonString
+  notEq: JsonString
+  in: [JsonString!]
+  lessThan: JsonString
+  greaterThan: JsonString
+  lessThanOrEqual: JsonString
+  greaterThanOrEqual: JsonString
+}
+
+input VolumeFilterDriver {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input VolumeFilterLabel {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input VolumeFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input VolumeFilterInput {
+  and: [VolumeFilterInput!]
+  or: [VolumeFilterInput!]
+  not: [VolumeFilterInput!]
+  id: VolumeFilterId
+  label: VolumeFilterLabel
+  driver: VolumeFilterDriver
+  options: VolumeFilterOptions
+  devices: DeviceFilterInput
+}
+
+input VolumeSortInput {
+  order: SortOrder
+  field: VolumeSortField!
+}
+
+type Volume implements Node {
+  id: ID!
+  label: String!
+  driver: String!
+  options: JsonString!
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
+}
+
+"The result of the :create_network mutation"
+type CreateNetworkResult {
+  "The successful result of the mutation"
+  result: Network
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateNetworkInput {
+  label: String
+  driver: String
+  internal: Boolean
+  enableIpv6: Boolean
+  options: JsonString
+}
+
 enum NetworkSortField {
   ID
+  LABEL
   DRIVER
   INTERNAL
   ENABLE_IPV6
+  OPTIONS
 }
 
 ":network connection"
@@ -897,6 +1072,32 @@ type NetworkEdge {
 
   ":network node"
   node: Network!
+}
+
+"A keyset page of :network"
+type KeysetPageOfNetwork {
+  "Total count on all pages"
+  count: Int
+
+  "The records contained in the page"
+  results: [Network!]
+
+  "The first keyset in the results"
+  startKeyset: String
+
+  "The last keyset in the results"
+  endKeyset: String
+}
+
+input NetworkFilterOptions {
+  isNil: Boolean
+  eq: JsonString
+  notEq: JsonString
+  in: [JsonString!]
+  lessThan: JsonString
+  greaterThan: JsonString
+  lessThanOrEqual: JsonString
+  greaterThanOrEqual: JsonString
 }
 
 input NetworkFilterEnableIpv6 {
@@ -934,6 +1135,19 @@ input NetworkFilterDriver {
   ilike: String
 }
 
+input NetworkFilterLabel {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
 input NetworkFilterId {
   isNil: Boolean
   eq: ID
@@ -950,9 +1164,13 @@ input NetworkFilterInput {
   or: [NetworkFilterInput!]
   not: [NetworkFilterInput!]
   id: NetworkFilterId
+  label: NetworkFilterLabel
   driver: NetworkFilterDriver
   internal: NetworkFilterInternal
   enableIpv6: NetworkFilterEnableIpv6
+  options: NetworkFilterOptions
+  containers: ContainerFilterInput
+  devices: DeviceFilterInput
 }
 
 input NetworkSortInput {
@@ -960,12 +1178,51 @@ input NetworkSortInput {
   field: NetworkSortField!
 }
 
-type Network {
+type Network implements Node {
   id: ID!
+  label: String
   driver: String!
   internal: Boolean!
   enableIpv6: Boolean!
-  options: [String!]!
+  options: JsonString!
+  containers(
+    "How to sort the records in the response"
+    sort: [ContainerSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerConnection!
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
 }
 
 "The result of the :create_release mutation"
@@ -1239,6 +1496,7 @@ input ImageFilterInput {
   reference: ImageFilterReference
   imageCredentialsId: ImageFilterImageCredentialsId
   credentials: ImageCredentialsFilterInput
+  devices: DeviceFilterInput
 }
 
 type Image {
@@ -1246,6 +1504,25 @@ type Image {
   reference: String!
   imageCredentialsId: ID
   credentials: ImageCredentials
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
 }
 
 "The result of the :upgrade_deployment mutation"
@@ -1304,8 +1581,9 @@ input DeployReleaseInput {
 
 enum DeploymentSortField {
   ID
-  STATUS
-  MESSAGE
+  RESOURCES_STATE
+  STATE
+  LAST_ERROR_MESSAGE
   DEVICE_ID
   RELEASE_ID
 }
@@ -1353,7 +1631,7 @@ input DeploymentFilterDeviceId {
   greaterThanOrEqual: Int
 }
 
-input DeploymentFilterMessage {
+input DeploymentFilterLastErrorMessage {
   isNil: Boolean
   eq: String
   notEq: String
@@ -1366,15 +1644,26 @@ input DeploymentFilterMessage {
   ilike: String
 }
 
-input DeploymentFilterStatus {
+input DeploymentFilterState {
   isNil: Boolean
-  eq: ApplicationDeploymentStatus
-  notEq: ApplicationDeploymentStatus
-  in: [ApplicationDeploymentStatus!]
-  lessThan: ApplicationDeploymentStatus
-  greaterThan: ApplicationDeploymentStatus
-  lessThanOrEqual: ApplicationDeploymentStatus
-  greaterThanOrEqual: ApplicationDeploymentStatus
+  eq: ApplicationDeploymentState
+  notEq: ApplicationDeploymentState
+  in: [ApplicationDeploymentState]
+  lessThan: ApplicationDeploymentState
+  greaterThan: ApplicationDeploymentState
+  lessThanOrEqual: ApplicationDeploymentState
+  greaterThanOrEqual: ApplicationDeploymentState
+}
+
+input DeploymentFilterResourcesState {
+  isNil: Boolean
+  eq: ApplicationDeploymentResourcesState
+  notEq: ApplicationDeploymentResourcesState
+  in: [ApplicationDeploymentResourcesState]
+  lessThan: ApplicationDeploymentResourcesState
+  greaterThan: ApplicationDeploymentResourcesState
+  lessThanOrEqual: ApplicationDeploymentResourcesState
+  greaterThanOrEqual: ApplicationDeploymentResourcesState
 }
 
 input DeploymentFilterId {
@@ -1393,8 +1682,9 @@ input DeploymentFilterInput {
   or: [DeploymentFilterInput!]
   not: [DeploymentFilterInput!]
   id: DeploymentFilterId
-  status: DeploymentFilterStatus
-  message: DeploymentFilterMessage
+  resourcesState: DeploymentFilterResourcesState
+  state: DeploymentFilterState
+  lastErrorMessage: DeploymentFilterLastErrorMessage
   deviceId: DeploymentFilterDeviceId
   releaseId: DeploymentFilterReleaseId
   device: DeviceFilterInput
@@ -1408,8 +1698,9 @@ input DeploymentSortInput {
 
 type Deployment {
   id: ID!
-  status: ApplicationDeploymentStatus!
-  message: String
+  resourcesState: ApplicationDeploymentResourcesState
+  state: ApplicationDeploymentState
+  lastErrorMessage: String
   deviceId: Int
   releaseId: ID
   device: Device
@@ -1540,7 +1831,10 @@ input ContainerFilterInput {
   networkMode: ContainerFilterNetworkMode
   imageId: ContainerFilterImageId
   image: ImageFilterInput
+  releases: ReleaseFilterInput
+  volumes: VolumeFilterInput
   networks: NetworkFilterInput
+  devices: DeviceFilterInput
 }
 
 input ContainerSortInput {
@@ -1558,6 +1852,44 @@ type Container {
   networkMode: String!
   imageId: ID!
   image: Image!
+  releases(
+    "How to sort the records in the response"
+    sort: [ReleaseSortInput]
+
+    "A filter to limit the results"
+    filter: ReleaseFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ReleaseConnection!
+  volumes(
+    "How to sort the records in the response"
+    sort: [VolumeSortInput]
+
+    "A filter to limit the results"
+    filter: VolumeFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): VolumeConnection!
   networks(
     "How to sort the records in the response"
     sort: [NetworkSortInput]
@@ -1577,6 +1909,25 @@ type Container {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): NetworkConnection!
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
 }
 
 "The result of the :create_application mutation"
@@ -2252,6 +2603,27 @@ enum DeviceSortField {
   LAST_CONNECTION
   LAST_DISCONNECTION
   SERIAL_NUMBER
+}
+
+":device connection"
+type DeviceConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device edges"
+  edges: [DeviceEdge!]
+}
+
+":device edge"
+type DeviceEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device node"
+  node: Device!
 }
 
 input DeviceFilterSerialNumber {
@@ -3709,6 +4081,54 @@ type RootQueryType {
   "Returns the desired release."
   release("The id of the record" id: ID!): Release
 
+  "Returns the desired network."
+  network("The id of the record" id: ID!): Network
+
+  "Returns all available networks."
+  networks(
+    "How to sort the records in the response"
+    sort: [NetworkSortInput]
+
+    "A filter to limit the results"
+    filter: NetworkFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): KeysetPageOfNetwork
+
+  "Returns the desired volume."
+  volume("The id of the record" id: ID!): Volume
+
+  "Returns all available volumes."
+  volumes(
+    "How to sort the records in the response"
+    sort: [VolumeSortInput]
+
+    "A filter to limit the results"
+    filter: VolumeFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): KeysetPageOfVolume
+
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
 
@@ -3842,6 +4262,10 @@ type RootMutationType {
 
   "Create a new release."
   createRelease(input: CreateReleaseInput!): CreateReleaseResult
+
+  createNetwork(input: CreateNetworkInput): CreateNetworkResult
+
+  createVolume(input: CreateVolumeInput!): CreateVolumeResult
 
   "Create a new base image in a base image collection."
   createBaseImage(input: CreateBaseImageInput!): CreateBaseImageResult
