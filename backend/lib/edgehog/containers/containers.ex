@@ -79,7 +79,14 @@ defmodule Edgehog.Containers do
       create Application, :create_application, :create do
         description "Create a new application."
 
-        relay_id_translations input: [system_model_id: :system_model]
+        relay_id_translations input: [
+                                system_model_id: :system_model,
+                                initial_release: [
+                                  containers: [
+                                    image: [image_credentials_id: :image_credentials]
+                                  ]
+                                ]
+                              ]
       end
 
       create Release, :create_release, :create do
@@ -87,7 +94,11 @@ defmodule Edgehog.Containers do
 
         relay_id_translations input: [
                                 application_id: :application,
-                                containers: [image: [image_credentials_id: :image_credentials]]
+                                containers: [
+                                  image: [
+                                    image_credentials_id: :image_credentials
+                                  ]
+                                ]
                               ]
       end
 
