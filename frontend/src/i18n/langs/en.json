@@ -387,6 +387,18 @@
   "components.CreateSystemModelForm.submitButton": {
     "defaultMessage": "Create"
   },
+  "components.CreateVolumeForm.driverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.CreateVolumeForm.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.CreateVolumeForm.optionsLabel": {
+    "defaultMessage": "Options"
+  },
+  "components.CreateVolumeForm.submitButton": {
+    "defaultMessage": "Create"
+  },
   "components.DeleteModal.confirmButton": {
     "defaultMessage": "Delete",
     "description": "Title for the button to confirm a deletion modal"
@@ -675,6 +687,9 @@
   "components.Sidebar.updateChannelsLabel": {
     "defaultMessage": "Update Channels"
   },
+  "components.Sidebar.volumes.volumesLabel": {
+    "defaultMessage": "Volumes"
+  },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
   },
@@ -834,6 +849,18 @@
   },
   "components.UpdateTargetsTabs.updateTargetsLabel": {
     "defaultMessage": "Devices"
+  },
+  "components.VolumesTable.driverTitle": {
+    "defaultMessage": "Driver",
+    "description": "Title for the Driver column of the volumes table"
+  },
+  "components.VolumesTable.label": {
+    "defaultMessage": "Label",
+    "description": "Title for the Label column of the volumes table"
+  },
+  "components.VolumesTable.optionsTitle": {
+    "defaultMessage": "Options",
+    "description": "Title for the Options column of the volumes table"
   },
   "components.WiFiScanResultsTable.apChannelTitle": {
     "defaultMessage": "Channel"
@@ -1259,6 +1286,15 @@
   },
   "navigation.routeTitle.UpdateChannelsNew": {
     "defaultMessage": "Create Update Channel"
+  },
+  "navigation.routeTitle.VolumeEdit": {
+    "defaultMessage": "Volume Details"
+  },
+  "navigation.routeTitle.Volumes": {
+    "defaultMessage": "Volumes"
+  },
+  "navigation.routeTitle.VolumesNew": {
+    "defaultMessage": "Create Volumes"
   },
   "pages.Application.applicationNotFound.message": {
     "defaultMessage": "Return to the applications list."
@@ -1708,6 +1744,33 @@
   },
   "pages.UpdateChannels.title": {
     "defaultMessage": "Update Channels"
+  },
+  "pages.Volume.volumeNotFound.message": {
+    "defaultMessage": "Return to the volumes list."
+  },
+  "pages.Volume.volumeNotFound.title": {
+    "defaultMessage": "Volume not found."
+  },
+  "pages.VolumeCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Volume, please try again."
+  },
+  "pages.VolumeCreate.title": {
+    "defaultMessage": "Create Volume"
+  },
+  "pages.Volumes.createButton": {
+    "defaultMessage": "Create Volume"
+  },
+  "pages.Volumes.title": {
+    "defaultMessage": "Volumes"
+  },
+  "pages.volume.driver": {
+    "defaultMessage": "Driver"
+  },
+  "pages.volume.label": {
+    "defaultMessage": "Label"
+  },
+  "pages.volume.options": {
+    "defaultMessage": "Options"
   },
   "validation.array.min": {
     "defaultMessage": "Does not have enough values."

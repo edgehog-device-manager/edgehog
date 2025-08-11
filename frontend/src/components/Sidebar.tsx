@@ -244,6 +244,16 @@ const Sidebar = () => (
           Route.imageCredentialsEdit,
         ]}
       />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.volumes.volumesLabel"
+            defaultMessage="Volumes"
+          />
+        }
+        route={Route.volumes}
+        activeRoutes={[Route.volumes, Route.volumeEdit, Route.volumesNew]}
+      />
     </SidebarItemGroup>
   </Navbar>
 );
