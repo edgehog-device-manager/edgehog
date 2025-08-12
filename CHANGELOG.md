@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adds support for trigger delivery policies in the tenant 
 reconciler, allowing Edgehog to automatically provision and manage 
 trigger delivery policies on Astarte realms that support them (v1.1.1+).
+- **Volumes management feature**:
+  - **Volumes page** – lists all existing volumes and allows navigation to individual volume pages.
+  - **Volume page** – displays details of a selected volume, including its label, driver, and options.
+  - **VolumeCreate page** – enables creating a new volume with fields for label, driver, and options.
 
 ## [0.9.3] - 2025-05-22
 ### Fixed
