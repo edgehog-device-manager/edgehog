@@ -25,7 +25,8 @@ import semver from "semver";
 
 import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
 import type {
-  ApplicationDeploymentStatus,
+  ApplicationDeploymentResourcesState,
+  ApplicationDeploymentState,
   DeployedApplicationsTable_deployedApplications$key,
 } from "api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
 
@@ -52,7 +53,8 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
       edges {
         node {
           id
-          status
+          state
+          resourcesState
           release {
             id
             version
@@ -124,8 +126,10 @@ const UPGRADE_DEPLOYMENT_MUTATION = graphql`
   }
 `;
 
-type DeploymentStatus =
+type DeploymentState =
   | "DEPLOYING"
+  | "CREATED"
+  | "SENT"
   | "STARTING"
   | "STARTED"
   | "STOPPING"
@@ -133,10 +137,22 @@ type DeploymentStatus =
   | "ERROR"
   | "DELETING";
 
-const parseDeploymentStatus = (
-  apiStatus?: ApplicationDeploymentStatus,
-): DeploymentStatus => {
-  switch (apiStatus) {
+type DeploymentResourcesState =
+  | "INITIAL"
+  | "CREATED_IMAGES"
+  | "CREATED_NETWORKS"
+  | "CREATED_VOLUMES"
+  | "CREATED_CONTAINERS"
+  | "READY";
+
+const parseDeploymentState = (
+  apiState?: ApplicationDeploymentState,
+): DeploymentState => {
+  switch (apiState) {
+    case "CREATED":
+      return "CREATED";
+    case "SENT":
+      return "SENT";
     case "STARTED":
       return "STARTED";
     case "STARTING":
@@ -154,7 +170,30 @@ const parseDeploymentStatus = (
   }
 };
 
-const statusColors: Record<DeploymentStatus, string> = {
+const parseDeploymentResourcesState = (
+  apiState?: ApplicationDeploymentResourcesState,
+): DeploymentResourcesState => {
+  switch (apiState) {
+    case "INITIAL":
+      return "INITIAL";
+    case "CREATED_IMAGES":
+      return "CREATED_IMAGES";
+    case "CREATED_NETWORKS":
+      return "CREATED_NETWORKS";
+    case "CREATED_VOLUMES":
+      return "CREATED_VOLUMES";
+    case "CREATED_CONTAINERS":
+      return "CREATED_CONTAINERS";
+    case "READY":
+      return "READY";
+    default:
+      return "INITIAL";
+  }
+};
+
+const stateColors: Record<DeploymentState, string> = {
+  CREATED: "text-success",
+  SENT: "text-success",
   STARTING: "text-success",
   STARTED: "text-success",
   STOPPING: "text-warning",
@@ -164,8 +203,25 @@ const statusColors: Record<DeploymentStatus, string> = {
   DEPLOYING: "text-muted",
 };
 
-// Define status messages for localization
-const statusMessages = defineMessages<DeploymentStatus>({
+const resourcesStateColors: Record<DeploymentResourcesState, string> = {
+  INITIAL: "text-muted",
+  CREATED_IMAGES: "text-muted",
+  CREATED_NETWORKS: "text-muted",
+  CREATED_VOLUMES: "text-muted",
+  CREATED_CONTAINERS: "text-muted",
+  READY: "text-success",
+};
+
+// Define deployment state messages for localization
+const stateMessages = defineMessages<DeploymentState>({
+  CREATED: {
+    id: "components.DeployedApplicationsTable.created",
+    defaultMessage: "Created",
+  },
+  SENT: {
+    id: "components.DeployedApplicationsTable.sent",
+    defaultMessage: "Sent",
+  },
   STARTING: {
     id: "components.DeployedApplicationsTable.starting",
     defaultMessage: "Starting",
@@ -196,48 +252,89 @@ const statusMessages = defineMessages<DeploymentStatus>({
   },
 });
 
-// Component to render the status with an icon and optional spin
-const DeploymentStatusComponent = ({
-  status,
-}: {
-  status: DeploymentStatus;
-}) => (
+// Define deployment resources state messages for localization
+const resourcesStateMessages = defineMessages<DeploymentResourcesState>({
+  INITIAL: {
+    id: "components.DeployedApplicationsTable.initial",
+    defaultMessage: "Initial",
+  },
+  CREATED_IMAGES: {
+    id: "components.DeployedApplicationsTable.createdImages",
+    defaultMessage: "Created images",
+  },
+  CREATED_NETWORKS: {
+    id: "components.DeployedApplicationsTable.createdNetworks",
+    defaultMessage: "Created networks",
+  },
+  CREATED_VOLUMES: {
+    id: "components.DeployedApplicationsTable.createdVolumes",
+    defaultMessage: "Created volumes",
+  },
+  CREATED_CONTAINERS: {
+    id: "components.DeployedApplicationsTable.createdContainers",
+    defaultMessage: "Created containers",
+  },
+  READY: {
+    id: "components.DeployedApplicationsTable.ready",
+    defaultMessage: "Ready",
+  },
+});
+
+// Component to render the deployment state with an icon and optional spin
+const DeploymentStateComponent = ({ state }: { state: DeploymentState }) => (
   <div className="d-flex align-items-center">
     <Icon
       icon={
-        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(status)
+        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
           ? "spinner"
           : "circle"
       }
-      className={`me-2 ${statusColors[status]} ${
-        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(status)
+      className={`me-2 ${stateColors[state]} ${
+        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
           ? "fa-spin"
           : ""
       }`}
     />
-    <FormattedMessage id={statusMessages[status].id} />
+    <FormattedMessage id={stateMessages[state].id} />
+  </div>
+);
+
+// Component to render the deployment resources state with an icon and optional spin
+const DeploymentResourcesStateComponent = ({
+  resourcesState,
+}: {
+  resourcesState: DeploymentResourcesState;
+}) => (
+  <div className="d-flex align-items-center">
+    <Icon
+      icon={resourcesState !== "READY" ? "spinner" : "circle"}
+      className={`me-2 ${resourcesStateColors[resourcesState]} ${
+        resourcesState !== "READY" ? "fa-spin" : ""
+      }`}
+    />
+    <FormattedMessage id={resourcesStateMessages[resourcesState].id} />
   </div>
 );
 
 // Action buttons with play and stop icons
 const ActionButtons = ({
-  status,
+  state,
   onStart,
   onStop,
 }: {
-  status: DeploymentStatus;
+  state: DeploymentState;
   onStart: () => void;
   onStop: () => void;
 }) => (
   <div>
-    {status === "STOPPED" || status === "ERROR" ? (
+    {state === "STOPPED" || state === "ERROR" ? (
       <Button
         onClick={onStart}
         className="btn p-0 text-success border-0 bg-transparent"
       >
         <Icon icon="play" className="text-success" />
       </Button>
-    ) : status === "STARTED" ? (
+    ) : state === "STARTED" ? (
       <Button
         onClick={onStop}
         className="btn p-0 text-danger border-0 bg-transparent"
@@ -247,9 +344,7 @@ const ActionButtons = ({
     ) : (
       <Button className="btn p-0 border-0 bg-transparent" disabled>
         <Icon
-          icon={
-            status === "STARTING" || status === "DEPLOYING" ? "play" : "stop"
-          }
+          icon={state === "STARTING" || state === "DEPLOYING" ? "play" : "stop"}
           className="text-muted"
         />
       </Button>
@@ -330,7 +425,10 @@ const DeployedApplicationsTable = ({
       applicationName: edge.node.release?.application?.name || "Unknown",
       releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
-      status: parseDeploymentStatus(edge.node.status),
+      state: parseDeploymentState(edge.node.state || undefined),
+      resources_state: parseDeploymentResourcesState(
+        edge.node.resourcesState || undefined,
+      ),
       upgradeTargetReleases:
         edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
           semver.gt(
@@ -539,14 +637,25 @@ const DeployedApplicationsTable = ({
         </Link>
       ),
     }),
-    columnHelper.accessor("status", {
+    columnHelper.accessor("state", {
       header: () => (
         <FormattedMessage
-          id="components.DeployedApplicationsTable.status"
-          defaultMessage="Status"
+          id="components.DeployedApplicationsTable.state"
+          defaultMessage="State"
         />
       ),
-      cell: ({ getValue }) => <DeploymentStatusComponent status={getValue()} />,
+      cell: ({ getValue }) => <DeploymentStateComponent state={getValue()} />,
+    }),
+    columnHelper.accessor("resources_state", {
+      header: () => (
+        <FormattedMessage
+          id="components.DeployedApplicationsTable.resourcesState"
+          defaultMessage="Resources State"
+        />
+      ),
+      cell: ({ getValue }) => (
+        <DeploymentResourcesStateComponent resourcesState={getValue()} />
+      ),
     }),
     columnHelper.accessor((row) => row, {
       id: "action",
@@ -559,7 +668,7 @@ const DeployedApplicationsTable = ({
       cell: ({ row, getValue }) => (
         <div className="d-flex align-items-center">
           <ActionButtons
-            status={getValue().status}
+            state={getValue().state}
             onStart={() => handleStartDeployedApplication(getValue().id)}
             onStop={() => handleStopDeployedApplication(getValue().id)}
           />
@@ -569,14 +678,14 @@ const DeployedApplicationsTable = ({
               setSelectedDeployment(row.original);
               handleShowUpgradeModal();
             }}
-            disabled={getValue().status === "DELETING"}
+            disabled={getValue().state === "DELETING"}
             className="btn p-0 border-0 bg-transparent ms-4"
           >
             <Icon icon="upgrade" className="text-primary" />
           </Button>
 
           <Button
-            disabled={getValue().status === "DELETING"}
+            disabled={getValue().state === "DELETING"}
             className="btn p-0 border-0 bg-transparent ms-4"
             onClick={() => {
               setSelectedDeployment(getValue());

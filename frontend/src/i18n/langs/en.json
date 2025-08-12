@@ -410,6 +410,21 @@
   "components.DeployedApplicationsTable.confirmModal.title": {
     "defaultMessage": "Upgrade Deployment"
   },
+  "components.DeployedApplicationsTable.created": {
+    "defaultMessage": "Created"
+  },
+  "components.DeployedApplicationsTable.createdContainers": {
+    "defaultMessage": "Created containers"
+  },
+  "components.DeployedApplicationsTable.createdImages": {
+    "defaultMessage": "Created images"
+  },
+  "components.DeployedApplicationsTable.createdNetworks": {
+    "defaultMessage": "Created networks"
+  },
+  "components.DeployedApplicationsTable.createdVolumes": {
+    "defaultMessage": "Created volumes"
+  },
   "components.DeployedApplicationsTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
   },
@@ -431,17 +446,29 @@
   "components.DeployedApplicationsTable.error": {
     "defaultMessage": "Error"
   },
+  "components.DeployedApplicationsTable.initial": {
+    "defaultMessage": "Initial"
+  },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },
   "components.DeployedApplicationsTable.noReleasesAvailable": {
     "defaultMessage": "No Release Versions Available"
   },
+  "components.DeployedApplicationsTable.ready": {
+    "defaultMessage": "Ready"
+  },
   "components.DeployedApplicationsTable.releaseVersion": {
     "defaultMessage": "Release Version"
   },
+  "components.DeployedApplicationsTable.resourcesState": {
+    "defaultMessage": "Resources State"
+  },
   "components.DeployedApplicationsTable.selectOption": {
     "defaultMessage": "Select a Release Version"
+  },
+  "components.DeployedApplicationsTable.sent": {
+    "defaultMessage": "Sent"
   },
   "components.DeployedApplicationsTable.startErrorFeedback": {
     "defaultMessage": "Could not Start the Deployed Application, please try again."
@@ -455,8 +482,8 @@
   "components.DeployedApplicationsTable.starting": {
     "defaultMessage": "Starting"
   },
-  "components.DeployedApplicationsTable.status": {
-    "defaultMessage": "Status"
+  "components.DeployedApplicationsTable.state": {
+    "defaultMessage": "State"
   },
   "components.DeployedApplicationsTable.stopErrorFeedback": {
     "defaultMessage": "Could not Stop the Deployed Application, please try again."
