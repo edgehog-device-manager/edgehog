@@ -557,7 +557,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> Ash.load!(containers: [:image, :networks, :volumes])
 
       [container] = release.containers
-      [network] = container.networks
+      networks = container.networks
       image = container.image
 
       container_deployment_fixture(
@@ -575,13 +575,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           state: :stopped
         )
 
-      network_deployment_fixture(
-        network_id: network.id,
-        realm_id: realm.id,
-        device_id: device.id,
-        state: :available,
-        tenant: tenant
-      )
+      for network <- networks do
+        network_deployment_fixture(
+          network_id: network.id,
+          realm_id: realm.id,
+          device_id: device.id,
+          state: :available,
+          tenant: tenant
+        )
+      end
 
       image_deployment_fixture(
         image_id: image.id,
@@ -622,7 +624,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> Ash.load!(containers: [:image, :networks, :volumes])
 
       [container] = release.containers
-      [network] = container.networks
+      networks = container.networks
       [volume] = container.volumes
       image = container.image
 
@@ -641,13 +643,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         tenant: tenant
       )
 
-      network_deployment_fixture(
-        network_id: network.id,
-        realm_id: realm.id,
-        device_id: device.id,
-        state: :available,
-        tenant: tenant
-      )
+      for network <- networks do
+        network_deployment_fixture(
+          network_id: network.id,
+          realm_id: realm.id,
+          device_id: device.id,
+          state: :available,
+          tenant: tenant
+        )
+      end
 
       volume_deployment_fixture(
         volume_id: volume.id,
@@ -694,7 +698,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> Ash.load!(containers: [:image, :networks])
 
       [container] = release.containers
-      [network] = container.networks
+      networks = container.networks
       image = container.image
 
       container_deployment_fixture(
@@ -712,13 +716,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           state: :sent
         )
 
-      network_deployment_fixture(
-        network_id: network.id,
-        realm_id: realm.id,
-        device_id: device.id,
-        state: :available,
-        tenant: tenant
-      )
+      for network <- networks do
+        network_deployment_fixture(
+          network_id: network.id,
+          realm_id: realm.id,
+          device_id: device.id,
+          state: :available,
+          tenant: tenant
+        )
+      end
 
       image_deployment_fixture(
         image_id: image.id,
@@ -759,7 +765,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> Ash.load!(containers: [:networks])
 
       [container] = release.containers
-      [network] = container.networks
+      networks = container.networks
 
       [container] = release.containers
       image = Ash.load!(container, :image, tenant: tenant).image
@@ -772,13 +778,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           state: :sent
         )
 
-      network_deployment_fixture(
-        network_id: network.id,
-        realm_id: realm.id,
-        device_id: device.id,
-        state: :available,
-        tenant: tenant
-      )
+      for network <- networks do
+        network_deployment_fixture(
+          network_id: network.id,
+          realm_id: realm.id,
+          device_id: device.id,
+          state: :available,
+          tenant: tenant
+        )
+      end
 
       container_deployment_fixture(
         container_id: container.id,

@@ -29,8 +29,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
     deployment = changeset.data
     %{tenant: tenant} = context
 
-    with {:ok, :created_volumes} <-
-           Ash.Changeset.fetch_argument_or_change(changeset, :resources_state),
+    with :created_volumes <- state(changeset),
          {:ok, deployment} <-
            Ash.load(deployment, device: [], release: [:containers]) do
       device = deployment.device
@@ -51,6 +50,13 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
         else: changeset
     else
       _ -> changeset
+    end
+  end
+
+  defp state(changeset) do
+    case Ash.Changeset.fetch_argument_or_change(changeset, :resources_state) do
+      {:ok, state} -> state
+      :error -> Ash.Changeset.get_attribute(changeset, :resources_state)
     end
   end
 end

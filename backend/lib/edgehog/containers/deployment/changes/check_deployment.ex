@@ -28,8 +28,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployment do
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
-    with {:ok, :created_containers} <-
-           Ash.Changeset.fetch_argument_or_change(changeset, :resources_state),
+    with :created_containers <- state(changeset),
          {:ok, deployment} <- Ash.load(deployment, :ready?),
          true <- deployment.ready? do
       changeset
@@ -41,6 +40,13 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployment do
       end)
     else
       _ -> changeset
+    end
+  end
+
+  defp state(changeset) do
+    case Ash.Changeset.fetch_argument_or_change(changeset, :resources_state) do
+      {:ok, state} -> state
+      :error -> Ash.Changeset.get_attribute(changeset, :resources_state)
     end
   end
 end

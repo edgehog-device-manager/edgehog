@@ -25,15 +25,24 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
   alias Edgehog.Containers
   alias Edgehog.Devices
 
+  require Logger
+
   @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
+  def change(changeset, _opts, %{tenant: tenant}) do
     device = Ash.Changeset.get_argument(changeset, :device)
     container = Ash.Changeset.get_argument(changeset, :container)
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    Ash.Changeset.after_action(changeset, fn _changeset, container_deployment ->
-      with {:ok, _device} <- Devices.send_create_container_request(device, container, deployment) do
-        Containers.mark_container_deployment_as_sent(container_deployment)
+    Ash.Changeset.after_transaction(changeset, fn _changeset, {:ok, container_deployment} ->
+      case Devices.send_create_container_request(device, container, deployment) do
+        {:ok, _device} ->
+          Containers.mark_container_deployment_as_sent(container_deployment)
+
+        # TODO: instead of destroying the container deployment, we should retry
+        # sending the request after a delay.
+        {:error, reason} ->
+          Logger.warning("Failed to send container deployment request: #{inspect(reason)}")
+          Containers.destroy_container_deployment(container_deployment, tenant: tenant)
       end
     end)
   end

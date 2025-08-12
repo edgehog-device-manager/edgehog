@@ -27,16 +27,12 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
   alias Edgehog.Astarte.Device.CreateContainerRequestMock
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.CreateImageRequestMock
-  alias Edgehog.Astarte.Device.CreateNetworkRequestMock
   alias Edgehog.Astarte.Device.CreateVolumeRequestMock
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
     # one image per container
     images = containers
-
-    # one network for the release
-    networks = 1
 
     # one volume per container
     volumes_per_container = 1
@@ -55,8 +51,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     expect(CreateVolumeRequestMock, :send_create_volume_request, volumes, fn _, _, _ -> :ok end)
 
     expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
-      assert data.networkIds != []
-
       assert Enum.count(data.volumeIds) == volumes_per_container
 
       binds_by_source =
@@ -77,10 +71,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
         assert Enum.find(volume_binds, fn %{target: target} -> target == volume_target end)
       end
 
-      :ok
-    end)
-
-    expect(CreateNetworkRequestMock, :send_create_network_request, networks, fn _, _, _ ->
       :ok
     end)
 
