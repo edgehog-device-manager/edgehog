@@ -98,6 +98,12 @@ defmodule Edgehog.Containers.Container do
 
       filter expr(image_id == ^arg(:image_id))
     end
+
+    destroy :destroy_if_dangling do
+      description "Destroys the container if it's dangling (not referenced by any release)"
+
+      manual Edgehog.Containers.Container.ManualActions.DestroyIfDangling
+    end
   end
 
   attributes do
@@ -172,6 +178,10 @@ defmodule Edgehog.Containers.Container do
 
   calculations do
     calculate :env_encoding, :vector, EnvEncoding
+
+    calculate :dangling?, :boolean, Edgehog.Containers.Container.Calculations.Dangling do
+      description "Returns true if this container has no releases referring to it"
+    end
   end
 
   postgres do

@@ -54,5 +54,9 @@ defmodule Edgehog.Containers.ReleaseContainers do
 
   postgres do
     table "application_release_containers"
+
+    references do
+      reference :release, on_delete: :delete
+    end
   end
 end

@@ -62,5 +62,9 @@ defmodule Edgehog.Containers.ContainerVolume do
   postgres do
     table "container_volumes"
     repo Edgehog.Repo
+
+    references do
+      reference :container, on_delete: :delete
+    end
   end
 end
