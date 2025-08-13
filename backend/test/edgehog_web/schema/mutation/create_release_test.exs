@@ -175,6 +175,66 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
 
       assert Enum.sort(containers) == Enum.sort(result_containers)
     end
+
+    test "create a release with nested containers with networks", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      network = network_fixture(tenant: tenant)
+      network_id = AshGraphql.Resource.encode_relay_id(network)
+
+      container = %{
+        "image" => %{
+          "reference" => "example/container1:latest"
+        },
+        "env" => ~s({"ENV_VAR":"value1"}),
+        "hostname" => "container1-host",
+        "networkMode" => "bridge",
+        "portBindings" => [
+          "8080:80"
+        ],
+        "privileged" => false,
+        "restartPolicy" => "always",
+        "networks" => [%{"id" => network_id}]
+      }
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            version
+            application {
+              id
+            }
+            containers {
+              edges {
+                node {
+                  id
+                  networks {
+                    edges {
+                      node {
+                        id
+                        label
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      [
+        tenant: tenant,
+        application_id: application_id,
+        containers: [container],
+        document: document
+      ]
+      |> create_release()
+      |> extract_result!()
+    end
   end
 
   def create_release(opts) do
