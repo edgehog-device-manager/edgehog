@@ -52,15 +52,6 @@
       "doc": "The ids of the volumes to mount on the container."
     },
     {
-      "endpoint": "/container/image",
-      "type": "string",
-      "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
-      "reliability": "guaranteed",
-      "description": "Container image",
-      "doc": "TODO: this will be remove (by only sending the image_id), when it will be supported on the device."
-    },
-    {
       "endpoint": "/container/hostname",
       "type": "string",
       "database_retention_policy": "use_ttl",

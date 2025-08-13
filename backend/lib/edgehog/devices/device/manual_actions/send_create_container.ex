@@ -41,7 +41,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
          {:ok, device} <- Ash.load(device, :appengine_client) do
       env_encoding = container.env_encoding
       restart_policy = to_correct_string(container.restart_policy)
-      image = container.image
 
       volume_ids = Enum.map(container.container_volumes, & &1.volume_id)
       volume_binds = Enum.map(container.container_volumes, & &1.binding)
@@ -50,7 +49,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         id: container.id,
         deploymentId: deployment.id,
         imageId: container.image_id,
-        image: image.reference,
         volumeIds: volume_ids,
         hostname: container.hostname,
         restartPolicy: restart_policy,
