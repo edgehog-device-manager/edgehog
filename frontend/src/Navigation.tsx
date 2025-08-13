@@ -61,6 +61,10 @@ enum Route {
   imageCredentials = "/image-credentials",
   imageCredentialsEdit = "/image-credentials/:imageCredentialId/edit",
   imageCredentialsNew = "/image-credentials/new",
+  volumes = "/volumes",
+  volumeEdit = "/volumes/:volumeId",
+  volumesNew = "/volumes/new",
+
   login = "/login",
   logout = "/logout",
 }
@@ -111,6 +115,8 @@ const matchingParametricRoute = (
     case Route.applicationNew:
     case Route.imageCredentials:
     case Route.imageCredentialsNew:
+    case Route.volumes:
+    case Route.volumesNew:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -227,6 +233,13 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { imageCredentialId: params.imageCredentialId },
+          }
+        : null;
+    case Route.volumeEdit:
+      return params && typeof params["volumeId"] === "string"
+        ? {
+            route,
+            params: { volumeId: params.volumeId },
           }
         : null;
   }
@@ -398,6 +411,18 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.logout]: {
     id: "navigation.routeTitle.Logout",
     defaultMessage: "Logout",
+  },
+  [Route.volumes]: {
+    id: "navigation.routeTitle.Volumes",
+    defaultMessage: "Volumes",
+  },
+  [Route.volumeEdit]: {
+    id: "navigation.routeTitle.VolumeEdit",
+    defaultMessage: "Volume Details",
+  },
+  [Route.volumesNew]: {
+    id: "navigation.routeTitle.VolumesNew",
+    defaultMessage: "Create Volumes",
   },
 });
 

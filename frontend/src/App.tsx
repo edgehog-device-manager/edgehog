@@ -58,6 +58,9 @@ import UpdateCampaigns from "pages/UpdateCampaigns";
 import UpdateChannelsEdit from "pages/UpdateChannel";
 import UpdateChannelsCreate from "pages/UpdateChannelCreate";
 import UpdateChannels from "pages/UpdateChannels";
+import Volumes from "pages/Volumes";
+import Volume from "pages/Volume";
+import VolumeCreatePage from "pages/VolumeCreate";
 
 import { bugs, repository, version } from "../package.json";
 
@@ -106,6 +109,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.application, element: <Application /> },
   { path: Route.release, element: <Release /> },
   { path: Route.releaseNew, element: <ReleaseCreatePage /> },
+  { path: Route.volumes, element: <Volumes /> },
+  { path: Route.volumeEdit, element: <Volume /> },
+  { path: Route.volumesNew, element: <VolumeCreatePage /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];
