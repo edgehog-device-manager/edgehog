@@ -58,6 +58,16 @@ defmodule Edgehog.ContainersFixtures do
   def unique_volume_target, do: "/fixture#{System.unique_integer()}/target"
 
   @doc """
+  Generate a unique volume label.
+  """
+  def unique_volume_label, do: "volume#{System.unique_integer()}"
+
+  @doc """
+  Generate a unique network label.
+  """
+  def unique_network_label, do: "network#{System.unique_integer()}"
+
+  @doc """
   Generate a unique application release version.
   """
   def unique_release_version, do: "0.0.#{System.unique_integer([:positive])}"

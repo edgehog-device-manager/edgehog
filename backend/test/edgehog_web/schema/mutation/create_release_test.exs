@@ -71,6 +71,110 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       assert [:version] = error.fields
       assert "has already been taken" == error.message
     end
+
+    test "create a release with nested containers", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      creadentials = image_credentials_fixture(tenant: tenant)
+      credentials_id = AshGraphql.Resource.encode_relay_id(creadentials)
+
+      container1 = %{
+        "image" => %{
+          "reference" => "example/container1:latest"
+        },
+        "env" => ~s({"ENV_VAR":"value1"}),
+        "hostname" => "container1-host",
+        "networkMode" => "bridge",
+        "portBindings" => [
+          "8080:80"
+        ],
+        "privileged" => false,
+        "restartPolicy" => "always"
+      }
+
+      container2 = %{
+        "image" => %{
+          "reference" => "example/container2:latest",
+          "imageCredentialsId" => credentials_id
+        },
+        "env" => ~s({"ENV_VAR":"value2"}),
+        "hostname" => "container2-host",
+        "networkMode" => "host",
+        "portBindings" => [
+          "9090:90"
+        ],
+        "privileged" => true,
+        "restartPolicy" => "no"
+      }
+
+      containers = [container1, container2]
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            version
+            application {
+              id
+            }
+            containers {
+              edges {
+                node {
+                  id
+                  image {
+                    reference
+                    credentials {
+                      username
+                    }
+                  }
+                  env
+                  hostname
+                  networkMode
+                  portBindings
+                  privileged
+                  restartPolicy
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      release =
+        [
+          tenant: tenant,
+          application_id: application_id,
+          containers: containers,
+          document: document
+        ]
+        |> create_release()
+        |> extract_result!()
+
+      result_containers =
+        release
+        |> extract_containers!()
+        |> Enum.map(&Map.delete(&1, "id"))
+
+      container2 =
+        Map.update!(container2, "image", fn image ->
+          image
+          |> Map.put("credentials", %{"username" => creadentials.username})
+          |> Map.delete("imageCredentialsId")
+        end)
+
+      container1 =
+        Map.update!(container1, "image", fn image ->
+          Map.put(image, "credentials", nil)
+        end)
+
+      containers = [container1, container2]
+
+      assert release["application"]["id"] == application_id
+
+      assert Enum.sort(containers) == Enum.sort(result_containers)
+    end
   end
 
   def create_release(opts) do
@@ -128,5 +232,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
            } = result
 
     error
+  end
+
+  defp extract_containers!(release) do
+    assert %{
+             "containers" => %{
+               "edges" => edges
+             }
+           } = release
+
+    Enum.map(edges, fn %{"node" => container} -> container end)
   end
 end
