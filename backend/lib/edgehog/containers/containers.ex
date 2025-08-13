@@ -123,6 +123,10 @@ defmodule Edgehog.Containers do
       update Deployment, :upgrade_deployment, :upgrade_release do
         relay_id_translations input: [target: :release]
       end
+
+      destroy Release, :delete_release, :destroy do
+        description "Delete a release and cleanup dangling resources"
+      end
     end
   end
 
@@ -132,6 +136,7 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Container do
       define :fetch_container, action: :read, get_by: [:id]
       define :containers_with_image, action: :filter_by_image, args: [:image_id]
+      define :destroy_container_if_dangling, action: :destroy_if_dangling
     end
 
     resource Edgehog.Containers.Container.Deployment do
@@ -165,6 +170,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Image do
       define :fetch_image, action: :read, get_by: [:id]
+      define :destroy_image_if_dangling, action: :destroy_if_dangling
     end
 
     resource Edgehog.Containers.Image.Deployment do
@@ -180,6 +186,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Release do
       define :fetch_release, action: :read, get_by: [:id]
+      define :delete_release, action: :destroy
     end
 
     resource Edgehog.Containers.ReleaseContainers do

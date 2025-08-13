@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Release do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Changes
+  alias Edgehog.Containers.Release.Changes, as: ReleaseChanges
   alias Edgehog.Validations
 
   graphql do
@@ -33,7 +34,7 @@ defmodule Edgehog.Containers.Release do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
 
     create :create do
       primary? true
@@ -50,6 +51,17 @@ defmodule Edgehog.Containers.Release do
              )
 
       change Changes.CreateDefaultNetwork
+    end
+
+    destroy :destroy do
+      primary? true
+      require_atomic? false
+
+      # Check if deployments exist before deletion
+      change ReleaseChanges.CheckDeployments
+
+      # After deletion, clean up dangling containers
+      change ReleaseChanges.CleanupContainers
     end
   end
 

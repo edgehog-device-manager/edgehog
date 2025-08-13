@@ -50,5 +50,9 @@ defmodule Edgehog.Containers.ContainerNetwork do
 
   postgres do
     table "container_networks"
+
+    references do
+      reference :container, on_delete: :delete
+    end
   end
 end

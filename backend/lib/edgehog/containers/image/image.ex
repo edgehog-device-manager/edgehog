@@ -33,6 +33,12 @@ defmodule Edgehog.Containers.Image do
 
   actions do
     defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
+
+    destroy :destroy_if_dangling do
+      description "Destroys the image if it's dangling (not referenced by any container)"
+
+      manual Edgehog.Containers.Image.ManualActions.DestroyIfDangling
+    end
   end
 
   attributes do
@@ -57,6 +63,12 @@ defmodule Edgehog.Containers.Image do
       through Edgehog.Containers.Image.Deployment
       join_relationship :image_deployments
       public? true
+    end
+  end
+
+  calculations do
+    calculate :dangling?, :boolean, Edgehog.Containers.Image.Calculations.Dangling do
+      description "Returns true if this image has no containers referring to it"
     end
   end
 
