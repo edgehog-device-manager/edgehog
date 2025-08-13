@@ -25,7 +25,14 @@ defmodule Edgehog.PubSub do
 
   alias Edgehog.OSManagement.OTAOperation
 
-  @type event :: :ota_operation_created | :ota_operation_updated
+  @type event ::
+          :ota_operation_created
+          | :ota_operation_updated
+          | :available_image
+          | :available_network
+          | :available_volume
+          | :available_container
+          | :available_deployment
 
   @doc """
   Publish an event to the PubSub. Raises if any of the publish fails.
@@ -51,6 +58,48 @@ defmodule Edgehog.PubSub do
     broadcast_many!(topics, payload)
   end
 
+  def publish!(:available_image = event, image_deployment_details) do
+    image_id = Keyword.fetch!(image_deployment_details, :image_id)
+    payload = {event, image_id}
+
+    topics = [topic_for_subject(image_deployment_details)]
+
+    broadcast_many!(topics, payload)
+  end
+
+  def publish!(:available_network = event, network_deployment_details) do
+    network_id = Keyword.fetch!(network_deployment_details, :network_id)
+    payload = {event, network_id}
+
+    topics = [topic_for_subject(network_deployment_details)]
+
+    broadcast_many!(topics, payload)
+  end
+
+  def publish!(:available_volume = event, volume_deployment_details) do
+    volume_id = Keyword.fetch!(volume_deployment_details, :volume_id)
+    payload = {event, volume_id}
+
+    topics = [topic_for_subject(volume_deployment_details)]
+
+    broadcast_many!(topics, payload)
+  end
+
+  def publish!(:available_container = event, container_deployment_details) do
+    container_id = Keyword.fetch!(container_deployment_details, :container_id)
+    payload = {event, container_id}
+
+    topics = [topic_for_subject(container_deployment_details)]
+
+    broadcast_many!(topics, payload)
+  end
+
+  def publish!(:available_deployment = event, deployment_details) do
+    topics = [topic_for_subject(deployment_details)]
+
+    broadcast_many!(topics, event)
+  end
+
   defp broadcast_many!(topics, payload) do
     Enum.each(topics, fn topic ->
       Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, payload)
@@ -73,4 +122,18 @@ defmodule Edgehog.PubSub do
   defp topic_for_subject(%OTAOperation{id: id}), do: "ota_operations:#{id}"
   defp topic_for_subject({:ota_operation, id}), do: "ota_operations:#{id}"
   defp topic_for_subject(:ota_operations), do: "ota_operations:*"
+
+  defp topic_for_subject(image_id: image_id, device_id: device_id, tenant: tenant),
+    do: "image_deployment:#{image_id}:#{device_id}:#{tenant}"
+
+  defp topic_for_subject(network_id: network_id, device_id: device_id, tenant: tenant),
+    do: "network_deployment:#{network_id}:#{device_id}:#{tenant}"
+
+  defp topic_for_subject(volume_id: volume_id, device_id: device_id, tenant: tenant),
+    do: "volume_deployment:#{volume_id}:#{device_id}:#{tenant}"
+
+  defp topic_for_subject(container_id: container_id, device_id: device_id, tenant: tenant),
+    do: "container_deployment:#{container_id}:#{device_id}:#{tenant}"
+
+  defp topic_for_subject(deployment_id: deployment_id, tenant: tenant), do: "deployment:#{deployment_id}:#{tenant}"
 end
