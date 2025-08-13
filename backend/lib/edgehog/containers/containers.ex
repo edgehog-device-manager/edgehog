@@ -100,6 +100,9 @@ defmodule Edgehog.Containers do
                                   ],
                                   networks: [
                                     id: :network
+                                  ],
+                                  volumes: [
+                                    id: :volume
                                   ]
                                 ]
                               ]

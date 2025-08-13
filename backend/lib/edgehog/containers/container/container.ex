@@ -66,6 +66,12 @@ defmodule Edgehog.Containers.Container do
 
       argument :image, :map
       argument :networks, {:array, :map}
+      argument :volumes, {:array, :map}
+
+      change manage_relationship(:volumes,
+               on_no_match: :error,
+               on_lookup: {:relate_and_update, :create, :read, [:target]}
+             )
 
       change manage_relationship(:image,
                on_no_match: :create,

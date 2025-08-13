@@ -20,10 +20,11 @@
 
 defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
   @moduledoc false
-
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.ContainersFixtures
+
+  alias Edgehog.Containers
 
   describe "createRelease mutation" do
     test "create release with valid application", %{tenant: tenant} do
@@ -234,6 +235,83 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       ]
       |> create_release()
       |> extract_result!()
+    end
+
+    test "create a release with nested container and volume", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      volume = volume_fixture(tenant: tenant)
+      volume_target = unique_volume_target()
+      volume_id = AshGraphql.Resource.encode_relay_id(volume)
+
+      container = %{
+        "image" => %{
+          "reference" => "example/container1:latest"
+        },
+        "env" => ~s({"ENV_VAR":"value1"}),
+        "hostname" => "container1-host",
+        "networkMode" => "bridge",
+        "portBindings" => [
+          "8080:80"
+        ],
+        "privileged" => false,
+        "restartPolicy" => "always",
+        "volumes" => [%{"id" => volume_id, "target" => volume_target}]
+      }
+
+      containers = [container]
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            id
+            version
+            application {
+              id
+            }
+            containers {
+              edges {
+                node {
+                  id
+                  volumes {
+                    edges {
+                      node {
+                        id
+                        label
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      release =
+        [
+          tenant: tenant,
+          application_id: application_id,
+          containers: containers,
+          document: document
+        ]
+        |> create_release()
+        |> extract_result!()
+
+      {:ok, %{id: release_id, type: :release}} =
+        AshGraphql.Resource.decode_relay_id(release["id"])
+
+      release =
+        Containers.fetch_release!(release_id, tenant: tenant, load: [containers: [:volumes]])
+
+      [container] = release.containers
+      [container_volume] = container.volumes
+
+      assert volume.id == container_volume.id
+      assert volume.label == container_volume.label
     end
   end
 

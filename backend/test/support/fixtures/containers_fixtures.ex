@@ -139,11 +139,9 @@ defmodule Edgehog.ContainersFixtures do
 
   def volume_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
+    {label, opts} = Keyword.pop(opts, :label, unique_volume_label())
 
-    params =
-      Enum.into(opts, %{
-        target: unique_volume_target()
-      })
+    params = Enum.into(opts, %{label: label})
 
     Ash.create!(Volume, params, tenant: tenant)
   end
