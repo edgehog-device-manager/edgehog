@@ -24,6 +24,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplicationTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
 
   describe "createApplication mutation" do
     test "create application with valid data", %{tenant: tenant} do
@@ -120,6 +121,31 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplicationTest do
 
       assert image_result["reference"] == reference
     end
+
+    test "create application with associated system model", %{tenant: tenant} do
+      name = "application_name"
+      description = "application description"
+
+      system_model =
+        system_model_fixture(tenant: tenant)
+
+      system_model_id = AshGraphql.Resource.encode_relay_id(system_model)
+
+      input = %{
+        "name" => name,
+        "description" => description,
+        "systemModelId" => system_model_id
+      }
+
+      application =
+        [tenant: tenant, input: input]
+        |> create_application_mutation()
+        |> extract_result!()
+
+      assert application["name"] == name
+      assert application["description"] == description
+      assert application["systemModel"]["name"] == system_model.name
+    end
   end
 
   def create_application_mutation(opts) do
@@ -129,6 +155,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplicationTest do
         result {
           name
           description
+          systemModel {
+            name
+          }
         }
       }
     }

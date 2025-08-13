@@ -98,6 +98,73 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     |> extract_result!()
   end
 
+  test "deployRelease returns an error if the application's system model does not match the device's system model",
+       %{tenant: tenant} do
+    part_number =
+      [tenant: tenant]
+      |> system_model_fixture()
+      |> Map.fetch!(:part_numbers)
+      |> Enum.random()
+      |> Map.fetch!(:part_number)
+
+    system_model_2 = system_model_fixture(tenant: tenant)
+
+    device = device_fixture(tenant: tenant, part_number: part_number)
+
+    application = application_fixture(tenant: tenant, system_model_id: system_model_2.id)
+
+    release =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id
+      )
+
+    error =
+      [
+        tenant: tenant,
+        release_id: AshGraphql.Resource.encode_relay_id(release),
+        device_id: AshGraphql.Resource.encode_relay_id(device)
+      ]
+      |> deploy_release_mutation()
+      |> extract_error!()
+
+    assert error.code == "invalid_argument"
+    assert error.fields == [:system_model]
+  end
+
+  test "deployRelease allows creating a deployment when device system model and application system model match",
+       %{tenant: tenant} do
+    system_model = system_model_fixture(tenant: tenant)
+
+    part_number =
+      system_model
+      |> Map.fetch!(:part_numbers)
+      |> Enum.random()
+      |> Map.fetch!(:part_number)
+
+    device = device_fixture(tenant: tenant, part_number: part_number)
+
+    application = application_fixture(tenant: tenant, system_model_id: system_model.id)
+
+    release =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id
+      )
+
+    expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _, _, _ ->
+      :ok
+    end)
+
+    [
+      tenant: tenant,
+      release_id: AshGraphql.Resource.encode_relay_id(release),
+      device_id: AshGraphql.Resource.encode_relay_id(device)
+    ]
+    |> deploy_release_mutation()
+    |> extract_result!()
+  end
+
   defp deploy_release_mutation(opts) do
     default_document = """
     mutation DeployRelease($input: DeployReleaseInput!) {
@@ -146,5 +213,14 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     assert deployment != nil
 
     deployment
+  end
+
+  defp extract_error!(result) do
+    assert %{
+             data: %{"deployRelease" => nil},
+             errors: [error]
+           } = result
+
+    error
   end
 end
