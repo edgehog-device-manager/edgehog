@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,12 +25,13 @@ defmodule Edgehog.Containers.Release do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Changes
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Release.Changes, as: ReleaseChanges
   alias Edgehog.Validations
 
   graphql do
     type :release
-    paginate_relationship_with containers: :relay
+    paginate_relationship_with containers: :relay, deployments: :relay
   end
 
   actions do
@@ -88,8 +89,12 @@ defmodule Edgehog.Containers.Release do
       public? true
     end
 
+    has_many :deployments, Deployment do
+      public? true
+    end
+
     many_to_many :devices, Edgehog.Devices.Device do
-      through Edgehog.Containers.Deployment
+      through Deployment
       join_relationship :deployments
     end
 
