@@ -97,6 +97,9 @@ defmodule Edgehog.Containers do
                                 containers: [
                                   image: [
                                     image_credentials_id: :image_credentials
+                                  ],
+                                  networks: [
+                                    id: :network
                                   ]
                                 ]
                               ]

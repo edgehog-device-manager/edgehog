@@ -112,7 +112,16 @@ defmodule Edgehog.ContainersFixtures do
   def network_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    params = Map.new(opts)
+    random_driver = Enum.random(["bridge", "host", "overlay", "macvlan", "ipvlan"])
+
+    params =
+      Enum.into(opts, %{
+        label: unique_network_label(),
+        driver: random_driver,
+        internal: Enum.random([true, false]),
+        enable_ipv6: Enum.random([true, false]),
+        options: %{}
+      })
 
     Ash.create!(Network, params, tenant: tenant)
   end

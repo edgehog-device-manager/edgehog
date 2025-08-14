@@ -65,12 +65,18 @@ defmodule Edgehog.Containers.Container do
       accept [:restart_policy, :hostname, :env, :privileged, :port_bindings, :network_mode]
 
       argument :image, :map
+      argument :networks, {:array, :map}
 
       change manage_relationship(:image,
                on_no_match: :create,
                on_lookup: :relate,
                on_match: :ignore,
                use_identities: [:reference]
+             )
+
+      change manage_relationship(:networks,
+               on_no_match: :error,
+               on_lookup: :relate
              )
     end
 
