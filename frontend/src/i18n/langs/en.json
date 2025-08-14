@@ -241,25 +241,65 @@
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
   },
-  "components.ContainersTable.credentialsLabel": {
-    "defaultMessage": "Credentials Label",
-    "description": "Title for the Credentials Label column of the container table"
+  "components.ContainersTable.envLabel": {
+    "defaultMessage": "Environment (JSON String)"
   },
-  "components.ContainersTable.credentialsUsername": {
-    "defaultMessage": "Credentials Username",
-    "description": "Title for the Credentials Username column of the container table"
+  "components.ContainersTable.hostnameLabel": {
+    "defaultMessage": "Hostname"
   },
-  "components.ContainersTable.imageReference": {
-    "defaultMessage": "Image Reference",
-    "description": "Title for the Image Reference column of the container table"
+  "components.ContainersTable.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
   },
-  "components.ContainersTable.networks": {
-    "defaultMessage": "Networks",
-    "description": "Title for the Networks column of the container table"
+  "components.ContainersTable.imageReferenceLabel": {
+    "defaultMessage": "Image Reference"
   },
-  "components.ContainersTable.portBindings": {
-    "defaultMessage": "Port Bindings",
-    "description": "Title for the Port Bindings column of the container table"
+  "components.ContainersTable.networkDriverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.ContainersTable.networkEnableIPv6Label": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "components.ContainersTable.networkInternalLabel": {
+    "defaultMessage": "Internal"
+  },
+  "components.ContainersTable.networkLabelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.ContainersTable.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "components.ContainersTable.networkOptionsLabel": {
+    "defaultMessage": "Options (JSON)"
+  },
+  "components.ContainersTable.networksLabel": {
+    "defaultMessage": "Networks"
+  },
+  "components.ContainersTable.noContainers": {
+    "defaultMessage": "No containers available."
+  },
+  "components.ContainersTable.noNetworks": {
+    "defaultMessage": "No networks assigned."
+  },
+  "components.ContainersTable.noVolumes": {
+    "defaultMessage": "No volumes assigned."
+  },
+  "components.ContainersTable.portBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "components.ContainersTable.privilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "components.ContainersTable.restartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "components.ContainersTable.volumeDriverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.ContainersTable.volumeLabelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.ContainersTable.volumesLabel": {
+    "defaultMessage": "Volumes"
   },
   "components.CreateApplication.descriptionLabel": {
     "defaultMessage": "Description"
