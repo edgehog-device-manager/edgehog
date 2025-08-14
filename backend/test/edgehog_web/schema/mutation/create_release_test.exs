@@ -332,6 +332,78 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       assert volume.id == container_volume.id
       assert volume.label == container_volume.label
     end
+
+    test "create a release with nested containers with quotas", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      container = %{
+        "image" => %{
+          "reference" => "example/container1:latest"
+        },
+        "env" => ~s({"ENV_VAR":"value1"}),
+        "hostname" => "container1-host",
+        "networkMode" => "bridge",
+        "portBindings" => [
+          "8080:80"
+        ],
+        "privileged" => false,
+        "cpuPeriod" => 300,
+        "cpuQuota" => 30,
+        "cpuRealTimePeriod" => 100,
+        "cpuRealtimeRuntime" => 90,
+        "memory" => 2048,
+        "memoryReservation" => 1024,
+        "memorySwap" => 2048,
+        "memorySwappiness" => 35,
+        "volumeDriver" => "driver",
+        "storageOpt" => ["size=120G"],
+        "readOnlyRootfs" => false,
+        "tmpfs" => ["/run=rw,noexec,nosuid,size=65536k"],
+        "restartPolicy" => "always"
+      }
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            version
+            application {
+              id
+            }
+            containers {
+              edges {
+                node {
+                  id
+                  cpuPeriod
+                  cpuQuota
+                  cpuRealTimePeriod
+                  cpuRealtimeRuntime
+                  memory
+                  memoryReservation
+                  memorySwap
+                  memorySwappiness
+                  volumeDriver
+                  storageOpt
+                  readOnlyRootfs
+                  tmpfs
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      [
+        tenant: tenant,
+        application_id: application_id,
+        containers: [container],
+        document: document
+      ]
+      |> create_release()
+      |> extract_result!()
+    end
   end
 
   def create_release(opts) do

@@ -36,10 +36,22 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
     :volumeIds,
     :networkMode,
     :portBindings,
-    :privileged,
     :extraHosts,
     :capAdd,
-    :capDrop
+    :capDrop,
+    :cpuPeriod,
+    :cpuQuota,
+    :cpuRealTimePeriod,
+    :cpuRealtimeRuntime,
+    :memory,
+    :memoryReservation,
+    :memorySwap,
+    :memorySwappiness,
+    :volumeDriver,
+    :storageOpt,
+    :readOnlyRootfs,
+    :tmpfs,
+    :privileged
   ]
 
   @type t() :: %__MODULE__{
@@ -54,9 +66,21 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
           networkIds: list(String.t()),
           networkMode: String.t(),
           portBindings: list(String.t()),
-          privileged: String.t(),
           extraHosts: list(String.t()),
           capAdd: list(String.t()),
-          capDrop: list(String.t())
+          capDrop: list(String.t()),
+          cpuPeriod: integer(),
+          cpuQuota: integer(),
+          cpuRealTimePeriod: integer(),
+          cpuRealtimeRuntime: integer(),
+          memory: integer(),
+          memoryReservation: integer(),
+          memorySwap: integer(),
+          memorySwappiness: integer(),
+          volumeDriver: String.t(),
+          storageOpt: list(String.t()),
+          readOnlyRootfs: boolean(),
+          tmpfs: list(String.t()),
+          privileged: String.t()
         }
 end

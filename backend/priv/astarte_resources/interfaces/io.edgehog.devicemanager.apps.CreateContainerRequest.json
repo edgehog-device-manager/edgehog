@@ -133,6 +133,111 @@
       "doc": "A list of kernel capabilities to drop from the container. Conflicts with option 'Capabilities'."
     },
     {
+      "endpoint": "/container/cpuPeriod",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "The length of a CPU period in microseconds.",
+      "doc": "Unset if the value is -1 (or negative) and the cpuQuota must also be unset."
+    },
+    {
+      "endpoint": "/container/cpuQuota",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Microseconds of CPU time that the container can get in a CPU period.",
+      "doc": "Unset if the value is -1 (or negative) and the cpuPeriod must also be unset."
+    },
+    {
+      "endpoint": "/container/cpuRealtimePeriod",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "The length of a CPU real-time period in microseconds.",
+      "doc": "The length of a CPU real-time period in microseconds. Set to 0 to allocate no time allocated to real-time tasks. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/cpuRealtimeRuntime",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "The length of a CPU real-time runtime in microseconds.",
+      "doc": "The length of a CPU real-time runtime in microseconds. Set to 0 to allocate no time allocated to real-time tasks. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/memory",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Memory limit in bytes.",
+      "doc": "Memory limit in bytes. Default to 0 for unlimited. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/memoryReservetion",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Memory soft limit in bytes. Default to 0 for unlimited. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/memorySwap",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Total memory limit (memory + swap).",
+      "doc": "Total memory limit (memory + swap). Set as -1 to enable unlimited swap. Unset if the value is -2 (or more negative)."
+    },
+    {
+      "endpoint": "/container/memorySwappiness",
+      "type": "integer",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Memory swappiness",
+      "doc": "Tune a container's memory swappiness behavior. Accepts an integer between 0 and 100. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/volumeDriver",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Driver that this container uses to mount volumes."
+    },
+    {
+      "endpoint": "/container/storageOpt",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Storage driver options for this container.",
+      "doc": "Storage driver options for this container, in the form \"size=120G\"."
+    },
+    {
+      "endpoint": "/container/readOnlyRootfs",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Mount the container's root filesystem as read only."
+    },
+    {
+      "endpoint": "/container/tmpfs",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "A map of container directories which should be replaced by tmpfs mounts.",
+      "doc": "A map of container directories which should be replaced by tmpfs mounts, and their corresponding mount options. For example:\n \"/run=rw,noexec,nosuid,size=65536k\""
+    },
+    {
       "endpoint": "/container/privileged",
       "type": "boolean",
       "database_retention_policy": "use_ttl",
