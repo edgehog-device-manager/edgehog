@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
 
   alias Edgehog.Containers.ContainerNetwork
   alias Edgehog.Containers.ReleaseContainers
 
-  test "can access containers and netowkrs trough relationship", %{tenant: tenant} do
+  test "can access containers, networks, and deployments through relationships", %{tenant: tenant} do
     app = application_fixture(tenant: tenant)
     release = release_fixture(application_id: app.id, tenant: tenant)
 
@@ -38,6 +39,15 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
 
     params = %{container_id: container.id, network_id: network.id}
     Ash.create!(ContainerNetwork, params, tenant: tenant)
+
+    device1 = device_fixture(tenant: tenant)
+    device2 = device_fixture(tenant: tenant)
+
+    deployment1 =
+      deployment_fixture(device_id: device1.id, release_id: release.id, tenant: tenant)
+
+    deployment2 =
+      deployment_fixture(device_id: device2.id, release_id: release.id, tenant: tenant)
 
     id = AshGraphql.Resource.encode_relay_id(release)
 
@@ -57,6 +67,26 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
       container_result |> get_in(["networks", "edges"]) |> Enum.map(& &1["node"]) |> hd()
 
     assert network_result["id"] == AshGraphql.Resource.encode_relay_id(network)
+
+    deployments_edges = get_in(release, ["release", "deployments", "edges"])
+    assert length(deployments_edges) == 2
+
+    deployment_ids =
+      deployments_edges
+      |> Enum.map(&get_in(&1, ["node", "id"]))
+      |> Enum.sort()
+
+    expected_ids =
+      [deployment1, deployment2]
+      |> Enum.map(&AshGraphql.Resource.encode_relay_id/1)
+      |> Enum.sort()
+
+    assert deployment_ids == expected_ids
+
+    for edge <- deployments_edges do
+      device_node = get_in(edge, ["node", "device"])
+      assert device_node["id"] != nil
+    end
   end
 
   defp get_release(opts) do
@@ -75,6 +105,19 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
                       id
                     }
                   }
+                }
+              }
+            }
+          }
+          deployments {
+            edges {
+              node {
+                id
+                state
+                device {
+                  id
+                  deviceId
+                  name
                 }
               }
             }
