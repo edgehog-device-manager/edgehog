@@ -24,6 +24,9 @@ defmodule Edgehog.Containers.Image do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Container
+  alias Edgehog.Containers.Image.Calculations
+  alias Edgehog.Containers.Image.ManualActions
   alias Edgehog.Containers.ImageCredentials
 
   graphql do
@@ -37,7 +40,7 @@ defmodule Edgehog.Containers.Image do
     destroy :destroy_if_dangling do
       description "Destroys the image if it's dangling (not referenced by any container)"
 
-      manual Edgehog.Containers.Image.ManualActions.DestroyIfDangling
+      manual ManualActions.DestroyIfDangling
     end
   end
 
@@ -64,10 +67,14 @@ defmodule Edgehog.Containers.Image do
       join_relationship :image_deployments
       public? true
     end
+
+    has_many :containers, Container do
+      public? true
+    end
   end
 
   calculations do
-    calculate :dangling?, :boolean, Edgehog.Containers.Image.Calculations.Dangling do
+    calculate :dangling?, :boolean, Calculations.Dangling do
       description "Returns true if this image has no containers referring to it"
     end
   end

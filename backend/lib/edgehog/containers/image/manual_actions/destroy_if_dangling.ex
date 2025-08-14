@@ -24,17 +24,13 @@ defmodule Edgehog.Containers.Image.ManualActions.DestroyIfDangling do
   use Ash.Resource.ManualDestroy
 
   @impl Ash.Resource.ManualDestroy
-  def destroy(changeset, _opts, _context) do
+  def destroy(changeset, _opts, %{tenant: tenant}) do
     image = changeset.data
 
     with {:ok, image} <- Ash.load(image, :dangling?) do
-      if image.dangling? do
-        # Image is dangling, destroy it
-        Ash.destroy(changeset)
-      else
-        # Image is not dangling, don't destroy it
-        {:ok, image}
-      end
+      if image.dangling?, do: Ash.destroy(image, tenant: tenant)
     end
+
+    {:ok, image}
   end
 end
