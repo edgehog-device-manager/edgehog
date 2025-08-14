@@ -49,6 +49,7 @@ defmodule Edgehog.Containers.Container do
         :network_mode,
         :env,
         :privileged,
+        :extra_hosts,
         :image_id
       ],
       update: [
@@ -58,12 +59,21 @@ defmodule Edgehog.Containers.Container do
         :network_mode,
         :env,
         :privileged,
+        :extra_hosts,
         :image_id
       ]
     ]
 
     create :create_with_nested do
-      accept [:restart_policy, :hostname, :env, :privileged, :port_bindings, :network_mode]
+      accept [
+        :restart_policy,
+        :hostname,
+        :env,
+        :privileged,
+        :port_bindings,
+        :network_mode,
+        :extra_hosts
+      ]
 
       argument :image, :map
       argument :networks, {:array, :map}
@@ -95,7 +105,8 @@ defmodule Edgehog.Containers.Container do
         :network_mode,
         :env,
         :privileged,
-        :image_id
+        :image_id,
+        :extra_hosts
       ]
 
       argument :volumes, {:array, :map}
@@ -153,6 +164,12 @@ defmodule Edgehog.Containers.Container do
       default "bridge"
       public? true
       allow_nil? false
+    end
+
+    attribute :extra_hosts, {:array, :string} do
+      default []
+      allow_nil? false
+      public? true
     end
 
     timestamps()
