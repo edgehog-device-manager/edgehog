@@ -28,8 +28,8 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckVolumes do
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
-    with {:ok, :created_networks} <-
-           Ash.Changeset.fetch_argument_or_change(changeset, :resources_state),
+    with :created_networks <- state(changeset),
+         Ash.Changeset.fetch_argument_or_change(changeset, :resources_state),
          {:ok, deployment} <- Ash.load(deployment, device: [], release: [containers: [:volumes]]) do
       device = deployment.device
 
@@ -50,6 +50,13 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckVolumes do
         else: changeset
     else
       _ -> changeset
+    end
+  end
+
+  defp state(changeset) do
+    case Ash.Changeset.fetch_argument_or_change(changeset, :resources_state) do
+      {:ok, state} -> state
+      :error -> Ash.Changeset.get_attribute(changeset, :resources_state)
     end
   end
 end

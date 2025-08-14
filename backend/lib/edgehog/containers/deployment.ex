@@ -92,15 +92,6 @@ defmodule Edgehog.Containers.Deployment do
       manual ManualActions.RunReadyActions
     end
 
-    action :send_deploy_request do
-      argument :deployment, :struct do
-        constraints instance_of: __MODULE__
-        allow_nil? false
-      end
-
-      run ManualActions.SendDeployRequest
-    end
-
     update :upgrade_release do
       argument :target, :uuid do
         allow_nil? false

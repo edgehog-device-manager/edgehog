@@ -281,6 +281,12 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
         "Error" ->
           Containers.mark_deployment_as_errored(deployment, message, tenant: tenant)
+
+        "Deleting" ->
+          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
+
+        "Updating" ->
+          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
       end
     end
   end

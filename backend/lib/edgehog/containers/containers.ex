@@ -144,6 +144,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Container.Deployment do
       define :deploy_container, action: :deploy, args: [:container, :device, :deployment]
+      define :destroy_container_deployment, action: :destroy
       define :fetch_container_deployment, action: :read, get_by_identity: :container_instance
       define :mark_container_deployment_as_sent, action: :mark_as_sent
       define :mark_container_deployment_as_received, action: :mark_as_received
@@ -155,7 +156,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Deployment do
       define :deploy, action: :deploy, args: [:release_id, :device_id]
-      define :send_deploy_request, action: :send_deploy_request, args: [:deployment]
+      define :destroy_deployment, action: :destroy
       define :fetch_deployment, action: :read, get_by: [:id]
       define :delete_deployment, action: :destroy
       define :deployment_update_resources_state, action: :update_resources_state
@@ -178,6 +179,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Image.Deployment do
       define :deploy_image, action: :deploy, args: [:image, :device, :deployment]
+      define :destroy_image_deployment, action: :destroy
       define :fetch_image_deployment, action: :read, get_by_identity: :image_instance
       define :mark_image_deployment_as_sent, action: :mark_as_sent
       define :mark_image_deployment_as_unpulled, action: :mark_as_unpulled
@@ -202,6 +204,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Network.Deployment do
       define :deploy_network, action: :deploy, args: [:network, :device, :deployment]
+      define :destroy_network_deployment, action: :destroy
       define :fetch_network_deployment, action: :read, get_by_identity: :network_instance
       define :mark_network_deployment_as_sent, action: :mark_as_sent
       define :mark_network_deployment_as_available, action: :mark_as_available
@@ -213,6 +216,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.Volume.Deployment do
       define :deploy_volume, action: :deploy, args: [:volume, :device, :deployment]
+      define :destroy_volume_deployment, action: :destroy
       define :fetch_volume_deployment, action: :read, get_by_identity: :volume_instance
       define :mark_volume_deployment_as_sent, action: :mark_as_sent
       define :mark_volume_deployment_as_available, action: :mark_as_available

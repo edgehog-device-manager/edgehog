@@ -24,9 +24,8 @@ defmodule Edgehog.Containers.Release do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Release.Changes, as: ReleaseChanges
+  alias Edgehog.Containers.Release.Changes
   alias Edgehog.Validations
 
   graphql do
@@ -50,19 +49,14 @@ defmodule Edgehog.Containers.Release do
                on_no_match: {:create, :create_with_nested},
                on_match: :ignore
              )
-
-      change Changes.CreateDefaultNetwork
     end
 
     destroy :destroy do
       primary? true
       require_atomic? false
 
-      # Check if deployments exist before deletion
-      change ReleaseChanges.CheckDeployments
-
-      # After deletion, clean up dangling containers
-      change ReleaseChanges.CleanupContainers
+      change Changes.CheckDeployments
+      change Changes.CleanupContainers
     end
   end
 

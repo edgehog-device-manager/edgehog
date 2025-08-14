@@ -25,15 +25,24 @@ defmodule Edgehog.Containers.Network.Changes.DeployNetworkOnDevice do
   alias Edgehog.Containers
   alias Edgehog.Devices
 
+  require Logger
+
   @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
+  def change(changeset, _opts, %{tenant: tenant}) do
     device = Ash.Changeset.get_argument(changeset, :device)
     network = Ash.Changeset.get_argument(changeset, :network)
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    Ash.Changeset.after_action(changeset, fn _changeset, network_deployment ->
-      with {:ok, _device} <- Devices.send_create_network_request(device, network, deployment) do
-        Containers.mark_network_deployment_as_sent(network_deployment)
+    Ash.Changeset.after_transaction(changeset, fn _changeset, {:ok, network_deployment} ->
+      case Devices.send_create_network_request(device, network, deployment) do
+        {:ok, _device} ->
+          Containers.mark_network_deployment_as_sent(network_deployment, tenant: tenant)
+
+        # TODO: instead of destroying the network deployment, we should retry
+        # sending the request after a delay.
+        {:error, reason} ->
+          Logger.warning("Failed to send network deployment request: #{inspect(reason)}")
+          Containers.destroy_network_deployment(network_deployment, tenant: tenant)
       end
     end)
   end
