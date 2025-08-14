@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Container do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container.EnvEncoding
+  alias Edgehog.Containers.Container.ManualActions
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Types.RestartPolicy
 
@@ -114,7 +115,7 @@ defmodule Edgehog.Containers.Container do
     destroy :destroy_if_dangling do
       description "Destroys the container if it's dangling (not referenced by any release)"
 
-      manual Edgehog.Containers.Container.ManualActions.DestroyIfDangling
+      manual ManualActions.DestroyIfDangling
     end
   end
 

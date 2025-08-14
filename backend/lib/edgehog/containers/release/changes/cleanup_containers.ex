@@ -20,49 +20,37 @@
 
 defmodule Edgehog.Containers.Release.Changes.CleanupContainers do
   @moduledoc false
-
   use Ash.Resource.Change
+
+  alias Edgehog.Containers
+
+  require Logger
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     release = changeset.data
     %{tenant: tenant} = context
 
-    # Preload containers on the release
-    {:ok, release_with_containers} = Ash.load(release, :containers, tenant: tenant)
-    containers = release_with_containers.containers
+    case Ash.load(release, :containers, tenant: tenant) do
+      {:ok, release} ->
+        containers = release.containers
 
-    # Use after_action to perform cleanup - this will revert the transaction if cleanup fails
-    Ash.Changeset.after_action(changeset, fn _changeset, release ->
-      cleanup_dangling_containers(containers, tenant)
-      {:ok, release}
-    end)
-  end
+        Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+          maybe_cleanup(result, containers, tenant)
+        end)
 
-  defp cleanup_dangling_containers(containers, tenant) do
-    # Load both dangling? and image for each container
-    {:ok, containers_with_data} = Ash.load(containers, [:dangling?, :image], tenant: tenant)
-
-    for container <- containers_with_data do
-      if container.dangling? do
-        cleanup_dangling_container(container, tenant)
-      end
+      _ ->
+        changeset
     end
   end
 
-  defp cleanup_dangling_container(container, tenant) do
-    image = container.image
-
-    # Container is dangling, destroy it
-    Ash.destroy!(container, tenant: tenant)
-
-    # Check if image is now dangling and destroy it too
-    if image do
-      {:ok, image_with_dangling} = Ash.load(image, :dangling?, tenant: tenant)
-
-      if image_with_dangling.dangling? do
-        Ash.destroy!(image, tenant: tenant)
-      end
+  defp maybe_cleanup({:ok, _} = result, containers, tenant) do
+    for container <- containers do
+      Containers.destroy_container_if_dangling(container, tenant: tenant)
     end
+
+    result
   end
+
+  defp maybe_cleanup(result, _containers, _tenant), do: result
 end

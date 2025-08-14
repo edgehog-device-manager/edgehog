@@ -30,23 +30,42 @@ defmodule Edgehog.Containers.Container.ManualActions.DestroyIfDangling do
     container = changeset.data
     %{tenant: tenant} = context
 
-    with {:ok, container} <- Ash.load(container, :dangling?) do
-      if container.dangling? do
-        # Container is dangling, destroy it and trigger image cleanup
-        image_id = container.image_id
-
-        changeset
-        |> Ash.Changeset.after_action(fn _changeset, destroyed_container ->
-          # Try to destroy the image if it's also dangling
-          _ = Containers.destroy_image_if_dangling(image_id, tenant: tenant)
-
-          {:ok, destroyed_container}
-        end)
-        |> Ash.destroy()
-      else
-        # Container is not dangling, don't destroy it
-        {:ok, container}
+    dangling? =
+      case Ash.load(container, :dangling?, tenant: tenant) do
+        {:ok, container} -> container.dangling?
+        _ -> false
       end
+
+    if dangling?,
+      do: delete_container(container, tenant),
+      else: {:ok, container}
+  end
+
+  defp delete_container(container, tenant) do
+    changeset = Ash.Changeset.for_destroy(container, :destroy)
+
+    changeset =
+      case Ash.load(container, :image) do
+        {:ok, container} ->
+          image = container.image
+
+          Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+            maybe_cleanup(result, image, tenant)
+          end)
+
+        _ ->
+          changeset
+      end
+
+    with :ok <- Ash.destroy(changeset, tenant: tenant) do
+      {:ok, container}
     end
   end
+
+  defp maybe_cleanup({:ok, _} = result, image, tenant) do
+    Containers.destroy_image_if_dangling(image, tenant: tenant)
+    result
+  end
+
+  defp maybe_cleanup(result, _image, _tenant), do: result
 end

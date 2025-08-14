@@ -30,23 +30,17 @@ defmodule Edgehog.Containers.Release.Changes.CheckDeployments do
     release = changeset.data
     %{tenant: tenant} = context
 
-    # Check if there are active deployments for this release
     case Containers.deployments_with_release(release.id, tenant: tenant) do
-      {:ok, deployments} ->
-        if Enum.empty?(deployments) do
-          changeset
-        else
-          # There are active deployments, cannot delete
-          Ash.Changeset.add_error(
-            changeset,
-            field: :base,
-            message: "Cannot delete release with active deployments"
-          )
-        end
-
-      {:error, _} ->
-        # If we can't check deployments, allow the deletion to proceed
+      {:ok, []} ->
         changeset
+
+      {:ok, _deployments} ->
+        Ash.Changeset.add_error(changeset,
+          message: "Cannot delete release with active deployments"
+        )
+
+      {:error, error} ->
+        Ash.Changeset.add_error(changeset, error)
     end
   end
 end
