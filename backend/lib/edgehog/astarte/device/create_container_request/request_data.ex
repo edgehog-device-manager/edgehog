@@ -36,6 +36,18 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
     :volumeIds,
     :networkMode,
     :portBindings,
+    :cpuPeriod,
+    :cpuQuota,
+    :cpuRealTimePeriod,
+    :cpuRealtimeRuntime,
+    :memory,
+    :memoryReservation,
+    :memorySwap,
+    :memorySwappiness,
+    :volumeDriver,
+    :storageOpt,
+    :readOnlyRootfs,
+    :tmpfs,
     :privileged
   ]
 
@@ -51,6 +63,18 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
           networkIds: list(String.t()),
           networkMode: String.t(),
           portBindings: list(String.t()),
+          cpuPeriod: integer(),
+          cpuQuota: integer(),
+          cpuRealTimePeriod: integer(),
+          cpuRealtimeRuntime: integer(),
+          memory: integer(),
+          memoryReservation: integer(),
+          memorySwap: integer(),
+          memorySwappiness: integer(),
+          volumeDriver: String.t(),
+          storageOpt: list(String.t()),
+          readOnlyRootfs: list(String.t()),
+          tmpfs: list(String.t()),
           privileged: String.t()
         }
 end

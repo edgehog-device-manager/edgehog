@@ -49,6 +49,18 @@ defmodule Edgehog.Containers.Container do
         :network_mode,
         :env,
         :privileged,
+        :cpuPeriod,
+        :cpuQuota,
+        :cpuRealTimePeriod,
+        :cpuRealtimeRuntime,
+        :memory,
+        :memoryReservation,
+        :memorySwap,
+        :memorySwappiness,
+        :volumeDriver,
+        :storageOpt,
+        :readOnlyRootfs,
+        :tmpfs,
         :image_id
       ],
       update: [
@@ -58,12 +70,43 @@ defmodule Edgehog.Containers.Container do
         :network_mode,
         :env,
         :privileged,
+        :cpuPeriod,
+        :cpuQuota,
+        :cpuRealTimePeriod,
+        :cpuRealtimeRuntime,
+        :memory,
+        :memoryReservation,
+        :memorySwap,
+        :memorySwappiness,
+        :volumeDriver,
+        :storageOpt,
+        :readOnlyRootfs,
+        :tmpfs,
         :image_id
       ]
     ]
 
     create :create_with_nested do
-      accept [:restart_policy, :hostname, :env, :privileged, :port_bindings, :network_mode]
+      accept [
+        :restart_policy,
+        :hostname,
+        :env,
+        :privileged,
+        :port_bindings,
+        :network_mode,
+        :cpuPeriod,
+        :cpuQuota,
+        :cpuRealTimePeriod,
+        :cpuRealtimeRuntime,
+        :memory,
+        :memoryReservation,
+        :memorySwap,
+        :memorySwappiness,
+        :volumeDriver,
+        :storageOpt,
+        :readOnlyRootfs,
+        :tmpfs
+      ]
 
       argument :image, :map
       argument :networks, {:array, :map}
@@ -95,6 +138,18 @@ defmodule Edgehog.Containers.Container do
         :network_mode,
         :env,
         :privileged,
+        :cpuPeriod,
+        :cpuQuota,
+        :cpuRealTimePeriod,
+        :cpuRealtimeRuntime,
+        :memory,
+        :memoryReservation,
+        :memorySwap,
+        :memorySwappiness,
+        :volumeDriver,
+        :storageOpt,
+        :readOnlyRootfs,
+        :tmpfs,
         :image_id
       ]
 
@@ -151,6 +206,79 @@ defmodule Edgehog.Containers.Container do
 
     attribute :network_mode, :string do
       default "bridge"
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cpuPeriod, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cpuQuota, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cpuRealTimePeriod, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cpuRealtimeRuntime, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memory, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memoryReservation, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memorySwap, :integer do
+      default -2
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memorySwappiness, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :volumeDriver, :string do
+      default ""
+      public? true
+      allow_nil? false
+      constraints allow_empty?: true
+    end
+
+    attribute :storageOpt, {:array, :string} do
+      default []
+      public? true
+      allow_nil? false
+    end
+
+    attribute :readOnlyRootfs, {:array, :string} do
+      default []
+      public? true
+      allow_nil? false
+    end
+
+    attribute :tmpfs, {:array, :string} do
+      default []
       public? true
       allow_nil? false
     end
