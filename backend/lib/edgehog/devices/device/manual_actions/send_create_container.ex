@@ -57,6 +57,18 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         networkIds: Enum.map(container.networks, & &1.id),
         networkMode: container.network_mode,
         portBindings: container.port_bindings,
+        cpuPeriod: container.cpuPeriod,
+        cpuQuota: container.cpuQuota,
+        cpuRealTimePeriod: container.cpuRealTimePeriod,
+        cpuRealtimeRuntime: container.cpuRealtimeRuntime,
+        memory: container.memory,
+        memoryReservation: container.memoryReservation,
+        memorySwap: container.memorySwap,
+        memorySwappiness: container.memorySwappiness,
+        volumeDriver: container.volumeDriver,
+        storageOpt: container.storageOpt,
+        readOnlyRootfs: container.readOnlyRootfs,
+        tmpfs: container.tmpfs,
         privileged: container.privileged
       }
 
