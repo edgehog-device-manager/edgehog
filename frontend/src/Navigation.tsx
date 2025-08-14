@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -64,7 +64,9 @@ enum Route {
   volumes = "/volumes",
   volumeEdit = "/volumes/:volumeId",
   volumesNew = "/volumes/new",
-
+  networks = "/networks",
+  networksEdit = "/networks/:networkId",
+  networksNew = "/networks/new",
   login = "/login",
   logout = "/logout",
 }
@@ -117,6 +119,8 @@ const matchingParametricRoute = (
     case Route.imageCredentialsNew:
     case Route.volumes:
     case Route.volumesNew:
+    case Route.networks:
+    case Route.networksNew:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -240,6 +244,14 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { volumeId: params.volumeId },
+          }
+        : null;
+
+    case Route.networksEdit:
+      return params && typeof params["networkId"] === "string"
+        ? {
+            route,
+            params: { networkId: params.networkId },
           }
         : null;
   }
@@ -423,6 +435,18 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.volumesNew]: {
     id: "navigation.routeTitle.VolumesNew",
     defaultMessage: "Create Volumes",
+  },
+  [Route.networks]: {
+    id: "navigation.routeTitle.Networks",
+    defaultMessage: "Networks",
+  },
+  [Route.networksEdit]: {
+    id: "navigation.routeTitle.NetworksEdit",
+    defaultMessage: "Network Details",
+  },
+  [Route.networksNew]: {
+    id: "navigation.routeTitle.NetworksNew",
+    defaultMessage: "Create Networks",
   },
 });
 

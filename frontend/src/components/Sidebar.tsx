@@ -254,6 +254,16 @@ const Sidebar = () => (
         route={Route.volumes}
         activeRoutes={[Route.volumes, Route.volumeEdit, Route.volumesNew]}
       />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.networks.networksLabel"
+            defaultMessage="Networks"
+          />
+        }
+        route={Route.networks}
+        activeRoutes={[Route.networks, Route.networksEdit, Route.networksNew]}
+      />
     </SidebarItemGroup>
   </Navbar>
 );
