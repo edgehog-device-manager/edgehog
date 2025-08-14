@@ -106,6 +106,15 @@
       "doc": "Array of ip:[host_port:]container_port[/protocol] | [hostPort:]containerPort[/protocol]. Protocol is TCP by default"
     },
     {
+      "endpoint": "/container/extraHosts",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "List of hostname/IP to add to the container's /etc/hosts",
+      "doc": "A list of hostnames/IP mappings to add to the container's /etc/hosts file. Specified in the form [\"hostname:IP\"]. You can use the `host-gateway` to connect to the host IP"
+    },
+    {
       "endpoint": "/container/privileged",
       "type": "boolean",
       "database_retention_policy": "use_ttl",
