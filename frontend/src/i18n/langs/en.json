@@ -312,6 +312,24 @@
   "components.CreateImageCredentialForm.usernameLabel": {
     "defaultMessage": "Username"
   },
+  "components.CreateNetworkForm.driverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.CreateNetworkForm.enableIpv6Label": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "components.CreateNetworkForm.internalLabel": {
+    "defaultMessage": "Internal"
+  },
+  "components.CreateNetworkForm.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.CreateNetworkForm.optionsLabel": {
+    "defaultMessage": "Options"
+  },
+  "components.CreateNetworkForm.submitButton": {
+    "defaultMessage": "Create"
+  },
   "components.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
@@ -625,6 +643,22 @@
   "components.NetworkInterfacesTable.technologyTitle": {
     "defaultMessage": "Technology"
   },
+  "components.NetworksTable.driverTitle": {
+    "defaultMessage": "Driver",
+    "description": "Title for the Driver column of the networks table"
+  },
+  "components.NetworksTable.enableIpv6": {
+    "defaultMessage": "Enable IPv6",
+    "description": "Title for the Enable IPv6 column of the networks table"
+  },
+  "components.NetworksTable.internalTitle": {
+    "defaultMessage": "Internal",
+    "description": "Title for the Internal column of the networks table"
+  },
+  "components.NetworksTable.label": {
+    "defaultMessage": "Label",
+    "description": "Title for the Label column of the networks table"
+  },
   "components.OperationTable.baseImage": {
     "defaultMessage": "Base Image"
   },
@@ -677,6 +711,9 @@
   },
   "components.Sidebar.modelsLabel": {
     "defaultMessage": "System Models"
+  },
+  "components.Sidebar.networks.networksLabel": {
+    "defaultMessage": "Networks"
   },
   "components.Sidebar.otaUpdatesGroupLabel": {
     "defaultMessage": "OTA Updates"
@@ -1254,6 +1291,15 @@
   "navigation.routeTitle.Logout": {
     "defaultMessage": "Logout"
   },
+  "navigation.routeTitle.Networks": {
+    "defaultMessage": "Networks"
+  },
+  "navigation.routeTitle.NetworksEdit": {
+    "defaultMessage": "Network Details"
+  },
+  "navigation.routeTitle.NetworksNew": {
+    "defaultMessage": "Create Networks"
+  },
   "navigation.routeTitle.Release": {
     "defaultMessage": "Release"
   },
@@ -1618,6 +1664,24 @@
   "pages.Logout.title": {
     "defaultMessage": "Logout"
   },
+  "pages.Network.networkNotFound.message": {
+    "defaultMessage": "Return to the networks list."
+  },
+  "pages.Network.networkNotFound.title": {
+    "defaultMessage": "Network not found."
+  },
+  "pages.NetworkCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Network, please try again."
+  },
+  "pages.NetworkCreate.title": {
+    "defaultMessage": "Create Network"
+  },
+  "pages.Networks.createButton": {
+    "defaultMessage": "Create Network"
+  },
+  "pages.Networks.title": {
+    "defaultMessage": "Networks"
+  },
   "pages.Release.releaseNotFound.message": {
     "defaultMessage": "Return to the applications list."
   },
@@ -1744,6 +1808,21 @@
   },
   "pages.UpdateChannels.title": {
     "defaultMessage": "Update Channels"
+  },
+  "pages.network.driver": {
+    "defaultMessage": "Driver"
+  },
+  "pages.network.enableIpv6": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "pages.network.internal": {
+    "defaultMessage": "Internal"
+  },
+  "pages.network.label": {
+    "defaultMessage": "Label"
+  },
+  "pages.network.options": {
+    "defaultMessage": "Options"
   },
   "pages.Volume.volumeNotFound.message": {
     "defaultMessage": "Return to the volumes list."
