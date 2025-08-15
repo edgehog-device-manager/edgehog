@@ -58,7 +58,9 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         networkMode: container.network_mode,
         portBindings: container.port_bindings,
         privileged: container.privileged,
-        extraHosts: container.extra_hosts
+        extraHosts: container.extra_hosts,
+        capAdd: container.cap_add,
+        capDrop: container.cap_drop
       }
 
       with :ok <-

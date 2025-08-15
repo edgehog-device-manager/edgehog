@@ -37,7 +37,9 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
     :networkMode,
     :portBindings,
     :privileged,
-    :extraHosts
+    :extraHosts,
+    :capAdd,
+    :capDrop
   ]
 
   @type t() :: %__MODULE__{
@@ -53,6 +55,8 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
           networkMode: String.t(),
           portBindings: list(String.t()),
           privileged: String.t(),
-          extraHosts: list(String.t())
+          extraHosts: list(String.t()),
+          capAdd: list(String.t()),
+          capDrop: list(String.t())
         }
 end
