@@ -50,7 +50,9 @@ defmodule Edgehog.Containers.Container do
         :env,
         :privileged,
         :extra_hosts,
-        :image_id
+        :image_id,
+        :cap_add,
+        :cap_drop
       ],
       update: [
         :port_bindings,
@@ -60,7 +62,9 @@ defmodule Edgehog.Containers.Container do
         :env,
         :privileged,
         :extra_hosts,
-        :image_id
+        :image_id,
+        :cap_add,
+        :cap_drop
       ]
     ]
 
@@ -72,7 +76,9 @@ defmodule Edgehog.Containers.Container do
         :privileged,
         :port_bindings,
         :network_mode,
-        :extra_hosts
+        :extra_hosts,
+        :cap_add,
+        :cap_drop
       ]
 
       argument :image, :map
@@ -106,7 +112,9 @@ defmodule Edgehog.Containers.Container do
         :env,
         :privileged,
         :image_id,
-        :extra_hosts
+        :extra_hosts,
+        :cap_add,
+        :cap_drop
       ]
 
       argument :volumes, {:array, :map}
@@ -167,6 +175,18 @@ defmodule Edgehog.Containers.Container do
     end
 
     attribute :extra_hosts, {:array, :string} do
+      default []
+      allow_nil? false
+      public? true
+    end
+
+    attribute :cap_add, {:array, :string} do
+      default []
+      allow_nil? false
+      public? true
+    end
+
+    attribute :cap_drop, {:array, :string} do
       default []
       allow_nil? false
       public? true
