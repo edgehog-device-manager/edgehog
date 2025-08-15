@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,8 +77,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       application = application_fixture(tenant: tenant)
       application_id = AshGraphql.Resource.encode_relay_id(application)
 
-      creadentials = image_credentials_fixture(tenant: tenant)
-      credentials_id = AshGraphql.Resource.encode_relay_id(creadentials)
+      credentials = image_credentials_fixture(tenant: tenant)
+      credentials_id = AshGraphql.Resource.encode_relay_id(credentials)
 
       container1 = %{
         "image" => %{
@@ -91,7 +91,13 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
           "8080:80"
         ],
         "privileged" => false,
-        "restartPolicy" => "always"
+        "restartPolicy" => "always",
+        "extraHosts" => [
+          "host1:192.168.1.100",
+          "host2:192.168.1.101"
+        ],
+        "capAdd" => ["CAP_CHOWN"],
+        "capDrop" => ["CAP_KILL"]
       }
 
       container2 = %{
@@ -106,7 +112,17 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
           "9090:90"
         ],
         "privileged" => true,
-        "restartPolicy" => "no"
+        "restartPolicy" => "no",
+        "extraHosts" => [
+          "database:10.0.0.1",
+          "cache:10.0.0.2",
+          "api:10.0.0.3"
+        ],
+        "capAdd" => [
+          "CAP_AUDIT_READ",
+          "CAP_AUDIT_WRITE"
+        ],
+        "capDrop" => ["CAP_MKNOD"]
       }
 
       containers = [container1, container2]
@@ -135,6 +151,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
                   portBindings
                   privileged
                   restartPolicy
+                  extraHosts
+                  capAdd
+                  capDrop
                 }
               }
             }
@@ -161,7 +180,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       container2 =
         Map.update!(container2, "image", fn image ->
           image
-          |> Map.put("credentials", %{"username" => creadentials.username})
+          |> Map.put("credentials", %{"username" => credentials.username})
           |> Map.delete("imageCredentialsId")
         end)
 

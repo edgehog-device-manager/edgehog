@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,10 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
     :volumeIds,
     :networkMode,
     :portBindings,
-    :privileged
+    :privileged,
+    :extraHosts,
+    :capAdd,
+    :capDrop
   ]
 
   @type t() :: %__MODULE__{
@@ -51,6 +54,9 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
           networkIds: list(String.t()),
           networkMode: String.t(),
           portBindings: list(String.t()),
-          privileged: String.t()
+          privileged: String.t(),
+          extraHosts: list(String.t()),
+          capAdd: list(String.t()),
+          capDrop: list(String.t())
         }
 end
