@@ -650,6 +650,18 @@
     "defaultMessage": "Release Version",
     "description": "Title for the Release Version column of the releases table"
   },
+  "components.ReleasesTable.action": {
+    "defaultMessage": "Action"
+  },
+  "components.ReleasesTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the release."
+  },
+  "components.ReleasesTable.deleteModal.title": {
+    "defaultMessage": "Delete Release"
+  },
+  "components.ReleasesTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the release, please try again."
+  },
   "components.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
@@ -857,10 +869,6 @@
   "components.VolumesTable.label": {
     "defaultMessage": "Label",
     "description": "Title for the Label column of the volumes table"
-  },
-  "components.VolumesTable.optionsTitle": {
-    "defaultMessage": "Options",
-    "description": "Title for the Options column of the volumes table"
   },
   "components.WiFiScanResultsTable.apChannelTitle": {
     "defaultMessage": "Channel"

@@ -19,16 +19,26 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
+import {
+  ConnectionHandler,
+  graphql,
+  useMutation,
+  usePaginationFragment,
+} from "react-relay/hooks";
+import { useCallback, useState } from "react";
+import { Button } from "react-bootstrap";
 
 import type { ReleasesTable_PaginationQuery } from "api/__generated__/ReleasesTable_PaginationQuery.graphql";
 import type {
   ReleasesTable_ReleaseFragment$data,
   ReleasesTable_ReleaseFragment$key,
 } from "api/__generated__/ReleasesTable_ReleaseFragment.graphql";
+import type { ReleasesTable_deleteRelease_Mutation } from "api/__generated__/ReleasesTable_deleteRelease_Mutation.graphql";
 
 import { Link, Route } from "Navigation";
 import Table, { createColumnHelper } from "components/Table";
+import Icon from "components/Icon";
+import DeleteModal from "./DeleteModal";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -50,45 +60,107 @@ const RELEASES_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const DELETE_RELEASE_MUTATION = graphql`
+  mutation ReleasesTable_deleteRelease_Mutation($id: ID!) {
+    deleteRelease(id: $id) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
 type TableRecord = NonNullable<
   ReleasesTable_ReleaseFragment$data["releases"]["edges"]
 >[number]["node"];
-
-const columnHelper = createColumnHelper<TableRecord>();
-const columns = [
-  columnHelper.accessor("version", {
-    header: () => (
-      <FormattedMessage
-        id="components.ReleaseTable.versionTitle"
-        defaultMessage="Release Version"
-        description="Title for the Release Version column of the releases table"
-      />
-    ),
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.release}
-        params={{
-          applicationId: row.original.application?.id ?? "",
-          releaseId: row.original.id,
-        }}
-      >
-        {getValue()}
-      </Link>
-    ),
-  }),
-];
 
 type ReleaseTableProps = {
   className?: string;
   releasesRef: ReleasesTable_ReleaseFragment$key;
   hideSearch?: boolean;
+  setErrorFeedback: (errorMessages: React.ReactNode) => void;
 };
 
 const ReleasesTable = ({
   className,
   releasesRef,
   hideSearch = false,
+  setErrorFeedback,
 }: ReleaseTableProps) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedRelease, setSelectedRelease] = useState<TableRecord | null>(
+    null,
+  );
+
+  const [deleteRelease, isDeletingRelease] =
+    useMutation<ReleasesTable_deleteRelease_Mutation>(DELETE_RELEASE_MUTATION);
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
+
+  const handleDeleteRelease = useCallback(
+    (releaseId: string) => {
+      deleteRelease({
+        variables: { id: releaseId },
+        onCompleted(data, errors) {
+          if (
+            !errors ||
+            errors.length === 0 ||
+            errors[0].code === "not_found"
+          ) {
+            setErrorFeedback(null);
+            setShowDeleteModal(false);
+            return;
+          }
+
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+          setErrorFeedback(errorFeedback);
+          setShowDeleteModal(false);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.ReleasesTable.deletionErrorFeedback"
+              defaultMessage="Could not delete the release, please try again."
+            />,
+          );
+          setShowDeleteModal(false);
+        },
+        updater(store, response) {
+          const deletedId = response?.deleteRelease?.result?.id;
+          if (!deletedId) return;
+
+          const applicationId = store
+            .getRootField("deleteRelease")
+            ?.getLinkedRecord("result")
+            ?.getLinkedRecord("application")
+            ?.getDataID();
+
+          if (!applicationId) return;
+
+          const applicationRecord = store.get(applicationId);
+          if (!applicationRecord) return;
+
+          const connection = ConnectionHandler.getConnection(
+            applicationRecord,
+            "ReleasesTable_releases",
+          );
+          if (!connection) return;
+
+          ConnectionHandler.deleteNode(connection, deletedId);
+
+          store.delete(deletedId);
+        },
+      });
+    },
+    [deleteRelease],
+  );
+
   const { data } = usePaginationFragment<
     ReleasesTable_PaginationQuery,
     ReleasesTable_ReleaseFragment$key
@@ -96,13 +168,85 @@ const ReleasesTable = ({
 
   const tableData = data.releases.edges?.map((edge) => edge.node) ?? [];
 
+  const columnHelper = createColumnHelper<TableRecord>();
+  const columns = [
+    columnHelper.accessor("version", {
+      header: () => (
+        <FormattedMessage
+          id="components.ReleaseTable.versionTitle"
+          defaultMessage="Release Version"
+          description="Title for the Release Version column of the releases table"
+        />
+      ),
+      cell: ({ row, getValue }) => (
+        <Link
+          route={Route.release}
+          params={{
+            applicationId: row.original.application?.id ?? "",
+            releaseId: row.original.id,
+          }}
+        >
+          {getValue()}
+        </Link>
+      ),
+    }),
+    columnHelper.accessor((row) => row, {
+      id: "action",
+      header: () => (
+        <FormattedMessage
+          id="components.ReleasesTable.action"
+          defaultMessage="Action"
+        />
+      ),
+      cell: ({ getValue }) => (
+        <Button
+          className="btn p-0 border-0 bg-transparent ms-4"
+          onClick={() => {
+            setSelectedRelease(getValue());
+            handleShowDeleteModal();
+          }}
+        >
+          <Icon className="text-danger" icon={"delete"} />
+        </Button>
+      ),
+    }),
+  ];
+
   return (
-    <Table
-      className={className}
-      columns={columns}
-      data={tableData}
-      hideSearch={hideSearch}
-    />
+    <div>
+      <Table
+        className={className}
+        columns={columns}
+        data={tableData}
+        hideSearch={hideSearch}
+      />
+
+      {showDeleteModal && (
+        <DeleteModal
+          confirmText={selectedRelease?.version || ""}
+          onCancel={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            if (selectedRelease?.id && selectedRelease.application?.id) {
+              handleDeleteRelease(selectedRelease.id);
+            }
+          }}
+          isDeleting={isDeletingRelease}
+          title={
+            <FormattedMessage
+              id="components.ReleasesTable.deleteModal.title"
+              defaultMessage="Delete Release"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.ReleasesTable.deleteModal.description"
+              defaultMessage="This action cannot be undone. This will permanently delete the release."
+            />
+          </p>
+        </DeleteModal>
+      )}
+    </div>
   );
 };
 
