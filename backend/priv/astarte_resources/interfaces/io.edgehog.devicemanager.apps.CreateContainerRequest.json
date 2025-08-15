@@ -115,6 +115,24 @@
       "doc": "A list of hostnames/IP mappings to add to the container's /etc/hosts file. Specified in the form [\"hostname:IP\"]. You can use the `host-gateway` to connect to the host IP"
     },
     {
+      "endpoint": "/container/capAdd",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "A list of kernel capabilities to add to the container.",
+      "doc": "A list of kernel capabilities to add to the container. Conflicts with option 'Capabilities'."
+    },
+    {
+      "endpoint": "/container/capDrop",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "A list of kernel capabilities to drop from the container.",
+      "doc": "A list of kernel capabilities to drop from the container. Conflicts with option 'Capabilities'."
+    },
+    {
       "endpoint": "/container/privileged",
       "type": "boolean",
       "database_retention_policy": "use_ttl",
