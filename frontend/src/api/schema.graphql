@@ -1939,6 +1939,15 @@ type Container {
   ): DeviceConnection!
 }
 
+"The result of the :delete_application mutation"
+type DeleteApplicationResult {
+  "The record that was successfully deleted"
+  result: Application
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 "The result of the :create_application mutation"
 type CreateApplicationResult {
   "The successful result of the mutation"
@@ -4261,6 +4270,8 @@ type RootMutationType {
 
   "Create a new application."
   createApplication(input: CreateApplicationInput!): CreateApplicationResult
+
+  deleteApplication(id: ID!): DeleteApplicationResult
 
   "Deploy the application on a device"
   deployRelease(input: DeployReleaseInput!): DeployReleaseResult
