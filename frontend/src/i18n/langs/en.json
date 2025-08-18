@@ -107,6 +107,18 @@
   "components.AddAvailableApplications.selectRelease": {
     "defaultMessage": "Select Release"
   },
+  "components.ApplicationsTable.action": {
+    "defaultMessage": "Action"
+  },
+  "components.ApplicationsTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the application."
+  },
+  "components.ApplicationsTable.deleteModal.title": {
+    "defaultMessage": "Delete Application"
+  },
+  "components.ApplicationsTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the application, please try again."
+  },
   "components.ApplicationsTable.nameTitle": {
     "defaultMessage": "Application Name",
     "description": "Title for the Name column of the applications table"
