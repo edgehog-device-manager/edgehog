@@ -19,14 +19,22 @@
 */
 
 import React from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import type { UseFormRegister } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import type { CreateRelease_OptionsFragment$key } from "api/__generated__/CreateRelease_OptionsFragment.graphql";
-import type { CreateRelease_OptionsFragment$data } from "api/__generated__/CreateRelease_OptionsFragment.graphql";
+import type {
+  CreateRelease_ImageCredentialsOptionsFragment$key,
+  CreateRelease_ImageCredentialsOptionsFragment$data,
+} from "api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
+import type {
+  CreateRelease_NetworksOptionsFragment$key,
+  CreateRelease_NetworksOptionsFragment$data,
+} from "api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
+import { ContainerCreateWithNestedNetworksInput } from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
+
 import Button from "components/Button";
 import Col from "components/Col";
 import Form from "components/Form";
@@ -34,9 +42,10 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { yup, envSchema, portBindingsSchema } from "./index";
+import MultiSelect from "components/MultiSelect";
 
-const CREATE_RELEASE_FRAGMENT = graphql`
-  fragment CreateRelease_OptionsFragment on RootQueryType {
+const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
+  fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
     listImageCredentials {
       results {
         id
@@ -46,6 +55,33 @@ const CREATE_RELEASE_FRAGMENT = graphql`
     }
   }
 `;
+
+const NETWORKS_OPTIONS_FRAGMENT = graphql`
+  fragment CreateRelease_NetworksOptionsFragment on RootQueryType {
+    networks {
+      results {
+        id
+        label
+      }
+    }
+  }
+`;
+
+const NetworksErrors = ({ errors }: { errors: unknown }) => {
+  if (errors == null) {
+    return null;
+  }
+  if (typeof errors === "object" && !Array.isArray(errors)) {
+    if (
+      "message" in errors &&
+      typeof (errors as Record<"message", unknown>).message === "string"
+    ) {
+      const message = (errors as Record<"message", string>).message;
+      return <FormattedMessage id={message} />;
+    }
+  }
+  return null;
+};
 
 const FormRow = ({
   id,
@@ -75,6 +111,7 @@ type ContainerInput = {
   restartPolicy?: string;
   networkMode?: string;
   portBindings?: string[];
+  networks: ContainerCreateWithNestedNetworksInput[];
 };
 
 type ReleaseData = {
@@ -108,6 +145,11 @@ const applicationSchema = yup
             .nullable()
             .transform((value) => value?.trim()),
           portBindings: portBindingsSchema,
+          networks: yup.array(
+            yup.object({
+              id: yup.string().required(),
+            }),
+          ),
         }),
       )
       .nullable(),
@@ -127,7 +169,8 @@ const restartPolicyOptions = [
 ];
 
 type CreateReleaseProps = {
-  optionsRef: CreateRelease_OptionsFragment$key;
+  imageCredentialsOptionsRef: CreateRelease_ImageCredentialsOptionsFragment$key;
+  networksOptionsRef: CreateRelease_NetworksOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: ReleaseData) => void;
 };
@@ -137,8 +180,10 @@ type ContainerFormProps = {
   register: UseFormRegister<ReleaseData>;
   errors: any;
   remove: (index: number) => void;
-  listImageCredentials: CreateRelease_OptionsFragment$data["listImageCredentials"];
+  listImageCredentials: CreateRelease_ImageCredentialsOptionsFragment$data["listImageCredentials"];
+  networks: CreateRelease_NetworksOptionsFragment$data["networks"];
   intl: ReturnType<typeof useIntl>;
+  control: any;
 };
 
 const ContainerForm = ({
@@ -147,7 +192,9 @@ const ContainerForm = ({
   errors,
   remove,
   listImageCredentials,
+  networks,
   intl,
+  control,
 }: ContainerFormProps) => {
   return (
     <div className="border p-3 mb-3">
@@ -282,6 +329,39 @@ const ContainerForm = ({
         </FormRow>
 
         <FormRow
+          id={`containers-${index}-networks`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.networksLabel"
+              defaultMessage="Networks"
+            />
+          }
+        >
+          <Controller
+            name={`containers.${index}.networks`}
+            control={control}
+            render={({
+              field: { value, onChange, onBlur },
+              fieldState: { invalid },
+            }) => (
+              <MultiSelect
+                invalid={invalid}
+                value={value}
+                onChange={onChange}
+                onBlur={onBlur}
+                options={networks?.results || []}
+                getOptionValue={(option) => option.id!}
+              />
+            )}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.networks && (
+              <NetworksErrors errors={errors.containers[index].networks} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
           id={`containers-${index}-portBindings`}
           label={
             <FormattedMessage
@@ -385,17 +465,22 @@ const ContainerForm = ({
 };
 
 const CreateRelease = ({
-  optionsRef,
+  imageCredentialsOptionsRef,
+  networksOptionsRef,
   isLoading = false,
   onSubmit,
 }: CreateReleaseProps) => {
   const intl = useIntl();
 
   const { listImageCredentials } = useFragment(
-    CREATE_RELEASE_FRAGMENT,
-    optionsRef,
+    IMAGE_CREDENTIALS_OPTIONS_FRAGMENT,
+    imageCredentialsOptionsRef,
   );
 
+  const { networks } = useFragment(
+    NETWORKS_OPTIONS_FRAGMENT,
+    networksOptionsRef,
+  );
   const {
     register,
     handleSubmit,
@@ -429,6 +514,7 @@ const CreateRelease = ({
             restartPolicy: container.restartPolicy || undefined,
             networkMode: container.networkMode || undefined,
             portBindings: container.portBindings || undefined,
+            networks: container.networks?.map((n) => ({ id: n.id })) || [],
           })),
         };
 
@@ -482,14 +568,16 @@ const CreateRelease = ({
             errors={errors}
             remove={remove}
             listImageCredentials={listImageCredentials}
+            networks={networks}
             intl={intl}
+            control={control}
           />
         ))}
 
         <div className="d-flex justify-content-start align-items-center">
           <Button
             variant="secondary"
-            onClick={() => append({ image: { reference: "" } })}
+            onClick={() => append({ image: { reference: "" }, networks: [] })}
           >
             <FormattedMessage
               id="components.CreateRelease.addContainerButton"

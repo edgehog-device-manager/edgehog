@@ -46,7 +46,8 @@ import Center from "components/Center";
 
 const CREATE_RELEASE_PAGE_QUERY = graphql`
   query ReleaseCreate_getOptions_Query {
-    ...CreateRelease_OptionsFragment
+    ...CreateRelease_ImageCredentialsOptionsFragment
+    ...CreateRelease_NetworksOptionsFragment
   }
 `;
 
@@ -76,7 +77,6 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
   const { applicationId = "" } = useParams();
-
   const [createRelease, isCreatingRelease] =
     useMutation<ReleaseCreate_createRelease_Mutation>(CREATE_RELEASE_MUTATION);
 
@@ -143,7 +143,8 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
         {errorFeedback}
       </Alert>
       <CreateRelease
-        optionsRef={releaseOptions}
+        imageCredentialsOptionsRef={releaseOptions}
+        networksOptionsRef={releaseOptions}
         onSubmit={handleCreateRelease}
         isLoading={isCreatingRelease}
       />

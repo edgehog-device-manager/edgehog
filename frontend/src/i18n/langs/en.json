@@ -366,6 +366,9 @@
   "components.CreateRelease.networkModeLabel": {
     "defaultMessage": "Network Mode"
   },
+  "components.CreateRelease.networksLabel": {
+    "defaultMessage": "Networks"
+  },
   "components.CreateRelease.noContainersFeedback": {
     "defaultMessage": "The release does not include any container."
   },
