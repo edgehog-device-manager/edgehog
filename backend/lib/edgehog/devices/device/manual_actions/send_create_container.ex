@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,7 +57,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         networkIds: Enum.map(container.networks, & &1.id),
         networkMode: container.network_mode,
         portBindings: container.port_bindings,
-        privileged: container.privileged
+        privileged: container.privileged,
+        extraHosts: container.extra_hosts
       }
 
       with :ok <-
