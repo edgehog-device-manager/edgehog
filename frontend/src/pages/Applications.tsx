@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -26,6 +26,7 @@ import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { Applications_getApplications_Query } from "api/__generated__/Applications_getApplications_Query.graphql";
 
+import Alert from "components/Alert";
 import Page from "components/Page";
 import Center from "components/Center";
 import Spinner from "components/Spinner";
@@ -50,6 +51,8 @@ interface ApplicationsContentProps {
 const ApplicationsContent = ({
   getApplicationsQuery,
 }: ApplicationsContentProps) => {
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
   const { applications } = usePreloadedQuery(
     GET_APPLICATIONS_QUERY,
     getApplicationsQuery,
@@ -73,7 +76,18 @@ const ApplicationsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <ApplicationsTable applicationsRef={applications?.results ?? []} />
+        <Alert
+          show={!!errorFeedback}
+          variant="danger"
+          onClose={() => setErrorFeedback(null)}
+          dismissible
+        >
+          {errorFeedback}
+        </Alert>
+        <ApplicationsTable
+          applicationsRef={applications?.results ?? []}
+          setErrorFeedback={setErrorFeedback}
+        />
       </Page.Main>
     </Page>
   );
