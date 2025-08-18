@@ -22,10 +22,11 @@ import React from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
+import type { UseFormRegister } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import type { CreateRelease_OptionsFragment$key } from "api/__generated__/CreateRelease_OptionsFragment.graphql";
-
+import type { CreateRelease_OptionsFragment$data } from "api/__generated__/CreateRelease_OptionsFragment.graphql";
 import Button from "components/Button";
 import Col from "components/Col";
 import Form from "components/Form";
@@ -131,6 +132,258 @@ type CreateReleaseProps = {
   onSubmit: (data: ReleaseData) => void;
 };
 
+type ContainerFormProps = {
+  index: number;
+  register: UseFormRegister<ReleaseData>;
+  errors: any;
+  remove: (index: number) => void;
+  listImageCredentials: CreateRelease_OptionsFragment$data["listImageCredentials"];
+  intl: ReturnType<typeof useIntl>;
+};
+
+const ContainerForm = ({
+  index,
+  register,
+  errors,
+  remove,
+  listImageCredentials,
+  intl,
+}: ContainerFormProps) => {
+  return (
+    <div className="border p-3 mb-3">
+      <h5>Container {index + 1}</h5>
+      <Stack gap={2}>
+        <FormRow
+          id={`containers-${index}-env`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.envLabel"
+              defaultMessage="Environment (JSON String)"
+            />
+          }
+        >
+          <Form.Control
+            {...register(`containers.${index}.env` as const)}
+            isInvalid={!!errors.containers?.[index]?.env}
+            placeholder='e.g., {"KEY": "value"}'
+            as="textarea"
+            rows={3}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.env?.message && (
+              <FormattedMessage id={errors.containers[index].env.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-image-reference`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.imageReferenceLabel"
+              defaultMessage="Image Reference"
+            />
+          }
+        >
+          <Form.Control
+            {...register(`containers.${index}.image.reference` as const)}
+            isInvalid={!!errors.containers?.[index]?.image?.reference}
+            placeholder="e.g., my-image:latest"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.image?.reference?.message && (
+              <FormattedMessage
+                id={errors.containers[index].image.reference.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-image-credentials`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.imageCredentialsLabel"
+              defaultMessage="Image Credentials"
+            />
+          }
+        >
+          <Form.Select
+            {...register(
+              `containers.${index}.image.imageCredentialsId` as const,
+            )}
+            isInvalid={!!errors.containers?.[index]?.image?.imageCredentialsId}
+          >
+            <option value="" disabled>
+              {intl.formatMessage({
+                id: "components.CreateRelease.imageCredentialOption",
+                defaultMessage: "Select Image Credentials",
+              })}
+            </option>
+            {listImageCredentials?.results?.map((imageCredential) => (
+              <option key={imageCredential.id} value={imageCredential.id}>
+                {imageCredential.label} ({imageCredential.username})
+              </option>
+            ))}
+          </Form.Select>
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.image?.imageCredentialsId?.message && (
+              <FormattedMessage
+                id={errors.containers[index].image.imageCredentialsId.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-hostname`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.hostnameLabel"
+              defaultMessage="Hostname"
+            />
+          }
+        >
+          <Form.Control
+            {...register(`containers.${index}.hostname` as const)}
+            isInvalid={!!errors.containers?.[index]?.hostname}
+            placeholder="Optional"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.hostname?.message && (
+              <FormattedMessage
+                id={errors.containers[index].hostname.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-networkMode`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.networkModeLabel"
+              defaultMessage="Network Mode"
+            />
+          }
+        >
+          <Form.Control
+            {...register(`containers.${index}.networkMode` as const)}
+            isInvalid={!!errors.containers?.[index]?.networkMode}
+            placeholder="e.g., bridge"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.networkMode?.message && (
+              <FormattedMessage
+                id={errors.containers[index].networkMode.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-portBindings`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.portBindingsLabel"
+              defaultMessage="Port Bindings"
+            />
+          }
+        >
+          <Form.Control
+            {...register(`containers.${index}.portBindings` as const)}
+            type="text"
+            isInvalid={!!errors.containers?.[index]?.portBindings}
+            placeholder="e.g., 8080:80, 443:443"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.portBindings?.message && (
+              <FormattedMessage
+                id={errors.containers[index].portBindings.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-restartPolicy`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.restartPolicyLabel"
+              defaultMessage="Restart Policy"
+            />
+          }
+        >
+          <Form.Select
+            {...register(`containers.${index}.restartPolicy` as const)}
+            isInvalid={!!errors.containers?.[index]?.restartPolicy}
+            defaultValue=""
+          >
+            <option value="" disabled>
+              {intl.formatMessage({
+                id: "components.CreateRelease.restartPolicyOption",
+                defaultMessage: "Select a Restart Policy",
+              })}
+            </option>
+            {restartPolicyOptions.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={option.value === ""}
+              >
+                {option.label}
+              </option>
+            ))}
+          </Form.Select>
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.restartPolicy?.message && (
+              <FormattedMessage
+                id={errors.containers[index].restartPolicy.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-privileged`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.privilegedLabel"
+              defaultMessage="Privileged"
+            />
+          }
+        >
+          <Form.Check
+            type="checkbox"
+            {...register(`containers.${index}.privileged` as const)}
+            isInvalid={!!errors.containers?.[index]?.privileged}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.privileged?.message && (
+              <FormattedMessage
+                id={errors.containers[index].privileged.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <div className="d-flex justify-content-start align-items-center">
+          <Button
+            variant="danger"
+            onClick={() => remove(index)}
+            className="mt-3"
+          >
+            <FormattedMessage
+              id="components.CreateRelease.removeContainerButton"
+              defaultMessage="Remove Container"
+            />
+          </Button>
+        </div>
+      </Stack>
+    </div>
+  );
+};
+
 const CreateRelease = ({
   optionsRef,
   isLoading = false,
@@ -222,245 +475,15 @@ const CreateRelease = ({
         </Stack>
 
         {fields.map((field, index) => (
-          <div key={field.id} className="border p-3 mb-3">
-            <h5>Container {index + 1}</h5>
-            <Stack gap={2}>
-              <FormRow
-                id={`containers-${index}-env`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.envLabel"
-                    defaultMessage="Environment (JSON String)"
-                  />
-                }
-              >
-                <Form.Control
-                  {...register(`containers.${index}.env` as const)}
-                  isInvalid={!!errors.containers?.[index]?.env}
-                  placeholder='e.g., {"KEY": "value"}'
-                  as="textarea"
-                  rows={3}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.env?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].env.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-
-              <FormRow
-                id={`containers-${index}-image-reference`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.imageReferenceLabel"
-                    defaultMessage="Image Reference"
-                  />
-                }
-              >
-                <Form.Control
-                  {...register(`containers.${index}.image.reference` as const)}
-                  isInvalid={!!errors.containers?.[index]?.image?.reference}
-                  placeholder="e.g., my-image:latest"
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.image?.reference?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].image.reference.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-
-              <FormRow
-                id={`containers-${index}-image-credentials`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.imageCredentialsLabel"
-                    defaultMessage="Image Credentials"
-                  />
-                }
-              >
-                <Form.Select
-                  {...register(
-                    `containers.${index}.image.imageCredentialsId` as const,
-                  )}
-                  isInvalid={
-                    !!errors.containers?.[index]?.image?.imageCredentialsId
-                  }
-                >
-                  <option value="" disabled>
-                    {intl.formatMessage({
-                      id: "components.CreateRelease.imageCredentialOption",
-                      defaultMessage: "Select Image Credentials",
-                    })}
-                  </option>
-                  {listImageCredentials?.results?.map((imageCredential) => (
-                    <option key={imageCredential.id} value={imageCredential.id}>
-                      {imageCredential.label} ({imageCredential.username})
-                    </option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.image?.imageCredentialsId
-                    ?.message && (
-                    <FormattedMessage
-                      id={
-                        errors.containers[index].image.imageCredentialsId
-                          .message
-                      }
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-
-              <FormRow
-                id={`containers-${index}-hostname`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.hostnameLabel"
-                    defaultMessage="Hostname"
-                  />
-                }
-              >
-                <Form.Control
-                  {...register(`containers.${index}.hostname` as const)}
-                  isInvalid={!!errors.containers?.[index]?.hostname}
-                  placeholder="Optional"
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.hostname?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].hostname.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-
-              <FormRow
-                id={`containers-${index}-networkMode`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.networkModeLabel"
-                    defaultMessage="Network Mode"
-                  />
-                }
-              >
-                <Form.Control
-                  {...register(`containers.${index}.networkMode` as const)}
-                  isInvalid={!!errors.containers?.[index]?.networkMode}
-                  placeholder="e.g., bridge"
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.networkMode?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].networkMode.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-
-              <FormRow
-                id={`containers-${index}-portBindings`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.portBindingsLabel"
-                    defaultMessage="Port Bindings"
-                  />
-                }
-              >
-                <Form.Control
-                  {...register(`containers.${index}.portBindings` as const)}
-                  type="text"
-                  isInvalid={!!errors.containers?.[index]?.portBindings}
-                  placeholder="e.g., 8080:80, 443:443"
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.portBindings?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].portBindings.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-
-              <FormRow
-                id={`containers-${index}-restartPolicy`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.restartPolicyLabel"
-                    defaultMessage="Restart Policy"
-                  />
-                }
-              >
-                <Form.Select
-                  {...register(`containers.${index}.restartPolicy` as const)}
-                  isInvalid={!!errors.containers?.[index]?.restartPolicy}
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    {intl.formatMessage({
-                      id: "components.CreateRelease.restartPolicyOption",
-                      defaultMessage: "Select a Restart Policy",
-                    })}
-                  </option>
-                  {restartPolicyOptions.map((option) => (
-                    <option
-                      key={option.value}
-                      value={option.value}
-                      disabled={option.value === ""}
-                    >
-                      {option.label}
-                    </option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.restartPolicy?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].restartPolicy.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-
-              <FormRow
-                id={`containers-${index}-privileged`}
-                label={
-                  <FormattedMessage
-                    id="components.CreateRelease.privilegedLabel"
-                    defaultMessage="Privileged"
-                  />
-                }
-              >
-                <Form.Check
-                  type="checkbox"
-                  {...register(`containers.${index}.privileged` as const)}
-                  isInvalid={!!errors.containers?.[index]?.privileged}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.privileged?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].privileged.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
-              </FormRow>
-            </Stack>
-
-            <div className="d-flex justify-content-start align-items-center">
-              <Button
-                variant="danger"
-                onClick={() => remove(index)}
-                className="mt-3"
-              >
-                <FormattedMessage
-                  id="components.CreateRelease.removeContainerButton"
-                  defaultMessage="Remove Container"
-                />
-              </Button>
-            </div>
-          </div>
+          <ContainerForm
+            key={field.id}
+            index={index}
+            register={register}
+            errors={errors}
+            remove={remove}
+            listImageCredentials={listImageCredentials}
+            intl={intl}
+          />
         ))}
 
         <div className="d-flex justify-content-start align-items-center">
