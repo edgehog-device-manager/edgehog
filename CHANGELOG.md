@@ -26,6 +26,7 @@ trigger delivery policies on Astarte realms that support them (v1.1.1+).
   - **Volume page** – displays details of a selected volume, including its label, driver, and options.
   - **VolumeCreate page** – enables creating a new volume with fields for label, driver, and options.
 - Added delete action for release in the releases table of an application
+- Added delete action for application in the applications table
 
 ## [0.9.3] - 2025-05-22
 ### Fixed
