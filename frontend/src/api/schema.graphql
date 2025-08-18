@@ -9,6 +9,15 @@ input ContainerCreateWithNestedImageInput {
   imageCredentialsId: ID
 }
 
+input ContainerCreateWithNestedNetworksInput {
+  id: ID
+}
+
+input ContainerCreateWithNestedVolumesInput {
+  id: ID
+  target: String!
+}
+
 input UpdateCampaignRolloutMechanismPushInput {
   "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
   forceDowngrade: Boolean
@@ -873,6 +882,11 @@ input ReleaseCreateContainersInput {
   env: JsonString
   image: ContainerCreateWithNestedImageInput
   hostname: String
+  networks: [ContainerCreateWithNestedNetworksInput!]
+  volumes: [ContainerCreateWithNestedVolumesInput!]
+  capAdd: [String!]
+  capDrop: [String!]
+  extraHosts: [String!]
   networkMode: String
   portBindings: [String!]
   privileged: Boolean
@@ -1319,6 +1333,7 @@ input ReleaseFilterInput {
   version: ReleaseFilterVersion
   applicationId: ReleaseFilterApplicationId
   application: ApplicationFilterInput
+  deployments: DeploymentFilterInput
   containers: ContainerFilterInput
 }
 
@@ -1332,6 +1347,25 @@ type Release implements Node {
   version: String!
   applicationId: ID
   application: Application
+  deployments(
+    "How to sort the records in the response"
+    sort: [DeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentConnection!
   containers(
     "How to sort the records in the response"
     sort: [ContainerSortInput]
@@ -1506,6 +1540,7 @@ input ImageFilterInput {
   imageCredentialsId: ImageFilterImageCredentialsId
   credentials: ImageCredentialsFilterInput
   devices: DeviceFilterInput
+  containers: ContainerFilterInput
 }
 
 type Image {
@@ -1532,6 +1567,19 @@ type Image {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceConnection!
+  containers(
+    "How to sort the records in the response"
+    sort: [ContainerSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [Container!]!
 }
 
 "The result of the :upgrade_deployment mutation"
@@ -1859,6 +1907,9 @@ type Container {
   env: JsonString
   privileged: Boolean
   networkMode: String!
+  extraHosts: [String!]!
+  capAdd: [String!]!
+  capDrop: [String!]!
   imageId: ID!
   image: Image!
   releases(
