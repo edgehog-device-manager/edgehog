@@ -42,7 +42,8 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
         # sending the request after a delay.
         {:error, reason} ->
           Logger.warning("Failed to send container deployment request: #{inspect(reason)}")
-          Containers.destroy_container_deployment(container_deployment, tenant: tenant)
+          :ok = Containers.destroy_container_deployment(container_deployment, tenant: tenant)
+          {:error, reason}
       end
     end)
   end

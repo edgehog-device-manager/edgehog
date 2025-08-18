@@ -23,7 +23,7 @@ defmodule Edgehog.Astarte.Device.CreateVolumeRequest do
   @behaviour Edgehog.Astarte.Device.CreateVolumeRequest.Behaviour
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Error.AstarteAPIError
+  alias Edgehog.Error
 
   @interface "io.edgehog.devicemanager.apps.CreateVolumeRequest"
 
@@ -31,19 +31,13 @@ defmodule Edgehog.Astarte.Device.CreateVolumeRequest do
   def send_create_volume_request(%AppEngine{} = client, device_id, request_data) do
     request_data = Map.from_struct(request_data)
 
-    api_call =
-      AppEngine.Devices.send_datastream(
-        client,
-        device_id,
-        @interface,
-        "/volume",
-        request_data
-      )
-
-    with {:error, api_error} <- api_call do
-      reason = AstarteAPIError.exception(status: api_error.status, response: api_error.response)
-
-      {:error, reason}
-    end
+    client
+    |> AppEngine.Devices.send_datastream(
+      device_id,
+      @interface,
+      "/volume",
+      request_data
+    )
+    |> Error.maybe_match_error(device_id, @interface)
   end
 end

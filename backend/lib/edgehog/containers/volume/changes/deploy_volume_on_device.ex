@@ -42,7 +42,8 @@ defmodule Edgehog.Containers.Volume.Changes.DeployVolumeOnDevice do
         # sending the request after a delay.
         {:error, reason} ->
           Logger.warning("Failed to send volume deployment request: #{inspect(reason)}")
-          Containers.destroy_volume_deployment(volume_deployment, tenant: tenant)
+          :ok = Containers.destroy_volume_deployment(volume_deployment, tenant: tenant)
+          {:error, reason}
       end
     end)
   end

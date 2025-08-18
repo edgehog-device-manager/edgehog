@@ -45,7 +45,8 @@ defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
         # sending the request after a delay.
         {:error, reason} ->
           Logger.warning("Failed to send image deployment request: #{inspect(reason)}")
-          Containers.destroy_image_deployment(image_deployment, tenant: tenant)
+          :ok = Containers.destroy_image_deployment(image_deployment, tenant: tenant)
+          {:error, reason}
       end
     end)
   end

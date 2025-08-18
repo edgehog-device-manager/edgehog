@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Volume.Calculations.OptionsEncoding do
 
   defp encode_options(options) do
     Enum.map(options, fn {key, value} ->
-      key <> "=" <> value
+      to_string(key) <> "=" <> to_string(value)
     end)
   end
 end

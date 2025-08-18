@@ -24,7 +24,7 @@ defmodule Edgehog.Astarte.Device.DeploymentUpdate do
   @behaviour Edgehog.Astarte.Device.DeploymentUpdate.Behaviour
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Error.AstarteAPIError
+  alias Edgehog.Error
 
   @interface "io.edgehog.devicemanager.apps.DeploymentUpdate"
 
@@ -32,13 +32,8 @@ defmodule Edgehog.Astarte.Device.DeploymentUpdate do
   def update(client, device_id, data) do
     data = Map.from_struct(data)
 
-    api_call =
-      AppEngine.Devices.send_datastream(client, device_id, @interface, "/deployment", data)
-
-    with {:error, api_error} <- api_call do
-      reason = AstarteAPIError.exception(status: api_error.status, response: api_error.response)
-
-      {:error, reason}
-    end
+    client
+    |> AppEngine.Devices.send_datastream(device_id, @interface, "/deployment", data)
+    |> Error.maybe_match_error(device_id, @interface)
   end
 end

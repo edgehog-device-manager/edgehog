@@ -42,7 +42,8 @@ defmodule Edgehog.Containers.Network.Changes.DeployNetworkOnDevice do
         # sending the request after a delay.
         {:error, reason} ->
           Logger.warning("Failed to send network deployment request: #{inspect(reason)}")
-          Containers.destroy_network_deployment(network_deployment, tenant: tenant)
+          :ok = Containers.destroy_network_deployment(network_deployment, tenant: tenant)
+          {:error, reason}
       end
     end)
   end
