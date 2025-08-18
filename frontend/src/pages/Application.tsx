@@ -104,7 +104,11 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
             />
           </Col>
         </Form.Group>
-        <ReleasesTable releasesRef={application} hideSearch />
+        <ReleasesTable
+          releasesRef={application}
+          hideSearch
+          setErrorFeedback={setErrorFeedback}
+        />
       </Page.Main>
     </Page>
   );
