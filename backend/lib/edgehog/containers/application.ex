@@ -30,7 +30,13 @@ defmodule Edgehog.Containers.Application do
   end
 
   actions do
-    defaults [:read, :destroy, update: [:name, :description]]
+    defaults [:read, update: [:name, :description]]
+
+    destroy :destroy do
+      primary? true
+      require_atomic? false
+      change Edgehog.Containers.Changes.DestroyRelatedReleases
+    end
 
     create :create do
       primary? true
