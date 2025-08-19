@@ -19,7 +19,7 @@
 */
 
 import React from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import type { UseFormRegister } from "react-hook-form";
@@ -33,7 +33,14 @@ import type {
   CreateRelease_NetworksOptionsFragment$key,
   CreateRelease_NetworksOptionsFragment$data,
 } from "api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
-import { ContainerCreateWithNestedNetworksInput } from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
+import type {
+  CreateRelease_VolumesOptionsFragment$key,
+  CreateRelease_VolumesOptionsFragment$data,
+} from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
+import {
+  ContainerCreateWithNestedNetworksInput,
+  ContainerCreateWithNestedVolumesInput,
+} from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
 import Button from "components/Button";
 import Col from "components/Col";
@@ -43,6 +50,8 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { yup, envSchema, portBindingsSchema } from "./index";
 import MultiSelect from "components/MultiSelect";
+import Select from "react-select";
+import Icon from "components/Icon";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -59,6 +68,17 @@ const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
 const NETWORKS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_NetworksOptionsFragment on RootQueryType {
     networks {
+      results {
+        id
+        label
+      }
+    }
+  }
+`;
+
+const VOLUMES_OPTIONS_FRAGMENT = graphql`
+  fragment CreateRelease_VolumesOptionsFragment on RootQueryType {
+    volumes {
       results {
         id
         label
@@ -112,6 +132,7 @@ type ContainerInput = {
   networkMode?: string;
   portBindings?: string[];
   networks: ContainerCreateWithNestedNetworksInput[];
+  volumes: ContainerCreateWithNestedVolumesInput[];
 };
 
 type ReleaseData = {
@@ -150,6 +171,14 @@ const applicationSchema = yup
               id: yup.string().required(),
             }),
           ),
+          volumes: yup.array(
+            yup
+              .object({
+                id: yup.string(),
+                target: yup.string().required(),
+              })
+              .required(),
+          ),
         }),
       )
       .nullable(),
@@ -171,6 +200,7 @@ const restartPolicyOptions = [
 type CreateReleaseProps = {
   imageCredentialsOptionsRef: CreateRelease_ImageCredentialsOptionsFragment$key;
   networksOptionsRef: CreateRelease_NetworksOptionsFragment$key;
+  volumesOptionsRef: CreateRelease_VolumesOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: ReleaseData) => void;
 };
@@ -182,6 +212,7 @@ type ContainerFormProps = {
   remove: (index: number) => void;
   listImageCredentials: CreateRelease_ImageCredentialsOptionsFragment$data["listImageCredentials"];
   networks: CreateRelease_NetworksOptionsFragment$data["networks"];
+  volumes: CreateRelease_VolumesOptionsFragment$data["volumes"];
   intl: ReturnType<typeof useIntl>;
   control: any;
 };
@@ -193,12 +224,34 @@ const ContainerForm = ({
   remove,
   listImageCredentials,
   networks,
+  volumes,
   intl,
   control,
 }: ContainerFormProps) => {
+  const volumesForm = useFieldArray({
+    control,
+    name: `containers.${index}.volumes`,
+    keyName: "id",
+  });
+  const volumesValues: ContainerCreateWithNestedVolumesInput[] =
+    useWatch({
+      control,
+      name: `containers.${index}.volumes`,
+    }) ?? [];
+
+  const canAddVolume = volumesValues.every(
+    (v) => v.id?.trim() && v.target?.trim(),
+  );
+
   return (
     <div className="border p-3 mb-3">
-      <h5>Container {index + 1}</h5>
+      <h5>
+        <FormattedMessage
+          id="components.CreateRelease.containerTitle"
+          defaultMessage="Container {containerNumber}"
+          values={{ containerNumber: index + 1 }}
+        />
+      </h5>{" "}
       <Stack gap={2}>
         <FormRow
           id={`containers-${index}-env`}
@@ -423,6 +476,146 @@ const ContainerForm = ({
             )}
           </Form.Control.Feedback>
         </FormRow>
+        <FormRow
+          id={`containers-${index}-volumes`}
+          label={
+            <FormattedMessage
+              id="forms.CreateRelease.volumesLabel"
+              defaultMessage="Volumes"
+            />
+          }
+        >
+          <div className="p-3 mb-3 bg-light border rounded">
+            <Stack gap={3}>
+              {volumesForm.fields.map((volume, volIndex) => {
+                const selectedIds = volumesValues
+                  .map((v, i) => (i !== volIndex ? v.id : null))
+                  .filter(Boolean) as string[];
+
+                const availableOptions = volumes?.results?.filter(
+                  (vol) => !selectedIds.includes(vol.id),
+                );
+
+                const fieldErrors =
+                  errors.containers?.[index]?.volumes?.[volIndex];
+
+                return (
+                  <Stack
+                    direction="horizontal"
+                    gap={3}
+                    key={volume.id}
+                    className="align-items-start"
+                  >
+                    <Stack
+                      direction="horizontal"
+                      gap={3}
+                      className="align-items-start"
+                    >
+                      <FormRow
+                        id={`containers-${index}-volumeId`}
+                        label={
+                          <FormattedMessage
+                            id="components.CreateRelease.volumeSelectLabel"
+                            defaultMessage="Volume:"
+                          />
+                        }
+                      >
+                        <div style={{ width: "250px", margin: "0 auto" }}>
+                          <Controller
+                            name={`containers.${index}.volumes.${volIndex}.id`}
+                            control={control}
+                            render={({ field }) => {
+                              const selectOptions =
+                                availableOptions?.map((vol) => ({
+                                  value: vol.id,
+                                  label: vol.label,
+                                })) || [];
+                              return (
+                                <Select
+                                  name={field.name}
+                                  value={
+                                    selectOptions.find(
+                                      (opt) => opt.value === field.value,
+                                    ) || null
+                                  }
+                                  onChange={(selected) =>
+                                    field.onChange(selected?.value)
+                                  }
+                                  onBlur={field.onBlur}
+                                  options={selectOptions}
+                                  noOptionsMessage={() => (
+                                    <FormattedMessage
+                                      id="components.CreateRelease.noVolumesMessage"
+                                      defaultMessage="No volumes available"
+                                    />
+                                  )}
+                                  className="basic-single"
+                                  classNamePrefix="select"
+                                  isSearchable
+                                />
+                              );
+                            }}
+                          />
+                        </div>
+
+                        <Form.Control.Feedback type="invalid">
+                          {fieldErrors?.id?.message && (
+                            <FormattedMessage id={fieldErrors.id.message} />
+                          )}
+                        </Form.Control.Feedback>
+                      </FormRow>
+
+                      <FormRow
+                        id={`containers-${index}-volumeTarget`}
+                        label={
+                          <FormattedMessage
+                            id="components.CreateRelease.volumeTargetLabel"
+                            defaultMessage="Target:"
+                          />
+                        }
+                      >
+                        <Form.Control
+                          {...register(
+                            `containers.${index}.volumes.${volIndex}.target` as const,
+                          )}
+                          placeholder="Target"
+                          isInvalid={!!fieldErrors?.target}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {fieldErrors?.target?.message && (
+                            <FormattedMessage id={fieldErrors.target.message} />
+                          )}
+                        </Form.Control.Feedback>
+                      </FormRow>
+                    </Stack>
+
+                    <Button
+                      variant="shadow-danger"
+                      type="button"
+                      onClick={() => volumesForm.remove(volIndex)}
+                      className="align-self-start"
+                    >
+                      <Icon className="text-danger" icon={"delete"} />
+                    </Button>
+                  </Stack>
+                );
+              })}
+
+              <div>
+                <Button
+                  variant="outline-primary"
+                  onClick={() => volumesForm.append({ id: "", target: "" })}
+                  disabled={!canAddVolume}
+                >
+                  <FormattedMessage
+                    id="forms.CreateRelease.addVolumeButton"
+                    defaultMessage="Add Volume"
+                  />
+                </Button>
+              </div>
+            </Stack>
+          </div>
+        </FormRow>
 
         <FormRow
           id={`containers-${index}-privileged`}
@@ -467,6 +660,7 @@ const ContainerForm = ({
 const CreateRelease = ({
   imageCredentialsOptionsRef,
   networksOptionsRef,
+  volumesOptionsRef,
   isLoading = false,
   onSubmit,
 }: CreateReleaseProps) => {
@@ -481,6 +675,8 @@ const CreateRelease = ({
     NETWORKS_OPTIONS_FRAGMENT,
     networksOptionsRef,
   );
+  const { volumes } = useFragment(VOLUMES_OPTIONS_FRAGMENT, volumesOptionsRef);
+
   const {
     register,
     handleSubmit,
@@ -515,6 +711,10 @@ const CreateRelease = ({
             networkMode: container.networkMode || undefined,
             portBindings: container.portBindings || undefined,
             networks: container.networks?.map((n) => ({ id: n.id })) || [],
+            volumes: container.volumes?.map((v) => ({
+              id: v.id,
+              target: v.target,
+            })),
           })),
         };
 
@@ -569,6 +769,7 @@ const CreateRelease = ({
             remove={remove}
             listImageCredentials={listImageCredentials}
             networks={networks}
+            volumes={volumes}
             intl={intl}
             control={control}
           />
@@ -577,7 +778,13 @@ const CreateRelease = ({
         <div className="d-flex justify-content-start align-items-center">
           <Button
             variant="secondary"
-            onClick={() => append({ image: { reference: "" }, networks: [] })}
+            onClick={() =>
+              append({
+                image: { reference: "" },
+                networks: [],
+                volumes: [],
+              })
+            }
           >
             <FormattedMessage
               id="components.CreateRelease.addContainerButton"

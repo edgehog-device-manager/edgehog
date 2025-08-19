@@ -48,6 +48,7 @@ const CREATE_RELEASE_PAGE_QUERY = graphql`
   query ReleaseCreate_getOptions_Query {
     ...CreateRelease_ImageCredentialsOptionsFragment
     ...CreateRelease_NetworksOptionsFragment
+    ...CreateRelease_VolumesOptionsFragment
   }
 `;
 
@@ -145,6 +146,7 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
       <CreateRelease
         imageCredentialsOptionsRef={releaseOptions}
         networksOptionsRef={releaseOptions}
+        volumesOptionsRef={releaseOptions}
         onSubmit={handleCreateRelease}
         isLoading={isCreatingRelease}
       />
