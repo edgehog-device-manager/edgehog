@@ -35,8 +35,10 @@ defmodule Edgehog.Containers.Container do
 
     paginate_relationship_with networks: :relay,
                                devices: :relay,
+                               volumes: :relay,
                                releases: :relay,
-                               container_volumes: :relay
+                               container_volumes: :relay,
+                               device_mappings: :relay
   end
 
   actions do
@@ -123,6 +125,7 @@ defmodule Edgehog.Containers.Container do
       argument :image, :map
       argument :networks, {:array, :map}
       argument :volumes, {:array, :map}
+      argument :device_mappings, {:array, :map}
 
       change manage_relationship(:volumes,
                on_no_match: :error,
@@ -139,6 +142,10 @@ defmodule Edgehog.Containers.Container do
       change manage_relationship(:networks,
                on_no_match: :error,
                on_lookup: :relate
+             )
+
+      change manage_relationship(:device_mappings,
+               type: :create
              )
     end
 
@@ -350,6 +357,10 @@ defmodule Edgehog.Containers.Container do
     end
 
     has_many :container_volumes, ContainerVolume do
+      public? true
+    end
+
+    has_many :device_mappings, Edgehog.Containers.DeviceMapping do
       public? true
     end
   end
