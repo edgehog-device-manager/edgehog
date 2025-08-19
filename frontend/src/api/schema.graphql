@@ -880,17 +880,29 @@ input ApplicationCreateInitialReleaseInput {
 
 input ReleaseCreateContainersInput {
   env: JsonString
+  memory: Int
   image: ContainerCreateWithNestedImageInput
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
   capAdd: [String!]
   capDrop: [String!]
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealTimePeriod: Int
+  cpuRealtimeRuntime: Int
   extraHosts: [String!]
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
   networkMode: String
   portBindings: [String!]
   privileged: Boolean
+  readOnlyRootfs: Boolean
   restartPolicy: String
+  storageOpt: [String!]
+  tmpfs: [String!]
+  volumeDriver: String
 }
 
 "The result of the :create_volume mutation"
@@ -1771,6 +1783,16 @@ enum ContainerSortField {
   ENV
   PRIVILEGED
   NETWORK_MODE
+  CPU_PERIOD
+  CPU_QUOTA
+  CPU_REAL_TIME_PERIOD
+  CPU_REALTIME_RUNTIME
+  MEMORY
+  MEMORY_RESERVATION
+  MEMORY_SWAP
+  MEMORY_SWAPPINESS
+  VOLUME_DRIVER
+  READ_ONLY_ROOTFS
   IMAGE_ID
 }
 
@@ -1804,6 +1826,118 @@ input ContainerFilterImageId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+}
+
+input ContainerFilterReadOnlyRootfs {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input ContainerFilterVolumeDriver {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterMemorySwappiness {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterMemorySwap {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterMemoryReservation {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterMemory {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuRealtimeRuntime {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuRealTimePeriod {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuQuota {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuPeriod {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
 }
 
 input ContainerFilterNetworkMode {
@@ -1886,6 +2020,16 @@ input ContainerFilterInput {
   env: ContainerFilterEnv
   privileged: ContainerFilterPrivileged
   networkMode: ContainerFilterNetworkMode
+  cpuPeriod: ContainerFilterCpuPeriod
+  cpuQuota: ContainerFilterCpuQuota
+  cpuRealTimePeriod: ContainerFilterCpuRealTimePeriod
+  cpuRealtimeRuntime: ContainerFilterCpuRealtimeRuntime
+  memory: ContainerFilterMemory
+  memoryReservation: ContainerFilterMemoryReservation
+  memorySwap: ContainerFilterMemorySwap
+  memorySwappiness: ContainerFilterMemorySwappiness
+  volumeDriver: ContainerFilterVolumeDriver
+  readOnlyRootfs: ContainerFilterReadOnlyRootfs
   imageId: ContainerFilterImageId
   image: ImageFilterInput
   releases: ReleaseFilterInput
@@ -1910,6 +2054,18 @@ type Container {
   extraHosts: [String!]!
   capAdd: [String!]!
   capDrop: [String!]!
+  cpuPeriod: Int!
+  cpuQuota: Int!
+  cpuRealTimePeriod: Int!
+  cpuRealtimeRuntime: Int!
+  memory: Int!
+  memoryReservation: Int!
+  memorySwap: Int!
+  memorySwappiness: Int!
+  volumeDriver: String!
+  storageOpt: [String!]!
+  readOnlyRootfs: Boolean!
+  tmpfs: [String!]!
   imageId: ID!
   image: Image!
   releases(
