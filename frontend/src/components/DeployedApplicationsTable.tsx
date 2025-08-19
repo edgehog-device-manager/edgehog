@@ -20,8 +20,9 @@
 
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import semver from "semver";
+import Select, { SingleValue } from "react-select";
 
 import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
 import type {
@@ -41,7 +42,6 @@ import Table, { createColumnHelper } from "components/Table";
 import Button from "./Button";
 import ConfirmModal from "./ConfirmModal";
 import DeleteModal from "./DeleteModal";
-import Form from "components/Form";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -366,6 +366,11 @@ type UpgradeTargetRelease = {
   version: string;
 };
 
+type SelectOption = {
+  value: string;
+  label: string;
+};
+
 const DeployedApplicationsTable = ({
   className,
   deviceRef,
@@ -390,6 +395,23 @@ const DeployedApplicationsTable = ({
   const [selectedDeployment, setSelectedDeployment] = useState<
     (typeof deployments)[0] | null
   >(null);
+
+  const upgradeReleaseOptions: SelectOption[] = useMemo(() => {
+    if (!selectedDeployment?.upgradeTargetReleases) return [];
+
+    return selectedDeployment.upgradeTargetReleases.map(({ node }) => ({
+      value: node.id,
+      label: node.version,
+    }));
+  }, [selectedDeployment?.upgradeTargetReleases]);
+
+  const selectedUpgradeReleaseOption = useMemo(() => {
+    return (
+      upgradeReleaseOptions.find(
+        (option) => option.value === upgradeTargetRelease?.id,
+      ) || null
+    );
+  }, [upgradeReleaseOptions, upgradeTargetRelease?.id]);
 
   const [startDeployment] =
     useMutation<DeployedApplicationsTable_startDeployment_Mutation>(
@@ -417,6 +439,20 @@ const DeployedApplicationsTable = ({
   const handleShowUpgradeModal = useCallback(() => {
     setShowUpgradeModal(true);
   }, [setShowUpgradeModal]);
+
+  const handleUpgradeReleaseChange = useCallback(
+    (option: SingleValue<SelectOption>) => {
+      if (option) {
+        setUpgradeTargetRelease({
+          id: option.value,
+          version: option.label,
+        });
+      } else {
+        setUpgradeTargetRelease(null);
+      }
+    },
+    [],
+  );
 
   const deployments =
     data.applicationDeployments?.edges?.map((edge) => ({
@@ -762,6 +798,7 @@ const DeployedApplicationsTable = ({
           onCancel={() => {
             setShowUpgradeModal(false);
             setUpgradeTargetRelease(null);
+            setSelectedDeployment(null);
           }}
           onConfirm={() => {
             if (selectedDeployment && upgradeTargetRelease) {
@@ -772,6 +809,7 @@ const DeployedApplicationsTable = ({
             }
             setShowUpgradeModal(false);
             setUpgradeTargetRelease(null);
+            setSelectedDeployment(null);
           }}
           title={
             <FormattedMessage
@@ -792,44 +830,42 @@ const DeployedApplicationsTable = ({
             />
           </p>
 
-          <Form.Select
-            defaultValue=""
-            onChange={(e) => {
-              const selectedRelease =
-                selectedDeployment?.upgradeTargetReleases?.find(
-                  (release) => release.node.id === e.target.value,
-                );
-              if (selectedRelease) {
-                setUpgradeTargetRelease({
-                  id: selectedRelease.node.id,
-                  version: selectedRelease.node.version,
-                });
-              }
+          <Select
+            value={selectedUpgradeReleaseOption}
+            onChange={handleUpgradeReleaseChange}
+            options={upgradeReleaseOptions}
+            isClearable
+            placeholder={intl.formatMessage({
+              id: "components.DeployedApplicationsTable.selectOption",
+              defaultMessage: "Select a Release Version",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              inputValue
+                ? intl.formatMessage(
+                    {
+                      id: "components.DeployedApplicationsTable.noReleasesFoundMatching",
+                      defaultMessage:
+                        'No release versions found matching "{inputValue}"',
+                    },
+                    { inputValue },
+                  )
+                : upgradeReleaseOptions.length === 0
+                  ? intl.formatMessage({
+                      id: "components.DeployedApplicationsTable.noReleasesAvailable",
+                      defaultMessage: "No Release Versions Available",
+                    })
+                  : intl.formatMessage({
+                      id: "components.DeployedApplicationsTable.selectOption",
+                      defaultMessage: "Select a Release Version",
+                    })
+            }
+            filterOption={(option, inputValue) => {
+              // Only search by release version (label), not by ID (value)
+              return option.label
+                .toLowerCase()
+                .includes(inputValue.toLowerCase());
             }}
-          >
-            {selectedDeployment?.upgradeTargetReleases?.length ? (
-              <>
-                <option value="" disabled>
-                  {intl.formatMessage({
-                    id: "components.DeployedApplicationsTable.selectOption",
-                    defaultMessage: "Select a Release Version",
-                  })}
-                </option>
-                {selectedDeployment.upgradeTargetReleases.map(({ node }) => (
-                  <option key={node.id} value={node.id}>
-                    {node.version}
-                  </option>
-                ))}
-              </>
-            ) : (
-              <option value="" disabled>
-                {intl.formatMessage({
-                  id: "components.DeployedApplicationsTable.noReleasesAvailable",
-                  defaultMessage: "No Release Versions Available",
-                })}
-              </option>
-            )}
-          </Form.Select>
+          />
         </ConfirmModal>
       )}
     </div>
