@@ -52,7 +52,20 @@ defmodule Edgehog.Containers.Container do
         :extra_hosts,
         :image_id,
         :cap_add,
-        :cap_drop
+        :cap_drop,
+        :cpu_period,
+        :cpu_quota,
+        :cpu_real_time_period,
+        :cpu_realtime_runtime,
+        :memory,
+        :memory_reservation,
+        :memory_swap,
+        :memory_swappiness,
+        :volume_driver,
+        :storage_opt,
+        :read_only_rootfs,
+        :tmpfs,
+        :image_id
       ],
       update: [
         :port_bindings,
@@ -64,7 +77,20 @@ defmodule Edgehog.Containers.Container do
         :extra_hosts,
         :image_id,
         :cap_add,
-        :cap_drop
+        :cap_drop,
+        :cpu_period,
+        :cpu_quota,
+        :cpu_real_time_period,
+        :cpu_realtime_runtime,
+        :memory,
+        :memory_reservation,
+        :memory_swap,
+        :memory_swappiness,
+        :volume_driver,
+        :storage_opt,
+        :read_only_rootfs,
+        :tmpfs,
+        :image_id
       ]
     ]
 
@@ -78,7 +104,19 @@ defmodule Edgehog.Containers.Container do
         :network_mode,
         :extra_hosts,
         :cap_add,
-        :cap_drop
+        :cap_drop,
+        :cpu_period,
+        :cpu_quota,
+        :cpu_real_time_period,
+        :cpu_realtime_runtime,
+        :memory,
+        :memory_reservation,
+        :memory_swap,
+        :memory_swappiness,
+        :volume_driver,
+        :storage_opt,
+        :read_only_rootfs,
+        :tmpfs
       ]
 
       argument :image, :map
@@ -114,7 +152,20 @@ defmodule Edgehog.Containers.Container do
         :image_id,
         :extra_hosts,
         :cap_add,
-        :cap_drop
+        :cap_drop,
+        :cpu_period,
+        :cpu_quota,
+        :cpu_real_time_period,
+        :cpu_realtime_runtime,
+        :memory,
+        :memory_reservation,
+        :memory_swap,
+        :memory_swappiness,
+        :volume_driver,
+        :storage_opt,
+        :read_only_rootfs,
+        :tmpfs,
+        :image_id
       ]
 
       argument :volumes, {:array, :map}
@@ -190,6 +241,79 @@ defmodule Edgehog.Containers.Container do
       default []
       allow_nil? false
       public? true
+    end
+
+    attribute :cpu_period, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cpu_quota, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cpu_real_time_period, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cpu_realtime_runtime, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memory, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memory_reservation, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memory_swap, :integer do
+      default -2
+      public? true
+      allow_nil? false
+    end
+
+    attribute :memory_swappiness, :integer do
+      default -1
+      public? true
+      allow_nil? false
+    end
+
+    attribute :volume_driver, :string do
+      default ""
+      public? true
+      allow_nil? false
+      constraints allow_empty?: true
+    end
+
+    attribute :storage_opt, {:array, :string} do
+      default []
+      public? true
+      allow_nil? false
+    end
+
+    attribute :read_only_rootfs, :boolean do
+      default true
+      public? true
+      allow_nil? false
+    end
+
+    attribute :tmpfs, {:array, :string} do
+      default []
+      public? true
+      allow_nil? false
     end
 
     timestamps()

@@ -57,10 +57,22 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         networkIds: Enum.map(container.networks, & &1.id),
         networkMode: container.network_mode,
         portBindings: container.port_bindings,
-        privileged: container.privileged,
         extraHosts: container.extra_hosts,
         capAdd: container.cap_add,
-        capDrop: container.cap_drop
+        capDrop: container.cap_drop,
+        cpuPeriod: container.cpu_period,
+        cpuQuota: container.cpu_quota,
+        cpuRealTimePeriod: container.cpu_real_time_period,
+        cpuRealtimeRuntime: container.cpu_realtime_runtime,
+        memory: container.memory,
+        memoryReservation: container.memory_reservation,
+        memorySwap: container.memory_swap,
+        memorySwappiness: container.memory_swappiness,
+        volumeDriver: container.volume_driver,
+        storageOpt: container.storage_opt,
+        readOnlyRootfs: container.read_only_rootfs,
+        tmpfs: container.tmpfs,
+        privileged: container.privileged
       }
 
       with :ok <-
