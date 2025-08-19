@@ -92,6 +92,7 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.applications:
       case Route.imageCredentials:
       case Route.volumes:
+      case Route.networks:
       case Route.login:
       case Route.logout:
         return [currentRoute];
@@ -159,6 +160,11 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.volumeEdit:
       case Route.volumesNew:
         return [{ route: Route.volumes }, currentRoute];
+
+      case Route.networksEdit:
+      case Route.networksNew:
+        return [{ route: Route.networks }, currentRoute];
+
       default:
         return [];
     }

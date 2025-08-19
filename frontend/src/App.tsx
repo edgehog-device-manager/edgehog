@@ -61,6 +61,9 @@ import UpdateChannels from "pages/UpdateChannels";
 import Volumes from "pages/Volumes";
 import Volume from "pages/Volume";
 import VolumeCreatePage from "pages/VolumeCreate";
+import Networks from "pages/Networks";
+import Network from "pages/Network";
+import NetworkCreatePage from "pages/NetworkCreate";
 
 import { bugs, repository, version } from "../package.json";
 
@@ -112,6 +115,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.volumes, element: <Volumes /> },
   { path: Route.volumeEdit, element: <Volume /> },
   { path: Route.volumesNew, element: <VolumeCreatePage /> },
+  { path: Route.networks, element: <Networks /> },
+  { path: Route.networksEdit, element: <Network /> },
+  { path: Route.networksNew, element: <NetworkCreatePage /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

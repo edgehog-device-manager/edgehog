@@ -27,6 +27,10 @@ trigger delivery policies on Astarte realms that support them (v1.1.1+).
   - **VolumeCreate page** – enables creating a new volume with fields for label, driver, and options.
 - Added delete action for release in the releases table of an application
 - Added delete action for application in the applications table
+- Implemented networks management feature, enabling users to view and create networks.
+  - **Networks page** – lists all existing networks and allows navigation to individual network pages.
+  - **Network page** – displays details of a selected network, including its label, driver, internal, enableIpv6, and options.
+  - **NetworkCreate page** – enables creating a new network with fields for label, driver, internal, enableIpv6, and options.
 
 ## [0.9.3] - 2025-05-22
 ### Fixed
