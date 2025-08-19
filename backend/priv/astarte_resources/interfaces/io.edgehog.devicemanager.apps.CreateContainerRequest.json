@@ -52,6 +52,15 @@
       "doc": "The ids of the volumes to mount on the container."
     },
     {
+      "endpoint": "/container/deviceMappingIds",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container device mappings ids",
+      "doc": "The ids of the device mappings to mount on the container."
+    },
+    {
       "endpoint": "/container/hostname",
       "type": "string",
       "database_retention_policy": "use_ttl",

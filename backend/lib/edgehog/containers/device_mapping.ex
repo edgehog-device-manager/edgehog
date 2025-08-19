@@ -20,26 +20,50 @@
 
 defmodule Edgehog.Containers.DeviceMapping do
   @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
+  use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource],
-    data_layer: AshPostgres.DataLayer
+    extensions: [AshGraphql.Resource]
+
+  alias Edgehog.Containers.Container
 
   graphql do
     type :device_mapping
   end
 
   actions do
-    defaults [:read, :destroy, create: [], update: []]
+    defaults [
+      :read,
+      :destroy,
+      create: [:path_on_host, :path_in_container, :cgroup_permissions],
+      update: [:path_on_host, :path_in_container, :cgroup_permissions]
+    ]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :path_on_host, :string
-    attribute :path_in_container, :string
-    attribute :cgroup_permissions, :string
+    attribute :path_on_host, :string do
+      public? true
+      allow_nil? false
+    end
+
+    attribute :path_in_container, :string do
+      public? true
+      allow_nil? false
+    end
+
+    attribute :cgroup_permissions, :string do
+      public? true
+      allow_nil? false
+    end
+  end
+
+  relationships do
+    belongs_to :container, Container do
+      source_attribute :container_id
+      attribute_type :uuid
+      public? true
+    end
   end
 
   postgres do
