@@ -345,6 +345,9 @@
   "components.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
+  "components.CreateRelease.containerTitle": {
+    "defaultMessage": "Container {containerNumber}"
+  },
   "components.CreateRelease.containersTitle": {
     "defaultMessage": "Containers"
   },
@@ -366,8 +369,14 @@
   "components.CreateRelease.networkModeLabel": {
     "defaultMessage": "Network Mode"
   },
+  "components.CreateRelease.networksLabel": {
+    "defaultMessage": "Networks"
+  },
   "components.CreateRelease.noContainersFeedback": {
     "defaultMessage": "The release does not include any container."
+  },
+  "components.CreateRelease.noVolumesMessage": {
+    "defaultMessage": "No volumes available"
   },
   "components.CreateRelease.portBindingsLabel": {
     "defaultMessage": "Port Bindings"
@@ -389,6 +398,12 @@
   },
   "components.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "components.CreateRelease.volumeSelectLabel": {
+    "defaultMessage": "Volume:"
+  },
+  "components.CreateRelease.volumeTargetLabel": {
+    "defaultMessage": "Target:"
   },
   "components.CreateSystemModelForm.addPartNumberButton": {
     "defaultMessage": "Add part number"
@@ -972,6 +987,12 @@
   },
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "forms.CreateRelease.addVolumeButton": {
+    "defaultMessage": "Add Volume"
+  },
+  "forms.CreateRelease.volumesLabel": {
+    "defaultMessage": "Volumes"
   },
   "forms.CreateUpdateCampaign.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
