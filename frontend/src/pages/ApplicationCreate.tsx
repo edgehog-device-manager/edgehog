@@ -18,16 +18,36 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useMutation } from "react-relay/hooks";
+import {
+  graphql,
+  PreloadedQuery,
+  useMutation,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
+import { ErrorBoundary } from "react-error-boundary";
 
+import type {
+  ApplicationCreate_getOptions_Query,
+  ApplicationCreate_getOptions_Query$data,
+} from "api/__generated__/ApplicationCreate_getOptions_Query.graphql";
 import type { ApplicationCreate_createApplication_Mutation } from "api/__generated__/ApplicationCreate_createApplication_Mutation.graphql";
+
 import Alert from "components/Alert";
 import Page from "components/Page";
 import CreateApplicationForm from "forms/CreateApplication";
 import type { ApplicationData } from "forms/CreateApplication";
 import { Route, useNavigate } from "Navigation";
+import Center from "components/Center";
+import Spinner from "components/Spinner";
+
+const CREATE_APPLICATION_PAGE_QUERY = graphql`
+  query ApplicationCreate_getOptions_Query {
+    ...CreateApplication_OptionsFragment
+  }
+`;
 
 const CREATE_APPLICATION_MUTATION = graphql`
   mutation ApplicationCreate_createApplication_Mutation(
@@ -42,7 +62,11 @@ const CREATE_APPLICATION_MUTATION = graphql`
   }
 `;
 
-const ApplicationCreatePage = () => {
+type ApplicationOptions = {
+  applicationOptions: ApplicationCreate_getOptions_Query$data;
+};
+
+const Application = ({ applicationOptions }: ApplicationOptions) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
 
@@ -114,30 +138,87 @@ const ApplicationCreatePage = () => {
   );
 
   return (
-    <Page>
-      <Page.Header
-        title={
-          <FormattedMessage
-            id="pages.ApplicationCreate.title"
-            defaultMessage="Create Application"
-          />
-        }
+    <>
+      <Alert
+        show={!!errorFeedback}
+        variant="danger"
+        onClose={() => setErrorFeedback(null)}
+        dismissible
+      >
+        {errorFeedback}
+      </Alert>
+      <CreateApplicationForm
+        optionsRef={applicationOptions}
+        onSubmit={handleCreateApplication}
+        isLoading={isCreatingApplication}
       />
-      <Page.Main>
-        <Alert
-          show={!!errorFeedback}
-          variant="danger"
-          onClose={() => setErrorFeedback(null)}
-          dismissible
-        >
-          {errorFeedback}
-        </Alert>
-        <CreateApplicationForm
-          onSubmit={handleCreateApplication}
-          isLoading={isCreatingApplication}
-        />
-      </Page.Main>
-    </Page>
+    </>
+  );
+};
+
+type ApplicationWrapperProps = {
+  getApplicationOptionsQuery: PreloadedQuery<ApplicationCreate_getOptions_Query>;
+};
+
+const ApplicationWrapper = ({
+  getApplicationOptionsQuery,
+}: ApplicationWrapperProps) => {
+  const applicationOptions = usePreloadedQuery(
+    CREATE_APPLICATION_PAGE_QUERY,
+    getApplicationOptionsQuery,
+  );
+
+  return <Application applicationOptions={applicationOptions} />;
+};
+
+const ApplicationCreatePage = () => {
+  const [getApplicationOptionsQuery, getApplicationOptions] =
+    useQueryLoader<ApplicationCreate_getOptions_Query>(
+      CREATE_APPLICATION_PAGE_QUERY,
+    );
+
+  const fetchApplicationOptions = useCallback(
+    () => getApplicationOptions({}, { fetchPolicy: "network-only" }),
+    [getApplicationOptions],
+  );
+
+  useEffect(fetchApplicationOptions, [fetchApplicationOptions]);
+
+  return (
+    <Suspense
+      fallback={
+        <Center data-testid="page-loading">
+          <Spinner />
+        </Center>
+      }
+    >
+      <ErrorBoundary
+        FallbackComponent={(props) => (
+          <Center data-testid="page-error">
+            <Page.LoadingError onRetry={props.resetErrorBoundary} />
+          </Center>
+        )}
+        onReset={fetchApplicationOptions}
+      >
+        {getApplicationOptionsQuery && (
+          <Page>
+            <Page.Header
+              title={
+                <FormattedMessage
+                  id="pages.ApplicationCreate.title"
+                  defaultMessage="Create Application"
+                />
+              }
+            />
+            <Page.Main>
+              <ApplicationWrapper
+                getApplicationOptionsQuery={getApplicationOptionsQuery}
+              />
+            </Page.Main>
+          </Page>
+        )}
+      </ErrorBoundary>
+    </Suspense>
   );
 };
 

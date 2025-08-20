@@ -49,6 +49,9 @@ const GET_APPLICATION_QUERY = graphql`
     application(id: $applicationId) {
       name
       description
+      systemModel {
+        name
+      }
       ...ReleasesTable_ReleaseFragment
     }
   }
@@ -88,6 +91,25 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
         >
           {errorFeedback}
         </Alert>
+        <Form.Group
+          as={Row}
+          controlId="system-model-name"
+          className="mt-3 mb-4"
+        >
+          <Form.Label column sm={2}>
+            <FormattedMessage
+              id="pages.Application.systemModel"
+              defaultMessage="System Model"
+            />
+          </Form.Label>
+          <Col sm={10}>
+            <Form.Control
+              value={application.systemModel?.name ?? ""}
+              readOnly
+            />
+          </Col>
+        </Form.Group>
+
         <Form.Group as={Row} controlId="application" className="mt-3 mb-4">
           <Form.Label column sm={2}>
             <FormattedMessage
