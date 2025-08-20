@@ -18,12 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.Supervisor do
+defmodule Edgehog.Campaigns.Supervisor do
   @moduledoc false
   use Supervisor
 
-  alias Edgehog.UpdateCampaigns.ExecutorRegistry
-  alias Edgehog.UpdateCampaigns.ExecutorSupervisor
+  alias Edgehog.Campaigns.ExecutorRegistry
+  alias Edgehog.Campaigns.ExecutorSupervisor
+
+  require Ash.Query
 
   @base_children [
     {Registry, name: ExecutorRegistry, keys: :unique},
@@ -42,7 +44,19 @@ defmodule Edgehog.UpdateCampaigns.Supervisor do
   end
 
   case @mix_env do
-    :test -> defp children, do: @base_children
-    _other -> defp children, do: @base_children ++ [Edgehog.UpdateCampaigns.Resumer]
+    :test ->
+      defp children, do: @base_children
+
+    _other ->
+      defp children, do: @base_children ++ [update_campaigns_resumer()]
+
+      defp update_campaigns_resumer do
+        update_campaigns_stream =
+          UpdateCampaign
+          |> Ash.Query.for_read(:read_all_resumable)
+          |> Ash.stream!()
+
+        {Edgehog.Campaigns.Resumer, update_campaigns_stream}
+      end
   end
 end

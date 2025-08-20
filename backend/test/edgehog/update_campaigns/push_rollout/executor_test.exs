@@ -784,7 +784,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
   defp executor_args(update_campaign) do
     [
       tenant_id: update_campaign.tenant_id,
-      update_campaign_id: update_campaign.id,
+      campaign_id: update_campaign.id,
       # This ensures the Executor waits for our :start_execution message to start
       wait_for_start_execution: true
     ]

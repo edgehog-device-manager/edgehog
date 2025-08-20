@@ -18,26 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.Resumer do
+defmodule Edgehog.Campaigns.Resumer do
   @moduledoc false
   use Task, restart: :transient
 
-  alias Edgehog.UpdateCampaigns.ExecutorSupervisor
-  alias Edgehog.UpdateCampaigns.Resumer.Core
+  alias Edgehog.Campaigns.ExecutorSupervisor
 
   require Logger
 
-  def start_link(_arg) do
-    Task.start_link(__MODULE__, :resume, [])
+  def start_link(campaigns_stream) do
+    Task.start_link(__MODULE__, :resume, [campaigns_stream])
   end
 
-  def resume do
+  def resume(campaigns_stream) do
     Logger.info("Resuming Update Campaigns")
 
     # For each resumable update campaign, we start its executor. `start_executor!/1` already
     # handles the case where the executor is already running (if, e.g., we crashed and we're
     # restarted again).
-    Enum.each(Core.stream_resumable_update_campaigns(), &ExecutorSupervisor.start_executor!/1)
+    Enum.each(campaigns_stream, &ExecutorSupervisor.start_executor!/1)
     Logger.info("Finished resuming Update Campaigns")
 
     :ok

@@ -26,7 +26,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.ExecutorRegistry
+  alias Edgehog.Campaigns.ExecutorRegistry
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
   describe "createUpdateCampaign mutation" do
@@ -454,7 +454,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
   end
 
   defp fetch_update_campaign_executor_pid(tenant, update_campaign) do
-    key = {tenant.tenant_id, update_campaign.id}
+    key = {tenant.tenant_id, update_campaign.id, :ota_update}
 
     case Registry.lookup(ExecutorRegistry, key) do
       [] -> :error

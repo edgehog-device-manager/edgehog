@@ -23,7 +23,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
   use Ash.Resource.Change
 
   alias Edgehog.BaseImages.BaseImage
-  alias Edgehog.UpdateCampaigns.ExecutorSupervisor
+  alias Edgehog.Campaigns.ExecutorSupervisor
   alias Edgehog.UpdateCampaigns.UpdateChannel
   alias Edgehog.UpdateCampaigns.UpdateTarget
 

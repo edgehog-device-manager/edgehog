@@ -18,15 +18,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
+defmodule Edgehog.Campaigns.ExecutorSupervisor do
   @moduledoc false
   use DynamicSupervisor
 
-  alias Edgehog.UpdateCampaigns.ExecutorRegistry
+  alias Edgehog.Campaigns.ExecutorRegistry
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
   require Logger
+
+  @mix_env Mix.env()
 
   # Public API
 
@@ -34,27 +36,33 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
     DynamicSupervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
-  def start_executor!(update_campaign) do
-    %UpdateCampaign{
-      id: update_campaign_id,
-      rollout_mechanism: %{value: rollout_mechanism},
-      tenant_id: tenant_id
-    } = update_campaign
+  @doc """
+  Starts an executor for the given campaign in the `ExecutorRegistry` registry,
+  with id `{tenant, campaign_id, type}` where `type` is the type of campaign (for
+  now only `:ot_update` campaign types are supported).
 
-    executor_id = {tenant_id, update_campaign_id}
+
+  """
+  def start_executor!(%UpdateCampaign{id: id, rollout_mechanism: %{value: rollout}, tenant_id: tenant_id} = _campaign),
+    do: do_start_executor!(id, rollout, tenant_id, :ota_update)
+
+  defp do_start_executor!(campaign_id, rollout_mechanism, tenant_id, type) do
+    executor_id = {tenant_id, campaign_id, type}
     name = {:via, Registry, {ExecutorRegistry, executor_id}}
 
     base_args = [
       name: name,
-      update_campaign_id: update_campaign_id,
+      campaign_id: campaign_id,
       tenant_id: tenant_id
     ]
 
-    child_spec =
-      rollout_mechanism
-      |> executor_child_spec(base_args)
-      |> Supervisor.child_spec(id: executor_id)
+    rollout_mechanism
+    |> executor_child_spec(base_args)
+    |> Supervisor.child_spec(id: executor_id)
+    |> start_child!(executor_id)
+  end
 
+  defp start_child!(child_spec, {tenant_id, campaign_id, type}) do
     case DynamicSupervisor.start_child(__MODULE__, child_spec) do
       {:ok, pid} ->
         pid
@@ -64,7 +72,7 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
 
       {:error, reason} ->
         msg =
-          "Update Campaign executor for campaign #{update_campaign_id} failed to start: " <>
+          "(tenant #{tenant_id}) Campaign executor for campaign #{campaign_id} of type #{inspect(type)} failed to start: " <>
             "#{inspect(reason)}"
 
         raise msg
@@ -79,13 +87,13 @@ defmodule Edgehog.UpdateCampaigns.ExecutorSupervisor do
     {PushRollout.Executor, args}
   end
 
-  if Mix.env() == :test do
+  case @mix_env do
     # Pass additional executor-specific test args only in the test env
-    defp executor_test_args(%PushRollout{} = _rollout_mechanism) do
-      [wait_for_start_execution: true]
-    end
-  else
-    defp executor_test_args(_rollout), do: []
+    :test ->
+      defp executor_test_args(%PushRollout{} = _rollout_mechanism), do: [wait_for_start_execution: true]
+
+    _other ->
+      defp executor_test_args(_rollout), do: []
   end
 
   # Callbacks
