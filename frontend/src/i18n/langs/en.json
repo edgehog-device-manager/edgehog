@@ -95,14 +95,29 @@
   "components.AddAvailableApplications.deviceOfflineError": {
     "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
   },
+  "components.AddAvailableApplications.noApplicationsAvailable": {
+    "defaultMessage": "No applications available"
+  },
+  "components.AddAvailableApplications.noApplicationsFoundMatching": {
+    "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "components.AddAvailableApplications.noReleasesAvailable": {
+    "defaultMessage": "No releases available for this application"
+  },
+  "components.AddAvailableApplications.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "components.AddAvailableApplications.searchPlaceholder": {
+    "defaultMessage": "Search or select an application..."
+  },
   "components.AddAvailableApplications.selectARelease": {
     "defaultMessage": "Select a release"
   },
-  "components.AddAvailableApplications.selectAnApplication": {
-    "defaultMessage": "Select an application"
-  },
   "components.AddAvailableApplications.selectApplication": {
     "defaultMessage": "Select Application"
+  },
+  "components.AddAvailableApplications.selectApplicationFirst": {
+    "defaultMessage": "Please select an application first"
   },
   "components.AddAvailableApplications.selectRelease": {
     "defaultMessage": "Select Release"
@@ -511,6 +526,9 @@
   },
   "components.DeployedApplicationsTable.noReleasesAvailable": {
     "defaultMessage": "No Release Versions Available"
+  },
+  "components.DeployedApplicationsTable.noReleasesFoundMatching": {
+    "defaultMessage": "No release versions found matching \"{inputValue}\""
   },
   "components.DeployedApplicationsTable.ready": {
     "defaultMessage": "Ready"

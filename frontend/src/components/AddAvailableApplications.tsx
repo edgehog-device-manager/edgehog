@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useMemo } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay/hooks";
+import Select, { SingleValue } from "react-select";
 
 import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from "api/__generated__/AddAvailableApplications_GetApplicationsWithReleases_Query.graphql";
 import type { AddAvailableApplications_DeployRelease_Mutation } from "api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
@@ -68,12 +69,19 @@ type AddAvailableApplicationsProps = {
   onDeployComplete: () => void;
 };
 
+type SelectOption = {
+  value: string;
+  label: string;
+};
+
 const AddAvailableApplications = ({
   deviceId,
   isOnline,
   setErrorFeedback,
   onDeployComplete,
 }: AddAvailableApplicationsProps) => {
+  const intl = useIntl();
+
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
   const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
 
@@ -84,27 +92,64 @@ const AddAvailableApplications = ({
       { fetchPolicy: "store-and-network" },
     );
 
+  const applicationOptions: SelectOption[] = useMemo(() => {
+    if (!data.applications?.results) return [];
+
+    return data.applications.results.map((app) => ({
+      value: app.id,
+      label: app.name,
+    }));
+  }, [data.applications?.results]);
+
+  const selectedApplicationOption = useMemo(() => {
+    return (
+      applicationOptions.find((option) => option.value === selectedApp) || null
+    );
+  }, [applicationOptions, selectedApp]);
+
+  const releaseOptions: SelectOption[] = useMemo(() => {
+    if (!selectedApp || !data.applications?.results) return [];
+
+    const selectedApplication = data.applications.results.find(
+      (app) => app.id === selectedApp,
+    );
+
+    if (!selectedApplication?.releases.edges) return [];
+
+    return selectedApplication.releases.edges.map(({ node }) => ({
+      value: node.id,
+      label: node.version,
+    }));
+  }, [selectedApp, data.applications?.results]);
+
+  const selectedReleaseOption = useMemo(() => {
+    return (
+      releaseOptions.find((option) => option.value === selectedRelease) || null
+    );
+  }, [releaseOptions, selectedRelease]);
+
   const [deployRelease, isDeploying] =
     useMutation<AddAvailableApplications_DeployRelease_Mutation>(
       DEPLOY_RELEASE_MUTATION,
     );
 
-  const handleAppChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (isOnline) {
-      setSelectedApp(e.target.value);
-      setSelectedRelease(null); // Reset release when app changes
-    } else {
+  const handleAppChange = (option: SingleValue<SelectOption>) => {
+    if (!isOnline) {
       setErrorFeedback(
         <FormattedMessage
           id="components.AddAvailableApplications.deviceOfflineError"
           defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
         />,
       );
+      return;
     }
+
+    setSelectedApp(option?.value || null);
+    setSelectedRelease(null); // Reset release when app changes
   };
 
-  const handleReleaseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedRelease(e.target.value);
+  const handleReleaseChange = (option: SingleValue<SelectOption>) => {
+    setSelectedRelease(option?.value || null);
   };
 
   const handleDeploy = useCallback(() => {
@@ -158,19 +203,37 @@ const AddAvailableApplications = ({
           />
         </Form.Label>
         <Col sm={10}>
-          <Form.Select value={selectedApp || ""} onChange={handleAppChange}>
-            <option value="">
-              <FormattedMessage
-                id="components.AddAvailableApplications.selectAnApplication"
-                defaultMessage="Select an application"
-              />
-            </option>
-            {data.applications?.results?.map((app) => (
-              <option key={app.id} value={app.id}>
-                {app.name}
-              </option>
-            ))}
-          </Form.Select>
+          <Select
+            value={selectedApplicationOption}
+            onChange={handleAppChange}
+            options={applicationOptions}
+            isClearable
+            placeholder={intl.formatMessage({
+              id: "components.AddAvailableApplications.searchPlaceholder",
+              defaultMessage: "Search or select an application...",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              inputValue
+                ? intl.formatMessage(
+                    {
+                      id: "components.AddAvailableApplications.noApplicationsFoundMatching",
+                      defaultMessage:
+                        'No applications found matching "{inputValue}"',
+                    },
+                    { inputValue },
+                  )
+                : intl.formatMessage({
+                    id: "components.AddAvailableApplications.noApplicationsAvailable",
+                    defaultMessage: "No applications available",
+                  })
+            }
+            filterOption={(option, inputValue) => {
+              // Only search by application name (label), not by ID (value)
+              return option.label
+                .toLowerCase()
+                .includes(inputValue.toLowerCase());
+            }}
+          />
         </Col>
       </Form.Group>
 
@@ -182,26 +245,44 @@ const AddAvailableApplications = ({
           />
         </Form.Label>
         <Col sm={10}>
-          <Form.Select
-            value={selectedRelease || ""}
+          <Select
+            value={selectedReleaseOption}
             onChange={handleReleaseChange}
-            disabled={!selectedApp}
-          >
-            <option value="">
-              <FormattedMessage
-                id="components.AddAvailableApplications.selectARelease"
-                defaultMessage="Select a release"
-              />
-            </option>
-            {selectedApp &&
-              data.applications?.results
-                ?.find((app) => app.id === selectedApp)
-                ?.releases.edges?.map(({ node }) => (
-                  <option key={node.id} value={node.id}>
-                    {node.version}
-                  </option>
-                ))}
-          </Form.Select>
+            options={releaseOptions}
+            isClearable
+            placeholder={intl.formatMessage({
+              id: "components.AddAvailableApplications.selectARelease",
+              defaultMessage: "Select a release",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              inputValue
+                ? intl.formatMessage(
+                    {
+                      id: "components.AddAvailableApplications.noReleasesFoundMatching",
+                      defaultMessage:
+                        'No releases found matching "{inputValue}"',
+                    },
+                    { inputValue },
+                  )
+                : selectedApp
+                  ? intl.formatMessage({
+                      id: "components.AddAvailableApplications.noReleasesAvailable",
+                      defaultMessage:
+                        "No releases available for this application",
+                    })
+                  : intl.formatMessage({
+                      id: "components.AddAvailableApplications.selectApplicationFirst",
+                      defaultMessage: "Please select an application first",
+                    })
+            }
+            filterOption={(option, inputValue) => {
+              // Only search by release version (label), not by ID (value)
+              return option.label
+                .toLowerCase()
+                .includes(inputValue.toLowerCase());
+            }}
+            isDisabled={!selectedApp}
+          />
         </Col>
       </Form.Group>
 
