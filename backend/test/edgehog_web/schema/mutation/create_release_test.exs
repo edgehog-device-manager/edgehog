@@ -417,6 +417,88 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       |> create_release()
       |> extract_result!()
     end
+
+    test "create a release with nested containers with device mappings", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      serial_number =
+        [:positive]
+        |> System.unique_integer()
+        |> Integer.to_string()
+
+      path =
+        "/dev/" <> Enum.random(["net/", "serial/"]) <> serial_number
+
+      params = %{
+        "pathOnHost" => path,
+        "pathInContainer" => path,
+        "cgroupPermissions" => "mrw"
+      }
+
+      container = %{
+        "image" => %{
+          "reference" => "example/container1:latest"
+        },
+        "env" => ~s({"ENV_VAR":"value1"}),
+        "hostname" => "container1-host",
+        "networkMode" => "bridge",
+        "portBindings" => [
+          "8080:80"
+        ],
+        "privileged" => false,
+        "restartPolicy" => "always",
+        "device_mappings" => [params]
+      }
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            version
+            application {
+              id
+            }
+            containers {
+              edges {
+                node {
+                  id
+                  deviceMappings {
+                    edges {
+                      node {
+                        id
+                        pathOnHost
+                        pathInContainer
+                        cgroupPermissions
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      release =
+        [
+          tenant: tenant,
+          application_id: application_id,
+          containers: [container],
+          document: document
+        ]
+        |> create_release()
+        |> extract_result!()
+
+      result_device_mappings =
+        release
+        |> extract_containers!()
+        |> extract_device_mappings!()
+        |> Enum.flat_map(&Enum.map(&1, fn dev_mapp -> Map.delete(dev_mapp, "id") end))
+
+      assert Enum.sort([params]) == Enum.sort(result_device_mappings)
+    end
   end
 
   def create_release(opts) do
@@ -484,5 +566,17 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
            } = release
 
     Enum.map(edges, fn %{"node" => container} -> container end)
+  end
+
+  defp extract_device_mappings!(containers) do
+    Enum.map(containers, fn container ->
+      assert %{
+               "deviceMappings" => %{
+                 "edges" => edges
+               }
+             } = container
+
+      Enum.map(edges, fn %{"node" => device_mapping} -> device_mapping end)
+    end)
   end
 end
