@@ -18,8 +18,13 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import React, { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import Collapse from "react-bootstrap/Collapse";
+import Button from "react-bootstrap/Button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 import type { ContainersTable_PaginationQuery } from "api/__generated__/ContainersTable_PaginationQuery.graphql";
 import type {
@@ -27,9 +32,27 @@ import type {
   ContainersTable_ContainerFragment$key,
 } from "api/__generated__/ContainersTable_ContainerFragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
+import Col from "components/Col";
+import Form from "components/Form";
+import Row from "components/Row";
 
-// We use graphql fields below in columns configuration
+const FormRow = ({
+  id,
+  label,
+  children,
+}: {
+  id: string;
+  label: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <Form.Group as={Row} controlId={id} className="mb-2">
+    <Form.Label column sm={3}>
+      {label}
+    </Form.Label>
+    <Col sm={9}>{children}</Col>
+  </Form.Group>
+);
+
 /* eslint-disable relay/unused-fields */
 const CONTAINERS_TABLE_FRAGMENT = graphql`
   fragment ContainersTable_ContainerFragment on Release
@@ -39,10 +62,16 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
       edges {
         node {
           id
+          env
+          hostname
+          networkMode
           portBindings
+          restartPolicy
+          privileged
           image {
             reference
             credentials {
+              id
               label
               username
             }
@@ -53,6 +82,19 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
                 id
                 driver
                 internal
+                label
+                options
+                enableIpv6
+              }
+            }
+          }
+          volumes {
+            edges {
+              node {
+                id
+                driver
+                label
+                options
               }
             }
           }
@@ -62,134 +104,506 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
   }
 `;
 
-type TableRecord = NonNullable<
+const styles = {
+  containerWrapper: {
+    border: "1px solid #ccc",
+    marginBottom: 16,
+    borderRadius: 4,
+  },
+  toggleButton: (isOpen: boolean) => ({
+    width: "100%",
+    padding: 10,
+    textAlign: "left",
+    background: isOpen ? "#eee" : "#f9f9f9",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }),
+  detailsWrapper: {
+    padding: 12,
+  },
+};
+
+const formatPortBindings = (
+  portBindings: readonly string[] | null | undefined,
+) => {
+  if (!portBindings || portBindings.length === 0) return "";
+  return portBindings.join(", ");
+};
+
+const formatJson = (jsonString: unknown) => {
+  try {
+    if (!jsonString) return "";
+    if (typeof jsonString === "string") {
+      return JSON.stringify(JSON.parse(jsonString), null, 2);
+    }
+    return JSON.stringify(jsonString, null, 2);
+  } catch (err) {
+    return "";
+  }
+};
+
+type volumeDetailsProps = {
+  volumes: NonNullable<
+    ContainersTable_ContainerFragment$data["containers"]["edges"]
+  >[number]["node"]["volumes"];
+  containerIndex: number;
+};
+
+const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
+  const [openVolumeIndexes, setOpenVolumeIndexes] = useState<number[]>(
+    volumes.edges?.map((_, index) => index) ?? [],
+  );
+
+  const toggleVolume = (index: number) => {
+    setOpenVolumeIndexes((current) =>
+      current.includes(index)
+        ? current.filter((i) => i !== index)
+        : [...current, index],
+    );
+  };
+
+  return (
+    <div className="mt-3">
+      <h5>
+        <FormattedMessage
+          id="components.ContainersTable.volumesLabel"
+          defaultMessage="Volumes"
+        />
+      </h5>
+
+      {!volumes?.edges?.length ? (
+        <p className="fst-italic">
+          <FormattedMessage
+            id="components.ContainersTable.noVolumes"
+            defaultMessage="No volumes assigned."
+          />
+        </p>
+      ) : (
+        volumes.edges.map((volEdge, volIndex) => {
+          const vol = volEdge.node;
+          const isOpen = openVolumeIndexes.includes(volIndex);
+
+          return (
+            <div
+              key={vol?.id ?? volIndex}
+              className="mb-2 border rounded bg-light"
+            >
+              <Button
+                variant="light"
+                className="w-100 d-flex align-items-center fw-bold"
+                onClick={() => toggleVolume(volIndex)}
+                aria-expanded={isOpen}
+              >
+                {vol?.label}
+                <span className="ms-auto">
+                  {isOpen ? (
+                    <FontAwesomeIcon icon={faChevronUp} />
+                  ) : (
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  )}
+                </span>
+              </Button>
+
+              <Collapse in={isOpen}>
+                <div className="p-2 border-top">
+                  <FormRow
+                    id={`containers-${containerIndex}-volume-${volIndex}-label`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.volumeLabelLabel"
+                        defaultMessage="Label"
+                      />
+                    }
+                  >
+                    <Form.Control value={vol?.label ?? ""} readOnly />
+                  </FormRow>
+
+                  <FormRow
+                    id={`containers-${containerIndex}-volume-${volIndex}-driver`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.volumeDriverLabel"
+                        defaultMessage="Driver"
+                      />
+                    }
+                  >
+                    <Form.Control value={vol?.driver ?? ""} readOnly />
+                  </FormRow>
+                  <FormRow
+                    id="volumeOptions"
+                    label={
+                      <FormattedMessage
+                        id="pages.volume.options"
+                        defaultMessage="Options"
+                      />
+                    }
+                  >
+                    <Form.Control
+                      as="textarea"
+                      value={formatJson(vol?.options)}
+                      rows={formatJson(vol?.options).split("\n").length}
+                      readOnly
+                      style={{
+                        fontFamily: "monospace",
+                        whiteSpace: "pre-wrap",
+                      }}
+                    />
+                  </FormRow>
+                </div>
+              </Collapse>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+};
+
+type networkDetailsProps = {
+  networks: NonNullable<
+    ContainersTable_ContainerFragment$data["containers"]["edges"]
+  >[number]["node"]["networks"];
+  containerIndex: number;
+};
+
+const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
+  const [openNetworkIndexes, setOpenNetworkIndexes] = useState<number[]>(
+    networks.edges?.map((_, index) => index) ?? [],
+  );
+
+  const toggleNetwork = (index: number) => {
+    setOpenNetworkIndexes((current) =>
+      current.includes(index)
+        ? current.filter((i) => i !== index)
+        : [...current, index],
+    );
+  };
+
+  return (
+    <div className="mt-3">
+      <h5>
+        <FormattedMessage
+          id="components.ContainersTable.networksLabel"
+          defaultMessage="Networks"
+        />
+      </h5>
+
+      {!networks?.edges?.length ? (
+        <p className="fst-italic">
+          <FormattedMessage
+            id="components.ContainersTable.noNetworks"
+            defaultMessage="No networks assigned."
+          />
+        </p>
+      ) : (
+        networks.edges.map((netEdge, netIndex) => {
+          const net = netEdge.node;
+          const isOpen = openNetworkIndexes.includes(netIndex);
+
+          return (
+            <div
+              key={net?.id ?? netIndex}
+              className="mb-2 border rounded bg-light"
+            >
+              <Button
+                variant="light"
+                className="w-100 d-flex align-items-center fw-bold"
+                onClick={() => toggleNetwork(netIndex)}
+                aria-expanded={isOpen}
+              >
+                {net?.label}
+                <span className="ms-auto">
+                  {isOpen ? (
+                    <FontAwesomeIcon icon={faChevronUp} />
+                  ) : (
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  )}
+                </span>
+              </Button>
+
+              <Collapse in={isOpen}>
+                <div className="p-2 border-top">
+                  <FormRow
+                    id={`containers-${containerIndex}-network-${netIndex}-label`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.networkLabelLabel"
+                        defaultMessage="Label"
+                      />
+                    }
+                  >
+                    <Form.Control value={net?.label ?? ""} readOnly />
+                  </FormRow>
+
+                  <FormRow
+                    id={`containers-${containerIndex}-network-${netIndex}-driver`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.networkDriverLabel"
+                        defaultMessage="Driver"
+                      />
+                    }
+                  >
+                    <Form.Control value={net?.driver ?? ""} readOnly />
+                  </FormRow>
+
+                  <FormRow
+                    id={`containers-${containerIndex}-network-${netIndex}-internal`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.networkInternalLabel"
+                        defaultMessage="Internal"
+                      />
+                    }
+                  >
+                    <Form.Check
+                      type="checkbox"
+                      checked={net?.internal === true}
+                      readOnly
+                    />
+                  </FormRow>
+
+                  <FormRow
+                    id={`containers-${containerIndex}-network-${netIndex}-enableipv6`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.networkEnableIPv6Label"
+                        defaultMessage="Enable IPv6"
+                      />
+                    }
+                  >
+                    <Form.Check
+                      type="checkbox"
+                      checked={net?.enableIpv6 === true}
+                      readOnly
+                    />
+                  </FormRow>
+
+                  <FormRow
+                    id={`containers-${containerIndex}-network-${netIndex}-options`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.networkOptionsLabel"
+                        defaultMessage="Options (JSON)"
+                      />
+                    }
+                  >
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={formatJson(net?.options)}
+                      readOnly
+                    />
+                  </FormRow>
+                </div>
+              </Collapse>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+};
+
+type ContainerRecord = NonNullable<
   ContainersTable_ContainerFragment$data["containers"]["edges"]
 >[number]["node"];
 
-const columnHelper = createColumnHelper<TableRecord>();
-const columns = [
-  columnHelper.accessor("image.reference", {
-    id: "imageReference",
-    header: () => (
-      <FormattedMessage
-        id="components.ContainersTable.imageReference"
-        defaultMessage="Image Reference"
-        description="Title for the Image Reference column of the container table"
-      />
-    ),
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor("image.credentials.label", {
-    id: "imageLabel",
-    header: () => (
-      <FormattedMessage
-        id="components.ContainersTable.credentialsLabel"
-        defaultMessage="Credentials Label"
-        description="Title for the Credentials Label column of the container table"
-      />
-    ),
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor("image.credentials.username", {
-    id: "imageUsername",
-    header: () => (
-      <FormattedMessage
-        id="components.ContainersTable.credentialsUsername"
-        defaultMessage="Credentials Username"
-        description="Title for the Credentials Username column of the container table"
-      />
-    ),
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor(
-    (row) =>
-      row.networks.edges?.map((edge) => ({
-        id: atob(edge.node.id).split(":")[1], // Decode and extract ID
-        driver: edge.node.driver,
-        internal: edge.node.internal,
-      })),
-    {
-      id: "networks",
-      header: () => (
-        <FormattedMessage
-          id="components.ContainersTable.networks"
-          defaultMessage="Networks"
-          description="Title for the Networks column of the container table"
-        />
-      ),
-      cell: ({ getValue }) => {
-        const networks = getValue();
-        if (!networks || networks.length === 0) {
-          return "";
+type ContainerDetailsProps = {
+  container: ContainerRecord;
+  index: number;
+};
+const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
+  return (
+    <div style={styles.detailsWrapper}>
+      <FormRow
+        id={`containers-${index}-env`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.envLabel"
+            defaultMessage="Environment (JSON String)"
+          />
         }
+      >
+        <Form.Control
+          as="textarea"
+          rows={formatJson(container.env).split("\n").length}
+          value={formatJson(container.env)}
+          readOnly
+        />
+      </FormRow>
 
-        return (
-          <div>
-            <ul>
-              {networks.map((network, index) => (
-                <li key={index}>
-                  {`${network.id} (${network.driver}${network.internal ? ", internal" : ""})`}
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      },
-    },
-  ),
-  columnHelper.accessor("portBindings", {
-    id: "portBindings",
-    header: () => (
-      <FormattedMessage
-        id="components.ContainersTable.portBindings"
-        defaultMessage="Port Bindings"
-        description="Title for the Port Bindings column of the container table"
-      />
-    ),
-    cell: ({ getValue }) => {
-      const portBindings = getValue();
-      if (!portBindings || portBindings.length === 0) {
-        return "";
-      }
+      <FormRow
+        id={`containers-${index}-image-reference`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.imageReferenceLabel"
+            defaultMessage="Image Reference"
+          />
+        }
+      >
+        <Form.Control value={container.image?.reference ?? ""} readOnly />
+      </FormRow>
 
-      return (
-        <div>
-          <ul>
-            {portBindings.map((portBinding, index) => (
-              <li key={index}>{portBinding}</li>
-            ))}
-          </ul>
-        </div>
-      );
-    },
-  }),
-];
+      <FormRow
+        id={`containers-${index}-image-credentials`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.imageCredentialsLabel"
+            defaultMessage="Image Credentials"
+          />
+        }
+      >
+        <Form.Control
+          value={
+            container.image?.credentials
+              ? `${container.image.credentials.label} (${container.image.credentials.username})`
+              : ""
+          }
+          readOnly
+        />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-hostname`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.hostnameLabel"
+            defaultMessage="Hostname"
+          />
+        }
+      >
+        <Form.Control value={container.hostname ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-networkMode`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.networkModeLabel"
+            defaultMessage="Network Mode"
+          />
+        }
+      >
+        <Form.Control value={container.networkMode ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-portBindings`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.portBindingsLabel"
+            defaultMessage="Port Bindings"
+          />
+        }
+      >
+        <Form.Control
+          value={formatPortBindings(container.portBindings)}
+          readOnly
+        />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-restartPolicy`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.restartPolicyLabel"
+            defaultMessage="Restart Policy"
+          />
+        }
+      >
+        <Form.Control value={container.restartPolicy ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-privileged`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.privilegedLabel"
+            defaultMessage="Privileged"
+          />
+        }
+      >
+        <Form.Check
+          type="checkbox"
+          checked={container.privileged === true}
+          readOnly
+        />
+      </FormRow>
+
+      <NetworkDetails networks={container.networks} containerIndex={index} />
+      <VolumeDetails volumes={container.volumes} containerIndex={index} />
+    </div>
+  );
+};
 
 type ContainersTableProps = {
   className?: string;
   containersRef: ContainersTable_ContainerFragment$key;
-  hideSearch?: boolean;
 };
 
 const ContainersTable = ({
   className,
   containersRef,
-  hideSearch = false,
 }: ContainersTableProps) => {
   const { data } = usePaginationFragment<
     ContainersTable_PaginationQuery,
     ContainersTable_ContainerFragment$key
   >(CONTAINERS_TABLE_FRAGMENT, containersRef);
 
-  const tableData = data.containers.edges?.map((edge) => edge.node) ?? [];
+  const containers = data.containers.edges?.map((edge) => edge.node) ?? [];
+  const [openIndexes, setOpenIndexes] = useState<number[]>(
+    containers.map((_, index) => index),
+  );
+  const toggleIndex = (index: number) => {
+    setOpenIndexes((current) =>
+      current.includes(index)
+        ? current.filter((i) => i !== index)
+        : [...current, index],
+    );
+  };
+
+  if (containers.length === 0) {
+    return (
+      <div className={className}>
+        <p>
+          <FormattedMessage
+            id="components.ContainersTable.noContainers"
+            defaultMessage="No containers available."
+          />
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <Table
-      className={className}
-      columns={columns}
-      data={tableData}
-      hideSearch={hideSearch}
-    />
+    <div className={className}>
+      {containers.map((container, index) => (
+        <div key={container.id ?? index} className="mb-3 border rounded">
+          <Button
+            variant="light"
+            className="w-100 d-flex align-items-center fw-bold"
+            onClick={() => toggleIndex(index)}
+          >
+            {container.image.reference}
+            <span className="ms-auto">
+              {openIndexes.includes(index) ? (
+                <FontAwesomeIcon icon={faChevronUp} />
+              ) : (
+                <FontAwesomeIcon icon={faChevronDown} />
+              )}
+            </span>
+          </Button>
+
+          <Collapse in={openIndexes.includes(index)}>
+            <div className="p-3 border-top">
+              <ContainerDetails container={container} index={index} />
+            </div>
+          </Collapse>
+        </div>
+      ))}
+    </div>
   );
 };
 
