@@ -107,6 +107,9 @@
   "components.AddAvailableApplications.selectRelease": {
     "defaultMessage": "Select Release"
   },
+  "components.AddAvailableSystemModels.searchPlaceholder": {
+    "defaultMessage": "Search or select a system model..."
+  },
   "components.ApplicationsTable.action": {
     "defaultMessage": "Action"
   },
@@ -269,6 +272,9 @@
   },
   "components.CreateApplication.submitButton": {
     "defaultMessage": "Create"
+  },
+  "components.CreateApplication.systemModelLabel": {
+    "defaultMessage": "System Model"
   },
   "components.CreateBaseImageCollectionForm.handleLabel": {
     "defaultMessage": "Handle"
@@ -1394,6 +1400,9 @@
   },
   "pages.Application.description": {
     "defaultMessage": "Description"
+  },
+  "pages.Application.systemModel": {
+    "defaultMessage": "System Model"
   },
   "pages.ApplicationCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the application, please try again."
