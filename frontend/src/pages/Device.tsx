@@ -281,6 +281,9 @@ const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
     device(id: $id) {
       id
       online
+      systemModel {
+        name
+      }
       ...DeployedApplicationsTable_deployedApplications
     }
   }
@@ -605,6 +608,7 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
         </h5>
         <AddAvailableApplications
           deviceId={device.id}
+          systemModelName={device.systemModel?.name}
           isOnline={isOnline}
           setErrorFeedback={setErrorFeedback}
           onDeployComplete={handleRefetch}

@@ -28,8 +28,10 @@ import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from 
 import type { AddAvailableApplications_DeployRelease_Mutation } from "api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
 
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
-  query AddAvailableApplications_GetApplicationsWithReleases_Query {
-    applications(first: 10000) {
+  query AddAvailableApplications_GetApplicationsWithReleases_Query(
+    $filter: ApplicationFilterInput
+  ) {
+    applications(first: 10000, filter: $filter) {
       results {
         id
         name
@@ -64,6 +66,7 @@ const DEPLOY_RELEASE_MUTATION = graphql`
 
 type AddAvailableApplicationsProps = {
   deviceId: string;
+  systemModelName: string | undefined;
   isOnline: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
   onDeployComplete: () => void;
@@ -76,6 +79,7 @@ type SelectOption = {
 
 const AddAvailableApplications = ({
   deviceId,
+  systemModelName,
   isOnline,
   setErrorFeedback,
   onDeployComplete,
@@ -88,7 +92,22 @@ const AddAvailableApplications = ({
   const data =
     useLazyLoadQuery<AddAvailableApplications_GetApplicationsWithReleases_Query>(
       GET_APPLICATIONS_WITH_RELEASES_QUERY,
-      {},
+      {
+        filter: {
+          or: [
+            {
+              systemModel: {
+                name: { eq: systemModelName },
+              },
+            },
+            {
+              systemModel: {
+                name: { isNil: true },
+              },
+            },
+          ],
+        },
+      },
       { fetchPolicy: "store-and-network" },
     );
 
