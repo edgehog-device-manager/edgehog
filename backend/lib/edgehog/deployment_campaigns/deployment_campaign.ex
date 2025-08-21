@@ -20,10 +20,12 @@
 
 defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
   @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
+  use Edgehog.MultitenantResource,
     domain: Edgehog.DeploymentCampaigns,
     extensions: [AshGraphql.Resource]
+
+  alias Edgehog.Campaigns.Outcome
+  alias Edgehog.Campaigns.Status
 
   graphql do
     type :deployment_campaign
@@ -40,6 +42,20 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       public? true
       allow_nil? false
     end
+
+    attribute :status, Status do
+      description "The status of the deployment campaign."
+      public? true
+      allow_nil? false
+    end
+
+    attribute :outcome, Outcome do
+      description "The outcome of the deployment campaign."
+      public? true
+    end
+
+    attribute :start_timestamp, :utc_datetime_usec
+    attribute :completion_timestamp, :utc_datetime_usec
 
     timestamps()
   end
