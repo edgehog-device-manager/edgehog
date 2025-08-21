@@ -32,11 +32,12 @@ import type {
 import UpdateCampaignOutcome from "components/UpdateCampaignOutcome";
 import UpdateCampaignStatus from "components/UpdateCampaignStatus";
 import { createColumnHelper } from "components/Table";
-import InfiniteTable from "./InfiniteTable";
+import InfiniteTable from "components/InfiniteTable";
 import { Link, Route } from "Navigation";
 
 const UPDATE_CAMPAIGNS_TO_LOAD_FIRST = 40;
 const UPDATE_CAMPAIGNS_TO_LOAD_NEXT = 10;
+
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
@@ -166,14 +167,13 @@ const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
     const enumStatuses = ["FINISHED", "IDLE", "IN_PROGRESS"] as const;
     const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
 
-    type UpdateCampaignStatus = (typeof enumStatuses)[number];
-    type UpdateCampaignOutcome = (typeof enumOutcomes)[number];
-
-    const isEnumStatus = (value: string): value is UpdateCampaignStatus =>
-      enumStatuses.includes(value.toUpperCase() as UpdateCampaignStatus);
-
-    const isEnumOutcome = (value: string): value is UpdateCampaignOutcome =>
-      enumOutcomes.includes(value.toUpperCase() as UpdateCampaignOutcome);
+    const findMatches = <T extends readonly string[]>(
+      enums: T,
+      searchText: string,
+    ): T[number][] =>
+      enums.filter((value) =>
+        value.toLowerCase().includes(searchText.toLowerCase()),
+      );
 
     return _.debounce((text: string) => {
       if (text === "") {
@@ -184,46 +184,35 @@ const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
           { fetchPolicy: "network-only" },
         );
       } else {
-        const likeText = `%${text}%`;
-        const normalizedText = text.toUpperCase();
-
-        const filters: any[] = [
-          { name: { ilike: likeText } },
-          {
-            baseImage: {
-              version: { ilike: likeText },
-              localizedReleaseDisplayNames: {
-                value: { ilike: likeText },
-              },
-              baseImageCollection: {
-                name: { ilike: likeText },
-              },
-            },
-          },
-          {
-            updateChannel: {
-              name: { ilike: likeText },
-            },
-          },
-        ];
-
-        if (isEnumStatus(normalizedText)) {
-          filters.push({
-            status: { eq: normalizedText as UpdateCampaignStatus },
-          });
-        }
-
-        if (isEnumOutcome(normalizedText)) {
-          filters.push({
-            outcome: { eq: normalizedText as UpdateCampaignOutcome },
-          });
-        }
-
+        // TODO : localizedReleaseDisplayNames is not part of BaseImageFilterInput
+        // in the GraphQL schema, so filtering by display names is not supported
+        // by the backend. Users can only search by version directly.
         refetch(
           {
             first: UPDATE_CAMPAIGNS_TO_LOAD_FIRST,
             filter: {
-              or: filters,
+              or: [
+                { name: { ilike: `%${text}%` } },
+                {
+                  baseImage: {
+                    version: { ilike: `%${text}%` },
+                    baseImageCollection: {
+                      name: { ilike: `%${text}%` },
+                    },
+                  },
+                },
+                {
+                  updateChannel: {
+                    name: { ilike: `%${text}%` },
+                  },
+                },
+                ...findMatches(enumStatuses, text).map((status) => ({
+                  status: { eq: status },
+                })),
+                ...findMatches(enumOutcomes, text).map((outcome) => ({
+                  outcome: { eq: outcome },
+                })),
+              ],
             },
           },
           { fetchPolicy: "network-only" },
