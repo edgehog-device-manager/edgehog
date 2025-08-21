@@ -26,6 +26,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
 
   alias Edgehog.Campaigns.Outcome
   alias Edgehog.Campaigns.Status
+  alias Edgehog.Containers.Release
 
   graphql do
     type :deployment_campaign
@@ -58,5 +59,19 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
     attribute :completion_timestamp, :utc_datetime_usec
 
     timestamps()
+  end
+
+  relationships do
+    belongs_to :release, Release do
+      description "The release distributed by the deployment campaign."
+      public? true
+      attribute_public? false
+      attribute_type :uuid
+      allow_nil? false
+    end
+  end
+
+  postgres do
+    table "deployment_campaign"
   end
 end
