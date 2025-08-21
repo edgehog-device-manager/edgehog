@@ -19,9 +19,16 @@
 #
 
 defmodule Edgehog.DeploymentCampaigns do
-  @moduledoc false
+  @moduledoc """
+  Deployment Campaings context.
+
+  This module provides the necessary code interfaces and GraphQL mutations (and
+  queries) to interact with deployment campaigns.
+  """
   use Ash.Domain,
-    otp_app: :edgehog
+    extensions: [
+      AshGraphql.Domain
+    ]
 
   resources do
   end
