@@ -69,6 +69,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       attribute_type :uuid
       allow_nil? false
     end
+
+    has_many :deployment_targets, Edgehog.DeploymentCampaigns.DeploymentTarget do
+      description "The depployment targets belonging to the deployment campaign."
+      public? true
+      writable? false
+    end
   end
 
   postgres do
