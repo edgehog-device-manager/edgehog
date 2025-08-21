@@ -19,7 +19,7 @@
 */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Row, Col } from "react-bootstrap";
+import { Form, Row, Col, Collapse } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -39,6 +39,8 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import ReleasesTable from "components/ReleasesTable";
 import Button from "components/Button";
+import Icon from "components/Icon";
+import ApplicationDevicesTable from "components/ApplicationDevicesTable";
 
 const GET_APPLICATION_QUERY = graphql`
   query Application_getApplication_Query(
@@ -53,6 +55,7 @@ const GET_APPLICATION_QUERY = graphql`
         name
       }
       ...ReleasesTable_ReleaseFragment
+      ...ApplicationDevicesTable_ReleaseFragment
     }
   }
 `;
@@ -65,6 +68,8 @@ interface ApplicationContentProps {
 
 const ApplicationContent = ({ application }: ApplicationContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const [isOpenReleasesSection, setIsOpenReleasesSection] = useState(true);
+  const [isOpenDevicesSection, setIsOpenDevicesSection] = useState(true);
 
   const { applicationId = "" } = useParams();
 
@@ -126,11 +131,59 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
             />
           </Col>
         </Form.Group>
-        <ReleasesTable
-          releasesRef={application}
-          hideSearch
-          setErrorFeedback={setErrorFeedback}
-        />
+        <Button
+          variant="light"
+          className="w-100 d-flex align-items-center fw-bold"
+          onClick={() => setIsOpenReleasesSection((prevState) => !prevState)}
+          aria-expanded={isOpenReleasesSection}
+        >
+          <FormattedMessage
+            id="pages.Application.releases"
+            defaultMessage="Releases"
+          />
+          <span className="ms-auto">
+            {isOpenReleasesSection ? (
+              <Icon icon="caretUp" />
+            ) : (
+              <Icon icon="caretDown" />
+            )}
+          </span>
+        </Button>
+        <Collapse in={isOpenReleasesSection}>
+          <div className="p-2 border-top">
+            <ReleasesTable
+              releasesRef={application}
+              hideSearch
+              setErrorFeedback={setErrorFeedback}
+            />
+          </div>
+        </Collapse>
+        <Button
+          variant="light"
+          className="w-100 d-flex align-items-center fw-bold"
+          onClick={() => setIsOpenDevicesSection((prevState) => !prevState)}
+          aria-expanded={isOpenDevicesSection}
+        >
+          <FormattedMessage
+            id="pages.Application.devices"
+            defaultMessage="Devices"
+          />
+          <span className="ms-auto">
+            {isOpenDevicesSection ? (
+              <Icon icon="caretUp" />
+            ) : (
+              <Icon icon="caretDown" />
+            )}
+          </span>
+        </Button>
+        <Collapse in={isOpenDevicesSection}>
+          <div className="p-2 border-top">
+            <ApplicationDevicesTable
+              applicationDevicesRef={application}
+              hideSearch
+            />
+          </div>
+        </Collapse>
       </Page.Main>
     </Page>
   );
