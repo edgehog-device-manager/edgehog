@@ -18,13 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.Supervisor do
+defmodule Edgehog.Campaigns.Supervisor do
   @moduledoc false
   use Supervisor
 
-  alias Edgehog.UpdateCampaigns.ExecutorRegistry
-  alias Edgehog.UpdateCampaigns.ExecutorSupervisor
-  alias Edgehog.UpdateCampaigns.Resumer
+  alias Edgehog.Campaigns.ExecutorRegistry
+  alias Edgehog.Campaigns.ExecutorSupervisor
+
+  require Ash.Query
 
   @base_children [
     {Registry, name: ExecutorRegistry, keys: :unique},
@@ -39,23 +40,23 @@ defmodule Edgehog.UpdateCampaigns.Supervisor do
 
   @impl Supervisor
   def init(_init_arg) do
-    @mix_env
-    |> children()
-    |> Supervisor.init(strategy: :rest_for_one)
+    Supervisor.init(children(), strategy: :rest_for_one)
   end
 
-  # Ignore dialyzer "The pattern can never match the type" warning. This is emitted because for a
-  # given Mix env, only one of the two function heads will be always taken, and dialyzer complains
-  # that the other one can never match since it's executed after Mix.env is fixed.
-  @dialyzer {:nowarn_function, children: 1}
+  case @mix_env do
+    :test ->
+      defp children, do: @base_children
 
-  defp children(:test = _mix_env) do
-    # We do not spawn the Resumer task in the :test env, otherwise we get spurious warnings
-    # about DB connections still being checked out while a test case terminates.
-    @base_children
-  end
+    _other ->
+      defp children, do: @base_children ++ [update_campaigns_resumer()]
 
-  defp children(_mix_env) do
-    @base_children ++ [Resumer]
+      defp update_campaigns_resumer do
+        update_campaigns_stream =
+          UpdateCampaign
+          |> Ash.Query.for_read(:read_all_resumable)
+          |> Ash.stream!()
+
+        {Edgehog.Campaigns.Resumer, update_campaigns_stream}
+      end
   end
 end
