@@ -18,17 +18,29 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.DeploymentCampaigns do
-  @moduledoc """
-  Deployment Campaings context.
+defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
+  @moduledoc false
+  use Ash.Resource,
+    otp_app: :edgehog,
+    domain: Edgehog.DeploymentCampaigns,
+    extensions: [AshGraphql.Resource]
 
-  This module provides the necessary code interfaces and GraphQL mutations (and
-  queries) to interact with deployment campaigns.
-  """
-  use Ash.Domain,
-    extensions: [AshGraphql.Domain]
+  graphql do
+    type :deployment_campaign
+  end
 
-  resources do
-    resource Edgehog.DeploymentCampaigns.DeploymentCampaign
+  actions do
+    defaults [:read]
+  end
+
+  attributes do
+    uuid_primary_key :id
+
+    attribute :name, :string do
+      public? true
+      allow_nil? false
+    end
+
+    timestamps()
   end
 end
