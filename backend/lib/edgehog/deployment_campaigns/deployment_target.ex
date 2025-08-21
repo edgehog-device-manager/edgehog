@@ -19,11 +19,21 @@
 #
 
 defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
-  @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
+  @moduledoc """
+  Represents a DeploymentTarget.
+
+  Deployment targets are the targets of a Deployment Campaign, which \
+  is composed by the target device and the state of the target in the \
+  linked Deployment Campaign.
+  """
+
+  use Edgehog.MultitenantResource,
     domain: Edgehog.DeploymentCampaigns,
     extensions: [AshGraphql.Resource]
+
+  resource do
+    description @moduledoc
+  end
 
   graphql do
     type :deployment_target
@@ -42,15 +52,32 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
     end
 
     attribute :retry_count, :integer do
+      description """
+      The number of retries of the deployment target. This indicated how many times
+      Edgehog retried to send all the necessary information about a deployment towards
+      the device without receiving acks.
+      """
+
       public? true
       allow_nil? false
+      constraints min: 0
+      default 0
     end
 
     attribute :latest_attempt, :utc_datetime_usec do
+      description """
+      The timestamp of the latest attempt to deploy to the update target.\
+      """
+
       public? true
     end
 
     attribute :completion_timestamp, :utc_datetime_usec do
+      description """
+      The timestamp when the update target completed its update, either with \
+      a success or a failure.\
+      """
+
       public? true
     end
 
@@ -61,16 +88,25 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
     belongs_to :deployment_campaign, Edgehog.DeploymentCampaigns.DeploymentCampaign do
       public? true
       allow_nil? false
+      attribute_public? false
+      attribute_type :uuid
     end
 
     belongs_to :device, Edgehog.Devices.Device do
       public? true
       allow_nil? false
+      attribute_public? false
     end
 
     belongs_to :deployment, Edgehog.Containers.Deployment do
       public? true
       allow_nil? false
+      attribute_public? false
+      attribute_type :uuid
     end
+  end
+
+  postgres do
+    table "deployment_target"
   end
 end
