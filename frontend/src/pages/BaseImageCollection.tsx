@@ -37,6 +37,7 @@ import type {
 } from "api/__generated__/BaseImageCollection_getBaseImageCollection_Query.graphql";
 import type { BaseImageCollection_updateBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollection_updateBaseImageCollection_Mutation.graphql";
 import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";
+
 import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import BaseImagesTable from "components/BaseImagesTable";
@@ -49,18 +50,21 @@ import Spinner from "components/Spinner";
 import UpdateBaseImageCollectionForm from "forms/UpdateBaseImageCollection";
 import type { BaseImageCollectionChanges } from "forms/UpdateBaseImageCollection";
 
+const BASE_IMAGES_TO_LOAD_FIRST = 40;
+
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCollection_getBaseImageCollection_Query(
     $baseImageCollectionId: ID!
     $first: Int
     $after: String
+    $filter: BaseImageFilterInput
   ) {
     baseImageCollection(id: $baseImageCollectionId) {
       id
       name
       handle
       ...UpdateBaseImageCollection_SystemModelFragment
-      ...BaseImagesTable_BaseImagesFragment
+      ...BaseImagesTable_BaseImagesFragment @arguments(filter: $filter)
     }
   }
 `;
@@ -328,7 +332,7 @@ const BaseImageCollectionPage = () => {
   const fetchBaseImageCollection = useCallback(
     () =>
       getBaseImageCollection(
-        { baseImageCollectionId, first: 10_000 },
+        { baseImageCollectionId, first: BASE_IMAGES_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ),
     [getBaseImageCollection, baseImageCollectionId],
