@@ -872,5 +872,6 @@ const DeployedApplicationsTable = ({
   );
 };
 
-export type { DeploymentTableProps };
+export type { DeploymentTableProps, DeploymentState };
+export { DeploymentStateComponent };
 export default DeployedApplicationsTable;

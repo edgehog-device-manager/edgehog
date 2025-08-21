@@ -125,6 +125,18 @@
   "components.AddAvailableSystemModels.searchPlaceholder": {
     "defaultMessage": "Search or select a system model..."
   },
+  "components.ApplicationDevicesTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the application devices table"
+  },
+  "components.ApplicationDevicesTable.nameTitle": {
+    "defaultMessage": "Name",
+    "description": "Title for the Name column of the application devices table"
+  },
+  "components.ApplicationDevicesTable.releaseVersionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the application devices table"
+  },
   "components.ApplicationsTable.action": {
     "defaultMessage": "Action"
   },
@@ -1458,6 +1470,12 @@
   },
   "pages.Application.description": {
     "defaultMessage": "Description"
+  },
+  "pages.Application.devices": {
+    "defaultMessage": "Devices"
+  },
+  "pages.Application.releases": {
+    "defaultMessage": "Releases"
   },
   "pages.Application.systemModel": {
     "defaultMessage": "System Model"
