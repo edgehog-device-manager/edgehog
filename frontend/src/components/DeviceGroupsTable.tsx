@@ -18,8 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
 import type { DeviceGroupsTable_PaginationQuery } from "api/__generated__/DeviceGroupsTable_PaginationQuery.graphql";
 import type {
@@ -27,15 +29,20 @@ import type {
   DeviceGroupsTable_DeviceGroupFragment$key,
 } from "api/__generated__/DeviceGroupsTable_DeviceGroupFragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "components/InfiniteTable";
 import { Link, Route } from "Navigation";
+
+const DEVICE_GROUPS_TO_LOAD_FIRST = 40;
+const DEVICE_GROUPS_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
   fragment DeviceGroupsTable_DeviceGroupFragment on RootQueryType
-  @refetchable(queryName: "DeviceGroupsTable_PaginationQuery") {
-    deviceGroups(first: $first, after: $after)
+  @refetchable(queryName: "DeviceGroupsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "DeviceGroupFilterInput" }) {
+    deviceGroups(first: $first, after: $after, filter: $filter)
       @connection(key: "DeviceGroupsTable_deviceGroups") {
       edges {
         node {
@@ -97,17 +104,90 @@ const columns = [
 type Props = {
   className?: string;
   deviceGroupsRef: DeviceGroupsTable_DeviceGroupFragment$key;
+  hideSearch?: boolean;
 };
 
-const DeviceGroupsTable = ({ className, deviceGroupsRef }: Props) => {
-  const { data } = usePaginationFragment<
+const DeviceGroupsTable = ({
+  className,
+  deviceGroupsRef,
+  hideSearch = false,
+}: Props) => {
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
     DeviceGroupsTable_PaginationQuery,
     DeviceGroupsTable_DeviceGroupFragment$key
   >(DEVICE_GROUPS_TABLE_FRAGMENT, deviceGroupsRef);
+  const [searchText, setSearchText] = useState<string | null>(null);
 
-  const tableData = data.deviceGroups?.edges?.map((edge) => edge.node) ?? [];
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: DEVICE_GROUPS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: DEVICE_GROUPS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { handle: { ilike: `%${text}%` } },
+                  { selector: { ilike: `%${text}%` } },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
 
-  return <Table className={className} columns={columns} data={tableData} />;
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextDeviceGroups = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(DEVICE_GROUPS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const deviceGroups = useMemo(() => {
+    return (
+      paginationData.deviceGroups?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.deviceGroups) {
+    return null;
+  }
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={deviceGroups}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextDeviceGroups : undefined}
+      setSearchText={setSearchText}
+      hideSearch={hideSearch}
+    />
+  );
 };
 
 export default DeviceGroupsTable;

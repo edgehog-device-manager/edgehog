@@ -33,9 +33,15 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
+const DEVICE_GROUPS_TO_LOAD_FIRST = 40;
+
 const GET_DEVICE_GROUPS_QUERY = graphql`
-  query DeviceGroups_getDeviceGroups_Query($first: Int, $after: String) {
-    ...DeviceGroupsTable_DeviceGroupFragment
+  query DeviceGroups_getDeviceGroups_Query(
+    $first: Int
+    $after: String
+    $filter: DeviceGroupFilterInput
+  ) {
+    ...DeviceGroupsTable_DeviceGroupFragment @arguments(filter: $filter)
   }
 `;
 
@@ -81,7 +87,10 @@ const DevicesPage = () => {
 
   const fetchDeviceGroups = useCallback(
     () =>
-      getDeviceGroups({ first: 10_000 }, { fetchPolicy: "store-and-network" }),
+      getDeviceGroups(
+        { first: DEVICE_GROUPS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getDeviceGroups],
   );
 
