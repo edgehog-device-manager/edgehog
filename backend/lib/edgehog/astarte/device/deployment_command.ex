@@ -25,7 +25,7 @@ defmodule Edgehog.Astarte.Device.DeploymentCommand do
 
   alias Astarte.Client.AppEngine
   alias Edgehog.Astarte.Device.DeploymentCommand.RequestData
-  alias Edgehog.Error.AstarteAPIError
+  alias Edgehog.Error
 
   @interface "io.edgehog.devicemanager.apps.DeploymentCommand"
 
@@ -35,13 +35,8 @@ defmodule Edgehog.Astarte.Device.DeploymentCommand do
 
     path = "/#{deployment_id}/command"
 
-    api_call = AppEngine.Devices.send_datastream(client, device_id, @interface, path, command)
-
-    with {:error, api_error} <- api_call do
-      reason =
-        AstarteAPIError.exception(status: api_error.status, response: api_error.response)
-
-      {:error, reason}
-    end
+    client
+    |> AppEngine.Devices.send_datastream(device_id, @interface, path, command)
+    |> Error.maybe_match_error(device_id, @interface)
   end
 end

@@ -23,6 +23,7 @@ defmodule Edgehog.Astarte.Device.CreateImageRequest do
   @behaviour Edgehog.Astarte.Device.CreateImageRequest.Behaviour
 
   alias Astarte.Client.AppEngine
+  alias Edgehog.Error
 
   @interface "io.edgehog.devicemanager.apps.CreateImageRequest"
 
@@ -30,12 +31,13 @@ defmodule Edgehog.Astarte.Device.CreateImageRequest do
   def send_create_image_request(%AppEngine{} = client, device_id, request_data) do
     request_data = Map.from_struct(request_data)
 
-    AppEngine.Devices.send_datastream(
-      client,
+    client
+    |> AppEngine.Devices.send_datastream(
       device_id,
       @interface,
       "/image",
       request_data
     )
+    |> Error.maybe_match_error(device_id, @interface)
   end
 end

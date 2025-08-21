@@ -94,7 +94,8 @@ defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
 
           {:error, reason} ->
             Logger.warning("Failed to send deployment request: #{inspect(reason)}")
-            Containers.destroy_deployment(deployment, tenant: tenant)
+            :ok = Containers.destroy_deployment(deployment, tenant: tenant)
+            {:error, reason}
         end
       end
     end

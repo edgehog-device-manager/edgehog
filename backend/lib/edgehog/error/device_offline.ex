@@ -18,18 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Network.Calculations.OptionsEncoding do
-  @moduledoc false
-  use Ash.Resource.Calculation
+defmodule Edgehog.Error.DeviceOffline do
+  @moduledoc "Used when requests to a device fail because the device appears offline."
+  use Splode.Error, fields: [:interface, :device_id], class: :invalid
 
-  @impl Ash.Resource.Calculation
-  def calculate(records, _opts, _context) do
-    Enum.map(records, &encode_options(&1.options))
-  end
-
-  defp encode_options(options) do
-    for {key, value} <- options do
-      to_string(key) <> "=" <> to_string(value)
-    end
+  def message(error) do
+    """
+    Device #{error.device_id} appears to be offline.
+    Request to interface #{error.interface} failed.
+    """
   end
 end

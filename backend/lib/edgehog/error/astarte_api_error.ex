@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Error.AstarteAPIError do
   @moduledoc "Used when Astarte replies with an APIError"
-  use Splode.Error, fields: [:status, :response], class: :invalid
+  use Splode.Error, fields: [:status, :response, :device_id, :interface], class: :invalid
 
   # TODO: this should probably be split in at least 2 different errors: one for
   # 403/401 responses, with class :forbidden, and another one from generic
@@ -32,13 +32,21 @@ defmodule Edgehog.Error.AstarteAPIError do
     error_details =
       case error.response do
         %{"error" => %{"detail" => error_message}} -> error_message
-        response -> Jason.encode(response)
+        %{"errors" => %{"detail" => error_message}} -> error_message
+        response -> Jason.encode!(response)
       end
+
+    # TODO: change old usages of `AstarteAPIError` to include device_id and
+    # interface
+    device_id = Map.get(error, :device_id, "Unknown")
+    interface = Map.get(error, :interface, "Unknown")
 
     """
     Astarte API Error with status #{error.status}:
 
     #{error_details}
+
+    on device #{device_id} and interface #{interface}
     """
   end
 
