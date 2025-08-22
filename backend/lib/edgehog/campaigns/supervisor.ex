@@ -52,7 +52,7 @@ defmodule Edgehog.Campaigns.Supervisor do
 
       defp update_campaigns_resumer do
         update_campaigns_stream =
-          UpdateCampaign
+          Edgehog.UpdateCampaigns.UpdateCampaign
           |> Ash.Query.for_read(:read_all_resumable)
           |> Ash.stream!()
 
