@@ -50,6 +50,7 @@ defmodule Edgehog.Containers.Release do
                on_no_match: {:create, :create_with_nested},
                on_match: :ignore
              )
+
       change manage_relationship(:system_models, type: :append)
     end
 

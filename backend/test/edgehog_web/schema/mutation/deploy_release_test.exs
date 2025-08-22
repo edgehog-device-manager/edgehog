@@ -88,7 +88,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     |> extract_result!()
   end
 
-  test "deployRelease returns an error if the application's system model does not match the device's system model",
+  test "deployRelease returns an error if the application's release system model does not match the device's system model",
        %{tenant: tenant} do
     part_number =
       [tenant: tenant]
@@ -101,12 +101,13 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     device = device_fixture(tenant: tenant, part_number: part_number)
 
-    application = application_fixture(tenant: tenant, system_model_id: system_model_2.id)
+    application = application_fixture(tenant: tenant)
 
     release =
       release_fixture(
         tenant: tenant,
-        application_id: application.id
+        application_id: application.id,
+        system_models: [system_model_2]
       )
 
     error =
@@ -122,7 +123,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     assert error.fields == [:system_model]
   end
 
-  test "deployRelease allows creating a deployment when device system model and application system model match",
+  test "deployRelease allows creating a deployment when device system model and application's release system model match",
        %{tenant: tenant} do
     system_model = system_model_fixture(tenant: tenant)
 
@@ -134,12 +135,13 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     device = device_fixture(tenant: tenant, part_number: part_number)
 
-    application = application_fixture(tenant: tenant, system_model_id: system_model.id)
+    application = application_fixture(tenant: tenant)
 
     release =
       release_fixture(
         tenant: tenant,
-        application_id: application.id
+        application_id: application.id,
+        system_models: [system_model]
       )
 
     expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _, _, _ ->
