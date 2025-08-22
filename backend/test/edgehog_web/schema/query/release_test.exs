@@ -27,9 +27,20 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
   alias Edgehog.Containers.ContainerNetwork
   alias Edgehog.Containers.ReleaseContainers
 
-  test "can access containers, networks, and deployments through relationships", %{tenant: tenant} do
+  test "can access containers, networks, system models and deployments through relationships", %{
+    tenant: tenant
+  } do
     app = application_fixture(tenant: tenant)
-    release = release_fixture(application_id: app.id, tenant: tenant)
+
+    system_models = 2
+
+    system_models =
+      Enum.map(1..system_models//1, fn _ ->
+        Edgehog.DevicesFixtures.system_model_fixture(tenant: tenant)
+      end)
+
+    release =
+      release_fixture(application_id: app.id, system_models: system_models, tenant: tenant)
 
     container = container_fixture(tenant: tenant)
     network = network_fixture(tenant: tenant)
@@ -87,6 +98,10 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
       device_node = get_in(edge, ["node", "device"])
       assert device_node["id"] != nil
     end
+
+    system_model_ids = release |> get_in(["release", "system_models"]) |> Enum.map(& &1["id"])
+    expected_system_model_ids = Enum.map(system_models, &AshGraphql.Resource.encode_id(&1, true))
+    assert system_model_ids, expected_system_model_ids
   end
 
   defp get_release(opts) do
@@ -121,6 +136,9 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
                 }
               }
             }
+          }
+          system_models {
+            id
           }
         }
       }

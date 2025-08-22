@@ -24,7 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplicationTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.ContainersFixtures
-  import Edgehog.DevicesFixtures
 
   describe "createApplication mutation" do
     test "create application with valid data", %{tenant: tenant} do

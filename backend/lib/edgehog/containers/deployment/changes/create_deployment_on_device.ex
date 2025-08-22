@@ -116,8 +116,10 @@ defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
   end
 
   defp can_deploy?(_device_sm, nil), do: true
+  defp can_deploy?(_device_sm, []), do: true
   defp can_deploy?(nil, _release_sms), do: false
-  defp can_deploy?(device_sm, release_sms), do: Enum.find_index(release_sms, & device_sm.id == &1.id) != nil
+
+  defp can_deploy?(device_sm, release_sms), do: Enum.any?(release_sms, &(device_sm.id == &1.id))
 
   defp deploy_networks(device, networks, deployment) do
     networks =

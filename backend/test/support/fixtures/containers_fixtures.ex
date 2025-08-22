@@ -202,11 +202,29 @@ defmodule Edgehog.ContainersFixtures do
 
     containers = Enum.map(1..containers//1, fn _ -> container_fixture(container_params) end)
 
+    # number of system models to associate with the release
+    {system_models, opts} = Keyword.pop(opts, :system_models, 0)
+
+    {system_model_params, opts} = Keyword.pop(opts, :system_model_params, [])
+    system_model_params = Keyword.put(system_model_params, :tenant, tenant)
+
+    system_models =
+      case system_models do
+        n when is_integer(n) ->
+          Enum.map(1..n//1, fn _ ->
+            Edgehog.DevicesFixtures.system_model_fixture(system_model_params)
+          end)
+
+        system_models when is_list(system_models) ->
+          system_models
+      end
+
     params =
       Enum.into(opts, %{
         application_id: application_id,
         version: unique_release_version(),
-        containers: containers
+        containers: containers,
+        required_system_models: system_models
       })
 
     Ash.create!(Release, params, tenant: tenant)
