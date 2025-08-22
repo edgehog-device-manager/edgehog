@@ -42,6 +42,7 @@ defmodule Edgehog.Containers.Release do
       accept [:application_id, :version]
 
       argument :containers, {:array, :map}
+      argument :required_system_models, {:array, :map}
 
       # TODO this should be a manual change, checking for existing containers,
       # for now each new release creates brand new containers
@@ -49,6 +50,8 @@ defmodule Edgehog.Containers.Release do
                on_no_match: {:create, :create_with_nested},
                on_match: :ignore
              )
+
+      change manage_relationship(:required_system_models, :system_models, type: :append)
     end
 
     destroy :destroy do
@@ -94,6 +97,11 @@ defmodule Edgehog.Containers.Release do
 
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ReleaseContainers
+      public? true
+    end
+
+    many_to_many :system_models, Edgehog.Devices.SystemModel do
+      through Edgehog.Containers.ReleaseSystemModel
       public? true
     end
   end
