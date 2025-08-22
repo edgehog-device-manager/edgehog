@@ -44,6 +44,7 @@ import {
   faUser,
   faEye,
   faEyeSlash,
+  faTriangleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -73,6 +74,7 @@ const icons = {
   upgrade: faArrowAltCircleUp,
   showPassword: faEye,
   hidePassword: faEyeSlash,
+  warning: faTriangleExclamation,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;

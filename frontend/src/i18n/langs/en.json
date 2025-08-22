@@ -719,6 +719,9 @@
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
   },
+  "components.MonacoJsonEditor.jsonError": {
+    "defaultMessage": "JSON error: {error}"
+  },
   "components.NetworkInterfacesTable.macAddressTitle": {
     "defaultMessage": "MAC Address"
   },

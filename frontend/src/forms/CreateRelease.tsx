@@ -52,6 +52,7 @@ import { yup, envSchema, portBindingsSchema } from "./index";
 import MultiSelect from "components/MultiSelect";
 import Select from "react-select";
 import Icon from "components/Icon";
+import MonacoJsonEditor from "components/MonacoJsonEditor";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -262,20 +263,21 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            {...register(`containers.${index}.env` as const)}
-            isInvalid={!!errors.containers?.[index]?.env}
-            placeholder='e.g., {"KEY": "value"}'
-            as="textarea"
-            rows={3}
-          />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.env?.message && (
-              <FormattedMessage id={errors.containers[index].env.message} />
+          <Controller
+            control={control}
+            name={`containers.${index}.env`}
+            render={({ field, fieldState: _fieldState }) => (
+              <MonacoJsonEditor
+                language="json"
+                value={field.value ?? ""}
+                onChange={(value) => {
+                  field.onChange(value ?? "");
+                }}
+                defaultValue={field.value || "{}"}
+              />
             )}
-          </Form.Control.Feedback>
+          />
         </FormRow>
-
         <FormRow
           id={`containers-${index}-image-reference`}
           label={

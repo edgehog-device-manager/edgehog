@@ -35,6 +35,7 @@ import type {
 import Col from "components/Col";
 import Form from "components/Form";
 import Row from "components/Row";
+import MonacoJsonEditor from "components/MonacoJsonEditor";
 
 const FormRow = ({
   id,
@@ -239,15 +240,13 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
                       />
                     }
                   >
-                    <Form.Control
-                      as="textarea"
+                    <MonacoJsonEditor
                       value={formatJson(vol?.options)}
-                      rows={formatJson(vol?.options).split("\n").length}
-                      readOnly
-                      style={{
-                        fontFamily: "monospace",
-                        whiteSpace: "pre-wrap",
-                      }}
+                      language="json"
+                      onChange={() => {}}
+                      defaultValue={formatJson(vol?.options)}
+                      readonly={true}
+                      initialLines={1}
                     />
                   </FormRow>
                 </div>
@@ -389,11 +388,13 @@ const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
                       />
                     }
                   >
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
+                    <MonacoJsonEditor
                       value={formatJson(net?.options)}
-                      readOnly
+                      language="json"
+                      onChange={() => {}}
+                      defaultValue={formatJson(net?.options)}
+                      readonly={true}
+                      initialLines={1}
                     />
                   </FormRow>
                 </div>
@@ -426,11 +427,13 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
           />
         }
       >
-        <Form.Control
-          as="textarea"
-          rows={formatJson(container.env).split("\n").length}
+        <MonacoJsonEditor
           value={formatJson(container.env)}
-          readOnly
+          language="json"
+          onChange={() => {}}
+          defaultValue={formatJson(container.env)}
+          readonly={true}
+          initialLines={1}
         />
       </FormRow>
 
