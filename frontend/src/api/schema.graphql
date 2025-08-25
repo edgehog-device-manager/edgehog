@@ -884,25 +884,100 @@ input ReleaseCreateContainersInput {
   image: ContainerCreateWithNestedImageInput
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
-  volumes: [ContainerCreateWithNestedVolumesInput!]
+  portBindings: [String!]
+  restartPolicy: String
+  networkMode: String
+  privileged: Boolean
+  extraHosts: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealTimePeriod: Int
   cpuRealtimeRuntime: Int
-  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  networkMode: String
-  portBindings: [String!]
-  privileged: Boolean
-  readOnlyRootfs: Boolean
-  restartPolicy: String
-  storageOpt: [String!]
-  tmpfs: [String!]
   volumeDriver: String
+  storageOpt: [String!]
+  readOnlyRootfs: Boolean
+  tmpfs: [String!]
+  volumes: [ContainerCreateWithNestedVolumesInput!]
+}
+
+enum ContainerVolumeSortField {
+  TARGET
+  VOLUME_ID
+}
+
+":container_volume connection"
+type ContainerVolumeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container_volume edges"
+  edges: [ContainerVolumeEdge!]
+}
+
+":container_volume edge"
+type ContainerVolumeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container_volume node"
+  node: ContainerVolume!
+}
+
+input ContainerVolumeFilterVolumeId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerVolumeFilterTarget {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerVolumeFilterInput {
+  and: [ContainerVolumeFilterInput!]
+  or: [ContainerVolumeFilterInput!]
+  not: [ContainerVolumeFilterInput!]
+  target: ContainerVolumeFilterTarget
+  volumeId: ContainerVolumeFilterVolumeId
+  volume: VolumeFilterInput
+}
+
+input ContainerVolumeSortInput {
+  order: SortOrder
+  field: ContainerVolumeSortField!
+}
+
+type ContainerVolume {
+  "A unique identifier"
+  id: ID!
+
+  target: String!
+
+  volumeId: ID!
+
+  volume: Volume!
 }
 
 "The result of the :create_volume mutation"
@@ -925,27 +1000,6 @@ enum VolumeSortField {
   LABEL
   DRIVER
   OPTIONS
-}
-
-":volume connection"
-type VolumeConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":volume edges"
-  edges: [VolumeEdge!]
-}
-
-":volume edge"
-type VolumeEdge {
-  "Cursor"
-  cursor: String!
-
-  ":volume node"
-  node: Volume!
 }
 
 "A keyset page of :volume"
@@ -2033,9 +2087,9 @@ input ContainerFilterInput {
   imageId: ContainerFilterImageId
   image: ImageFilterInput
   releases: ReleaseFilterInput
-  volumes: VolumeFilterInput
   networks: NetworkFilterInput
   devices: DeviceFilterInput
+  containerVolumes: ContainerVolumeFilterInput
 }
 
 input ContainerSortInput {
@@ -2087,25 +2141,6 @@ type Container {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ReleaseConnection!
-  volumes(
-    "How to sort the records in the response"
-    sort: [VolumeSortInput]
-
-    "A filter to limit the results"
-    filter: VolumeFilterInput
-
-    "The number of records to return from the beginning. Maximum 250"
-    first: Int
-
-    "Show records before the specified keyset."
-    before: String
-
-    "Show records after the specified keyset."
-    after: String
-
-    "The number of records to return to the end. Maximum 250"
-    last: Int
-  ): VolumeConnection!
   networks(
     "How to sort the records in the response"
     sort: [NetworkSortInput]
@@ -2144,6 +2179,25 @@ type Container {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceConnection!
+  containerVolumes(
+    "How to sort the records in the response"
+    sort: [ContainerVolumeSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerVolumeFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerVolumeConnection!
 }
 
 "The result of the :delete_application mutation"
