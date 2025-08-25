@@ -22,7 +22,8 @@ defmodule Edgehog.Containers.Release do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    authorizers: [Ash.Policy.Authorizer]
 
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Release.Changes

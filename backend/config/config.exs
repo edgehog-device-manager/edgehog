@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -111,6 +111,8 @@ config :edgehog, :edgehog_forwarder, %{
   secure_sessions?: false,
   enabled?: true
 }
+
+config :edgehog, :features, containers: true
 
 config :edgehog,
   ecto_repos: [Edgehog.Repo]
