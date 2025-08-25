@@ -31,5 +31,6 @@ defmodule Edgehog.DeploymentCampaigns do
   resources do
     resource Edgehog.DeploymentCampaigns.DeploymentCampaign
     resource Edgehog.DeploymentCampaigns.DeploymentTarget
+    resource Edgehog.DeploymentCampaigns.DeploymentChannel
   end
 end
