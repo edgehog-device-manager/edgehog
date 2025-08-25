@@ -205,6 +205,12 @@ defmodule Edgehog.Containers do
         args: [:container_id]
     end
 
+    resource Edgehog.Containers.ReleaseSystemModel do
+      define :releases_with_system_model,
+        action: :releases_by_system_model,
+        args: [:system_model_id]
+    end
+
     resource Edgehog.Containers.Network
 
     resource Edgehog.Containers.Network.Deployment do
