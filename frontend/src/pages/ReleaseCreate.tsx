@@ -39,7 +39,7 @@ import type { ReleaseCreate_createRelease_Mutation } from "api/__generated__/Rel
 import Alert from "components/Alert";
 import Page from "components/Page";
 import CreateRelease from "forms/CreateRelease";
-import type { ReleaseData } from "forms/CreateRelease";
+import type { ReleaseSubmitData } from "forms/CreateRelease";
 import { Route, useNavigate } from "Navigation";
 import Spinner from "components/Spinner";
 import Center from "components/Center";
@@ -82,7 +82,7 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
     useMutation<ReleaseCreate_createRelease_Mutation>(CREATE_RELEASE_MUTATION);
 
   const handleCreateRelease = useCallback(
-    (release: ReleaseData) => {
+    (release: ReleaseSubmitData) => {
       const newRelease = { ...release, applicationId };
 
       createRelease({
