@@ -89,13 +89,16 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
               }
             }
           }
-          volumes {
+          containerVolumes {
             edges {
               node {
-                id
-                driver
-                label
-                options
+                target
+                volume {
+                  id
+                  label
+                  driver
+                  options
+                }
               }
             }
           }
@@ -145,15 +148,18 @@ const formatJson = (jsonString: unknown) => {
 };
 
 type volumeDetailsProps = {
-  volumes: NonNullable<
+  containerVolumes: NonNullable<
     ContainersTable_ContainerFragment$data["containers"]["edges"]
-  >[number]["node"]["volumes"];
+  >[number]["node"]["containerVolumes"];
   containerIndex: number;
 };
 
-const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
+const VolumeDetails = ({
+  containerVolumes,
+  containerIndex,
+}: volumeDetailsProps) => {
   const [openVolumeIndexes, setOpenVolumeIndexes] = useState<number[]>(
-    volumes.edges?.map((_, index) => index) ?? [],
+    containerVolumes.edges?.map((_, index) => index) ?? [],
   );
 
   const toggleVolume = (index: number) => {
@@ -173,7 +179,7 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
         />
       </h5>
 
-      {!volumes?.edges?.length ? (
+      {!containerVolumes?.edges?.length ? (
         <p className="fst-italic">
           <FormattedMessage
             id="components.ContainersTable.noVolumes"
@@ -181,13 +187,13 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
           />
         </p>
       ) : (
-        volumes.edges.map((volEdge, volIndex) => {
-          const vol = volEdge.node;
+        containerVolumes.edges.map((volEdge, volIndex) => {
+          const mount = volEdge.node;
           const isOpen = openVolumeIndexes.includes(volIndex);
 
           return (
             <div
-              key={vol?.id ?? volIndex}
+              key={mount?.volume.id ?? volIndex}
               className="mb-2 border rounded bg-light"
             >
               <Button
@@ -196,7 +202,7 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
                 onClick={() => toggleVolume(volIndex)}
                 aria-expanded={isOpen}
               >
-                {vol?.label}
+                {mount?.volume.label}
                 <span className="ms-auto">
                   {isOpen ? (
                     <FontAwesomeIcon icon={faChevronUp} />
@@ -209,6 +215,18 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
               <Collapse in={isOpen}>
                 <div className="p-2 border-top">
                   <FormRow
+                    id={`containers-${containerIndex}-volume-${volIndex}-target`}
+                    label={
+                      <FormattedMessage
+                        id="components.ContainersTable.targetLabel"
+                        defaultMessage="Target"
+                      />
+                    }
+                  >
+                    <Form.Control value={mount?.target ?? ""} readOnly />
+                  </FormRow>
+
+                  <FormRow
                     id={`containers-${containerIndex}-volume-${volIndex}-label`}
                     label={
                       <FormattedMessage
@@ -217,7 +235,7 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
                       />
                     }
                   >
-                    <Form.Control value={vol?.label ?? ""} readOnly />
+                    <Form.Control value={mount?.volume.label ?? ""} readOnly />
                   </FormRow>
 
                   <FormRow
@@ -229,7 +247,7 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
                       />
                     }
                   >
-                    <Form.Control value={vol?.driver ?? ""} readOnly />
+                    <Form.Control value={mount?.volume.driver ?? ""} readOnly />
                   </FormRow>
                   <FormRow
                     id="volumeOptions"
@@ -241,10 +259,10 @@ const VolumeDetails = ({ volumes, containerIndex }: volumeDetailsProps) => {
                     }
                   >
                     <MonacoJsonEditor
-                      value={formatJson(vol?.options)}
+                      value={formatJson(mount?.volume.options)}
                       language="json"
                       onChange={() => {}}
-                      defaultValue={formatJson(vol?.options)}
+                      defaultValue={formatJson(mount?.volume.options)}
                       readonly={true}
                       initialLines={1}
                     />
@@ -536,7 +554,10 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
       </FormRow>
 
       <NetworkDetails networks={container.networks} containerIndex={index} />
-      <VolumeDetails volumes={container.volumes} containerIndex={index} />
+      <VolumeDetails
+        containerVolumes={container.containerVolumes}
+        containerIndex={index}
+      />
     </div>
   );
 };

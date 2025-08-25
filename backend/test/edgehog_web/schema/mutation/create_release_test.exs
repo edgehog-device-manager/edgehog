@@ -294,11 +294,16 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
               edges {
                 node {
                   id
-                  volumes {
+                  ContainerVolumes {
                     edges {
                       node {
-                        id
-                        label
+                        target
+                        volume{
+                          id
+                          label
+                          driver
+                          options
+                        }
                       }
                     }
                   }
@@ -324,13 +329,21 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         AshGraphql.Resource.decode_relay_id(release["id"])
 
       release =
-        Containers.fetch_release!(release_id, tenant: tenant, load: [containers: [:volumes]])
+        Containers.fetch_release!(release_id,
+          tenant: tenant,
+          load: [
+            containers: [
+              container_volumes: [:volume]
+            ]
+          ]
+        )
 
       [container] = release.containers
-      [container_volume] = container.volumes
+      [container_volume] = container.container_volumes
 
-      assert volume.id == container_volume.id
-      assert volume.label == container_volume.label
+      assert volume.id == container_volume.volume.id
+      assert volume.label == container_volume.volume.label
+      assert volume_target == container_volume.target
     end
 
     test "create a release with nested containers with quotas", %{tenant: tenant} do
