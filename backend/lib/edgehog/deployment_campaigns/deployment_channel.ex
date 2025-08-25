@@ -20,10 +20,18 @@
 
 defmodule Edgehog.DeploymentCampaigns.DeploymentChannel do
   @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
+  use Edgehog.MultitenantResource,
     domain: Edgehog.DeploymentCampaigns,
     extensions: [AshGraphql.Resource]
+
+  resource do
+    description """
+    Represents a DeploymentChannel.
+
+    A DeploymentChannel represents a set of device groups that can be targeted in
+    a DeploymentCampaign.
+    """
+  end
 
   graphql do
     type :deployment_channel
@@ -57,5 +65,9 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentChannel do
     has_many :deployment_campaigns, Edgehog.DeploymentCampaigns.DeploymentCampaign do
       public? true
     end
+  end
+
+  postgres do
+    table "deployment_channels"
   end
 end
