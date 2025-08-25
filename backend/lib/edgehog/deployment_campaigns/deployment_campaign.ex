@@ -70,6 +70,14 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       allow_nil? false
     end
 
+    belongs_to :deployment_channel, Edgehog.DeploymentCampaigns.DeploymentChannel do
+      description "The deployment channel associated with the campaign."
+      public? true
+      allow_nil? false
+      attribute_public? false
+      attribute_type :uuid
+    end
+
     has_many :deployment_targets, Edgehog.DeploymentCampaigns.DeploymentTarget do
       description "The depployment targets belonging to the deployment campaign."
       public? true
