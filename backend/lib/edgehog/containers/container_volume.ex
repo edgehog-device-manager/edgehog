@@ -22,7 +22,12 @@ defmodule Edgehog.Containers.ContainerVolume do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
+    extensions: [AshGraphql.Resource],
     tenant_id_in_primary_key?: true
+
+  graphql do
+    type :container_volume
+  end
 
   actions do
     defaults [:read, :destroy, create: [:target, :container_id, :volume_id]]
@@ -49,6 +54,7 @@ defmodule Edgehog.Containers.ContainerVolume do
     end
 
     belongs_to :volume, Edgehog.Containers.Volume do
+      public? true
       primary_key? true
       allow_nil? false
       attribute_type :uuid

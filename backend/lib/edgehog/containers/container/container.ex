@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Container do
 
   alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Container.ManualActions
+  alias Edgehog.Containers.ContainerVolume
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Types.RestartPolicy
 
@@ -34,8 +35,8 @@ defmodule Edgehog.Containers.Container do
 
     paginate_relationship_with networks: :relay,
                                devices: :relay,
-                               volumes: :relay,
-                               releases: :relay
+                               releases: :relay,
+                               container_volumes: :relay
   end
 
   actions do
@@ -333,9 +334,8 @@ defmodule Edgehog.Containers.Container do
     end
 
     many_to_many :volumes, Edgehog.Containers.Volume do
-      through Edgehog.Containers.ContainerVolume
+      through ContainerVolume
       join_relationship :container_volumes
-      public? true
     end
 
     many_to_many :networks, Edgehog.Containers.Network do
@@ -346,6 +346,10 @@ defmodule Edgehog.Containers.Container do
     many_to_many :devices, Edgehog.Devices.Device do
       through Edgehog.Containers.Container.Deployment
       join_relationship :container_deployments
+      public? true
+    end
+
+    has_many :container_volumes, ContainerVolume do
       public? true
     end
   end
