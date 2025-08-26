@@ -36,7 +36,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignTest do
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foobar"])
 
       context = %{

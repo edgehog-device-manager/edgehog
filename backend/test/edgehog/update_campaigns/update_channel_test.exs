@@ -48,7 +48,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foobar"])
 
       _other_device =
@@ -74,12 +74,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foobar"])
 
       _other_device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["not-foobar"])
 
       device_id = device.id
@@ -99,12 +99,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
 
       foo_device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foo"])
 
       bar_device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["bar"])
 
       update_channel =
@@ -125,7 +125,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foo", "bar"])
 
       device_id = device.id

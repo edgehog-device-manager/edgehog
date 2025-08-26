@@ -68,6 +68,14 @@ defmodule Edgehog.Groups.DeviceGroup do
       validate Validations.UpdateChannelAbsent
     end
 
+    update :assign_deployment_channel do
+      accept [:deployment_channel_id]
+
+      require_atomic? false
+
+      validate Validations.DeploymentChannelAbsent
+    end
+
     destroy :destroy do
       description "Deletes a device group."
       primary? true

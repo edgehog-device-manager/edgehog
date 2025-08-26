@@ -28,6 +28,35 @@ defmodule Edgehog.DeploymentCampaigns do
   use Ash.Domain,
     extensions: [AshGraphql.Domain]
 
+  alias Edgehog.DeploymentCampaigns.DeploymentCampaign
+  alias Edgehog.DeploymentCampaigns.DeploymentChannel
+
+  graphql do
+    root_level_errors? true
+
+    queries do
+      get DeploymentCampaign, :deployment_campaign, :read do
+        description "Returns the desired deployment campaign."
+      end
+
+      list DeploymentCampaign, :deployment_campaigns, :read do
+        description "Returns all available deployment campaigns."
+        paginate_with :keyset
+        relay? true
+      end
+
+      get DeploymentChannel, :deployment_channel, :read do
+        description "Returns the desired deployment channel."
+      end
+
+      list DeploymentChannel, :deployment_channels, :read do
+        description "Returns all available deployment channels."
+        paginate_with :keyset
+        relay? true
+      end
+    end
+  end
+
   resources do
     resource Edgehog.DeploymentCampaigns.DeploymentCampaign
     resource Edgehog.DeploymentCampaigns.DeploymentTarget
