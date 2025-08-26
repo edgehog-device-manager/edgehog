@@ -18,10 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
 import type { UseFormRegister } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -42,6 +42,11 @@ import {
   ContainerCreateWithNestedVolumesInput,
 } from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
+import type {
+  CreateRelease_getApplicationsWithReleases_Query,
+  CreateRelease_getApplicationsWithReleases_Query$data,
+} from "api/__generated__/CreateRelease_getApplicationsWithReleases_Query.graphql";
+
 import Button from "components/Button";
 import Col from "components/Col";
 import Form from "components/Form";
@@ -50,9 +55,10 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { yup, envSchema, portBindingsSchema } from "./index";
 import MultiSelect from "components/MultiSelect";
-import Select from "react-select";
+import Select, { SingleValue } from "react-select";
 import Icon from "components/Icon";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
+import ConfirmModal from "components/ConfirmModal";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -87,6 +93,74 @@ const VOLUMES_OPTIONS_FRAGMENT = graphql`
     }
   }
 `;
+
+const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
+  query CreateRelease_getApplicationsWithReleases_Query {
+    applications {
+      results {
+        id
+        name
+        releases {
+          edges {
+            node {
+              id
+              version
+              containers {
+                edges {
+                  node {
+                    id
+                    env
+                    hostname
+                    networkMode
+                    restartPolicy
+                    privileged
+                    portBindings
+                    image {
+                      reference
+                      credentials {
+                        id
+                      }
+                    }
+                    networks {
+                      edges {
+                        node {
+                          id
+                          label
+                        }
+                      }
+                    }
+                    containerVolumes {
+                      edges {
+                        node {
+                          target
+                          volume {
+                            id
+                            label
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type ApplicationsData = NonNullable<
+  CreateRelease_getApplicationsWithReleases_Query$data["applications"]
+>;
+
+type ApplicationResult = NonNullable<ApplicationsData["results"]>[number];
+
+type ReleasesData = NonNullable<ApplicationResult["releases"]>;
+type ReleaseEdge = NonNullable<NonNullable<ReleasesData["edges"]>[number]>;
+
+type ReleaseNode = NonNullable<ReleaseEdge["node"]>;
 
 const NetworksErrors = ({ errors }: { errors: unknown }) => {
   if (errors == null) {
@@ -319,24 +393,32 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Select
-            {...register(
-              `containers.${index}.image.imageCredentialsId` as const,
-            )}
-            isInvalid={!!errors.containers?.[index]?.image?.imageCredentialsId}
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "components.CreateRelease.imageCredentialOption",
-                defaultMessage: "Select Image Credentials",
-              })}
-            </option>
-            {listImageCredentials?.results?.map((imageCredential) => (
-              <option key={imageCredential.id} value={imageCredential.id}>
-                {imageCredential.label} ({imageCredential.username})
-              </option>
-            ))}
-          </Form.Select>
+          <Controller
+            control={control}
+            name={`containers.${index}.image.imageCredentialsId`}
+            render={({ field }) => {
+              const options =
+                listImageCredentials?.results?.map((ic) => ({
+                  value: ic.id,
+                  label: `${ic.label} (${ic.username})`,
+                })) || [];
+
+              const selectedOption =
+                options.find((opt) => opt.value === field.value) || null;
+
+              return (
+                <Select
+                  value={selectedOption}
+                  onChange={(option) => {
+                    field.onChange(option ? option.value : null);
+                  }}
+                  options={options}
+                  isClearable
+                />
+              );
+            }}
+          />
+
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.image?.imageCredentialsId?.message && (
               <FormattedMessage
@@ -407,16 +489,23 @@ const ContainerForm = ({
             render={({
               field: { value, onChange, onBlur },
               fieldState: { invalid },
-            }) => (
-              <MultiSelect
-                invalid={invalid}
-                value={value}
-                onChange={onChange}
-                onBlur={onBlur}
-                options={networks?.results || []}
-                getOptionValue={(option) => option.id!}
-              />
-            )}
+            }) => {
+              const mappedValue = (value || []).map(
+                (v: { id: string }) =>
+                  networks?.results?.find((n) => n.id === v.id) || v,
+              );
+
+              return (
+                <MultiSelect
+                  invalid={invalid}
+                  value={mappedValue}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  options={networks?.results || []}
+                  getOptionValue={(option) => option.id!}
+                />
+              );
+            }}
           />
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.networks && (
@@ -704,121 +793,264 @@ const CreateRelease = ({
     name: "containers",
   });
 
+  const applicationsData =
+    useLazyLoadQuery<CreateRelease_getApplicationsWithReleases_Query>(
+      GET_APPLICATIONS_WITH_RELEASES_QUERY,
+      {},
+      { fetchPolicy: "store-and-network" },
+    );
+
+  const applications = applicationsData.applications?.results ?? [];
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [selectedRelease, setSelectedRelease] =
+    useState<SingleValue<{ value: string; label: string }>>(null);
+
+  const [selectedApp, setSelectedApp] =
+    useState<
+      SingleValue<{ value: string; label: string; releases: ReleaseNode[] }>
+    >(null);
+
   return (
-    <form
-      onSubmit={handleSubmit((data: ReleaseInputData) => {
-        const submitData: ReleaseSubmitData = {
-          ...data,
-          containers: data.containers?.map((container) => ({
-            env: container.env || undefined,
-            image: {
-              reference: container.image.reference,
-              imageCredentialsId:
-                container.image.imageCredentialsId || undefined,
-            },
-            hostname: container.hostname || undefined,
-            privileged: container.privileged || undefined,
-            restartPolicy: container.restartPolicy || undefined,
-            networkMode: container.networkMode || undefined,
-            portBindings: container.portBindings
-              ? (container.portBindings
-                  .split(",")
-                  .map((v) => v.trim()) as string[])
-              : undefined,
-            networks: container.networks?.map((n) => ({ id: n.id })) || [],
-            volumes: container.volumes?.map((v) => ({
-              id: v.id,
-              target: v.target,
+    <>
+      <form
+        onSubmit={handleSubmit((data: ReleaseInputData) => {
+          const submitData: ReleaseSubmitData = {
+            ...data,
+            containers: data.containers?.map((container) => ({
+              env: container.env || undefined,
+              image: {
+                reference: container.image.reference,
+                imageCredentialsId:
+                  container.image.imageCredentialsId || undefined,
+              },
+              hostname: container.hostname || undefined,
+              privileged: container.privileged || undefined,
+              restartPolicy: container.restartPolicy || undefined,
+              networkMode: container.networkMode || undefined,
+              portBindings: container.portBindings
+                ? (container.portBindings
+                    .split(",")
+                    .map((v) => v.trim()) as string[])
+                : undefined,
+              networks: container.networks?.map((n) => ({ id: n.id })) || [],
+              volumes: container.volumes?.map((v) => ({
+                id: v.id,
+                target: v.target,
+              })),
             })),
-          })),
-        };
+          };
 
-        onSubmit(submitData);
-      })}
-    >
-      <Stack gap={2}>
-        <FormRow
-          id="application-form-version"
-          label={
-            <FormattedMessage
-              id="components.CreateRelease.versionLabel"
-              defaultMessage="Version"
-            />
-          }
-        >
-          <Form.Control
-            {...register("version")}
-            isInvalid={!!errors.version}
-            placeholder="e.g., 1.0.0"
-          />
-          <Form.Control.Feedback type="invalid">
-            {errors.version?.message && (
-              <FormattedMessage id={errors.version.message} />
-            )}
-          </Form.Control.Feedback>
-        </FormRow>
-
-        <Stack className="mt-3">
-          <h5>
-            <FormattedMessage
-              id="components.CreateRelease.containersTitle"
-              defaultMessage="Containers"
-            />
-          </h5>
-          {fields.length === 0 && (
-            <p>
+          onSubmit(submitData);
+        })}
+      >
+        <Stack gap={2}>
+          <FormRow
+            id="application-form-version"
+            label={
               <FormattedMessage
-                id="components.CreateRelease.noContainersFeedback"
-                defaultMessage="The release does not include any container."
+                id="components.CreateRelease.versionLabel"
+                defaultMessage="Version"
               />
-            </p>
-          )}
-        </Stack>
-
-        {fields.map((field, index) => (
-          <ContainerForm
-            key={field.id}
-            index={index}
-            register={register}
-            errors={errors}
-            remove={remove}
-            listImageCredentials={listImageCredentials}
-            networks={networks}
-            volumes={volumes}
-            intl={intl}
-            control={control}
-          />
-        ))}
-
-        <div className="d-flex justify-content-start align-items-center">
-          <Button
-            variant="secondary"
-            onClick={() =>
-              append({
-                image: { reference: "" },
-                networks: [],
-                volumes: [],
-              })
             }
           >
-            <FormattedMessage
-              id="components.CreateRelease.addContainerButton"
-              defaultMessage="Add Container"
+            <Form.Control
+              {...register("version")}
+              isInvalid={!!errors.version}
+              placeholder="e.g., 1.0.0"
             />
-          </Button>
-        </div>
+            <Form.Control.Feedback type="invalid">
+              {errors.version?.message && (
+                <FormattedMessage id={errors.version.message} />
+              )}
+            </Form.Control.Feedback>
+          </FormRow>
 
-        <div className="d-flex justify-content-end align-items-center">
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading && <Spinner size="sm" className="me-2" />}
-            <FormattedMessage
-              id="components.CreateRelease.submitButton"
-              defaultMessage="Create"
+          <Stack className="mt-3">
+            <h5>
+              <FormattedMessage
+                id="components.CreateRelease.containersTitle"
+                defaultMessage="Containers"
+              />
+            </h5>
+            {fields.length === 0 && (
+              <p>
+                <FormattedMessage
+                  id="components.CreateRelease.noContainersFeedback"
+                  defaultMessage="The release does not include any container."
+                />
+              </p>
+            )}
+          </Stack>
+
+          {fields.map((field, index) => (
+            <ContainerForm
+              key={field.id}
+              index={index}
+              register={register}
+              errors={errors}
+              remove={remove}
+              listImageCredentials={listImageCredentials}
+              networks={networks}
+              volumes={volumes}
+              intl={intl}
+              control={control}
             />
-          </Button>
-        </div>
-      </Stack>
-    </form>
+          ))}
+
+          <div className="d-flex justify-content-start align-items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() =>
+                append({
+                  image: { reference: "" },
+                  networks: [],
+                  volumes: [],
+                })
+              }
+            >
+              <FormattedMessage
+                id="components.CreateRelease.addContainerButton"
+                defaultMessage="Add Container"
+              />
+            </Button>
+
+            <Button
+              variant="primary"
+              title={intl.formatMessage({
+                id: "components.CreateRelease.reuseResourcesTitleButton",
+                defaultMessage:
+                  "Copy containers and their configurations from an existing release",
+              })}
+              onClick={() => setShowModal(true)}
+            >
+              <FormattedMessage
+                id="components.CreateRelease.reuseResourcesButton"
+                defaultMessage="Reuse Containers"
+              />
+            </Button>
+          </div>
+
+          <div className="d-flex justify-content-end align-items-center">
+            <Button variant="primary" type="submit" disabled={isLoading}>
+              {isLoading && <Spinner size="sm" className="me-2" />}
+              <FormattedMessage
+                id="components.CreateRelease.submitButton"
+                defaultMessage="Create"
+              />
+            </Button>
+          </div>
+        </Stack>
+      </form>
+
+      {showModal && (
+        <ConfirmModal
+          title={intl.formatMessage({
+            id: "components.CreateRelease.reuseResourcesModalTitle",
+            defaultMessage: "Reuse Resources Modal",
+          })}
+          confirmLabel={
+            <FormattedMessage
+              id="components.CreateRelease.confirmButton"
+              defaultMessage="Confirm"
+            />
+          }
+          onCancel={() => setShowModal(false)}
+          onConfirm={() => {
+            if (!selectedRelease || !selectedApp) return;
+
+            const release = selectedApp?.releases?.find(
+              (r) => r.id === selectedRelease.value,
+            );
+
+            if (!release) return;
+
+            remove();
+
+            release.containers?.edges?.forEach((containerEdge) => {
+              const c = containerEdge.node;
+              append({
+                env: c.env || "",
+                image: {
+                  reference: c.image?.reference || "",
+                  imageCredentialsId: c.image?.credentials?.id || undefined,
+                },
+                hostname: c.hostname || "",
+                privileged: c.privileged || false,
+                restartPolicy: c.restartPolicy || "",
+                networkMode: c.networkMode || "",
+                portBindings: c.portBindings?.join(",") || "",
+                networks:
+                  c.networks?.edges?.map((n: any) => ({ id: n.node.id })) ?? [],
+                volumes:
+                  c.containerVolumes?.edges?.map((v: any) => ({
+                    id: v.node.volume.id,
+                    target: v.node.target,
+                  })) ?? [],
+              });
+            });
+
+            setShowModal(false);
+          }}
+        >
+          <p>
+            <FormattedMessage
+              id="components.CreateRelease.confirmPrompt"
+              defaultMessage="Choose a release from which you want to copy containers and their configurations."
+            />
+          </p>
+          <div className="mt-3 mb-2 p-3 border rounded">
+            <div className="mb-2 d-flex flex-column gap-2">
+              <FormRow
+                id="containers-reuseResources-application"
+                label={intl.formatMessage({
+                  id: "components.CreateRelease.selectApplication",
+                  defaultMessage: "Select Application",
+                })}
+              >
+                <Select
+                  value={selectedApp}
+                  onChange={(val) => {
+                    setSelectedApp(val);
+                    setSelectedRelease(null);
+                  }}
+                  classNamePrefix="select"
+                  isSearchable
+                  options={applications.map((app) => ({
+                    value: app.id,
+                    label: app.name,
+                    releases: app.releases?.edges?.map((e) => e.node) ?? [],
+                  }))}
+                />
+              </FormRow>
+
+              <FormRow
+                id="containers-reuseResources-release"
+                label={intl.formatMessage({
+                  id: "components.CreateRelease.selectRelease",
+                  defaultMessage: "Select Release",
+                })}
+              >
+                <Select
+                  isDisabled={!selectedApp}
+                  value={selectedRelease}
+                  onChange={(val) => setSelectedRelease(val)}
+                  classNamePrefix="select"
+                  isSearchable
+                  options={
+                    selectedApp?.releases?.map((rel) => ({
+                      value: rel.id,
+                      label: rel.version,
+                    })) || []
+                  }
+                />
+              </FormRow>
+            </div>
+          </div>
+        </ConfirmModal>
+      )}
+    </>
   );
 };
 
