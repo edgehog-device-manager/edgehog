@@ -131,14 +131,23 @@ type ContainerInput = {
   privileged?: boolean;
   restartPolicy?: string;
   networkMode?: string;
-  portBindings?: string[];
+  portBindings?: string;
   networks: ContainerCreateWithNestedNetworksInput[];
   volumes: ContainerCreateWithNestedVolumesInput[];
 };
 
-type ReleaseData = {
+type ReleaseInputData = {
   version: string;
   containers?: ContainerInput[] | null;
+};
+
+type ReleaseSubmitData = {
+  version: string;
+  containers?: ContainerSubmit[] | null;
+};
+
+type ContainerSubmit = Omit<ContainerInput, "portBindings"> & {
+  portBindings?: string[];
 };
 
 // Yup schema for form validation
@@ -186,7 +195,7 @@ const applicationSchema = yup
   })
   .required();
 
-const initialData: ReleaseData = {
+const initialData: ReleaseInputData = {
   version: "",
   containers: null,
 };
@@ -203,12 +212,12 @@ type CreateReleaseProps = {
   networksOptionsRef: CreateRelease_NetworksOptionsFragment$key;
   volumesOptionsRef: CreateRelease_VolumesOptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: ReleaseData) => void;
+  onSubmit: (data: ReleaseSubmitData) => void;
 };
 
 type ContainerFormProps = {
   index: number;
-  register: UseFormRegister<ReleaseData>;
+  register: UseFormRegister<ReleaseInputData>;
   errors: any;
   remove: (index: number) => void;
   listImageCredentials: CreateRelease_ImageCredentialsOptionsFragment$data["listImageCredentials"];
@@ -684,7 +693,7 @@ const CreateRelease = ({
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<ReleaseData>({
+  } = useForm<ReleaseInputData>({
     mode: "onTouched",
     defaultValues: initialData,
     resolver: yupResolver(applicationSchema),
@@ -697,8 +706,8 @@ const CreateRelease = ({
 
   return (
     <form
-      onSubmit={handleSubmit((data) => {
-        const cleanedData: ReleaseData = {
+      onSubmit={handleSubmit((data: ReleaseInputData) => {
+        const submitData: ReleaseSubmitData = {
           ...data,
           containers: data.containers?.map((container) => ({
             env: container.env || undefined,
@@ -711,7 +720,11 @@ const CreateRelease = ({
             privileged: container.privileged || undefined,
             restartPolicy: container.restartPolicy || undefined,
             networkMode: container.networkMode || undefined,
-            portBindings: container.portBindings || undefined,
+            portBindings: container.portBindings
+              ? (container.portBindings
+                  .split(",")
+                  .map((v) => v.trim()) as string[])
+              : undefined,
             networks: container.networks?.map((n) => ({ id: n.id })) || [],
             volumes: container.volumes?.map((v) => ({
               id: v.id,
@@ -720,7 +733,7 @@ const CreateRelease = ({
           })),
         };
 
-        onSubmit(cleanedData);
+        onSubmit(submitData);
       })}
     >
       <Stack gap={2}>
@@ -809,6 +822,6 @@ const CreateRelease = ({
   );
 };
 
-export type { ReleaseData };
+export type { ReleaseSubmitData };
 
 export default CreateRelease;
