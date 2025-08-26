@@ -21,9 +21,7 @@
 defmodule Edgehog.Containers do
   @moduledoc false
   use Ash.Domain,
-    extensions: [
-      AshGraphql.Domain
-    ]
+    extensions: [AshGraphql.Domain]
 
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Deployment
@@ -249,5 +247,6 @@ defmodule Edgehog.Containers do
     end
 
     resource Upgrade
+    resource Edgehog.Containers.DeviceMapping
   end
 end
