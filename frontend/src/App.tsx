@@ -64,6 +64,7 @@ import VolumeCreatePage from "pages/VolumeCreate";
 import Networks from "pages/Networks";
 import Network from "pages/Network";
 import NetworkCreatePage from "pages/NetworkCreate";
+import DeploymentsPage from "pages/Deployments";
 
 import { bugs, repository, version } from "../package.json";
 
@@ -118,6 +119,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.networks, element: <Networks /> },
   { path: Route.networksEdit, element: <Network /> },
   { path: Route.networksNew, element: <NetworkCreatePage /> },
+  { path: Route.deployments, element: <DeploymentsPage /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

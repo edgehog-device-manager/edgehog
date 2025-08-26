@@ -636,6 +636,22 @@
   "components.DeployedApplicationsTable.upgradeErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
+  "components.DeploymentsTable.applicationNameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Application Name column of the deployments table"
+  },
+  "components.DeploymentsTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the deployments table"
+  },
+  "components.DeploymentsTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the deployments table"
+  },
+  "components.DeploymentsTable.releaseVersionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the deployments table"
+  },
   "components.DeviceGroupsTable.handleTitle": {
     "defaultMessage": "Handle",
     "description": "Title for the Handle column of the device groups table"
@@ -811,6 +827,9 @@
   },
   "components.Sidebar.applications.credentialsLabel": {
     "defaultMessage": "Image Credentials"
+  },
+  "components.Sidebar.applications.deploymentsLabel": {
+    "defaultMessage": "Deployments"
   },
   "components.Sidebar.applications.networksLabel": {
     "defaultMessage": "Networks"
@@ -1372,6 +1391,9 @@
   "navigation.routeTitle.BaseImagesNew": {
     "defaultMessage": "Create Base Image"
   },
+  "navigation.routeTitle.Deployments": {
+    "defaultMessage": "Deployments"
+  },
   "navigation.routeTitle.DeviceGroups": {
     "defaultMessage": "Groups"
   },
@@ -1576,6 +1598,9 @@
   },
   "pages.BaseImageCreate.title": {
     "defaultMessage": "Create Base Image"
+  },
+  "pages.Deployments.title": {
+    "defaultMessage": "Deployments"
   },
   "pages.Device.ApplicationsTab": {
     "defaultMessage": "Applications"

@@ -264,6 +264,16 @@ const Sidebar = () => (
         route={Route.networks}
         activeRoutes={[Route.networks, Route.networksEdit, Route.networksNew]}
       />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.deploymentsLabel"
+            defaultMessage="Deployments"
+          />
+        }
+        route={Route.deployments}
+        activeRoutes={[Route.deployments]}
+      />
     </SidebarItemGroup>
   </Navbar>
 );
