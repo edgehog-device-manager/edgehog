@@ -31,6 +31,7 @@ trigger delivery policies on Astarte realms that support them (v1.1.1+).
   - **Networks page** – lists all existing networks and allows navigation to individual network pages.
   - **Network page** – displays details of a selected network, including its label, driver, internal, enableIpv6, and options.
   - **NetworkCreate page** – enables creating a new network with fields for label, driver, internal, enableIpv6, and options.
+- Implemented deployments overview with **Deployments page** - lists all deployments and enables filtering by app, release, device.
 
 ## [0.9.3] - 2025-05-22
 ### Fixed
