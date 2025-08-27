@@ -268,5 +268,6 @@ defmodule Edgehog.Containers do
 
     resource Upgrade
     resource Edgehog.Containers.DeviceMapping
+    resource Edgehog.Containers.DeviceMapping.Deployment
   end
 end
