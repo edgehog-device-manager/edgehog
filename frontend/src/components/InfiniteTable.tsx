@@ -60,7 +60,7 @@ const SortDirectionIndicator = ({
   </span>
 );
 
-type InfiniteTableProps<T extends object> = {
+type InfiniteTableProps<T extends RowData> = {
   columns: TableOptions<T>["columns"];
   data: T[];
   className?: string;
@@ -71,10 +71,10 @@ type InfiniteTableProps<T extends object> = {
   searchFunction?: FilterFnOption<T>;
   hideSearch?: boolean;
   getRowProps?: (row: Row<T>) => object;
-  setSearchText: (value: string | null) => void;
+  setSearchText?: (value: string | null) => void;
 };
 
-const InfiniteTable = <T extends { id: string }>({
+const InfiniteTable = <T extends RowData>({
   columns,
   data,
   className = "",
@@ -115,7 +115,7 @@ const InfiniteTable = <T extends { id: string }>({
     <div className={className}>
       {hideSearch || (
         <div className="py-2 mb-3">
-          <SearchBox onChange={(text) => setSearchText(text)} />
+          <SearchBox onChange={(text) => setSearchText?.(text)} />
         </div>
       )}
       <InfiniteScroll

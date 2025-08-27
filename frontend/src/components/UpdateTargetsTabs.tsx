@@ -18,10 +18,11 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
+import type { UpdateTargetsTabs_PaginationQuery } from "api/__generated__/UpdateTargetsTabs_PaginationQuery.graphql";
 import type {
   UpdateTargetStatus as UpdateTargetStatusType,
   UpdateTargetsTabs_UpdateTargetsFragment$key,
@@ -34,9 +35,19 @@ import UpdateTargetsTable, { columnIds } from "components/UpdateTargetsTable";
 import type { ColumnId } from "components/UpdateTargetsTable";
 import UpdateTargetStatus from "components/UpdateTargetStatus";
 
+const UPDATE_TARGETS_TO_LOAD_FIRST = 10;
+const UPDATE_TARGETS_TO_LOAD_NEXT = 10;
+
 const UPDATE_TARGETS_TABS_FRAGMENT = graphql`
-  fragment UpdateTargetsTabs_UpdateTargetsFragment on UpdateCampaign {
-    updateTargets {
+  fragment UpdateTargetsTabs_UpdateTargetsFragment on UpdateCampaign
+  @refetchable(queryName: "UpdateTargetsTabs_PaginationQuery")
+  @argumentDefinitions(
+    first: { type: "Int" }
+    after: { type: "String" }
+    filter: { type: "UpdateTargetFilterInput" }
+  ) {
+    updateTargets(first: $first, after: $after, filter: $filter)
+      @connection(key: "UpdateTargetsTabs_updateTargets") {
       edges {
         node {
           status
@@ -47,30 +58,16 @@ const UPDATE_TARGETS_TABS_FRAGMENT = graphql`
   }
 `;
 
-const getVisibleColumns = (status: UpdateTargetStatusType): ColumnId[] => {
-  switch (status) {
-    case "IDLE":
-      return ["deviceName"];
-
-    case "IN_PROGRESS":
-      return [
-        "deviceName",
-        "otaOperationStatus",
-        "otaOperationStatusProgress",
-        "latestAttempt",
-      ];
-
-    case "SUCCESSFUL":
-      return ["deviceName", "completionTimestamp"];
-
-    case "FAILED":
-      return ["deviceName", "otaOperationStatusCode", "completionTimestamp"];
-  }
-};
-
-const getHiddenColumns = (status: UpdateTargetStatusType): ColumnId[] => {
-  const visibleColumns = getVisibleColumns(status);
-  return columnIds.filter((column) => !visibleColumns.includes(column));
+const columnMap: Record<UpdateTargetStatusType, ColumnId[]> = {
+  IDLE: ["deviceName"],
+  IN_PROGRESS: [
+    "deviceName",
+    "otaOperationStatus",
+    "otaOperationStatusProgress",
+    "latestAttempt",
+  ],
+  SUCCESSFUL: ["deviceName", "completionTimestamp"],
+  FAILED: ["deviceName", "otaOperationStatusCode", "completionTimestamp"],
 };
 
 const updateTargetTabs: UpdateTargetStatusType[] = [
@@ -87,18 +84,47 @@ type Props = {
 const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
   const [activeTab, setActiveTab] =
     useState<UpdateTargetStatusType>("SUCCESSFUL");
-  const { updateTargets } = useFragment(
-    UPDATE_TARGETS_TABS_FRAGMENT,
-    updateCampaignRef,
-  );
-  const visibleTargets = useMemo(
-    () =>
-      updateTargets.edges
-        ?.filter(({ node }) => node.status === activeTab)
-        .map(({ node }) => node) || [],
-    [activeTab, updateTargets],
-  );
-  const hiddenColumns = useMemo(() => getHiddenColumns(activeTab), [activeTab]);
+
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      UpdateTargetsTabs_PaginationQuery,
+      UpdateTargetsTabs_UpdateTargetsFragment$key
+    >(UPDATE_TARGETS_TABS_FRAGMENT, updateCampaignRef);
+
+  const loadNextUpdateTargets = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(UPDATE_TARGETS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const updateTargets = useMemo(() => {
+    return data.updateTargets?.edges?.map((edge) => edge?.node) ?? [];
+  }, [data]);
+
+  const hiddenColumns = useMemo(() => {
+    const visible = columnMap[activeTab];
+    return columnIds.filter((c) => !visible.includes(c));
+  }, [activeTab]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      refetch(
+        {
+          first: UPDATE_TARGETS_TO_LOAD_FIRST,
+          filter: {
+            status: {
+              eq: activeTab,
+            },
+          },
+        },
+        { fetchPolicy: "network-only" },
+      );
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [activeTab, refetch]);
+
+  if (!data.updateTargets) return null;
 
   return (
     <div>
@@ -124,8 +150,11 @@ const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
           ))}
         </Nav>
         <UpdateTargetsTable
-          updateTargetsRef={visibleTargets}
+          updateTargetsRef={updateTargets}
           hiddenColumns={hiddenColumns}
+          isLoadingNext={isLoadingNext}
+          hasNext={hasNext}
+          loadNextUpdateTargets={loadNextUpdateTargets}
         />
       </div>
     </div>
