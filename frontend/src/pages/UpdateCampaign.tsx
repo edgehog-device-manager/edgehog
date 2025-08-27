@@ -47,13 +47,21 @@ import UpdateTargetsTabs from "components/UpdateTargetsTabs";
 import UpdateCampaignForm from "forms/UpdateCampaignForm";
 import { Link, Route } from "Navigation";
 
+const UPDATE_TARGETS_TO_LOAD_FIRST = 15;
+
 const GET_UPDATE_CAMPAIGN_QUERY = graphql`
-  query UpdateCampaign_getUpdateCampaign_Query($updateCampaignId: ID!) {
+  query UpdateCampaign_getUpdateCampaign_Query(
+    $updateCampaignId: ID!
+    $first: Int
+    $after: String
+    $filter: UpdateTargetFilterInput
+  ) {
     updateCampaign(id: $updateCampaignId) {
       name
       ...UpdateCampaignForm_UpdateCampaignFragment
       ...UpdateCampaignStatsChart_UpdateCampaignStatsChartFragment
       ...UpdateTargetsTabs_UpdateTargetsFragment
+        @arguments(first: $first, after: $after, filter: $filter)
       ...UpdateCampaign_RefreshFragment
     }
   }
@@ -180,7 +188,10 @@ const UpdateCampaignPage = () => {
     );
 
   const fetchUpdateCampaign = useCallback(() => {
-    getUpdateCampaign({ updateCampaignId }, { fetchPolicy: "network-only" });
+    getUpdateCampaign(
+      { updateCampaignId, first: UPDATE_TARGETS_TO_LOAD_FIRST },
+      { fetchPolicy: "network-only" },
+    );
   }, [getUpdateCampaign, updateCampaignId]);
 
   useEffect(fetchUpdateCampaign, [fetchUpdateCampaign]);
