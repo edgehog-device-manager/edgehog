@@ -322,6 +322,9 @@
   "components.ContainersTable.restartPolicyLabel": {
     "defaultMessage": "Restart Policy"
   },
+  "components.ContainersTable.targetLabel": {
+    "defaultMessage": "Target"
+  },
   "components.ContainersTable.volumeDriverLabel": {
     "defaultMessage": "Driver"
   },
@@ -418,6 +421,12 @@
   "components.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
+  "components.CreateRelease.confirmButton": {
+    "defaultMessage": "Confirm"
+  },
+  "components.CreateRelease.confirmPrompt": {
+    "defaultMessage": "Choose a release from which you want to copy containers and their configurations."
+  },
   "components.CreateRelease.containerTitle": {
     "defaultMessage": "Container {containerNumber}"
   },
@@ -429,9 +438,6 @@
   },
   "components.CreateRelease.hostnameLabel": {
     "defaultMessage": "Hostname"
-  },
-  "components.CreateRelease.imageCredentialOption": {
-    "defaultMessage": "Select Image Credentials"
   },
   "components.CreateRelease.imageCredentialsLabel": {
     "defaultMessage": "Image Credentials"
@@ -465,6 +471,21 @@
   },
   "components.CreateRelease.restartPolicyOption": {
     "defaultMessage": "Select a Restart Policy"
+  },
+  "components.CreateRelease.reuseResourcesButton": {
+    "defaultMessage": "Reuse Containers"
+  },
+  "components.CreateRelease.reuseResourcesModalTitle": {
+    "defaultMessage": "Reuse Resources Modal"
+  },
+  "components.CreateRelease.reuseResourcesTitleButton": {
+    "defaultMessage": "Copy containers and their configurations from an existing release"
+  },
+  "components.CreateRelease.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "components.CreateRelease.selectRelease": {
+    "defaultMessage": "Select Release"
   },
   "components.CreateRelease.submitButton": {
     "defaultMessage": "Create"
