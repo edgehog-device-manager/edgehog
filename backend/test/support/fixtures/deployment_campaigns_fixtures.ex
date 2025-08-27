@@ -82,11 +82,22 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
         [tenant: tenant] |> ContainersFixtures.release_fixture() |> Map.fetch!(:id)
       end)
 
+    {deployment_rollout_mechanism_opts, opts} =
+      Keyword.pop(opts, :deployment_rollout_mechanism, [])
+
+    deployment_rollout_mechanism_opts =
+      Enum.into(deployment_rollout_mechanism_opts, %{
+        type: "lazy",
+        max_failure_percentage: 50.0,
+        max_in_progress_deployments: 100
+      })
+
     params =
       Enum.into(opts, %{
         name: unique_deployment_campaign_name(),
         release_id: release_id,
-        deployment_channel_id: deployment_channel_id
+        deployment_channel_id: deployment_channel_id,
+        deploy_rollout_mechanism: deployment_rollout_mechanism_opts
       })
 
     Edgehog.DeploymentCampaigns.DeploymentCampaign

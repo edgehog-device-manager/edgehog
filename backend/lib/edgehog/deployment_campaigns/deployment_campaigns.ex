@@ -58,8 +58,21 @@ defmodule Edgehog.DeploymentCampaigns do
   end
 
   resources do
-    resource Edgehog.DeploymentCampaigns.DeploymentCampaign
-    resource Edgehog.DeploymentCampaigns.DeploymentTarget
+    resource Edgehog.DeploymentCampaigns.DeploymentCampaign do
+      define :get_campaign, action: :read, get_by: [:id]
+      define :mark_campaign_in_progress, action: :mark_as_in_progress
+      define :mark_campaign_failed, action: :mark_as_failed
+      define :mark_campaign_successful, action: :mark_as_successful
+    end
+
+    resource Edgehog.DeploymentCampaigns.DeploymentTarget do
+      define :fetch_next_valid_target,
+        action: :next_valid_target,
+        args: [:deployment_campaign_id],
+        get?: true,
+        not_found_error?: true
+    end
+
     resource Edgehog.DeploymentCampaigns.DeploymentChannel
   end
 end
