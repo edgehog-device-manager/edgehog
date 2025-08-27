@@ -41,6 +41,33 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
 
   actions do
     defaults [:read]
+
+    read :next_valid_target do
+      description """
+      Returns the next valid target.
+      The next valid target is chosen with these criteria:
+      - It must be idle.
+      - It must be online.
+      - It must either not have been attempted before or it has to be the least
+      recently attempted target, in this order of preference.
+
+      This set of constraints guarantees that when we make an attempt on a
+      target that fails with a temporary error, given we update latest_attempt,
+      we can read the next updatable target to attempt updates on other
+      targets, or retry the same target if it is the only updatable one.
+      """
+
+      get? true
+      argument :deployment_campaign_id, :uuid, allow_nil?: false
+
+      prepare build(load: [device: :online])
+      prepare build(load: [latest_attempt: :asc_nils_first])
+      prepare build(limit: 1)
+
+      filter expr(deployment_campaign_id == ^arg(:deployment_campaign_id))
+      filter expr(status == :idle)
+      filter expr(device.online == true)
+    end
   end
 
   attributes do
