@@ -67,6 +67,7 @@ enum Route {
   networks = "/networks",
   networksEdit = "/networks/:networkId",
   networksNew = "/networks/new",
+  deployments = "/deployments",
   login = "/login",
   logout = "/logout",
 }
@@ -121,6 +122,7 @@ const matchingParametricRoute = (
     case Route.volumesNew:
     case Route.networks:
     case Route.networksNew:
+    case Route.deployments:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -447,6 +449,10 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.networksNew]: {
     id: "navigation.routeTitle.NetworksNew",
     defaultMessage: "Create Networks",
+  },
+  [Route.deployments]: {
+    id: "navigation.routeTitle.Deployments",
+    defaultMessage: "Deployments",
   },
 });
 

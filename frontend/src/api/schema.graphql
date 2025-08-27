@@ -1819,7 +1819,7 @@ input DeploymentSortInput {
   field: DeploymentSortField!
 }
 
-type Deployment {
+type Deployment implements Node {
   id: ID!
   resourcesState: ApplicationDeploymentResourcesState
   state: ApplicationDeploymentState
@@ -4349,6 +4349,30 @@ type RootQueryType {
 
   "Returns the desired application."
   application("The id of the record" id: ID!): Application
+
+  "Returns all available dpeloyments."
+  deployments(
+    "How to sort the records in the response"
+    sort: [DeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentConnection
+
+  "Returns the desired deployment."
+  deployment("The id of the record" id: ID!): Deployment
 
   "Returns the desired image credentials."
   imageCredentials("The id of the record" id: ID!): ImageCredentials

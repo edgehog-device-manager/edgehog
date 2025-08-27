@@ -93,6 +93,7 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.imageCredentials:
       case Route.volumes:
       case Route.networks:
+      case Route.deployments:
       case Route.login:
       case Route.logout:
         return [currentRoute];
