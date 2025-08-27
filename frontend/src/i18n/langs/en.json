@@ -271,6 +271,18 @@
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
   },
+  "components.ContainersTable.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (in microseconds)"
+  },
+  "components.ContainersTable.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (in microseconds)"
+  },
+  "components.ContainersTable.cpuRealTimePeriodLabel": {
+    "defaultMessage": "CPU Real Time Period (in microseconds)"
+  },
+  "components.ContainersTable.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Realtime Runtime (in microseconds)"
+  },
   "components.ContainersTable.envLabel": {
     "defaultMessage": "Environment (JSON String)"
   },
@@ -282,6 +294,18 @@
   },
   "components.ContainersTable.imageReferenceLabel": {
     "defaultMessage": "Image Reference"
+  },
+  "components.ContainersTable.memoryLabel": {
+    "defaultMessage": "Memory (in bytes)"
+  },
+  "components.ContainersTable.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (in bytes)"
+  },
+  "components.ContainersTable.memorySwapLabel": {
+    "defaultMessage": "Memory + Swap (in bytes)"
+  },
+  "components.ContainersTable.memorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
   },
   "components.ContainersTable.networkDriverLabel": {
     "defaultMessage": "Driver"
@@ -319,11 +343,20 @@
   "components.ContainersTable.privilegedLabel": {
     "defaultMessage": "Privileged"
   },
+  "components.ContainersTable.readOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
   "components.ContainersTable.restartPolicyLabel": {
     "defaultMessage": "Restart Policy"
   },
+  "components.ContainersTable.storageOptLabel": {
+    "defaultMessage": "Storage Options"
+  },
   "components.ContainersTable.targetLabel": {
     "defaultMessage": "Target"
+  },
+  "components.ContainersTable.tmpfsLabel": {
+    "defaultMessage": "Tmpfs"
   },
   "components.ContainersTable.volumeDriverLabel": {
     "defaultMessage": "Driver"
@@ -433,6 +466,18 @@
   "components.CreateRelease.containersTitle": {
     "defaultMessage": "Containers"
   },
+  "components.CreateRelease.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "components.CreateRelease.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "components.CreateRelease.cpuRealTimePeriodLabel": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "components.CreateRelease.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
   "components.CreateRelease.envLabel": {
     "defaultMessage": "Environment (JSON String)"
   },
@@ -444,6 +489,18 @@
   },
   "components.CreateRelease.imageReferenceLabel": {
     "defaultMessage": "Image Reference"
+  },
+  "components.CreateRelease.memoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "components.CreateRelease.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "components.CreateRelease.memorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
+  },
+  "components.CreateRelease.memorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
   },
   "components.CreateRelease.networkModeLabel": {
     "defaultMessage": "Network Mode"
@@ -463,6 +520,9 @@
   "components.CreateRelease.privilegedLabel": {
     "defaultMessage": "Privileged"
   },
+  "components.CreateRelease.readOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
   "components.CreateRelease.removeContainerButton": {
     "defaultMessage": "Remove Container"
   },
@@ -472,26 +532,20 @@
   "components.CreateRelease.restartPolicyOption": {
     "defaultMessage": "Select a Restart Policy"
   },
-  "components.CreateRelease.reuseResourcesButton": {
-    "defaultMessage": "Reuse Containers"
-  },
-  "components.CreateRelease.reuseResourcesModalTitle": {
-    "defaultMessage": "Reuse Resources Modal"
-  },
-  "components.CreateRelease.reuseResourcesTitleButton": {
-    "defaultMessage": "Copy containers and their configurations from an existing release"
-  },
-  "components.CreateRelease.selectApplication": {
-    "defaultMessage": "Select Application"
-  },
-  "components.CreateRelease.selectRelease": {
-    "defaultMessage": "Select Release"
+  "components.CreateRelease.storageOptLabel": {
+    "defaultMessage": "Storage Options"
   },
   "components.CreateRelease.submitButton": {
     "defaultMessage": "Create"
   },
+  "components.CreateRelease.tmpfsLabel": {
+    "defaultMessage": "Tmpfs Mounts"
+  },
   "components.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "components.CreateRelease.volumeDriverLabel": {
+    "defaultMessage": "Volume Driver"
   },
   "components.CreateRelease.volumeSelectLabel": {
     "defaultMessage": "Volume:"

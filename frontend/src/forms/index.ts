@@ -173,6 +173,32 @@ const portBindingsSchema = yup
       value.split(", ").every((v) => /^[0-9]+:[0-9]+$/.test(v.trim())),
   });
 
+const storageTmpfsOptSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json-array-of-strings",
+    message:
+      'Must be a valid JSON array of strings, e.g. ["key=value","string"]',
+    test: (value) => {
+      if (!value) return true;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(value);
+      } catch {
+        return false;
+      }
+      if (
+        !Array.isArray(parsed) ||
+        !parsed.every((item) => typeof item === "string")
+      ) {
+        return false;
+      }
+      return parsed.length === 0 || /^[^=]+=[^=]+$/.test(parsed[0]);
+    },
+  });
+
 export {
   deviceGroupHandleSchema,
   systemModelHandleSchema,
@@ -187,4 +213,5 @@ export {
   portBindingsSchema,
   messages,
   yup,
+  storageTmpfsOptSchema,
 };

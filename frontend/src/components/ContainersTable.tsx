@@ -69,6 +69,17 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
           portBindings
           restartPolicy
           privileged
+          memory
+          memorySwap
+          memoryReservation
+          memorySwappiness
+          cpuPeriod
+          cpuQuota
+          cpuRealTimePeriod
+          cpuRealtimeRuntime
+          tmpfs
+          storageOpt
+          readOnlyRootfs
           image {
             reference
             credentials {
@@ -538,6 +549,101 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
       </FormRow>
 
       <FormRow
+        id={`containers-${index}-memory`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.memoryLabel"
+            defaultMessage="Memory (in bytes)"
+          />
+        }
+      >
+        <Form.Control value={container.memory ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-memorySwap`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.memorySwapLabel"
+            defaultMessage="Memory + Swap (in bytes)"
+          />
+        }
+      >
+        <Form.Control value={container.memorySwap ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-memoryReservation`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.memoryReservationLabel"
+            defaultMessage="Memory Reservation (in bytes)"
+          />
+        }
+      >
+        <Form.Control value={container.memoryReservation ?? ""} readOnly />
+      </FormRow>
+      <FormRow
+        id={`containers-${index}-memorySwappiness`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.memorySwappinessLabel"
+            defaultMessage="Memory Swappiness (0-100)"
+          />
+        }
+      >
+        <Form.Control value={container.memorySwappiness ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-cpuPeriod`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.cpuPeriodLabel"
+            defaultMessage="CPU Period (in microseconds)"
+          />
+        }
+      >
+        <Form.Control value={container.cpuPeriod ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-cpuQuota`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.cpuQuotaLabel"
+            defaultMessage="CPU Quota (in microseconds)"
+          />
+        }
+      >
+        <Form.Control value={container.cpuQuota ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-cpuRealTimePeriod`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.cpuRealTimePeriodLabel"
+            defaultMessage="CPU Real Time Period (in microseconds)"
+          />
+        }
+      >
+        <Form.Control value={container.cpuRealTimePeriod ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-cpuRealtimeRuntime`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.cpuRealtimeRuntimeLabel"
+            defaultMessage="CPU Realtime Runtime (in microseconds)"
+          />
+        }
+      >
+        <Form.Control value={container.cpuRealtimeRuntime ?? ""} readOnly />
+      </FormRow>
+
+      <FormRow
         id={`containers-${index}-privileged`}
         label={
           <FormattedMessage
@@ -550,6 +656,60 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
           type="checkbox"
           checked={container.privileged === true}
           readOnly
+        />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-readOnlyRootfs`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.readOnlyRootfsLabel"
+            defaultMessage="Read-Only Root Filesystem"
+          />
+        }
+      >
+        <Form.Check
+          type="checkbox"
+          checked={container.readOnlyRootfs === true}
+          readOnly
+        />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-storageOpt`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.storageOptLabel"
+            defaultMessage="Storage Options"
+          />
+        }
+      >
+        <MonacoJsonEditor
+          value={container.storageOpt.join("\n")}
+          language="json"
+          onChange={() => {}}
+          defaultValue={container.storageOpt.join("\n")}
+          readonly={true}
+          initialLines={1}
+        />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-tmpfs`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.tmpfsLabel"
+            defaultMessage="Tmpfs"
+          />
+        }
+      >
+        <MonacoJsonEditor
+          value={container.tmpfs.join("\n")}
+          language="json"
+          onChange={() => {}}
+          defaultValue={container.tmpfs.join("\n")}
+          readonly={true}
+          initialLines={1}
         />
       </FormRow>
 
