@@ -71,6 +71,16 @@ defmodule Edgehog.Containers do
       list Network, :networks, :read do
         description "Returns all available networks."
       end
+
+      list Deployment, :deployments, :read do
+        description "Returns all available dpeloyments."
+        paginate_with :keyset
+        relay? true
+      end
+
+      get Deployment, :deployment, :read do
+        description "Returns the desired deployment."
+      end
     end
 
     mutations do
