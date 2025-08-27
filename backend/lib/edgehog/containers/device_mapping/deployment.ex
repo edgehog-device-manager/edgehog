@@ -20,35 +20,102 @@
 
 defmodule Edgehog.Containers.DeviceMapping.Deployment do
   @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
+  use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource],
-    data_layer: AshPostgres.DataLayer
+    extensions: [AshGraphql.Resource]
+
+  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.DeviceMapping
+  alias Edgehog.Containers.DeviceMapping.Changes
+  alias Edgehog.Devices.Device
 
   graphql do
-    type :deployment
+    type :device_mapping_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: []]
+    defaults [:read, :destroy, create: [:device_mapping_id, :device_id, :state]]
+
+    create :deploy do
+      description """
+      Deploys a device file mapping on a device.
+      """
+
+      argument :device_mapping, :struct do
+        constraints instance_of: DeviceMapping
+        allow_nil? false
+      end
+
+      argument :device, :struct do
+        constraints instance_of: Device
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        allow_nil? false
+      end
+
+      change set_attribute(:state, :created)
+      change manage_relationship(:device, type: :append)
+      change manage_relationship(:device_mapping, type: :append)
+      change Changes.DeployDeviceMappingOnDevice
+    end
+
+    update :mark_as_sent do
+      change set_attribute(:state, :sent)
+    end
+
+    update :mark_as_present do
+      change set_attribute(:state, :present)
+    end
+
+    update :mark_as_errored do
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change set_attribute(:state, :error)
+    end
   end
 
   attributes do
     uuid_primary_key :id
 
     attribute :last_message, :string
-    attribute :state, :atom
+
+    attribute :state, :atom,
+      constraints: [
+        one_of: [:created, :sent, :present, :error]
+      ]
+
     timestamps()
   end
 
   relationships do
-    belongs_to :device_mapping, Edgehog.Containers.DeviceMapping
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device_mapping, DeviceMapping do
+      attribute_type :uuid
+    end
+
+    belongs_to :device, Device
+  end
+
+  calculations do
+    calculate :ready?, :boolean, expr(state == :present)
+  end
+
+  identities do
+    identity :device_mapping_instance, [:device_mapping_id, :device_id]
   end
 
   postgres do
-    table "deployments"
+    table "device_mapping_deployments"
     repo Edgehog.Repo
+
+    references do
+      reference :device_mapping, on_delete: :delete
+      reference :device, on_delete: :delete
+    end
   end
 end
