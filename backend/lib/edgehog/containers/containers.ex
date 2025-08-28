@@ -213,6 +213,8 @@ defmodule Edgehog.Containers do
         args: [:container_id]
     end
 
+    resource Edgehog.Containers.ReleaseSystemModel
+
     resource Edgehog.Containers.Network
 
     resource Edgehog.Containers.Network.Deployment do

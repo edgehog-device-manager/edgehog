@@ -37,7 +37,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
 
     with {:ok, device} <- fetch_device(device_id, tenant),
          {:ok, release} <- fetch_release(release_id, tenant) do
-      if can_deploy?(device.system_model, release.application.system_model),
+      if can_deploy?(device.system_model, release.system_models),
         do: Ash.Changeset.after_transaction(changeset, &after_transaction/2),
         else: invalid_argument_error(changeset)
     end
@@ -55,7 +55,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
       changeset,
       InvalidArgument.exception(
         field: :system_model,
-        message: "The device's system model does not match the application's system model."
+        message: "The device's system model does not match the system model of the application's release."
       )
     )
   end
@@ -111,13 +111,15 @@ defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
   defp fetch_release(release_id, tenant) do
     Containers.Release
     |> Ash.Query.filter(id == ^release_id)
-    |> Ash.Query.load(application: [:system_model])
+    |> Ash.Query.load(:system_models)
     |> Ash.read_one(tenant: tenant)
   end
 
   defp can_deploy?(_device_sm, nil), do: true
-  defp can_deploy?(nil, _release_sm), do: false
-  defp can_deploy?(device_sm, release_sm), do: device_sm.id == release_sm.id
+  defp can_deploy?(_device_sm, []), do: true
+  defp can_deploy?(nil, _release_sms), do: false
+
+  defp can_deploy?(device_sm, release_sms), do: Enum.any?(release_sms, &(device_sm.id == &1.id))
 
   defp deploy_networks(device, networks, deployment) do
     networks =
