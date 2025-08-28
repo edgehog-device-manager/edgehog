@@ -144,6 +144,7 @@ defmodule Edgehog.Containers.Deployment do
       change Changes.CheckImages
       change Changes.CheckNetworks
       change Changes.CheckVolumes
+      change Changes.CheckDeviceMappings
       change Changes.CheckContainers
       change Changes.CheckDeployment
 

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,35 +18,35 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
+defmodule Edgehog.Containers.Deployment.Changes.CheckDeviceMappings do
   @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.Containers
 
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
+  def change(changeset, _opts, _context) do
     deployment = changeset.data
-    %{tenant: tenant} = context
 
-    with :created_device_mappings <- state(changeset),
+    with :created_volumes <- state(changeset),
          {:ok, deployment} <-
-           Ash.load(deployment, device: [], release: [:containers]) do
+           Ash.load(deployment, device: [], release: [containers: [:device_mappings]]) do
       device = deployment.device
 
-      containers_ready? =
+      device_mappings_ready? =
         deployment.release.containers
+        |> Enum.flat_map(& &1.device_mappings)
         |> Enum.uniq_by(& &1.id)
         |> Enum.map(
-          &Containers.fetch_container_deployment!(&1.id, device.id,
-            tenant: tenant,
+          &Containers.fetch_device_mapping_deployment!(&1.id, device.id,
+            tenant: &1.tenant_id,
             load: [:ready?]
           )
         )
         |> Enum.all?(& &1.ready?)
 
-      if containers_ready?,
-        do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_containers),
+      if device_mappings_ready?,
+        do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_device_mappings),
         else: changeset
     else
       _ -> changeset
