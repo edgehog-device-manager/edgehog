@@ -59,7 +59,7 @@ defmodule Edgehog.DeploymentCampaigns do
 
   resources do
     resource Edgehog.DeploymentCampaigns.DeploymentCampaign do
-      define :get_campaign, action: :read, get_by: [:id]
+      define :fetch_campaign, action: :read, get_by: [:id]
       define :mark_campaign_in_progress, action: :mark_as_in_progress
       define :mark_campaign_failed, action: :mark_as_failed
       define :mark_campaign_successful, action: :mark_as_successful
@@ -71,6 +71,29 @@ defmodule Edgehog.DeploymentCampaigns do
         args: [:deployment_campaign_id],
         get?: true,
         not_found_error?: true
+
+      define :fetch_target, action: :read, get_by: [:id], not_found_error?: true
+
+      define :list_in_progress_targets,
+        action: :read_in_progress_targets,
+        args: [:deployment_campaign_id]
+
+      define :fetch_target_by_deployment,
+        action: :read,
+        get_by: [:deployment_id],
+        not_found_error?: true
+
+      define :mark_target_as_in_progress, action: :mark_as_in_progress
+      define :mark_target_as_failed, action: :mark_as_failed
+      define :mark_target_as_successful, action: :mark_as_successful
+
+      define :increase_target_retry_count, action: :increase_retry_count
+
+      define :update_target_latest_attempt,
+        action: :update_latest_attempt,
+        args: [:latest_attempt]
+
+      define :deploy_to_target, action: :deploy, args: [:release]
     end
 
     resource Edgehog.DeploymentCampaigns.DeploymentChannel

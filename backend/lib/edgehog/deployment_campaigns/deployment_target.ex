@@ -26,10 +26,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
   is composed by the target device and the state of the target in the \
   linked Deployment Campaign.
   """
-
   use Edgehog.MultitenantResource,
     domain: Edgehog.DeploymentCampaigns,
     extensions: [AshGraphql.Resource]
+
+  alias Edgehog.Containers.Release
+  alias Edgehog.DeploymentCampaigns.DeploymentTarget
 
   resource do
     description @moduledoc
@@ -68,10 +70,78 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
       filter expr(status == :idle)
       filter expr(device.online == true)
     end
+
+    read :read_in_progress_targets do
+      description """
+      Reads all the targets of a deployment campaign that have `in_progress`
+      status. This is useful when resuming an deployment campaign to know which
+      targets need to setup a retry timeout.
+      """
+
+      argument :deployment_campaign_id, :integer, allow_nil?: false
+
+      filter expr(deployment_campaign_id == ^arg(:deployment_campaign_id))
+      filter expr(status == :in_progress)
+    end
+
+    update :mark_as_in_progress do
+      change set_attribute(:status, :in_progress)
+    end
+
+    update :mark_as_failed do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :failed)
+    end
+
+    update :mark_as_successful do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :successful)
+    end
+
+    update :increase_retry_count do
+      change atomic_update(:retry_count, expr(retry_count + 1))
+    end
+
+    update :update_latest_attempt do
+      accept [:latest_attempt]
+    end
+
+    update :deploy do
+      description """
+      Start a deployment towards this target.
+      It creates a Deployment and associates it with the target, sending all the
+      necessary requests to the device.
+      The target is marked as :in_progress.
+      """
+
+      argument :release, :struct do
+        constraints instance_of: Release
+        allow_nil? false
+      end
+
+      require_atomic? false
+
+      change set_attribute(:status, :in_progress)
+      change Changes.Deploy
+    end
   end
 
   attributes do
     uuid_primary_key :id
+
+    attribute :status, DeploymentTarget.Status do
+      description "The status of the update target."
+      public? true
+      allow_nil? false
+    end
 
     attribute :name, :string do
       public? true
