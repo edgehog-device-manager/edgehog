@@ -52,6 +52,13 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
           name
           deviceId
           online
+          otaOperations {
+            edges {
+              node {
+                id
+              }
+            }
+          }
         }
       }
     }

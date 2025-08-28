@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Managed OTA operations expose the update target that created them in graphql ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Expose the associated UpdateCampaign (if any) from an OTA Operation on the Software Updates tab  ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Support for using Azure Storage as the persistence layer for asset uploads ([#233](https://github.com/edgehog-device-manager/edgehog/issues/233)).
-- Ecto SSL configuration is exposed trough `DATABASE_*` environment variables (see [.env](./.env))
+- Ecto SSL configuration is exposed through `DATABASE_*` environment variables (see [.env](./.env))
+- Adds support for trigger delivery policies in the tenant reconciler, allowing Edgehog to automatically provision and manage trigger delivery policies on Astarte realms that support them (v1.1.1+).
 - Added Applications tab to Device page ([#662](https://github.com/edgehog-device-manager/edgehog/issues/662))
 - Implemented a application management feature, enabling users to view and navigate through applications and their release details ([#704](https://github.com/edgehog-device-manager/edgehog/issues/704))
   - **Applications page**: Displays a list of all existing applications, with navigation to individual Application pages.
@@ -18,9 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `ApplicationCreate` page to enable users to create a new application with fields for application name and description.
 - Added `ReleaseCreate` page to enable users to create a new release for an application with fields for release Version and a list of Containers.
 - Add upgrade deployment functionality with version selection ([#703](https://github.com/edgehog-device-manager/edgehog/issues/703))
-- Adds support for trigger delivery policies in the tenant 
-reconciler, allowing Edgehog to automatically provision and manage 
-trigger delivery policies on Astarte realms that support them (v1.1.1+).
 - **Volumes management feature**:
   - **Volumes page** – lists all existing volumes and allows navigation to individual volume pages.
   - **Volume page** – displays details of a selected volume, including its label, driver, and options.
@@ -32,6 +30,8 @@ trigger delivery policies on Astarte realms that support them (v1.1.1+).
   - **Network page** – displays details of a selected network, including its label, driver, internal, enableIpv6, and options.
   - **NetworkCreate page** – enables creating a new network with fields for label, driver, internal, enableIpv6, and options.
 - Implemented deployments overview with **Deployments page** - lists all deployments and enables filtering by app, release, device.
+### Changed
+- BREAKING: GraphQL API that return unbounded lists now use Relay/keyset pagination. Edgehog's dashboard now relies on server-side pagination for queries and filtering, and uses tables with infinite scrolling instead of client-side paginated tables.
 
 ## [0.9.3] - 2025-05-22
 ### Fixed

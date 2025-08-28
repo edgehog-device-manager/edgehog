@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2024 SECO Mind Srl
+  Copyright 2022 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -40,7 +41,7 @@ import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
 import DeleteModal from "components/DeleteModal";
-import DevicesTable from "components/DevicesTable";
+import DevicesGroupsTable from "components/DevicesGroupsTable";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
@@ -55,7 +56,7 @@ const GET_DEVICE_GROUP_QUERY = graphql`
       handle
       ...UpdateDeviceGroup_DeviceGroupFragment
       devices {
-        ...DevicesTable_DeviceFragment
+        ...DevicesGroupsTable_DeviceFragment
       }
     }
   }
@@ -72,7 +73,7 @@ const UPDATE_DEVICE_GROUP_MUTATION = graphql`
         handle
         ...UpdateDeviceGroup_DeviceGroupFragment
         devices {
-          ...DevicesTable_DeviceFragment
+          ...DevicesGroupsTable_DeviceFragment
         }
       }
     }
@@ -137,24 +138,23 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        if (!data?.deleteDeviceGroup?.result?.id) {
+        const deviceGroupId = data?.deleteDeviceGroup?.result?.id;
+        if (!deviceGroupId) {
           return;
         }
 
         const deviceGroup = store
           .getRootField("deleteDeviceGroup")
           .getLinkedRecord("result");
-        const deviceGroupId = deviceGroup.getDataID();
         const root = store.getRoot();
 
-        const deviceGroups = root.getLinkedRecords("deviceGroups");
-        if (deviceGroups) {
-          root.setLinkedRecords(
-            deviceGroups.filter(
-              (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId,
-            ),
-            "deviceGroups",
-          );
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "DeviceGroupsTable_deviceGroups",
+        );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, deviceGroupId);
         }
 
         const devices = deviceGroup.getLinkedRecords("devices");
@@ -277,7 +277,11 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
             isLoading={isUpdatingDeviceGroup}
           />
         </div>
-        <DevicesTable devicesRef={deviceGroup.devices} hideSearch />
+        {/* TODO This component is being temporarily used
+            to display devices in a group. It should be removed once the
+            backend returns DeviceConnection objects in the group query
+            and DevicesTable should be used in its place. */}
+        <DevicesGroupsTable devicesRef={deviceGroup.devices} hideSearch />
         {showDeleteModal && (
           <DeleteModal
             confirmText={deviceGroup.handle}

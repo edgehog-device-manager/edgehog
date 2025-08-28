@@ -44,6 +44,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageCollectionTest do
                  "id" => ^system_model_id,
                  "name" => ^system_model_name,
                  "handle" => ^system_model_handle
+               },
+               "baseImages" => %{
+                 "edges" => []
                }
              } = base_image_collection
     end
@@ -158,6 +161,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageCollectionTest do
             id
             name
             handle
+          }
+          baseImages {
+            count
+            edges {
+              node {
+                id
+                version
+              }
+            }
           }
         }
       }

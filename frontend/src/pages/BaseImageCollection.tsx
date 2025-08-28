@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -36,6 +37,7 @@ import type {
 } from "api/__generated__/BaseImageCollection_getBaseImageCollection_Query.graphql";
 import type { BaseImageCollection_updateBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollection_updateBaseImageCollection_Mutation.graphql";
 import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";
+
 import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import BaseImagesTable from "components/BaseImagesTable";
@@ -48,16 +50,21 @@ import Spinner from "components/Spinner";
 import UpdateBaseImageCollectionForm from "forms/UpdateBaseImageCollection";
 import type { BaseImageCollectionChanges } from "forms/UpdateBaseImageCollection";
 
+const BASE_IMAGES_TO_LOAD_FIRST = 40;
+
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCollection_getBaseImageCollection_Query(
     $baseImageCollectionId: ID!
+    $first: Int
+    $after: String
+    $filter: BaseImageFilterInput
   ) {
     baseImageCollection(id: $baseImageCollectionId) {
       id
       name
       handle
       ...UpdateBaseImageCollection_SystemModelFragment
-      ...BaseImagesTable_BaseImagesFragment
+      ...BaseImagesTable_BaseImagesFragment @arguments(filter: $filter)
     }
   }
 `;
@@ -65,6 +72,8 @@ const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
 const UPDATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
   mutation BaseImageCollection_updateBaseImageCollection_Mutation(
     $baseImageCollectionId: ID!
+    $first: Int
+    $after: String
     $input: UpdateBaseImageCollectionInput!
   ) {
     updateBaseImageCollection(id: $baseImageCollectionId, input: $input) {
@@ -147,17 +156,14 @@ const BaseImageCollectionContent = ({
         }
 
         const root = store.getRoot();
-        const baseImageCollections = root.getLinkedRecords(
-          "baseImageCollections",
+
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "BaseImageCollectionsTable_baseImageCollections",
         );
-        if (baseImageCollections) {
-          root.setLinkedRecords(
-            baseImageCollections.filter(
-              (baseImageCollection) =>
-                baseImageCollection.getDataID() !== baseImageCollectionId,
-            ),
-            "baseImageCollections",
-          );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, baseImageCollectionId);
         }
 
         store.delete(baseImageCollectionId);
@@ -173,7 +179,11 @@ const BaseImageCollectionContent = ({
   const handleUpdateBaseImageCollection = useCallback(
     (baseImageCollection: BaseImageCollectionChanges) => {
       updateBaseImageCollection({
-        variables: { baseImageCollectionId, input: baseImageCollection },
+        variables: {
+          baseImageCollectionId,
+          input: baseImageCollection,
+          first: 10_000,
+        },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
@@ -322,7 +332,7 @@ const BaseImageCollectionPage = () => {
   const fetchBaseImageCollection = useCallback(
     () =>
       getBaseImageCollection(
-        { baseImageCollectionId },
+        { baseImageCollectionId, first: BASE_IMAGES_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ),
     [getBaseImageCollection, baseImageCollectionId],

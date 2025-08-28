@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 - 2025 SECO Mind Srl
+  Copyright 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,72 +18,58 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
-import _ from "lodash";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { DevicesTable_PaginationQuery } from "api/__generated__/DevicesTable_PaginationQuery.graphql";
 import type {
-  DevicesTable_DeviceFragment$data,
-  DevicesTable_DeviceFragment$key,
-} from "api/__generated__/DevicesTable_DeviceFragment.graphql";
+  DevicesGroupsTable_DeviceFragment$data,
+  DevicesGroupsTable_DeviceFragment$key,
+} from "api/__generated__/DevicesGroupsTable_DeviceFragment.graphql";
 
-import ConnectionStatus from "components/ConnectionStatus";
-import { createColumnHelper } from "components/Table";
-import InfiniteTable from "./InfiniteTable";
 import LastSeen from "components/LastSeen";
-import { Link, Route } from "Navigation";
+import Table, { createColumnHelper } from "components/Table";
+import ConnectionStatus from "components/ConnectionStatus";
 import Tag from "components/Tag";
+import { Link, Route } from "Navigation";
 
-const DEVICES_TO_LOAD_FIRST = 40;
-const DEVICES_TO_LOAD_NEXT = 10;
+// TODO This component is being temporarily used in DeviceGroup.tsx
+// to display devices in a group. It should be removed once the
+// backend returns DeviceConnection objects in the group query.
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICES_TABLE_FRAGMENT = graphql`
-  fragment DevicesTable_DeviceFragment on RootQueryType
-  @refetchable(queryName: "DevicesTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "DeviceFilterInput" }) {
-    devices(first: $first, after: $after, filter: $filter)
-      @connection(key: "DevicesTable_devices") {
+  fragment DevicesGroupsTable_DeviceFragment on Device @relay(plural: true) {
+    id
+    deviceId
+    lastConnection
+    lastDisconnection
+    name
+    online
+    systemModel {
+      name
+      hardwareType {
+        name
+      }
+    }
+    tags {
       edges {
         node {
-          id
-          deviceId
-          lastConnection
-          lastDisconnection
           name
-          online
-          systemModel {
-            name
-            hardwareType {
-              name
-            }
-          }
-          tags {
-            edges {
-              node {
-                name
-              }
-            }
-          }
         }
       }
     }
   }
 `;
 
-type TableRecord = NonNullable<
-  NonNullable<DevicesTable_DeviceFragment$data["devices"]>["edges"]
->[number]["node"];
+type TableRecord = DevicesGroupsTable_DeviceFragment$data[0];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
   columnHelper.accessor("online", {
     header: () => (
       <FormattedMessage
-        id="components.DevicesTable.statusTitle"
+        id="components.DevicesGroupsTable.statusTitle"
         defaultMessage="Status"
         description="Title for the Status column of the devices table"
       />
@@ -94,7 +80,7 @@ const columns = [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
-        id="components.DevicesTable.nameTitle"
+        id="components.DevicesGroupsTable.nameTitle"
         defaultMessage="Device Name"
         description="Title for the Name column of the devices table"
       />
@@ -108,7 +94,7 @@ const columns = [
   columnHelper.accessor("deviceId", {
     header: () => (
       <FormattedMessage
-        id="components.DevicesTable.deviceIdTitle"
+        id="components.DevicesGroupsTable.deviceIdTitle"
         defaultMessage="Device ID"
         description="Title for the Device ID column of the devices table"
       />
@@ -142,7 +128,7 @@ const columns = [
       id: "lastSeen",
       header: () => (
         <FormattedMessage
-          id="components.DevicesTable.lastSeenTitle"
+          id="components.DevicesGroupsTable.lastSeenTitle"
           defaultMessage="Last Seen"
           description="Title for the Last Seen column of the devices table"
         />
@@ -160,7 +146,7 @@ const columns = [
     enableSorting: false,
     header: () => (
       <FormattedMessage
-        id="components.DevicesTable.tagsTitle"
+        id="components.DevicesGroupsTable.tagsTitle"
         defaultMessage="Tags"
         description="Title for the Tags column of the devices table"
       />
@@ -179,85 +165,25 @@ const columns = [
 
 type Props = {
   className?: string;
-  devicesRef: DevicesTable_DeviceFragment$key;
+  devicesRef: DevicesGroupsTable_DeviceFragment$key;
+  hideSearch?: boolean;
 };
 
-const DevicesTable = ({ className, devicesRef }: Props) => {
-  const {
-    data: paginationData,
-    loadNext,
-    hasNext,
-    isLoadingNext,
-    refetch,
-  } = usePaginationFragment<
-    DevicesTable_PaginationQuery,
-    DevicesTable_DeviceFragment$key
-  >(DEVICES_TABLE_FRAGMENT, devicesRef);
-
-  const [searchText, setSearchText] = useState<string | null>(null);
-
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: DEVICES_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: DEVICES_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { deviceId: { ilike: `%${text}%` } },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
-
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextDevices = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(DEVICES_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const devices = useMemo(() => {
-    return (
-      paginationData.devices?.edges
-        ?.map((edge) => edge?.node)
-        .filter((node): node is TableRecord => node != null) ?? []
-    );
-  }, [paginationData]);
-
-  if (!paginationData.devices) {
-    return null;
-  }
+const DevicesGroupsTable = ({
+  className,
+  devicesRef,
+  hideSearch = false,
+}: Props) => {
+  const devices = useFragment(DEVICES_TABLE_FRAGMENT, devicesRef);
 
   return (
-    <InfiniteTable
+    <Table
       className={className}
       columns={columns}
       data={devices}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextDevices : undefined}
-      setSearchText={setSearchText}
+      hideSearch={hideSearch}
     />
   );
 };
 
-export default DevicesTable;
+export default DevicesGroupsTable;

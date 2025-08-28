@@ -37,6 +37,7 @@ import {
   fetchQuery,
   useRelayEnvironment,
   useRefetchableFragment,
+  usePaginationFragment,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import type { PayloadError, Subscription } from "relay-runtime";
@@ -44,6 +45,7 @@ import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import _ from "lodash";
 
+import type { Device_PaginationQuery } from "api/__generated__/Device_PaginationQuery.graphql";
 import type { Device_batteryStatus$key } from "api/__generated__/Device_batteryStatus.graphql";
 import type { Device_hardwareInfo$key } from "api/__generated__/Device_hardwareInfo.graphql";
 import type { Device_location$key } from "api/__generated__/Device_location.graphql";
@@ -178,14 +180,20 @@ const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
 `;
 
 const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
-  fragment Device_otaOperations on Device {
+  fragment Device_otaOperations on Device
+  @refetchable(queryName: "Device_PaginationQuery") {
     id
     capabilities
-    otaOperations {
-      id
-      baseImageUrl
-      status
-      createdAt
+    otaOperations(first: $first, after: $after)
+      @connection(key: "Device_otaOperations") {
+      edges {
+        node {
+          id
+          baseImageUrl
+          status
+          createdAt
+        }
+      }
     }
     ...OperationTable_otaOperations
   }
@@ -244,8 +252,12 @@ const GET_DEVICE_QUERY = graphql`
         }
       }
       tags {
-        id
-        name
+        edges {
+          node {
+            id
+            name
+          }
+        }
       }
       deviceGroups {
         id
@@ -290,7 +302,11 @@ const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
 `;
 
 const GET_DEVICE_OTA_OPERATIONS_QUERY = graphql`
-  query Device_getDeviceOtaOperations_Query($id: ID!) {
+  query Device_getDeviceOtaOperations_Query(
+    $id: ID!
+    $first: Int
+    $after: String
+  ) {
     device(id: $id) {
       id
       online
@@ -341,8 +357,12 @@ const ADD_DEVICE_TAGS_MUTATION = graphql`
       result {
         id
         tags {
-          id
-          name
+          edges {
+            node {
+              id
+              name
+            }
+          }
         }
         deviceGroups {
           id
@@ -362,8 +382,12 @@ const REMOVE_DEVICE_TAGS_MUTATION = graphql`
       result {
         id
         tags {
-          id
-          name
+          edges {
+            node {
+              id
+              name
+            }
+          }
         }
         deviceGroups {
           id
@@ -377,7 +401,11 @@ const REMOVE_DEVICE_TAGS_MUTATION = graphql`
 const GET_TAGS_QUERY = graphql`
   query Device_getExistingDeviceTags_Query {
     existingDeviceTags {
-      name
+      edges {
+        node {
+          name
+        }
+      }
     }
   }
 `;
@@ -1118,25 +1146,29 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
   const intl = useIntl();
   const relayEnvironment = useRelayEnvironment();
 
-  const device = useFragment(DEVICE_OTA_OPERATIONS_FRAGMENT, deviceRef);
-  const deviceId = device.id;
+  const { data } = usePaginationFragment<
+    Device_PaginationQuery,
+    Device_otaOperations$key
+  >(DEVICE_OTA_OPERATIONS_FRAGMENT, deviceRef);
+
+  const deviceId = data.id;
 
   const [createOtaOperation, isCreatingOtaOperation] =
     useMutation<Device_createManualOtaOperation_Mutation>(
       DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION,
     );
 
-  const otaOperations = device.otaOperations
-    .map((operation) => ({ ...operation }))
-    .sort((a, b) => {
-      if (a.createdAt > b.createdAt) {
-        return -1;
-      }
-      if (a.createdAt < b.createdAt) {
-        return 1;
-      }
-      return 0;
-    });
+  const otaOperations = (
+    data.otaOperations?.edges?.map(({ node }) => node) || []
+  ).sort((a, b) => {
+    if (a.createdAt > b.createdAt) {
+      return -1;
+    }
+    if (a.createdAt < b.createdAt) {
+      return 1;
+    }
+    return 0;
+  });
 
   const lastFinishedOperationIndex = otaOperations.findIndex(
     ({ status }) => status === "SUCCESS" || status === "FAILURE",
@@ -1170,6 +1202,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
         GET_DEVICE_OTA_OPERATIONS_QUERY,
         {
           id: deviceId,
+          first: 10_000,
         },
       ).subscribe({
         complete: () => {
@@ -1192,7 +1225,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
     deviceId,
   ]);
 
-  if (!device.capabilities.includes("SOFTWARE_UPDATES")) {
+  if (!data.capabilities.includes("SOFTWARE_UPDATES")) {
     return null;
   }
 
@@ -1294,7 +1327,7 @@ const SoftwareUpdateTab = ({ deviceRef }: SoftwareUpdateTabProps) => {
             defaultMessage="History"
           />
         </h5>
-        <OperationTable deviceRef={device} />
+        <OperationTable deviceRef={data} />
       </div>
     </Tab>
   );
@@ -1461,7 +1494,7 @@ const DeviceContent = ({
 
   const deviceTags = useMemo(
     () =>
-      device?.tags?.map(({ name: tag }) => ({
+      device?.tags?.edges?.map(({ node: { name: tag } }) => ({
         label: tag,
         value: tag,
       })) || [],
@@ -1470,7 +1503,7 @@ const DeviceContent = ({
 
   const tags = useMemo(
     () =>
-      tagsData.existingDeviceTags.map(({ name: tag }) => ({
+      tagsData.existingDeviceTags?.edges?.map(({ node: { name: tag } }) => ({
         label: tag,
         value: tag,
       })),
@@ -2036,7 +2069,7 @@ const DevicePage = () => {
           </Center>
         )}
         onReset={() => {
-          getDevice({ id: deviceId });
+          getDevice({ id: deviceId, first: 10_000 });
           refreshTags();
         }}
       >

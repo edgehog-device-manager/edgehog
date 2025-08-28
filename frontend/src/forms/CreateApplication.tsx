@@ -38,8 +38,12 @@ import { yup } from "forms";
 const CREATE_APPLICATION_FRAGMENT = graphql`
   fragment CreateApplication_OptionsFragment on RootQueryType {
     systemModels {
-      id
-      handle
+      edges {
+        node {
+          id
+          handle
+        }
+      }
     }
   }
 `;
@@ -96,7 +100,8 @@ const CreateApplication = ({
 
   const listSystemModel = useFragment(CREATE_APPLICATION_FRAGMENT, optionsRef);
 
-  const systemModelOptions = listSystemModel?.systemModels ?? [];
+  const systemModelOptions =
+    listSystemModel?.systemModels?.edges?.map((e) => e.node) ?? [];
 
   const {
     register,

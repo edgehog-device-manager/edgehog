@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,35 +18,57 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
-import Table, { createColumnHelper } from "components/Table";
-import { Link, Route } from "Navigation";
+import type { SystemModelsTable_PaginationQuery } from "../api/__generated__/SystemModelsTable_PaginationQuery.graphql";
 import type {
   SystemModelsTable_SystemModelsFragment$key,
   SystemModelsTable_SystemModelsFragment$data,
 } from "../api/__generated__/SystemModelsTable_SystemModelsFragment.graphql";
 
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
+import { Link, Route } from "Navigation";
+
+const SYSTEM_MODELS_TO_LOAD_FIRST = 40;
+const SYSTEM_MODELS_TO_LOAD_NEXT = 10;
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const SYSTEM_MODELS_TABLE_FRAGMENT = graphql`
-  fragment SystemModelsTable_SystemModelsFragment on SystemModel
-  @relay(plural: true) {
-    id
-    handle
-    name
-    hardwareType {
-      name
-    }
-    partNumbers {
-      partNumber
+  fragment SystemModelsTable_SystemModelsFragment on RootQueryType
+  @refetchable(queryName: "SystemModelsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "SystemModelFilterInput" }) {
+    systemModels(first: $first, after: $after, filter: $filter)
+      @connection(key: "SystemModelsTable_systemModels") {
+      edges {
+        node {
+          id
+          handle
+          name
+          hardwareType {
+            name
+          }
+          partNumbers {
+            edges {
+              node {
+                partNumber
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;
 
-type TableRecord = SystemModelsTable_SystemModelsFragment$data[number];
+type TableRecord = NonNullable<
+  NonNullable<
+    SystemModelsTable_SystemModelsFragment$data["systemModels"]
+  >["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
@@ -93,7 +115,7 @@ const columns = [
       />
     ),
     cell: ({ getValue }) =>
-      getValue().map(({ partNumber }, index) => (
+      getValue().edges?.map(({ node: { partNumber } }, index) => (
         <React.Fragment key={partNumber}>
           {index > 0 && ", "}
           <span className="text-nowrap">{partNumber}</span>
@@ -109,11 +131,94 @@ type Props = {
 };
 
 const SystemModelsTable = ({ className, systemModelsRef }: Props) => {
-  const systemModels = useFragment(
-    SYSTEM_MODELS_TABLE_FRAGMENT,
-    systemModelsRef,
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
+    SystemModelsTable_PaginationQuery,
+    SystemModelsTable_SystemModelsFragment$key
+  >(SYSTEM_MODELS_TABLE_FRAGMENT, systemModelsRef);
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: SYSTEM_MODELS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: SYSTEM_MODELS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { handle: { ilike: `%${text}%` } },
+                  {
+                    partNumbers: {
+                      partNumber: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                  {
+                    hardwareType: {
+                      name: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
   );
-  return <Table className={className} columns={columns} data={systemModels} />;
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextSystemModels = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(SYSTEM_MODELS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const hardwareTypes = useMemo(() => {
+    return (
+      paginationData.systemModels?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.systemModels) {
+    return null;
+  }
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={hardwareTypes}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextSystemModels : undefined}
+      setSearchText={setSearchText}
+    />
+  );
 };
 
 export default SystemModelsTable;

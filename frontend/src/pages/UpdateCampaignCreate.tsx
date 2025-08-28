@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import type {
   UpdateCampaignCreate_getOptions_Query$data,
 } from "api/__generated__/UpdateCampaignCreate_getOptions_Query.graphql";
 import type { UpdateCampaignCreate_createUpdateCampaign_Mutation } from "api/__generated__/UpdateCampaignCreate_createUpdateCampaign_Mutation.graphql";
+
 import Alert from "components/Alert";
 import Button from "components/Button";
 import Center from "components/Center";
@@ -49,9 +50,11 @@ const GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   query UpdateCampaignCreate_getOptions_Query {
     baseImageCollections {
       __typename
+      count
     }
     updateChannels {
       __typename
+      count
     }
     ...CreateUpdateCampaign_OptionsFragment
   }
@@ -214,10 +217,10 @@ const UpdateCampaignWrapper = ({
   );
   const { baseImageCollections, updateChannels } = updateCampaignOptions;
 
-  if (baseImageCollections.length === 0) {
+  if (baseImageCollections?.count === 0) {
     return <NoBaseImageCollections />;
   }
-  if (updateChannels.length === 0) {
+  if (updateChannels?.count === 0) {
     return <NoUpdateChannels />;
   }
 

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { BaseImageCollections_getBaseImageCollections_Query } from "api/__generated__/BaseImageCollections_getBaseImageCollections_Query.graphql";
+
 import Button from "components/Button";
 import Center from "components/Center";
 import BaseImageCollectionsTable from "components/BaseImageCollectionsTable";
@@ -32,11 +33,16 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
+const BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST = 40;
+
 const GET_BASE_IMAGE_COLLECTIONS_QUERY = graphql`
-  query BaseImageCollections_getBaseImageCollections_Query {
-    baseImageCollections {
-      ...BaseImageCollectionsTable_BaseImageCollectionFragment
-    }
+  query BaseImageCollections_getBaseImageCollections_Query(
+    $first: Int
+    $after: String
+    $filter: BaseImageCollectionFilterInput
+  ) {
+    ...BaseImageCollectionsTable_BaseImageCollectionFragment
+      @arguments(filter: $filter)
   }
 `;
 
@@ -47,7 +53,7 @@ interface BaseImageCollectionsContentProps {
 const BaseImageCollectionsContent = ({
   getBaseImageCollectionsQuery,
 }: BaseImageCollectionsContentProps) => {
-  const { baseImageCollections } = usePreloadedQuery(
+  const baseImageCollections = usePreloadedQuery(
     GET_BASE_IMAGE_COLLECTIONS_QUERY,
     getBaseImageCollectionsQuery,
   );
@@ -85,7 +91,11 @@ const BaseImageCollectionsPage = () => {
     );
 
   const fetchBaseImageCollections = useCallback(
-    () => getBaseImageCollections({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getBaseImageCollections(
+        { first: BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getBaseImageCollections],
   );
 

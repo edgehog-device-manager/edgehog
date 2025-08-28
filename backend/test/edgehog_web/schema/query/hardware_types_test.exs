@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
 
   describe "hardwareTypes query" do
     test "returns empty hardware types", %{tenant: tenant} do
-      assert %{data: %{"hardwareTypes" => []}} == hardware_types_query(tenant: tenant)
+      assert [] == [tenant: tenant] |> hardware_types_query() |> extract_result!()
     end
 
     test "returns hardware types if they're present", %{tenant: tenant} do
@@ -34,14 +34,17 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
         |> hardware_type_fixture()
         |> Ash.load!(:part_number_strings)
 
-      assert %{data: %{"hardwareTypes" => [hardware_type]}} = hardware_types_query(tenant: tenant)
+      assert [hardware_type] =
+               [tenant: tenant] |> hardware_types_query() |> extract_result!() |> extract_nodes!()
 
       assert hardware_type["name"] == fixture.name
       assert hardware_type["handle"] == fixture.handle
-      assert length(hardware_type["partNumbers"]) == length(fixture.part_number_strings)
+      assert length(hardware_type["partNumbers"]["edges"]) == length(fixture.part_number_strings)
+
+      part_numbers = extract_nodes!(hardware_type["partNumbers"]["edges"])
 
       Enum.each(fixture.part_number_strings, fn pn ->
-        assert(%{"partNumber" => pn} in hardware_type["partNumbers"])
+        assert(%{"partNumber" => pn} in part_numbers)
       end)
     end
 
@@ -57,8 +60,11 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
         ]
       }
 
-      assert %{data: %{"hardwareTypes" => hardware_types}} =
-               hardware_types_query(tenant: tenant, filter: filter)
+      assert hardware_types =
+               [tenant: tenant, filter: filter]
+               |> hardware_types_query()
+               |> extract_result!()
+               |> extract_nodes!()
 
       assert length(hardware_types) == 2
       assert "foo" in Enum.map(hardware_types, & &1["handle"])
@@ -75,8 +81,11 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
         %{"field" => "HANDLE", "order" => "ASC"}
       ]
 
-      assert %{data: %{"hardwareTypes" => hardware_types}} =
-               hardware_types_query(tenant: tenant, sort: sort)
+      assert hardware_types =
+               [tenant: tenant, sort: sort]
+               |> hardware_types_query()
+               |> extract_result!()
+               |> extract_nodes!()
 
       assert [
                %{"handle" => "1"},
@@ -91,10 +100,18 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
       """
       query HardwareTypes($filter: HardwareTypeFilterInput, $sort: [HardwareTypeSortInput]) {
         hardwareTypes(filter: $filter, sort: $sort) {
-          name
-          handle
-          partNumbers {
-            partNumber
+          edges {
+            node {
+              name
+              handle
+              partNumbers {
+                edges {
+                  node {
+                    partNumber
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -110,5 +127,26 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
       }
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "hardwareTypes" => %{
+                 "edges" => hardware_types
+               }
+             }
+           } = result
+
+    assert hardware_types != nil
+
+    hardware_types
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end
