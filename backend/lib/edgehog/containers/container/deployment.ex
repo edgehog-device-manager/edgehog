@@ -25,7 +25,9 @@ defmodule Edgehog.Containers.Container.Deployment do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
+  alias Edgehog.Containers.Container.Calculations
   alias Edgehog.Containers.Container.Changes
+  alias Edgehog.Containers.Container.Types.DeploymentState
   alias Edgehog.Containers.Deployment
   alias Edgehog.Devices.Device
 
@@ -56,7 +58,6 @@ defmodule Edgehog.Containers.Container.Deployment do
         allow_nil? false
       end
 
-      change set_attribute(:state, :created)
       change manage_relationship(:container, type: :append)
       change manage_relationship(:device, type: :append)
       change Changes.DeployContainerOnDevice
@@ -97,10 +98,10 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     attribute :last_message, :string
 
-    attribute :state, :atom,
-      constraints: [
-        one_of: [:created, :sent, :received, :device_created, :stopped, :running, :error]
-      ]
+    attribute :state, DeploymentState do
+      default :created
+      public? true
+    end
 
     timestamps()
   end
@@ -117,7 +118,7 @@ defmodule Edgehog.Containers.Container.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:received, :device_created, :stopped, :running])
+    calculate :ready?, :term, Calculations.Ready
   end
 
   identities do

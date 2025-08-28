@@ -30,7 +30,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckDeployment do
 
     with :created_containers <- state(changeset),
          {:ok, deployment} <- Ash.load(deployment, :ready?),
-         true <- deployment.ready? do
+         :ready <- deployment.ready? do
       changeset
       |> Ash.Changeset.change_attribute(:resources_state, :ready)
       |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->

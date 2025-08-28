@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Deployment do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Changes.PublishNotification
+  alias Edgehog.Containers.Deployment.Calculations
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.Deployment.Types.DeploymentState
   alias Edgehog.Containers.Deployment.Types.ResourcesState
@@ -230,8 +231,7 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:started, :starting, :stopped, :stopping])
-    calculate :resources_ready?, :boolean, expr(resources_state == :ready)
+    calculate :ready?, :term, Calculations.Ready
   end
 
   identities do

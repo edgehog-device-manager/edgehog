@@ -420,19 +420,21 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
   def handle_event(:info, {:deployment_updated, deployment}, _state, data) do
-    resources_state =
+    ready? =
       deployment
-      |> Ash.load!(:resources_state, tenant: data.tenant_id)
-      |> Map.get(:resources_state)
-
-    state = deployment.state
+      |> Ash.load!(:ready?, tenant: data.tenant_id)
+      |> Map.get(:ready?)
 
     # Event generated from PubSub when a Deployment is updated
     additional_actions =
-      case {resources_state, state} do
-        {:ready, _} -> [internal_event({:deployment_success, deployment})]
-        {_, :error} -> [internal_event({:deployment_failure, deployment})]
-        {_, _} -> []
+      case ready? do
+        :ready ->
+          [internal_event({:deployment_success, deployment})]
+
+        {:not_ready, missing} ->
+          if errors?(missing),
+            do: [internal_event({:deployment_failure, deployment})],
+            else: []
       end
 
     # We always cancel the retry timeout for every kind of update we see on an Deployment.
@@ -579,6 +581,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     Logger.info("Terminating executor process for Deployment Campaign #{deployment_campaign_id}")
     {:stop, :normal}
   end
+
+  defp errors?(missing), do: Enum.any?(missing, &in_error_state?/1)
+  defp in_error_state?({_deployment, :error}), do: true
+  defp in_error_state?({_deployment, _state}), do: false
 
   # Data manipulation
 

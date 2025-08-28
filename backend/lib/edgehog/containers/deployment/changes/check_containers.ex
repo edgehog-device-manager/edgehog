@@ -43,7 +43,7 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
             load: [:ready?]
           )
         )
-        |> Enum.all?(& &1.ready?)
+        |> Enum.all?(&(&1.ready? == :ready))
 
       if containers_ready?,
         do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_containers),
