@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -81,8 +82,12 @@ const UPDATE_UPDATE_CHANNEL_MUTATION = graphql`
         handle
         ...UpdateUpdateChannel_UpdateChannelFragment
         targetGroups {
-          id
-          name
+          edges {
+            node {
+              id
+              name
+            }
+          }
         }
       }
     }
@@ -95,7 +100,11 @@ const DELETE_UPDATE_CHANNEL_MUTATION = graphql`
       result {
         id
         targetGroups {
-          id
+          edges {
+            node {
+              id
+            }
+          }
         }
       }
     }
@@ -159,34 +168,37 @@ const UpdateChannelContent = ({
         setShowDeleteModal(false);
       },
       updater(store, data) {
-        if (!data?.deleteUpdateChannel?.result?.id) {
+        const updateChannelId = data?.deleteUpdateChannel?.result?.id;
+        if (!updateChannelId) {
           return;
         }
         const updateChannel = store
           .getRootField("deleteUpdateChannel")
           .getLinkedRecord("result");
-        const updateChannelId = updateChannel.getDataID();
+
         const root = store.getRoot();
 
-        const updateChannels = root.getLinkedRecords("updateChannels");
-        if (updateChannels) {
-          root.setLinkedRecords(
-            updateChannels.filter(
-              (updateChannel) => updateChannel.getDataID() !== updateChannelId,
-            ),
-            "updateChannels",
-          );
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "UpdateChannelsTable_updateChannels",
+        );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, updateChannelId);
         }
 
         const targetGroupIds = new Set(
           updateChannel
-            .getLinkedRecords("targetGroups")
-            .map((targetGroup) => targetGroup.getDataID()),
+            .getLinkedRecord("targetGroups")
+            ?.getLinkedRecords("edges")
+            ?.map((edge) => edge.getLinkedRecord("node").getDataID()) || [],
         );
-        const deviceGroups = root.getLinkedRecords("deviceGroups");
+
+        const deviceGroups = root.getLinkedRecord("deviceGroups");
         if (deviceGroups && targetGroupIds.size) {
-          deviceGroups.forEach((deviceGroup) => {
-            if (targetGroupIds.has(deviceGroup.getDataID())) {
+          deviceGroups?.getLinkedRecords("edges")?.forEach((edge) => {
+            const deviceGroup = edge.getLinkedRecord("node");
+            if (deviceGroup && targetGroupIds.has(deviceGroup.getDataID())) {
               deviceGroup.invalidateRecord();
             }
           });

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       assert update_campaign_data["updateChannel"]["id"] == update_channel_id
       assert update_campaign_data["updateChannel"]["name"] == update_channel.name
       assert update_campaign_data["updateChannel"]["handle"] == update_channel.handle
-      assert [target_data] = update_campaign_data["updateTargets"]
+      assert [target_data] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
       assert target_data["status"] == "IDLE"
       assert target_data["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
 
@@ -81,7 +81,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       assert update_campaign_data["name"] == "My Update Campaign"
       assert update_campaign_data["status"] == "FINISHED"
       assert update_campaign_data["outcome"] == "SUCCESS"
-      assert update_campaign_data["updateTargets"] == []
+      assert update_campaign_data["updateTargets"]["edges"] == []
 
       # Check that no executor got started
       update_campaign = fetch_update_campaign_from_graphql_id!(tenant, update_campaign_data["id"])
@@ -353,9 +353,13 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
             handle
           }
           updateTargets {
-            status
-            device {
-              id
+            edges {
+              node {
+                status
+                device {
+                  id
+                }
+              }
             }
           }
         }
@@ -460,5 +464,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       [] -> :error
       [{pid, _}] -> {:ok, pid}
     end
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end

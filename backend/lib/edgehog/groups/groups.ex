@@ -37,7 +37,8 @@ defmodule Edgehog.Groups do
 
       list DeviceGroup, :device_groups, :read do
         description "Returns a list of device groups."
-        paginate_with nil
+        paginate_with :keyset
+        relay? true
       end
     end
 

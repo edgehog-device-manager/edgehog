@@ -35,7 +35,7 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
     test "successfully adds tags", %{tenant: tenant, id: id} do
       result = add_device_tags_mutation(tenant: tenant, id: id, tags: ["foo", "bar"])
 
-      assert %{"tags" => tags} = extract_result!(result)
+      assert tags = extract_result_tags!(result)
       assert length(tags) == 2
       tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
       assert "foo" in tag_names
@@ -46,7 +46,7 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
       result =
         add_device_tags_mutation(tenant: tenant, id: id, tags: ["FOO", "bAr", "  BaZ  ", "baz"])
 
-      assert %{"tags" => tags} = extract_result!(result)
+      assert tags = extract_result_tags!(result)
       assert length(tags) == 3
       tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
       assert "foo" in tag_names
@@ -62,7 +62,7 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
       result =
         add_device_tags_mutation(tenant: tenant, id: id, tags: ["foo", "baz"])
 
-      assert %{"tags" => tags} = extract_result!(result)
+      assert tags = extract_result_tags!(result)
       assert length(tags) == 3
       tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
       assert "foo" in tag_names
@@ -92,8 +92,13 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
     mutation AddDeviceTags($id: ID!, $input: AddDeviceTagsInput!) {
       addDeviceTags(id: $id, input: $input) {
         result {
-          tags {
-            name
+          tags(first: 10, sort: [{field: NAME, order: ASC}]) {
+            count
+            edges {
+              node {
+                name
+              }
+            }
           }
         }
       }
@@ -122,21 +127,27 @@ defmodule EdgehogWeb.Schema.Mutation.AddDeviceTagsTest do
     error
   end
 
-  defp extract_result!(result) do
+  defp extract_result_tags!(result) do
     refute :errors in Map.keys(result)
     refute "errors" in Map.keys(result[:data])
 
     assert %{
              data: %{
                "addDeviceTags" => %{
-                 "result" => device
+                 "result" => %{
+                   "tags" => %{
+                     "count" => count,
+                     "edges" => edges
+                   }
+                 }
                }
              }
            } = result
 
-    assert device != nil
+    tags = Enum.map(edges, & &1["node"])
+    assert length(tags) == count
 
-    device
+    tags
   end
 
   defp non_existing_device_id(tenant) do

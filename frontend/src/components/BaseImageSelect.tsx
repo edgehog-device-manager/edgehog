@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -38,15 +38,21 @@ import Stack from "components/Stack";
 
 type SelectProps = ComponentProps<typeof Form.Select>;
 type BaseImage = NonNullable<
-  BaseImageSelect_getBaseImages_Query$data["baseImageCollection"]
->["baseImages"][number];
+  NonNullable<
+    BaseImageSelect_getBaseImages_Query$data["baseImageCollection"]
+  >["baseImages"]["edges"]
+>[number]["node"];
 
 const GET_BASE_IMAGES_QUERY = graphql`
   query BaseImageSelect_getBaseImages_Query($baseImageCollectionId: ID!) {
     baseImageCollection(id: $baseImageCollectionId) {
       baseImages {
-        id
-        name
+        edges {
+          node {
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -97,13 +103,10 @@ const BaseImageSelectContent = forwardRef<
     return notFoundComponent;
   }
 
-  return (
-    <BaseImageSelect
-      {...selectProps}
-      baseImages={baseImageCollection.baseImages}
-      ref={ref}
-    />
-  );
+  const baseImages =
+    baseImageCollection.baseImages.edges?.map((edge) => edge.node) ?? [];
+
+  return <BaseImageSelect {...selectProps} baseImages={baseImages} ref={ref} />;
 });
 BaseImageSelectContent.displayName = "BaseImageSelectContent";
 

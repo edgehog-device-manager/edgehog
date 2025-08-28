@@ -31,6 +31,8 @@ defmodule Edgehog.Groups.DeviceGroup do
 
   graphql do
     type :device_group
+
+    # TODO: paginate `device` relationship with relay
   end
 
   actions do

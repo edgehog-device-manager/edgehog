@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,15 +29,17 @@ import type { HardwareTypesTable_getHardwareTypes_Query } from "api/__generated_
 import HardwareTypesTable from "./HardwareTypesTable";
 
 const GET_HARDWARE_TYPES_QUERY = graphql`
-  query HardwareTypesTable_getHardwareTypes_Query @relay_test_operation {
-    hardwareTypes {
-      ...HardwareTypesTable_HardwareTypesFragment
-    }
+  query HardwareTypesTable_getHardwareTypes_Query(
+    $first: Int
+    $after: String
+    $filter: HardwareTypeFilterInput
+  ) @relay_test_operation {
+    ...HardwareTypesTable_HardwareTypesFragment @arguments(filter: $filter)
   }
 `;
 
 const ComponentWithQuery = () => {
-  const { hardwareTypes } =
+  const hardwareTypes =
     useLazyLoadQuery<HardwareTypesTable_getHardwareTypes_Query>(
       GET_HARDWARE_TYPES_QUERY,
       {},
@@ -50,16 +52,30 @@ type HardwareType = {
   handle: string;
   name: string;
   partNumbers: {
-    id: string;
-    partNumber: string;
-  }[];
+    edges: {
+      node: {
+        id: string;
+        partNumber: string;
+      };
+    }[];
+  };
 };
 
 const renderComponent = (hardwareTypes: HardwareType[] = []) => {
   const relayEnvironment = createMockEnvironment();
-  relayEnvironment.mock.queueOperationResolver((_operation) => ({
-    data: { hardwareTypes },
+
+  relayEnvironment.mock.queueOperationResolver(() => ({
+    data: {
+      hardwareTypes: {
+        edges: hardwareTypes.map((model) => ({
+          node: model,
+        })),
+      },
+    },
   }));
+
+  relayEnvironment.mock.queuePendingOperation(GET_HARDWARE_TYPES_QUERY, {});
+
   renderWithProviders(<ComponentWithQuery />, { relayEnvironment });
 };
 
@@ -81,7 +97,9 @@ it("renders Hardware Type data", () => {
       id: "HW-ID",
       handle: "hw-handle",
       name: "HW name",
-      partNumbers: [{ id: "HW-PN1", partNumber: "HW-PN1" }],
+      partNumbers: {
+        edges: [{ node: { id: "HW-PN1", partNumber: "HW-PN1" } }],
+      },
     },
   ]);
 
@@ -100,10 +118,12 @@ it("renders multiple Part Numbers separated by comma", () => {
       id: "HW-ID",
       handle: "hw-handle",
       name: "HW name",
-      partNumbers: [
-        { id: "HW-PN1", partNumber: "HW-PN1" },
-        { id: "HW-PN2", partNumber: "HW-PN2" },
-      ],
+      partNumbers: {
+        edges: [
+          { node: { id: "HW-PN1", partNumber: "HW-PN1" } },
+          { node: { id: "HW-PN2", partNumber: "HW-PN2" } },
+        ],
+      },
     },
   ]);
 
@@ -116,10 +136,12 @@ it("renders Hardware Type data in correct columns", () => {
       id: "HW-ID",
       handle: "hw-handle",
       name: "HW name",
-      partNumbers: [
-        { id: "HW-PN1", partNumber: "HW-PN1" },
-        { id: "HW-PN2", partNumber: "HW-PN2" },
-      ],
+      partNumbers: {
+        edges: [
+          { node: { id: "HW-PN1", partNumber: "HW-PN1" } },
+          { node: { id: "HW-PN2", partNumber: "HW-PN2" } },
+        ],
+      },
     },
   ]);
 

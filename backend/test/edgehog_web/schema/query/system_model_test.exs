@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Query.SystemModelTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -46,10 +44,10 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
       assert system_model["name"] == fixture.name
       assert system_model["handle"] == fixture.handle
       assert system_model["pictureUrl"] == fixture.picture_url
-      assert length(system_model["partNumbers"]) == length(fixture.part_number_strings)
+      assert length(system_model["partNumbers"]["edges"]) == length(fixture.part_number_strings)
 
       Enum.each(fixture.part_number_strings, fn pn ->
-        assert(%{"partNumber" => pn} in system_model["partNumbers"])
+        assert(%{"node" => %{"partNumber" => pn}} in system_model["partNumbers"]["edges"])
       end)
 
       assert system_model["hardwareType"]["id"] ==
@@ -164,7 +162,11 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
         handle
         pictureUrl
         partNumbers {
-          partNumber
+          edges {
+            node {
+              partNumber
+            }
+          }
         }
         hardwareType {
           id

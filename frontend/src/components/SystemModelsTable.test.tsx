@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,15 +29,17 @@ import type { SystemModelsTable_getSystemModels_Query } from "api/__generated__/
 import SystemModelsTable from "./SystemModelsTable";
 
 const GET_SYSTEM_MODELS_QUERY = graphql`
-  query SystemModelsTable_getSystemModels_Query @relay_test_operation {
-    systemModels {
-      ...SystemModelsTable_SystemModelsFragment
-    }
+  query SystemModelsTable_getSystemModels_Query(
+    $first: Int
+    $after: String
+    $filter: SystemModelFilterInput
+  ) @relay_test_operation {
+    ...SystemModelsTable_SystemModelsFragment @arguments(filter: $filter)
   }
 `;
 
 const ComponentWithQuery = () => {
-  const { systemModels } =
+  const systemModels =
     useLazyLoadQuery<SystemModelsTable_getSystemModels_Query>(
       GET_SYSTEM_MODELS_QUERY,
       {},
@@ -54,16 +56,30 @@ type SystemModel = {
     name: string;
   };
   partNumbers: {
-    id: string;
-    partNumber: string;
-  }[];
+    edges: {
+      node: {
+        id: string;
+        partNumber: string;
+      };
+    }[];
+  };
 };
 
 const renderComponent = (systemModels: SystemModel[] = []) => {
   const relayEnvironment = createMockEnvironment();
-  relayEnvironment.mock.queueOperationResolver((_operation) => ({
-    data: { systemModels },
+
+  relayEnvironment.mock.queueOperationResolver(() => ({
+    data: {
+      systemModels: {
+        edges: systemModels.map((model) => ({
+          node: model,
+        })),
+      },
+    },
   }));
+
+  relayEnvironment.mock.queuePendingOperation(GET_SYSTEM_MODELS_QUERY, {});
+
   renderWithProviders(<ComponentWithQuery />, { relayEnvironment });
 };
 
@@ -92,7 +108,9 @@ it("renders System Model data", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: [{ id: "SM-PN1", partNumber: "SM-PN1" }],
+      partNumbers: {
+        edges: [{ node: { id: "SM-PN1", partNumber: "SM-PN1" } }],
+      },
     },
   ]);
 
@@ -116,10 +134,12 @@ it("renders multiple Part Numbers separated by comma", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: [
-        { id: "SM-PN1", partNumber: "SM-PN1" },
-        { id: "SM-PN2", partNumber: "SM-PN2" },
-      ],
+      partNumbers: {
+        edges: [
+          { node: { id: "SM-PN1", partNumber: "SM-PN1" } },
+          { node: { id: "SM-PN2", partNumber: "SM-PN2" } },
+        ],
+      },
     },
   ]);
 
@@ -136,7 +156,9 @@ it("renders System Model data in correct columns", async () => {
         id: "HW-ID",
         name: "HW name",
       },
-      partNumbers: [{ id: "SM-PN1", partNumber: "SM-PN1" }],
+      partNumbers: {
+        edges: [{ node: { id: "SM-PN1", partNumber: "SM-PN1" } }],
+      },
     },
   ]);
 
