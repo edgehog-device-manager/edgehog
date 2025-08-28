@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,32 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema do
-  @moduledoc false
-  use Absinthe.Schema
+defmodule Edgehog.DeploymentCampaigns do
+  @moduledoc """
+  Deployment Campaings context.
 
-  use AshGraphql,
-    domains: [
-      Edgehog.BaseImages,
-      Edgehog.Containers,
-      Edgehog.Devices,
-      Edgehog.Forwarder,
-      Edgehog.Groups,
-      Edgehog.Labeling,
-      Edgehog.OSManagement,
-      Edgehog.Tenants,
-      Edgehog.UpdateCampaigns,
-      Edgehog.DeploymentCampaigns
-    ],
-    relay_ids?: true
+  This module provides the necessary code interfaces and GraphQL mutations (and
+  queries) to interact with deployment campaigns.
+  """
+  use Ash.Domain,
+    extensions: [AshGraphql.Domain]
 
-  import_types EdgehogWeb.Schema.AstarteTypes
-  import_types Absinthe.Plug.Types
-  import_types Absinthe.Type.Custom
-
-  query do
-  end
-
-  mutation do
+  resources do
+    resource Edgehog.DeploymentCampaigns.DeploymentCampaign
+    resource Edgehog.DeploymentCampaigns.DeploymentTarget
+    resource Edgehog.DeploymentCampaigns.DeploymentChannel
   end
 end

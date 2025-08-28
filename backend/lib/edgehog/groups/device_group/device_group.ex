@@ -139,6 +139,13 @@ defmodule Edgehog.Groups.DeviceGroup do
       public? true
       attribute_public? false
     end
+
+    belongs_to :deployment_channel, Edgehog.DeploymentCampaigns.DeploymentChannel do
+      description "The deployment channel associated with the group, if present."
+      public? true
+      attribute_public? false
+      attribute_type :uuid
+    end
   end
 
   identities do
