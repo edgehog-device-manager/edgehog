@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -28,11 +28,13 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
+
 import type {
   SystemModelCreate_getOptions_Query,
   SystemModelCreate_getOptions_Query$data,
 } from "api/__generated__/SystemModelCreate_getOptions_Query.graphql";
 import type { SystemModelCreate_createSystemModel_Mutation } from "api/__generated__/SystemModelCreate_createSystemModel_Mutation.graphql";
+
 import Alert from "components/Alert";
 import Button from "components/Button";
 import Center from "components/Center";
@@ -47,6 +49,7 @@ const CREATE_SYSTEM_MODEL_PAGE_QUERY = graphql`
   query SystemModelCreate_getOptions_Query {
     hardwareTypes {
       __typename
+      count
     }
     ...CreateSystemModel_OptionsFragment
   }
@@ -190,7 +193,7 @@ const SystemModelWrapper = ({
     getCreateSystemModelOptionsQuery,
   );
   const { hardwareTypes } = systemModelOptions;
-  if (hardwareTypes.length === 0) {
+  if (hardwareTypes?.count === 0) {
     return <NoHardwareTypes />;
   }
   return <SystemModel systemModelOptions={systemModelOptions} />;

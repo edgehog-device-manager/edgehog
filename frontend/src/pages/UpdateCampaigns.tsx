@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { UpdateCampaigns_getUpdateCampaigns_Query } from "api/__generated__/UpdateCampaigns_getUpdateCampaigns_Query.graphql";
+
 import Button from "components/Button";
 import Center from "components/Center";
 import Page from "components/Page";
@@ -32,11 +33,15 @@ import Spinner from "components/Spinner";
 import UpdateCampaignsTable from "components/UpdateCampaignsTable";
 import { Link, Route } from "Navigation";
 
+const UPDATE_CAMPAIGNS_TO_LOAD_FIRST = 40;
+
 const GET_UPDATE_CAMPAIGNS_QUERY = graphql`
-  query UpdateCampaigns_getUpdateCampaigns_Query {
-    updateCampaigns {
-      ...UpdateCampaignsTable_UpdateCampaignFragment
-    }
+  query UpdateCampaigns_getUpdateCampaigns_Query(
+    $first: Int
+    $after: String
+    $filter: UpdateCampaignFilterInput
+  ) {
+    ...UpdateCampaignsTable_UpdateCampaignFragment @arguments(filter: $filter)
   }
 `;
 
@@ -47,7 +52,7 @@ type UpdateCampaignsContentProps = {
 const UpdateCampaignsContent = ({
   getUpdateCampaignsQuery,
 }: UpdateCampaignsContentProps) => {
-  const { updateCampaigns } = usePreloadedQuery(
+  const updateCampaignsData = usePreloadedQuery(
     GET_UPDATE_CAMPAIGNS_QUERY,
     getUpdateCampaignsQuery,
   );
@@ -70,7 +75,7 @@ const UpdateCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <UpdateCampaignsTable updateCampaignsRef={updateCampaigns} />
+        <UpdateCampaignsTable updateCampaignsData={updateCampaignsData} />
       </Page.Main>
     </Page>
   );
@@ -83,7 +88,11 @@ const UpdateCampaignsPage = () => {
     );
 
   const fetchUpdateCampaigns = useCallback(
-    () => getUpdateCampaigns({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getUpdateCampaigns(
+        { first: UPDATE_CAMPAIGNS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getUpdateCampaigns],
   );
 

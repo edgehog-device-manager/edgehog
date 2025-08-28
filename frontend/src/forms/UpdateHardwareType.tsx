@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
+import type { UpdateHardwareType_HardwareTypeFragment$key } from "api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
+
 import Button from "components/Button";
 import Col from "components/Col";
 import Form from "components/Form";
@@ -33,14 +35,17 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { hardwareTypeHandleSchema, messages, yup } from "forms";
 
-import type { UpdateHardwareType_HardwareTypeFragment$key } from "api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
-
 const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
   fragment UpdateHardwareType_HardwareTypeFragment on HardwareType {
     name
     handle
     partNumbers {
-      partNumber
+      count
+      edges {
+        node {
+          partNumber
+        }
+      }
     }
   }
 `;
@@ -127,10 +132,10 @@ const UpdateHardwareTypeForm = ({
       name: hardwareType.name,
       handle: hardwareType.handle,
       partNumbers:
-        hardwareType.partNumbers.length > 0
-          ? hardwareType.partNumbers.map(({ partNumber }) => ({
+        hardwareType.partNumbers?.count && hardwareType.partNumbers.count > 0
+          ? hardwareType.partNumbers.edges?.map(({ node: { partNumber } }) => ({
               value: partNumber,
-            }))
+            })) ?? []
           : [{ value: "" }], // default with at least one empty part number
     }),
     [hardwareType.name, hardwareType.handle, hardwareType.partNumbers],

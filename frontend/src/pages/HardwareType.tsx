@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -137,15 +138,16 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
         }
 
         const root = store.getRoot();
-        const hardwareTypes = root.getLinkedRecords("hardwareTypes");
-        if (hardwareTypes) {
-          root.setLinkedRecords(
-            hardwareTypes.filter(
-              (hardwareType) => hardwareType.getDataID() !== hardwareTypeId,
-            ),
-            "hardwareTypes",
-          );
+
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "HardwareTypesTable_hardwareTypes",
+        );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, hardwareTypeId);
         }
+
         store.delete(hardwareTypeId);
       },
     });

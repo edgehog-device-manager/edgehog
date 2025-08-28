@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -49,15 +47,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
                "name" => "Foobar",
                "handle" => "foobar",
                "pictureUrl" => nil,
-               "partNumbers" => part_numbers,
+               "partNumbers" => %{"edges" => part_numbers},
                "hardwareType" => %{
                  "id" => ^hardware_type_id
                }
              } = system_model
 
       assert length(part_numbers) == 2
-      assert %{"partNumber" => "123"} in part_numbers
-      assert %{"partNumber" => "456"} in part_numbers
+      assert %{"node" => %{"partNumber" => "123"}} in part_numbers
+      assert %{"node" => %{"partNumber" => "456"}} in part_numbers
     end
 
     test "allows passing localized descriptions", %{tenant: tenant} do
@@ -233,7 +231,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateSystemModelTest do
           handle
           pictureUrl
           partNumbers {
-            partNumber
+            edges {
+              node {
+                partNumber
+              }
+            }
           }
           hardwareType {
             id

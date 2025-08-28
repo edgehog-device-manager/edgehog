@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ const CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY = graphql`
   query BaseImageCollectionCreate_getOptions_Query {
     systemModels {
       __typename
+      count
     }
     ...CreateBaseImageCollection_OptionsFragment
   }
@@ -190,7 +191,7 @@ const BaseImageCollectionWrapper = ({
     getBaseImageCollectionOptionsQuery,
   );
   const { systemModels } = baseImageCollectionOptions;
-  if (systemModels.length === 0) {
+  if (systemModels?.count === 0) {
     return <NoSystemModels />;
   }
   return (

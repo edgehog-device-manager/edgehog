@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -39,12 +39,20 @@ import type { CreateUpdateCampaign_OptionsFragment$key } from "api/__generated__
 const UPDATE_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
   fragment CreateUpdateCampaign_OptionsFragment on RootQueryType {
     baseImageCollections {
-      id
-      name
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
     updateChannels {
-      id
-      name
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
   }
 `;
@@ -262,14 +270,16 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select a Base Image Collection",
               })}
             </option>
-            {baseImageCollections.map((baseImageCollection) => (
-              <option
-                key={baseImageCollection.id}
-                value={baseImageCollection.id}
-              >
-                {baseImageCollection.name}
-              </option>
-            ))}
+            {baseImageCollections?.edges?.map(
+              ({ node: baseImageCollection }) => (
+                <option
+                  key={baseImageCollection.id}
+                  value={baseImageCollection.id}
+                >
+                  {baseImageCollection.name}
+                </option>
+              ),
+            )}
           </Form.Select>
           <FormFeedback feedback={errors.baseImageCollectionId?.message} />
         </FormRow>
@@ -308,7 +318,7 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select an Update Channel",
               })}
             </option>
-            {updateChannels.map((updateChannel) => (
+            {updateChannels?.edges?.map(({ node: updateChannel }) => (
               <option key={updateChannel.id} value={updateChannel.id}>
                 {updateChannel.name}
               </option>

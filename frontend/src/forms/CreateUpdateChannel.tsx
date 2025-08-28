@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import { useForm, Controller } from "react-hook-form";
 import { useIntl, FormattedMessage } from "react-intl";
 import { yupResolver } from "@hookform/resolvers/yup";
 
+import type { CreateUpdateChannel_OptionsFragment$key } from "api/__generated__/CreateUpdateChannel_OptionsFragment.graphql";
+
 import Button from "components/Button";
 import Col from "components/Col";
 import Form from "components/Form";
@@ -32,15 +34,18 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { updateChannelHandleSchema, yup, messages } from "forms";
 import { graphql, useFragment } from "react-relay/hooks";
-import type { CreateUpdateChannel_OptionsFragment$key } from "api/__generated__/CreateUpdateChannel_OptionsFragment.graphql";
 
 const CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
   fragment CreateUpdateChannel_OptionsFragment on RootQueryType {
     deviceGroups {
-      id
-      name
-      updateChannel {
-        name
+      edges {
+        node {
+          id
+          name
+          updateChannel {
+            name
+          }
+        }
       }
     }
   }
@@ -179,18 +184,20 @@ const CreateUpdateChannel = ({
 
   const targetGroupOptions = useMemo(() => {
     // move disabled options to the end
-    return [...targetGroups].sort((group1, group2) => {
-      const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
-      const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
+    return [...(targetGroups?.edges?.map((edge) => edge.node) || [])].sort(
+      (group1, group2) => {
+        const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
+        const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
 
-      if (group1Disabled === group2Disabled) {
-        return 0;
-      }
-      if (group1Disabled) {
-        return 1;
-      }
-      return -1;
-    });
+        if (group1Disabled === group2Disabled) {
+          return 0;
+        }
+        if (group1Disabled) {
+          return 1;
+        }
+        return -1;
+      },
+    );
   }, [targetGroups]);
 
   const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,12 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
       |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "bar"])
       |> Ash.update!()
 
-      assert tags = [tenant: tenant] |> existing_device_tags_query() |> extract_result!()
+      assert tags =
+               [tenant: tenant]
+               |> existing_device_tags_query()
+               |> extract_result!()
+               |> extract_nodes!()
+
       assert length(tags) == 2
       tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
       assert "foo" in tag_names
@@ -50,7 +55,10 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
       |> Ash.update!()
 
       assert [%{"name" => "bar"}] ==
-               [tenant: tenant] |> existing_device_tags_query() |> extract_result!()
+               [tenant: tenant]
+               |> existing_device_tags_query()
+               |> extract_result!()
+               |> extract_nodes!()
     end
 
     test "does not return duplicates if a tag is assigned multiple times", %{tenant: tenant} do
@@ -64,7 +72,12 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
       |> Ash.Changeset.for_update(:add_tags, tags: ["foo", "baz"])
       |> Ash.update!()
 
-      assert tags = [tenant: tenant] |> existing_device_tags_query() |> extract_result!()
+      assert tags =
+               [tenant: tenant]
+               |> existing_device_tags_query()
+               |> extract_result!()
+               |> extract_nodes!()
+
       assert length(tags) == 3
       tag_names = Enum.map(tags, &Map.fetch!(&1, "name"))
       assert "foo" in tag_names
@@ -77,7 +90,11 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
     document = """
     query {
       existingDeviceTags {
-        name
+        edges {
+          node {
+            name
+          }
+        }
       }
     }
     """
@@ -89,9 +106,13 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
 
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
-    assert %{data: %{"existingDeviceTags" => tags}} = result
+    assert %{data: %{"existingDeviceTags" => %{"edges" => tags}}} = result
     assert tags != nil
 
     tags
+  end
+
+  defp extract_nodes!(result) do
+    Enum.map(result, &Map.fetch!(&1, "node"))
   end
 end

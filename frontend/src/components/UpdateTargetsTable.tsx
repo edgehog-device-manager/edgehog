@@ -29,8 +29,9 @@ import type {
 } from "api/__generated__/UpdateTargetsTable_UpdateTargetsFragment.graphql";
 
 import Icon from "components/Icon";
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
+import InfiniteTable from "./InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -297,12 +298,18 @@ type Props = {
   className?: string;
   hiddenColumns?: ColumnId[];
   updateTargetsRef: UpdateTargetsTable_UpdateTargetsFragment$key;
+  isLoadingNext: boolean;
+  hasNext: boolean;
+  loadNextUpdateTargets: () => void;
 };
 
 const UpdateTargetsTable = ({
   className,
   updateTargetsRef,
   hiddenColumns = [],
+  isLoadingNext,
+  hasNext,
+  loadNextUpdateTargets,
 }: Props) => {
   const updateTargets = useFragment(
     UPDATE_TARGETS_TABLE_FRAGMENT,
@@ -310,10 +317,12 @@ const UpdateTargetsTable = ({
   );
 
   return (
-    <Table
+    <InfiniteTable
       className={className}
       columns={columns}
-      data={updateTargets}
+      data={[...updateTargets]}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextUpdateTargets : undefined}
       hiddenColumns={hiddenColumns}
       hideSearch
     />

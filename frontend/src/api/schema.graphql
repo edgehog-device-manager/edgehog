@@ -485,6 +485,27 @@ enum BaseImageCollectionSortField {
   HANDLE
 }
 
+":base_image_collection connection"
+type BaseImageCollectionConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":base_image_collection edges"
+  edges: [BaseImageCollectionEdge!]
+}
+
+":base_image_collection edge"
+type BaseImageCollectionEdge {
+  "Cursor"
+  cursor: String!
+
+  ":base_image_collection node"
+  node: BaseImageCollection!
+}
+
 input BaseImageCollectionFilterHandle {
   isNil: Boolean
   eq: String
@@ -582,12 +603,18 @@ type BaseImageCollection implements Node {
     "A filter to limit the results"
     filter: BaseImageFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [BaseImage!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): BaseImageConnection!
 }
 
 "The result of the :delete_base_image mutation"
@@ -653,6 +680,27 @@ enum BaseImageSortField {
   VERSION
   STARTING_VERSION_REQUIREMENT
   URL
+}
+
+":base_image connection"
+type BaseImageConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":base_image edges"
+  edges: [BaseImageEdge!]
+}
+
+":base_image edge"
+type BaseImageEdge {
+  "Cursor"
+  cursor: String!
+
+  ":base_image node"
+  node: BaseImage!
 }
 
 input BaseImageFilterUrl {
@@ -761,6 +809,21 @@ type BaseImage implements Node {
   ): [LocalizedAttribute!]
 }
 
+"A relay page info"
+type PageInfo {
+  "When paginating backwards, are there more items?"
+  hasPreviousPage: Boolean!
+
+  "When paginating forwards, are there more items?"
+  hasNextPage: Boolean!
+
+  "When paginating backwards, the cursor to continue"
+  startCursor: String
+
+  "When paginating forwards, the cursor to continue"
+  endCursor: String
+}
+
 "A relay node"
 interface Node {
   "A unique identifier"
@@ -797,6 +860,27 @@ type MutationError {
 enum SystemModelPartNumberSortField {
   ID
   PART_NUMBER
+}
+
+":system_model_part_number connection"
+type SystemModelPartNumberConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":system_model_part_number edges"
+  edges: [SystemModelPartNumberEdge!]
+}
+
+":system_model_part_number edge"
+type SystemModelPartNumberEdge {
+  "Cursor"
+  cursor: String!
+
+  ":system_model_part_number node"
+  node: SystemModelPartNumber!
 }
 
 input SystemModelPartNumberFilterPartNumber {
@@ -942,6 +1026,27 @@ enum SystemModelSortField {
   PICTURE_URL
 }
 
+":system_model connection"
+type SystemModelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":system_model edges"
+  edges: [SystemModelEdge!]
+}
+
+":system_model edge"
+type SystemModelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":system_model node"
+  node: SystemModel!
+}
+
 input SystemModelFilterPictureUrl {
   isNil: Boolean
   eq: String
@@ -1056,12 +1161,18 @@ type SystemModel implements Node {
     "A filter to limit the results"
     filter: SystemModelPartNumberFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [SystemModelPartNumber!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): SystemModelPartNumberConnection!
 
   "The Hardware type associated with the System Model"
   hardwareType: HardwareType
@@ -1073,6 +1184,27 @@ type SystemModel implements Node {
 enum HardwareTypePartNumberSortField {
   ID
   PART_NUMBER
+}
+
+":hardware_type_part_number connection"
+type HardwareTypePartNumberConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":hardware_type_part_number edges"
+  edges: [HardwareTypePartNumberEdge!]
+}
+
+":hardware_type_part_number edge"
+type HardwareTypePartNumberEdge {
+  "Cursor"
+  cursor: String!
+
+  ":hardware_type_part_number node"
+  node: HardwareTypePartNumber!
 }
 
 input HardwareTypePartNumberFilterPartNumber {
@@ -1190,6 +1322,27 @@ enum HardwareTypeSortField {
   NAME
 }
 
+":hardware_type connection"
+type HardwareTypeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":hardware_type edges"
+  edges: [HardwareTypeEdge!]
+}
+
+":hardware_type edge"
+type HardwareTypeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":hardware_type node"
+  node: HardwareType!
+}
+
 input HardwareTypeFilterName {
   isNil: Boolean
   eq: String
@@ -1284,12 +1437,18 @@ type HardwareType implements Node {
     "A filter to limit the results"
     filter: HardwareTypePartNumberFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [HardwareTypePartNumber!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): HardwareTypePartNumberConnection!
 }
 
 "The result of the :set_device_led_behavior mutation"
@@ -1354,6 +1513,27 @@ enum DeviceSortField {
   LAST_CONNECTION
   LAST_DISCONNECTION
   SERIAL_NUMBER
+}
+
+":device connection"
+type DeviceConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device edges"
+  edges: [DeviceEdge!]
+}
+
+":device edge"
+type DeviceEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device node"
+  node: Device!
 }
 
 input DeviceFilterSerialNumber {
@@ -1523,12 +1703,18 @@ type Device implements Node {
     "A filter to limit the results"
     filter: TagFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [Tag!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): TagConnection!
 
   "The groups the device belongs to."
   deviceGroups(
@@ -1553,12 +1739,18 @@ type Device implements Node {
     "A filter to limit the results"
     filter: OtaOperationFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [OtaOperation!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): OtaOperationConnection!
 
   "The capabilities that the device can support."
   capabilities: [DeviceCapability!]!
@@ -1714,6 +1906,27 @@ enum DeviceGroupSortField {
   SELECTOR
 }
 
+":device_group connection"
+type DeviceGroupConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_group edges"
+  edges: [DeviceGroupEdge!]
+}
+
+":device_group edge"
+type DeviceGroupEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_group node"
+  node: DeviceGroup!
+}
+
 input DeviceGroupFilterSelector {
   isNil: Boolean
   eq: String
@@ -1846,6 +2059,27 @@ enum TagSortField {
   NAME
 }
 
+":tag connection"
+type TagConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":tag edges"
+  edges: [TagEdge!]
+}
+
+":tag edge"
+type TagEdge {
+  "Cursor"
+  cursor: String!
+
+  ":tag node"
+  node: Tag!
+}
+
 input TagFilterName {
   isNil: Boolean
   eq: String
@@ -1915,6 +2149,27 @@ enum OtaOperationSortField {
   MESSAGE
   CREATED_AT
   UPDATED_AT
+}
+
+":ota_operation connection"
+type OtaOperationConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":ota_operation edges"
+  edges: [OtaOperationEdge!]
+}
+
+":ota_operation edge"
+type OtaOperationEdge {
+  "Cursor"
+  cursor: String!
+
+  ":ota_operation node"
+  node: OtaOperation!
 }
 
 input OtaOperationFilterUpdatedAt {
@@ -2110,6 +2365,27 @@ enum UpdateTargetSortField {
   COMPLETION_TIMESTAMP
 }
 
+":update_target connection"
+type UpdateTargetConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":update_target edges"
+  edges: [UpdateTargetEdge!]
+}
+
+":update_target edge"
+type UpdateTargetEdge {
+  "Cursor"
+  cursor: String!
+
+  ":update_target node"
+  node: UpdateTarget!
+}
+
 input UpdateTargetFilterCompletionTimestamp {
   isNil: Boolean
   eq: DateTime
@@ -2294,6 +2570,27 @@ enum UpdateChannelSortField {
   NAME
 }
 
+":update_channel connection"
+type UpdateChannelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":update_channel edges"
+  edges: [UpdateChannelEdge!]
+}
+
+":update_channel edge"
+type UpdateChannelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":update_channel node"
+  node: UpdateChannel!
+}
+
 input UpdateChannelFilterName {
   isNil: Boolean
   eq: String
@@ -2385,12 +2682,18 @@ type UpdateChannel implements Node {
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [DeviceGroup!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceGroupConnection!
 }
 
 "The result of the :create_update_campaign mutation"
@@ -2426,6 +2729,27 @@ enum UpdateCampaignSortField {
   IN_PROGRESS_TARGET_COUNT
   FAILED_TARGET_COUNT
   SUCCESSFUL_TARGET_COUNT
+}
+
+":update_campaign connection"
+type UpdateCampaignConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":update_campaign edges"
+  edges: [UpdateCampaignEdge!]
+}
+
+":update_campaign edge"
+type UpdateCampaignEdge {
+  "Cursor"
+  cursor: String!
+
+  ":update_campaign node"
+  node: UpdateCampaign!
 }
 
 input UpdateCampaignFilterSuccessfulTargetCount {
@@ -2611,12 +2935,18 @@ type UpdateCampaign implements Node {
     "A filter to limit the results"
     filter: UpdateTargetFilterInput
 
-    "The number of records to return."
-    limit: Int
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
 
-    "The number of records to skip."
-    offset: Int
-  ): [UpdateTarget!]!
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): UpdateTargetConnection!
 
   "The total number of update targets."
   totalTargetCount: Int!
@@ -2645,7 +2975,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: UpdateCampaignFilterInput
-  ): [UpdateCampaign!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): UpdateCampaignConnection
 
   "Returns a single update channel."
   updateChannel("The id of the record" id: ID!): UpdateChannel
@@ -2657,19 +2999,43 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: UpdateChannelFilterInput
-  ): [UpdateChannel!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): UpdateChannelConnection
 
   "Retrieves the current tenant."
   tenantInfo: TenantInfo!
 
-  "Returns Tags currently assigned to some device."
+  "Returns the list of device tags associated to some device group."
   existingDeviceTags(
     "How to sort the records in the response"
     sort: [TagSortInput]
 
     "A filter to limit the results"
     filter: TagFilterInput
-  ): [Tag!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): TagConnection
 
   "Returns a single device group."
   deviceGroup("The id of the record" id: ID!): DeviceGroup
@@ -2681,7 +3047,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
-  ): [DeviceGroup!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceGroupConnection
 
   """
   Fetches the forwarder config, if available.
@@ -2702,7 +3080,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: DeviceFilterInput
-  ): [Device!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection
 
   "Returns a single hardware type."
   hardwareType("The id of the record" id: ID!): HardwareType
@@ -2714,7 +3104,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: HardwareTypeFilterInput
-  ): [HardwareType!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): HardwareTypeConnection
 
   "Returns a single system model."
   systemModel("The id of the record" id: ID!): SystemModel
@@ -2726,7 +3128,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: SystemModelFilterInput
-  ): [SystemModel!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): SystemModelConnection
 
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
@@ -2744,7 +3158,19 @@ type RootQueryType {
 
     "A filter to limit the results"
     filter: BaseImageCollectionFilterInput
-  ): [BaseImageCollection!]!
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): BaseImageCollectionConnection
 }
 
 type RootMutationType {

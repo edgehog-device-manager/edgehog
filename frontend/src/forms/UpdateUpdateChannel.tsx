@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,10 +33,7 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { updateChannelHandleSchema, yup, messages } from "forms";
 
-import type {
-  UpdateUpdateChannel_UpdateChannelFragment$key,
-  UpdateUpdateChannel_UpdateChannelFragment$data,
-} from "api/__generated__/UpdateUpdateChannel_UpdateChannelFragment.graphql";
+import type { UpdateUpdateChannel_UpdateChannelFragment$key } from "api/__generated__/UpdateUpdateChannel_UpdateChannelFragment.graphql";
 import type {
   UpdateUpdateChannel_OptionsFragment$key,
   UpdateUpdateChannel_OptionsFragment$data,
@@ -48,11 +45,15 @@ const UPDATE_UPDATE_CHANNEL_FRAGMENT = graphql`
     name
     handle
     targetGroups {
-      id
-      name
-      updateChannel {
-        id
-        name
+      edges {
+        node {
+          id
+          name
+          updateChannel {
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -61,11 +62,15 @@ const UPDATE_UPDATE_CHANNEL_FRAGMENT = graphql`
 const UPDATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
   fragment UpdateUpdateChannel_OptionsFragment on RootQueryType {
     deviceGroups {
-      id
-      name
-      updateChannel {
-        id
-        name
+      edges {
+        node {
+          id
+          name
+          updateChannel {
+            id
+            name
+          }
+        }
       }
     }
   }
@@ -108,12 +113,16 @@ const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
   return null;
 };
 
-type UpdateChannel = Omit<
-  UpdateUpdateChannel_UpdateChannelFragment$data,
-  " $fragmentType"
->;
-type TargetGroup =
-  UpdateUpdateChannel_OptionsFragment$data["deviceGroups"][number];
+type FormData = {
+  id: string;
+  name: string;
+  handle: string;
+  targetGroups: TargetGroup[];
+};
+
+type TargetGroup = NonNullable<
+  NonNullable<UpdateUpdateChannel_OptionsFragment$data["deviceGroups"]>["edges"]
+>[number]["node"];
 
 const getTargetGroupValue = (targetGroup: TargetGroup) => targetGroup.id;
 
@@ -135,7 +144,7 @@ const transformOutputData = ({
   id: _id,
   targetGroups,
   ...rest
-}: UpdateChannel): UpdateChannelData => ({
+}: FormData): UpdateChannelData => ({
   ...rest,
   targetGroupIds: targetGroups.map((targetGroup) => targetGroup.id),
 });
@@ -171,13 +180,21 @@ const UpdateUpdateChannel = ({
     formState: { errors, isDirty },
     control,
     reset,
-  } = useForm<UpdateChannel>({
+  } = useForm<FormData>({
     mode: "onTouched",
-    defaultValues: updateChannel,
+    defaultValues: {
+      ...updateChannel,
+      targetGroups: updateChannel.targetGroups.edges?.map((edge) => edge.node),
+    },
     resolver: yupResolver(updateChannelSchema),
   });
 
-  useEffect(() => reset(updateChannel), [reset, updateChannel]);
+  useEffect(() => {
+    reset({
+      ...updateChannel,
+      targetGroups: updateChannel.targetGroups.edges?.map((edge) => edge.node),
+    });
+  }, [reset, updateChannel]);
 
   const intl = useIntl();
 
@@ -216,22 +233,25 @@ const UpdateUpdateChannel = ({
 
   const targetGroupOptions = useMemo(() => {
     // move disabled options to the end
-    return [...targetGroups].sort((group1, group2) => {
-      const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
-      const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
+    return [...(targetGroups?.edges?.map((edge) => edge.node) || [])].sort(
+      (group1, group2) => {
+        const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
+        const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
 
-      if (group1Disabled === group2Disabled) {
-        return 0;
-      }
-      if (group1Disabled) {
-        return 1;
-      }
-      return -1;
-    });
+        if (group1Disabled === group2Disabled) {
+          return 0;
+        }
+        if (group1Disabled) {
+          return 1;
+        }
+        return -1;
+      },
+    );
   }, [targetGroups, isTargetGroupUsedByOtherChannel]);
 
-  const onFormSubmit = (data: UpdateChannel) =>
+  const onFormSubmit = (data: FormData) => {
     onSubmit(transformOutputData(data));
+  };
 
   const canSubmit = !isLoading && isDirty;
   const canReset = isDirty && !isLoading;

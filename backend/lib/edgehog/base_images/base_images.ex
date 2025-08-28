@@ -45,7 +45,8 @@ defmodule Edgehog.BaseImages do
 
       list BaseImageCollection, :base_image_collections, :read do
         description "Returns a list of base image collections."
-        paginate_with nil
+        relay? true
+        paginate_with :keyset
       end
     end
 

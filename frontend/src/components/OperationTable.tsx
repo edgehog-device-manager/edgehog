@@ -19,8 +19,9 @@
 */
 
 import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
+import type { OperationTable_PaginationQuery } from "api/__generated__/OperationTable_PaginationQuery.graphql";
 import type {
   OtaOperationStatus,
   OperationTable_otaOperations$data,
@@ -34,16 +35,22 @@ import { Link, Route } from "Navigation";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const OPERATION_TABLE_FRAGMENT = graphql`
-  fragment OperationTable_otaOperations on Device {
-    otaOperations {
-      baseImageUrl
-      createdAt
-      status
-      updatedAt
-      updateTarget {
-        updateCampaign {
-          id
-          name
+  fragment OperationTable_otaOperations on Device
+  @refetchable(queryName: "OperationTable_PaginationQuery") {
+    otaOperations(first: $first, after: $after)
+      @connection(key: "Device_otaOperations") {
+      edges {
+        node {
+          baseImageUrl
+          createdAt
+          status
+          updatedAt
+          updateTarget {
+            updateCampaign {
+              id
+              name
+            }
+          }
         }
       }
     }
@@ -58,7 +65,9 @@ const isOtaOperationFinalStatus = (
 ): status is OtaOperationFinalStatus =>
   (otaOperationFinalStatuses as readonly string[]).includes(status);
 
-type OtaOperation = OperationTable_otaOperations$data["otaOperations"][number];
+type OtaOperation = NonNullable<
+  NonNullable<OperationTable_otaOperations$data["otaOperations"]>["edges"]
+>[number]["node"];
 type OtaOperationWithFinalStatus = Omit<OtaOperation, "status"> & {
   readonly status: OtaOperationFinalStatus;
 };
@@ -179,11 +188,15 @@ type OperationTableProps = {
 const initialSortedColumns = [{ id: "updatedAt", desc: true }];
 
 const OperationTable = ({ className, deviceRef }: OperationTableProps) => {
-  const data = useFragment(OPERATION_TABLE_FRAGMENT, deviceRef);
+  const { data } = usePaginationFragment<
+    OperationTable_PaginationQuery,
+    OperationTable_otaOperations$key
+  >(OPERATION_TABLE_FRAGMENT, deviceRef);
 
-  const otaOperations = data.otaOperations.filter(
-    isOtaOperationWithFinalStatus,
-  );
+  const otaOperations =
+    data.otaOperations?.edges
+      ?.map((edge) => edge.node)
+      .filter(isOtaOperationWithFinalStatus) ?? [];
 
   if (!otaOperations) {
     return (
