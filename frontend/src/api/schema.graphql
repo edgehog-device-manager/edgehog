@@ -884,25 +884,25 @@ input ReleaseCreateContainersInput {
   image: ContainerCreateWithNestedImageInput
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
-  portBindings: [String!]
-  restartPolicy: String
-  networkMode: String
-  privileged: Boolean
-  extraHosts: [String!]
+  volumes: [ContainerCreateWithNestedVolumesInput!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealTimePeriod: Int
   cpuRealtimeRuntime: Int
+  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  volumeDriver: String
-  storageOpt: [String!]
+  networkMode: String
+  portBindings: [String!]
+  privileged: Boolean
   readOnlyRootfs: Boolean
+  restartPolicy: String
+  storageOpt: [String!]
   tmpfs: [String!]
-  volumes: [ContainerCreateWithNestedVolumesInput!]
+  volumeDriver: String
 }
 
 enum ContainerVolumeSortField {

@@ -53,7 +53,12 @@ import Form from "components/Form";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
-import { yup, envSchema, portBindingsSchema } from "./index";
+import {
+  yup,
+  envSchema,
+  portBindingsSchema,
+  storageTmpfsOptSchema,
+} from "./index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
 import Icon from "components/Icon";
@@ -196,17 +201,29 @@ const FormRow = ({
 );
 
 type ContainerInput = {
-  env?: string;
+  cpuPeriod?: number;
+  cpuQuota?: number;
+  cpuRealTimePeriod?: number;
+  cpuRealtimeRuntime?: number;
+  env?: string; // JsonString
+  hostname?: string;
   image: {
     reference: string;
     imageCredentialsId?: string;
-  };
-  hostname?: string;
-  privileged?: boolean;
-  restartPolicy?: string;
+  }; // ContainerCreateWithNestedImageInput
+  memory?: number;
+  memoryReservation?: number;
+  memorySwap?: number;
+  memorySwappiness?: number;
   networkMode?: string;
-  portBindings?: string;
   networks: ContainerCreateWithNestedNetworksInput[];
+  portBindings?: string;
+  privileged?: boolean;
+  readOnlyRootfs?: boolean;
+  restartPolicy?: string;
+  storageOpt?: string[];
+  tmpfs?: string[];
+  volumeDriver?: string;
   volumes: ContainerCreateWithNestedVolumesInput[];
 };
 
@@ -250,6 +267,21 @@ const applicationSchema = yup
             .nullable()
             .transform((value) => value?.trim()),
           portBindings: portBindingsSchema,
+          memory: yup.number().nullable(),
+          memoryReservation: yup.number().nullable(),
+          memorySwap: yup.number().nullable(),
+          memorySwappiness: yup.number().min(0).max(100).nullable(),
+          cpuPeriod: yup.number().nullable(),
+          cpuQuota: yup.number().nullable(),
+          cpuRealTimePeriod: yup.number().nullable(),
+          cpuRealtimeRuntime: yup.number().nullable(),
+          readOnlyRootfs: yup.boolean().nullable(),
+          storageOpt: storageTmpfsOptSchema,
+          tmpfs: storageTmpfsOptSchema,
+          volumeDriver: yup
+            .string()
+            .nullable()
+            .transform((value) => value?.trim()),
           networks: yup.array(
             yup.object({
               id: yup.string().required(),
@@ -718,6 +750,212 @@ const ContainerForm = ({
         </FormRow>
 
         <FormRow
+          id={`containers-${index}-memory`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.memoryLabel"
+              defaultMessage="Memory (bytes)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.memory` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.memory}
+            placeholder="e.g., 104857600 for 100MB"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.memory?.message && (
+              <FormattedMessage id={errors.containers[index].memory.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-memoryReservation`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.memoryReservationLabel"
+              defaultMessage="Memory Reservation (bytes)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.memoryReservation` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.memoryReservation}
+            placeholder="e.g., 104857600 for 100MB"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.memoryReservation?.message && (
+              <FormattedMessage
+                id={errors.containers[index].memoryReservation.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-memorySwap`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.memorySwapLabel"
+              defaultMessage="Memory Swap (bytes)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.memorySwap` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.memorySwap}
+            placeholder="e.g., 209715200 for 200MB"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.memorySwap?.message && (
+              <FormattedMessage
+                id={errors.containers[index].memorySwap.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-memorySwappiness`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.memorySwappinessLabel"
+              defaultMessage="Memory Swappiness (0-100)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.memorySwappiness` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.memorySwappiness}
+            placeholder="e.g., 60"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.memorySwappiness?.message && (
+              <FormattedMessage
+                id={errors.containers[index].memorySwappiness.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-cpuPeriod`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.cpuPeriodLabel"
+              defaultMessage="CPU Period (microseconds)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.cpuPeriod` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.cpuPeriod}
+            placeholder="e.g., 100000"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.cpuPeriod?.message && (
+              <FormattedMessage
+                id={errors.containers[index].cpuPeriod.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-cpuQuota`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.cpuQuotaLabel"
+              defaultMessage="CPU Quota (microseconds)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.cpuQuota` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.cpuQuota}
+            placeholder="e.g., 50000"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.cpuQuota?.message && (
+              <FormattedMessage
+                id={errors.containers[index].cpuQuota.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-cpuRealTimePeriod`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.cpuRealTimePeriodLabel"
+              defaultMessage="CPU Real-Time Period (microseconds)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.cpuRealTimePeriod` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.cpuRealTimePeriod}
+            placeholder="e.g., 1000000"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.cpuRealTimePeriod?.message && (
+              <FormattedMessage
+                id={errors.containers[index].cpuRealTimePeriod.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-cpuRealtimeRuntime`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.cpuRealtimeRuntimeLabel"
+              defaultMessage="CPU Real-Time Runtime (microseconds)"
+            />
+          }
+        >
+          <Form.Control
+            type="number"
+            {...register(`containers.${index}.cpuRealtimeRuntime` as const, {
+              valueAsNumber: true,
+            })}
+            isInvalid={!!errors.containers?.[index]?.cpuRealtimeRuntime}
+            placeholder="e.g., 950000"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.cpuRealtimeRuntime?.message && (
+              <FormattedMessage
+                id={errors.containers[index].cpuRealtimeRuntime.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
           id={`containers-${index}-privileged`}
           label={
             <FormattedMessage
@@ -735,6 +973,118 @@ const ContainerForm = ({
             {errors.containers?.[index]?.privileged?.message && (
               <FormattedMessage
                 id={errors.containers[index].privileged.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-readOnlyRootfs`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.readOnlyRootfsLabel"
+              defaultMessage="Read-Only Root Filesystem"
+            />
+          }
+        >
+          <Form.Check
+            type="checkbox"
+            {...register(`containers.${index}.readOnlyRootfs` as const)}
+            isInvalid={!!errors.containers?.[index]?.readOnlyRootfs}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.readOnlyRootfs?.message && (
+              <FormattedMessage
+                id={errors.containers[index].readOnlyRootfs.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-storageOpt`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.storageOptLabel"
+              defaultMessage="Storage Options"
+            />
+          }
+        >
+          <Controller
+            control={control}
+            name={`containers.${index}.storageOpt`}
+            render={({ field, fieldState: _fieldState }) => (
+              <MonacoJsonEditor
+                language="json"
+                value={field.value ?? ""}
+                onChange={(value) => {
+                  field.onChange(value ?? "");
+                }}
+                defaultValue={field.value || "[]"}
+                initialLines={1}
+              />
+            )}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.storageOpt?.message && (
+              <FormattedMessage
+                id={errors.containers[index].storageOpt.message}
+              />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-tmpfs`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.tmpfsLabel"
+              defaultMessage="Tmpfs Mounts"
+            />
+          }
+        >
+          <>
+            <Controller
+              control={control}
+              name={`containers.${index}.tmpfs`}
+              render={({ field, fieldState: _fieldState }) => (
+                <MonacoJsonEditor
+                  language="json"
+                  value={field.value ?? ""}
+                  onChange={(value) => {
+                    field.onChange(value ?? "");
+                  }}
+                  defaultValue={field.value || "[]"}
+                  initialLines={1}
+                />
+              )}
+            />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.tmpfs?.message && (
+                <FormattedMessage id={errors.containers[index].tmpfs.message} />
+              )}
+            </Form.Control.Feedback>
+          </>
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-volumeDriver`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.volumeDriverLabel"
+              defaultMessage="Volume Driver"
+            />
+          }
+        >
+          <Form.Control
+            {...register(`containers.${index}.volumeDriver` as const)}
+            isInvalid={!!errors.containers?.[index]?.volumeDriver}
+            placeholder="e.g., local"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.volumeDriver?.message && (
+              <FormattedMessage
+                id={errors.containers[index].volumeDriver.message}
               />
             )}
           </Form.Control.Feedback>
@@ -827,6 +1177,18 @@ const CreateRelease = ({
               },
               hostname: container.hostname || undefined,
               privileged: container.privileged || undefined,
+              memory: container.memory || undefined,
+              memoryReservation: container.memoryReservation || undefined,
+              memorySwap: container.memorySwap || undefined,
+              memorySwappiness: container.memorySwappiness || undefined,
+              cpuPeriod: container.cpuPeriod || undefined,
+              cpuQuota: container.cpuQuota || undefined,
+              cpuRealTimePeriod: container.cpuRealTimePeriod || undefined,
+              cpuRealtimeRuntime: container.cpuRealtimeRuntime || undefined,
+              readOnlyRootfs: container.readOnlyRootfs || undefined,
+              storageOpt: container.storageOpt || undefined,
+              tmpfs: container.tmpfs || undefined,
+              volumeDriver: container.volumeDriver || undefined,
               restartPolicy: container.restartPolicy || undefined,
               networkMode: container.networkMode || undefined,
               portBindings: container.portBindings
