@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Query.DeviceTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -58,7 +56,11 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
           systemModel {
             id
             partNumbers {
-              partNumber
+              edges {
+                node {
+                  partNumber
+                }
+              }
             }
           }
         }
@@ -71,7 +73,10 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         |> extract_result!()
 
       assert device["systemModel"]["id"] == system_model_id
-      assert device["systemModel"]["partNumbers"] == [%{"partNumber" => part_number}]
+
+      assert device["systemModel"]["partNumbers"]["edges"] == [
+               %{"node" => %{"partNumber" => part_number}}
+             ]
     end
 
     test "queries associated OTA operations", %{tenant: tenant} do
@@ -94,20 +99,44 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       query ($id: ID!) {
         device(id: $id) {
           otaOperations {
-            id
-            baseImageUrl
+            count
+            edges {
+              cursor
+              node {
+                id
+                baseImageUrl
+              }
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
           }
         }
       }
       """
 
-      %{"otaOperations" => [ota_operation]} =
-        [document: document, tenant: tenant, id: id]
-        |> device_query()
-        |> extract_result!()
-
-      assert ota_operation["id"] == ota_operation_id
-      assert ota_operation["baseImageUrl"] == base_image_url
+      assert %{
+               "otaOperations" => %{
+                 "count" => 1,
+                 "edges" => [
+                   %{
+                     "cursor" => cursor,
+                     "node" => %{
+                       "id" => ^ota_operation_id,
+                       "baseImageUrl" => ^base_image_url
+                     }
+                   }
+                 ],
+                 "pageInfo" => %{
+                   "endCursor" => cursor,
+                   "hasNextPage" => false
+                 }
+               }
+             } =
+               [document: document, tenant: tenant, id: id]
+               |> device_query()
+               |> extract_result!()
     end
 
     test "returns nil if non existing", %{tenant: tenant} do
@@ -574,8 +603,6 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     setup %{tenant: tenant} do
       fixture = device_fixture(tenant: tenant)
 
-      device_id = fixture.device_id
-
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
       document = """
@@ -588,7 +615,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       }
       """
 
-      %{device: fixture, device_id: device_id, tenant: tenant, id: id, document: document}
+      %{device: fixture, tenant: tenant, id: id, document: document}
     end
 
     test "is empty with no groups", ctx do

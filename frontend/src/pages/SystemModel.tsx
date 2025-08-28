@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -197,14 +198,13 @@ const SystemModelContent = ({
 
         const root = store.getRoot();
 
-        const systemModels = root.getLinkedRecords("systemModels");
-        if (systemModels) {
-          root.setLinkedRecords(
-            systemModels.filter(
-              (systemModel) => systemModel.getDataID() !== systemModelId,
-            ),
-            "systemModels",
-          );
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "SystemModelsTable_systemModels",
+        );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, systemModelId);
         }
 
         root.getLinkedRecords("devices")?.forEach((device) => {

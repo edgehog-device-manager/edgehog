@@ -32,16 +32,16 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
 
       id = AshGraphql.Resource.encode_relay_id(fixture)
 
-      result = hardware_type_query(tenant: tenant, id: id)
+      hardware_type = [tenant: tenant, id: id] |> hardware_type_query() |> extract_result!()
 
-      refute Map.has_key?(result, :errors)
-      assert %{data: %{"hardwareType" => hardware_type}} = result
       assert hardware_type["name"] == fixture.name
       assert hardware_type["handle"] == fixture.handle
-      assert length(hardware_type["partNumbers"]) == length(fixture.part_number_strings)
+      assert length(hardware_type["partNumbers"]["edges"]) == length(fixture.part_number_strings)
+
+      part_numbers = extract_nodes!(hardware_type["partNumbers"]["edges"])
 
       Enum.each(fixture.part_number_strings, fn pn ->
-        assert(%{"partNumber" => pn} in hardware_type["partNumbers"])
+        assert(%{"partNumber" => pn} in part_numbers)
       end)
     end
 
@@ -67,7 +67,11 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
         name
         handle
         partNumbers {
-          partNumber
+          edges {
+            node {
+              partNumber
+            }
+          }
         }
       }
     }
@@ -81,5 +85,24 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
     document = Keyword.get(opts, :document, default_document)
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+  end
+
+  defp extract_result!(result) do
+    refute :errors in Map.keys(result)
+    refute "errors" in Map.keys(result[:data])
+
+    assert %{
+             data: %{
+               "hardwareType" => hardware_type
+             }
+           } = result
+
+    assert hardware_type != nil
+
+    hardware_type
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end

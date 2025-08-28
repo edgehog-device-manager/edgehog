@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
           tenant: tenant
         )
 
-      [update_campaign_data] = [tenant: tenant] |> update_campaigns_query() |> extract_result!()
+      [update_campaign_data] =
+        [tenant: tenant] |> update_campaigns_query() |> extract_result!() |> extract_nodes!()
 
       assert update_campaign_data["name"] == update_campaign.name
       assert update_campaign_data["status"] == "IDLE"
@@ -91,7 +92,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       assert response_rollout_mechanism["forceDowngrade"] ==
                update_campaign.rollout_mechanism.value.force_downgrade
 
-      assert [target] = update_campaign_data["updateTargets"]
+      assert [target] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
       assert target["status"] == "IDLE"
 
       assert target["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
@@ -104,14 +105,22 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       document = """
       query {
         updateCampaigns {
-          updateTargets {
-            id
-            status
-            retryCount
-            latestAttempt
-            completionTimestamp
-            otaOperation {
-              id
+          edges {
+            node {
+              updateTargets {
+                edges {
+                  node {
+                    id
+                    status
+                    retryCount
+                    latestAttempt
+                    completionTimestamp
+                    otaOperation {
+                      id
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -119,9 +128,12 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       """
 
       [update_campaign_data] =
-        [document: document, tenant: tenant] |> update_campaigns_query() |> extract_result!()
+        [document: document, tenant: tenant]
+        |> update_campaigns_query()
+        |> extract_result!()
+        |> extract_nodes!()
 
-      assert [update_target] = update_campaign_data["updateTargets"]
+      assert [update_target] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
 
       assert update_target["id"] == AshGraphql.Resource.encode_relay_id(target)
       assert update_target["status"] == "FAILED"
@@ -138,30 +150,38 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
     default_document = """
     query {
       updateCampaigns {
-        name
-        status
-        outcome
-        rolloutMechanism {
-          ... on PushRollout {
-            maxFailurePercentage
-            maxInProgressUpdates
-            otaRequestRetries
-            otaRequestTimeoutSeconds
-            forceDowngrade
-          }
-        }
-        baseImage {
-          version
-          url
-        }
-        updateChannel {
-          name
-          handle
-        }
-        updateTargets {
-          status
-          device {
-            id
+        edges {
+          node {
+            name
+            status
+            outcome
+            rolloutMechanism {
+              ... on PushRollout {
+                maxFailurePercentage
+                maxInProgressUpdates
+                otaRequestRetries
+                otaRequestTimeoutSeconds
+                forceDowngrade
+              }
+            }
+            baseImage {
+              version
+              url
+            }
+            updateChannel {
+              name
+              handle
+            }
+            updateTargets {
+              edges {
+                node {
+                  status
+                  device {
+                    id
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -177,7 +197,9 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
   defp extract_result!(result) do
     assert %{
              data: %{
-               "updateCampaigns" => update_campaigns
+               "updateCampaigns" => %{
+                 "edges" => update_campaigns
+               }
              }
            } = result
 
@@ -186,5 +208,9 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
     assert update_campaigns != nil
 
     update_campaigns
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end

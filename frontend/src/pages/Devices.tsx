@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
@@ -30,11 +30,15 @@ import DevicesTable from "components/DevicesTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 
+const DEVICES_TO_LOAD_FIRST = 40;
+
 const GET_DEVICES_QUERY = graphql`
-  query Devices_getDevices_Query {
-    devices {
-      ...DevicesTable_DeviceFragment
-    }
+  query Devices_getDevices_Query(
+    $first: Int
+    $after: String
+    $filter: DeviceFilterInput
+  ) {
+    ...DevicesTable_DeviceFragment @arguments(filter: $filter)
   }
 `;
 
@@ -43,7 +47,7 @@ interface DevicesContentProps {
 }
 
 const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
-  const { devices } = usePreloadedQuery(GET_DEVICES_QUERY, getDevicesQuery);
+  const devices = usePreloadedQuery(GET_DEVICES_QUERY, getDevicesQuery);
 
   return (
     <Page>
@@ -63,7 +67,16 @@ const DevicesPage = () => {
   const [getDevicesQuery, getDevices] =
     useQueryLoader<Devices_getDevices_Query>(GET_DEVICES_QUERY);
 
-  useEffect(() => getDevices({}), [getDevices]);
+  const fetchDevices = useCallback(
+    () =>
+      getDevices(
+        { first: DEVICES_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
+    [getDevices],
+  );
+
+  useEffect(fetchDevices, [fetchDevices]);
 
   return (
     <Suspense

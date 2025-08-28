@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,9 +56,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
                "id" => _id,
                "name" => "Updated Name",
                "handle" => "updatedhandle",
-               "partNumbers" => [
-                 %{"partNumber" => "updated-1234"}
-               ]
+               "partNumbers" => %{
+                 "edges" => [
+                   %{"node" => %{"partNumber" => "updated-1234"}}
+                 ]
+               }
              } = hardware_type
     end
 
@@ -77,8 +79,12 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
       assert %{
                "name" => "Only Name Update",
                "handle" => ^old_handle,
-               "partNumbers" => part_numbers
+               "partNumbers" => %{
+                 "edges" => part_numbers
+               }
              } = hardware_type
+
+      part_numbers = extract_nodes!(part_numbers)
 
       assert length(part_numbers) == length(old_part_numbers)
 
@@ -99,7 +105,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
 
       hardware_type = extract_result!(result)
 
-      assert %{"partNumbers" => part_numbers} = hardware_type
+      assert %{"partNumbers" => %{"edges" => part_numbers}} = hardware_type
+
+      part_numbers = extract_nodes!(part_numbers)
+
       assert length(part_numbers) == 2
       assert %{"partNumber" => "B"} in part_numbers
       assert %{"partNumber" => "D"} in part_numbers
@@ -202,7 +211,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
           name
           handle
           partNumbers {
-            partNumber
+            edges {
+              node {
+                partNumber
+              }
+            }
           }
         }
       }
@@ -254,5 +267,9 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
     assert hardware_type != nil
 
     hardware_type
+  end
+
+  defp extract_nodes!(data) do
+    Enum.map(data, &Map.fetch!(&1, "node"))
   end
 end

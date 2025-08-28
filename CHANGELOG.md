@@ -9,10 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Managed OTA operations expose the update target that created them in graphql ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Expose the associated UpdateCampaign (if any) from an OTA Operation on the Software Updates tab  ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Support for using Azure Storage as the persistence layer for asset uploads ([#233](https://github.com/edgehog-device-manager/edgehog/issues/233)).
-- Ecto SSL configuration is exposed trough `DATABASE_*` environment variables (see [.env](./.env))
-- Adds support for trigger delivery policies in the tenant 
-reconciler, allowing Edgehog to automatically provision and manage 
-trigger delivery policies on Astarte realms that support them (v1.1.1+).
+- Ecto SSL configuration is exposed through `DATABASE_*` environment variables (see [.env](./.env))
+- Adds support for trigger delivery policies in the tenant reconciler, allowing Edgehog to automatically provision and manage trigger delivery policies on Astarte realms that support them (v1.1.1+).
+### Changed
+- BREAKING: GraphQL API that return unbounded lists now use Relay/keyset pagination. Edgehog's dashboard now relies on server-side pagination for queries and filtering, and uses tables with infinite scrolling instead of client-side paginated tables.
 
 ## [0.9.3] - 2025-05-22
 ### Fixed

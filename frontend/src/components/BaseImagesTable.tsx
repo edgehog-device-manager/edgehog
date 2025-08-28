@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,37 +18,51 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
+import type { BaseImagesTable_PaginationQuery } from "api/__generated__/BaseImagesTable_PaginationQuery.graphql";
 import type {
   BaseImagesTable_BaseImagesFragment$data,
   BaseImagesTable_BaseImagesFragment$key,
 } from "api/__generated__/BaseImagesTable_BaseImagesFragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "components/InfiniteTable";
 import { Link, Route } from "Navigation";
+
+const BASE_IMAGES_TO_LOAD_FIRST = 40;
+const BASE_IMAGES_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const BASE_IMAGES_TABLE_FRAGMENT = graphql`
-  fragment BaseImagesTable_BaseImagesFragment on BaseImageCollection {
+  fragment BaseImagesTable_BaseImagesFragment on BaseImageCollection
+  @refetchable(queryName: "BaseImagesTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "BaseImageFilterInput" }) {
     id
-    baseImages {
-      id
-      version
-      startingVersionRequirement
-      localizedReleaseDisplayNames {
-        value
-        languageTag
+    baseImages(first: $first, after: $after, filter: $filter)
+      @connection(key: "BaseImagesTable_baseImages") {
+      edges {
+        node {
+          id
+          version
+          startingVersionRequirement
+          localizedReleaseDisplayNames {
+            value
+            languageTag
+          }
+        }
       }
     }
   }
 `;
 
-type TableRecord =
-  BaseImagesTable_BaseImagesFragment$data["baseImages"][number];
+type TableRecord = NonNullable<
+  NonNullable<BaseImagesTable_BaseImagesFragment$data["baseImages"]>["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const getColumnsDefinition = (baseImageCollectionId: string) => [
@@ -110,21 +124,89 @@ const BaseImagesTable = ({
   baseImageCollectionRef,
   hideSearch = false,
 }: Props) => {
-  const baseImageCollection = useFragment(
-    BASE_IMAGES_TABLE_FRAGMENT,
-    baseImageCollectionRef,
-  );
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
+    BaseImagesTable_PaginationQuery,
+    BaseImagesTable_BaseImagesFragment$key
+  >(BASE_IMAGES_TABLE_FRAGMENT, baseImageCollectionRef);
+
+  const [searchText, setSearchText] = useState<string | null>(null);
 
   const columns = useMemo(
-    () => getColumnsDefinition(baseImageCollection.id),
-    [baseImageCollection.id],
+    () => getColumnsDefinition(paginationData.id),
+    [paginationData.id],
   );
 
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: BASE_IMAGES_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: BASE_IMAGES_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { version: { ilike: `%${text}%` } },
+                  { url: { ilike: `%${text}%` } },
+                  {
+                    startingVersionRequirement: {
+                      ilike: `%${text}%`,
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextBaseImageCollections = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(BASE_IMAGES_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const baseImages = useMemo(() => {
+    return (
+      paginationData.baseImages?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.baseImages) {
+    return null;
+  }
+
   return (
-    <Table
+    <InfiniteTable
       className={className}
       columns={columns}
-      data={baseImageCollection.baseImages}
+      data={baseImages}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextBaseImageCollections : undefined}
+      setSearchText={setSearchText}
       hideSearch={hideSearch}
     />
   );

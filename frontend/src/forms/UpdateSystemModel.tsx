@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -56,7 +56,11 @@ const UPDATE_SYSTEM_MODEL_FRAGMENT = graphql`
       name
     }
     partNumbers {
-      partNumber
+      edges {
+        node {
+          partNumber
+        }
+      }
     }
     pictureUrl
   }
@@ -164,8 +168,10 @@ const transformInputData = (
     description,
     hardwareType: hardwareType?.name || "",
     partNumbers:
-      partNumbers.length > 0
-        ? data.partNumbers.map(({ partNumber }) => ({ value: partNumber }))
+      partNumbers.edges && partNumbers.edges.length > 0
+        ? data.partNumbers.edges?.map(({ node }) => ({
+            value: node.partNumber,
+          })) ?? []
         : [{ value: "" }], // default with at least one empty part number
   };
 };
@@ -202,7 +208,7 @@ const transformOutputData = (
 
   const partNumbers = data.partNumbers.map((pn) => pn.value);
   const systemModelPartNumbers = new Set(
-    systemModel.partNumbers.map(({ partNumber }) => partNumber),
+    systemModel.partNumbers.edges?.map(({ node }) => node.partNumber) || [],
   );
   const formPartNumbers = new Set(partNumbers);
   const partNumbersEqual =

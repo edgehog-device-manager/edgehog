@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
+import type { CreateSystemModel_OptionsFragment$key } from "api/__generated__/CreateSystemModel_OptionsFragment.graphql";
+
 import Button from "components/Button";
 import CloseButton from "components/CloseButton";
 import Col from "components/Col";
@@ -35,13 +37,15 @@ import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { systemModelHandleSchema, messages, yup } from "forms";
 
-import type { CreateSystemModel_OptionsFragment$key } from "api/__generated__/CreateSystemModel_OptionsFragment.graphql";
-
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment CreateSystemModel_OptionsFragment on RootQueryType {
     hardwareTypes {
-      id
-      name
+      edges {
+        node {
+          id
+          name
+        }
+      }
     }
     tenantInfo {
       defaultLocale
@@ -303,7 +307,7 @@ const CreateSystemModelForm = ({
                       defaultMessage: "Select a Hardware Type",
                     })}
                   </option>
-                  {hardwareTypes.map((hardwareType) => (
+                  {hardwareTypes?.edges?.map(({ node: hardwareType }) => (
                     <option key={hardwareType.id} value={hardwareType.id}>
                       {hardwareType.name}
                     </option>

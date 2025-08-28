@@ -1,4 +1,3 @@
-#
 # This file is part of Edgehog.
 #
 # Copyright 2021-2025 SECO Mind Srl
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Devices do
   @moduledoc """
@@ -42,7 +40,8 @@ defmodule Edgehog.Devices do
 
       list Device, :devices, :read do
         description "Returns a list of devices."
-        paginate_with nil
+        paginate_with :keyset
+        relay? true
       end
 
       get HardwareType, :hardware_type, :read do
@@ -51,7 +50,8 @@ defmodule Edgehog.Devices do
 
       list HardwareType, :hardware_types, :read do
         description "Returns a list of hardware types."
-        paginate_with nil
+        paginate_with :keyset
+        relay? true
       end
 
       get SystemModel, :system_model, :read do
@@ -60,7 +60,8 @@ defmodule Edgehog.Devices do
 
       list SystemModel, :system_models, :read do
         description "Returns a list of system models."
-        paginate_with nil
+        relay? true
+        paginate_with :keyset
       end
     end
 

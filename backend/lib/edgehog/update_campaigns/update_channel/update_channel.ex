@@ -43,6 +43,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     type :update_channel
 
     error_handler {ErrorHandler, :handle_error, []}
+
+    paginate_relationship_with target_groups: :relay, update_campaigns: :relay
   end
 
   actions do
