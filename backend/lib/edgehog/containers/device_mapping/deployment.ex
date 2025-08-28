@@ -38,7 +38,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
 
     create :deploy do
       description """
-      Deploys a device file mapping on a device.
+      Deploys a device-file mapping on a device.
       """
 
       argument :device_mapping, :struct do

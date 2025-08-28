@@ -320,7 +320,7 @@ defmodule Edgehog.Devices.Device do
     end
 
     update :send_create_device_mapping_request do
-      description "Send a create device file mapping request to the device."
+      description "Send a create device-file mapping request to the device."
 
       argument :device_mapping, :struct do
         constraints instance_of: DeviceMapping
