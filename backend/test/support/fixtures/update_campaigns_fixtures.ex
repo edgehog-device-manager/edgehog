@@ -125,7 +125,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
       # Create devices as online by default
       _ =
         [base_image_id: base_image_id, online: true, tenant: tenant]
-        |> DevicesFixtures.device_fixture_compatible_with()
+        |> DevicesFixtures.device_fixture_compatible_with_base_image()
         |> DevicesFixtures.add_tags([tag])
     end
 
@@ -168,7 +168,7 @@ defmodule Edgehog.UpdateCampaignsFixtures do
     _ =
       opts
       |> Keyword.merge(base_image_id: base_image_id, online: true, tenant: tenant)
-      |> DevicesFixtures.device_fixture_compatible_with()
+      |> DevicesFixtures.device_fixture_compatible_with_base_image()
       |> DevicesFixtures.add_tags([tag])
 
     update_campaign =

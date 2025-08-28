@@ -37,7 +37,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foobar"])
 
       base_image_id = AshGraphql.Resource.encode_relay_id(base_image)
