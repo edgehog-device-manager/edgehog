@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
@@ -58,6 +58,7 @@ import {
   envSchema,
   portBindingsSchema,
   storageTmpfsOptSchema,
+  extraHostsSchema,
 } from "./index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
@@ -205,6 +206,7 @@ type ContainerInput = {
   cpuQuota?: number;
   cpuRealTimePeriod?: number;
   cpuRealtimeRuntime?: number;
+  extraHosts?: string[];
   env?: string; // JsonString
   hostname?: string;
   image: {
@@ -249,6 +251,7 @@ const applicationSchema = yup
       .array(
         yup.object({
           env: envSchema,
+          extraHosts: extraHostsSchema,
           image: yup.object({
             reference: yup.string().required(),
             imageCredentialsId: yup.string().nullable(),
@@ -355,6 +358,22 @@ const ContainerForm = ({
       name: `containers.${index}.volumes`,
     }) ?? [];
 
+  const extraHostsForm = useFieldArray({
+    control,
+    name: `containers.${index}.extraHosts`,
+  });
+
+  const handleAddExtraHost = useCallback(() => {
+    extraHostsForm.append("");
+  }, [extraHostsForm]);
+
+  const handleDeleteExtraHost = useCallback(
+    (i: number) => {
+      extraHostsForm.remove(i);
+    },
+    [extraHostsForm],
+  );
+
   const canAddVolume = volumesValues.every(
     (v) => v.id?.trim() && v.target?.trim(),
   );
@@ -393,6 +412,59 @@ const ContainerForm = ({
             )}
           />
         </FormRow>
+
+        <FormRow
+          id={`containers-${index}-extraHosts`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.extraHostsLabel"
+              defaultMessage="Extra Hosts"
+            />
+          }
+        >
+          <div className="p-3 mb-3 bg-light border rounded">
+            <Stack gap={3}>
+              {extraHostsForm.fields.map((field, i) => (
+                <Stack direction="horizontal" gap={3} key={field.id}>
+                  <Stack>
+                    <Form.Control
+                      {...register(
+                        `containers.${index}.extraHosts.${i}` as const,
+                      )}
+                      isInvalid={!!errors.containers?.[index]?.extraHosts?.[i]}
+                      placeholder="e.g., myhost:127.0.0.1"
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.containers?.[index]?.extraHosts?.[i]?.message && (
+                        <FormattedMessage
+                          id={errors.containers[index].extraHosts[i].message}
+                        />
+                      )}
+                    </Form.Control.Feedback>
+                  </Stack>
+                  <Button
+                    className="mb-auto"
+                    variant="shadow-danger"
+                    onClick={() => handleDeleteExtraHost(i)}
+                  >
+                    <Icon className="text-danger" icon={"delete"} />
+                  </Button>
+                </Stack>
+              ))}
+              <Button
+                className="me-auto"
+                variant="outline-primary"
+                onClick={handleAddExtraHost}
+              >
+                <FormattedMessage
+                  id="components.CreateRelease.addExtraHostButton"
+                  defaultMessage="Add Extra Host"
+                />
+              </Button>
+            </Stack>
+          </div>
+        </FormRow>
+
         <FormRow
           id={`containers-${index}-image-reference`}
           label={
@@ -1170,6 +1242,7 @@ const CreateRelease = ({
             ...data,
             containers: data.containers?.map((container) => ({
               env: container.env || undefined,
+              extra_hosts: container.extraHosts || undefined,
               image: {
                 reference: container.image.reference,
                 imageCredentialsId:
