@@ -64,6 +64,7 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
         node {
           id
           env
+          extraHosts
           hostname
           networkMode
           portBindings
@@ -464,6 +465,18 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
           readonly={true}
           initialLines={1}
         />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-extraHosts`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.extraHostsLabel"
+            defaultMessage="Extra Hosts"
+          />
+        }
+      >
+        <Form.Control value={container.extraHosts?.join(", ") ?? ""} readOnly />
       </FormRow>
 
       <FormRow
