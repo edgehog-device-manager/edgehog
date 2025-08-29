@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,32 +18,27 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema do
+defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism do
   @moduledoc false
-  use Absinthe.Schema
+  use Ash.Type.NewType,
+    subtype_of: :union,
+    constraints: [
+      storage: :map_with_tag,
+      types: [
+        lazy: [
+          tag: :type,
+          tag_value: :lazy,
+          type: Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy,
+          cast_tag?: true
+        ]
+      ]
+    ]
 
-  use AshGraphql,
-    domains: [
-      Edgehog.BaseImages,
-      Edgehog.Containers,
-      Edgehog.Devices,
-      Edgehog.Forwarder,
-      Edgehog.Groups,
-      Edgehog.Labeling,
-      Edgehog.OSManagement,
-      Edgehog.Tenants,
-      Edgehog.UpdateCampaigns,
-      Edgehog.DeploymentCampaigns
-    ],
-    relay_ids?: true
+  use AshGraphql.Type
 
-  import_types EdgehogWeb.Schema.AstarteTypes
-  import_types Absinthe.Plug.Types
-  import_types Absinthe.Type.Custom
+  @impl AshGraphql.Type
+  def graphql_type(_), do: :deploy_rollout_mechanism
 
-  query do
-  end
-
-  mutation do
-  end
+  @impl AshGraphql.Type
+  def graphql_unnested_unions(_constraints), do: [:deploy]
 end

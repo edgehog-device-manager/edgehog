@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,32 +18,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema do
+defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   @moduledoc false
-  use Absinthe.Schema
+  use GenStateMachine, restart: :transient, callback_mode: [:handle_event_function, :state_enter]
 
-  use AshGraphql,
-    domains: [
-      Edgehog.BaseImages,
-      Edgehog.Containers,
-      Edgehog.Devices,
-      Edgehog.Forwarder,
-      Edgehog.Groups,
-      Edgehog.Labeling,
-      Edgehog.OSManagement,
-      Edgehog.Tenants,
-      Edgehog.UpdateCampaigns,
-      Edgehog.DeploymentCampaigns
-    ],
-    relay_ids?: true
+  # Public API
 
-  import_types EdgehogWeb.Schema.AstarteTypes
-  import_types Absinthe.Plug.Types
-  import_types Absinthe.Type.Custom
+  def start_link(args) do
+    name = args[:name] || __MODULE__
 
-  query do
+    GenStateMachine.start_link(__MODULE__, args, name: name)
   end
 
-  mutation do
+  # Callbacks
+
+  @impl GenStateMachine
+  def init(_opts) do
+    # TODO
+    :ignore
   end
 end

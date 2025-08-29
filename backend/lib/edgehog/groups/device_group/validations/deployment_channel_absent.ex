@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,32 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema do
+defmodule Edgehog.Groups.DeviceGroup.Validations.DeploymentChannelAbsent do
   @moduledoc false
-  use Absinthe.Schema
+  use Ash.Resource.Validation
 
-  use AshGraphql,
-    domains: [
-      Edgehog.BaseImages,
-      Edgehog.Containers,
-      Edgehog.Devices,
-      Edgehog.Forwarder,
-      Edgehog.Groups,
-      Edgehog.Labeling,
-      Edgehog.OSManagement,
-      Edgehog.Tenants,
-      Edgehog.UpdateCampaigns,
-      Edgehog.DeploymentCampaigns
-    ],
-    relay_ids?: true
+  @impl Ash.Resource.Validation
+  def validate(changeset, _opts, _context) do
+    device_group = changeset.data
 
-  import_types EdgehogWeb.Schema.AstarteTypes
-  import_types Absinthe.Plug.Types
-  import_types Absinthe.Type.Custom
-
-  query do
-  end
-
-  mutation do
+    if device_group.deployment_channel_id do
+      {:error,
+       field: :deployment_channel_id,
+       message: "The deployment channel is already set for the device group \"#{device_group.name}\"",
+       short_message: "Deployment channel already set"}
+    else
+      :ok
+    end
   end
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,32 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema do
+defmodule Edgehog.Campaigns.Status do
   @moduledoc false
-  use Absinthe.Schema
+  use Ash.Type.Enum,
+    values: [
+      idle: "The campaign has been created but is not being rolled-out yet.",
+      in_progress: "The campaign is being rolled-out.",
+      finished: "The campaign has finished."
+    ]
 
-  use AshGraphql,
-    domains: [
-      Edgehog.BaseImages,
-      Edgehog.Containers,
-      Edgehog.Devices,
-      Edgehog.Forwarder,
-      Edgehog.Groups,
-      Edgehog.Labeling,
-      Edgehog.OSManagement,
-      Edgehog.Tenants,
-      Edgehog.UpdateCampaigns,
-      Edgehog.DeploymentCampaigns
-    ],
-    relay_ids?: true
-
-  import_types EdgehogWeb.Schema.AstarteTypes
-  import_types Absinthe.Plug.Types
-  import_types Absinthe.Type.Custom
-
-  query do
-  end
-
-  mutation do
-  end
+  def graphql_type(_), do: :campaign_status
 end
