@@ -37,6 +37,7 @@ import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import ContainersTable from "components/ContainersTable";
+import ReleaseDevicesTable from "components/ReleaseDevicesTable";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -46,6 +47,7 @@ const GET_RELEASE_QUERY = graphql`
         name
       }
       ...ContainersTable_ContainerFragment
+      ...ReleaseDevicesTable_DeploymentsFragment
     }
   }
 `;
@@ -72,6 +74,7 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
           {errorFeedback}
         </Alert>
         <ContainersTable containersRef={release} />
+        <ReleaseDevicesTable releaseDevicesRef={release} />
       </Page.Main>
     </Page>
   );
