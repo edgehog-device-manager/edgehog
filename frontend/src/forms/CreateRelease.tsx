@@ -223,6 +223,8 @@ type ContainerInput = {
   restartPolicy?: string;
   storageOpt?: string[];
   tmpfs?: string[];
+  capAdd?: string[];
+  capDrop?: string[];
   volumeDriver?: string;
   volumes: ContainerCreateWithNestedVolumesInput[];
 };
@@ -240,6 +242,49 @@ type ReleaseSubmitData = {
 type ContainerSubmit = Omit<ContainerInput, "portBindings"> & {
   portBindings?: string[];
 };
+
+export const CapDropList = [
+  "CAP_AUDIT_WRITE",
+  "CAP_CHOWN",
+  "CAP_DAC_OVERRIDE",
+  "CAP_FOWNER",
+  "CAP_FSETID",
+  "CAP_KILL",
+  "CAP_MKNOD",
+  "CAP_NET_BIND_SERVICE",
+  "CAP_NET_RAW",
+  "CAP_SETFCAP",
+  "CAP_SETGID",
+  "CAP_SETPCAP",
+  "CAP_SETUID",
+  "CAP_SYS_CHROOT",
+] as const;
+
+export const CapAddList = [
+  "CAP_AUDIT_CONTROL",
+  "CAP_BLOCK_SUSPEND",
+  "CAP_DAC_READ_SEARCH",
+  "CAP_IPC_LOCK",
+  "CAP_IPC_OWNER",
+  "CAP_LEASE",
+  "CAP_LINUX_IMMUTABLE",
+  "CAP_MAC_ADMIN",
+  "CAP_MAC_OVERRIDE",
+  "CAP_NET_ADMIN",
+  "CAP_NET_BROADCAST",
+  "CAP_SYS_ADMIN",
+  "CAP_SYS_BOOT",
+  "CAP_SYS_MODULE",
+  "CAP_SYS_NICE",
+  "CAP_SYS_PACCT",
+  "CAP_SYS_PTRACE",
+  "CAP_SYS_RAWIO",
+  "CAP_SYS_RESOURCE",
+  "CAP_SYS_TIME",
+  "CAP_SYS_TTY_CONFIG",
+  "CAP_SYSLOG",
+  "CAP_WAKE_ALARM",
+] as const;
 
 // Yup schema for form validation
 const applicationSchema = yup
@@ -278,6 +323,14 @@ const applicationSchema = yup
           readOnlyRootfs: yup.boolean().nullable(),
           storageOpt: storageTmpfsOptSchema,
           tmpfs: storageTmpfsOptSchema,
+          capAdd: yup
+            .array()
+            .of(yup.string().required().oneOf(CapAddList))
+            .nullable(),
+          capDrop: yup
+            .array()
+            .of(yup.string().required().oneOf(CapDropList))
+            .nullable(),
           volumeDriver: yup
             .string()
             .nullable()
@@ -1068,6 +1121,75 @@ const ContainerForm = ({
         </FormRow>
 
         <FormRow
+          id={`containers-${index}-capAdd`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.capAddLabel"
+              defaultMessage="Cap Add"
+            />
+          }
+        >
+          <Controller
+            name={`containers.${index}.capAdd`}
+            control={control}
+            render={({
+              field: { value, onChange, onBlur },
+              fieldState: { invalid },
+            }) => {
+              const options = CapAddList.map((cap) => ({ id: cap, name: cap }));
+
+              return (
+                <MultiSelect
+                  invalid={invalid}
+                  value={(value || []).map((v: string) => ({ id: v, name: v }))}
+                  onChange={(selected) => onChange(selected.map((s) => s.id))}
+                  onBlur={onBlur}
+                  options={options}
+                  getOptionValue={(option) => option.id}
+                  getOptionLabel={(option) => option.name}
+                />
+              );
+            }}
+          />
+        </FormRow>
+
+        <FormRow
+          id={`containers-${index}-capDrop`}
+          label={
+            <FormattedMessage
+              id="components.CreateRelease.capDropLabel"
+              defaultMessage="Cap Drop"
+            />
+          }
+        >
+          <Controller
+            name={`containers.${index}.capDrop`}
+            control={control}
+            render={({
+              field: { value, onChange, onBlur },
+              fieldState: { invalid },
+            }) => {
+              const options = CapDropList.map((cap) => ({
+                id: cap,
+                name: cap,
+              }));
+
+              return (
+                <MultiSelect
+                  invalid={invalid}
+                  value={(value || []).map((v: string) => ({ id: v, name: v }))}
+                  onChange={(selected) => onChange(selected.map((s) => s.id))}
+                  onBlur={onBlur}
+                  options={options}
+                  getOptionValue={(option) => option.id}
+                  getOptionLabel={(option) => option.name}
+                />
+              );
+            }}
+          />
+        </FormRow>
+
+        <FormRow
           id={`containers-${index}-volumeDriver`}
           label={
             <FormattedMessage
@@ -1201,6 +1323,10 @@ const CreateRelease = ({
                 id: v.id,
                 target: v.target,
               })),
+              capAdd: container.capAdd?.length ? container.capAdd : undefined,
+              capDrop: container.capDrop?.length
+                ? container.capDrop
+                : undefined,
             })),
           };
 

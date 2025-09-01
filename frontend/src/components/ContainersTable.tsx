@@ -36,6 +36,7 @@ import Col from "components/Col";
 import Form from "components/Form";
 import Row from "components/Row";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
+import MultiSelect from "./MultiSelect";
 
 const FormRow = ({
   id,
@@ -80,6 +81,8 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
           tmpfs
           storageOpt
           readOnlyRootfs
+          capAdd
+          capDrop
           image {
             reference
             credentials {
@@ -711,6 +714,54 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
           readonly={true}
           initialLines={1}
         />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-capAdd`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.capAdd"
+            defaultMessage="Cap Add"
+          />
+        }
+      >
+        {(container.capAdd || []).length > 0 ? (
+          <MultiSelect
+            value={(container.capAdd || []).map((cap) => ({
+              id: cap,
+              name: cap,
+            }))}
+            getOptionValue={(option) => option.id}
+            getOptionLabel={(option) => option.name}
+            disabled={true}
+          />
+        ) : (
+          <div className="text-muted fst-italic">None</div>
+        )}
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-capDrop`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.capDrop"
+            defaultMessage="Cap Drop"
+          />
+        }
+      >
+        {(container.capDrop || []).length > 0 ? (
+          <MultiSelect
+            value={(container.capDrop || []).map((cap) => ({
+              id: cap,
+              name: cap,
+            }))}
+            getOptionValue={(option) => option.id}
+            getOptionLabel={(option) => option.name}
+            disabled={true}
+          />
+        ) : (
+          <div className="text-muted fst-italic">None</div>
+        )}
       </FormRow>
 
       <NetworkDetails networks={container.networks} containerIndex={index} />
