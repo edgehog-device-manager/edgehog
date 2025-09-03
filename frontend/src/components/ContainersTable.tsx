@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import Collapse from "react-bootstrap/Collapse";
@@ -37,6 +37,9 @@ import Form from "components/Form";
 import Row from "components/Row";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import MultiSelect from "./MultiSelect";
+import InfiniteScroll from "./InfiniteScroll";
+
+const CONTAINERS_TO_LOAD_NEXT = 5;
 
 const FormRow = ({
   id,
@@ -795,12 +798,19 @@ const ContainersTable = ({
   className,
   containersRef,
 }: ContainersTableProps) => {
-  const { data } = usePaginationFragment<
+  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
     ContainersTable_PaginationQuery,
     ContainersTable_ContainerFragment$key
   >(CONTAINERS_TABLE_FRAGMENT, containersRef);
 
-  const containers = data.containers.edges?.map((edge) => edge.node) ?? [];
+  const loadNextContainers = useCallback(() => {
+    if (hasNext && !isLoadingNext) loadNext(CONTAINERS_TO_LOAD_NEXT);
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const containers: ContainerRecord[] = useMemo(() => {
+    return data.containers?.edges?.map((edge) => edge?.node) ?? [];
+  }, [data]);
+
   const [openIndexes, setOpenIndexes] = useState<number[]>(
     containers.map((_, index) => index),
   );
@@ -843,12 +853,17 @@ const ContainersTable = ({
               )}
             </span>
           </Button>
-
-          <Collapse in={openIndexes.includes(index)}>
-            <div className="p-3 border-top">
-              <ContainerDetails container={container} index={index} />
-            </div>
-          </Collapse>
+          <InfiniteScroll
+            className={className}
+            loading={isLoadingNext}
+            onLoadMore={hasNext ? loadNextContainers : undefined}
+          >
+            <Collapse in={openIndexes.includes(index)}>
+              <div className="p-3 border-top">
+                <ContainerDetails container={container} index={index} />
+              </div>
+            </Collapse>
+          </InfiniteScroll>
         </div>
       ))}
     </div>

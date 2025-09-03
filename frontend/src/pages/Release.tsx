@@ -38,6 +38,8 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import ContainersTable from "components/ContainersTable";
 
+const CONTAINERS_TO_LOAD_FIRST = 5;
+
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
     release(id: $releaseId) {
@@ -115,7 +117,10 @@ const ReleasePage = () => {
 
   const fetchRelease = useCallback(
     () =>
-      getRelease({ releaseId, first: 10_000 }, { fetchPolicy: "network-only" }),
+      getRelease(
+        { releaseId, first: CONTAINERS_TO_LOAD_FIRST },
+        { fetchPolicy: "network-only" },
+      ),
     [getRelease, releaseId],
   );
 
