@@ -92,6 +92,7 @@ config :edgehog, EdgehogWeb.Endpoint,
   live_view: [signing_salt: "aiSLZVyY"]
 
 config :edgehog, :ash_domains, [
+  Edgehog.DeploymentCampaigns,
   Edgehog.Astarte,
   Edgehog.BaseImages,
   Edgehog.Containers,
