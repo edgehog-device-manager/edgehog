@@ -19,31 +19,48 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
-import { useMemo } from "react";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import _ from "lodash";
 
+import type { NetworksTable_PaginationQuery } from "../api/__generated__/NetworksTable_PaginationQuery.graphql";
 import type {
   NetworksTable_NetworkFragment$data,
   NetworksTable_NetworkFragment$key,
 } from "api/__generated__/NetworksTable_NetworkFragment.graphql";
 
 import { Link, Route } from "Navigation";
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
+
+const NETWORKS_TO_LOAD_FIRST = 40;
+const NETWORKS_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const NETWORKS_TABLE_FRAGMENT = graphql`
-  fragment NetworksTable_NetworkFragment on Network @relay(plural: true) {
-    id
-    label
-    driver
-    internal
-    enableIpv6
-    options
+  fragment NetworksTable_NetworkFragment on RootQueryType
+  @refetchable(queryName: "NetworksTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "NetworkFilterInput" }) {
+    networks(first: $first, after: $after, filter: $filter)
+      @connection(key: "NetworksTable_networks") {
+      edges {
+        node {
+          id
+          label
+          driver
+          internal
+          enableIpv6
+          options
+        }
+      }
+    }
   }
 `;
 
-type TableRecord = NetworksTable_NetworkFragment$data[0];
+type TableRecord = NonNullable<
+  NonNullable<NetworksTable_NetworkFragment$data["networks"]>["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
@@ -101,16 +118,71 @@ const NetworksTable = ({
   networksRef,
   hideSearch = false,
 }: NetworksTableProps) => {
-  const networks = useFragment(NETWORKS_TABLE_FRAGMENT, networksRef);
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      NetworksTable_PaginationQuery,
+      NetworksTable_NetworkFragment$key
+    >(NETWORKS_TABLE_FRAGMENT, networksRef);
 
-  const memoizedColumns = useMemo(() => columns, []);
+  const [searchText, setSearchText] = useState<string | null>(null);
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: NETWORKS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: NETWORKS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { label: { ilike: `%${text}%` } },
+                  { driver: { ilike: `%${text}%` } },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextVolumes = useCallback(() => {
+    if (hasNext && !isLoadingNext) loadNext(NETWORKS_TO_LOAD_NEXT);
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const volumes: TableRecord[] = useMemo(() => {
+    return (
+      data.networks?.edges
+        ?.map((edge) => edge?.node)
+        .filter(
+          (node): node is TableRecord => node !== undefined && node !== null,
+        ) ?? []
+    );
+  }, [data]);
+
+  if (!data.networks) return null;
 
   return (
-    <Table
+    <InfiniteTable
       className={className}
-      columns={memoizedColumns}
-      data={networks}
-      hideSearch={hideSearch}
+      columns={columns}
+      data={volumes}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextVolumes : undefined}
+      setSearchText={hideSearch ? undefined : setSearchText}
     />
   );
 };
