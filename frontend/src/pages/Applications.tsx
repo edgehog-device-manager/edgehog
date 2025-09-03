@@ -34,13 +34,15 @@ import ApplicationsTable from "components/ApplicationsTable";
 import Button from "components/Button";
 import { Link, Route } from "Navigation";
 
+const APPLICATIONS_TO_LOAD_FIRST = 40;
+
 const GET_APPLICATIONS_QUERY = graphql`
-  query Applications_getApplications_Query {
-    applications {
-      results {
-        ...ApplicationsTable_ApplicationFragment
-      }
-    }
+  query Applications_getApplications_Query(
+    $first: Int
+    $after: String
+    $filter: ApplicationFilterInput
+  ) {
+    ...ApplicationsTable_ApplicationFragment @arguments(filter: $filter)
   }
 `;
 
@@ -53,7 +55,7 @@ const ApplicationsContent = ({
 }: ApplicationsContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const { applications } = usePreloadedQuery(
+  const applicationsRef = usePreloadedQuery(
     GET_APPLICATIONS_QUERY,
     getApplicationsQuery,
   );
@@ -85,7 +87,7 @@ const ApplicationsContent = ({
           {errorFeedback}
         </Alert>
         <ApplicationsTable
-          applicationsRef={applications?.results ?? []}
+          applicationsRef={applicationsRef}
           setErrorFeedback={setErrorFeedback}
         />
       </Page.Main>
@@ -98,7 +100,11 @@ const ApplicationsPage = () => {
     useQueryLoader<Applications_getApplications_Query>(GET_APPLICATIONS_QUERY);
 
   const fetchApplications = useCallback(
-    () => getApplications({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getApplications(
+        { first: APPLICATIONS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getApplications],
   );
 
