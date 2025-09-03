@@ -69,10 +69,12 @@ import ConfirmModal from "components/ConfirmModal";
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
     listImageCredentials {
-      results {
-        id
-        label
-        username
+      edges {
+        node {
+          id
+          label
+          username
+        }
       }
     }
   }
@@ -81,9 +83,11 @@ const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
 const NETWORKS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_NetworksOptionsFragment on RootQueryType {
     networks {
-      results {
-        id
-        label
+      edges {
+        node {
+          id
+          label
+        }
       }
     }
   }
@@ -92,9 +96,11 @@ const NETWORKS_OPTIONS_FRAGMENT = graphql`
 const VOLUMES_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_VolumesOptionsFragment on RootQueryType {
     volumes {
-      results {
-        id
-        label
+      edges {
+        node {
+          id
+          label
+        }
       }
     }
   }
@@ -103,45 +109,47 @@ const VOLUMES_OPTIONS_FRAGMENT = graphql`
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
   query CreateRelease_getApplicationsWithReleases_Query {
     applications {
-      results {
-        id
-        name
-        releases {
-          edges {
-            node {
-              id
-              version
-              containers {
-                edges {
-                  node {
-                    id
-                    env
-                    hostname
-                    networkMode
-                    restartPolicy
-                    privileged
-                    portBindings
-                    image {
-                      reference
-                      credentials {
-                        id
-                      }
-                    }
-                    networks {
-                      edges {
-                        node {
+      edges {
+        node {
+          id
+          name
+          releases {
+            edges {
+              node {
+                id
+                version
+                containers {
+                  edges {
+                    node {
+                      id
+                      env
+                      hostname
+                      networkMode
+                      restartPolicy
+                      privileged
+                      portBindings
+                      image {
+                        reference
+                        credentials {
                           id
-                          label
                         }
                       }
-                    }
-                    containerVolumes {
-                      edges {
-                        node {
-                          target
-                          volume {
+                      networks {
+                        edges {
+                          node {
                             id
                             label
+                          }
+                        }
+                      }
+                      containerVolumes {
+                        edges {
+                          node {
+                            target
+                            volume {
+                              id
+                              label
+                            }
                           }
                         }
                       }
@@ -161,9 +169,9 @@ type ApplicationsData = NonNullable<
   CreateRelease_getApplicationsWithReleases_Query$data["applications"]
 >;
 
-type ApplicationResult = NonNullable<ApplicationsData["results"]>[number];
+type ApplicationResult = NonNullable<ApplicationsData["edges"]>[number];
 
-type ReleasesData = NonNullable<ApplicationResult["releases"]>;
+type ReleasesData = NonNullable<ApplicationResult["node"]["releases"]>;
 type ReleaseEdge = NonNullable<NonNullable<ReleasesData["edges"]>[number]>;
 
 type ReleaseNode = NonNullable<ReleaseEdge["node"]>;
@@ -555,9 +563,9 @@ const ContainerForm = ({
             name={`containers.${index}.image.imageCredentialsId`}
             render={({ field }) => {
               const options =
-                listImageCredentials?.results?.map((ic) => ({
-                  value: ic.id,
-                  label: `${ic.label} (${ic.username})`,
+                listImageCredentials?.edges?.map((ic) => ({
+                  value: ic.node.id,
+                  label: `${ic.node.label} (${ic.node.username})`,
                 })) || [];
 
               const selectedOption =
@@ -649,7 +657,7 @@ const ContainerForm = ({
             }) => {
               const mappedValue = (value || []).map(
                 (v: { id: string }) =>
-                  networks?.results?.find((n) => n.id === v.id) || v,
+                  networks?.edges?.find((n) => n.node.id === v.id) || v,
               );
 
               return (
@@ -658,8 +666,8 @@ const ContainerForm = ({
                   value={mappedValue}
                   onChange={onChange}
                   onBlur={onBlur}
-                  options={networks?.results || []}
-                  getOptionValue={(option) => option.id!}
+                  options={networks?.edges || []}
+                  getOptionValue={(option) => option.node.id!}
                 />
               );
             }}
@@ -749,8 +757,8 @@ const ContainerForm = ({
                   .map((v, i) => (i !== volIndex ? v.id : null))
                   .filter(Boolean) as string[];
 
-                const availableOptions = volumes?.results?.filter(
-                  (vol) => !selectedIds.includes(vol.id),
+                const availableOptions = volumes?.edges?.filter(
+                  (vol) => !selectedIds.includes(vol.node.id),
                 );
 
                 const fieldErrors =
@@ -784,8 +792,8 @@ const ContainerForm = ({
                             render={({ field }) => {
                               const selectOptions =
                                 availableOptions?.map((vol) => ({
-                                  value: vol.id,
-                                  label: vol.label,
+                                  value: vol.node.id,
+                                  label: vol.node.label,
                                 })) || [];
                               return (
                                 <Select
@@ -1344,7 +1352,7 @@ const CreateRelease = ({
       { fetchPolicy: "store-and-network" },
     );
 
-  const applications = applicationsData.applications?.results ?? [];
+  const applications = applicationsData.applications?.edges ?? [];
 
   const [showModal, setShowModal] = useState(false);
 
@@ -1579,9 +1587,10 @@ const CreateRelease = ({
                   classNamePrefix="select"
                   isSearchable
                   options={applications.map((app) => ({
-                    value: app.id,
-                    label: app.name,
-                    releases: app.releases?.edges?.map((e) => e.node) ?? [],
+                    value: app.node.id,
+                    label: app.node.name,
+                    releases:
+                      app.node.releases?.edges?.map((e) => e.node) ?? [],
                   }))}
                 />
               </FormRow>

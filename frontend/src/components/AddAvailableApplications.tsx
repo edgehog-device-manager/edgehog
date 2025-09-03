@@ -32,14 +32,16 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
     $filter: ApplicationFilterInput
   ) {
     applications(first: 10000, filter: $filter) {
-      results {
-        id
-        name
-        releases(first: 10000) {
-          edges {
-            node {
-              id
-              version
+      edges {
+        node {
+          id
+          name
+          releases(first: 10000) {
+            edges {
+              node {
+                id
+                version
+              }
             }
           }
         }
@@ -112,13 +114,13 @@ const AddAvailableApplications = ({
     );
 
   const applicationOptions: SelectOption[] = useMemo(() => {
-    if (!data.applications?.results) return [];
+    if (!data.applications?.edges) return [];
 
-    return data.applications.results.map((app) => ({
-      value: app.id,
-      label: app.name,
+    return data.applications.edges.map((app) => ({
+      value: app.node.id,
+      label: app.node.name,
     }));
-  }, [data.applications?.results]);
+  }, [data.applications?.edges]);
 
   const selectedApplicationOption = useMemo(() => {
     return (
@@ -127,19 +129,19 @@ const AddAvailableApplications = ({
   }, [applicationOptions, selectedApp]);
 
   const releaseOptions: SelectOption[] = useMemo(() => {
-    if (!selectedApp || !data.applications?.results) return [];
+    if (!selectedApp || !data.applications?.edges) return [];
 
-    const selectedApplication = data.applications.results.find(
-      (app) => app.id === selectedApp,
+    const selectedApplication = data.applications.edges.find(
+      (app) => app.node.id === selectedApp,
     );
 
-    if (!selectedApplication?.releases.edges) return [];
+    if (!selectedApplication?.node.releases.edges) return [];
 
-    return selectedApplication.releases.edges.map(({ node }) => ({
+    return selectedApplication.node.releases.edges.map(({ node }) => ({
       value: node.id,
       label: node.version,
     }));
-  }, [selectedApp, data.applications?.results]);
+  }, [selectedApp, data.applications?.edges]);
 
   const selectedReleaseOption = useMemo(() => {
     return (
