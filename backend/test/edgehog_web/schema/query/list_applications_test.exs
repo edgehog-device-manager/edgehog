@@ -27,7 +27,7 @@ defmodule EdgehogWeb.Schema.Query.ListApplicationsTest do
     test "returns empty list when there are no applications", %{tenant: tenant} do
       data = [tenant: tenant] |> list_applications() |> extract_result!()
 
-      assert %{"applications" => %{"results" => []}} = data
+      assert %{"applications" => %{"edges" => []}} = data
     end
 
     test "returns all the available applications", %{tenant: tenant} do
@@ -36,9 +36,9 @@ defmodule EdgehogWeb.Schema.Query.ListApplicationsTest do
 
       data = [tenant: tenant] |> list_applications() |> extract_result!()
 
-      assert %{"applications" => %{"results" => applications}} = data
+      assert %{"applications" => %{"edges" => applications}} = data
 
-      names = applications |> Enum.map(& &1["name"]) |> Enum.sort()
+      names = applications |> Enum.map(& &1["node"]["name"]) |> Enum.sort()
       expected_names = [app1, app2] |> Enum.map(& &1.name) |> Enum.sort()
 
       assert names == expected_names
@@ -50,9 +50,11 @@ defmodule EdgehogWeb.Schema.Query.ListApplicationsTest do
       """
       query {
         applications {
-          results {
-            name
-            description
+          edges {
+            node {
+              name
+              description
+            }
           }
         }
       }

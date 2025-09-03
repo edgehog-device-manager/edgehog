@@ -38,6 +38,8 @@ defmodule Edgehog.Containers do
     queries do
       list Application, :applications, :read do
         description "Returns all the available applications."
+        paginate_with :keyset
+        relay? true
       end
 
       get ImageCredentials, :image_credentials, :read do
@@ -46,6 +48,8 @@ defmodule Edgehog.Containers do
 
       list ImageCredentials, :list_image_credentials, :read do
         description "Returns all available image credentials."
+        paginate_with :keyset
+        relay? true
       end
 
       get Application, :application, :read do
@@ -62,6 +66,8 @@ defmodule Edgehog.Containers do
 
       list Volume, :volumes, :read do
         description "Returns all available volumes."
+        paginate_with :keyset
+        relay? true
       end
 
       get Network, :network, :read do
@@ -70,6 +76,8 @@ defmodule Edgehog.Containers do
 
       list Network, :networks, :read do
         description "Returns all available networks."
+        paginate_with :keyset
+        relay? true
       end
 
       list Deployment, :deployments, :read do
