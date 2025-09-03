@@ -40,7 +40,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       description "Creates a new deployment campaign."
       primary? true
 
-      accept [:name]
+      accept [:name, :deploy_rollout_mechanism]
 
       argument :release_id, :uuid do
         description """
@@ -65,6 +65,35 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       change manage_relationship(:release_id, :release, type: :append)
       change manage_relationship(:deployment_channel_id, :deployment_channel, type: :append)
     end
+
+    update :mark_as_in_progress do
+      argument :start_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:start_timestamp, arg(:start_timestamp))
+      change set_attribute(:status, :in_progress)
+    end
+
+    update :mark_as_failed do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :finished)
+      change set_attribute(:outcome, :failure)
+    end
+
+    update :mark_as_successful do
+      argument :completion_timestamp, :utc_datetime_usec do
+        default &DateTime.utc_now/0
+      end
+
+      change set_attribute(:completion_timestamp, arg(:completion_timestamp))
+      change set_attribute(:status, :finished)
+      change set_attribute(:outcome, :success)
+    end
   end
 
   attributes do
@@ -84,6 +113,15 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
     attribute :outcome, Outcome do
       description "The outcome of the deployment campaign."
       public? true
+    end
+
+    attribute :deploy_rollout_mechanism, Edgehog.DeploymentCampaigns.DeploymentMechanism do
+      description """
+      The deployment mechanism to carry the campaign.
+      """
+
+      public? true
+      allow_nil? false
     end
 
     attribute :start_timestamp, :utc_datetime_usec
@@ -113,6 +151,37 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       description "The depployment targets belonging to the deployment campaign."
       public? true
       writable? false
+    end
+  end
+
+  aggregates do
+    count :total_target_count, :deployment_targets do
+      description "The total number of deployment targets."
+      public? true
+    end
+
+    count :idle_target_count, :deployment_targets do
+      description "The number of deployment targets with an idle status."
+      public? true
+      filter expr(status == :idle)
+    end
+
+    count :in_progress_target_count, :deployment_targets do
+      description "The number of deployment targets with an in-progress status."
+      public? true
+      filter expr(status == :in_progress)
+    end
+
+    count :failed_target_count, :deployment_targets do
+      description "The number of deployment targets with a failed status."
+      public? true
+      filter expr(status == :failed)
+    end
+
+    count :successful_target_count, :deployment_targets do
+      description "The number of deployment targets with a successful status."
+      public? true
+      filter expr(status == :successful)
     end
   end
 
