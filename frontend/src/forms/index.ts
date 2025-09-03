@@ -83,6 +83,10 @@ const messages = defineMessages({
     defaultMessage:
       "Port Bindings must be comma-separated values like '8080:80, 443:443'.",
   },
+  extraHostsFormat: {
+    id: "validation.extraHosts.format",
+    defaultMessage: "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)",
+  },
 });
 
 yup.setLocale({
@@ -199,6 +203,25 @@ const storageTmpfsOptSchema = yup
     },
   });
 
+const extraHostsSchema = yup
+  .array()
+  .nullable()
+  .of(
+    yup
+      .string()
+      .required()
+      .test({
+        name: "is-valid-extra-host",
+        message: messages.extraHostsFormat.id,
+        test: (value) => {
+          if (!value) return true;
+          const regex =
+            /^(?!-)[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63})*:(?:\d{1,3}\.){3}\d{1,3}$/;
+          return regex.test(value.trim());
+        },
+      }),
+  );
+
 export {
   deviceGroupHandleSchema,
   systemModelHandleSchema,
@@ -211,6 +234,7 @@ export {
   numberSchema,
   envSchema,
   portBindingsSchema,
+  extraHostsSchema,
   messages,
   yup,
   storageTmpfsOptSchema,

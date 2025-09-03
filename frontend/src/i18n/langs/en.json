@@ -286,6 +286,9 @@
   "components.ContainersTable.envLabel": {
     "defaultMessage": "Environment (JSON String)"
   },
+  "components.ContainersTable.extraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
   "components.ContainersTable.hostnameLabel": {
     "defaultMessage": "Hostname"
   },
@@ -454,6 +457,9 @@
   "components.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
+  "components.CreateRelease.addExtraHostButton": {
+    "defaultMessage": "Add Extra Host"
+  },
   "components.CreateRelease.confirmButton": {
     "defaultMessage": "Confirm"
   },
@@ -480,6 +486,9 @@
   },
   "components.CreateRelease.envLabel": {
     "defaultMessage": "Environment (JSON String)"
+  },
+  "components.CreateRelease.extraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
   },
   "components.CreateRelease.hostnameLabel": {
     "defaultMessage": "Hostname"
@@ -531,6 +540,21 @@
   },
   "components.CreateRelease.restartPolicyOption": {
     "defaultMessage": "Select a Restart Policy"
+  },
+  "components.CreateRelease.reuseResourcesButton": {
+    "defaultMessage": "Reuse Containers"
+  },
+  "components.CreateRelease.reuseResourcesModalTitle": {
+    "defaultMessage": "Reuse Resources Modal"
+  },
+  "components.CreateRelease.reuseResourcesTitleButton": {
+    "defaultMessage": "Copy containers and their configurations from an existing release"
+  },
+  "components.CreateRelease.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "components.CreateRelease.selectRelease": {
+    "defaultMessage": "Select Release"
   },
   "components.CreateRelease.storageOptLabel": {
     "defaultMessage": "Storage Options"
@@ -738,6 +762,26 @@
   "components.DeviceGroupsTable.selectorTitle": {
     "defaultMessage": "Selector",
     "description": "Title for the Selector column of the device groups table"
+  },
+  "components.DevicesGroupsTable.deviceIdTitle": {
+    "defaultMessage": "Device ID",
+    "description": "Title for the Device ID column of the devices table"
+  },
+  "components.DevicesGroupsTable.lastSeenTitle": {
+    "defaultMessage": "Last Seen",
+    "description": "Title for the Last Seen column of the devices table"
+  },
+  "components.DevicesGroupsTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the devices table"
+  },
+  "components.DevicesGroupsTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.DevicesGroupsTable.tagsTitle": {
+    "defaultMessage": "Tags",
+    "description": "Title for the Tags column of the devices table"
   },
   "components.DevicesTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
@@ -1577,9 +1621,6 @@
   "pages.Application.releases": {
     "defaultMessage": "Releases"
   },
-  "pages.Application.systemModel": {
-    "defaultMessage": "System Model"
-  },
   "pages.ApplicationCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the application, please try again."
   },
@@ -2094,6 +2135,9 @@
   },
   "validation.env.invalidJson": {
     "defaultMessage": "Must be a valid JSON string."
+  },
+  "validation.extraHosts.format": {
+    "defaultMessage": "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)"
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
