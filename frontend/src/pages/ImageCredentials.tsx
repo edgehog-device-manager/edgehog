@@ -37,14 +37,16 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 
+const IMAGE_CREDENTIALS_TO_LOAD_FIRST = 40;
+
 const IMAGE_CREDENTIALS_QUERY = graphql`
-  query ImageCredentials_imageCredentials_Query {
-    listImageCredentials {
-      # eslint-disable-next-line relay/unused-fields
-      results {
-        ...ImageCredentialsTable_imageCredentials_Fragment
-      }
-    }
+  query ImageCredentials_imageCredentials_Query(
+    $first: Int
+    $after: String
+    $filter: ImageCredentialsFilterInput
+  ) {
+    ...ImageCredentialsTable_imageCredentials_Fragment
+      @arguments(filter: $filter)
   }
 `;
 
@@ -55,7 +57,7 @@ interface ImageCredentialsContentProps {
 const ImageCredentialsContent = ({
   getImageCredentialsQuery,
 }: ImageCredentialsContentProps) => {
-  const { listImageCredentials } =
+  const listImageCredentialsRef =
     usePreloadedQuery<ImageCredentials_imageCredentials_Query>(
       IMAGE_CREDENTIALS_QUERY,
       getImageCredentialsQuery,
@@ -80,7 +82,7 @@ const ImageCredentialsContent = ({
       </Page.Header>
       <Page.Main>
         <ImageCredentialsTable
-          listImageCredentialsRef={listImageCredentials!.results!}
+          listImageCredentialsRef={listImageCredentialsRef}
         />
       </Page.Main>
     </Page>
@@ -94,7 +96,11 @@ const ImageCredentialsPage = () => {
     );
 
   const fetchImageCredentials = useCallback(
-    () => getImageCredentials({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getImageCredentials(
+        { first: IMAGE_CREDENTIALS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getImageCredentials],
   );
 

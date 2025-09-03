@@ -28,14 +28,13 @@ import { graphql, useLazyLoadQuery } from "react-relay/hooks";
 import ImageCredentialsTable from "./ImageCredentialsTable";
 
 const IMAGE_CREDENTIALS_TEST_QUERY = graphql`
-  query ImageCredentialsTable_imageCredentials_Test_Query
-  @relay_test_operation {
-    listImageCredentials {
-      # eslint-disable-next-line relay/unused-fields
-      results {
-        ...ImageCredentialsTable_imageCredentials_Fragment
-      }
-    }
+  query ImageCredentialsTable_imageCredentials_Test_Query(
+    $first: Int
+    $after: String
+    $filter: ImageCredentialsFilterInput
+  ) {
+    ...ImageCredentialsTable_imageCredentials_Fragment
+      @arguments(filter: $filter)
   }
 `;
 
@@ -46,11 +45,19 @@ type ImageCredentialData = {
 };
 
 interface Data {
-  results: Array<ImageCredentialData>;
+  edges: { node: ImageCredentialData }[];
 }
 
 const data: Data = {
-  results: [{ id: "IC-ID", label: "IC Label", username: "IC Username" }],
+  edges: [
+    {
+      node: {
+        id: "IC-ID",
+        label: "IC Label",
+        username: "IC Username",
+      },
+    },
+  ],
 };
 
 const labels = {
@@ -59,16 +66,14 @@ const labels = {
 };
 
 const ComponentWithQuery = () => {
-  const { listImageCredentials } =
+  const listImageCredentialsRef =
     useLazyLoadQuery<ImageCredentialsTable_imageCredentials_Test_Query>(
       IMAGE_CREDENTIALS_TEST_QUERY,
       {},
     );
 
   return (
-    <ImageCredentialsTable
-      listImageCredentialsRef={listImageCredentials!.results!}
-    />
+    <ImageCredentialsTable listImageCredentialsRef={listImageCredentialsRef} />
   );
 };
 
@@ -81,7 +86,7 @@ const renderComponent = (listImageCredentials: Data) => {
 };
 
 it("renders column headers", () => {
-  renderComponent({ results: [] });
+  renderComponent({ edges: [] });
   expect(
     screen.getByRole("columnheader", { name: labels.label }),
   ).toBeVisible();
@@ -91,7 +96,7 @@ it("renders column headers", () => {
 });
 
 it("renders column headers", () => {
-  renderComponent({ results: [] });
+  renderComponent({ edges: [] });
   expect(
     screen.getByRole("columnheader", { name: labels.label }),
   ).toBeVisible();
@@ -103,20 +108,22 @@ it("renders column headers", () => {
 it("renders Image Credentials data", () => {
   renderComponent(data);
 
-  const record = data.results[0];
+  const record = data.edges[0];
 
-  expect(screen.getByRole("cell", { name: record.label })).toBeVisible();
-  expect(screen.getByRole("link", { name: record.label })).toHaveAttribute(
+  expect(screen.getByRole("cell", { name: record.node.label })).toBeVisible();
+  expect(screen.getByRole("link", { name: record.node.label })).toHaveAttribute(
     "href",
-    `/image-credentials/${record.id}/edit`,
+    `/image-credentials/${record.node.id}/edit`,
   );
-  expect(screen.getByRole("cell", { name: record.username })).toBeVisible();
+  expect(
+    screen.getByRole("cell", { name: record.node.username }),
+  ).toBeVisible();
 });
 
 it("renders Image Credentials data in correct columns", () => {
   renderComponent(data);
 
-  const record = data.results[0];
+  const record = data.edges[0];
 
   const columns = screen.getAllByRole("columnheader");
   const cells = screen.getAllByRole("cell");
@@ -125,8 +132,8 @@ it("renders Image Credentials data in correct columns", () => {
   expect(cells).toHaveLength(2);
 
   expect(columns[0]).toHaveTextContent(labels.label);
-  expect(cells[0]).toHaveTextContent(record.label);
+  expect(cells[0]).toHaveTextContent(record.node.label);
 
   expect(columns[1]).toHaveTextContent(labels.username);
-  expect(cells[1]).toHaveTextContent(record.username);
+  expect(cells[1]).toHaveTextContent(record.node.username);
 });

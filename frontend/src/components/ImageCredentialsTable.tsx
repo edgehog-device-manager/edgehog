@@ -19,28 +19,47 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
+import type { ImageCredentialsTable_PaginationQuery } from "../api/__generated__/ImageCredentialsTable_PaginationQuery.graphql";
 import type {
   ImageCredentialsTable_imageCredentials_Fragment$key,
   ImageCredentialsTable_imageCredentials_Fragment$data,
 } from "api/__generated__/ImageCredentialsTable_imageCredentials_Fragment.graphql";
 
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import InfiniteTable from "./InfiniteTable";
+import _ from "lodash";
+
+const IMAGE_CREDENTIALS_TO_LOAD_FIRST = 40;
+const IMAGE_CREDENTIALS_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const IMAGE_CREDENTIALS_FRAGMENT = graphql`
-  fragment ImageCredentialsTable_imageCredentials_Fragment on ImageCredentials
-  @relay(plural: true) {
-    id
-    label
-    username
+  fragment ImageCredentialsTable_imageCredentials_Fragment on RootQueryType
+  @refetchable(queryName: "ImageCredentialsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "ImageCredentialsFilterInput" }) {
+    listImageCredentials(first: $first, after: $after, filter: $filter)
+      @connection(key: "ImageCredentialsTable_listImageCredentials") {
+      edges {
+        node {
+          id
+          label
+          username
+        }
+      }
+    }
   }
 `;
 
-type TableRecord = ImageCredentialsTable_imageCredentials_Fragment$data[0];
+type TableRecord = NonNullable<
+  NonNullable<
+    ImageCredentialsTable_imageCredentials_Fragment$data["listImageCredentials"]
+  >["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
@@ -84,17 +103,72 @@ const ImageCredentialsTable = ({
   listImageCredentialsRef,
   hideSearch = false,
 }: ImageCredentialsTableProps) => {
-  const imageCredentials = useFragment(
-    IMAGE_CREDENTIALS_FRAGMENT,
-    listImageCredentialsRef,
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      ImageCredentialsTable_PaginationQuery,
+      ImageCredentialsTable_imageCredentials_Fragment$key
+    >(IMAGE_CREDENTIALS_FRAGMENT, listImageCredentialsRef);
+
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: IMAGE_CREDENTIALS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: IMAGE_CREDENTIALS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { label: { ilike: `%${text}%` } },
+                  { username: { ilike: `%${text}%` } },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
   );
 
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextImageCredentials = useCallback(() => {
+    if (hasNext && !isLoadingNext) loadNext(IMAGE_CREDENTIALS_TO_LOAD_NEXT);
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const imageCredentials: TableRecord[] = useMemo(() => {
+    return (
+      data.listImageCredentials?.edges
+        ?.map((edge) => edge?.node)
+        .filter(
+          (node): node is TableRecord => node !== undefined && node !== null,
+        ) ?? []
+    );
+  }, [data]);
+
+  if (!data.listImageCredentials) return null;
+
   return (
-    <Table
+    <InfiniteTable
       className={className}
       columns={columns}
       data={imageCredentials}
-      hideSearch={hideSearch}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextImageCredentials : undefined}
+      setSearchText={hideSearch ? undefined : setSearchText}
     />
   );
 };
