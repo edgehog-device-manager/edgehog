@@ -30,10 +30,41 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
 
   graphql do
     type :deployment_campaign
+    paginate_relationship_with deployment_targets: :relay
   end
 
   actions do
     defaults [:read]
+
+    create :create do
+      description "Creates a new deployment campaign."
+      primary? true
+
+      accept [:name]
+
+      argument :release_id, :uuid do
+        description """
+        The ID of the release that will be distributed in the deployment campaign.
+        """
+
+        allow_nil? false
+      end
+
+      argument :deployment_channel_id, :uuid do
+        description """
+        The ID of the deployment channel that will be targeted by the deployment campaign.
+        """
+
+        allow_nil? false
+      end
+
+      # TODO compute deployment targets: look at `ComputeUpdateTargets`
+      # change Changes.ComputeDeploymentTargets
+      change set_attribute(:status, :idle)
+
+      change manage_relationship(:release_id, :release, type: :append)
+      change manage_relationship(:deployment_channel_id, :deployment_channel, type: :append)
+    end
   end
 
   attributes do

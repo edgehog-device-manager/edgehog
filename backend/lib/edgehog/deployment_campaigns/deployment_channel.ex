@@ -39,6 +39,26 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentChannel do
 
   actions do
     defaults [:read]
+
+    create :create do
+      description "Creates a new deployment channel."
+      primary? true
+
+      accept [:name, :handle]
+
+      argument :target_group_ids, {:array, :id} do
+        description """
+        The IDs of the target groups that are targeted by this update channel.
+        """
+      end
+
+      change manage_relationship(:target_group_ids, :target_groups,
+               on_lookup: {:relate, :assign_deployment_channel},
+               on_no_match: :error
+             ) do
+        where present(:target_group_ids)
+      end
+    end
   end
 
   attributes do
