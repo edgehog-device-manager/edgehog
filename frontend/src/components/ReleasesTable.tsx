@@ -25,8 +25,9 @@ import {
   useMutation,
   usePaginationFragment,
 } from "react-relay/hooks";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "react-bootstrap";
+import _ from "lodash";
 
 import type { ReleasesTable_PaginationQuery } from "api/__generated__/ReleasesTable_PaginationQuery.graphql";
 import type {
@@ -36,16 +37,21 @@ import type {
 import type { ReleasesTable_deleteRelease_Mutation } from "api/__generated__/ReleasesTable_deleteRelease_Mutation.graphql";
 
 import { Link, Route } from "Navigation";
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
 import Icon from "components/Icon";
 import DeleteModal from "./DeleteModal";
+import InfiniteTable from "./InfiniteTable";
+
+const RELEASES_TO_LOAD_FIRST = 40;
+const RELEASES_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const RELEASES_TABLE_FRAGMENT = graphql`
   fragment ReleasesTable_ReleaseFragment on Application
-  @refetchable(queryName: "ReleasesTable_PaginationQuery") {
-    releases(first: $first, after: $after)
+  @refetchable(queryName: "ReleasesTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "ReleaseFilterInput" }) {
+    releases(first: $first, after: $after, filter: $filter)
       @connection(key: "ReleasesTable_releases") {
       edges {
         node {
@@ -161,12 +167,56 @@ const ReleasesTable = ({
     [deleteRelease],
   );
 
-  const { data } = usePaginationFragment<
-    ReleasesTable_PaginationQuery,
-    ReleasesTable_ReleaseFragment$key
-  >(RELEASES_TABLE_FRAGMENT, releasesRef);
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      ReleasesTable_PaginationQuery,
+      ReleasesTable_ReleaseFragment$key
+    >(RELEASES_TABLE_FRAGMENT, releasesRef);
 
-  const tableData = data.releases.edges?.map((edge) => edge.node) ?? [];
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RELEASES_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RELEASES_TO_LOAD_FIRST,
+              filter: { version: { ilike: "%${text}%" } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextReleases = useCallback(() => {
+    if (hasNext && !isLoadingNext) loadNext(RELEASES_TO_LOAD_NEXT);
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const releases: TableRecord[] = useMemo(() => {
+    return (
+      data.releases?.edges
+        ?.map((edge) => edge?.node)
+        .filter(
+          (node): node is TableRecord => node !== undefined && node !== null,
+        ) ?? []
+    );
+  }, [data]);
 
   const columnHelper = createColumnHelper<TableRecord>();
   const columns = [
@@ -214,10 +264,13 @@ const ReleasesTable = ({
 
   return (
     <div>
-      <Table
+      <InfiniteTable
         className={className}
         columns={columns}
-        data={tableData}
+        data={releases}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextReleases : undefined}
+        setSearchText={hideSearch ? undefined : setSearchText}
         hideSearch={hideSearch}
       />
 
