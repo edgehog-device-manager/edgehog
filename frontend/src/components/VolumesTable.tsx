@@ -19,29 +19,44 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
-import { useMemo } from "react";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import _ from "lodash";
 
+import type { VolumesTable_PaginationQuery } from "../api/__generated__/VolumesTable_PaginationQuery.graphql";
 import type {
   VolumesTable_VolumeFragment$data,
   VolumesTable_VolumeFragment$key,
 } from "api/__generated__/VolumesTable_VolumeFragment.graphql";
 
 import { Link, Route } from "Navigation";
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
+import InfiniteTable from "./InfiniteTable";
 
-// We use graphql fields below in columns configuration
-/* eslint-disable relay/unused-fields */
+const VOLUMES_TO_LOAD_FIRST = 40;
+const VOLUMES_TO_LOAD_NEXT = 10;
+
 const VOLUMES_TABLE_FRAGMENT = graphql`
-  fragment VolumesTable_VolumeFragment on Volume @relay(plural: true) {
-    id
-    label
-    driver
-    options
+  fragment VolumesTable_VolumeFragment on RootQueryType
+  @refetchable(queryName: "VolumesTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "VolumeFilterInput" }) {
+    volumes(first: $first, after: $after, filter: $filter)
+      @connection(key: "VolumesTable_volumes") {
+      edges {
+        node {
+          id
+          label
+          driver
+          options
+        }
+      }
+    }
   }
 `;
 
-type TableRecord = VolumesTable_VolumeFragment$data[0];
+type TableRecord = NonNullable<
+  NonNullable<VolumesTable_VolumeFragment$data["volumes"]>["edges"]
+>[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
@@ -81,16 +96,72 @@ const VolumesTable = ({
   volumesRef,
   hideSearch = false,
 }: VolumesTableProps) => {
-  const volumes = useFragment(VOLUMES_TABLE_FRAGMENT, volumesRef);
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      VolumesTable_PaginationQuery,
+      VolumesTable_VolumeFragment$key
+    >(VOLUMES_TABLE_FRAGMENT, volumesRef);
 
-  const memoizedColumns = useMemo(() => columns, []);
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: VOLUMES_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: VOLUMES_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { label: { ilike: `%${text}%` } },
+                  { driver: { ilike: `%${text}%` } },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextVolumes = useCallback(() => {
+    if (hasNext && !isLoadingNext) loadNext(VOLUMES_TO_LOAD_NEXT);
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const volumes: TableRecord[] = useMemo(() => {
+    return (
+      data.volumes?.edges
+        ?.map((edge) => edge?.node)
+        .filter(
+          (node): node is TableRecord => node !== undefined && node !== null,
+        ) ?? []
+    );
+  }, [data]);
+
+  if (!data.volumes) return null;
 
   return (
-    <Table
+    <InfiniteTable
       className={className}
-      columns={memoizedColumns}
+      columns={columns}
       data={volumes}
-      hideSearch={hideSearch}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextVolumes : undefined}
+      setSearchText={hideSearch ? undefined : setSearchText}
     />
   );
 };
