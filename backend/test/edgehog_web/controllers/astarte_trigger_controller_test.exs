@@ -511,6 +511,43 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert deployment.state == :started
     end
 
+    test "Started status updates a Starting deployment", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant
+      } = context
+
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id, state: :starting)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+          path: "/" <> deployment.id,
+          value: %{
+            "status" => "Started",
+            "message" => nil
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      # Deployment must be reloaded from the db
+      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+
+      assert deployment.state == :started
+    end
+
     test "Stopping status does not update a Stopped deployment", context do
       %{
         conn: conn,
@@ -529,6 +566,43 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           path: "/" <> deployment.id,
           value: %{
             "status" => "Stopping",
+            "message" => nil
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      # Deployment must be reloaded from the db
+      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+
+      assert deployment.state == :stopped
+    end
+
+    test "Stopped status updates a Stopping deployment", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant
+      } = context
+
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id, state: :stopping)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+          path: "/" <> deployment.id,
+          value: %{
+            "status" => "Stopped",
             "message" => nil
           }
         },
