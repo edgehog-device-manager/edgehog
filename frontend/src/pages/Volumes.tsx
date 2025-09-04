@@ -33,13 +33,15 @@ import VolumesTable from "components/VolumesTable";
 import Button from "components/Button";
 import { Link, Route } from "Navigation";
 
+const VOLUMES_TO_LOAD_FIRST = 40;
+
 const GET_VOLUMES_QUERY = graphql`
-  query Volumes_getVolumes_Query {
-    volumes {
-      results {
-        ...VolumesTable_VolumeFragment
-      }
-    }
+  query Volumes_getVolumes_Query(
+    $first: Int
+    $after: String
+    $filter: VolumeFilterInput
+  ) {
+    ...VolumesTable_VolumeFragment @arguments(filter: $filter)
   }
 `;
 
@@ -48,7 +50,7 @@ interface VolumesContentProps {
 }
 
 const VolumesContent = ({ getVolumesQuery }: VolumesContentProps) => {
-  const { volumes } = usePreloadedQuery(GET_VOLUMES_QUERY, getVolumesQuery);
+  const volumesRef = usePreloadedQuery(GET_VOLUMES_QUERY, getVolumesQuery);
 
   return (
     <Page>
@@ -65,7 +67,7 @@ const VolumesContent = ({ getVolumesQuery }: VolumesContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <VolumesTable volumesRef={volumes?.results ?? []} />
+        <VolumesTable volumesRef={volumesRef} />
       </Page.Main>
     </Page>
   );
@@ -76,7 +78,11 @@ const VolumesPage = () => {
     useQueryLoader<Volumes_getVolumes_Query>(GET_VOLUMES_QUERY);
 
   const fetchVolumes = useCallback(
-    () => getVolumes({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getVolumes(
+        { first: VOLUMES_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getVolumes],
   );
 

@@ -42,11 +42,14 @@ import Button from "components/Button";
 import Icon from "components/Icon";
 import ApplicationDevicesTable from "components/ApplicationDevicesTable";
 
+const RELEASES_TO_LOAD_FIRST = 40;
+
 const GET_APPLICATION_QUERY = graphql`
   query Application_getApplication_Query(
     $applicationId: ID!
     $first: Int
     $after: String
+    $filter: ReleaseFilterInput
   ) {
     application(id: $applicationId) {
       name
@@ -54,8 +57,8 @@ const GET_APPLICATION_QUERY = graphql`
       systemModel {
         name
       }
-      ...ReleasesTable_ReleaseFragment
-      ...ApplicationDevicesTable_ReleaseFragment
+      ...ReleasesTable_ReleaseFragment @arguments(filter: $filter)
+      ...ApplicationDevicesTable_ReleaseFragment @arguments(filter: $filter)
     }
   }
 `;
@@ -233,7 +236,7 @@ const ApplicationPage = () => {
   const fetchApplication = useCallback(
     () =>
       getApplication(
-        { applicationId, first: 10_000 },
+        { applicationId, first: RELEASES_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ),
     [getApplication, applicationId],

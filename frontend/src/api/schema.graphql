@@ -18,6 +18,12 @@ input ContainerCreateWithNestedVolumesInput {
   target: String!
 }
 
+input ContainerCreateWithNestedDeviceMappingsInput {
+  cgroupPermissions: String!
+  pathInContainer: String!
+  pathOnHost: String!
+}
+
 input UpdateCampaignRolloutMechanismPushInput {
   "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
   forceDowngrade: Boolean
@@ -924,6 +930,7 @@ type MutationError {
 input ApplicationCreateInitialReleaseInput {
   version: String!
   containers: [ReleaseCreateContainersInput!]
+  requiredSystemModels: [ReleaseCreateRequiredSystemModelsInput!]
 }
 
 input ReleaseCreateContainersInput {
@@ -951,6 +958,127 @@ input ReleaseCreateContainersInput {
   storageOpt: [String!]
   tmpfs: [String!]
   volumeDriver: String
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+}
+
+input ReleaseCreateRequiredSystemModelsInput {
+  id: ID
+}
+
+enum DeviceMappingSortField {
+  ID
+  PATH_ON_HOST
+  PATH_IN_CONTAINER
+  CGROUP_PERMISSIONS
+  CONTAINER_ID
+}
+
+":device_mapping connection"
+type DeviceMappingConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_mapping edges"
+  edges: [DeviceMappingEdge!]
+}
+
+":device_mapping edge"
+type DeviceMappingEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_mapping node"
+  node: DeviceMapping!
+}
+
+input DeviceMappingFilterContainerId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeviceMappingFilterCgroupPermissions {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceMappingFilterPathInContainer {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceMappingFilterPathOnHost {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceMappingFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeviceMappingFilterInput {
+  and: [DeviceMappingFilterInput!]
+  or: [DeviceMappingFilterInput!]
+  not: [DeviceMappingFilterInput!]
+  id: DeviceMappingFilterId
+  pathOnHost: DeviceMappingFilterPathOnHost
+  pathInContainer: DeviceMappingFilterPathInContainer
+  cgroupPermissions: DeviceMappingFilterCgroupPermissions
+  containerId: DeviceMappingFilterContainerId
+  container: ContainerFilterInput
+}
+
+input DeviceMappingSortInput {
+  order: SortOrder
+  field: DeviceMappingSortField!
+}
+
+type DeviceMapping {
+  id: ID!
+  pathOnHost: String!
+  pathInContainer: String!
+  cgroupPermissions: String!
+  containerId: ID
+  container: Container
 }
 
 enum ContainerVolumeSortField {
@@ -1050,19 +1178,25 @@ enum VolumeSortField {
   OPTIONS
 }
 
-"A keyset page of :volume"
-type KeysetPageOfVolume {
+":volume connection"
+type VolumeConnection {
   "Total count on all pages"
   count: Int
 
-  "The records contained in the page"
-  results: [Volume!]
+  "Page information"
+  pageInfo: PageInfo!
 
-  "The first keyset in the results"
-  startKeyset: String
+  ":volume edges"
+  edges: [VolumeEdge!]
+}
 
-  "The last keyset in the results"
-  endKeyset: String
+":volume edge"
+type VolumeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":volume node"
+  node: Volume!
 }
 
 input VolumeFilterOptions {
@@ -1200,21 +1334,6 @@ type NetworkEdge {
 
   ":network node"
   node: Network!
-}
-
-"A keyset page of :network"
-type KeysetPageOfNetwork {
-  "Total count on all pages"
-  count: Int
-
-  "The records contained in the page"
-  results: [Network!]
-
-  "The first keyset in the results"
-  startKeyset: String
-
-  "The last keyset in the results"
-  endKeyset: String
 }
 
 input NetworkFilterOptions {
@@ -1375,6 +1494,7 @@ input CreateReleaseInput {
   version: String!
   applicationId: ID
   containers: [ReleaseCreateContainersInput!]
+  requiredSystemModels: [ReleaseCreateRequiredSystemModelsInput!]
 }
 
 enum ReleaseSortField {
@@ -1449,6 +1569,7 @@ input ReleaseFilterInput {
   application: ApplicationFilterInput
   deployments: DeploymentFilterInput
   containers: ContainerFilterInput
+  systemModels: SystemModelFilterInput
 }
 
 input ReleaseSortInput {
@@ -1499,6 +1620,19 @@ type Release implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerConnection!
+  systemModels(
+    "How to sort the records in the response"
+    sort: [SystemModelSortInput]
+
+    "A filter to limit the results"
+    filter: SystemModelFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [SystemModel!]!
 }
 
 "The result of the :delete_image_credentials mutation"
@@ -1531,19 +1665,25 @@ enum ImageCredentialsSortField {
   USERNAME
 }
 
-"A keyset page of :image_credentials"
-type KeysetPageOfImageCredentials {
+":image_credentials connection"
+type ImageCredentialsConnection {
   "Total count on all pages"
   count: Int
 
-  "The records contained in the page"
-  results: [ImageCredentials!]
+  "Page information"
+  pageInfo: PageInfo!
 
-  "The first keyset in the results"
-  startKeyset: String
+  ":image_credentials edges"
+  edges: [ImageCredentialsEdge!]
+}
 
-  "The last keyset in the results"
-  endKeyset: String
+":image_credentials edge"
+type ImageCredentialsEdge {
+  "Cursor"
+  cursor: String!
+
+  ":image_credentials node"
+  node: ImageCredentials!
 }
 
 input ImageCredentialsFilterUsername {
@@ -2138,6 +2278,7 @@ input ContainerFilterInput {
   networks: NetworkFilterInput
   devices: DeviceFilterInput
   containerVolumes: ContainerVolumeFilterInput
+  deviceMappings: DeviceMappingFilterInput
 }
 
 input ContainerSortInput {
@@ -2246,6 +2387,25 @@ type Container {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerVolumeConnection!
+  deviceMappings(
+    "How to sort the records in the response"
+    sort: [DeviceMappingSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceMappingFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceMappingConnection!
 }
 
 "The result of the :delete_application mutation"
@@ -2277,33 +2437,27 @@ enum ApplicationSortField {
   ID
   NAME
   DESCRIPTION
-  SYSTEM_MODEL_ID
 }
 
-"A keyset page of :application"
-type KeysetPageOfApplication {
+":application connection"
+type ApplicationConnection {
   "Total count on all pages"
   count: Int
 
-  "The records contained in the page"
-  results: [Application!]
+  "Page information"
+  pageInfo: PageInfo!
 
-  "The first keyset in the results"
-  startKeyset: String
-
-  "The last keyset in the results"
-  endKeyset: String
+  ":application edges"
+  edges: [ApplicationEdge!]
 }
 
-input ApplicationFilterSystemModelId {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
+":application edge"
+type ApplicationEdge {
+  "Cursor"
+  cursor: String!
+
+  ":application node"
+  node: Application!
 }
 
 input ApplicationFilterDescription {
@@ -2350,9 +2504,7 @@ input ApplicationFilterInput {
   id: ApplicationFilterId
   name: ApplicationFilterName
   description: ApplicationFilterDescription
-  systemModelId: ApplicationFilterSystemModelId
   releases: ReleaseFilterInput
-  systemModel: SystemModelFilterInput
 }
 
 input ApplicationSortInput {
@@ -2364,7 +2516,6 @@ type Application implements Node {
   id: ID!
   name: String!
   description: String
-  systemModelId: Int
   releases(
     "How to sort the records in the response"
     sort: [ReleaseSortInput]
@@ -2384,7 +2535,6 @@ type Application implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ReleaseConnection!
-  systemModel: SystemModel
 }
 
 enum SystemModelPartNumberSortField {
@@ -2654,6 +2804,9 @@ input SystemModelFilterInput {
 
   "The Hardware type associated with the System Model"
   hardwareType: HardwareTypeFilterInput
+
+  "The various application releases that require the system model to be deployed."
+  releases: ReleaseFilterInput
 }
 
 input SystemModelSortInput {
@@ -2706,6 +2859,21 @@ type SystemModel implements Node {
 
   "The Hardware type associated with the System Model"
   hardwareType: HardwareType
+
+  "The various application releases that require the system model to be deployed."
+  releases(
+    "How to sort the records in the response"
+    sort: [ReleaseSortInput]
+
+    "A filter to limit the results"
+    filter: ReleaseFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [Release!]!
 
   "A list of descriptions in different languages."
   localizedDescriptions(preferredLanguageTags: [String!]): [LocalizedAttribute!]
@@ -4723,7 +4891,7 @@ type RootQueryType {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): KeysetPageOfApplication
+  ): ApplicationConnection
 
   "Returns the desired application."
   application("The id of the record" id: ID!): Application
@@ -4774,7 +4942,7 @@ type RootQueryType {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): KeysetPageOfImageCredentials
+  ): ImageCredentialsConnection
 
   "Returns the desired release."
   release("The id of the record" id: ID!): Release
@@ -4801,7 +4969,7 @@ type RootQueryType {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): KeysetPageOfNetwork
+  ): NetworkConnection
 
   "Returns the desired volume."
   volume("The id of the record" id: ID!): Volume
@@ -4825,7 +4993,7 @@ type RootQueryType {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): KeysetPageOfVolume
+  ): VolumeConnection
 
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!

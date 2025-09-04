@@ -19,9 +19,11 @@
 */
 
 import { FormattedMessage } from "react-intl";
-import { useCallback, useState } from "react";
-import { graphql, useFragment, useMutation } from "react-relay/hooks";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
 
+import type { ApplicationsTable_PaginationQuery } from "../api/__generated__/ApplicationsTable_PaginationQuery.graphql";
 import type {
   ApplicationsTable_ApplicationFragment$data,
   ApplicationsTable_ApplicationFragment$key,
@@ -29,19 +31,31 @@ import type {
 import type { ApplicationsTable_deleteApplication_Mutation } from "api/__generated__/ApplicationsTable_deleteApplication_Mutation.graphql";
 
 import { Link, Route } from "Navigation";
-import Table, { createColumnHelper } from "components/Table";
+import { createColumnHelper } from "components/Table";
 import DeleteModal from "components/DeleteModal";
 import Button from "components/Button";
 import Icon from "components/Icon";
+import InfiniteTable from "./InfiniteTable";
+
+const APPLICATIONS_TO_LOAD_FIRST = 40;
+const APPLICATIONS_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const APPLICATIONS_TABLE_FRAGMENT = graphql`
-  fragment ApplicationsTable_ApplicationFragment on Application
-  @relay(plural: true) {
-    id
-    name
-    description
+  fragment ApplicationsTable_ApplicationFragment on RootQueryType
+  @refetchable(queryName: "ApplicationsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "ApplicationFilterInput" }) {
+    applications(first: $first, after: $after, filter: $filter)
+      @connection(key: "ApplicationsTable_applications") {
+      edges {
+        node {
+          id
+          name
+          description
+        }
+      }
+    }
   }
 `;
 
@@ -55,7 +69,11 @@ const DELETE_APPLICATION_MUTATION = graphql`
   }
 `;
 
-type TableRecord = ApplicationsTable_ApplicationFragment$data[0];
+type TableRecord = NonNullable<
+  NonNullable<
+    ApplicationsTable_ApplicationFragment$data["applications"]
+  >["edges"]
+>[number]["node"];
 
 type ApplicationsTableProps = {
   className?: string;
@@ -70,10 +88,59 @@ const ApplicationsTable = ({
   hideSearch = false,
   setErrorFeedback,
 }: ApplicationsTableProps) => {
-  const applications = useFragment(
-    APPLICATIONS_TABLE_FRAGMENT,
-    applicationsRef,
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      ApplicationsTable_PaginationQuery,
+      ApplicationsTable_ApplicationFragment$key
+    >(APPLICATIONS_TABLE_FRAGMENT, applicationsRef);
+
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: APPLICATIONS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: APPLICATIONS_TO_LOAD_FIRST,
+              filter: {
+                or: [{ name: { ilike: `%${text}%` } }],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
   );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextApplications = useCallback(() => {
+    if (hasNext && !isLoadingNext) loadNext(APPLICATIONS_TO_LOAD_NEXT);
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const applications: TableRecord[] = useMemo(() => {
+    return (
+      data.applications?.edges
+        ?.map((edge) => edge?.node)
+        .filter(
+          (node): node is TableRecord => node !== undefined && node !== null,
+        ) ?? []
+    );
+  }, [data]);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedApplication, setSelectedApplication] =
     useState<TableRecord | null>(null);
@@ -185,11 +252,13 @@ const ApplicationsTable = ({
 
   return (
     <div>
-      <Table
+      <InfiniteTable
         className={className}
         columns={columns}
         data={applications}
-        hideSearch={hideSearch}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextApplications : undefined}
+        setSearchText={hideSearch ? undefined : setSearchText}
       />
       {showDeleteModal && (
         <DeleteModal

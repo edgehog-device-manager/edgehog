@@ -33,13 +33,15 @@ import NetworksTable from "components/NetworksTable";
 import Button from "components/Button";
 import { Link, Route } from "Navigation";
 
+const NETWORKS_TO_LOAD_FIRST = 40;
+
 const GET_NETWORKS_QUERY = graphql`
-  query Networks_getNetworks_Query {
-    networks {
-      results {
-        ...NetworksTable_NetworkFragment
-      }
-    }
+  query Networks_getNetworks_Query(
+    $first: Int
+    $after: String
+    $filter: NetworkFilterInput
+  ) {
+    ...NetworksTable_NetworkFragment @arguments(filter: $filter)
   }
 `;
 
@@ -48,7 +50,7 @@ interface NetworksContentProps {
 }
 
 const NetworksContent = ({ getNetworksQuery }: NetworksContentProps) => {
-  const { networks } = usePreloadedQuery(GET_NETWORKS_QUERY, getNetworksQuery);
+  const networksRef = usePreloadedQuery(GET_NETWORKS_QUERY, getNetworksQuery);
 
   return (
     <Page>
@@ -68,7 +70,7 @@ const NetworksContent = ({ getNetworksQuery }: NetworksContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <NetworksTable networksRef={networks?.results ?? []} />
+        <NetworksTable networksRef={networksRef} />
       </Page.Main>
     </Page>
   );
@@ -79,7 +81,11 @@ const NetworksPage = () => {
     useQueryLoader<Networks_getNetworks_Query>(GET_NETWORKS_QUERY);
 
   const fetchNetworks = useCallback(
-    () => getNetworks({}, { fetchPolicy: "store-and-network" }),
+    () =>
+      getNetworks(
+        { first: NETWORKS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
     [getNetworks],
   );
 

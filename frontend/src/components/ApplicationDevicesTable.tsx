@@ -39,8 +39,9 @@ import { Link, Route } from "Navigation";
 /* eslint-disable relay/unused-fields */
 const APPLICATION_DEVICES_TABLE_FRAGMENT = graphql`
   fragment ApplicationDevicesTable_ReleaseFragment on Application
-  @refetchable(queryName: "ApplicationDevicesTable_PaginationQuery") {
-    releases(first: $first, after: $after)
+  @refetchable(queryName: "ApplicationDevicesTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "ReleaseFilterInput" }) {
+    releases(first: $first, after: $after, filter: $filter)
       @connection(key: "ApplicationDevicesTable_releases") {
       edges {
         node {
