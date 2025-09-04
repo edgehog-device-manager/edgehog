@@ -41,6 +41,9 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
               node {
                 id
                 version
+                systemModels {
+                  name
+                }
               }
             }
           }
@@ -77,6 +80,7 @@ type AddAvailableApplicationsProps = {
 type SelectOption = {
   value: string;
   label: string;
+  disabled: boolean;
 };
 
 const AddAvailableApplications = ({
@@ -96,18 +100,20 @@ const AddAvailableApplications = ({
       GET_APPLICATIONS_WITH_RELEASES_QUERY,
       {
         filter: {
-          or: [
-            {
-              systemModel: {
-                name: { eq: systemModelName },
+          releases: {
+            or: [
+              {
+                systemModels: {
+                  name: { eq: systemModelName },
+                },
               },
-            },
-            {
-              systemModel: {
-                name: { isNil: true },
+              {
+                systemModels: {
+                  name: { isNil: true },
+                },
               },
-            },
-          ],
+            ],
+          },
         },
       },
       { fetchPolicy: "store-and-network" },
@@ -119,6 +125,7 @@ const AddAvailableApplications = ({
     return data.applications.edges.map((app) => ({
       value: app.node.id,
       label: app.node.name,
+      disabled: false,
     }));
   }, [data.applications?.edges]);
 
@@ -137,11 +144,23 @@ const AddAvailableApplications = ({
 
     if (!selectedApplication?.node.releases.edges) return [];
 
-    return selectedApplication.node.releases.edges.map(({ node }) => ({
-      value: node.id,
-      label: node.version,
-    }));
-  }, [selectedApp, data.applications?.edges]);
+    return selectedApplication.node.releases.edges.map(({ node: release }) => {
+      const systemModelNames = release.systemModels?.map((sm) => sm.name) ?? [];
+
+      const hasSystemModel = !!systemModelName;
+      const matchesSystemModel =
+        hasSystemModel && systemModelNames.includes(systemModelName);
+      const appliesToAll = systemModelNames.length === 0;
+
+      const enabled = matchesSystemModel || appliesToAll;
+
+      return {
+        value: release.id,
+        label: release.version,
+        disabled: !enabled,
+      };
+    });
+  }, [selectedApp, data.applications?.edges, systemModelName]);
 
   const selectedReleaseOption = useMemo(() => {
     return (
@@ -182,7 +201,7 @@ const AddAvailableApplications = ({
             releaseId: selectedRelease,
           },
         },
-        onCompleted: (data, errors) => {
+        onCompleted: (_data, errors) => {
           if (errors) {
             const errorFeedback = errors
               .map(({ fields, message }) =>
@@ -303,6 +322,7 @@ const AddAvailableApplications = ({
                 .includes(inputValue.toLowerCase());
             }}
             isDisabled={!selectedApp}
+            isOptionDisabled={(option) => option.disabled}
           />
         </Col>
       </Form.Group>
