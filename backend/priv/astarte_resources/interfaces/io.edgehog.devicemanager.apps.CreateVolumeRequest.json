@@ -40,7 +40,7 @@
       "database_retention_ttl": 31556952,
       "reliability": "guaranteed",
       "description": "Volume driver options",
-      "doc": "An array of key=value options. The key cannot contain `=`. to set for the driver."
+      "doc": "An array of key=value options to set for the driver. The key cannot contain an `=`."
     }
   ]
 }

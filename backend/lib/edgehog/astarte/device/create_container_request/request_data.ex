@@ -21,9 +21,6 @@
 defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
   @moduledoc false
 
-  # TODO the interface for now has the :image key, this is a device
-  # problem, once solved it should be removed
-
   defstruct [
     :id,
     :deploymentId,

@@ -24,7 +24,7 @@
       "database_retention_ttl": 600,
       "reliability": "guaranteed",
       "description": "Reference to a Deployment using the image",
-      "doc": "The deployment in which the image is used, so the device can send deployment events to Astarte for te create request"
+      "doc": "The deployment in which the image is used, so the device can send deployment events to Astarte for the create request"
     },
     {
       "endpoint": "/image/reference",

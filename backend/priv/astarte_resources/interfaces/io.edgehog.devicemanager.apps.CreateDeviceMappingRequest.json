@@ -16,6 +16,15 @@
       "doc": "Unique id for the container."
     },
     {
+      "endpoint": "/deviceMapping/deploymentId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Reference to a Deployment using the device mapping",
+      "doc": "The deployment in which the device mapping is used, so the device can send deployment events to Astarte for the create request"
+    },
+    {
       "endpoint": "/deviceMapping/pathOnHost",
       "type": "string",
       "database_retention_policy": "use_ttl",
@@ -30,7 +39,8 @@
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
       "reliability": "guaranteed",
-      "description": "Path in the container for the device"
+      "description": "Path in the container for the device",
+      "doc": "Path in the container for the device, for example '/dev/deviceName'"
     },
     {
       "endpoint": "/deviceMapping/cGroupPermissions",
