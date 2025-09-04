@@ -269,6 +269,39 @@ app_nginx_8081 =
     tenant: tenant
   )
 
+self_hosted_credentials =
+  Ash.create!(
+    ImageCredentials,
+    %{label: "Self-hosted registry credentials", username: "admin", password: "admin"},
+    tenant: tenant
+  )
+
+app_test_dev_self_hosted =
+  Ash.create!(
+    Application,
+    %{
+      name: "Self-hosted app",
+      description: "It was sample for self-hosted deployments.",
+      initial_release: %{
+        version: "0.0.1",
+        containers: [
+          %{
+            image: %{
+              reference: "registry.edgehog.localhost/test/http-echo:latest",
+              image_credentials_id: self_hosted_credentials.id
+            },
+            restart_policy: :unless_stopped,
+            hostname: "",
+            env: %{},
+            privileged: false,
+            port_bindings: ["5678:5678"]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
 image_credentials =
   Ash.create!(
     ImageCredentials,
