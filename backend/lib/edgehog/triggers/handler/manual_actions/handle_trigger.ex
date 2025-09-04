@@ -274,9 +274,19 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
           |> Containers.mark_deployment_as_starting!(tenant: tenant)
           |> Containers.deployment_update_resources_state(tenant: tenant)
 
+        "Started" ->
+          deployment
+          |> Containers.mark_deployment_as_started!(tenant: tenant)
+          |> Containers.deployment_update_resources_state(tenant: tenant)
+
         "Stopping" ->
           deployment
           |> Containers.mark_deployment_as_stopping!(tenant: tenant)
+          |> Containers.deployment_update_resources_state(tenant: tenant)
+
+        "Stopped" ->
+          deployment
+          |> Containers.mark_deployment_as_stopped!(tenant: tenant)
           |> Containers.deployment_update_resources_state(tenant: tenant)
 
         "Error" ->

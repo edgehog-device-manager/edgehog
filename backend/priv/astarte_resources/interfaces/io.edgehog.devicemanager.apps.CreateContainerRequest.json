@@ -130,7 +130,7 @@
       "database_retention_ttl": 31556952,
       "reliability": "guaranteed",
       "description": "A list of kernel capabilities to add to the container.",
-      "doc": "A list of kernel capabilities to add to the container. Conflicts with option 'Capabilities'."
+      "doc": "A list of kernel capabilities to add to the container."
     },
     {
       "endpoint": "/container/capDrop",
@@ -139,7 +139,7 @@
       "database_retention_ttl": 31556952,
       "reliability": "guaranteed",
       "description": "A list of kernel capabilities to drop from the container.",
-      "doc": "A list of kernel capabilities to drop from the container. Conflicts with option 'Capabilities'."
+      "doc": "A list of kernel capabilities to drop from the container."
     },
     {
       "endpoint": "/container/cpuPeriod",
@@ -187,7 +187,7 @@
       "doc": "Memory limit in bytes. Default to 0 for unlimited. Unset if the value is -1 (or negative)."
     },
     {
-      "endpoint": "/container/memoryReservetion",
+      "endpoint": "/container/memoryReservation",
       "type": "longinteger",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,

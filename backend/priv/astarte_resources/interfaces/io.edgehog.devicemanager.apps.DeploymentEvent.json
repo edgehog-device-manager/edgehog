@@ -11,14 +11,16 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "explicit_timestamp": true,
       "description": "Deployment status",
-      "doc": "Possible values: [Starting, Stopping, Updating, Deleting, Error]"
+      "doc": "Possible values: [Starting, Started, Stopping, Stopped, Updating, Deleting, Error]"
     },
     {
       "endpoint": "/%{deployment_id}/message",
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 31556952,
+      "explicit_timestamp": true,
       "description": "Optional message for the event"
     }
   ]
