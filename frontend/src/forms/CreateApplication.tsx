@@ -18,14 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useMemo } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { graphql, useFragment } from "react-relay/hooks";
-import Select from "react-select";
-
-import type { CreateApplication_OptionsFragment$key } from "api/__generated__/CreateApplication_OptionsFragment.graphql";
 
 import Button from "components/Button";
 import Col from "components/Col";
@@ -34,19 +30,6 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { yup } from "forms";
-
-const CREATE_APPLICATION_FRAGMENT = graphql`
-  fragment CreateApplication_OptionsFragment on RootQueryType {
-    systemModels {
-      edges {
-        node {
-          id
-          handle
-        }
-      }
-    }
-  }
-`;
 
 const FormRow = ({
   id,
@@ -68,63 +51,35 @@ const FormRow = ({
 type ApplicationData = {
   name: string;
   description: string;
-  systemModelId: string;
 };
 
 const applicationSchema = yup
   .object({
     name: yup.string().required(),
     description: yup.string(),
-    systemModel: yup.string().nullable(),
   })
   .required();
 
 const initialData: ApplicationData = {
   name: "",
   description: "",
-  systemModelId: "",
 };
 
 type Props = {
-  optionsRef: CreateApplication_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: ApplicationData) => void;
 };
 
-const CreateApplication = ({
-  optionsRef,
-  isLoading = false,
-  onSubmit,
-}: Props) => {
-  const intl = useIntl();
-
-  const listSystemModel = useFragment(CREATE_APPLICATION_FRAGMENT, optionsRef);
-
-  const systemModelOptions =
-    listSystemModel?.systemModels?.edges?.map((e) => e.node) ?? [];
-
+const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
   } = useForm<ApplicationData>({
     mode: "onTouched",
     defaultValues: initialData,
     resolver: yupResolver(applicationSchema),
   });
-
-  const systemModelId = watch("systemModelId");
-
-  const selectedOption = useMemo(
-    () => systemModelOptions.find((opt) => opt.id === systemModelId) ?? null,
-    [systemModelId, systemModelOptions],
-  );
-
-  const handleOnChange = (newOption: { id: string } | null) => {
-    setValue("systemModelId", newOption?.id ?? "");
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -144,33 +99,6 @@ const CreateApplication = ({
               <FormattedMessage id={errors.name?.message} />
             )}
           </Form.Control.Feedback>
-        </FormRow>
-
-        <FormRow
-          id="application-form-systemModel"
-          label={
-            <FormattedMessage
-              id="components.CreateApplication.systemModelLabel"
-              defaultMessage="System Model"
-            />
-          }
-        >
-          <Select
-            value={selectedOption}
-            placeholder={intl.formatMessage({
-              id: "components.AddAvailableSystemModels.searchPlaceholder",
-              defaultMessage: "Search or select a system model...",
-            })}
-            onChange={handleOnChange}
-            options={systemModelOptions}
-            getOptionLabel={(option: { id: string; handle: string }) =>
-              option.handle
-            }
-            getOptionValue={(option: { id: string; handle: string }) =>
-              option.id
-            }
-            isClearable
-          />
         </FormRow>
 
         <FormRow

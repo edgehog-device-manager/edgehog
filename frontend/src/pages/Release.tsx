@@ -21,8 +21,12 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
+import {
+  graphql,
+  PreloadedQuery,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 
 import type {
@@ -37,6 +41,11 @@ import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import ContainersTable from "components/ContainersTable";
+import Table, { createColumnHelper } from "components/Table";
+import Stack from "components/Stack";
+import Button from "components/Button";
+import Icon from "components/Icon";
+import { Collapse } from "react-bootstrap";
 
 const CONTAINERS_TO_LOAD_FIRST = 5;
 
@@ -47,14 +56,96 @@ const GET_RELEASE_QUERY = graphql`
       application {
         name
       }
+      systemModels {
+        id
+        name
+      }
       ...ContainersTable_ContainerFragment
     }
   }
 `;
 
+type Release = NonNullable<Release_getRelease_Query$data["release"]>;
 interface ReleaseContentProps {
-  release: NonNullable<Release_getRelease_Query$data["release"]>;
+  release: Release;
 }
+type SystemModels = Release["systemModels"];
+
+// TODO: decide if include more information about the system models. if yes,
+// consider de-duplicate this code and use SysteemModelsTable instead
+type TableRecord = SystemModels[number];
+
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
+      <FormattedMessage
+        id="components.ReleasesSystemModelsTable.nameTitle"
+        defaultMessage="Name"
+      />
+    ),
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.systemModelsEdit}
+        params={{ systemModelId: row.original.id }}
+      >
+        {getValue()}
+      </Link>
+    ),
+  }),
+];
+
+type ReleaseSystemModelsProps = {
+  className?: string;
+  systemModels: SystemModels;
+};
+
+const ReleaseSystemModels = ({
+  className,
+  systemModels: data,
+}: ReleaseSystemModelsProps) => {
+  const [isOpenSysModsSection, setIsOpenSysModsSection] = useState(true);
+
+  const systemModels =
+    data?.filter((sm): sm is TableRecord => sm != null) ?? [];
+
+  return (
+    <div>
+      <Button
+        variant="light"
+        className="w-100 d-flex align-items-center fw-bold"
+        onClick={() => setIsOpenSysModsSection((prevState) => !prevState)}
+        aria-expanded={isOpenSysModsSection}
+      >
+        <FormattedMessage
+          id="pages.Release.systemModels"
+          defaultMessage="System Models"
+        />
+        <span className="ms-auto">
+          {isOpenSysModsSection ? (
+            <Icon icon="caretUp" />
+          ) : (
+            <Icon icon="caretDown" />
+          )}
+        </span>
+      </Button>
+      <Collapse in={isOpenSysModsSection}>
+        <div className="p-2 border-top">
+          {systemModels.length ? (
+            <Table
+              className={className}
+              columns={columns}
+              data={systemModels}
+              hideSearch
+            />
+          ) : (
+            "No required system model. This release can be applied to any device."
+          )}
+        </div>
+      </Collapse>
+    </div>
+  );
+};
 
 const ReleaseContent = ({ release }: ReleaseContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
@@ -65,15 +156,18 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         title={`${release.application?.name ?? ""} (v${release.version})`}
       />
       <Page.Main>
-        <Alert
-          show={!!errorFeedback}
-          variant="danger"
-          onClose={() => setErrorFeedback(null)}
-          dismissible
-        >
-          {errorFeedback}
-        </Alert>
-        <ContainersTable containersRef={release} />
+        <Stack gap={2}>
+          <Alert
+            show={!!errorFeedback}
+            variant="danger"
+            onClose={() => setErrorFeedback(null)}
+            dismissible
+          >
+            {errorFeedback}
+          </Alert>
+          <ReleaseSystemModels systemModels={release["systemModels"]} />
+          <ContainersTable containersRef={release} />
+        </Stack>
       </Page.Main>
     </Page>
   );

@@ -37,9 +37,11 @@ import type {
   CreateRelease_VolumesOptionsFragment$key,
   CreateRelease_VolumesOptionsFragment$data,
 } from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
+import type { CreateRelease_SystemModelsOptionsFragment$key } from "api/__generated__/CreateRelease_SystemModelsOptionsFragment.graphql";
 import {
   ContainerCreateWithNestedNetworksInput,
   ContainerCreateWithNestedVolumesInput,
+  ReleaseCreateRequiredSystemModelsInput,
 } from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
 import type {
@@ -106,6 +108,19 @@ const VOLUMES_OPTIONS_FRAGMENT = graphql`
   }
 `;
 
+const SYSTEM_MODELS_OPTIONS_FRAGMENT = graphql`
+  fragment CreateRelease_SystemModelsOptionsFragment on RootQueryType {
+    systemModels {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
   query CreateRelease_getApplicationsWithReleases_Query {
     applications {
@@ -155,6 +170,10 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
                       }
                     }
                   }
+                }
+                systemModels {
+                  id
+                  name
                 }
               }
             }
@@ -242,11 +261,13 @@ type ContainerInput = {
 type ReleaseInputData = {
   version: string;
   containers?: ContainerInput[] | null;
+  requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
 };
 
 type ReleaseSubmitData = {
   version: string;
   containers?: ContainerSubmit[] | null;
+  requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
 };
 
 type ContainerSubmit = Omit<ContainerInput, "portBindings"> & {
@@ -362,12 +383,16 @@ const applicationSchema = yup
         }),
       )
       .nullable(),
+    requiredSystemModels: yup.array(
+      yup.object({ id: yup.string().required() }),
+    ),
   })
   .required();
 
 const initialData: ReleaseInputData = {
   version: "",
   containers: null,
+  requiredSystemModels: [],
 };
 
 const restartPolicyOptions = [
@@ -381,6 +406,7 @@ type CreateReleaseProps = {
   imageCredentialsOptionsRef: CreateRelease_ImageCredentialsOptionsFragment$key;
   networksOptionsRef: CreateRelease_NetworksOptionsFragment$key;
   volumesOptionsRef: CreateRelease_VolumesOptionsFragment$key;
+  requiredSystemModelsOptionsRef: CreateRelease_SystemModelsOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: ReleaseSubmitData) => void;
 };
@@ -1313,6 +1339,7 @@ const CreateRelease = ({
   imageCredentialsOptionsRef,
   networksOptionsRef,
   volumesOptionsRef,
+  requiredSystemModelsOptionsRef,
   isLoading = false,
   onSubmit,
 }: CreateReleaseProps) => {
@@ -1328,6 +1355,10 @@ const CreateRelease = ({
     networksOptionsRef,
   );
   const { volumes } = useFragment(VOLUMES_OPTIONS_FRAGMENT, volumesOptionsRef);
+  const { systemModels: requiredSystemModels } = useFragment(
+    SYSTEM_MODELS_OPTIONS_FRAGMENT,
+    requiredSystemModelsOptionsRef,
+  );
 
   const {
     register,
@@ -1356,10 +1387,12 @@ const CreateRelease = ({
 
   const [showModal, setShowModal] = useState(false);
 
-  const [selectedRelease, setSelectedRelease] =
-    useState<SingleValue<{ value: string; label: string }>>(null);
+  const [
+    selectedContainersTemplateRelease,
+    setSelectedContainersTemplateRelease,
+  ] = useState<SingleValue<{ value: string; label: string }>>(null);
 
-  const [selectedApp, setSelectedApp] =
+  const [selectedContainersTemplateApp, setSelectedContainersTemplateApp] =
     useState<
       SingleValue<{ value: string; label: string; releases: ReleaseNode[] }>
     >(null);
@@ -1409,6 +1442,7 @@ const CreateRelease = ({
                 ? container.capDrop
                 : undefined,
             })),
+            requiredSystemModels: data.requiredSystemModels,
           };
 
           onSubmit(submitData);
@@ -1434,6 +1468,46 @@ const CreateRelease = ({
                 <FormattedMessage id={errors.version.message} />
               )}
             </Form.Control.Feedback>
+          </FormRow>
+
+          <FormRow
+            id="application-release-form-required-system-models"
+            label={
+              <FormattedMessage
+                id="components.CreateRelease.requiredSystemModelsLabels"
+                defaultMessage="Required System Models"
+              />
+            }
+          >
+            <Controller
+              control={control}
+              name="requiredSystemModels"
+              render={({ field: { value, onChange, onBlur } }) => {
+                const nodes =
+                  requiredSystemModels?.edges?.map(({ node }) => node) || [];
+                const options = nodes.map((n) => ({
+                  value: n.id,
+                  label: n.name,
+                }));
+                const mappedValue = (value || []).map((v) => {
+                  const node = nodes.find((sm) => sm.id === v.id);
+                  return { value: v.id ?? "", label: node?.name ?? v.id ?? "" };
+                });
+
+                return (
+                  <MultiSelect
+                    value={mappedValue}
+                    onChange={(selected) =>
+                      onChange(selected.map(({ value }) => ({ id: value })))
+                    }
+                    onBlur={onBlur}
+                    options={options}
+                    getOptionValue={(option) => option.value}
+                    getOptionLabel={(option) => option.label}
+                  />
+                );
+              }}
+            />
           </FormRow>
 
           <Stack className="mt-3">
@@ -1527,10 +1601,14 @@ const CreateRelease = ({
           }
           onCancel={() => setShowModal(false)}
           onConfirm={() => {
-            if (!selectedRelease || !selectedApp) return;
+            if (
+              !selectedContainersTemplateRelease ||
+              !selectedContainersTemplateApp
+            )
+              return;
 
-            const release = selectedApp?.releases?.find(
-              (r) => r.id === selectedRelease.value,
+            const release = selectedContainersTemplateApp?.releases?.find(
+              (r) => r.id === selectedContainersTemplateRelease.value,
             );
 
             if (!release) return;
@@ -1579,10 +1657,10 @@ const CreateRelease = ({
                 })}
               >
                 <Select
-                  value={selectedApp}
+                  value={selectedContainersTemplateApp}
                   onChange={(val) => {
-                    setSelectedApp(val);
-                    setSelectedRelease(null);
+                    setSelectedContainersTemplateApp(val);
+                    setSelectedContainersTemplateRelease(null);
                   }}
                   classNamePrefix="select"
                   isSearchable
@@ -1603,13 +1681,13 @@ const CreateRelease = ({
                 })}
               >
                 <Select
-                  isDisabled={!selectedApp}
-                  value={selectedRelease}
-                  onChange={(val) => setSelectedRelease(val)}
+                  isDisabled={!selectedContainersTemplateApp}
+                  value={selectedContainersTemplateRelease}
+                  onChange={(val) => setSelectedContainersTemplateRelease(val)}
                   classNamePrefix="select"
                   isSearchable
                   options={
-                    selectedApp?.releases?.map((rel) => ({
+                    selectedContainersTemplateApp?.releases?.map((rel) => ({
                       value: rel.id,
                       label: rel.version,
                     })) || []

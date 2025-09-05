@@ -49,6 +49,7 @@ const CREATE_RELEASE_PAGE_QUERY = graphql`
     ...CreateRelease_ImageCredentialsOptionsFragment
     ...CreateRelease_NetworksOptionsFragment
     ...CreateRelease_VolumesOptionsFragment
+    ...CreateRelease_SystemModelsOptionsFragment
   }
 `;
 
@@ -64,6 +65,9 @@ const CREATE_RELEASE_MUTATION = graphql`
               id
             }
           }
+        }
+        systemModels {
+          id
         }
       }
     }
@@ -147,6 +151,7 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
         imageCredentialsOptionsRef={releaseOptions}
         networksOptionsRef={releaseOptions}
         volumesOptionsRef={releaseOptions}
+        requiredSystemModelsOptionsRef={releaseOptions}
         onSubmit={handleCreateRelease}
         isLoading={isCreatingRelease}
       />

@@ -96,10 +96,18 @@ defmodule Edgehog.Containers do
         description "Create a new application."
 
         relay_id_translations input: [
-                                system_model_id: :system_model,
                                 initial_release: [
                                   containers: [
-                                    image: [image_credentials_id: :image_credentials]
+                                    image: [image_credentials_id: :image_credentials],
+                                    networks: [
+                                      id: :network
+                                    ],
+                                    volumes: [
+                                      id: :volume
+                                    ]
+                                  ],
+                                  required_system_models: [
+                                    id: :system_model
                                   ]
                                 ]
                               ]
@@ -122,6 +130,9 @@ defmodule Edgehog.Containers do
                                   volumes: [
                                     id: :volume
                                   ]
+                                ],
+                                required_system_models: [
+                                  id: :system_model
                                 ]
                               ]
       end
