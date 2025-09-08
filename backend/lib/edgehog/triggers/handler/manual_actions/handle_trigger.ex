@@ -38,6 +38,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @available_images "io.edgehog.devicemanager.apps.AvailableImages"
   @available_networks "io.edgehog.devicemanager.apps.AvailableNetworks"
   @available_volumes "io.edgehog.devicemanager.apps.AvailableVolumes"
+  @available_device_mappings "io.edgehog.devicemanager.apps.AvailableDeviceMappings"
   @deployment_event "io.edgehog.devicemanager.apps.DeploymentEvent"
   @ota_event "io.edgehog.devicemanager.OTAEvent"
   @ota_response "io.edgehog.devicemanager.OTAResponse"
@@ -202,6 +203,46 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         releases =
           containers
           |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
+          |> Enum.map(& &1.release_id)
+          |> Enum.uniq()
+
+        deployments =
+          releases
+          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
+          |> Enum.uniq_by(& &1.id)
+
+        {:ok, Enum.map(deployments, &Containers.deployment_update_resources_state!/1)}
+
+      _ ->
+        {:error, :invalid_event_path}
+    end
+  end
+
+  defp handle_event(%IncomingData{interface: @available_device_mappings} = event, tenant, realm_id, device_id, _timestamp) do
+    device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
+
+    case String.split(event.path, "/") do
+      ["", device_mapping_id, "present"] ->
+        device_mapping_deployment =
+          Containers.fetch_device_mapping_deployment(device_mapping_id, device.id, tenant: tenant)
+
+        if event.value,
+          do:
+            Containers.mark_device_mapping_deployment_as_present(device_mapping_deployment,
+              tenant: tenant
+            ),
+          else:
+            Containers.mark_device_mapping_deployment_as_not_present(device_mapping_deployment,
+              tenant: tenant
+            )
+
+        device_mapping_deployment = Ash.load!(device_mapping_deployment, :device_mapping)
+
+        container_id = device_mapping_deployment.device_mapping.container_id
+
+        releases =
+          container_id
+          |> Containers.releases_with_container!(tenant: tenant, load: :release)
           |> Enum.map(& &1.release_id)
           |> Enum.uniq()
 

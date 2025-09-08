@@ -70,6 +70,10 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
       change set_attribute(:state, :present)
     end
 
+    update :mark_as_not_present do
+      change set_attribute(:state, :not_present)
+    end
+
     update :mark_as_errored do
       argument :message, :string do
         allow_nil? false
@@ -87,7 +91,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
 
     attribute :state, :atom,
       constraints: [
-        one_of: [:created, :sent, :present, :error]
+        one_of: [:created, :sent, :present, :not_present, :error]
       ]
 
     timestamps()
@@ -102,7 +106,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state == :present)
+    calculate :ready?, :boolean, expr(state in [:present, :not_present])
   end
 
   identities do
