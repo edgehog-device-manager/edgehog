@@ -481,7 +481,7 @@ const ContainerForm = ({
     <div className="border p-3 mb-3">
       <h5>
         <FormattedMessage
-          id="components.CreateRelease.containerTitle"
+          id="forms.CreateRelease.containerTitle"
           defaultMessage="Container {containerNumber}"
           values={{ containerNumber: index + 1 }}
         />
@@ -491,7 +491,7 @@ const ContainerForm = ({
           id={`containers-${index}-env`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.envLabel"
+              id="forms.CreateRelease.envLabel"
               defaultMessage="Environment (JSON String)"
             />
           }
@@ -516,7 +516,7 @@ const ContainerForm = ({
           id={`containers-${index}-extraHosts`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.extraHostsLabel"
+              id="forms.CreateRelease.extraHostsLabel"
               defaultMessage="Extra Hosts"
             />
           }
@@ -556,7 +556,7 @@ const ContainerForm = ({
                 onClick={handleAddExtraHost}
               >
                 <FormattedMessage
-                  id="components.CreateRelease.addExtraHostButton"
+                  id="forms.CreateRelease.addExtraHostButton"
                   defaultMessage="Add Extra Host"
                 />
               </Button>
@@ -568,7 +568,7 @@ const ContainerForm = ({
           id={`containers-${index}-image-reference`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.imageReferenceLabel"
+              id="forms.CreateRelease.imageReferenceLabel"
               defaultMessage="Image Reference"
             />
           }
@@ -591,7 +591,7 @@ const ContainerForm = ({
           id={`containers-${index}-image-credentials`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.imageCredentialsLabel"
+              id="forms.CreateRelease.imageCredentialsLabel"
               defaultMessage="Image Credentials"
             />
           }
@@ -635,7 +635,7 @@ const ContainerForm = ({
           id={`containers-${index}-hostname`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.hostnameLabel"
+              id="forms.CreateRelease.hostnameLabel"
               defaultMessage="Hostname"
             />
           }
@@ -658,7 +658,7 @@ const ContainerForm = ({
           id={`containers-${index}-networkMode`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.networkModeLabel"
+              id="forms.CreateRelease.networkModeLabel"
               defaultMessage="Network Mode"
             />
           }
@@ -681,7 +681,7 @@ const ContainerForm = ({
           id={`containers-${index}-networks`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.networksLabel"
+              id="forms.CreateRelease.networksLabel"
               defaultMessage="Networks"
             />
           }
@@ -721,7 +721,7 @@ const ContainerForm = ({
           id={`containers-${index}-portBindings`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.portBindingsLabel"
+              id="forms.CreateRelease.portBindingsLabel"
               defaultMessage="Port Bindings"
             />
           }
@@ -745,7 +745,7 @@ const ContainerForm = ({
           id={`containers-${index}-restartPolicy`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.restartPolicyLabel"
+              id="forms.CreateRelease.restartPolicyLabel"
               defaultMessage="Restart Policy"
             />
           }
@@ -757,7 +757,7 @@ const ContainerForm = ({
           >
             <option value="" disabled>
               {intl.formatMessage({
-                id: "components.CreateRelease.restartPolicyOption",
+                id: "forms.CreateRelease.restartPolicyOption",
                 defaultMessage: "Select a Restart Policy",
               })}
             </option>
@@ -818,7 +818,7 @@ const ContainerForm = ({
                         id={`containers-${index}-volumeId`}
                         label={
                           <FormattedMessage
-                            id="components.CreateRelease.volumeSelectLabel"
+                            id="forms.CreateRelease.volumeSelectLabel"
                             defaultMessage="Volume:"
                           />
                         }
@@ -848,7 +848,7 @@ const ContainerForm = ({
                                   options={selectOptions}
                                   noOptionsMessage={() => (
                                     <FormattedMessage
-                                      id="components.CreateRelease.noVolumesMessage"
+                                      id="forms.CreateRelease.noVolumesMessage"
                                       defaultMessage="No volumes available"
                                     />
                                   )}
@@ -872,7 +872,7 @@ const ContainerForm = ({
                         id={`containers-${index}-volumeTarget`}
                         label={
                           <FormattedMessage
-                            id="components.CreateRelease.volumeTargetLabel"
+                            id="forms.CreateRelease.volumeTargetLabel"
                             defaultMessage="Target:"
                           />
                         }
@@ -924,7 +924,7 @@ const ContainerForm = ({
           id={`containers-${index}-memory`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memoryLabel"
+              id="forms.CreateRelease.memoryLabel"
               defaultMessage="Memory (bytes)"
             />
           }
@@ -948,7 +948,7 @@ const ContainerForm = ({
           id={`containers-${index}-memoryReservation`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memoryReservationLabel"
+              id="forms.CreateRelease.memoryReservationLabel"
               defaultMessage="Memory Reservation (bytes)"
             />
           }
@@ -974,7 +974,7 @@ const ContainerForm = ({
           id={`containers-${index}-memorySwap`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memorySwapLabel"
+              id="forms.CreateRelease.memorySwapLabel"
               defaultMessage="Memory Swap (bytes)"
             />
           }
@@ -1000,7 +1000,7 @@ const ContainerForm = ({
           id={`containers-${index}-memorySwappiness`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memorySwappinessLabel"
+              id="forms.CreateRelease.memorySwappinessLabel"
               defaultMessage="Memory Swappiness (0-100)"
             />
           }
@@ -1026,7 +1026,7 @@ const ContainerForm = ({
           id={`containers-${index}-cpuPeriod`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuPeriodLabel"
+              id="forms.CreateRelease.cpuPeriodLabel"
               defaultMessage="CPU Period (microseconds)"
             />
           }
@@ -1052,7 +1052,7 @@ const ContainerForm = ({
           id={`containers-${index}-cpuQuota`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuQuotaLabel"
+              id="forms.CreateRelease.cpuQuotaLabel"
               defaultMessage="CPU Quota (microseconds)"
             />
           }
@@ -1078,7 +1078,7 @@ const ContainerForm = ({
           id={`containers-${index}-cpuRealtimePeriod`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuRealtimePeriodLabel"
+              id="forms.CreateRelease.cpuRealtimePeriodLabel"
               defaultMessage="CPU Real-Time Period (microseconds)"
             />
           }
@@ -1104,7 +1104,7 @@ const ContainerForm = ({
           id={`containers-${index}-cpuRealtimeRuntime`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuRealtimeRuntimeLabel"
+              id="forms.CreateRelease.cpuRealtimeRuntimeLabel"
               defaultMessage="CPU Real-Time Runtime (microseconds)"
             />
           }
@@ -1130,7 +1130,7 @@ const ContainerForm = ({
           id={`containers-${index}-privileged`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.privilegedLabel"
+              id="forms.CreateRelease.privilegedLabel"
               defaultMessage="Privileged"
             />
           }
@@ -1153,7 +1153,7 @@ const ContainerForm = ({
           id={`containers-${index}-readOnlyRootfs`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.readOnlyRootfsLabel"
+              id="forms.CreateRelease.readOnlyRootfsLabel"
               defaultMessage="Read-Only Root Filesystem"
             />
           }
@@ -1176,7 +1176,7 @@ const ContainerForm = ({
           id={`containers-${index}-storageOpt`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.storageOptLabel"
+              id="forms.CreateRelease.storageOptLabel"
               defaultMessage="Storage Options"
             />
           }
@@ -1208,7 +1208,7 @@ const ContainerForm = ({
           id={`containers-${index}-tmpfs`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.tmpfsLabel"
+              id="forms.CreateRelease.tmpfsLabel"
               defaultMessage="Tmpfs Mounts"
             />
           }
@@ -1240,7 +1240,7 @@ const ContainerForm = ({
           id={`containers-${index}-capAdd`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.capAddLabel"
+              id="forms.CreateRelease.capAddLabel"
               defaultMessage="Cap Add"
             />
           }
@@ -1273,7 +1273,7 @@ const ContainerForm = ({
           id={`containers-${index}-capDrop`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.capDropLabel"
+              id="forms.CreateRelease.capDropLabel"
               defaultMessage="Cap Drop"
             />
           }
@@ -1309,7 +1309,7 @@ const ContainerForm = ({
           id={`containers-${index}-volumeDriver`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.volumeDriverLabel"
+              id="forms.CreateRelease.volumeDriverLabel"
               defaultMessage="Volume Driver"
             />
           }
@@ -1335,7 +1335,7 @@ const ContainerForm = ({
             className="mt-3"
           >
             <FormattedMessage
-              id="components.CreateRelease.removeContainerButton"
+              id="forms.CreateRelease.removeContainerButton"
               defaultMessage="Remove Container"
             />
           </Button>
@@ -1471,7 +1471,7 @@ const CreateRelease = ({
             id="application-form-version"
             label={
               <FormattedMessage
-                id="components.CreateRelease.versionLabel"
+                id="forms.CreateRelease.versionLabel"
                 defaultMessage="Version"
               />
             }
@@ -1492,7 +1492,7 @@ const CreateRelease = ({
             id="application-release-form-required-system-models"
             label={
               <FormattedMessage
-                id="components.CreateRelease.requiredSystemModelsLabels"
+                id="forms.CreateRelease.requiredSystemModelsLabels"
                 defaultMessage="Required System Models"
               />
             }
@@ -1531,14 +1531,14 @@ const CreateRelease = ({
           <Stack className="mt-3">
             <h5>
               <FormattedMessage
-                id="components.CreateRelease.containersTitle"
+                id="forms.CreateRelease.containersTitle"
                 defaultMessage="Containers"
               />
             </h5>
             {fields.length === 0 && (
               <p>
                 <FormattedMessage
-                  id="components.CreateRelease.noContainersFeedback"
+                  id="forms.CreateRelease.noContainersFeedback"
                   defaultMessage="The release does not include any container."
                 />
               </p>
@@ -1566,7 +1566,7 @@ const CreateRelease = ({
               onClick={() => append({ image: { reference: "" } })}
             >
               <FormattedMessage
-                id="components.CreateRelease.addContainerButton"
+                id="forms.CreateRelease.addContainerButton"
                 defaultMessage="Add Container"
               />
             </Button>
@@ -1574,14 +1574,14 @@ const CreateRelease = ({
             <Button
               variant="primary"
               title={intl.formatMessage({
-                id: "components.CreateRelease.reuseResourcesTitleButton",
+                id: "forms.CreateRelease.reuseResourcesTitleButton",
                 defaultMessage:
                   "Copy containers and their configurations from an existing release",
               })}
               onClick={() => setShowModal(true)}
             >
               <FormattedMessage
-                id="components.CreateRelease.reuseResourcesButton"
+                id="forms.CreateRelease.reuseResourcesButton"
                 defaultMessage="Reuse Containers"
               />
             </Button>
@@ -1591,7 +1591,7 @@ const CreateRelease = ({
             <Button variant="primary" type="submit" disabled={isLoading}>
               {isLoading && <Spinner size="sm" className="me-2" />}
               <FormattedMessage
-                id="components.CreateRelease.submitButton"
+                id="forms.CreateRelease.submitButton"
                 defaultMessage="Create"
               />
             </Button>
@@ -1602,12 +1602,12 @@ const CreateRelease = ({
       {showModal && (
         <ConfirmModal
           title={intl.formatMessage({
-            id: "components.CreateRelease.reuseResourcesModalTitle",
+            id: "forms.CreateRelease.reuseResourcesModalTitle",
             defaultMessage: "Reuse Resources Modal",
           })}
           confirmLabel={
             <FormattedMessage
-              id="components.CreateRelease.confirmButton"
+              id="forms.CreateRelease.confirmButton"
               defaultMessage="Confirm"
             />
           }
@@ -1655,7 +1655,7 @@ const CreateRelease = ({
         >
           <p>
             <FormattedMessage
-              id="components.CreateRelease.confirmPrompt"
+              id="forms.CreateRelease.confirmPrompt"
               defaultMessage="Choose a release from which you want to copy containers and their configurations."
             />
           </p>
@@ -1664,7 +1664,7 @@ const CreateRelease = ({
               <FormRow
                 id="containers-reuseResources-application"
                 label={intl.formatMessage({
-                  id: "components.CreateRelease.selectApplication",
+                  id: "forms.CreateRelease.selectApplication",
                   defaultMessage: "Select Application",
                 })}
               >
@@ -1688,7 +1688,7 @@ const CreateRelease = ({
               <FormRow
                 id="containers-reuseResources-release"
                 label={intl.formatMessage({
-                  id: "components.CreateRelease.selectRelease",
+                  id: "forms.CreateRelease.selectRelease",
                   defaultMessage: "Select Release",
                 })}
               >
