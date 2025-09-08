@@ -147,6 +147,7 @@ defmodule Edgehog.Containers.Deployment do
       change Changes.CheckContainers
       change Changes.CheckDeployment
 
+      # TODO: signal deployment state update when this is triggered
       require_atomic? false
     end
 
@@ -166,7 +167,7 @@ defmodule Edgehog.Containers.Deployment do
     end
 
     attribute :state, DeploymentState do
-      default :created
+      default :pending
       public? true
     end
 

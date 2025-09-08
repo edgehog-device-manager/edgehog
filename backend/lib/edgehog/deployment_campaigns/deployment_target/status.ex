@@ -18,20 +18,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Types.DeploymentState do
+defmodule Edgehog.DeploymentCampaigns.DeploymentTarget.Status do
   @moduledoc false
-
   use Ash.Type.Enum,
     values: [
-      pending: "The deployment has been created in the database layer, the device yet has to receive it.",
-      sent: "The deployment description has been sent to the device.",
-      deleting: "The device is deleting the deployment.",
-      error: "The device reported an error. Check `last_error_message` for the error message.",
-      started: "The deployment is started on the device.",
-      starting: "The device is starting the deployment.",
-      stopped: "The deployment is stopped on the device.",
-      stopping: "The device is stopping the deployment."
+      idle: "The deployment target is waiting for the deployment to start.",
+      in_progress: "The deployment is in progress.",
+      failed: "Something went wrong while deploying the target.",
+      successful: "The release has been successfully deployed to the target."
     ]
 
-  def graphql_type(_), do: :application_deployment_state
+  def graphql_type(_), do: :deployment_target_status
 end
