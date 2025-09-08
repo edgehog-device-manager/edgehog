@@ -80,7 +80,7 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
           memorySwappiness
           cpuPeriod
           cpuQuota
-          cpuRealTimePeriod
+          cpuRealtimePeriod
           cpuRealtimeRuntime
           tmpfs
           storageOpt
@@ -639,15 +639,15 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
       </FormRow>
 
       <FormRow
-        id={`containers-${index}-cpuRealTimePeriod`}
+        id={`containers-${index}-cpuRealtimePeriod`}
         label={
           <FormattedMessage
-            id="components.ContainersTable.cpuRealTimePeriodLabel"
+            id="components.ContainersTable.cpuRealtimePeriodLabel"
             defaultMessage="CPU Real Time Period (in microseconds)"
           />
         }
       >
-        <Form.Control value={container.cpuRealTimePeriod ?? ""} readOnly />
+        <Form.Control value={container.cpuRealtimePeriod ?? ""} readOnly />
       </FormRow>
 
       <FormRow

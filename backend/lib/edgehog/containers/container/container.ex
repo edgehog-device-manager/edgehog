@@ -58,7 +58,7 @@ defmodule Edgehog.Containers.Container do
         :cap_drop,
         :cpu_period,
         :cpu_quota,
-        :cpu_real_time_period,
+        :cpu_realtime_period,
         :cpu_realtime_runtime,
         :memory,
         :memory_reservation,
@@ -83,7 +83,7 @@ defmodule Edgehog.Containers.Container do
         :cap_drop,
         :cpu_period,
         :cpu_quota,
-        :cpu_real_time_period,
+        :cpu_realtime_period,
         :cpu_realtime_runtime,
         :memory,
         :memory_reservation,
@@ -110,7 +110,7 @@ defmodule Edgehog.Containers.Container do
         :cap_drop,
         :cpu_period,
         :cpu_quota,
-        :cpu_real_time_period,
+        :cpu_realtime_period,
         :cpu_realtime_runtime,
         :memory,
         :memory_reservation,
@@ -163,7 +163,7 @@ defmodule Edgehog.Containers.Container do
         :cap_drop,
         :cpu_period,
         :cpu_quota,
-        :cpu_real_time_period,
+        :cpu_realtime_period,
         :cpu_realtime_runtime,
         :memory,
         :memory_reservation,
@@ -263,7 +263,7 @@ defmodule Edgehog.Containers.Container do
       allow_nil? false
     end
 
-    attribute :cpu_real_time_period, :integer do
+    attribute :cpu_realtime_period, :integer do
       default -1
       public? true
       allow_nil? false

@@ -139,7 +139,7 @@
       "primary_key?": false,
       "references": null,
       "size": null,
-      "source": "cpu_real_time_period",
+      "source": "cpu_realtime_period",
       "type": "bigint"
     },
     {

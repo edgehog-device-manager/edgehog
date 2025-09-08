@@ -31,7 +31,7 @@ defmodule Edgehog.Repo.Migrations.AddQuotasToCreateContainer do
     alter table(:containers) do
       add :cpu_period, :bigint, null: false, default: -1
       add :cpu_quota, :bigint, null: false, default: -1
-      add :cpu_real_time_period, :bigint, null: false, default: -1
+      add :cpu_realtime_period, :bigint, null: false, default: -1
       add :cpu_realtime_runtime, :bigint, null: false, default: -1
       add :memory, :bigint, null: false, default: -1
       add :memory_reservation, :bigint, null: false, default: -1
@@ -55,7 +55,7 @@ defmodule Edgehog.Repo.Migrations.AddQuotasToCreateContainer do
       remove :memory_reservation
       remove :memory
       remove :cpu_realtime_runtime
-      remove :cpu_real_time_period
+      remove :cpu_realtime_period
       remove :cpu_quota
       remove :cpu_period
     end

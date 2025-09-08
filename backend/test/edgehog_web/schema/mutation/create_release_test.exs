@@ -363,7 +363,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         "privileged" => false,
         "cpuPeriod" => 300,
         "cpuQuota" => 30,
-        "cpuRealTimePeriod" => 100,
+        "cpuRealtimePeriod" => 100,
         "cpuRealtimeRuntime" => 90,
         "memory" => 2048,
         "memoryReservation" => 1024,
@@ -390,7 +390,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
                   id
                   cpuPeriod
                   cpuQuota
-                  cpuRealTimePeriod
+                  cpuRealtimePeriod
                   cpuRealtimeRuntime
                   memory
                   memoryReservation
