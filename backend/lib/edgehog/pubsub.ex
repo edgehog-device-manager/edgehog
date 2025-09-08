@@ -23,7 +23,7 @@ defmodule Edgehog.PubSub do
   This module implements a PubSub system for events happening inside Edgehog
   """
 
-  alias Edgehog.Containers.Container.Deployment
+  alias Edgehog.Containers.Deployment
   alias Edgehog.OSManagement.OTAOperation
 
   @type event ::
