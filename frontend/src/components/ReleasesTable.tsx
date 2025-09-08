@@ -152,13 +152,21 @@ const ReleasesTable = ({
           const applicationRecord = store.get(applicationId);
           if (!applicationRecord) return;
 
-          const connection = ConnectionHandler.getConnection(
+          const releasesConnection = ConnectionHandler.getConnection(
             applicationRecord,
             "ReleasesTable_releases",
           );
-          if (!connection) return;
+          if (!releasesConnection) return;
 
-          ConnectionHandler.deleteNode(connection, deletedId);
+          ConnectionHandler.deleteNode(releasesConnection, deletedId);
+
+          const devicesConnection = ConnectionHandler.getConnection(
+            applicationRecord,
+            "ApplicationDevicesTable_releases",
+          );
+          if (!devicesConnection) return;
+
+          ConnectionHandler.deleteNode(devicesConnection, deletedId);
 
           store.delete(deletedId);
         },
