@@ -245,7 +245,7 @@ type ContainerInput = {
   memorySwap?: number;
   memorySwappiness?: number;
   networkMode?: string;
-  networks: ContainerCreateWithNestedNetworksInput[];
+  networks?: ContainerCreateWithNestedNetworksInput[];
   portBindings?: string;
   privileged?: boolean;
   readOnlyRootfs?: boolean;
@@ -255,7 +255,7 @@ type ContainerInput = {
   capAdd?: string[];
   capDrop?: string[];
   volumeDriver?: string;
-  volumes: ContainerCreateWithNestedVolumesInput[];
+  volumes?: ContainerCreateWithNestedVolumesInput[];
 };
 
 type ReleaseInputData = {
@@ -367,19 +367,25 @@ const applicationSchema = yup
             .string()
             .nullable()
             .transform((value) => value?.trim()),
-          networks: yup.array(
-            yup.object({
-              id: yup.string().required(),
-            }),
-          ),
-          volumes: yup.array(
-            yup
-              .object({
-                id: yup.string(),
-                target: yup.string().required(),
-              })
-              .required(),
-          ),
+          networks: yup
+            .array(
+              yup
+                .object({
+                  id: yup.string(),
+                })
+                .required(),
+            )
+            .nullable(),
+          volumes: yup
+            .array(
+              yup
+                .object({
+                  id: yup.string(),
+                  target: yup.string().required(),
+                })
+                .required(),
+            )
+            .nullable(),
         }),
       )
       .nullable(),
@@ -1405,7 +1411,7 @@ const CreateRelease = ({
             ...data,
             containers: data.containers?.map((container) => ({
               env: container.env || undefined,
-              extra_hosts: container.extraHosts || undefined,
+              extraHosts: container.extraHosts || undefined,
               image: {
                 reference: container.image.reference,
                 imageCredentialsId:
@@ -1432,11 +1438,8 @@ const CreateRelease = ({
                     .split(",")
                     .map((v) => v.trim()) as string[])
                 : undefined,
-              networks: container.networks?.map((n) => ({ id: n.id })) || [],
-              volumes: container.volumes?.map((v) => ({
-                id: v.id,
-                target: v.target,
-              })),
+              networks: container.networks || undefined,
+              volumes: container.volumes || undefined,
               capAdd: container.capAdd?.length ? container.capAdd : undefined,
               capDrop: container.capDrop?.length
                 ? container.capDrop
@@ -1545,13 +1548,7 @@ const CreateRelease = ({
           <div className="d-flex justify-content-start align-items-center gap-2">
             <Button
               variant="secondary"
-              onClick={() =>
-                append({
-                  image: { reference: "" },
-                  networks: [],
-                  volumes: [],
-                })
-              }
+              onClick={() => append({ image: { reference: "" } })}
             >
               <FormattedMessage
                 id="components.CreateRelease.addContainerButton"
