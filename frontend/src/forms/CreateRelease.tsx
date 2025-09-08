@@ -18,11 +18,11 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
@@ -493,13 +493,13 @@ type CreateReleaseProps = {
 type ContainerFormProps = {
   index: number;
   register: UseFormRegister<ReleaseInputData>;
-  errors: any;
+  errors: FieldErrors<ReleaseInputData>;
   remove: (index: number) => void;
   imageCredentials: Option[];
   networks: Option[];
   volumes: Option[];
   intl: ReturnType<typeof useIntl>;
-  control: any;
+  control: Control<ReleaseInputData>;
 };
 
 const ContainerForm = ({
@@ -523,22 +523,6 @@ const ContainerForm = ({
       control,
       name: `containers.${index}.volumes`,
     }) ?? [];
-
-  const extraHostsForm = useFieldArray({
-    control,
-    name: `containers.${index}.extraHosts`,
-  });
-
-  const handleAddExtraHost = useCallback(() => {
-    extraHostsForm.append("");
-  }, [extraHostsForm]);
-
-  const handleDeleteExtraHost = useCallback(
-    (i: number) => {
-      extraHostsForm.remove(i);
-    },
-    [extraHostsForm],
-  );
 
   const canAddVolume = volumesValues.every(
     (v) => v.id?.trim() && v.target?.trim(),
@@ -588,47 +572,81 @@ const ContainerForm = ({
             />
           }
         >
-          <div className="p-3 mb-3 bg-light border rounded">
-            <Stack gap={3}>
-              {extraHostsForm.fields.map((field, i) => (
-                <Stack direction="horizontal" gap={3} key={field.id}>
-                  <Stack>
-                    <Form.Control
-                      {...register(
-                        `containers.${index}.extraHosts.${i}` as const,
-                      )}
-                      isInvalid={!!errors.containers?.[index]?.extraHosts?.[i]}
-                      placeholder="e.g., myhost:127.0.0.1"
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.containers?.[index]?.extraHosts?.[i]?.message && (
-                        <FormattedMessage
-                          id={errors.containers[index].extraHosts[i].message}
-                        />
-                      )}
-                    </Form.Control.Feedback>
+          <Controller
+            control={control}
+            name={`containers.${index}.extraHosts`}
+            render={({ field }) => {
+              const extraHosts = field.value || [];
+
+              const handleAddExtraHost = () => {
+                field.onChange([...extraHosts, ""]);
+              };
+
+              const handleDeleteExtraHost = (i: number) => {
+                field.onChange(extraHosts.filter((_, idx) => idx !== i));
+              };
+
+              const handleChangeHost = (i: number, value: string) => {
+                const updated = [...extraHosts];
+                updated[i] = value;
+                field.onChange(updated);
+              };
+
+              return (
+                <div className="p-3 mb-3 bg-light border rounded">
+                  <Stack gap={3}>
+                    {extraHosts.map((host, i) => {
+                      const hostError =
+                        errors.containers?.[index]?.extraHosts?.[i]?.message;
+
+                      return (
+                        <Stack direction="horizontal" gap={3} key={i}>
+                          <Stack>
+                            <Form.Control
+                              value={host}
+                              onChange={(e) =>
+                                handleChangeHost(i, e.target.value)
+                              }
+                              isInvalid={!!hostError}
+                              placeholder="e.g., myhost:127.0.0.1"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.containers?.[index]?.extraHosts?.[i]
+                                ?.message && (
+                                <FormattedMessage
+                                  id={
+                                    errors.containers[index].extraHosts[i]
+                                      .message
+                                  }
+                                />
+                              )}
+                            </Form.Control.Feedback>
+                          </Stack>
+                          <Button
+                            className="mb-auto"
+                            variant="shadow-danger"
+                            onClick={() => handleDeleteExtraHost(i)}
+                          >
+                            <Icon className="text-danger" icon={"delete"} />
+                          </Button>
+                        </Stack>
+                      );
+                    })}
+                    <Button
+                      className="me-auto"
+                      variant="outline-primary"
+                      onClick={handleAddExtraHost}
+                    >
+                      <FormattedMessage
+                        id="forms.CreateRelease.addExtraHostButton"
+                        defaultMessage="Add Extra Host"
+                      />
+                    </Button>
                   </Stack>
-                  <Button
-                    className="mb-auto"
-                    variant="shadow-danger"
-                    onClick={() => handleDeleteExtraHost(i)}
-                  >
-                    <Icon className="text-danger" icon={"delete"} />
-                  </Button>
-                </Stack>
-              ))}
-              <Button
-                className="me-auto"
-                variant="outline-primary"
-                onClick={handleAddExtraHost}
-              >
-                <FormattedMessage
-                  id="forms.CreateRelease.addExtraHostButton"
-                  defaultMessage="Add Extra Host"
-                />
-              </Button>
-            </Stack>
-          </div>
+                </div>
+              );
+            }}
+          />
         </FormRow>
 
         <FormRow
