@@ -440,6 +440,124 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     end
   end
 
+  describe "Lazy.Executor marks campaign as failed if max_failure_percentage is exceeded" do
+    setup %{tenant: tenant} do
+      target_count = Enum.random(10..20)
+      # 20 < x <= 70
+      max_failure_percentage = 20 + :rand.uniform() * 50
+
+      # The minimum number of targets that have to fail to trigger a failure
+      failing_target_count = min_failed_targets_for_failure(target_count, max_failure_percentage)
+
+      # Create a base image with a specific version and starting_version_requirement
+      release_version = "2.1.0"
+
+      release =
+        release_fixture(
+          version: release_version,
+          system_models: 1,
+          tenant: tenant
+        )
+
+      deployment_campaign =
+        deployment_campaign_with_targets_fixture(target_count,
+          release_id: release.id,
+          deployment_mechanism: [
+            max_in_progress_deployments: target_count,
+            max_failure_percentage: max_failure_percentage
+          ],
+          tenant: tenant
+        )
+
+      %{pid: pid, ref: ref} =
+        start_and_monitor_executor!(deployment_campaign, start_execution: false)
+
+      ctx = [
+        executor_pid: pid,
+        failing_target_count: failing_target_count,
+        monitor_ref: ref,
+        deployment_campaign_id: deployment_campaign.id
+      ]
+
+      {:ok, ctx}
+    end
+
+    test "by failed Deployments", ctx do
+      %{
+        executor_pid: pid,
+        failing_target_count: failing_target_count,
+        monitor_ref: ref,
+        deployment_campaign_id: deployment_campaign_id,
+        tenant: tenant
+      } = ctx
+
+      # Start the execution
+      start_execution(pid)
+
+      # Wait for the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      {failing_targets, remaining_targets} =
+        tenant.tenant_id
+        |> Core.list_in_progress_targets(deployment_campaign_id)
+        |> Enum.split(failing_target_count)
+
+      # Produce failing_target_count failures
+      Enum.each(failing_targets, fn target ->
+        update_deployment_state!(tenant, target.deployment_id, :error)
+      end)
+
+      # Now the Executor should arrive at :campaign_failure, but not terminate yet
+      wait_for_state(pid, :campaign_failure)
+
+      # Make the remaining targets reach a final state, some with success, some with failure
+      # The random count guarantees that we have at least one success and one failure
+      remaining_failing_count = Enum.random(1..(length(remaining_targets) - 1))
+
+      {remaining_failing_targets, remaining_successful_targets} =
+        Enum.split(remaining_targets, remaining_failing_count)
+
+      Enum.each(remaining_successful_targets, fn target ->
+        update_deployment_state!(tenant, target.deployment_id, :stopped)
+      end)
+
+      Enum.each(remaining_failing_targets, fn target ->
+        update_deployment_state!(tenant, target.deployment_id, :error)
+      end)
+
+      # Now the Executor should terminate
+      assert_normal_exit(pid, ref)
+      assert_deployment_campaign_outcome(tenant, deployment_campaign_id, :failure)
+    end
+
+    test "by targets failing during the initial rollout with a non-temporary API failure", ctx do
+      %{
+        executor_pid: pid,
+        failing_target_count: failing_target_count,
+        monitor_ref: ref,
+        deployment_campaign_id: deployment_campaign_id,
+        tenant: tenant
+      } = ctx
+
+      # Expect failing_target_count calls to the mock and return a non-temporary error
+      expect(
+        CreateDeploymentRequestMock,
+        :send_create_deployment_request,
+        failing_target_count,
+        fn _client, _device_id, _data ->
+          status = Enum.random(400..499)
+          {:error, %Astarte.Client.APIError{status: status, response: "F"}}
+        end
+      )
+
+      # Start the execution
+      start_execution(pid)
+
+      assert_normal_exit(pid, ref)
+      assert_deployment_campaign_outcome(tenant, deployment_campaign_id, :failure)
+    end
+  end
+
   defp fake_deploy(device, release, tenant) do
     deployment_fixture(
       tenant: tenant,
@@ -451,6 +569,11 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
   defp max_failed_targets_for_success(target_count, max_failure_percentage) do
     # Returns the maximum number of targets that can fail and still produce a successful campaign
     floor(target_count * max_failure_percentage / 100)
+  end
+
+  defp min_failed_targets_for_failure(target_count, max_failure_percentage) do
+    # Returns the minimum number of targets that must fail to produce a failed campaign
+    1 + max_failed_targets_for_success(target_count, max_failure_percentage)
   end
 
   defp send_sync(dest, ref) do
