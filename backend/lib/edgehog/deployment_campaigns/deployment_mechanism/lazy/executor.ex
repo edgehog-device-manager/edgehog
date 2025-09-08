@@ -420,11 +420,20 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
   def handle_event(:info, {:deployment_updated, deployment}, _state, data) do
+    ready? =
+      deployment
+      |> Ash.load!(:ready?, tenant: data.tenant_id)
+      |> Map.get(:ready?)
+
+    state = deployment.state
+
     # Event generated from PubSub when a Deployment is updated
     additional_actions =
-      if Core.deployment_ready?(deployment),
-        do: [internal_event({:deployment_success, deployment})],
-        else: []
+      case {ready?, state} do
+        {true, _} -> [internal_event({:deployment_success, deployment})]
+        {_, :error} -> [internal_event({:deployment_failure, deployment})]
+        {_, _} -> []
+      end
 
     # We always cancel the retry timeout for every kind of update we see on an Deployment.
     # This ensures we don't resend the request even if we accidentally miss the acknowledge.

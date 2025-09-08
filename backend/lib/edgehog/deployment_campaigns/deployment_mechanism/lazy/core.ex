@@ -407,10 +407,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
       |> Map.get(:device)
 
     case Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id) do
-      {:ok, deployment} ->
-        deployment
-        |> Ash.load!(:ready)
-        |> Map.get(:ready)
+      {:ok, _deployment} ->
+        true
 
       {:error, %Ash.Error.Query.NotFound{}} ->
         false

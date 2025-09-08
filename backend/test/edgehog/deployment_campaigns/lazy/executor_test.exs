@@ -22,12 +22,14 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
   @moduledoc false
   use Edgehog.DataCase, async: true
 
+  import Edgehog.ContainersFixtures
   import Edgehog.DeploymentCampaignsFixtures
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Containers
+  alias Edgehog.DeploymentCampaigns.DeploymentCampaign
   alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core
   alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor
 
@@ -283,7 +285,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       {:ok, executor_pid: pid, release_id: release_id}
     end
 
-    for status <- [:started, :starting, :stopped, :stopping] do
+    for status <- [:started, :starting, :stopped, :stopping, :error] do
       test "frees up slot if Deployment state is #{status}", ctx do
         %{
           executor_pid: pid,
@@ -303,7 +305,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       end
     end
 
-    for status <- [:pending, :sent, :error] do
+    for status <- [:pending, :sent] do
       test "doesn't free up slots if Deployment status is #{status}", ctx do
         %{
           executor_pid: pid,
@@ -322,6 +324,133 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
         wait_for_state(pid, :wait_for_available_slot)
       end
     end
+  end
+
+  describe "Lazy.Executor marks campaign as successful" do
+    setup %{tenant: tenant} do
+      target_count = Enum.random(10..20)
+      # 20 < x <= 70
+      max_failure_percentage = 20 + :rand.uniform() * 50
+
+      # Create a base image with a specific version
+      release_version = "2.1.0"
+      release = release_fixture(version: release_version, system_models: 1, tenant: tenant)
+
+      # Also define an higher version to test downgrade
+      higher_release_version = "2.2.0"
+
+      deployment_campaign =
+        deployment_campaign_with_targets_fixture(target_count,
+          release_id: release.id,
+          deployment_mechanism: [
+            max_in_progress_deployments: target_count,
+            max_failure_percentage: max_failure_percentage
+          ],
+          tenant: tenant.tenant_id
+        )
+
+      %{pid: pid, ref: ref} =
+        start_and_monitor_executor!(deployment_campaign, start_execution: false)
+
+      ctx = [
+        release: release,
+        executor_pid: pid,
+        higher_release_version: higher_release_version,
+        max_failure_percentage: max_failure_percentage,
+        monitor_ref: ref,
+        target_count: target_count,
+        deployment_campaign_id: deployment_campaign.id
+      ]
+
+      {:ok, ctx}
+    end
+
+    test "if all targets are successful", ctx do
+      %{
+        executor_pid: pid,
+        monitor_ref: ref,
+        deployment_campaign_id: deployment_campaign_id,
+        tenant: tenant
+      } = ctx
+
+      start_execution(pid)
+
+      # Wait for the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      mark_all_pending_deployments_with_state(tenant, deployment_campaign_id, :stopped)
+
+      assert_normal_exit(pid, ref)
+      assert_deployment_campaign_outcome(tenant, deployment_campaign_id, :success)
+    end
+
+    test "if all targets already have the release version it's being rolled out", ctx do
+      %{
+        release: release,
+        executor_pid: pid,
+        monitor_ref: ref,
+        deployment_campaign_id: deployment_campaign_id,
+        tenant: tenant
+      } = ctx
+
+      # tenant realm device release
+      DeploymentCampaign
+      |> Ash.get!(deployment_campaign_id,
+        tenant: tenant,
+        load: [deployment_targets: [:device]]
+      )
+      |> Map.get(:deployment_targets, [])
+      |> Enum.map(fn target -> fake_deploy(target.device, release, tenant) end)
+
+      start_execution(pid)
+
+      assert_normal_exit(pid, ref)
+      assert_deployment_campaign_outcome(tenant, deployment_campaign_id, :success)
+    end
+
+    test "if just less than max_failure_percentage targets fail", ctx do
+      %{
+        executor_pid: pid,
+        max_failure_percentage: max_failure_percentage,
+        monitor_ref: ref,
+        target_count: target_count,
+        deployment_campaign_id: deployment_campaign_id,
+        tenant: tenant
+      } = ctx
+
+      start_execution(pid)
+
+      # Wait for the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      deployment_ids =
+        tenant.tenant_id
+        |> Core.list_in_progress_targets(deployment_campaign_id)
+        |> Enum.map(& &1.deployment_id)
+
+      failing_target_count = max_failed_targets_for_success(target_count, max_failure_percentage)
+
+      {failing_deployment_ids, successful_deployment_ids} =
+        Enum.split(deployment_ids, failing_target_count)
+
+      Enum.each(failing_deployment_ids, &update_deployment_state!(tenant, &1, :error))
+      Enum.each(successful_deployment_ids, &update_deployment_state!(tenant, &1, :stopped))
+      assert_normal_exit(pid, ref, 6000)
+      assert_deployment_campaign_outcome(tenant, deployment_campaign_id, :success)
+    end
+  end
+
+  defp fake_deploy(device, release, tenant) do
+    deployment_fixture(
+      tenant: tenant,
+      device_id: device.id,
+      release_id: release.id
+    )
+  end
+
+  defp max_failed_targets_for_success(target_count, max_failure_percentage) do
+    # Returns the maximum number of targets that can fail and still produce a successful campaign
+    floor(target_count * max_failure_percentage / 100)
   end
 
   defp send_sync(dest, ref) do
@@ -466,6 +595,20 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     |> Enum.each(fn target ->
       Ash.update!(target.device, %{online: online}, action: :from_device_status)
     end)
+  end
+
+  defp mark_all_pending_deployments_with_state(tenant, deployment_campaign_id, state) do
+    tenant.tenant_id
+    |> Core.list_in_progress_targets(deployment_campaign_id)
+    |> Enum.each(fn target ->
+      update_deployment_state!(tenant, target.deployment_id, state)
+    end)
+  end
+
+  defp assert_deployment_campaign_outcome(tenant, id, outcome) do
+    deployment_campaign = Core.get_deployment_campaign!(tenant.tenant_id, id)
+    assert deployment_campaign.status == :finished
+    assert deployment_campaign.outcome == outcome
   end
 
   defp repeat(value, n) do

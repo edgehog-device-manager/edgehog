@@ -219,11 +219,13 @@ defmodule Edgehog.ContainersFixtures do
           system_models
       end
 
+    {version, opts} = Keyword.pop_lazy(opts, :version, fn -> unique_release_version() end)
+
     params =
       Enum.into(opts, %{
         application_id: application_id,
-        version: unique_release_version(),
         containers: containers,
+        version: version,
         required_system_models: system_models
       })
 
