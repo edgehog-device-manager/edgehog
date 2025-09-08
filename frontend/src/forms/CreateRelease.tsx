@@ -62,12 +62,14 @@ import {
   tmpfsOptSchema,
   storageOptSchema,
   extraHostsSchema,
+  numberSchema,
 } from "./index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
 import Icon from "components/Icon";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import ConfirmModal from "components/ConfirmModal";
+import FormFeedback from "./FormFeedback";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -324,82 +326,151 @@ export const CapAddList = [
 ] as const;
 
 // Yup schema for form validation
-const applicationSchema = yup
-  .object({
-    version: yup.string().required(),
-    containers: yup
-      .array(
-        yup.object({
-          env: envSchema,
-          extraHosts: extraHostsSchema,
-          image: yup.object({
-            reference: yup.string().required(),
-            imageCredentialsId: yup.string().nullable(),
+const applicationSchema = (intl: any) =>
+  yup
+    .object({
+      version: yup.string().required(),
+      containers: yup
+        .array(
+          yup.object({
+            env: envSchema,
+            extraHosts: extraHostsSchema,
+            image: yup.object({
+              reference: yup.string().required(),
+              imageCredentialsId: yup.string().nullable(),
+            }),
+            hostname: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            privileged: yup.boolean().nullable(),
+            restartPolicy: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            networkMode: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            portBindings: portBindingsSchema,
+            memory: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memoryLabel",
+                  defaultMessage: "Memory (bytes)",
+                }),
+              ),
+
+            memoryReservation: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memoryReservationLabel",
+                  defaultMessage: "Memory Reservation (bytes)",
+                }),
+              ),
+            memorySwap: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memorySwapLabel",
+                  defaultMessage: "Memory Swap (bytes)",
+                }),
+              ),
+            memorySwappiness: numberSchema
+              .integer()
+              .min(0)
+              .max(100)
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memorySwappinessLabel",
+                  defaultMessage: "Memory Swappiness (0-100)",
+                }),
+              ),
+            cpuPeriod: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuPeriodLabel",
+                  defaultMessage: "CPU Period (microseconds)",
+                }),
+              ),
+            cpuQuota: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuQuotaLabel",
+                  defaultMessage: "CPU Quota (microseconds)",
+                }),
+              ),
+            cpuRealtimePeriod: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuRealtimePeriodLabel",
+                  defaultMessage: "CPU Real-Time Period (microseconds)",
+                }),
+              ),
+            cpuRealtimeRuntime: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuRealtimeRuntimeLabel",
+                  defaultMessage: "CPU Real-Time Runtime (microseconds)",
+                }),
+              ),
+
+            readOnlyRootfs: yup.boolean().nullable(),
+            storageOpt: storageOptSchema,
+            tmpfs: tmpfsOptSchema,
+            capAdd: yup
+              .array()
+              .of(yup.string().required().oneOf(CapAddList))
+              .nullable(),
+            capDrop: yup
+              .array()
+              .of(yup.string().required().oneOf(CapDropList))
+              .nullable(),
+            volumeDriver: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            networks: yup
+              .array(
+                yup
+                  .object({
+                    id: yup.string(),
+                  })
+                  .required(),
+              )
+              .nullable(),
+            volumes: yup
+              .array(
+                yup
+                  .object({
+                    id: yup.string(),
+                    target: yup.string().required(),
+                  })
+                  .required(),
+              )
+              .nullable(),
           }),
-          hostname: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          privileged: yup.boolean().nullable(),
-          restartPolicy: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          networkMode: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          portBindings: portBindingsSchema,
-          memory: yup.number().nullable(),
-          memoryReservation: yup.number().nullable(),
-          memorySwap: yup.number().nullable(),
-          memorySwappiness: yup.number().min(0).max(100).nullable(),
-          cpuPeriod: yup.number().nullable(),
-          cpuQuota: yup.number().nullable(),
-          cpuRealtimePeriod: yup.number().nullable(),
-          cpuRealtimeRuntime: yup.number().nullable(),
-          readOnlyRootfs: yup.boolean().nullable(),
-          storageOpt: storageOptSchema,
-          tmpfs: tmpfsOptSchema,
-          capAdd: yup
-            .array()
-            .of(yup.string().required().oneOf(CapAddList))
-            .nullable(),
-          capDrop: yup
-            .array()
-            .of(yup.string().required().oneOf(CapDropList))
-            .nullable(),
-          volumeDriver: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          networks: yup
-            .array(
-              yup
-                .object({
-                  id: yup.string(),
-                })
-                .required(),
-            )
-            .nullable(),
-          volumes: yup
-            .array(
-              yup
-                .object({
-                  id: yup.string(),
-                  target: yup.string().required(),
-                })
-                .required(),
-            )
-            .nullable(),
-        }),
-      )
-      .nullable(),
-    requiredSystemModels: yup.array(
-      yup.object({ id: yup.string().required() }),
-    ),
-  })
-  .required();
+        )
+        .nullable(),
+      requiredSystemModels: yup.array(
+        yup.object({ id: yup.string().required() }),
+      ),
+    })
+    .required();
 
 const initialData: ReleaseInputData = {
   version: "",
@@ -937,11 +1008,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memory}
             placeholder="e.g., 104857600 for 100MB"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memory?.message && (
-              <FormattedMessage id={errors.containers[index].memory.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memory?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -961,13 +1030,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memoryReservation}
             placeholder="e.g., 104857600 for 100MB"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memoryReservation?.message && (
-              <FormattedMessage
-                id={errors.containers[index].memoryReservation.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memoryReservation?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -987,13 +1052,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memorySwap}
             placeholder="e.g., 209715200 for 200MB"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memorySwap?.message && (
-              <FormattedMessage
-                id={errors.containers[index].memorySwap.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memorySwap?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -1013,13 +1074,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memorySwappiness}
             placeholder="e.g., 60"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memorySwappiness?.message && (
-              <FormattedMessage
-                id={errors.containers[index].memorySwappiness.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memorySwappiness?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -1039,13 +1096,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuPeriod}
             placeholder="e.g., 100000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuPeriod?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuPeriod.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuPeriod?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -1065,13 +1118,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuQuota}
             placeholder="e.g., 50000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuQuota?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuQuota.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuQuota?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -1091,13 +1140,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuRealtimePeriod}
             placeholder="e.g., 1000000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuRealtimePeriod?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuRealtimePeriod.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuRealtimePeriod?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -1117,13 +1162,9 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuRealtimeRuntime}
             placeholder="e.g., 950000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuRealtimeRuntime?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuRealtimeRuntime.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuRealtimeRuntime?.message}
+          />
         </FormRow>
 
         <FormRow
@@ -1192,7 +1233,7 @@ const ContainerForm = ({
                   onChange={(value) => field.onChange(value ?? "")}
                   defaultValue={field.value || "[]"}
                   initialLines={1}
-                  aria-invalid={fieldState.invalid} 
+                  aria-invalid={fieldState.invalid}
                 />
                 {fieldState.error && (
                   <Form.Control.Feedback type="invalid" className="d-block">
@@ -1378,7 +1419,7 @@ const CreateRelease = ({
   } = useForm<ReleaseInputData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(applicationSchema),
+    resolver: yupResolver(applicationSchema(intl)),
   });
 
   const { fields, append, remove } = useFieldArray({
