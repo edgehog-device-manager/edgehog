@@ -107,9 +107,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
       tenant_id
       |> Core.get_deployment_campaign!(deployment_campaign_id)
       |> Ash.load!(
-        [total_target_count: [], release: [containers: [:networks, :volumes, :image]]],
+        [release: [containers: [:networks, :volumes, :image]]],
         tenant: tenant_id
       )
+      |> Ash.load!(:total_target_count)
 
     release = deployment_campaign.release
 

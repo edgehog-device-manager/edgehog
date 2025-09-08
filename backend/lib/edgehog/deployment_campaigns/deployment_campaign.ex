@@ -27,6 +27,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
   alias Edgehog.Campaigns.Outcome
   alias Edgehog.Campaigns.Status
   alias Edgehog.Containers.Release
+  alias Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes
 
   graphql do
     type :deployment_campaign
@@ -40,7 +41,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       description "Creates a new deployment campaign."
       primary? true
 
-      accept [:name, :deploy_rollout_mechanism]
+      accept [:name, :deployment_mechanism]
 
       argument :release_id, :uuid do
         description """
@@ -58,8 +59,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
         allow_nil? false
       end
 
-      # TODO compute deployment targets: look at `ComputeUpdateTargets`
-      # change Changes.ComputeDeploymentTargets
+      change Changes.ComputeDeploymentTargets
       change set_attribute(:status, :idle)
 
       change manage_relationship(:release_id, :release, type: :append)
@@ -115,7 +115,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       public? true
     end
 
-    attribute :deploy_rollout_mechanism, Edgehog.DeploymentCampaigns.DeploymentMechanism do
+    attribute :deployment_mechanism, Edgehog.DeploymentCampaigns.DeploymentMechanism do
       description """
       The deployment mechanism to carry the campaign.
       """

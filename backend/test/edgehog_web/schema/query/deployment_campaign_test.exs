@@ -34,7 +34,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
       deployment_channel =
         deployment_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
 
-      release = release_fixture(tenant: tenant)
+      release = release_fixture(tenant: tenant, system_models: 1)
 
       device =
         device_fixture_compatible_with_release(
@@ -112,7 +112,6 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
                 edges {
                   node {
                     id
-                    name
                     device {
                       id
                     }

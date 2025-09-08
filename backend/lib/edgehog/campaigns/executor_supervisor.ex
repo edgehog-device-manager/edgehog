@@ -23,6 +23,8 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
   use DynamicSupervisor
 
   alias Edgehog.Campaigns.ExecutorRegistry
+  alias Edgehog.DeploymentCampaigns.DeploymentCampaign
+  alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy
   alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
@@ -43,8 +45,15 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
 
 
   """
+  def start_executor!(campaign)
+
   def start_executor!(%UpdateCampaign{id: id, rollout_mechanism: %{value: rollout}, tenant_id: tenant_id} = _campaign),
     do: do_start_executor!(id, rollout, tenant_id, :ota_update)
+
+  def start_executor!(
+        %DeploymentCampaign{id: id, deployment_mechanism: %{value: mechanism}, tenant_id: tenant_id} = _campaign
+      ),
+      do: do_start_executor!(id, mechanism, tenant_id, :deployment)
 
   defp do_start_executor!(campaign_id, rollout_mechanism, tenant_id, type) do
     executor_id = {tenant_id, campaign_id, type}
@@ -87,10 +96,20 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
     {PushRollout.Executor, args}
   end
 
+  defp executor_child_spec(%Lazy{} = mechanism, base_args) do
+    # During tests we add `:wait_for_start_execution` to avoid having the executor running
+    # without us being ready to test it
+    args = base_args ++ executor_test_args(mechanism)
+
+    {Lazy.Executor, args}
+  end
+
   case @mix_env do
     # Pass additional executor-specific test args only in the test env
     :test ->
       defp executor_test_args(%PushRollout{} = _rollout_mechanism), do: [wait_for_start_execution: true]
+
+      defp executor_test_args(%Lazy{} = _rollout_mechanism), do: [wait_for_start_execution: true]
 
     _other ->
       defp executor_test_args(_rollout), do: []

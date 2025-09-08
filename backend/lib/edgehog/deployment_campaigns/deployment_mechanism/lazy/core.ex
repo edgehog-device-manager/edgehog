@@ -287,12 +287,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
 
   @doc delegate_to: {DeploymentCampaigns, :mark_target_as_failed!, 2}
   def mark_target_as_failed!(target, now \\ DateTime.utc_now()) do
-    DeploymentCampaigns.mark_target_as_failed!(target, now)
+    DeploymentCampaigns.mark_target_as_failed!(target, %{completion_timestamp: now})
   end
 
   @doc delegate_to: {DeploymentCampaigns, :mark_target_as_successful!, 2}
   def mark_target_as_successful!(target, now \\ DateTime.utc_now()) do
-    DeploymentCampaigns.mark_target_as_successful!(target, now)
+    DeploymentCampaigns.mark_target_as_successful!(target, %{completion_timestamp: now})
   end
 
   @doc """

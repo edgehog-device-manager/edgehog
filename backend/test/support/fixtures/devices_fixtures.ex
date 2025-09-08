@@ -26,6 +26,7 @@ defmodule Edgehog.DevicesFixtures do
 
   alias Edgehog.AstarteFixtures
   alias Edgehog.BaseImages.BaseImage
+  alias Edgehog.Containers.Release
   alias Edgehog.Tenants.Tenant
 
   @doc """
@@ -106,10 +107,21 @@ defmodule Edgehog.DevicesFixtures do
   Generate a %Devices.Device{} compatible with a specific %Containers.Release{}, passed as argument.
   """
   def device_fixture_compatible_with_release(opts \\ []) do
-    # TODO make this generate a device actually compatible when releases will be
-    # associated to system models
-    {_, opts} = Keyword.pop!(opts, :release_id)
-    device_fixture(opts)
+    {release_id, opts} = Keyword.pop!(opts, :release_id)
+    tenant = Keyword.get(opts, :tenant)
+
+    part_number =
+      Release
+      |> Ash.get!(release_id, load: [system_models: [part_numbers: :part_number]], tenant: tenant)
+      |> Map.get(:system_models, [])
+      |> Enum.random()
+      |> Map.get(:part_numbers, [])
+      |> Enum.random()
+      |> Map.get(:part_number, [])
+
+    opts
+    |> Keyword.put(:part_number, part_number)
+    |> device_fixture()
   end
 
   @doc """
