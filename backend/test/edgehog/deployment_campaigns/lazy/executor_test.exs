@@ -136,8 +136,130 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     end
   end
 
+  describe "Lazy.Executor sends" do
+    test "all target Deploy Requests in parallel if there are enough available slots", %{
+      tenant: tenant
+    } do
+      target_count = Enum.random(2..20)
+
+      deployment_campaign =
+        target_count
+        |> deployment_campaign_with_targets_fixture(
+          deployment_mechanism: [max_in_progress_deployments: target_count],
+          tenant: tenant
+        )
+        |> Ash.load!(deployment_targets: [device: [:device_id]])
+
+      parent = self()
+      ref = make_ref()
+      target_device_ids = Enum.map(deployment_campaign.deployment_targets, & &1.device.device_id)
+
+      # Expect target_count deployment calls and send back a message for each device
+      expect(
+        CreateDeploymentRequestMock,
+        :send_create_deployment_request,
+        target_count,
+        # TODO: assert that we' receiving the correct data!
+        fn _client, device_id, _data ->
+          send_sync(parent, {ref, device_id})
+          :ok
+        end
+      )
+
+      pid = start_executor!(deployment_campaign)
+
+      # Wait for all the device sync messages
+      target_device_ids
+      |> Enum.map(&{ref, &1})
+      |> wait_for_sync!()
+
+      # Expect the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion)
+    end
+
+    test "at most max_in_progress_deployments Deployment Requests", %{tenant: tenant} do
+      target_count = Enum.random(10..20)
+      max_in_progress_deployments = Enum.random(2..5)
+
+      deployment_campaign =
+        deployment_campaign_with_targets_fixture(target_count,
+          deployment_mechanism: [max_in_progress_deployments: max_in_progress_deployments],
+          tenant: tenant
+        )
+
+      # Expect max_in_progress_deployments Deploy Requests
+      ref = expect_deployment_requests_and_send_sync(max_in_progress_deployments)
+
+      pid = start_executor!(deployment_campaign)
+
+      # Wait for max_in_progress_deployments sync messages
+      ref
+      |> repeat(max_in_progress_deployments)
+      |> wait_for_sync!()
+
+      # Expect the Executor to arrive at :wait_for_available_slot
+      wait_for_state(pid, :wait_for_available_slot)
+    end
+
+    test "Deployment Requests only to online targets", %{tenant: tenant} do
+      target_count = Enum.random(10..20)
+      # We want at least 1 offline target to test that we arrive in :wait_for_target
+      offline_count = Enum.random(1..target_count)
+      online_count = target_count - offline_count
+
+      deployment_campaign =
+        target_count
+        |> deployment_campaign_with_targets_fixture(tenant: tenant)
+        |> Ash.load!(:deployment_targets)
+
+      {offline_targets, online_targets} =
+        Enum.split(deployment_campaign.deployment_targets, offline_count)
+
+      # Mark the online targets as online
+      deployment_device_online_for_targets(online_targets, true)
+      # Mark the offline targets as offline
+      deployment_device_online_for_targets(offline_targets, false)
+
+      # Expect online_count calls to the mock
+      ref = expect_deployment_requests_and_send_sync(online_count)
+
+      pid = start_executor!(deployment_campaign)
+
+      # Wait for online_count sync messages
+      ref
+      |> repeat(online_count)
+      |> wait_for_sync!()
+
+      # Expect the Executor to arrive at :wait_for_target
+      wait_for_state(pid, :wait_for_target)
+    end
+  end
+
   defp send_sync(dest, ref) do
     send(dest, {:sync, ref})
+  end
+
+  defp wait_for_sync!([] = _refs) do
+    :ok
+  end
+
+  defp wait_for_sync!(refs) when is_list(refs) do
+    receive do
+      {:sync, ref} ->
+        if ref in refs do
+          refs
+          |> List.delete(ref)
+          |> wait_for_sync!()
+        else
+          flunk("Received unexpected ref: #{inspect(ref)}")
+        end
+    after
+      1000 -> flunk("Sync timeout, not received: #{inspect(refs)}")
+    end
+  end
+
+  defp wait_for_sync!(ref) do
+    assert_receive {:sync, ^ref}, 1000
   end
 
   defp wait_for_state(executor_pid, state, timeout \\ 1000) do
@@ -237,6 +359,21 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     end)
 
     ref
+  end
+
+  defp deployment_device_online_for_targets(targets, online) do
+    targets
+    |> Ash.load!(Core.default_preloads_for_target())
+    |> Enum.each(fn target ->
+      Ash.update!(target.device, %{online: online}, action: :from_device_status)
+    end)
+  end
+
+  defp repeat(value, n) do
+    # Repeats value for n times and returns a list of them
+    fn -> value end
+    |> Stream.repeatedly()
+    |> Enum.take(n)
   end
 
   defp assert_normal_exit(pid, ref, timeout \\ 1000) do
