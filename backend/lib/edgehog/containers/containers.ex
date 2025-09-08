@@ -259,6 +259,27 @@ defmodule Edgehog.Containers do
       define :mark_volume_deployment_as_errored, action: :mark_as_errored, args: [:message]
     end
 
+    resource Edgehog.Containers.DeviceMapping
+
+    resource Edgehog.Containers.DeviceMapping.Deployment do
+      define :deploy_device_mapping,
+        action: :deploy,
+        args: [:device_mapping, :device, :deployment]
+
+      define :destroy_device_mapping_deployment, action: :destroy
+
+      define :fetch_device_mapping_deployment,
+        action: :read,
+        get_by_identity: :device_mapping_instance
+
+      define :mark_device_mapping_deployment_as_sent, action: :mark_as_sent
+      define :mark_device_mapping_deployment_as_present, action: :mark_as_present
+
+      define :mark_device_mapping_deployment_as_errored,
+        action: :mark_as_errored,
+        args: [:message]
+    end
+
     resource DeploymentReadyAction
     resource Upgrade
 
@@ -279,6 +300,5 @@ defmodule Edgehog.Containers do
     end
 
     resource Upgrade
-    resource Edgehog.Containers.DeviceMapping
   end
 end

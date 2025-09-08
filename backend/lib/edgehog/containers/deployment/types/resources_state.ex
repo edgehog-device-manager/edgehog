@@ -26,6 +26,8 @@ defmodule Edgehog.Containers.Deployment.Types.ResourcesState do
       created_images: "The device has received the necessary image descriptions for the deployment.",
       created_networks: "The device has received all the network descriptions necessary for the deployment.",
       created_volumes: "The device has received all the volume descriptions necessary for the deployment.",
+      created_device_mappings:
+        "The device has received all the device-file mappings descriptions necessary for the deployment.",
       created_containers: "The device has received all the container descriptions necessary for the deployment.",
       ready: "All the underlying resources needed for the deployment have been received by the device."
     ]
