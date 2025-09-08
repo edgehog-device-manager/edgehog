@@ -59,7 +59,8 @@ import {
   yup,
   envSchema,
   portBindingsSchema,
-  storageTmpfsOptSchema,
+  tmpfsOptSchema,
+  storageOptSchema,
   extraHostsSchema,
 } from "./index";
 import MultiSelect from "components/MultiSelect";
@@ -250,8 +251,8 @@ type ContainerInput = {
   privileged?: boolean;
   readOnlyRootfs?: boolean;
   restartPolicy?: string;
-  storageOpt?: string[];
-  tmpfs?: string[];
+  storageOpt?: string;
+  tmpfs?: string;
   capAdd?: string[];
   capDrop?: string[];
   volumeDriver?: string;
@@ -270,8 +271,13 @@ type ReleaseSubmitData = {
   requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
 };
 
-type ContainerSubmit = Omit<ContainerInput, "portBindings"> & {
+type ContainerSubmit = Omit<
+  ContainerInput,
+  "portBindings" | "tmpfs" | "storageOpt"
+> & {
   portBindings?: string[];
+  tmpfs?: string[];
+  storageOpt?: string[];
 };
 
 export const CapDropList = [
@@ -353,8 +359,8 @@ const applicationSchema = yup
           cpuRealtimePeriod: yup.number().nullable(),
           cpuRealtimeRuntime: yup.number().nullable(),
           readOnlyRootfs: yup.boolean().nullable(),
-          storageOpt: storageTmpfsOptSchema,
-          tmpfs: storageTmpfsOptSchema,
+          storageOpt: storageOptSchema,
+          tmpfs: tmpfsOptSchema,
           capAdd: yup
             .array()
             .of(yup.string().required().oneOf(CapAddList))
@@ -1178,25 +1184,24 @@ const ContainerForm = ({
           <Controller
             control={control}
             name={`containers.${index}.storageOpt`}
-            render={({ field, fieldState: _fieldState }) => (
-              <MonacoJsonEditor
-                language="json"
-                value={field.value ?? ""}
-                onChange={(value) => {
-                  field.onChange(value ?? "");
-                }}
-                defaultValue={field.value || "[]"}
-                initialLines={1}
-              />
+            render={({ field, fieldState }) => (
+              <>
+                <MonacoJsonEditor
+                  language="json"
+                  value={field.value ?? ""}
+                  onChange={(value) => field.onChange(value ?? "")}
+                  defaultValue={field.value || "[]"}
+                  initialLines={1}
+                  aria-invalid={fieldState.invalid} 
+                />
+                {fieldState.error && (
+                  <Form.Control.Feedback type="invalid" className="d-block">
+                    <FormattedMessage id={fieldState.error.message} />
+                  </Form.Control.Feedback>
+                )}
+              </>
             )}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.storageOpt?.message && (
-              <FormattedMessage
-                id={errors.containers[index].storageOpt.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
@@ -1208,28 +1213,27 @@ const ContainerForm = ({
             />
           }
         >
-          <>
-            <Controller
-              control={control}
-              name={`containers.${index}.tmpfs`}
-              render={({ field, fieldState: _fieldState }) => (
+          <Controller
+            control={control}
+            name={`containers.${index}.tmpfs`}
+            render={({ field, fieldState }) => (
+              <>
                 <MonacoJsonEditor
                   language="json"
                   value={field.value ?? ""}
-                  onChange={(value) => {
-                    field.onChange(value ?? "");
-                  }}
+                  onChange={(value) => field.onChange(value ?? "")}
                   defaultValue={field.value || "[]"}
                   initialLines={1}
+                  aria-invalid={fieldState.invalid}
                 />
-              )}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.containers?.[index]?.tmpfs?.message && (
-                <FormattedMessage id={errors.containers[index].tmpfs.message} />
-              )}
-            </Form.Control.Feedback>
-          </>
+                {fieldState.error && (
+                  <Form.Control.Feedback type="invalid" className="d-block">
+                    <FormattedMessage id={fieldState.error.message} />
+                  </Form.Control.Feedback>
+                )}
+              </>
+            )}
+          />
         </FormRow>
 
         <FormRow
@@ -1403,6 +1407,17 @@ const CreateRelease = ({
       SingleValue<{ value: string; label: string; releases: ReleaseNode[] }>
     >(null);
 
+  const parseJsonToStringArray = (jsonStr: string | undefined): string[] => {
+    if (!jsonStr) return [];
+    try {
+      const parsed = JSON.parse(jsonStr);
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      console.error("Invalid JSON:", jsonStr);
+      return [];
+    }
+  };
+
   return (
     <>
       <form
@@ -1428,8 +1443,8 @@ const CreateRelease = ({
               cpuRealtimePeriod: container.cpuRealtimePeriod || undefined,
               cpuRealtimeRuntime: container.cpuRealtimeRuntime || undefined,
               readOnlyRootfs: container.readOnlyRootfs || undefined,
-              storageOpt: container.storageOpt || undefined,
-              tmpfs: container.tmpfs || undefined,
+              storageOpt: parseJsonToStringArray(container.storageOpt),
+              tmpfs: parseJsonToStringArray(container.tmpfs),
               volumeDriver: container.volumeDriver || undefined,
               restartPolicy: container.restartPolicy || undefined,
               networkMode: container.networkMode || undefined,
