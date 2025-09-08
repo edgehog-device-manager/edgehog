@@ -62,6 +62,10 @@ defmodule Edgehog.Containers.Deployment do
       change {PublishNotification, event_type: :deployment_created}
     end
 
+    update :set_state do
+      accept [:state]
+    end
+
     update :start do
       description """
       Sends a :start command to the release on the device.
@@ -150,7 +154,6 @@ defmodule Edgehog.Containers.Deployment do
       change Changes.CheckContainers
       change Changes.CheckDeployment
 
-      # TODO: signal deployment state update when this is triggered
       require_atomic? false
       change {PublishNotification, event_type: :deployment_updated}
     end

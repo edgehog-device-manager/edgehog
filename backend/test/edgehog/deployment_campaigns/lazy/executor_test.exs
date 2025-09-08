@@ -22,12 +22,12 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
   @moduledoc false
   use Edgehog.DataCase, async: true
 
-  import Edgehog.ContainersFixtures
   import Edgehog.DeploymentCampaignsFixtures
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
+  alias Edgehog.Containers
   alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core
   alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor
 
@@ -235,6 +235,95 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     end
   end
 
+  describe "Lazy.Executor receiving a Deployment update" do
+    setup %{tenant: tenant} do
+      target_count = 10
+      max_deployments = 5
+
+      deployment_campaign =
+        deployment_campaign_with_targets_fixture(target_count,
+          deployment_mechanism: [max_in_progress_deployments: max_deployments],
+          tenant: tenant
+        )
+
+      parent = self()
+
+      expect(
+        CreateDeploymentRequestMock,
+        :send_create_deployment_request,
+        max_deployments,
+        fn _client, _device_id, data ->
+          %{id: deployment_id} = data
+          # Since we don't know _which_ target will receive the request, we send it back from here
+          send(parent, {:deployment_target, deployment_id})
+          :ok
+        end
+      )
+
+      pid = start_executor!(deployment_campaign)
+
+      # Wait for the Executor to arrive at :wait_for_available_slot
+      wait_for_state(pid, :wait_for_available_slot)
+
+      # Verify that all the expectations we defined until now were called
+      verify!()
+
+      # Extract Deployment for a target that received the OTA Request
+      release_id =
+        receive do
+          {:deployment_target, release_id} ->
+            release_id
+        after
+          1000 -> flunk()
+        end
+
+      # Throw away the other messages
+      flush_messages()
+
+      {:ok, executor_pid: pid, release_id: release_id}
+    end
+
+    for status <- [:started, :starting, :stopped, :stopping] do
+      test "frees up slot if Deployment state is #{status}", ctx do
+        %{
+          executor_pid: pid,
+          release_id: release_id,
+          tenant: tenant
+        } = ctx
+
+        # Expect another call to the mock since a slot has freed up
+        ref = expect_deployment_requests_and_send_sync()
+
+        update_deployment_state!(tenant, release_id, unquote(status))
+
+        wait_for_sync!(ref)
+
+        # Wait for the Executor to arrive at :wait_for_available_slot
+        wait_for_state(pid, :wait_for_available_slot)
+      end
+    end
+
+    for status <- [:pending, :sent, :error] do
+      test "doesn't free up slots if Deployment status is #{status}", ctx do
+        %{
+          executor_pid: pid,
+          release_id: release_id,
+          tenant: tenant
+        } = ctx
+
+        # Expect no calls to the mock
+        expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
+          :ok
+        end)
+
+        update_deployment_state!(tenant, release_id, unquote(status))
+
+        # Expect the executor to remain in the :wait_for_available_slot state
+        wait_for_state(pid, :wait_for_available_slot)
+      end
+    end
+  end
+
   defp send_sync(dest, ref) do
     send(dest, {:sync, ref})
   end
@@ -361,6 +450,16 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     ref
   end
 
+  defp update_deployment_state!(tenant, deployment_id, state) do
+    assert {:ok, deployment} =
+             deployment_id
+             |> Containers.fetch_deployment!(tenant: tenant)
+             |> Containers.set_deployment_state!(%{state: state}, tenant: tenant)
+             |> Containers.deployment_update_resources_state(tenant: tenant)
+
+    deployment
+  end
+
   defp deployment_device_online_for_targets(targets, online) do
     targets
     |> Ash.load!(Core.default_preloads_for_target())
@@ -380,5 +479,13 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     assert_receive {:DOWN, ^ref, :process, ^pid, :normal},
                    timeout,
                    "Process did not terminate with reason :normal as expected"
+  end
+
+  defp flush_messages do
+    receive do
+      _msg -> flush_messages()
+    after
+      10 -> :ok
+    end
   end
 end
