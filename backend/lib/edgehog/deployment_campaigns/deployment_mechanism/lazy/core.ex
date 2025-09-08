@@ -200,8 +200,9 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   ## Returns
     - The number of in progress deployment targets associated with the campaign.
   """
-  def get_in_progress_target_count(tenant_id, campaign) do
-    campaign
+  def get_in_progress_target_count(tenant_id, campaign_id) do
+    tenant_id
+    |> get_deployment_campaign!(campaign_id)
     |> Ash.load!(:in_progress_target_count, tenant: tenant_id)
     |> Map.get(:in_progress_target_count)
   end

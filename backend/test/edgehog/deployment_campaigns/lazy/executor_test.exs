@@ -27,10 +27,15 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL
+  alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core
   alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor
 
   setup do
+    stub(CreateDeploymentRequestMock, :send_create_deployment_request, fn _client, _device_id, _data ->
+      :ok
+    end)
+
     %{tenant: tenant_fixture()}
   end
 
@@ -74,8 +79,93 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     end
   end
 
+  describe "Lazy.Executor resumes :in_progress campaign" do
+    test "when it already has max_in_progress_deployments pending deployments", %{tenant: tenant} do
+      target_count = Enum.random(10..20)
+      max_in_progress_deployments = Enum.random(2..5)
+
+      deployment_campaign =
+        deployment_campaign_with_targets_fixture(target_count,
+          deployment_mechanism: [max_in_progress_deployments: max_in_progress_deployments],
+          tenant: tenant
+        )
+
+      pid = start_executor!(deployment_campaign)
+
+      # Wait for the Executor to arrive at :wait_for_available_slot
+      wait_for_state(pid, :wait_for_available_slot, 1000)
+
+      # Stop the executor
+      stop_supervised(Executor)
+
+      # Start another executor for the same deployment campaign
+      resumed_pid = start_executor!(deployment_campaign)
+
+      # Expect no new Deploy Requests
+      _ = expect_deployment_requests_and_send_sync(0)
+
+      # Expect the Executor to arrive at :wait_for_available_slot
+      wait_for_state(resumed_pid, :wait_for_available_slot)
+    end
+
+    test "when it is waiting for completion", %{tenant: tenant} do
+      target_count = Enum.random(2..20)
+
+      deployment_campaign =
+        deployment_campaign_with_targets_fixture(target_count,
+          deployment_mechanism: [max_in_progress_deployments: target_count],
+          tenant: tenant
+        )
+
+      pid = start_executor!(deployment_campaign)
+
+      # Wait for the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion, 1000)
+
+      # Stop the executor
+      stop_supervised(Executor)
+
+      # Start another executor for the same deployment campaign
+      resumed_pid = start_executor!(deployment_campaign)
+
+      # Expect no Deploy Requests
+      _ = expect_deployment_requests_and_send_sync(0)
+
+      # Expect the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(resumed_pid, :wait_for_campaign_completion)
+    end
+  end
+
+  defp send_sync(dest, ref) do
+    send(dest, {:sync, ref})
+  end
+
+  defp wait_for_state(executor_pid, state, timeout \\ 1000) do
+    start_time = DateTime.utc_now()
+
+    loop_until_state!(executor_pid, state, start_time, timeout)
+  end
+
+  defp loop_until_state!(executor_pid, state, _start_time, remaining_time) when remaining_time <= 0 do
+    {actual_state, _data} = :sys.get_state(executor_pid)
+    flunk("State #{state} not reached, last state: #{actual_state}")
+  end
+
+  defp loop_until_state!(executor_pid, state, start_time, _remaining_time) do
+    case :sys.get_state(executor_pid) do
+      {^state, _data} ->
+        :ok
+
+      _other ->
+        Process.sleep(100)
+        remaining_time = DateTime.diff(start_time, DateTime.utc_now(), :millisecond)
+        loop_until_state!(executor_pid, state, start_time, remaining_time)
+    end
+  end
+
   @executor_allowed_mocks [
-    Edgehog.Astarte.Device.DeviceStatusMock
+    Edgehog.Astarte.Device.DeviceStatusMock,
+    CreateDeploymentRequestMock
   ]
 
   defp start_and_monitor_executor!(deployment_campaign, opts \\ []) do
@@ -131,6 +221,22 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
     send(pid, :start_execution)
 
     pid
+  end
+
+  defp expect_deployment_requests_and_send_sync(count \\ 1) do
+    # Asserts that count Deploy Requests where sent and sends a sync message for
+    # each of them Returns the ref contained in the sync message
+    parent = self()
+    ref = make_ref()
+
+    # Expect count calls to the mock
+    expect(CreateDeploymentRequestMock, :send_create_deployment_request, count, fn _client, _device_id, _data ->
+      # Send the sync
+      send_sync(parent, ref)
+      :ok
+    end)
+
+    ref
   end
 
   defp assert_normal_exit(pid, ref, timeout \\ 1000) do

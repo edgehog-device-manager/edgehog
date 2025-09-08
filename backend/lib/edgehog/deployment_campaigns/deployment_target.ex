@@ -32,6 +32,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
 
   alias Edgehog.Containers.Release
   alias Edgehog.DeploymentCampaigns.DeploymentTarget
+  alias Edgehog.DeploymentCampaigns.DeploymentTarget.Changes
 
   resource do
     description @moduledoc
@@ -78,7 +79,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
       targets need to setup a retry timeout.
       """
 
-      argument :deployment_campaign_id, :integer, allow_nil?: false
+      argument :deployment_campaign_id, :uuid, allow_nil?: false
 
       filter expr(deployment_campaign_id == ^arg(:deployment_campaign_id))
       filter expr(status == :in_progress)
