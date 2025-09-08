@@ -274,6 +274,7 @@ defmodule Edgehog.Containers do
 
       define :mark_device_mapping_deployment_as_sent, action: :mark_as_sent
       define :mark_device_mapping_deployment_as_present, action: :mark_as_present
+      define :mark_device_mapping_deployment_as_not_present, action: :mark_as_not_present
 
       define :mark_device_mapping_deployment_as_errored,
         action: :mark_as_errored,
