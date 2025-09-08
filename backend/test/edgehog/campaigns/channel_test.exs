@@ -18,13 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
+defmodule Edgehog.Campaigns.ChannelTest do
   use Edgehog.DataCase, async: true
 
   import Edgehog.BaseImagesFixtures
+  import Edgehog.CampaignsFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
-  import Edgehog.UpdateCampaignsFixtures
 
   describe "updatable_devices calculation" do
     setup do
@@ -34,12 +34,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
     test "returns empty list without devices", %{tenant: tenant} do
       base_image = base_image_fixture(tenant: tenant)
 
-      update_channel =
+      channel =
         [tenant: tenant]
-        |> update_channel_fixture()
+        |> channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
-      assert update_channel.updatable_devices == []
+      assert channel.updatable_devices == []
     end
 
     test "returns only devices matching the system model of the base image", %{tenant: tenant} do
@@ -58,12 +58,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
 
       device_id = device.id
 
-      update_channel =
+      channel =
         [target_group_ids: [target_group.id], tenant: tenant]
-        |> update_channel_fixture()
+        |> channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
-      assert [%{id: ^device_id}] = update_channel.updatable_devices
+      assert [%{id: ^device_id}] = channel.updatable_devices
     end
 
     test "returns only devices belonging to the update channel with the base image", %{
@@ -84,12 +84,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
 
       device_id = device.id
 
-      update_channel =
+      channel =
         [target_group_ids: [target_group.id], tenant: tenant]
-        |> update_channel_fixture()
+        |> channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
-      assert [%{id: ^device_id}] = update_channel.updatable_devices
+      assert [%{id: ^device_id}] = channel.updatable_devices
     end
 
     test "returns the union of all target groups of the update channel", %{tenant: tenant} do
@@ -107,12 +107,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
         |> device_fixture_compatible_with_base_image()
         |> add_tags(["bar"])
 
-      update_channel =
+      channel =
         [target_group_ids: [foo_group.id, bar_group.id], tenant: tenant]
-        |> update_channel_fixture()
+        |> channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
-      updatable_device_ids = Enum.map(update_channel.updatable_devices, & &1.id)
+      updatable_device_ids = Enum.map(channel.updatable_devices, & &1.id)
       assert length(updatable_device_ids) == 2
       assert foo_device.id in updatable_device_ids
       assert bar_device.id in updatable_device_ids
@@ -130,12 +130,12 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannelTest do
 
       device_id = device.id
 
-      update_channel =
+      channel =
         [target_group_ids: [foo_group.id, bar_group.id], tenant: tenant]
-        |> update_channel_fixture()
+        |> channel_fixture()
         |> Ash.load!(updatable_devices: [base_image: base_image])
 
-      assert [%{id: ^device_id}] = update_channel.updatable_devices
+      assert [%{id: ^device_id}] = channel.updatable_devices
     end
   end
 end

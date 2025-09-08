@@ -55,19 +55,19 @@ defmodule Edgehog.Groups.DeviceGroup do
       accept [:name, :handle, :selector]
     end
 
-    update :update_update_channel do
+    update :channel do
       # Needed because resource's validations are not atomic
       require_atomic? false
 
-      accept [:update_channel_id]
+      accept [:channel_id]
     end
 
-    update :assign_update_channel do
-      accept [:update_channel_id]
+    update :assign_channel do
+      accept [:channel_id]
 
       require_atomic? false
 
-      validate Validations.UpdateChannelAbsent
+      validate Validations.ChannelAbsent
     end
 
     update :assign_deployment_channel do
@@ -142,7 +142,7 @@ defmodule Edgehog.Groups.DeviceGroup do
       manual ManualRelationships.Devices
     end
 
-    belongs_to :update_channel, Edgehog.UpdateCampaigns.UpdateChannel do
+    belongs_to :channel, Edgehog.Campaigns.Channel do
       description "The update channel associated with the group, if present."
       public? true
       attribute_public? false
@@ -166,7 +166,7 @@ defmodule Edgehog.Groups.DeviceGroup do
     repo Edgehog.Repo
 
     references do
-      reference :update_channel, on_delete: :nilify, match_with: [tenant_id: :tenant_id]
+      reference :channel, on_delete: :nilify, match_with: [tenant_id: :tenant_id]
     end
   end
 end

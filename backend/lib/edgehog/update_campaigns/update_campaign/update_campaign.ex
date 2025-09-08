@@ -34,7 +34,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
     Represents an UpdateCampaign.
 
     An Update Campaign is the operation that tracks the distribution of a \
-    specific Base Image to all devices belonging to an Update Channel.
+    specific Base Image to all devices belonging to a Channel.
     """
   end
 
@@ -68,7 +68,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
         allow_nil? false
       end
 
-      argument :update_channel_id, :id do
+      argument :channel_id, :id do
         description """
         The ID of the update channel that will be targeted by the update \
         campaign.\
@@ -80,7 +80,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
       change Changes.ComputeUpdateTargets
 
       change manage_relationship(:base_image_id, :base_image, type: :append)
-      change manage_relationship(:update_channel_id, :update_channel, type: :append)
+      change manage_relationship(:channel_id, :channel, type: :append)
     end
 
     update :update do
@@ -172,8 +172,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
       allow_nil? false
     end
 
-    belongs_to :update_channel, Edgehog.UpdateCampaigns.UpdateChannel do
-      description "The update channel targeted by the update campaign."
+    belongs_to :channel, Edgehog.Campaigns.Channel do
+      description "The channel targeted by the update campaign."
       public? true
       attribute_public? false
       allow_nil? false
@@ -228,7 +228,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
 
-      reference :update_channel,
+      reference :channel,
         index?: true,
         on_delete: :nothing,
         match_type: :full,

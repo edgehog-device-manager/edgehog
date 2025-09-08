@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.UnrelateCurrentTargetGroups do
+defmodule Edgehog.Campaigns.Channel.Changes.UnrelateCurrentTargetGroups do
   @moduledoc false
   use Ash.Resource.Change
 
@@ -36,13 +36,13 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel.Changes.UnrelateCurrentTargetGro
   end
 
   defp unrelate_target_groups(tenant, changeset) do
-    update_channel_id = changeset.data.id
+    channel_id = changeset.data.id
 
     %Ash.BulkResult{status: :success} =
       DeviceGroup
-      |> Ash.Query.filter(update_channel_id == ^update_channel_id)
+      |> Ash.Query.filter(channel_id == ^channel_id)
       |> Ash.Query.set_tenant(tenant)
-      |> Ash.bulk_update!(:update_update_channel, %{update_channel_id: nil})
+      |> Ash.bulk_update!(:channel, %{channel_id: nil})
 
     changeset
   end

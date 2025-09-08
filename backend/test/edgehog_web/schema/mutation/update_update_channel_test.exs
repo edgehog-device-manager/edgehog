@@ -18,25 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
+defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
   use EdgehogWeb.GraphqlCase, async: true
 
+  import Edgehog.CampaignsFixtures
   import Edgehog.GroupsFixtures
-  import Edgehog.UpdateCampaignsFixtures
 
-  describe "updateUpdateChannel mutation" do
+  describe "channel mutation" do
     setup %{tenant: tenant} do
-      update_channel = update_channel_fixture(tenant: tenant)
-      id = AshGraphql.Resource.encode_relay_id(update_channel)
+      channel = channel_fixture(tenant: tenant)
+      id = AshGraphql.Resource.encode_relay_id(channel)
 
-      {:ok, update_channel: update_channel, id: id}
+      {:ok, channel: channel, id: id}
     end
 
     test "updates update channel with valid data", %{tenant: tenant, id: id} do
       target_group = device_group_fixture(tenant: tenant)
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
-      update_channel_data =
+      channel_data =
         [
           id: id,
           name: "Updated name",
@@ -44,15 +44,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
           target_group_ids: [target_group_id],
           tenant: tenant
         ]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_result!()
 
-      assert update_channel_data["id"] == id
-      assert update_channel_data["name"] == "Updated name"
-      assert update_channel_data["handle"] == "updated-handle"
+      assert channel_data["id"] == id
+      assert channel_data["name"] == "Updated name"
+      assert channel_data["handle"] == "updated-handle"
 
       assert [target_group_data] =
-               extract_nodes!(update_channel_data["targetGroups"]["edges"])
+               extract_nodes!(channel_data["targetGroups"]["edges"])
 
       assert target_group_data["id"] == target_group_id
       assert target_group_data["name"] == target_group.name
@@ -62,11 +62,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     test "fails with empty name", %{tenant: tenant, id: id} do
       error =
         [id: id, name: "", tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_error!()
 
       assert %{
-               path: ["updateUpdateChannel"],
+               path: ["channel"],
                fields: [:name],
                code: "required",
                message: "is required"
@@ -74,15 +74,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     end
 
     test "fails with non-unique name", %{tenant: tenant, id: id} do
-      _ = update_channel_fixture(tenant: tenant, name: "existing-name")
+      _ = channel_fixture(tenant: tenant, name: "existing-name")
 
       error =
         [id: id, name: "existing-name", tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_error!()
 
       assert %{
-               path: ["updateUpdateChannel"],
+               path: ["channel"],
                fields: [:name],
                code: "invalid_attribute",
                message: "has already been taken"
@@ -92,11 +92,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     test "fails with empty handle", %{tenant: tenant, id: id} do
       error =
         [id: id, handle: "", tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_error!()
 
       assert %{
-               path: ["updateUpdateChannel"],
+               path: ["channel"],
                fields: [:handle],
                code: "required",
                message: "is required"
@@ -106,11 +106,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     test "fails with invalid handle", %{tenant: tenant, id: id} do
       error =
         [id: id, handle: "1nvalid Handle", tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_error!()
 
       assert %{
-               path: ["updateUpdateChannel"],
+               path: ["channel"],
                fields: [:handle],
                code: "invalid_attribute",
                message: "should only contain lower case ASCII letters (from a to z), digits and -"
@@ -118,25 +118,25 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
     end
 
     test "fails with non-unique handle", %{tenant: tenant, id: id} do
-      _ = update_channel_fixture(tenant: tenant, handle: "existing-handle")
+      _ = channel_fixture(tenant: tenant, handle: "existing-handle")
 
       error =
         [id: id, handle: "existing-handle", tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_error!()
 
       assert %{
-               path: ["updateUpdateChannel"],
+               path: ["channel"],
                fields: [:handle],
                code: "invalid_attribute",
                message: "has already been taken"
              } = error
     end
 
-    test "updates update_channel with empty target_group_ids", %{tenant: tenant, id: id} do
+    test "updates channel with empty target_group_ids", %{tenant: tenant, id: id} do
       result =
         [id: id, target_group_ids: [], tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_result!()
 
       assert result["id"] == id
@@ -147,11 +147,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
 
       error =
         [id: id, target_group_ids: [target_group_id], tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_error!()
 
       assert %{
-               path: ["updateUpdateChannel"],
+               path: ["channel"],
                fields: [:target_group_ids],
                code: "not_found",
                message: "One or more target groups could not be found"
@@ -162,30 +162,30 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
       target_group = device_group_fixture(tenant: tenant)
 
       _ =
-        update_channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
+        channel_fixture(tenant: tenant, target_group_ids: [target_group.id])
 
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
       error =
         [id: id, target_group_ids: [target_group_id], tenant: tenant]
-        |> update_update_channel_mutation()
+        |> update_channel_mutation()
         |> extract_error!()
 
       assert %{
-               path: ["updateUpdateChannel"],
-               fields: [:update_channel_id],
+               path: ["channel"],
+               fields: [:channel_id],
                code: "invalid_attribute",
-               message: "The update channel is already set for the device group " <> name
+               message: "The channel is already set for the device group " <> name
              } = error
 
       assert name == ~s["#{target_group.name}"]
     end
   end
 
-  defp update_update_channel_mutation(opts) do
+  defp update_channel_mutation(opts) do
     default_document = """
-    mutation UpdateUpdateChannel($id: ID!, $input: UpdateUpdateChannelInput!) {
-      updateUpdateChannel(id: $id, input: $input) {
+    mutation UpdateChannel($id: ID!, $input: ChannelInput!) {
+      channel(id: $id, input: $input) {
         result {
           id
           name
@@ -224,7 +224,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
   end
 
   defp extract_error!(result) do
-    assert is_nil(result[:data]["updateUpdateChannel"])
+    assert is_nil(result[:data]["channel"])
     assert %{errors: [error]} = result
 
     error
@@ -233,17 +233,17 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateUpdateChannelTest do
   defp extract_result!(result) do
     assert %{
              data: %{
-               "updateUpdateChannel" => %{
-                 "result" => update_channel
+               "channel" => %{
+                 "result" => channel
                }
              }
            } = result
 
     refute Map.get(result, :errors)
 
-    assert update_channel != nil
+    assert channel != nil
 
-    update_channel
+    channel
   end
 
   defp non_existing_device_group_id(tenant) do
