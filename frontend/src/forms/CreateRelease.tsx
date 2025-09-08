@@ -25,18 +25,9 @@ import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
 import type { UseFormRegister } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import type {
-  CreateRelease_ImageCredentialsOptionsFragment$key,
-  CreateRelease_ImageCredentialsOptionsFragment$data,
-} from "api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
-import type {
-  CreateRelease_NetworksOptionsFragment$key,
-  CreateRelease_NetworksOptionsFragment$data,
-} from "api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
-import type {
-  CreateRelease_VolumesOptionsFragment$key,
-  CreateRelease_VolumesOptionsFragment$data,
-} from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
+import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
+import type { CreateRelease_NetworksOptionsFragment$key } from "api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
+import type { CreateRelease_VolumesOptionsFragment$key } from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
 import type { CreateRelease_SystemModelsOptionsFragment$key } from "api/__generated__/CreateRelease_SystemModelsOptionsFragment.graphql";
 import {
   ContainerCreateWithNestedNetworksInput,
@@ -485,6 +476,11 @@ const restartPolicyOptions = [
   { value: "unless_stopped", label: "Unless Stopped" },
 ];
 
+type Option = {
+  value: string;
+  label: string;
+};
+
 type CreateReleaseProps = {
   imageCredentialsOptionsRef: CreateRelease_ImageCredentialsOptionsFragment$key;
   networksOptionsRef: CreateRelease_NetworksOptionsFragment$key;
@@ -499,9 +495,9 @@ type ContainerFormProps = {
   register: UseFormRegister<ReleaseInputData>;
   errors: any;
   remove: (index: number) => void;
-  listImageCredentials: CreateRelease_ImageCredentialsOptionsFragment$data["listImageCredentials"];
-  networks: CreateRelease_NetworksOptionsFragment$data["networks"];
-  volumes: CreateRelease_VolumesOptionsFragment$data["volumes"];
+  imageCredentials: Option[];
+  networks: Option[];
+  volumes: Option[];
   intl: ReturnType<typeof useIntl>;
   control: any;
 };
@@ -511,7 +507,7 @@ const ContainerForm = ({
   register,
   errors,
   remove,
-  listImageCredentials,
+  imageCredentials,
   networks,
   volumes,
   intl,
@@ -671,14 +667,9 @@ const ContainerForm = ({
             control={control}
             name={`containers.${index}.image.imageCredentialsId`}
             render={({ field }) => {
-              const options =
-                listImageCredentials?.edges?.map((ic) => ({
-                  value: ic.node.id,
-                  label: `${ic.node.label} (${ic.node.username})`,
-                })) || [];
-
               const selectedOption =
-                options.find((opt) => opt.value === field.value) || null;
+                imageCredentials.find((opt) => opt.value === field.value) ||
+                null;
 
               return (
                 <Select
@@ -686,7 +677,7 @@ const ContainerForm = ({
                   onChange={(option) => {
                     field.onChange(option ? option.value : null);
                   }}
-                  options={options}
+                  options={imageCredentials}
                   isClearable
                 />
               );
@@ -764,19 +755,29 @@ const ContainerForm = ({
               field: { value, onChange, onBlur },
               fieldState: { invalid },
             }) => {
-              const mappedValue = (value || []).map(
-                (v: { id: string }) =>
-                  networks?.edges?.find((n) => n.node.id === v.id) || v,
+              const mappedValue: Option[] = (value || []).map(
+                (v: ContainerCreateWithNestedNetworksInput) => {
+                  const id = v.id ?? "";
+                  return (
+                    networks.find((n) => n.value === id) || {
+                      value: id,
+                      label: id,
+                    }
+                  );
+                },
               );
 
               return (
                 <MultiSelect
                   invalid={invalid}
                   value={mappedValue}
-                  onChange={onChange}
+                  onChange={(selected) =>
+                    onChange(selected.map((s) => ({ id: s.value })))
+                  }
                   onBlur={onBlur}
-                  options={networks?.edges || []}
-                  getOptionValue={(option) => option.node.id!}
+                  options={networks}
+                  getOptionValue={(option) => option.value}
+                  getOptionLabel={(option) => option.label}
                 />
               );
             }}
@@ -866,8 +867,8 @@ const ContainerForm = ({
                   .map((v, i) => (i !== volIndex ? v.id : null))
                   .filter(Boolean) as string[];
 
-                const availableOptions = volumes?.edges?.filter(
-                  (vol) => !selectedIds.includes(vol.node.id),
+                const availableOptions = volumes?.filter(
+                  (vol) => !selectedIds.includes(vol.value),
                 );
 
                 const fieldErrors =
@@ -899,16 +900,11 @@ const ContainerForm = ({
                             name={`containers.${index}.volumes.${volIndex}.id`}
                             control={control}
                             render={({ field }) => {
-                              const selectOptions =
-                                availableOptions?.map((vol) => ({
-                                  value: vol.node.id,
-                                  label: vol.node.label,
-                                })) || [];
                               return (
                                 <Select
                                   name={field.name}
                                   value={
-                                    selectOptions.find(
+                                    availableOptions.find(
                                       (opt) => opt.value === field.value,
                                     ) || null
                                   }
@@ -916,7 +912,7 @@ const ContainerForm = ({
                                     field.onChange(selected?.value)
                                   }
                                   onBlur={field.onBlur}
-                                  options={selectOptions}
+                                  options={availableOptions}
                                   noOptionsMessage={() => (
                                     <FormattedMessage
                                       id="forms.CreateRelease.noVolumesMessage"
@@ -1401,15 +1397,41 @@ const CreateRelease = ({
     imageCredentialsOptionsRef,
   );
 
+  const imageCredentialsOptions: Option[] =
+    listImageCredentials?.edges?.map(({ node: imageCredentials }) => ({
+      value: imageCredentials.id,
+      label: `${imageCredentials.label} (${imageCredentials.username})`,
+    })) ?? [];
+
   const { networks } = useFragment(
     NETWORKS_OPTIONS_FRAGMENT,
     networksOptionsRef,
   );
+
+  const networkOptions: Option[] =
+    networks?.edges?.map(({ node: network }) => ({
+      value: network.id,
+      label: network.label ?? "",
+    })) ?? [];
+
   const { volumes } = useFragment(VOLUMES_OPTIONS_FRAGMENT, volumesOptionsRef);
+
+  const volumeOptions: Option[] =
+    volumes?.edges?.map(({ node: volume }) => ({
+      value: volume.id,
+      label: volume.label ?? "",
+    })) ?? [];
+
   const { systemModels: requiredSystemModels } = useFragment(
     SYSTEM_MODELS_OPTIONS_FRAGMENT,
     requiredSystemModelsOptionsRef,
   );
+
+  const systemModelsOptions: Option[] =
+    requiredSystemModels?.edges?.map(({ node: systemModel }) => ({
+      value: systemModel.id,
+      label: systemModel.name,
+    })) ?? [];
 
   const {
     register,
@@ -1542,15 +1564,14 @@ const CreateRelease = ({
               control={control}
               name="requiredSystemModels"
               render={({ field: { value, onChange, onBlur } }) => {
-                const nodes =
-                  requiredSystemModels?.edges?.map(({ node }) => node) || [];
-                const options = nodes.map((n) => ({
-                  value: n.id,
-                  label: n.name,
-                }));
                 const mappedValue = (value || []).map((v) => {
-                  const node = nodes.find((sm) => sm.id === v.id);
-                  return { value: v.id ?? "", label: node?.name ?? v.id ?? "" };
+                  const option = systemModelsOptions.find(
+                    (sm) => sm.value === v.id,
+                  );
+                  return {
+                    value: v.id ?? "",
+                    label: option?.label ?? v.id ?? "",
+                  };
                 });
 
                 return (
@@ -1560,7 +1581,7 @@ const CreateRelease = ({
                       onChange(selected.map(({ value }) => ({ id: value })))
                     }
                     onBlur={onBlur}
-                    options={options}
+                    options={systemModelsOptions}
                     getOptionValue={(option) => option.value}
                     getOptionLabel={(option) => option.label}
                   />
@@ -1593,9 +1614,9 @@ const CreateRelease = ({
               register={register}
               errors={errors}
               remove={remove}
-              listImageCredentials={listImageCredentials}
-              networks={networks}
-              volumes={volumes}
+              imageCredentials={imageCredentialsOptions}
+              networks={networkOptions}
+              volumes={volumeOptions}
               intl={intl}
               control={control}
             />
