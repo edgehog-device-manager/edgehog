@@ -70,14 +70,6 @@ defmodule Edgehog.Groups.DeviceGroup do
       validate Validations.ChannelAbsent
     end
 
-    update :assign_deployment_channel do
-      accept [:deployment_channel_id]
-
-      require_atomic? false
-
-      validate Validations.DeploymentChannelAbsent
-    end
-
     destroy :destroy do
       description "Deletes a device group."
       primary? true
@@ -146,13 +138,6 @@ defmodule Edgehog.Groups.DeviceGroup do
       description "The update channel associated with the group, if present."
       public? true
       attribute_public? false
-    end
-
-    belongs_to :deployment_channel, Edgehog.DeploymentCampaigns.DeploymentChannel do
-      description "The deployment channel associated with the group, if present."
-      public? true
-      attribute_public? false
-      attribute_type :uuid
     end
   end
 

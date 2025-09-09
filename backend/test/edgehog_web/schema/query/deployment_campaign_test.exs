@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
   @moduledoc false
   use EdgehogWeb.GraphqlCase, async: true
 
+  import Edgehog.CampaignsFixtures
   import Edgehog.ContainersFixtures
   import Edgehog.DeploymentCampaignsFixtures
   import Edgehog.DevicesFixtures
@@ -32,7 +33,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
 
       deployment_channel =
-        deployment_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+        channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
 
       release = release_fixture(tenant: tenant, system_models: 1)
 
@@ -64,7 +65,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
       deployment_campaign =
         deployment_campaign_fixture(
           release_id: release.id,
-          deployment_channel_id: deployment_channel.id,
+          channel_id: deployment_channel.id,
           tenant: tenant
         )
 
@@ -81,8 +82,8 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
       assert deployment_campaign_data["outcome"] == nil
       assert deployment_campaign_data["release"]["version"] == release.version
       assert deployment_campaign_data["release"]["id"] == expected_release_id
-      assert deployment_campaign_data["deploymentChannel"]["name"] == deployment_channel.name
-      assert deployment_campaign_data["deploymentChannel"]["handle"] == deployment_channel.handle
+      assert deployment_campaign_data["channel"]["name"] == deployment_channel.name
+      assert deployment_campaign_data["channel"]["handle"] == deployment_channel.handle
     end
   end
 
@@ -103,7 +104,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
                 }
               }
               status
-              deploymentChannel {
+              channel {
                 id
                 name
                 handle

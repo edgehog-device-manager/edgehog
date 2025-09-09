@@ -29,7 +29,6 @@ defmodule Edgehog.DeploymentCampaigns do
     extensions: [AshGraphql.Domain]
 
   alias Edgehog.DeploymentCampaigns.DeploymentCampaign
-  alias Edgehog.DeploymentCampaigns.DeploymentChannel
 
   graphql do
     root_level_errors? true
@@ -41,16 +40,6 @@ defmodule Edgehog.DeploymentCampaigns do
 
       list DeploymentCampaign, :deployment_campaigns, :read do
         description "Returns all available deployment campaigns."
-        paginate_with :keyset
-        relay? true
-      end
-
-      get DeploymentChannel, :deployment_channel, :read do
-        description "Returns the desired deployment channel."
-      end
-
-      list DeploymentChannel, :deployment_channels, :read do
-        description "Returns all available deployment channels."
         paginate_with :keyset
         relay? true
       end
@@ -95,7 +84,5 @@ defmodule Edgehog.DeploymentCampaigns do
 
       define :deploy_to_target, action: :deploy, args: [:release]
     end
-
-    resource Edgehog.DeploymentCampaigns.DeploymentChannel
   end
 end

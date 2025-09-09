@@ -29,6 +29,7 @@ defmodule Edgehog.Campaigns.Channel do
   alias Edgehog.Campaigns.Channel.Calculations
   alias Edgehog.Campaigns.Channel.Changes
   alias Edgehog.Campaigns.Channel.ErrorHandler
+  alias Edgehog.Devices.Device
 
   resource do
     description """
@@ -155,6 +156,10 @@ defmodule Edgehog.Campaigns.Channel do
     # base images so we can render a nice looking error instead of crashing, see
     # https://github.com/ash-project/ash_postgres/blob/0ccb35a713b9097c4aac6fde996dbb4d1c00cccb/lib/data_layer.ex#L2370
     has_many :update_campaigns, Edgehog.UpdateCampaigns.UpdateCampaign
+
+    has_many :deployment_campaigns, Edgehog.DeploymentCampaigns.DeploymentCampaign do
+      public? true
+    end
   end
 
   calculations do
@@ -168,7 +173,7 @@ defmodule Edgehog.Campaigns.Channel do
       result in a failed operation.\
       """
 
-      constraints items: [instance_of: Edgehog.Devices.Device]
+      constraints items: [instance_of: Device]
       allow_nil? false
 
       argument :base_image, :struct do
@@ -177,6 +182,26 @@ defmodule Edgehog.Campaigns.Channel do
       end
 
       calculation Calculations.UpdatableDevices
+    end
+
+    calculate :deployable_devices, {:array, :struct} do
+      description """
+      The devices targeted by the deployment channel that can be updated with the
+      provided release. Note that this only checks the compatibility between the
+      device and the system model targeted by the release. The starting version
+      requirement will be checked just before the update and will potentially
+      result in a failed operation.
+      """
+
+      constraints items: [instance_of: Device]
+      allow_nil? false
+
+      argument :release, :struct do
+        allow_nil? false
+        constraints instance_of: Edgehog.Containers.Release
+      end
+
+      calculation Calculations.DeployableDevices
     end
   end
 
