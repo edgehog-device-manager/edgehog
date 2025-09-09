@@ -24,6 +24,37 @@ input ContainerCreateWithNestedDeviceMappingsInput {
   pathOnHost: String!
 }
 
+"An object representing the properties of a Lazy Deployment Mechanism."
+type LazyDeployment {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressDeployments: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  createRequestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+}
+
 input UpdateCampaignRolloutMechanismPushInput {
   "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
   forceDowngrade: Boolean
@@ -179,11 +210,50 @@ type Position {
   source: String
 }
 
+type DeployRolloutMechanismLazy {
+  value: LazyDeployment!
+}
+
+union DeployRolloutMechanism = DeployRolloutMechanismLazy
+
 input RolloutMechanismInput {
   push: UpdateCampaignRolloutMechanismPushInput
 }
 
 union RolloutMechanism = PushRollout
+
+enum DeploymentTargetStatus {
+  "The deployment target is waiting for the deployment to start."
+  IDLE
+
+  "The deployment is in progress."
+  IN_PROGRESS
+
+  "Something went wrong while deploying the target."
+  FAILED
+
+  "The release has been successfully deployed to the target."
+  SUCCESSFUL
+}
+
+enum CampaignStatus {
+  "The campaign has been created but is not being rolled-out yet."
+  IDLE
+
+  "The campaign is being rolled-out."
+  IN_PROGRESS
+
+  "The campaign has finished."
+  FINISHED
+}
+
+enum CampaignOutcome {
+  "The campaign has finished succesfully."
+  SUCCESS
+
+  "The campaign has finished with a failure."
+  FAILURE
+}
 
 enum UpdateTargetStatus {
   "The update campaign is waiting for the OTA Request to be sent."
@@ -447,6 +517,9 @@ enum ApplicationDeploymentResourcesState {
   "The device has received all the volume descriptions necessary for the deployment."
   CREATED_VOLUMES
 
+  "The device has received all the device-file mappings descriptions necessary for the deployment."
+  CREATED_DEVICE_MAPPINGS
+
   "The device has received all the container descriptions necessary for the deployment."
   CREATED_CONTAINERS
 
@@ -456,7 +529,7 @@ enum ApplicationDeploymentResourcesState {
 
 enum ApplicationDeploymentState {
   "The deployment has been created in the database layer, the device yet has to receive it."
-  CREATED
+  PENDING
 
   "The deployment description has been sent to the device."
   SENT
@@ -965,6 +1038,81 @@ input ReleaseCreateRequiredSystemModelsInput {
   id: ID
 }
 
+enum ContainerVolumeSortField {
+  TARGET
+  VOLUME_ID
+}
+
+":container_volume connection"
+type ContainerVolumeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container_volume edges"
+  edges: [ContainerVolumeEdge!]
+}
+
+":container_volume edge"
+type ContainerVolumeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container_volume node"
+  node: ContainerVolume!
+}
+
+input ContainerVolumeFilterVolumeId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerVolumeFilterTarget {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerVolumeFilterInput {
+  and: [ContainerVolumeFilterInput!]
+  or: [ContainerVolumeFilterInput!]
+  not: [ContainerVolumeFilterInput!]
+  target: ContainerVolumeFilterTarget
+  volumeId: ContainerVolumeFilterVolumeId
+  volume: VolumeFilterInput
+}
+
+input ContainerVolumeSortInput {
+  order: SortOrder
+  field: ContainerVolumeSortField!
+}
+
+type ContainerVolume {
+  "A unique identifier"
+  id: ID!
+
+  target: String!
+
+  volumeId: ID!
+
+  volume: Volume!
+}
+
 enum DeviceMappingSortField {
   ID
   PATH_ON_HOST
@@ -1079,81 +1227,6 @@ type DeviceMapping {
   cgroupPermissions: String!
   containerId: ID
   container: Container
-}
-
-enum ContainerVolumeSortField {
-  TARGET
-  VOLUME_ID
-}
-
-":container_volume connection"
-type ContainerVolumeConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":container_volume edges"
-  edges: [ContainerVolumeEdge!]
-}
-
-":container_volume edge"
-type ContainerVolumeEdge {
-  "Cursor"
-  cursor: String!
-
-  ":container_volume node"
-  node: ContainerVolume!
-}
-
-input ContainerVolumeFilterVolumeId {
-  isNil: Boolean
-  eq: ID
-  notEq: ID
-  in: [ID!]
-  lessThan: ID
-  greaterThan: ID
-  lessThanOrEqual: ID
-  greaterThanOrEqual: ID
-}
-
-input ContainerVolumeFilterTarget {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
-}
-
-input ContainerVolumeFilterInput {
-  and: [ContainerVolumeFilterInput!]
-  or: [ContainerVolumeFilterInput!]
-  not: [ContainerVolumeFilterInput!]
-  target: ContainerVolumeFilterTarget
-  volumeId: ContainerVolumeFilterVolumeId
-  volume: VolumeFilterInput
-}
-
-input ContainerVolumeSortInput {
-  order: SortOrder
-  field: ContainerVolumeSortField!
-}
-
-type ContainerVolume {
-  "A unique identifier"
-  id: ID!
-
-  target: String!
-
-  volumeId: ID!
-
-  volume: Volume!
 }
 
 "The result of the :create_volume mutation"
@@ -2027,7 +2100,7 @@ enum ContainerSortField {
   NETWORK_MODE
   CPU_PERIOD
   CPU_QUOTA
-  CPU_REAL_TIME_PERIOD
+  CPU_REALTIME_PERIOD
   CPU_REALTIME_RUNTIME
   MEMORY
   MEMORY_RESERVATION
@@ -2149,7 +2222,7 @@ input ContainerFilterCpuRealtimeRuntime {
   greaterThanOrEqual: Int
 }
 
-input ContainerFilterCpuRealTimePeriod {
+input ContainerFilterCpuRealtimePeriod {
   isNil: Boolean
   eq: Int
   notEq: Int
@@ -2264,7 +2337,7 @@ input ContainerFilterInput {
   networkMode: ContainerFilterNetworkMode
   cpuPeriod: ContainerFilterCpuPeriod
   cpuQuota: ContainerFilterCpuQuota
-  cpuRealtimePeriod: ContainerFilterCpuRealTimePeriod
+  cpuRealtimePeriod: ContainerFilterCpuRealtimePeriod
   cpuRealtimeRuntime: ContainerFilterCpuRealtimeRuntime
   memory: ContainerFilterMemory
   memoryReservation: ContainerFilterMemoryReservation
@@ -3738,6 +3811,9 @@ input DeviceGroupFilterInput {
 
   "The update channel associated with the group, if present."
   updateChannel: UpdateChannelFilterInput
+
+  "The deployment channel associated with the group, if present."
+  deploymentChannel: DeploymentChannelFilterInput
 }
 
 input DeviceGroupSortInput {
@@ -3782,6 +3858,9 @@ type DeviceGroup implements Node {
 
   "The update channel associated with the group, if present."
   updateChannel: UpdateChannel
+
+  "The deployment channel associated with the group, if present."
+  deploymentChannel: DeploymentChannel
 }
 
 enum TagSortField {
@@ -4694,7 +4773,581 @@ type UpdateCampaign implements Node {
   successfulTargetCount: Int!
 }
 
+enum DeploymentChannelSortField {
+  ID
+  NAME
+  HANDLE
+}
+
+":deployment_channel connection"
+type DeploymentChannelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":deployment_channel edges"
+  edges: [DeploymentChannelEdge!]
+}
+
+":deployment_channel edge"
+type DeploymentChannelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":deployment_channel node"
+  node: DeploymentChannel!
+}
+
+input DeploymentChannelFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeploymentChannelFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeploymentChannelFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentChannelFilterInput {
+  and: [DeploymentChannelFilterInput!]
+  or: [DeploymentChannelFilterInput!]
+  not: [DeploymentChannelFilterInput!]
+  id: DeploymentChannelFilterId
+  name: DeploymentChannelFilterName
+  handle: DeploymentChannelFilterHandle
+  targetGroups: DeviceGroupFilterInput
+  deploymentCampaigns: DeploymentCampaignFilterInput
+}
+
+input DeploymentChannelSortInput {
+  order: SortOrder
+  field: DeploymentChannelSortField!
+}
+
+"""
+Represents a DeploymentChannel.
+
+A DeploymentChannel represents a set of device groups that can be targeted in
+a DeploymentCampaign.
+"""
+type DeploymentChannel implements Node {
+  id: ID!
+  name: String!
+  handle: String!
+  targetGroups(
+    "How to sort the records in the response"
+    sort: [DeviceGroupSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceGroupFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [DeviceGroup!]!
+  deploymentCampaigns(
+    "How to sort the records in the response"
+    sort: [DeploymentCampaignSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentCampaignFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [DeploymentCampaign!]!
+}
+
+enum DeploymentTargetSortField {
+  ID
+  STATUS
+  NAME
+  RETRY_COUNT
+  LATEST_ATTEMPT
+  COMPLETION_TIMESTAMP
+}
+
+":deployment_target connection"
+type DeploymentTargetConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":deployment_target edges"
+  edges: [DeploymentTargetEdge!]
+}
+
+":deployment_target edge"
+type DeploymentTargetEdge {
+  "Cursor"
+  cursor: String!
+
+  ":deployment_target node"
+  node: DeploymentTarget!
+}
+
+input DeploymentTargetFilterCompletionTimestamp {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeploymentTargetFilterLatestAttempt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeploymentTargetFilterRetryCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeploymentTargetFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeploymentTargetFilterStatus {
+  isNil: Boolean
+  eq: DeploymentTargetStatus
+  notEq: DeploymentTargetStatus
+  in: [DeploymentTargetStatus!]
+  lessThan: DeploymentTargetStatus
+  greaterThan: DeploymentTargetStatus
+  lessThanOrEqual: DeploymentTargetStatus
+  greaterThanOrEqual: DeploymentTargetStatus
+}
+
+input DeploymentTargetFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentTargetFilterInput {
+  and: [DeploymentTargetFilterInput!]
+
+  or: [DeploymentTargetFilterInput!]
+
+  not: [DeploymentTargetFilterInput!]
+
+  id: DeploymentTargetFilterId
+
+  "The status of the update target."
+  status: DeploymentTargetFilterStatus
+
+  name: DeploymentTargetFilterName
+
+  """
+  The number of retries of the deployment target. This indicated how many times
+  Edgehog retried to send all the necessary information about a deployment towards
+  the device without receiving acks.
+  """
+  retryCount: DeploymentTargetFilterRetryCount
+
+  "The timestamp of the latest attempt to deploy to the update target."
+  latestAttempt: DeploymentTargetFilterLatestAttempt
+
+  "The timestamp when the update target completed its update, either with a success or a failure."
+  completionTimestamp: DeploymentTargetFilterCompletionTimestamp
+
+  deploymentCampaign: DeploymentCampaignFilterInput
+
+  device: DeviceFilterInput
+
+  deployment: DeploymentFilterInput
+}
+
+input DeploymentTargetSortInput {
+  order: SortOrder
+  field: DeploymentTargetSortField!
+}
+
+"""
+Represents a DeploymentTarget.
+
+Deployment targets are the targets of a Deployment Campaign, which is composed by the target device and the state of the target in the linked Deployment Campaign.
+"""
+type DeploymentTarget {
+  id: ID!
+
+  "The status of the update target."
+  status: DeploymentTargetStatus!
+
+  name: String!
+
+  """
+  The number of retries of the deployment target. This indicated how many times
+  Edgehog retried to send all the necessary information about a deployment towards
+  the device without receiving acks.
+  """
+  retryCount: Int!
+
+  "The timestamp of the latest attempt to deploy to the update target."
+  latestAttempt: DateTime
+
+  "The timestamp when the update target completed its update, either with a success or a failure."
+  completionTimestamp: DateTime
+
+  deploymentCampaign: DeploymentCampaign!
+
+  device: Device!
+
+  deployment: Deployment!
+}
+
+enum DeploymentCampaignSortField {
+  ID
+  NAME
+  STATUS
+  OUTCOME
+  TOTAL_TARGET_COUNT
+  IDLE_TARGET_COUNT
+  IN_PROGRESS_TARGET_COUNT
+  FAILED_TARGET_COUNT
+  SUCCESSFUL_TARGET_COUNT
+}
+
+":deployment_campaign connection"
+type DeploymentCampaignConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":deployment_campaign edges"
+  edges: [DeploymentCampaignEdge!]
+}
+
+":deployment_campaign edge"
+type DeploymentCampaignEdge {
+  "Cursor"
+  cursor: String!
+
+  ":deployment_campaign node"
+  node: DeploymentCampaign!
+}
+
+input DeploymentCampaignFilterSuccessfulTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeploymentCampaignFilterFailedTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeploymentCampaignFilterInProgressTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeploymentCampaignFilterIdleTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeploymentCampaignFilterTotalTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeploymentCampaignFilterOutcome {
+  isNil: Boolean
+  eq: CampaignOutcome
+  notEq: CampaignOutcome
+  in: [CampaignOutcome]
+  lessThan: CampaignOutcome
+  greaterThan: CampaignOutcome
+  lessThanOrEqual: CampaignOutcome
+  greaterThanOrEqual: CampaignOutcome
+}
+
+input DeploymentCampaignFilterStatus {
+  isNil: Boolean
+  eq: CampaignStatus
+  notEq: CampaignStatus
+  in: [CampaignStatus!]
+  lessThan: CampaignStatus
+  greaterThan: CampaignStatus
+  lessThanOrEqual: CampaignStatus
+  greaterThanOrEqual: CampaignStatus
+}
+
+input DeploymentCampaignFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeploymentCampaignFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentCampaignFilterInput {
+  and: [DeploymentCampaignFilterInput!]
+
+  or: [DeploymentCampaignFilterInput!]
+
+  not: [DeploymentCampaignFilterInput!]
+
+  id: DeploymentCampaignFilterId
+
+  name: DeploymentCampaignFilterName
+
+  "The status of the deployment campaign."
+  status: DeploymentCampaignFilterStatus
+
+  "The outcome of the deployment campaign."
+  outcome: DeploymentCampaignFilterOutcome
+
+  "The release distributed by the deployment campaign."
+  release: ReleaseFilterInput
+
+  "The deployment channel associated with the campaign."
+  deploymentChannel: DeploymentChannelFilterInput
+
+  "The depployment targets belonging to the deployment campaign."
+  deploymentTargets: DeploymentTargetFilterInput
+
+  "The total number of deployment targets."
+  totalTargetCount: DeploymentCampaignFilterTotalTargetCount
+
+  "The number of deployment targets with an idle status."
+  idleTargetCount: DeploymentCampaignFilterIdleTargetCount
+
+  "The number of deployment targets with an in-progress status."
+  inProgressTargetCount: DeploymentCampaignFilterInProgressTargetCount
+
+  "The number of deployment targets with a failed status."
+  failedTargetCount: DeploymentCampaignFilterFailedTargetCount
+
+  "The number of deployment targets with a successful status."
+  successfulTargetCount: DeploymentCampaignFilterSuccessfulTargetCount
+}
+
+input DeploymentCampaignSortInput {
+  order: SortOrder
+  field: DeploymentCampaignSortField!
+}
+
+type DeploymentCampaign implements Node {
+  id: ID!
+
+  name: String!
+
+  "The status of the deployment campaign."
+  status: CampaignStatus!
+
+  "The outcome of the deployment campaign."
+  outcome: CampaignOutcome
+
+  "The deployment mechanism to carry the campaign."
+  deployRolloutMechanism: DeployRolloutMechanism!
+
+  "The release distributed by the deployment campaign."
+  release: Release!
+
+  "The deployment channel associated with the campaign."
+  deploymentChannel: DeploymentChannel!
+
+  "The depployment targets belonging to the deployment campaign."
+  deploymentTargets(
+    "How to sort the records in the response"
+    sort: [DeploymentTargetSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentTargetFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentTargetConnection!
+
+  "The total number of deployment targets."
+  totalTargetCount: Int!
+
+  "The number of deployment targets with an idle status."
+  idleTargetCount: Int!
+
+  "The number of deployment targets with an in-progress status."
+  inProgressTargetCount: Int!
+
+  "The number of deployment targets with a failed status."
+  failedTargetCount: Int!
+
+  "The number of deployment targets with a successful status."
+  successfulTargetCount: Int!
+}
+
 type RootQueryType {
+  "Returns the desired deployment campaign."
+  deploymentCampaign("The id of the record" id: ID!): DeploymentCampaign
+
+  "Returns all available deployment campaigns."
+  deploymentCampaigns(
+    "How to sort the records in the response"
+    sort: [DeploymentCampaignSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentCampaignFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentCampaignConnection
+
+  "Returns the desired deployment channel."
+  deploymentChannel("The id of the record" id: ID!): DeploymentChannel
+
+  "Returns all available deployment channels."
+  deploymentChannels(
+    "How to sort the records in the response"
+    sort: [DeploymentChannelSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentChannelFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentChannelConnection
+
   "Returns a single update campaign."
   updateCampaign("The id of the record" id: ID!): UpdateCampaign
 
