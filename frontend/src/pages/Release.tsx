@@ -46,6 +46,7 @@ import Stack from "components/Stack";
 import Button from "components/Button";
 import Icon from "components/Icon";
 import { Collapse } from "react-bootstrap";
+import ReleaseDevicesTable from "components/ReleaseDevicesTable";
 
 const CONTAINERS_TO_LOAD_FIRST = 5;
 
@@ -61,6 +62,7 @@ const GET_RELEASE_QUERY = graphql`
         name
       }
       ...ContainersTable_ContainerFragment
+      ...ReleaseDevicesTable_DeploymentsFragment
     }
   }
 `;
@@ -167,6 +169,7 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
           </Alert>
           <ReleaseSystemModels systemModels={release["systemModels"]} />
           <ContainersTable containersRef={release} />
+          <ReleaseDevicesTable releaseDevicesRef={release} />
         </Stack>
       </Page.Main>
     </Page>
