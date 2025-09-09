@@ -20,29 +20,34 @@
 
 defmodule Edgehog.Containers.ContainerDeploymentNetworkDeployment do
   @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
+  use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    data_layer: AshPostgres.DataLayer
+    tenant_id_in_primary_key?: true
 
   actions do
-    defaults [:read, :destroy, create: []]
+    defaults [:read, :destroy, create: [:container_deployment_id, :network_deployment_id]]
   end
 
   relationships do
     belongs_to :container_deployment, Edgehog.Containers.Container.Deployment do
       primary_key? true
       allow_nil? false
+      attribute_type :uuid
     end
 
     belongs_to :network_deployment, Edgehog.Containers.Network.Deployment do
       primary_key? true
       allow_nil? false
+      attribute_type :uuid
     end
   end
 
   postgres do
     table "container_deployment_network_deployments"
-    repo Edgehog.Repo
+
+    references do
+      reference :container_deployment, on_delete: :delete
+      reference :network_deployment, on_delete: :delete
+    end
   end
 end
