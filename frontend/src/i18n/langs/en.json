@@ -122,9 +122,6 @@
   "components.AddAvailableApplications.selectRelease": {
     "defaultMessage": "Select Release"
   },
-  "components.AddAvailableSystemModels.searchPlaceholder": {
-    "defaultMessage": "Search or select a system model..."
-  },
   "components.ApplicationDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the application devices table"
@@ -271,6 +268,12 @@
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
   },
+  "components.ContainersTable.capAdd": {
+    "defaultMessage": "Cap Add"
+  },
+  "components.ContainersTable.capDrop": {
+    "defaultMessage": "Cap Drop"
+  },
   "components.ContainersTable.cpuPeriodLabel": {
     "defaultMessage": "CPU Period (in microseconds)"
   },
@@ -379,9 +382,6 @@
   "components.CreateApplication.submitButton": {
     "defaultMessage": "Create"
   },
-  "components.CreateApplication.systemModelLabel": {
-    "defaultMessage": "System Model"
-  },
   "components.CreateBaseImageCollectionForm.handleLabel": {
     "defaultMessage": "Handle"
   },
@@ -453,129 +453,6 @@
   },
   "components.CreateNetworkForm.submitButton": {
     "defaultMessage": "Create"
-  },
-  "components.CreateRelease.addContainerButton": {
-    "defaultMessage": "Add Container"
-  },
-  "components.CreateRelease.addExtraHostButton": {
-    "defaultMessage": "Add Extra Host"
-  },
-  "components.CreateRelease.confirmButton": {
-    "defaultMessage": "Confirm"
-  },
-  "components.CreateRelease.confirmPrompt": {
-    "defaultMessage": "Choose a release from which you want to copy containers and their configurations."
-  },
-  "components.CreateRelease.containerTitle": {
-    "defaultMessage": "Container {containerNumber}"
-  },
-  "components.CreateRelease.containersTitle": {
-    "defaultMessage": "Containers"
-  },
-  "components.CreateRelease.cpuPeriodLabel": {
-    "defaultMessage": "CPU Period (microseconds)"
-  },
-  "components.CreateRelease.cpuQuotaLabel": {
-    "defaultMessage": "CPU Quota (microseconds)"
-  },
-  "components.CreateRelease.cpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Real-Time Period (microseconds)"
-  },
-  "components.CreateRelease.cpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
-  },
-  "components.CreateRelease.envLabel": {
-    "defaultMessage": "Environment (JSON String)"
-  },
-  "components.CreateRelease.extraHostsLabel": {
-    "defaultMessage": "Extra Hosts"
-  },
-  "components.CreateRelease.hostnameLabel": {
-    "defaultMessage": "Hostname"
-  },
-  "components.CreateRelease.imageCredentialsLabel": {
-    "defaultMessage": "Image Credentials"
-  },
-  "components.CreateRelease.imageReferenceLabel": {
-    "defaultMessage": "Image Reference"
-  },
-  "components.CreateRelease.memoryLabel": {
-    "defaultMessage": "Memory (bytes)"
-  },
-  "components.CreateRelease.memoryReservationLabel": {
-    "defaultMessage": "Memory Reservation (bytes)"
-  },
-  "components.CreateRelease.memorySwapLabel": {
-    "defaultMessage": "Memory Swap (bytes)"
-  },
-  "components.CreateRelease.memorySwappinessLabel": {
-    "defaultMessage": "Memory Swappiness (0-100)"
-  },
-  "components.CreateRelease.networkModeLabel": {
-    "defaultMessage": "Network Mode"
-  },
-  "components.CreateRelease.networksLabel": {
-    "defaultMessage": "Networks"
-  },
-  "components.CreateRelease.noContainersFeedback": {
-    "defaultMessage": "The release does not include any container."
-  },
-  "components.CreateRelease.noVolumesMessage": {
-    "defaultMessage": "No volumes available"
-  },
-  "components.CreateRelease.portBindingsLabel": {
-    "defaultMessage": "Port Bindings"
-  },
-  "components.CreateRelease.privilegedLabel": {
-    "defaultMessage": "Privileged"
-  },
-  "components.CreateRelease.readOnlyRootfsLabel": {
-    "defaultMessage": "Read-Only Root Filesystem"
-  },
-  "components.CreateRelease.removeContainerButton": {
-    "defaultMessage": "Remove Container"
-  },
-  "components.CreateRelease.restartPolicyLabel": {
-    "defaultMessage": "Restart Policy"
-  },
-  "components.CreateRelease.restartPolicyOption": {
-    "defaultMessage": "Select a Restart Policy"
-  },
-  "components.CreateRelease.reuseResourcesButton": {
-    "defaultMessage": "Reuse Containers"
-  },
-  "components.CreateRelease.reuseResourcesModalTitle": {
-    "defaultMessage": "Reuse Resources Modal"
-  },
-  "components.CreateRelease.reuseResourcesTitleButton": {
-    "defaultMessage": "Copy containers and their configurations from an existing release"
-  },
-  "components.CreateRelease.selectApplication": {
-    "defaultMessage": "Select Application"
-  },
-  "components.CreateRelease.selectRelease": {
-    "defaultMessage": "Select Release"
-  },
-  "components.CreateRelease.storageOptLabel": {
-    "defaultMessage": "Storage Options"
-  },
-  "components.CreateRelease.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateRelease.tmpfsLabel": {
-    "defaultMessage": "Tmpfs Mounts"
-  },
-  "components.CreateRelease.versionLabel": {
-    "defaultMessage": "Version"
-  },
-  "components.CreateRelease.volumeDriverLabel": {
-    "defaultMessage": "Volume Driver"
-  },
-  "components.CreateRelease.volumeSelectLabel": {
-    "defaultMessage": "Volume:"
-  },
-  "components.CreateRelease.volumeTargetLabel": {
-    "defaultMessage": "Target:"
   },
   "components.CreateSystemModelForm.addPartNumberButton": {
     "defaultMessage": "Add part number"
@@ -946,6 +823,9 @@
     "defaultMessage": "Release Version",
     "description": "Title for the Release Version column of the releases table"
   },
+  "components.ReleasesSystemModelsTable.nameTitle": {
+    "defaultMessage": "Name"
+  },
   "components.ReleasesTable.action": {
     "defaultMessage": "Action"
   },
@@ -1226,8 +1106,140 @@
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateRelease.addContainerButton": {
+    "defaultMessage": "Add Container"
+  },
+  "forms.CreateRelease.addExtraHostButton": {
+    "defaultMessage": "Add Extra Host"
+  },
   "forms.CreateRelease.addVolumeButton": {
     "defaultMessage": "Add Volume"
+  },
+  "forms.CreateRelease.capAddLabel": {
+    "defaultMessage": "Cap Add"
+  },
+  "forms.CreateRelease.capDropLabel": {
+    "defaultMessage": "Cap Drop"
+  },
+  "forms.CreateRelease.confirmButton": {
+    "defaultMessage": "Confirm"
+  },
+  "forms.CreateRelease.confirmPrompt": {
+    "defaultMessage": "Choose a release from which you want to copy containers and their configurations."
+  },
+  "forms.CreateRelease.containerTitle": {
+    "defaultMessage": "Container {containerNumber}"
+  },
+  "forms.CreateRelease.containersTitle": {
+    "defaultMessage": "Containers"
+  },
+  "forms.CreateRelease.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "forms.CreateRelease.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "forms.CreateRelease.cpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "forms.CreateRelease.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.CreateRelease.envLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "forms.CreateRelease.extraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "forms.CreateRelease.hostnameLabel": {
+    "defaultMessage": "Hostname"
+  },
+  "forms.CreateRelease.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "forms.CreateRelease.imageReferenceLabel": {
+    "defaultMessage": "Image Reference"
+  },
+  "forms.CreateRelease.memoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "forms.CreateRelease.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "forms.CreateRelease.memorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
+  },
+  "forms.CreateRelease.memorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "forms.CreateRelease.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "forms.CreateRelease.networksLabel": {
+    "defaultMessage": "Networks"
+  },
+  "forms.CreateRelease.noContainersFeedback": {
+    "defaultMessage": "The release does not include any container."
+  },
+  "forms.CreateRelease.noVolumesMessage": {
+    "defaultMessage": "No volumes available"
+  },
+  "forms.CreateRelease.portBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "forms.CreateRelease.privilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "forms.CreateRelease.readOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "forms.CreateRelease.removeContainerButton": {
+    "defaultMessage": "Remove Container"
+  },
+  "forms.CreateRelease.requiredSystemModelsLabels": {
+    "defaultMessage": "Required System Models"
+  },
+  "forms.CreateRelease.restartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "forms.CreateRelease.restartPolicyOption": {
+    "defaultMessage": "Select a Restart Policy"
+  },
+  "forms.CreateRelease.reuseResourcesButton": {
+    "defaultMessage": "Reuse Containers"
+  },
+  "forms.CreateRelease.reuseResourcesModalTitle": {
+    "defaultMessage": "Reuse Resources Modal"
+  },
+  "forms.CreateRelease.reuseResourcesTitleButton": {
+    "defaultMessage": "Copy containers and their configurations from an existing release"
+  },
+  "forms.CreateRelease.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "forms.CreateRelease.selectRelease": {
+    "defaultMessage": "Select Release"
+  },
+  "forms.CreateRelease.storageOptLabel": {
+    "defaultMessage": "Storage Options"
+  },
+  "forms.CreateRelease.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateRelease.tmpfsLabel": {
+    "defaultMessage": "Tmpfs Mounts"
+  },
+  "forms.CreateRelease.versionLabel": {
+    "defaultMessage": "Version"
+  },
+  "forms.CreateRelease.volumeDriverLabel": {
+    "defaultMessage": "Volume Driver"
+  },
+  "forms.CreateRelease.volumeSelectLabel": {
+    "defaultMessage": "Volume:"
+  },
+  "forms.CreateRelease.volumeTargetLabel": {
+    "defaultMessage": "Target:"
   },
   "forms.CreateRelease.volumesLabel": {
     "defaultMessage": "Volumes"
@@ -1979,6 +1991,9 @@
   "pages.Release.releaseNotFound.title": {
     "defaultMessage": "Release not found."
   },
+  "pages.Release.systemModels": {
+    "defaultMessage": "System Models"
+  },
   "pages.ReleaseCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the release, please try again."
   },
@@ -2183,6 +2198,12 @@
   },
   "validation.required": {
     "defaultMessage": "Required."
+  },
+  "validation.storage.format": {
+    "defaultMessage": "Must be a valid JSON array of strings in the format \"key=value\", e.g. [\"size=120G\"]"
+  },
+  "validation.tmpfs.format": {
+    "defaultMessage": "Must be a valid JSON array of strings in the format \"/path=option1,option2\", e.g. [\"/run=rw,size=64m\"]"
   },
   "validation.unique": {
     "defaultMessage": "Duplicate value."

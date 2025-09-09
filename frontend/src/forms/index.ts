@@ -87,6 +87,16 @@ const messages = defineMessages({
     id: "validation.extraHosts.format",
     defaultMessage: "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)",
   },
+  tmpfsFormat: {
+    id: "validation.tmpfs.format",
+    defaultMessage:
+      'Must be a valid JSON array of strings in the format "/path=option1,option2", e.g. ["/run=rw,size=64m"]',
+  },
+  storageFormat: {
+    id: "validation.storage.format",
+    defaultMessage:
+      'Must be a valid JSON array of strings in the format "key=value", e.g. ["size=120G"]',
+  },
 });
 
 yup.setLocale({
@@ -177,14 +187,49 @@ const portBindingsSchema = yup
       value.split(", ").every((v) => /^[0-9]+:[0-9]+$/.test(v.trim())),
   });
 
-const storageTmpfsOptSchema = yup
+const tmpfsOptSchema = yup
   .string()
   .nullable()
   .transform((value) => value?.trim())
   .test({
-    name: "is-json-array-of-strings",
-    message:
-      'Must be a valid JSON array of strings, e.g. ["key=value","string"]',
+    name: "is-json-array-of-tmpfs",
+    message: messages.tmpfsFormat.id,
+    test: (value) => {
+      if (!value) return true;
+
+      let parsed;
+      try {
+        parsed = JSON.parse(value);
+      } catch {
+        return false;
+      }
+
+      if (
+        !Array.isArray(parsed) ||
+        !parsed.every((item) => typeof item === "string")
+      ) {
+        return false;
+      }
+
+      const tmpfsRegex = /^\/[A-Za-z0-9/_-]+=[A-Za-z0-9,=:_-]+$/;
+
+      for (const entry of parsed) {
+        if (!tmpfsRegex.test(entry)) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+  });
+
+const storageOptSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json-array-of-storage-opts",
+    message: messages.storageFormat.id,
     test: (value) => {
       if (!value) return true;
       let parsed: unknown;
@@ -199,7 +244,16 @@ const storageTmpfsOptSchema = yup
       ) {
         return false;
       }
-      return parsed.length === 0 || /^[^=]+=[^=]+$/.test(parsed[0]);
+
+      const keyValueRegex = /^[A-Za-z0-9_.-]+=[A-Za-z0-9_.:-]+$/;
+
+      for (const entry of parsed) {
+        if (!keyValueRegex.test(entry)) {
+          return false;
+        }
+      }
+
+      return true;
     },
   });
 
@@ -237,5 +291,6 @@ export {
   extraHostsSchema,
   messages,
   yup,
-  storageTmpfsOptSchema,
+  tmpfsOptSchema,
+  storageOptSchema,
 };

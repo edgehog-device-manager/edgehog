@@ -18,25 +18,16 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
-import type { UseFormRegister } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import type {
-  CreateRelease_ImageCredentialsOptionsFragment$key,
-  CreateRelease_ImageCredentialsOptionsFragment$data,
-} from "api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
-import type {
-  CreateRelease_NetworksOptionsFragment$key,
-  CreateRelease_NetworksOptionsFragment$data,
-} from "api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
-import type {
-  CreateRelease_VolumesOptionsFragment$key,
-  CreateRelease_VolumesOptionsFragment$data,
-} from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
+import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
+import type { CreateRelease_NetworksOptionsFragment$key } from "api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
+import type { CreateRelease_VolumesOptionsFragment$key } from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
 import type { CreateRelease_SystemModelsOptionsFragment$key } from "api/__generated__/CreateRelease_SystemModelsOptionsFragment.graphql";
 import {
   ContainerCreateWithNestedNetworksInput,
@@ -59,14 +50,17 @@ import {
   yup,
   envSchema,
   portBindingsSchema,
-  storageTmpfsOptSchema,
+  tmpfsOptSchema,
+  storageOptSchema,
   extraHostsSchema,
+  numberSchema,
 } from "./index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
 import Icon from "components/Icon";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import ConfirmModal from "components/ConfirmModal";
+import FormFeedback from "./FormFeedback";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -245,17 +239,17 @@ type ContainerInput = {
   memorySwap?: number;
   memorySwappiness?: number;
   networkMode?: string;
-  networks: ContainerCreateWithNestedNetworksInput[];
+  networks?: ContainerCreateWithNestedNetworksInput[];
   portBindings?: string;
   privileged?: boolean;
   readOnlyRootfs?: boolean;
   restartPolicy?: string;
-  storageOpt?: string[];
-  tmpfs?: string[];
+  storageOpt?: string;
+  tmpfs?: string;
   capAdd?: string[];
   capDrop?: string[];
   volumeDriver?: string;
-  volumes: ContainerCreateWithNestedVolumesInput[];
+  volumes?: ContainerCreateWithNestedVolumesInput[];
 };
 
 type ReleaseInputData = {
@@ -270,8 +264,13 @@ type ReleaseSubmitData = {
   requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
 };
 
-type ContainerSubmit = Omit<ContainerInput, "portBindings"> & {
+type ContainerSubmit = Omit<
+  ContainerInput,
+  "portBindings" | "tmpfs" | "storageOpt"
+> & {
   portBindings?: string[];
+  tmpfs?: string[];
+  storageOpt?: string[];
 };
 
 export const CapDropList = [
@@ -318,76 +317,151 @@ export const CapAddList = [
 ] as const;
 
 // Yup schema for form validation
-const applicationSchema = yup
-  .object({
-    version: yup.string().required(),
-    containers: yup
-      .array(
-        yup.object({
-          env: envSchema,
-          extraHosts: extraHostsSchema,
-          image: yup.object({
-            reference: yup.string().required(),
-            imageCredentialsId: yup.string().nullable(),
-          }),
-          hostname: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          privileged: yup.boolean().nullable(),
-          restartPolicy: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          networkMode: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          portBindings: portBindingsSchema,
-          memory: yup.number().nullable(),
-          memoryReservation: yup.number().nullable(),
-          memorySwap: yup.number().nullable(),
-          memorySwappiness: yup.number().min(0).max(100).nullable(),
-          cpuPeriod: yup.number().nullable(),
-          cpuQuota: yup.number().nullable(),
-          cpuRealtimePeriod: yup.number().nullable(),
-          cpuRealtimeRuntime: yup.number().nullable(),
-          readOnlyRootfs: yup.boolean().nullable(),
-          storageOpt: storageTmpfsOptSchema,
-          tmpfs: storageTmpfsOptSchema,
-          capAdd: yup
-            .array()
-            .of(yup.string().required().oneOf(CapAddList))
-            .nullable(),
-          capDrop: yup
-            .array()
-            .of(yup.string().required().oneOf(CapDropList))
-            .nullable(),
-          volumeDriver: yup
-            .string()
-            .nullable()
-            .transform((value) => value?.trim()),
-          networks: yup.array(
-            yup.object({
-              id: yup.string().required(),
+const applicationSchema = (intl: any) =>
+  yup
+    .object({
+      version: yup.string().required(),
+      containers: yup
+        .array(
+          yup.object({
+            env: envSchema,
+            extraHosts: extraHostsSchema,
+            image: yup.object({
+              reference: yup.string().required(),
+              imageCredentialsId: yup.string().nullable(),
             }),
-          ),
-          volumes: yup.array(
-            yup
-              .object({
-                id: yup.string(),
-                target: yup.string().required(),
-              })
-              .required(),
-          ),
-        }),
-      )
-      .nullable(),
-    requiredSystemModels: yup.array(
-      yup.object({ id: yup.string().required() }),
-    ),
-  })
-  .required();
+            hostname: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            privileged: yup.boolean().nullable(),
+            restartPolicy: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            networkMode: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            portBindings: portBindingsSchema,
+            memory: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memoryLabel",
+                  defaultMessage: "Memory (bytes)",
+                }),
+              ),
+
+            memoryReservation: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memoryReservationLabel",
+                  defaultMessage: "Memory Reservation (bytes)",
+                }),
+              ),
+            memorySwap: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memorySwapLabel",
+                  defaultMessage: "Memory Swap (bytes)",
+                }),
+              ),
+            memorySwappiness: numberSchema
+              .integer()
+              .min(0)
+              .max(100)
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memorySwappinessLabel",
+                  defaultMessage: "Memory Swappiness (0-100)",
+                }),
+              ),
+            cpuPeriod: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuPeriodLabel",
+                  defaultMessage: "CPU Period (microseconds)",
+                }),
+              ),
+            cpuQuota: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuQuotaLabel",
+                  defaultMessage: "CPU Quota (microseconds)",
+                }),
+              ),
+            cpuRealtimePeriod: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuRealtimePeriodLabel",
+                  defaultMessage: "CPU Real-Time Period (microseconds)",
+                }),
+              ),
+            cpuRealtimeRuntime: numberSchema
+              .integer()
+              .nullable()
+              .label(
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuRealtimeRuntimeLabel",
+                  defaultMessage: "CPU Real-Time Runtime (microseconds)",
+                }),
+              ),
+
+            readOnlyRootfs: yup.boolean().nullable(),
+            storageOpt: storageOptSchema,
+            tmpfs: tmpfsOptSchema,
+            capAdd: yup
+              .array()
+              .of(yup.string().required().oneOf(CapAddList))
+              .nullable(),
+            capDrop: yup
+              .array()
+              .of(yup.string().required().oneOf(CapDropList))
+              .nullable(),
+            volumeDriver: yup
+              .string()
+              .nullable()
+              .transform((value) => value?.trim()),
+            networks: yup
+              .array(
+                yup
+                  .object({
+                    id: yup.string(),
+                  })
+                  .required(),
+              )
+              .nullable(),
+            volumes: yup
+              .array(
+                yup
+                  .object({
+                    id: yup.string(),
+                    target: yup.string().required(),
+                  })
+                  .required(),
+              )
+              .nullable(),
+          }),
+        )
+        .nullable(),
+      requiredSystemModels: yup.array(
+        yup.object({ id: yup.string().required() }),
+      ),
+    })
+    .required();
 
 const initialData: ReleaseInputData = {
   version: "",
@@ -402,6 +476,11 @@ const restartPolicyOptions = [
   { value: "unless_stopped", label: "Unless Stopped" },
 ];
 
+type Option = {
+  value: string;
+  label: string;
+};
+
 type CreateReleaseProps = {
   imageCredentialsOptionsRef: CreateRelease_ImageCredentialsOptionsFragment$key;
   networksOptionsRef: CreateRelease_NetworksOptionsFragment$key;
@@ -414,13 +493,13 @@ type CreateReleaseProps = {
 type ContainerFormProps = {
   index: number;
   register: UseFormRegister<ReleaseInputData>;
-  errors: any;
+  errors: FieldErrors<ReleaseInputData>;
   remove: (index: number) => void;
-  listImageCredentials: CreateRelease_ImageCredentialsOptionsFragment$data["listImageCredentials"];
-  networks: CreateRelease_NetworksOptionsFragment$data["networks"];
-  volumes: CreateRelease_VolumesOptionsFragment$data["volumes"];
+  imageCredentials: Option[];
+  networks: Option[];
+  volumes: Option[];
   intl: ReturnType<typeof useIntl>;
-  control: any;
+  control: Control<ReleaseInputData>;
 };
 
 const ContainerForm = ({
@@ -428,7 +507,7 @@ const ContainerForm = ({
   register,
   errors,
   remove,
-  listImageCredentials,
+  imageCredentials,
   networks,
   volumes,
   intl,
@@ -445,22 +524,6 @@ const ContainerForm = ({
       name: `containers.${index}.volumes`,
     }) ?? [];
 
-  const extraHostsForm = useFieldArray({
-    control,
-    name: `containers.${index}.extraHosts`,
-  });
-
-  const handleAddExtraHost = useCallback(() => {
-    extraHostsForm.append("");
-  }, [extraHostsForm]);
-
-  const handleDeleteExtraHost = useCallback(
-    (i: number) => {
-      extraHostsForm.remove(i);
-    },
-    [extraHostsForm],
-  );
-
   const canAddVolume = volumesValues.every(
     (v) => v.id?.trim() && v.target?.trim(),
   );
@@ -469,7 +532,7 @@ const ContainerForm = ({
     <div className="border p-3 mb-3">
       <h5>
         <FormattedMessage
-          id="components.CreateRelease.containerTitle"
+          id="forms.CreateRelease.containerTitle"
           defaultMessage="Container {containerNumber}"
           values={{ containerNumber: index + 1 }}
         />
@@ -479,7 +542,7 @@ const ContainerForm = ({
           id={`containers-${index}-env`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.envLabel"
+              id="forms.CreateRelease.envLabel"
               defaultMessage="Environment (JSON String)"
             />
           }
@@ -504,59 +567,93 @@ const ContainerForm = ({
           id={`containers-${index}-extraHosts`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.extraHostsLabel"
+              id="forms.CreateRelease.extraHostsLabel"
               defaultMessage="Extra Hosts"
             />
           }
         >
-          <div className="p-3 mb-3 bg-light border rounded">
-            <Stack gap={3}>
-              {extraHostsForm.fields.map((field, i) => (
-                <Stack direction="horizontal" gap={3} key={field.id}>
-                  <Stack>
-                    <Form.Control
-                      {...register(
-                        `containers.${index}.extraHosts.${i}` as const,
-                      )}
-                      isInvalid={!!errors.containers?.[index]?.extraHosts?.[i]}
-                      placeholder="e.g., myhost:127.0.0.1"
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.containers?.[index]?.extraHosts?.[i]?.message && (
-                        <FormattedMessage
-                          id={errors.containers[index].extraHosts[i].message}
-                        />
-                      )}
-                    </Form.Control.Feedback>
+          <Controller
+            control={control}
+            name={`containers.${index}.extraHosts`}
+            render={({ field }) => {
+              const extraHosts = field.value || [];
+
+              const handleAddExtraHost = () => {
+                field.onChange([...extraHosts, ""]);
+              };
+
+              const handleDeleteExtraHost = (i: number) => {
+                field.onChange(extraHosts.filter((_, idx) => idx !== i));
+              };
+
+              const handleChangeHost = (i: number, value: string) => {
+                const updated = [...extraHosts];
+                updated[i] = value;
+                field.onChange(updated);
+              };
+
+              return (
+                <div className="p-3 mb-3 bg-light border rounded">
+                  <Stack gap={3}>
+                    {extraHosts.map((host, i) => {
+                      const hostError =
+                        errors.containers?.[index]?.extraHosts?.[i]?.message;
+
+                      return (
+                        <Stack direction="horizontal" gap={3} key={i}>
+                          <Stack>
+                            <Form.Control
+                              value={host}
+                              onChange={(e) =>
+                                handleChangeHost(i, e.target.value)
+                              }
+                              isInvalid={!!hostError}
+                              placeholder="e.g., myhost:127.0.0.1"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {errors.containers?.[index]?.extraHosts?.[i]
+                                ?.message && (
+                                <FormattedMessage
+                                  id={
+                                    errors.containers[index].extraHosts[i]
+                                      .message
+                                  }
+                                />
+                              )}
+                            </Form.Control.Feedback>
+                          </Stack>
+                          <Button
+                            className="mb-auto"
+                            variant="shadow-danger"
+                            onClick={() => handleDeleteExtraHost(i)}
+                          >
+                            <Icon className="text-danger" icon={"delete"} />
+                          </Button>
+                        </Stack>
+                      );
+                    })}
+                    <Button
+                      className="me-auto"
+                      variant="outline-primary"
+                      onClick={handleAddExtraHost}
+                    >
+                      <FormattedMessage
+                        id="forms.CreateRelease.addExtraHostButton"
+                        defaultMessage="Add Extra Host"
+                      />
+                    </Button>
                   </Stack>
-                  <Button
-                    className="mb-auto"
-                    variant="shadow-danger"
-                    onClick={() => handleDeleteExtraHost(i)}
-                  >
-                    <Icon className="text-danger" icon={"delete"} />
-                  </Button>
-                </Stack>
-              ))}
-              <Button
-                className="me-auto"
-                variant="outline-primary"
-                onClick={handleAddExtraHost}
-              >
-                <FormattedMessage
-                  id="components.CreateRelease.addExtraHostButton"
-                  defaultMessage="Add Extra Host"
-                />
-              </Button>
-            </Stack>
-          </div>
+                </div>
+              );
+            }}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-image-reference`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.imageReferenceLabel"
+              id="forms.CreateRelease.imageReferenceLabel"
               defaultMessage="Image Reference"
             />
           }
@@ -579,7 +676,7 @@ const ContainerForm = ({
           id={`containers-${index}-image-credentials`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.imageCredentialsLabel"
+              id="forms.CreateRelease.imageCredentialsLabel"
               defaultMessage="Image Credentials"
             />
           }
@@ -588,14 +685,9 @@ const ContainerForm = ({
             control={control}
             name={`containers.${index}.image.imageCredentialsId`}
             render={({ field }) => {
-              const options =
-                listImageCredentials?.edges?.map((ic) => ({
-                  value: ic.node.id,
-                  label: `${ic.node.label} (${ic.node.username})`,
-                })) || [];
-
               const selectedOption =
-                options.find((opt) => opt.value === field.value) || null;
+                imageCredentials.find((opt) => opt.value === field.value) ||
+                null;
 
               return (
                 <Select
@@ -603,7 +695,7 @@ const ContainerForm = ({
                   onChange={(option) => {
                     field.onChange(option ? option.value : null);
                   }}
-                  options={options}
+                  options={imageCredentials}
                   isClearable
                 />
               );
@@ -623,7 +715,7 @@ const ContainerForm = ({
           id={`containers-${index}-hostname`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.hostnameLabel"
+              id="forms.CreateRelease.hostnameLabel"
               defaultMessage="Hostname"
             />
           }
@@ -646,7 +738,7 @@ const ContainerForm = ({
           id={`containers-${index}-networkMode`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.networkModeLabel"
+              id="forms.CreateRelease.networkModeLabel"
               defaultMessage="Network Mode"
             />
           }
@@ -669,7 +761,7 @@ const ContainerForm = ({
           id={`containers-${index}-networks`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.networksLabel"
+              id="forms.CreateRelease.networksLabel"
               defaultMessage="Networks"
             />
           }
@@ -681,19 +773,29 @@ const ContainerForm = ({
               field: { value, onChange, onBlur },
               fieldState: { invalid },
             }) => {
-              const mappedValue = (value || []).map(
-                (v: { id: string }) =>
-                  networks?.edges?.find((n) => n.node.id === v.id) || v,
+              const mappedValue: Option[] = (value || []).map(
+                (v: ContainerCreateWithNestedNetworksInput) => {
+                  const id = v.id ?? "";
+                  return (
+                    networks.find((n) => n.value === id) || {
+                      value: id,
+                      label: id,
+                    }
+                  );
+                },
               );
 
               return (
                 <MultiSelect
                   invalid={invalid}
                   value={mappedValue}
-                  onChange={onChange}
+                  onChange={(selected) =>
+                    onChange(selected.map((s) => ({ id: s.value })))
+                  }
                   onBlur={onBlur}
-                  options={networks?.edges || []}
-                  getOptionValue={(option) => option.node.id!}
+                  options={networks}
+                  getOptionValue={(option) => option.value}
+                  getOptionLabel={(option) => option.label}
                 />
               );
             }}
@@ -709,7 +811,7 @@ const ContainerForm = ({
           id={`containers-${index}-portBindings`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.portBindingsLabel"
+              id="forms.CreateRelease.portBindingsLabel"
               defaultMessage="Port Bindings"
             />
           }
@@ -733,7 +835,7 @@ const ContainerForm = ({
           id={`containers-${index}-restartPolicy`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.restartPolicyLabel"
+              id="forms.CreateRelease.restartPolicyLabel"
               defaultMessage="Restart Policy"
             />
           }
@@ -745,7 +847,7 @@ const ContainerForm = ({
           >
             <option value="" disabled>
               {intl.formatMessage({
-                id: "components.CreateRelease.restartPolicyOption",
+                id: "forms.CreateRelease.restartPolicyOption",
                 defaultMessage: "Select a Restart Policy",
               })}
             </option>
@@ -783,8 +885,8 @@ const ContainerForm = ({
                   .map((v, i) => (i !== volIndex ? v.id : null))
                   .filter(Boolean) as string[];
 
-                const availableOptions = volumes?.edges?.filter(
-                  (vol) => !selectedIds.includes(vol.node.id),
+                const availableOptions = volumes?.filter(
+                  (vol) => !selectedIds.includes(vol.value),
                 );
 
                 const fieldErrors =
@@ -806,7 +908,7 @@ const ContainerForm = ({
                         id={`containers-${index}-volumeId`}
                         label={
                           <FormattedMessage
-                            id="components.CreateRelease.volumeSelectLabel"
+                            id="forms.CreateRelease.volumeSelectLabel"
                             defaultMessage="Volume:"
                           />
                         }
@@ -816,16 +918,11 @@ const ContainerForm = ({
                             name={`containers.${index}.volumes.${volIndex}.id`}
                             control={control}
                             render={({ field }) => {
-                              const selectOptions =
-                                availableOptions?.map((vol) => ({
-                                  value: vol.node.id,
-                                  label: vol.node.label,
-                                })) || [];
                               return (
                                 <Select
                                   name={field.name}
                                   value={
-                                    selectOptions.find(
+                                    availableOptions.find(
                                       (opt) => opt.value === field.value,
                                     ) || null
                                   }
@@ -833,10 +930,10 @@ const ContainerForm = ({
                                     field.onChange(selected?.value)
                                   }
                                   onBlur={field.onBlur}
-                                  options={selectOptions}
+                                  options={availableOptions}
                                   noOptionsMessage={() => (
                                     <FormattedMessage
-                                      id="components.CreateRelease.noVolumesMessage"
+                                      id="forms.CreateRelease.noVolumesMessage"
                                       defaultMessage="No volumes available"
                                     />
                                   )}
@@ -860,7 +957,7 @@ const ContainerForm = ({
                         id={`containers-${index}-volumeTarget`}
                         label={
                           <FormattedMessage
-                            id="components.CreateRelease.volumeTargetLabel"
+                            id="forms.CreateRelease.volumeTargetLabel"
                             defaultMessage="Target:"
                           />
                         }
@@ -912,7 +1009,7 @@ const ContainerForm = ({
           id={`containers-${index}-memory`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memoryLabel"
+              id="forms.CreateRelease.memoryLabel"
               defaultMessage="Memory (bytes)"
             />
           }
@@ -925,18 +1022,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memory}
             placeholder="e.g., 104857600 for 100MB"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memory?.message && (
-              <FormattedMessage id={errors.containers[index].memory.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memory?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-memoryReservation`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memoryReservationLabel"
+              id="forms.CreateRelease.memoryReservationLabel"
               defaultMessage="Memory Reservation (bytes)"
             />
           }
@@ -949,20 +1044,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memoryReservation}
             placeholder="e.g., 104857600 for 100MB"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memoryReservation?.message && (
-              <FormattedMessage
-                id={errors.containers[index].memoryReservation.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memoryReservation?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-memorySwap`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memorySwapLabel"
+              id="forms.CreateRelease.memorySwapLabel"
               defaultMessage="Memory Swap (bytes)"
             />
           }
@@ -975,20 +1066,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memorySwap}
             placeholder="e.g., 209715200 for 200MB"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memorySwap?.message && (
-              <FormattedMessage
-                id={errors.containers[index].memorySwap.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memorySwap?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-memorySwappiness`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.memorySwappinessLabel"
+              id="forms.CreateRelease.memorySwappinessLabel"
               defaultMessage="Memory Swappiness (0-100)"
             />
           }
@@ -1001,20 +1088,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.memorySwappiness}
             placeholder="e.g., 60"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.memorySwappiness?.message && (
-              <FormattedMessage
-                id={errors.containers[index].memorySwappiness.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.memorySwappiness?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-cpuPeriod`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuPeriodLabel"
+              id="forms.CreateRelease.cpuPeriodLabel"
               defaultMessage="CPU Period (microseconds)"
             />
           }
@@ -1027,20 +1110,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuPeriod}
             placeholder="e.g., 100000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuPeriod?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuPeriod.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuPeriod?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-cpuQuota`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuQuotaLabel"
+              id="forms.CreateRelease.cpuQuotaLabel"
               defaultMessage="CPU Quota (microseconds)"
             />
           }
@@ -1053,20 +1132,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuQuota}
             placeholder="e.g., 50000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuQuota?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuQuota.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuQuota?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-cpuRealtimePeriod`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuRealtimePeriodLabel"
+              id="forms.CreateRelease.cpuRealtimePeriodLabel"
               defaultMessage="CPU Real-Time Period (microseconds)"
             />
           }
@@ -1079,20 +1154,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuRealtimePeriod}
             placeholder="e.g., 1000000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuRealtimePeriod?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuRealtimePeriod.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuRealtimePeriod?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-cpuRealtimeRuntime`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuRealtimeRuntimeLabel"
+              id="forms.CreateRelease.cpuRealtimeRuntimeLabel"
               defaultMessage="CPU Real-Time Runtime (microseconds)"
             />
           }
@@ -1105,20 +1176,16 @@ const ContainerForm = ({
             isInvalid={!!errors.containers?.[index]?.cpuRealtimeRuntime}
             placeholder="e.g., 950000"
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuRealtimeRuntime?.message && (
-              <FormattedMessage
-                id={errors.containers[index].cpuRealtimeRuntime.message}
-              />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback
+            feedback={errors.containers?.[index]?.cpuRealtimeRuntime?.message}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-privileged`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.privilegedLabel"
+              id="forms.CreateRelease.privilegedLabel"
               defaultMessage="Privileged"
             />
           }
@@ -1141,7 +1208,7 @@ const ContainerForm = ({
           id={`containers-${index}-readOnlyRootfs`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.readOnlyRootfsLabel"
+              id="forms.CreateRelease.readOnlyRootfsLabel"
               defaultMessage="Read-Only Root Filesystem"
             />
           }
@@ -1164,7 +1231,7 @@ const ContainerForm = ({
           id={`containers-${index}-storageOpt`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.storageOptLabel"
+              id="forms.CreateRelease.storageOptLabel"
               defaultMessage="Storage Options"
             />
           }
@@ -1172,65 +1239,63 @@ const ContainerForm = ({
           <Controller
             control={control}
             name={`containers.${index}.storageOpt`}
-            render={({ field, fieldState: _fieldState }) => (
-              <MonacoJsonEditor
-                language="json"
-                value={field.value ?? ""}
-                onChange={(value) => {
-                  field.onChange(value ?? "");
-                }}
-                defaultValue={field.value || "[]"}
-                initialLines={1}
-              />
+            render={({ field, fieldState }) => (
+              <>
+                <MonacoJsonEditor
+                  language="json"
+                  value={field.value ?? ""}
+                  onChange={(value) => field.onChange(value ?? "")}
+                  defaultValue={field.value || "[]"}
+                  initialLines={1}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.error && (
+                  <Form.Control.Feedback type="invalid" className="d-block">
+                    <FormattedMessage id={fieldState.error.message} />
+                  </Form.Control.Feedback>
+                )}
+              </>
             )}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.storageOpt?.message && (
-              <FormattedMessage
-                id={errors.containers[index].storageOpt.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
           id={`containers-${index}-tmpfs`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.tmpfsLabel"
+              id="forms.CreateRelease.tmpfsLabel"
               defaultMessage="Tmpfs Mounts"
             />
           }
         >
-          <>
-            <Controller
-              control={control}
-              name={`containers.${index}.tmpfs`}
-              render={({ field, fieldState: _fieldState }) => (
+          <Controller
+            control={control}
+            name={`containers.${index}.tmpfs`}
+            render={({ field, fieldState }) => (
+              <>
                 <MonacoJsonEditor
                   language="json"
                   value={field.value ?? ""}
-                  onChange={(value) => {
-                    field.onChange(value ?? "");
-                  }}
+                  onChange={(value) => field.onChange(value ?? "")}
                   defaultValue={field.value || "[]"}
                   initialLines={1}
+                  aria-invalid={fieldState.invalid}
                 />
-              )}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.containers?.[index]?.tmpfs?.message && (
-                <FormattedMessage id={errors.containers[index].tmpfs.message} />
-              )}
-            </Form.Control.Feedback>
-          </>
+                {fieldState.error && (
+                  <Form.Control.Feedback type="invalid" className="d-block">
+                    <FormattedMessage id={fieldState.error.message} />
+                  </Form.Control.Feedback>
+                )}
+              </>
+            )}
+          />
         </FormRow>
 
         <FormRow
           id={`containers-${index}-capAdd`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.capAddLabel"
+              id="forms.CreateRelease.capAddLabel"
               defaultMessage="Cap Add"
             />
           }
@@ -1263,7 +1328,7 @@ const ContainerForm = ({
           id={`containers-${index}-capDrop`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.capDropLabel"
+              id="forms.CreateRelease.capDropLabel"
               defaultMessage="Cap Drop"
             />
           }
@@ -1299,7 +1364,7 @@ const ContainerForm = ({
           id={`containers-${index}-volumeDriver`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.volumeDriverLabel"
+              id="forms.CreateRelease.volumeDriverLabel"
               defaultMessage="Volume Driver"
             />
           }
@@ -1325,7 +1390,7 @@ const ContainerForm = ({
             className="mt-3"
           >
             <FormattedMessage
-              id="components.CreateRelease.removeContainerButton"
+              id="forms.CreateRelease.removeContainerButton"
               defaultMessage="Remove Container"
             />
           </Button>
@@ -1350,15 +1415,41 @@ const CreateRelease = ({
     imageCredentialsOptionsRef,
   );
 
+  const imageCredentialsOptions: Option[] =
+    listImageCredentials?.edges?.map(({ node: imageCredentials }) => ({
+      value: imageCredentials.id,
+      label: `${imageCredentials.label} (${imageCredentials.username})`,
+    })) ?? [];
+
   const { networks } = useFragment(
     NETWORKS_OPTIONS_FRAGMENT,
     networksOptionsRef,
   );
+
+  const networkOptions: Option[] =
+    networks?.edges?.map(({ node: network }) => ({
+      value: network.id,
+      label: network.label ?? "",
+    })) ?? [];
+
   const { volumes } = useFragment(VOLUMES_OPTIONS_FRAGMENT, volumesOptionsRef);
+
+  const volumeOptions: Option[] =
+    volumes?.edges?.map(({ node: volume }) => ({
+      value: volume.id,
+      label: volume.label ?? "",
+    })) ?? [];
+
   const { systemModels: requiredSystemModels } = useFragment(
     SYSTEM_MODELS_OPTIONS_FRAGMENT,
     requiredSystemModelsOptionsRef,
   );
+
+  const systemModelsOptions: Option[] =
+    requiredSystemModels?.edges?.map(({ node: systemModel }) => ({
+      value: systemModel.id,
+      label: systemModel.name,
+    })) ?? [];
 
   const {
     register,
@@ -1368,7 +1459,7 @@ const CreateRelease = ({
   } = useForm<ReleaseInputData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(applicationSchema),
+    resolver: yupResolver(applicationSchema(intl)),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -1397,6 +1488,17 @@ const CreateRelease = ({
       SingleValue<{ value: string; label: string; releases: ReleaseNode[] }>
     >(null);
 
+  const parseJsonToStringArray = (jsonStr: string | undefined): string[] => {
+    if (!jsonStr) return [];
+    try {
+      const parsed = JSON.parse(jsonStr);
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      console.error("Invalid JSON:", jsonStr);
+      return [];
+    }
+  };
+
   return (
     <>
       <form
@@ -1405,7 +1507,7 @@ const CreateRelease = ({
             ...data,
             containers: data.containers?.map((container) => ({
               env: container.env || undefined,
-              extra_hosts: container.extraHosts || undefined,
+              extraHosts: container.extraHosts || undefined,
               image: {
                 reference: container.image.reference,
                 imageCredentialsId:
@@ -1422,8 +1524,8 @@ const CreateRelease = ({
               cpuRealtimePeriod: container.cpuRealtimePeriod || undefined,
               cpuRealtimeRuntime: container.cpuRealtimeRuntime || undefined,
               readOnlyRootfs: container.readOnlyRootfs || undefined,
-              storageOpt: container.storageOpt || undefined,
-              tmpfs: container.tmpfs || undefined,
+              storageOpt: parseJsonToStringArray(container.storageOpt),
+              tmpfs: parseJsonToStringArray(container.tmpfs),
               volumeDriver: container.volumeDriver || undefined,
               restartPolicy: container.restartPolicy || undefined,
               networkMode: container.networkMode || undefined,
@@ -1432,11 +1534,8 @@ const CreateRelease = ({
                     .split(",")
                     .map((v) => v.trim()) as string[])
                 : undefined,
-              networks: container.networks?.map((n) => ({ id: n.id })) || [],
-              volumes: container.volumes?.map((v) => ({
-                id: v.id,
-                target: v.target,
-              })),
+              networks: container.networks || undefined,
+              volumes: container.volumes || undefined,
               capAdd: container.capAdd?.length ? container.capAdd : undefined,
               capDrop: container.capDrop?.length
                 ? container.capDrop
@@ -1453,7 +1552,7 @@ const CreateRelease = ({
             id="application-form-version"
             label={
               <FormattedMessage
-                id="components.CreateRelease.versionLabel"
+                id="forms.CreateRelease.versionLabel"
                 defaultMessage="Version"
               />
             }
@@ -1474,7 +1573,7 @@ const CreateRelease = ({
             id="application-release-form-required-system-models"
             label={
               <FormattedMessage
-                id="components.CreateRelease.requiredSystemModelsLabels"
+                id="forms.CreateRelease.requiredSystemModelsLabels"
                 defaultMessage="Required System Models"
               />
             }
@@ -1483,15 +1582,14 @@ const CreateRelease = ({
               control={control}
               name="requiredSystemModels"
               render={({ field: { value, onChange, onBlur } }) => {
-                const nodes =
-                  requiredSystemModels?.edges?.map(({ node }) => node) || [];
-                const options = nodes.map((n) => ({
-                  value: n.id,
-                  label: n.name,
-                }));
                 const mappedValue = (value || []).map((v) => {
-                  const node = nodes.find((sm) => sm.id === v.id);
-                  return { value: v.id ?? "", label: node?.name ?? v.id ?? "" };
+                  const option = systemModelsOptions.find(
+                    (sm) => sm.value === v.id,
+                  );
+                  return {
+                    value: v.id ?? "",
+                    label: option?.label ?? v.id ?? "",
+                  };
                 });
 
                 return (
@@ -1501,7 +1599,7 @@ const CreateRelease = ({
                       onChange(selected.map(({ value }) => ({ id: value })))
                     }
                     onBlur={onBlur}
-                    options={options}
+                    options={systemModelsOptions}
                     getOptionValue={(option) => option.value}
                     getOptionLabel={(option) => option.label}
                   />
@@ -1513,14 +1611,14 @@ const CreateRelease = ({
           <Stack className="mt-3">
             <h5>
               <FormattedMessage
-                id="components.CreateRelease.containersTitle"
+                id="forms.CreateRelease.containersTitle"
                 defaultMessage="Containers"
               />
             </h5>
             {fields.length === 0 && (
               <p>
                 <FormattedMessage
-                  id="components.CreateRelease.noContainersFeedback"
+                  id="forms.CreateRelease.noContainersFeedback"
                   defaultMessage="The release does not include any container."
                 />
               </p>
@@ -1534,9 +1632,9 @@ const CreateRelease = ({
               register={register}
               errors={errors}
               remove={remove}
-              listImageCredentials={listImageCredentials}
-              networks={networks}
-              volumes={volumes}
+              imageCredentials={imageCredentialsOptions}
+              networks={networkOptions}
+              volumes={volumeOptions}
               intl={intl}
               control={control}
             />
@@ -1545,16 +1643,10 @@ const CreateRelease = ({
           <div className="d-flex justify-content-start align-items-center gap-2">
             <Button
               variant="secondary"
-              onClick={() =>
-                append({
-                  image: { reference: "" },
-                  networks: [],
-                  volumes: [],
-                })
-              }
+              onClick={() => append({ image: { reference: "" } })}
             >
               <FormattedMessage
-                id="components.CreateRelease.addContainerButton"
+                id="forms.CreateRelease.addContainerButton"
                 defaultMessage="Add Container"
               />
             </Button>
@@ -1562,14 +1654,14 @@ const CreateRelease = ({
             <Button
               variant="primary"
               title={intl.formatMessage({
-                id: "components.CreateRelease.reuseResourcesTitleButton",
+                id: "forms.CreateRelease.reuseResourcesTitleButton",
                 defaultMessage:
                   "Copy containers and their configurations from an existing release",
               })}
               onClick={() => setShowModal(true)}
             >
               <FormattedMessage
-                id="components.CreateRelease.reuseResourcesButton"
+                id="forms.CreateRelease.reuseResourcesButton"
                 defaultMessage="Reuse Containers"
               />
             </Button>
@@ -1579,7 +1671,7 @@ const CreateRelease = ({
             <Button variant="primary" type="submit" disabled={isLoading}>
               {isLoading && <Spinner size="sm" className="me-2" />}
               <FormattedMessage
-                id="components.CreateRelease.submitButton"
+                id="forms.CreateRelease.submitButton"
                 defaultMessage="Create"
               />
             </Button>
@@ -1590,12 +1682,12 @@ const CreateRelease = ({
       {showModal && (
         <ConfirmModal
           title={intl.formatMessage({
-            id: "components.CreateRelease.reuseResourcesModalTitle",
+            id: "forms.CreateRelease.reuseResourcesModalTitle",
             defaultMessage: "Reuse Resources Modal",
           })}
           confirmLabel={
             <FormattedMessage
-              id="components.CreateRelease.confirmButton"
+              id="forms.CreateRelease.confirmButton"
               defaultMessage="Confirm"
             />
           }
@@ -1643,7 +1735,7 @@ const CreateRelease = ({
         >
           <p>
             <FormattedMessage
-              id="components.CreateRelease.confirmPrompt"
+              id="forms.CreateRelease.confirmPrompt"
               defaultMessage="Choose a release from which you want to copy containers and their configurations."
             />
           </p>
@@ -1652,7 +1744,7 @@ const CreateRelease = ({
               <FormRow
                 id="containers-reuseResources-application"
                 label={intl.formatMessage({
-                  id: "components.CreateRelease.selectApplication",
+                  id: "forms.CreateRelease.selectApplication",
                   defaultMessage: "Select Application",
                 })}
               >
@@ -1676,7 +1768,7 @@ const CreateRelease = ({
               <FormRow
                 id="containers-reuseResources-release"
                 label={intl.formatMessage({
-                  id: "components.CreateRelease.selectRelease",
+                  id: "forms.CreateRelease.selectRelease",
                   defaultMessage: "Select Release",
                 })}
               >
