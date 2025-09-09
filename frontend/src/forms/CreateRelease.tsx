@@ -231,7 +231,7 @@ const FormRow = ({
 type ContainerInput = {
   cpuPeriod?: number;
   cpuQuota?: number;
-  cpuRealTimePeriod?: number;
+  cpuRealtimePeriod?: number;
   cpuRealtimeRuntime?: number;
   extraHosts?: string[];
   env?: string; // JsonString
@@ -350,7 +350,7 @@ const applicationSchema = yup
           memorySwappiness: yup.number().min(0).max(100).nullable(),
           cpuPeriod: yup.number().nullable(),
           cpuQuota: yup.number().nullable(),
-          cpuRealTimePeriod: yup.number().nullable(),
+          cpuRealtimePeriod: yup.number().nullable(),
           cpuRealtimeRuntime: yup.number().nullable(),
           readOnlyRootfs: yup.boolean().nullable(),
           storageOpt: storageTmpfsOptSchema,
@@ -1063,26 +1063,26 @@ const ContainerForm = ({
         </FormRow>
 
         <FormRow
-          id={`containers-${index}-cpuRealTimePeriod`}
+          id={`containers-${index}-cpuRealtimePeriod`}
           label={
             <FormattedMessage
-              id="components.CreateRelease.cpuRealTimePeriodLabel"
+              id="components.CreateRelease.cpuRealtimePeriodLabel"
               defaultMessage="CPU Real-Time Period (microseconds)"
             />
           }
         >
           <Form.Control
             type="number"
-            {...register(`containers.${index}.cpuRealTimePeriod` as const, {
+            {...register(`containers.${index}.cpuRealtimePeriod` as const, {
               valueAsNumber: true,
             })}
-            isInvalid={!!errors.containers?.[index]?.cpuRealTimePeriod}
+            isInvalid={!!errors.containers?.[index]?.cpuRealtimePeriod}
             placeholder="e.g., 1000000"
           />
           <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.cpuRealTimePeriod?.message && (
+            {errors.containers?.[index]?.cpuRealtimePeriod?.message && (
               <FormattedMessage
-                id={errors.containers[index].cpuRealTimePeriod.message}
+                id={errors.containers[index].cpuRealtimePeriod.message}
               />
             )}
           </Form.Control.Feedback>
@@ -1419,7 +1419,7 @@ const CreateRelease = ({
               memorySwappiness: container.memorySwappiness || undefined,
               cpuPeriod: container.cpuPeriod || undefined,
               cpuQuota: container.cpuQuota || undefined,
-              cpuRealTimePeriod: container.cpuRealTimePeriod || undefined,
+              cpuRealtimePeriod: container.cpuRealtimePeriod || undefined,
               cpuRealtimeRuntime: container.cpuRealtimeRuntime || undefined,
               readOnlyRootfs: container.readOnlyRootfs || undefined,
               storageOpt: container.storageOpt || undefined,

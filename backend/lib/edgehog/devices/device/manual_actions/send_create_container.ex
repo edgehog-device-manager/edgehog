@@ -69,7 +69,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         deviceMappingIds: Enum.map(container.device_mappings, & &1.id),
         cpuPeriod: container.cpu_period,
         cpuQuota: container.cpu_quota,
-        cpuRealTimePeriod: container.cpu_real_time_period,
+        cpuRealtimePeriod: container.cpu_realtime_period,
         cpuRealtimeRuntime: container.cpu_realtime_runtime,
         memory: container.memory,
         memoryReservation: container.memory_reservation,

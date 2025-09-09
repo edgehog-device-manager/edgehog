@@ -277,7 +277,7 @@
   "components.ContainersTable.cpuQuotaLabel": {
     "defaultMessage": "CPU Quota (in microseconds)"
   },
-  "components.ContainersTable.cpuRealTimePeriodLabel": {
+  "components.ContainersTable.cpuRealtimePeriodLabel": {
     "defaultMessage": "CPU Real Time Period (in microseconds)"
   },
   "components.ContainersTable.cpuRealtimeRuntimeLabel": {
@@ -478,7 +478,7 @@
   "components.CreateRelease.cpuQuotaLabel": {
     "defaultMessage": "CPU Quota (microseconds)"
   },
-  "components.CreateRelease.cpuRealTimePeriodLabel": {
+  "components.CreateRelease.cpuRealtimePeriodLabel": {
     "defaultMessage": "CPU Real-Time Period (microseconds)"
   },
   "components.CreateRelease.cpuRealtimeRuntimeLabel": {

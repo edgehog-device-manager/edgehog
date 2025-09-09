@@ -944,7 +944,7 @@ input ReleaseCreateContainersInput {
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
-  cpuRealTimePeriod: Int
+  cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
   extraHosts: [String!]
   memoryReservation: Int
@@ -2264,7 +2264,7 @@ input ContainerFilterInput {
   networkMode: ContainerFilterNetworkMode
   cpuPeriod: ContainerFilterCpuPeriod
   cpuQuota: ContainerFilterCpuQuota
-  cpuRealTimePeriod: ContainerFilterCpuRealTimePeriod
+  cpuRealtimePeriod: ContainerFilterCpuRealTimePeriod
   cpuRealtimeRuntime: ContainerFilterCpuRealtimeRuntime
   memory: ContainerFilterMemory
   memoryReservation: ContainerFilterMemoryReservation
@@ -2299,7 +2299,7 @@ type Container {
   capDrop: [String!]!
   cpuPeriod: Int!
   cpuQuota: Int!
-  cpuRealTimePeriod: Int!
+  cpuRealtimePeriod: Int!
   cpuRealtimeRuntime: Int!
   memory: Int!
   memoryReservation: Int!
