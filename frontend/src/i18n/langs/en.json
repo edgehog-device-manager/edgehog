@@ -639,11 +639,11 @@
   "components.DeployedApplicationsTable.confirmModal.title": {
     "defaultMessage": "Upgrade Deployment"
   },
-  "components.DeployedApplicationsTable.created": {
-    "defaultMessage": "Created"
-  },
   "components.DeployedApplicationsTable.createdContainers": {
     "defaultMessage": "Created containers"
+  },
+  "components.DeployedApplicationsTable.createdDeviceMappings": {
+    "defaultMessage": "Created device mappings"
   },
   "components.DeployedApplicationsTable.createdImages": {
     "defaultMessage": "Created images"
@@ -686,6 +686,9 @@
   },
   "components.DeployedApplicationsTable.noReleasesFoundMatching": {
     "defaultMessage": "No release versions found matching \"{inputValue}\""
+  },
+  "components.DeployedApplicationsTable.pending": {
+    "defaultMessage": "Pending"
   },
   "components.DeployedApplicationsTable.ready": {
     "defaultMessage": "Ready"

@@ -128,7 +128,7 @@ const UPGRADE_DEPLOYMENT_MUTATION = graphql`
 
 type DeploymentState =
   | "DEPLOYING"
-  | "CREATED"
+  | "PENDING"
   | "SENT"
   | "STARTING"
   | "STARTED"
@@ -142,6 +142,7 @@ type DeploymentResourcesState =
   | "CREATED_IMAGES"
   | "CREATED_NETWORKS"
   | "CREATED_VOLUMES"
+  | "CREATED_DEVICE_MAPPINGS"
   | "CREATED_CONTAINERS"
   | "READY";
 
@@ -149,8 +150,8 @@ const parseDeploymentState = (
   apiState?: ApplicationDeploymentState,
 ): DeploymentState => {
   switch (apiState) {
-    case "CREATED":
-      return "CREATED";
+    case "PENDING":
+      return "PENDING";
     case "SENT":
       return "SENT";
     case "STARTED":
@@ -182,6 +183,8 @@ const parseDeploymentResourcesState = (
       return "CREATED_NETWORKS";
     case "CREATED_VOLUMES":
       return "CREATED_VOLUMES";
+    case "CREATED_DEVICE_MAPPINGS":
+      return "CREATED_DEVICE_MAPPINGS";
     case "CREATED_CONTAINERS":
       return "CREATED_CONTAINERS";
     case "READY":
@@ -192,7 +195,7 @@ const parseDeploymentResourcesState = (
 };
 
 const stateColors: Record<DeploymentState, string> = {
-  CREATED: "text-success",
+  PENDING: "text-success",
   SENT: "text-success",
   STARTING: "text-success",
   STARTED: "text-success",
@@ -208,15 +211,16 @@ const resourcesStateColors: Record<DeploymentResourcesState, string> = {
   CREATED_IMAGES: "text-muted",
   CREATED_NETWORKS: "text-muted",
   CREATED_VOLUMES: "text-muted",
+  CREATED_DEVICE_MAPPINGS: "text-muted",
   CREATED_CONTAINERS: "text-muted",
   READY: "text-success",
 };
 
 // Define deployment state messages for localization
 const stateMessages = defineMessages<DeploymentState>({
-  CREATED: {
-    id: "components.DeployedApplicationsTable.created",
-    defaultMessage: "Created",
+  PENDING: {
+    id: "components.DeployedApplicationsTable.pending",
+    defaultMessage: "Pending",
   },
   SENT: {
     id: "components.DeployedApplicationsTable.sent",
@@ -269,6 +273,10 @@ const resourcesStateMessages = defineMessages<DeploymentResourcesState>({
   CREATED_VOLUMES: {
     id: "components.DeployedApplicationsTable.createdVolumes",
     defaultMessage: "Created volumes",
+  },
+  CREATED_DEVICE_MAPPINGS: {
+    id: "components.DeployedApplicationsTable.createdDeviceMappings",
+    defaultMessage: "Created device mappings",
   },
   CREATED_CONTAINERS: {
     id: "components.DeployedApplicationsTable.createdContainers",
