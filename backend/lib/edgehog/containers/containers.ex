@@ -261,6 +261,8 @@ defmodule Edgehog.Containers do
       define :mark_network_deployment_as_errored, action: :mark_as_errored, args: [:message]
     end
 
+    resource Edgehog.Containers.ContainerDeploymentNetworkDeployment
+
     resource Edgehog.Containers.Volume
 
     resource Edgehog.Containers.Volume.Deployment do
