@@ -299,6 +299,8 @@ defmodule Edgehog.Containers do
         args: [:message]
     end
 
+    resource Edgehog.Containers.ContainerDeploymentDeviceMappingDeployment
+
     resource DeploymentReadyAction
     resource Upgrade
 
