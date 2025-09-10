@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,29 +18,30 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.UpdateChannel do
+defmodule Edgehog.Campaigns.Channel do
   @moduledoc false
   use Edgehog.MultitenantResource,
-    domain: Edgehog.UpdateCampaigns,
+    domain: Edgehog.Campaigns,
     extensions: [
       AshGraphql.Resource
     ]
 
-  alias Edgehog.UpdateCampaigns.UpdateChannel.Calculations
-  alias Edgehog.UpdateCampaigns.UpdateChannel.Changes
-  alias Edgehog.UpdateCampaigns.UpdateChannel.ErrorHandler
+  alias Edgehog.Campaigns.Channel.Calculations
+  alias Edgehog.Campaigns.Channel.Changes
+  alias Edgehog.Campaigns.Channel.ErrorHandler
+  alias Edgehog.Devices.Device
 
   resource do
     description """
-    Represents an UpdateChannel.
+    Represents an Channel.
 
-    An UpdateChannel represents a set of device groups that can be targeted in \
-    an UpdateCampaign.
+    An Channel represents a set of device groups that can be targeted in \
+    an Campaign.
     """
   end
 
   graphql do
-    type :update_channel
+    type :channel
 
     error_handler {ErrorHandler, :handle_error, []}
 
@@ -51,14 +52,14 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     defaults [:read]
 
     create :create do
-      description "Creates a new update channel."
+      description "Creates a new channel."
       primary? true
 
       accept [:name, :handle]
 
       argument :target_group_ids, {:array, :id} do
         description """
-        The IDs of the target groups that are targeted by this update channel.
+        The IDs of the target groups that are targeted by this channel.
         """
       end
 
@@ -68,14 +69,14 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     end
 
     update :update do
-      description "Updates an update channel."
+      description "s an channel."
       primary? true
 
       accept [:name, :handle]
 
       argument :target_group_ids, {:array, :id} do
         description """
-        The IDs of the target groups that are targeted by this update channel.
+        The IDs of the target groups that are targeted by this channel.
         """
       end
 
@@ -92,16 +93,16 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     end
 
     destroy :destroy do
-      description "Deletes an update channel."
+      description "Deletes an channel."
       primary? true
 
       # Needed because Changes.UnrelateTargetGroups is not atomic
       require_atomic? false
 
-      # TODO: here we manually unrelate the update channel from its target
+      # TODO: here we manually unrelate the channel from its target
       # groups. Indeed, the database constraints on the device_groups table are
-      # configured so that the (tenant_id, update_channel_id) foreign key is
-      # set to NULL when the referenced update channel is deleted. However that
+      # configured so that the (tenant_id, channel_id) foreign key is
+      # set to NULL when the referenced channel is deleted. However that
       # would also set the tenant_id of the target group to NULL.
       # Postgres v15.0 introduced the possibility to specify which columns of
       # the foreign key should be set to NULL when the referenced resource is
@@ -109,7 +110,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
       # Since we don't want to impose the use of Postgres v15+, for now we
       # simply avoid triggering the ON DELETE database constraint by manually
       # setting the correct columns to NULL before deleting the referenced
-      # update channel: i.e. without affecting the tenant_id of device groups.
+      # channel: i.e. without affecting the tenant_id of device groups.
       change Changes.UnrelateCurrentTargetGroups
     end
   end
@@ -125,7 +126,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
     attribute :handle, :string do
       description """
-      The identifier of the update channel.
+      The identifier of the channel.
 
       It should start with a lower case ASCII letter and only contain \
       lower case ASCII letters, digits and the hyphen - symbol.
@@ -136,7 +137,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     end
 
     attribute :name, :string do
-      description "The display name of the update channel."
+      description "The display name of the channel."
       public? true
       allow_nil? false
     end
@@ -147,7 +148,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
   relationships do
     has_many :target_groups, Edgehog.Groups.DeviceGroup do
-      description "The device groups targeted by the update channel."
+      description "The device groups targeted by the channel."
       public? true
     end
 
@@ -155,12 +156,16 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
     # base images so we can render a nice looking error instead of crashing, see
     # https://github.com/ash-project/ash_postgres/blob/0ccb35a713b9097c4aac6fde996dbb4d1c00cccb/lib/data_layer.ex#L2370
     has_many :update_campaigns, Edgehog.UpdateCampaigns.UpdateCampaign
+
+    has_many :deployment_campaigns, Edgehog.DeploymentCampaigns.DeploymentCampaign do
+      public? true
+    end
   end
 
   calculations do
     calculate :updatable_devices, {:array, :struct} do
       description """
-      The devices targeted by the update channel that can be updated with the \
+      The devices targeted by the channel that can be updated with the \
       provided base image.
       Note that this only checks the compatibility between the device and the \
       system model targeted by the base image. The starting version \
@@ -168,7 +173,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
       result in a failed operation.\
       """
 
-      constraints items: [instance_of: Edgehog.Devices.Device]
+      constraints items: [instance_of: Device]
       allow_nil? false
 
       argument :base_image, :struct do
@@ -178,6 +183,26 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
 
       calculation Calculations.UpdatableDevices
     end
+
+    calculate :deployable_devices, {:array, :struct} do
+      description """
+      The devices targeted by the deployment channel that can be updated with the
+      provided release. Note that this only checks the compatibility between the
+      device and the system model targeted by the release. The starting version
+      requirement will be checked just before the update and will potentially
+      result in a failed operation.
+      """
+
+      constraints items: [instance_of: Device]
+      allow_nil? false
+
+      argument :release, :struct do
+        allow_nil? false
+        constraints instance_of: Edgehog.Containers.Release
+      end
+
+      calculation Calculations.DeployableDevices
+    end
   end
 
   identities do
@@ -186,7 +211,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateChannel do
   end
 
   postgres do
-    table "update_channels"
+    table "channels"
     repo Edgehog.Repo
   end
 end

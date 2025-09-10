@@ -18,9 +18,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.DeploymentCampaigns.DeploymentChannel.Calculations.DeployableDevices do
+defmodule Edgehog.Campaigns.Channel.Calculations.DeployableDevices do
   @moduledoc """
-  Containers calculation to compute valid devices in a channle to receive a deploy.
+  Containers calculation to compute valid devices in a channel to receive a deploy.
 
   It checks devices against the system model of the release.
   """

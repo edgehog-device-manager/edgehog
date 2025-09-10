@@ -22,13 +22,13 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes.ComputeDeployme
   @moduledoc """
   Change to compute deployment targets.
 
-  It starts from the deployment channel of the campaign and finds the suitable targets for the campaign.
+  It starts from the channel of the campaign and finds the suitable targets for the campaign.
   """
   use Ash.Resource.Change
 
+  alias Edgehog.Campaigns.Channel
   alias Edgehog.Campaigns.ExecutorSupervisor
   alias Edgehog.Containers.Release
-  alias Edgehog.DeploymentCampaigns.DeploymentChannel
   alias Edgehog.DeploymentCampaigns.DeploymentTarget
 
   @impl Ash.Resource.Change
@@ -36,10 +36,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes.ComputeDeployme
     %{tenant: tenant} = context
 
     with {:ok, release} <- fetch_release(changeset, tenant),
-         {:ok, deployment_channel} <- fetch_deployment_channel(changeset, tenant) do
-      deployment_channel = Ash.load!(deployment_channel, deployable_devices: [release: release])
+         {:ok, channel} <- fetch_channel(changeset, tenant) do
+      channel = Ash.load!(channel, deployable_devices: [release: release])
 
-      deployable_devices = deployment_channel.deployable_devices
+      deployable_devices = channel.deployable_devices
 
       if Enum.empty?(deployable_devices) do
         changeset
@@ -66,12 +66,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes.ComputeDeployme
     end
   end
 
-  defp fetch_deployment_channel(changeset, tenant) do
-    {:ok, deployment_channel_id} = Ash.Changeset.fetch_argument(changeset, :deployment_channel_id)
+  defp fetch_channel(changeset, tenant) do
+    {:ok, channel_id} = Ash.Changeset.fetch_argument(changeset, :channel_id)
 
-    with {:error, _reason} <- Ash.get(DeploymentChannel, deployment_channel_id, tenant: tenant) do
+    with {:error, _reason} <- Ash.get(Channel, channel_id, tenant: tenant) do
       Ash.Changeset.add_error(changeset,
-        field: :deployment_channel_id,
+        field: :channel_id,
         message: "could not be found"
       )
     end

@@ -24,6 +24,7 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
   entities via the `Edgehog.DeploymentCampaigns` context.
   """
 
+  alias Edgehog.CampaignsFixtures
   alias Edgehog.ContainersFixtures
   alias Edgehog.DevicesFixtures
   alias Edgehog.GroupsFixtures
@@ -31,50 +32,16 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
   require Ash.Query
 
   @doc """
-  Generate a unique deployment_channel handle.
-  """
-  def unique_deployment_channel_handle, do: "some-handle#{System.unique_integer([:positive])}"
-
-  @doc """
-  Generate a unique deployment_channel name.
-  """
-  def unique_deployment_channel_name, do: "some name#{System.unique_integer([:positive])}"
-
-  @doc """
   Generate a unique deployment_campaign name.
   """
   def unique_deployment_campaign_name, do: "some name#{System.unique_integer([:positive])}"
-
-  @doc """
-  Generate a deployment_channel.
-  """
-  def deployment_channel_fixture(opts \\ []) do
-    {tenant, opts} = Keyword.pop!(opts, :tenant)
-
-    {target_group_ids, opts} =
-      Keyword.pop_lazy(opts, :target_group_ids, fn ->
-        target_group = Edgehog.GroupsFixtures.device_group_fixture(tenant: tenant)
-        [target_group.id]
-      end)
-
-    params =
-      Enum.into(opts, %{
-        handle: unique_deployment_channel_handle(),
-        name: unique_deployment_channel_name(),
-        target_group_ids: target_group_ids
-      })
-
-    Edgehog.DeploymentCampaigns.DeploymentChannel
-    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
-    |> Ash.create!()
-  end
 
   def deployment_campaign_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
     {deployment_channel_id, opts} =
-      Keyword.pop_lazy(opts, :deployment_channel_id, fn ->
-        [tenant: tenant] |> deployment_channel_fixture() |> Map.fetch!(:id)
+      Keyword.pop_lazy(opts, :channel_id, fn ->
+        [tenant: tenant] |> CampaignsFixtures.channel_fixture() |> Map.fetch!(:id)
       end)
 
     {release_id, opts} =
@@ -96,7 +63,7 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
       Enum.into(opts, %{
         name: unique_deployment_campaign_name(),
         release_id: release_id,
-        deployment_channel_id: deployment_channel_id,
+        channel_id: deployment_channel_id,
         deployment_mechanism: deployment_mechanism_opts
       })
 
@@ -122,7 +89,8 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
     tag = "foo"
     group = GroupsFixtures.device_group_fixture(selector: ~s<"#{tag}" in tags>, tenant: tenant)
 
-    deployment_channel = deployment_channel_fixture(target_group_ids: [group.id], tenant: tenant)
+    deployment_channel =
+      CampaignsFixtures.channel_fixture(target_group_ids: [group.id], tenant: tenant)
 
     for _ <- 1..target_count do
       # Create devices as online by default
@@ -135,7 +103,7 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
     opts
     |> Keyword.merge(
       release_id: release_id,
-      deployment_channel_id: deployment_channel.id,
+      channel_id: deployment_channel.id,
       tenant: tenant
     )
     |> deployment_campaign_fixture()

@@ -18,24 +18,24 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.UpdateCampaigns.UpdateChannel.Calculations.UpdatableDevices do
+defmodule Edgehog.Campaigns.Channel.Calculations.UpdatableDevices do
   @moduledoc false
   use Ash.Resource.Calculation
 
   require Ash.Query
 
   @impl Ash.Resource.Calculation
-  def calculate(update_channels, _opts, context) do
+  def calculate(channels, _opts, context) do
     %{arguments: %{base_image: base_image}} = context
 
     base_image = Ash.load!(base_image, base_image_collection: [:system_model_id])
 
     system_model_id = base_image.base_image_collection.system_model_id
 
-    update_channels
+    channels
     |> Ash.load!(target_groups: [devices: :system_model])
-    |> Enum.map(fn update_channel ->
-      update_channel.target_groups
+    |> Enum.map(fn channel ->
+      channel.target_groups
       |> Enum.flat_map(fn target_group ->
         Enum.filter(
           target_group.devices,

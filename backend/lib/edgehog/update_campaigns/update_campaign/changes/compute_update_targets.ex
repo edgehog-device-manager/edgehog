@@ -23,8 +23,8 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
   use Ash.Resource.Change
 
   alias Edgehog.BaseImages.BaseImage
+  alias Edgehog.Campaigns.Channel
   alias Edgehog.Campaigns.ExecutorSupervisor
-  alias Edgehog.UpdateCampaigns.UpdateChannel
   alias Edgehog.UpdateCampaigns.UpdateTarget
 
   require Ash.Query
@@ -34,10 +34,10 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
     %{tenant: tenant} = context
 
     with {:ok, base_image} <- fetch_base_image(changeset, tenant),
-         {:ok, update_channel} <- fetch_update_channel(changeset, tenant) do
-      update_channel = Ash.load!(update_channel, updatable_devices: [base_image: base_image])
+         {:ok, channel} <- fetch_channel(changeset, tenant) do
+      channel = Ash.load!(channel, updatable_devices: [base_image: base_image])
 
-      updatable_devices = update_channel.updatable_devices
+      updatable_devices = channel.updatable_devices
 
       if Enum.empty?(updatable_devices) do
         changeset
@@ -64,11 +64,11 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign.Changes.ComputeUpdateTargets do
     end
   end
 
-  defp fetch_update_channel(changeset, tenant) do
-    {:ok, update_channel_id} = Ash.Changeset.fetch_argument(changeset, :update_channel_id)
+  defp fetch_channel(changeset, tenant) do
+    {:ok, channel_id} = Ash.Changeset.fetch_argument(changeset, :channel_id)
 
-    with {:error, _reason} <- Ash.get(UpdateChannel, update_channel_id, tenant: tenant) do
-      Ash.Changeset.add_error(changeset, field: :update_channel_id, message: "could not be found")
+    with {:error, _reason} <- Ash.get(Channel, channel_id, tenant: tenant) do
+      Ash.Changeset.add_error(changeset, field: :channel_id, message: "could not be found")
     end
   end
 

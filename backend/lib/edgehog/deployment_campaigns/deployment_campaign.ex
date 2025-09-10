@@ -51,9 +51,9 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
         allow_nil? false
       end
 
-      argument :deployment_channel_id, :uuid do
+      argument :channel_id, :id do
         description """
-        The ID of the deployment channel that will be targeted by the deployment campaign.
+        The ID of the channel that will be targeted by the deployment campaign.
         """
 
         allow_nil? false
@@ -63,7 +63,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       change set_attribute(:status, :idle)
 
       change manage_relationship(:release_id, :release, type: :append)
-      change manage_relationship(:deployment_channel_id, :deployment_channel, type: :append)
+      change manage_relationship(:channel_id, :channel, type: :append)
     end
 
     update :mark_as_in_progress do
@@ -139,12 +139,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       allow_nil? false
     end
 
-    belongs_to :deployment_channel, Edgehog.DeploymentCampaigns.DeploymentChannel do
-      description "The deployment channel associated with the campaign."
+    belongs_to :channel, Edgehog.Campaigns.Channel do
+      description "The channel associated with the campaign."
       public? true
       allow_nil? false
       attribute_public? false
-      attribute_type :uuid
+      attribute_type :id
     end
 
     has_many :deployment_targets, Edgehog.DeploymentCampaigns.DeploymentTarget do
@@ -187,5 +187,13 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
 
   postgres do
     table "deployment_campaign"
+
+    references do
+      reference :channel,
+        index?: true,
+        on_delete: :nothing,
+        match_type: :full,
+        match_with: [tenant_id: :tenant_id]
+    end
   end
 end

@@ -29,7 +29,6 @@ defmodule Edgehog.UpdateCampaigns do
     ]
 
   alias Edgehog.UpdateCampaigns.UpdateCampaign
-  alias Edgehog.UpdateCampaigns.UpdateChannel
 
   graphql do
     root_level_errors? true
@@ -44,35 +43,15 @@ defmodule Edgehog.UpdateCampaigns do
         paginate_with :keyset
         relay? true
       end
-
-      get UpdateChannel, :update_channel, :read do
-        description "Returns a single update channel."
-      end
-
-      list UpdateChannel, :update_channels, :read do
-        description "Returns a list of update channels."
-        paginate_with :keyset
-        relay? true
-      end
     end
 
     mutations do
       create UpdateCampaign, :create_update_campaign, :create do
         relay_id_translations input: [
                                 base_image_id: :base_image,
-                                update_channel_id: :update_channel
+                                channel_id: :channel
                               ]
       end
-
-      create UpdateChannel, :create_update_channel, :create do
-        relay_id_translations input: [target_group_ids: :device_group]
-      end
-
-      update UpdateChannel, :update_update_channel, :update do
-        relay_id_translations input: [target_group_ids: :device_group]
-      end
-
-      destroy UpdateChannel, :delete_update_channel, :destroy
     end
   end
 
@@ -83,8 +62,6 @@ defmodule Edgehog.UpdateCampaigns do
       define :mark_campaign_as_failed, action: :mark_as_failed
       define :mark_campaign_as_successful, action: :mark_as_successful
     end
-
-    resource UpdateChannel
 
     resource Edgehog.UpdateCampaigns.UpdateTarget do
       define :fetch_target, action: :read, get_by: [:id], not_found_error?: true
