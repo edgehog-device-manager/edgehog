@@ -37,8 +37,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism do
   use AshGraphql.Type
 
   @impl AshGraphql.Type
-  def graphql_type(_), do: :deploy_rollout_mechanism
+  def graphql_type(_), do: :deployment_mechanism
 
   @impl AshGraphql.Type
-  def graphql_unnested_unions(_constraints), do: [:deploy]
+  def graphql_unnested_unions(_constraints), do: [:lazy]
 end

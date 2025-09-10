@@ -60,7 +60,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       end
 
       change Changes.ComputeDeploymentTargets
-      change set_attribute(:status, :idle)
 
       change manage_relationship(:release_id, :release, type: :append)
       change manage_relationship(:channel_id, :channel, type: :append)
