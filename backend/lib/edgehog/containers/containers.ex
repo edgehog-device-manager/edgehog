@@ -275,6 +275,8 @@ defmodule Edgehog.Containers do
       define :mark_volume_deployment_as_errored, action: :mark_as_errored, args: [:message]
     end
 
+    resource Edgehog.Containers.ContainerDeploymentVolumeDeployment
+
     resource Edgehog.Containers.DeviceMapping
 
     resource Edgehog.Containers.DeviceMapping.Deployment do
