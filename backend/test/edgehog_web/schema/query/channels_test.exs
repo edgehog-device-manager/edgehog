@@ -29,11 +29,11 @@ defmodule EdgehogWeb.Schema.Query.ChannelsTest do
       {:ok, target_group: device_group_fixture(tenant: tenant)}
     end
 
-    test "returns empty update channels", %{tenant: tenant} do
+    test "returns empty channels", %{tenant: tenant} do
       assert [] == [tenant: tenant] |> channels_query() |> extract_result!()
     end
 
-    test "returns update channels if present", %{tenant: tenant, target_group: target_group} do
+    test "returns channels if present", %{tenant: tenant, target_group: target_group} do
       channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
 
       [channel_data] =

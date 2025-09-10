@@ -55,11 +55,11 @@ defmodule Edgehog.Groups.DeviceGroup do
       accept [:name, :handle, :selector]
     end
 
-    update :channel do
+    update :unassign_channel do
       # Needed because resource's validations are not atomic
       require_atomic? false
 
-      accept [:channel_id]
+      change set_attribute(:channel_id, nil)
     end
 
     update :assign_channel do
@@ -135,7 +135,7 @@ defmodule Edgehog.Groups.DeviceGroup do
     end
 
     belongs_to :channel, Edgehog.Campaigns.Channel do
-      description "The update channel associated with the group, if present."
+      description "The channel associated with the group, if present."
       public? true
       attribute_public? false
     end

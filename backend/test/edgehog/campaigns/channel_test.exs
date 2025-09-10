@@ -66,7 +66,7 @@ defmodule Edgehog.Campaigns.ChannelTest do
       assert [%{id: ^device_id}] = channel.updatable_devices
     end
 
-    test "returns only devices belonging to the update channel with the base image", %{
+    test "returns only devices belonging to the channel with the base image", %{
       tenant: tenant
     } do
       base_image = base_image_fixture(tenant: tenant)
@@ -92,7 +92,7 @@ defmodule Edgehog.Campaigns.ChannelTest do
       assert [%{id: ^device_id}] = channel.updatable_devices
     end
 
-    test "returns the union of all target groups of the update channel", %{tenant: tenant} do
+    test "returns the union of all target groups of the channel", %{tenant: tenant} do
       base_image = base_image_fixture(tenant: tenant)
       foo_group = device_group_fixture(selector: ~s<"foo" in tags>, tenant: tenant)
       bar_group = device_group_fixture(selector: ~s<"bar" in tags>, tenant: tenant)

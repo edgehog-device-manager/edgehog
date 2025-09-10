@@ -36,7 +36,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteChannelTest do
       {:ok, channel: channel, id: id}
     end
 
-    test "deletes existing update channel", %{
+    test "deletes existing channel", %{
       tenant: tenant,
       channel: channel,
       id: id
@@ -55,7 +55,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteChannelTest do
              |> Ash.exists?()
     end
 
-    test "fails with non-existing update channel", %{tenant: tenant} do
+    test "fails with non-existing channel", %{tenant: tenant} do
       id = non_existing_channel_id(tenant)
 
       error = [tenant: tenant, id: id] |> delete_channel_mutation() |> extract_error!()

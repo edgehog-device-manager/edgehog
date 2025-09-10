@@ -33,16 +33,16 @@ defmodule EdgehogWeb.Schema.Mutation.CreateChannelTest do
 
       channel_data =
         [
-          name: "My Update Channel",
-          handle: "my-update-channel",
+          name: "My Channel",
+          handle: "my-channel",
           target_group_ids: [target_group_id],
           tenant: tenant
         ]
         |> create_channel_mutation()
         |> extract_result!()
 
-      assert channel_data["name"] == "My Update Channel"
-      assert channel_data["handle"] == "my-update-channel"
+      assert channel_data["name"] == "My Channel"
+      assert channel_data["handle"] == "my-channel"
 
       assert [target_group_data] =
                extract_nodes!(channel_data["targetGroups"]["edges"])
