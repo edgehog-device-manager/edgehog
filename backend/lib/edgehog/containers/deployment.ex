@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Changes.PublishNotification
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.Deployment.Types.DeploymentState
   alias Edgehog.Containers.Deployment.Types.ResourcesState
@@ -58,6 +59,11 @@ defmodule Edgehog.Containers.Deployment do
       change manage_relationship(:device_id, :device, type: :append)
 
       change Changes.CreateDeploymentOnDevice
+      change {PublishNotification, event_type: :deployment_created}
+    end
+
+    update :set_state do
+      accept [:state]
     end
 
     update :start do
@@ -148,8 +154,8 @@ defmodule Edgehog.Containers.Deployment do
       change Changes.CheckContainers
       change Changes.CheckDeployment
 
-      # TODO: signal deployment state update when this is triggered
       require_atomic? false
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     read :filter_by_release do

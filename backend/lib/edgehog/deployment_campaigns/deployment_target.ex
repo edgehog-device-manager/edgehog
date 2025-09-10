@@ -32,6 +32,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
 
   alias Edgehog.Containers.Release
   alias Edgehog.DeploymentCampaigns.DeploymentTarget
+  alias Edgehog.DeploymentCampaigns.DeploymentTarget.Changes
 
   resource do
     description @moduledoc
@@ -63,7 +64,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
       argument :deployment_campaign_id, :uuid, allow_nil?: false
 
       prepare build(load: [device: :online])
-      prepare build(load: [latest_attempt: :asc_nils_first])
+      prepare build(sort: [latest_attempt: :asc_nils_first])
       prepare build(limit: 1)
 
       filter expr(deployment_campaign_id == ^arg(:deployment_campaign_id))
@@ -78,10 +79,17 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
       targets need to setup a retry timeout.
       """
 
-      argument :deployment_campaign_id, :integer, allow_nil?: false
+      argument :deployment_campaign_id, :uuid, allow_nil?: false
 
       filter expr(deployment_campaign_id == ^arg(:deployment_campaign_id))
       filter expr(status == :in_progress)
+    end
+
+    create :create do
+      description "Creates a new update target."
+      primary? true
+
+      accept [:status, :deployment_campaign_id, :device_id]
     end
 
     update :mark_as_in_progress do
@@ -143,11 +151,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
       allow_nil? false
     end
 
-    attribute :name, :string do
-      public? true
-      allow_nil? false
-    end
-
     attribute :retry_count, :integer do
       description """
       The number of retries of the deployment target. This indicated how many times
@@ -197,7 +200,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
 
     belongs_to :deployment, Edgehog.Containers.Deployment do
       public? true
-      allow_nil? false
       attribute_public? false
       attribute_type :uuid
     end

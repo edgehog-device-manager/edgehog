@@ -195,6 +195,7 @@ defmodule Edgehog.Containers do
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
       define :deployment_by_identity, action: :read, get_by_identity: :release_instance
       define :run_ready_actions, action: :run_ready_actions
+      define :set_deployment_state, action: :set_state
 
       define :mark_deployment_as_sent, action: :mark_as_sent
       define :mark_deployment_as_deleting, action: :mark_as_deleting

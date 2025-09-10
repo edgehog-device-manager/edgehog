@@ -24,6 +24,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentChannel do
     domain: Edgehog.DeploymentCampaigns,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.DeploymentCampaigns.DeploymentChannel.Calculations
+
   resource do
     description """
     Represents a DeploymentChannel.
@@ -84,6 +86,28 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentChannel do
 
     has_many :deployment_campaigns, Edgehog.DeploymentCampaigns.DeploymentCampaign do
       public? true
+    end
+  end
+
+  calculations do
+    calculate :deployable_devices, {:array, :struct} do
+      description """
+      The devices targeted by the deployment channel that can be updated with the
+      provided release. Note that this only checks the compatibility between the
+      device and the system model targeted by the release. The starting version
+      requirement will be checked just before the update and will potentially
+      result in a failed operation.
+      """
+
+      constraints items: [instance_of: Edgehog.Devices.Device]
+      allow_nil? false
+
+      argument :release, :struct do
+        allow_nil? false
+        constraints instance_of: Edgehog.Containers.Release
+      end
+
+      calculation Calculations.DeployableDevices
     end
   end
 

@@ -200,8 +200,9 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   ## Returns
     - The number of in progress deployment targets associated with the campaign.
   """
-  def get_in_progress_target_count(tenant_id, campaign) do
-    campaign
+  def get_in_progress_target_count(tenant_id, campaign_id) do
+    tenant_id
+    |> get_deployment_campaign!(campaign_id)
     |> Ash.load!(:in_progress_target_count, tenant: tenant_id)
     |> Map.get(:in_progress_target_count)
   end
@@ -287,12 +288,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
 
   @doc delegate_to: {DeploymentCampaigns, :mark_target_as_failed!, 2}
   def mark_target_as_failed!(target, now \\ DateTime.utc_now()) do
-    DeploymentCampaigns.mark_target_as_failed!(target, now)
+    DeploymentCampaigns.mark_target_as_failed!(target, %{completion_timestamp: now})
   end
 
   @doc delegate_to: {DeploymentCampaigns, :mark_target_as_successful!, 2}
   def mark_target_as_successful!(target, now \\ DateTime.utc_now()) do
-    DeploymentCampaigns.mark_target_as_successful!(target, now)
+    DeploymentCampaigns.mark_target_as_successful!(target, %{completion_timestamp: now})
   end
 
   @doc """
@@ -406,10 +407,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
       |> Map.get(:device)
 
     case Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id) do
-      {:ok, deployment} ->
-        deployment
-        |> Ash.load!(:ready)
-        |> Map.get(:ready)
+      {:ok, _deployment} ->
+        true
 
       {:error, %Ash.Error.Query.NotFound{}} ->
         false
@@ -460,4 +459,14 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   def temporary_error?("connection refused"), do: true
   def temporary_error?(%AstarteAPIError{status: status}) when status in 500..599, do: true
   def temporary_error?(_reason), do: false
+
+  @doc """
+  Lists the default associations that should be preloaded for a target or a list of targets.
+  """
+  def default_preloads_for_target do
+    [
+      deployment: [:resources_state],
+      device: [realm: [:cluster]]
+    ]
+  end
 end
