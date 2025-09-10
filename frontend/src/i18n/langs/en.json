@@ -1205,14 +1205,14 @@
   "forms.CreateRelease.restartPolicyOption": {
     "defaultMessage": "Select a Restart Policy"
   },
-  "forms.CreateRelease.reuseResourcesButton": {
-    "defaultMessage": "Reuse Containers"
+  "forms.CreateRelease.reuseReleaseButton": {
+    "defaultMessage": "Reuse Release"
+  },
+  "forms.CreateRelease.reuseReleaseTitleButton": {
+    "defaultMessage": "Copy configuration from an existing release"
   },
   "forms.CreateRelease.reuseResourcesModalTitle": {
     "defaultMessage": "Reuse Resources Modal"
-  },
-  "forms.CreateRelease.reuseResourcesTitleButton": {
-    "defaultMessage": "Copy containers and their configurations from an existing release"
   },
   "forms.CreateRelease.selectApplication": {
     "defaultMessage": "Select Application"
