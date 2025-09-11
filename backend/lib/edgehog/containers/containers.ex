@@ -151,7 +151,13 @@ defmodule Edgehog.Containers do
         description "Delete a volume if not used by any container."
       end
 
-      create Network, :create_network, :create
+      create Network, :create_network, :create do
+        description "Create a new network."
+      end
+
+      destroy Network, :delete_network, :destroy do
+        description "Delete a network if not used by any container."
+      end
 
       create Deployment, :deploy_release, :deploy do
         description "Deploy the application on a device"

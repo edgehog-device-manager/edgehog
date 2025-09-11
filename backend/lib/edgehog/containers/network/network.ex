@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Network do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.ContainerNetwork
   alias Edgehog.Containers.Network.Calculations
 
   graphql do
@@ -32,7 +33,12 @@ defmodule Edgehog.Containers.Network do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:label, :driver, :internal, :enable_ipv6, :options]]
+    defaults [:read, create: [:label, :driver, :internal, :enable_ipv6, :options]]
+
+    destroy :destroy do
+      description "Deletes a volume if not used by any container."
+      primary? true
+    end
   end
 
   attributes do
@@ -71,7 +77,7 @@ defmodule Edgehog.Containers.Network do
 
   relationships do
     many_to_many :containers, Edgehog.Containers.Container do
-      through Edgehog.Containers.ContainerNetwork
+      through ContainerNetwork
       public? true
     end
 
@@ -80,6 +86,8 @@ defmodule Edgehog.Containers.Network do
       join_relationship :network_deployments
       public? true
     end
+
+    has_many :container_networks, ContainerNetwork
   end
 
   calculations do
@@ -92,5 +100,10 @@ defmodule Edgehog.Containers.Network do
 
   postgres do
     table "networks"
+    repo Edgehog.Repo
+
+    references do
+      reference :container_networks, on_delete: :restrict, match_with: [tenant_id: :tenant_id]
+    end
   end
 end
