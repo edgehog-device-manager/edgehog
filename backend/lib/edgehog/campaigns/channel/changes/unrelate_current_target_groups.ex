@@ -42,7 +42,7 @@ defmodule Edgehog.Campaigns.Channel.Changes.UnrelateCurrentTargetGroups do
       DeviceGroup
       |> Ash.Query.filter(channel_id == ^channel_id)
       |> Ash.Query.set_tenant(tenant)
-      |> Ash.bulk_update!(:channel, %{channel_id: nil})
+      |> Ash.bulk_update!(:unassign_channel, %{})
 
     changeset
   end

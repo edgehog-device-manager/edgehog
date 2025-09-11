@@ -32,7 +32,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
       {:ok, channel: channel, id: id}
     end
 
-    test "updates update channel with valid data", %{tenant: tenant, id: id} do
+    test "updates channel with valid data", %{tenant: tenant, id: id} do
       target_group = device_group_fixture(tenant: tenant)
       target_group_id = AshGraphql.Resource.encode_relay_id(target_group)
 
@@ -66,7 +66,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
         |> extract_error!()
 
       assert %{
-               path: ["channel"],
+               path: ["updateChannel"],
                fields: [:name],
                code: "required",
                message: "is required"
@@ -82,7 +82,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
         |> extract_error!()
 
       assert %{
-               path: ["channel"],
+               path: ["updateChannel"],
                fields: [:name],
                code: "invalid_attribute",
                message: "has already been taken"
@@ -96,7 +96,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
         |> extract_error!()
 
       assert %{
-               path: ["channel"],
+               path: ["updateChannel"],
                fields: [:handle],
                code: "required",
                message: "is required"
@@ -110,7 +110,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
         |> extract_error!()
 
       assert %{
-               path: ["channel"],
+               path: ["updateChannel"],
                fields: [:handle],
                code: "invalid_attribute",
                message: "should only contain lower case ASCII letters (from a to z), digits and -"
@@ -126,7 +126,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
         |> extract_error!()
 
       assert %{
-               path: ["channel"],
+               path: ["updateChannel"],
                fields: [:handle],
                code: "invalid_attribute",
                message: "has already been taken"
@@ -151,7 +151,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
         |> extract_error!()
 
       assert %{
-               path: ["channel"],
+               path: ["updateChannel"],
                fields: [:target_group_ids],
                code: "not_found",
                message: "One or more target groups could not be found"
@@ -172,7 +172,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
         |> extract_error!()
 
       assert %{
-               path: ["channel"],
+               path: ["updateChannel"],
                fields: [:channel_id],
                code: "invalid_attribute",
                message: "The channel is already set for the device group " <> name
@@ -184,8 +184,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
 
   defp update_channel_mutation(opts) do
     default_document = """
-    mutation UpdateChannel($id: ID!, $input: ChannelInput!) {
-      channel(id: $id, input: $input) {
+    mutation UpdateChannel($id: ID!, $input: UpdateChannelInput!) {
+      updateChannel(id: $id, input: $input) {
         result {
           id
           name
@@ -224,7 +224,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
   end
 
   defp extract_error!(result) do
-    assert is_nil(result[:data]["channel"])
+    assert is_nil(result[:data]["updateChannel"])
     assert %{errors: [error]} = result
 
     error
@@ -233,7 +233,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
   defp extract_result!(result) do
     assert %{
              data: %{
-               "channel" => %{
+               "updateChannel" => %{
                  "result" => channel
                }
              }

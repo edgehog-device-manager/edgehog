@@ -148,7 +148,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
              } = error
     end
 
-    test "fails when trying to use a non-existing update channel", %{tenant: tenant} do
+    test "fails when trying to use a non-existing channel", %{tenant: tenant} do
       channel_id = non_existing_channel_id(tenant)
 
       error =

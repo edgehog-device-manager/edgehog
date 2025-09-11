@@ -29,7 +29,7 @@ defmodule EdgehogWeb.Schema.Query.ChannelTest do
       {:ok, target_group: device_group_fixture(tenant: tenant)}
     end
 
-    test "returns update channel if present", %{tenant: tenant, target_group: target_group} do
+    test "returns channel if present", %{tenant: tenant, target_group: target_group} do
       channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
 
       id = AshGraphql.Resource.encode_relay_id(channel)

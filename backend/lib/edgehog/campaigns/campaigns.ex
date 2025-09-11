@@ -50,7 +50,7 @@ defmodule Edgehog.Campaigns do
         relay_id_translations input: [target_group_ids: :device_group]
       end
 
-      update Channel, :channel, :update do
+      update Channel, :update_channel, :update do
         relay_id_translations input: [target_group_ids: :device_group]
       end
 

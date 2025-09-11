@@ -70,8 +70,7 @@ defmodule Edgehog.UpdateCampaigns.UpdateCampaign do
 
       argument :channel_id, :id do
         description """
-        The ID of the update channel that will be targeted by the update \
-        campaign.\
+        The ID of the channel that will be targeted by the update campaign.
         """
 
         allow_nil? false
