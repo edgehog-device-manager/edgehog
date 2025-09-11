@@ -714,7 +714,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
 
   defp deployment_device_online_for_targets(targets, online) do
     targets
-    |> Ash.load!(Core.default_preloads_for_target())
+    |> Ash.load!(:device)
     |> Enum.each(fn target ->
       Ash.update!(target.device, %{online: online}, action: :from_device_status)
     end)
