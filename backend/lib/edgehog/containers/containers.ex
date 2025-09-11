@@ -143,8 +143,21 @@ defmodule Edgehog.Containers do
 
       destroy ImageCredentials, :delete_image_credentials, :destroy
 
-      create Volume, :create_volume, :create
-      create Network, :create_network, :create
+      create Volume, :create_volume, :create do
+        description "Create a new volume."
+      end
+
+      destroy Volume, :delete_volume, :destroy do
+        description "Delete a volume if not used by any container."
+      end
+
+      create Network, :create_network, :create do
+        description "Create a new network."
+      end
+
+      destroy Network, :delete_network, :destroy do
+        description "Delete a network if not used by any container."
+      end
 
       create Deployment, :deploy_release, :deploy do
         description "Deploy the application on a device"

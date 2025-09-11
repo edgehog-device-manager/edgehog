@@ -34,10 +34,14 @@ defmodule Edgehog.Containers.Volume do
   actions do
     defaults [
       :read,
-      :destroy,
       create: [:label, :driver, :options],
       update: [:driver, :options]
     ]
+
+    destroy :destroy do
+      description "Deletes a volume if not used by any container."
+      primary? true
+    end
   end
 
   attributes do
@@ -69,6 +73,8 @@ defmodule Edgehog.Containers.Volume do
       join_relationship :volume_deployments
       public? true
     end
+
+    has_many :container_volumes, Edgehog.Containers.ContainerVolume
   end
 
   calculations do
@@ -81,5 +87,10 @@ defmodule Edgehog.Containers.Volume do
 
   postgres do
     table "volumes"
+    repo Edgehog.Repo
+
+    references do
+      reference :container_volumes, on_delete: :restrict, match_with: [tenant_id: :tenant_id]
+    end
   end
 end

@@ -1967,6 +1967,18 @@
   "pages.Logout.title": {
     "defaultMessage": "Logout"
   },
+  "pages.Network.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "pages.Network.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Network <bold>{network}</bold>."
+  },
+  "pages.Network.deleteModal.title": {
+    "defaultMessage": "Delete Network"
+  },
+  "pages.Network.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Network, please try again."
+  },
   "pages.Network.networkNotFound.message": {
     "defaultMessage": "Return to the networks list."
   },
@@ -2114,6 +2126,18 @@
   },
   "pages.UpdateChannels.title": {
     "defaultMessage": "Update Channels"
+  },
+  "pages.Volume.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "pages.Volume.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Volume <bold>{volume}</bold>."
+  },
+  "pages.Volume.deleteModal.title": {
+    "defaultMessage": "Delete Volume"
+  },
+  "pages.Volume.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Volume, please try again."
   },
   "pages.Volume.volumeNotFound.message": {
     "defaultMessage": "Return to the volumes list."

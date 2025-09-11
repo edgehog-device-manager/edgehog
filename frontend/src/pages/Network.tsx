@@ -19,24 +19,32 @@
 */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Row, Col } from "react-bootstrap";
+import { Form, Row, Col, Stack } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import {
+  graphql,
+  useMutation,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 
+import type { Network_deleteNetwork_Mutation } from "api/__generated__/Network_deleteNetwork_Mutation.graphql";
 import type {
   Network_getNetwork_Query,
   Network_getNetwork_Query$data,
 } from "api/__generated__/Network_getNetwork_Query.graphql";
 
-import { Link, Route } from "Navigation";
+import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
+import Button from "components/Button";
+import DeleteModal from "components/DeleteModal";
 
 const GET_NETWORK_QUERY = graphql`
   query Network_getNetwork_Query($networkId: ID!) {
@@ -46,6 +54,16 @@ const GET_NETWORK_QUERY = graphql`
       internal
       enableIpv6
       options
+    }
+  }
+`;
+
+const DELETE_NETWORK_MUTATION = graphql`
+  mutation Network_deleteNetwork_Mutation($networkId: ID!) {
+    deleteNetwork(id: $networkId) {
+      result {
+        id
+      }
     }
   }
 `;
@@ -72,7 +90,46 @@ interface NetworkContentProps {
 }
 
 const NetworkContent = ({ network }: NetworkContentProps) => {
+  const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const { networkId = "" } = useParams();
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
+
+  const [deleteNetwork, isDeletingNetwork] =
+    useMutation<Network_deleteNetwork_Mutation>(DELETE_NETWORK_MUTATION);
+
+  const handleDeleteNetwork = useCallback(() => {
+    deleteNetwork({
+      variables: { networkId },
+      onCompleted(_data, errors) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          return navigate({ route: Route.networks });
+        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.Network.deletionErrorFeedback"
+            defaultMessage="Could not delete the Network, please try again."
+          />,
+        );
+        setShowDeleteModal(false);
+      },
+    });
+  }, [deleteNetwork, networkId, navigate]);
 
   const getPrettyOptions = () => {
     try {
@@ -162,6 +219,45 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
         >
           <Form.Check type="checkbox" checked={network.enableIpv6} readOnly />
         </FormRow>
+
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
+          <Button variant="danger" onClick={handleShowDeleteModal}>
+            <FormattedMessage
+              id="pages.Network.deleteButton"
+              defaultMessage="Delete"
+            />
+          </Button>
+        </Stack>
+
+        {showDeleteModal && (
+          <DeleteModal
+            confirmText={network.label ?? ""}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteNetwork}
+            isDeleting={isDeletingNetwork}
+            title={
+              <FormattedMessage
+                id="pages.Network.deleteModal.title"
+                defaultMessage="Delete Network"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="pages.Network.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the Network <bold>{network}</bold>."
+                values={{
+                  network: network.label,
+                  bold: (chunks) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
+          </DeleteModal>
+        )}
       </Page.Main>
     </Page>
   );

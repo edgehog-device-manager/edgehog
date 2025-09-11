@@ -19,24 +19,32 @@
 */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Row, Col } from "react-bootstrap";
+import { Form, Row, Col, Stack } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import {
+  graphql,
+  useMutation,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 
+import type { Volume_deleteVolume_Mutation } from "api/__generated__/Volume_deleteVolume_Mutation.graphql";
 import type {
   Volume_getVolume_Query,
   Volume_getVolume_Query$data,
 } from "api/__generated__/Volume_getVolume_Query.graphql";
 
-import { Link, Route } from "Navigation";
+import { Link, Route, useNavigate } from "Navigation";
 import Alert from "components/Alert";
 import Center from "components/Center";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
+import Button from "components/Button";
+import DeleteModal from "components/DeleteModal";
 
 const GET_VOLUME_QUERY = graphql`
   query Volume_getVolume_Query($volumeId: ID!) {
@@ -44,6 +52,16 @@ const GET_VOLUME_QUERY = graphql`
       label
       driver
       options
+    }
+  }
+`;
+
+const DELETE_VOLUME_MUTATION = graphql`
+  mutation Volume_deleteVolume_Mutation($volumeId: ID!) {
+    deleteVolume(id: $volumeId) {
+      result {
+        id
+      }
     }
   }
 `;
@@ -70,7 +88,46 @@ interface VolumeContentProps {
 }
 
 const VolumeContent = ({ volume }: VolumeContentProps) => {
+  const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const { volumeId = "" } = useParams();
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
+
+  const [deleteVolume, isDeletingVolume] =
+    useMutation<Volume_deleteVolume_Mutation>(DELETE_VOLUME_MUTATION);
+
+  const handleDeleteVolume = useCallback(() => {
+    deleteVolume({
+      variables: { volumeId },
+      onCompleted(_data, errors) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          return navigate({ route: Route.volumes });
+        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.Volume.deletionErrorFeedback"
+            defaultMessage="Could not delete the Volume, please try again."
+          />,
+        );
+        setShowDeleteModal(false);
+      },
+    });
+  }, [deleteVolume, volumeId, navigate]);
 
   const getPrettyOptions = () => {
     try {
@@ -136,6 +193,45 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
             style={{ fontFamily: "monospace", whiteSpace: "pre-wrap" }}
           />
         </FormRow>
+
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center"
+        >
+          <Button variant="danger" onClick={handleShowDeleteModal}>
+            <FormattedMessage
+              id="pages.Volume.deleteButton"
+              defaultMessage="Delete"
+            />
+          </Button>
+        </Stack>
+
+        {showDeleteModal && (
+          <DeleteModal
+            confirmText={volume.label}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteVolume}
+            isDeleting={isDeletingVolume}
+            title={
+              <FormattedMessage
+                id="pages.Volume.deleteModal.title"
+                defaultMessage="Delete Volume"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="pages.Volume.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the Volume <bold>{volume}</bold>."
+                values={{
+                  volume: volume.label,
+                  bold: (chunks) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
+          </DeleteModal>
+        )}
       </Page.Main>
     </Page>
   );
