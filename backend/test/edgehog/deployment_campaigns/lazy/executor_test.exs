@@ -270,11 +270,11 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       # Verify that all the expectations we defined until now were called
       verify!()
 
-      # Extract Deployment for a target that received the OTA Request
-      release_id =
+      # Extract Deployment for a target that received the Deployment request
+      deployment_id =
         receive do
-          {:deployment_target, release_id} ->
-            release_id
+          {:deployment_target, deployment_id} ->
+            deployment_id
         after
           1000 -> flunk()
         end
@@ -282,21 +282,21 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       # Throw away the other messages
       flush_messages()
 
-      {:ok, executor_pid: pid, release_id: release_id}
+      {:ok, executor_pid: pid, deployment_id: deployment_id}
     end
 
     for status <- [:started, :starting, :stopped, :stopping, :error] do
       test "frees up slot if Deployment state is #{status}", ctx do
         %{
           executor_pid: pid,
-          release_id: release_id,
+          deployment_id: deployment_id,
           tenant: tenant
         } = ctx
 
         # Expect another call to the mock since a slot has freed up
         ref = expect_deployment_requests_and_send_sync()
 
-        update_deployment_state!(tenant, release_id, unquote(status))
+        update_deployment_state!(tenant, deployment_id, unquote(status))
 
         wait_for_sync!(ref)
 
@@ -309,7 +309,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       test "doesn't free up slots if Deployment status is #{status}", ctx do
         %{
           executor_pid: pid,
-          release_id: release_id,
+          deployment_id: deployment_id,
           tenant: tenant
         } = ctx
 
@@ -318,7 +318,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
           :ok
         end)
 
-        update_deployment_state!(tenant, release_id, unquote(status))
+        update_deployment_state!(tenant, deployment_id, unquote(status))
 
         # Expect the executor to remain in the :wait_for_available_slot state
         wait_for_state(pid, :wait_for_available_slot)
@@ -332,7 +332,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       # 20 < x <= 70
       max_failure_percentage = 20 + :rand.uniform() * 50
 
-      # Create a base image with a specific version
+      # Create a release with a specific version
       release_version = "2.1.0"
       release = release_fixture(version: release_version, system_models: 1, tenant: tenant)
 
@@ -449,7 +449,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       # The minimum number of targets that have to fail to trigger a failure
       failing_target_count = min_failed_targets_for_failure(target_count, max_failure_percentage)
 
-      # Create a base image with a specific version and starting_version_requirement
+      # Create a release with a specific version and starting_version_requirement
       release_version = "2.1.0"
 
       release =
