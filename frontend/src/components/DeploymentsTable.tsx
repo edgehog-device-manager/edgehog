@@ -18,6 +18,8 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
@@ -31,8 +33,12 @@ import {
   DeploymentState,
   DeploymentStateComponent,
 } from "components/DeployedApplicationsTable";
-import Table, { createColumnHelper } from "components/Table";
+import InfiniteTable from "components/InfiniteTable";
+import { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
+
+const DEPLOYMENTS_TO_LOAD_FIRST = 40;
+const DEPLOYMENTS_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -150,19 +156,93 @@ const DeploymentsTable = ({
   deploymentsRef,
   hideSearch = false,
 }: DeploymentsTableProps) => {
-  const { data } = usePaginationFragment<
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
     DeploymentsTable_PaginationQuery,
     DeploymentsTable_DeploymentFragment$key
   >(DEPLOYMENTS_TABLE_FRAGMENT, deploymentsRef);
 
-  const tableData = data.deployments?.edges?.map((edge) => edge.node) ?? [];
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: DEPLOYMENTS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: DEPLOYMENTS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  {
+                    release: {
+                      version: { ilike: `%${text}%` },
+                    },
+                  },
+                  {
+                    release: {
+                      application: { name: { ilike: `%${text}%` } },
+                    },
+                  },
+                  {
+                    device: {
+                      name: { ilike: `%${text}%` },
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextDevices = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(DEPLOYMENTS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const deployments = useMemo(() => {
+    return (
+      paginationData.deployments?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is TableRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  if (!paginationData.deployments) {
+    return null;
+  }
 
   return (
     <div>
-      <Table
+      <InfiniteTable
         className={className}
         columns={columns}
-        data={tableData}
+        data={deployments}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextDevices : undefined}
+        setSearchText={setSearchText}
         hideSearch={hideSearch}
       />
     </div>

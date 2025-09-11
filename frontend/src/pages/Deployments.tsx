@@ -31,11 +31,15 @@ import DeploymentsTable from "components/DeploymentsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 
-const DEPLOYMENTS_TO_LOAD_FIRST = 10_000;
+const DEPLOYMENTS_TO_LOAD_FIRST = 40;
 
 const GET_DEPLOYMENTS_QUERY = graphql`
-  query Deployments_getDeployments_Query($first: Int, $after: String) {
-    ...DeploymentsTable_DeploymentFragment
+  query Deployments_getDeployments_Query(
+    $first: Int
+    $after: String
+    $filter: DeploymentFilterInput
+  ) {
+    ...DeploymentsTable_DeploymentFragment @arguments(filter: $filter)
   }
 `;
 
