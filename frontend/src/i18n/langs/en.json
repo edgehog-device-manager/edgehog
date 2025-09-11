@@ -845,6 +845,9 @@
   "components.Sidebar.applications.applicationsLabel": {
     "defaultMessage": "Applications"
   },
+  "components.Sidebar.applications.campaignsLabel": {
+    "defaultMessage": "Campaigns"
+  },
   "components.Sidebar.applications.credentialsLabel": {
     "defaultMessage": "Image Credentials"
   },
@@ -1543,6 +1546,15 @@
   "navigation.routeTitle.BaseImagesNew": {
     "defaultMessage": "Create Base Image"
   },
+  "navigation.routeTitle.DeploymentCampaigns": {
+    "defaultMessage": "Campaigns"
+  },
+  "navigation.routeTitle.DeploymentCampaignsEdit": {
+    "defaultMessage": "Edit Campaign"
+  },
+  "navigation.routeTitle.DeploymentCampaignsNew": {
+    "defaultMessage": "Create Campaign"
+  },
   "navigation.routeTitle.Deployments": {
     "defaultMessage": "Deployments"
   },
@@ -1747,6 +1759,9 @@
   },
   "pages.BaseImageCreate.title": {
     "defaultMessage": "Create Base Image"
+  },
+  "pages.Campaigns.title": {
+    "defaultMessage": "Campaigns"
   },
   "pages.Deployments.title": {
     "defaultMessage": "Deployments"

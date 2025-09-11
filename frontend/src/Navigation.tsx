@@ -68,6 +68,9 @@ enum Route {
   networksEdit = "/networks/:networkId",
   networksNew = "/networks/new",
   deployments = "/deployments",
+  deploymentCampaigns = "/deployment-campaigns",
+  deploymentCampaignsNew = "/deployment-campaigns/new",
+  deploymentCampaignsEdit = "/deployment-campaigns/:deploymentCampaignId",
   login = "/login",
   logout = "/logout",
 }
@@ -123,6 +126,9 @@ const matchingParametricRoute = (
     case Route.networks:
     case Route.networksNew:
     case Route.deployments:
+    case Route.deploymentCampaigns:
+    case Route.deploymentCampaignsNew:
+    case Route.deploymentCampaignsEdit:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -453,6 +459,18 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.deployments]: {
     id: "navigation.routeTitle.Deployments",
     defaultMessage: "Deployments",
+  },
+  [Route.deploymentCampaigns]: {
+    id: "navigation.routeTitle.DeploymentCampaigns",
+    defaultMessage: "Campaigns",
+  },
+  [Route.deploymentCampaignsNew]: {
+    id: "navigation.routeTitle.DeploymentCampaignsNew",
+    defaultMessage: "Create Campaign",
+  },
+  [Route.deploymentCampaignsEdit]: {
+    id: "navigation.routeTitle.DeploymentCampaignsEdit",
+    defaultMessage: "Edit Campaign",
   },
 });
 
