@@ -92,7 +92,8 @@ defmodule Edgehog.Containers.Volume.Deployment do
     attribute :state, :atom,
       constraints: [
         one_of: [:created, :sent, :available, :unavailable, :error]
-      ]
+      ],
+      public?: true
 
     timestamps()
   end
