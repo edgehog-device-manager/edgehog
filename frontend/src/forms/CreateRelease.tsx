@@ -127,16 +127,35 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
               node {
                 id
                 version
+                systemModels {
+                  id
+                  name
+                }
                 containers {
                   edges {
                     node {
                       id
                       env
+                      extraHosts
                       hostname
                       networkMode
                       restartPolicy
                       privileged
                       portBindings
+                      cpuPeriod
+                      cpuQuota
+                      cpuRealtimePeriod
+                      cpuRealtimeRuntime
+                      memory
+                      memorySwap
+                      memorySwappiness
+                      capAdd
+                      capDrop
+                      storageOpt
+                      tmpfs
+                      memoryReservation
+                      readOnlyRootfs
+                      volumeDriver
                       image {
                         reference
                         credentials {
@@ -1455,6 +1474,7 @@ const CreateRelease = ({
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<ReleaseInputData>({
     mode: "onTouched",
@@ -1607,7 +1627,21 @@ const CreateRelease = ({
               }}
             />
           </FormRow>
-
+          <div className="d-flex justify-content-start align-items-center gap-2">
+            <Button
+              variant="primary"
+              title={intl.formatMessage({
+                id: "forms.CreateRelease.reuseReleaseTitleButton",
+                defaultMessage: "Copy configuration from an existing release",
+              })}
+              onClick={() => setShowModal(true)}
+            >
+              <FormattedMessage
+                id="forms.CreateRelease.reuseReleaseButton"
+                defaultMessage="Reuse Release"
+              />
+            </Button>
+          </div>
           <Stack className="mt-3">
             <h5>
               <FormattedMessage
@@ -1650,21 +1684,6 @@ const CreateRelease = ({
                 defaultMessage="Add Container"
               />
             </Button>
-
-            <Button
-              variant="primary"
-              title={intl.formatMessage({
-                id: "forms.CreateRelease.reuseResourcesTitleButton",
-                defaultMessage:
-                  "Copy containers and their configurations from an existing release",
-              })}
-              onClick={() => setShowModal(true)}
-            >
-              <FormattedMessage
-                id="forms.CreateRelease.reuseResourcesButton"
-                defaultMessage="Reuse Containers"
-              />
-            </Button>
           </div>
 
           <div className="d-flex justify-content-end align-items-center">
@@ -1705,29 +1724,53 @@ const CreateRelease = ({
 
             if (!release) return;
 
-            remove();
+            const mappedContainers =
+              release.containers?.edges?.map((containerEdge) => {
+                const c = containerEdge.node;
+                return {
+                  env: c.env || undefined,
+                  extraHosts: c.extraHosts ? [...c.extraHosts] : undefined,
+                  image: {
+                    reference: c.image.reference,
+                    imageCredentialsId: c.image?.credentials?.id || undefined,
+                  },
+                  hostname: c.hostname || undefined,
+                  privileged: c.privileged || undefined,
+                  restartPolicy: c.restartPolicy || undefined,
+                  networkMode: c.networkMode || undefined,
+                  portBindings: c.portBindings?.join(",") || undefined,
+                  cpuPeriod: c.cpuPeriod || undefined,
+                  cpuQuota: c.cpuQuota || undefined,
+                  cpuRealtimePeriod: c.cpuRealtimePeriod || undefined,
+                  cpuRealtimeRuntime: c.cpuRealtimeRuntime || undefined,
+                  memory: c.memory || undefined,
+                  memorySwap: c.memorySwap || undefined,
+                  memorySwappiness: c.memorySwappiness || undefined,
+                  capAdd: c.capAdd ? [...c.capAdd] : undefined,
+                  capDrop: c.capDrop ? [...c.capDrop] : undefined,
+                  storageOpt: c.storageOpt
+                    ? JSON.stringify(c.storageOpt)
+                    : undefined,
+                  tmpfs: c.tmpfs ? JSON.stringify(c.tmpfs) : undefined,
+                  memoryReservation: c.memoryReservation || undefined,
+                  readOnlyRootfs: c.readOnlyRootfs || undefined,
+                  volumeDriver: c.volumeDriver || undefined,
+                  networks:
+                    c.networks?.edges?.map((n: any) => ({ id: n.node.id })) ??
+                    undefined,
+                  volumes:
+                    c.containerVolumes?.edges?.map((v: any) => ({
+                      id: v.node.volume.id,
+                      target: v.node.target,
+                    })) ?? undefined,
+                };
+              }) ?? [];
 
-            release.containers?.edges?.forEach((containerEdge) => {
-              const c = containerEdge.node;
-              append({
-                env: c.env || "",
-                image: {
-                  reference: c.image?.reference || "",
-                  imageCredentialsId: c.image?.credentials?.id || undefined,
-                },
-                hostname: c.hostname || "",
-                privileged: c.privileged || false,
-                restartPolicy: c.restartPolicy || "",
-                networkMode: c.networkMode || "",
-                portBindings: c.portBindings?.join(",") || "",
-                networks:
-                  c.networks?.edges?.map((n: any) => ({ id: n.node.id })) ?? [],
-                volumes:
-                  c.containerVolumes?.edges?.map((v: any) => ({
-                    id: v.node.volume.id,
-                    target: v.node.target,
-                  })) ?? [],
-              });
+            reset({
+              requiredSystemModels: release.systemModels.map(({ id }) => ({
+                id: id ?? undefined,
+              })),
+              containers: mappedContainers,
             });
 
             setShowModal(false);
