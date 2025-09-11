@@ -92,7 +92,8 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
     attribute :state, :atom,
       constraints: [
         one_of: [:created, :sent, :present, :not_present, :error]
-      ]
+      ],
+      public?: true
 
     timestamps()
   end

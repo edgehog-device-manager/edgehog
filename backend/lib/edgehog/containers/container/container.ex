@@ -177,10 +177,22 @@ defmodule Edgehog.Containers.Container do
       ]
 
       argument :volumes, {:array, :map}
+      argument :networks, {:array, :map}
+      argument :device_mappings, {:array, :map}
 
       change manage_relationship(:volumes,
                on_no_match: {:create, :create, :create, [:target]},
                on_lookup: {:relate, :create}
+             )
+
+      change manage_relationship(:networks,
+               on_no_match: :create,
+               on_lookup: {:relate, :create}
+             )
+
+      change manage_relationship(:device_mappings,
+               on_no_match: :create,
+               on_lookup: :relate
              )
     end
 

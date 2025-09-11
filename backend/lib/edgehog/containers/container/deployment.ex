@@ -31,10 +31,18 @@ defmodule Edgehog.Containers.Container.Deployment do
 
   graphql do
     type :container_deployment
+
+    paginate_relationship_with network_deployments: :relay,
+                               volume_deployments: :relay,
+                               device_mapping_deployments: :relay
   end
 
   actions do
-    defaults [:read, :destroy, create: [:container_id, :device_id, :state]]
+    defaults [
+      :read,
+      :destroy,
+      create: [:container_id, :device_id, :image_deployment_id, :state]
+    ]
 
     create :deploy do
       description """
@@ -100,7 +108,8 @@ defmodule Edgehog.Containers.Container.Deployment do
     attribute :state, :atom,
       constraints: [
         one_of: [:created, :sent, :received, :device_created, :stopped, :running, :error]
-      ]
+      ],
+      public?: true
 
     timestamps()
   end
@@ -112,6 +121,36 @@ defmodule Edgehog.Containers.Container.Deployment do
     end
 
     belongs_to :device, Edgehog.Devices.Device do
+      public? true
+    end
+
+    many_to_many :deployment, Edgehog.Containers.Deployment do
+      through Edgehog.Containers.DeploymentContainerDeployment
+    end
+
+    belongs_to :image_deployment, Edgehog.Containers.Image.Deployment do
+      attribute_type :uuid
+      public? true
+    end
+
+    many_to_many :network_deployments, Edgehog.Containers.Network.Deployment do
+      through Edgehog.Containers.ContainerDeploymentNetworkDeployment
+      source_attribute_on_join_resource :container_deployment_id
+      destination_attribute_on_join_resource :network_deployment_id
+      public? true
+    end
+
+    many_to_many :volume_deployments, Edgehog.Containers.Volume.Deployment do
+      through Edgehog.Containers.ContainerDeploymentVolumeDeployment
+      source_attribute_on_join_resource :container_deployment_id
+      destination_attribute_on_join_resource :volume_deployment_id
+      public? true
+    end
+
+    many_to_many :device_mapping_deployments, Edgehog.Containers.DeviceMapping.Deployment do
+      through Edgehog.Containers.ContainerDeploymentDeviceMappingDeployment
+      source_attribute_on_join_resource :container_deployment_id
+      destination_attribute_on_join_resource :device_mapping_deployment_id
       public? true
     end
   end
