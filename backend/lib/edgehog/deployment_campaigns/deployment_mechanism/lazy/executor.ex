@@ -420,17 +420,17 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
   def handle_event(:info, {:deployment_updated, deployment}, _state, data) do
-    ready? =
+    resources_state =
       deployment
-      |> Ash.load!(:ready?, tenant: data.tenant_id)
-      |> Map.get(:ready?)
+      |> Ash.load!(:resources_state, tenant: data.tenant_id)
+      |> Map.get(:resources_state)
 
     state = deployment.state
 
     # Event generated from PubSub when a Deployment is updated
     additional_actions =
-      case {ready?, state} do
-        {true, _} -> [internal_event({:deployment_success, deployment})]
+      case {resources_state, state} do
+        {:ready, _} -> [internal_event({:deployment_success, deployment})]
         {_, :error} -> [internal_event({:deployment_failure, deployment})]
         {_, _} -> []
       end

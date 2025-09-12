@@ -86,7 +86,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
     end
 
     create :create do
-      description "Creates a new update target."
+      description "Creates a new deployment target."
       primary? true
 
       accept [:status, :deployment_campaign_id, :device_id]

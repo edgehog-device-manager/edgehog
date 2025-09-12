@@ -123,26 +123,37 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_sent do
       change set_attribute(:state, :sent)
+
+      require_atomic? false
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_started do
       change set_attribute(:state, :started)
+
+      require_atomic? false
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_starting do
       require_atomic? false
 
       change Changes.MarkAsStarting
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
+
+      require_atomic? false
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_stopping do
       require_atomic? false
 
       change Changes.MarkAsStopping
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_errored do
@@ -152,10 +163,16 @@ defmodule Edgehog.Containers.Deployment do
 
       change set_attribute(:last_error_message, arg(:message))
       change set_attribute(:state, :error)
+
+      require_atomic? false
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_deleting do
       change set_attribute(:state, :deleting)
+
+      require_atomic? false
+      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :update_resources_state do

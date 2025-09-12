@@ -38,21 +38,27 @@ defmodule Edgehog.Campaigns.Channel.Calculations.DeployableDevices do
   def calculate(deployment_channels, _opts, context) do
     %{arguments: %{release: release}} = context
 
-    system_model_ids =
+    system_model_requirements =
       release
       |> Ash.load!(:system_models)
       |> Map.get(:system_models, [])
-      |> Enum.map(& &1.id)
 
     Enum.map(deployment_channels, fn deployment_channel ->
       deployment_channel.target_groups
       |> Enum.flat_map(fn target_group ->
         Enum.filter(
           target_group.devices,
-          &(&1.system_model != nil && &1.system_model.id in system_model_ids)
+          &satisfies?(&1.system_model, system_model_requirements)
         )
       end)
       |> Enum.uniq_by(& &1.id)
     end)
+  end
+
+  defp satisfies?(_system_model, [] = _system_model_requirements), do: true
+  defp satisfies?(nil = _system_model, _system_model_requirements), do: false
+
+  defp satisfies?(system_model, system_model_requirements) do
+    Enum.any?(system_model_requirements, &(system_model.id == &1.id))
   end
 end

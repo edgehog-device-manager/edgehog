@@ -459,14 +459,4 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   def temporary_error?("connection refused"), do: true
   def temporary_error?(%AstarteAPIError{status: status}) when status in 500..599, do: true
   def temporary_error?(_reason), do: false
-
-  @doc """
-  Lists the default associations that should be preloaded for a target or a list of targets.
-  """
-  def default_preloads_for_target do
-    [
-      deployment: [:resources_state],
-      device: [realm: [:cluster]]
-    ]
-  end
 end
