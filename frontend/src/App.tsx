@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ import Networks from "pages/Networks";
 import Network from "pages/Network";
 import NetworkCreatePage from "pages/NetworkCreate";
 import DeploymentsPage from "pages/Deployments";
+import DeploymentCampaignsPage from "pages/DeploymentCampaigns";
 
 import { bugs, repository, version } from "../package.json";
 
@@ -120,6 +121,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.networksEdit, element: <Network /> },
   { path: Route.networksNew, element: <NetworkCreatePage /> },
   { path: Route.deployments, element: <DeploymentsPage /> },
+  { path: Route.deploymentCampaigns, element: <DeploymentCampaignsPage /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

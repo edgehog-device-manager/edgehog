@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,15 +18,20 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-@import "bootstrap/scss/bootstrap.scss";
+.deployment-target-status {
+  .color-idle {
+    color: var(--deployment-target-status_color_idle);
+  }
 
-:root {
-  --update-target-status_color_idle: var(--bs-gray);
-  --update-target-status_color_in-progress: var(--bs-warning);
-  --update-target-status_color_successful: var(--bs-success);
-  --update-target-status_color_failed: var(--bs-danger);
-  --deployment-target-status_color_idle: var(--bs-gray);
-  --deployment-target-status_color_in-progress: var(--bs-warning);
-  --deployment-target-status_color_successful: var(--bs-success);
-  --deployment-target-status_color_failed: var(--bs-danger);
+  .color-in-progress {
+    color: var(--deployment-target-status_color_in-progress);
+  }
+
+  .color-successful {
+    color: var(--deployment-target-status_color_successful);
+  }
+
+  .color-failed {
+    color: var(--deployment-target-status_color_failed);
+  }
 }

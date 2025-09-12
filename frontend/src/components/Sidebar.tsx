@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -273,6 +273,20 @@ const Sidebar = () => (
         }
         route={Route.deployments}
         activeRoutes={[Route.deployments]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.campaignsLabel"
+            defaultMessage="Campaigns"
+          />
+        }
+        route={Route.deploymentCampaigns}
+        activeRoutes={[
+          Route.deploymentCampaigns,
+          Route.deploymentCampaignsEdit,
+          Route.deploymentCampaignsNew,
+        ]}
       />
     </SidebarItemGroup>
   </Navbar>

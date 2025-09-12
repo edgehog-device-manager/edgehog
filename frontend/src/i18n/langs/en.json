@@ -615,6 +615,21 @@
   "components.DeployedApplicationsTable.upgradeErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
+  "components.DeploymentCampaignOutcome.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.DeploymentCampaignOutcome.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.DeploymentCampaignStatus.Finished": {
+    "defaultMessage": "Finished"
+  },
+  "components.DeploymentCampaignStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.DeploymentCampaignStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
   "components.DeploymentsTable.applicationNameTitle": {
     "defaultMessage": "Application Name",
     "description": "Title for the Application Name column of the deployments table"
@@ -845,6 +860,9 @@
   "components.Sidebar.applications.applicationsLabel": {
     "defaultMessage": "Applications"
   },
+  "components.Sidebar.applications.campaignsLabel": {
+    "defaultMessage": "Campaigns"
+  },
   "components.Sidebar.applications.credentialsLabel": {
     "defaultMessage": "Image Credentials"
   },
@@ -1066,6 +1084,18 @@
   },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
+  },
+  "components.deploymentTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.deploymentTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.deploymentTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.deploymentTargetStatus.Successful": {
+    "defaultMessage": "Successful"
   },
   "components.updateTargetStatus.Failed": {
     "defaultMessage": "Failed"
@@ -1543,6 +1573,15 @@
   "navigation.routeTitle.BaseImagesNew": {
     "defaultMessage": "Create Base Image"
   },
+  "navigation.routeTitle.DeploymentCampaigns": {
+    "defaultMessage": "Campaigns"
+  },
+  "navigation.routeTitle.DeploymentCampaignsEdit": {
+    "defaultMessage": "Edit Campaign"
+  },
+  "navigation.routeTitle.DeploymentCampaignsNew": {
+    "defaultMessage": "Create Campaign"
+  },
   "navigation.routeTitle.Deployments": {
     "defaultMessage": "Deployments"
   },
@@ -1747,6 +1786,9 @@
   },
   "pages.BaseImageCreate.title": {
     "defaultMessage": "Create Base Image"
+  },
+  "pages.Campaigns.title": {
+    "defaultMessage": "Campaigns"
   },
   "pages.Deployments.title": {
     "defaultMessage": "Deployments"
