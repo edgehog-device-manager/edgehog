@@ -23,27 +23,27 @@ import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import _ from "lodash";
 
-import type { UpdateChannelsTable_PaginationQuery } from "api/__generated__/UpdateChannelsTable_PaginationQuery.graphql";
+import type { ChannelsTable_PaginationQuery } from "api/__generated__/ChannelsTable_PaginationQuery.graphql";
 import type {
-  UpdateChannelsTable_UpdateChannelFragment$data,
-  UpdateChannelsTable_UpdateChannelFragment$key,
-} from "api/__generated__/UpdateChannelsTable_UpdateChannelFragment.graphql";
+  ChannelsTable_ChannelFragment$data,
+  ChannelsTable_ChannelFragment$key,
+} from "api/__generated__/ChannelsTable_ChannelFragment.graphql";
 
 import { createColumnHelper } from "components/Table";
 import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "Navigation";
 import Tag from "components/Tag";
 
-const UPDATE_CHANNELS_TO_LOAD_FIRST = 40;
-const UPDATE_CHANNELS_TO_LOAD_NEXT = 10;
+const CHANNELS_TO_LOAD_FIRST = 40;
+const CHANNELS_TO_LOAD_NEXT = 10;
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
-  fragment UpdateChannelsTable_UpdateChannelFragment on RootQueryType
-  @refetchable(queryName: "UpdateChannelsTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "UpdateChannelFilterInput" }) {
-    updateChannels(first: $first, after: $after, filter: $filter)
-      @connection(key: "UpdateChannelsTable_updateChannels") {
+  fragment ChannelsTable_ChannelFragment on RootQueryType
+  @refetchable(queryName: "ChannelsTable_PaginationQuery")
+  @argumentDefinitions(filter: { type: "ChannelFilterInput" }) {
+    channels(first: $first, after: $after, filter: $filter)
+      @connection(key: "ChannelsTable_channels") {
       edges {
         node {
           id
@@ -63,9 +63,7 @@ const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
 `;
 
 type TableRecord = NonNullable<
-  NonNullable<
-    UpdateChannelsTable_UpdateChannelFragment$data["updateChannels"]
-  >["edges"]
+  NonNullable<ChannelsTable_ChannelFragment$data["channels"]>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
@@ -73,16 +71,13 @@ const columns = [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
-        id="components.UpdateChannelsTable.nameTitle"
-        defaultMessage="Update Channel Name"
-        description="Title for the Name column of the update channels table"
+        id="components.ChannelsTable.nameTitle"
+        defaultMessage="Channel Name"
+        description="Title for the Name column of the channels table"
       />
     ),
     cell: ({ row, getValue }) => (
-      <Link
-        route={Route.updateChannelsEdit}
-        params={{ updateChannelId: row.original.id }}
-      >
+      <Link route={Route.channelsEdit} params={{ channelId: row.original.id }}>
         {getValue()}
       </Link>
     ),
@@ -90,9 +85,9 @@ const columns = [
   columnHelper.accessor("handle", {
     header: () => (
       <FormattedMessage
-        id="components.UpdateChannelsTable.handleTitle"
+        id="components.ChannelsTable.handleTitle"
         defaultMessage="Handle"
-        description="Title for the Handle column of the update channels table"
+        description="Title for the Handle column of the channels table"
       />
     ),
   }),
@@ -100,9 +95,9 @@ const columns = [
     enableSorting: false,
     header: () => (
       <FormattedMessage
-        id="components.UpdateChannelsTable.targetGroupsTitle"
+        id="components.ChannelsTable.targetGroupsTitle"
         defaultMessage="Target Groups"
-        description="Title for the Target Groups column of the update channels table"
+        description="Title for the Target Groups column of the channels table"
       />
     ),
     cell: ({ getValue }) => (
@@ -119,10 +114,10 @@ const columns = [
 
 type Props = {
   className?: string;
-  updateChannelsRef: UpdateChannelsTable_UpdateChannelFragment$key;
+  channelsRef: ChannelsTable_ChannelFragment$key;
 };
 
-const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
+const ChannelsTable = ({ className, channelsRef }: Props) => {
   const {
     data: paginationData,
     loadNext,
@@ -130,9 +125,9 @@ const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
     isLoadingNext,
     refetch,
   } = usePaginationFragment<
-    UpdateChannelsTable_PaginationQuery,
-    UpdateChannelsTable_UpdateChannelFragment$key
-  >(DEVICE_GROUPS_TABLE_FRAGMENT, updateChannelsRef);
+    ChannelsTable_PaginationQuery,
+    ChannelsTable_ChannelFragment$key
+  >(DEVICE_GROUPS_TABLE_FRAGMENT, channelsRef);
   const [searchText, setSearchText] = useState<string | null>(null);
 
   const debounceRefetch = useMemo(
@@ -141,14 +136,14 @@ const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
         if (text === "") {
           refetch(
             {
-              first: UPDATE_CHANNELS_TO_LOAD_FIRST,
+              first: CHANNELS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: UPDATE_CHANNELS_TO_LOAD_FIRST,
+              first: CHANNELS_TO_LOAD_FIRST,
               filter: {
                 or: [
                   { name: { ilike: `%${text}%` } },
@@ -176,21 +171,21 @@ const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
     }
   }, [debounceRefetch, searchText]);
 
-  const loadNextUpdateChannels = useCallback(() => {
+  const loadNextChannels = useCallback(() => {
     if (hasNext && !isLoadingNext) {
-      loadNext(UPDATE_CHANNELS_TO_LOAD_NEXT);
+      loadNext(CHANNELS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 
-  const updateChannels = useMemo(() => {
+  const channels = useMemo(() => {
     return (
-      paginationData.updateChannels?.edges
+      paginationData.channels?.edges
         ?.map((edge) => edge?.node)
         .filter((node): node is TableRecord => node != null) ?? []
     );
   }, [paginationData]);
 
-  if (!paginationData.updateChannels) {
+  if (!paginationData.channels) {
     return null;
   }
 
@@ -198,12 +193,12 @@ const UpdateChannelsTable = ({ className, updateChannelsRef }: Props) => {
     <InfiniteTable
       className={className}
       columns={columns}
-      data={updateChannels}
+      data={channels}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextUpdateChannels : undefined}
+      onLoadMore={hasNext ? loadNextChannels : undefined}
       setSearchText={setSearchText}
     />
   );
 };
 
-export default UpdateChannelsTable;
+export default ChannelsTable;

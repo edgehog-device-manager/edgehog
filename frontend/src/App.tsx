@@ -55,9 +55,9 @@ import SystemModels from "pages/SystemModels";
 import UpdateCampaign from "pages/UpdateCampaign";
 import UpdateCampaignCreate from "pages/UpdateCampaignCreate";
 import UpdateCampaigns from "pages/UpdateCampaigns";
-import UpdateChannelsEdit from "pages/UpdateChannel";
-import UpdateChannelsCreate from "pages/UpdateChannelCreate";
-import UpdateChannels from "pages/UpdateChannels";
+import ChannelsEdit from "pages/Channel";
+import ChannelsCreate from "pages/ChannelCreate";
+import Channels from "pages/Channels";
 import Volumes from "pages/Volumes";
 import Volume from "pages/Volume";
 import VolumeCreatePage from "pages/VolumeCreate";
@@ -103,9 +103,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.imageCredentials, element: <ImageCredentials /> },
   { path: Route.imageCredentialsEdit, element: <ImageCredential /> },
   { path: Route.imageCredentialsNew, element: <ImageCredentialCreate /> },
-  { path: Route.updateChannels, element: <UpdateChannels /> },
-  { path: Route.updateChannelsEdit, element: <UpdateChannelsEdit /> },
-  { path: Route.updateChannelsNew, element: <UpdateChannelsCreate /> },
+  { path: Route.channels, element: <Channels /> },
+  { path: Route.channelsEdit, element: <ChannelsEdit /> },
+  { path: Route.channelsNew, element: <ChannelsCreate /> },
   { path: Route.updateCampaigns, element: <UpdateCampaigns /> },
   { path: Route.updateCampaignsNew, element: <UpdateCampaignCreate /> },
   { path: Route.updateCampaignsEdit, element: <UpdateCampaign /> },

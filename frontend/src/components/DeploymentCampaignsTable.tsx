@@ -61,7 +61,7 @@ const DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT = graphql`
               id
             }
           }
-          deploymentChannel {
+          channel {
             name
           }
         }
@@ -117,7 +117,7 @@ const columns = [
       <DeploymentCampaignOutcome deploymentCampaignRef={row.original} />
     ),
   }),
-  columnHelper.accessor("deploymentChannel.name", {
+  columnHelper.accessor("channel.name", {
     header: () => (
       <FormattedMessage
         id="components.DeploymentCampaignsTable.deploymentChannelNameTitle"
@@ -202,7 +202,7 @@ const DeploymentCampaignsTable = ({
                   },
                 },
                 {
-                  deploymentChannel: {
+                  channel: {
                     name: { ilike: `%${text}%` },
                   },
                 },

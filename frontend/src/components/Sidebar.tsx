@@ -117,6 +117,17 @@ const Sidebar = () => (
         Route.deviceGroupsNew,
       ]}
     />
+    <SidebarItem
+      label={
+        <FormattedMessage
+          id="components.Sidebar.ChannelsLabel"
+          defaultMessage="Channels"
+        />
+      }
+      icon="channels"
+      route={Route.channels}
+      activeRoutes={[Route.channels, Route.channelsEdit, Route.channelsNew]}
+    />
     <SidebarItemGroup
       label={
         <FormattedMessage
@@ -136,20 +147,7 @@ const Sidebar = () => (
         route={Route.updateCampaigns}
         activeRoutes={[Route.updateCampaigns, Route.updateCampaignsEdit]}
       />
-      <SidebarItem
-        label={
-          <FormattedMessage
-            id="components.Sidebar.updateChannelsLabel"
-            defaultMessage="Update Channels"
-          />
-        }
-        route={Route.updateChannels}
-        activeRoutes={[
-          Route.updateChannels,
-          Route.updateChannelsEdit,
-          Route.updateChannelsNew,
-        ]}
-      />
+
       <SidebarItem
         label={
           <FormattedMessage

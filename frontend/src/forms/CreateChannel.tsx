@@ -23,7 +23,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useIntl, FormattedMessage } from "react-intl";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import type { CreateUpdateChannel_OptionsFragment$key } from "api/__generated__/CreateUpdateChannel_OptionsFragment.graphql";
+import type { CreateChannel_OptionsFragment$key } from "api/__generated__/CreateChannel_OptionsFragment.graphql";
 
 import Button from "components/Button";
 import Col from "components/Col";
@@ -32,17 +32,17 @@ import MultiSelect from "components/MultiSelect";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
-import { updateChannelHandleSchema, yup, messages } from "forms";
+import { channelHandleSchema, yup, messages } from "forms";
 import { graphql, useFragment } from "react-relay/hooks";
 
 const CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
-  fragment CreateUpdateChannel_OptionsFragment on RootQueryType {
+  fragment CreateChannel_OptionsFragment on RootQueryType {
     deviceGroups {
       edges {
         node {
           id
           name
-          updateChannel {
+          channel {
             name
           }
         }
@@ -91,16 +91,16 @@ const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
 type TargetGroup = {
   readonly id: string;
   readonly name: string;
-  readonly updateChannel: {
+  readonly channel: {
     readonly name: string;
   } | null;
 };
 
 const getTargetGroupValue = (targetGroup: TargetGroup) => targetGroup.id;
 const isTargetGroupUsedByOtherChannel = (targetGroup: TargetGroup) =>
-  targetGroup.updateChannel !== null;
+  targetGroup.channel !== null;
 
-type UpdateChannelData = {
+type ChannelData = {
   name: string;
   handle: string;
   targetGroupIds: string[];
@@ -112,10 +112,10 @@ type FormData = {
   targetGroups: TargetGroup[];
 };
 
-const updateChannelSchema = yup
+const channelSchema = yup
   .object({
     name: yup.string().required(),
-    handle: updateChannelHandleSchema.required(),
+    handle: channelHandleSchema.required(),
     targetGroups: yup.array().ensure().min(1, messages.required.id),
   })
   .required();
@@ -129,22 +129,18 @@ const initialData: FormData = {
 const transformOutputData = ({
   targetGroups,
   ...rest
-}: FormData): UpdateChannelData => ({
+}: FormData): ChannelData => ({
   ...rest,
   targetGroupIds: targetGroups.map((targetGroup) => targetGroup.id),
 });
 
 type Props = {
-  queryRef: CreateUpdateChannel_OptionsFragment$key;
+  queryRef: CreateChannel_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: UpdateChannelData) => void;
+  onSubmit: (data: ChannelData) => void;
 };
 
-const CreateUpdateChannel = ({
-  queryRef,
-  isLoading = false,
-  onSubmit,
-}: Props) => {
+const CreateChannel = ({ queryRef, isLoading = false, onSubmit }: Props) => {
   const { deviceGroups: targetGroups } = useFragment(
     CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT,
     queryRef,
@@ -157,25 +153,25 @@ const CreateUpdateChannel = ({
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(updateChannelSchema),
+    resolver: yupResolver(channelSchema),
   });
 
   const intl = useIntl();
   const getTargetGroupLabel = useCallback(
     (targetGroup: TargetGroup) => {
-      if (targetGroup.updateChannel === null) {
+      if (targetGroup.channel === null) {
         return targetGroup.name;
       }
       return intl.formatMessage(
         {
-          id: "forms.CreateUpdateChannel.targetGroupWithChannelLabel",
-          defaultMessage: "{targetGroupName} (used for {updateChannelName})",
+          id: "forms.CreateChannel.targetGroupWithChannelLabel",
+          defaultMessage: "{targetGroupName} (used for {channelName})",
           description:
-            "Target group label of select option with optional update channel name it used for.",
+            "Target group label of select option with optional channel name it used for.",
         },
         {
           targetGroupName: targetGroup.name,
-          updateChannelName: targetGroup.updateChannel.name,
+          channelName: targetGroup.channel.name,
         },
       );
     },
@@ -206,10 +202,10 @@ const CreateUpdateChannel = ({
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
         <FormRow
-          id="create-update-channel-form-name"
+          id="create-channel-form-name"
           label={
             <FormattedMessage
-              id="forms.CreateUpdateChannel.nameLabel"
+              id="forms.CreateChannel.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -222,10 +218,10 @@ const CreateUpdateChannel = ({
           </Form.Control.Feedback>
         </FormRow>
         <FormRow
-          id="create-update-channel-form-handle"
+          id="create-channel-form-handle"
           label={
             <FormattedMessage
-              id="forms.CreateUpdateChannel.handleLabel"
+              id="forms.CreateChannel.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -238,10 +234,10 @@ const CreateUpdateChannel = ({
           </Form.Control.Feedback>
         </FormRow>
         <FormRow
-          id="create-update-channel-form-target-groups"
+          id="create-channel-form-target-groups"
           label={
             <FormattedMessage
-              id="forms.CreateUpdateChannel.targetGroupsLabel"
+              id="forms.CreateChannel.targetGroupsLabel"
               defaultMessage="Target Groups"
             />
           }
@@ -275,7 +271,7 @@ const CreateUpdateChannel = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="forms.CreateUpdateChannel.submitButton"
+              id="forms.CreateChannel.submitButton"
               defaultMessage="Create"
             />
           </Button>
@@ -285,6 +281,6 @@ const CreateUpdateChannel = ({
   );
 };
 
-export type { UpdateChannelData };
+export type { ChannelData };
 
-export default CreateUpdateChannel;
+export default CreateChannel;

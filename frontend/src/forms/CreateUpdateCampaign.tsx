@@ -46,7 +46,7 @@ const UPDATE_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
         }
       }
     }
-    updateChannels {
+    channels {
       edges {
         node {
           id
@@ -75,7 +75,7 @@ const FormRow = ({
 );
 
 type UpdateCampaignData = {
-  updateChannelId: string;
+  channelId: string;
   baseImageId: string;
   name: string;
   rolloutMechanism: {
@@ -91,7 +91,7 @@ type UpdateCampaignData = {
 
 type FormData = {
   name: string;
-  updateChannelId: string;
+  channelId: string;
   baseImageCollectionId: string;
   baseImageId: string;
   maxFailurePercentage: number | string;
@@ -103,7 +103,7 @@ type FormData = {
 
 const initialData: FormData = {
   name: "",
-  updateChannelId: "",
+  channelId: "",
   baseImageCollectionId: "",
   baseImageId: "",
   maxFailurePercentage: "",
@@ -117,7 +117,7 @@ const transformOutputData = (data: FormData): UpdateCampaignData => {
   const {
     name,
     baseImageId,
-    updateChannelId,
+    channelId,
     maxFailurePercentage,
     maxInProgressUpdates,
     otaRequestRetries,
@@ -128,7 +128,7 @@ const transformOutputData = (data: FormData): UpdateCampaignData => {
   return {
     name,
     baseImageId,
-    updateChannelId,
+    channelId,
     rolloutMechanism: {
       push: {
         maxFailurePercentage:
@@ -165,7 +165,7 @@ const CreateBaseImageCollectionForm = ({
       name: yup.string().required(),
       baseImageCollectionId: yup.string().required(),
       baseImageId: yup.string().required(),
-      updateChannelId: yup.string().required(),
+      channelId: yup.string().required(),
       maxInProgressUpdates: numberSchema
         .integer()
         .positive()
@@ -220,7 +220,7 @@ const CreateBaseImageCollectionForm = ({
 
   const baseImageCollectionId = watch("baseImageCollectionId");
 
-  const { baseImageCollections, updateChannels } = useFragment(
+  const { baseImageCollections, channels } = useFragment(
     UPDATE_CAMPAIGN_OPTIONS_FRAGMENT,
     updateCampaignOptionsRef,
   );
@@ -300,31 +300,31 @@ const CreateBaseImageCollectionForm = ({
           <FormFeedback feedback={errors.baseImageId?.message} />
         </FormRow>
         <FormRow
-          id="create-update-campaign-form-update-channel"
+          id="create-update-campaign-form-channel"
           label={
             <FormattedMessage
-              id="forms.CreateUpdateCampaign.updateChannelLabel"
-              defaultMessage="Update Channel"
+              id="forms.CreateUpdateCampaign.channelLabel"
+              defaultMessage="Channel"
             />
           }
         >
           <Form.Select
-            {...register("updateChannelId")}
-            isInvalid={!!errors.updateChannelId}
+            {...register("channelId")}
+            isInvalid={!!errors.channelId}
           >
             <option value="" disabled>
               {intl.formatMessage({
-                id: "forms.CreateUpdateCampaign.updateChannelOption",
-                defaultMessage: "Select an Update Channel",
+                id: "forms.CreateUpdateCampaign.channelOption",
+                defaultMessage: "Select a Channel",
               })}
             </option>
-            {updateChannels?.edges?.map(({ node: updateChannel }) => (
-              <option key={updateChannel.id} value={updateChannel.id}>
-                {updateChannel.name}
+            {channels?.edges?.map(({ node: channel }) => (
+              <option key={channel.id} value={channel.id}>
+                {channel.name}
               </option>
             ))}
           </Form.Select>
-          <FormFeedback feedback={errors.updateChannelId?.message} />
+          <FormFeedback feedback={errors.channelId?.message} />
         </FormRow>
         <FormRow
           id="create-update-campaign-form-max-in-progress-updates"

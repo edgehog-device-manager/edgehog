@@ -87,7 +87,7 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.systemModels:
       case Route.hardwareTypes:
       case Route.baseImageCollections:
-      case Route.updateChannels:
+      case Route.channels:
       case Route.updateCampaigns:
       case Route.applications:
       case Route.imageCredentials:
@@ -131,9 +131,9 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
           currentRoute,
         ];
 
-      case Route.updateChannelsEdit:
-      case Route.updateChannelsNew:
-        return [{ route: Route.updateChannels }, currentRoute];
+      case Route.channelsEdit:
+      case Route.channelsNew:
+        return [{ route: Route.channels }, currentRoute];
 
       case Route.updateCampaignsEdit:
       case Route.updateCampaignsNew:
