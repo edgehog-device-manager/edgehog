@@ -19,12 +19,12 @@
 */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Row, Col, Collapse } from "react-bootstrap";
+import { Form, Row, Col } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import type {
   Application_getApplication_Query,
@@ -39,8 +39,8 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import ReleasesTable from "components/ReleasesTable";
 import Button from "components/Button";
-import Icon from "components/Icon";
 import ApplicationDevicesTable from "components/ApplicationDevicesTable";
+import Tabs, { Tab } from "components/Tabs";
 
 const RELEASES_TO_LOAD_FIRST = 40;
 
@@ -66,10 +66,64 @@ interface ApplicationContentProps {
   >;
 }
 
+interface ReleasesTabProps {
+  application: NonNullable<
+    Application_getApplication_Query$data["application"]
+  >;
+  setErrorFeedback: (error: React.ReactNode) => void;
+}
+
+const ReleasesTab = ({ application, setErrorFeedback }: ReleasesTabProps) => {
+  const intl = useIntl();
+
+  return (
+    <Tab
+      eventKey="releases-tab"
+      title={intl.formatMessage({
+        id: "pages.Application.releases",
+        defaultMessage: "Releases",
+      })}
+    >
+      <div className="mt-3">
+        <ReleasesTable
+          releasesRef={application}
+          hideSearch
+          setErrorFeedback={setErrorFeedback}
+        />
+      </div>
+    </Tab>
+  );
+};
+
+interface DevicesTabProps {
+  application: NonNullable<
+    Application_getApplication_Query$data["application"]
+  >;
+}
+
+const DevicesTab = ({ application }: DevicesTabProps) => {
+  const intl = useIntl();
+
+  return (
+    <Tab
+      eventKey="devices-tab"
+      title={intl.formatMessage({
+        id: "pages.Application.devices",
+        defaultMessage: "Devices",
+      })}
+    >
+      <div className="mt-3">
+        <ApplicationDevicesTable
+          applicationDevicesRef={application}
+          hideSearch
+        />
+      </div>
+    </Tab>
+  );
+};
+
 const ApplicationContent = ({ application }: ApplicationContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
-  const [isOpenReleasesSection, setIsOpenReleasesSection] = useState(true);
-  const [isOpenDevicesSection, setIsOpenDevicesSection] = useState(true);
 
   const { applicationId = "" } = useParams();
 
@@ -113,59 +167,17 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
             />
           </Col>
         </Form.Group>
-        <Button
-          variant="light"
-          className="w-100 d-flex align-items-center fw-bold"
-          onClick={() => setIsOpenReleasesSection((prevState) => !prevState)}
-          aria-expanded={isOpenReleasesSection}
+
+        <Tabs
+          defaultActiveKey="releases-tab"
+          tabsOrder={["releases-tab", "devices-tab"]}
         >
-          <FormattedMessage
-            id="pages.Application.releases"
-            defaultMessage="Releases"
+          <ReleasesTab
+            application={application}
+            setErrorFeedback={setErrorFeedback}
           />
-          <span className="ms-auto">
-            {isOpenReleasesSection ? (
-              <Icon icon="caretUp" />
-            ) : (
-              <Icon icon="caretDown" />
-            )}
-          </span>
-        </Button>
-        <Collapse in={isOpenReleasesSection}>
-          <div className="p-2 border-top">
-            <ReleasesTable
-              releasesRef={application}
-              hideSearch
-              setErrorFeedback={setErrorFeedback}
-            />
-          </div>
-        </Collapse>
-        <Button
-          variant="light"
-          className="w-100 d-flex align-items-center fw-bold"
-          onClick={() => setIsOpenDevicesSection((prevState) => !prevState)}
-          aria-expanded={isOpenDevicesSection}
-        >
-          <FormattedMessage
-            id="pages.Application.devices"
-            defaultMessage="Devices"
-          />
-          <span className="ms-auto">
-            {isOpenDevicesSection ? (
-              <Icon icon="caretUp" />
-            ) : (
-              <Icon icon="caretDown" />
-            )}
-          </span>
-        </Button>
-        <Collapse in={isOpenDevicesSection}>
-          <div className="p-2 border-top">
-            <ApplicationDevicesTable
-              applicationDevicesRef={application}
-              hideSearch
-            />
-          </div>
-        </Collapse>
+          <DevicesTab application={application} />
+        </Tabs>
       </Page.Main>
     </Page>
   );
