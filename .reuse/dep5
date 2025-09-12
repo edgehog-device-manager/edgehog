@@ -15,8 +15,8 @@ Files: CHANGELOG.md
 Copyright: 2021-2023 SECO Mind Srl
 License: CC0-1.0
 
-Files: backend/priv/repo/seeds/keys/*.pem
-Copyright: 2023 Seco Mind Srl
+Files: backend/priv/repo/seeds/keys/*.pem backend/priv/repo/seeds/keys/*.txt
+Copyright: 2023-2025 Seco Mind Srl
 License: CC0-1.0
 
 Files: backend/priv/astarte_resources/interfaces/*.json
