@@ -18,15 +18,44 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { Suspense } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
+import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+
+import type { DeploymentCampaigns_getDeploymentCampaigns_Query } from "api/__generated__/DeploymentCampaigns_getDeploymentCampaigns_Query.graphql";
 
 import Center from "components/Center";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
+import DeploymentCampaignsTable from "components/DeploymentCampaignsTable";
 
-const DeploymentCampaignsContent = () => {
+const DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST = 40;
+
+const GET_DEPLOYMENT_CAMPAIGNS_QUERY = graphql`
+  query DeploymentCampaigns_getDeploymentCampaigns_Query(
+    $first: Int
+    $after: String
+    $filter: DeploymentCampaignFilterInput
+  ) {
+    ...DeploymentCampaignsTable_DeploymentCampaignFragment
+      @arguments(filter: $filter)
+  }
+`;
+
+interface DeploymentCampaignsContentProps {
+  getDeploymentCampaignsQuery: PreloadedQuery<DeploymentCampaigns_getDeploymentCampaigns_Query>;
+}
+
+const DeploymentCampaignsContent = ({
+  getDeploymentCampaignsQuery,
+}: DeploymentCampaignsContentProps) => {
+  const campaigns = usePreloadedQuery(
+    GET_DEPLOYMENT_CAMPAIGNS_QUERY,
+    getDeploymentCampaignsQuery,
+  );
+
   return (
     <Page>
       <Page.Header
@@ -37,11 +66,30 @@ const DeploymentCampaignsContent = () => {
           />
         }
       />
+      <Page.Main>
+        <DeploymentCampaignsTable deploymentCampaignsData={campaigns} />
+      </Page.Main>
     </Page>
   );
 };
 
 const DeploymentCampaignsPage = () => {
+  const [getDeploymentCampaignsQuery, getDeploymentCampaigns] =
+    useQueryLoader<DeploymentCampaigns_getDeploymentCampaigns_Query>(
+      GET_DEPLOYMENT_CAMPAIGNS_QUERY,
+    );
+
+  const fetchDeploymentCampaigns = useCallback(
+    () =>
+      getDeploymentCampaigns(
+        { first: DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
+    [getDeploymentCampaigns],
+  );
+
+  useEffect(fetchDeploymentCampaigns, [fetchDeploymentCampaigns]);
+
   return (
     <Suspense
       fallback={
@@ -56,8 +104,13 @@ const DeploymentCampaignsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
+        onReset={fetchDeploymentCampaigns}
       >
-        <DeploymentCampaignsContent />
+        {getDeploymentCampaignsQuery && (
+          <DeploymentCampaignsContent
+            getDeploymentCampaignsQuery={getDeploymentCampaignsQuery}
+          />
+        )}
       </ErrorBoundary>
     </Suspense>
   );
