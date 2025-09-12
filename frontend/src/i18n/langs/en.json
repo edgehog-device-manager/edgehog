@@ -630,6 +630,24 @@
   "components.DeploymentCampaignStatus.InProgress": {
     "defaultMessage": "In progress"
   },
+  "components.DeploymentCampaignsTable.deploymentChannelNameTitle": {
+    "defaultMessage": "Channel",
+    "description": "Title for the Channel column of the Deployment Campaigns table"
+  },
+  "components.DeploymentCampaignsTable.nameTitle": {
+    "defaultMessage": "Deployment Campaign Name",
+    "description": "Title for the Name column of the Deployment Campaigns table"
+  },
+  "components.DeploymentCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.DeploymentCampaignsTable.releaseNameTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release column of the Deployment Campaigns table"
+  },
+  "components.DeploymentCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
   "components.DeploymentsTable.applicationNameTitle": {
     "defaultMessage": "Application Name",
     "description": "Title for the Application Name column of the deployments table"
