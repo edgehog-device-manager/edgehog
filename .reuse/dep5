@@ -35,3 +35,6 @@ Files: backend/priv/resource_snapshots/*
 Copyright: 2024 Seco Mind Srl
 License: Apache-2.0
 
+Files: justfile
+Copyright: 2025 Seco Mind Srl
+License: Apache-2.0
