@@ -38,11 +38,9 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
       release = release_fixture(tenant: tenant, system_models: 1)
 
       device =
-        device_fixture_compatible_with_release(
-          release_id: release.id,
-          online: true,
-          tenant: tenant
-        )
+        [release_id: release.id, online: true, tenant: tenant]
+        |> device_fixture_compatible_with_release()
+        |> add_tags(["foobar"])
 
       context = %{
         deployment_channel: deployment_channel,

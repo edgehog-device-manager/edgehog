@@ -35,7 +35,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy do
   end
 
   graphql do
-    type :lazy_deployment
+    type :lazy
   end
 
   attributes do
