@@ -59,6 +59,7 @@ const DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT = graphql`
             version
             application {
               id
+              name
             }
           }
           channel {
@@ -124,6 +125,23 @@ const columns = [
         defaultMessage="Channel"
         description="Title for the Channel column of the Deployment Campaigns table"
       />
+    ),
+  }),
+  columnHelper.accessor("release.application.name", {
+    header: () => (
+      <FormattedMessage
+        id="components.DeploymentCampaignsTable.applicationNameTitle"
+        defaultMessage="Application Name"
+        description="Title for the Application Name column of the Deployment Campaigns table"
+      />
+    ),
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.application}
+        params={{ applicationId: row.original.release?.application?.id || "" }}
+      >
+        {getValue()}
+      </Link>
     ),
   }),
   columnHelper.accessor("release.version", {
