@@ -28,10 +28,9 @@ import type {
 } from "api/__generated__/ApplicationDevicesTable_ReleaseFragment.graphql";
 
 import ConnectionStatus from "components/ConnectionStatus";
-import {
-  DeploymentState,
-  DeploymentStateComponent,
-} from "components/DeployedApplicationsTable";
+import DeploymentStateComponent, {
+  type DeploymentState,
+} from "components/DeploymentState";
 import Table, { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
 

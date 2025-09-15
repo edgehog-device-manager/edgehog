@@ -28,10 +28,8 @@ import type {
 
 import { createColumnHelper } from "components/Table";
 import InfiniteTable from "components/InfiniteTable";
-import {
-  DeploymentResourcesStateComponent,
-  DeploymentStateComponent,
-} from "components/DeployedApplicationsTable";
+import DeploymentStateComponent from "components/DeploymentState";
+import DeploymentResourcesStateComponent from "components/DeploymentResourcesState";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration

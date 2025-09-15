@@ -18,18 +18,14 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { defineMessages, FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
 import { useCallback, useState, useMemo } from "react";
 import semver from "semver";
 import Select, { SingleValue } from "react-select";
 
 import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
-import type {
-  ApplicationDeploymentResourcesState,
-  ApplicationDeploymentState,
-  DeployedApplicationsTable_deployedApplications$key,
-} from "api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
+import type { DeployedApplicationsTable_deployedApplications$key } from "api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
 
 import type { DeployedApplicationsTable_startDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_startDeployment_Mutation.graphql";
 import type { DeployedApplicationsTable_stopDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
@@ -39,9 +35,16 @@ import type { DeployedApplicationsTable_upgradeDeployment_Mutation } from "api/_
 import Icon from "components/Icon";
 import { Link, Route } from "Navigation";
 import Table, { createColumnHelper } from "components/Table";
-import Button from "./Button";
-import ConfirmModal from "./ConfirmModal";
-import DeleteModal from "./DeleteModal";
+import Button from "components/Button";
+import ConfirmModal from "components/ConfirmModal";
+import DeleteModal from "components/DeleteModal";
+import DeploymentStateComponent, {
+  type DeploymentState,
+  parseDeploymentState,
+} from "components/DeploymentState";
+import DeploymentResourcesStateComponent, {
+  parseDeploymentResourcesState,
+} from "components/DeploymentResourcesState";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -125,204 +128,6 @@ const UPGRADE_DEPLOYMENT_MUTATION = graphql`
     }
   }
 `;
-
-type DeploymentState =
-  | "DEPLOYING"
-  | "PENDING"
-  | "SENT"
-  | "STARTING"
-  | "STARTED"
-  | "STOPPING"
-  | "STOPPED"
-  | "ERROR"
-  | "DELETING";
-
-type DeploymentResourcesState =
-  | "INITIAL"
-  | "CREATED_IMAGES"
-  | "CREATED_NETWORKS"
-  | "CREATED_VOLUMES"
-  | "CREATED_DEVICE_MAPPINGS"
-  | "CREATED_CONTAINERS"
-  | "READY";
-
-const parseDeploymentState = (
-  apiState?: ApplicationDeploymentState,
-): DeploymentState => {
-  switch (apiState) {
-    case "PENDING":
-      return "PENDING";
-    case "SENT":
-      return "SENT";
-    case "STARTED":
-      return "STARTED";
-    case "STARTING":
-      return "STARTING";
-    case "STOPPED":
-      return "STOPPED";
-    case "STOPPING":
-      return "STOPPING";
-    case "ERROR":
-      return "ERROR";
-    case "DELETING":
-      return "DELETING";
-    default:
-      return "DEPLOYING";
-  }
-};
-
-const parseDeploymentResourcesState = (
-  apiState?: ApplicationDeploymentResourcesState,
-): DeploymentResourcesState => {
-  switch (apiState) {
-    case "INITIAL":
-      return "INITIAL";
-    case "CREATED_IMAGES":
-      return "CREATED_IMAGES";
-    case "CREATED_NETWORKS":
-      return "CREATED_NETWORKS";
-    case "CREATED_VOLUMES":
-      return "CREATED_VOLUMES";
-    case "CREATED_DEVICE_MAPPINGS":
-      return "CREATED_DEVICE_MAPPINGS";
-    case "CREATED_CONTAINERS":
-      return "CREATED_CONTAINERS";
-    case "READY":
-      return "READY";
-    default:
-      return "INITIAL";
-  }
-};
-
-const stateColors: Record<DeploymentState, string> = {
-  PENDING: "text-success",
-  SENT: "text-success",
-  STARTING: "text-success",
-  STARTED: "text-success",
-  STOPPING: "text-warning",
-  STOPPED: "text-secondary",
-  ERROR: "text-danger",
-  DELETING: "text-danger",
-  DEPLOYING: "text-muted",
-};
-
-const resourcesStateColors: Record<DeploymentResourcesState, string> = {
-  INITIAL: "text-muted",
-  CREATED_IMAGES: "text-muted",
-  CREATED_NETWORKS: "text-muted",
-  CREATED_VOLUMES: "text-muted",
-  CREATED_DEVICE_MAPPINGS: "text-muted",
-  CREATED_CONTAINERS: "text-muted",
-  READY: "text-success",
-};
-
-// Define deployment state messages for localization
-const stateMessages = defineMessages<DeploymentState>({
-  PENDING: {
-    id: "components.DeployedApplicationsTable.pending",
-    defaultMessage: "Pending",
-  },
-  SENT: {
-    id: "components.DeployedApplicationsTable.sent",
-    defaultMessage: "Sent",
-  },
-  STARTING: {
-    id: "components.DeployedApplicationsTable.starting",
-    defaultMessage: "Starting",
-  },
-  STARTED: {
-    id: "components.DeployedApplicationsTable.started",
-    defaultMessage: "Started",
-  },
-  STOPPING: {
-    id: "components.DeployedApplicationsTable.stopping",
-    defaultMessage: "Stopping",
-  },
-  STOPPED: {
-    id: "components.DeployedApplicationsTable.stopped",
-    defaultMessage: "Stopped",
-  },
-  ERROR: {
-    id: "components.DeployedApplicationsTable.error",
-    defaultMessage: "Error",
-  },
-  DELETING: {
-    id: "components.DeployedApplicationsTable.deleting",
-    defaultMessage: "Deleting",
-  },
-  DEPLOYING: {
-    id: "components.DeployedApplicationsTable.deploying",
-    defaultMessage: "Deploying",
-  },
-});
-
-// Define deployment resources state messages for localization
-const resourcesStateMessages = defineMessages<DeploymentResourcesState>({
-  INITIAL: {
-    id: "components.DeployedApplicationsTable.initial",
-    defaultMessage: "Initial",
-  },
-  CREATED_IMAGES: {
-    id: "components.DeployedApplicationsTable.createdImages",
-    defaultMessage: "Created images",
-  },
-  CREATED_NETWORKS: {
-    id: "components.DeployedApplicationsTable.createdNetworks",
-    defaultMessage: "Created networks",
-  },
-  CREATED_VOLUMES: {
-    id: "components.DeployedApplicationsTable.createdVolumes",
-    defaultMessage: "Created volumes",
-  },
-  CREATED_DEVICE_MAPPINGS: {
-    id: "components.DeployedApplicationsTable.createdDeviceMappings",
-    defaultMessage: "Created device mappings",
-  },
-  CREATED_CONTAINERS: {
-    id: "components.DeployedApplicationsTable.createdContainers",
-    defaultMessage: "Created containers",
-  },
-  READY: {
-    id: "components.DeployedApplicationsTable.ready",
-    defaultMessage: "Ready",
-  },
-});
-
-// Component to render the deployment state with an icon and optional spin
-const DeploymentStateComponent = ({ state }: { state: DeploymentState }) => (
-  <div className="d-flex align-items-center">
-    <Icon
-      icon={
-        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
-          ? "spinner"
-          : "circle"
-      }
-      className={`me-2 ${stateColors[state]} ${
-        ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
-          ? "fa-spin"
-          : ""
-      }`}
-    />
-    <FormattedMessage id={stateMessages[state].id} />
-  </div>
-);
-
-// Component to render the deployment resources state with an icon and optional spin
-const DeploymentResourcesStateComponent = ({
-  resourcesState,
-}: {
-  resourcesState: DeploymentResourcesState;
-}) => (
-  <div className="d-flex align-items-center">
-    <Icon
-      icon={resourcesState !== "READY" ? "spinner" : "circle"}
-      className={`me-2 ${resourcesStateColors[resourcesState]} ${
-        resourcesState !== "READY" ? "fa-spin" : ""
-      }`}
-    />
-    <FormattedMessage id={resourcesStateMessages[resourcesState].id} />
-  </div>
-);
 
 // Action buttons with play and stop icons
 const ActionButtons = ({
@@ -879,9 +684,6 @@ const DeployedApplicationsTable = ({
     </div>
   );
 };
-
-// TODO: Make dedicated files for these components
-export { DeploymentStateComponent, DeploymentResourcesStateComponent };
 
 export type { DeploymentTableProps, DeploymentState };
 export default DeployedApplicationsTable;

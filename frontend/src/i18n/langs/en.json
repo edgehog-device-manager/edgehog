@@ -528,21 +528,6 @@
   "components.DeployedApplicationsTable.confirmModal.title": {
     "defaultMessage": "Upgrade Deployment"
   },
-  "components.DeployedApplicationsTable.createdContainers": {
-    "defaultMessage": "Created containers"
-  },
-  "components.DeployedApplicationsTable.createdDeviceMappings": {
-    "defaultMessage": "Created device mappings"
-  },
-  "components.DeployedApplicationsTable.createdImages": {
-    "defaultMessage": "Created images"
-  },
-  "components.DeployedApplicationsTable.createdNetworks": {
-    "defaultMessage": "Created networks"
-  },
-  "components.DeployedApplicationsTable.createdVolumes": {
-    "defaultMessage": "Created volumes"
-  },
   "components.DeployedApplicationsTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
   },
@@ -552,20 +537,8 @@
   "components.DeployedApplicationsTable.deleteModal.title": {
     "defaultMessage": "Delete Deployment"
   },
-  "components.DeployedApplicationsTable.deleting": {
-    "defaultMessage": "Deleting"
-  },
   "components.DeployedApplicationsTable.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the deployment, please try again."
-  },
-  "components.DeployedApplicationsTable.deploying": {
-    "defaultMessage": "Deploying"
-  },
-  "components.DeployedApplicationsTable.error": {
-    "defaultMessage": "Error"
-  },
-  "components.DeployedApplicationsTable.initial": {
-    "defaultMessage": "Initial"
   },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
@@ -576,12 +549,6 @@
   "components.DeployedApplicationsTable.noReleasesFoundMatching": {
     "defaultMessage": "No release versions found matching \"{inputValue}\""
   },
-  "components.DeployedApplicationsTable.pending": {
-    "defaultMessage": "Pending"
-  },
-  "components.DeployedApplicationsTable.ready": {
-    "defaultMessage": "Ready"
-  },
   "components.DeployedApplicationsTable.releaseVersion": {
     "defaultMessage": "Release Version"
   },
@@ -591,20 +558,11 @@
   "components.DeployedApplicationsTable.selectOption": {
     "defaultMessage": "Select a Release Version"
   },
-  "components.DeployedApplicationsTable.sent": {
-    "defaultMessage": "Sent"
-  },
   "components.DeployedApplicationsTable.startErrorFeedback": {
     "defaultMessage": "Could not Start the Deployed Application, please try again."
   },
   "components.DeployedApplicationsTable.startErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot start an application while it is offline."
-  },
-  "components.DeployedApplicationsTable.started": {
-    "defaultMessage": "Started"
-  },
-  "components.DeployedApplicationsTable.starting": {
-    "defaultMessage": "Starting"
   },
   "components.DeployedApplicationsTable.state": {
     "defaultMessage": "State"
@@ -614,12 +572,6 @@
   },
   "components.DeployedApplicationsTable.stopErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
-  },
-  "components.DeployedApplicationsTable.stopped": {
-    "defaultMessage": "Stopped"
-  },
-  "components.DeployedApplicationsTable.stopping": {
-    "defaultMessage": "Stopping"
   },
   "components.DeployedApplicationsTable.upgradeErrorFeedback": {
     "defaultMessage": "Could not upgrade the deployment, please try again."
@@ -663,6 +615,54 @@
   },
   "components.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
+  },
+  "components.DeploymentResourcesStateComponent.createdContainers": {
+    "defaultMessage": "Created containers"
+  },
+  "components.DeploymentResourcesStateComponent.createdDeviceMappings": {
+    "defaultMessage": "Created device mappings"
+  },
+  "components.DeploymentResourcesStateComponent.createdImages": {
+    "defaultMessage": "Created images"
+  },
+  "components.DeploymentResourcesStateComponent.createdNetworks": {
+    "defaultMessage": "Created networks"
+  },
+  "components.DeploymentResourcesStateComponent.createdVolumes": {
+    "defaultMessage": "Created volumes"
+  },
+  "components.DeploymentResourcesStateComponent.initial": {
+    "defaultMessage": "Initial"
+  },
+  "components.DeploymentResourcesStateComponent.ready": {
+    "defaultMessage": "Ready"
+  },
+  "components.DeploymentStateComponent.deleting": {
+    "defaultMessage": "Deleting"
+  },
+  "components.DeploymentStateComponent.deploying": {
+    "defaultMessage": "Deploying"
+  },
+  "components.DeploymentStateComponent.error": {
+    "defaultMessage": "Error"
+  },
+  "components.DeploymentStateComponent.pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.DeploymentStateComponent.sent": {
+    "defaultMessage": "Sent"
+  },
+  "components.DeploymentStateComponent.started": {
+    "defaultMessage": "Started"
+  },
+  "components.DeploymentStateComponent.starting": {
+    "defaultMessage": "Starting"
+  },
+  "components.DeploymentStateComponent.stopped": {
+    "defaultMessage": "Stopped"
+  },
+  "components.DeploymentStateComponent.stopping": {
+    "defaultMessage": "Stopping"
   },
   "components.DeploymentTargetsTable.completionTimestampTitle": {
     "defaultMessage": "Completed at",

@@ -29,10 +29,9 @@ import type {
 import type { ReleaseDevicesTable_PaginationQuery } from "api/__generated__/ReleaseDevicesTable_PaginationQuery.graphql";
 
 import ConnectionStatus from "components/ConnectionStatus";
-import {
-  DeploymentState,
-  DeploymentStateComponent,
-} from "components/DeployedApplicationsTable";
+import DeploymentStateComponent, {
+  type DeploymentState,
+} from "components/DeploymentState";
 import InfiniteScroll from "components/InfiniteScroll";
 import InfiniteTable from "components/InfiniteTable";
 import { createColumnHelper } from "components/Table";
