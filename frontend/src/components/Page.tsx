@@ -167,6 +167,8 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.networksNew:
         return [{ route: Route.networks }, currentRoute];
 
+      case Route.deploymentCampaignsEdit:
+        return [{ route: Route.deploymentCampaigns }, currentRoute];
       default:
         return [];
     }
