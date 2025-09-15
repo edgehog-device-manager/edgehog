@@ -29,10 +29,9 @@ import type {
 } from "api/__generated__/DeploymentsTable_DeploymentFragment.graphql";
 import type { DeploymentsTable_PaginationQuery } from "api/__generated__/DeploymentsTable_PaginationQuery.graphql";
 
-import {
-  DeploymentState,
-  DeploymentStateComponent,
-} from "components/DeployedApplicationsTable";
+import DeploymentStateComponent, {
+  type DeploymentState,
+} from "components/DeploymentState";
 import InfiniteTable from "components/InfiniteTable";
 import { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
