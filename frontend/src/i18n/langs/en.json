@@ -1351,6 +1351,30 @@
   "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
   },
+  "forms.DeploymentCampaignForm.deploymentChannelLabel": {
+    "defaultMessage": "Deployment Channel"
+  },
+  "forms.DeploymentCampaignForm.outcomeLabel": {
+    "defaultMessage": "Outcome"
+  },
+  "forms.DeploymentCampaignForm.releaseLabel": {
+    "defaultMessage": "Release"
+  },
+  "forms.DeploymentCampaignForm.rolloutMechanism.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "forms.DeploymentCampaignForm.rolloutMechanism.maxInProgressDeploymentsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.DeploymentCampaignForm.rolloutMechanism.otaRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.DeploymentCampaignForm.rolloutMechanism.otaRequestTimeoutSeconds": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.DeploymentCampaignForm.statusLabel": {
+    "defaultMessage": "Status"
+  },
   "forms.UpdateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
@@ -1843,6 +1867,12 @@
   },
   "pages.Channels.title": {
     "defaultMessage": "Channels"
+  },
+  "pages.DeploymentCampaign.deploymentCampaignNotFound.message": {
+    "defaultMessage": "Return to the Deployment Campaign list."
+  },
+  "pages.DeploymentCampaign.deploymentCampaignNotFound.title": {
+    "defaultMessage": "Deployment Campaign not found."
   },
   "pages.DeploymentCampaigns.createButton": {
     "defaultMessage": "Create Campaign"

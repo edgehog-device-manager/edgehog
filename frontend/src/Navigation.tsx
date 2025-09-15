@@ -128,7 +128,6 @@ const matchingParametricRoute = (
     case Route.deployments:
     case Route.deploymentCampaigns:
     case Route.deploymentCampaignsNew:
-    case Route.deploymentCampaignsEdit:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -260,6 +259,13 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { networkId: params.networkId },
+          }
+        : null;
+    case Route.deploymentCampaignsEdit:
+      return params && typeof params["deploymentCampaignId"] === "string"
+        ? {
+            route,
+            params: { deploymentCampaignId: params.deploymentCampaignId },
           }
         : null;
   }
