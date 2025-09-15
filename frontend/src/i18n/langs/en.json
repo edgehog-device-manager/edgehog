@@ -127,7 +127,7 @@
     "description": "Title for the Application State column of the application devices table"
   },
   "components.ApplicationDevicesTable.nameTitle": {
-    "defaultMessage": "Name",
+    "defaultMessage": "Device Name",
     "description": "Title for the Name column of the application devices table"
   },
   "components.ApplicationDevicesTable.releaseVersionTitle": {

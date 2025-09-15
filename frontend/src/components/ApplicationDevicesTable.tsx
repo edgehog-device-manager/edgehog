@@ -116,7 +116,7 @@ const ApplicationDevicesTable = ({
       header: () => (
         <FormattedMessage
           id="components.ApplicationDevicesTable.nameTitle"
-          defaultMessage="Name"
+          defaultMessage="Device Name"
           description="Title for the Name column of the application devices table"
         />
       ),
