@@ -298,6 +298,9 @@
   "components.ContainersTable.cpuRealtimeRuntimeLabel": {
     "defaultMessage": "CPU Realtime Runtime (in microseconds)"
   },
+  "components.ContainersTable.deviceMappingsLabel": {
+    "defaultMessage": "Device Mappings"
+  },
   "components.ContainersTable.envLabel": {
     "defaultMessage": "Environment (JSON String)"
   },
@@ -348,6 +351,9 @@
   },
   "components.ContainersTable.noContainers": {
     "defaultMessage": "No containers available."
+  },
+  "components.ContainersTable.noDeviceMappings": {
+    "defaultMessage": "No device mappings assigned."
   },
   "components.ContainersTable.noNetworks": {
     "defaultMessage": "No networks assigned."
@@ -1173,6 +1179,9 @@
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
+  "forms.CreateRelease.addDeviceMappingButton": {
+    "defaultMessage": "Add Device Mapping"
+  },
   "forms.CreateRelease.addExtraHostButton": {
     "defaultMessage": "Add Extra Host"
   },
@@ -1184,6 +1193,9 @@
   },
   "forms.CreateRelease.capDropLabel": {
     "defaultMessage": "Cap Drop"
+  },
+  "forms.CreateRelease.cgroupPermissionsLabel": {
+    "defaultMessage": "Container Group Permissions"
   },
   "forms.CreateRelease.confirmButton": {
     "defaultMessage": "Confirm"
@@ -1208,6 +1220,9 @@
   },
   "forms.CreateRelease.cpuRealtimeRuntimeLabel": {
     "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.CreateRelease.deviceMappingsLabel": {
+    "defaultMessage": "Device Mappings"
   },
   "forms.CreateRelease.envLabel": {
     "defaultMessage": "Environment (JSON String)"
@@ -1247,6 +1262,12 @@
   },
   "forms.CreateRelease.noVolumesMessage": {
     "defaultMessage": "No volumes available"
+  },
+  "forms.CreateRelease.pathInContainerLabel": {
+    "defaultMessage": "Path In Container"
+  },
+  "forms.CreateRelease.pathOnHostLabel": {
+    "defaultMessage": "Path On Host"
   },
   "forms.CreateRelease.portBindingsLabel": {
     "defaultMessage": "Port Bindings"

@@ -38,6 +38,7 @@ import Row from "components/Row";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import MultiSelect from "./MultiSelect";
 import InfiniteScroll from "./InfiniteScroll";
+import Icon from "components/Icon";
 
 const CONTAINERS_TO_LOAD_NEXT = 5;
 
@@ -117,6 +118,16 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
                   driver
                   options
                 }
+              }
+            }
+          }
+          deviceMappings {
+            edges {
+              node {
+                id
+                pathInContainer
+                pathOnHost
+                cgroupPermissions
               }
             }
           }
@@ -432,6 +443,120 @@ const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
                       readonly={true}
                       initialLines={1}
                     />
+                  </FormRow>
+                </div>
+              </Collapse>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+};
+
+type DeviceMappingDetailsProps = {
+  deviceMappings: NonNullable<
+    ContainersTable_ContainerFragment$data["containers"]["edges"]
+  >[number]["node"]["deviceMappings"];
+  containerIndex: number;
+};
+
+const DeviceMappingDetails = ({
+  deviceMappings,
+  containerIndex,
+}: DeviceMappingDetailsProps) => {
+  const [openDeviceMappingIndexes, setOpenDeviceMappingIndexes] = useState<
+    number[]
+  >(deviceMappings.edges?.map((_, index) => index) ?? []);
+
+  const toggleDeviceMapping = (index: number) => {
+    setOpenDeviceMappingIndexes((current) =>
+      current.includes(index)
+        ? current.filter((i) => i !== index)
+        : [...current, index],
+    );
+  };
+
+  const lastPathElement = (path: string) => {
+    const pathElements = path.split("/");
+    return pathElements[pathElements.length - 1];
+  };
+
+  return (
+    <div className="mt-3">
+      <h5>
+        <FormattedMessage
+          id="components.ContainersTable.deviceMappingsLabel"
+          defaultMessage="Device Mappings"
+        />
+      </h5>
+
+      {!deviceMappings?.edges?.length ? (
+        <p className="fst-italic">
+          <FormattedMessage
+            id="components.ContainersTable.noDeviceMappings"
+            defaultMessage="No device mappings assigned."
+          />
+        </p>
+      ) : (
+        deviceMappings.edges.map((deviceMappingEdge, dmIndex) => {
+          const dmNode = deviceMappingEdge.node;
+          const isOpen = openDeviceMappingIndexes.includes(dmIndex);
+
+          return (
+            <div
+              key={dmNode?.id ?? dmIndex}
+              className="mb-2 border rounded bg-light"
+            >
+              <Button
+                variant="light"
+                className="w-100 d-flex align-items-center fw-bold"
+                onClick={() => toggleDeviceMapping(dmIndex)}
+                aria-expanded={isOpen}
+              >
+                {lastPathElement(dmNode?.pathInContainer)}
+                <Icon
+                  icon={isOpen ? "caretUp" : "caretDown"}
+                  className="ms-auto"
+                />
+              </Button>
+
+              <Collapse in={isOpen}>
+                <div className="p-2 border-top">
+                  <FormRow
+                    id={`containers-${containerIndex}-deviceMapping-${dmIndex}-pathInContainer`}
+                    label={
+                      <FormattedMessage
+                        id="forms.CreateRelease.pathInContainerLabel"
+                        defaultMessage="Path In Container"
+                      />
+                    }
+                  >
+                    <Form.Control value={dmNode.pathInContainer} readOnly />
+                  </FormRow>
+
+                  <FormRow
+                    id={`containers-${containerIndex}-deviceMapping-${dmIndex}-pathOnHost`}
+                    label={
+                      <FormattedMessage
+                        id="forms.CreateRelease.pathOnHostLabel"
+                        defaultMessage="Path On Host"
+                      />
+                    }
+                  >
+                    <Form.Control value={dmNode.pathOnHost} readOnly />
+                  </FormRow>
+
+                  <FormRow
+                    id={`containers-${containerIndex}-deviceMapping-${dmIndex}-cgroupPermissions`}
+                    label={
+                      <FormattedMessage
+                        id="forms.CreateRelease.cgroupPermissionsLabel"
+                        defaultMessage="Container Group Permissions"
+                      />
+                    }
+                  >
+                    <Form.Control value={dmNode.cgroupPermissions} readOnly />
                   </FormRow>
                 </div>
               </Collapse>
@@ -783,6 +908,10 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
       <NetworkDetails networks={container.networks} containerIndex={index} />
       <VolumeDetails
         containerVolumes={container.containerVolumes}
+        containerIndex={index}
+      />
+      <DeviceMappingDetails
+        deviceMappings={container.deviceMappings}
         containerIndex={index}
       />
     </div>

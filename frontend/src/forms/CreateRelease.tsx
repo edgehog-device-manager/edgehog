@@ -30,6 +30,7 @@ import type { CreateRelease_NetworksOptionsFragment$key } from "api/__generated_
 import type { CreateRelease_VolumesOptionsFragment$key } from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
 import type { CreateRelease_SystemModelsOptionsFragment$key } from "api/__generated__/CreateRelease_SystemModelsOptionsFragment.graphql";
 import {
+  ContainerCreateWithNestedDeviceMappingsInput,
   ContainerCreateWithNestedNetworksInput,
   ContainerCreateWithNestedVolumesInput,
   ReleaseCreateRequiredSystemModelsInput,
@@ -181,6 +182,16 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
                           }
                         }
                       }
+                      deviceMappings {
+                        edges {
+                          node {
+                            id
+                            pathInContainer
+                            pathOnHost
+                            cgroupPermissions
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -269,6 +280,7 @@ type ContainerInput = {
   capDrop?: string[];
   volumeDriver?: string;
   volumes?: ContainerCreateWithNestedVolumesInput[];
+  deviceMappings?: ContainerCreateWithNestedDeviceMappingsInput[];
 };
 
 type ReleaseInputData = {
@@ -473,6 +485,26 @@ const applicationSchema = (intl: any) =>
                   .required(),
               )
               .nullable(),
+            deviceMappings: yup
+              .array(
+                yup
+                  .object({
+                    pathInContainer: yup
+                      .string()
+                      .transform((value) => value?.trim())
+                      .required(),
+                    pathOnHost: yup
+                      .string()
+                      .transform((value) => value?.trim())
+                      .required(),
+                    cgroupPermissions: yup
+                      .string()
+                      .transform((value) => value?.trim())
+                      .required(),
+                  })
+                  .required(),
+              )
+              .nullable(),
           }),
         )
         .nullable(),
@@ -545,6 +577,25 @@ const ContainerForm = ({
 
   const canAddVolume = volumesValues.every(
     (v) => v.id?.trim() && v.target?.trim(),
+  );
+
+  const deviceMappingsForm = useFieldArray({
+    control,
+    name: `containers.${index}.deviceMappings`,
+    keyName: "id",
+  });
+
+  const deviceMappingsValues: ContainerCreateWithNestedDeviceMappingsInput[] =
+    useWatch({
+      control,
+      name: `containers.${index}.deviceMappings`,
+    }) ?? [];
+
+  const canAddDeviceMapping = deviceMappingsValues.every(
+    (dm) =>
+      dm.pathInContainer?.trim() &&
+      dm.pathOnHost?.trim() &&
+      dm.cgroupPermissions?.trim(),
   );
 
   return (
@@ -1402,6 +1453,130 @@ const ContainerForm = ({
           </Form.Control.Feedback>
         </FormRow>
 
+        <FormRow
+          id={`containers-${index}-deviceMappings`}
+          label={
+            <FormattedMessage
+              id="forms.CreateRelease.deviceMappingsLabel"
+              defaultMessage="Device Mappings"
+            />
+          }
+        >
+          <div className="p-3 mb-3 bg-light border rounded">
+            <Stack gap={3}>
+              {deviceMappingsForm.fields.map((deviceMapping, dmIndex) => {
+                const fieldErrors =
+                  errors.containers?.[index]?.deviceMappings?.[dmIndex];
+
+                return (
+                  <Stack
+                    direction="horizontal"
+                    gap={3}
+                    key={`stack1-deviceMapping-${dmIndex}`}
+                    className="align-items-start"
+                  >
+                    <Form.Group id={`containers-${index}-pathInContainer`}>
+                      <Form.Label>
+                        <FormattedMessage
+                          id="forms.CreateRelease.pathInContainerLabel"
+                          defaultMessage="Path In Container"
+                        />
+                      </Form.Label>
+                      <Form.Control
+                        {...register(
+                          `containers.${index}.deviceMappings.${dmIndex}.pathInContainer` as const,
+                        )}
+                        placeholder="e.g., /dev/net/1"
+                        isInvalid={!!fieldErrors?.pathInContainer}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {fieldErrors?.pathInContainer?.message && (
+                          <FormattedMessage
+                            id={fieldErrors.pathInContainer.message}
+                          />
+                        )}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group id={`containers-${index}-pathOnHost`}>
+                      <Form.Label>
+                        <FormattedMessage
+                          id="forms.CreateRelease.pathOnHostLabel"
+                          defaultMessage="Path On Host"
+                        />
+                      </Form.Label>
+                      <Form.Control
+                        {...register(
+                          `containers.${index}.deviceMappings.${dmIndex}.pathOnHost` as const,
+                        )}
+                        placeholder="e.g., /dev/net/1"
+                        isInvalid={!!fieldErrors?.pathOnHost}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {fieldErrors?.pathOnHost?.message && (
+                          <FormattedMessage
+                            id={fieldErrors.pathOnHost.message}
+                          />
+                        )}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group id={`containers-${index}-cgroupPermissions`}>
+                      <Form.Label>
+                        <FormattedMessage
+                          id="forms.CreateRelease.cgroupPermissionsLabel"
+                          defaultMessage="Container Group Permissions"
+                        />
+                      </Form.Label>
+                      <Form.Control
+                        {...register(
+                          `containers.${index}.deviceMappings.${dmIndex}.cgroupPermissions` as const,
+                        )}
+                        placeholder="e.g., mrw"
+                        isInvalid={!!fieldErrors?.cgroupPermissions}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {fieldErrors?.cgroupPermissions?.message && (
+                          <FormattedMessage
+                            id={fieldErrors.cgroupPermissions.message}
+                          />
+                        )}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Button
+                      variant="shadow-danger"
+                      type="button"
+                      onClick={() => deviceMappingsForm.remove(dmIndex)}
+                    >
+                      <Icon className="text-danger" icon={"delete"} />
+                    </Button>
+                  </Stack>
+                );
+              })}
+
+              <div>
+                <Button
+                  variant="outline-primary"
+                  onClick={() =>
+                    deviceMappingsForm.append({
+                      pathOnHost: "",
+                      pathInContainer: "",
+                      cgroupPermissions: "",
+                    })
+                  }
+                  disabled={!canAddDeviceMapping}
+                >
+                  <FormattedMessage
+                    id="forms.CreateRelease.addDeviceMappingButton"
+                    defaultMessage="Add Device Mapping"
+                  />
+                </Button>
+              </div>
+            </Stack>
+          </div>
+        </FormRow>
+
         <div className="d-flex justify-content-start align-items-center">
           <Button
             variant="danger"
@@ -1560,6 +1735,7 @@ const CreateRelease = ({
               capDrop: container.capDrop?.length
                 ? container.capDrop
                 : undefined,
+              deviceMappings: container.deviceMappings || undefined,
             })),
             requiredSystemModels: data.requiredSystemModels,
           };
@@ -1762,6 +1938,12 @@ const CreateRelease = ({
                     c.containerVolumes?.edges?.map((v: any) => ({
                       id: v.node.volume.id,
                       target: v.node.target,
+                    })) ?? undefined,
+                  deviceMappings:
+                    c.deviceMappings?.edges?.map((dm: any) => ({
+                      pathInContainer: dm.node.pathInContainer,
+                      pathOnHost: dm.node.pathOnHost,
+                      cgroupPermissions: dm.node.cgroupPermissions,
                     })) ?? undefined,
                 };
               }) ?? [];
