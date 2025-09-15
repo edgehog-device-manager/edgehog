@@ -880,6 +880,8 @@ const DeployedApplicationsTable = ({
   );
 };
 
+// TODO: Make dedicated files for these components
+export { DeploymentStateComponent, DeploymentResourcesStateComponent };
+
 export type { DeploymentTableProps, DeploymentState };
-export { DeploymentStateComponent };
 export default DeployedApplicationsTable;

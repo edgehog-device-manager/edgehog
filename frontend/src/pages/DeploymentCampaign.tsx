@@ -45,6 +45,7 @@ import Spinner from "components/Spinner";
 import DeploymentCampaignStatsChart from "components/DeploymentCampaignStatsChart";
 import DeploymentCampaignForm from "forms/DeploymentCampaignForm";
 import { Link, Route } from "Navigation";
+import DeploymentTargetsTabs from "components/DeploymentTargetsTabs";
 
 const GET_DEPLOYMENT_CAMPAIGN_QUERY = graphql`
   query DeploymentCampaign_getDeploymentCampaign_Query(
@@ -55,6 +56,7 @@ const GET_DEPLOYMENT_CAMPAIGN_QUERY = graphql`
       ...DeploymentCampaignForm_DeploymentCampaignFragment
       ...DeploymentCampaignStatsChart_DeploymentCampaignStatsChartFragment
       ...DeploymentCampaign_RefreshFragment
+      ...DeploymentTargetsTabs_DeploymentTargetsFragment
     }
   }
 `;
@@ -168,6 +170,8 @@ const DeploymentCampaignContent = ({
             />
           </Col>
         </Row>
+        <hr className="bg-secondary border-2 border-top border-secondary" />
+        <DeploymentTargetsTabs deploymentCampaignRef={deploymentCampaign} />
       </Page.Main>
     </Page>
   );
