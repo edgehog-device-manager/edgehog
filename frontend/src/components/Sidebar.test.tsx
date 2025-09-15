@@ -28,7 +28,7 @@ const sidebarLinks = [
   ["Devices", "/devices"],
   ["Groups", "/device-groups"],
   ["Update Campaigns", "/update-campaigns"],
-  ["Update Channels", "/update-channels"],
+  ["Channels", "/channels"],
   ["Base Image Collections", "/base-image-collections"],
   ["System Models", "/system-models"],
   ["Hardware Types", "/hardware-types"],

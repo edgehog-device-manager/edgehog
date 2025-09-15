@@ -31,16 +31,16 @@ import MultiSelect from "components/MultiSelect";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
-import { updateChannelHandleSchema, yup, messages } from "forms";
+import { channelHandleSchema, yup, messages } from "forms";
 
-import type { UpdateUpdateChannel_UpdateChannelFragment$key } from "api/__generated__/UpdateUpdateChannel_UpdateChannelFragment.graphql";
+import type { UpdateChannel_ChannelFragment$key } from "api/__generated__/UpdateChannel_ChannelFragment.graphql";
 import type {
-  UpdateUpdateChannel_OptionsFragment$key,
-  UpdateUpdateChannel_OptionsFragment$data,
-} from "api/__generated__/UpdateUpdateChannel_OptionsFragment.graphql";
+  UpdateChannel_OptionsFragment$key,
+  UpdateChannel_OptionsFragment$data,
+} from "api/__generated__/UpdateChannel_OptionsFragment.graphql";
 
 const UPDATE_UPDATE_CHANNEL_FRAGMENT = graphql`
-  fragment UpdateUpdateChannel_UpdateChannelFragment on UpdateChannel {
+  fragment UpdateChannel_ChannelFragment on Channel {
     id
     name
     handle
@@ -49,7 +49,7 @@ const UPDATE_UPDATE_CHANNEL_FRAGMENT = graphql`
         node {
           id
           name
-          updateChannel {
+          channel {
             id
             name
           }
@@ -60,13 +60,13 @@ const UPDATE_UPDATE_CHANNEL_FRAGMENT = graphql`
 `;
 
 const UPDATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
-  fragment UpdateUpdateChannel_OptionsFragment on RootQueryType {
+  fragment UpdateChannel_OptionsFragment on RootQueryType {
     deviceGroups {
       edges {
         node {
           id
           name
-          updateChannel {
+          channel {
             id
             name
           }
@@ -121,21 +121,21 @@ type FormData = {
 };
 
 type TargetGroup = NonNullable<
-  NonNullable<UpdateUpdateChannel_OptionsFragment$data["deviceGroups"]>["edges"]
+  NonNullable<UpdateChannel_OptionsFragment$data["deviceGroups"]>["edges"]
 >[number]["node"];
 
 const getTargetGroupValue = (targetGroup: TargetGroup) => targetGroup.id;
 
-type UpdateChannelData = {
+type ChannelData = {
   name: string;
   handle: string;
   targetGroupIds: string[];
 };
 
-const updateChannelSchema = yup
+const channelSchema = yup
   .object({
     name: yup.string().required(),
-    handle: updateChannelHandleSchema.required(),
+    handle: channelHandleSchema.required(),
     targetGroups: yup.array().ensure().min(1, messages.required.id),
   })
   .required();
@@ -144,30 +144,27 @@ const transformOutputData = ({
   id: _id,
   targetGroups,
   ...rest
-}: FormData): UpdateChannelData => ({
+}: FormData): ChannelData => ({
   ...rest,
   targetGroupIds: targetGroups.map((targetGroup) => targetGroup.id),
 });
 
 type Props = {
-  updateChannelRef: UpdateUpdateChannel_UpdateChannelFragment$key;
-  optionsRef: UpdateUpdateChannel_OptionsFragment$key;
+  channelRef: UpdateChannel_ChannelFragment$key;
+  optionsRef: UpdateChannel_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: UpdateChannelData) => void;
+  onSubmit: (data: ChannelData) => void;
   onDelete: () => void;
 };
 
-const UpdateUpdateChannel = ({
-  updateChannelRef,
+const UpdateChannel = ({
+  channelRef,
   optionsRef,
   isLoading = false,
   onSubmit,
   onDelete,
 }: Props) => {
-  const updateChannel = useFragment(
-    UPDATE_UPDATE_CHANNEL_FRAGMENT,
-    updateChannelRef,
-  );
+  const channel = useFragment(UPDATE_UPDATE_CHANNEL_FRAGMENT, channelRef);
 
   const { deviceGroups: targetGroups } = useFragment(
     UPDATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT,
@@ -183,52 +180,51 @@ const UpdateUpdateChannel = ({
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: {
-      ...updateChannel,
-      targetGroups: updateChannel.targetGroups.edges?.map((edge) => edge.node),
+      ...channel,
+      targetGroups: channel.targetGroups.edges?.map((edge) => edge.node),
     },
-    resolver: yupResolver(updateChannelSchema),
+    resolver: yupResolver(channelSchema),
   });
 
   useEffect(() => {
     reset({
-      ...updateChannel,
-      targetGroups: updateChannel.targetGroups.edges?.map((edge) => edge.node),
+      ...channel,
+      targetGroups: channel.targetGroups.edges?.map((edge) => edge.node),
     });
-  }, [reset, updateChannel]);
+  }, [reset, channel]);
 
   const intl = useIntl();
 
   const getTargetGroupLabel = useCallback(
     (targetGroup: TargetGroup) => {
       if (
-        targetGroup.updateChannel === null ||
-        targetGroup.updateChannel.id === updateChannel.id
+        targetGroup.channel === null ||
+        targetGroup.channel.id === channel.id
       ) {
         return targetGroup.name;
       }
       return intl.formatMessage(
         {
-          id: "forms.UpdateUpdateChannel.targetGroupWithChannelLabel",
-          defaultMessage: "{targetGroupName} (used for {updateChannelName})",
+          id: "forms.UpdateChannel.targetGroupWithChannelLabel",
+          defaultMessage: "{targetGroupName} (used for {channelName})",
           description:
             "Target group label of select option with optional update channel name it used for.",
         },
         {
           targetGroupName: targetGroup.name,
-          updateChannelName: targetGroup.updateChannel.name,
+          channelName: targetGroup.channel.name,
         },
       );
     },
-    [intl, updateChannel.id],
+    [intl, channel.id],
   );
   const isTargetGroupUsedByOtherChannel = useCallback(
     (targetGroup: TargetGroup) => {
       return !(
-        targetGroup.updateChannel === null ||
-        targetGroup.updateChannel.id === updateChannel.id
+        targetGroup.channel === null || targetGroup.channel.id === channel.id
       );
     },
-    [updateChannel.id],
+    [channel.id],
   );
 
   const targetGroupOptions = useMemo(() => {
@@ -260,10 +256,10 @@ const UpdateUpdateChannel = ({
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
         <FormRow
-          id="update-update-channel-form-name"
+          id="update-channel-form-name"
           label={
             <FormattedMessage
-              id="forms.UpdateUpdateChannel.nameLabel"
+              id="forms.UpdateChannel.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -276,10 +272,10 @@ const UpdateUpdateChannel = ({
           </Form.Control.Feedback>
         </FormRow>
         <FormRow
-          id="update-update-channel-form-handle"
+          id="update-channel-form-handle"
           label={
             <FormattedMessage
-              id="forms.UpdateUpdateChannel.handleLabel"
+              id="forms.UpdateChannel.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -292,10 +288,10 @@ const UpdateUpdateChannel = ({
           </Form.Control.Feedback>
         </FormRow>
         <FormRow
-          id="update-update-channel-form-target-groups"
+          id="update-channel-form-target-groups"
           label={
             <FormattedMessage
-              id="forms.UpdateUpdateChannel.targetGroupsLabel"
+              id="forms.UpdateChannel.targetGroupsLabel"
               defaultMessage="Target Groups"
             />
           }
@@ -333,7 +329,7 @@ const UpdateUpdateChannel = ({
           <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="forms.UpdateUpdateChannel.submitButton"
+              id="forms.UpdateChannel.submitButton"
               defaultMessage="Update"
             />
           </Button>
@@ -343,13 +339,13 @@ const UpdateUpdateChannel = ({
             onClick={() => reset()}
           >
             <FormattedMessage
-              id="forms.UpdateUpdateChannel.resetButton"
+              id="forms.UpdateChannel.resetButton"
               defaultMessage="Reset"
             />
           </Button>
           <Button variant="danger" onClick={onDelete}>
             <FormattedMessage
-              id="forms.UpdateUpdateChannel.deleteButton"
+              id="forms.UpdateChannel.deleteButton"
               defaultMessage="Delete"
             />
           </Button>
@@ -359,6 +355,6 @@ const UpdateUpdateChannel = ({
   );
 };
 
-export type { UpdateChannelData };
+export type { ChannelData };
 
-export default UpdateUpdateChannel;
+export default UpdateChannel;

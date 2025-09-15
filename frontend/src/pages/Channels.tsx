@@ -24,79 +24,72 @@ import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
-import type { UpdateChannels_getUpdateChannels_Query } from "api/__generated__/UpdateChannels_getUpdateChannels_Query.graphql";
+import type { Channels_getChannels_Query } from "api/__generated__/Channels_getChannels_Query.graphql";
 
 import Button from "components/Button";
 import Center from "components/Center";
-import UpdateChannelsTable from "components/UpdateChannelsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
+import ChannelsTable from "components/ChannelsTable";
 
-const UPDATE_CHANNELS_TO_LOAD_FIRST = 40;
+const CHANNELS_TO_LOAD_FIRST = 40;
 
-const GET_UPDATE_CHANNELS_QUERY = graphql`
-  query UpdateChannels_getUpdateChannels_Query(
+const GET_CHANNELS_QUERY = graphql`
+  query Channels_getChannels_Query(
     $first: Int
     $after: String
-    $filter: UpdateChannelFilterInput
+    $filter: ChannelFilterInput
   ) {
-    ...UpdateChannelsTable_UpdateChannelFragment @arguments(filter: $filter)
+    ...ChannelsTable_ChannelFragment @arguments(filter: $filter)
   }
 `;
 
-type UpdateChannelsContentProps = {
-  getUpdateChannelsQuery: PreloadedQuery<UpdateChannels_getUpdateChannels_Query>;
+type ChannelsContentProps = {
+  getChannelsQuery: PreloadedQuery<Channels_getChannels_Query>;
 };
 
-const UpdateChannelsContent = ({
-  getUpdateChannelsQuery,
-}: UpdateChannelsContentProps) => {
-  const updateChannels = usePreloadedQuery(
-    GET_UPDATE_CHANNELS_QUERY,
-    getUpdateChannelsQuery,
-  );
+const ChannelsContent = ({ getChannelsQuery }: ChannelsContentProps) => {
+  const channels = usePreloadedQuery(GET_CHANNELS_QUERY, getChannelsQuery);
 
   return (
     <Page>
       <Page.Header
         title={
           <FormattedMessage
-            id="pages.UpdateChannels.title"
-            defaultMessage="Update Channels"
+            id="pages.Channels.title"
+            defaultMessage="Channels"
           />
         }
       >
-        <Button as={Link} route={Route.updateChannelsNew}>
+        <Button as={Link} route={Route.channelsNew}>
           <FormattedMessage
-            id="pages.UpdateChannels.createButton"
-            defaultMessage="Create Update Channel"
+            id="pages.Channels.createButton"
+            defaultMessage="Create Channel"
           />
         </Button>
       </Page.Header>
       <Page.Main>
-        <UpdateChannelsTable updateChannelsRef={updateChannels} />
+        <ChannelsTable channelsRef={channels} />
       </Page.Main>
     </Page>
   );
 };
 
-const UpdateChannelsPage = () => {
-  const [getUpdateChannelsQuery, getUpdateChannels] =
-    useQueryLoader<UpdateChannels_getUpdateChannels_Query>(
-      GET_UPDATE_CHANNELS_QUERY,
-    );
+const ChannelsPage = () => {
+  const [getChannelsQuery, getChannels] =
+    useQueryLoader<Channels_getChannels_Query>(GET_CHANNELS_QUERY);
 
-  const fetchUpdateChannels = useCallback(
+  const fetchChannels = useCallback(
     () =>
-      getUpdateChannels(
-        { first: UPDATE_CHANNELS_TO_LOAD_FIRST },
+      getChannels(
+        { first: CHANNELS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
-    [getUpdateChannels],
+    [getChannels],
   );
 
-  useEffect(fetchUpdateChannels, [fetchUpdateChannels]);
+  useEffect(fetchChannels, [fetchChannels]);
 
   return (
     <Suspense
@@ -112,16 +105,14 @@ const UpdateChannelsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchUpdateChannels}
+        onReset={fetchChannels}
       >
-        {getUpdateChannelsQuery && (
-          <UpdateChannelsContent
-            getUpdateChannelsQuery={getUpdateChannelsQuery}
-          />
+        {getChannelsQuery && (
+          <ChannelsContent getChannelsQuery={getChannelsQuery} />
         )}
       </ErrorBoundary>
     </Suspense>
   );
 };
 
-export default UpdateChannelsPage;
+export default ChannelsPage;

@@ -29,27 +29,25 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
-import type { UpdateChannelCreate_getDeviceGroups_Query } from "api/__generated__/UpdateChannelCreate_getDeviceGroups_Query.graphql";
-import type { UpdateChannelCreate_createUpdateChannel_Mutation } from "api/__generated__/UpdateChannelCreate_createUpdateChannel_Mutation.graphql";
+import type { ChannelCreate_getDeviceGroups_Query } from "api/__generated__/ChannelCreate_getDeviceGroups_Query.graphql";
+import type { ChannelCreate_createChannel_Mutation } from "api/__generated__/ChannelCreate_createChannel_Mutation.graphql";
 import Alert from "components/Alert";
 import Center from "components/Center";
-import CreateUpdateChannelForm from "forms/CreateUpdateChannel";
-import type { UpdateChannelData } from "forms/CreateUpdateChannel";
+import CreateChannelForm from "forms/CreateChannel";
+import type { ChannelData } from "forms/CreateChannel";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Route, useNavigate } from "Navigation";
 
 const GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY = graphql`
-  query UpdateChannelCreate_getDeviceGroups_Query {
-    ...CreateUpdateChannel_OptionsFragment
+  query ChannelCreate_getDeviceGroups_Query {
+    ...CreateChannel_OptionsFragment
   }
 `;
 
 const CREATE_UPDATE_CHANNEL_MUTATION = graphql`
-  mutation UpdateChannelCreate_createUpdateChannel_Mutation(
-    $input: CreateUpdateChannelInput!
-  ) {
-    createUpdateChannel(input: $input) {
+  mutation ChannelCreate_createChannel_Mutation($input: CreateChannelInput!) {
+    createChannel(input: $input) {
       result {
         id
       }
@@ -57,36 +55,34 @@ const CREATE_UPDATE_CHANNEL_MUTATION = graphql`
   }
 `;
 
-type UpdateChannelProps = {
-  getCreateUpdateChannelOptionsQuery: PreloadedQuery<UpdateChannelCreate_getDeviceGroups_Query>;
+type ChannelProps = {
+  getCreateChannelOptionsQuery: PreloadedQuery<ChannelCreate_getDeviceGroups_Query>;
 };
 
-const UpdateChannel = ({
-  getCreateUpdateChannelOptionsQuery,
-}: UpdateChannelProps) => {
+const Channel = ({ getCreateChannelOptionsQuery }: ChannelProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
 
-  const updateChannelCreateData = usePreloadedQuery(
+  const channelCreateData = usePreloadedQuery(
     GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY,
-    getCreateUpdateChannelOptionsQuery,
+    getCreateChannelOptionsQuery,
   );
 
-  const [createUpdateChannel, isCreatingUpdateChannel] =
-    useMutation<UpdateChannelCreate_createUpdateChannel_Mutation>(
+  const [createChannel, isCreatingChannel] =
+    useMutation<ChannelCreate_createChannel_Mutation>(
       CREATE_UPDATE_CHANNEL_MUTATION,
     );
 
-  const handleCreateUpdateChannel = useCallback(
-    (updateChannel: UpdateChannelData) => {
-      createUpdateChannel({
-        variables: { input: updateChannel },
+  const handleCreateChannel = useCallback(
+    (channel: ChannelData) => {
+      createChannel({
+        variables: { input: channel },
         onCompleted(data, errors) {
-          const updateChannelId = data?.createUpdateChannel?.result?.id;
-          if (updateChannelId) {
+          const channelId = data?.createChannel?.result?.id;
+          if (channelId) {
             return navigate({
-              route: Route.updateChannelsEdit,
-              params: { updateChannelId },
+              route: Route.channelsEdit,
+              params: { channelId },
             });
           }
           if (errors) {
@@ -101,32 +97,29 @@ const UpdateChannel = ({
         onError() {
           setErrorFeedback(
             <FormattedMessage
-              id="pages.UpdateChannelCreate.creationErrorFeedback"
-              defaultMessage="Could not create the Update Channel, please try again."
+              id="pages.ChannelCreate.creationErrorFeedback"
+              defaultMessage="Could not create the Channel, please try again."
             />,
           );
         },
         updater(store, data) {
-          if (!data?.createUpdateChannel?.result) {
+          if (!data?.createChannel?.result) {
             return;
           }
 
-          const updateChannel = store
-            .getRootField("createUpdateChannel")
+          const channel = store
+            .getRootField("createChannel")
             .getLinkedRecord("result");
           const root = store.getRoot();
 
-          const updateChannels = root.getLinkedRecords("updateChannels");
-          if (updateChannels) {
-            root.setLinkedRecords(
-              [...updateChannels, updateChannel],
-              "updateChannels",
-            );
+          const channels = root.getLinkedRecords("channels");
+          if (channels) {
+            root.setLinkedRecords([...channels, channel], "channels");
           }
         },
       });
     },
-    [createUpdateChannel, navigate],
+    [createChannel, navigate],
   );
 
   return (
@@ -134,8 +127,8 @@ const UpdateChannel = ({
       <Page.Header
         title={
           <FormattedMessage
-            id="pages.UpdateChannelCreate.title"
-            defaultMessage="Create Update Channel"
+            id="pages.ChannelCreate.title"
+            defaultMessage="Create Channel"
           />
         }
       />
@@ -148,28 +141,28 @@ const UpdateChannel = ({
         >
           {errorFeedback}
         </Alert>
-        <CreateUpdateChannelForm
-          queryRef={updateChannelCreateData}
-          onSubmit={handleCreateUpdateChannel}
-          isLoading={isCreatingUpdateChannel}
+        <CreateChannelForm
+          queryRef={channelCreateData}
+          onSubmit={handleCreateChannel}
+          isLoading={isCreatingChannel}
         />
       </Page.Main>
     </Page>
   );
 };
 
-const UpdateChannelCreatePage = () => {
-  const [getCreateUpdateChannelOptionsQuery, getCreateUpdateChannelOptions] =
-    useQueryLoader<UpdateChannelCreate_getDeviceGroups_Query>(
+const ChannelCreatePage = () => {
+  const [getCreateChannelOptionsQuery, getCreateChannelOptions] =
+    useQueryLoader<ChannelCreate_getDeviceGroups_Query>(
       GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY,
     );
 
-  const fetchCreateUpdateChannelOptions = useCallback(
-    () => getCreateUpdateChannelOptions({}, { fetchPolicy: "network-only" }),
-    [getCreateUpdateChannelOptions],
+  const fetchCreateChannelOptions = useCallback(
+    () => getCreateChannelOptions({}, { fetchPolicy: "network-only" }),
+    [getCreateChannelOptions],
   );
 
-  useEffect(fetchCreateUpdateChannelOptions, [fetchCreateUpdateChannelOptions]);
+  useEffect(fetchCreateChannelOptions, [fetchCreateChannelOptions]);
 
   return (
     <Suspense
@@ -185,13 +178,11 @@ const UpdateChannelCreatePage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchCreateUpdateChannelOptions}
+        onReset={fetchCreateChannelOptions}
       >
-        {getCreateUpdateChannelOptionsQuery && (
-          <UpdateChannel
-            getCreateUpdateChannelOptionsQuery={
-              getCreateUpdateChannelOptionsQuery
-            }
+        {getCreateChannelOptionsQuery && (
+          <Channel
+            getCreateChannelOptionsQuery={getCreateChannelOptionsQuery}
           />
         )}
       </ErrorBoundary>
@@ -199,4 +190,4 @@ const UpdateChannelCreatePage = () => {
   );
 };
 
-export default UpdateChannelCreatePage;
+export default ChannelCreatePage;

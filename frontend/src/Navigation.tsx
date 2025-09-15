@@ -47,9 +47,9 @@ enum Route {
   baseImageCollectionsEdit = "/base-image-collections/:baseImageCollectionId/edit",
   baseImagesNew = "/base-image-collections/:baseImageCollectionId/base-images/new",
   baseImagesEdit = "/base-image-collections/:baseImageCollectionId/base-images/:baseImageId/edit",
-  updateChannels = "/update-channels",
-  updateChannelsEdit = "/update-channels/:updateChannelId/edit",
-  updateChannelsNew = "/update-channels/new",
+  channels = "/channels",
+  channelsEdit = "/channels/:channelId/edit",
+  channelsNew = "/channels/new",
   updateCampaigns = "/update-campaigns",
   updateCampaignsNew = "/update-campaigns/new",
   updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
@@ -113,8 +113,8 @@ const matchingParametricRoute = (
     case Route.hardwareTypesNew:
     case Route.baseImageCollections:
     case Route.baseImageCollectionsNew:
-    case Route.updateChannels:
-    case Route.updateChannelsNew:
+    case Route.channels:
+    case Route.channelsNew:
     case Route.updateCampaigns:
     case Route.updateCampaignsNew:
     case Route.applications:
@@ -194,11 +194,11 @@ const matchingParametricRoute = (
           }
         : null;
 
-    case Route.updateChannelsEdit:
-      return params && typeof params["updateChannelId"] === "string"
+    case Route.channelsEdit:
+      return params && typeof params["channelId"] === "string"
         ? {
             route,
-            params: { updateChannelId: params.updateChannelId },
+            params: { channelId: params.channelId },
           }
         : null;
 
@@ -368,17 +368,17 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
     id: "navigation.routeTitle.BaseImagesEdit",
     defaultMessage: "Base Image Details",
   },
-  [Route.updateChannels]: {
-    id: "navigation.routeTitle.UpdateChannels",
-    defaultMessage: "Update Channels",
+  [Route.channels]: {
+    id: "navigation.routeTitle.Channels",
+    defaultMessage: "Channels",
   },
-  [Route.updateChannelsNew]: {
-    id: "navigation.routeTitle.UpdateChannelsNew",
-    defaultMessage: "Create Update Channel",
+  [Route.channelsNew]: {
+    id: "navigation.routeTitle.ChannelsNew",
+    defaultMessage: "Create Channel",
   },
-  [Route.updateChannelsEdit]: {
-    id: "navigation.routeTitle.UpdateChannelsEdit",
-    defaultMessage: "Update Channel Details",
+  [Route.channelsEdit]: {
+    id: "navigation.routeTitle.ChannelsEdit",
+    defaultMessage: "Channel Details",
   },
   [Route.updateCampaigns]: {
     id: "navigation.routeTitle.UpdateCampaigns",

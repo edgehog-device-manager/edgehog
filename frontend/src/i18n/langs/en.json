@@ -258,6 +258,18 @@
   "components.CellularConnectionTabs.Modem.technology": {
     "defaultMessage": "Technology"
   },
+  "components.ChannelsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the channels table"
+  },
+  "components.ChannelsTable.nameTitle": {
+    "defaultMessage": "Channel Name",
+    "description": "Title for the Name column of the channels table"
+  },
+  "components.ChannelsTable.targetGroupsTitle": {
+    "defaultMessage": "Target Groups",
+    "description": "Title for the Target Groups column of the channels table"
+  },
   "components.ConfirmModal.cancelButton": {
     "defaultMessage": "Cancel",
     "description": "Title for the button to cancel and dismiss a confirmation modal"
@@ -875,6 +887,9 @@
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
   },
+  "components.Sidebar.ChannelsLabel": {
+    "defaultMessage": "Channels"
+  },
   "components.Sidebar.applications.applicationsLabel": {
     "defaultMessage": "Applications"
   },
@@ -913,9 +928,6 @@
   },
   "components.Sidebar.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
-  },
-  "components.Sidebar.updateChannelsLabel": {
-    "defaultMessage": "Update Channels"
   },
   "components.Sidebar.volumes.volumesLabel": {
     "defaultMessage": "Volumes"
@@ -973,6 +985,10 @@
     "defaultMessage": "Base Image",
     "description": "Title for the Base Image column of the Update Campaigns table"
   },
+  "components.UpdateCampaignsTable.channelNameTitle": {
+    "defaultMessage": "Channel",
+    "description": "Title for the Channel column of the Update Campaigns table"
+  },
   "components.UpdateCampaignsTable.nameTitle": {
     "defaultMessage": "Update Campaign Name",
     "description": "Title for the Name column of the Update Campaigns table"
@@ -982,22 +998,6 @@
   },
   "components.UpdateCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
-  },
-  "components.UpdateCampaignsTable.updateChannelNameTitle": {
-    "defaultMessage": "Update Channel",
-    "description": "Title for the Update Channel column of the Update Campaigns table"
-  },
-  "components.UpdateChannelsTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the update channels table"
-  },
-  "components.UpdateChannelsTable.nameTitle": {
-    "defaultMessage": "Update Channel Name",
-    "description": "Title for the Name column of the update channels table"
-  },
-  "components.UpdateChannelsTable.targetGroupsTitle": {
-    "defaultMessage": "Target Groups",
-    "description": "Title for the Target Groups column of the update channels table"
   },
   "components.UpdateTargetsTable.completionTimestampTitle": {
     "defaultMessage": "Completed at",
@@ -1154,6 +1154,22 @@
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateChannel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateChannel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateChannel.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateChannel.targetGroupWithChannelLabel": {
+    "defaultMessage": "{targetGroupName} (used for {channelName})",
+    "description": "Target group label of select option with optional channel name it used for."
+  },
+  "forms.CreateChannel.targetGroupsLabel": {
+    "defaultMessage": "Target Groups"
+  },
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
@@ -1301,6 +1317,12 @@
   "forms.CreateUpdateCampaign.baseImageLabel": {
     "defaultMessage": "Base Image"
   },
+  "forms.CreateUpdateCampaign.channelLabel": {
+    "defaultMessage": "Channel"
+  },
+  "forms.CreateUpdateCampaign.channelOption": {
+    "defaultMessage": "Select a Channel"
+  },
   "forms.CreateUpdateCampaign.forceDowngradeLabel": {
     "defaultMessage": "Force Downgrade"
   },
@@ -1324,28 +1346,6 @@
   },
   "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
-  },
-  "forms.CreateUpdateCampaign.updateChannelLabel": {
-    "defaultMessage": "Update Channel"
-  },
-  "forms.CreateUpdateCampaign.updateChannelOption": {
-    "defaultMessage": "Select an Update Channel"
-  },
-  "forms.CreateUpdateChannel.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "forms.CreateUpdateChannel.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "forms.CreateUpdateChannel.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "forms.CreateUpdateChannel.targetGroupWithChannelLabel": {
-    "defaultMessage": "{targetGroupName} (used for {updateChannelName})",
-    "description": "Target group label of select option with optional update channel name it used for."
-  },
-  "forms.CreateUpdateChannel.targetGroupsLabel": {
-    "defaultMessage": "Target Groups"
   },
   "forms.UpdateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -1401,6 +1401,9 @@
   "forms.UpdateCampaignForm.baseImageLabel": {
     "defaultMessage": "Base Image"
   },
+  "forms.UpdateCampaignForm.channelLabel": {
+    "defaultMessage": "Channel"
+  },
   "forms.UpdateCampaignForm.outcomeLabel": {
     "defaultMessage": "Outcome"
   },
@@ -1422,8 +1425,27 @@
   "forms.UpdateCampaignForm.statusLabel": {
     "defaultMessage": "Status"
   },
-  "forms.UpdateCampaignForm.updateChannelLabel": {
-    "defaultMessage": "Update Channel"
+  "forms.UpdateChannel.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateChannel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateChannel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateChannel.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateChannel.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "forms.UpdateChannel.targetGroupWithChannelLabel": {
+    "defaultMessage": "{targetGroupName} (used for {channelName})",
+    "description": "Target group label of select option with optional update channel name it used for."
+  },
+  "forms.UpdateChannel.targetGroupsLabel": {
+    "defaultMessage": "Target Groups"
   },
   "forms.UpdateDeviceGroup.deleteButton": {
     "defaultMessage": "Delete"
@@ -1500,28 +1522,6 @@
   "forms.UpdateSystemModel.submitButton": {
     "defaultMessage": "Update"
   },
-  "forms.UpdateUpdateChannel.deleteButton": {
-    "defaultMessage": "Delete"
-  },
-  "forms.UpdateUpdateChannel.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "forms.UpdateUpdateChannel.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "forms.UpdateUpdateChannel.resetButton": {
-    "defaultMessage": "Reset"
-  },
-  "forms.UpdateUpdateChannel.submitButton": {
-    "defaultMessage": "Update"
-  },
-  "forms.UpdateUpdateChannel.targetGroupWithChannelLabel": {
-    "defaultMessage": "{targetGroupName} (used for {updateChannelName})",
-    "description": "Target group label of select option with optional update channel name it used for."
-  },
-  "forms.UpdateUpdateChannel.targetGroupsLabel": {
-    "defaultMessage": "Target Groups"
-  },
   "froms.CreateUpdateCampaign.submitButton": {
     "defaultMessage": "Create"
   },
@@ -1590,6 +1590,15 @@
   },
   "navigation.routeTitle.BaseImagesNew": {
     "defaultMessage": "Create Base Image"
+  },
+  "navigation.routeTitle.Channels": {
+    "defaultMessage": "Channels"
+  },
+  "navigation.routeTitle.ChannelsEdit": {
+    "defaultMessage": "Channel Details"
+  },
+  "navigation.routeTitle.ChannelsNew": {
+    "defaultMessage": "Create Channel"
   },
   "navigation.routeTitle.DeploymentCampaigns": {
     "defaultMessage": "Campaigns"
@@ -1674,15 +1683,6 @@
   },
   "navigation.routeTitle.UpdateCampaignsNew": {
     "defaultMessage": "Create Update Campaign"
-  },
-  "navigation.routeTitle.UpdateChannels": {
-    "defaultMessage": "Update Channels"
-  },
-  "navigation.routeTitle.UpdateChannelsEdit": {
-    "defaultMessage": "Update Channel Details"
-  },
-  "navigation.routeTitle.UpdateChannelsNew": {
-    "defaultMessage": "Create Update Channel"
   },
   "navigation.routeTitle.VolumeEdit": {
     "defaultMessage": "Volume Details"
@@ -1807,6 +1807,38 @@
   },
   "pages.Campaigns.title": {
     "defaultMessage": "Campaigns"
+  },
+  "pages.Channel.channelNotFound.message": {
+    "defaultMessage": "Return to the Channel list."
+  },
+  "pages.Channel.channelNotFound.title": {
+    "defaultMessage": "Channel not found."
+  },
+  "pages.Channel.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Channel <bold>{channel}</bold>.",
+    "description": "Description for the confirmation modal to delete a Channel"
+  },
+  "pages.Channel.deleteModal.title": {
+    "defaultMessage": "Delete Channel",
+    "description": "Title for the confirmation modal to delete a Channel"
+  },
+  "pages.Channel.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Channel, please try again."
+  },
+  "pages.Channel.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Channel, please try again."
+  },
+  "pages.ChannelCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Channel, please try again."
+  },
+  "pages.ChannelCreate.title": {
+    "defaultMessage": "Create Channel"
+  },
+  "pages.Channels.createButton": {
+    "defaultMessage": "Create Channel"
+  },
+  "pages.Channels.title": {
+    "defaultMessage": "Channels"
   },
   "pages.Deployments.title": {
     "defaultMessage": "Deployments"
@@ -2137,14 +2169,14 @@
   "pages.UpdateCampaignCreate.noBaseImageCollection.title": {
     "defaultMessage": "You haven't created any Base Image Collection yet"
   },
-  "pages.UpdateCampaignCreate.noUpdateChannel.createButton": {
-    "defaultMessage": "Create Update Channel"
+  "pages.UpdateCampaignCreate.noChannel.createButton": {
+    "defaultMessage": "Create Channel"
   },
-  "pages.UpdateCampaignCreate.noUpdateChannel.message": {
-    "defaultMessage": "You need at least one Update Channel to create an Update Campaign"
+  "pages.UpdateCampaignCreate.noChannel.message": {
+    "defaultMessage": "You need at least one Channel to create an Update Campaign"
   },
-  "pages.UpdateCampaignCreate.noUpdateChannel.title": {
-    "defaultMessage": "You haven't created any Update Channel yet"
+  "pages.UpdateCampaignCreate.noChannel.title": {
+    "defaultMessage": "You haven't created any Channel yet"
   },
   "pages.UpdateCampaignCreate.title": {
     "defaultMessage": "Create Update Campaign"
@@ -2154,38 +2186,6 @@
   },
   "pages.UpdateCampaigns.title": {
     "defaultMessage": "Update Campaigns"
-  },
-  "pages.UpdateChannel.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the Update Channel <bold>{updateChannel}</bold>.",
-    "description": "Description for the confirmation modal to delete a Update Channel"
-  },
-  "pages.UpdateChannel.deleteModal.title": {
-    "defaultMessage": "Delete Update Channel",
-    "description": "Title for the confirmation modal to delete a Update Channel"
-  },
-  "pages.UpdateChannel.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the Update Channel, please try again."
-  },
-  "pages.UpdateChannel.updateChannelNotFound.message": {
-    "defaultMessage": "Return to the Update Channel list."
-  },
-  "pages.UpdateChannel.updateChannelNotFound.title": {
-    "defaultMessage": "Update Channel not found."
-  },
-  "pages.UpdateChannel.updateErrorFeedback": {
-    "defaultMessage": "Could not update the Update Channel, please try again."
-  },
-  "pages.UpdateChannelCreate.creationErrorFeedback": {
-    "defaultMessage": "Could not create the Update Channel, please try again."
-  },
-  "pages.UpdateChannelCreate.title": {
-    "defaultMessage": "Create Update Channel"
-  },
-  "pages.UpdateChannels.createButton": {
-    "defaultMessage": "Create Update Channel"
-  },
-  "pages.UpdateChannels.title": {
-    "defaultMessage": "Update Channels"
   },
   "pages.Volume.deleteButton": {
     "defaultMessage": "Delete"

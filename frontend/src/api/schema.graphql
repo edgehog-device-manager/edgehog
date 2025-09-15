@@ -19,13 +19,43 @@ input ContainerCreateWithNestedVolumesInput {
 }
 
 input ContainerCreateWithNestedDeviceMappingsInput {
-  pathOnHost: String!
-  pathInContainer: String!
   cgroupPermissions: String!
+  pathInContainer: String!
+  pathOnHost: String!
+}
+
+input DeploymentCampaignDeploymentMechanismLazyInput {
+  """
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressDeployments: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  createRequestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Lazy Deployment Mechanism."
-type LazyDeployment {
+type Lazy {
   """
   The maximum percentage of failures allowed over the number of total targets.
   If the failures exceed this threshold, the Deployment Campaign terminates with
@@ -59,17 +89,17 @@ input UpdateCampaignRolloutMechanismPushInput {
   "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
   maxFailurePercentage: Float
 
-  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
-  otaRequestTimeoutSeconds: Int
-
-  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
-  otaRequestRetries: Int
+  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
+  forceDowngrade: Boolean
 
   "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
   maxInProgressUpdates: Int
 
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean
+  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
+  otaRequestRetries: Int
+
+  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
+  otaRequestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Push Rollout Mechanism."
@@ -210,11 +240,11 @@ type Position {
   source: String
 }
 
-type DeployRolloutMechanismLazy {
-  value: LazyDeployment!
+input DeploymentMechanismInput {
+  lazy: DeploymentCampaignDeploymentMechanismLazyInput
 }
 
-union DeployRolloutMechanism = DeployRolloutMechanismLazy
+union DeploymentMechanism = Lazy
 
 input RolloutMechanismInput {
   push: UpdateCampaignRolloutMechanismPushInput
@@ -1013,25 +1043,25 @@ input ReleaseCreateContainersInput {
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
-  tmpfs: [String!]
-  privileged: Boolean
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
-  portBindings: [String!]
-  restartPolicy: String
-  networkMode: String
-  extraHosts: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
+  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  volumeDriver: String
-  storageOpt: [String!]
+  networkMode: String
+  portBindings: [String!]
+  privileged: Boolean
   readOnlyRootfs: Boolean
+  restartPolicy: String
+  storageOpt: [String!]
+  tmpfs: [String!]
+  volumeDriver: String
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -3827,11 +3857,8 @@ input DeviceGroupFilterInput {
   "The devices belonging to the group."
   devices: DeviceFilterInput
 
-  "The update channel associated with the group, if present."
-  updateChannel: UpdateChannelFilterInput
-
-  "The deployment channel associated with the group, if present."
-  deploymentChannel: DeploymentChannelFilterInput
+  "The channel associated with the group, if present."
+  channel: ChannelFilterInput
 }
 
 input DeviceGroupSortInput {
@@ -3874,11 +3901,8 @@ type DeviceGroup implements Node {
     offset: Int
   ): [Device!]!
 
-  "The update channel associated with the group, if present."
-  updateChannel: UpdateChannel
-
-  "The deployment channel associated with the group, if present."
-  deploymentChannel: DeploymentChannel
+  "The channel associated with the group, if present."
+  channel: Channel
 }
 
 enum TagSortField {
@@ -4184,6 +4208,211 @@ type TenantInfo {
   defaultLocale: String!
 }
 
+"The result of the :delete_channel mutation"
+type DeleteChannelResult {
+  "The record that was successfully deleted"
+  result: Channel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_channel mutation"
+type UpdateChannelResult {
+  "The successful result of the mutation"
+  result: Channel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateChannelInput {
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The display name of the channel."
+  name: String
+
+  "The IDs of the target groups that are targeted by this channel."
+  targetGroupIds: [ID!]
+}
+
+"The result of the :create_channel mutation"
+type CreateChannelResult {
+  "The successful result of the mutation"
+  result: Channel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateChannelInput {
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the channel."
+  name: String!
+
+  "The IDs of the target groups that are targeted by this channel."
+  targetGroupIds: [ID!]
+}
+
+enum ChannelSortField {
+  ID
+  HANDLE
+  NAME
+}
+
+":channel connection"
+type ChannelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":channel edges"
+  edges: [ChannelEdge!]
+}
+
+":channel edge"
+type ChannelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":channel node"
+  node: Channel!
+}
+
+input ChannelFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ChannelFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ChannelFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ChannelFilterInput {
+  and: [ChannelFilterInput!]
+
+  or: [ChannelFilterInput!]
+
+  not: [ChannelFilterInput!]
+
+  id: ChannelFilterId
+
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: ChannelFilterHandle
+
+  "The display name of the channel."
+  name: ChannelFilterName
+
+  "The device groups targeted by the channel."
+  targetGroups: DeviceGroupFilterInput
+
+  deploymentCampaigns: DeploymentCampaignFilterInput
+}
+
+input ChannelSortInput {
+  order: SortOrder
+  field: ChannelSortField!
+}
+
+"""
+Represents an Channel.
+
+An Channel represents a set of device groups that can be targeted in an Campaign.
+"""
+type Channel implements Node {
+  id: ID!
+
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the channel."
+  name: String!
+
+  "The device groups targeted by the channel."
+  targetGroups(
+    "How to sort the records in the response"
+    sort: [DeviceGroupSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceGroupFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceGroupConnection!
+
+  deploymentCampaigns(
+    "How to sort the records in the response"
+    sort: [DeploymentCampaignSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentCampaignFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [DeploymentCampaign!]!
+}
+
 enum UpdateTargetSortField {
   ID
   STATUS
@@ -4334,195 +4563,6 @@ type UpdateTarget {
   otaOperation: OtaOperation
 }
 
-"The result of the :delete_update_channel mutation"
-type DeleteUpdateChannelResult {
-  "The record that was successfully deleted"
-  result: UpdateChannel
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
-"The result of the :update_update_channel mutation"
-type UpdateUpdateChannelResult {
-  "The successful result of the mutation"
-  result: UpdateChannel
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
-input UpdateUpdateChannelInput {
-  """
-  The identifier of the update channel.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String
-
-  "The display name of the update channel."
-  name: String
-
-  "The IDs of the target groups that are targeted by this update channel."
-  targetGroupIds: [ID!]
-}
-
-"The result of the :create_update_channel mutation"
-type CreateUpdateChannelResult {
-  "The successful result of the mutation"
-  result: UpdateChannel
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
-input CreateUpdateChannelInput {
-  """
-  The identifier of the update channel.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  "The display name of the update channel."
-  name: String!
-
-  "The IDs of the target groups that are targeted by this update channel."
-  targetGroupIds: [ID!]
-}
-
-enum UpdateChannelSortField {
-  ID
-  HANDLE
-  NAME
-}
-
-":update_channel connection"
-type UpdateChannelConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":update_channel edges"
-  edges: [UpdateChannelEdge!]
-}
-
-":update_channel edge"
-type UpdateChannelEdge {
-  "Cursor"
-  cursor: String!
-
-  ":update_channel node"
-  node: UpdateChannel!
-}
-
-input UpdateChannelFilterName {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
-}
-
-input UpdateChannelFilterHandle {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
-}
-
-input UpdateChannelFilterId {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int!]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateChannelFilterInput {
-  and: [UpdateChannelFilterInput!]
-
-  or: [UpdateChannelFilterInput!]
-
-  not: [UpdateChannelFilterInput!]
-
-  id: UpdateChannelFilterId
-
-  """
-  The identifier of the update channel.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: UpdateChannelFilterHandle
-
-  "The display name of the update channel."
-  name: UpdateChannelFilterName
-
-  "The device groups targeted by the update channel."
-  targetGroups: DeviceGroupFilterInput
-}
-
-input UpdateChannelSortInput {
-  order: SortOrder
-  field: UpdateChannelSortField!
-}
-
-"""
-Represents an UpdateChannel.
-
-An UpdateChannel represents a set of device groups that can be targeted in an UpdateCampaign.
-"""
-type UpdateChannel implements Node {
-  id: ID!
-
-  """
-  The identifier of the update channel.
-
-  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
-  """
-  handle: String!
-
-  "The display name of the update channel."
-  name: String!
-
-  "The device groups targeted by the update channel."
-  targetGroups(
-    "How to sort the records in the response"
-    sort: [DeviceGroupSortInput]
-
-    "A filter to limit the results"
-    filter: DeviceGroupFilterInput
-
-    "The number of records to return from the beginning. Maximum 250"
-    first: Int
-
-    "Show records before the specified keyset."
-    before: String
-
-    "Show records after the specified keyset."
-    after: String
-
-    "The number of records to return to the end. Maximum 250"
-    last: Int
-  ): DeviceGroupConnection!
-}
-
 "The result of the :create_update_campaign mutation"
 type CreateUpdateCampaignResult {
   "The successful result of the mutation"
@@ -4542,8 +4582,8 @@ input CreateUpdateCampaignInput {
   "The ID of the base image that will be distributed in the update campaign."
   baseImageId: ID!
 
-  "The ID of the update channel that will be targeted by the update campaign."
-  updateChannelId: ID!
+  "The ID of the channel that will be targeted by the update campaign."
+  channelId: ID!
 }
 
 enum UpdateCampaignSortField {
@@ -4701,8 +4741,8 @@ input UpdateCampaignFilterInput {
   "The base image distributed by the update campaign."
   baseImage: BaseImageFilterInput
 
-  "The update channel targeted by the update campaign."
-  updateChannel: UpdateChannelFilterInput
+  "The channel targeted by the update campaign."
+  channel: ChannelFilterInput
 
   "The update targets belonging to the update campaign."
   updateTargets: UpdateTargetFilterInput
@@ -4731,7 +4771,7 @@ input UpdateCampaignSortInput {
 """
 Represents an UpdateCampaign.
 
-An Update Campaign is the operation that tracks the distribution of a specific Base Image to all devices belonging to an Update Channel.
+An Update Campaign is the operation that tracks the distribution of a specific Base Image to all devices belonging to a Channel.
 """
 type UpdateCampaign implements Node {
   id: ID!
@@ -4751,8 +4791,8 @@ type UpdateCampaign implements Node {
   "The base image distributed by the update campaign."
   baseImage: BaseImage!
 
-  "The update channel targeted by the update campaign."
-  updateChannel: UpdateChannel!
+  "The channel targeted by the update campaign."
+  channel: Channel!
 
   "The update targets belonging to the update campaign."
   updateTargets(
@@ -4791,128 +4831,9 @@ type UpdateCampaign implements Node {
   successfulTargetCount: Int!
 }
 
-enum DeploymentChannelSortField {
-  ID
-  NAME
-  HANDLE
-}
-
-":deployment_channel connection"
-type DeploymentChannelConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":deployment_channel edges"
-  edges: [DeploymentChannelEdge!]
-}
-
-":deployment_channel edge"
-type DeploymentChannelEdge {
-  "Cursor"
-  cursor: String!
-
-  ":deployment_channel node"
-  node: DeploymentChannel!
-}
-
-input DeploymentChannelFilterHandle {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
-}
-
-input DeploymentChannelFilterName {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
-}
-
-input DeploymentChannelFilterId {
-  isNil: Boolean
-  eq: ID
-  notEq: ID
-  in: [ID!]
-  lessThan: ID
-  greaterThan: ID
-  lessThanOrEqual: ID
-  greaterThanOrEqual: ID
-}
-
-input DeploymentChannelFilterInput {
-  and: [DeploymentChannelFilterInput!]
-  or: [DeploymentChannelFilterInput!]
-  not: [DeploymentChannelFilterInput!]
-  id: DeploymentChannelFilterId
-  name: DeploymentChannelFilterName
-  handle: DeploymentChannelFilterHandle
-  targetGroups: DeviceGroupFilterInput
-  deploymentCampaigns: DeploymentCampaignFilterInput
-}
-
-input DeploymentChannelSortInput {
-  order: SortOrder
-  field: DeploymentChannelSortField!
-}
-
-"""
-Represents a DeploymentChannel.
-
-A DeploymentChannel represents a set of device groups that can be targeted in
-a DeploymentCampaign.
-"""
-type DeploymentChannel implements Node {
-  id: ID!
-  name: String!
-  handle: String!
-  targetGroups(
-    "How to sort the records in the response"
-    sort: [DeviceGroupSortInput]
-
-    "A filter to limit the results"
-    filter: DeviceGroupFilterInput
-
-    "The number of records to return."
-    limit: Int
-
-    "The number of records to skip."
-    offset: Int
-  ): [DeviceGroup!]!
-  deploymentCampaigns(
-    "How to sort the records in the response"
-    sort: [DeploymentCampaignSortInput]
-
-    "A filter to limit the results"
-    filter: DeploymentCampaignFilterInput
-
-    "The number of records to return."
-    limit: Int
-
-    "The number of records to skip."
-    offset: Int
-  ): [DeploymentCampaign!]!
-}
-
 enum DeploymentTargetSortField {
   ID
   STATUS
-  NAME
   RETRY_COUNT
   LATEST_ATTEMPT
   COMPLETION_TIMESTAMP
@@ -4972,19 +4893,6 @@ input DeploymentTargetFilterRetryCount {
   greaterThanOrEqual: Int
 }
 
-input DeploymentTargetFilterName {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
-}
-
 input DeploymentTargetFilterStatus {
   isNil: Boolean
   eq: DeploymentTargetStatus
@@ -5018,8 +4926,6 @@ input DeploymentTargetFilterInput {
 
   "The status of the update target."
   status: DeploymentTargetFilterStatus
-
-  name: DeploymentTargetFilterName
 
   """
   The number of retries of the deployment target. This indicated how many times
@@ -5057,8 +4963,6 @@ type DeploymentTarget {
   "The status of the update target."
   status: DeploymentTargetStatus!
 
-  name: String!
-
   """
   The number of retries of the deployment target. This indicated how many times
   Edgehog retried to send all the necessary information about a deployment towards
@@ -5076,7 +4980,29 @@ type DeploymentTarget {
 
   device: Device!
 
-  deployment: Deployment!
+  deployment: Deployment
+}
+
+"The result of the :create_deployment_campaign mutation"
+type CreateDeploymentCampaignResult {
+  "The successful result of the mutation"
+  result: DeploymentCampaign
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateDeploymentCampaignInput {
+  name: String!
+
+  "The deployment mechanism to carry the campaign."
+  deploymentMechanism: DeploymentMechanismInput!
+
+  "The ID of the release that will be distributed in the deployment campaign."
+  releaseId: ID!
+
+  "The ID of the channel that will be targeted by the deployment campaign."
+  channelId: ID!
 }
 
 enum DeploymentCampaignSortField {
@@ -5233,8 +5159,8 @@ input DeploymentCampaignFilterInput {
   "The release distributed by the deployment campaign."
   release: ReleaseFilterInput
 
-  "The deployment channel associated with the campaign."
-  deploymentChannel: DeploymentChannelFilterInput
+  "The channel associated with the campaign."
+  channel: ChannelFilterInput
 
   "The depployment targets belonging to the deployment campaign."
   deploymentTargets: DeploymentTargetFilterInput
@@ -5272,13 +5198,13 @@ type DeploymentCampaign implements Node {
   outcome: CampaignOutcome
 
   "The deployment mechanism to carry the campaign."
-  deployRolloutMechanism: DeployRolloutMechanism!
+  deploymentMechanism: DeploymentMechanism!
 
   "The release distributed by the deployment campaign."
   release: Release!
 
-  "The deployment channel associated with the campaign."
-  deploymentChannel: DeploymentChannel!
+  "The channel associated with the campaign."
+  channel: Channel!
 
   "The depployment targets belonging to the deployment campaign."
   deploymentTargets(
@@ -5342,30 +5268,6 @@ type RootQueryType {
     last: Int
   ): DeploymentCampaignConnection
 
-  "Returns the desired deployment channel."
-  deploymentChannel("The id of the record" id: ID!): DeploymentChannel
-
-  "Returns all available deployment channels."
-  deploymentChannels(
-    "How to sort the records in the response"
-    sort: [DeploymentChannelSortInput]
-
-    "A filter to limit the results"
-    filter: DeploymentChannelFilterInput
-
-    "The number of records to return from the beginning. Maximum 250"
-    first: Int
-
-    "Show records before the specified keyset."
-    before: String
-
-    "Show records after the specified keyset."
-    after: String
-
-    "The number of records to return to the end. Maximum 250"
-    last: Int
-  ): DeploymentChannelConnection
-
   "Returns a single update campaign."
   updateCampaign("The id of the record" id: ID!): UpdateCampaign
 
@@ -5390,16 +5292,16 @@ type RootQueryType {
     last: Int
   ): UpdateCampaignConnection
 
-  "Returns a single update channel."
-  updateChannel("The id of the record" id: ID!): UpdateChannel
+  "Returns a single channel."
+  channel("The id of the record" id: ID!): Channel
 
-  "Returns a list of update channels."
-  updateChannels(
+  "Returns a list of channels."
+  channels(
     "How to sort the records in the response"
-    sort: [UpdateChannelSortInput]
+    sort: [ChannelSortInput]
 
     "A filter to limit the results"
-    filter: UpdateChannelFilterInput
+    filter: ChannelFilterInput
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -5412,7 +5314,7 @@ type RootQueryType {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): UpdateChannelConnection
+  ): ChannelConnection
 
   "Retrieves the current tenant."
   tenantInfo: TenantInfo!
@@ -5698,24 +5600,24 @@ type RootQueryType {
 }
 
 type RootMutationType {
+  "Creates a new deployment campaign."
+  createDeploymentCampaign(
+    input: CreateDeploymentCampaignInput!
+  ): CreateDeploymentCampaignResult
+
   "Creates a new update campaign."
   createUpdateCampaign(
     input: CreateUpdateCampaignInput!
   ): CreateUpdateCampaignResult
 
-  "Creates a new update channel."
-  createUpdateChannel(
-    input: CreateUpdateChannelInput!
-  ): CreateUpdateChannelResult
+  "Creates a new channel."
+  createChannel(input: CreateChannelInput!): CreateChannelResult
 
-  "Updates an update channel."
-  updateUpdateChannel(
-    id: ID!
-    input: UpdateUpdateChannelInput
-  ): UpdateUpdateChannelResult
+  "Updates an channel."
+  updateChannel(id: ID!, input: UpdateChannelInput): UpdateChannelResult
 
-  "Deletes an update channel."
-  deleteUpdateChannel(id: ID!): DeleteUpdateChannelResult
+  "Deletes an channel."
+  deleteChannel(id: ID!): DeleteChannelResult
 
   "Initiates an OTA update with a user provided OS image"
   createManualOtaOperation(
