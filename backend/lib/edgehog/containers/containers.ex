@@ -301,6 +301,8 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.ContainerDeploymentDeviceMappingDeployment
 
+    resource Edgehog.Containers.DeploymentContainerDeployment
+
     resource DeploymentReadyAction
     resource Upgrade
 
