@@ -20,4 +20,57 @@
 
 defmodule Edgehog.DeploymentCampaigns.Lazy.CoreTest do
   @moduledoc false
+  use Edgehog.DataCase, async: true
+
+  import Edgehog.ContainersFixtures
+  import Edgehog.DeploymentCampaignsFixtures
+  import Edgehog.TenantsFixtures
+
+  alias Ash.Error.Invalid
+  alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
+  alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core
+  alias Edgehog.Error.AstarteAPIError
+
+  setup do
+    %{tenant: tenant_fixture()}
+  end
+
+  describe "retry_target_update/1" do
+    setup %{tenant: tenant} do
+      target = [tenant: tenant] |> in_progress_target_fixture() |> Ash.load!(:device)
+      release = release_fixture(tenant: tenant)
+
+      %{target: target, release: release}
+    end
+
+    test "succeeds if Astarte API replies with a success", ctx do
+      %{
+        target: target
+      } = ctx
+
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _client, _device_id, _data ->
+        :ok
+      end)
+
+      assert :ok = Core.retry_target_deployment(target)
+    end
+
+    test "fails if Astarte API replies with a failure", ctx do
+      %{
+        target: target
+      } = ctx
+
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _client, _device_id, _data ->
+        {:error, %AstarteAPIError{status: 500, response: "Internal server error"}}
+      end)
+
+      assert {:error, reason} = Core.retry_target_deployment(target)
+
+      assert %Invalid{
+               errors: [
+                 %AstarteAPIError{status: 500, response: "Internal server error"}
+               ]
+             } = reason
+    end
+  end
 end
