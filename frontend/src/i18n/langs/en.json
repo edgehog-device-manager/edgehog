@@ -664,6 +664,33 @@
   "components.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
+  "components.DeploymentTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at",
+    "description": "Title for the Completed at column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.deviceNameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Device Name column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.lastErrorMessageTitle": {
+    "defaultMessage": "Failure Reason",
+    "description": "Title for the Last Error Message column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at",
+    "description": "Title for the Latest attempt at column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.resourcesStateTitle": {
+    "defaultMessage": "Resources state",
+    "description": "Title for the Resources state column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.stateTitle": {
+    "defaultMessage": "State",
+    "description": "Title for the State column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTabs.deploymentTargetsLabel": {
+    "defaultMessage": "Devices"
+  },
   "components.DeploymentsTable.applicationNameTitle": {
     "defaultMessage": "Application Name",
     "description": "Title for the Application Name column of the deployments table"
