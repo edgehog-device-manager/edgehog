@@ -854,9 +854,6 @@
     "defaultMessage": "Device Name",
     "description": "Title for the Device Name column of the release devices table"
   },
-  "components.ReleaseDevicesTable.devices": {
-    "defaultMessage": "Devices"
-  },
   "components.ReleaseDevicesTable.noDevices": {
     "defaultMessage": "No devices available."
   },
@@ -864,12 +861,15 @@
     "defaultMessage": "Status",
     "description": "Title for the Status column of the devices table"
   },
+  "components.ReleaseSystemModelsTable.noSystemModels": {
+    "defaultMessage": "No required system model. This release can be applied to any device."
+  },
   "components.ReleaseTable.versionTitle": {
     "defaultMessage": "Release Version",
     "description": "Title for the Release Version column of the releases table"
   },
   "components.ReleasesSystemModelsTable.nameTitle": {
-    "defaultMessage": "Name"
+    "defaultMessage": "System Model Name"
   },
   "components.ReleasesTable.action": {
     "defaultMessage": "Action"
@@ -2088,6 +2088,12 @@
   },
   "pages.Networks.title": {
     "defaultMessage": "Networks"
+  },
+  "pages.Release.containers": {
+    "defaultMessage": "Containers"
+  },
+  "pages.Release.devices": {
+    "defaultMessage": "Devices"
   },
   "pages.Release.releaseNotFound.message": {
     "defaultMessage": "Return to the applications list."

@@ -18,8 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useCallback, useMemo, useState } from "react";
-import { Button, Collapse } from "react-bootstrap";
+import { useCallback, useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
@@ -34,13 +33,12 @@ import {
   DeploymentState,
   DeploymentStateComponent,
 } from "components/DeployedApplicationsTable";
-import Icon from "components/Icon";
 import InfiniteScroll from "components/InfiniteScroll";
 import InfiniteTable from "components/InfiniteTable";
 import { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
 
-const DEVICES_TO_LOAD_NEXT = 5;
+const DEVICES_TO_LOAD_NEXT = 10;
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -79,8 +77,6 @@ const ReleaseDevicesTable = ({
   releaseDevicesRef,
   hideSearch = true,
 }: ReleaseDevicesTableProps) => {
-  const [isOpenDevicesSection, setIsOpenDevicesSection] = useState(true);
-
   const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
     ReleaseDevicesTable_PaginationQuery,
     ReleaseDevicesTable_DeploymentsFragment$key
@@ -140,52 +136,28 @@ const ReleaseDevicesTable = ({
   ];
 
   return (
-    <div className={className}>
-      <div className="border rounded">
-        <Button
-          variant="light"
-          className="w-100 d-flex align-items-center fw-bold"
-          onClick={() => setIsOpenDevicesSection((prevState) => !prevState)}
-        >
-          <FormattedMessage
-            id="components.ReleaseDevicesTable.devices"
-            defaultMessage="Devices"
+    <div>
+      <InfiniteScroll
+        className={className}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextContainers : undefined}
+      >
+        {deployments.length ? (
+          <InfiniteTable
+            className={className}
+            columns={columns}
+            data={deployments}
+            hideSearch={hideSearch}
           />
-          <span className="ms-auto">
-            {isOpenDevicesSection ? (
-              <Icon icon="caretUp" />
-            ) : (
-              <Icon icon="caretDown" />
-            )}
-          </span>
-        </Button>
-
-        <InfiniteScroll
-          className={className}
-          loading={isLoadingNext}
-          onLoadMore={hasNext ? loadNextContainers : undefined}
-        >
-          <Collapse in={isOpenDevicesSection}>
-            <div className="p-3 border-top">
-              {deployments.length ? (
-                <InfiniteTable
-                  className={className}
-                  columns={columns}
-                  data={deployments}
-                  hideSearch={hideSearch}
-                />
-              ) : (
-                <p>
-                  <FormattedMessage
-                    id="components.ReleaseDevicesTable.noDevices"
-                    defaultMessage="No devices available."
-                  />
-                </p>
-              )}
-            </div>
-          </Collapse>
-        </InfiniteScroll>
-      </div>
+        ) : (
+          <p>
+            <FormattedMessage
+              id="components.ReleaseDevicesTable.noDevices"
+              defaultMessage="No devices available."
+            />
+          </p>
+        )}
+      </InfiniteScroll>
     </div>
   );
 };

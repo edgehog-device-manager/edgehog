@@ -27,7 +27,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import type {
   Release_getRelease_Query,
@@ -41,14 +41,11 @@ import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import ContainersTable from "components/ContainersTable";
-import Table, { createColumnHelper } from "components/Table";
-import Stack from "components/Stack";
-import Button from "components/Button";
-import Icon from "components/Icon";
-import { Collapse } from "react-bootstrap";
 import ReleaseDevicesTable from "components/ReleaseDevicesTable";
+import ReleaseSystemModelsTable from "components/ReleaseSystemModelsTable";
+import Tabs, { Tab } from "components/Tabs";
 
-const CONTAINERS_TO_LOAD_FIRST = 5;
+const CONTAINERS_TO_LOAD_FIRST = 40;
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -57,95 +54,82 @@ const GET_RELEASE_QUERY = graphql`
       application {
         name
       }
-      systemModels {
-        id
-        name
-      }
       ...ContainersTable_ContainerFragment
+      ...ReleaseSystemModelsTable_SystemModelsFragment
       ...ReleaseDevicesTable_DeploymentsFragment
     }
   }
 `;
 
 type Release = NonNullable<Release_getRelease_Query$data["release"]>;
+
+interface ContainersTabProps {
+  release: Release;
+}
+
+const ContainersTab = ({ release }: ContainersTabProps) => {
+  const intl = useIntl();
+
+  return (
+    <Tab
+      eventKey="containers-tab"
+      title={intl.formatMessage({
+        id: "pages.Release.containers",
+        defaultMessage: "Containers",
+      })}
+    >
+      <div className="mt-3">
+        <ContainersTable containersRef={release} />
+      </div>
+    </Tab>
+  );
+};
+
 interface ReleaseContentProps {
   release: Release;
 }
-type SystemModels = Release["systemModels"];
 
-// TODO: decide if include more information about the system models. if yes,
-// consider de-duplicate this code and use SysteemModelsTable instead
-type TableRecord = SystemModels[number];
+interface SystemModelsTabProps {
+  release: Release;
+}
 
-const columnHelper = createColumnHelper<TableRecord>();
-const columns = [
-  columnHelper.accessor("name", {
-    header: () => (
-      <FormattedMessage
-        id="components.ReleasesSystemModelsTable.nameTitle"
-        defaultMessage="Name"
-      />
-    ),
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.systemModelsEdit}
-        params={{ systemModelId: row.original.id }}
-      >
-        {getValue()}
-      </Link>
-    ),
-  }),
-];
-
-type ReleaseSystemModelsProps = {
-  className?: string;
-  systemModels: SystemModels;
-};
-
-const ReleaseSystemModels = ({
-  className,
-  systemModels: data,
-}: ReleaseSystemModelsProps) => {
-  const [isOpenSysModsSection, setIsOpenSysModsSection] = useState(true);
-
-  const systemModels =
-    data?.filter((sm): sm is TableRecord => sm != null) ?? [];
+const SystemModelsTab = ({ release }: SystemModelsTabProps) => {
+  const intl = useIntl();
 
   return (
-    <div>
-      <Button
-        variant="light"
-        className="w-100 d-flex align-items-center fw-bold"
-        onClick={() => setIsOpenSysModsSection((prevState) => !prevState)}
-        aria-expanded={isOpenSysModsSection}
-      >
-        <FormattedMessage
-          id="pages.Release.systemModels"
-          defaultMessage="System Models"
-        />
-        <span className="ms-auto">
-          {isOpenSysModsSection ? (
-            <Icon icon="caretUp" />
-          ) : (
-            <Icon icon="caretDown" />
-          )}
-        </span>
-      </Button>
-      <Collapse in={isOpenSysModsSection}>
-        <div className="p-2 border-top">
-          {systemModels.length ? (
-            <Table
-              className={className}
-              columns={columns}
-              data={systemModels}
-              hideSearch
-            />
-          ) : (
-            "No required system model. This release can be applied to any device."
-          )}
-        </div>
-      </Collapse>
-    </div>
+    <Tab
+      eventKey="system-models-tab"
+      title={intl.formatMessage({
+        id: "pages.Release.systemModels",
+        defaultMessage: "System Models",
+      })}
+    >
+      <div className="mt-3">
+        <ReleaseSystemModelsTable systemModelsRef={release} />
+      </div>
+    </Tab>
+  );
+};
+
+interface DevicesTabProps {
+  release: Release;
+}
+
+const DevicesTab = ({ release }: DevicesTabProps) => {
+  const intl = useIntl();
+
+  return (
+    <Tab
+      eventKey="devices-tab"
+      title={intl.formatMessage({
+        id: "pages.Release.devices",
+        defaultMessage: "Devices",
+      })}
+    >
+      <div className="mt-3">
+        <ReleaseDevicesTable releaseDevicesRef={release} />
+      </div>
+    </Tab>
   );
 };
 
@@ -158,19 +142,23 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         title={`${release.application?.name ?? ""} (v${release.version})`}
       />
       <Page.Main>
-        <Stack gap={2}>
-          <Alert
-            show={!!errorFeedback}
-            variant="danger"
-            onClose={() => setErrorFeedback(null)}
-            dismissible
-          >
-            {errorFeedback}
-          </Alert>
-          <ReleaseSystemModels systemModels={release["systemModels"]} />
-          <ContainersTable containersRef={release} />
-          <ReleaseDevicesTable releaseDevicesRef={release} />
-        </Stack>
+        <Alert
+          show={!!errorFeedback}
+          variant="danger"
+          onClose={() => setErrorFeedback(null)}
+          dismissible
+        >
+          {errorFeedback}
+        </Alert>
+
+        <Tabs
+          defaultActiveKey="containers-tab"
+          tabsOrder={["containers-tab", "system-models-tab", "devices-tab"]}
+        >
+          <ContainersTab release={release} />
+          <SystemModelsTab release={release} />
+          <DevicesTab release={release} />
+        </Tabs>
       </Page.Main>
     </Page>
   );
