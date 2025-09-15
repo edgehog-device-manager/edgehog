@@ -26,10 +26,12 @@ import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 
 import type { DeploymentCampaigns_getDeploymentCampaigns_Query } from "api/__generated__/DeploymentCampaigns_getDeploymentCampaigns_Query.graphql";
 
+import Button from "components/Button";
 import Center from "components/Center";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import DeploymentCampaignsTable from "components/DeploymentCampaignsTable";
+import { Link, Route } from "Navigation";
 
 const DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST = 40;
 
@@ -65,7 +67,14 @@ const DeploymentCampaignsContent = ({
             defaultMessage="Campaigns"
           />
         }
-      />
+      >
+        <Button as={Link} route={Route.deploymentCampaignsNew}>
+          <FormattedMessage
+            id="pages.DeploymentCampaigns.createButton"
+            defaultMessage="Create Campaign"
+          />
+        </Button>
+      </Page.Header>
       <Page.Main>
         <DeploymentCampaignsTable deploymentCampaignsData={campaigns} />
       </Page.Main>

@@ -642,6 +642,10 @@
   "components.DeploymentCampaignStatus.InProgress": {
     "defaultMessage": "In progress"
   },
+  "components.DeploymentCampaignsTable.applicationNameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Application Name column of the Deployment Campaigns table"
+  },
   "components.DeploymentCampaignsTable.deploymentChannelNameTitle": {
     "defaultMessage": "Channel",
     "description": "Title for the Channel column of the Deployment Campaigns table"
@@ -1839,6 +1843,9 @@
   },
   "pages.Channels.title": {
     "defaultMessage": "Channels"
+  },
+  "pages.DeploymentCampaigns.createButton": {
+    "defaultMessage": "Create Campaign"
   },
   "pages.Deployments.title": {
     "defaultMessage": "Deployments"
