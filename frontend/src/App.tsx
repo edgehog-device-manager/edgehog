@@ -67,6 +67,7 @@ import NetworkCreatePage from "pages/NetworkCreate";
 import DeploymentsPage from "pages/Deployments";
 import DeploymentCampaignsPage from "pages/DeploymentCampaigns";
 import DeploymentCampaign from "pages/DeploymentCampaign";
+import DeploymentCampaignCreate from "pages/DeploymentCampaignCreate";
 
 import { bugs, repository, version } from "../package.json";
 
@@ -123,6 +124,7 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.networksNew, element: <NetworkCreatePage /> },
   { path: Route.deployments, element: <DeploymentsPage /> },
   { path: Route.deploymentCampaigns, element: <DeploymentCampaignsPage /> },
+  { path: Route.deploymentCampaignsNew, element: <DeploymentCampaignCreate /> },
   { path: Route.deploymentCampaignsEdit, element: <DeploymentCampaign /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
