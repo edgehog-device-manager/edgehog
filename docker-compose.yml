@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,27 @@ services:
     volumes:
       - postgresql-data:/var/lib/postgresql/data
 
+  pgadmin:
+    image: dpage/pgadmin4:9.6.0
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      MASTER_PASSWORD_REQUIRED: 'False'
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    configs:
+      - source: pgadmin_servers.json
+        target: /pgadmin4/servers.json
+    depends_on:
+      - postgresql
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.edgehog-pgadmin.rule=Host(`pgadmin.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.edgehog-pgadmin.entrypoints=web"
+      - "traefik.http.routers.edgehog-pgadmin.service=pgadmin"
+      - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
+
   edgehog-backend:
     image: edgehogdevicemanager/edgehog-backend:0.9.3
     build:
@@ -48,8 +69,10 @@ services:
       EDGEHOG_FORWARDER_HOSTNAME: device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
       EDGEHOG_FORWARDER_PORT: 80
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
+      ADMIN_JWT_PUBLIC_KEY_PATH: /keys/admin_public.pem
     restart: on-failure
     volumes:
+      - ./backend/priv/repo/seeds/keys/admin_public.pem:/keys/admin_public.pem:z
       - ${SEEDS_TENANT_PRIVATE_KEY_FILE}:/keys/tenant_private.pem:z
       - ${SEEDS_REALM_PRIVATE_KEY_FILE}:/keys/realm_private.pem:z
     depends_on:
@@ -124,10 +147,79 @@ services:
       exit 0;
       "
 
+  registry:
+    image: registry:2
+    restart: on-failure
+    environment:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry-Realm
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/registry.passwd
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+    volumes:
+      - registry-auth:/auth
+      - registry-data:/var/lib/registry
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.edgehog-registry.rule=Host(`registry.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+    - "traefik.http.routers.edgehog-registry.entrypoints=web"
+    - "traefik.http.routers.edgehog-registry.service=edgehog-registry"
+    - "traefik.http.services.edgehog-registry.loadbalancer.server.port=5000"
+
+  registry-auth:
+    image: httpd:2.4
+    depends_on:
+      - registry
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "htpasswd -Bbn admin admin > /auth/registry.passwd"
+    volumes:
+      - registry-auth:/auth
+
+  registry-init:
+    image: docker:25.0.3-dind
+    depends_on:
+      - registry
+    privileged: true
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["
+      dockerd --insecure-registry registry:5000 &
+      echo 'Waiting for Docker daemon to be ready...' &&
+      until docker info >/dev/null 2>&1; do sleep 1; done &&
+      echo 'Docker daemon ready, signing in with registry...' &&
+      echo 'admin' | docker login registry:5000 -u admin --password-stdin &&
+      echo 'Signed in with registry, pulling sample images...' &&
+      docker pull hashicorp/http-echo &&
+      echo 'Tagging sample images...' &&
+      docker tag hashicorp/http-echo registry:5000/test/http-echo &&
+      echo 'Pushing sample images...' &&
+      docker push registry:5000/test/http-echo &&
+      echo 'Images preloaded.'"]
+
+configs:
+  pgadmin_servers.json:
+    content: |
+      {
+        "Servers": {
+          "1": {
+            "Name": "Edgehog",
+            "Group": "Servers",
+            "Host": "postgresql",
+            "Port": 5432,
+            "MaintenanceDB": "postgres",
+            "Username": "edgehog",
+            "PasswordExecCommand": "echo 'edgehog'",
+            "SSLMode": "prefer"
+          }
+        }
+      }
+
 volumes:
   postgresql-data:
+  pgadmin-data:
   minio-data-v2:
     driver: local
+  registry-auth:
+  registry-data:
 
 networks:
   default:
