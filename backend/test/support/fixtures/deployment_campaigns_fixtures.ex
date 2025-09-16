@@ -26,6 +26,7 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
 
   alias Edgehog.CampaignsFixtures
   alias Edgehog.ContainersFixtures
+  alias Edgehog.DeploymentCampaigns
   alias Edgehog.DevicesFixtures
   alias Edgehog.GroupsFixtures
 
@@ -70,6 +71,99 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
     Edgehog.DeploymentCampaigns.DeploymentCampaign
     |> Ash.Changeset.for_create(:create, params, tenant: tenant)
     |> Ash.create!()
+  end
+
+  @doc """
+  Generates an idle update target
+  """
+  def target_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {release_id, opts} =
+      Keyword.pop_lazy(opts, :release_id, fn ->
+        [tenant: tenant, system_models: 1]
+        |> ContainersFixtures.release_fixture()
+        |> Map.fetch!(:id)
+      end)
+
+    {tag, opts} = Keyword.pop(opts, :tag, "foo")
+
+    {group_id, opts} =
+      Keyword.pop_lazy(opts, :device_group_id, fn ->
+        [selector: ~s<"#{tag}" in tags>, tenant: tenant]
+        |> GroupsFixtures.device_group_fixture()
+        |> Map.fetch!(:id)
+      end)
+
+    {channel_id, opts} =
+      Keyword.pop_lazy(opts, :channel_id, fn ->
+        [target_group_ids: [group_id], tenant: tenant]
+        |> CampaignsFixtures.channel_fixture()
+        |> Map.fetch!(:id)
+      end)
+
+    _ =
+      opts
+      |> Keyword.merge(release_id: release_id, online: true, tenant: tenant)
+      |> DevicesFixtures.device_fixture_compatible_with_release()
+      |> DevicesFixtures.add_tags([tag])
+
+    deployment_campaign =
+      deployment_campaign_fixture(
+        release_id: release_id,
+        channel_id: channel_id,
+        tenant: tenant
+      )
+
+    deployment_campaign_id = deployment_campaign.id
+
+    target =
+      Edgehog.DeploymentCampaigns.DeploymentTarget
+      |> Ash.Query.filter(deployment_campaign_id == ^deployment_campaign_id)
+      |> Ash.read_one!(tenant: tenant, not_found_error?: true)
+
+    target
+  end
+
+  @doc """
+  Generates an update target with an associated OTA Operation
+  """
+  def in_progress_target_fixture(opts \\ []) do
+    alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core
+
+    tenant = Keyword.fetch!(opts, :tenant)
+    {now, opts} = Keyword.pop(opts, :now, DateTime.utc_now())
+
+    # A little dance to create a target_fixture which has an associated OTA Operation
+    target =
+      opts
+      |> target_fixture()
+      |> Ash.load!(
+        deployment: [:state],
+        device: [realm: [:cluster]]
+      )
+
+    release =
+      opts[:tenant]
+      |> Core.get_deployment_campaign!(target.deployment_campaign_id)
+      |> Ash.load!(
+        [release: [containers: [:networks, :volumes, :image]]],
+        tenant: tenant
+      )
+      |> Map.fetch!(:release)
+
+    Mox.stub(
+      Edgehog.Astarte.Device.CreateDeploymentRequestMock,
+      :send_create_deployment_request,
+      fn _client, _device_id, _data -> :ok end
+    )
+
+    {:ok, target} =
+      target
+      |> Core.update_target_latest_attempt!(now)
+      |> DeploymentCampaigns.deploy_to_target(release, tenant: tenant)
+
+    target
   end
 
   @doc """

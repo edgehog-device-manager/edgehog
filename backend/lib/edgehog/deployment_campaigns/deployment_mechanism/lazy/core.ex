@@ -361,14 +361,16 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     - `:ok` if the retry operation is successful.
   """
   def retry_target_deployment(target) do
-    target
-    |> Ash.load!(:deployment)
-    |> Map.get(:deployment)
+    deployment_result =
+      target
+      |> Ash.load!(:deployment)
+      |> Map.get(:deployment)
+      |> Ash.Changeset.for_update(:send_deployment)
+      |> Ash.update(tenant: target.tenant_id)
 
-    # TODO: make the `retry` action
-    # |> Ash.Changeset.for_update(:retry)
-    # |> Ash.update!(tenant: target.tenant_id)
-    :ok
+    with {:ok, _deployment} <- deployment_result do
+      :ok
+    end
   end
 
   @doc """

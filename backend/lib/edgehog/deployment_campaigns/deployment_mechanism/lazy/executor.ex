@@ -524,23 +524,22 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
 
         {:keep_state_and_data, action}
 
-        # TODO: uncomment when `retry_target_deployment` has the correct type
-        # {:error, reason} ->
-        #   reason
-        #   |> Core.error_message(target.device_id)
-        #   |> Logger.notice()
+      {:error, reason} ->
+        reason
+        |> Core.error_message(target.device_id)
+        |> Logger.notice()
 
-        #   # We don't check if the error is temporary or not, since by definition
-        #   # it shouldn't be because we already have a successful pending
-        #   # Deployment request if we're here. If we failed during a retry, we just
-        #   # schedule another timeout after the retry timeout period, and we'll do
-        #   # another retry (in this case we're counting them towards the retry
-        #   # count since the Deployment, differently from the case where we fail
-        #   # during the initial rollout) TODO: evaluate if this is the desired
-        #   # behaviour
-        #   action = setup_retry_timeout(data.tenant_id, target, data.deployment_mechanism)
+        # We don't check if the error is temporary or not, since by definition
+        # it shouldn't be because we already have a successful pending
+        # Deployment request if we're here. If we failed during a retry, we just
+        # schedule another timeout after the retry timeout period, and we'll do
+        # another retry (in this case we're counting them towards the retry
+        # count since the Deployment, differently from the case where we fail
+        # during the initial rollout) TODO: evaluate if this is the desired
+        # behaviour
+        action = setup_retry_timeout(data.tenant_id, target, data.deployment_mechanism)
 
-        #   {:keep_state_and_data, action}
+        {:keep_state_and_data, action}
     end
   end
 
