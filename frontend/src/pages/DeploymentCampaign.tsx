@@ -47,16 +47,22 @@ import DeploymentCampaignForm from "forms/DeploymentCampaignForm";
 import { Link, Route } from "Navigation";
 import DeploymentTargetsTabs from "components/DeploymentTargetsTabs";
 
+const DEPLOYMENT_TARGETS_INITIAL_LOAD = 40;
+
 const GET_DEPLOYMENT_CAMPAIGN_QUERY = graphql`
   query DeploymentCampaign_getDeploymentCampaign_Query(
     $deploymentCampaignId: ID!
+    $first: Int!
   ) {
     deploymentCampaign(id: $deploymentCampaignId) {
       name
       ...DeploymentCampaignForm_DeploymentCampaignFragment
       ...DeploymentCampaignStatsChart_DeploymentCampaignStatsChartFragment
       ...DeploymentCampaign_RefreshFragment
-      ...DeploymentTargetsTabs_DeploymentTargetsFragment
+      ...DeploymentTargetsTabs_SuccessfulFragment @arguments(first: $first)
+      ...DeploymentTargetsTabs_FailedFragment @arguments(first: $first)
+      ...DeploymentTargetsTabs_InProgressFragment @arguments(first: $first)
+      ...DeploymentTargetsTabs_IdleFragment @arguments(first: $first)
     }
   }
 `;
@@ -100,7 +106,10 @@ const DeploymentCampaignRefresh = ({
       subscriptionRef.current = fetchQuery(
         relayEnvironment,
         GET_DEPLOYMENT_CAMPAIGN_QUERY,
-        { deploymentCampaignId: id },
+        {
+          deploymentCampaignId: id,
+          first: DEPLOYMENT_TARGETS_INITIAL_LOAD,
+        },
         { fetchPolicy: "network-only" },
       ).subscribe({
         complete: () => {
@@ -187,7 +196,10 @@ const DeploymentCampaignPage = () => {
 
   const fetchDeploymentCampaign = useCallback(() => {
     getDeploymentCampaign(
-      { deploymentCampaignId },
+      {
+        deploymentCampaignId,
+        first: DEPLOYMENT_TARGETS_INITIAL_LOAD,
+      },
       { fetchPolicy: "network-only" },
     );
   }, [getDeploymentCampaign, deploymentCampaignId]);
