@@ -54,14 +54,14 @@ import {
   tmpfsOptSchema,
   storageOptSchema,
   extraHostsSchema,
-  numberSchema,
-} from "./index";
+  optionalNumberSchema,
+} from "forms/index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
 import Icon from "components/Icon";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import ConfirmModal from "components/ConfirmModal";
-import FormFeedback from "./FormFeedback";
+import FormFeedback from "forms/FormFeedback";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -375,7 +375,7 @@ const applicationSchema = (intl: any) =>
               .nullable()
               .transform((value) => value?.trim()),
             portBindings: portBindingsSchema,
-            memory: numberSchema
+            memory: optionalNumberSchema
               .integer()
               .nullable()
               .label(
@@ -385,7 +385,7 @@ const applicationSchema = (intl: any) =>
                 }),
               ),
 
-            memoryReservation: numberSchema
+            memoryReservation: optionalNumberSchema
               .integer()
               .nullable()
               .label(
@@ -394,7 +394,7 @@ const applicationSchema = (intl: any) =>
                   defaultMessage: "Memory Reservation (bytes)",
                 }),
               ),
-            memorySwap: numberSchema
+            memorySwap: optionalNumberSchema
               .integer()
               .nullable()
               .label(
@@ -403,7 +403,7 @@ const applicationSchema = (intl: any) =>
                   defaultMessage: "Memory Swap (bytes)",
                 }),
               ),
-            memorySwappiness: numberSchema
+            memorySwappiness: optionalNumberSchema
               .integer()
               .min(0)
               .max(100)
@@ -414,7 +414,7 @@ const applicationSchema = (intl: any) =>
                   defaultMessage: "Memory Swappiness (0-100)",
                 }),
               ),
-            cpuPeriod: numberSchema
+            cpuPeriod: optionalNumberSchema
               .integer()
               .nullable()
               .label(
@@ -423,7 +423,7 @@ const applicationSchema = (intl: any) =>
                   defaultMessage: "CPU Period (microseconds)",
                 }),
               ),
-            cpuQuota: numberSchema
+            cpuQuota: optionalNumberSchema
               .integer()
               .nullable()
               .label(
@@ -432,7 +432,7 @@ const applicationSchema = (intl: any) =>
                   defaultMessage: "CPU Quota (microseconds)",
                 }),
               ),
-            cpuRealtimePeriod: numberSchema
+            cpuRealtimePeriod: optionalNumberSchema
               .integer()
               .nullable()
               .label(
@@ -441,7 +441,7 @@ const applicationSchema = (intl: any) =>
                   defaultMessage: "CPU Real-Time Period (microseconds)",
                 }),
               ),
-            cpuRealtimeRuntime: numberSchema
+            cpuRealtimeRuntime: optionalNumberSchema
               .integer()
               .nullable()
               .label(

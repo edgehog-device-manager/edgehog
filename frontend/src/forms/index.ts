@@ -156,6 +156,16 @@ const numberSchema = yup
   .number()
   .typeError((values) => ({ messageId: messages.number.id, values }));
 
+const optionalNumberSchema = yup
+  .number()
+  .transform((value, originalValue) => {
+    if (originalValue === "" || originalValue == null || Number.isNaN(value)) {
+      return undefined;
+    }
+    return value;
+  })
+  .typeError((values) => ({ messageId: messages.number.id, values }));
+
 const isValidJson = (value: string) => {
   try {
     JSON.parse(value);
@@ -293,4 +303,5 @@ export {
   yup,
   tmpfsOptSchema,
   storageOptSchema,
+  optionalNumberSchema,
 };
