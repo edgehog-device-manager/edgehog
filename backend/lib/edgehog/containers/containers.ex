@@ -221,6 +221,8 @@ defmodule Edgehog.Containers do
       define :mark_deployment_as_stopping, action: :mark_as_stopping
     end
 
+    resource Edgehog.Containers.Deployment.Event
+
     resource Edgehog.Containers.Image do
       define :fetch_image, action: :read, get_by: [:id]
       define :destroy_image_if_dangling, action: :destroy_if_dangling
