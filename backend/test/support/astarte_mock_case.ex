@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2024 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,6 +51,21 @@ defmodule Edgehog.AstarteMockCase do
     Mox.stub_with(
       Edgehog.Astarte.Device.DeviceStatusMock,
       Edgehog.Mocks.Astarte.Device.DeviceStatus
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableContainersMock,
+      Edgehog.Astarte.Device.AvailableContainers
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.DeploymentCommandMock,
+      Edgehog.Astarte.Device.DeploymentCommand
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.DeploymentUpdateMock,
+      Edgehog.Astarte.Device.DeploymentUpdate
     )
 
     Mox.stub_with(
@@ -116,6 +131,26 @@ defmodule Edgehog.AstarteMockCase do
     Mox.stub_with(
       Edgehog.Astarte.Device.ForwarderSessionMock,
       Edgehog.Mocks.Astarte.Device.ForwarderSession
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableImagesMock,
+      Edgehog.Mocks.Astarte.Device.AvailableImages
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableDeploymentsMock,
+      Edgehog.Mocks.Astarte.Device.AvailableDeployments
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableVolumesMock,
+      Edgehog.Mocks.Astarte.Device.AvailableVolumes
+    )
+
+    Mox.stub_with(
+      Edgehog.Astarte.Device.AvailableNetworksMock,
+      Edgehog.Mocks.Astarte.Device.AvailableNetworks
     )
 
     :ok

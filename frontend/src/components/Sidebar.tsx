@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@
 */
 
 import React, { useCallback, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { FormattedMessage } from "react-intl";
 import Accordion from "react-bootstrap/Accordion";
-import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
 import NavLink from "react-bootstrap/NavLink";
+import { FormattedMessage } from "react-intl";
+import { useLocation } from "react-router-dom";
 
 import Icon from "components/Icon";
 import { Link, matchPaths, ParametricRoute, Route } from "Navigation";
@@ -117,6 +117,17 @@ const Sidebar = () => (
         Route.deviceGroupsNew,
       ]}
     />
+    <SidebarItem
+      label={
+        <FormattedMessage
+          id="components.Sidebar.ChannelsLabel"
+          defaultMessage="Channels"
+        />
+      }
+      icon="channels"
+      route={Route.channels}
+      activeRoutes={[Route.channels, Route.channelsEdit, Route.channelsNew]}
+    />
     <SidebarItemGroup
       label={
         <FormattedMessage
@@ -136,20 +147,7 @@ const Sidebar = () => (
         route={Route.updateCampaigns}
         activeRoutes={[Route.updateCampaigns, Route.updateCampaignsEdit]}
       />
-      <SidebarItem
-        label={
-          <FormattedMessage
-            id="components.Sidebar.updateChannelsLabel"
-            defaultMessage="Update Channels"
-          />
-        }
-        route={Route.updateChannels}
-        activeRoutes={[
-          Route.updateChannels,
-          Route.updateChannelsEdit,
-          Route.updateChannelsNew,
-        ]}
-      />
+
       <SidebarItem
         label={
           <FormattedMessage
@@ -202,6 +200,90 @@ const Sidebar = () => (
           Route.hardwareTypes,
           Route.hardwareTypesNew,
           Route.hardwareTypesEdit,
+        ]}
+      />
+    </SidebarItemGroup>
+    <SidebarItemGroup
+      label={
+        <FormattedMessage
+          id="components.Sidebar.applications.applicationsLabel"
+          defaultMessage="Applications"
+        />
+      }
+      icon="applications"
+    >
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.applicationsLabel"
+            defaultMessage="Applications"
+          />
+        }
+        route={Route.applications}
+        activeRoutes={[
+          Route.applications,
+          Route.applicationNew,
+          Route.application,
+          Route.release,
+          Route.releaseNew,
+        ]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.credentialsLabel"
+            defaultMessage="Image Credentials"
+          />
+        }
+        route={Route.imageCredentials}
+        activeRoutes={[
+          Route.imageCredentials,
+          Route.imageCredentialsNew,
+          Route.imageCredentialsEdit,
+        ]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.volumes.volumesLabel"
+            defaultMessage="Volumes"
+          />
+        }
+        route={Route.volumes}
+        activeRoutes={[Route.volumes, Route.volumeEdit, Route.volumesNew]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.networksLabel"
+            defaultMessage="Networks"
+          />
+        }
+        route={Route.networks}
+        activeRoutes={[Route.networks, Route.networksEdit, Route.networksNew]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.deploymentsLabel"
+            defaultMessage="Deployments"
+          />
+        }
+        route={Route.deployments}
+        activeRoutes={[Route.deployments]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.applications.campaignsLabel"
+            defaultMessage="Campaigns"
+          />
+        }
+        route={Route.deploymentCampaigns}
+        activeRoutes={[
+          Route.deploymentCampaigns,
+          Route.deploymentCampaignsEdit,
+          Route.deploymentCampaignsNew,
         ]}
       />
     </SidebarItemGroup>

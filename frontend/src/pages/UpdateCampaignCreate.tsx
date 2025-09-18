@@ -52,7 +52,7 @@ const GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY = graphql`
       __typename
       count
     }
-    updateChannels {
+    channels {
       __typename
       count
     }
@@ -180,25 +180,25 @@ const NoBaseImageCollections = () => (
   </Result.EmptyList>
 );
 
-const NoUpdateChannels = () => (
+const NoChannels = () => (
   <Result.EmptyList
     title={
       <FormattedMessage
-        id="pages.UpdateCampaignCreate.noUpdateChannel.title"
-        defaultMessage="You haven't created any Update Channel yet"
+        id="pages.UpdateCampaignCreate.noChannel.title"
+        defaultMessage="You haven't created any Channel yet"
       />
     }
   >
     <p>
       <FormattedMessage
-        id="pages.UpdateCampaignCreate.noUpdateChannel.message"
-        defaultMessage="You need at least one Update Channel to create an Update Campaign"
+        id="pages.UpdateCampaignCreate.noChannel.message"
+        defaultMessage="You need at least one Channel to create an Update Campaign"
       />
     </p>
-    <Button as={Link} route={Route.updateChannelsNew}>
+    <Button as={Link} route={Route.channelsNew}>
       <FormattedMessage
-        id="pages.UpdateCampaignCreate.noUpdateChannel.createButton"
-        defaultMessage="Create Update Channel"
+        id="pages.UpdateCampaignCreate.noChannel.createButton"
+        defaultMessage="Create Channel"
       />
     </Button>
   </Result.EmptyList>
@@ -215,13 +215,13 @@ const UpdateCampaignWrapper = ({
     GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY,
     getCreateUpdateCampaignOptionsQuery,
   );
-  const { baseImageCollections, updateChannels } = updateCampaignOptions;
+  const { baseImageCollections, channels } = updateCampaignOptions;
 
   if (baseImageCollections?.count === 0) {
     return <NoBaseImageCollections />;
   }
-  if (updateChannels?.count === 0) {
-    return <NoUpdateChannels />;
+  if (channels?.count === 0) {
+    return <NoChannels />;
   }
 
   return <UpdateCampaign updateCampaignOptions={updateCampaignOptions} />;

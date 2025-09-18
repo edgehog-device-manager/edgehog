@@ -25,4 +25,8 @@
   --update-target-status_color_in-progress: var(--bs-warning);
   --update-target-status_color_successful: var(--bs-success);
   --update-target-status_color_failed: var(--bs-danger);
+  --deployment-target-status_color_idle: var(--bs-gray);
+  --deployment-target-status_color_in-progress: var(--bs-warning);
+  --deployment-target-status_color_successful: var(--bs-success);
+  --deployment-target-status_color_failed: var(--bs-danger);
 }

@@ -1,0 +1,16 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.AvailableContainers",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "allow_unset": true,
+      "endpoint": "/%{container_id}/status",
+      "type": "string",
+      "description": "Container status",
+      "doc": "Possible values [Received, Created, Running, Stopped]"
+    }
+  ]
+}

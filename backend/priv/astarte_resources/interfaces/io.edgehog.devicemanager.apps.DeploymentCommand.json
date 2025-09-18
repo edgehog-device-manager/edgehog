@@ -1,0 +1,18 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.DeploymentCommand",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "individual",
+  "mappings": [
+    {
+      "endpoint": "/%{deployment_id}/command",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Deployment command",
+      "doc": "Possible values [Start, Stop, Delete]"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.CreateDeploymentRequest",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/deployment/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Create Deployment Request id",
+      "doc": "Unique id for the deployment."
+    },
+    {
+      "endpoint": "/deployment/containers",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Deployment containers",
+      "doc": "Containers used by the deployment."
+    }
+  ]
+}

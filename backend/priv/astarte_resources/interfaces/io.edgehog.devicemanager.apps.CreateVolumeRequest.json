@@ -1,0 +1,46 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.CreateVolumeRequest",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/volume/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Create Volume Request id",
+      "doc": "Unique id for the volume."
+    },
+    {
+      "endpoint": "/volume/deploymentId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Reference to a Deployment using the volume",
+      "doc": "The deployment in which the volume is used, so the device can send deployment events to Astarte for the create request"
+    },
+    {
+      "endpoint": "/volume/driver",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Volume driver name",
+      "doc": "Name of the volume driver to use."
+    },
+    {
+      "endpoint": "/volume/options",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Volume driver options",
+      "doc": "An array of key=value options to set for the driver. The key cannot contain an `=`."
+    }
+  ]
+}

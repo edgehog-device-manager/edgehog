@@ -49,6 +49,18 @@ config :edgehog, EdgehogWeb.Endpoint,
 
 # Mocks for tests
 config :edgehog, :assets_system_model_picture_module, Edgehog.Assets.SystemModelPictureMock
+
+config :edgehog,
+       :astarte_available_containers_module,
+       Edgehog.Astarte.Device.AvailableContainersMock
+
+config :edgehog,
+       :astarte_available_deployments_module,
+       Edgehog.Astarte.Device.AvailableDeploymentsMock
+
+config :edgehog, :astarte_available_images_module, Edgehog.Astarte.Device.AvailableImagesMock
+config :edgehog, :astarte_available_networks_module, Edgehog.Astarte.Device.AvailableNetworksMock
+config :edgehog, :astarte_available_volumes_module, Edgehog.Astarte.Device.AvailableVolumesMock
 config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
 
@@ -57,9 +69,31 @@ config :edgehog,
        Edgehog.Astarte.Device.CellularConnectionMock
 
 config :edgehog,
+       :astarte_create_container_request_module,
+       Edgehog.Astarte.Device.CreateContainerRequestMock
+
+config :edgehog,
+       :astarte_create_deployment_request_module,
+       Edgehog.Astarte.Device.CreateDeploymentRequestMock
+
+config :edgehog,
+       :astarte_create_image_request_module,
+       Edgehog.Astarte.Device.CreateImageRequestMock
+
+config :edgehog,
+       :astarte_create_network_request_module,
+       Edgehog.Astarte.Device.CreateNetworkRequestMock
+
+config :edgehog,
+       :astarte_create_volume_request_module,
+       Edgehog.Astarte.Device.CreateVolumeRequestMock
+
+config :edgehog,
        :astarte_delivery_policies_data_layer,
        Edgehog.Astarte.DeliveryPolicies.MockDataLayer
 
+config :edgehog, :astarte_deployment_command_module, Edgehog.Astarte.Device.DeploymentCommandMock
+config :edgehog, :astarte_deployment_update_module, Edgehog.Astarte.Device.DeploymentUpdateMock
 config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
 config :edgehog, :astarte_forwarder_session_module, Edgehog.Astarte.Device.ForwarderSessionMock
 config :edgehog, :astarte_geolocation_module, Edgehog.Astarte.Device.GeolocationMock

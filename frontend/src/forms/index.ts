@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2024 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -74,6 +74,29 @@ const messages = defineMessages({
     id: "validation.number.integer",
     defaultMessage: "{label} must be an integer.",
   },
+  envInvalidJson: {
+    id: "validation.env.invalidJson",
+    defaultMessage: "Must be a valid JSON string.",
+  },
+  portBindingsFormat: {
+    id: "validation.portBindings.format",
+    defaultMessage:
+      "Port Bindings must be comma-separated values like '8080:80, 443:443'.",
+  },
+  extraHostsFormat: {
+    id: "validation.extraHosts.format",
+    defaultMessage: "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)",
+  },
+  tmpfsFormat: {
+    id: "validation.tmpfs.format",
+    defaultMessage:
+      'Must be a valid JSON array of strings in the format "/path=option1,option2", e.g. ["/run=rw,size=64m"]',
+  },
+  storageFormat: {
+    id: "validation.storage.format",
+    defaultMessage:
+      'Must be a valid JSON array of strings in the format "key=value", e.g. ["size=120G"]',
+  },
 });
 
 yup.setLocale({
@@ -125,13 +148,143 @@ const baseImageStartingVersionRequirementSchema = yup.string().test({
   test: (value) => semverValidRange(value) !== null,
 });
 
-const updateChannelHandleSchema = yup
+const channelHandleSchema = yup
   .string()
   .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
 
 const numberSchema = yup
   .number()
   .typeError((values) => ({ messageId: messages.number.id, values }));
+
+const optionalNumberSchema = yup
+  .number()
+  .transform((value, originalValue) => {
+    if (originalValue === "" || originalValue == null || Number.isNaN(value)) {
+      return undefined;
+    }
+    return value;
+  })
+  .typeError((values) => ({ messageId: messages.number.id, values }));
+
+const isValidJson = (value: string) => {
+  try {
+    JSON.parse(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const envSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json",
+    message: messages.envInvalidJson.id,
+    test: (value) => (value ? isValidJson(value) : true),
+  });
+
+const portBindingsSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim().replace(/\s*,\s*/g, ", "))
+  .test({
+    name: "is-valid-port-bindings",
+    message: messages.portBindingsFormat.id,
+    test: (value) =>
+      !value ||
+      value.split(", ").every((v) => /^[0-9]+:[0-9]+$/.test(v.trim())),
+  });
+
+const tmpfsOptSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json-array-of-tmpfs",
+    message: messages.tmpfsFormat.id,
+    test: (value) => {
+      if (!value) return true;
+
+      let parsed;
+      try {
+        parsed = JSON.parse(value);
+      } catch {
+        return false;
+      }
+
+      if (
+        !Array.isArray(parsed) ||
+        !parsed.every((item) => typeof item === "string")
+      ) {
+        return false;
+      }
+
+      const tmpfsRegex = /^\/[A-Za-z0-9/_-]+=[A-Za-z0-9,=:_-]+$/;
+
+      for (const entry of parsed) {
+        if (!tmpfsRegex.test(entry)) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+  });
+
+const storageOptSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json-array-of-storage-opts",
+    message: messages.storageFormat.id,
+    test: (value) => {
+      if (!value) return true;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(value);
+      } catch {
+        return false;
+      }
+      if (
+        !Array.isArray(parsed) ||
+        !parsed.every((item) => typeof item === "string")
+      ) {
+        return false;
+      }
+
+      const keyValueRegex = /^[A-Za-z0-9_.-]+=[A-Za-z0-9_.:-]+$/;
+
+      for (const entry of parsed) {
+        if (!keyValueRegex.test(entry)) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+  });
+
+const extraHostsSchema = yup
+  .array()
+  .nullable()
+  .of(
+    yup
+      .string()
+      .required()
+      .test({
+        name: "is-valid-extra-host",
+        message: messages.extraHostsFormat.id,
+        test: (value) => {
+          if (!value) return true;
+          const regex =
+            /^(?!-)[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63})*:(?:\d{1,3}\.){3}\d{1,3}$/;
+          return regex.test(value.trim());
+        },
+      }),
+  );
 
 export {
   deviceGroupHandleSchema,
@@ -141,8 +294,14 @@ export {
   baseImageFileSchema,
   baseImageVersionSchema,
   baseImageStartingVersionRequirementSchema,
-  updateChannelHandleSchema,
+  channelHandleSchema,
   numberSchema,
+  envSchema,
+  portBindingsSchema,
+  extraHostsSchema,
   messages,
   yup,
+  tmpfsOptSchema,
+  storageOptSchema,
+  optionalNumberSchema,
 };

@@ -48,7 +48,7 @@ const UPDATE_CAMPAIGN_FORM_FRAGMENT = graphql`
         name
       }
     }
-    updateChannel {
+    channel {
       id
       name
     }
@@ -168,7 +168,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
     updateCampaignRef,
   );
 
-  const { baseImage, updateChannel, rolloutMechanism } = updateCampaign;
+  const { baseImage, channel, rolloutMechanism } = updateCampaign;
   const { baseImageCollection } = baseImage;
   return (
     <Row>
@@ -229,16 +229,13 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
         <FormRow
           label={
             <FormattedMessage
-              id="forms.UpdateCampaignForm.updateChannelLabel"
-              defaultMessage="Update Channel"
+              id="forms.UpdateCampaignForm.channelLabel"
+              defaultMessage="Channel"
             />
           }
         >
-          <Link
-            route={Route.updateChannelsEdit}
-            params={{ updateChannelId: updateChannel.id }}
-          >
-            {updateChannel.name}
+          <Link route={Route.channelsEdit} params={{ channelId: channel.id }}>
+            {channel.name}
           </Link>
         </FormRow>
       </Col>

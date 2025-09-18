@@ -1,0 +1,64 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.CreateNetworkRequest",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/network/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Create Network Request id",
+      "doc": "Unique id for the container network."
+    },
+    {
+      "endpoint": "/network/deploymentId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Reference to a Deployment using the network",
+      "doc": "The deployment in which the network is used, so the device can send deployment events to Astarte for the create request"
+    },
+    {
+      "endpoint": "/network/driver",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Network driver",
+      "doc": "Name of the network driver plugin to use."
+    },
+    {
+      "endpoint": "/network/internal",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Internal network",
+      "doc": "Restrict external access to the network."
+    },
+    {
+      "endpoint": "/network/enableIpv6",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Enable IPv6",
+      "doc": "Enable IPv6 on the network."
+    },
+    {
+      "endpoint": "/network/options",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Network driver options",
+      "doc": "An array of key=value options to set for the driver. The key cannot contain an `=`."
+    }
+  ]
+}

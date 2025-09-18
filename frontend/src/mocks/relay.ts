@@ -181,12 +181,12 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
       timestamp: "2021-11-15T11:44:57.432Z",
     };
   },
-  UpdateChannel(_, generateId) {
+  Channel(_, generateId) {
     const id = generateId();
     return {
       id: btoa(`UpdateChannel:${id}`),
       name: "Foo devices",
-      handle: "update-channel-foo",
+      handle: "channel-foo",
     };
   },
   UpdateCampaign(_, generateId) {

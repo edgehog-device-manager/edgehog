@@ -25,13 +25,16 @@ defmodule EdgehogWeb.Schema do
   use AshGraphql,
     domains: [
       Edgehog.BaseImages,
+      Edgehog.Containers,
       Edgehog.Devices,
       Edgehog.Forwarder,
       Edgehog.Groups,
       Edgehog.Labeling,
       Edgehog.OSManagement,
       Edgehog.Tenants,
-      Edgehog.UpdateCampaigns
+      Edgehog.Campaigns,
+      Edgehog.UpdateCampaigns,
+      Edgehog.DeploymentCampaigns
     ],
     relay_ids?: true
 

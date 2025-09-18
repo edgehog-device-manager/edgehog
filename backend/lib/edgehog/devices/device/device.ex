@@ -27,6 +27,11 @@ defmodule Edgehog.Devices.Device do
     ]
 
   alias Edgehog.Changes.NormalizeTagName
+  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.DeviceMapping
+  alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device.BatterySlot
   alias Edgehog.Devices.Device.Calculations
   alias Edgehog.Devices.Device.Changes
@@ -54,7 +59,9 @@ defmodule Edgehog.Devices.Device do
     # TODO: add :device_groups as a relay-paginated relationship. Since it's a
     # manual relationship, it needs to implement callbacks that define
     # datalayer subqueries so Ash can compose and support the functionality.
-    paginate_relationship_with ota_operations: :relay, tags: :relay
+    paginate_relationship_with application_deployments: :relay,
+                               ota_operations: :relay,
+                               tags: :relay
   end
 
   actions do
@@ -198,6 +205,36 @@ defmodule Edgehog.Devices.Device do
              )
     end
 
+    update :send_create_deployment_request do
+      description "Send a create deployment request to the device."
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The Deployment the device has to instanciate."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateDeployment
+    end
+
+    update :send_create_volume_request do
+      description "Send a create volume request to the device."
+
+      argument :volume, :struct do
+        constraints instance_of: Volume
+        description "The new volume for the device."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this volume is used"
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateVolume
+    end
+
     update :remove_tags do
       description "Remove tags from a device."
 
@@ -228,6 +265,111 @@ defmodule Edgehog.Devices.Device do
       description "Sets led behavior."
       argument :behavior, LedBehavior, description: "The led behavior.", allow_nil?: false
       manual ManualActions.SetLedBehavior
+    end
+
+    update :send_create_image do
+      description "Sends a create image request to the device."
+
+      argument :image, :struct do
+        constraints instance_of: Image
+        description "The image the device will pull."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this image is used"
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateImageRequest
+    end
+
+    update :send_create_container_request do
+      description "Sends a create container request to the device."
+
+      argument :container, :struct,
+        constraints: [instance_of: Edgehog.Containers.Container],
+        description: "The Container the device has to initiate.",
+        allow_nil?: false
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this container is used"
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateContainer
+    end
+
+    update :send_create_network_request do
+      description "Sends a create network request to the device."
+
+      argument :network, :struct,
+        constraints: [instance_of: Edgehog.Containers.Network],
+        description: "The Network the device has to create.",
+        allow_nil?: false
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this network is used"
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateNetwork
+    end
+
+    update :send_create_device_mapping_request do
+      description "Send a create device-file mapping request to the device."
+
+      argument :device_mapping, :struct do
+        constraints instance_of: DeviceMapping
+        description "The new device-file mapping for the device."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this device-file mapping is used."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateDeviceMapping
+    end
+
+    update :send_release_command do
+      description "Sends a command for the given application release."
+
+      argument :release, :struct do
+        constraints instance_of: Release
+        description "The release target of the command."
+      end
+
+      argument :command, Edgehog.Devices.Device.DeploymentCommand
+
+      manual Edgehog.Devices.Device.ManualActions.SendApplicationCommand
+    end
+
+    update :update_application do
+      description "Updates an application to a newer release."
+
+      argument :from, :struct do
+        constraints instance_of: Deployment
+        allow_nil? false
+
+        description """
+        The release to be upgraded. Should be currently installed.
+        This argument is needed because there might be multiple versions of a single application installed on the device.
+        """
+      end
+
+      argument :to, :struct do
+        constraints instance_of: Deployment
+        allow_nil? false
+        description "The new release of the application"
+      end
+
+      manual Edgehog.Devices.Device.ManualActions.UpdateApplication
     end
   end
 
@@ -307,12 +449,36 @@ defmodule Edgehog.Devices.Device do
       description "The existing OTA operations for this device"
       writable? false
     end
+
+    has_many :application_deployments, Edgehog.Containers.Deployment do
+      public? true
+    end
+
+    many_to_many :application_releases, Edgehog.Containers.Release do
+      through Edgehog.Containers.Deployment
+      join_relationship :application_deployments
+    end
   end
 
   calculations do
     calculate :appengine_client, :struct, Calculations.AppEngineClient do
       constraints instance_of: Astarte.Client.AppEngine
       filterable? false
+    end
+
+    calculate :available_images, {:array, Types.ImageStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_images}
+    end
+
+    calculate :available_volumes, {:array, Types.VolumeStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_volumes}
+    end
+
+    calculate :available_networks, {:array, Types.NetworkStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_networks}
     end
 
     calculate :device_status, :struct, Calculations.DeviceStatus do
@@ -332,9 +498,19 @@ defmodule Edgehog.Devices.Device do
       calculation Calculations.CellularConnection
     end
 
+    calculate :available_deployments, {:array, Types.DeploymentStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_deployments}
+    end
+
     calculate :base_image, Types.BaseImage do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :base_image_info}
+    end
+
+    calculate :available_containers, {:array, Types.ContainerStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_containers}
     end
 
     calculate :battery_status, {:array, BatterySlot} do

@@ -1,0 +1,16 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.AvailableDeployments",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "allow_unset": true,
+      "endpoint": "/%{deployment_id}/status",
+      "type": "string",
+      "description": "Status of the deployment",
+      "doc": "Possible values: [Stopped, Started]"
+    }
+  ]
+}

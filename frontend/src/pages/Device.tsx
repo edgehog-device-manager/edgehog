@@ -36,6 +36,7 @@ import {
   useMutation,
   fetchQuery,
   useRelayEnvironment,
+  useRefetchableFragment,
   usePaginationFragment,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -57,6 +58,8 @@ import type { Device_wifiScanResults$key } from "api/__generated__/Device_wifiSc
 import type { Device_networkInterfaces$key } from "api/__generated__/Device_networkInterfaces.graphql";
 import type { Device_otaOperations$key } from "api/__generated__/Device_otaOperations.graphql";
 import type { Device_cellularConnection$key } from "api/__generated__/Device_cellularConnection.graphql";
+import type { Device_deployedApplications$key } from "api/__generated__/Device_deployedApplications.graphql";
+import type { Device_deployedApplications_RefetchQuery } from "api/__generated__/Device_deployedApplications_RefetchQuery.graphql";
 import type { Device_connectionStatus$key } from "api/__generated__/Device_connectionStatus.graphql";
 import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
 import type { Device_createManualOtaOperation_Mutation } from "api/__generated__/Device_createManualOtaOperation_Mutation.graphql";
@@ -67,12 +70,14 @@ import type { Device_requestForwarderSession_Mutation } from "api/__generated__/
 import type { Device_getForwarderSession_Query } from "api/__generated__/Device_getForwarderSession_Query.graphql";
 import type { Device_getExistingDeviceTags_Query } from "api/__generated__/Device_getExistingDeviceTags_Query.graphql";
 import { Link, Route } from "Navigation";
+import AddAvailableApplications from "components/AddAvailableApplications";
 import Alert from "components/Alert";
 import Button from "components/Button";
 import CellularConnectionTabs from "components/CellularConnectionTabs";
 import Center from "components/Center";
 import ConnectionStatus from "components/ConnectionStatus";
 import Col from "components/Col";
+import DeployedApplicationsTable from "components/DeployedApplicationsTable";
 import Figure from "components/Figure";
 import Form from "components/Form";
 import LastSeen from "components/LastSeen";
@@ -271,6 +276,27 @@ const GET_DEVICE_QUERY = graphql`
       ...Device_cellularConnection
       ...Device_networkInterfaces
       ...Device_connectionStatus
+    }
+    ...Device_deployedApplications
+  }
+`;
+
+// TODO: the fragment is defined on the RootQueryType so it can specify
+// which query to run, otherwise Relay would automatically use the `node`
+// query when refetching the fragment. However, the backend doesn't currently
+// support loading relationships (the device's deployments) through the `node`
+// query.
+// See also: https://github.com/ash-project/ash_graphql/issues/99
+const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
+  fragment Device_deployedApplications on RootQueryType
+  @refetchable(queryName: "Device_deployedApplications_RefetchQuery") {
+    device(id: $id) {
+      id
+      online
+      systemModel {
+        name
+      }
+      ...DeployedApplicationsTable_deployedApplications
     }
   }
 `;
@@ -546,6 +572,87 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
             </FormRow>
           )}
         </Stack>
+      </div>
+    </Tab>
+  );
+};
+
+interface ApplicationsTabProps {
+  deviceRef: Device_deployedApplications$key;
+}
+
+const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const intl = useIntl();
+
+  const [{ device }, refetch] = useRefetchableFragment<
+    Device_deployedApplications_RefetchQuery,
+    Device_deployedApplications$key
+  >(DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT, deviceRef);
+
+  const isOnline = useMemo(() => device?.online ?? false, [device]);
+
+  const handleRefetch = useCallback(() => {
+    refetch(
+      { id: device?.id, first: 10_000 },
+      { fetchPolicy: "store-and-network" },
+    );
+  }, [refetch, device?.id]);
+
+  useEffect(() => {
+    const intervalId = setInterval(handleRefetch, 5000);
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  if (!device) {
+    return null;
+  }
+
+  return (
+    <Tab
+      eventKey="applications-tab"
+      title={intl.formatMessage({
+        id: "pages.Device.ApplicationsTab",
+        defaultMessage: "Applications",
+      })}
+    >
+      <Alert
+        className="mt-3"
+        show={!!errorFeedback}
+        variant="danger"
+        onClose={() => setErrorFeedback(null)}
+        dismissible
+      >
+        {errorFeedback}
+      </Alert>
+      <div className="mt-3">
+        <h5>
+          <FormattedMessage
+            id="pages.Device.ApplicationsTab.InstallNewApp"
+            defaultMessage="Add Available Applications"
+          />
+        </h5>
+        <AddAvailableApplications
+          deviceId={device.id}
+          systemModelName={device.systemModel?.name}
+          isOnline={isOnline}
+          setErrorFeedback={setErrorFeedback}
+          onDeployComplete={handleRefetch}
+        />
+        <h5 className="mt-4">
+          <FormattedMessage
+            id="pages.Device.ApplicationsTab.DeployedApplications"
+            defaultMessage="Deployed Applications"
+          />
+        </h5>
+        <DeployedApplicationsTable
+          deviceRef={device}
+          isOnline={isOnline}
+          setErrorFeedback={setErrorFeedback}
+          onDeploymentChange={handleRefetch}
+        />
       </div>
     </Tab>
   );
@@ -1905,6 +2012,7 @@ const DeviceContent = ({
               "device-network-interfaces-tab",
               "device-wifi-scan-results-tab",
               "device-software-update-tab",
+              "applications-tab",
             ]}
           >
             <DeviceHardwareInfoTab deviceRef={device} />
@@ -1919,6 +2027,7 @@ const DeviceContent = ({
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
             <SoftwareUpdateTab deviceRef={device} />
+            <ApplicationsTab deviceRef={deviceData} />
           </Tabs>
         </Stack>
       </Page.Main>

@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
+  import Edgehog.CampaignsFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
@@ -29,16 +30,16 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
   describe "updateCampaigns query" do
     setup %{tenant: tenant} do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
-      update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
       base_image = base_image_fixture(tenant: tenant)
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foobar"])
 
       context = %{
-        update_channel: update_channel,
+        channel: channel,
         base_image: base_image,
         device: device
       }
@@ -53,7 +54,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
     test "returns update campaigns if present", ctx do
       %{
         tenant: tenant,
-        update_channel: update_channel,
+        channel: channel,
         base_image: base_image,
         device: device
       } = ctx
@@ -61,7 +62,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       update_campaign =
         update_campaign_fixture(
           base_image_id: base_image.id,
-          update_channel_id: update_channel.id,
+          channel_id: channel.id,
           tenant: tenant
         )
 
@@ -73,8 +74,8 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       assert update_campaign_data["outcome"] == nil
       assert update_campaign_data["baseImage"]["version"] == base_image.version
       assert update_campaign_data["baseImage"]["url"] == base_image.url
-      assert update_campaign_data["updateChannel"]["name"] == update_channel.name
-      assert update_campaign_data["updateChannel"]["handle"] == update_channel.handle
+      assert update_campaign_data["channel"]["name"] == channel.name
+      assert update_campaign_data["channel"]["handle"] == channel.handle
       assert response_rollout_mechanism = update_campaign_data["rolloutMechanism"]
 
       assert response_rollout_mechanism["maxFailurePercentage"] ==
@@ -168,7 +169,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
               version
               url
             }
-            updateChannel {
+            channel {
               name
               handle
             }

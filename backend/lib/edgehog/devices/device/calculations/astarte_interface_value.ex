@@ -46,6 +46,33 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
     end)
   end
 
+  @available_containers Application.compile_env(
+                          :edgehog,
+                          :astarte_available_containers_module,
+                          Edgehog.Astarte.Device.AvailableContainers
+                        )
+  @available_images Application.compile_env(
+                      :edgehog,
+                      :astarte_available_images_module,
+                      Edgehog.Astarte.Device.AvailableImages
+                    )
+  @available_deployments Application.compile_env(
+                           :edgehog,
+                           :astarte_available_deployments_module,
+                           Edgehog.Astarte.Device.AvailableDeployments
+                         )
+  @available_networks Application.compile_env(
+                        :edgehog,
+                        :astarte_available_networks_module,
+                        Edgehog.Astarte.Device.AvailableNetworks
+                      )
+
+  @available_volumes Application.compile_env(
+                       :edgehog,
+                       :astarte_available_volumes_module,
+                       Edgehog.Astarte.Device.AvailableVolumes
+                     )
+
   @base_image Application.compile_env(
                 :edgehog,
                 :astarte_base_image_module,
@@ -94,6 +121,11 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                       Edgehog.Astarte.Device.WiFiScanResult
                     )
 
+  defp value_id_to_fetch_fun(:available_containers), do: &@available_containers.get/2
+  defp value_id_to_fetch_fun(:available_deployments), do: &@available_deployments.get/2
+  defp value_id_to_fetch_fun(:available_images), do: &@available_images.get/2
+  defp value_id_to_fetch_fun(:available_volumes), do: &@available_volumes.get/2
+  defp value_id_to_fetch_fun(:available_networks), do: &@available_networks.get/2
   defp value_id_to_fetch_fun(:base_image_info), do: &@base_image.get/2
   defp value_id_to_fetch_fun(:hardware_info), do: &@hardware_info.get/2
   defp value_id_to_fetch_fun(:modem_properties), do: &@cellular_connection.get_modem_properties/2
