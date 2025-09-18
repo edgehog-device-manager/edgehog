@@ -213,7 +213,7 @@ const DeploymentCampaign = ({
               releaseId: release.id,
             }}
           >
-            {channel.name}
+            {release.version}
           </Link>
         </FormRow>
       </Col>
