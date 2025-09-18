@@ -23,6 +23,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   Lazy executor core pure funcitons.
   """
   alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment
   alias Edgehog.DeploymentCampaigns
   alias Edgehog.DeploymentCampaigns.DeploymentCampaign
   alias Edgehog.DeploymentCampaigns.DeploymentTarget
@@ -172,7 +173,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
 
   def mark_deployment_as_timed_out!(tenant_id, deployment) do
     # TODO: add timneout information on the deplyment and correctly handle this case
-    Containers.mark_deployment_as_errored!(deployment, "timed out.", tenant: tenant_id)
+    Containers.mark_deployment_as_timed_out!(deployment, tenant: tenant_id)
   end
 
   @doc """

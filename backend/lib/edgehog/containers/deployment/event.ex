@@ -24,14 +24,23 @@ defmodule Edgehog.Containers.Deployment.Event do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Deployment.EventType
+
   graphql do
     type :deployment_event
+  end
+
+  actions do
+    defaults [
+      :read,
+      create: [:deployment_id, :type, :message]
+    ]
   end
 
   attributes do
     uuid_primary_key :id
 
-    attribute :type, :atom do
+    attribute :type, EventType do
       public? true
       allow_nil? false
     end
