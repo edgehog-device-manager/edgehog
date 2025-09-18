@@ -29,6 +29,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   alias Edgehog.Error.AstarteAPIError
   alias Edgehog.PubSub
 
+  require Ash.Query
+
   @doc """
   Fetches a deployment campaign by its ID and tenant ID, raising an error if not found.
 
@@ -418,6 +420,15 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
         {:ok, target}
       end
     end
+  end
+
+  def get_latest_error_for_deployment(tenant_id, deployment_id) do
+    Deployment.Event
+    |> Ash.Query.filter(deployment_id == ^deployment_id)
+    |> Ash.Query.filter(type == :error)
+    |> Ash.Query.sort(inserted_at: :desc)
+    |> Ash.Query.limit(1)
+    |> Ash.read(tenant: tenant_id)
   end
 
   defp do_deploy(target, release, _deployment_mechanism) do
