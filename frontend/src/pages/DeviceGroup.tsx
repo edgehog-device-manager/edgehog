@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2024 SECO Mind Srl
+  Copyright 2022 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -166,6 +166,19 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
                 (deviceGroup) => deviceGroup.getDataID() !== deviceGroupId,
               ),
               "deviceGroups",
+            );
+          }
+        });
+
+        const updateChannels = root.getLinkedRecords("updateChannels");
+        updateChannels?.forEach((updateChannel) => {
+          const targetGroups = updateChannel.getLinkedRecords("targetGroups");
+          if (targetGroups) {
+            updateChannel.setLinkedRecords(
+              targetGroups.filter(
+                (targetGroup) => targetGroup.getDataID() !== deviceGroupId,
+              ),
+              "targetGroups",
             );
           }
         });
