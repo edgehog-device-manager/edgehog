@@ -466,7 +466,13 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   def handle_event(:internal, {:deployment_failure, deployment}, state, data) do
-    Logger.notice("Device #{deployment.device_id} failed to update: #{deployment.last_error_message}")
+    latest_error_event =
+      case Core.get_latest_error_for_deployment(deployment.tenant_id, deployment.id) do
+        {:ok, error} -> error
+        _ -> "Could not find any error event."
+      end
+
+    Logger.notice("Device #{deployment.device_id} failed. Latest recorded error: \n #{inspect(latest_error_event)}")
 
     _ =
       data.tenant_id
