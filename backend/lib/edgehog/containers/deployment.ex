@@ -39,7 +39,7 @@ defmodule Edgehog.Containers.Deployment do
   graphql do
     type :deployment
 
-    paginate_relationship_with container_deployments: :relay
+    paginate_relationship_with container_deployments: :relay, events: :relay
   end
 
   actions do
@@ -179,13 +179,6 @@ defmodule Edgehog.Containers.Deployment do
       change {PublishNotification, event_type: :deployment_updated}
     end
 
-    update :mark_as_starting do
-      require_atomic? false
-
-      change Changes.MarkAsStarting
-      change {PublishNotification, event_type: :deployment_updated}
-    end
-
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
 
@@ -193,28 +186,21 @@ defmodule Edgehog.Containers.Deployment do
       change {PublishNotification, event_type: :deployment_updated}
     end
 
-    update :mark_as_stopping do
-      require_atomic? false
+    update :mark_as_timed_out do
+      change set_attribute(:timed_out, true)
 
-      change Changes.MarkAsStopping
-      change {PublishNotification, event_type: :deployment_updated}
+      require_atomic? false
+      change {PublishNotification, event_type: :deployment_timeout}
     end
 
-    update :mark_as_errored do
-      argument :message, :string do
+    update :append_event do
+      require_atomic? false
+
+      argument :event, :map do
         allow_nil? false
       end
 
-      change set_attribute(:state, :error)
-
-      require_atomic? false
-      change {PublishNotification, event_type: :deployment_error}
-    end
-
-    update :mark_as_deleting do
-      change set_attribute(:state, :deleting)
-
-      require_atomic? false
+      change Changes.AppendEvent
       change {PublishNotification, event_type: :deployment_updated}
     end
 
@@ -241,6 +227,12 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
+    attribute :timed_out, :boolean do
+      allow_nil? false
+      default false
+      public? true
+    end
+
     timestamps()
   end
 
@@ -262,6 +254,10 @@ defmodule Edgehog.Containers.Deployment do
       through Edgehog.Containers.DeploymentContainerDeployment
       source_attribute_on_join_resource :deployment_id
       destination_attribute_on_join_resource :container_deployment_id
+      public? true
+    end
+
+    has_many :events, Edgehog.Containers.Deployment.Event do
       public? true
     end
   end
