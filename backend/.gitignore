@@ -34,3 +34,6 @@ edgehog-*.tar
 
 /.nix-mix
 /.mix-hex
+
+# Ignore expert lsp files
+/.expert

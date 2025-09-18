@@ -42,6 +42,38 @@ Mox.defmock(Edgehog.Astarte.Device.StorageUsageMock,
   for: Edgehog.Astarte.Device.StorageUsage.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.DeploymentCommandMock,
+  for: Edgehog.Astarte.Device.DeploymentCommand.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.DeploymentUpdateMock,
+  for: Edgehog.Astarte.Device.DeploymentUpdate.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableContainersMock,
+  for: Edgehog.Astarte.Device.AvailableContainers.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateContainerRequestMock,
+  for: Edgehog.Astarte.Device.CreateContainerRequest.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateDeploymentRequestMock,
+  for: Edgehog.Astarte.Device.CreateDeploymentRequest.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateNetworkRequestMock,
+  for: Edgehog.Astarte.Device.CreateNetworkRequest.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateImageRequestMock,
+  for: Edgehog.Astarte.Device.CreateImageRequest.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.CreateVolumeRequestMock,
+  for: Edgehog.Astarte.Device.CreateVolumeRequest.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.SystemStatusMock,
   for: Edgehog.Astarte.Device.SystemStatus.Behaviour
 )
@@ -99,3 +131,19 @@ Mox.defmock(Edgehog.OSManagement.EphemeralImageMock,
 Mox.defmock(Edgehog.BaseImages.StorageMock, for: Edgehog.BaseImages.Storage)
 
 Mox.defmock(Edgehog.Tenants.ReconcilerMock, for: Edgehog.Tenants.Reconciler.Behaviour)
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableImagesMock,
+  for: Edgehog.Astarte.Device.AvailableImages.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableDeploymentsMock,
+  for: Edgehog.Astarte.Device.AvailableDeployments.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableVolumesMock,
+  for: Edgehog.Astarte.Device.AvailableVolumes.Behaviour
+)
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableNetworksMock,
+  for: Edgehog.Astarte.Device.AvailableNetworks.Behaviour
+)

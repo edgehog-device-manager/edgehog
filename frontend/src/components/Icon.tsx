@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2022 SECO Mind Srl
+  Copyright 2021-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,27 +18,36 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import {
   faAngleDown,
   faAngleUp,
+  faArrowAltCircleUp,
   faArrowDown,
   faArrowUp,
   faBug,
+  faCheck,
   faCircle,
+  faCloud,
   faCompactDisc,
+  faDatabase,
+  faPlay,
   faPlus,
+  faRocket,
   faSearch,
+  faSpinner,
+  faStop,
   faSwatchbook,
   faTabletAlt,
+  faTimes,
   faTrash,
   faUser,
-  faCheck,
-  faTimes,
-  faDatabase,
-  faCloud,
+  faEye,
+  faEyeSlash,
+  faTriangleExclamation,
+  faObjectGroup,
 } from "@fortawesome/free-solid-svg-icons";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const icons = {
   arrowDown: faArrowDown,
@@ -53,12 +62,21 @@ const icons = {
   github: faGithub,
   models: faSwatchbook,
   os: faCompactDisc,
+  play: faPlay,
   plus: faPlus,
   profile: faUser,
   search: faSearch,
+  spinner: faSpinner,
+  stop: faStop,
   check: faCheck,
   close: faTimes,
   otaUpdates: faCloud,
+  applications: faRocket,
+  upgrade: faArrowAltCircleUp,
+  showPassword: faEye,
+  hidePassword: faEyeSlash,
+  warning: faTriangleExclamation,
+  channels: faObjectGroup,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;

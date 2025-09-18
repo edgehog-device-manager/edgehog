@@ -22,32 +22,33 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
+  import Edgehog.CampaignsFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
   import Edgehog.UpdateCampaignsFixtures
 
-  alias Edgehog.UpdateCampaigns.ExecutorRegistry
+  alias Edgehog.Campaigns.ExecutorRegistry
   alias Edgehog.UpdateCampaigns.UpdateCampaign
 
   describe "createUpdateCampaign mutation" do
     test "creates update_campaign with valid data and at least one target", %{tenant: tenant} do
       target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
-      update_channel = update_channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
       base_image = base_image_fixture(tenant: tenant)
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
-        |> device_fixture_compatible_with()
+        |> device_fixture_compatible_with_base_image()
         |> add_tags(["foobar"])
 
       base_image_id = AshGraphql.Resource.encode_relay_id(base_image)
-      update_channel_id = AshGraphql.Resource.encode_relay_id(update_channel)
+      channel_id = AshGraphql.Resource.encode_relay_id(channel)
 
       update_campaign_data =
         [
           name: "My Update Campaign",
           base_image_id: base_image_id,
-          update_channel_id: update_channel_id,
+          channel_id: channel_id,
           tenant: tenant
         ]
         |> create_update_campaign_mutation()
@@ -59,9 +60,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
       assert update_campaign_data["baseImage"]["id"] == base_image_id
       assert update_campaign_data["baseImage"]["version"] == base_image.version
       assert update_campaign_data["baseImage"]["url"] == base_image.url
-      assert update_campaign_data["updateChannel"]["id"] == update_channel_id
-      assert update_campaign_data["updateChannel"]["name"] == update_channel.name
-      assert update_campaign_data["updateChannel"]["handle"] == update_channel.handle
+      assert update_campaign_data["channel"]["id"] == channel_id
+      assert update_campaign_data["channel"]["name"] == channel.name
+      assert update_campaign_data["channel"]["handle"] == channel.handle
       assert [target_data] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
       assert target_data["status"] == "IDLE"
       assert target_data["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
@@ -147,17 +148,17 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
              } = error
     end
 
-    test "fails when trying to use a non-existing update channel", %{tenant: tenant} do
-      update_channel_id = non_existing_update_channel_id(tenant)
+    test "fails when trying to use a non-existing channel", %{tenant: tenant} do
+      channel_id = non_existing_channel_id(tenant)
 
       error =
-        [update_channel_id: update_channel_id, tenant: tenant]
+        [channel_id: channel_id, tenant: tenant]
         |> create_update_campaign_mutation()
         |> extract_error!()
 
       assert %{
                path: ["createUpdateCampaign"],
-               fields: [:update_channel_id],
+               fields: [:channel_id],
                message: "could not be found",
                code: "invalid_attribute"
              } = error
@@ -347,7 +348,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
             version
             url
           }
-          updateChannel {
+          channel {
             id
             name
             handle
@@ -371,10 +372,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     {name, opts} = Keyword.pop_lazy(opts, :name, fn -> unique_update_campaign_name() end)
 
-    {update_channel_id, opts} =
-      Keyword.pop_lazy(opts, :update_channel_id, fn ->
+    {channel_id, opts} =
+      Keyword.pop_lazy(opts, :channel_id, fn ->
         [tenant: tenant]
-        |> update_channel_fixture()
+        |> channel_fixture()
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
@@ -398,7 +399,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
     input = %{
       "name" => name,
       "baseImageId" => base_image_id,
-      "updateChannelId" => update_channel_id,
+      "channelId" => channel_id,
       "rolloutMechanism" => rollout_mechanism
     }
 
@@ -432,8 +433,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
     update_campaign
   end
 
-  defp non_existing_update_channel_id(tenant) do
-    fixture = update_channel_fixture(tenant: tenant)
+  defp non_existing_channel_id(tenant) do
+    fixture = channel_fixture(tenant: tenant)
     id = AshGraphql.Resource.encode_relay_id(fixture)
 
     :ok = Ash.destroy!(fixture, tenant: tenant)
@@ -458,7 +459,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
   end
 
   defp fetch_update_campaign_executor_pid(tenant, update_campaign) do
-    key = {tenant.tenant_id, update_campaign.id}
+    key = {tenant.tenant_id, update_campaign.id, :ota_update}
 
     case Registry.lookup(ExecutorRegistry, key) do
       [] -> :error

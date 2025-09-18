@@ -286,6 +286,7 @@ defmodule Edgehog.TenantsTest do
   describe "Tenants.destroy_tenant/1" do
     import Edgehog.AstarteFixtures
     import Edgehog.BaseImagesFixtures
+    import Edgehog.CampaignsFixtures
     import Edgehog.DevicesFixtures
     import Edgehog.GroupsFixtures
     import Edgehog.OSManagementFixtures
@@ -327,7 +328,7 @@ defmodule Edgehog.TenantsTest do
 
       manual_ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
 
-      update_channel = update_channel_fixture(tenant: tenant)
+      channel = channel_fixture(tenant: tenant)
       update_campaign = update_campaign_fixture(base_image_id: base_image.id, tenant: tenant)
       update_target = target_fixture(base_image_id: base_image.id, tenant: tenant)
 
@@ -362,7 +363,7 @@ defmodule Edgehog.TenantsTest do
 
       refute entry_exists?(Edgehog.OSManagement.OTAOperation, manual_ota_operation.id, tenant)
 
-      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateChannel, update_channel.id, tenant)
+      refute entry_exists?(Edgehog.Campaigns.Channel, channel.id, tenant)
       refute entry_exists?(Edgehog.UpdateCampaigns.UpdateCampaign, update_campaign.id, tenant)
       refute entry_exists?(Edgehog.UpdateCampaigns.UpdateTarget, update_target.id, tenant)
     end

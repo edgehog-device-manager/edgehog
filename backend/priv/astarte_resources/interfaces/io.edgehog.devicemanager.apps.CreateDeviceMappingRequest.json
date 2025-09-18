@@ -1,0 +1,55 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/deviceMapping/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Create Device Mapping Request id",
+      "doc": "Unique id for the container."
+    },
+    {
+      "endpoint": "/deviceMapping/deploymentId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Reference to a Deployment using the device mapping",
+      "doc": "The deployment in which the device mapping is used, so the device can send deployment events to Astarte for the create request"
+    },
+    {
+      "endpoint": "/deviceMapping/pathOnHost",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Path on host for the device",
+      "doc": "Path on host for the device, for example '/dev/deviceName'"
+    },
+    {
+      "endpoint": "/deviceMapping/pathInContainer",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Path in the container for the device",
+      "doc": "Path in the container for the device, for example '/dev/deviceName'"
+    },
+    {
+      "endpoint": "/deviceMapping/cGroupPermissions",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Permissions on the device.",
+      "doc": "Permissions on the device, for example 'mrw'"
+    }
+  ]
+}

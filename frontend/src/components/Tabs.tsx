@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -107,6 +107,13 @@ const Tabs = ({
     );
     return sortedEventKeys.map((eventKey) => tabRefsByEventKey[eventKey]);
   }, [tabRefs, tabsOrder]);
+
+  useEffect(() => {
+    if (!activeKey && sortedTabRefs.length > 0) {
+      const fallback = defaultActiveKey ?? sortedTabRefs[0].eventKey;
+      setActiveKey(fallback);
+    }
+  }, [activeKey, defaultActiveKey, sortedTabRefs]);
 
   return (
     <TabsContext.Provider value={contextValue}>

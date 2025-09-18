@@ -1,0 +1,15 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.AvailableDeviceMappings",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "allow_unset": true,
+      "endpoint": "/%{device_mapping_id}/present",
+      "type": "boolean",
+      "description": "The device is present on the host"
+    }
+  ]
+}

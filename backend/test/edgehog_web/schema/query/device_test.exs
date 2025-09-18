@@ -139,6 +139,47 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
                |> extract_result!()
     end
 
+    test "queries associated application deployments", %{tenant: tenant} do
+      fixture = [tenant: tenant] |> device_fixture() |> Ash.load!(:realm, tenant: tenant)
+
+      deployments = [
+        Edgehog.ContainersFixtures.deployment_fixture(device_id: fixture.id, tenant: tenant),
+        Edgehog.ContainersFixtures.deployment_fixture(device_id: fixture.id, tenant: tenant)
+      ]
+
+      deployments = Enum.sort_by(deployments, & &1.release_id)
+
+      _extra_deployment =
+        Edgehog.ContainersFixtures.deployment_fixture(realm_id: fixture.realm.id, tenant: tenant)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          applicationDeployments {
+            edges {
+              node {
+                releaseId
+              }
+            }
+          }
+        }
+      }
+      """
+
+      id = AshGraphql.Resource.encode_relay_id(fixture)
+      device = [document: document, tenant: tenant, id: id] |> device_query() |> extract_result!()
+
+      results =
+        device
+        |> get_in(["applicationDeployments", "edges"])
+        |> Enum.map(& &1["node"])
+        |> Enum.sort_by(& &1["releaseId"])
+
+      for {deployment, result} <- Enum.zip(deployments, results) do
+        assert result["releaseId"] == deployment.release_id
+      end
+    end
+
     test "returns nil if non existing", %{tenant: tenant} do
       id = non_existing_device_id(tenant)
       result = device_query(tenant: tenant, id: id)
@@ -353,6 +394,60 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert network_interface["technology"] == "ETHERNET"
     end
 
+    test "Available containers", %{tenant: tenant, id: id, device_id: device_id} do
+      container_id = Ash.UUID.generate()
+      status = "Stopped"
+
+      expect(Edgehog.Astarte.Device.AvailableContainersMock, :get, fn _client, ^device_id ->
+        {:ok, available_containers_fixture(id: container_id, status: status)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableContainers {
+            id
+            status
+          }
+        }
+      }
+      """
+
+      %{"availableContainers" => [container]} =
+        [document: document, tenant: tenant, id: id]
+        |> device_query()
+        |> extract_result!()
+
+      assert container["id"] == container_id
+      assert container["status"] == status
+    end
+
+    test "Available volumes", %{tenant: tenant, id: id, device_id: device_id} do
+      volume_id = Ash.UUID.generate()
+      created = true
+
+      expect(Edgehog.Astarte.Device.AvailableVolumesMock, :get, fn _client, ^device_id ->
+        {:ok, available_volumes_fixture(id: volume_id, created: created)}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableVolumes {
+            id
+            created
+          }
+        }
+      }
+      """
+
+      %{"availableVolumes" => [volume]} =
+        [document: document, tenant: tenant, id: id] |> device_query() |> extract_result!()
+
+      assert volume["id"] == volume_id
+      assert volume["created"] == created
+    end
+
     test "OS info", %{tenant: tenant, id: id, device_id: device_id} do
       expect(Edgehog.Astarte.Device.OSInfoMock, :get, fn _client, ^device_id ->
         {:ok, os_info_fixture(name: "foo", version: "3.0.0")}
@@ -505,6 +600,91 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       assert wifi_scan_result["channel"] == 7
       assert wifi_scan_result["essid"] == "MyAP"
     end
+
+    test "Queries available images on the device with their status", %{
+      tenant: tenant,
+      id: id,
+      device_id: device_id
+    } do
+      expect(Edgehog.Astarte.Device.AvailableImagesMock, :get, fn _client, ^device_id ->
+        {:ok, available_images_fixture()}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableImages {
+            id
+            pulled
+          }
+        }
+      }
+      """
+
+      assert %{"availableImages" => [first_image, second_image]} =
+               [document: document, tenant: tenant, id: id]
+               |> device_query()
+               |> extract_result!()
+
+      assert first_image["pulled"]
+      refute second_image["pulled"]
+    end
+
+    test "Queries available networks on the device with their status", %{
+      tenant: tenant,
+      id: id,
+      device_id: device_id
+    } do
+      expect(Edgehog.Astarte.Device.AvailableNetworksMock, :get, fn _client, ^device_id ->
+        {:ok, available_networks_fixture()}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableNetworks {
+            id
+            created
+          }
+        }
+      }
+      """
+
+      assert %{"availableNetworks" => [network]} =
+               [document: document, tenant: tenant, id: id]
+               |> device_query()
+               |> extract_result!()
+
+      assert network["created"]
+    end
+
+    test "can read available deployments on the device", %{
+      tenant: tenant,
+      id: id,
+      device_id: device_id
+    } do
+      expect(Edgehog.Astarte.Device.AvailableDeploymentsMock, :get, fn _client, ^device_id ->
+        {:ok, available_deployments_fixture()}
+      end)
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          availableDeployments {
+            id
+            status
+          }
+        }
+      }
+      """
+
+      assert %{"availableDeployments" => [deployment]} =
+               [document: document, tenant: tenant, id: id]
+               |> device_query()
+               |> extract_result!()
+
+      assert deployment["status"] == "Stopped"
+    end
   end
 
   describe "capabilities" do
@@ -553,6 +733,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         "BATTERY_STATUS",
         "CELLULAR_CONNECTION",
         "COMMANDS",
+        "CONTAINER_MANAGEMENT",
         "GEOLOCATION",
         "HARDWARE_INFO",
         "LED_BEHAVIORS",

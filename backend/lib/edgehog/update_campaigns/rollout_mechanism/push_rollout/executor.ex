@@ -54,7 +54,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   @impl GenStateMachine
   def init(opts) do
     tenant_id = Keyword.fetch!(opts, :tenant_id)
-    update_campaign_id = Keyword.fetch!(opts, :update_campaign_id)
+    update_campaign_id = Keyword.fetch!(opts, :campaign_id)
 
     data = %Data{
       update_campaign_id: update_campaign_id,

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,33 +25,51 @@ import Sidebar from "components/Sidebar";
 import Topbar from "components/Topbar";
 import { useAuth } from "contexts/Auth";
 import { Route } from "Navigation";
-import Device from "pages/Device";
-import Devices from "pages/Devices";
-import DeviceGroup from "pages/DeviceGroup";
-import DeviceGroups from "pages/DeviceGroups";
-import DeviceGroupsNew from "pages/DeviceGroupCreate";
-import SystemModel from "pages/SystemModel";
-import SystemModelCreate from "pages/SystemModelCreate";
-import SystemModels from "pages/SystemModels";
-import HardwareType from "pages/HardwareType";
-import HardwareTypeCreate from "pages/HardwareTypeCreate";
-import HardwareTypes from "pages/HardwareTypes";
+import Application from "pages/Application";
+import ApplicationCreatePage from "pages/ApplicationCreate";
+import Applications from "pages/Applications";
+import AttemptLogin from "pages/AttemptLogin";
+import BaseImage from "pages/BaseImage";
 import BaseImageCollection from "pages/BaseImageCollection";
 import BaseImageCollectionCreate from "pages/BaseImageCollectionCreate";
 import BaseImageCollections from "pages/BaseImageCollections";
-import BaseImage from "pages/BaseImage";
 import BaseImageCreate from "pages/BaseImageCreate";
-import UpdateChannel from "pages/UpdateChannel";
-import UpdateChannelCreate from "pages/UpdateChannelCreate";
-import UpdateChannels from "pages/UpdateChannels";
+import Device from "pages/Device";
+import DeviceGroup from "pages/DeviceGroup";
+import DeviceGroupsNew from "pages/DeviceGroupCreate";
+import DeviceGroups from "pages/DeviceGroups";
+import Devices from "pages/Devices";
+import HardwareType from "pages/HardwareType";
+import HardwareTypeCreate from "pages/HardwareTypeCreate";
+import HardwareTypes from "pages/HardwareTypes";
+import ImageCredential from "pages/ImageCredential";
+import ImageCredentialCreate from "pages/ImageCredentialCreate";
+import ImageCredentials from "pages/ImageCredentials";
+import Login from "pages/Login";
+import Logout from "pages/Logout";
+import Release from "pages/Release";
+import ReleaseCreatePage from "pages/ReleaseCreate";
+import SystemModel from "pages/SystemModel";
+import SystemModelCreate from "pages/SystemModelCreate";
+import SystemModels from "pages/SystemModels";
 import UpdateCampaign from "pages/UpdateCampaign";
 import UpdateCampaignCreate from "pages/UpdateCampaignCreate";
 import UpdateCampaigns from "pages/UpdateCampaigns";
-import Login from "pages/Login";
-import Logout from "pages/Logout";
-import AttemptLogin from "pages/AttemptLogin";
+import ChannelsEdit from "pages/Channel";
+import ChannelsCreate from "pages/ChannelCreate";
+import Channels from "pages/Channels";
+import Volumes from "pages/Volumes";
+import Volume from "pages/Volume";
+import VolumeCreatePage from "pages/VolumeCreate";
+import Networks from "pages/Networks";
+import Network from "pages/Network";
+import NetworkCreatePage from "pages/NetworkCreate";
+import DeploymentsPage from "pages/Deployments";
+import DeploymentCampaignsPage from "pages/DeploymentCampaigns";
+import DeploymentCampaign from "pages/DeploymentCampaign";
+import DeploymentCampaignCreate from "pages/DeploymentCampaignCreate";
 
-import { version, repository, bugs } from "../package.json";
+import { bugs, repository, version } from "../package.json";
 
 type RouterRule = {
   path: string;
@@ -84,12 +102,30 @@ const authenticatedRoutes: RouterRule[] = [
   },
   { path: Route.baseImagesEdit, element: <BaseImage /> },
   { path: Route.baseImagesNew, element: <BaseImageCreate /> },
-  { path: Route.updateChannels, element: <UpdateChannels /> },
-  { path: Route.updateChannelsEdit, element: <UpdateChannel /> },
-  { path: Route.updateChannelsNew, element: <UpdateChannelCreate /> },
+  { path: Route.imageCredentials, element: <ImageCredentials /> },
+  { path: Route.imageCredentialsEdit, element: <ImageCredential /> },
+  { path: Route.imageCredentialsNew, element: <ImageCredentialCreate /> },
+  { path: Route.channels, element: <Channels /> },
+  { path: Route.channelsEdit, element: <ChannelsEdit /> },
+  { path: Route.channelsNew, element: <ChannelsCreate /> },
   { path: Route.updateCampaigns, element: <UpdateCampaigns /> },
   { path: Route.updateCampaignsNew, element: <UpdateCampaignCreate /> },
   { path: Route.updateCampaignsEdit, element: <UpdateCampaign /> },
+  { path: Route.applications, element: <Applications /> },
+  { path: Route.applicationNew, element: <ApplicationCreatePage /> },
+  { path: Route.application, element: <Application /> },
+  { path: Route.release, element: <Release /> },
+  { path: Route.releaseNew, element: <ReleaseCreatePage /> },
+  { path: Route.volumes, element: <Volumes /> },
+  { path: Route.volumeEdit, element: <Volume /> },
+  { path: Route.volumesNew, element: <VolumeCreatePage /> },
+  { path: Route.networks, element: <Networks /> },
+  { path: Route.networksEdit, element: <Network /> },
+  { path: Route.networksNew, element: <NetworkCreatePage /> },
+  { path: Route.deployments, element: <DeploymentsPage /> },
+  { path: Route.deploymentCampaigns, element: <DeploymentCampaignsPage /> },
+  { path: Route.deploymentCampaignsNew, element: <DeploymentCampaignCreate /> },
+  { path: Route.deploymentCampaignsEdit, element: <DeploymentCampaign /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

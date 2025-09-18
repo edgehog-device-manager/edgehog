@@ -1,0 +1,16 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.AvailableImages",
+  "version_major": 0,
+  "version_minor": 1,
+  "description": "Properties available for a specific Docker image on the device",
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "allow_unset": true,
+      "endpoint": "/%{image_id}/pulled",
+      "description": "Pulled image",
+      "type": "boolean"
+    }
+  ]
+}

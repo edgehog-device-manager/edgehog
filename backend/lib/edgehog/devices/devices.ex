@@ -1,6 +1,6 @@
 # This file is part of Edgehog.
 #
-# Copyright 2021-2025 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,7 +84,41 @@ defmodule Edgehog.Devices do
   end
 
   resources do
-    resource Device
+    resource Device do
+      define :fetch_device, action: :read, get_by: [:id]
+      define :fetch_device_by_identity, action: :read, get_by_identity: :unique_realm_device_id
+
+      define :send_create_image_request,
+        action: :send_create_image,
+        args: [:image, :deployment]
+
+      define :send_create_container_request,
+        action: :send_create_container_request,
+        args: [:container, :deployment]
+
+      define :send_create_network_request,
+        action: :send_create_network_request,
+        args: [:network, :deployment]
+
+      define :send_create_volume_request,
+        action: :send_create_volume_request,
+        args: [:volume, :deployment]
+
+      define :send_create_device_mapping_request,
+        action: :send_create_device_mapping_request,
+        args: [:device_mapping, :deployment]
+
+      define :send_create_deployment_request,
+        action: :send_create_deployment_request,
+        args: [:deployment]
+
+      define :send_release_command,
+        action: :send_release_command,
+        args: [:release, :command]
+
+      define :update_application, action: :update_application, args: [:from, :to]
+    end
+
     resource HardwareType
     resource Edgehog.Devices.HardwareTypePartNumber
 

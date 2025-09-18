@@ -1,0 +1,259 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.CreateContainerRequest",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/container/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Create Container Request id",
+      "doc": "Unique id for the container."
+    },
+    {
+      "endpoint": "/container/deploymentId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Reference to a Deployment using the container",
+      "doc": "The deployment in which the container is used, so the device can send deployment events to Astarte for the create request"
+    },
+    {
+      "endpoint": "/container/imageId",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container image id",
+      "doc": "The id of the image to use when creating the container."
+    },
+    {
+      "endpoint": "/container/networkIds",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container network ids",
+      "doc": "The ids of the network to connect with the container."
+    },
+    {
+      "endpoint": "/container/volumeIds",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container volume ids",
+      "doc": "The ids of the volumes to mount on the container."
+    },
+    {
+      "endpoint": "/container/deviceMappingIds",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container device mappings ids",
+      "doc": "The ids of the device mappings to mount on the container."
+    },
+    {
+      "endpoint": "/container/hostname",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container hostname",
+      "doc": "The hostname to use for the container, as a valid RFC 1123 hostname."
+    },
+    {
+      "endpoint": "/container/restartPolicy",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container restart policy",
+      "doc": "The behavior to apply when the container exits. Possible values are: ['', 'no', 'always' 'unless-stopped', 'on-failure']"
+    },
+    {
+      "endpoint": "/container/env",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container environment",
+      "doc": "Array of key=value environment variables. The key cannot contain `=`."
+    },
+    {
+      "endpoint": "/container/binds",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container binds",
+      "doc": "A list of volume bindings for this container. Each volume binding is a string in one of these forms: host-src:container-dest[:options], or volume-name:container-dest[:options]. The container-dest must be an absolute path."
+    },
+    {
+      "endpoint": "/container/networkMode",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Network mode used for this container.",
+      "doc": "Supported standard values are: bridge, host, none, and container:<name|id>. Any other value is taken as a custom network's name to which this container should connect to. If you are using a different container engine than docker, there could be other values."
+    },
+    {
+      "endpoint": "/container/portBindings",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Container port bindings",
+      "doc": "Array of ip:[host_port:]container_port[/protocol] | [hostPort:]containerPort[/protocol]. Protocol is TCP by default"
+    },
+    {
+      "endpoint": "/container/extraHosts",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "List of hostname/IP to add to the container's /etc/hosts",
+      "doc": "A list of hostnames/IP mappings to add to the container's /etc/hosts file. Specified in the form [\"hostname:IP\"]. You can use the `host-gateway` to connect to the host IP"
+    },
+    {
+      "endpoint": "/container/capAdd",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "A list of kernel capabilities to add to the container.",
+      "doc": "A list of kernel capabilities to add to the container."
+    },
+    {
+      "endpoint": "/container/capDrop",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "A list of kernel capabilities to drop from the container.",
+      "doc": "A list of kernel capabilities to drop from the container."
+    },
+    {
+      "endpoint": "/container/cpuPeriod",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "The length of a CPU period in microseconds.",
+      "doc": "Unset if the value is -1 (or negative) and the cpuQuota must also be unset."
+    },
+    {
+      "endpoint": "/container/cpuQuota",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Microseconds of CPU time that the container can get in a CPU period.",
+      "doc": "Unset if the value is -1 (or negative) and the cpuPeriod must also be unset."
+    },
+    {
+      "endpoint": "/container/cpuRealtimePeriod",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "The length of a CPU real-time period in microseconds.",
+      "doc": "The length of a CPU real-time period in microseconds. Set to 0 to allocate no time allocated to real-time tasks. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/cpuRealtimeRuntime",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "The length of a CPU real-time runtime in microseconds.",
+      "doc": "The length of a CPU real-time runtime in microseconds. Set to 0 to allocate no time allocated to real-time tasks. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/memory",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Memory limit in bytes.",
+      "doc": "Memory limit in bytes. Default to 0 for unlimited. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/memoryReservation",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Memory soft limit in bytes. Default to 0 for unlimited. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/memorySwap",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Total memory limit (memory + swap).",
+      "doc": "Total memory limit (memory + swap). Set as -1 to enable unlimited swap. Unset if the value is -2 (or more negative)."
+    },
+    {
+      "endpoint": "/container/memorySwappiness",
+      "type": "integer",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Memory swappiness",
+      "doc": "Tune a container's memory swappiness behavior. Accepts an integer between 0 and 100. Unset if the value is -1 (or negative)."
+    },
+    {
+      "endpoint": "/container/volumeDriver",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Driver that this container uses to mount volumes."
+    },
+    {
+      "endpoint": "/container/storageOpt",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Storage driver options for this container.",
+      "doc": "Storage driver options for this container, in the form \"size=120G\"."
+    },
+    {
+      "endpoint": "/container/readOnlyRootfs",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Mount the container's root filesystem as read only."
+    },
+    {
+      "endpoint": "/container/tmpfs",
+      "type": "stringarray",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "A map of container directories which should be replaced by tmpfs mounts.",
+      "doc": "A map of container directories which should be replaced by tmpfs mounts, and their corresponding mount options. For example:\n \"/run=rw,noexec,nosuid,size=65536k\""
+    },
+    {
+      "endpoint": "/container/privileged",
+      "type": "boolean",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "reliability": "guaranteed",
+      "description": "Run privileged",
+      "doc": "Runs the exec process with extended privileges."
+    }
+  ]
+}

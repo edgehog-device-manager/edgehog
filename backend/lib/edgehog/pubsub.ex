@@ -23,9 +23,14 @@ defmodule Edgehog.PubSub do
   This module implements a PubSub system for events happening inside Edgehog
   """
 
+  alias Edgehog.Containers.Deployment
   alias Edgehog.OSManagement.OTAOperation
 
-  @type event :: :ota_operation_created | :ota_operation_updated
+  @type event ::
+          :ota_operation_created
+          | :ota_operation_updated
+          | :deployment_created
+          | :deployment_updated
 
   @doc """
   Publish an event to the PubSub. Raises if any of the publish fails.
@@ -51,6 +56,24 @@ defmodule Edgehog.PubSub do
     broadcast_many!(topics, payload)
   end
 
+  def publish!(:deployment_created = event, %Deployment{} = deployment) do
+    payload = {event, deployment}
+    topics = [wildcard_topic_for_subject(deployment)]
+
+    broadcast_many!(topics, payload)
+  end
+
+  def publish!(:deployment_updated = event, %Deployment{} = deployment) do
+    payload = {event, deployment}
+
+    topics = [
+      topic_for_subject(deployment),
+      wildcard_topic_for_subject(deployment)
+    ]
+
+    broadcast_many!(topics, payload)
+  end
+
   defp broadcast_many!(topics, payload) do
     Enum.each(topics, fn topic ->
       Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, payload)
@@ -68,9 +91,15 @@ defmodule Edgehog.PubSub do
 
   defp wildcard_topic_for_subject(subject)
   defp wildcard_topic_for_subject(%OTAOperation{}), do: topic_for_subject(:ota_operations)
+  defp wildcard_topic_for_subject(%Deployment{}), do: topic_for_subject(:deployments)
 
   defp topic_for_subject(subject)
   defp topic_for_subject(%OTAOperation{id: id}), do: "ota_operations:#{id}"
   defp topic_for_subject({:ota_operation, id}), do: "ota_operations:#{id}"
   defp topic_for_subject(:ota_operations), do: "ota_operations:*"
+
+  # deployment topics
+  defp topic_for_subject(%Deployment{id: id}), do: "deployments:#{id}"
+  defp topic_for_subject({:deployment, id}), do: "deployments:#{id}"
+  defp topic_for_subject(:deployments), do: "deployments:*"
 end

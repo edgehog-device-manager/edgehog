@@ -25,6 +25,8 @@ defmodule Edgehog.DevicesFixtures do
   """
 
   alias Edgehog.AstarteFixtures
+  alias Edgehog.BaseImages.BaseImage
+  alias Edgehog.Containers.Release
   alias Edgehog.Tenants.Tenant
 
   @doc """
@@ -85,16 +87,37 @@ defmodule Edgehog.DevicesFixtures do
   @doc """
   Generate a %Devices.Device{} compatible with a specific %BaseImages.BaseImage{}, passed as argument.
   """
-  def device_fixture_compatible_with(opts \\ []) do
+  def device_fixture_compatible_with_base_image(opts \\ []) do
     {base_image_id, opts} = Keyword.pop!(opts, :base_image_id)
 
     base_image =
-      Ash.get!(Edgehog.BaseImages.BaseImage, base_image_id,
+      Ash.get!(BaseImage, base_image_id,
         load: [base_image_collection: [system_model: [part_numbers: :part_number]]],
         tenant: opts[:tenant]
       )
 
     [%{part_number: part_number} | _] = base_image.base_image_collection.system_model.part_numbers
+
+    opts
+    |> Keyword.put(:part_number, part_number)
+    |> device_fixture()
+  end
+
+  @doc """
+  Generate a %Devices.Device{} compatible with a specific %Containers.Release{}, passed as argument.
+  """
+  def device_fixture_compatible_with_release(opts \\ []) do
+    {release_id, opts} = Keyword.pop!(opts, :release_id)
+    tenant = Keyword.get(opts, :tenant)
+
+    part_number =
+      Release
+      |> Ash.get!(release_id, load: [system_models: [part_numbers: :part_number]], tenant: tenant)
+      |> Map.get(:system_models, [])
+      |> Enum.random()
+      |> Map.get(:part_numbers, [])
+      |> Enum.random()
+      |> Map.get(:part_number, [])
 
     opts
     |> Keyword.put(:part_number, part_number)

@@ -1,0 +1,15 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.AvailableNetworks",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "mappings": [
+    {
+      "allow_unset": true,
+      "endpoint": "/%{network_id}/created",
+      "type": "boolean",
+      "description": "Network was created"
+    }
+  ]
+}

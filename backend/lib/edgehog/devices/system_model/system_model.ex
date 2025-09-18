@@ -193,6 +193,12 @@ defmodule Edgehog.Devices.SystemModel do
       description "The Hardware type associated with the System Model"
       attribute_public? false
     end
+
+    many_to_many :releases, Edgehog.Containers.Release do
+      through Edgehog.Containers.ReleaseSystemModel
+      public? true
+      description "The various application releases that require the system model to be deployed."
+    end
   end
 
   calculations do

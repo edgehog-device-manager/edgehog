@@ -1,0 +1,22 @@
+{
+    "name": "edgehog-available-images",
+    "action": {
+        "http_url": "<%= @trigger_url %>",
+        "http_method": "post",
+        "http_static_headers": {},
+        "ignore_ssl_errors": false
+    },
+    "simple_triggers": [
+        {
+            "type": "data_trigger",
+            "interface_name": "io.edgehog.devicemanager.apps.AvailableImages",
+            "interface_major": 0,
+            "on": "incoming_data",
+            "match_path": "/*",
+            "value_match_operator": "*"
+        }
+    ]
+    <%= if @can_use_trigger_delivery_policy do %>,
+    "policy": "edgehog-retry-on-server-error"
+    <% end %>
+}

@@ -127,6 +127,15 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     field :timestamp, non_null(:datetime)
   end
 
+  @desc "Describes the status of a container on a device."
+  object :container_status do
+    @desc "The identifier of the container."
+    field :id, :string
+
+    @desc "The status of the container."
+    field :status, :string
+  end
+
   @desc "Describes an Edgehog runtime."
   object :runtime_info do
     @desc "The name of the Edgehog runtime."
@@ -140,5 +149,41 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     @desc "The URL that uniquely identifies the Edgehog runtime implementation."
     field :url, :string
+  end
+
+  @desc "Describe the available images on the device."
+  object :image_status do
+    @desc "The image id."
+    field :id, :string
+
+    @desc "Whether the image is pulled or not."
+    field :pulled, :boolean
+  end
+
+  @desc "Describes the status of a deployment on a device."
+  object :deployment_status do
+    @desc "The deployment id."
+    field :id, :string
+
+    @desc "The deployment status, can be :stopped or :started"
+    field :status, :string
+  end
+
+  @desc "Describes the status of a volume on a device."
+  object :volume_status do
+    @desc "The volume id."
+    field :id, :string
+
+    @desc "The volume status, wheather it was created or not."
+    field :created, :boolean
+  end
+
+  @desc "Describe the available networks on the device."
+  object :network_status do
+    @desc "The network id."
+    field :id, :string
+
+    @desc "Whether the network has been created."
+    field :created, :boolean
   end
 end

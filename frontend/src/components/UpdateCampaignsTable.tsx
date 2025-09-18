@@ -60,7 +60,7 @@ const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
               name
             }
           }
-          updateChannel {
+          channel {
             name
           }
         }
@@ -116,12 +116,12 @@ const columns = [
       <UpdateCampaignOutcome updateCampaignRef={row.original} />
     ),
   }),
-  columnHelper.accessor("updateChannel.name", {
+  columnHelper.accessor("channel.name", {
     header: () => (
       <FormattedMessage
-        id="components.UpdateCampaignsTable.updateChannelNameTitle"
-        defaultMessage="Update Channel"
-        description="Title for the Update Channel column of the Update Campaigns table"
+        id="components.UpdateCampaignsTable.channelNameTitle"
+        defaultMessage="Channel"
+        description="Title for the Channel column of the Update Campaigns table"
       />
     ),
   }),
@@ -202,7 +202,7 @@ const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
                   },
                 },
                 {
-                  updateChannel: {
+                  channel: {
                     name: { ilike: `%${text}%` },
                   },
                 },

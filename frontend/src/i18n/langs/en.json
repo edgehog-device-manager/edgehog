@@ -86,6 +86,70 @@
   "Device.tags": {
     "defaultMessage": "Tags"
   },
+  "components.AddAvailableApplications.deployButton": {
+    "defaultMessage": "Deploy"
+  },
+  "components.AddAvailableApplications.deployErrorFeedback": {
+    "defaultMessage": "Could not deploy the Application, please try again."
+  },
+  "components.AddAvailableApplications.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
+  },
+  "components.AddAvailableApplications.noApplicationsAvailable": {
+    "defaultMessage": "No applications available"
+  },
+  "components.AddAvailableApplications.noApplicationsFoundMatching": {
+    "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "components.AddAvailableApplications.noReleasesAvailable": {
+    "defaultMessage": "No releases available for this application"
+  },
+  "components.AddAvailableApplications.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "components.AddAvailableApplications.searchPlaceholder": {
+    "defaultMessage": "Search or select an application..."
+  },
+  "components.AddAvailableApplications.selectARelease": {
+    "defaultMessage": "Select a release"
+  },
+  "components.AddAvailableApplications.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "components.AddAvailableApplications.selectApplicationFirst": {
+    "defaultMessage": "Please select an application first"
+  },
+  "components.AddAvailableApplications.selectRelease": {
+    "defaultMessage": "Select Release"
+  },
+  "components.ApplicationDevicesTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the application devices table"
+  },
+  "components.ApplicationDevicesTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the application devices table"
+  },
+  "components.ApplicationDevicesTable.releaseVersionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the application devices table"
+  },
+  "components.ApplicationsTable.action": {
+    "defaultMessage": "Action"
+  },
+  "components.ApplicationsTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the application."
+  },
+  "components.ApplicationsTable.deleteModal.title": {
+    "defaultMessage": "Delete Application"
+  },
+  "components.ApplicationsTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the application, please try again."
+  },
+  "components.ApplicationsTable.nameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Name column of the applications table"
+  },
   "components.BaseImageCollectionsTable.handleTitle": {
     "defaultMessage": "Handle",
     "description": "Title for the Handle column of the base image collections table"
@@ -194,6 +258,18 @@
   "components.CellularConnectionTabs.Modem.technology": {
     "defaultMessage": "Technology"
   },
+  "components.ChannelsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the channels table"
+  },
+  "components.ChannelsTable.nameTitle": {
+    "defaultMessage": "Channel Name",
+    "description": "Title for the Name column of the channels table"
+  },
+  "components.ChannelsTable.targetGroupsTitle": {
+    "defaultMessage": "Target Groups",
+    "description": "Title for the Target Groups column of the channels table"
+  },
   "components.ConfirmModal.cancelButton": {
     "defaultMessage": "Cancel",
     "description": "Title for the button to cancel and dismiss a confirmation modal"
@@ -203,6 +279,126 @@
   },
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
+  },
+  "components.ContainersTable.capAdd": {
+    "defaultMessage": "Cap Add"
+  },
+  "components.ContainersTable.capDrop": {
+    "defaultMessage": "Cap Drop"
+  },
+  "components.ContainersTable.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (in microseconds)"
+  },
+  "components.ContainersTable.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (in microseconds)"
+  },
+  "components.ContainersTable.cpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Real Time Period (in microseconds)"
+  },
+  "components.ContainersTable.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Realtime Runtime (in microseconds)"
+  },
+  "components.ContainersTable.deviceMappingsLabel": {
+    "defaultMessage": "Device Mappings"
+  },
+  "components.ContainersTable.envLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "components.ContainersTable.extraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "components.ContainersTable.hostnameLabel": {
+    "defaultMessage": "Hostname"
+  },
+  "components.ContainersTable.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "components.ContainersTable.imageReferenceLabel": {
+    "defaultMessage": "Image Reference"
+  },
+  "components.ContainersTable.memoryLabel": {
+    "defaultMessage": "Memory (in bytes)"
+  },
+  "components.ContainersTable.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (in bytes)"
+  },
+  "components.ContainersTable.memorySwapLabel": {
+    "defaultMessage": "Memory + Swap (in bytes)"
+  },
+  "components.ContainersTable.memorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "components.ContainersTable.networkDriverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.ContainersTable.networkEnableIPv6Label": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "components.ContainersTable.networkInternalLabel": {
+    "defaultMessage": "Internal"
+  },
+  "components.ContainersTable.networkLabelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.ContainersTable.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "components.ContainersTable.networkOptionsLabel": {
+    "defaultMessage": "Options (JSON)"
+  },
+  "components.ContainersTable.networksLabel": {
+    "defaultMessage": "Networks"
+  },
+  "components.ContainersTable.noContainers": {
+    "defaultMessage": "No containers available."
+  },
+  "components.ContainersTable.noDeviceMappings": {
+    "defaultMessage": "No device mappings assigned."
+  },
+  "components.ContainersTable.noNetworks": {
+    "defaultMessage": "No networks assigned."
+  },
+  "components.ContainersTable.noVolumes": {
+    "defaultMessage": "No volumes assigned."
+  },
+  "components.ContainersTable.portBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "components.ContainersTable.privilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "components.ContainersTable.readOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "components.ContainersTable.restartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "components.ContainersTable.storageOptLabel": {
+    "defaultMessage": "Storage Options"
+  },
+  "components.ContainersTable.targetLabel": {
+    "defaultMessage": "Target"
+  },
+  "components.ContainersTable.tmpfsLabel": {
+    "defaultMessage": "Tmpfs"
+  },
+  "components.ContainersTable.volumeDriverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.ContainersTable.volumeLabelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.ContainersTable.volumesLabel": {
+    "defaultMessage": "Volumes"
+  },
+  "components.CreateApplication.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "components.CreateApplication.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.CreateApplication.submitButton": {
+    "defaultMessage": "Create"
   },
   "components.CreateBaseImageCollectionForm.handleLabel": {
     "defaultMessage": "Handle"
@@ -246,6 +442,36 @@
   "components.CreateHardwareTypeForm.submitButton": {
     "defaultMessage": "Create"
   },
+  "components.CreateImageCredentialForm.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.CreateImageCredentialForm.passwordLabel": {
+    "defaultMessage": "Password"
+  },
+  "components.CreateImageCredentialForm.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "components.CreateImageCredentialForm.usernameLabel": {
+    "defaultMessage": "Username"
+  },
+  "components.CreateNetworkForm.driverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.CreateNetworkForm.enableIpv6Label": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "components.CreateNetworkForm.internalLabel": {
+    "defaultMessage": "Internal"
+  },
+  "components.CreateNetworkForm.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.CreateNetworkForm.optionsLabel": {
+    "defaultMessage": "Options"
+  },
+  "components.CreateNetworkForm.submitButton": {
+    "defaultMessage": "Create"
+  },
   "components.CreateSystemModelForm.addPartNumberButton": {
     "defaultMessage": "Add part number"
   },
@@ -273,6 +499,18 @@
   "components.CreateSystemModelForm.submitButton": {
     "defaultMessage": "Create"
   },
+  "components.CreateVolumeForm.driverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.CreateVolumeForm.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.CreateVolumeForm.optionsLabel": {
+    "defaultMessage": "Options"
+  },
+  "components.CreateVolumeForm.submitButton": {
+    "defaultMessage": "Create"
+  },
   "components.DeleteModal.confirmButton": {
     "defaultMessage": "Delete",
     "description": "Title for the button to confirm a deletion modal"
@@ -280,6 +518,200 @@
   "components.DeleteModal.confirmPrompt": {
     "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
     "description": "Description of the action to perform to confirm the deletion modal"
+  },
+  "components.DeployedApplicationsTable.actions": {
+    "defaultMessage": "Actions"
+  },
+  "components.DeployedApplicationsTable.applicationName": {
+    "defaultMessage": "Application Name"
+  },
+  "components.DeployedApplicationsTable.confirmLabel": {
+    "defaultMessage": "Confirm"
+  },
+  "components.DeployedApplicationsTable.confirmModal.description": {
+    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+  },
+  "components.DeployedApplicationsTable.confirmModal.title": {
+    "defaultMessage": "Upgrade Deployment"
+  },
+  "components.DeployedApplicationsTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
+  },
+  "components.DeployedApplicationsTable.deleteModal.note": {
+    "defaultMessage": "Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
+  },
+  "components.DeployedApplicationsTable.deleteModal.title": {
+    "defaultMessage": "Delete Deployment"
+  },
+  "components.DeployedApplicationsTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the deployment, please try again."
+  },
+  "components.DeployedApplicationsTable.noDeployedApplications": {
+    "defaultMessage": "No deployed applications"
+  },
+  "components.DeployedApplicationsTable.noReleasesAvailable": {
+    "defaultMessage": "No Release Versions Available"
+  },
+  "components.DeployedApplicationsTable.noReleasesFoundMatching": {
+    "defaultMessage": "No release versions found matching \"{inputValue}\""
+  },
+  "components.DeployedApplicationsTable.releaseVersion": {
+    "defaultMessage": "Release Version"
+  },
+  "components.DeployedApplicationsTable.resourcesState": {
+    "defaultMessage": "Resources State"
+  },
+  "components.DeployedApplicationsTable.selectOption": {
+    "defaultMessage": "Select a Release Version"
+  },
+  "components.DeployedApplicationsTable.startErrorFeedback": {
+    "defaultMessage": "Could not Start the Deployed Application, please try again."
+  },
+  "components.DeployedApplicationsTable.startErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot start an application while it is offline."
+  },
+  "components.DeployedApplicationsTable.state": {
+    "defaultMessage": "State"
+  },
+  "components.DeployedApplicationsTable.stopErrorFeedback": {
+    "defaultMessage": "Could not Stop the Deployed Application, please try again."
+  },
+  "components.DeployedApplicationsTable.stopErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
+  },
+  "components.DeployedApplicationsTable.upgradeErrorFeedback": {
+    "defaultMessage": "Could not upgrade the deployment, please try again."
+  },
+  "components.DeployedApplicationsTable.upgradeErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
+  },
+  "components.DeploymentCampaignOutcome.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.DeploymentCampaignOutcome.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.DeploymentCampaignStatus.Finished": {
+    "defaultMessage": "Finished"
+  },
+  "components.DeploymentCampaignStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.DeploymentCampaignStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.DeploymentCampaignsTable.applicationNameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Application Name column of the Deployment Campaigns table"
+  },
+  "components.DeploymentCampaignsTable.deploymentChannelNameTitle": {
+    "defaultMessage": "Channel",
+    "description": "Title for the Channel column of the Deployment Campaigns table"
+  },
+  "components.DeploymentCampaignsTable.nameTitle": {
+    "defaultMessage": "Deployment Campaign Name",
+    "description": "Title for the Name column of the Deployment Campaigns table"
+  },
+  "components.DeploymentCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.DeploymentCampaignsTable.releaseNameTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release column of the Deployment Campaigns table"
+  },
+  "components.DeploymentCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.DeploymentResourcesStateComponent.createdContainers": {
+    "defaultMessage": "Created containers"
+  },
+  "components.DeploymentResourcesStateComponent.createdDeviceMappings": {
+    "defaultMessage": "Created device mappings"
+  },
+  "components.DeploymentResourcesStateComponent.createdImages": {
+    "defaultMessage": "Created images"
+  },
+  "components.DeploymentResourcesStateComponent.createdNetworks": {
+    "defaultMessage": "Created networks"
+  },
+  "components.DeploymentResourcesStateComponent.createdVolumes": {
+    "defaultMessage": "Created volumes"
+  },
+  "components.DeploymentResourcesStateComponent.initial": {
+    "defaultMessage": "Initial"
+  },
+  "components.DeploymentResourcesStateComponent.ready": {
+    "defaultMessage": "Ready"
+  },
+  "components.DeploymentStateComponent.deleting": {
+    "defaultMessage": "Deleting"
+  },
+  "components.DeploymentStateComponent.deploying": {
+    "defaultMessage": "Deploying"
+  },
+  "components.DeploymentStateComponent.error": {
+    "defaultMessage": "Error"
+  },
+  "components.DeploymentStateComponent.pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.DeploymentStateComponent.sent": {
+    "defaultMessage": "Sent"
+  },
+  "components.DeploymentStateComponent.started": {
+    "defaultMessage": "Started"
+  },
+  "components.DeploymentStateComponent.starting": {
+    "defaultMessage": "Starting"
+  },
+  "components.DeploymentStateComponent.stopped": {
+    "defaultMessage": "Stopped"
+  },
+  "components.DeploymentStateComponent.stopping": {
+    "defaultMessage": "Stopping"
+  },
+  "components.DeploymentTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at",
+    "description": "Title for the Completed at column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.deviceNameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Device Name column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.lastErrorMessageTitle": {
+    "defaultMessage": "Failure Reason",
+    "description": "Title for the Last Error Message column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at",
+    "description": "Title for the Latest attempt at column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.resourcesStateTitle": {
+    "defaultMessage": "Resources state",
+    "description": "Title for the Resources state column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTable.stateTitle": {
+    "defaultMessage": "State",
+    "description": "Title for the State column of the Deployment Targets table"
+  },
+  "components.DeploymentTargetsTabs.deploymentTargetsLabel": {
+    "defaultMessage": "Devices"
+  },
+  "components.DeploymentsTable.applicationNameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Application Name column of the deployments table"
+  },
+  "components.DeploymentsTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the deployments table"
+  },
+  "components.DeploymentsTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the deployments table"
+  },
+  "components.DeploymentsTable.releaseVersionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the deployments table"
   },
   "components.DeviceGroupsTable.handleTitle": {
     "defaultMessage": "Handle",
@@ -292,6 +724,26 @@
   "components.DeviceGroupsTable.selectorTitle": {
     "defaultMessage": "Selector",
     "description": "Title for the Selector column of the device groups table"
+  },
+  "components.DevicesGroupsTable.deviceIdTitle": {
+    "defaultMessage": "Device ID",
+    "description": "Title for the Device ID column of the devices table"
+  },
+  "components.DevicesGroupsTable.lastSeenTitle": {
+    "defaultMessage": "Last Seen",
+    "description": "Title for the Last Seen column of the devices table"
+  },
+  "components.DevicesGroupsTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the devices table"
+  },
+  "components.DevicesGroupsTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.DevicesGroupsTable.tagsTitle": {
+    "defaultMessage": "Tags",
+    "description": "Title for the Tags column of the devices table"
   },
   "components.DevicesTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
@@ -334,6 +786,12 @@
   "components.HardwareTypesTable.partNumbersTitle": {
     "defaultMessage": "Part Numbers"
   },
+  "components.ImageCredentialsTable.labelTitle": {
+    "defaultMessage": "Label"
+  },
+  "components.ImageCredentialsTable.usernameTitle": {
+    "defaultMessage": "Username"
+  },
   "components.LastSeen.never": {
     "defaultMessage": "Never"
   },
@@ -357,6 +815,9 @@
   },
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
+  },
+  "components.MonacoJsonEditor.jsonError": {
+    "defaultMessage": "JSON error: {error}"
   },
   "components.NetworkInterfacesTable.macAddressTitle": {
     "defaultMessage": "MAC Address"
@@ -385,6 +846,22 @@
   "components.NetworkInterfacesTable.technologyTitle": {
     "defaultMessage": "Technology"
   },
+  "components.NetworksTable.driverTitle": {
+    "defaultMessage": "Driver",
+    "description": "Title for the Driver column of the networks table"
+  },
+  "components.NetworksTable.enableIpv6": {
+    "defaultMessage": "Enable IPv6",
+    "description": "Title for the Enable IPv6 column of the networks table"
+  },
+  "components.NetworksTable.internalTitle": {
+    "defaultMessage": "Internal",
+    "description": "Title for the Internal column of the networks table"
+  },
+  "components.NetworksTable.label": {
+    "defaultMessage": "Label",
+    "description": "Title for the Label column of the networks table"
+  },
   "components.OperationTable.baseImage": {
     "defaultMessage": "Base Image"
   },
@@ -406,9 +883,64 @@
   "components.Page.loadingError.retryButton": {
     "defaultMessage": "Try Again"
   },
+  "components.ReleaseDevicesTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the release devices table"
+  },
+  "components.ReleaseDevicesTable.deviceNameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Device Name column of the release devices table"
+  },
+  "components.ReleaseDevicesTable.noDevices": {
+    "defaultMessage": "No devices available."
+  },
+  "components.ReleaseDevicesTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.ReleaseSystemModelsTable.noSystemModels": {
+    "defaultMessage": "No required system model. This release can be applied to any device."
+  },
+  "components.ReleaseTable.versionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the releases table"
+  },
+  "components.ReleasesSystemModelsTable.nameTitle": {
+    "defaultMessage": "System Model Name"
+  },
+  "components.ReleasesTable.action": {
+    "defaultMessage": "Action"
+  },
+  "components.ReleasesTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the release."
+  },
+  "components.ReleasesTable.deleteModal.title": {
+    "defaultMessage": "Delete Release"
+  },
+  "components.ReleasesTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the release, please try again."
+  },
   "components.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
+  },
+  "components.Sidebar.ChannelsLabel": {
+    "defaultMessage": "Channels"
+  },
+  "components.Sidebar.applications.applicationsLabel": {
+    "defaultMessage": "Applications"
+  },
+  "components.Sidebar.applications.campaignsLabel": {
+    "defaultMessage": "Campaigns"
+  },
+  "components.Sidebar.applications.credentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "components.Sidebar.applications.deploymentsLabel": {
+    "defaultMessage": "Deployments"
+  },
+  "components.Sidebar.applications.networksLabel": {
+    "defaultMessage": "Networks"
   },
   "components.Sidebar.baseImageCollectionsLabel": {
     "defaultMessage": "Base Image Collections"
@@ -434,8 +966,8 @@
   "components.Sidebar.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
   },
-  "components.Sidebar.updateChannelsLabel": {
-    "defaultMessage": "Update Channels"
+  "components.Sidebar.volumes.volumesLabel": {
+    "defaultMessage": "Volumes"
   },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
@@ -490,6 +1022,10 @@
     "defaultMessage": "Base Image",
     "description": "Title for the Base Image column of the Update Campaigns table"
   },
+  "components.UpdateCampaignsTable.channelNameTitle": {
+    "defaultMessage": "Channel",
+    "description": "Title for the Channel column of the Update Campaigns table"
+  },
   "components.UpdateCampaignsTable.nameTitle": {
     "defaultMessage": "Update Campaign Name",
     "description": "Title for the Name column of the Update Campaigns table"
@@ -499,22 +1035,6 @@
   },
   "components.UpdateCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
-  },
-  "components.UpdateCampaignsTable.updateChannelNameTitle": {
-    "defaultMessage": "Update Channel",
-    "description": "Title for the Update Channel column of the Update Campaigns table"
-  },
-  "components.UpdateChannelsTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the update channels table"
-  },
-  "components.UpdateChannelsTable.nameTitle": {
-    "defaultMessage": "Update Channel Name",
-    "description": "Title for the Name column of the update channels table"
-  },
-  "components.UpdateChannelsTable.targetGroupsTitle": {
-    "defaultMessage": "Target Groups",
-    "description": "Title for the Target Groups column of the update channels table"
   },
   "components.UpdateTargetsTable.completionTimestampTitle": {
     "defaultMessage": "Completed at",
@@ -597,6 +1117,14 @@
   "components.UpdateTargetsTabs.updateTargetsLabel": {
     "defaultMessage": "Devices"
   },
+  "components.VolumesTable.driverTitle": {
+    "defaultMessage": "Driver",
+    "description": "Title for the Driver column of the volumes table"
+  },
+  "components.VolumesTable.label": {
+    "defaultMessage": "Label",
+    "description": "Title for the Label column of the volumes table"
+  },
   "components.WiFiScanResultsTable.apChannelTitle": {
     "defaultMessage": "Channel"
   },
@@ -611,6 +1139,18 @@
   },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
+  },
+  "components.deploymentTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.deploymentTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.deploymentTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.deploymentTargetStatus.Successful": {
+    "defaultMessage": "Successful"
   },
   "components.updateTargetStatus.Failed": {
     "defaultMessage": "Failed"
@@ -651,6 +1191,217 @@
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateChannel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateChannel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateChannel.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateChannel.targetGroupWithChannelLabel": {
+    "defaultMessage": "{targetGroupName} (used for {channelName})",
+    "description": "Target group label of select option with optional channel name it used for."
+  },
+  "forms.CreateChannel.targetGroupsLabel": {
+    "defaultMessage": "Target Groups"
+  },
+  "forms.CreateDeploymentCampaign.applicationLabel": {
+    "defaultMessage": "Application"
+  },
+  "forms.CreateDeploymentCampaign.applicationOption": {
+    "defaultMessage": "Select an Application"
+  },
+  "forms.CreateDeploymentCampaign.channelLabel": {
+    "defaultMessage": "Channel"
+  },
+  "forms.CreateDeploymentCampaign.channelOption": {
+    "defaultMessage": "Select a Channel"
+  },
+  "forms.CreateDeploymentCampaign.createRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.CreateDeploymentCampaign.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "forms.CreateDeploymentCampaign.maxFailurePercentageValidationLabel": {
+    "defaultMessage": "Max Failures"
+  },
+  "forms.CreateDeploymentCampaign.maxInProgressDeploymentsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.CreateDeploymentCampaign.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateDeploymentCampaign.releaseLabel": {
+    "defaultMessage": "Release"
+  },
+  "forms.CreateDeploymentCampaign.releaseOption": {
+    "defaultMessage": "Select a Release"
+  },
+  "forms.CreateDeploymentCampaign.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.CreateDeploymentCampaign.requestTimeoutSecondsValidationLabel": {
+    "defaultMessage": "Request Timeout"
+  },
+  "forms.CreateDeploymentCampaign.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateRelease.addContainerButton": {
+    "defaultMessage": "Add Container"
+  },
+  "forms.CreateRelease.addDeviceMappingButton": {
+    "defaultMessage": "Add Device Mapping"
+  },
+  "forms.CreateRelease.addExtraHostButton": {
+    "defaultMessage": "Add Extra Host"
+  },
+  "forms.CreateRelease.addVolumeButton": {
+    "defaultMessage": "Add Volume"
+  },
+  "forms.CreateRelease.capAddLabel": {
+    "defaultMessage": "Cap Add"
+  },
+  "forms.CreateRelease.capDropLabel": {
+    "defaultMessage": "Cap Drop"
+  },
+  "forms.CreateRelease.cgroupPermissionsLabel": {
+    "defaultMessage": "Container Group Permissions"
+  },
+  "forms.CreateRelease.confirmButton": {
+    "defaultMessage": "Confirm"
+  },
+  "forms.CreateRelease.confirmPrompt": {
+    "defaultMessage": "Choose a release from which you want to copy containers and their configurations."
+  },
+  "forms.CreateRelease.containerTitle": {
+    "defaultMessage": "Container {containerNumber}"
+  },
+  "forms.CreateRelease.containersTitle": {
+    "defaultMessage": "Containers"
+  },
+  "forms.CreateRelease.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "forms.CreateRelease.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "forms.CreateRelease.cpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "forms.CreateRelease.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.CreateRelease.deviceMappingsLabel": {
+    "defaultMessage": "Device Mappings"
+  },
+  "forms.CreateRelease.envLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "forms.CreateRelease.extraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "forms.CreateRelease.hostnameLabel": {
+    "defaultMessage": "Hostname"
+  },
+  "forms.CreateRelease.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "forms.CreateRelease.imageReferenceLabel": {
+    "defaultMessage": "Image Reference"
+  },
+  "forms.CreateRelease.memoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "forms.CreateRelease.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "forms.CreateRelease.memorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
+  },
+  "forms.CreateRelease.memorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "forms.CreateRelease.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "forms.CreateRelease.networksLabel": {
+    "defaultMessage": "Networks"
+  },
+  "forms.CreateRelease.noContainersFeedback": {
+    "defaultMessage": "The release does not include any container."
+  },
+  "forms.CreateRelease.noVolumesMessage": {
+    "defaultMessage": "No volumes available"
+  },
+  "forms.CreateRelease.pathInContainerLabel": {
+    "defaultMessage": "Path In Container"
+  },
+  "forms.CreateRelease.pathOnHostLabel": {
+    "defaultMessage": "Path On Host"
+  },
+  "forms.CreateRelease.portBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "forms.CreateRelease.privilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "forms.CreateRelease.readOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "forms.CreateRelease.removeContainerButton": {
+    "defaultMessage": "Remove Container"
+  },
+  "forms.CreateRelease.requiredSystemModelsLabels": {
+    "defaultMessage": "Required System Models"
+  },
+  "forms.CreateRelease.restartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "forms.CreateRelease.restartPolicyOption": {
+    "defaultMessage": "Select a Restart Policy"
+  },
+  "forms.CreateRelease.reuseReleaseButton": {
+    "defaultMessage": "Reuse Release"
+  },
+  "forms.CreateRelease.reuseReleaseTitleButton": {
+    "defaultMessage": "Copy configuration from an existing release"
+  },
+  "forms.CreateRelease.reuseResourcesModalTitle": {
+    "defaultMessage": "Reuse Resources Modal"
+  },
+  "forms.CreateRelease.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "forms.CreateRelease.selectRelease": {
+    "defaultMessage": "Select Release"
+  },
+  "forms.CreateRelease.storageOptLabel": {
+    "defaultMessage": "Storage Options"
+  },
+  "forms.CreateRelease.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateRelease.tmpfsLabel": {
+    "defaultMessage": "Tmpfs Mounts"
+  },
+  "forms.CreateRelease.versionLabel": {
+    "defaultMessage": "Version"
+  },
+  "forms.CreateRelease.volumeDriverLabel": {
+    "defaultMessage": "Volume Driver"
+  },
+  "forms.CreateRelease.volumeSelectLabel": {
+    "defaultMessage": "Volume:"
+  },
+  "forms.CreateRelease.volumeTargetLabel": {
+    "defaultMessage": "Target:"
+  },
+  "forms.CreateRelease.volumesLabel": {
+    "defaultMessage": "Volumes"
+  },
   "forms.CreateUpdateCampaign.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
@@ -659,6 +1410,12 @@
   },
   "forms.CreateUpdateCampaign.baseImageLabel": {
     "defaultMessage": "Base Image"
+  },
+  "forms.CreateUpdateCampaign.channelLabel": {
+    "defaultMessage": "Channel"
+  },
+  "forms.CreateUpdateCampaign.channelOption": {
+    "defaultMessage": "Select a Channel"
   },
   "forms.CreateUpdateCampaign.forceDowngradeLabel": {
     "defaultMessage": "Force Downgrade"
@@ -684,27 +1441,29 @@
   "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
   },
-  "forms.CreateUpdateCampaign.updateChannelLabel": {
-    "defaultMessage": "Update Channel"
+  "forms.DeploymentCampaignForm.deploymentChannelLabel": {
+    "defaultMessage": "Deployment Channel"
   },
-  "forms.CreateUpdateCampaign.updateChannelOption": {
-    "defaultMessage": "Select an Update Channel"
+  "forms.DeploymentCampaignForm.outcomeLabel": {
+    "defaultMessage": "Outcome"
   },
-  "forms.CreateUpdateChannel.handleLabel": {
-    "defaultMessage": "Handle"
+  "forms.DeploymentCampaignForm.releaseLabel": {
+    "defaultMessage": "Release"
   },
-  "forms.CreateUpdateChannel.nameLabel": {
-    "defaultMessage": "Name"
+  "forms.DeploymentCampaignForm.rolloutMechanism.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
   },
-  "forms.CreateUpdateChannel.submitButton": {
-    "defaultMessage": "Create"
+  "forms.DeploymentCampaignForm.rolloutMechanism.maxInProgressDeploymentsLabel": {
+    "defaultMessage": "Max Pending Operations"
   },
-  "forms.CreateUpdateChannel.targetGroupWithChannelLabel": {
-    "defaultMessage": "{targetGroupName} (used for {updateChannelName})",
-    "description": "Target group label of select option with optional update channel name it used for."
+  "forms.DeploymentCampaignForm.rolloutMechanism.otaRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
   },
-  "forms.CreateUpdateChannel.targetGroupsLabel": {
-    "defaultMessage": "Target Groups"
+  "forms.DeploymentCampaignForm.rolloutMechanism.otaRequestTimeoutSeconds": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.DeploymentCampaignForm.statusLabel": {
+    "defaultMessage": "Status"
   },
   "forms.UpdateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -760,6 +1519,9 @@
   "forms.UpdateCampaignForm.baseImageLabel": {
     "defaultMessage": "Base Image"
   },
+  "forms.UpdateCampaignForm.channelLabel": {
+    "defaultMessage": "Channel"
+  },
   "forms.UpdateCampaignForm.outcomeLabel": {
     "defaultMessage": "Outcome"
   },
@@ -781,8 +1543,27 @@
   "forms.UpdateCampaignForm.statusLabel": {
     "defaultMessage": "Status"
   },
-  "forms.UpdateCampaignForm.updateChannelLabel": {
-    "defaultMessage": "Update Channel"
+  "forms.UpdateChannel.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateChannel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateChannel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateChannel.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateChannel.submitButton": {
+    "defaultMessage": "Update"
+  },
+  "forms.UpdateChannel.targetGroupWithChannelLabel": {
+    "defaultMessage": "{targetGroupName} (used for {channelName})",
+    "description": "Target group label of select option with optional update channel name it used for."
+  },
+  "forms.UpdateChannel.targetGroupsLabel": {
+    "defaultMessage": "Target Groups"
   },
   "forms.UpdateDeviceGroup.deleteButton": {
     "defaultMessage": "Delete"
@@ -823,6 +1604,15 @@
   "forms.UpdateHardwareType.submitButton": {
     "defaultMessage": "Update"
   },
+  "forms.UpdateImageCredential.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateImageCredential.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "forms.UpdateImageCredential.usernameLabel": {
+    "defaultMessage": "Username"
+  },
   "forms.UpdateSystemModel.addPartNumberButton": {
     "defaultMessage": "Add part number"
   },
@@ -849,28 +1639,6 @@
   },
   "forms.UpdateSystemModel.submitButton": {
     "defaultMessage": "Update"
-  },
-  "forms.UpdateUpdateChannel.deleteButton": {
-    "defaultMessage": "Delete"
-  },
-  "forms.UpdateUpdateChannel.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "forms.UpdateUpdateChannel.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "forms.UpdateUpdateChannel.resetButton": {
-    "defaultMessage": "Reset"
-  },
-  "forms.UpdateUpdateChannel.submitButton": {
-    "defaultMessage": "Update"
-  },
-  "forms.UpdateUpdateChannel.targetGroupWithChannelLabel": {
-    "defaultMessage": "{targetGroupName} (used for {updateChannelName})",
-    "description": "Target group label of select option with optional update channel name it used for."
-  },
-  "forms.UpdateUpdateChannel.targetGroupsLabel": {
-    "defaultMessage": "Target Groups"
   },
   "froms.CreateUpdateCampaign.submitButton": {
     "defaultMessage": "Create"
@@ -916,6 +1684,162 @@
   },
   "modem.technology.UTRAN_HSUPA": {
     "defaultMessage": "UTRAN with HSUPA"
+  },
+  "navigation.routeTitle.Application": {
+    "defaultMessage": "Application"
+  },
+  "navigation.routeTitle.ApplicationNew": {
+    "defaultMessage": "Create Application"
+  },
+  "navigation.routeTitle.Applications": {
+    "defaultMessage": "Applications"
+  },
+  "navigation.routeTitle.BaseImageCollections": {
+    "defaultMessage": "Base Image Collections"
+  },
+  "navigation.routeTitle.BaseImageCollectionsEdit": {
+    "defaultMessage": "Base Image Collection Details"
+  },
+  "navigation.routeTitle.BaseImageCollectionsNew": {
+    "defaultMessage": "Create Base Image Collection"
+  },
+  "navigation.routeTitle.BaseImagesEdit": {
+    "defaultMessage": "Base Image Details"
+  },
+  "navigation.routeTitle.BaseImagesNew": {
+    "defaultMessage": "Create Base Image"
+  },
+  "navigation.routeTitle.Channels": {
+    "defaultMessage": "Channels"
+  },
+  "navigation.routeTitle.ChannelsEdit": {
+    "defaultMessage": "Channel Details"
+  },
+  "navigation.routeTitle.ChannelsNew": {
+    "defaultMessage": "Create Channel"
+  },
+  "navigation.routeTitle.DeploymentCampaigns": {
+    "defaultMessage": "Campaigns"
+  },
+  "navigation.routeTitle.DeploymentCampaignsEdit": {
+    "defaultMessage": "Edit Campaign"
+  },
+  "navigation.routeTitle.DeploymentCampaignsNew": {
+    "defaultMessage": "Create Campaign"
+  },
+  "navigation.routeTitle.Deployments": {
+    "defaultMessage": "Deployments"
+  },
+  "navigation.routeTitle.DeviceGroups": {
+    "defaultMessage": "Groups"
+  },
+  "navigation.routeTitle.DeviceGroupsEdit": {
+    "defaultMessage": "Group Details"
+  },
+  "navigation.routeTitle.DeviceGroupsNew": {
+    "defaultMessage": "Create Group"
+  },
+  "navigation.routeTitle.Devices": {
+    "defaultMessage": "Devices"
+  },
+  "navigation.routeTitle.DevicesEdit": {
+    "defaultMessage": "Device Details"
+  },
+  "navigation.routeTitle.HardwareTypes": {
+    "defaultMessage": "Hardware Types"
+  },
+  "navigation.routeTitle.HardwareTypesEdit": {
+    "defaultMessage": "Hardware Type Details"
+  },
+  "navigation.routeTitle.HardwareTypesNew": {
+    "defaultMessage": "Create Hardware Type"
+  },
+  "navigation.routeTitle.ImageCredentialEdit": {
+    "defaultMessage": "Image Credentials Details"
+  },
+  "navigation.routeTitle.ImageCredentialNew": {
+    "defaultMessage": "Create Image Credentials"
+  },
+  "navigation.routeTitle.ImageCredentials": {
+    "defaultMessage": "Image Credentials"
+  },
+  "navigation.routeTitle.Login": {
+    "defaultMessage": "Login"
+  },
+  "navigation.routeTitle.Logout": {
+    "defaultMessage": "Logout"
+  },
+  "navigation.routeTitle.Networks": {
+    "defaultMessage": "Networks"
+  },
+  "navigation.routeTitle.NetworksEdit": {
+    "defaultMessage": "Network Details"
+  },
+  "navigation.routeTitle.NetworksNew": {
+    "defaultMessage": "Create Networks"
+  },
+  "navigation.routeTitle.Release": {
+    "defaultMessage": "Release"
+  },
+  "navigation.routeTitle.ReleaseNew": {
+    "defaultMessage": "Create Release"
+  },
+  "navigation.routeTitle.SystemModels": {
+    "defaultMessage": "System Models"
+  },
+  "navigation.routeTitle.SystemModelsEdit": {
+    "defaultMessage": "System Model Details"
+  },
+  "navigation.routeTitle.SystemModelsNew": {
+    "defaultMessage": "Create System Model"
+  },
+  "navigation.routeTitle.UpdateCampaigns": {
+    "defaultMessage": "Update Campaigns"
+  },
+  "navigation.routeTitle.UpdateCampaignsEdit": {
+    "defaultMessage": "Update Campaign Details"
+  },
+  "navigation.routeTitle.UpdateCampaignsNew": {
+    "defaultMessage": "Create Update Campaign"
+  },
+  "navigation.routeTitle.VolumeEdit": {
+    "defaultMessage": "Volume Details"
+  },
+  "navigation.routeTitle.Volumes": {
+    "defaultMessage": "Volumes"
+  },
+  "navigation.routeTitle.VolumesNew": {
+    "defaultMessage": "Create Volumes"
+  },
+  "pages.Application.applicationNotFound.message": {
+    "defaultMessage": "Return to the applications list."
+  },
+  "pages.Application.applicationNotFound.title": {
+    "defaultMessage": "Application not found."
+  },
+  "pages.Application.createButton": {
+    "defaultMessage": "Create Release"
+  },
+  "pages.Application.description": {
+    "defaultMessage": "Description"
+  },
+  "pages.Application.devices": {
+    "defaultMessage": "Devices"
+  },
+  "pages.Application.releases": {
+    "defaultMessage": "Releases"
+  },
+  "pages.ApplicationCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the application, please try again."
+  },
+  "pages.ApplicationCreate.title": {
+    "defaultMessage": "Create Application"
+  },
+  "pages.Applications.createButton": {
+    "defaultMessage": "Create Application"
+  },
+  "pages.Applications.title": {
+    "defaultMessage": "Applications"
   },
   "pages.BaseImage.baseImageNotFound.message": {
     "defaultMessage": "Return to the Base Image Collection."
@@ -998,6 +1922,86 @@
   },
   "pages.BaseImageCreate.title": {
     "defaultMessage": "Create Base Image"
+  },
+  "pages.Campaigns.title": {
+    "defaultMessage": "Campaigns"
+  },
+  "pages.Channel.channelNotFound.message": {
+    "defaultMessage": "Return to the Channel list."
+  },
+  "pages.Channel.channelNotFound.title": {
+    "defaultMessage": "Channel not found."
+  },
+  "pages.Channel.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Channel <bold>{channel}</bold>.",
+    "description": "Description for the confirmation modal to delete a Channel"
+  },
+  "pages.Channel.deleteModal.title": {
+    "defaultMessage": "Delete Channel",
+    "description": "Title for the confirmation modal to delete a Channel"
+  },
+  "pages.Channel.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Channel, please try again."
+  },
+  "pages.Channel.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Channel, please try again."
+  },
+  "pages.ChannelCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Channel, please try again."
+  },
+  "pages.ChannelCreate.title": {
+    "defaultMessage": "Create Channel"
+  },
+  "pages.Channels.createButton": {
+    "defaultMessage": "Create Channel"
+  },
+  "pages.Channels.title": {
+    "defaultMessage": "Channels"
+  },
+  "pages.DeploymentApplication.noApplication.createButton": {
+    "defaultMessage": "Create Application"
+  },
+  "pages.DeploymentCampaign.deploymentCampaignNotFound.message": {
+    "defaultMessage": "Return to the Deployment Campaign list."
+  },
+  "pages.DeploymentCampaign.deploymentCampaignNotFound.title": {
+    "defaultMessage": "Deployment Campaign not found."
+  },
+  "pages.DeploymentCampaignCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Deployment Campaign, please try again."
+  },
+  "pages.DeploymentCampaignCreate.noApplication.message": {
+    "defaultMessage": "You need at least one Application with Release to create a Deployment Campaign"
+  },
+  "pages.DeploymentCampaignCreate.noApplication.title": {
+    "defaultMessage": "You haven't created any Application yet"
+  },
+  "pages.DeploymentCampaignCreate.noChannel.createButton": {
+    "defaultMessage": "Create Channel"
+  },
+  "pages.DeploymentCampaignCreate.noChannel.message": {
+    "defaultMessage": "You need at least one Channel to create a Deployment Campaign"
+  },
+  "pages.DeploymentCampaignCreate.noChannel.title": {
+    "defaultMessage": "You haven't created any Channel yet"
+  },
+  "pages.DeploymentCampaignCreate.title": {
+    "defaultMessage": "Create Deployment Campaign"
+  },
+  "pages.DeploymentCampaigns.createButton": {
+    "defaultMessage": "Create Campaign"
+  },
+  "pages.Deployments.title": {
+    "defaultMessage": "Deployments"
+  },
+  "pages.Device.ApplicationsTab": {
+    "defaultMessage": "Applications"
+  },
+  "pages.Device.ApplicationsTab.DeployedApplications": {
+    "defaultMessage": "Deployed Applications"
+  },
+  "pages.Device.ApplicationsTab.InstallNewApp": {
+    "defaultMessage": "Add Available Applications"
   },
   "pages.Device.BatteryStatusTab": {
     "defaultMessage": "Battery"
@@ -1155,6 +2159,33 @@
   "pages.HardwareTypes.title": {
     "defaultMessage": "Hardware Types"
   },
+  "pages.ImageCredential.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Image Credentials <bold>{imageCredentials}</bold>."
+  },
+  "pages.ImageCredential.deleteModal.title": {
+    "defaultMessage": "Delete Image Credentials"
+  },
+  "pages.ImageCredential.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Image Credentials, please try again."
+  },
+  "pages.ImageCredential.imageCredentialNotFound.message": {
+    "defaultMessage": "Return to the Image Credentials list."
+  },
+  "pages.ImageCredential.imageCredentialNotFound.title": {
+    "defaultMessage": "Image Credentials not found."
+  },
+  "pages.ImageCredentialCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Image Credentials, please try again."
+  },
+  "pages.ImageCredentialCreate.title": {
+    "defaultMessage": "Create Image Credentials"
+  },
+  "pages.ImageCredentials.createButton": {
+    "defaultMessage": "Create Image Credentials"
+  },
+  "pages.ImageCredentials.title": {
+    "defaultMessage": "Image Credentials"
+  },
   "pages.Login.authTokenPlaceholder": {
     "defaultMessage": "Auth Token"
   },
@@ -1178,6 +2209,57 @@
   },
   "pages.Logout.title": {
     "defaultMessage": "Logout"
+  },
+  "pages.Network.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "pages.Network.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Network <bold>{network}</bold>."
+  },
+  "pages.Network.deleteModal.title": {
+    "defaultMessage": "Delete Network"
+  },
+  "pages.Network.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Network, please try again."
+  },
+  "pages.Network.networkNotFound.message": {
+    "defaultMessage": "Return to the networks list."
+  },
+  "pages.Network.networkNotFound.title": {
+    "defaultMessage": "Network not found."
+  },
+  "pages.NetworkCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Network, please try again."
+  },
+  "pages.NetworkCreate.title": {
+    "defaultMessage": "Create Network"
+  },
+  "pages.Networks.createButton": {
+    "defaultMessage": "Create Network"
+  },
+  "pages.Networks.title": {
+    "defaultMessage": "Networks"
+  },
+  "pages.Release.containers": {
+    "defaultMessage": "Containers"
+  },
+  "pages.Release.devices": {
+    "defaultMessage": "Devices"
+  },
+  "pages.Release.releaseNotFound.message": {
+    "defaultMessage": "Return to the applications list."
+  },
+  "pages.Release.releaseNotFound.title": {
+    "defaultMessage": "Release not found."
+  },
+  "pages.Release.systemModels": {
+    "defaultMessage": "System Models"
+  },
+  "pages.ReleaseCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the release, please try again."
+  },
+  "pages.ReleaseCreate.title": {
+    "defaultMessage": "Create Release"
   },
   "pages.SystemModel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>.",
@@ -1244,14 +2326,14 @@
   "pages.UpdateCampaignCreate.noBaseImageCollection.title": {
     "defaultMessage": "You haven't created any Base Image Collection yet"
   },
-  "pages.UpdateCampaignCreate.noUpdateChannel.createButton": {
-    "defaultMessage": "Create Update Channel"
+  "pages.UpdateCampaignCreate.noChannel.createButton": {
+    "defaultMessage": "Create Channel"
   },
-  "pages.UpdateCampaignCreate.noUpdateChannel.message": {
-    "defaultMessage": "You need at least one Update Channel to create an Update Campaign"
+  "pages.UpdateCampaignCreate.noChannel.message": {
+    "defaultMessage": "You need at least one Channel to create an Update Campaign"
   },
-  "pages.UpdateCampaignCreate.noUpdateChannel.title": {
-    "defaultMessage": "You haven't created any Update Channel yet"
+  "pages.UpdateCampaignCreate.noChannel.title": {
+    "defaultMessage": "You haven't created any Channel yet"
   },
   "pages.UpdateCampaignCreate.title": {
     "defaultMessage": "Create Update Campaign"
@@ -1262,37 +2344,59 @@
   "pages.UpdateCampaigns.title": {
     "defaultMessage": "Update Campaigns"
   },
-  "pages.UpdateChannel.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the Update Channel <bold>{updateChannel}</bold>.",
-    "description": "Description for the confirmation modal to delete a Update Channel"
+  "pages.Volume.deleteButton": {
+    "defaultMessage": "Delete"
   },
-  "pages.UpdateChannel.deleteModal.title": {
-    "defaultMessage": "Delete Update Channel",
-    "description": "Title for the confirmation modal to delete a Update Channel"
+  "pages.Volume.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Volume <bold>{volume}</bold>."
   },
-  "pages.UpdateChannel.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the Update Channel, please try again."
+  "pages.Volume.deleteModal.title": {
+    "defaultMessage": "Delete Volume"
   },
-  "pages.UpdateChannel.updateChannelNotFound.message": {
-    "defaultMessage": "Return to the Update Channel list."
+  "pages.Volume.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Volume, please try again."
   },
-  "pages.UpdateChannel.updateChannelNotFound.title": {
-    "defaultMessage": "Update Channel not found."
+  "pages.Volume.volumeNotFound.message": {
+    "defaultMessage": "Return to the volumes list."
   },
-  "pages.UpdateChannel.updateErrorFeedback": {
-    "defaultMessage": "Could not update the Update Channel, please try again."
+  "pages.Volume.volumeNotFound.title": {
+    "defaultMessage": "Volume not found."
   },
-  "pages.UpdateChannelCreate.creationErrorFeedback": {
-    "defaultMessage": "Could not create the Update Channel, please try again."
+  "pages.VolumeCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Volume, please try again."
   },
-  "pages.UpdateChannelCreate.title": {
-    "defaultMessage": "Create Update Channel"
+  "pages.VolumeCreate.title": {
+    "defaultMessage": "Create Volume"
   },
-  "pages.UpdateChannels.createButton": {
-    "defaultMessage": "Create Update Channel"
+  "pages.Volumes.createButton": {
+    "defaultMessage": "Create Volume"
   },
-  "pages.UpdateChannels.title": {
-    "defaultMessage": "Update Channels"
+  "pages.Volumes.title": {
+    "defaultMessage": "Volumes"
+  },
+  "pages.network.driver": {
+    "defaultMessage": "Driver"
+  },
+  "pages.network.enableIpv6": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "pages.network.internal": {
+    "defaultMessage": "Internal"
+  },
+  "pages.network.label": {
+    "defaultMessage": "Label"
+  },
+  "pages.network.options": {
+    "defaultMessage": "Options"
+  },
+  "pages.volume.driver": {
+    "defaultMessage": "Driver"
+  },
+  "pages.volume.label": {
+    "defaultMessage": "Label"
+  },
+  "pages.volume.options": {
+    "defaultMessage": "Options"
   },
   "validation.array.min": {
     "defaultMessage": "Does not have enough values."
@@ -1305,6 +2409,12 @@
   },
   "validation.baseImageVersion.format": {
     "defaultMessage": "The version must follow the Semantic Versioning spec"
+  },
+  "validation.env.invalidJson": {
+    "defaultMessage": "Must be a valid JSON string."
+  },
+  "validation.extraHosts.format": {
+    "defaultMessage": "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)"
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
@@ -1324,8 +2434,17 @@
   "validation.number.positive": {
     "defaultMessage": "{label} must be a positive number."
   },
+  "validation.portBindings.format": {
+    "defaultMessage": "Port Bindings must be comma-separated values like '8080:80, 443:443'."
+  },
   "validation.required": {
     "defaultMessage": "Required."
+  },
+  "validation.storage.format": {
+    "defaultMessage": "Must be a valid JSON array of strings in the format \"key=value\", e.g. [\"size=120G\"]"
+  },
+  "validation.tmpfs.format": {
+    "defaultMessage": "Must be a valid JSON array of strings in the format \"/path=option1,option2\", e.g. [\"/run=rw,size=64m\"]"
   },
   "validation.unique": {
     "defaultMessage": "Duplicate value."
