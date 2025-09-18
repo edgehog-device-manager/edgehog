@@ -86,7 +86,7 @@ defmodule Edgehog.PubSub do
     broadcast_many!(topics, payload)
   end
 
-  def publish!(:deployment_error = event, %Deployment{} = deployment) do
+  def publish!(:deployment_timeout = event, %Deployment{} = deployment) do
     payload = {event, deployment}
 
     topics = [

@@ -30,7 +30,7 @@ defmodule Edgehog.Containers.Deployment.Calculations.Ready do
 
   alias Ash.Resource.Calculation
 
-  @ready_states [:started, :starting, :stopped, :stopping]
+  @ready_states [:started, :stopped]
 
   @impl Calculation
   def load(_query, _opts, _context), do: [state: [], container_deployments: :is_ready]
