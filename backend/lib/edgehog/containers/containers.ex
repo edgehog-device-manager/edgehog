@@ -211,14 +211,12 @@ defmodule Edgehog.Containers do
       define :run_ready_actions, action: :run_ready_actions
       define :set_deployment_state, action: :set_state
       define :send_deployment, action: :send_deployment
+      define :append_deployment_event, action: :append_event
 
       define :mark_deployment_as_sent, action: :mark_as_sent
-      define :mark_deployment_as_deleting, action: :mark_as_deleting
-      define :mark_deployment_as_errored, action: :mark_as_errored, args: [:message]
       define :mark_deployment_as_started, action: :mark_as_started
-      define :mark_deployment_as_starting, action: :mark_as_starting
       define :mark_deployment_as_stopped, action: :mark_as_stopped
-      define :mark_deployment_as_stopping, action: :mark_as_stopping
+      define :mark_deployment_as_timed_out, action: :mark_as_timed_out
     end
 
     resource Edgehog.Containers.Deployment.Event

@@ -560,8 +560,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   def handle_event(:internal, {:retry_threshold_exceeded, target}, _state, data) do
     Logger.notice("Device #{target.device_id} update failed: no more retries left")
 
-    # Just mark the Deployment as failed with request_timeout. The associated target will
-    # be marked as failed when it receives the :deployment_updated message from the PubSub
     _ = Core.mark_deployment_as_timed_out!(data.tenant_id, target.deployment_id)
 
     :keep_state_and_data
