@@ -477,7 +477,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
 
       assert deployment.state == :error
-      assert deployment.last_error_message == "error message"
 
       deployment_event = %{
         device_id: device.device_id,

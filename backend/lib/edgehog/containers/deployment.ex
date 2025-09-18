@@ -46,7 +46,7 @@ defmodule Edgehog.Containers.Deployment do
     defaults [
       :read,
       :destroy,
-      create: [:device_id, :release_id, :state, :last_error_message]
+      create: [:device_id, :release_id, :state]
     ]
 
     create :deploy do
@@ -205,7 +205,6 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
-      change set_attribute(:last_error_message, arg(:message))
       change set_attribute(:state, :error)
 
       require_atomic? false
@@ -241,10 +240,6 @@ defmodule Edgehog.Containers.Deployment do
 
     attribute :state, DeploymentState do
       default :pending
-      public? true
-    end
-
-    attribute :last_error_message, :string do
       public? true
     end
 
