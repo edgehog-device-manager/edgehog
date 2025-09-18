@@ -1207,6 +1207,48 @@
   "forms.CreateChannel.targetGroupsLabel": {
     "defaultMessage": "Target Groups"
   },
+  "forms.CreateDeploymentCampaign.applicationLabel": {
+    "defaultMessage": "Application"
+  },
+  "forms.CreateDeploymentCampaign.applicationOption": {
+    "defaultMessage": "Select an Application"
+  },
+  "forms.CreateDeploymentCampaign.channelLabel": {
+    "defaultMessage": "Channel"
+  },
+  "forms.CreateDeploymentCampaign.channelOption": {
+    "defaultMessage": "Select a Channel"
+  },
+  "forms.CreateDeploymentCampaign.createRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.CreateDeploymentCampaign.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "forms.CreateDeploymentCampaign.maxFailurePercentageValidationLabel": {
+    "defaultMessage": "Max Failures"
+  },
+  "forms.CreateDeploymentCampaign.maxInProgressDeploymentsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.CreateDeploymentCampaign.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateDeploymentCampaign.releaseLabel": {
+    "defaultMessage": "Release"
+  },
+  "forms.CreateDeploymentCampaign.releaseOption": {
+    "defaultMessage": "Select a Release"
+  },
+  "forms.CreateDeploymentCampaign.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.CreateDeploymentCampaign.requestTimeoutSecondsValidationLabel": {
+    "defaultMessage": "Request Timeout"
+  },
+  "forms.CreateDeploymentCampaign.submitButton": {
+    "defaultMessage": "Create"
+  },
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
@@ -1916,11 +1958,35 @@
   "pages.Channels.title": {
     "defaultMessage": "Channels"
   },
+  "pages.DeploymentApplication.noApplication.createButton": {
+    "defaultMessage": "Create Application"
+  },
   "pages.DeploymentCampaign.deploymentCampaignNotFound.message": {
     "defaultMessage": "Return to the Deployment Campaign list."
   },
   "pages.DeploymentCampaign.deploymentCampaignNotFound.title": {
     "defaultMessage": "Deployment Campaign not found."
+  },
+  "pages.DeploymentCampaignCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Deployment Campaign, please try again."
+  },
+  "pages.DeploymentCampaignCreate.noApplication.message": {
+    "defaultMessage": "You need at least one Application with Release to create a Deployment Campaign"
+  },
+  "pages.DeploymentCampaignCreate.noApplication.title": {
+    "defaultMessage": "You haven't created any Application yet"
+  },
+  "pages.DeploymentCampaignCreate.noChannel.createButton": {
+    "defaultMessage": "Create Channel"
+  },
+  "pages.DeploymentCampaignCreate.noChannel.message": {
+    "defaultMessage": "You need at least one Channel to create a Deployment Campaign"
+  },
+  "pages.DeploymentCampaignCreate.noChannel.title": {
+    "defaultMessage": "You haven't created any Channel yet"
+  },
+  "pages.DeploymentCampaignCreate.title": {
+    "defaultMessage": "Create Deployment Campaign"
   },
   "pages.DeploymentCampaigns.createButton": {
     "defaultMessage": "Create Campaign"
