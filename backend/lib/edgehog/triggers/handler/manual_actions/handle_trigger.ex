@@ -265,28 +265,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     } = event.value
 
     with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      case state do
-        "Starting" ->
-          Containers.mark_deployment_as_starting(deployment, tenant: tenant)
+      type = deployment_event(state)
+      event = %{type: type, message: message}
 
-        "Started" ->
-          Containers.mark_deployment_as_started(deployment, tenant: tenant)
-
-        "Stopping" ->
-          Containers.mark_deployment_as_stopping(deployment, tenant: tenant)
-
-        "Stopped" ->
-          Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
-
-        "Error" ->
-          Containers.mark_deployment_as_errored(deployment, message, tenant: tenant)
-
-        "Deleting" ->
-          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
-
-        "Updating" ->
-          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
-      end
+      Containers.append_deployment_event(deployment, %{event: event}, tenant: tenant)
     end
   end
 
@@ -385,4 +367,12 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   defp translate_ota_response_status_code("OTAFailed"), do: nil
   defp translate_ota_response_status_code("OTAErrorDeploy"), do: "IOError"
   defp translate_ota_response_status_code("OTAErrorBootWrongPartition"), do: "SystemRollback"
+
+  defp deployment_event("Starting"), do: :starting
+  defp deployment_event("Started"), do: :started
+  defp deployment_event("Stopping"), do: :stopping
+  defp deployment_event("Stopped"), do: :stopped
+  defp deployment_event("Error"), do: :error
+  defp deployment_event("Deleting"), do: :deleting
+  defp deployment_event("Updating"), do: :updating
 end
