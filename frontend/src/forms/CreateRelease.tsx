@@ -1600,6 +1600,7 @@ const CreateRelease = ({
     handleSubmit,
     control,
     reset,
+    setFocus,
     formState: { errors },
   } = useForm<ReleaseInputData>({
     mode: "onTouched",
@@ -1862,7 +1863,13 @@ const CreateRelease = ({
           <div className="d-flex justify-content-start align-items-center gap-2">
             <Button
               variant="secondary"
-              onClick={() => append({ image: { reference: "" } })}
+              onClick={() => {
+                append({ image: { reference: "" } });
+                setTimeout(() => {
+                  const newIndex = fields.length;
+                  setFocus(`containers.${newIndex}.image.reference`);
+                }, 0);
+              }}
             >
               <FormattedMessage
                 id="forms.CreateRelease.addContainerButton"
