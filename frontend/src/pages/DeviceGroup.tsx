@@ -170,6 +170,43 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
           }
         });
 
+        const channelsConnection = ConnectionHandler.getConnection(
+          root,
+          "ChannelsTable_channels",
+        );
+        if (channelsConnection) {
+          const channelEdges = channelsConnection.getLinkedRecords("edges");
+          channelEdges?.forEach((edge) => {
+            const channel = edge?.getLinkedRecord("node");
+            if (channel) {
+              const targetGroups = channel.getLinkedRecord("targetGroups");
+              if (targetGroups) {
+                const targetGroupEdges = targetGroups.getLinkedRecords("edges");
+                if (targetGroupEdges) {
+                  const hasDeletedGroup = targetGroupEdges.some(
+                    (targetGroupEdge) => {
+                      const targetGroupNode =
+                        targetGroupEdge.getLinkedRecord("node");
+                      return targetGroupNode?.getDataID() === deviceGroupId;
+                    },
+                  );
+
+                  if (hasDeletedGroup) {
+                    const filteredEdges = targetGroupEdges.filter(
+                      (targetGroupEdge) => {
+                        const targetGroupNode =
+                          targetGroupEdge.getLinkedRecord("node");
+                        return targetGroupNode?.getDataID() !== deviceGroupId;
+                      },
+                    );
+                    targetGroups.setLinkedRecords(filteredEdges, "edges");
+                  }
+                }
+              }
+            }
+          });
+        }
+
         store.delete(deviceGroupId);
       },
     });
