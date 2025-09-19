@@ -1211,13 +1211,13 @@
     "defaultMessage": "Application"
   },
   "forms.CreateDeploymentCampaign.applicationOption": {
-    "defaultMessage": "Select an Application"
+    "defaultMessage": "Search or select an application..."
   },
   "forms.CreateDeploymentCampaign.channelLabel": {
     "defaultMessage": "Channel"
   },
   "forms.CreateDeploymentCampaign.channelOption": {
-    "defaultMessage": "Select a Channel"
+    "defaultMessage": "Search or select a channel..."
   },
   "forms.CreateDeploymentCampaign.createRequestRetriesLabel": {
     "defaultMessage": "Request Retries"
@@ -1234,11 +1234,29 @@
   "forms.CreateDeploymentCampaign.nameLabel": {
     "defaultMessage": "Name"
   },
+  "forms.CreateDeploymentCampaign.noApplicationsAvailable": {
+    "defaultMessage": "No applications available"
+  },
+  "forms.CreateDeploymentCampaign.noApplicationsFoundMatching": {
+    "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "forms.CreateDeploymentCampaign.noChannelsAvailable": {
+    "defaultMessage": "No channels available"
+  },
+  "forms.CreateDeploymentCampaign.noChannelsFoundMatching": {
+    "defaultMessage": "No channels found matching \"{inputValue}\""
+  },
+  "forms.CreateDeploymentCampaign.noReleasesAvailable": {
+    "defaultMessage": "No releases available"
+  },
+  "forms.CreateDeploymentCampaign.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
   "forms.CreateDeploymentCampaign.releaseLabel": {
     "defaultMessage": "Release"
   },
   "forms.CreateDeploymentCampaign.releaseOption": {
-    "defaultMessage": "Select a Release"
+    "defaultMessage": "Search or select a release..."
   },
   "forms.CreateDeploymentCampaign.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
