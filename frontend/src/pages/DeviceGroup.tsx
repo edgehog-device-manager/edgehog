@@ -170,6 +170,19 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
           }
         });
 
+        const updateChannels = root.getLinkedRecords("updateChannels");
+        updateChannels?.forEach((updateChannel) => {
+          const targetGroups = updateChannel.getLinkedRecords("targetGroups");
+          if (targetGroups) {
+            updateChannel.setLinkedRecords(
+              targetGroups.filter(
+                (targetGroup) => targetGroup.getDataID() !== deviceGroupId,
+              ),
+              "targetGroups",
+            );
+          }
+        });
+
         store.delete(deviceGroupId);
       },
     });

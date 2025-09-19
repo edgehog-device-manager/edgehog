@@ -872,7 +872,7 @@ The following commands will create a database entry representing the tenant, wit
 Astarte cluster and Realm.
 
 ```elixir
-iex> alias Edgehog.Provisioning
+iex> alias Edgehog.Tenants
 iex> tenant_name = "<TENANT-NAME>"
 iex> tenant_slug = "<TENANT-SLUG>"
 iex> tenant_public_key = """
@@ -883,7 +883,7 @@ iex> realm_name = "<ASTARTE-REALM-NAME>"
 iex> realm_private_key = """
 <ASTARTE-REALM-PRIVATE-KEY>
 """
-iex> {:ok, tenant} = Provisioning.provision_tenant(
+iex> {:ok, tenant} = Tenants.provision_tenant(
   %{
     name: tenant_name,
     slug: tenant_slug,
