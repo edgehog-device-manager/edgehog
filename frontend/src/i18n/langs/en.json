@@ -1441,8 +1441,11 @@
   "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
   },
+  "forms.DeploymentCampaignForm.applicationLabel": {
+    "defaultMessage": "Application"
+  },
   "forms.DeploymentCampaignForm.deploymentChannelLabel": {
-    "defaultMessage": "Deployment Channel"
+    "defaultMessage": "Channel"
   },
   "forms.DeploymentCampaignForm.outcomeLabel": {
     "defaultMessage": "Outcome"

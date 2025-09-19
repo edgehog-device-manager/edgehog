@@ -46,7 +46,10 @@ const DEPLOYMENT_CAMPAIGN_FORM_FRAGMENT = graphql`
     release {
       id
       version
-      applicationId
+      application {
+        id
+        name
+      }
     }
     deploymentMechanism {
       __typename
@@ -189,15 +192,21 @@ const DeploymentCampaign = ({
         <FormRow
           label={
             <FormattedMessage
-              id="forms.DeploymentCampaignForm.deploymentChannelLabel"
-              defaultMessage="Deployment Channel"
+              id="forms.DeploymentCampaignForm.applicationLabel"
+              defaultMessage="Application"
             />
           }
         >
-          <Link route={Route.channelsEdit} params={{ channelId: channel.id }}>
-            {channel.name}
+          <Link
+            route={Route.application}
+            params={{
+              applicationId: release.application?.id || "",
+            }}
+          >
+            {release.application?.name}
           </Link>
         </FormRow>
+
         <FormRow
           label={
             <FormattedMessage
@@ -209,11 +218,24 @@ const DeploymentCampaign = ({
           <Link
             route={Route.release}
             params={{
-              applicationId: release.applicationId || "",
+              applicationId: release.application?.id || "",
               releaseId: release.id,
             }}
           >
             {release.version}
+          </Link>
+        </FormRow>
+
+        <FormRow
+          label={
+            <FormattedMessage
+              id="forms.DeploymentCampaignForm.deploymentChannelLabel"
+              defaultMessage="Channel"
+            />
+          }
+        >
+          <Link route={Route.channelsEdit} params={{ channelId: channel.id }}>
+            {channel.name}
           </Link>
         </FormRow>
       </Col>
