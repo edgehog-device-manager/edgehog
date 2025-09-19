@@ -28,6 +28,7 @@ defmodule Edgehog.Containers.Deployment do
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.Deployment.Types.DeploymentState
   alias Edgehog.Containers.Deployment.Types.ResourcesState
+  alias Edgehog.Containers.Deployment.Validations
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Validations.IsUpgrade
@@ -56,9 +57,30 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
-      change manage_relationship(:device_id, :device, type: :append)
+      validate Validations.DeviceIsCompatible
 
-      change Changes.CreateDeploymentOnDevice
+      change manage_relationship(:device_id, :device, type: :append)
+      change Changes.Relate
+      change Changes.SendRequest
+      change {PublishNotification, event_type: :deployment_created}
+    end
+
+    create :just_create do
+      description """
+      Starts the deployment of a release on a device.
+      It starts an Executor, handling the communication with the device.
+      """
+
+      accept [:release_id]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      validate Validations.DeviceIsCompatible
+
+      change manage_relationship(:device_id, :device, type: :append)
+      change Changes.Relate
       change {PublishNotification, event_type: :deployment_created}
     end
 
@@ -100,7 +122,7 @@ defmodule Edgehog.Containers.Deployment do
 
     update :send_deployment do
       description """
-      Retry sending the deployment to the device.
+      Sends the deployment to the device.
       Deploys the necessary resources and sends the deployment request.
       """
 
@@ -230,6 +252,8 @@ defmodule Edgehog.Containers.Deployment do
 
     many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
       through Edgehog.Containers.DeploymentContainerDeployment
+      source_attribute_on_join_resource :deployment_id
+      destination_attribute_on_join_resource :container_deployment_id
     end
   end
 

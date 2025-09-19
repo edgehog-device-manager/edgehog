@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Image.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Image.Changes
@@ -51,14 +52,24 @@ defmodule Edgehog.Containers.Image.Deployment do
         allow_nil? false
       end
 
+      change set_attribute(:state, :created)
+      change manage_relationship(:image, type: :append)
+      change manage_relationship(:device, type: :append)
+    end
+
+    update :send_deployment do
+      description """
+      Sends the deployment to the device.
+      Deploys the necessary resources and sends the deployment request.
+      """
+
       argument :deployment, :struct do
         constraints instance_of: Deployment
         allow_nil? false
       end
 
-      change set_attribute(:state, :created)
-      change manage_relationship(:image, type: :append)
-      change manage_relationship(:device, type: :append)
+      require_atomic? false
+
       change Changes.DeployImageOnDevice
     end
 

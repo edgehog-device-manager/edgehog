@@ -18,29 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.DeviceMapping.Changes.DeployDeviceMappingOnDevice do
-  @moduledoc false
+defmodule Edgehog.Containers.Deployment.Changes.SendRequest do
+  @moduledoc """
+  Automatically update the deployment and send the requests to the device once
+  the database transaction is clsed and all the resources are available.
+  """
   use Ash.Resource.Change
 
-  alias Ash.Resource.Change
-  alias Edgehog.Devices
+  alias Edgehog.Containers
 
-  require Logger
-
-  @impl Change
+  @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    device_mapping_deployment = changeset.data
-    deployment = Ash.Changeset.get_argument(changeset, :deployment)
-
-    with {:ok, device_mapping_deployment} <-
-           Ash.load(device_mapping_deployment, [:device_mapping, :device], tenant: tenant) do
-      device_mapping = device_mapping_deployment.device_mapping
-      device = device_mapping_deployment.device
-
-      with {:ok, _device} <-
-             Devices.send_create_device_mapping_request(device, device_mapping, deployment) do
-        Ash.Changeset.change_attribute(changeset, :state, :sent)
+    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+      with {:ok, deployment} <- result do
+        Containers.send_deployment(deployment, tenant: tenant)
       end
-    end
+    end)
   end
 end

@@ -28,6 +28,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget.Changes.Deploy do
     device_id = Ash.Changeset.get_attribute(changeset, :device_id)
     deployment = %{device_id: device_id, release_id: release.id}
 
-    Ash.Changeset.manage_relationship(changeset, :deployment, deployment, on_no_match: {:create, :deploy})
+    Ash.Changeset.manage_relationship(changeset, :deployment, deployment, on_no_match: {:create, :just_create})
   end
 end

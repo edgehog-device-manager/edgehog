@@ -29,22 +29,46 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    device = Ash.Changeset.get_argument(changeset, :device)
-    container = Ash.Changeset.get_argument(changeset, :container)
+    Ash.Changeset.after_action(changeset, &send_deployment(&1, &2, tenant))
+  end
+
+  defp send_deployment(changeset, container_deployment, tenant) do
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    Ash.Changeset.after_transaction(changeset, fn _changeset, {:ok, container_deployment} ->
-      case Devices.send_create_container_request(device, container, deployment) do
-        {:ok, _device} ->
-          Containers.mark_container_deployment_as_sent(container_deployment)
+    with {:ok, container_deployment} <-
+           Ash.load(container_deployment, [
+             :image_deployment,
+             :volume_deployments,
+             :network_deployments,
+             :device_mapping_deployments,
+             :device,
+             :container
+           ]) do
+      image_deployment = container_deployment.image_deployment
+      volume_deployments = container_deployment.volume_deployments
+      network_deployments = container_deployment.network_deployments
+      device_mapping_deployments = container_deployment.device_mapping_deployments
 
-        # TODO: instead of destroying the container deployment, we should retry
-        # sending the request after a delay.
-        {:error, reason} ->
-          Logger.warning("Failed to send container deployment request: #{inspect(reason)}")
-          :ok = Containers.destroy_container_deployment(container_deployment, tenant: tenant)
-          {:error, reason}
-      end
-    end)
+      resources = [
+        image_deployment | volume_deployments ++ network_deployments ++ device_mapping_deployments
+      ]
+
+      Enum.each(resources, &deploy_resource(&1, deployment, tenant))
+
+      with {:ok, _device} <-
+             Devices.send_create_container_request(
+               container_deployment.device,
+               container_deployment.container,
+               deployment,
+               tenant: tenant
+             ),
+           do: Containers.mark_container_deployment_as_sent(container_deployment, tenant: tenant)
+    end
+  end
+
+  defp deploy_resource(res, deployment, tenant) do
+    res
+    |> Ash.Changeset.for_update(:send_deployment, %{deployment: deployment}, tenant: tenant)
+    |> Ash.update(tenant: tenant)
   end
 end

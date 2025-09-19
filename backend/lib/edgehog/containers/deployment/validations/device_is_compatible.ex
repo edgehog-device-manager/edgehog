@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,35 +18,26 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
+defmodule Edgehog.Containers.Deployment.Validations.DeviceIsCompatible do
   @moduledoc false
-  use Ash.Resource.Change
+  use Ash.Resource.Validation
 
   alias Ash.Error.Changes.InvalidArgument
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice
-  alias Edgehog.Devices.Device
+  alias Edgehog.Devices
 
   require Ash.Query
-  require Logger
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, %{tenant: tenant}) do
+  @impl Ash.Resource.Validation
+  def validate(changeset, _opts, %{tenant: tenant}) do
     device_id = Ash.Changeset.get_argument(changeset, :device_id)
     release_id = Ash.Changeset.get_attribute(changeset, :release_id)
 
     with {:ok, device} <- fetch_device(device_id, tenant),
          {:ok, release} <- fetch_release(release_id, tenant) do
       if can_deploy?(device.system_model, release.system_models),
-        do: Ash.Changeset.after_transaction(changeset, &after_transaction/2),
-        else: invalid_argument_error(changeset)
-    end
-  end
-
-  defp after_transaction(_changeset, result) do
-    case result do
-      {:ok, deployment} -> SendDeploymentToDevice.deploy_resources(deployment, true)
-      error -> Logger.error("Failed to create deployment on device: #{inspect(error)}")
+        do: :ok,
+        else: {:error, invalid_argument_error(changeset)}
     end
   end
 
@@ -61,17 +52,11 @@ defmodule Edgehog.Containers.Deployment.Changes.CreateDeploymentOnDevice do
   end
 
   defp fetch_device(device_id, tenant) do
-    Device
-    |> Ash.Query.filter(id == ^device_id)
-    |> Ash.Query.load(:system_model)
-    |> Ash.read_one(tenant: tenant)
+    Devices.fetch_device(device_id, tenant: tenant, load: :system_model)
   end
 
   defp fetch_release(release_id, tenant) do
-    Containers.Release
-    |> Ash.Query.filter(id == ^release_id)
-    |> Ash.Query.load(:system_models)
-    |> Ash.read_one(tenant: tenant)
+    Containers.fetch_release(release_id, tenant: tenant, load: :system_models)
   end
 
   defp can_deploy?(_device_sm, nil), do: true

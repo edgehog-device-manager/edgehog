@@ -22,29 +22,23 @@ defmodule Edgehog.Containers.Volume.Changes.DeployVolumeOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
   alias Edgehog.Devices
 
   require Logger
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    device = Ash.Changeset.get_argument(changeset, :device)
-    volume = Ash.Changeset.get_argument(changeset, :volume)
+    volume_deployment = changeset.data
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    Ash.Changeset.after_transaction(changeset, fn _changeset, {:ok, volume_deployment} ->
-      case Devices.send_create_volume_request(device, volume, deployment) do
-        {:ok, _device} ->
-          Containers.mark_volume_deployment_as_sent(volume_deployment, tenant: tenant)
+    with {:ok, volume_deployment} <-
+           Ash.load(volume_deployment, [:volume, :device], tenant: tenant) do
+      volume = volume_deployment.volume
+      device = volume_deployment.device
 
-        # TODO: instead of destroying the volume deployment, we should retry
-        # sending the request after a delay.
-        {:error, reason} ->
-          Logger.warning("Failed to send volume deployment request: #{inspect(reason)}")
-          :ok = Containers.destroy_volume_deployment(volume_deployment, tenant: tenant)
-          {:error, reason}
+      with {:ok, _device} <- Devices.send_create_volume_request(device, volume, deployment) do
+        Ash.Changeset.change_attribute(changeset, :state, :sent)
       end
-    end)
+    end
   end
 end

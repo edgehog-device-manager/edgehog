@@ -161,7 +161,12 @@ defmodule Edgehog.DeploymentCampaignsFixtures do
     {:ok, target} =
       target
       |> Core.update_target_latest_attempt!(now)
-      |> DeploymentCampaigns.deploy_to_target(release, tenant: tenant)
+      |> DeploymentCampaigns.deploy_to_target(release, tenant: tenant, load: :deployment)
+
+    target
+    |> Map.get(:deployment)
+    |> Ash.Changeset.for_update(:send_deployment, %{deployment: target.deployment}, tenant: tenant)
+    |> Ash.update()
 
     target
   end
