@@ -28,124 +28,49 @@ defmodule Edgehog.Repo.Migrations.UpdateChannelToChannel do
   use Ecto.Migration
 
   def up do
-    create table(:channels, primary_key: false) do
-      add :id, :bigserial, null: false, primary_key: true
-      add :handle, :text, null: false
-      add :name, :text, null: false
+    rename table(:update_channels), to: table(:channels)
 
-      add :inserted_at, :utc_datetime_usec,
-        null: false,
-        default: fragment("(now() AT TIME ZONE 'utc')")
+    # Note: Ecto.Migration doesn't provide functions for renaming indexes/constraints, so we use execute
+    execute "ALTER INDEX update_channels_handle_index RENAME TO channels_handle_index"
+    execute "ALTER INDEX update_channels_name_index RENAME TO channels_name_index"
+    execute "ALTER INDEX update_channels_id_tenant_id_index RENAME TO channels_id_tenant_id_index"
+    execute "ALTER INDEX update_channels_tenant_id_index RENAME TO channels_tenant_id_index"
 
-      add :updated_at, :utc_datetime_usec,
-        null: false,
-        default: fragment("(now() AT TIME ZONE 'utc')")
-
-      add :tenant_id,
-          references(:tenants,
-            column: :tenant_id,
-            name: "channels_tenant_id_fkey",
-            type: :bigint,
-            prefix: "public",
-            on_delete: :delete_all
-          ),
-          null: false
-    end
-
-    create index(:channels, [:tenant_id])
-
-    create index(:channels, [:id, :tenant_id], unique: true)
-
-    create unique_index(:channels, [:tenant_id, :handle], name: "channels_handle_index")
-
-    create unique_index(:channels, [:tenant_id, :name], name: "channels_name_index")
+    execute "ALTER TABLE channels RENAME CONSTRAINT update_channels_tenant_id_fkey TO channels_tenant_id_fkey"
 
     drop_if_exists index(:update_campaigns, [:tenant_id, :update_channel_id])
 
     rename table(:update_campaigns), :update_channel_id, to: :channel_id
 
-    drop constraint(:update_campaigns, "update_campaigns_update_channel_id_fkey")
-
-    alter table(:update_campaigns) do
-      modify :channel_id,
-             references(:channels,
-               column: :id,
-               with: [tenant_id: :tenant_id],
-               match: :full,
-               name: "update_campaigns_channel_id_fkey",
-               type: :bigint,
-               prefix: "public",
-               on_delete: :nothing
-             )
-    end
+    execute "ALTER TABLE update_campaigns RENAME CONSTRAINT update_campaigns_update_channel_id_fkey TO update_campaigns_channel_id_fkey"
 
     create index(:update_campaigns, [:tenant_id, :channel_id])
 
     rename table(:device_groups), :update_channel_id, to: :channel_id
 
-    drop constraint(:device_groups, "device_groups_update_channel_id_fkey")
-
-    alter table(:device_groups) do
-      modify :channel_id,
-             references(:channels,
-               column: :id,
-               with: [tenant_id: :tenant_id],
-               name: "device_groups_channel_id_fkey",
-               type: :bigint,
-               prefix: "public",
-               on_delete: :nilify_all
-             )
-    end
+    execute "ALTER TABLE device_groups RENAME CONSTRAINT device_groups_update_channel_id_fkey TO device_groups_channel_id_fkey"
   end
 
   def down do
-    drop constraint(:device_groups, "device_groups_channel_id_fkey")
-
-    alter table(:device_groups) do
-      modify :update_channel_id,
-             references(:update_channels,
-               column: :id,
-               with: [tenant_id: :tenant_id],
-               name: "device_groups_update_channel_id_fkey",
-               type: :bigint,
-               prefix: "public",
-               on_delete: :nilify_all
-             )
-    end
+    execute "ALTER TABLE device_groups RENAME CONSTRAINT device_groups_channel_id_fkey TO device_groups_update_channel_id_fkey"
 
     rename table(:device_groups), :channel_id, to: :update_channel_id
 
     drop_if_exists index(:update_campaigns, [:tenant_id, :channel_id])
 
-    drop constraint(:update_campaigns, "update_campaigns_channel_id_fkey")
-
-    alter table(:update_campaigns) do
-      modify :update_channel_id,
-             references(:update_channels,
-               column: :id,
-               with: [tenant_id: :tenant_id],
-               match: :full,
-               name: "update_campaigns_update_channel_id_fkey",
-               type: :bigint,
-               prefix: "public",
-               on_delete: :nothing
-             )
-    end
+    execute "ALTER TABLE update_campaigns RENAME CONSTRAINT update_campaigns_channel_id_fkey TO update_campaigns_update_channel_id_fkey"
 
     rename table(:update_campaigns), :channel_id, to: :update_channel_id
 
     create index(:update_campaigns, [:tenant_id, :update_channel_id])
 
-    drop_if_exists unique_index(:channels, [:tenant_id, :name], name: "channels_name_index")
+    execute "ALTER TABLE channels RENAME CONSTRAINT channels_tenant_id_fkey TO update_channels_tenant_id_fkey"
 
-    drop_if_exists unique_index(:channels, [:tenant_id, :handle], name: "channels_handle_index")
+    execute "ALTER INDEX channels_tenant_id_index RENAME TO update_channels_tenant_id_index"
+    execute "ALTER INDEX channels_id_tenant_id_index RENAME TO update_channels_id_tenant_id_index"
+    execute "ALTER INDEX channels_name_index RENAME TO update_channels_name_index"
+    execute "ALTER INDEX channels_handle_index RENAME TO update_channels_handle_index"
 
-    drop constraint(:channels, "channels_tenant_id_fkey")
-
-    drop_if_exists index(:channels, [:id, :tenant_id])
-
-    drop_if_exists index(:channels, [:tenant_id])
-
-    drop table(:channels)
+    rename table(:channels), to: table(:update_channels)
   end
 end
