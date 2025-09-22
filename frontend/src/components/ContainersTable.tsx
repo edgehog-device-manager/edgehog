@@ -38,7 +38,7 @@ import Row from "components/Row";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import MultiSelect from "./MultiSelect";
 import InfiniteScroll from "./InfiniteScroll";
-import Icon from "components/Icon";
+import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
 
 const CONTAINERS_TO_LOAD_NEXT = 5;
 
@@ -458,30 +458,13 @@ type DeviceMappingDetailsProps = {
   deviceMappings: NonNullable<
     ContainersTable_ContainerFragment$data["containers"]["edges"]
   >[number]["node"]["deviceMappings"];
-  containerIndex: number;
+  containerIndex?: number;
 };
 
 const DeviceMappingDetails = ({
   deviceMappings,
-  containerIndex,
 }: DeviceMappingDetailsProps) => {
-  const [openDeviceMappingIndexes, setOpenDeviceMappingIndexes] = useState<
-    number[]
-  >(deviceMappings.edges?.map((_, index) => index) ?? []);
-
-  const toggleDeviceMapping = (index: number) => {
-    setOpenDeviceMappingIndexes((current) =>
-      current.includes(index)
-        ? current.filter((i) => i !== index)
-        : [...current, index],
-    );
-  };
-
-  const lastPathElement = (path: string) => {
-    const pathElements = path.split("/");
-    return pathElements[pathElements.length - 1];
-  };
-
+  const dmFormInputProps = { deviceMappings: deviceMappings };
   return (
     <div className="mt-3">
       <h5>
@@ -499,70 +482,13 @@ const DeviceMappingDetails = ({
           />
         </p>
       ) : (
-        deviceMappings.edges.map((deviceMappingEdge, dmIndex) => {
-          const dmNode = deviceMappingEdge.node;
-          const isOpen = openDeviceMappingIndexes.includes(dmIndex);
-
-          return (
-            <div
-              key={dmNode?.id ?? dmIndex}
-              className="mb-2 border rounded bg-light"
-            >
-              <Button
-                variant="light"
-                className="w-100 d-flex align-items-center fw-bold"
-                onClick={() => toggleDeviceMapping(dmIndex)}
-                aria-expanded={isOpen}
-              >
-                {lastPathElement(dmNode?.pathInContainer)}
-                <Icon
-                  icon={isOpen ? "caretUp" : "caretDown"}
-                  className="ms-auto"
-                />
-              </Button>
-
-              <Collapse in={isOpen}>
-                <div className="p-2 border-top">
-                  <FormRow
-                    id={`containers-${containerIndex}-deviceMapping-${dmIndex}-pathInContainer`}
-                    label={
-                      <FormattedMessage
-                        id="forms.CreateRelease.pathInContainerLabel"
-                        defaultMessage="Path In Container"
-                      />
-                    }
-                  >
-                    <Form.Control value={dmNode.pathInContainer} readOnly />
-                  </FormRow>
-
-                  <FormRow
-                    id={`containers-${containerIndex}-deviceMapping-${dmIndex}-pathOnHost`}
-                    label={
-                      <FormattedMessage
-                        id="forms.CreateRelease.pathOnHostLabel"
-                        defaultMessage="Path On Host"
-                      />
-                    }
-                  >
-                    <Form.Control value={dmNode.pathOnHost} readOnly />
-                  </FormRow>
-
-                  <FormRow
-                    id={`containers-${containerIndex}-deviceMapping-${dmIndex}-cgroupPermissions`}
-                    label={
-                      <FormattedMessage
-                        id="forms.CreateRelease.cgroupPermissionsLabel"
-                        defaultMessage="Container Group Permissions"
-                      />
-                    }
-                  >
-                    <Form.Control value={dmNode.cgroupPermissions} readOnly />
-                  </FormRow>
-                </div>
-              </Collapse>
-            </div>
-          );
-        })
+        <div className="p-2 mb-2 border rounded bg-light">
+          <DeviceMappingsFormInput
+            readOnly={true}
+            readOnlyProps={dmFormInputProps}
+            editableProps={null}
+          />
+        </div>
       )}
     </div>
   );
@@ -910,10 +836,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         containerVolumes={container.containerVolumes}
         containerIndex={index}
       />
-      <DeviceMappingDetails
-        deviceMappings={container.deviceMappings}
-        containerIndex={index}
-      />
+      <DeviceMappingDetails deviceMappings={container.deviceMappings} />
     </div>
   );
 };

@@ -62,6 +62,7 @@ import Icon from "components/Icon";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import ConfirmModal from "components/ConfirmModal";
 import FormFeedback from "forms/FormFeedback";
+import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -283,7 +284,7 @@ type ContainerInput = {
   deviceMappings?: ContainerCreateWithNestedDeviceMappingsInput[];
 };
 
-type ReleaseInputData = {
+export type ReleaseInputData = {
   version: string;
   containers?: ContainerInput[] | null;
   requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
@@ -597,6 +598,16 @@ const ContainerForm = ({
       dm.pathOnHost?.trim() &&
       dm.cgroupPermissions?.trim(),
   );
+
+  const dmFormInputProps = {
+    containerIndex: index,
+    deviceMappingsForm: deviceMappingsForm,
+    canAddDeviceMapping: canAddDeviceMapping,
+    errorFeedback: errors,
+    register: register,
+    removeDeviceMapping: (dmIndex: number) =>
+      deviceMappingsForm.remove(dmIndex),
+  };
 
   return (
     <div className="border p-3 mb-3">
@@ -1463,117 +1474,10 @@ const ContainerForm = ({
           }
         >
           <div className="p-3 mb-3 bg-light border rounded">
-            <Stack gap={3}>
-              {deviceMappingsForm.fields.map((deviceMapping, dmIndex) => {
-                const fieldErrors =
-                  errors.containers?.[index]?.deviceMappings?.[dmIndex];
-
-                return (
-                  <Stack
-                    direction="horizontal"
-                    gap={3}
-                    key={`stack1-deviceMapping-${dmIndex}`}
-                    className="align-items-start"
-                  >
-                    <Form.Group id={`containers-${index}-pathInContainer`}>
-                      <Form.Label>
-                        <FormattedMessage
-                          id="forms.CreateRelease.pathInContainerLabel"
-                          defaultMessage="Path In Container"
-                        />
-                      </Form.Label>
-                      <Form.Control
-                        {...register(
-                          `containers.${index}.deviceMappings.${dmIndex}.pathInContainer` as const,
-                        )}
-                        placeholder="e.g., /dev/net/1"
-                        isInvalid={!!fieldErrors?.pathInContainer}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {fieldErrors?.pathInContainer?.message && (
-                          <FormattedMessage
-                            id={fieldErrors.pathInContainer.message}
-                          />
-                        )}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-
-                    <Form.Group id={`containers-${index}-pathOnHost`}>
-                      <Form.Label>
-                        <FormattedMessage
-                          id="forms.CreateRelease.pathOnHostLabel"
-                          defaultMessage="Path On Host"
-                        />
-                      </Form.Label>
-                      <Form.Control
-                        {...register(
-                          `containers.${index}.deviceMappings.${dmIndex}.pathOnHost` as const,
-                        )}
-                        placeholder="e.g., /dev/net/1"
-                        isInvalid={!!fieldErrors?.pathOnHost}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {fieldErrors?.pathOnHost?.message && (
-                          <FormattedMessage
-                            id={fieldErrors.pathOnHost.message}
-                          />
-                        )}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-
-                    <Form.Group id={`containers-${index}-cgroupPermissions`}>
-                      <Form.Label>
-                        <FormattedMessage
-                          id="forms.CreateRelease.cgroupPermissionsLabel"
-                          defaultMessage="Container Group Permissions"
-                        />
-                      </Form.Label>
-                      <Form.Control
-                        {...register(
-                          `containers.${index}.deviceMappings.${dmIndex}.cgroupPermissions` as const,
-                        )}
-                        placeholder="e.g., mrw"
-                        isInvalid={!!fieldErrors?.cgroupPermissions}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {fieldErrors?.cgroupPermissions?.message && (
-                          <FormattedMessage
-                            id={fieldErrors.cgroupPermissions.message}
-                          />
-                        )}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-
-                    <Button
-                      variant="shadow-danger"
-                      type="button"
-                      onClick={() => deviceMappingsForm.remove(dmIndex)}
-                    >
-                      <Icon className="text-danger" icon={"delete"} />
-                    </Button>
-                  </Stack>
-                );
-              })}
-
-              <div>
-                <Button
-                  variant="outline-primary"
-                  onClick={() =>
-                    deviceMappingsForm.append({
-                      pathOnHost: "",
-                      pathInContainer: "",
-                      cgroupPermissions: "",
-                    })
-                  }
-                  disabled={!canAddDeviceMapping}
-                >
-                  <FormattedMessage
-                    id="forms.CreateRelease.addDeviceMappingButton"
-                    defaultMessage="Add Device Mapping"
-                  />
-                </Button>
-              </div>
-            </Stack>
+            <DeviceMappingsFormInput
+              editableProps={dmFormInputProps}
+              readOnlyProps={null}
+            />
           </div>
         </FormRow>
 
