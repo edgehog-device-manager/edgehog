@@ -1,0 +1,38 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.stats.ContainerMemory",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "mappings": [
+    {
+      "endpoint": "/%{container_id}/usage",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Current res_counter usage for memory.",
+      "doc": "Current total memory usage (RAM + swap) of the container, in bytes."
+    },
+    {
+      "endpoint": "/%{container_id}/maxUsage",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Maximum usage ever recorded.",
+      "doc": "The maximum memory usage recorded since the container's start, in bytes."
+    },
+    {
+      "endpoint": "/%{container_id}/failcnt",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Number of times memory usage hits limits.",
+      "doc": "The number of times the memory limit has been reached."
+    },
+    {
+      "endpoint": "/%{container_id}/limit",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Memory usage limit",
+      "doc": "The memory usage limit for the container"
+    }
+  ]
+}

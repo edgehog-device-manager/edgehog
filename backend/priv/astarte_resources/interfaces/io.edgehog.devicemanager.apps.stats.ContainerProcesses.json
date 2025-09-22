@@ -1,0 +1,23 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.stats.ContainerProcesses",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "description": "PidsStats contains Linux-specific stats of a container's process-IDs (PIDs).",
+  "mappings": [
+    {
+      "endpoint": "/%{container_id}/current",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Current is the number of PIDs in the cgroup."
+    },
+    {
+      "endpoint": "/%{container_id}/limit",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Limit is the hard limit on the number of pids in the cgroup."
+    }
+  ]
+}

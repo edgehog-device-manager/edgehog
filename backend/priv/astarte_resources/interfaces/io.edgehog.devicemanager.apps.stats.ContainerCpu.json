@@ -1,0 +1,125 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.stats.ContainerCpu",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "doc": "The precpu stats is the CPU statistic of the previous read, and is used to calculate the CPU usage percentage. It is not an exact copy of the cpu_stats field.",
+  "mappings": [
+    {
+      "endpoint": "/%{container_id}/cpuUsageTotalUsage",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Total CPU time consumed in nanoseconds",
+      "doc": "Total CPU time consumed by the container, in nanoseconds."
+    },
+    {
+      "endpoint": "/%{container_id}/cpuUsagePercpuUsage",
+      "type": "longintegerarray",
+      "explicit_timestamp": true,
+      "description": "Total CPU time (in nanoseconds) consumed per core",
+      "doc": "This field is Linux-specific when using cgroups v1."
+    },
+    {
+      "endpoint": "/%{container_id}/cpuUsageUsageInKernelmode",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Time (in nanoseconds) spent by tasks of the cgroup in kernel mode",
+      "doc": "CPU time spent in kernel mode by the container's tasks, in nanoseconds."
+    },
+    {
+      "endpoint": "/%{container_id}/cpuUsageUsageInUsermode",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Time (in nanoseconds) spent by tasks of the cgroup in user mode"
+    },
+    {
+      "endpoint": "/%{container_id}/systemCpuUsage",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "System Usage."
+    },
+    {
+      "endpoint": "/%{container_id}/onlineCpus",
+      "type": "integer",
+      "explicit_timestamp": true,
+      "description": "Number of online CPUs."
+    },
+    {
+      "endpoint": "/%{container_id}/throttlingDataPeriods",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Number of periods with throttling active."
+    },
+    {
+      "endpoint": "/%{container_id}/throttlingDataThrottledPeriods",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Number of periods when the container hit its throttling limit."
+    },
+    {
+      "endpoint": "/%{container_id}/throttlingDataThrottledTime",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Aggregated time (in nanoseconds) the container was throttled for."
+    },
+    {
+      "endpoint": "/%{container_id}/preCpuUsageTotalUsage",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Total CPU time consumed in nanoseconds",
+      "doc": "Total CPU time consumed by the container, in nanoseconds."
+    },
+    {
+      "endpoint": "/%{container_id}/preCpuUsagePercpuUsage",
+      "type": "longintegerarray",
+      "explicit_timestamp": true,
+      "description": "Total CPU time (in nanoseconds) consumed per core",
+      "doc": "This field is Linux-specific when using cgroups v1."
+    },
+    {
+      "endpoint": "/%{container_id}/preCpuUsageUsageInKernelmode",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Time (in nanoseconds) spent by tasks of the cgroup in kernel mode",
+      "doc": "CPU time spent in kernel mode by the container's tasks, in nanoseconds."
+    },
+    {
+      "endpoint": "/%{container_id}/preCpuUsageUsageInUsermode",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Time (in nanoseconds) spent by tasks of the cgroup in user mode"
+    },
+    {
+      "endpoint": "/%{container_id}/preSystemCpuUsage",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "System Usage."
+    },
+    {
+      "endpoint": "/%{container_id}/preOnlineCpus",
+      "type": "integer",
+      "explicit_timestamp": true,
+      "description": "Number of online CPUs."
+    },
+    {
+      "endpoint": "/%{container_id}/preThrottlingDataPeriods",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Number of periods with throttling active."
+    },
+    {
+      "endpoint": "/%{container_id}/preThrottlingDataThrottledPeriods",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Number of periods when the container hit its throttling limit."
+    },
+    {
+      "endpoint": "/%{container_id}/preThrottlingDataThrottledTime",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Aggregated time (in nanoseconds) the container was throttled for."
+    }
+  ]
+}

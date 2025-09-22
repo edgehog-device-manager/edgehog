@@ -1,0 +1,23 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.stats.ContainerMemoryStats",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "doc": "All the stats exported via memory.stat. when using cgroups v2.",
+  "mappings": [
+    {
+      "endpoint": "/%{container_id}/name",
+      "type": "string",
+      "explicit_timestamp": true,
+      "description": "Name of the stat"
+    },
+    {
+      "endpoint": "/%{container_id}/value",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Value of the stat"
+    }
+  ]
+}
