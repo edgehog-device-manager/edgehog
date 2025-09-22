@@ -18,11 +18,12 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import Select from "react-select";
 
 import type { CreateDeploymentCampaign_OptionsFragment$key } from "api/__generated__/CreateDeploymentCampaign_OptionsFragment.graphql";
 
@@ -104,6 +105,12 @@ type FormData = {
   maxInProgressDeployments: number | string;
   createRequestRetries: number;
   requestTimeoutSeconds: number;
+};
+
+type SelectOption = {
+  value: string;
+  label: string;
+  disabled?: boolean;
 };
 
 const initialData: FormData = {
@@ -213,7 +220,7 @@ const CreateDeploymentCampaignForm = ({
     handleSubmit,
     formState: { errors },
     watch,
-    resetField,
+    control,
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: initialData,
@@ -225,12 +232,38 @@ const CreateDeploymentCampaignForm = ({
     deploymentCampaignOptionsRef,
   );
 
-  const selectedApplicationId = watch("applicationId");
-  const selectedApplication = applications?.edges?.find(
-    ({ node }) => node.id === selectedApplicationId,
-  )?.node;
-
   const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+
+  const selectedApp = watch("applicationId");
+
+  const applicationOptions: SelectOption[] = useMemo(() => {
+    return (
+      applications?.edges?.map((app) => ({
+        value: app.node.id,
+        label: app.node.name,
+      })) ?? []
+    );
+  }, [applications?.edges]);
+
+  const releaseOptions: SelectOption[] = useMemo(() => {
+    if (!selectedApp) return [];
+    const app = applications?.edges?.find((a) => a.node.id === selectedApp);
+    return (
+      app?.node?.releases?.edges?.map(({ node }) => ({
+        value: node.id,
+        label: node.version,
+      })) ?? []
+    );
+  }, [selectedApp, applications?.edges]);
+
+  const channelOptions: SelectOption[] = useMemo(() => {
+    return (
+      channels?.edges?.map(({ node }) => ({
+        value: node.id,
+        label: node.name,
+      })) ?? []
+    );
+  }, [channels?.edges]);
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -257,27 +290,48 @@ const CreateDeploymentCampaignForm = ({
             />
           }
         >
-          <Form.Select
-            {...register("applicationId", {
-              onChange: () => resetField("releaseId"),
-            })}
-            isInvalid={!!errors.applicationId}
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "forms.CreateDeploymentCampaign.applicationOption",
-                defaultMessage: "Select an Application",
-              })}
-            </option>
-            {applications?.edges?.map(({ node: app }) => (
-              <option key={app.id} value={app.id}>
-                {app.name ?? app.id}
-              </option>
-            ))}
-          </Form.Select>
-          <FormFeedback feedback={errors.applicationId?.message} />
-        </FormRow>
+          <Controller
+            name="applicationId"
+            control={control}
+            render={({ field }) => (
+              <>
+                <Select
+                  {...field}
+                  value={
+                    applicationOptions.find(
+                      (opt) => opt.value === field.value,
+                    ) || null
+                  }
+                  onChange={(option) => field.onChange(option?.value || "")}
+                  options={applicationOptions}
+                  isClearable
+                  placeholder={intl.formatMessage({
+                    id: "forms.CreateDeploymentCampaign.applicationOption",
+                    defaultMessage: "Search or select an application...",
+                  })}
+                  noOptionsMessage={({ inputValue }) =>
+                    inputValue
+                      ? intl.formatMessage(
+                          {
+                            id: "forms.CreateDeploymentCampaign.noApplicationsFoundMatching",
+                            defaultMessage:
+                              'No applications found matching "{inputValue}"',
+                          },
+                          { inputValue },
+                        )
+                      : intl.formatMessage({
+                          id: "forms.CreateDeploymentCampaign.noApplicationsAvailable",
+                          defaultMessage: "No applications available",
+                        })
+                  }
+                  className={errors.applicationId && "is-invalid"}
+                />
 
+                <FormFeedback feedback={errors.applicationId?.message} />
+              </>
+            )}
+          />
+        </FormRow>
         <FormRow
           id="create-deployment-campaign-form-release"
           label={
@@ -287,24 +341,47 @@ const CreateDeploymentCampaignForm = ({
             />
           }
         >
-          <Form.Select
-            {...register("releaseId")}
-            disabled={!selectedApplication}
-            isInvalid={!!errors.releaseId}
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "forms.CreateDeploymentCampaign.releaseOption",
-                defaultMessage: "Select a Release",
-              })}
-            </option>
-            {selectedApplication?.releases?.edges?.map(({ node: release }) => (
-              <option key={release.id} value={release.id}>
-                {release.version ?? release.id}
-              </option>
-            ))}
-          </Form.Select>
-          <FormFeedback feedback={errors.releaseId?.message} />
+          <Controller
+            name="releaseId"
+            control={control}
+            render={({ field }) => (
+              <>
+                <Select
+                  {...field}
+                  value={
+                    releaseOptions.find((opt) => opt.value === field.value) ||
+                    null
+                  }
+                  onChange={(option) => field.onChange(option?.value || "")}
+                  options={releaseOptions}
+                  isClearable
+                  isDisabled={!selectedApp}
+                  placeholder={intl.formatMessage({
+                    id: "forms.CreateDeploymentCampaign.releaseOption",
+                    defaultMessage: "Search or select a release...",
+                  })}
+                  noOptionsMessage={({ inputValue }) =>
+                    inputValue
+                      ? intl.formatMessage(
+                          {
+                            id: "forms.CreateDeploymentCampaign.noReleasesFoundMatching",
+                            defaultMessage:
+                              'No releases found matching "{inputValue}"',
+                          },
+                          { inputValue },
+                        )
+                      : intl.formatMessage({
+                          id: "forms.CreateDeploymentCampaign.noReleasesAvailable",
+                          defaultMessage: "No releases available",
+                        })
+                  }
+                  className={errors.releaseId && "is-invalid"}
+                />
+
+                <FormFeedback feedback={errors.releaseId?.message} />
+              </>
+            )}
+          />
         </FormRow>
         <FormRow
           id="create-deployment-campaign-form-channel"
@@ -315,23 +392,46 @@ const CreateDeploymentCampaignForm = ({
             />
           }
         >
-          <Form.Select
-            {...register("channelId")}
-            isInvalid={!!errors.channelId}
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "forms.CreateDeploymentCampaign.channelOption",
-                defaultMessage: "Select a Channel",
-              })}
-            </option>
-            {channels?.edges?.map(({ node: channel }) => (
-              <option key={channel.id} value={channel.id}>
-                {channel.name}
-              </option>
-            ))}
-          </Form.Select>
-          <FormFeedback feedback={errors.channelId?.message} />
+          <Controller
+            name="channelId"
+            control={control}
+            render={({ field }) => (
+              <>
+                <Select
+                  {...field}
+                  value={
+                    channelOptions.find((opt) => opt.value === field.value) ||
+                    null
+                  }
+                  onChange={(option) => field.onChange(option?.value || "")}
+                  options={channelOptions}
+                  isClearable
+                  placeholder={intl.formatMessage({
+                    id: "forms.CreateDeploymentCampaign.channelOption",
+                    defaultMessage: "Search or select a channel...",
+                  })}
+                  noOptionsMessage={({ inputValue }) =>
+                    inputValue
+                      ? intl.formatMessage(
+                          {
+                            id: "forms.CreateDeploymentCampaign.noChannelsFoundMatching",
+                            defaultMessage:
+                              'No channels found matching "{inputValue}"',
+                          },
+                          { inputValue },
+                        )
+                      : intl.formatMessage({
+                          id: "forms.CreateDeploymentCampaign.noChannelsAvailable",
+                          defaultMessage: "No channels available",
+                        })
+                  }
+                  className={errors.channelId && "is-invalid"}
+                />
+
+                <FormFeedback feedback={errors.channelId?.message} />
+              </>
+            )}
+          />
         </FormRow>
         <FormRow
           id="create-deployment-campaign-form-max-in-progress-updates"
