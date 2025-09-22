@@ -120,7 +120,7 @@ config :ex_aws,
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:module, :function, :request_id, :tag, :tenant, :realm]
+  metadata: [:module, :function, :request_id, :tag, :tenant_id]
 
 config :mime, :extensions, %{
   "json" => "application/vnd.api+json"

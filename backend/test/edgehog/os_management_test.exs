@@ -236,5 +236,75 @@ defmodule Edgehog.OSManagementTest do
 
       assert ota_operation.status == :failure
     end
+
+    test "update_ota_operation_status/3 with success status logs the outcome",
+         %{tenant: tenant} do
+      import ExUnit.CaptureLog
+
+      log_level = Logger.level()
+      Logger.configure(level: :info)
+
+      ota_operation = manual_ota_operation_fixture(tenant: tenant)
+      expect(EphemeralImageMock, :delete, 1, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
+      status = "SUCCESS"
+      status_attrs = %{status_code: "", message: "Yey!"}
+
+      {result, log} =
+        with_log(fn ->
+          OSManagement.update_ota_operation_status(ota_operation, status, status_attrs)
+        end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} = result
+
+      assert log =~
+               "OTA operation #{ota_operation.id} on device #{ota_operation.device_id} completed successfully with status code #{ota_operation.status_code} and message: #{ota_operation.message}"
+
+      Logger.configure(level: log_level)
+    end
+
+    test "update_ota_operation_status/3 with failure status logs the outcome",
+         %{tenant: tenant} do
+      import ExUnit.CaptureLog
+
+      log_level = Logger.level()
+      Logger.configure(level: :info)
+
+      ota_operation = manual_ota_operation_fixture(tenant: tenant)
+      expect(EphemeralImageMock, :delete, 1, fn _tenant_id, _ota_operation_id, _url -> :ok end)
+
+      status = "FAILURE"
+      status_attrs = %{status_code: "SYSTEM_ROLLBACK", message: "Something bad happened"}
+
+      {result, log} =
+        with_log(fn ->
+          OSManagement.update_ota_operation_status(ota_operation, status, status_attrs)
+        end)
+
+      assert {:ok, %OTAOperation{} = ota_operation} = result
+
+      assert log =~
+               "OTA operation #{ota_operation.id} on device #{ota_operation.device_id} failed with status code #{ota_operation.status_code} and message: #{ota_operation.message}"
+
+      Logger.configure(level: log_level)
+    end
+
+    test "mark_ota_operation_as_timed_out!/2 logs the outcome",
+         %{tenant: tenant} do
+      import ExUnit.CaptureLog
+
+      log_level = Logger.level()
+      Logger.configure(level: :info)
+
+      ota_operation = managed_ota_operation_fixture(tenant: tenant)
+
+      {ota_operation, log} =
+        with_log(fn -> OSManagement.mark_ota_operation_as_timed_out!(ota_operation) end)
+
+      assert log =~
+               "OTA operation #{ota_operation.id} on device #{ota_operation.device_id} failed with status code request_timeout and message: "
+
+      Logger.configure(level: log_level)
+    end
   end
 end
