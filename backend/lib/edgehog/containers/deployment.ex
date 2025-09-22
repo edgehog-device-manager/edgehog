@@ -227,6 +227,10 @@ defmodule Edgehog.Containers.Deployment do
     has_many :ready_actions, Edgehog.Containers.DeploymentReadyAction do
       public? true
     end
+
+    many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      through Edgehog.Containers.DeploymentContainerDeployment
+    end
   end
 
   calculations do

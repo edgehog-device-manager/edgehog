@@ -261,6 +261,8 @@ defmodule Edgehog.Containers do
       define :mark_network_deployment_as_errored, action: :mark_as_errored, args: [:message]
     end
 
+    resource Edgehog.Containers.ContainerDeploymentNetworkDeployment
+
     resource Edgehog.Containers.Volume
 
     resource Edgehog.Containers.Volume.Deployment do
@@ -272,6 +274,8 @@ defmodule Edgehog.Containers do
       define :mark_volume_deployment_as_unavailable, action: :mark_as_unavailable
       define :mark_volume_deployment_as_errored, action: :mark_as_errored, args: [:message]
     end
+
+    resource Edgehog.Containers.ContainerDeploymentVolumeDeployment
 
     resource Edgehog.Containers.DeviceMapping
 
@@ -294,6 +298,10 @@ defmodule Edgehog.Containers do
         action: :mark_as_errored,
         args: [:message]
     end
+
+    resource Edgehog.Containers.ContainerDeploymentDeviceMappingDeployment
+
+    resource Edgehog.Containers.DeploymentContainerDeployment
 
     resource DeploymentReadyAction
     resource Upgrade

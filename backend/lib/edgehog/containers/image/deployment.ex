@@ -92,7 +92,8 @@ defmodule Edgehog.Containers.Image.Deployment do
     attribute :state, :atom,
       constraints: [
         one_of: [:created, :sent, :pulled, :unpulled, :error]
-      ]
+      ],
+      public?: true
 
     timestamps()
   end
