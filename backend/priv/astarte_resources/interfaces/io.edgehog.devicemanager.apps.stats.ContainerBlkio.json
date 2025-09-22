@@ -1,0 +1,36 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.stats.ContainerBlkio",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "doc": "BlkioStats stores all IO service stats for data read and write.",
+  "mappings": [
+    {
+      "endpoint": "/%{container_id}/name",
+      "type": "string",
+      "explicit_timestamp": true
+    },
+    {
+      "endpoint": "/%{container_id}/major",
+      "type": "longinteger",
+      "explicit_timestamp": true
+    },
+    {
+      "endpoint": "/%{container_id}/minor",
+      "type": "longinteger",
+      "explicit_timestamp": true
+    },
+    {
+      "endpoint": "/%{container_id}/op",
+      "type": "string",
+      "explicit_timestamp": true
+    },
+    {
+      "endpoint": "/%{container_id}/value",
+      "type": "longinteger",
+      "explicit_timestamp": true
+    }
+  ]
+}

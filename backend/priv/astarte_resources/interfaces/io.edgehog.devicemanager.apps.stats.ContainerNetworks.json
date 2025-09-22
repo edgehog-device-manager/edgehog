@@ -1,0 +1,74 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.stats.ContainerNetworks",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "doc": "Network statistics for the container per interface.",
+  "mappings": [
+    {
+      "endpoint": "/%{container_id}/interface",
+      "type": "string",
+      "explicit_timestamp": true,
+      "description": "Network interface name",
+      "doc": "Name of the network for which the statistics are provided."
+    },
+    {
+      "endpoint": "/%{container_id}/rxBytes",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Bytes received.",
+      "doc": "Total number of bytes received on the interface."
+    },
+    {
+      "endpoint": "/%{container_id}/rxPackets",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Packets received.",
+      "doc": "Total number of packets successfully received on the interface."
+    },
+    {
+      "endpoint": "/%{container_id}/rxDropped",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Incoming packets dropped.",
+      "doc": "Total number of incoming packets that were dropped."
+    },
+    {
+      "endpoint": "/%{container_id}/rxErrors",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Received errors.",
+      "doc": "Total number of errors that occurred while receiving."
+    },
+    {
+      "endpoint": "/%{container_id}/txBytes",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Bytes sent.",
+      "doc": "Total number of bytes transmitted on the interface."
+    },
+    {
+      "endpoint": "/%{container_id}/txPackets",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Packets sent.",
+      "doc": "Total number of packets successfully transmitted on the interface."
+    },
+    {
+      "endpoint": "/%{container_id}/txErrors",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Sent errors.",
+      "doc": "Total number of errors that occurred while transmitting."
+    },
+    {
+      "endpoint": "/%{container_id}/txDropped",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Outgoing packets dropped.",
+      "doc": "Total number of outgoing packets that were dropped."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "interface_name": "io.edgehog.devicemanager.apps.stats.VolumeUsage",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "device",
+  "doc": "Statistics on the volumes",
+  "mappings": [
+    {
+      "endpoint": "/%{volume_id}/driver",
+      "type": "string",
+      "explicit_timestamp": true,
+      "description": "Name of the volume driver used by the volume."
+    },
+    {
+      "endpoint": "/%{volume_id}/mountpoint",
+      "type": "string",
+      "explicit_timestamp": true,
+      "description": "Mount path of the volume on the host."
+    },
+    {
+      "endpoint": "/%{volume_id}/createdAt",
+      "type": "datetime",
+      "explicit_timestamp": true,
+      "description": "Date/Time the volume was created."
+    },
+    {
+      "endpoint": "/%{volume_id}/usageDataSize",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "Amount of disk space used by the volume (in bytes)."
+    },
+    {
+      "endpoint": "/%{volume_id}/usageDataRefCount",
+      "type": "longinteger",
+      "explicit_timestamp": true,
+      "description": "The number of containers referencing this volume."
+    }
+  ]
+}
