@@ -458,7 +458,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   def handle_event(:internal, {:deployment_failure, deployment}, state, data) do
-    Logger.notice("Device #{deployment.device_id} failed to update: #{deployment.status_code}")
+    Logger.notice("Device #{deployment.device_id} failed to update: #{deployment.last_error_message}")
 
     _ =
       data.tenant_id
