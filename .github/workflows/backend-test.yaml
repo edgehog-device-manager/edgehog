@@ -200,25 +200,34 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      minio:
-        image: minio/minio:latest
-        env:
-          MINIO_ROOT_USER: "minioadmin"
-          MINIO_ROOT_PASSWORD: "minioadmin"
-        command: server
-        ports:
-        - 9000:9000
-        options: >-
-         --name minio
-         --health-interval 10s
-         --health-timeout 5s
-         --health-retries 5
-         --health-cmd "curl http://localhost:9000/minio/health/live"
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         show-progress: false
+
+    - name: Start MinIO
+      run: |
+        docker run -d \
+          --name minio \
+          -p 9000:9000 \
+          -p 9001:9001 \
+          -e MINIO_ROOT_USER=minioadmin \
+          -e MINIO_ROOT_PASSWORD=minioadmin \
+          minio/minio:latest \
+          server /data --console-address ":9001"
+
+    - name: Wait for MinIO to be ready
+      run: |
+        echo "Waiting for MinIO to start..."
+        for i in {1..30}; do
+          if curl -f http://localhost:9000/minio/health/live 2>/dev/null; then
+            echo "MinIO is ready!"
+            break
+          fi
+          echo "Attempt $i/30: MinIO not ready yet..."
+          sleep 2
+        done
 
     - name: Bucket setup
       run: |

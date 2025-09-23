@@ -22,32 +22,23 @@ defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
   alias Edgehog.Devices
 
   require Logger
 
   @impl Ash.Resource.Change
-  @spec change(Ash.Changeset.t(), any(), %{:tenant => any(), optional(any()) => any()}) ::
-          Ash.Changeset.t()
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
-    image = Ash.Changeset.get_argument(changeset, :image)
-    device = Ash.Changeset.get_argument(changeset, :device)
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    Ash.Changeset.after_transaction(changeset, fn _changeset, {:ok, image_deployment} ->
-      case Devices.send_create_image_request(device, image, deployment, tenant: tenant) do
-        {:ok, _device} ->
-          Containers.mark_image_deployment_as_sent(image_deployment)
+    with {:ok, image_deployment} <- Ash.load(changeset.data, [:image, :device], tenant: tenant) do
+      image = image_deployment.image
+      device = image_deployment.device
 
-        # TODO: instead of destroying the image deployment, we should retry
-        # sending the request after a delay.
-        {:error, reason} ->
-          Logger.warning("Failed to send image deployment request: #{inspect(reason)}")
-          :ok = Containers.destroy_image_deployment(image_deployment, tenant: tenant)
-          {:error, reason}
+      with {:ok, _device} <-
+             Devices.send_create_image_request(device, image, deployment, tenant: tenant) do
+        Ash.Changeset.change_attribute(changeset, :state, :sent)
       end
-    end)
+    end
   end
 end

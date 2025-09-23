@@ -25,6 +25,7 @@ defmodule Edgehog.Containers do
 
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.DeploymentContainerDeployment
   alias Edgehog.Containers.DeploymentReadyAction
   alias Edgehog.Containers.DeploymentReadyAction.Upgrade
   alias Edgehog.Containers.ImageCredentials
@@ -188,7 +189,7 @@ defmodule Edgehog.Containers do
     end
 
     resource Edgehog.Containers.Container.Deployment do
-      define :deploy_container, action: :deploy, args: [:container, :device, :deployment]
+      define :deploy_container, action: :deploy, args: [:container, :device]
       define :destroy_container_deployment, action: :destroy
       define :fetch_container_deployment, action: :read, get_by_identity: :container_instance
       define :mark_container_deployment_as_sent, action: :mark_as_sent
@@ -209,6 +210,7 @@ defmodule Edgehog.Containers do
       define :deployment_by_identity, action: :read, get_by_identity: :release_instance
       define :run_ready_actions, action: :run_ready_actions
       define :set_deployment_state, action: :set_state
+      define :send_deployment, action: :send_deployment
 
       define :mark_deployment_as_sent, action: :mark_as_sent
       define :mark_deployment_as_deleting, action: :mark_as_deleting
@@ -225,7 +227,7 @@ defmodule Edgehog.Containers do
     end
 
     resource Edgehog.Containers.Image.Deployment do
-      define :deploy_image, action: :deploy, args: [:image, :device, :deployment]
+      define :deploy_image, action: :deploy, args: [:image, :device]
       define :destroy_image_deployment, action: :destroy
       define :fetch_image_deployment, action: :read, get_by_identity: :image_instance
       define :mark_image_deployment_as_sent, action: :mark_as_sent
@@ -252,7 +254,7 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Network
 
     resource Edgehog.Containers.Network.Deployment do
-      define :deploy_network, action: :deploy, args: [:network, :device, :deployment]
+      define :deploy_network, action: :deploy, args: [:network, :device]
       define :destroy_network_deployment, action: :destroy
       define :fetch_network_deployment, action: :read, get_by_identity: :network_instance
       define :mark_network_deployment_as_sent, action: :mark_as_sent
@@ -266,7 +268,7 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Volume
 
     resource Edgehog.Containers.Volume.Deployment do
-      define :deploy_volume, action: :deploy, args: [:volume, :device, :deployment]
+      define :deploy_volume, action: :deploy, args: [:volume, :device]
       define :destroy_volume_deployment, action: :destroy
       define :fetch_volume_deployment, action: :read, get_by_identity: :volume_instance
       define :mark_volume_deployment_as_sent, action: :mark_as_sent
@@ -282,7 +284,7 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.DeviceMapping.Deployment do
       define :deploy_device_mapping,
         action: :deploy,
-        args: [:device_mapping, :device, :deployment]
+        args: [:device_mapping, :device]
 
       define :destroy_device_mapping_deployment, action: :destroy
 
@@ -301,7 +303,7 @@ defmodule Edgehog.Containers do
 
     resource Edgehog.Containers.ContainerDeploymentDeviceMappingDeployment
 
-    resource Edgehog.Containers.DeploymentContainerDeployment
+    resource DeploymentContainerDeployment
 
     resource DeploymentReadyAction
     resource Upgrade
@@ -323,5 +325,6 @@ defmodule Edgehog.Containers do
     end
 
     resource Upgrade
+    resource DeploymentContainerDeployment
   end
 end

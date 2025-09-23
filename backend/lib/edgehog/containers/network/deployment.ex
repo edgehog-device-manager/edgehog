@@ -59,6 +59,16 @@ defmodule Edgehog.Containers.Network.Deployment do
       change set_attribute(:state, :created)
       change manage_relationship(:device, type: :append)
       change manage_relationship(:network, type: :append)
+    end
+
+    update :send_deployment do
+      description """
+      Sends the deployment to the device.
+      Deploys the necessary resources and sends the deployment request.
+      """
+
+      require_atomic? false
+
       change Changes.DeployNetworkOnDevice
     end
 

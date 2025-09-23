@@ -392,7 +392,18 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     if already_deployed?(target, release) do
       {:ok, :already_deployed}
     else
-      do_deploy(target, release, deployment_mechanism)
+      {:ok, target} = do_deploy(target, release, deployment_mechanism)
+
+      deployment_result =
+        target
+        |> Ash.load!(:deployment, tenant: target.tenant_id)
+        |> Map.get(:deployment)
+        |> Ash.Changeset.for_update(:send_deployment, %{}, tenant: target.tenant_id)
+        |> Ash.update()
+
+      with {:ok, _deployment} <- deployment_result do
+        {:ok, target}
+      end
     end
   end
 
