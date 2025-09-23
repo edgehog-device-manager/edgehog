@@ -117,6 +117,10 @@ defmodule Edgehog.OSManagement.OTAOperation do
       change Changes.HandleEphemeralImageDeletion do
         where attribute_equals(:manual?, true)
       end
+
+      change Changes.LogOtaOperationOutcome do
+        where [attribute_in(:status, @terminal_statuses)]
+      end
     end
 
     update :update_status do
@@ -129,6 +133,10 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
       change Changes.HandleEphemeralImageDeletion do
         where [attribute_equals(:manual?, true), attribute_in(:status, @terminal_statuses)]
+      end
+
+      change Changes.LogOtaOperationOutcome do
+        where [attribute_in(:status, @terminal_statuses)]
       end
     end
 
