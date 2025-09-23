@@ -420,6 +420,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
   def handle_event(:info, {:deployment_updated, deployment}, _state, data) do
+    target_in_progress? =
+      data.tenant_id
+      |> Core.get_target_for_deployment!(deployment.id)
+      |> Map.get(:status)
+      |> Kernel.==(:in_progress)
+
     resources_state =
       deployment
       |> Ash.load!(:resources_state, tenant: data.tenant_id)
@@ -440,7 +446,9 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     # If the timeout does not exist, this is a no-op anyway.
     actions = [cancel_retry_timeout(data.tenant_id, deployment.id) | additional_actions]
 
-    {:keep_state_and_data, actions}
+    if target_in_progress?,
+      do: {:keep_state_and_data, actions},
+      else: :keep_state_and_data
   end
 
   def handle_event(:internal, {:deployment_success, deployment}, _state, data) do
