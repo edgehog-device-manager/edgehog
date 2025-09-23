@@ -185,7 +185,7 @@ _register-device:
 connect-device: _check-rust-prereqs _check-astarte-prereqs _init-device-runtime _register-device
     @echo "🚀 Starting Edgehog Device Runtime..."
     @echo "💡 TODO: run 'ttyd -W bash' to support Edgehog's remote terminal functionality"
-    cd edgehog-device-runtime && RUST_LOG=debug cargo run --features "forwarder containers"
+    cd edgehog-device-runtime && RUST_LOG=debug cargo run --features "forwarder,containers,vendored"
 
 # Clean up all generated files and directories
 [private]
