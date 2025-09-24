@@ -40,14 +40,14 @@ defmodule Edgehog.Repo.Migrations.DeploymentCaching do
   end
 
   def down do
+    rename table(:application_deployments), :last_error_message, to: :message
+
+    rename table(:application_deployments), :state, to: :status
+
     alter table(:application_deployments) do
       remove :resources_state
       modify :status, :text, null: false
       modify :message, :text
     end
-
-    rename table(:application_deployments), :last_error_message, to: :message
-
-    rename table(:application_deployments), :state, to: :status
   end
 end

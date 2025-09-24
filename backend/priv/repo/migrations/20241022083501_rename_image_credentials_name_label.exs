@@ -48,6 +48,8 @@ defmodule Edgehog.Repo.Migrations.RenameImageCredentialsNameLabel do
                      name: "image_credentials_label_index"
                    )
 
+    rename table(:image_credentials), :label, to: :name
+
     create unique_index(:image_credentials, [:tenant_id, :name],
              name: "image_credentials_name_index"
            )
@@ -55,7 +57,5 @@ defmodule Edgehog.Repo.Migrations.RenameImageCredentialsNameLabel do
     alter table(:image_credentials) do
       modify :name, :text
     end
-
-    rename table(:image_credentials), :label, to: :name
   end
 end

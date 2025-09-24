@@ -37,7 +37,7 @@ defmodule Edgehog.Repo.Migrations.DeployRolloutToDeploymentMechanism do
 
   def down do
     alter table(:deployment_campaign) do
-      modify :deploy_rollout_mechanism, :map
+      modify :deployment_mechanism, :map
     end
 
     rename table(:deployment_campaign), :deployment_mechanism, to: :deploy_rollout_mechanism
