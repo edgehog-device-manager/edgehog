@@ -75,10 +75,6 @@ defmodule Edgehog.Repo.Migrations.MultipleSystemModelsPerRelease do
   end
 
   def down do
-    create unique_index(:applications, [:tenant_id, :name, :system_model_id],
-             name: "applications_name_and_system_model_index"
-           )
-
     alter table(:applications) do
       add :system_model_id,
           references(:system_models,
@@ -88,6 +84,10 @@ defmodule Edgehog.Repo.Migrations.MultipleSystemModelsPerRelease do
             prefix: "public"
           )
     end
+
+    create unique_index(:applications, [:tenant_id, :name, :system_model_id],
+             name: "applications_name_and_system_model_index"
+           )
 
     drop constraint(:release_system_models, "release_system_models_tenant_id_fkey")
 
