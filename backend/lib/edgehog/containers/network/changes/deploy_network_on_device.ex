@@ -36,7 +36,8 @@ defmodule Edgehog.Containers.Network.Changes.DeployNetworkOnDevice do
       network = network_deployment.network
       device = network_deployment.device
 
-      with {:ok, _device} <- Devices.send_create_network_request(device, network, deployment) do
+      with {:ok, _device} <-
+             Devices.send_create_network_request(device, network, deployment, tenant: tenant) do
         Ash.Changeset.change_attribute(changeset, :state, :sent)
       end
     end

@@ -22,30 +22,24 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckVolumes do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
-
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
     with :created_networks <- state(changeset),
-         Ash.Changeset.fetch_argument_or_change(changeset, :resources_state),
-         {:ok, deployment} <- Ash.load(deployment, device: [], release: [containers: [:volumes]]) do
-      device = deployment.device
+         {:ok, deployment} <-
+           Ash.load(deployment, container_deployments: [volume_deployments: :ready?]) do
+      volumes_ready? =
+        deployment
+        |> Map.get(:container_deployments, [])
+        |> Enum.map(fn container_deployment ->
+          container_deployment
+          |> Map.get(:volume_deployments, [])
+          |> Enum.all?(& &1.ready?)
+        end)
+        |> Enum.all?()
 
-      deployments_ready? =
-        deployment.release.containers
-        |> Enum.flat_map(& &1.volumes)
-        |> Enum.uniq_by(& &1.id)
-        |> Enum.map(
-          &Containers.fetch_volume_deployment!(&1.id, device.id,
-            tenant: &1.tenant_id,
-            load: [:ready?]
-          )
-        )
-        |> Enum.all?(& &1.ready?)
-
-      if deployments_ready?,
+      if volumes_ready?,
         do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_volumes),
         else: changeset
     else

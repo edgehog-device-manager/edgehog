@@ -177,11 +177,16 @@ defmodule Edgehog.Containers.Container do
       ]
 
       argument :volumes, {:array, :map}
+      argument :networks, {:array, :uuid}
+      argument :device_mappings, {:array, :uuid}
 
       change manage_relationship(:volumes,
                on_no_match: {:create, :create, :create, [:target]},
                on_lookup: {:relate, :create}
              )
+
+      change manage_relationship(:networks, type: :append)
+      change manage_relationship(:device_mappings, type: :append)
     end
 
     read :filter_by_image do

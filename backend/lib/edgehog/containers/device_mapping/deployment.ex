@@ -51,14 +51,23 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
         allow_nil? false
       end
 
+      change set_attribute(:state, :created)
+      change manage_relationship(:device, type: :append)
+      change manage_relationship(:device_mapping, type: :append)
+    end
+
+    update :send_deployment do
+      description """
+      Sends the deployment to the device.
+      """
+
       argument :deployment, :struct do
         constraints instance_of: Deployment
         allow_nil? false
       end
 
-      change set_attribute(:state, :created)
-      change manage_relationship(:device, type: :append)
-      change manage_relationship(:device_mapping, type: :append)
+      require_atomic? false
+
       change Changes.DeployDeviceMappingOnDevice
     end
 

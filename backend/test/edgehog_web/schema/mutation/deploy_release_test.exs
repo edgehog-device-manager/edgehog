@@ -26,7 +26,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
   alias Edgehog.Astarte.Device.CreateContainerRequestMock
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
+  alias Edgehog.Astarte.Device.CreateDeviceMappingRequestMock
   alias Edgehog.Astarte.Device.CreateImageRequestMock
+  alias Edgehog.Astarte.Device.CreateNetworkRequestMock
   alias Edgehog.Astarte.Device.CreateVolumeRequestMock
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
@@ -39,7 +41,15 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     volumes = volumes_per_container * containers
     volume_target = "/var/local/fixture#{System.unique_integer([:positive])}"
 
-    container_params = [volumes: volumes_per_container, volume_target: volume_target]
+    network = network_fixture(tenant: tenant)
+    device_mapping = device_mapping_fixture(tenant: tenant)
+
+    container_params = [
+      volumes: volumes_per_container,
+      volume_target: volume_target,
+      networks: [network.id],
+      device_mappings: [device_mapping.id]
+    ]
 
     device = device_fixture(tenant: tenant)
 
@@ -49,6 +59,14 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     expect(CreateImageRequestMock, :send_create_image_request, images, fn _, _, _ -> :ok end)
 
     expect(CreateVolumeRequestMock, :send_create_volume_request, volumes, fn _, _, _ -> :ok end)
+
+    expect(CreateNetworkRequestMock, :send_create_network_request, containers, fn _, _, _ ->
+      :ok
+    end)
+
+    expect(CreateDeviceMappingRequestMock, :send_create_device_mapping_request, 1, fn _, _, _ ->
+      :ok
+    end)
 
     expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
       assert Enum.count(data.volumeIds) == volumes_per_container

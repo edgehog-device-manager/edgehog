@@ -152,7 +152,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     case String.split(event.path, "/") do
       ["", network_id, "created"] ->
         network_deployment =
-          Containers.fetch_network_deployment(network_id, device.id, tenant: tenant)
+          Containers.fetch_network_deployment!(network_id, device.id, tenant: tenant)
 
         if event.value,
           do: Containers.mark_network_deployment_as_available(network_deployment, tenant: tenant),

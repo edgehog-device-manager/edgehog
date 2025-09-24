@@ -48,7 +48,8 @@ defmodule Edgehog.Containers.Release do
       # for now each new release creates brand new containers
       change manage_relationship(:containers,
                on_no_match: {:create, :create_with_nested},
-               on_match: :ignore
+               on_match: :ignore,
+               on_lookup: :relate
              )
 
       change manage_relationship(:required_system_models, :system_models, type: :append)

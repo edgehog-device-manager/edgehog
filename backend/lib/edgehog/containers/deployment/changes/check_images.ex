@@ -22,24 +22,22 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckImages do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
-
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
+  def change(changeset, _opts, _context) do
     deployment = changeset.data
-    %{tenant: tenant} = context
 
     with :initial <- deployment.resources_state,
          {:ok, deployment} <-
-           Ash.load(deployment, device: [], release: [containers: [:image]]) do
-      device = deployment.device
-
+           Ash.load(deployment, container_deployments: [image_deployment: :ready?]) do
       images_ready? =
-        deployment.release.containers
-        |> Enum.map(& &1.image)
-        |> Enum.uniq_by(& &1.id)
-        |> Enum.map(&Containers.fetch_image_deployment!(&1.id, device.id, tenant: tenant, load: [:ready?]))
-        |> Enum.all?(& &1.ready?)
+        deployment
+        |> Map.get(:container_deployments, [])
+        |> Enum.map(fn container_deployment ->
+          container_deployment
+          |> Map.get(:image_deployment, [])
+          |> Map.get(:ready?)
+        end)
+        |> Enum.all?()
 
       if images_ready?,
         do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_images),

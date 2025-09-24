@@ -66,6 +66,10 @@ Mox.defmock(Edgehog.Astarte.Device.CreateNetworkRequestMock,
   for: Edgehog.Astarte.Device.CreateNetworkRequest.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.CreateDeviceMappingRequestMock,
+  for: Edgehog.Astarte.Device.CreateDeviceMappingRequest.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.CreateImageRequestMock,
   for: Edgehog.Astarte.Device.CreateImageRequest.Behaviour
 )
