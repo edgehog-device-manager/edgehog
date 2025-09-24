@@ -43,7 +43,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateDeviceMapping do
         deploymentId: deployment.id,
         pathOnHost: device_mapping.path_on_host,
         pathInContainer: device_mapping.path_in_container,
-        cgroupPermissions: device_mapping.cgroup_permissions
+        cGroupPermissions: device_mapping.cgroup_permissions
       }
 
       with :ok <-

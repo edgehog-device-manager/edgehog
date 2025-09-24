@@ -88,6 +88,16 @@ defmodule Edgehog.ContainersFixtures do
   def unique_image_credentials_password, do: "some-password#{System.unique_integer([:positive])}"
 
   @doc """
+  Generates a unique path for a device on the host.
+  """
+  def unique_device_mapping_path_on_host, do: "/dev/sda#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generates a unique path for a device in the container
+  """
+  def unique_device_mapping_path_in_container, do: "/dev/sda#{System.unique_integer([:positive])}"
+
+  @doc """
   Generate a %ImageCredentials{}.
   """
   def image_credentials_fixture(opts \\ []) do
@@ -101,6 +111,25 @@ defmodule Edgehog.ContainersFixtures do
       })
 
     Edgehog.Containers.ImageCredentials
+    |> Ash.Changeset.for_create(
+      :create,
+      params,
+      tenant: tenant
+    )
+    |> Ash.create!()
+  end
+
+  def device_mapping_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        path_on_host: unique_device_mapping_path_on_host(),
+        path_in_container: unique_device_mapping_path_in_container(),
+        cgroup_permissions: "wrc"
+      })
+
+    Edgehog.Containers.DeviceMapping
     |> Ash.Changeset.for_create(
       :create,
       params,
@@ -160,10 +189,15 @@ defmodule Edgehog.ContainersFixtures do
     volume_params = %{target: volume_target, label: volume_label}
     volumes = Enum.map(1..volumes//1, fn _ -> volume_params end)
 
+    {networks, opts} = Keyword.pop(opts, :networks, [])
+    {device_mappings, opts} = Keyword.pop(opts, :device_mappings, [])
+
     params =
       Enum.into(opts, %{
         image_id: image_id,
-        volumes: volumes
+        volumes: volumes,
+        networks: networks,
+        device_mappings: device_mappings
       })
 
     Container

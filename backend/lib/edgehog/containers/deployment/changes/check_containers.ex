@@ -22,27 +22,16 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
-
   @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
+  def change(changeset, _opts, _context) do
     deployment = changeset.data
-    %{tenant: tenant} = context
 
     with :created_device_mappings <- state(changeset),
          {:ok, deployment} <-
-           Ash.load(deployment, device: [], release: [:containers]) do
-      device = deployment.device
-
+           Ash.load(deployment, container_deployments: :ready?) do
       containers_ready? =
-        deployment.release.containers
-        |> Enum.uniq_by(& &1.id)
-        |> Enum.map(
-          &Containers.fetch_container_deployment!(&1.id, device.id,
-            tenant: tenant,
-            load: [:ready?]
-          )
-        )
+        deployment
+        |> Map.get(:container_deployments, [])
         |> Enum.all?(& &1.ready?)
 
       if containers_ready?,

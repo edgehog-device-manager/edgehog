@@ -26,7 +26,7 @@ defmodule Edgehog.Astarte.Device.CreateDeviceMappingRequest.RequestData do
     :deploymentId,
     :pathOnHost,
     :pathInContainer,
-    :cgroupPermissions
+    :cGroupPermissions
   ]
 
   @type t() :: %__MODULE__{
@@ -34,6 +34,6 @@ defmodule Edgehog.Astarte.Device.CreateDeviceMappingRequest.RequestData do
           deploymentId: String.t(),
           pathOnHost: String.t(),
           pathInContainer: String.t(),
-          cgroupPermissions: String.t()
+          cGroupPermissions: String.t()
         }
 end

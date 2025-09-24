@@ -51,11 +51,6 @@ defmodule Edgehog.Containers.Network.Deployment do
         allow_nil? false
       end
 
-      argument :deployment, :struct do
-        constraints instance_of: Deployment
-        allow_nil? false
-      end
-
       change set_attribute(:state, :created)
       change manage_relationship(:device, type: :append)
       change manage_relationship(:network, type: :append)
@@ -66,6 +61,11 @@ defmodule Edgehog.Containers.Network.Deployment do
       Sends the deployment to the device.
       Deploys the necessary resources and sends the deployment request.
       """
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        allow_nil? false
+      end
 
       require_atomic? false
 

@@ -22,28 +22,22 @@ defmodule Edgehog.Containers.Deployment.Changes.CheckNetworks do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
-
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     deployment = changeset.data
 
     with :created_images <- state(changeset),
          {:ok, deployment} <-
-           Ash.load(deployment, device: [], release: [containers: [:networks]]) do
-      device = deployment.device
-
+           Ash.load(deployment, container_deployments: [network_deployments: :ready?]) do
       networks_ready? =
-        deployment.release.containers
-        |> Enum.flat_map(& &1.networks)
-        |> Enum.uniq_by(& &1.id)
-        |> Enum.map(
-          &Containers.fetch_network_deployment!(&1.id, device.id,
-            tenant: &1.tenant_id,
-            load: [:ready?]
-          )
-        )
-        |> Enum.all?(& &1.ready?)
+        deployment
+        |> Map.get(:container_deployments, [])
+        |> Enum.map(fn container_deployment ->
+          container_deployment
+          |> Map.get(:network_deployments, [])
+          |> Enum.all?(& &1.ready?)
+        end)
+        |> Enum.all?()
 
       if networks_ready?,
         do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_networks),

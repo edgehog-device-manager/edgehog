@@ -77,6 +77,10 @@ config :edgehog,
        Edgehog.Astarte.Device.CreateDeploymentRequestMock
 
 config :edgehog,
+       :astarte_create_device_mapping_request_module,
+       Edgehog.Astarte.Device.CreateDeviceMappingRequestMock
+
+config :edgehog,
        :astarte_create_image_request_module,
        Edgehog.Astarte.Device.CreateImageRequestMock
 
