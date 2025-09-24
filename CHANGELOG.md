@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.10] - Unreleased
+## [v0.10.0-alpha.0] - 2025-09-24
 ### Added
 - Managed OTA operations expose the update target that created them in graphql ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
 - Expose the associated UpdateCampaign (if any) from an OTA Operation on the Software Updates tab  ([#356](https://github.com/edgehog-device-manager/edgehog/issues/356)).
