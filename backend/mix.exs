@@ -24,7 +24,7 @@ defmodule Edgehog.MixProject do
   def project do
     [
       app: :edgehog,
-      version: "0.10.0-alpha.0",
+      version: "0.10.0-alpha.1",
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
