@@ -195,7 +195,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     case String.split(event.path, "/") do
       ["", volume_id, "created"] ->
         volume_deployment =
-          Containers.fetch_volume_deployment!(volume_id, device.id, tenant: tenant)
+          Containers.fetch_volume_deployment!(volume_id, device.id,
+            tenant: tenant,
+            load: [container_deployments: :deployments]
+          )
 
         case event.value do
           true ->
