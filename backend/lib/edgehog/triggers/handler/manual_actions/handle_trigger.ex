@@ -120,10 +120,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         image_deployment =
           Containers.fetch_image_deployment!(image_id, device.id, tenant: tenant)
 
-        if event.value do
-          Containers.mark_image_deployment_as_pulled!(image_deployment, tenant: tenant)
-        else
-          Containers.mark_image_deployment_as_unpulled!(image_deployment, tenant: tenant)
+        case event.value do
+          true -> Containers.mark_image_deployment_as_pulled!(image_deployment, tenant: tenant)
+          false -> Containers.mark_image_deployment_as_unpulled!(image_deployment, tenant: tenant)
+          nil -> Containers.destroy_image_deployment!(image_deployment, tenant: tenant)
         end
 
         containers = Containers.containers_with_image!(image_id, tenant: tenant)
@@ -154,9 +154,16 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         network_deployment =
           Containers.fetch_network_deployment!(network_id, device.id, tenant: tenant)
 
-        if event.value,
-          do: Containers.mark_network_deployment_as_available(network_deployment, tenant: tenant),
-          else: Containers.mark_network_deployment_as_unavailable(network_deployment, tenant: tenant)
+        case event.value do
+          true ->
+            Containers.mark_network_deployment_as_available!(network_deployment, tenant: tenant)
+
+          false ->
+            Containers.mark_network_deployment_as_unavailable!(network_deployment, tenant: tenant)
+
+          nil ->
+            Containers.destroy_network_deployment!(network_deployment, tenant: tenant)
+        end
 
         containers =
           network_id
@@ -190,9 +197,17 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         volume_deployment =
           Containers.fetch_volume_deployment!(volume_id, device.id, tenant: tenant)
 
-        if event.value,
-          do: Containers.mark_volume_deployment_as_available(volume_deployment, tenant: tenant),
-          else: Containers.mark_volume_deployment_as_unavailable(volume_deployment, tenant: tenant)
+        case event.value do
+          true ->
+            Containers.mark_volume_deployment_as_available!(volume_deployment, tenant: tenant)
+
+          false ->
+            Containers.mark_volume_deployment_as_unavailable!(volume_deployment, tenant: tenant)
+
+          # The volume has been removed on the device, we should remove it too.
+          nil ->
+            Containers.destroy_volume_deployment!(volume_deployment, tenant: tenant)
+        end
 
         containers =
           volume_id
@@ -224,17 +239,25 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     case String.split(event.path, "/") do
       ["", device_mapping_id, "present"] ->
         device_mapping_deployment =
-          Containers.fetch_device_mapping_deployment(device_mapping_id, device.id, tenant: tenant)
+          Containers.fetch_device_mapping_deployment!(device_mapping_id, device.id, tenant: tenant)
 
-        if event.value,
-          do:
-            Containers.mark_device_mapping_deployment_as_present(device_mapping_deployment,
-              tenant: tenant
-            ),
-          else:
-            Containers.mark_device_mapping_deployment_as_not_present(device_mapping_deployment,
+        case event.value do
+          true ->
+            Containers.mark_device_mapping_deployment_as_present!(device_mapping_deployment,
               tenant: tenant
             )
+
+          false ->
+            Containers.mark_device_mapping_deployment_as_not_present!(device_mapping_deployment,
+              tenant: tenant
+            )
+
+          # The device mapping has been removed on the device. We should remove it too.
+          nil ->
+            Containers.destroy_device_mapping_deployment!(device_mapping_deployment,
+              tenant: tenant
+            )
+        end
 
         device_mapping_deployment = Ash.load!(device_mapping_deployment, :device_mapping)
 
@@ -266,6 +289,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
         container_deployment =
           Containers.fetch_container_deployment!(container_id, device.id, tenant: tenant)
 
+        # Pure side effects
         case event.value do
           "Received" ->
             Containers.mark_container_deployment_as_received!(container_deployment,
@@ -280,6 +304,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
           "Stopped" ->
             Containers.mark_container_deployment_as_stopped!(container_deployment, tenant: tenant)
+
+          # The container has been deleted, astarte is purgin properties on the available container
+          nil ->
+            Containers.destroy_container_deployment!(container_deployment, tenant: tenant)
         end
 
         releases =
@@ -349,9 +377,6 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
         with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
           case state do
-            nil ->
-              Containers.delete_deployment(deployment)
-
             "Started" ->
               Containers.mark_deployment_as_started(deployment, tenant: tenant)
               Containers.deployment_update_resources_state(deployment, tenant: tenant)
@@ -359,6 +384,11 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
             "Stopped" ->
               Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
               Containers.deployment_update_resources_state(deployment, tenant: tenant)
+
+            # The device is removing the deployment, remove it!
+            nil ->
+              Containers.destroy_deployment!(deployment, tenant: tenant)
+              {:ok, deployment}
           end
         end
 

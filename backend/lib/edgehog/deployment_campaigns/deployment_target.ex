@@ -207,5 +207,11 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
 
   postgres do
     table "deployment_target"
+
+    references do
+      reference :device, on_delete: :delete
+      reference :deployment, on_delete: :delete
+      reference :deployment_campaign, on_delete: :delete
+    end
   end
 end
