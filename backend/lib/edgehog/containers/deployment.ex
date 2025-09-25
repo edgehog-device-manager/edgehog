@@ -38,6 +38,8 @@ defmodule Edgehog.Containers.Deployment do
 
   graphql do
     type :deployment
+
+    paginate_relationship_with container_deployments: :relay
   end
 
   actions do
@@ -274,6 +276,7 @@ defmodule Edgehog.Containers.Deployment do
       through Edgehog.Containers.DeploymentContainerDeployment
       source_attribute_on_join_resource :deployment_id
       destination_attribute_on_join_resource :container_deployment_id
+      public? true
     end
   end
 

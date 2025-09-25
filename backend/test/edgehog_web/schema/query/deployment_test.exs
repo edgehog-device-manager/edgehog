@@ -24,27 +24,40 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Containers.ContainerNetwork
-  alias Edgehog.Containers.ReleaseContainers
-
-  test "can access release and device trough relationships", %{tenant: tenant} do
+  setup %{tenant: tenant} do
     app = application_fixture(tenant: tenant)
-    release = release_fixture(application_id: app.id, tenant: tenant)
-
-    container = container_fixture(tenant: tenant)
     network = network_fixture(tenant: tenant)
+    volume_target = "/var/local/fixture#{System.unique_integer([:positive])}"
+    device_mapping = device_mapping_fixture(tenant: tenant)
 
-    params = %{container_id: container.id, release_id: release.id}
-    Ash.create!(ReleaseContainers, params, tenant: tenant)
+    container_params = [
+      volumes: 1,
+      volume_target: volume_target,
+      networks: [network.id],
+      device_mappings: [device_mapping.id]
+    ]
 
-    params = %{container_id: container.id, network_id: network.id}
-    Ash.create!(ContainerNetwork, params, tenant: tenant)
+    release =
+      [application_id: app.id, tenant: tenant, containers: 1, container_params: container_params]
+      |> release_fixture()
+      |> Ash.load!(:containers)
+
+    [container] = release.containers
 
     device = device_fixture(tenant: tenant)
 
     deployment =
       deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
 
+    %{deployment: deployment, release: release, device: device, container: container}
+  end
+
+  test "can access release and device trough relationships", %{
+    tenant: tenant,
+    deployment: deployment,
+    release: release,
+    device: device
+  } do
     id = AshGraphql.Resource.encode_relay_id(deployment)
 
     deployment_result =
@@ -55,8 +68,66 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
     expected_release_id = AshGraphql.Resource.encode_relay_id(release)
     expected_device_id = AshGraphql.Resource.encode_relay_id(device)
 
-    assert deployment_result["deployment"]["release"]["id"] == expected_release_id
-    assert deployment_result["deployment"]["device"]["id"] == expected_device_id
+    assert deployment_result["release"]["id"] == expected_release_id
+    assert deployment_result["device"]["id"] == expected_device_id
+  end
+
+  test "can access underlying resources states", %{tenant: tenant, deployment: deployment} do
+    document = """
+      query($id:ID!) {
+        deployment(id:$id) {
+          state
+          containerDeployments {
+            edges {
+              node {
+                state
+                imageDeployment {
+                  state
+                }
+                networkDeployments {
+                  edges {
+                    node {
+                      state
+                    }
+                  }
+                }
+                volumeDeployments {
+                  edges {
+                    node {
+                      state
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    """
+
+    id = AshGraphql.Resource.encode_relay_id(deployment)
+
+    deployment_result =
+      [tenant: tenant, id: id, document: document]
+      |> get_deployment()
+      |> extract_result!()
+
+    assert deployment_result["state"] == "PENDING"
+
+    assert [container_deployment] = deployment_result["containerDeployments"]["edges"]
+    container_deployment = container_deployment["node"]
+
+    assert container_deployment["imageDeployment"]["state"] == "created"
+
+    assert [network_deployment] = container_deployment["networkDeployments"]["edges"]
+    network_deployment = network_deployment["node"]
+
+    assert network_deployment["state"] == "created"
+
+    assert [volume_deployment] = container_deployment["volumeDeployments"]["edges"]
+    volume_deployment = volume_deployment["node"]
+
+    assert volume_deployment["state"] == "created"
   end
 
   defp get_deployment(opts) do
@@ -86,9 +157,9 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
 
   def extract_result!(result) do
     refute :errors in Map.keys(result)
-    assert %{data: data} = result
-    assert data != nil
+    assert %{data: %{"deployment" => deployment}} = result
+    assert deployment != nil
 
-    data
+    deployment
   end
 end
