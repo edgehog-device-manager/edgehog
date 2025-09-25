@@ -118,7 +118,7 @@ defmodule Edgehog.Containers.Image.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:pulled, :unpulled])
+    calculate :is_ready, :boolean, expr(state in [:pulled, :unpulled])
   end
 
   identities do

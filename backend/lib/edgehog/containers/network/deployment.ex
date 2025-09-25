@@ -117,7 +117,7 @@ defmodule Edgehog.Containers.Network.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:available, :unavailable])
+    calculate :is_ready, :boolean, expr(state in [:available, :unavailable])
   end
 
   identities do

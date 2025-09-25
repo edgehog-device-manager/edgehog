@@ -92,6 +92,11 @@ defmodule Edgehog.Containers.Volume.Deployment do
       change set_attribute(:last_message, arg(:message))
       change set_attribute(:state, :error)
     end
+
+    update :maybe_notify_upwards do
+      require_atomic? false
+      change Changes.MaybeNotifyUpwards
+    end
   end
 
   attributes do
@@ -124,7 +129,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:available, :unavailable])
+    calculate :is_ready, :boolean, expr(state in [:available, :unavailable])
   end
 
   identities do

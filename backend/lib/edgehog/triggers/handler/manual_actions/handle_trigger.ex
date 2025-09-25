@@ -212,24 +212,9 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
             Containers.destroy_volume_deployment!(volume_deployment, tenant: tenant)
         end
 
-        containers =
-          volume_id
-          |> Containers.containers_with_volume!(tenant: tenant, load: :container)
-          |> Enum.map(& &1.container_id)
-          |> Enum.uniq()
-
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_resources_state!/1)}
+        volume_deployment
+        |> Ash.Changeset.for_update(:maybe_notify_upwards, %{})
+        |> Ash.update()
 
       _ ->
         {:error, :invalid_event_path}
