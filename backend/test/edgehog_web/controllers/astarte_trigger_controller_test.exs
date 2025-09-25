@@ -532,6 +532,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> deployment_fixture()
         |> Ash.load!(:container_deployments)
 
+      [container_deployment] = deployment.container_deployments
+      set_ready(container_deployment)
+
       deployment_event = %{
         device_id: device.device_id,
         event: %{
@@ -550,8 +553,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> post(path, deployment_event)
       |> response(200)
 
-      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.resources_state == :created_device_mappings
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant, load: :is_ready)
+      assert deployment.is_ready
     end
 
     test "AvailableVolumes triggers update deployment status", context do
@@ -566,13 +569,18 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       [volume] = container.volumes
 
       deployment =
-        deployment_fixture(
-          tenant: tenant,
-          device_id: device.id,
-          release_id: release.id,
-          state: :stopped,
-          resources_state: :created_images
-        )
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :stopped]
+        |> deployment_fixture()
+        |> Ash.load!(container_deployments: [:image_deployment])
+
+      [container_deployment] = deployment.container_deployments
+      set_ready(container_deployment)
+
+      image_deployment = container_deployment.image_deployment
+      set_ready(image_deployment)
+
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant, load: :is_ready)
+      refute deployment.is_ready
 
       deployment_event = %{
         device_id: device.device_id,
@@ -592,8 +600,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> post(path, deployment_event)
       |> response(200)
 
-      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.resources_state == :created_device_mappings
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant, load: :is_ready)
+      assert deployment.is_ready
     end
 
     test "AvailableContainers triggers update deployment status", context do
@@ -613,7 +621,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         |> Ash.load!(container_deployments: [:image_deployment])
 
       [container_deployment] = deployment.container_deployments
-
       set_ready(container_deployment.image_deployment)
 
       deployment_event = %{
@@ -634,8 +641,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> post(path, deployment_event)
       |> response(200)
 
-      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.resources_state == :ready
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant, load: :is_ready)
+      assert deployment.is_ready
     end
 
     test "Stopped status updates a Stopping deployment", context do

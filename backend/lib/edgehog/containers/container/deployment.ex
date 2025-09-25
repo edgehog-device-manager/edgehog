@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Container.Deployment do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
+  alias Edgehog.Containers.Container.Calculations
   alias Edgehog.Containers.Container.Changes
   alias Edgehog.Containers.Deployment
   alias Edgehog.Devices.Device
@@ -114,6 +115,11 @@ defmodule Edgehog.Containers.Container.Deployment do
       change set_attribute(:last_message, arg(:message))
       change set_attribute(:state, :error)
     end
+
+    update :maybe_notify_upwards do
+      require_atomic? false
+      change Changes.MaybeNotifyUpwards
+    end
   end
 
   attributes do
@@ -142,6 +148,8 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     many_to_many :deployments, Edgehog.Containers.Deployment do
       through Edgehog.Containers.DeploymentContainerDeployment
+      source_attribute_on_join_resource :container_deployment_id
+      destination_attribute_on_join_resource :deployment_id
     end
 
     belongs_to :image_deployment, Edgehog.Containers.Image.Deployment do
@@ -172,7 +180,7 @@ defmodule Edgehog.Containers.Container.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:received, :device_created, :stopped, :running])
+    calculate :is_ready, :boolean, Calculations.Ready
   end
 
   identities do

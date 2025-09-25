@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Network.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Network.Changes
@@ -77,11 +78,15 @@ defmodule Edgehog.Containers.Network.Deployment do
     end
 
     update :mark_as_available do
+      require_atomic? false
       change set_attribute(:state, :available)
+      change MaybeNotifyUpwards
     end
 
     update :mark_as_unavailable do
+      require_atomic? false
       change set_attribute(:state, :unavailable)
+      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -114,10 +119,17 @@ defmodule Edgehog.Containers.Network.Deployment do
     end
 
     belongs_to :device, Device
+
+    many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      through Edgehog.Containers.ContainerDeploymentNetworkDeployment
+      source_attribute_on_join_resource :network_deployment_id
+      destination_attribute_on_join_resource :container_deployment_id
+      public? true
+    end
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:available, :unavailable])
+    calculate :is_ready, :boolean, expr(state in [:available, :unavailable])
   end
 
   identities do
