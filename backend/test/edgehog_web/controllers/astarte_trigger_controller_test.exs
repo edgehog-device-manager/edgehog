@@ -27,7 +27,13 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.OSManagementFixtures
 
   alias Edgehog.Astarte.Device.DeviceStatusMock
+  alias Edgehog.Containers
+  alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.DeviceMapping
+  alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
 
@@ -511,26 +517,28 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert deployment.state == :started
     end
 
-    test "Started status updates a Starting deployment", context do
-      %{
-        conn: conn,
-        realm: realm,
-        device: device,
-        tenant: tenant
-      } = context
+    test "AvailableImages triggers update deployment status", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
-      deployment = deployment_fixture(tenant: tenant, device_id: device.id, state: :starting)
+      release =
+        [containers: 1, tenant: tenant]
+        |> release_fixture()
+        |> Ash.load!(containers: [:image])
+
+      [container] = release.containers
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :stopped]
+        |> deployment_fixture()
+        |> Ash.load!(:container_deployments)
 
       deployment_event = %{
         device_id: device.device_id,
         event: %{
           type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
-          path: "/" <> deployment.id,
-          value: %{
-            "status" => "Started",
-            "message" => nil
-          }
+          interface: "io.edgehog.devicemanager.apps.AvailableImages",
+          path: "/" <> container.image.id <> "/pulled",
+          value: true
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
@@ -542,32 +550,37 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> post(path, deployment_event)
       |> response(200)
 
-      # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
-
-      assert deployment.state == :started
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
+      assert deployment.resources_state == :created_device_mappings
     end
 
-    test "Stopping status does not update a Stopped deployment", context do
-      %{
-        conn: conn,
-        realm: realm,
-        device: device,
-        tenant: tenant
-      } = context
+    test "AvailableVolumes triggers update deployment status", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
-      deployment = deployment_fixture(tenant: tenant, device_id: device.id, state: :stopped)
+      release =
+        [containers: 1, container_params: [volumes: 1], tenant: tenant]
+        |> release_fixture()
+        |> Ash.load!(containers: :volumes)
+
+      [container] = release.containers
+      [volume] = container.volumes
+
+      deployment =
+        deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          release_id: release.id,
+          state: :stopped,
+          resources_state: :created_images
+        )
 
       deployment_event = %{
         device_id: device.device_id,
         event: %{
           type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
-          path: "/" <> deployment.id,
-          value: %{
-            "status" => "Stopping",
-            "message" => nil
-          }
+          interface: "io.edgehog.devicemanager.apps.AvailableVolumes",
+          path: "/" <> volume.id <> "/created",
+          value: true
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
       }
@@ -579,10 +592,50 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> post(path, deployment_event)
       |> response(200)
 
-      # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
+      assert deployment.resources_state == :created_device_mappings
+    end
 
-      assert deployment.state == :stopped
+    test "AvailableContainers triggers update deployment status", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      release =
+        [containers: 1, tenant: tenant]
+        |> release_fixture()
+        |> Ash.load!(:containers)
+
+      [container] = release.containers
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
+        |> deployment_fixture()
+        |> set_ready()
+        |> Ash.load!(container_deployments: [:image_deployment])
+
+      [container_deployment] = deployment.container_deployments
+
+      set_ready(container_deployment.image_deployment)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableContainers",
+          path: "/" <> container.id <> "/status",
+          value: "Created"
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
+      assert deployment.resources_state == :ready
     end
 
     test "Stopped status updates a Stopping deployment", context do
@@ -622,227 +675,11 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert deployment.state == :stopped
     end
 
-    test "AvailableImages triggers update deployment status", context do
-      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
-
-      release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(containers: [:image, :networks, :volumes])
-
-      [container] = release.containers
-      networks = container.networks
-      image = container.image
-
-      container_deployment_fixture(
-        container_id: container.id,
-        device_id: device.id,
-        tenant: tenant,
-        state: :received
-      )
-
-      deployment =
-        deployment_fixture(
-          tenant: tenant,
-          device_id: device.id,
-          release_id: release.id,
-          state: :stopped
-        )
-
-      for network <- networks do
-        network_deployment_fixture(
-          network_id: network.id,
-          realm_id: realm.id,
-          device_id: device.id,
-          state: :available,
-          tenant: tenant
-        )
-      end
-
-      image_deployment_fixture(
-        image_id: image.id,
-        realm_id: realm.id,
-        device_id: device.id,
-        state: :sent,
-        tenant: tenant
-      )
-
-      deployment_event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.AvailableImages",
-          path: "/" <> container.image.id <> "/pulled",
-          value: true
-        },
-        timestamp: DateTime.to_iso8601(DateTime.utc_now())
-      }
-
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
-
-      conn
-      |> put_req_header("astarte-realm", realm.name)
-      |> post(path, deployment_event)
-      |> response(200)
-
-      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.resources_state == :ready
-    end
-
-    test "AvailableVolumes triggers update deployment status", context do
-      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
-
-      release =
-        [containers: 1, container_params: [volumes: 1], tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(containers: [:image, :networks, :volumes])
-
-      [container] = release.containers
-      networks = container.networks
-      [volume] = container.volumes
-      image = container.image
-
-      deployment =
-        deployment_fixture(
-          tenant: tenant,
-          device_id: device.id,
-          release_id: release.id,
-          state: :stopped
-        )
-
-      image_deployment_fixture(
-        image_id: image.id,
-        device_id: device.id,
-        state: :pulled,
-        tenant: tenant
-      )
-
-      for network <- networks do
-        network_deployment_fixture(
-          network_id: network.id,
-          realm_id: realm.id,
-          device_id: device.id,
-          state: :available,
-          tenant: tenant
-        )
-      end
-
-      volume_deployment_fixture(
-        volume_id: volume.id,
-        device_id: device.id,
-        state: :sent,
-        tenant: tenant
-      )
-
-      container_deployment_fixture(
-        container_id: container.id,
-        device_id: device.id,
-        state: :device_created,
-        tenant: tenant
-      )
-
-      deployment_event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.AvailableVolumes",
-          path: "/" <> volume.id <> "/created",
-          value: true
-        },
-        timestamp: DateTime.to_iso8601(DateTime.utc_now())
-      }
-
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
-
-      conn
-      |> put_req_header("astarte-realm", realm.name)
-      |> post(path, deployment_event)
-      |> response(200)
-
-      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.resources_state == :ready
-    end
-
-    test "AvailableContainers triggers update deployment status", context do
-      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
-
-      release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(containers: [:image, :networks])
-
-      [container] = release.containers
-      networks = container.networks
-      image = container.image
-
-      container_deployment_fixture(
-        container_id: container.id,
-        device_id: device.id,
-        tenant: tenant,
-        state: :sent
-      )
-
-      deployment =
-        deployment_fixture(
-          tenant: tenant,
-          device_id: device.id,
-          release_id: release.id,
-          state: :sent
-        )
-
-      for network <- networks do
-        network_deployment_fixture(
-          network_id: network.id,
-          realm_id: realm.id,
-          device_id: device.id,
-          state: :available,
-          tenant: tenant
-        )
-      end
-
-      image_deployment_fixture(
-        image_id: image.id,
-        realm_id: realm.id,
-        device_id: device.id,
-        state: :unpulled,
-        tenant: tenant
-      )
-
-      deployment_event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.AvailableContainers",
-          path: "/" <> container.id <> "/status",
-          value: "Created"
-        },
-        timestamp: DateTime.to_iso8601(DateTime.utc_now())
-      }
-
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
-
-      conn
-      |> put_req_header("astarte-realm", realm.name)
-      |> post(path, deployment_event)
-      |> response(200)
-
-      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
-      assert deployment.resources_state == :created_containers
-    end
-
     test "AvailableDeployments triggers update deployment status", context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(containers: [:networks])
-
-      [container] = release.containers
-      networks = container.networks
-
-      [container] = release.containers
-      image = Ash.load!(container, :image, tenant: tenant).image
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         deployment_fixture(
@@ -851,31 +688,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           release_id: release.id,
           state: :sent
         )
-
-      for network <- networks do
-        network_deployment_fixture(
-          network_id: network.id,
-          realm_id: realm.id,
-          device_id: device.id,
-          state: :available,
-          tenant: tenant
-        )
-      end
-
-      container_deployment_fixture(
-        container_id: container.id,
-        device_id: device.id,
-        tenant: tenant,
-        state: :device_created
-      )
-
-      image_deployment_fixture(
-        image_id: image.id,
-        realm_id: realm.id,
-        device_id: device.id,
-        state: :unpulled,
-        tenant: tenant
-      )
 
       deployment_event = %{
         device_id: device.device_id,
@@ -1152,4 +964,17 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       response: %{"errors" => %{"detail" => message}}
     }
   end
+
+  defp set_ready(%Image.Deployment{} = deployment), do: Containers.mark_image_deployment_as_pulled!(deployment)
+
+  defp set_ready(%Network.Deployment{} = deployment), do: Containers.mark_network_deployment_as_available!(deployment)
+
+  defp set_ready(%Volume.Deployment{} = deployment), do: Containers.mark_volume_deployment_as_available!(deployment)
+
+  defp set_ready(%DeviceMapping.Deployment{} = deployment),
+    do: Containers.mark_device_mapping_deployment_as_present!(deployment)
+
+  defp set_ready(%Container.Deployment{} = deployment), do: Containers.mark_container_deployment_as_created!(deployment)
+
+  defp set_ready(%Deployment{} = deployment), do: Containers.mark_deployment_as_stopped!(deployment)
 end

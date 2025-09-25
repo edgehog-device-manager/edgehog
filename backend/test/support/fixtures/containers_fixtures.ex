@@ -297,7 +297,9 @@ defmodule Edgehog.ContainersFixtures do
         release_id: release_id
       })
 
-    Ash.create!(Deployment, params, tenant: tenant)
+    Deployment
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!(tenant: tenant)
   end
 
   @doc """
