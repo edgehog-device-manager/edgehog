@@ -170,7 +170,9 @@ defmodule Edgehog.Tenants.Reconciler.Core do
   end
 
   defp normalize_policy(policy) do
-    update_in(policy, ["retry_times"], &(&1 || 0))
+    policy
+    |> update_in(["retry_times"], &(&1 || 0))
+    |> update_in(["prefetch_count"], &(&1 || 0))
   end
 
   defp list_triggers_that_reference_policy(rm_client, policy_name) do
