@@ -114,6 +114,13 @@ defmodule Edgehog.Containers.Volume.Deployment do
     end
 
     belongs_to :device, Edgehog.Devices.Device
+
+    many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      through Edgehog.Containers.ContainerDeploymentVolumeDeployment
+      source_attribute_on_join_resource :container_deployment_id
+      destination_attribute_on_join_resource :volume_deployment_id
+      public? true
+    end
   end
 
   calculations do
