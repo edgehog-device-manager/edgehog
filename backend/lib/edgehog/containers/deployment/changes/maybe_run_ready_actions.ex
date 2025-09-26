@@ -18,34 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.CheckContainers do
+defmodule Edgehog.Containers.Deployment.Changes.MaybeRunReadyActions do
   @moduledoc false
   use Ash.Resource.Change
 
+  alias Edgehog.Containers
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
-    deployment = changeset.data
+    Ash.Changeset.after_transaction(changeset, fn _changeset, transaction_result ->
+      with {:ok, deployment} <- transaction_result,
+           {:ok, deployment} <- Ash.load(deployment, :is_ready) do
+        if deployment.is_ready, do: Containers.run_ready_actions(deployment)
 
-    with :created_device_mappings <- state(changeset),
-         {:ok, deployment} <-
-           Ash.load(deployment, container_deployments: :ready?) do
-      containers_ready? =
-        deployment
-        |> Map.get(:container_deployments, [])
-        |> Enum.all?(& &1.ready?)
-
-      if containers_ready?,
-        do: Ash.Changeset.change_attribute(changeset, :resources_state, :created_containers),
-        else: changeset
-    else
-      _ -> changeset
-    end
-  end
-
-  defp state(changeset) do
-    case Ash.Changeset.fetch_argument_or_change(changeset, :resources_state) do
-      {:ok, state} -> state
-      :error -> Ash.Changeset.get_attribute(changeset, :resources_state)
-    end
+        {:ok, deployment}
+      end
+    end)
   end
 end

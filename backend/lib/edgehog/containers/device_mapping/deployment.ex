@@ -116,7 +116,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:present, :not_present])
+    calculate :is_ready, :boolean, expr(state in [:present, :not_present])
   end
 
   identities do

@@ -117,7 +117,6 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
                     deployment {
                       id
                       state
-                      resourcesState
                     }
                   }
                 }

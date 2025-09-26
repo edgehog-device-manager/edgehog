@@ -205,7 +205,7 @@ defmodule Edgehog.Containers do
       define :destroy_deployment, action: :destroy
       define :fetch_deployment, action: :read, get_by: [:id]
       define :delete_deployment, action: :destroy
-      define :deployment_update_resources_state, action: :update_resources_state
+      define :deployment_update_resources_state, action: :maybe_run_ready_actions
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
       define :deployment_by_identity, action: :read, get_by_identity: :release_instance
       define :run_ready_actions, action: :run_ready_actions
