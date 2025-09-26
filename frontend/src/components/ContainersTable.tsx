@@ -289,7 +289,6 @@ const VolumeDetails = ({
                   >
                     <MonacoJsonEditor
                       value={formatJson(mount?.volume.options)}
-                      language="json"
                       onChange={() => {}}
                       defaultValue={formatJson(mount?.volume.options)}
                       readonly={true}
@@ -437,7 +436,6 @@ const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
                   >
                     <MonacoJsonEditor
                       value={formatJson(net?.options)}
-                      language="json"
                       onChange={() => {}}
                       defaultValue={formatJson(net?.options)}
                       readonly={true}
@@ -516,7 +514,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
       >
         <MonacoJsonEditor
           value={formatJson(container.env)}
-          language="json"
           onChange={() => {}}
           defaultValue={formatJson(container.env)}
           readonly={true}
@@ -756,7 +753,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
       >
         <MonacoJsonEditor
           value={container.storageOpt.join("\n")}
-          language="json"
           onChange={() => {}}
           defaultValue={container.storageOpt.join("\n")}
           readonly={true}
@@ -775,7 +771,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
       >
         <MonacoJsonEditor
           value={container.tmpfs.join("\n")}
-          language="json"
           onChange={() => {}}
           defaultValue={container.tmpfs.join("\n")}
           readonly={true}

@@ -657,7 +657,6 @@ const ContainerForm = ({
             name={`containers.${index}.env`}
             render={({ field, fieldState: _fieldState }) => (
               <MonacoJsonEditor
-                language="json"
                 value={field.value ?? ""}
                 onChange={(value) => {
                   field.onChange(value ?? "");
@@ -1355,7 +1354,6 @@ const ContainerForm = ({
             render={({ field, fieldState }) => (
               <>
                 <MonacoJsonEditor
-                  language="json"
                   value={field.value ?? ""}
                   onChange={(value) => {
                     field.onChange(value ?? "");
@@ -1390,7 +1388,6 @@ const ContainerForm = ({
             render={({ field, fieldState }) => (
               <>
                 <MonacoJsonEditor
-                  language="json"
                   value={field.value ?? ""}
                   onChange={(value) => {
                     field.onChange(value ?? "");
