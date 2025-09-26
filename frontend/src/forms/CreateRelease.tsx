@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
@@ -47,6 +47,8 @@ import Form from "components/Form";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import Alert from "components/Alert";
+import Tag from "components/Tag";
 import {
   yup,
   envSchema,
@@ -540,6 +542,8 @@ type CreateReleaseProps = {
   requiredSystemModelsOptionsRef: CreateRelease_SystemModelsOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: ReleaseSubmitData) => void;
+  showModal?: boolean;
+  onToggleModal?: (show: boolean) => void;
 };
 
 type ContainerFormProps = {
@@ -550,8 +554,10 @@ type ContainerFormProps = {
   imageCredentials: Option[];
   networks: Option[];
   volumes: Option[];
-  intl: ReturnType<typeof useIntl>;
   control: Control<ReleaseInputData>;
+  isImported?: boolean;
+  isModified?: boolean;
+  markUserInteraction: () => void;
 };
 
 const ContainerForm = ({
@@ -562,8 +568,10 @@ const ContainerForm = ({
   imageCredentials,
   networks,
   volumes,
-  intl,
   control,
+  isImported = false,
+  isModified = false,
+  markUserInteraction,
 }: ContainerFormProps) => {
   const volumesForm = useFieldArray({
     control,
@@ -611,13 +619,29 @@ const ContainerForm = ({
 
   return (
     <div className="border p-3 mb-3">
-      <h5>
+      <h5 className="d-flex align-items-center gap-2">
         <FormattedMessage
           id="forms.CreateRelease.containerTitle"
           defaultMessage="Container {containerNumber}"
           values={{ containerNumber: index + 1 }}
         />
-      </h5>{" "}
+        {isImported && (
+          <Tag className="bg-secondary">
+            <FormattedMessage
+              id="forms.CreateRelease.importedLabel"
+              defaultMessage="Imported"
+            />
+          </Tag>
+        )}
+        {isModified && (
+          <Tag className="bg-secondary">
+            <FormattedMessage
+              id="forms.CreateRelease.modifiedLabel"
+              defaultMessage="Modified"
+            />
+          </Tag>
+        )}
+      </h5>
       <Stack gap={2}>
         <FormRow
           id={`containers-${index}-env`}
@@ -637,6 +661,7 @@ const ContainerForm = ({
                 value={field.value ?? ""}
                 onChange={(value) => {
                   field.onChange(value ?? "");
+                  markUserInteraction();
                 }}
                 defaultValue={field.value || "{}"}
               />
@@ -661,16 +686,19 @@ const ContainerForm = ({
 
               const handleAddExtraHost = () => {
                 field.onChange([...extraHosts, ""]);
+                markUserInteraction();
               };
 
               const handleDeleteExtraHost = (i: number) => {
                 field.onChange(extraHosts.filter((_, idx) => idx !== i));
+                markUserInteraction();
               };
 
               const handleChangeHost = (i: number, value: string) => {
                 const updated = [...extraHosts];
                 updated[i] = value;
                 field.onChange(updated);
+                markUserInteraction();
               };
 
               return (
@@ -775,6 +803,7 @@ const ContainerForm = ({
                   value={selectedOption}
                   onChange={(option) => {
                     field.onChange(option ? option.value : null);
+                    markUserInteraction();
                   }}
                   options={imageCredentials}
                   isClearable
@@ -870,9 +899,10 @@ const ContainerForm = ({
                 <MultiSelect
                   invalid={invalid}
                   value={mappedValue}
-                  onChange={(selected) =>
-                    onChange(selected.map((s) => ({ id: s.value })))
-                  }
+                  onChange={(selected) => {
+                    onChange(selected.map((s) => ({ id: s.value })));
+                    markUserInteraction();
+                  }}
                   onBlur={onBlur}
                   options={networks}
                   getOptionValue={(option) => option.value}
@@ -921,27 +951,28 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Select
-            {...register(`containers.${index}.restartPolicy` as const)}
-            isInvalid={!!errors.containers?.[index]?.restartPolicy}
-            defaultValue=""
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "forms.CreateRelease.restartPolicyOption",
-                defaultMessage: "Select a Restart Policy",
-              })}
-            </option>
-            {restartPolicyOptions.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                disabled={option.value === ""}
-              >
-                {option.label}
-              </option>
-            ))}
-          </Form.Select>
+          <Controller
+            control={control}
+            name={`containers.${index}.restartPolicy`}
+            render={({ field }) => {
+              const selectedOption =
+                restartPolicyOptions.find((opt) => opt.value === field.value) ||
+                null;
+
+              return (
+                <Select
+                  value={selectedOption}
+                  onChange={(option) => {
+                    field.onChange(option ? option.value : null);
+                    markUserInteraction();
+                  }}
+                  options={restartPolicyOptions}
+                  isClearable
+                />
+              );
+            }}
+          />
+
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.restartPolicy?.message && (
               <FormattedMessage
@@ -1007,9 +1038,10 @@ const ContainerForm = ({
                                       (opt) => opt.value === field.value,
                                     ) || null
                                   }
-                                  onChange={(selected) =>
-                                    field.onChange(selected?.value)
-                                  }
+                                  onChange={(selected) => {
+                                    field.onChange(selected?.value);
+                                    markUserInteraction();
+                                  }}
                                   onBlur={field.onBlur}
                                   options={availableOptions}
                                   noOptionsMessage={() => (
@@ -1325,7 +1357,10 @@ const ContainerForm = ({
                 <MonacoJsonEditor
                   language="json"
                   value={field.value ?? ""}
-                  onChange={(value) => field.onChange(value ?? "")}
+                  onChange={(value) => {
+                    field.onChange(value ?? "");
+                    markUserInteraction();
+                  }}
                   defaultValue={field.value || "[]"}
                   initialLines={1}
                   aria-invalid={fieldState.invalid}
@@ -1357,7 +1392,10 @@ const ContainerForm = ({
                 <MonacoJsonEditor
                   language="json"
                   value={field.value ?? ""}
-                  onChange={(value) => field.onChange(value ?? "")}
+                  onChange={(value) => {
+                    field.onChange(value ?? "");
+                    markUserInteraction();
+                  }}
                   defaultValue={field.value || "[]"}
                   initialLines={1}
                   aria-invalid={fieldState.invalid}
@@ -1394,7 +1432,10 @@ const ContainerForm = ({
                 <MultiSelect
                   invalid={invalid}
                   value={(value || []).map((v: string) => ({ id: v, name: v }))}
-                  onChange={(selected) => onChange(selected.map((s) => s.id))}
+                  onChange={(selected) => {
+                    onChange(selected.map((s) => s.id));
+                    markUserInteraction();
+                  }}
                   onBlur={onBlur}
                   options={options}
                   getOptionValue={(option) => option.id}
@@ -1430,7 +1471,10 @@ const ContainerForm = ({
                 <MultiSelect
                   invalid={invalid}
                   value={(value || []).map((v: string) => ({ id: v, name: v }))}
-                  onChange={(selected) => onChange(selected.map((s) => s.id))}
+                  onChange={(selected) => {
+                    onChange(selected.map((s) => s.id));
+                    markUserInteraction();
+                  }}
                   onBlur={onBlur}
                   options={options}
                   getOptionValue={(option) => option.id}
@@ -1505,6 +1549,8 @@ const CreateRelease = ({
   requiredSystemModelsOptionsRef,
   isLoading = false,
   onSubmit,
+  showModal = false,
+  onToggleModal,
 }: CreateReleaseProps) => {
   const intl = useIntl();
 
@@ -1554,6 +1600,7 @@ const CreateRelease = ({
     handleSubmit,
     control,
     reset,
+    setFocus,
     formState: { errors },
   } = useForm<ReleaseInputData>({
     mode: "onTouched",
@@ -1575,8 +1622,6 @@ const CreateRelease = ({
 
   const applications = applicationsData.applications?.edges ?? [];
 
-  const [showModal, setShowModal] = useState(false);
-
   const [
     selectedContainersTemplateRelease,
     setSelectedContainersTemplateRelease,
@@ -1586,6 +1631,52 @@ const CreateRelease = ({
     useState<
       SingleValue<{ value: string; label: string; releases: ReleaseNode[] }>
     >(null);
+
+  const [showImportSuccess, setShowImportSuccess] = useState(false);
+  const [importedData, setImportedData] = useState<ReleaseInputData | null>(
+    null,
+  );
+  const [justImported, setJustImported] = useState(false);
+  const isImportingRef = useRef(false);
+  const userHasInteractedRef = useRef(false);
+
+  // Watch all form values to detect changes
+  const formValues = useWatch({ control });
+
+  // Helper function to check if a specific container is modified
+  const isContainerModified = (containerIndex: number): boolean => {
+    // If we just imported or are currently importing, don't show modified tags yet
+    if (justImported || isImportingRef.current) {
+      return false;
+    }
+
+    // Only show modified if user has actually interacted with the form
+    if (!userHasInteractedRef.current) {
+      return false;
+    }
+
+    if (
+      !importedData?.containers?.[containerIndex] ||
+      !formValues?.containers?.[containerIndex]
+    ) {
+      return false;
+    }
+
+    // Simple JSON comparison - only after user interaction
+    const importedContainer = importedData.containers[containerIndex];
+    const currentContainer = formValues.containers[containerIndex];
+
+    return (
+      JSON.stringify(importedContainer) !== JSON.stringify(currentContainer)
+    );
+  };
+
+  // Helper function to mark user interaction
+  const markUserInteraction = () => {
+    if (!isImportingRef.current && !justImported) {
+      userHasInteractedRef.current = true;
+    }
+  };
 
   const parseJsonToStringArray = (jsonStr: string | undefined): string[] => {
     if (!jsonStr) return [];
@@ -1646,8 +1737,23 @@ const CreateRelease = ({
 
           onSubmit(submitData);
         })}
+        onChange={markUserInteraction}
+        onInput={markUserInteraction}
       >
         <Stack gap={2}>
+          {showImportSuccess && (
+            <Alert
+              variant="success"
+              dismissible
+              onClose={() => setShowImportSuccess(false)}
+            >
+              <FormattedMessage
+                id="forms.CreateRelease.importSuccessMessage"
+                defaultMessage="Release configuration has been successfully imported!"
+              />
+            </Alert>
+          )}
+
           <FormRow
             id="application-form-version"
             label={
@@ -1673,8 +1779,8 @@ const CreateRelease = ({
             id="application-release-form-required-system-models"
             label={
               <FormattedMessage
-                id="forms.CreateRelease.requiredSystemModelsLabels"
-                defaultMessage="Required System Models"
+                id="forms.CreateRelease.supportedSystemModelsLabels"
+                defaultMessage="Supported System Models"
               />
             }
           >
@@ -1695,9 +1801,10 @@ const CreateRelease = ({
                 return (
                   <MultiSelect
                     value={mappedValue}
-                    onChange={(selected) =>
-                      onChange(selected.map(({ value }) => ({ id: value })))
-                    }
+                    onChange={(selected) => {
+                      onChange(selected.map(({ value }) => ({ id: value })));
+                      markUserInteraction();
+                    }}
                     onBlur={onBlur}
                     options={systemModelsOptions}
                     getOptionValue={(option) => option.value}
@@ -1707,21 +1814,6 @@ const CreateRelease = ({
               }}
             />
           </FormRow>
-          <div className="d-flex justify-content-start align-items-center gap-2">
-            <Button
-              variant="primary"
-              title={intl.formatMessage({
-                id: "forms.CreateRelease.reuseReleaseTitleButton",
-                defaultMessage: "Copy configuration from an existing release",
-              })}
-              onClick={() => setShowModal(true)}
-            >
-              <FormattedMessage
-                id="forms.CreateRelease.reuseReleaseButton"
-                defaultMessage="Reuse Release"
-              />
-            </Button>
-          </div>
           <Stack className="mt-3">
             <h5>
               <FormattedMessage
@@ -1739,25 +1831,45 @@ const CreateRelease = ({
             )}
           </Stack>
 
-          {fields.map((field, index) => (
-            <ContainerForm
-              key={field.id}
-              index={index}
-              register={register}
-              errors={errors}
-              remove={remove}
-              imageCredentials={imageCredentialsOptions}
-              networks={networkOptions}
-              volumes={volumeOptions}
-              intl={intl}
-              control={control}
-            />
-          ))}
+          {fields.map((field, index) => {
+            // Check if this container was imported (either by index or by checking if any containers were imported)
+            const hasImportedContainers = Boolean(
+              importedData?.containers?.length,
+            );
+            const isThisContainerImported =
+              hasImportedContainers &&
+              index < (importedData?.containers?.length || 0);
+
+            return (
+              <ContainerForm
+                key={field.id}
+                index={index}
+                register={register}
+                errors={errors}
+                remove={remove}
+                imageCredentials={imageCredentialsOptions}
+                networks={networkOptions}
+                volumes={volumeOptions}
+                control={control}
+                isImported={isThisContainerImported}
+                isModified={
+                  isThisContainerImported && isContainerModified(index)
+                }
+                markUserInteraction={markUserInteraction}
+              />
+            );
+          })}
 
           <div className="d-flex justify-content-start align-items-center gap-2">
             <Button
               variant="secondary"
-              onClick={() => append({ image: { reference: "" } })}
+              onClick={() => {
+                append({ image: { reference: "" } });
+                setTimeout(() => {
+                  const newIndex = fields.length;
+                  setFocus(`containers.${newIndex}.image.reference`);
+                }, 0);
+              }}
             >
               <FormattedMessage
                 id="forms.CreateRelease.addContainerButton"
@@ -1790,7 +1902,7 @@ const CreateRelease = ({
               defaultMessage="Confirm"
             />
           }
-          onCancel={() => setShowModal(false)}
+          onCancel={() => onToggleModal?.(false)}
           onConfirm={() => {
             if (
               !selectedContainersTemplateRelease ||
@@ -1852,14 +1964,46 @@ const CreateRelease = ({
                 };
               }) ?? [];
 
-            reset({
+            const newFormData = {
               requiredSystemModels: release.systemModels.map(({ id }) => ({
                 id: id ?? undefined,
               })),
               containers: mappedContainers,
+              version: "", // Keep the current version as it shouldn't be imported
+            };
+
+            // Reset the form and wait for it to complete
+            reset(newFormData, {
+              keepErrors: false,
+              keepDirty: false,
+              keepIsSubmitted: false,
+              keepTouched: false,
+              keepIsValid: false,
+              keepSubmitCount: false,
             });
 
-            setShowModal(false);
+            // Set importing flags to prevent premature modification detection
+            isImportingRef.current = true;
+            setJustImported(true);
+            setShowImportSuccess(true);
+
+            // Immediately set imported data so tags can show
+            setImportedData(newFormData);
+
+            // Use requestAnimationFrame to wait for the reset to complete
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                // Clear flags after form reset is complete
+                isImportingRef.current = false;
+                setJustImported(false);
+                userHasInteractedRef.current = false; // Reset interaction flag
+              });
+            });
+
+            // Auto-hide success message after 5 seconds
+            setTimeout(() => setShowImportSuccess(false), 5000);
+
+            onToggleModal?.(false);
           }}
         >
           <p>
