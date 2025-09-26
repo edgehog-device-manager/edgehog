@@ -92,6 +92,11 @@ defmodule Edgehog.Containers.Volume.Deployment do
       change set_attribute(:last_message, arg(:message))
       change set_attribute(:state, :error)
     end
+
+    update :maybe_notify_upwards do
+      require_atomic? false
+      change Changes.MaybeNotifyUpwards
+    end
   end
 
   attributes do
@@ -114,10 +119,17 @@ defmodule Edgehog.Containers.Volume.Deployment do
     end
 
     belongs_to :device, Edgehog.Devices.Device
+
+    many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      through Edgehog.Containers.ContainerDeploymentVolumeDeployment
+      source_attribute_on_join_resource :container_deployment_id
+      destination_attribute_on_join_resource :volume_deployment_id
+      public? true
+    end
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:available, :unavailable])
+    calculate :is_ready, :boolean, expr(state in [:available, :unavailable])
   end
 
   identities do

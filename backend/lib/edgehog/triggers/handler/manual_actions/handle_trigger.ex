@@ -195,7 +195,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     case String.split(event.path, "/") do
       ["", volume_id, "created"] ->
         volume_deployment =
-          Containers.fetch_volume_deployment!(volume_id, device.id, tenant: tenant)
+          Containers.fetch_volume_deployment!(volume_id, device.id,
+            tenant: tenant,
+            load: [container_deployments: :deployments]
+          )
 
         case event.value do
           true ->
@@ -209,24 +212,9 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
             Containers.destroy_volume_deployment!(volume_deployment, tenant: tenant)
         end
 
-        containers =
-          volume_id
-          |> Containers.containers_with_volume!(tenant: tenant, load: :container)
-          |> Enum.map(& &1.container_id)
-          |> Enum.uniq()
-
-        releases =
-          containers
-          |> Enum.flat_map(&Containers.releases_with_container!(&1, tenant: tenant, load: :release))
-          |> Enum.map(& &1.release_id)
-          |> Enum.uniq()
-
-        deployments =
-          releases
-          |> Enum.flat_map(&Containers.deployments_with_release!(&1, tenant: tenant))
-          |> Enum.uniq_by(& &1.id)
-
-        {:ok, Enum.map(deployments, &Containers.deployment_update_resources_state!/1)}
+        volume_deployment
+        |> Ash.Changeset.for_update(:maybe_notify_upwards, %{})
+        |> Ash.update()
 
       _ ->
         {:error, :invalid_event_path}
@@ -337,36 +325,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     } = event.value
 
     with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      case state do
-        "Starting" ->
-          deployment
-          |> Containers.mark_deployment_as_starting!(tenant: tenant)
-          |> Containers.deployment_update_resources_state(tenant: tenant)
+      type = deployment_event(state)
+      event = %{type: type, message: message}
 
-        "Started" ->
-          deployment
-          |> Containers.mark_deployment_as_started!(tenant: tenant)
-          |> Containers.deployment_update_resources_state(tenant: tenant)
-
-        "Stopping" ->
-          deployment
-          |> Containers.mark_deployment_as_stopping!(tenant: tenant)
-          |> Containers.deployment_update_resources_state(tenant: tenant)
-
-        "Stopped" ->
-          deployment
-          |> Containers.mark_deployment_as_stopped!(tenant: tenant)
-          |> Containers.deployment_update_resources_state(tenant: tenant)
-
-        "Error" ->
-          Containers.mark_deployment_as_errored(deployment, message, tenant: tenant)
-
-        "Deleting" ->
-          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
-
-        "Updating" ->
-          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
-      end
+      Containers.append_deployment_event(deployment, %{event: event}, tenant: tenant)
     end
   end
 
@@ -465,4 +427,12 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   defp translate_ota_response_status_code("OTAFailed"), do: nil
   defp translate_ota_response_status_code("OTAErrorDeploy"), do: "IOError"
   defp translate_ota_response_status_code("OTAErrorBootWrongPartition"), do: "SystemRollback"
+
+  defp deployment_event("Starting"), do: :starting
+  defp deployment_event("Started"), do: :started
+  defp deployment_event("Stopping"), do: :stopping
+  defp deployment_event("Stopped"), do: :stopped
+  defp deployment_event("Error"), do: :error
+  defp deployment_event("Deleting"), do: :deleting
+  defp deployment_event("Updating"), do: :updating
 end
