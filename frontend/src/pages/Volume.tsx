@@ -45,6 +45,7 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import Button from "components/Button";
 import DeleteModal from "components/DeleteModal";
+import MonacoJsonEditor from "components/MonacoJsonEditor";
 
 const GET_VOLUME_QUERY = graphql`
   query Volume_getVolume_Query($volumeId: ID!) {
@@ -185,12 +186,12 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
             />
           }
         >
-          <Form.Control
-            as="textarea"
+          <MonacoJsonEditor
             value={getPrettyOptions()}
-            rows={getPrettyOptions().split("\n").length}
-            readOnly
-            style={{ fontFamily: "monospace", whiteSpace: "pre-wrap" }}
+            onChange={() => {}}
+            defaultValue={getPrettyOptions()}
+            readonly={true}
+            initialLines={1}
           />
         </FormRow>
 
