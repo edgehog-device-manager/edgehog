@@ -100,7 +100,7 @@ const ReleaseSystemModelsTable = ({
           <p>
             <FormattedMessage
               id="components.ReleaseSystemModelsTable.noSystemModels"
-              defaultMessage="No required system model. This release can be applied to any device."
+              defaultMessage="No supported system model specified. This release can be applied to any device."
             />
           </p>
         )}

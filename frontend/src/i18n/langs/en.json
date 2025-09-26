@@ -899,7 +899,7 @@
     "description": "Title for the Status column of the devices table"
   },
   "components.ReleaseSystemModelsTable.noSystemModels": {
-    "defaultMessage": "No required system model. This release can be applied to any device."
+    "defaultMessage": "No supported system model specified. This release can be applied to any device."
   },
   "components.ReleaseTable.versionTitle": {
     "defaultMessage": "Release Version",
@@ -1330,6 +1330,12 @@
   "forms.CreateRelease.imageReferenceLabel": {
     "defaultMessage": "Image Reference"
   },
+  "forms.CreateRelease.importSuccessMessage": {
+    "defaultMessage": "Release configuration has been successfully imported!"
+  },
+  "forms.CreateRelease.importedLabel": {
+    "defaultMessage": "Imported"
+  },
   "forms.CreateRelease.memoryLabel": {
     "defaultMessage": "Memory (bytes)"
   },
@@ -1341,6 +1347,9 @@
   },
   "forms.CreateRelease.memorySwappinessLabel": {
     "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "forms.CreateRelease.modifiedLabel": {
+    "defaultMessage": "Modified"
   },
   "forms.CreateRelease.networkModeLabel": {
     "defaultMessage": "Network Mode"
@@ -1372,20 +1381,8 @@
   "forms.CreateRelease.removeContainerButton": {
     "defaultMessage": "Remove Container"
   },
-  "forms.CreateRelease.requiredSystemModelsLabels": {
-    "defaultMessage": "Required System Models"
-  },
   "forms.CreateRelease.restartPolicyLabel": {
     "defaultMessage": "Restart Policy"
-  },
-  "forms.CreateRelease.restartPolicyOption": {
-    "defaultMessage": "Select a Restart Policy"
-  },
-  "forms.CreateRelease.reuseReleaseButton": {
-    "defaultMessage": "Reuse Release"
-  },
-  "forms.CreateRelease.reuseReleaseTitleButton": {
-    "defaultMessage": "Copy configuration from an existing release"
   },
   "forms.CreateRelease.reuseResourcesModalTitle": {
     "defaultMessage": "Reuse Resources Modal"
@@ -1401,6 +1398,9 @@
   },
   "forms.CreateRelease.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateRelease.supportedSystemModelsLabels": {
+    "defaultMessage": "Supported System Models"
   },
   "forms.CreateRelease.tmpfsLabel": {
     "defaultMessage": "Tmpfs Mounts"
@@ -1485,6 +1485,12 @@
   },
   "forms.DeploymentCampaignForm.statusLabel": {
     "defaultMessage": "Status"
+  },
+  "forms.ReleaseCreate.reuseReleaseButton": {
+    "defaultMessage": "Reuse Release"
+  },
+  "forms.ReleaseCreate.reuseReleaseTitleButton": {
+    "defaultMessage": "Copy configuration from an existing release"
   },
   "forms.UpdateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"

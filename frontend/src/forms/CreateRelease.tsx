@@ -1779,8 +1779,8 @@ const CreateRelease = ({
             id="application-release-form-required-system-models"
             label={
               <FormattedMessage
-                id="forms.CreateRelease.requiredSystemModelsLabels"
-                defaultMessage="Required System Models"
+                id="forms.CreateRelease.supportedSystemModelsLabels"
+                defaultMessage="Supported System Models"
               />
             }
           >
