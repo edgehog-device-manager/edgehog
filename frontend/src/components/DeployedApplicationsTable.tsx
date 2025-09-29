@@ -45,6 +45,7 @@ import DeploymentStateComponent, {
 import DeploymentResourcesStateComponent, {
   parseDeploymentResourcesState,
 } from "components/DeploymentResourcesState";
+import ContainerStatusList from "components/ContainerStatusList";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -72,6 +73,19 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
                     systemModels {
                       name
                     }
+                  }
+                }
+              }
+            }
+          }
+          containerDeployments {
+            edges {
+              node {
+                id
+                state
+                container {
+                  image {
+                    reference
                   }
                 }
               }
@@ -215,6 +229,11 @@ const DeployedApplicationsTable = ({
     (typeof deployments)[0] | null
   >(null);
 
+  // Track expanded state for container status lists
+  const [expandedContainerLists, setExpandedContainerLists] = useState<
+    Set<string>
+  >(new Set());
+
   const upgradeReleaseOptions: SelectOption[] = useMemo(() => {
     if (!selectedDeployment?.upgradeTargetReleases) return [];
     return selectedDeployment?.upgradeTargetReleases.map(
@@ -298,6 +317,19 @@ const DeployedApplicationsTable = ({
       resources_state: parseDeploymentResourcesState(
         edge.node.resourcesState || undefined,
       ),
+      containerDeployments:
+        edge.node.containerDeployments?.edges?.map((containerEdge) => ({
+          id: containerEdge.node.id,
+          state: containerEdge.node.state,
+          container: containerEdge.node.container
+            ? {
+                image: {
+                  reference:
+                    containerEdge.node.container.image?.reference || "Unknown",
+                },
+              }
+            : null,
+        })) || [],
       upgradeTargetReleases:
         edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
           semver.gt(
@@ -526,6 +558,37 @@ const DeployedApplicationsTable = ({
         <DeploymentResourcesStateComponent resourcesState={getValue()} />
       ),
     }),
+    columnHelper.accessor("containerDeployments", {
+      header: () => (
+        <FormattedMessage
+          id="components.DeployedApplicationsTable.containerStatus"
+          defaultMessage="Container Status"
+        />
+      ),
+      cell: ({ getValue, row }) => {
+        const deployment = row.original;
+        const deploymentId = deployment.id;
+        const isExpanded = expandedContainerLists.has(deploymentId);
+
+        const handleToggleExpanded = () => {
+          const newExpanded = new Set(expandedContainerLists);
+          if (isExpanded) {
+            newExpanded.delete(deploymentId);
+          } else {
+            newExpanded.add(deploymentId);
+          }
+          setExpandedContainerLists(newExpanded);
+        };
+
+        return (
+          <ContainerStatusList
+            containerDeployments={getValue()}
+            isExpanded={isExpanded}
+            onToggleExpanded={handleToggleExpanded}
+          />
+        );
+      },
+    }),
     columnHelper.accessor((row) => row, {
       id: "action",
       header: () => (
@@ -706,5 +769,5 @@ const DeployedApplicationsTable = ({
   );
 };
 
-export type { DeploymentTableProps, DeploymentState };
+export type { DeploymentTableProps };
 export default DeployedApplicationsTable;

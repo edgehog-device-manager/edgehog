@@ -280,6 +280,54 @@
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
   },
+  "components.ContainerStatus.created": {
+    "defaultMessage": "Created"
+  },
+  "components.ContainerStatus.dead": {
+    "defaultMessage": "Dead"
+  },
+  "components.ContainerStatus.exited": {
+    "defaultMessage": "Exited"
+  },
+  "components.ContainerStatus.paused": {
+    "defaultMessage": "Paused"
+  },
+  "components.ContainerStatus.removing": {
+    "defaultMessage": "Removing"
+  },
+  "components.ContainerStatus.restarting": {
+    "defaultMessage": "Restarting"
+  },
+  "components.ContainerStatus.running": {
+    "defaultMessage": "Running"
+  },
+  "components.ContainerStatus.unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.ContainerStatusList.collapseContainerList": {
+    "defaultMessage": "Collapse container list"
+  },
+  "components.ContainerStatusList.containerReference": {
+    "defaultMessage": "{reference}"
+  },
+  "components.ContainerStatusList.deadCount": {
+    "defaultMessage": "{count} dead"
+  },
+  "components.ContainerStatusList.exitedCount": {
+    "defaultMessage": "{count} exited"
+  },
+  "components.ContainerStatusList.expandContainerList": {
+    "defaultMessage": "Expand container list"
+  },
+  "components.ContainerStatusList.noContainers": {
+    "defaultMessage": "No containers"
+  },
+  "components.ContainerStatusList.processingCount": {
+    "defaultMessage": "{count} processing"
+  },
+  "components.ContainerStatusList.runningCount": {
+    "defaultMessage": "{count} running"
+  },
   "components.ContainersTable.capAdd": {
     "defaultMessage": "Cap Add"
   },
@@ -533,6 +581,9 @@
   },
   "components.DeployedApplicationsTable.confirmModal.title": {
     "defaultMessage": "Upgrade Deployment"
+  },
+  "components.DeployedApplicationsTable.containerStatus": {
+    "defaultMessage": "Container Status"
   },
   "components.DeployedApplicationsTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
