@@ -318,7 +318,7 @@ defmodule Edgehog.Containers.Container do
     end
 
     attribute :read_only_rootfs, :boolean do
-      default true
+      default false
       public? true
       allow_nil? false
     end
