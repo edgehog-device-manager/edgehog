@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0-alpha.4] - 2025-09-29
+### Fixed
+- Correctly use Docker's default `false` value for container's readonly root filesystem option.
+
 ## [0.10.0-alpha.3] - 2025-09-26
 ### Fixed
 - Astarte reconciler not correctly comparing trigger delivery policies, thus continuously reinstalling them.
