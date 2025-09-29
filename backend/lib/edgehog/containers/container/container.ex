@@ -295,6 +295,7 @@ defmodule Edgehog.Containers.Container do
 
     attribute :memory_swappiness, :integer do
       public? true
+      constraints min: 0, max: 100
     end
 
     attribute :volume_driver, :string do

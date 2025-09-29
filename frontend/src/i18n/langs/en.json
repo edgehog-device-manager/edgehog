@@ -1327,6 +1327,9 @@
   "forms.CreateRelease.memoryReservationLabel": {
     "defaultMessage": "Memory Reservation (bytes)"
   },
+  "forms.CreateRelease.memorySwapInvalid": {
+    "defaultMessage": "Memory Swap must be greater than/equal to Memory."
+  },
   "forms.CreateRelease.memorySwapLabel": {
     "defaultMessage": "Memory Swap (bytes)"
   },
