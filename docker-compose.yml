@@ -49,7 +49,7 @@ services:
       - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
 
   edgehog-backend:
-    image: edgehogdevicemanager/edgehog-backend:0.10.0-alpha.3
+    image: edgehogdevicemanager/edgehog-backend:0.10.0-alpha.4
     build:
       context: backend
     env_file: .env
@@ -87,7 +87,7 @@ services:
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: edgehogdevicemanager/edgehog-frontend:0.10.0-alpha.3
+    image: edgehogdevicemanager/edgehog-frontend:0.10.0-alpha.4
     build:
       context: frontend
     environment:
