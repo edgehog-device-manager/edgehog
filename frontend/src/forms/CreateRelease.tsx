@@ -523,7 +523,7 @@ const initialData: ReleaseInputData = {
   requiredSystemModels: [],
 };
 
-const restartPolicyOptions = [
+export const restartPolicyOptions = [
   { value: "no", label: "No" },
   { value: "always", label: "Always" },
   { value: "on_failure", label: "On Failure" },
