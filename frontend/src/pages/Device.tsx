@@ -650,6 +650,7 @@ const ApplicationsTab = ({ deviceRef }: ApplicationsTabProps) => {
         <DeployedApplicationsTable
           deviceRef={device}
           isOnline={isOnline}
+          systemModelName={device.systemModel?.name}
           setErrorFeedback={setErrorFeedback}
           onDeploymentChange={handleRefetch}
         />

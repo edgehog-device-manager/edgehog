@@ -69,6 +69,9 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
                   node {
                     id
                     version
+                    systemModels {
+                      name
+                    }
                   }
                 }
               }
@@ -169,6 +172,7 @@ type DeploymentTableProps = {
   className?: string;
   deviceRef: DeployedApplicationsTable_deployedApplications$key;
   isOnline: boolean;
+  systemModelName: string | undefined;
   hideSearch?: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
   onDeploymentChange: () => void;
@@ -182,12 +186,14 @@ type UpgradeTargetRelease = {
 type SelectOption = {
   value: string;
   label: string;
+  disabled: boolean;
 };
 
 const DeployedApplicationsTable = ({
   className,
   deviceRef,
   isOnline,
+  systemModelName,
   hideSearch = false,
   setErrorFeedback,
   onDeploymentChange,
@@ -211,11 +217,25 @@ const DeployedApplicationsTable = ({
 
   const upgradeReleaseOptions: SelectOption[] = useMemo(() => {
     if (!selectedDeployment?.upgradeTargetReleases) return [];
+    return selectedDeployment?.upgradeTargetReleases.map(
+      ({ node: release }) => {
+        const systemModelNames =
+          release.systemModels?.map((sm) => sm.name) ?? [];
 
-    return selectedDeployment.upgradeTargetReleases.map(({ node }) => ({
-      value: node.id,
-      label: node.version,
-    }));
+        const hasSystemModel = !!systemModelName;
+        const matchesSystemModel =
+          hasSystemModel && systemModelNames.includes(systemModelName);
+        const appliesToAll = systemModelNames.length === 0;
+
+        const enabled = matchesSystemModel || appliesToAll;
+
+        return {
+          value: release.id,
+          label: release.version,
+          disabled: !enabled,
+        };
+      },
+    );
   }, [selectedDeployment?.upgradeTargetReleases]);
 
   const selectedUpgradeReleaseOption = useMemo(() => {
@@ -647,6 +667,7 @@ const DeployedApplicationsTable = ({
             value={selectedUpgradeReleaseOption}
             onChange={handleUpgradeReleaseChange}
             options={upgradeReleaseOptions}
+            isOptionDisabled={(option) => option.disabled}
             isClearable
             placeholder={intl.formatMessage({
               id: "components.DeployedApplicationsTable.selectOption",
