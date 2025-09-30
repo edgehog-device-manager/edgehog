@@ -37,6 +37,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
   actions do
     defaults [:read]
 
+    read :read_all_resumable do
+      multitenancy :allow_global
+      pagination keyset?: true
+      filter expr(status in [:idle, :in_progress])
+    end
+
     create :create do
       description "Creates a new deployment campaign."
       primary? true

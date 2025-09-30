@@ -56,7 +56,14 @@ defmodule Edgehog.Campaigns.Supervisor do
           |> Ash.Query.for_read(:read_all_resumable)
           |> Ash.stream!()
 
-        {Edgehog.Campaigns.Resumer, update_campaigns_stream}
+        deployment_campaign_stream =
+          Edgehog.DeploymentCampaigns.DeploymentCampaign
+          |> Ash.Query.for_read(:read_all_resumable)
+          |> Ash.stream!()
+
+        campaigns_stream = Stream.concat(update_campaigns_stream, deployment_campaign_stream)
+
+        {Edgehog.Campaigns.Resumer, campaigns_stream}
       end
   end
 end
