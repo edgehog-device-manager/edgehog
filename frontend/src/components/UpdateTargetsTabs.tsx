@@ -18,15 +18,15 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
-import type { UpdateTargetsTabs_PaginationQuery } from "api/__generated__/UpdateTargetsTabs_PaginationQuery.graphql";
-import type {
-  UpdateTargetStatus as UpdateTargetStatusType,
-  UpdateTargetsTabs_UpdateTargetsFragment$key,
-} from "api/__generated__/UpdateTargetsTabs_UpdateTargetsFragment.graphql";
+import type { UpdateTargetStatus as UpdateTargetStatusType } from "api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
+import type { UpdateTargetsTabs_SuccessfulFragment$key } from "api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
+import type { UpdateTargetsTabs_FailedFragment$key } from "api/__generated__/UpdateTargetsTabs_FailedFragment.graphql";
+import type { UpdateTargetsTabs_InProgressFragment$key } from "api/__generated__/UpdateTargetsTabs_InProgressFragment.graphql";
+import type { UpdateTargetsTabs_IdleFragment$key } from "api/__generated__/UpdateTargetsTabs_IdleFragment.graphql";
 
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
@@ -35,19 +35,74 @@ import UpdateTargetsTable, { columnIds } from "components/UpdateTargetsTable";
 import type { ColumnId } from "components/UpdateTargetsTable";
 import UpdateTargetStatus from "components/UpdateTargetStatus";
 
-const UPDATE_TARGETS_TO_LOAD_FIRST = 10;
 const UPDATE_TARGETS_TO_LOAD_NEXT = 10;
 
-const UPDATE_TARGETS_TABS_FRAGMENT = graphql`
-  fragment UpdateTargetsTabs_UpdateTargetsFragment on UpdateCampaign
-  @refetchable(queryName: "UpdateTargetsTabs_PaginationQuery")
-  @argumentDefinitions(
-    first: { type: "Int" }
-    after: { type: "String" }
-    filter: { type: "UpdateTargetFilterInput" }
-  ) {
-    updateTargets(first: $first, after: $after, filter: $filter)
-      @connection(key: "UpdateTargetsTabs_updateTargets") {
+const UPDATE_TARGETS_SUCCESSFUL_FRAGMENT = graphql`
+  fragment UpdateTargetsTabs_SuccessfulFragment on UpdateCampaign
+  @refetchable(queryName: "UpdateTargetsTabs_SuccessfulPaginationQuery")
+  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
+    successfulUpdateTargets: updateTargets(
+      first: $first
+      after: $after
+      filter: { status: { eq: SUCCESSFUL } }
+    ) @connection(key: "UpdateTargetsTabs_successfulUpdateTargets") {
+      edges {
+        node {
+          status
+          ...UpdateTargetsTable_UpdateTargetsFragment
+        }
+      }
+    }
+  }
+`;
+
+const UPDATE_TARGETS_FAILED_FRAGMENT = graphql`
+  fragment UpdateTargetsTabs_FailedFragment on UpdateCampaign
+  @refetchable(queryName: "UpdateTargetsTabs_FailedPaginationQuery")
+  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
+    failedUpdateTargets: updateTargets(
+      first: $first
+      after: $after
+      filter: { status: { eq: FAILED } }
+    ) @connection(key: "UpdateTargetsTabs_failedUpdateTargets") {
+      edges {
+        node {
+          status
+          ...UpdateTargetsTable_UpdateTargetsFragment
+        }
+      }
+    }
+  }
+`;
+
+const UPDATE_TARGETS_IN_PROGRESS_FRAGMENT = graphql`
+  fragment UpdateTargetsTabs_InProgressFragment on UpdateCampaign
+  @refetchable(queryName: "UpdateTargetsTabs_InProgressPaginationQuery")
+  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
+    inProgressUpdateTargets: updateTargets(
+      first: $first
+      after: $after
+      filter: { status: { eq: IN_PROGRESS } }
+    ) @connection(key: "UpdateTargetsTabs_inProgressUpdateTargets") {
+      edges {
+        node {
+          status
+          ...UpdateTargetsTable_UpdateTargetsFragment
+        }
+      }
+    }
+  }
+`;
+
+const UPDATE_TARGETS_IDLE_FRAGMENT = graphql`
+  fragment UpdateTargetsTabs_IdleFragment on UpdateCampaign
+  @refetchable(queryName: "UpdateTargetsTabs_IdlePaginationQuery")
+  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
+    idleUpdateTargets: updateTargets(
+      first: $first
+      after: $after
+      filter: { status: { eq: IDLE } }
+    ) @connection(key: "UpdateTargetsTabs_idleUpdateTargets") {
       edges {
         node {
           status
@@ -77,54 +132,90 @@ const updateTargetTabs: UpdateTargetStatusType[] = [
   "IDLE",
 ];
 
+const tabConfig = {
+  SUCCESSFUL: {
+    fragment: UPDATE_TARGETS_SUCCESSFUL_FRAGMENT,
+    dataField: "successfulUpdateTargets",
+  },
+  FAILED: {
+    fragment: UPDATE_TARGETS_FAILED_FRAGMENT,
+    dataField: "failedUpdateTargets",
+  },
+  IN_PROGRESS: {
+    fragment: UPDATE_TARGETS_IN_PROGRESS_FRAGMENT,
+    dataField: "inProgressUpdateTargets",
+  },
+  IDLE: {
+    fragment: UPDATE_TARGETS_IDLE_FRAGMENT,
+    dataField: "idleUpdateTargets",
+  },
+} as const;
+
+const useActiveStatusPaginationFragment = (
+  activeTab: UpdateTargetStatusType,
+  updateCampaignRef: any,
+  isVisited: boolean,
+) => {
+  const config = tabConfig[activeTab];
+  return usePaginationFragment(
+    config.fragment,
+    isVisited ? updateCampaignRef : null,
+  );
+};
+
 type Props = {
-  updateCampaignRef: UpdateTargetsTabs_UpdateTargetsFragment$key;
+  updateCampaignRef: UpdateTargetsTabs_SuccessfulFragment$key &
+    UpdateTargetsTabs_FailedFragment$key &
+    UpdateTargetsTabs_InProgressFragment$key &
+    UpdateTargetsTabs_IdleFragment$key;
 };
 
 const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
   const [activeTab, setActiveTab] =
     useState<UpdateTargetStatusType>("SUCCESSFUL");
 
-  const { data, loadNext, hasNext, isLoadingNext, refetch } =
-    usePaginationFragment<
-      UpdateTargetsTabs_PaginationQuery,
-      UpdateTargetsTabs_UpdateTargetsFragment$key
-    >(UPDATE_TARGETS_TABS_FRAGMENT, updateCampaignRef);
+  const [visitedTabs, setVisitedTabs] = useState<Set<UpdateTargetStatusType>>(
+    new Set(["SUCCESSFUL"]),
+  );
+
+  const handleTabChange = useCallback((newTab: UpdateTargetStatusType) => {
+    setActiveTab(newTab);
+    setVisitedTabs((prev) => new Set([...prev, newTab]));
+  }, []);
+
+  // Only runs one fragment hook (for the active tab)
+  const currentTabFragment = useActiveStatusPaginationFragment(
+    activeTab,
+    updateCampaignRef,
+    visitedTabs.has(activeTab),
+  );
+
+  const isTabDataLoading =
+    !visitedTabs.has(activeTab) ||
+    (visitedTabs.has(activeTab) && !currentTabFragment?.data);
+
+  const visibleTargets = useMemo(() => {
+    const config = tabConfig[activeTab as keyof typeof tabConfig];
+    const updateTargetsField = currentTabFragment?.data?.[config.dataField];
+
+    if (!updateTargetsField?.edges) return [];
+    return updateTargetsField.edges
+      .map((edge: any) => edge?.node)
+      .filter(Boolean);
+  }, [currentTabFragment?.data, activeTab]);
 
   const loadNextUpdateTargets = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(UPDATE_TARGETS_TO_LOAD_NEXT);
+    if (currentTabFragment?.hasNext && !currentTabFragment?.isLoadingNext) {
+      currentTabFragment.loadNext(UPDATE_TARGETS_TO_LOAD_NEXT);
     }
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const updateTargets = useMemo(() => {
-    return data.updateTargets?.edges?.map((edge) => edge?.node) ?? [];
-  }, [data]);
+  }, [currentTabFragment]);
 
   const hiddenColumns = useMemo(() => {
     const visible = columnMap[activeTab];
     return columnIds.filter((c) => !visible.includes(c));
   }, [activeTab]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      refetch(
-        {
-          first: UPDATE_TARGETS_TO_LOAD_FIRST,
-          filter: {
-            status: {
-              eq: activeTab,
-            },
-          },
-        },
-        { fetchPolicy: "network-only" },
-      );
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [activeTab, refetch]);
-
-  if (!data.updateTargets) return null;
+  if (!updateCampaignRef) return null;
 
   return (
     <div>
@@ -142,20 +233,27 @@ const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
                 as="button"
                 type="button"
                 active={activeTab === tab}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabChange(tab)}
               >
                 <UpdateTargetStatus status={tab} />
               </NavLink>
             </NavItem>
           ))}
         </Nav>
-        <UpdateTargetsTable
-          updateTargetsRef={updateTargets}
-          hiddenColumns={hiddenColumns}
-          isLoadingNext={isLoadingNext}
-          hasNext={hasNext}
-          loadNextUpdateTargets={loadNextUpdateTargets}
-        />
+
+        {isTabDataLoading ? (
+          <div className="d-flex justify-content-center p-4">
+            <div className="spinner-border" role="status"></div>
+          </div>
+        ) : (
+          <UpdateTargetsTable
+            updateTargetsRef={visibleTargets}
+            hiddenColumns={hiddenColumns}
+            isLoadingNext={currentTabFragment?.isLoadingNext ?? false}
+            hasNext={currentTabFragment?.hasNext ?? false}
+            loadNextUpdateTargets={loadNextUpdateTargets}
+          />
+        )}
       </div>
     </div>
   );

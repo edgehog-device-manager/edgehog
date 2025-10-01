@@ -47,22 +47,22 @@ import UpdateTargetsTabs from "components/UpdateTargetsTabs";
 import UpdateCampaignForm from "forms/UpdateCampaignForm";
 import { Link, Route } from "Navigation";
 
-const UPDATE_TARGETS_TO_LOAD_FIRST = 15;
+const UPDATE_TARGETS_TO_LOAD_FIRST = 40;
 
 const GET_UPDATE_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getUpdateCampaign_Query(
     $updateCampaignId: ID!
-    $first: Int
-    $after: String
-    $filter: UpdateTargetFilterInput
+    $first: Int!
   ) {
     updateCampaign(id: $updateCampaignId) {
       name
       ...UpdateCampaignForm_UpdateCampaignFragment
       ...UpdateCampaignStatsChart_UpdateCampaignStatsChartFragment
-      ...UpdateTargetsTabs_UpdateTargetsFragment
-        @arguments(first: $first, after: $after, filter: $filter)
       ...UpdateCampaign_RefreshFragment
+      ...UpdateTargetsTabs_SuccessfulFragment @arguments(first: $first)
+      ...UpdateTargetsTabs_FailedFragment @arguments(first: $first)
+      ...UpdateTargetsTabs_InProgressFragment @arguments(first: $first)
+      ...UpdateTargetsTabs_IdleFragment @arguments(first: $first)
     }
   }
 `;
@@ -106,7 +106,7 @@ const UpdateCampaignRefresh = ({
       subscriptionRef.current = fetchQuery(
         relayEnvironment,
         GET_UPDATE_CAMPAIGN_QUERY,
-        { updateCampaignId: id },
+        { updateCampaignId: id, first: UPDATE_TARGETS_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ).subscribe({
         complete: () => {
