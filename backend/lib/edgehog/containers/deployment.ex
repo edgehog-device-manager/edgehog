@@ -34,6 +34,8 @@ defmodule Edgehog.Containers.Deployment do
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
 
+  @testing Mix.env() == :test
+
   graphql do
     type :deployment
   end
@@ -82,6 +84,24 @@ defmodule Edgehog.Containers.Deployment do
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.Relate
       change {PublishNotification, event_type: :deployment_created}
+    end
+
+    if @testing do
+      create :create_fixture do
+        description """
+        Starts the deployment of a release on a device.
+        It starts an Executor, handling the communication with the device.
+        """
+
+        accept [:release_id, :state, :resources_state]
+
+        argument :device_id, :id do
+          allow_nil? false
+        end
+
+        change manage_relationship(:device_id, :device, type: :append)
+        change Changes.Relate
+      end
     end
 
     update :set_state do
