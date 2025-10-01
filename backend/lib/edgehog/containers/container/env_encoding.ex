@@ -27,8 +27,8 @@ defmodule Edgehog.Containers.Container.EnvEncoding do
     Enum.map(records, &encode_env(&1.env))
   end
 
-  defp encode_env(%{} = env) do
-    Enum.map(env, fn {key, value} ->
+  defp encode_env(env) when is_list(env) do
+    Enum.map(env, fn %{key: key, value: value} ->
       key <> "=" <> value
     end)
   end

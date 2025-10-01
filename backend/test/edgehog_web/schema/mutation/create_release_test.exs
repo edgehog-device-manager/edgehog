@@ -84,7 +84,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         "image" => %{
           "reference" => "example/container1:latest"
         },
-        "env" => ~s({"ENV_VAR":"value1"}),
+        "env" => [%{"key" => "ENV_VAR", "value" => "value1"}],
         "hostname" => "container1-host",
         "networkMode" => "bridge",
         "portBindings" => [
@@ -105,7 +105,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
           "reference" => "example/container2:latest",
           "imageCredentialsId" => credentials_id
         },
-        "env" => ~s({"ENV_VAR":"value2"}),
+        "env" => [%{"key" => "ENV_VAR", "value" => "value2"}],
         "hostname" => "container2-host",
         "networkMode" => "host",
         "portBindings" => [
@@ -145,7 +145,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
                       username
                     }
                   }
-                  env
+                  env {
+                    key
+                    value
+                  }
                   hostname
                   networkMode
                   portBindings
@@ -207,7 +210,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         "image" => %{
           "reference" => "example/container1:latest"
         },
-        "env" => ~s({"ENV_VAR":"value1"}),
+        "env" => [%{"key" => "ENV_VAR", "value" => "value1"}],
         "hostname" => "container1-host",
         "networkMode" => "bridge",
         "portBindings" => [
@@ -268,7 +271,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         "image" => %{
           "reference" => "example/container1:latest"
         },
-        "env" => ~s({"ENV_VAR":"value1"}),
+        "env" => [%{"key" => "ENV_VAR", "value" => "value1"}],
         "hostname" => "container1-host",
         "networkMode" => "bridge",
         "portBindings" => [
@@ -354,7 +357,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         "image" => %{
           "reference" => "example/container1:latest"
         },
-        "env" => ~s({"ENV_VAR":"value1"}),
+        "env" => [%{"key" => "ENV_VAR", "value" => "value1"}],
         "hostname" => "container1-host",
         "networkMode" => "bridge",
         "portBindings" => [
@@ -440,7 +443,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         "image" => %{
           "reference" => "example/container1:latest"
         },
-        "env" => ~s({"ENV_VAR":"value1"}),
+        "env" => [%{"key" => "ENV_VAR", "value" => "value1"}],
         "hostname" => "container1-host",
         "networkMode" => "bridge",
         "portBindings" => [
