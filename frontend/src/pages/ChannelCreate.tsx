@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -37,15 +37,21 @@ import CreateChannelForm from "forms/CreateChannel";
 import type { ChannelData } from "forms/CreateChannel";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
-import { Route, useNavigate } from "Navigation";
+import { Link, Route, useNavigate } from "Navigation";
+import Result from "components/Result";
+import Button from "components/Button";
 
-const GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY = graphql`
+const GET_CREATE_CHANNEL_OPTIONS_QUERY = graphql`
   query ChannelCreate_getDeviceGroups_Query {
+    deviceGroups {
+      __typename
+      count
+    }
     ...CreateChannel_OptionsFragment
   }
 `;
 
-const CREATE_UPDATE_CHANNEL_MUTATION = graphql`
+const CREATE_CHANNEL_MUTATION = graphql`
   mutation ChannelCreate_createChannel_Mutation($input: CreateChannelInput!) {
     createChannel(input: $input) {
       result {
@@ -64,14 +70,12 @@ const Channel = ({ getCreateChannelOptionsQuery }: ChannelProps) => {
   const navigate = useNavigate();
 
   const channelCreateData = usePreloadedQuery(
-    GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY,
+    GET_CREATE_CHANNEL_OPTIONS_QUERY,
     getCreateChannelOptionsQuery,
   );
 
   const [createChannel, isCreatingChannel] =
-    useMutation<ChannelCreate_createChannel_Mutation>(
-      CREATE_UPDATE_CHANNEL_MUTATION,
-    );
+    useMutation<ChannelCreate_createChannel_Mutation>(CREATE_CHANNEL_MUTATION);
 
   const handleCreateChannel = useCallback(
     (channel: ChannelData) => {
@@ -150,11 +154,56 @@ const Channel = ({ getCreateChannelOptionsQuery }: ChannelProps) => {
     </Page>
   );
 };
+const NoGroups = () => (
+  <Result.EmptyList
+    title={
+      <FormattedMessage
+        id="pages.ChannelCreate.noGroup.title"
+        defaultMessage="You haven't created any Groups yet"
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        id="pages.ChannelCreate.noGroup.message"
+        defaultMessage="You need at least one Group to create a Channel"
+      />
+    </p>
+    <Button as={Link} route={Route.deviceGroupsNew}>
+      <FormattedMessage
+        id="pages.ChannelCreate.noGroup.createButton"
+        defaultMessage="Create Group"
+      />
+    </Button>
+  </Result.EmptyList>
+);
+
+type ChannelWrapperProps = {
+  getCreateChannelOptionsQuery: PreloadedQuery<ChannelCreate_getDeviceGroups_Query>;
+};
+
+const ChannelWrapper = ({
+  getCreateChannelOptionsQuery,
+}: ChannelWrapperProps) => {
+  const channelOptions = usePreloadedQuery(
+    GET_CREATE_CHANNEL_OPTIONS_QUERY,
+    getCreateChannelOptionsQuery,
+  );
+  const { deviceGroups } = channelOptions;
+
+  if (deviceGroups?.count === 0) {
+    return <NoGroups />;
+  }
+
+  return (
+    <Channel getCreateChannelOptionsQuery={getCreateChannelOptionsQuery} />
+  );
+};
 
 const ChannelCreatePage = () => {
   const [getCreateChannelOptionsQuery, getCreateChannelOptions] =
     useQueryLoader<ChannelCreate_getDeviceGroups_Query>(
-      GET_CREATE_UPDATE_CHANNEL_OPTIONS_QUERY,
+      GET_CREATE_CHANNEL_OPTIONS_QUERY,
     );
 
   const fetchCreateChannelOptions = useCallback(
@@ -181,7 +230,7 @@ const ChannelCreatePage = () => {
         onReset={fetchCreateChannelOptions}
       >
         {getCreateChannelOptionsQuery && (
-          <Channel
+          <ChannelWrapper
             getCreateChannelOptionsQuery={getCreateChannelOptionsQuery}
           />
         )}
