@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2021-2024 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2025 SECO Mind Srl
 # SPDX-License-Identifier: Apache-2.0
-FROM node:22.4.0 as builder
+FROM node:22.4.0 AS builder
 
 WORKDIR /app
 ADD package*.json ./
