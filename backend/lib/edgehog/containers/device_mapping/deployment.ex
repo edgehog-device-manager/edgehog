@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceMapping.Changes
@@ -76,11 +77,17 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
     end
 
     update :mark_as_present do
+      require_atomic? false
+
       change set_attribute(:state, :present)
+      change MaybeNotifyUpwards
     end
 
     update :mark_as_not_present do
+      require_atomic? false
+
       change set_attribute(:state, :not_present)
+      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -113,10 +120,17 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
     end
 
     belongs_to :device, Device
+
+    many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      through Edgehog.Containers.ContainerDeploymentDeviceMappingDeployment
+      source_attribute_on_join_resource :device_mapping_deployment_id
+      destination_attribute_on_join_resource :container_deployment_id
+      public? true
+    end
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:present, :not_present])
+    calculate :is_ready, :boolean, expr(state in [:present, :not_present])
   end
 
   identities do

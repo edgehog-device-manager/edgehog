@@ -285,7 +285,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       {:ok, executor_pid: pid, deployment_id: deployment_id}
     end
 
-    for status <- [:started, :starting, :stopped, :stopping, :error] do
+    for status <- [:started, :starting, :stopped, :stopping] do
       test "frees up slot if Deployment state is #{status}", ctx do
         %{
           executor_pid: pid,
@@ -303,6 +303,24 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
         # Wait for the Executor to arrive at :wait_for_available_slot
         wait_for_state(pid, :wait_for_available_slot)
       end
+    end
+
+    test "frees up slot if Deployment state is error", ctx do
+      %{
+        executor_pid: pid,
+        deployment_id: deployment_id,
+        tenant: tenant
+      } = ctx
+
+      # Expect another call to the mock since a slot has freed up
+      ref = expect_deployment_requests_and_send_sync()
+
+      deployment_error!(tenant, deployment_id)
+
+      wait_for_sync!(ref)
+
+      # Wait for the Executor to arrive at :wait_for_available_slot
+      wait_for_state(pid, :wait_for_available_slot)
     end
 
     for status <- [:pending, :sent] do
@@ -433,7 +451,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       {failing_deployment_ids, successful_deployment_ids} =
         Enum.split(deployment_ids, failing_target_count)
 
-      Enum.each(failing_deployment_ids, &update_deployment_state!(tenant, &1, :error))
+      Enum.each(failing_deployment_ids, &deployment_error!(tenant, &1))
       Enum.each(successful_deployment_ids, &update_deployment_state!(tenant, &1, :stopped))
       assert_normal_exit(pid, ref, 6000)
       assert_deployment_campaign_outcome(tenant, deployment_campaign_id, :success)
@@ -504,7 +522,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
 
       # Produce failing_target_count failures
       Enum.each(failing_targets, fn target ->
-        update_deployment_state!(tenant, target.deployment_id, :error)
+        deployment_error!(tenant, target.deployment_id)
       end)
 
       # Now the Executor should arrive at :campaign_failure, but not terminate yet
@@ -522,7 +540,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       end)
 
       Enum.each(remaining_failing_targets, fn target ->
-        update_deployment_state!(tenant, target.deployment_id, :error)
+        deployment_error!(tenant, target.deployment_id)
       end)
 
       # Now the Executor should terminate
@@ -707,6 +725,16 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
              deployment_id
              |> Containers.fetch_deployment!(tenant: tenant)
              |> Containers.set_deployment_state!(%{state: state}, tenant: tenant)
+             |> Containers.deployment_update_resources_state(tenant: tenant)
+
+    deployment
+  end
+
+  defp deployment_error!(tenant, deployment_id) do
+    assert {:ok, deployment} =
+             deployment_id
+             |> Containers.fetch_deployment!(tenant: tenant)
+             |> Containers.mark_deployment_as_errored!("error from test suite")
              |> Containers.deployment_update_resources_state(tenant: tenant)
 
     deployment
