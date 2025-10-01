@@ -45,6 +45,7 @@ import Result from "components/Result";
 import Spinner from "components/Spinner";
 import Button from "components/Button";
 import DeleteModal from "components/DeleteModal";
+import MonacoJsonEditor from "components/MonacoJsonEditor";
 
 const GET_NETWORK_QUERY = graphql`
   query Network_getNetwork_Query($networkId: ID!) {
@@ -187,12 +188,12 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
             />
           }
         >
-          <Form.Control
-            as="textarea"
+          <MonacoJsonEditor
             value={getPrettyOptions()}
-            rows={getPrettyOptions().split("\n").length}
-            readOnly
-            style={{ fontFamily: "monospace", whiteSpace: "pre-wrap" }}
+            onChange={() => {}}
+            defaultValue={getPrettyOptions()}
+            readonly={true}
+            initialLines={1}
           />
         </FormRow>
 

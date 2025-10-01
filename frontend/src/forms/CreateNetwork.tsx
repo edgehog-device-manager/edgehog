@@ -20,7 +20,7 @@
 
 import React from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FieldError, useForm } from "react-hook-form";
+import { Controller, FieldError, useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
 import Button from "components/Button";
@@ -30,6 +30,7 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 
 import { yup, envSchema } from "forms";
+import MonacoJsonEditor from "components/MonacoJsonEditor";
 
 const FormRow = ({
   id,
@@ -92,6 +93,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isValid, isSubmitting },
   } = useForm<NetworkData>({
     mode: "onTouched",
@@ -136,13 +138,19 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
           />
         }
       >
-        <Form.Control
-          as="textarea"
-          rows={5}
-          {...register("options")}
-          isInvalid={!!errors.options}
+        <Controller
+          control={control}
+          name={"options"}
+          render={({ field, fieldState: _fieldState }) => (
+            <MonacoJsonEditor
+              value={field.value ?? ""}
+              onChange={(value) => {
+                field.onChange(value ?? "");
+              }}
+              defaultValue={field.value || "{}"}
+            />
+          )}
         />
-        <ErrorMessage error={errors.options} />
       </FormRow>
 
       <FormRow

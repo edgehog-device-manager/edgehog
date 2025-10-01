@@ -18,15 +18,10 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useRef, useState, useCallback } from "react";
-import { Editor } from "@monaco-editor/react";
-import { FormattedMessage } from "react-intl";
-
-import Icon from "components/Icon";
+import MonacoEditor from "components/MonacoEditor";
 
 type MonacoJsonEditorProps = {
   value: string;
-  language?: string;
   onChange?: (value: string | undefined) => void;
   defaultValue?: string;
   readonly?: boolean;
@@ -36,83 +31,24 @@ type MonacoJsonEditorProps = {
 
 const MonacoJsonEditor = ({
   value,
-  language = "json",
   onChange,
   defaultValue,
   readonly = false,
   initialLines = 5,
   autoFormat = true,
 }: MonacoJsonEditorProps) => {
-  const editorRef = useRef<any>(null);
-  const lineHeight = 22;
-  const [height, setHeight] = useState(initialLines * lineHeight);
-  const [jsonError, setJsonError] = useState<string | null>(null);
-
-  const formatJson = useCallback(() => {
-    if (editorRef.current && autoFormat && language === "json") {
-      try {
-        const currentValue = editorRef.current.getValue();
-        JSON.parse(currentValue); // validacija
-        editorRef.current.getAction("editor.action.formatDocument").run();
-        setJsonError(null); // nema greške
-      } catch (error: any) {
-        setJsonError(error.message); // snimi grešku
-      }
-    }
-  }, [autoFormat, language]);
-
-  const updateHeight = useCallback(() => {
-    if (editorRef.current) {
-      const contentHeight = editorRef.current.getContentHeight();
-      const minHeight = initialLines * lineHeight;
-      setHeight(Math.max(contentHeight, minHeight));
-      editorRef.current.layout();
-    }
-  }, [initialLines]);
-
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor;
-    editor.onDidContentSizeChange(updateHeight);
-    editor.onDidChangeModelContent(() => {
-      setTimeout(formatJson, 100);
-    });
-    updateHeight();
-  };
-
   return (
-    <div className="border rounded bg-white p-2 overflow-hidden">
-      <Editor
-        height={height}
-        defaultLanguage={language}
-        value={value}
-        onChange={onChange}
-        defaultValue={defaultValue}
-        onMount={handleEditorDidMount}
-        options={{
-          automaticLayout: true,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          wordWrap: "on",
-          readOnly: readonly,
-          lineNumbers: "off",
-          scrollbar: {
-            vertical: "hidden",
-            horizontal: "hidden",
-            alwaysConsumeMouseWheel: false,
-          },
-        }}
-      />
-      {jsonError && (
-        <p className="text-red-500 text-sm mt-2">
-          <Icon icon="warning" />
-          <FormattedMessage
-            id="components.MonacoJsonEditor.jsonError"
-            defaultMessage="JSON error: {error}"
-            values={{ error: jsonError }}
-          />
-        </p>
-      )}
-    </div>
+    <MonacoEditor
+      language={"json"}
+      value={value}
+      onChange={onChange}
+      defaultValue={defaultValue}
+      readonly={readonly}
+      initialLines={initialLines}
+      autoFormat={autoFormat}
+      validationFunction={JSON.parse}
+      languageForErrorString={"JSON"}
+    />
   );
 };
 
