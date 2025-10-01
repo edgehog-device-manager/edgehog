@@ -39,6 +39,7 @@ import MonacoJsonEditor from "components/MonacoJsonEditor";
 import MultiSelect from "./MultiSelect";
 import InfiniteScroll from "./InfiniteScroll";
 import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
+import { restartPolicyOptions } from "forms/CreateRelease";
 
 const CONTAINERS_TO_LOAD_NEXT = 5;
 
@@ -612,7 +613,14 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
           />
         }
       >
-        <Form.Control value={container.restartPolicy ?? ""} readOnly />
+        <Form.Control
+          value={
+            restartPolicyOptions.find(
+              (opt) => opt.value === container.restartPolicy,
+            )?.label ?? ""
+          }
+          readOnly
+        />
       </FormRow>
 
       <FormRow
