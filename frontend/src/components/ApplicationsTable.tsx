@@ -22,6 +22,7 @@ import { FormattedMessage } from "react-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
 import _ from "lodash";
+import { ConnectionHandler } from "relay-runtime";
 
 import type { ApplicationsTable_PaginationQuery } from "../api/__generated__/ApplicationsTable_PaginationQuery.graphql";
 import type {
@@ -191,18 +192,13 @@ const ApplicationsTable = ({
           if (!deletedId) return;
 
           const root = store.getRoot();
-          const applications = root.getLinkedRecord("applications");
-          if (!applications) return;
-
-          const results = applications.getLinkedRecords("results");
-          if (!results) return;
-
-          applications.setLinkedRecords(
-            results.filter((app) => app.getDataID() !== deletedId),
-            "results",
+          const applicationConnection = ConnectionHandler.getConnection(
+            root,
+            "ApplicationsTable_applications",
           );
-
-          store.delete(deletedId);
+          if (applicationConnection) {
+            ConnectionHandler.deleteNode(applicationConnection, deletedId);
+          }
         },
       });
     },
