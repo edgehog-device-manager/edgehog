@@ -46,9 +46,7 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
         &%{
           container: &1,
           device: device,
-          deployment: deployment,
-          container_id: &1.id,
-          device_id: device.id
+          deployment: deployment
         }
       )
 
@@ -58,6 +56,7 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
       inputs,
       on_no_match: {:create, :deploy},
       on_match: :ignore,
+      on_lookup: {:relate, :create},
       use_identities: [:container_instance]
     )
   end
