@@ -57,6 +57,7 @@ import {
   storageOptSchema,
   extraHostsSchema,
   optionalNumberSchema,
+  messages,
 } from "forms/index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
@@ -434,7 +435,17 @@ const applicationSchema = (intl: any) =>
                   id: "forms.CreateRelease.cpuQuotaLabel",
                   defaultMessage: "CPU Quota (microseconds)",
                 }),
-              ),
+              )
+              .test({
+                name: "cpuQuotaPeriod",
+                message: messages.cpuQuotaPeriod.id,
+                test: function (cpuQuota) {
+                  const { cpuPeriod } = this.parent;
+                  const bothEmpty = cpuQuota == null && cpuPeriod == null;
+                  const bothSet = cpuQuota != null && cpuPeriod != null;
+                  return bothEmpty || bothSet;
+                },
+              }),
             cpuRealtimePeriod: optionalNumberSchema
               .integer()
               .nullable()
