@@ -46,12 +46,16 @@ import {
   faEyeSlash,
   faTriangleExclamation,
   faObjectGroup,
+  faChevronRight,
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const icons = {
   arrowDown: faArrowDown,
   arrowUp: faArrowUp,
+  chevronRight: faChevronRight,
+  chevronLeft: faChevronLeft,
   bug: faBug,
   caretDown: faAngleDown,
   caretUp: faAngleUp,
