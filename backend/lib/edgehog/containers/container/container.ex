@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Container do
 
   alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Container.ManualActions
+  alias Edgehog.Containers.Container.Validations.CpuPeriodQuotaConsistency
   alias Edgehog.Containers.Container.Validations.VolumeTargetUniqueness
   alias Edgehog.Containers.ContainerVolume
   alias Edgehog.Containers.Image
@@ -204,6 +205,7 @@ defmodule Edgehog.Containers.Container do
   end
 
   validations do
+    validate CpuPeriodQuotaConsistency
     validate VolumeTargetUniqueness
   end
 
