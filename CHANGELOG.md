@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0-alpha.5] - 2025-10-06
+### Changed
+- When no device group exist, on the Channel List page prompt the user to create at least one group before creating a Channel ([#972](https://github.com/edgehog-device-manager/edgehog/issues/972)).
+- Improved how Network and Volumes options can be displayed and edited in the Applications section ([#963](https://github.com/edgehog-device-manager/edgehog/issues/963)).
+### Fixed
+- Remove application displayed in the application list after deleting it ([#967](https://github.com/edgehog-device-manager/edgehog/issues/967)).
+- On the device page, propose only options compatible with the device when users want to upgrade an app's release ([#970](https://github.com/edgehog-device-manager/edgehog/issues/970)).
+- Use uniform and readable labels for displaying Restart Policy values of containers ([#971](https://github.com/edgehog-device-manager/edgehog/issues/971)).
+- Add logic to resume app campaigns when Edgehog starts up ([#969](https://github.com/edgehog-device-manager/edgehog/issues/969)).
+
 ## [0.10.0-alpha.4] - 2025-09-29
 ### Fixed
 - Correctly use Docker's default `false` value for container's readonly root filesystem option.
