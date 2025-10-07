@@ -265,10 +265,12 @@ defmodule Edgehog.Containers.Container do
 
     attribute :cpu_period, :integer do
       public? true
+      constraints min: 1_000, max: 1_000_000
     end
 
     attribute :cpu_quota, :integer do
       public? true
+      constraints min: 1_000
     end
 
     attribute :cpu_realtime_period, :integer do
