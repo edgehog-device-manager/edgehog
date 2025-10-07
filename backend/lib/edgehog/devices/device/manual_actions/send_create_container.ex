@@ -67,14 +67,14 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         capAdd: container.cap_add,
         capDrop: container.cap_drop,
         deviceMappingIds: Enum.map(container.device_mappings, & &1.id),
-        cpuPeriod: container.cpu_period,
-        cpuQuota: container.cpu_quota,
-        cpuRealtimePeriod: container.cpu_realtime_period,
-        cpuRealtimeRuntime: container.cpu_realtime_runtime,
-        memory: container.memory,
-        memoryReservation: container.memory_reservation,
-        memorySwap: container.memory_swap,
-        memorySwappiness: container.memory_swappiness,
+        cpuPeriod: normalize(container.cpu_period),
+        cpuQuota: normalize(container.cpu_quota),
+        cpuRealtimePeriod: normalize(container.cpu_realtime_period),
+        cpuRealtimeRuntime: normalize(container.cpu_realtime_runtime),
+        memory: normalize(container.memory),
+        memoryReservation: normalize(container.memory_reservation),
+        memorySwap: normalize_memory_swap(container.memory_swap),
+        memorySwappiness: normalize(container.memory_swappiness),
         volumeDriver: container.volume_driver,
         storageOpt: container.storage_opt,
         readOnlyRootfs: container.read_only_rootfs,
@@ -96,4 +96,9 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
   defp to_correct_string(atom) do
     atom |> to_string() |> String.replace("_", "-")
   end
+
+  defp normalize(nil), do: -1
+  defp normalize(value), do: value
+  defp normalize_memory_swap(nil), do: -2
+  defp normalize_memory_swap(value), do: value
 end

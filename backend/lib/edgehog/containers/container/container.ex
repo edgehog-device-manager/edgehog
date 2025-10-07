@@ -262,51 +262,35 @@ defmodule Edgehog.Containers.Container do
     end
 
     attribute :cpu_period, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :cpu_quota, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :cpu_realtime_period, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :cpu_realtime_runtime, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :memory, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :memory_reservation, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :memory_swap, :integer do
-      default -2
       public? true
-      allow_nil? false
     end
 
     attribute :memory_swappiness, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :volume_driver, :string do
