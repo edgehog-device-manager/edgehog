@@ -420,6 +420,8 @@ const applicationSchema = (intl: any) =>
               ),
             cpuPeriod: optionalNumberSchema
               .integer()
+              .min(1_000)
+              .max(1_000_000)
               .nullable()
               .label(
                 intl.formatMessage({
@@ -429,6 +431,7 @@ const applicationSchema = (intl: any) =>
               ),
             cpuQuota: optionalNumberSchema
               .integer()
+              .min(1_000)
               .nullable()
               .label(
                 intl.formatMessage({
