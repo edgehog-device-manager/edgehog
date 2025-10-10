@@ -286,6 +286,65 @@ const extraHostsSchema = yup
       }),
   );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ArrayType = any[] | null | undefined;
+
+function distinctOnProperty<
+  TIn extends ArrayType,
+  TContext,
+  TDefault = undefined,
+  TFlags extends yup.Flags = "",
+>(this: yup.ArraySchema<TIn, TContext, TDefault, TFlags>, property: string) {
+  return this.test("distinct-on-property", (array, context) => {
+    if (!array) {
+      return true;
+    }
+
+    const errors: yup.ValidationError[] = [];
+    const duplicateProperties = array
+      .filter(
+        (e, i) => array.findIndex((e2) => e2[property] === e[property]) !== i,
+      )
+      .map((e) => e[property]);
+    for (let i = 0; i < array.length; ++i) {
+      const element = array[i];
+      if (
+        element[property] !== "" &&
+        duplicateProperties.includes(element[property])
+      ) {
+        errors.push(
+          new yup.ValidationError(
+            messages.unique.id,
+            element,
+            `${context.path}[${i}].${property}`,
+          ),
+        );
+      }
+    }
+
+    if (errors.length > 0) {
+      return context.createError({ message: () => errors });
+    }
+
+    return true;
+  });
+}
+
+yup.addMethod(yup.array, "distinctOnProperty", distinctOnProperty);
+
+declare module "yup" {
+  interface ArraySchema<
+    TIn extends ArrayType,
+    TContext,
+    TDefault = undefined,
+    TFlags extends yup.Flags = "",
+  > {
+    distinctOnProperty(
+      property: string,
+    ): ArraySchema<TIn, TContext, TDefault, TFlags>;
+  }
+}
+
 export {
   deviceGroupHandleSchema,
   systemModelHandleSchema,
