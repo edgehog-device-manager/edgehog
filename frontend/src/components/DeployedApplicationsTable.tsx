@@ -42,9 +42,7 @@ import DeploymentStateComponent, {
   type DeploymentState,
   parseDeploymentState,
 } from "components/DeploymentState";
-import DeploymentResourcesStateComponent, {
-  parseDeploymentResourcesState,
-} from "components/DeploymentResourcesState";
+import DeploymentReadiness from "components/DeploymentReadiness";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -57,7 +55,7 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
         node {
           id
           state
-          resourcesState
+          isReady
           release {
             id
             version
@@ -295,9 +293,7 @@ const DeployedApplicationsTable = ({
       releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
       state: parseDeploymentState(edge.node.state || undefined),
-      resources_state: parseDeploymentResourcesState(
-        edge.node.resourcesState || undefined,
-      ),
+      isReady: edge.node.isReady,
       upgradeTargetReleases:
         edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
           semver.gt(
@@ -515,16 +511,15 @@ const DeployedApplicationsTable = ({
       ),
       cell: ({ getValue }) => <DeploymentStateComponent state={getValue()} />,
     }),
-    columnHelper.accessor("resources_state", {
+    columnHelper.accessor("isReady", {
+      id: "readiness",
       header: () => (
         <FormattedMessage
-          id="components.DeployedApplicationsTable.resourcesState"
-          defaultMessage="Resources State"
+          id="components.DeployedApplicationsTable.readiness"
+          defaultMessage="Readiness"
         />
       ),
-      cell: ({ getValue }) => (
-        <DeploymentResourcesStateComponent resourcesState={getValue()} />
-      ),
+      cell: ({ getValue }) => <DeploymentReadiness isReady={getValue()} />,
     }),
     columnHelper.accessor((row) => row, {
       id: "action",

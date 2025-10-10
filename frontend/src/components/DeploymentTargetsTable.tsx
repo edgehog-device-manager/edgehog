@@ -29,7 +29,7 @@ import type {
 import { createColumnHelper } from "components/Table";
 import InfiniteTable from "components/InfiniteTable";
 import DeploymentStateComponent from "components/DeploymentState";
-import DeploymentResourcesStateComponent from "components/DeploymentResourcesState";
+import DeploymentReadiness from "components/DeploymentReadiness";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
@@ -45,7 +45,7 @@ const DEPLOYMENT_TARGETS_TABLE_FRAGMENT = graphql`
     completionTimestamp
     deployment {
       state
-      resourcesState
+      isReady
       lastErrorMessage
     }
   }
@@ -56,7 +56,7 @@ type TableRecord =
 const columnIds = [
   "deviceName",
   "state",
-  "resourcesState",
+  "readiness",
   "lastErrorMessage",
   "latestAttempt",
   "completionTimestamp",
@@ -101,25 +101,19 @@ const columns = [
     },
   ),
   columnHelper.accessor(
-    (deploymentTarget) => deploymentTarget.deployment?.resourcesState ?? null,
+    (deploymentTarget) => deploymentTarget.deployment?.isReady ?? null,
     {
-      id: "resourcesState",
+      id: "readiness",
       header: () => (
         <FormattedMessage
-          id="components.DeploymentTargetsTable.resourcesStateTitle"
-          defaultMessage="Resources state"
-          description="Title for the Resources state column of the Deployment Targets table"
+          id="components.DeploymentTargetsTable.readinessTitle"
+          defaultMessage="Readiness"
+          description="Title for the Readiness column of the Deployment Targets table"
         />
       ),
       cell: ({ getValue }) => {
-        const resourcesState = getValue();
-        return (
-          resourcesState && (
-            <DeploymentResourcesStateComponent
-              resourcesState={resourcesState}
-            />
-          )
-        );
+        const isReady = getValue();
+        return <DeploymentReadiness isReady={isReady} />;
       },
     },
   ),

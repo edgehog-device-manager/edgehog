@@ -272,7 +272,9 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   calculations do
-    calculate :is_ready, :boolean, Calculations.Ready
+    calculate :is_ready, :boolean, Calculations.Ready do
+      public? true
+    end
   end
 
   identities do

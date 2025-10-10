@@ -555,11 +555,11 @@
   "components.DeployedApplicationsTable.noReleasesFoundMatching": {
     "defaultMessage": "No release versions found matching \"{inputValue}\""
   },
+  "components.DeployedApplicationsTable.readiness": {
+    "defaultMessage": "Readiness"
+  },
   "components.DeployedApplicationsTable.releaseVersion": {
     "defaultMessage": "Release Version"
-  },
-  "components.DeployedApplicationsTable.resourcesState": {
-    "defaultMessage": "Resources State"
   },
   "components.DeployedApplicationsTable.selectOption": {
     "defaultMessage": "Select a Release Version"
@@ -622,25 +622,10 @@
   "components.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
-  "components.DeploymentResourcesStateComponent.createdContainers": {
-    "defaultMessage": "Created containers"
+  "components.DeploymentReadiness.notReady": {
+    "defaultMessage": "Deploying"
   },
-  "components.DeploymentResourcesStateComponent.createdDeviceMappings": {
-    "defaultMessage": "Created device mappings"
-  },
-  "components.DeploymentResourcesStateComponent.createdImages": {
-    "defaultMessage": "Created images"
-  },
-  "components.DeploymentResourcesStateComponent.createdNetworks": {
-    "defaultMessage": "Created networks"
-  },
-  "components.DeploymentResourcesStateComponent.createdVolumes": {
-    "defaultMessage": "Created volumes"
-  },
-  "components.DeploymentResourcesStateComponent.initial": {
-    "defaultMessage": "Initial"
-  },
-  "components.DeploymentResourcesStateComponent.ready": {
+  "components.DeploymentReadiness.ready": {
     "defaultMessage": "Ready"
   },
   "components.DeploymentStateComponent.deleting": {
@@ -686,9 +671,9 @@
     "defaultMessage": "Latest attempt at",
     "description": "Title for the Latest attempt at column of the Deployment Targets table"
   },
-  "components.DeploymentTargetsTable.resourcesStateTitle": {
-    "defaultMessage": "Resources state",
-    "description": "Title for the Resources state column of the Deployment Targets table"
+  "components.DeploymentTargetsTable.readinessTitle": {
+    "defaultMessage": "Readiness",
+    "description": "Title for the Readiness column of the Deployment Targets table"
   },
   "components.DeploymentTargetsTable.stateTitle": {
     "defaultMessage": "State",
