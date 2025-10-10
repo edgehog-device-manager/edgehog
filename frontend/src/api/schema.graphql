@@ -534,29 +534,6 @@ enum NetworkInterfaceTechnology {
   WIFI
 }
 
-enum ApplicationDeploymentResourcesState {
-  "The backend has not checked the state of the underlying resources of the deployment with the device."
-  INITIAL
-
-  "The device has received the necessary image descriptions for the deployment."
-  CREATED_IMAGES
-
-  "The device has received all the network descriptions necessary for the deployment."
-  CREATED_NETWORKS
-
-  "The device has received all the volume descriptions necessary for the deployment."
-  CREATED_VOLUMES
-
-  "The device has received all the device-file mappings descriptions necessary for the deployment."
-  CREATED_DEVICE_MAPPINGS
-
-  "The device has received all the container descriptions necessary for the deployment."
-  CREATED_CONTAINERS
-
-  "All the underlying resources needed for the deployment have been received by the device."
-  READY
-}
-
 enum ApplicationDeploymentState {
   "The deployment has been created in the database layer, the device yet has to receive it."
   PENDING
@@ -1038,6 +1015,7 @@ input ApplicationCreateInitialReleaseInput {
 
 input ReleaseCreateContainersInput {
   env: JsonString
+  id: ID
   memory: Int
   image: ContainerCreateWithNestedImageInput
   hostname: String
@@ -1141,6 +1119,86 @@ type ContainerVolume {
   volumeId: ID!
 
   volume: Volume!
+}
+
+enum DeviceMappingDeploymentSortField {
+  ID
+  STATE
+}
+
+":device_mapping_deployment connection"
+type DeviceMappingDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_mapping_deployment edges"
+  edges: [DeviceMappingDeploymentEdge!]
+}
+
+":device_mapping_deployment edge"
+type DeviceMappingDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_mapping_deployment node"
+  node: DeviceMappingDeployment!
+}
+
+input DeviceMappingDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input DeviceMappingDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeviceMappingDeploymentFilterInput {
+  and: [DeviceMappingDeploymentFilterInput!]
+  or: [DeviceMappingDeploymentFilterInput!]
+  not: [DeviceMappingDeploymentFilterInput!]
+  id: DeviceMappingDeploymentFilterId
+  state: DeviceMappingDeploymentFilterState
+  containerDeployments: ContainerDeploymentFilterInput
+}
+
+input DeviceMappingDeploymentSortInput {
+  order: SortOrder
+  field: DeviceMappingDeploymentSortField!
+}
+
+type DeviceMappingDeployment {
+  id: ID!
+  state: String
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
 }
 
 enum DeviceMappingSortField {
@@ -1257,6 +1315,86 @@ type DeviceMapping {
   cgroupPermissions: String!
   containerId: ID
   container: Container
+}
+
+enum VolumeDeploymentSortField {
+  ID
+  STATE
+}
+
+":volume_deployment connection"
+type VolumeDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":volume_deployment edges"
+  edges: [VolumeDeploymentEdge!]
+}
+
+":volume_deployment edge"
+type VolumeDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":volume_deployment node"
+  node: VolumeDeployment!
+}
+
+input VolumeDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input VolumeDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input VolumeDeploymentFilterInput {
+  and: [VolumeDeploymentFilterInput!]
+  or: [VolumeDeploymentFilterInput!]
+  not: [VolumeDeploymentFilterInput!]
+  id: VolumeDeploymentFilterId
+  state: VolumeDeploymentFilterState
+  containerDeployments: ContainerDeploymentFilterInput
+}
+
+input VolumeDeploymentSortInput {
+  order: SortOrder
+  field: VolumeDeploymentSortField!
+}
+
+type VolumeDeployment {
+  id: ID!
+  state: String
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
 }
 
 "The result of the :delete_volume mutation"
@@ -1399,6 +1537,86 @@ type Volume implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceConnection!
+}
+
+enum NetworkDeploymentSortField {
+  ID
+  STATE
+}
+
+":network_deployment connection"
+type NetworkDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":network_deployment edges"
+  edges: [NetworkDeploymentEdge!]
+}
+
+":network_deployment edge"
+type NetworkDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":network_deployment node"
+  node: NetworkDeployment!
+}
+
+input NetworkDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input NetworkDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input NetworkDeploymentFilterInput {
+  and: [NetworkDeploymentFilterInput!]
+  or: [NetworkDeploymentFilterInput!]
+  not: [NetworkDeploymentFilterInput!]
+  id: NetworkDeploymentFilterId
+  state: NetworkDeploymentFilterState
+  containerDeployments: ContainerDeploymentFilterInput
+}
+
+input NetworkDeploymentSortInput {
+  order: SortOrder
+  field: NetworkDeploymentSortField!
+}
+
+type NetworkDeployment {
+  id: ID!
+  state: String
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
 }
 
 "The result of the :delete_network mutation"
@@ -1871,6 +2089,41 @@ type ImageCredentials implements Node {
   username: String!
 }
 
+input ImageDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input ImageDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ImageDeploymentFilterInput {
+  and: [ImageDeploymentFilterInput!]
+  or: [ImageDeploymentFilterInput!]
+  not: [ImageDeploymentFilterInput!]
+  id: ImageDeploymentFilterId
+  state: ImageDeploymentFilterState
+}
+
+type ImageDeployment {
+  id: ID!
+  state: String
+}
+
 input ImageFilterImageCredentialsId {
   isNil: Boolean
   eq: ID
@@ -2013,7 +2266,6 @@ input DeployReleaseInput {
 
 enum DeploymentSortField {
   ID
-  RESOURCES_STATE
   STATE
   LAST_ERROR_MESSAGE
   DEVICE_ID
@@ -2087,17 +2339,6 @@ input DeploymentFilterState {
   greaterThanOrEqual: ApplicationDeploymentState
 }
 
-input DeploymentFilterResourcesState {
-  isNil: Boolean
-  eq: ApplicationDeploymentResourcesState
-  notEq: ApplicationDeploymentResourcesState
-  in: [ApplicationDeploymentResourcesState]
-  lessThan: ApplicationDeploymentResourcesState
-  greaterThan: ApplicationDeploymentResourcesState
-  lessThanOrEqual: ApplicationDeploymentResourcesState
-  greaterThanOrEqual: ApplicationDeploymentResourcesState
-}
-
 input DeploymentFilterId {
   isNil: Boolean
   eq: ID
@@ -2114,13 +2355,13 @@ input DeploymentFilterInput {
   or: [DeploymentFilterInput!]
   not: [DeploymentFilterInput!]
   id: DeploymentFilterId
-  resourcesState: DeploymentFilterResourcesState
   state: DeploymentFilterState
   lastErrorMessage: DeploymentFilterLastErrorMessage
   deviceId: DeploymentFilterDeviceId
   releaseId: DeploymentFilterReleaseId
   device: DeviceFilterInput
   release: ReleaseFilterInput
+  containerDeployments: ContainerDeploymentFilterInput
 }
 
 input DeploymentSortInput {
@@ -2130,13 +2371,206 @@ input DeploymentSortInput {
 
 type Deployment implements Node {
   id: ID!
-  resourcesState: ApplicationDeploymentResourcesState
   state: ApplicationDeploymentState
   lastErrorMessage: String
   deviceId: Int
   releaseId: ID
   device: Device
   release: Release
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerDeploymentConnection!
+  isReady: Boolean
+}
+
+enum ContainerDeploymentSortField {
+  ID
+  STATE
+  CONTAINER_ID
+  DEVICE_ID
+  IMAGE_DEPLOYMENT_ID
+}
+
+":container_deployment connection"
+type ContainerDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container_deployment edges"
+  edges: [ContainerDeploymentEdge!]
+}
+
+":container_deployment edge"
+type ContainerDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container_deployment node"
+  node: ContainerDeployment!
+}
+
+input ContainerDeploymentFilterImageDeploymentId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerDeploymentFilterDeviceId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerDeploymentFilterContainerId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input ContainerDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerDeploymentFilterInput {
+  and: [ContainerDeploymentFilterInput!]
+  or: [ContainerDeploymentFilterInput!]
+  not: [ContainerDeploymentFilterInput!]
+  id: ContainerDeploymentFilterId
+  state: ContainerDeploymentFilterState
+  containerId: ContainerDeploymentFilterContainerId
+  deviceId: ContainerDeploymentFilterDeviceId
+  imageDeploymentId: ContainerDeploymentFilterImageDeploymentId
+  container: ContainerFilterInput
+  device: DeviceFilterInput
+  imageDeployment: ImageDeploymentFilterInput
+  networkDeployments: NetworkDeploymentFilterInput
+  volumeDeployments: VolumeDeploymentFilterInput
+  deviceMappingDeployments: DeviceMappingDeploymentFilterInput
+}
+
+input ContainerDeploymentSortInput {
+  order: SortOrder
+  field: ContainerDeploymentSortField!
+}
+
+type ContainerDeployment {
+  id: ID!
+  state: String
+  containerId: ID
+  deviceId: Int
+  imageDeploymentId: ID
+  container: Container
+  device: Device
+  imageDeployment: ImageDeployment
+  networkDeployments(
+    "How to sort the records in the response"
+    sort: [NetworkDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: NetworkDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): NetworkDeploymentConnection!
+  volumeDeployments(
+    "How to sort the records in the response"
+    sort: [VolumeDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: VolumeDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): VolumeDeploymentConnection!
+  deviceMappingDeployments(
+    "How to sort the records in the response"
+    sort: [DeviceMappingDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceMappingDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceMappingDeploymentConnection!
 }
 
 enum ContainerSortField {
