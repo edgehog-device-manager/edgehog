@@ -1309,6 +1309,9 @@
   "forms.CreateRelease.cpuRealtimePeriodLabel": {
     "defaultMessage": "CPU Real-Time Period (microseconds)"
   },
+  "forms.CreateRelease.cpuRealtimeRuntimeInvalid": {
+    "defaultMessage": "Must be ≥ 1000 or -1 (for unlimited)."
+  },
   "forms.CreateRelease.cpuRealtimeRuntimeLabel": {
     "defaultMessage": "CPU Real-Time Runtime (microseconds)"
   },
@@ -1341,6 +1344,9 @@
   },
   "forms.CreateRelease.memoryReservationLabel": {
     "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "forms.CreateRelease.memorySwapInvalid": {
+    "defaultMessage": "Memory Swap must be -1 (unlimited) or greater than/equal to Memory."
   },
   "forms.CreateRelease.memorySwapLabel": {
     "defaultMessage": "Memory Swap (bytes)"

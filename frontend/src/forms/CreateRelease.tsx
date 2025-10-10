@@ -379,6 +379,7 @@ const applicationSchema = (intl: any) =>
               .transform((value) => value?.trim()),
             portBindings: portBindingsSchema,
             memory: optionalNumberSchema
+              .min(6 * 1024 * 1024)
               .integer()
               .nullable()
               .label(
@@ -390,6 +391,8 @@ const applicationSchema = (intl: any) =>
 
             memoryReservation: optionalNumberSchema
               .integer()
+              .min(0)
+              .max(yup.ref("memory"))
               .nullable()
               .label(
                 intl.formatMessage({
@@ -399,6 +402,27 @@ const applicationSchema = (intl: any) =>
               ),
             memorySwap: optionalNumberSchema
               .integer()
+              .test(
+                "memorySwap-valid",
+                intl.formatMessage({
+                  id: "forms.CreateRelease.memorySwapInvalid",
+                  defaultMessage:
+                    "Memory Swap must be -1 (unlimited) or greater than/equal to Memory.",
+                }),
+                function (value) {
+                  const memory = this.parent.memory;
+                  if (
+                    value === undefined ||
+                    value === null ||
+                    memory === undefined ||
+                    memory === null
+                  ) {
+                    return true;
+                  }
+                  if (value === -1) return true;
+                  return value >= memory;
+                },
+              )
               .nullable()
               .label(
                 intl.formatMessage({
@@ -408,7 +432,7 @@ const applicationSchema = (intl: any) =>
               ),
             memorySwappiness: optionalNumberSchema
               .integer()
-              .min(0)
+              .min(-1)
               .max(100)
               .nullable()
               .label(
@@ -419,6 +443,7 @@ const applicationSchema = (intl: any) =>
               ),
             cpuPeriod: optionalNumberSchema
               .integer()
+              .min(1000)
               .nullable()
               .label(
                 intl.formatMessage({
@@ -428,6 +453,7 @@ const applicationSchema = (intl: any) =>
               ),
             cpuQuota: optionalNumberSchema
               .integer()
+              .min(1000)
               .nullable()
               .label(
                 intl.formatMessage({
@@ -437,6 +463,7 @@ const applicationSchema = (intl: any) =>
               ),
             cpuRealtimePeriod: optionalNumberSchema
               .integer()
+              .min(1000)
               .nullable()
               .label(
                 intl.formatMessage({
@@ -446,6 +473,19 @@ const applicationSchema = (intl: any) =>
               ),
             cpuRealtimeRuntime: optionalNumberSchema
               .integer()
+              .test(
+                "cpuRealtimeRuntime-valid",
+                intl.formatMessage({
+                  id: "forms.CreateRelease.cpuRealtimeRuntimeInvalid",
+                  defaultMessage: "Must be ≥ 1000 or -1 (for unlimited).",
+                }),
+                function (value) {
+                  if (value === undefined || value === null) return true;
+                  if (value === -1) return true;
+                  return value >= 1000;
+                },
+              )
+              .max(yup.ref("cpuRealtimePeriod"))
               .nullable()
               .label(
                 intl.formatMessage({
