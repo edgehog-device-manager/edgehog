@@ -255,6 +255,15 @@ defmodule Edgehog.Containers.Deployment do
       source_attribute_on_join_resource :deployment_id
       destination_attribute_on_join_resource :container_deployment_id
     end
+
+    has_one :deployment_target, Edgehog.DeploymentCampaigns.DeploymentTarget do
+      description """
+      The deployment target of an deployment campaign that created the managed
+      ota operation, if any.
+      """
+
+      public? true
+    end
   end
 
   calculations do
