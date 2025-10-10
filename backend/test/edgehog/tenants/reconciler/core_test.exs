@@ -262,6 +262,23 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       assert :ok = Core.reconcile_delivery_policy!(client, policy_map)
     end
 
+    test "doesn't create or delete the policy when astarte adds extra fields", ctx do
+      %{
+        client: client,
+        policy_name: policy_name,
+        policy_map: policy_map
+      } = ctx
+
+      Edgehog.Astarte.DeliveryPolicies.MockDataLayer
+      |> expect(:get, fn ^client, ^policy_name ->
+        {:ok, %{"data" => Map.put(policy_map, "additional_field", "some-value")}}
+      end)
+      |> expect(:create, 0, fn _client, _policy_map -> :ok end)
+      |> expect(:delete, 0, fn _client, _policy_name -> :ok end)
+
+      assert :ok = Core.reconcile_delivery_policy!(client, policy_map)
+    end
+
     test "updates the policy if it differs from the required one", ctx do
       %{
         client: client,
@@ -361,6 +378,23 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       Edgehog.Astarte.Trigger.MockDataLayer
       |> expect(:get, fn ^client, ^trigger_name ->
         {:ok, %{"data" => trigger_map}}
+      end)
+      |> expect(:create, 0, fn _client, _trigger_map -> :ok end)
+      |> expect(:delete, 0, fn _client, _trigger_name -> :ok end)
+
+      assert :ok = Core.reconcile_trigger!(client, trigger_map)
+    end
+
+    test "doesn't create or delete the trigger when Astarte adds extra fields", ctx do
+      %{
+        client: client,
+        trigger_name: trigger_name,
+        trigger_map: trigger_map
+      } = ctx
+
+      Edgehog.Astarte.Trigger.MockDataLayer
+      |> expect(:get, fn ^client, ^trigger_name ->
+        {:ok, %{"data" => Map.put(trigger_map, "additional-field", "some-value")}}
       end)
       |> expect(:create, 0, fn _client, _trigger_map -> :ok end)
       |> expect(:delete, 0, fn _client, _trigger_name -> :ok end)

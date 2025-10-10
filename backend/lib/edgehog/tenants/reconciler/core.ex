@@ -165,14 +165,24 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end
   end
 
-  defp delivery_policy_matches?(required, existing) do
-    normalize_policy(required) == normalize_policy(existing)
+  defp delivery_policy_matches?(existing, required) do
+    contains?(normalize_policy(existing), normalize_policy(required))
   end
 
   defp normalize_policy(policy) do
     policy
     |> update_in(["retry_times"], &(&1 || 0))
     |> update_in(["prefetch_count"], &(&1 || 0))
+    |> sort_error_handlers()
+  end
+
+  defp sort_error_handlers(delivery_policy) do
+    error_handlers =
+      delivery_policy
+      |> Map.get("error_handlers", [])
+      |> Enum.sort_by(&Map.get(&1, "on"))
+
+    Map.put(delivery_policy, "error_handlers", error_handlers)
   end
 
   defp list_triggers_that_reference_policy(rm_client, policy_name) do
@@ -206,14 +216,24 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     :ok
   end
 
-  defp trigger_matches?(required, existing) do
-    normalize_defaults(required) == normalize_defaults(existing)
+  defp trigger_matches?(existing, required) do
+    contains?(normalize_defaults(existing), normalize_defaults(required))
   end
 
   defp normalize_defaults(trigger) do
     trigger
     |> drop_if_default(["action", "ignore_ssl_errors"], false)
     |> drop_if_default(["action", "http_static_headers"], %{})
+    |> sort_simple_triggers()
+  end
+
+  defp sort_simple_triggers(trigger) do
+    simple_triggers =
+      trigger
+      |> Map.get("simple_triggers", [])
+      |> Enum.sort_by(&Map.get(&1, "interface_name"))
+
+    Map.put(trigger, "simple_triggers", simple_triggers)
   end
 
   defp drop_if_default(trigger, path, default) do
@@ -238,4 +258,15 @@ defmodule Edgehog.Tenants.Reconciler.Core do
         {:error, reason}
     end
   end
+
+  defp contains?(%{} = supermap, %{} = submap) do
+    Enum.all?(submap, fn {key, sub_val} ->
+      case Map.fetch(supermap, key) do
+        {:ok, super_val} -> contains?(super_val, sub_val)
+        :error -> false
+      end
+    end)
+  end
+
+  defp contains?(super_val, sub_val), do: super_val == sub_val
 end
