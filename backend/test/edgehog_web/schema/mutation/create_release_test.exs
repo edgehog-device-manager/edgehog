@@ -361,8 +361,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
           "8080:80"
         ],
         "privileged" => false,
-        "cpuPeriod" => 300,
-        "cpuQuota" => 30,
+        "cpuPeriod" => 1300,
+        "cpuQuota" => 1300,
         "cpuRealtimePeriod" => 100,
         "cpuRealtimeRuntime" => 90,
         "memory" => 2048,
