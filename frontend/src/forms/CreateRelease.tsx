@@ -487,6 +487,7 @@ const applicationSchema = (intl: any) =>
                   })
                   .required(),
               )
+              .distinctOnProperty("target")
               .nullable(),
             deviceMappings: yup
               .array(
@@ -1066,7 +1067,7 @@ const ContainerForm = ({
                       </FormRow>
 
                       <FormRow
-                        id={`containers-${index}-volumeTarget`}
+                        id={`containers-${index}-volumeTarget-${volIndex}`}
                         label={
                           <FormattedMessage
                             id="forms.CreateRelease.volumeTargetLabel"
