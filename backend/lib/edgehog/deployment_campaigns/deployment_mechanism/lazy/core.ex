@@ -253,6 +253,19 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   end
 
   @doc """
+  Unsubscribes to updates for a specific deployment.
+
+  ## Parameters
+    - deployment_id: The ID of the deployment to subscribe to.
+
+  ## Returns
+    - :ok if the subscription is successful, otherwise raises an error.
+  """
+  def unsubscribe_to_deployment_updates!(deployment_id) do
+    PubSub.unsubscribe_to_events_for({:deployment, deployment_id})
+  end
+
+  @doc """
   Fetches the next valid deployment target for a given deployment campaign.
 
   ## Parameters
@@ -308,8 +321,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   """
   def deployment_ready?(deployment) do
     deployment
-    |> Ash.load!(:ready?)
-    |> Map.get(:ready?)
+    |> Ash.load!(:is_ready)
+    |> Map.get(:is_ready)
   end
 
   @doc """

@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Image.Deployment do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
@@ -78,11 +79,17 @@ defmodule Edgehog.Containers.Image.Deployment do
     end
 
     update :mark_as_unpulled do
+      require_atomic? false
+
       change set_attribute(:state, :unpulled)
+      change MaybeNotifyUpwards
     end
 
     update :mark_as_pulled do
+      require_atomic? false
+
       change set_attribute(:state, :pulled)
+      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -115,10 +122,14 @@ defmodule Edgehog.Containers.Image.Deployment do
     end
 
     belongs_to :device, Edgehog.Devices.Device
+
+    has_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      destination_attribute :image_deployment_id
+    end
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:pulled, :unpulled])
+    calculate :is_ready, :boolean, expr(state in [:pulled, :unpulled])
   end
 
   identities do

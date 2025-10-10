@@ -67,14 +67,13 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
              |> Map.fetch!(:deployment_id) == deployment_id
     end
 
-    test "sends the deployment upgrade once the new deployment reaches :ready state", args do
+    test "sends the deployment upgrade once the new deployment is ready", args do
       %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
 
       deployment_0_0_1 =
         deployment_fixture(
           release_id: release_0_0_1.id,
-          resources_state: :ready,
           tenant: tenant
         )
 

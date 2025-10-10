@@ -419,36 +419,35 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
-  def handle_event(:info, {:deployment_updated, deployment}, _state, data) do
-    target_in_progress? =
-      data.tenant_id
-      |> Core.get_target_for_deployment!(deployment.id)
-      |> Map.get(:status)
-      |> Kernel.==(:in_progress)
-
-    resources_state =
-      deployment
-      |> Ash.load!(:resources_state, tenant: data.tenant_id)
-      |> Map.get(:resources_state)
-
-    state = deployment.state
-
-    # Event generated from PubSub when a Deployment is updated
-    additional_actions =
-      case {resources_state, state} do
-        {:ready, _} -> [internal_event({:deployment_success, deployment})]
-        {_, :error} -> [internal_event({:deployment_failure, deployment})]
-        {_, _} -> []
-      end
-
+  def handle_event(:info, {:deployment_ready, deployment}, _state, data) do
     # We always cancel the retry timeout for every kind of update we see on an Deployment.
     # This ensures we don't resend the request even if we accidentally miss the acknowledge.
     # If the timeout does not exist, this is a no-op anyway.
-    actions = [cancel_retry_timeout(data.tenant_id, deployment.id) | additional_actions]
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({:deployment_success, deployment})
+    ]
 
-    if target_in_progress?,
-      do: {:keep_state_and_data, actions},
-      else: :keep_state_and_data
+    Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+    {:keep_state_and_data, actions}
+  end
+
+  # Ignore deployment_updated events
+  def handle_event(:info, {:deployment_updated, _deployment}, _state, _data) do
+    :keep_state_and_data
+  end
+
+  def handle_event(:info, {:deployment_error, deployment}, _state, data) do
+    # We always cancel the retry timeout for every kind of update we see on an Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({:deployment_failure, deployment})
+    ]
+
+    {:keep_state_and_data, actions}
   end
 
   def handle_event(:internal, {:deployment_success, deployment}, _state, data) do

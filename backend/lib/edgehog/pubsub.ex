@@ -31,6 +31,7 @@ defmodule Edgehog.PubSub do
           | :ota_operation_updated
           | :deployment_created
           | :deployment_updated
+          | :deployment_ready
 
   @doc """
   Publish an event to the PubSub. Raises if any of the publish fails.
@@ -74,6 +75,28 @@ defmodule Edgehog.PubSub do
     broadcast_many!(topics, payload)
   end
 
+  def publish!(:deployment_ready = event, %Deployment{} = deployment) do
+    payload = {event, deployment}
+
+    topics = [
+      topic_for_subject(deployment),
+      wildcard_topic_for_subject(deployment)
+    ]
+
+    broadcast_many!(topics, payload)
+  end
+
+  def publish!(:deployment_error = event, %Deployment{} = deployment) do
+    payload = {event, deployment}
+
+    topics = [
+      topic_for_subject(deployment),
+      wildcard_topic_for_subject(deployment)
+    ]
+
+    broadcast_many!(topics, payload)
+  end
+
   defp broadcast_many!(topics, payload) do
     Enum.each(topics, fn topic ->
       Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, payload)
@@ -87,6 +110,15 @@ defmodule Edgehog.PubSub do
     topic = topic_for_subject(subject)
 
     Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+  end
+
+  @doc """
+  Unsubscribe to events for a specific subject.
+  """
+  def unsubscribe_to_events_for(subject) do
+    topic = topic_for_subject(subject)
+
+    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
   end
 
   defp wildcard_topic_for_subject(subject)

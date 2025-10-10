@@ -25,9 +25,9 @@ defmodule Edgehog.Containers.Deployment do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Changes.PublishNotification
+  alias Edgehog.Containers.Deployment.Calculations
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.Deployment.Types.DeploymentState
-  alias Edgehog.Containers.Deployment.Types.ResourcesState
   alias Edgehog.Containers.Deployment.Validations
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
@@ -46,7 +46,7 @@ defmodule Edgehog.Containers.Deployment do
     defaults [
       :read,
       :destroy,
-      create: [:device_id, :release_id, :state, :last_error_message, :resources_state]
+      create: [:device_id, :release_id, :state, :last_error_message]
     ]
 
     create :deploy do
@@ -95,7 +95,7 @@ defmodule Edgehog.Containers.Deployment do
         It starts an Executor, handling the communication with the device.
         """
 
-        accept [:release_id, :state, :resources_state]
+        accept [:release_id, :state]
 
         argument :device_id, :id do
           allow_nil? false
@@ -209,7 +209,7 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:state, :error)
 
       require_atomic? false
-      change {PublishNotification, event_type: :deployment_updated}
+      change {PublishNotification, event_type: :deployment_error}
     end
 
     update :mark_as_deleting do
@@ -219,13 +219,9 @@ defmodule Edgehog.Containers.Deployment do
       change {PublishNotification, event_type: :deployment_updated}
     end
 
-    update :update_resources_state do
-      change Changes.CheckImages
-      change Changes.CheckNetworks
-      change Changes.CheckVolumes
-      change Changes.CheckDeviceMappings
-      change Changes.CheckContainers
-      change Changes.CheckDeployment
+    update :maybe_run_ready_actions do
+      change Changes.MaybeRunReadyActions
+      change Changes.MaybePublishDeploymentReady
 
       require_atomic? false
       change {PublishNotification, event_type: :deployment_updated}
@@ -240,11 +236,6 @@ defmodule Edgehog.Containers.Deployment do
 
   attributes do
     uuid_primary_key :id
-
-    attribute :resources_state, ResourcesState do
-      default :initial
-      public? true
-    end
 
     attribute :state, DeploymentState do
       default :pending
@@ -281,8 +272,7 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   calculations do
-    calculate :ready?, :boolean, expr(state in [:started, :starting, :stopped, :stopping])
-    calculate :resources_ready?, :boolean, expr(resources_state == :ready)
+    calculate :is_ready, :boolean, Calculations.Ready
   end
 
   identities do
