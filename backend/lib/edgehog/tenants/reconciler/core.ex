@@ -166,7 +166,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
   end
 
   defp delivery_policy_matches?(required, existing) do
-    normalize_policy(required) == normalize_policy(existing)
+    map_subset?(normalize_policy(required), normalize_policy(existing), "on")
   end
 
   defp normalize_policy(policy) do
@@ -206,8 +206,8 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     :ok
   end
 
-  defp trigger_matches?(required, existing) do
-    normalize_defaults(required) == normalize_defaults(existing)
+  defp trigger_matches?(existing, required) do
+    map_subset?(normalize_defaults(required), normalize_defaults(existing), "interface_name")
   end
 
   defp normalize_defaults(trigger) do
@@ -236,6 +236,32 @@ defmodule Edgehog.Tenants.Reconciler.Core do
 
       {:error, reason} ->
         {:error, reason}
+    end
+  end
+
+  defp map_subset?(%{} = required, %{} = existing, sort_field \\ nil) do
+    Enum.all?(required, fn
+      {k, v} when is_map(v) ->
+        map_subset?(existing[k], v)
+
+      {k, v} when is_list(v) ->
+        check_list(v, existing[k], sort_field)
+
+      {k, v} ->
+        existing[k] == v
+    end)
+  end
+
+  defp check_list(required, existing, sort_field) do
+    if length(required) == length(existing) do
+      sorted_required = Enum.sort_by(required, &Map.get(&1, sort_field))
+      sorted_existing = Enum.sort_by(existing, &Map.get(&1, sort_field))
+
+      Enum.all?(Enum.zip(sorted_required, sorted_existing), fn {req_el, exist_el} ->
+        map_subset?(req_el, exist_el, sort_field)
+      end)
+    else
+      false
     end
   end
 end
