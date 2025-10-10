@@ -77,6 +77,12 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
               }
             }
           }
+          deploymentTarget {
+            deploymentCampaign {
+              id
+              name
+            }
+          }
         }
       }
     }
@@ -298,6 +304,7 @@ const DeployedApplicationsTable = ({
       resources_state: parseDeploymentResourcesState(
         edge.node.resourcesState || undefined,
       ),
+      deploymentTarget: edge.node.deploymentTarget,
       upgradeTargetReleases:
         edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
           semver.gt(
@@ -506,6 +513,29 @@ const DeployedApplicationsTable = ({
         </Link>
       ),
     }),
+    columnHelper.accessor(
+      (row) => row.deploymentTarget?.deploymentCampaign?.name,
+      {
+        id: "deploymentCampaignName",
+        header: () => (
+          <FormattedMessage
+            id="components.DeployedApplicationsTable.deploymentCampaignNameTitle"
+            defaultMessage="Deployment Campaign"
+          />
+        ),
+        cell: ({ row, getValue }) => (
+          <Link
+            route={Route.deploymentCampaignsEdit}
+            params={{
+              deploymentCampaignId:
+                row.original.deploymentTarget?.deploymentCampaign?.id ?? "",
+            }}
+          >
+            {getValue()}
+          </Link>
+        ),
+      },
+    ),
     columnHelper.accessor("state", {
       header: () => (
         <FormattedMessage

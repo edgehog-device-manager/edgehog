@@ -1038,6 +1038,7 @@ input ApplicationCreateInitialReleaseInput {
 
 input ReleaseCreateContainersInput {
   env: JsonString
+  id: ID
   memory: Int
   image: ContainerCreateWithNestedImageInput
   hostname: String
@@ -2111,16 +2112,32 @@ input DeploymentFilterId {
 
 input DeploymentFilterInput {
   and: [DeploymentFilterInput!]
+
   or: [DeploymentFilterInput!]
+
   not: [DeploymentFilterInput!]
+
   id: DeploymentFilterId
+
   resourcesState: DeploymentFilterResourcesState
+
   state: DeploymentFilterState
+
   lastErrorMessage: DeploymentFilterLastErrorMessage
+
   deviceId: DeploymentFilterDeviceId
+
   releaseId: DeploymentFilterReleaseId
+
   device: DeviceFilterInput
+
   release: ReleaseFilterInput
+
+  """
+  The deployment target of an deployment campaign that created the managed
+  ota operation, if any.
+  """
+  deploymentTarget: DeploymentTargetFilterInput
 }
 
 input DeploymentSortInput {
@@ -2130,13 +2147,26 @@ input DeploymentSortInput {
 
 type Deployment implements Node {
   id: ID!
+
   resourcesState: ApplicationDeploymentResourcesState
+
   state: ApplicationDeploymentState
+
   lastErrorMessage: String
+
   deviceId: Int
+
   releaseId: ID
+
   device: Device
+
   release: Release
+
+  """
+  The deployment target of an deployment campaign that created the managed
+  ota operation, if any.
+  """
+  deploymentTarget: DeploymentTarget
 }
 
 enum ContainerSortField {
