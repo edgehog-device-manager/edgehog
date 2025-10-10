@@ -1031,25 +1031,25 @@ input ReleaseCreateContainersInput {
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
-  portBindings: [String!]
-  restartPolicy: String
-  networkMode: String
-  privileged: Boolean
-  extraHosts: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
+  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  volumeDriver: String
-  storageOpt: [String!]
+  networkMode: String
+  portBindings: [String!]
+  privileged: Boolean
   readOnlyRootfs: Boolean
+  restartPolicy: String
+  storageOpt: [String!]
   tmpfs: [String!]
+  volumeDriver: String
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -2362,16 +2362,32 @@ input DeploymentFilterId {
 
 input DeploymentFilterInput {
   and: [DeploymentFilterInput!]
+
   or: [DeploymentFilterInput!]
+
   not: [DeploymentFilterInput!]
+
   id: DeploymentFilterId
+
   state: DeploymentFilterState
+
   lastErrorMessage: DeploymentFilterLastErrorMessage
+
   deviceId: DeploymentFilterDeviceId
+
   releaseId: DeploymentFilterReleaseId
+
   device: DeviceFilterInput
+
   release: ReleaseFilterInput
+
   containerDeployments: ContainerDeploymentFilterInput
+
+  """
+  The deployment target of an deployment campaign that created the managed
+  ota operation, if any.
+  """
+  deploymentTarget: DeploymentTargetFilterInput
 }
 
 input DeploymentSortInput {
@@ -2381,12 +2397,19 @@ input DeploymentSortInput {
 
 type Deployment implements Node {
   id: ID!
+
   state: ApplicationDeploymentState
+
   lastErrorMessage: String
+
   deviceId: Int
+
   releaseId: ID
+
   device: Device
+
   release: Release
+
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -2406,6 +2429,13 @@ type Deployment implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerDeploymentConnection!
+
+  """
+  The deployment target of an deployment campaign that created the managed
+  ota operation, if any.
+  """
+  deploymentTarget: DeploymentTarget
+
   isReady: Boolean
 }
 
