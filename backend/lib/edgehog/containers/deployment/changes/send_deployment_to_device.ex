@@ -22,6 +22,7 @@ defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
   @moduledoc false
   use Ash.Resource.Change
 
+  alias Edgehog.Containers
   alias Edgehog.Devices
 
   require Logger
@@ -33,14 +34,14 @@ defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
 
   defp after_action(_changeset, deployment, tenant) do
     with {:ok, deployment} <-
-           Ash.load(deployment, [:container_deployments, :device], tenant: tenant) do
+           Ash.load(deployment, [:container_deployments, :device, :state], tenant: tenant) do
       container_deployments = deployment.container_deployments
 
       Enum.each(container_deployments, &deploy_container(&1, deployment, tenant))
 
       with {:ok, _device} <-
              Devices.send_create_deployment_request(deployment.device, deployment, tenant: tenant),
-           do: {:ok, deployment}
+           do: maybe_update_state(deployment, tenant)
     end
   end
 
@@ -48,5 +49,15 @@ defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
     container_deployment
     |> Ash.Changeset.for_update(:send_deployment, %{deployment: deployment}, tenant: tenant)
     |> Ash.update(tenant: tenant)
+  end
+
+  defp maybe_update_state(deployment, tenant) do
+    case deployment.state do
+      :pending ->
+        Containers.mark_deployment_as_sent(deployment, tenant: tenant)
+
+      _others ->
+        {:ok, deployment}
+    end
   end
 end
