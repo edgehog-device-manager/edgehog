@@ -2431,6 +2431,9 @@
   "validation.baseImageVersion.format": {
     "defaultMessage": "The version must follow the Semantic Versioning spec"
   },
+  "validation.cpuQuotaPeriod.format": {
+    "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
+  },
   "validation.env.invalidJson": {
     "defaultMessage": "Must be a valid JSON string."
   },

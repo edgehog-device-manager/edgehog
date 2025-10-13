@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Container do
 
   alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Container.ManualActions
+  alias Edgehog.Containers.Container.Validations.CpuPeriodQuotaConsistency
   alias Edgehog.Containers.Container.Validations.VolumeTargetUniqueness
   alias Edgehog.Containers.ContainerVolume
   alias Edgehog.Containers.Image
@@ -204,6 +205,7 @@ defmodule Edgehog.Containers.Container do
   end
 
   validations do
+    validate CpuPeriodQuotaConsistency
     validate VolumeTargetUniqueness
   end
 
@@ -262,51 +264,37 @@ defmodule Edgehog.Containers.Container do
     end
 
     attribute :cpu_period, :integer do
-      default -1
       public? true
-      allow_nil? false
+      constraints min: 1_000, max: 1_000_000
     end
 
     attribute :cpu_quota, :integer do
-      default -1
       public? true
-      allow_nil? false
+      constraints min: 1_000
     end
 
     attribute :cpu_realtime_period, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :cpu_realtime_runtime, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :memory, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :memory_reservation, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :memory_swap, :integer do
-      default -2
       public? true
-      allow_nil? false
     end
 
     attribute :memory_swappiness, :integer do
-      default -1
       public? true
-      allow_nil? false
     end
 
     attribute :volume_driver, :string do

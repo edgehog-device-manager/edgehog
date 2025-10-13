@@ -97,6 +97,11 @@ const messages = defineMessages({
     defaultMessage:
       'Must be a valid JSON array of strings in the format "key=value", e.g. ["size=120G"]',
   },
+  cpuQuotaPeriod: {
+    id: "validation.cpuQuotaPeriod.format",
+    defaultMessage:
+      "CPU Period and CPU Quota must be either both set or both unset",
+  },
 });
 
 yup.setLocale({
