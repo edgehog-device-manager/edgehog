@@ -20,7 +20,7 @@
 
 import { useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useMutation } from "react-relay/hooks";
+import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
 
 import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "api/__generated__/DeviceGroupCreate_createDeviceGroup_Mutation.graphql";
 import Alert from "components/Alert";
@@ -92,12 +92,19 @@ const DeviceGroupCreatePage = () => {
             .getLinkedRecord("result");
           const root = store.getRoot();
 
-          const deviceGroups = root.getLinkedRecords("deviceGroups");
-          if (deviceGroups) {
-            root.setLinkedRecords(
-              [...deviceGroups, deviceGroup],
-              "deviceGroups",
+          const connection = ConnectionHandler.getConnection(
+            root,
+            "DeviceGroupsTable_deviceGroups",
+          );
+
+          if (connection && deviceGroup) {
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              deviceGroup,
+              "DeviceGroupEdge",
             );
+            ConnectionHandler.insertEdgeBefore(connection, edge);
           }
 
           const devices = deviceGroup?.getLinkedRecords("devices");
