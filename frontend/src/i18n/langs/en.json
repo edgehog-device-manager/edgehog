@@ -585,6 +585,9 @@
   "components.DeployedApplicationsTable.containerStatus": {
     "defaultMessage": "Container Status"
   },
+  "components.DeployedApplicationsTable.deleteButtonTitle": {
+    "defaultMessage": "Delete Deployment"
+  },
   "components.DeployedApplicationsTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
   },
@@ -615,6 +618,9 @@
   "components.DeployedApplicationsTable.selectOption": {
     "defaultMessage": "Select a Release Version"
   },
+  "components.DeployedApplicationsTable.startButtonTitle": {
+    "defaultMessage": "Start Deployment"
+  },
   "components.DeployedApplicationsTable.startErrorFeedback": {
     "defaultMessage": "Could not Start the Deployed Application, please try again."
   },
@@ -624,11 +630,17 @@
   "components.DeployedApplicationsTable.state": {
     "defaultMessage": "State"
   },
+  "components.DeployedApplicationsTable.stopButtonTitle": {
+    "defaultMessage": "Stop Deployment"
+  },
   "components.DeployedApplicationsTable.stopErrorFeedback": {
     "defaultMessage": "Could not Stop the Deployed Application, please try again."
   },
   "components.DeployedApplicationsTable.stopErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
+  },
+  "components.DeployedApplicationsTable.upgradeButtonTitle": {
+    "defaultMessage": "Upgrade Deployment"
   },
   "components.DeployedApplicationsTable.upgradeErrorFeedback": {
     "defaultMessage": "Could not upgrade the deployment, please try again."
