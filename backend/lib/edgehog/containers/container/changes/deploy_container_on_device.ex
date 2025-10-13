@@ -42,7 +42,8 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
              :network_deployments,
              :device_mapping_deployments,
              :device,
-             :container
+             :container,
+             :state
            ]) do
       image_deployment = container_deployment.image_deployment
       volume_deployments = container_deployment.volume_deployments
@@ -62,7 +63,7 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
                deployment,
                tenant: tenant
              ),
-           do: Containers.mark_container_deployment_as_sent(container_deployment, tenant: tenant)
+           do: maybe_update_state(container_deployment, tenant)
     end
   end
 
@@ -70,5 +71,15 @@ defmodule Edgehog.Containers.Container.Changes.DeployContainerOnDevice do
     res
     |> Ash.Changeset.for_update(:send_deployment, %{deployment: deployment}, tenant: tenant)
     |> Ash.update(tenant: tenant)
+  end
+
+  defp maybe_update_state(container_deployment, tenant) do
+    case container_deployment.state do
+      :created ->
+        Containers.mark_container_deployment_as_sent(container_deployment, tenant: tenant)
+
+      _others ->
+        {:ok, container_deployment}
+    end
   end
 end

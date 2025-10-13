@@ -31,14 +31,19 @@ defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
     %{tenant: tenant} = context
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    with {:ok, image_deployment} <- Ash.load(changeset.data, [:image, :device], tenant: tenant) do
+    with {:ok, image_deployment} <-
+           Ash.load(changeset.data, [:image, :device, :state], tenant: tenant) do
       image = image_deployment.image
       device = image_deployment.device
 
       with {:ok, _device} <-
              Devices.send_create_image_request(device, image, deployment, tenant: tenant) do
-        Ash.Changeset.change_attribute(changeset, :state, :sent)
+        maybe_update_state(changeset, image_deployment.state)
       end
     end
   end
+
+  defp maybe_update_state(changeset, :created), do: Ash.Changeset.change_attribute(changeset, :state, :sent)
+
+  defp maybe_update_state(changeset, _), do: changeset
 end
