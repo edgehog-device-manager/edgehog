@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -121,14 +122,19 @@ const BaseImageCollection = ({
             .getLinkedRecord("result");
           const root = store.getRoot();
 
-          const baseImageCollections = root.getLinkedRecords(
-            "baseImageCollections",
+          const connection = ConnectionHandler.getConnection(
+            root,
+            "BaseImageCollectionsTable_baseImageCollections",
           );
-          if (baseImageCollections) {
-            root.setLinkedRecords(
-              [...baseImageCollections, baseImageCollection],
-              "baseImageCollections",
+
+          if (connection && baseImageCollection) {
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              baseImageCollection,
+              "BaseImageCollectionEdge",
             );
+            ConnectionHandler.insertEdgeBefore(connection, edge);
           }
         },
       });
