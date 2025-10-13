@@ -20,7 +20,7 @@
 
 import { useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useMutation } from "react-relay/hooks";
+import { graphql, useMutation, ConnectionHandler } from "react-relay/hooks";
 
 import type { HardwareTypeCreate_createHardwareType_Mutation } from "api/__generated__/HardwareTypeCreate_createHardwareType_Mutation.graphql";
 import Alert from "components/Alert";
@@ -88,13 +88,20 @@ const HardwareTypeCreatePage = () => {
             .getRootField("createHardwareType")
             .getLinkedRecord("result");
           const root = store.getRoot();
-          const hardwareTypes = root.getLinkedRecords("hardwareTypes");
 
-          if (hardwareTypes) {
-            root.setLinkedRecords(
-              [...hardwareTypes, hardwareType],
-              "hardwareTypes",
+          const connection = ConnectionHandler.getConnection(
+            root,
+            "HardwareTypesTable_hardwareTypes",
+          );
+
+          if (connection && hardwareType) {
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              hardwareType,
+              "HardwareTypeEdge",
             );
+            ConnectionHandler.insertEdgeBefore(connection, edge);
           }
         },
       });
