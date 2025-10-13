@@ -124,7 +124,7 @@ defmodule Edgehog.Containers.Image.Deployment do
     belongs_to :device, Edgehog.Devices.Device
 
     has_many :container_deployments, Edgehog.Containers.Container.Deployment do
-      destination_attribute :image_deployment_id
+      destination_attribute :id
     end
   end
 
