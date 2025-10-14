@@ -20,7 +20,7 @@
 
 import { Suspense, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useMutation } from "react-relay/hooks";
+import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
 import { ErrorBoundary } from "react-error-boundary";
 
 import type { ApplicationCreate_createApplication_Mutation } from "api/__generated__/ApplicationCreate_createApplication_Mutation.graphql";
@@ -96,20 +96,19 @@ const Application = () => {
             .getLinkedRecord("result");
           const root = store.getRoot();
 
-          const applications = root.getLinkedRecord("applications", {
-            id: "root",
-          });
+          const connection = ConnectionHandler.getConnection(
+            root,
+            "ApplicationsTable_applications",
+          );
 
-          if (applications) {
-            root.setLinkedRecords(
-              applications
-                ? [
-                    ...(applications.getLinkedRecords("applications") || []),
-                    application,
-                  ]
-                : [application],
-              "applications",
+          if (connection && application) {
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              application,
+              "ApplicationEdge",
             );
+            ConnectionHandler.insertEdgeBefore(connection, edge);
           }
         },
       });

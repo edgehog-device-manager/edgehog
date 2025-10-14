@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -116,9 +117,19 @@ const Channel = ({ getCreateChannelOptionsQuery }: ChannelProps) => {
             .getLinkedRecord("result");
           const root = store.getRoot();
 
-          const channels = root.getLinkedRecords("channels");
-          if (channels) {
-            root.setLinkedRecords([...channels, channel], "channels");
+          const connection = ConnectionHandler.getConnection(
+            root,
+            "ChannelsTable_channels",
+          );
+
+          if (connection && channel) {
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              channel,
+              "ChannelEdge",
+            );
+            ConnectionHandler.insertEdgeBefore(connection, edge);
           }
         },
       });
