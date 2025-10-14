@@ -78,6 +78,10 @@ const messages = defineMessages({
     id: "validation.env.invalidJson",
     defaultMessage: "Must be a valid JSON string.",
   },
+  envInvalidIsNested: {
+    id: "validation.env.invalidIsNested",
+    defaultMessage: "Environment Variables' values cannot be nested.",
+  },
   portBindingsFormat: {
     id: "validation.portBindings.format",
     defaultMessage:
@@ -171,6 +175,14 @@ const optionalNumberSchema = yup
   })
   .typeError((values) => ({ messageId: messages.number.id, values }));
 
+interface KeyValueMaybeNested {
+  key: string;
+  value: any;
+}
+export interface KeyValue<T> extends KeyValueMaybeNested {
+  value: T;
+}
+
 const isValidJson = (value: string) => {
   try {
     JSON.parse(value);
@@ -179,16 +191,43 @@ const isValidJson = (value: string) => {
     return false;
   }
 };
+const isNotNested = (
+  value: KeyValueMaybeNested[] | string,
+): value is KeyValueMaybeNested[] => {
+  return (value as KeyValueMaybeNested[])
+    .map(({ key: _, value: val }) => val)
+    .reduce(
+      (acc: boolean, curr) =>
+        acc && ["number", "boolean", "string"].includes(typeof curr),
+      true,
+    );
+};
 
 const envSchema = yup
-  .string()
+  .mixed<string | KeyValueMaybeNested[]>()
   .nullable()
-  .transform((value) => value?.trim())
+  .transform((value) => (typeof value === "string" ? value?.trim() : value))
+  .transform((value) => {
+    if (typeof value === "string" && isValidJson(value)) {
+      const obj = JSON.parse(value);
+      return Object.entries(obj).map(
+        ([key, val]) => ({ key: key, value: val }) as KeyValueMaybeNested,
+      );
+    }
+    return value;
+  })
   .test({
     name: "is-json",
     message: messages.envInvalidJson.id,
-    test: (value) => (value ? isValidJson(value) : true),
-  });
+    test: (value) =>
+      value && typeof value === "string" ? isValidJson(value) : true,
+  })
+  .test({
+    name: "is-not-nested",
+    message: messages.envInvalidIsNested.id,
+    test: (value) => (value ? isNotNested(value) : true),
+  })
+  .default("{}");
 
 const portBindingsSchema = yup
   .string()

@@ -67,6 +67,8 @@ import ConfirmModal from "components/ConfirmModal";
 import FormFeedback from "forms/FormFeedback";
 import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
 
+import type { KeyValue } from "forms/index";
+
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
     listImageCredentials {
@@ -140,7 +142,10 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
                   edges {
                     node {
                       id
-                      env
+                      env {
+                        key
+                        value
+                      }
                       extraHosts
                       hostname
                       networkMode
@@ -256,13 +261,19 @@ const FormRow = ({
   </Form.Group>
 );
 
+type ReleaseContainerNode = NonNullable<
+  ReleaseNode["containers"]["edges"]
+>[number]["node"];
+type EnvironmentVariable = NonNullable<ReleaseContainerNode["env"]>[number] &
+  KeyValue<string>;
+
 type ContainerInput = {
   cpuPeriod?: number;
   cpuQuota?: number;
   cpuRealtimePeriod?: number;
   cpuRealtimeRuntime?: number;
   extraHosts?: string[];
-  env?: string; // JsonString
+  env?: EnvironmentVariable[];
   hostname?: string;
   image: {
     reference: string;
@@ -575,6 +586,29 @@ type ContainerFormProps = {
   markUserInteraction: () => void;
 };
 
+const reduceEnv = (env: EnvironmentVariable[]) =>
+  env.reduce((acc: any, envVar: EnvironmentVariable) => {
+    envVar ? (acc[envVar.key] = envVar.value) : acc;
+    return acc;
+  }, {});
+const envToString = (env: EnvironmentVariable[]) =>
+  JSON.stringify(reduceEnv(env));
+
+const envValidation = (envJson: any): void => {
+  if (Array.isArray(envJson)) {
+    throw new TypeError("expected an object, found: 'array'");
+  }
+  const entries = Object.entries(envJson);
+  entries.forEach(([key, value]) => {
+    const valueType = typeof value;
+    if (valueType !== "string") {
+      throw new TypeError(
+        `the value of an environment variable can only be a string. Found '${Array.isArray(value) ? "array" : valueType}' for key: '${key}'`,
+      );
+    }
+  });
+};
+
 const ContainerForm = ({
   index,
   register,
@@ -672,12 +706,21 @@ const ContainerForm = ({
             name={`containers.${index}.env`}
             render={({ field, fieldState: _fieldState }) => (
               <MonacoJsonEditor
-                value={field.value ?? ""}
+                value={
+                  field.value && typeof field.value !== "string"
+                    ? envToString(field.value)
+                    : field.value ?? ""
+                }
                 onChange={(value) => {
                   field.onChange(value ?? "");
                   markUserInteraction();
                 }}
-                defaultValue={field.value || "{}"}
+                defaultValue={
+                  field.value && typeof field.value !== "string"
+                    ? envToString(field.value)
+                    : field.value ?? "{}"
+                }
+                additionalValidation={envValidation}
               />
             )}
           />
@@ -1708,7 +1751,7 @@ const CreateRelease = ({
           const submitData: ReleaseSubmitData = {
             ...data,
             containers: data.containers?.map((container) => ({
-              env: container.env || undefined,
+              env: container.env,
               extraHosts: container.extraHosts || undefined,
               image: {
                 reference: container.image.reference,
@@ -1932,7 +1975,7 @@ const CreateRelease = ({
               release.containers?.edges?.map((containerEdge) => {
                 const c = containerEdge.node;
                 return {
-                  env: c.env || undefined,
+                  env: (c.env as EnvironmentVariable[]) || undefined,
                   extraHosts: c.extraHosts ? [...c.extraHosts] : undefined,
                   image: {
                     reference: c.image.reference,
