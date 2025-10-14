@@ -22,6 +22,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -119,12 +120,19 @@ const SystemModel = ({ systemModelOptions }: SystemModelProps) => {
             .getLinkedRecord("result");
           const root = store.getRoot();
 
-          const systemModels = root.getLinkedRecords("systemModels");
-          if (systemModels) {
-            root.setLinkedRecords(
-              [...systemModels, systemModel],
-              "systemModels",
+          const connection = ConnectionHandler.getConnection(
+            root,
+            "SystemModelsTable_systemModels",
+          );
+
+          if (connection && systemModel) {
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              systemModel,
+              "SystemModelEdge",
             );
+            ConnectionHandler.insertEdgeBefore(connection, edge);
           }
 
           root.getLinkedRecords("devices")?.forEach((device) => {
