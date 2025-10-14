@@ -30,36 +30,4 @@ defmodule Edgehog.Repo do
   def min_pg_version do
     %Version{major: 13, minor: 0, patch: 0}
   end
-
-  def fetch(queryable, id, opts \\ []) do
-    {error, opts} = Keyword.pop_first(opts, :error, :not_found)
-
-    case get(queryable, id, opts) do
-      nil -> {:error, error}
-      item -> {:ok, item}
-    end
-  end
-
-  def fetch_by(queryable, clauses, opts \\ []) do
-    {error, opts} = Keyword.pop_first(opts, :error, :not_found)
-
-    case get_by(queryable, clauses, opts) do
-      nil -> {:error, error}
-      item -> {:ok, item}
-    end
-  end
-
-  def transact(fun, opts \\ []) do
-    transaction(
-      fn ->
-        case fun.() do
-          {:ok, value} -> value
-          :ok -> :transaction_committed
-          {:error, reason} -> rollback(reason)
-          :error -> rollback(:transaction_rollback_error)
-        end
-      end,
-      opts
-    )
-  end
 end

@@ -27,13 +27,13 @@
 # This file is based on these images:
 #
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20231009-slim - for the release image
+#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20250929-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.15.7-erlang-26.1.2-debian-bullseye-20231009-slim
+#   - Ex: hexpm/elixir:1.18.4-erlang-28.1-debian-bullseye-20250929-slim
 #
-ARG ELIXIR_VERSION=1.17.2
-ARG OTP_VERSION=27.0
-ARG DEBIAN_VERSION=bookworm-20240701-slim
+ARG ELIXIR_VERSION=1.18.4
+ARG OTP_VERSION=28.1
+ARG DEBIAN_VERSION=bullseye-20250929-slim
 
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
@@ -100,7 +100,7 @@ RUN chown nobody /app
 ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/prod/rel/edgehog ./
+COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/edgehog ./
 
 USER nobody
 
