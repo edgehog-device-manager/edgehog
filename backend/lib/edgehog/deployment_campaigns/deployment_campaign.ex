@@ -28,6 +28,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
   alias Edgehog.Campaigns.Status
   alias Edgehog.Containers.Release
   alias Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes
+  alias Edgehog.DeploymentCampaigns.OperationType
 
   graphql do
     type :deployment_campaign
@@ -47,7 +48,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       description "Creates a new deployment campaign."
       primary? true
 
-      accept [:name, :deployment_mechanism]
+      accept [:name, :deployment_mechanism, :operation_type]
 
       argument :release_id, :uuid do
         description """
@@ -129,6 +130,16 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       allow_nil? false
     end
 
+    attribute :operation_type, OperationType do
+      description """
+      The type of operation to perform in the deployment campaign.
+      """
+
+      public? true
+      allow_nil? false
+      default :deploy
+    end
+
     attribute :start_timestamp, :utc_datetime_usec
     attribute :completion_timestamp, :utc_datetime_usec
 
@@ -141,7 +152,13 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       public? true
       attribute_public? false
       attribute_type :uuid
-      allow_nil? false
+    end
+
+    belongs_to :target_release, Release do
+      description "The release used for upgrading by the deployment campaign."
+      public? true
+      attribute_public? false
+      attribute_type :uuid
     end
 
     belongs_to :channel, Edgehog.Campaigns.Channel do
