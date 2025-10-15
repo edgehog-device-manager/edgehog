@@ -133,9 +133,11 @@ const UpdateHardwareTypeForm = ({
       handle: hardwareType.handle,
       partNumbers:
         hardwareType.partNumbers?.count && hardwareType.partNumbers.count > 0
-          ? hardwareType.partNumbers.edges?.map(({ node: { partNumber } }) => ({
-              value: partNumber,
-            })) ?? []
+          ? (hardwareType.partNumbers.edges?.map(
+              ({ node: { partNumber } }) => ({
+                value: partNumber,
+              }),
+            ) ?? [])
           : [{ value: "" }], // default with at least one empty part number
     }),
     [hardwareType.name, hardwareType.handle, hardwareType.partNumbers],
