@@ -69,7 +69,10 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
       edges {
         node {
           id
-          env
+          env {
+            key
+            value
+          }
           extraHosts
           hostname
           networkMode
@@ -496,6 +499,17 @@ const DeviceMappingDetails = ({
 type ContainerRecord = NonNullable<
   ContainersTable_ContainerFragment$data["containers"]["edges"]
 >[number]["node"];
+type ContainerEnv = ContainerRecord["env"];
+
+const formatEnvJson = (env: ContainerEnv) => {
+  const reducedEnv = env
+    ? env.reduce((acc: any, envVar) => {
+        acc[envVar.key] = envVar.value;
+        return acc;
+      }, {})
+    : env;
+  return formatJson(reducedEnv);
+};
 
 type ContainerDetailsProps = {
   container: ContainerRecord;
@@ -514,9 +528,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         }
       >
         <MonacoJsonEditor
-          value={formatJson(container.env)}
+          value={formatEnvJson(container.env)}
           onChange={() => {}}
-          defaultValue={formatJson(container.env)}
+          defaultValue={formatEnvJson(container.env)}
           readonly={true}
           initialLines={1}
         />

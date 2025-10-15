@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Container do
 
   alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Container.ManualActions
+  alias Edgehog.Containers.Container.Types.EnvVar
   alias Edgehog.Containers.Container.Validations.CpuPeriodQuotaConsistency
   alias Edgehog.Containers.Container.Validations.VolumeTargetUniqueness
   alias Edgehog.Containers.ContainerVolume
@@ -229,8 +230,8 @@ defmodule Edgehog.Containers.Container do
       public? true
     end
 
-    attribute :env, :map do
-      default %{}
+    attribute :env, {:array, EnvVar} do
+      default []
       public? true
     end
 

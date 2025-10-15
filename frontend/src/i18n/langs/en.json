@@ -2437,6 +2437,9 @@
   "validation.cpuQuotaPeriod.format": {
     "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
   },
+  "validation.env.invalidIsNested": {
+    "defaultMessage": "Environment Variables' values cannot be nested."
+  },
   "validation.env.invalidJson": {
     "defaultMessage": "Must be a valid JSON string."
   },

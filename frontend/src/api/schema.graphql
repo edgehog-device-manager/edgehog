@@ -560,6 +560,16 @@ enum ApplicationDeploymentState {
   STOPPING
 }
 
+input ContainerEnvVarInput {
+  value: String!
+  key: String!
+}
+
+type ContainerEnvVar {
+  value: String!
+  key: String!
+}
+
 input LocalizedAttributeUpdateInput {
   value: String
   languageTag: String!
@@ -1014,32 +1024,32 @@ input ApplicationCreateInitialReleaseInput {
 }
 
 input ReleaseCreateContainersInput {
-  env: JsonString
+  env: [ContainerEnvVarInput!]
   id: ID
   memory: Int
   image: ContainerCreateWithNestedImageInput
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  portBindings: [String!]
+  restartPolicy: String
+  networkMode: String
+  privileged: Boolean
+  extraHosts: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
-  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  networkMode: String
-  portBindings: [String!]
-  privileged: Boolean
-  readOnlyRootfs: Boolean
-  restartPolicy: String
-  storageOpt: [String!]
-  tmpfs: [String!]
   volumeDriver: String
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  storageOpt: [String!]
+  readOnlyRootfs: Boolean
+  tmpfs: [String!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -2577,7 +2587,6 @@ enum ContainerSortField {
   ID
   RESTART_POLICY
   HOSTNAME
-  ENV
   PRIVILEGED
   NETWORK_MODE
   CPU_PERIOD
@@ -2653,7 +2662,7 @@ input ContainerFilterMemorySwappiness {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2664,7 +2673,7 @@ input ContainerFilterMemorySwap {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2675,7 +2684,7 @@ input ContainerFilterMemoryReservation {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2686,7 +2695,7 @@ input ContainerFilterMemory {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2697,7 +2706,7 @@ input ContainerFilterCpuRealtimeRuntime {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2708,7 +2717,7 @@ input ContainerFilterCpuRealtimePeriod {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2719,7 +2728,7 @@ input ContainerFilterCpuQuota {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2730,7 +2739,7 @@ input ContainerFilterCpuPeriod {
   isNil: Boolean
   eq: Int
   notEq: Int
-  in: [Int!]
+  in: [Int]
   lessThan: Int
   greaterThan: Int
   lessThanOrEqual: Int
@@ -2759,17 +2768,6 @@ input ContainerFilterPrivileged {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-}
-
-input ContainerFilterEnv {
-  isNil: Boolean
-  eq: JsonString
-  notEq: JsonString
-  in: [JsonString]
-  lessThan: JsonString
-  greaterThan: JsonString
-  lessThanOrEqual: JsonString
-  greaterThanOrEqual: JsonString
 }
 
 input ContainerFilterHostname {
@@ -2814,7 +2812,6 @@ input ContainerFilterInput {
   id: ContainerFilterId
   restartPolicy: ContainerFilterRestartPolicy
   hostname: ContainerFilterHostname
-  env: ContainerFilterEnv
   privileged: ContainerFilterPrivileged
   networkMode: ContainerFilterNetworkMode
   cpuPeriod: ContainerFilterCpuPeriod
@@ -2846,20 +2843,20 @@ type Container {
   restartPolicy: String
   portBindings: [String!]!
   hostname: String!
-  env: JsonString
+  env: [ContainerEnvVar!]
   privileged: Boolean
   networkMode: String!
   extraHosts: [String!]!
   capAdd: [String!]!
   capDrop: [String!]!
-  cpuPeriod: Int!
-  cpuQuota: Int!
-  cpuRealtimePeriod: Int!
-  cpuRealtimeRuntime: Int!
-  memory: Int!
-  memoryReservation: Int!
-  memorySwap: Int!
-  memorySwappiness: Int!
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealtimePeriod: Int
+  cpuRealtimeRuntime: Int
+  memory: Int
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
   volumeDriver: String!
   storageOpt: [String!]!
   readOnlyRootfs: Boolean!
