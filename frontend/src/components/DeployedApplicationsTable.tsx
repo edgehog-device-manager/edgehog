@@ -151,15 +151,18 @@ const ActionButtons = ({
   state,
   onStart,
   onStop,
+  disabled,
 }: {
   intl: ReturnType<typeof useIntl>;
   state: DeploymentState;
   onStart: () => void;
   onStop: () => void;
+  disabled: boolean;
 }) => (
   <div>
     {state === "STOPPED" || state === "ERROR" ? (
       <Button
+        disabled={disabled}
         onClick={onStart}
         className="btn p-0 text-success border-0 bg-transparent icon-click"
         title={intl.formatMessage({
@@ -171,6 +174,7 @@ const ActionButtons = ({
       </Button>
     ) : state === "STARTED" ? (
       <Button
+        disabled={disabled}
         onClick={onStop}
         className="btn p-0 text-danger border-0 bg-transparent icon-click"
         title={intl.formatMessage({
@@ -611,6 +615,7 @@ const DeployedApplicationsTable = ({
       cell: ({ row, getValue }) => (
         <div className="d-flex align-items-center">
           <ActionButtons
+            disabled={!getValue().isReady}
             intl={intl}
             state={getValue().state}
             onStart={() => handleStartDeployedApplication(getValue().id)}
@@ -622,7 +627,7 @@ const DeployedApplicationsTable = ({
               setSelectedDeployment(row.original);
               handleShowUpgradeModal();
             }}
-            disabled={getValue().state === "DELETING"}
+            disabled={getValue().state === "DELETING" || !getValue()?.isReady}
             className="btn p-0 border-0 bg-transparent ms-4 icon-click"
             title={intl.formatMessage({
               id: "components.DeployedApplicationsTable.upgradeButtonTitle",
@@ -633,7 +638,7 @@ const DeployedApplicationsTable = ({
           </Button>
 
           <Button
-            disabled={getValue().state === "DELETING"}
+            disabled={getValue().state === "DELETING" || !getValue()?.isReady}
             className="btn p-0 border-0 bg-transparent ms-4 icon-click"
             title={intl.formatMessage({
               id: "components.DeployedApplicationsTable.deleteButtonTitle",
