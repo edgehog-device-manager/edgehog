@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,11 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStartTest do
 
   describe "startDeployment mutation tests" do
     test "start on an existing deployment", %{tenant: tenant} do
-      deployment = deployment_fixture(tenant: tenant)
+      # we need to set the state of deployment in one of ready states so the action validation passes
+      {:ok, deployment} =
+        [tenant: tenant]
+        |> deployment_fixture()
+        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
 
       expect(DeploymentCommandMock, :send_deployment_command, 1, fn _, _, _ -> :ok end)
 
@@ -41,6 +45,15 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentStartTest do
       deployment = deployment_fixture(tenant: tenant)
 
       deployment |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
+
+      [tenant: tenant, deployment: deployment]
+      |> send_start_deployment_mutation()
+      |> extract_error!()
+    end
+
+    test "start on nonready deployment return an error", %{tenant: tenant} do
+      # deployment is not ready because it is in :pending state
+      deployment = deployment_fixture(tenant: tenant)
 
       [tenant: tenant, deployment: deployment]
       |> send_start_deployment_mutation()
