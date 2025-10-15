@@ -33,6 +33,8 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Triggers.IncomingData
   alias Edgehog.Triggers.TriggerPayload
 
+  require Logger
+
   @available_containers "io.edgehog.devicemanager.apps.AvailableContainers"
   @available_deployments "io.edgehog.devicemanager.apps.AvailableDeployments"
   @available_images "io.edgehog.devicemanager.apps.AvailableImages"
@@ -264,7 +266,11 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
       "message" => message
     } = event.value
 
-    with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
+    with {:ok, deployment} <-
+           Containers.fetch_deployment(deployment_id,
+             tenant: tenant,
+             load: [device: [:device_id]]
+           ) do
       case state do
         "Starting" ->
           Containers.mark_deployment_as_starting(deployment, tenant: tenant)
@@ -285,7 +291,12 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
           Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
 
         "Updating" ->
-          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
+          # TODO: we do not have a real state to represent deployment update, it
+          # should stay on its previous state. We just log the event and return
+          # the unmodified deployment.
+          Logger.info("Device #{inspect(deployment.device.device_id)} updating deployment #{inspect(deployment.id)}")
+
+          {:ok, deployment}
       end
     end
   end
