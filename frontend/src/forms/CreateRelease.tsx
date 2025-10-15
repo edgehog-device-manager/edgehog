@@ -739,7 +739,7 @@ const ContainerForm = ({
                 value={
                   field.value && typeof field.value !== "string"
                     ? envToString(field.value)
-                    : field.value ?? ""
+                    : (field.value ?? "")
                 }
                 onChange={(value) => {
                   field.onChange(value ?? "");
@@ -748,7 +748,7 @@ const ContainerForm = ({
                 defaultValue={
                   field.value && typeof field.value !== "string"
                     ? envToString(field.value)
-                    : field.value ?? "{}"
+                    : (field.value ?? "{}")
                 }
                 additionalValidation={envValidation}
               />
