@@ -43,6 +43,7 @@ import DeploymentStateComponent, {
   parseDeploymentState,
 } from "components/DeploymentState";
 import DeploymentReadiness from "components/DeploymentReadiness";
+import ContainerStatusList from "components/ContainerStatusList";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -70,6 +71,19 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
                     systemModels {
                       name
                     }
+                  }
+                }
+              }
+            }
+          }
+          containerDeployments {
+            edges {
+              node {
+                id
+                state
+                container {
+                  image {
+                    reference
                   }
                 }
               }
@@ -132,10 +146,12 @@ const UPGRADE_DEPLOYMENT_MUTATION = graphql`
 
 // Action buttons with play and stop icons
 const ActionButtons = ({
+  intl,
   state,
   onStart,
   onStop,
 }: {
+  intl: ReturnType<typeof useIntl>;
   state: DeploymentState;
   onStart: () => void;
   onStop: () => void;
@@ -145,6 +161,10 @@ const ActionButtons = ({
       <Button
         onClick={onStart}
         className="btn p-0 text-success border-0 bg-transparent"
+        title={intl.formatMessage({
+          id: "components.DeployedApplicationsTable.startButtonTitle",
+          defaultMessage: "Start Deployment",
+        })}
       >
         <Icon icon="play" className="text-success" />
       </Button>
@@ -152,6 +172,10 @@ const ActionButtons = ({
       <Button
         onClick={onStop}
         className="btn p-0 text-danger border-0 bg-transparent"
+        title={intl.formatMessage({
+          id: "components.DeployedApplicationsTable.stopButtonTitle",
+          defaultMessage: "Stop Deployment",
+        })}
       >
         <Icon icon="stop" className="text-danger" />
       </Button>
@@ -212,6 +236,11 @@ const DeployedApplicationsTable = ({
   const [selectedDeployment, setSelectedDeployment] = useState<
     (typeof deployments)[0] | null
   >(null);
+
+  // Track expanded state for container status lists
+  const [expandedContainerLists, setExpandedContainerLists] = useState<
+    Set<string>
+  >(new Set());
 
   const upgradeReleaseOptions: SelectOption[] = useMemo(() => {
     if (!selectedDeployment?.upgradeTargetReleases) return [];
@@ -294,6 +323,19 @@ const DeployedApplicationsTable = ({
       releaseVersion: edge.node.release?.version || "N/A",
       state: parseDeploymentState(edge.node.state || undefined),
       isReady: edge.node.isReady,
+      containerDeployments:
+        edge.node.containerDeployments?.edges?.map((containerEdge) => ({
+          id: containerEdge.node.id,
+          state: containerEdge.node.state,
+          container: containerEdge.node.container
+            ? {
+                image: {
+                  reference:
+                    containerEdge.node.container.image?.reference || "Unknown",
+                },
+              }
+            : null,
+        })) || [],
       upgradeTargetReleases:
         edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
           semver.gt(
@@ -526,6 +568,37 @@ const DeployedApplicationsTable = ({
       ),
       cell: ({ getValue }) => <DeploymentReadiness isReady={getValue()} />,
     }),
+    columnHelper.accessor("containerDeployments", {
+      header: () => (
+        <FormattedMessage
+          id="components.DeployedApplicationsTable.containerStatus"
+          defaultMessage="Container Status"
+        />
+      ),
+      cell: ({ getValue, row }) => {
+        const deployment = row.original;
+        const deploymentId = deployment.id;
+        const isExpanded = expandedContainerLists.has(deploymentId);
+
+        const handleToggleExpanded = () => {
+          const newExpanded = new Set(expandedContainerLists);
+          if (isExpanded) {
+            newExpanded.delete(deploymentId);
+          } else {
+            newExpanded.add(deploymentId);
+          }
+          setExpandedContainerLists(newExpanded);
+        };
+
+        return (
+          <ContainerStatusList
+            containerDeployments={getValue()}
+            isExpanded={isExpanded}
+            onToggleExpanded={handleToggleExpanded}
+          />
+        );
+      },
+    }),
     columnHelper.accessor((row) => row, {
       id: "action",
       header: () => (
@@ -537,6 +610,7 @@ const DeployedApplicationsTable = ({
       cell: ({ row, getValue }) => (
         <div className="d-flex align-items-center">
           <ActionButtons
+            intl={intl}
             state={getValue().state}
             onStart={() => handleStartDeployedApplication(getValue().id)}
             onStop={() => handleStopDeployedApplication(getValue().id)}
@@ -549,6 +623,10 @@ const DeployedApplicationsTable = ({
             }}
             disabled={getValue().state === "DELETING"}
             className="btn p-0 border-0 bg-transparent ms-4"
+            title={intl.formatMessage({
+              id: "components.DeployedApplicationsTable.upgradeButtonTitle",
+              defaultMessage: "Upgrade Deployment",
+            })}
           >
             <Icon icon="upgrade" className="text-primary" />
           </Button>
@@ -556,6 +634,10 @@ const DeployedApplicationsTable = ({
           <Button
             disabled={getValue().state === "DELETING"}
             className="btn p-0 border-0 bg-transparent ms-4"
+            title={intl.formatMessage({
+              id: "components.DeployedApplicationsTable.deleteButtonTitle",
+              defaultMessage: "Delete Deployment",
+            })}
             onClick={() => {
               setSelectedDeployment(getValue());
               handleShowDeleteModal();
@@ -706,5 +788,5 @@ const DeployedApplicationsTable = ({
   );
 };
 
-export type { DeploymentTableProps, DeploymentState };
+export type { DeploymentTableProps };
 export default DeployedApplicationsTable;
