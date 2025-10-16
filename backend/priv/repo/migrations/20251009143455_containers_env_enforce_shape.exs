@@ -35,8 +35,8 @@ defmodule Edgehog.Repo.Migrations.ContainersEnvEnforceShape do
       add :env_new, :map
     end
 
-    # Copy original values
-    execute("UPDATE containers SET env_new = env")
+    # Copy original values, converting NULL to empty object
+    execute("UPDATE containers SET env_new = COALESCE(env, '{}'::jsonb)")
 
     # Create a function for the edit, as nested queries are not allowed in the
     # `USING` clause of `ALTER`. See PostgresQL docs for info about `jsonb_each`,
@@ -65,8 +65,9 @@ defmodule Edgehog.Repo.Migrations.ContainersEnvEnforceShape do
       )
     """)
 
-    # Add default value adapted to the new type
+    # Add default value adapted to the new type and set not null constraint
     execute("ALTER TABLE containers ALTER COLUMN env_new SET DEFAULT ARRAY[]::jsonb[]")
+    execute("ALTER TABLE containers ALTER COLUMN env_new SET NOT NULL")
 
     execute("DROP FUNCTION jsonb_obj_to_array(jsonb)")
 
@@ -76,12 +77,6 @@ defmodule Edgehog.Repo.Migrations.ContainersEnvEnforceShape do
     end
 
     rename table(:containers), :env_new, to: :env
-  end
-
-  def _down do
-    alter table(:containers) do
-      remove :env_new
-    end
   end
 
   def down do
@@ -128,6 +123,9 @@ defmodule Edgehog.Repo.Migrations.ContainersEnvEnforceShape do
 
     # Add default value adapted to the new type
     execute("ALTER TABLE containers ALTER COLUMN env_old SET DEFAULT '{}'::jsonb")
+
+    # Drop NOT NULL constraint to restore original column state
+    execute("ALTER TABLE containers ALTER COLUMN env_old DROP NOT NULL")
 
     execute("DROP FUNCTION jsonb_array_to_obj(jsonb[])")
 
