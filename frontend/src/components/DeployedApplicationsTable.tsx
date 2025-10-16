@@ -509,7 +509,12 @@ const DeployedApplicationsTable = ({
           defaultMessage="State"
         />
       ),
-      cell: ({ getValue }) => <DeploymentStateComponent state={getValue()} />,
+      cell: ({ row, getValue }) => (
+        <DeploymentStateComponent
+          state={getValue()}
+          isReady={row.original.isReady}
+        />
+      ),
     }),
     columnHelper.accessor("isReady", {
       id: "readiness",
