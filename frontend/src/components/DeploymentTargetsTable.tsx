@@ -94,9 +94,12 @@ const columns = [
           description="Title for the State column of the Deployment Targets table"
         />
       ),
-      cell: ({ getValue }) => {
+      cell: ({ row, getValue }) => {
         const state = getValue();
-        return state && <DeploymentStateComponent state={state} />;
+        const isReady = row.original.deployment?.isReady;
+        return (
+          state && <DeploymentStateComponent state={state} isReady={isReady} />
+        );
       },
     },
   ),

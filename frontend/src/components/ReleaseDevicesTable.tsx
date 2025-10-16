@@ -50,6 +50,7 @@ const RELEASE_DEVICES_TABLE_FRAGMENT = graphql`
         node {
           id
           state
+          isReady
           device {
             id
             name
@@ -129,6 +130,7 @@ const ReleaseDevicesTable = ({
       cell: ({ row }) => (
         <DeploymentStateComponent
           state={row.original.state as DeploymentState}
+          isReady={row.original.isReady}
         />
       ),
     }),

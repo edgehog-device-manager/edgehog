@@ -111,26 +111,31 @@ const stateMessages = defineMessages<DeploymentState>({
   },
 });
 
-type DeploymentStateComponentProps = {
-  state: DeploymentState;
+const displaySpinner = (state: string, isReady?: boolean | null) => {
+  return (
+    !isReady ||
+    ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
+  );
 };
 
-const DeploymentStateComponent = ({ state }: DeploymentStateComponentProps) => {
+type DeploymentStateComponentProps = {
+  state: DeploymentState;
+  isReady?: boolean | null;
+};
+
+const DeploymentStateComponent = ({
+  state,
+  isReady,
+}: DeploymentStateComponentProps) => {
   return (
     <div className="d-flex align-items-center">
       <Icon
-        icon={
-          ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
-            ? "spinner"
-            : "circle"
-        }
-        className={`me-2 ${stateColors[state]} ${
-          ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
-            ? "fa-spin"
-            : ""
-        }`}
+        icon={displaySpinner(state, isReady) ? "spinner" : "circle"}
+        className={`me-2 ${stateColors[state]} ${displaySpinner(state, isReady) ? "fa-spin" : ""}`}
       />
-      <FormattedMessage id={stateMessages[state].id} />
+      <FormattedMessage
+        id={isReady ? stateMessages[state].id : stateMessages["DEPLOYING"].id}
+      />
     </div>
   );
 };
