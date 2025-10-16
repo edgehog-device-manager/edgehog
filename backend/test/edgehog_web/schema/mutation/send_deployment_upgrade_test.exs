@@ -50,8 +50,11 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
 
-      deployment_0_0_1 =
-        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
+      # we need to set the state of deployment in one of ready states so the action validation passes
+      {:ok, deployment_0_0_1} =
+        [release_id: release_0_0_1.id, tenant: tenant]
+        |> deployment_fixture()
+        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
 
@@ -71,11 +74,11 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
 
-      deployment_0_0_1 =
-        deployment_fixture(
-          release_id: release_0_0_1.id,
-          tenant: tenant
-        )
+      # we need to set the state of deployment in one of ready states so the action validation passes
+      {:ok, deployment_0_0_1} =
+        [release_id: release_0_0_1.id, tenant: tenant]
+        |> deployment_fixture()
+        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
       expect(DeploymentUpdateMock, :update, fn _, _, _ -> :ok end)
@@ -100,8 +103,11 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
 
-      deployment_0_0_1 =
-        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
+      # we need to set the state of deployment in one of ready states so the action validation passes
+      {:ok, deployment_0_0_1} =
+        [release_id: release_0_0_1.id, tenant: tenant]
+        |> deployment_fixture()
+        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
 
       release_0_0_2_b = release_fixture(version: release_0_0_2.version, tenant: tenant)
 
@@ -114,11 +120,32 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
 
-      deployment_0_0_2 = deployment_fixture(release_id: release_0_0_2.id, tenant: tenant)
+      # we need to set the state of deployment in one of ready states so the action validation passes
+      {:ok, deployment_0_0_2} =
+        [release_id: release_0_0_2.id, tenant: tenant]
+        |> deployment_fixture()
+        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
 
       [tenant: tenant, deployment: deployment_0_0_2, target: release_0_0_1]
       |> send_deployment_upgrade_mutation()
       |> extract_error!()
+    end
+
+    test "fails when deployment is in non ready state", args do
+      %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
+        args
+
+      deployment_0_0_1 =
+        deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
+
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _, _, _ ->
+        :ok
+      end)
+
+      _result =
+        [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
+        |> send_deployment_upgrade_mutation()
+        |> extract_error!()
     end
   end
 

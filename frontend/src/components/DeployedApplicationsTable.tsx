@@ -135,14 +135,17 @@ const ActionButtons = ({
   state,
   onStart,
   onStop,
+  disabled,
 }: {
   state: DeploymentState;
   onStart: () => void;
   onStop: () => void;
+  disabled: boolean;
 }) => (
   <div>
     {state === "STOPPED" || state === "ERROR" ? (
       <Button
+        disabled={disabled}
         onClick={onStart}
         className="btn p-0 text-success border-0 bg-transparent"
       >
@@ -150,6 +153,7 @@ const ActionButtons = ({
       </Button>
     ) : state === "STARTED" ? (
       <Button
+        disabled={disabled}
         onClick={onStop}
         className="btn p-0 text-danger border-0 bg-transparent"
       >
@@ -537,6 +541,7 @@ const DeployedApplicationsTable = ({
       cell: ({ row, getValue }) => (
         <div className="d-flex align-items-center">
           <ActionButtons
+            disabled={!getValue().isReady}
             state={getValue().state}
             onStart={() => handleStartDeployedApplication(getValue().id)}
             onStop={() => handleStopDeployedApplication(getValue().id)}
@@ -547,14 +552,14 @@ const DeployedApplicationsTable = ({
               setSelectedDeployment(row.original);
               handleShowUpgradeModal();
             }}
-            disabled={getValue().state === "DELETING"}
+            disabled={getValue().state === "DELETING" || !getValue()?.isReady}
             className="btn p-0 border-0 bg-transparent ms-4"
           >
             <Icon icon="upgrade" className="text-primary" />
           </Button>
 
           <Button
-            disabled={getValue().state === "DELETING"}
+            disabled={getValue().state === "DELETING" || !getValue()?.isReady}
             className="btn p-0 border-0 bg-transparent ms-4"
             onClick={() => {
               setSelectedDeployment(getValue());
