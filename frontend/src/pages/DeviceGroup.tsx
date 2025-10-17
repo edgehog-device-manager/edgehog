@@ -219,8 +219,9 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
 
   const handleUpdateDeviceGroup = useCallback(
     (deviceGroup: DeviceGroupData) => {
+      const newDeviceGroup = { ...deviceGroup };
       updateDeviceGroup({
-        variables: { deviceGroupId, input: deviceGroup },
+        variables: { deviceGroupId, input: newDeviceGroup },
         onCompleted(data, errors) {
           if (errors) {
             const errorFeedback = errors
