@@ -116,8 +116,8 @@
       ]
     },
     {
-      "allow_nil?": false,
-      "default": "-1",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -126,8 +126,8 @@
       "type": "bigint"
     },
     {
-      "allow_nil?": false,
-      "default": "-1",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -136,8 +136,8 @@
       "type": "bigint"
     },
     {
-      "allow_nil?": false,
-      "default": "-1",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -146,8 +146,8 @@
       "type": "bigint"
     },
     {
-      "allow_nil?": false,
-      "default": "-1",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -156,8 +156,8 @@
       "type": "bigint"
     },
     {
-      "allow_nil?": false,
-      "default": "-1",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -166,8 +166,8 @@
       "type": "bigint"
     },
     {
-      "allow_nil?": false,
-      "default": "-1",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -176,8 +176,8 @@
       "type": "bigint"
     },
     {
-      "allow_nil?": false,
-      "default": "-2",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -186,8 +186,8 @@
       "type": "bigint"
     },
     {
-      "allow_nil?": false,
-      "default": "-1",
+      "allow_nil?": true,
+      "default": "nil",
       "generated?": false,
       "primary_key?": false,
       "references": null,
@@ -375,7 +375,7 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "693FA6079050EF27BF5E3E98DB99A2A198EB702B59B477C71711FB1EDA85B922",
+  "hash": "C222564DA7C705E91573C06655C0B99A79AF5BCD09B523B5D9B74D3BB217A6E1",
   "identities": [],
   "multitenancy": {
     "attribute": "tenant_id",
