@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0-alpha.6] - 2025-10-16
+### Added
+- The backend now allows to define different images with the same reference but different image credentials associated.
+### Changed
+- CPU Period and CPU Quota get validated on the fronted.
+- Updated the postgres version in dev, test still run on all versions.
+- Added validation for unique volume targets
+- Deployment readiness is now a single field
+- Deployments now report in the UI the state of each single container. Showing whether the container is running, exited or encountered some error.
+- Key-value structure for container environment variables is enforced on backend level.
+### Fixed
+- Reconciler wrongful map comparison.
+- Properly update relay connections to avoid out-of sync errors.
+
 ## [0.10.0-alpha.5] - 2025-10-06
 ### Changed
 - When no device group exist, on the Channel List page prompt the user to create at least one group before creating a Channel ([#972](https://github.com/edgehog-device-manager/edgehog/issues/972)).
