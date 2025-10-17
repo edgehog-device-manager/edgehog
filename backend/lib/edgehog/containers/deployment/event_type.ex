@@ -18,16 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Types.DeploymentState do
-  @moduledoc false
+defmodule Edgehog.Containers.Deployment.EventType do
+  @moduledoc """
+  Expresses the type of event a device can communicate to the backend trough the `DeploymentEvent` interface.
+  """
 
   use Ash.Type.Enum,
     values: [
-      pending: "The deployment has been created in the database layer, the device yet has to receive it.",
-      sent: "The deployment description has been sent to the device.",
-      started: "The deployment is started on the device.",
-      stopped: "The deployment is stopped on the device."
+      starting: "The deployment is starting.",
+      stopping: "The deployment is stopping.",
+      started: "The deployment is started.",
+      stopped: "The deployment is stopped.",
+      updating: "The deployment is getting updated.",
+      deleting: "The deployment is getting deleted.",
+      error: "The deployment encountered an error."
     ]
 
-  def graphql_type(_), do: :application_deployment_state
+  def graphql_type(_), do: :deployment_event_type
 end
