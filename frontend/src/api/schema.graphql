@@ -2843,7 +2843,7 @@ type Container {
   restartPolicy: String
   portBindings: [String!]!
   hostname: String!
-  env: [ContainerEnvVar!]
+  env: [ContainerEnvVar!]!
   privileged: Boolean
   networkMode: String!
   extraHosts: [String!]!
