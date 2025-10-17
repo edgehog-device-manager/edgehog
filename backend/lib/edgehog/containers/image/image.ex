@@ -80,7 +80,7 @@ defmodule Edgehog.Containers.Image do
   end
 
   identities do
-    identity :reference, [:reference]
+    identity :reference_credentials, [:reference, :image_credentials_id]
   end
 
   postgres do
