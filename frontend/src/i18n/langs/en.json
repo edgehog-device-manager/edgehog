@@ -415,6 +415,9 @@
   "components.CreateBaseImageCollectionForm.systemModelOption": {
     "defaultMessage": "Select a System Model"
   },
+  "components.CreateBaseImageCollectionForm.systemModelOptionUsed": {
+    "defaultMessage": "{name} (already used)"
+  },
   "components.CreateDeviceGroup.handleLabel": {
     "defaultMessage": "Handle"
   },
