@@ -139,7 +139,7 @@ defmodule Edgehog.Containers.Container do
                on_no_match: :create,
                on_lookup: :relate,
                on_match: :ignore,
-               use_identities: [:reference]
+               use_identities: [:reference_credentials]
              )
 
       change manage_relationship(:networks,
