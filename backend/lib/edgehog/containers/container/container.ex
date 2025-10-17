@@ -232,6 +232,7 @@ defmodule Edgehog.Containers.Container do
 
     attribute :env, {:array, EnvVar} do
       default []
+      allow_nil? false
       public? true
     end
 

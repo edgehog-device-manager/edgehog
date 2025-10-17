@@ -44,7 +44,7 @@
       "type": "text"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "[]",
       "generated?": false,
       "primary_key?": false,
@@ -375,7 +375,7 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "C222564DA7C705E91573C06655C0B99A79AF5BCD09B523B5D9B74D3BB217A6E1",
+  "hash": "90E81FEDC0181BFC61A3102B8387999BEEB110AE80E824F70D5F4762415E7443",
   "identities": [],
   "multitenancy": {
     "attribute": "tenant_id",

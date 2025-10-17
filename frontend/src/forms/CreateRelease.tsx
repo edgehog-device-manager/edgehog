@@ -1776,7 +1776,7 @@ const CreateRelease = ({
           const submitData: ReleaseSubmitData = {
             ...data,
             containers: data.containers?.map((container) => ({
-              env: container.env,
+              env: container.env || undefined,
               extraHosts: container.extraHosts || undefined,
               image: {
                 reference: container.image.reference,
