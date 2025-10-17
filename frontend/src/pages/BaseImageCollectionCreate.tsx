@@ -51,6 +51,16 @@ const CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY = graphql`
       __typename
       count
     }
+    baseImageCollections {
+      edges {
+        node {
+          systemModel {
+            id
+            name
+          }
+        }
+      }
+    }
     ...CreateBaseImageCollection_OptionsFragment
   }
 `;
@@ -69,10 +79,12 @@ const CREATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
 
 type BaseImageCollectionProps = {
   baseImageCollectionOptions: BaseImageCollectionCreate_getOptions_Query$data;
+  usedSystemModelIds?: string[];
 };
 
 const BaseImageCollection = ({
   baseImageCollectionOptions,
+  usedSystemModelIds = [],
 }: BaseImageCollectionProps) => {
   const navigate = useNavigate();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
@@ -156,6 +168,7 @@ const BaseImageCollection = ({
         optionsRef={baseImageCollectionOptions}
         onSubmit={handleCreateBaseImageCollection}
         isLoading={isCreatingBaseImageCollection}
+        usedSystemModelIds={usedSystemModelIds}
       />
     </>
   );
@@ -196,13 +209,18 @@ const BaseImageCollectionWrapper = ({
     CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY,
     getBaseImageCollectionOptionsQuery,
   );
-  const { systemModels } = baseImageCollectionOptions;
+  const { systemModels, baseImageCollections } = baseImageCollectionOptions;
   if (systemModels?.count === 0) {
     return <NoSystemModels />;
   }
+
+  const usedSystemModelIds =
+    baseImageCollections?.edges?.map((edge) => edge.node.systemModel.id) ?? [];
+
   return (
     <BaseImageCollection
       baseImageCollectionOptions={baseImageCollectionOptions}
+      usedSystemModelIds={usedSystemModelIds}
     />
   );
 };
