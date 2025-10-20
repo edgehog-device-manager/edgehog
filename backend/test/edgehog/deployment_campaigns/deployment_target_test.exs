@@ -29,7 +29,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTargetTest do
   import Edgehog.GroupsFixtures
   import Edgehog.TenantsFixtures
 
-  alias Ash.Error.Query.NotFound
+  alias Ash.Error.Invalid
   alias Edgehog.DeploymentCampaigns
 
   setup do
@@ -107,7 +107,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTargetTest do
           tenant: tenant
         )
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                DeploymentCampaigns.fetch_next_valid_target_with_application_deployed(
                  campaign.id,
                  application.id,
@@ -132,7 +132,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTargetTest do
 
       DeploymentCampaigns.mark_target_as_in_progress(target, tenant: tenant)
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                DeploymentCampaigns.fetch_next_valid_target_with_application_deployed(
                  campaign.id,
                  application.id,
@@ -166,7 +166,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTargetTest do
           tenant: tenant
         )
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                DeploymentCampaigns.fetch_next_valid_target_with_application_deployed(
                  campaign.id,
                  application.id,

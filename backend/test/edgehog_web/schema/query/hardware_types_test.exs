@@ -122,7 +122,7 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypesTest do
 
     variables =
       %{
-        "filter" => opts[:filter],
+        "filter" => opts[:filter] || %{},
         "sort" => opts[:sort] || []
       }
 
