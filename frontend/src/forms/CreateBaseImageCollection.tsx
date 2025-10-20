@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -88,12 +88,14 @@ type Props = {
   optionsRef: CreateBaseImageCollection_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionData) => void;
+  usedSystemModelIds?: string[];
 };
 
 const CreateBaseImageCollectionForm = ({
   optionsRef,
   isLoading = false,
   onSubmit,
+  usedSystemModelIds = [],
 }: Props) => {
   const intl = useIntl();
   const { systemModels } = useFragment(
@@ -109,6 +111,16 @@ const CreateBaseImageCollectionForm = ({
     defaultValues: initialData,
     resolver: yupResolver(baseImageCollectionSchema),
   });
+
+  // Sort system models: available first, used ones last
+  const systemModelOptions = useMemo(() => {
+    const nodes = systemModels?.edges?.map((edge) => edge.node) ?? [];
+    return nodes.sort((model1, model2) => {
+      const model1Used = usedSystemModelIds.includes(model1.id);
+      const model2Used = usedSystemModelIds.includes(model2.id);
+      return Number(model1Used) - Number(model2Used);
+    });
+  }, [systemModels, usedSystemModelIds]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -164,11 +176,27 @@ const CreateBaseImageCollectionForm = ({
                 defaultMessage: "Select a System Model",
               })}
             </option>
-            {systemModels?.edges?.map(({ node: systemModel }) => (
-              <option key={systemModel.id} value={systemModel.id}>
-                {systemModel.name}
-              </option>
-            ))}
+
+            {systemModelOptions.map((systemModel) => {
+              const isUsed = usedSystemModelIds.includes(systemModel.id);
+              return (
+                <option
+                  key={systemModel.id}
+                  value={systemModel.id}
+                  disabled={isUsed}
+                >
+                  {isUsed
+                    ? intl.formatMessage(
+                        {
+                          id: "components.CreateBaseImageCollectionForm.systemModelOptionUsed",
+                          defaultMessage: "{name} (already used)",
+                        },
+                        { name: systemModel.name },
+                      )
+                    : systemModel.name}
+                </option>
+              );
+            })}
           </Form.Select>
           <Form.Control.Feedback type="invalid">
             {errors.systemModelId?.message && (
