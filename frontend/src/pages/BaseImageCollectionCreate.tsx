@@ -96,8 +96,9 @@ const BaseImageCollection = ({
 
   const handleCreateBaseImageCollection = useCallback(
     (baseImageCollection: BaseImageCollectionData) => {
+      const newBaseImageCollection = { ...baseImageCollection };
       createBaseImageCollection({
-        variables: { input: baseImageCollection },
+        variables: { input: newBaseImageCollection },
         onCompleted(data, errors) {
           const baseImageCollectionId =
             data.createBaseImageCollection?.result?.id;

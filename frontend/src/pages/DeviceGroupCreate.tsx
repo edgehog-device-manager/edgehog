@@ -55,8 +55,9 @@ const DeviceGroupCreatePage = () => {
 
   const handleCreateDeviceGroup = useCallback(
     (deviceGroup: DeviceGroupData) => {
+      const newDeviceGroup = { ...deviceGroup };
       createDeviceGroup({
-        variables: { input: deviceGroup },
+        variables: { input: newDeviceGroup },
         onCompleted(data, errors) {
           const deviceGroupId = data.createDeviceGroup?.result?.id;
           if (deviceGroupId) {
