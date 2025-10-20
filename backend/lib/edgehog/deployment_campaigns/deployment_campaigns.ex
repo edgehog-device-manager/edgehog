@@ -76,6 +76,10 @@ defmodule Edgehog.DeploymentCampaigns do
         action: :read_in_progress_targets,
         args: [:deployment_campaign_id]
 
+      define :fetch_next_valid_target_with_application_deployed,
+        action: :next_valid_target_with_application_deployed,
+        args: [:deployment_campaign_id, :application_id]
+
       define :fetch_target_by_deployment,
         action: :read,
         get_by: [:deployment_id],
