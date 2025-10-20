@@ -85,6 +85,45 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
       filter expr(status == :in_progress)
     end
 
+    read :next_valid_target_with_application_deployed do
+      description """
+      Returns the next valid target whose device has a specific application deployed.
+
+      The next valid target is chosen with these criteria:
+      - Must be idle
+      - Must be online
+      - Must have the specified application deployed
+      - It must either not have been attempted before or it has to be the least
+      recently attempted target, in this order of preference.
+
+      This set of constraints guarantees that when we make an attempt on a
+      target that fails with a temporary error, given we update latest_attempt,
+      we can read the next deployable target to attempt deployment operations on other
+      targets, or retry the same target if it is the only deployable one.
+      This is useful for campaigns that require an existing deployment to be present
+      (e.g., start, stop, upgrade, delete operations).
+      """
+
+      get? true
+      argument :deployment_campaign_id, :uuid, allow_nil?: false
+      argument :application_id, :uuid, allow_nil?: false
+
+      prepare build(load: [device: [:online, application_deployments: :release]])
+      prepare build(sort: [latest_attempt: :asc_nils_first])
+      prepare build(limit: 1)
+
+      filter expr(deployment_campaign_id == ^arg(:deployment_campaign_id))
+      filter expr(status == :idle)
+      filter expr(device.online == true)
+
+      filter expr(
+               exists(
+                 device.application_deployments,
+                 release.application_id == ^arg(:application_id)
+               )
+             )
+    end
+
     create :create do
       description "Creates a new deployment target."
       primary? true
