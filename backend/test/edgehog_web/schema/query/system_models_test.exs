@@ -128,7 +128,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelsTest do
 
     variables =
       %{
-        "filter" => opts[:filter],
+        "filter" => opts[:filter] || %{},
         "sort" => opts[:sort] || []
       }
 

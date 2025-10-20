@@ -27,7 +27,6 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
   import Edgehog.UpdateCampaignsFixtures
 
   alias Ash.Error.Invalid
-  alias Ash.Error.Query.NotFound
   alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.BaseImage
   alias Edgehog.Astarte.Device.BaseImageMock
@@ -58,7 +57,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises for non-existing update campaign", %{tenant: tenant} do
-      assert_raise NotFound, fn ->
+      assert_raise Invalid, fn ->
         Core.get_update_campaign!(tenant.tenant_id, 12_345)
       end
     end
@@ -79,7 +78,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises for non-existing update campaign", %{tenant: tenant} do
-      assert_raise NotFound, fn ->
+      assert_raise Invalid, fn ->
         Core.get_update_campaign_base_image!(tenant.tenant_id, 12_345)
       end
     end
@@ -222,7 +221,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises with non-existing target", %{tenant: tenant} do
-      assert_raise NotFound, fn ->
+      assert_raise Invalid, fn ->
         Core.get_target!(tenant.tenant_id, 1_234_567)
       end
     end
@@ -255,7 +254,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
 
     test "raises with non-existing linked target", %{tenant: tenant} do
-      assert_raise NotFound, fn ->
+      assert_raise Invalid, fn ->
         Core.get_target_for_ota_operation!(tenant.tenant_id, Ecto.UUID.generate())
       end
     end
@@ -545,7 +544,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.start_target_update(update_campaign.base_image)
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
 
@@ -559,7 +558,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.mark_target_as_successful!()
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
 
@@ -573,7 +572,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> Core.mark_target_as_failed!()
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
 
@@ -587,7 +586,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> update_device_online_for_target!(false)
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
 
       target
@@ -646,7 +645,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Ash.load!(Core.default_preloads_for_target())
       |> update_device_online_for_target!(false)
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                Core.fetch_next_updatable_target(tenant.tenant_id, update_campaign.id)
     end
   end

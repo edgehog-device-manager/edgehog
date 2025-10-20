@@ -24,7 +24,8 @@ defmodule Edgehog.BaseImages.BaseImage do
     domain: Edgehog.BaseImages,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    auto_cleanup: false
 
   alias Edgehog.BaseImages.BaseImage.Changes
   alias Edgehog.Localization
