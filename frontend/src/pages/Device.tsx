@@ -96,6 +96,7 @@ import BatteryTable from "components/BatteryTable";
 import NetworkInterfacesTable from "components/NetworkInterfacesTable";
 import BaseImageForm from "forms/BaseImageForm";
 import MultiSelect from "components/MultiSelect";
+import assets from "assets";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment Device_hardwareInfo on Device {
@@ -1821,7 +1822,7 @@ const DeviceContent = ({
               <div>
                 <Figure
                   alt={device.name}
-                  src={device.systemModel?.pictureUrl || undefined}
+                  src={device.systemModel?.pictureUrl || assets.images.devices}
                 />
               </div>
             </Col>

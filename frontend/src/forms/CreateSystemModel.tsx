@@ -36,6 +36,7 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { systemModelHandleSchema, messages, yup } from "forms";
+import assets from "assets";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment CreateSystemModel_OptionsFragment on RootQueryType {
@@ -226,7 +227,10 @@ const CreateSystemModelForm = ({
                     onClick={() => setValue("pictureFile", null)}
                   />
                 )}
-                <Figure alt={initialData.name} src={picture || undefined} />
+                <Figure
+                  alt={initialData.name}
+                  src={picture || assets.images.devices}
+                />
               </div>
               <Form.Group controlId="pictureFile">
                 <Form.Control
