@@ -28,6 +28,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
   alias Edgehog.Campaigns.Status
   alias Edgehog.Containers.Release
   alias Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes
+  alias Edgehog.DeploymentCampaigns.DeploymentCampaign.Validations
   alias Edgehog.DeploymentCampaigns.OperationType
 
   graphql do
@@ -66,10 +67,19 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
         allow_nil? false
       end
 
+      argument :target_release_id, :uuid do
+        description """
+        The ID of the new release that will be distributed if operationType is 'UPGRADE'.
+        """
+      end
+
+      validate Validations.SameApplication
+
       change Changes.ComputeDeploymentTargets
 
       change manage_relationship(:release_id, :release, type: :append)
       change manage_relationship(:channel_id, :channel, type: :append)
+      change manage_relationship(:target_release_id, :target_release, type: :append)
     end
 
     update :mark_as_in_progress do
@@ -152,6 +162,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
       public? true
       attribute_public? false
       attribute_type :uuid
+      allow_nil? false
     end
 
     belongs_to :target_release, Release do

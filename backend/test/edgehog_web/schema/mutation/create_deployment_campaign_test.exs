@@ -84,6 +84,72 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
       assert {:wait_for_start_execution, _data} = :sys.get_state(pid)
     end
 
+    test "creates a deployment campaign (:upgrade) with valid target_release", %{
+      tenant: tenant
+    } do
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      release = release_fixture(system_models: 1, tenant: tenant)
+
+      target_release_params =
+        [
+          application_id: release.application_id,
+          version: "0.1.#{System.unique_integer([:positive])}",
+          system_models: release.system_models,
+          tenant: tenant
+        ]
+
+      target_release = release_fixture(target_release_params)
+
+      device =
+        [release_id: release.id, tenant: tenant]
+        |> device_fixture_compatible_with_release()
+        |> add_tags(["foobar"])
+
+      release_id = AshGraphql.Resource.encode_relay_id(release)
+      target_release_id = AshGraphql.Resource.encode_relay_id(target_release)
+      channel_id = AshGraphql.Resource.encode_relay_id(channel)
+
+      campaign_name = "Test deployment campaign"
+
+      deployment_campaign_data =
+        [
+          name: campaign_name,
+          operation_type: :upgrade,
+          release_id: release_id,
+          channel_id: channel_id,
+          target_release_id: target_release_id,
+          tenant: tenant
+        ]
+        |> create_deployment_campaign_mutation()
+        |> extract_result!()
+
+      assert ^campaign_name = deployment_campaign_data["name"]
+      assert "IDLE" = deployment_campaign_data["status"]
+      assert deployment_campaign_data["outcome"] == nil
+      assert deployment_campaign_data["release"]["id"] == release_id
+      assert deployment_campaign_data["target_release"]["id"] == target_release_id
+      assert deployment_campaign_data["release"]["version"] == release.version
+      assert deployment_campaign_data["channel"]["id"] == channel_id
+      assert deployment_campaign_data["channel"]["name"] == channel.name
+      assert deployment_campaign_data["channel"]["handle"] == channel.handle
+
+      assert [target_data] =
+               extract_nodes!(deployment_campaign_data["deploymentTargets"]["edges"])
+
+      assert "IDLE" = target_data["status"]
+
+      expected_device_id = AshGraphql.Resource.encode_relay_id(device)
+      assert target_data["device"]["id"] == expected_device_id
+
+      # Check that the executor got started
+      deployment_campaign =
+        fetch_deployment_campaign_from_graphql_id!(tenant, deployment_campaign_data["id"])
+
+      assert {:ok, pid} = fetch_deployment_campaign_executor_pid(tenant, deployment_campaign)
+      assert {:wait_for_start_execution, _data} = :sys.get_state(pid)
+    end
+
     test "creates finished deployment_campaign with valid data and no targets", %{tenant: tenant} do
       campaign_name = "Test Deployment Campaign"
 
@@ -318,6 +384,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
             id
             version
           }
+          target_release {
+            id
+            version
+          }
           channel {
             id
             name
@@ -342,6 +412,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
 
     {name, opts} = Keyword.pop_lazy(opts, :name, fn -> unique_deployment_campaign_name() end)
 
+    {operation_type, opts} = Keyword.pop(opts, :operation_type, :deploy)
+    operation_type = operation_type |> to_string() |> String.upcase()
+
     {channel_id, opts} =
       Keyword.pop_lazy(opts, :channel_id, fn ->
         [tenant: tenant]
@@ -356,6 +429,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
+    {target_release_id, opts} =
+      Keyword.pop(opts, :target_release_id, nil)
+
     {deployment_mechanism, opts} =
       Keyword.pop_lazy(opts, :deployment_mechanism, fn ->
         %{
@@ -368,10 +444,18 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
 
     input = %{
       "name" => name,
+      "operationType" => operation_type,
       "releaseId" => release_id,
       "channelId" => channel_id,
       "deploymentMechanism" => deployment_mechanism
     }
+
+    input =
+      if is_nil(target_release_id) do
+        input
+      else
+        Map.put(input, "targetReleaseId", target_release_id)
+      end
 
     variables = %{"input" => input}
 
