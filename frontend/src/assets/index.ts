@@ -21,12 +21,14 @@
 import brand from "assets/images/brand.png";
 import login_brand from "assets/images/login_brand.png";
 import logo from "assets/images/logo.png";
+import devices from "assets/images/devices.svg";
 
 const assets = {
   images: {
     brand,
     login_brand,
     logo,
+    devices,
   },
 };
 

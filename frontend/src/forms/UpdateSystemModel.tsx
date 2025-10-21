@@ -43,6 +43,7 @@ import type {
   UpdateSystemModel_OptionsFragment$key,
   UpdateSystemModel_OptionsFragment$data,
 } from "api/__generated__/UpdateSystemModel_OptionsFragment.graphql";
+import assets from "assets";
 
 const UPDATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment UpdateSystemModel_SystemModelFragment on SystemModel {
@@ -305,7 +306,10 @@ const UpdateSystemModelForm = ({
                     onClick={() => setValue("pictureFile", null)}
                   />
                 )}
-                <Figure alt={systemModel.name} src={picture || undefined} />
+                <Figure
+                  alt={systemModel.name}
+                  src={picture || assets.images.devices}
+                />
               </div>
               <Form.Group controlId="pictureFile">
                 <Form.Control
