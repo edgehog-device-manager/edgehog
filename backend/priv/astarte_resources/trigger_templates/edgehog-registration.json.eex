@@ -1,0 +1,18 @@
+{
+    "name": "edgehog-registration",
+    "action": {
+        "http_url": "<%= @trigger_url %>",
+        "ignore_ssl_errors": false,
+        "http_method": "post",
+        "http_static_headers": {}
+    },
+    "simple_triggers": [
+        {
+            "type": "device_trigger",
+            "on": "device_registered"
+        }
+    ]
+    <%= if @can_use_trigger_delivery_policy do %>,
+    "policy": "edgehog-retry-on-server-error"
+    <% end %>
+}
