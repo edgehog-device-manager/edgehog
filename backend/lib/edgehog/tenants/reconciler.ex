@@ -31,6 +31,7 @@ defmodule Edgehog.Tenants.Reconciler do
   require Logger
 
   @reconcile_interval :timer.minutes(10)
+  @minimum_astarte_version_with_policies_support "1.1.1"
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -102,50 +103,39 @@ defmodule Edgehog.Tenants.Reconciler do
       Enum.each(Core.list_required_interfaces(), &Core.reconcile_interface!(rm_client, &1))
       trigger_url = tenant_to_trigger_url_fun.(tenant)
 
-      reconcile_policies_and_triggers(rm_client, trigger_url, tenant.name)
+      reconcile_policies_and_triggers(rm_client, trigger_url, tenant)
     end)
   end
 
-  defp reconcile_policies_and_triggers(rm_client, trigger_url, tenant_name) do
-    case Core.verify_trigger_delivery_policy_support(rm_client) do
-      {:ok, supports_policies?} ->
-        handle_policy_support(rm_client, trigger_url, tenant_name, supports_policies?)
+  defp reconcile_policies_and_triggers(rm_client, trigger_url, tenant) do
+    with {:ok, version} <- Core.fetch_astarte_version(rm_client) do
+      supports_policies? =
+        Core.min_version_matches(version, @minimum_astarte_version_with_policies_support)
 
-      {:error, reason} ->
-        Logger.warning(
-          "Error, skipping trigger delivery policies reconciliation for tenant #{tenant_name}: #{inspect(reason)}"
-        )
+      # optionally reconcile policies
+      if supports_policies?,
+        do: reconcile_policies(rm_client),
+        else:
+          Logger.warning(
+            "Skipping trigger delivery policies reconciliation for tenant #{tenant.tenant_id}. Astarte version does not support policies."
+          )
 
-        reconcile_triggers_without_policies(rm_client, trigger_url)
+      # reconcile triggers, pass down policies support and astarte version
+      reconcile_triggers(rm_client, trigger_url, supports_policies?, version, tenant)
     end
   end
 
-  defp handle_policy_support(rm_client, trigger_url, _tenant_name, true) do
+  defp reconcile_policies(rm_client) do
     Enum.each(
       Core.list_required_delivery_policies(),
       &Core.reconcile_delivery_policy!(rm_client, &1)
     )
-
-    reconcile_triggers_with_policies(rm_client, trigger_url)
   end
 
-  defp handle_policy_support(rm_client, trigger_url, tenant_name, false) do
-    Logger.warning("Skipping trigger delivery policies reconciliation for tenant #{tenant_name}.
-       Astarte version does not support policies.")
-
-    reconcile_triggers_without_policies(rm_client, trigger_url)
-  end
-
-  defp reconcile_triggers_with_policies(rm_client, trigger_url) do
+  defp reconcile_triggers(rm_client, trigger_url, policies_support, astarte_version, tenant) do
     trigger_url
-    |> Core.list_required_triggers(true)
-    |> Enum.each(&Core.reconcile_trigger!(rm_client, &1))
-  end
-
-  defp reconcile_triggers_without_policies(rm_client, trigger_url) do
-    trigger_url
-    |> Core.list_required_triggers(false)
-    |> Enum.each(&Core.reconcile_trigger!(rm_client, &1))
+    |> Core.list_required_triggers(policies_support)
+    |> Enum.each(&Core.reconcile_trigger!(rm_client, &1, astarte_version, tenant))
   end
 
   defp schedule_reconciliation(time) do

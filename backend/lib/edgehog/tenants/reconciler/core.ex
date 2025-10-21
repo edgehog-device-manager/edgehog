@@ -27,7 +27,9 @@ defmodule Edgehog.Tenants.Reconciler.Core do
   alias Edgehog.Astarte.Trigger
   alias Edgehog.Tenants.Reconciler.AstarteResources
 
-  @minimum_astarte_version_with_policies_support "1.1.1"
+  require Logger
+
+  @minimum_astarte_version_with_registration_triggers_support "1.3.0"
 
   @interfaces AstarteResources.load_interfaces()
   @delivery_policies AstarteResources.load_delivery_policies()
@@ -102,7 +104,44 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end
   end
 
-  def reconcile_trigger!(%Client.RealmManagement{} = client, required_trigger) do
+  def reconcile_trigger!(%Client.RealmManagement{} = client, required_trigger, astarte_version, tenant) do
+    if trigger_compatible?(astarte_version, required_trigger) do
+      do_reconcile_trigger(client, required_trigger)
+    else
+      Logger.warning(
+        "Skipping reconciliation for tenant #{tenant.tenant_id} and trigger #{required_trigger["name"]}, astarte minimum requirement not met."
+      )
+
+      :ok
+    end
+  end
+
+  defp trigger_compatible?(astarte_version, required_trigger) do
+    check_on_device_registered_and_deletion(astarte_version, required_trigger)
+  end
+
+  defp check_on_device_registered_and_deletion(astarte_version, %{"simple_triggers" => simple_triggers}) do
+    features_1_3? =
+      Enum.any?(simple_triggers, fn simple_trigger ->
+        on = simple_trigger["on"]
+
+        on == "device_registered" || on == "device_deletion_started" ||
+          on == "device_deletion_finished"
+      end)
+
+    # If the trigger is using astarte 1.3 features we should check the
+    # compatibility. Otherwise this step can be skipped, device registration and
+    # compatibility is `true`
+    if features_1_3?,
+      do:
+        min_version_matches(
+          astarte_version,
+          @minimum_astarte_version_with_registration_triggers_support
+        ),
+      else: true
+  end
+
+  defp do_reconcile_trigger(client, required_trigger) do
     %{
       "name" => trigger_name
     } = required_trigger
@@ -121,6 +160,10 @@ defmodule Edgehog.Tenants.Reconciler.Core do
       {:error, :not_found} ->
         install_trigger!(client, required_trigger)
     end
+  end
+
+  def min_version_matches(astarte_version, min_version) do
+    Version.compare(min_version, astarte_version) != :gt
   end
 
   defp update_interface!(rm_client, name, major, interface_json) do
@@ -243,19 +286,9 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end
   end
 
-  def verify_trigger_delivery_policy_support(rm_client) do
-    case RealmManagement.Version.get(rm_client) do
-      {:ok, %{"data" => version}} ->
-        case Version.compare(version, @minimum_astarte_version_with_policies_support) do
-          :lt ->
-            {:ok, false}
-
-          _ ->
-            {:ok, true}
-        end
-
-      {:error, reason} ->
-        {:error, reason}
+  def fetch_astarte_version(rm_client) do
+    with {:ok, %{"data" => version}} <- RealmManagement.Version.get(rm_client) do
+      {:ok, version}
     end
   end
 

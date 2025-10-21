@@ -176,6 +176,31 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
              } = device
     end
 
+    test "creates an empty device from a registration event", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
+
+      device_id = random_device_id()
+      timestamp = utc_now_second()
+      event = registration_trigger(device_id, timestamp)
+
+      assert conn |> post(path, event) |> response(200)
+
+      assert {:ok, device} = fetch_device(realm, device_id, tenant)
+
+      assert %Device{
+               device_id: ^device_id,
+               name: ^device_id,
+               online: false,
+               last_connection: nil,
+               last_disconnection: nil
+             } = device
+    end
+
     test "accepts trigger payload without `trigger_name` key (Astarte < 1.2.0)", ctx do
       %{conn: conn, path: path} = ctx
 
@@ -932,6 +957,17 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
   defp utc_now_second do
     DateTime.truncate(DateTime.utc_now(), :second)
+  end
+
+  defp registration_trigger(device_id, timestamp) do
+    %{
+      trigger_name: "edgehog-registration",
+      device_id: device_id,
+      event: %{
+        type: "device_registered"
+      },
+      timestamp: DateTime.to_iso8601(timestamp)
+    }
   end
 
   defp connection_trigger(device_id, timestamp) do

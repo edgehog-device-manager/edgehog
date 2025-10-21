@@ -22,6 +22,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
   use Edgehog.DataCase, async: true
 
   import Edgehog.AstarteFixtures
+  import Edgehog.TenantsFixtures
 
   alias Astarte.Client.APIError
   alias Edgehog.Tenants.Reconciler.Core
@@ -332,8 +333,11 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
 
   describe "reconcile_trigger!/2" do
     setup do
+      tenant = tenant_fixture()
+
       client =
-        realm_fixture()
+        [tenant: tenant]
+        |> realm_fixture()
         |> Ash.load!(:realm_management_client)
         |> Map.fetch!(:realm_management_client)
 
@@ -342,6 +346,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       trigger_map = trigger_map_fixture(name: trigger_name)
 
       ctx = %{
+        tenant: tenant,
         client: client,
         trigger_name: trigger_name,
         trigger_map: trigger_map
@@ -352,6 +357,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
 
     test "installs the trigger if it's not present", ctx do
       %{
+        tenant: tenant,
         client: client,
         trigger_name: trigger_name,
         trigger_map: trigger_map
@@ -365,11 +371,13 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         :ok
       end)
 
-      assert :ok = Core.reconcile_trigger!(client, trigger_map)
+      # Use latest astarte version.
+      assert :ok = Core.reconcile_trigger!(client, trigger_map, "1.3.0", tenant)
     end
 
     test "doesn't create or delete the trigger if it's already the correct one", ctx do
       %{
+        tenant: tenant,
         client: client,
         trigger_name: trigger_name,
         trigger_map: trigger_map
@@ -382,11 +390,12 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:create, 0, fn _client, _trigger_map -> :ok end)
       |> expect(:delete, 0, fn _client, _trigger_name -> :ok end)
 
-      assert :ok = Core.reconcile_trigger!(client, trigger_map)
+      assert :ok = Core.reconcile_trigger!(client, trigger_map, "1.3.0", tenant)
     end
 
     test "doesn't create or delete the trigger when Astarte adds extra fields", ctx do
       %{
+        tenant: tenant,
         client: client,
         trigger_name: trigger_name,
         trigger_map: trigger_map
@@ -399,11 +408,12 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:create, 0, fn _client, _trigger_map -> :ok end)
       |> expect(:delete, 0, fn _client, _trigger_name -> :ok end)
 
-      assert :ok = Core.reconcile_trigger!(client, trigger_map)
+      assert :ok = Core.reconcile_trigger!(client, trigger_map, "1.3.0", tenant)
     end
 
     test "works even if Astarte returns the trigger without some defaults", ctx do
       %{
+        tenant: tenant,
         client: client,
         trigger_name: trigger_name,
         trigger_map: trigger_map
@@ -419,11 +429,12 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:create, 0, fn _client, _trigger_map -> :ok end)
       |> expect(:delete, 0, fn _client, _trigger_name -> :ok end)
 
-      assert :ok = Core.reconcile_trigger!(client, trigger_map)
+      assert :ok = Core.reconcile_trigger!(client, trigger_map, "1.3.0", tenant)
     end
 
     test "deletes and recreates the trigger if it differs from the required one", ctx do
       %{
+        tenant: tenant,
         client: client,
         trigger_name: trigger_name,
         trigger_map: trigger_map
@@ -436,11 +447,12 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:delete, fn ^client, ^trigger_name -> :ok end)
       |> expect(:create, fn ^client, ^trigger_map -> :ok end)
 
-      assert :ok = Core.reconcile_trigger!(client, trigger_map)
+      assert :ok = Core.reconcile_trigger!(client, trigger_map, "1.3.0", tenant)
     end
 
     test "crashes on API errors", ctx do
       %{
+        tenant: tenant,
         client: client,
         trigger_map: trigger_map
       } = ctx
@@ -450,12 +462,23 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       end)
 
       assert_raise CaseClauseError, fn ->
-        Core.reconcile_trigger!(client, trigger_map)
+        Core.reconcile_trigger!(client, trigger_map, "1.3.0", tenant)
       end
     end
   end
 
-  describe "verify_trigger_delivery_policy_support/1" do
+  describe "min_version_matches/1" do
+    test "returns true for Astarte versions >=" do
+      assert Core.min_version_matches("1.2.0", "1.1.1")
+      assert Core.min_version_matches("1.1.1", "1.1.1")
+    end
+
+    test "returns false for Astarte versions <" do
+      refute Core.min_version_matches("1.1.0", "1.1.1")
+    end
+  end
+
+  describe "fetch_astarte_version/1" do
     setup do
       client =
         realm_fixture()
@@ -465,7 +488,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       %{client: client}
     end
 
-    test "returns true for Astarte versions >= 1.1.1", %{client: client} do
+    test "listens for realm management version", %{client: client} do
       # Mock the version endpoint
       Tesla.Mock.mock_global(fn
         %{method: :get, url: url} ->
@@ -476,25 +499,11 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
           end
       end)
 
-      assert {:ok, true} = Core.verify_trigger_delivery_policy_support(client)
+      assert {:ok, "1.2.0"} = Core.fetch_astarte_version(client)
     end
 
-    test "returns false for Astarte versions < 1.1.1", %{client: client} do
+    test "fails if realm management fails", %{client: client} do
       # Mock the version endpoint
-      Tesla.Mock.mock_global(fn
-        %{method: :get, url: url} ->
-          if String.ends_with?(url, "/version") do
-            %Tesla.Env{status: 200, body: %{"data" => "1.0.0"}}
-          else
-            %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
-          end
-      end)
-
-      assert {:ok, false} = Core.verify_trigger_delivery_policy_support(client)
-    end
-
-    test "returns error when version check fails", %{client: client} do
-      # Mock the version endpoint to fail
       Tesla.Mock.mock_global(fn
         %{method: :get, url: url} ->
           if String.ends_with?(url, "/version") do
@@ -504,7 +513,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
           end
       end)
 
-      assert {:error, _} = Core.verify_trigger_delivery_policy_support(client)
+      assert {:error, _} = Core.fetch_astarte_version(client)
     end
   end
 

@@ -24,6 +24,12 @@ defmodule Edgehog.Triggers.Event do
     subtype_of: :union,
     constraints: [
       types: [
+        device_registered: [
+          type: Edgehog.Triggers.DeviceRegistered,
+          tag: :type,
+          tag_value: "device_registered",
+          cast_tag?: false
+        ],
         device_connected: [
           type: Edgehog.Triggers.DeviceConnected,
           tag: :type,
