@@ -58,6 +58,13 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
         allow_nil? false
       end
 
+      argument :target_release_id, :uuid do
+        description """
+        The ID of the target release for upgrade operations.
+        Required when operation_type is :upgrade.
+        """
+      end
+
       argument :channel_id, :id do
         description """
         The ID of the channel that will be targeted by the deployment campaign.
@@ -66,9 +73,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
         allow_nil? false
       end
 
+      validate Edgehog.DeploymentCampaigns.DeploymentCampaign.Validations.ValidateOperationTypeRequirements
+
       change Changes.ComputeDeploymentTargets
 
       change manage_relationship(:release_id, :release, type: :append)
+      change manage_relationship(:target_release_id, :target_release, type: :append)
       change manage_relationship(:channel_id, :channel, type: :append)
     end
 
