@@ -200,10 +200,10 @@ const DeploymentCampaign = ({
           <Link
             route={Route.application}
             params={{
-              applicationId: release.application?.id || "",
+              applicationId: release?.application?.id || "",
             }}
           >
-            {release.application?.name}
+            {release?.application?.name}
           </Link>
         </FormRow>
 
@@ -218,11 +218,11 @@ const DeploymentCampaign = ({
           <Link
             route={Route.release}
             params={{
-              applicationId: release.application?.id || "",
-              releaseId: release.id,
+              applicationId: release?.application?.id || "",
+              releaseId: release?.id || "",
             }}
           >
-            {release.version}
+            {release?.version}
           </Link>
         </FormRow>
 
