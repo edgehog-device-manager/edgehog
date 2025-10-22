@@ -203,6 +203,18 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
              } = device
     end
 
+    test "remove an existing device after device deletion finished on astarte", ctx do
+      %{device: device, conn: conn, path: path, realm: realm, tenant: tenant} = ctx
+
+      timestamp = utc_now_second()
+      event = deletion_finished_trigger(device.device_id, timestamp)
+
+      assert conn |> post(path, event) |> response(200)
+
+      assert {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{}]}} =
+               fetch_device(realm, device.device_id, tenant)
+    end
+
     test "accepts trigger payload without `trigger_name` key (Astarte < 1.2.0)", ctx do
       %{conn: conn, path: path} = ctx
 
@@ -994,6 +1006,17 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       device_id: device_id,
       event: %{
         type: "device_registered"
+      },
+      timestamp: DateTime.to_iso8601(timestamp)
+    }
+  end
+
+  defp deletion_finished_trigger(device_id, timestamp) do
+    %{
+      trigger_name: "edgehog-deletion-finished",
+      device_id: device_id,
+      event: %{
+        type: "device_deletion_finished"
       },
       timestamp: DateTime.to_iso8601(timestamp)
     }
