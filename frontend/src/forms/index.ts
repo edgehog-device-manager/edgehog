@@ -87,6 +87,11 @@ const messages = defineMessages({
     defaultMessage:
       "Port Bindings must be comma-separated values like '8080:80, 443:443'.",
   },
+  bindsInvalid: {
+    id: "validation.binds.format",
+    defaultMessage:
+      "Each bind must be in the format hostDir:containerDir[:options], separated by commas.",
+  },
   extraHostsFormat: {
     id: "validation.extraHosts.format",
     defaultMessage: "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)",
@@ -239,6 +244,24 @@ const portBindingsSchema = yup
     test: (value) =>
       !value ||
       value.split(", ").every((v) => /^[0-9]+:[0-9]+$/.test(v.trim())),
+  });
+
+const bindingsSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim().replace(/\s*,\s*/g, ", "))
+  .test({
+    name: "is-valid-bindings",
+    message: messages.bindsInvalid.id,
+    test: (value) =>
+      !value ||
+      value.split(", ").every((v) => {
+        const parts = v.trim().split(":");
+        return (
+          (parts.length === 2 || parts.length === 3) &&
+          parts.every((p) => p.trim() !== "")
+        );
+      }),
   });
 
 const tmpfsOptSchema = yup
@@ -401,6 +424,7 @@ export {
   numberSchema,
   envSchema,
   portBindingsSchema,
+  bindingsSchema,
   extraHostsSchema,
   messages,
   yup,

@@ -58,6 +58,7 @@ import {
   extraHostsSchema,
   optionalNumberSchema,
   messages,
+  bindingsSchema,
 } from "forms/index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
@@ -152,6 +153,7 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
                       restartPolicy
                       privileged
                       portBindings
+                      binds
                       cpuPeriod
                       cpuQuota
                       cpuRealtimePeriod
@@ -286,6 +288,7 @@ type ContainerInput = {
   networkMode?: string;
   networks?: ContainerCreateWithNestedNetworksInput[];
   portBindings?: string;
+  binds?: string;
   privileged?: boolean;
   readOnlyRootfs?: boolean;
   restartPolicy?: string;
@@ -312,11 +315,12 @@ type ReleaseSubmitData = {
 
 type ContainerSubmit = Omit<
   ContainerInput,
-  "portBindings" | "tmpfs" | "storageOpt"
+  "portBindings" | "tmpfs" | "storageOpt" | "binds"
 > & {
   portBindings?: string[];
   tmpfs?: string[];
   storageOpt?: string[];
+  binds?: string[];
 };
 
 export const CapDropList = [
@@ -390,6 +394,7 @@ const applicationSchema = (intl: any) =>
               .nullable()
               .transform((value) => value?.trim()),
             portBindings: portBindingsSchema,
+            binds: bindingsSchema,
             memory: optionalNumberSchema
               .min(6 * 1024 * 1024)
               .integer()
@@ -1024,6 +1029,27 @@ const ContainerForm = ({
           </Form.Control.Feedback>
         </FormRow>
 
+        <FormRow
+          id={`containers-${index}-binds`}
+          label={
+            <FormattedMessage
+              id="forms.CreateRelease.bindsLabel"
+              defaultMessage="Binds"
+            />
+          }
+        >
+          <Form.Control
+            {...register(`containers.${index}.binds` as const)}
+            type="text"
+            isInvalid={!!errors.containers?.[index]?.binds}
+            placeholder="e.g., /data:/data, /config:/config:ro"
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.containers?.[index]?.binds?.message && (
+              <FormattedMessage id={errors.containers[index].binds.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
         <FormRow
           id={`containers-${index}-restartPolicy`}
           label={
@@ -1804,6 +1830,9 @@ const CreateRelease = ({
                     .split(",")
                     .map((v) => v.trim()) as string[])
                 : undefined,
+              binds: container.binds
+                ? (container.binds.split(",").map((v) => v.trim()) as string[])
+                : undefined,
               networks: container.networks || undefined,
               volumes: container.volumes || undefined,
               capAdd: container.capAdd?.length ? container.capAdd : undefined,
@@ -2011,6 +2040,7 @@ const CreateRelease = ({
                   restartPolicy: c.restartPolicy || undefined,
                   networkMode: c.networkMode || undefined,
                   portBindings: c.portBindings?.join(",") || undefined,
+                  binds: c.binds?.join(",") || undefined,
                   cpuPeriod: c.cpuPeriod || undefined,
                   cpuQuota: c.cpuQuota || undefined,
                   cpuRealtimePeriod: c.cpuRealtimePeriod || undefined,
