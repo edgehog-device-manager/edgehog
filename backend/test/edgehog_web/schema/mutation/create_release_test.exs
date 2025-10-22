@@ -97,7 +97,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
           "host2:192.168.1.101"
         ],
         "capAdd" => ["CAP_CHOWN"],
-        "capDrop" => ["CAP_KILL"]
+        "capDrop" => ["CAP_KILL"],
+        "binds" => [
+          "/host/data:/container/data",
+          "/host/logs:/container/logs"
+        ]
       }
 
       container2 = %{
@@ -122,7 +126,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
           "CAP_AUDIT_READ",
           "CAP_AUDIT_WRITE"
         ],
-        "capDrop" => ["CAP_MKNOD"]
+        "capDrop" => ["CAP_MKNOD"],
+        "binds" => [
+          "/host/config:/container/config",
+          "/host/storage:/container/storage:ro"
+        ]
       }
 
       containers = [container1, container2]
@@ -157,6 +165,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
                   extraHosts
                   capAdd
                   capDrop
+                  binds
                 }
               }
             }
