@@ -285,6 +285,23 @@ enum CampaignOutcome {
   FAILURE
 }
 
+enum OperationType {
+  "Deploy an application."
+  DEPLOY
+
+  "Start deployments."
+  START
+
+  "Stop deployments."
+  STOP
+
+  "Upgrade an existing deployment."
+  UPGRADE
+
+  "Delete a deployment."
+  DELETE
+}
+
 enum UpdateTargetStatus {
   "The update campaign is waiting for the OTA Request to be sent."
   IDLE
@@ -1031,25 +1048,26 @@ input ReleaseCreateContainersInput {
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
-  portBindings: [String!]
-  restartPolicy: String
-  networkMode: String
-  privileged: Boolean
-  extraHosts: [String!]
+  binds: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
+  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  volumeDriver: String
-  storageOpt: [String!]
+  networkMode: String
+  portBindings: [String!]
+  privileged: Boolean
   readOnlyRootfs: Boolean
+  restartPolicy: String
+  storageOpt: [String!]
   tmpfs: [String!]
+  volumeDriver: String
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -2861,6 +2879,7 @@ type Container {
   storageOpt: [String!]!
   readOnlyRootfs: Boolean!
   tmpfs: [String!]!
+  binds: [String!]!
   imageId: ID!
   image: Image!
   releases(
@@ -5429,6 +5448,9 @@ input CreateDeploymentCampaignInput {
   "The deployment mechanism to carry the campaign."
   deploymentMechanism: DeploymentMechanismInput!
 
+  "The type of operation to perform in the deployment campaign."
+  operationType: OperationType
+
   "The ID of the release that will be distributed in the deployment campaign."
   releaseId: ID!
 
@@ -5441,6 +5463,7 @@ enum DeploymentCampaignSortField {
   NAME
   STATUS
   OUTCOME
+  OPERATION_TYPE
   TOTAL_TARGET_COUNT
   IDLE_TARGET_COUNT
   IN_PROGRESS_TARGET_COUNT
@@ -5524,6 +5547,17 @@ input DeploymentCampaignFilterTotalTargetCount {
   greaterThanOrEqual: Int
 }
 
+input DeploymentCampaignFilterOperationType {
+  isNil: Boolean
+  eq: OperationType
+  notEq: OperationType
+  in: [OperationType!]
+  lessThan: OperationType
+  greaterThan: OperationType
+  lessThanOrEqual: OperationType
+  greaterThanOrEqual: OperationType
+}
+
 input DeploymentCampaignFilterOutcome {
   isNil: Boolean
   eq: CampaignOutcome
@@ -5587,8 +5621,14 @@ input DeploymentCampaignFilterInput {
   "The outcome of the deployment campaign."
   outcome: DeploymentCampaignFilterOutcome
 
+  "The type of operation to perform in the deployment campaign."
+  operationType: DeploymentCampaignFilterOperationType
+
   "The release distributed by the deployment campaign."
   release: ReleaseFilterInput
+
+  "The release used for upgrading by the deployment campaign."
+  targetRelease: ReleaseFilterInput
 
   "The channel associated with the campaign."
   channel: ChannelFilterInput
@@ -5631,8 +5671,14 @@ type DeploymentCampaign implements Node {
   "The deployment mechanism to carry the campaign."
   deploymentMechanism: DeploymentMechanism!
 
+  "The type of operation to perform in the deployment campaign."
+  operationType: OperationType!
+
   "The release distributed by the deployment campaign."
-  release: Release!
+  release: Release
+
+  "The release used for upgrading by the deployment campaign."
+  targetRelease: Release
 
   "The channel associated with the campaign."
   channel: Channel!
