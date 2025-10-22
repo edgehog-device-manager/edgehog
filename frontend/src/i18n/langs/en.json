@@ -328,6 +328,9 @@
   "components.ContainerStatusList.runningCount": {
     "defaultMessage": "{count} running"
   },
+  "components.ContainersTable.bindsLabel": {
+    "defaultMessage": "Binds"
+  },
   "components.ContainersTable.capAdd": {
     "defaultMessage": "Cap Add"
   },
@@ -1329,6 +1332,9 @@
   },
   "forms.CreateRelease.addVolumeButton": {
     "defaultMessage": "Add Volume"
+  },
+  "forms.CreateRelease.bindsLabel": {
+    "defaultMessage": "Binds"
   },
   "forms.CreateRelease.capAddLabel": {
     "defaultMessage": "Cap Add"
@@ -2499,6 +2505,9 @@
   },
   "validation.baseImageVersion.format": {
     "defaultMessage": "The version must follow the Semantic Versioning spec"
+  },
+  "validation.binds.format": {
+    "defaultMessage": "Each bind must be in the format hostDir:containerDir[:options], separated by commas."
   },
   "validation.cpuQuotaPeriod.format": {
     "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"

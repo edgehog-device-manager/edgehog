@@ -77,6 +77,7 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
           hostname
           networkMode
           portBindings
+          binds
           restartPolicy
           privileged
           memory
@@ -161,7 +162,7 @@ const styles = {
   },
 };
 
-const formatPortBindings = (
+const formatBindingsList = (
   portBindings: readonly string[] | null | undefined,
 ) => {
   if (!portBindings || portBindings.length === 0) return "";
@@ -613,9 +614,21 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         }
       >
         <Form.Control
-          value={formatPortBindings(container.portBindings)}
+          value={formatBindingsList(container.portBindings)}
           readOnly
         />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-binds`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.bindsLabel"
+            defaultMessage="Binds"
+          />
+        }
+      >
+        <Form.Control value={formatBindingsList(container.binds)} readOnly />
       </FormRow>
 
       <FormRow
