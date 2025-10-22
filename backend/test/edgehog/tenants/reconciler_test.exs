@@ -193,7 +193,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # 1.0.0, only from astarte 1.3 onwards device registration (and
       # deletion) triggers are supported.
       trigger_count =
-        "foo" |> Reconciler.Core.list_required_triggers(false) |> length() |> Kernel.-(1)
+        "foo" |> Reconciler.Core.list_required_triggers(false) |> length() |> Kernel.-(2)
 
       test_pid = self()
       ref = make_ref()
