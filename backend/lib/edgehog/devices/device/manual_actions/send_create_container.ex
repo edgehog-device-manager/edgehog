@@ -51,6 +51,9 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
       volume_ids = Enum.map(container.container_volumes, & &1.volume_id)
       volume_binds = Enum.map(container.container_volumes, & &1.binding)
 
+      # Append container binds to volume binds
+      binds = volume_binds ++ container.binds
+
       data = %RequestData{
         id: container.id,
         deploymentId: deployment.id,
@@ -59,7 +62,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         hostname: container.hostname,
         restartPolicy: restart_policy,
         env: env_encoding,
-        binds: volume_binds,
+        binds: binds,
         networkIds: Enum.map(container.networks, & &1.id),
         networkMode: container.network_mode,
         portBindings: container.port_bindings,

@@ -27,6 +27,7 @@ defmodule Edgehog.Containers.Container do
   alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Container.ManualActions
   alias Edgehog.Containers.Container.Types.EnvVar
+  alias Edgehog.Containers.Container.Validations.BindsFormat
   alias Edgehog.Containers.Container.Validations.CpuPeriodQuotaConsistency
   alias Edgehog.Containers.Container.Validations.VolumeTargetUniqueness
   alias Edgehog.Containers.ContainerVolume
@@ -71,6 +72,7 @@ defmodule Edgehog.Containers.Container do
         :storage_opt,
         :read_only_rootfs,
         :tmpfs,
+        :binds,
         :image_id
       ],
       update: [
@@ -96,6 +98,7 @@ defmodule Edgehog.Containers.Container do
         :storage_opt,
         :read_only_rootfs,
         :tmpfs,
+        :binds,
         :image_id
       ]
     ]
@@ -122,7 +125,8 @@ defmodule Edgehog.Containers.Container do
         :volume_driver,
         :storage_opt,
         :read_only_rootfs,
-        :tmpfs
+        :tmpfs,
+        :binds
       ]
 
       argument :image, :map
@@ -176,6 +180,7 @@ defmodule Edgehog.Containers.Container do
         :storage_opt,
         :read_only_rootfs,
         :tmpfs,
+        :binds,
         :image_id
       ]
 
@@ -208,6 +213,7 @@ defmodule Edgehog.Containers.Container do
   validations do
     validate CpuPeriodQuotaConsistency
     validate VolumeTargetUniqueness
+    validate BindsFormat
   end
 
   attributes do
@@ -320,6 +326,12 @@ defmodule Edgehog.Containers.Container do
     end
 
     attribute :tmpfs, {:array, :string} do
+      default []
+      public? true
+      allow_nil? false
+    end
+
+    attribute :binds, {:array, :string} do
       default []
       public? true
       allow_nil? false
