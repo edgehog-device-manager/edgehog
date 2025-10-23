@@ -32,7 +32,7 @@ const GET_SYSTEM_MODELS_QUERY = graphql`
   query SystemModelsTable_getSystemModels_Query(
     $first: Int
     $after: String
-    $filter: SystemModelFilterInput
+    $filter: SystemModelFilterInput = {}
   ) @relay_test_operation {
     ...SystemModelsTable_SystemModelsFragment @arguments(filter: $filter)
   }

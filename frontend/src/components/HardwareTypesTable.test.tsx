@@ -32,7 +32,7 @@ const GET_HARDWARE_TYPES_QUERY = graphql`
   query HardwareTypesTable_getHardwareTypes_Query(
     $first: Int
     $after: String
-    $filter: HardwareTypeFilterInput
+    $filter: HardwareTypeFilterInput = {}
   ) @relay_test_operation {
     ...HardwareTypesTable_HardwareTypesFragment @arguments(filter: $filter)
   }

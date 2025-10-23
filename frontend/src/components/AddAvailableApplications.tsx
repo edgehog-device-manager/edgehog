@@ -29,7 +29,7 @@ import type { AddAvailableApplications_DeployRelease_Mutation } from "api/__gene
 
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
   query AddAvailableApplications_GetApplicationsWithReleases_Query(
-    $filter: ApplicationFilterInput
+    $filter: ApplicationFilterInput = {}
   ) {
     applications(first: 10000, filter: $filter) {
       edges {

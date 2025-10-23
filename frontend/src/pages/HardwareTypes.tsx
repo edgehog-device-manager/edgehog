@@ -40,7 +40,7 @@ const GET_HARDWARE_TYPES_QUERY = graphql`
   query HardwareTypes_getHardwareTypes_Query(
     $first: Int
     $after: String
-    $filter: HardwareTypeFilterInput
+    $filter: HardwareTypeFilterInput = {}
   ) {
     hardwareTypes(first: $first, after: $after, filter: $filter) {
       count

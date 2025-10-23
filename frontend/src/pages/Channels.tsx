@@ -39,7 +39,7 @@ const GET_CHANNELS_QUERY = graphql`
   query Channels_getChannels_Query(
     $first: Int
     $after: String
-    $filter: ChannelFilterInput
+    $filter: ChannelFilterInput = {}
   ) {
     ...ChannelsTable_ChannelFragment @arguments(filter: $filter)
   }

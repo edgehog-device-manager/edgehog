@@ -39,7 +39,7 @@ const GET_DEPLOYMENT_CAMPAIGNS_QUERY = graphql`
   query DeploymentCampaigns_getDeploymentCampaigns_Query(
     $first: Int
     $after: String
-    $filter: DeploymentCampaignFilterInput
+    $filter: DeploymentCampaignFilterInput = {}
   ) {
     ...DeploymentCampaignsTable_DeploymentCampaignFragment
       @arguments(filter: $filter)

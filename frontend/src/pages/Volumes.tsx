@@ -39,7 +39,7 @@ const GET_VOLUMES_QUERY = graphql`
   query Volumes_getVolumes_Query(
     $first: Int
     $after: String
-    $filter: VolumeFilterInput
+    $filter: VolumeFilterInput = {}
   ) {
     ...VolumesTable_VolumeFragment @arguments(filter: $filter)
   }

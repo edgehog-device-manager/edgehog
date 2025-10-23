@@ -39,7 +39,7 @@ const GET_UPDATE_CAMPAIGNS_QUERY = graphql`
   query UpdateCampaigns_getUpdateCampaigns_Query(
     $first: Int
     $after: String
-    $filter: UpdateCampaignFilterInput
+    $filter: UpdateCampaignFilterInput = {}
   ) {
     ...UpdateCampaignsTable_UpdateCampaignFragment @arguments(filter: $filter)
   }

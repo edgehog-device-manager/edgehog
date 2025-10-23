@@ -49,7 +49,7 @@ const GET_APPLICATION_QUERY = graphql`
     $applicationId: ID!
     $first: Int
     $after: String
-    $filter: ReleaseFilterInput
+    $filter: ReleaseFilterInput = {}
   ) {
     application(id: $applicationId) {
       name
