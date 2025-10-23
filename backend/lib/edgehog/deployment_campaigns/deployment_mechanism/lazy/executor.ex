@@ -115,7 +115,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
       tenant_id
       |> Core.get_deployment_campaign!(deployment_campaign_id)
       |> Ash.load!(
-        [:target_release, release: [containers: [:networks, :volumes, :image]]],
+        [target_release: [], release: [containers: [:networks, :volumes, :image]]],
         tenant: tenant_id
       )
       |> Ash.load!(:total_target_count)
@@ -229,7 +229,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # State: :deployment
 
   def handle_event(:enter, _old_state, :deployment, data) do
-    Logger.info("Update Campaign #{data.deployment_campaign_id}: entering the :deployment state")
+    Logger.info("Deployment Campaign #{data.deployment_campaign_id}: entering the :deployment state")
+
     :keep_state_and_data
   end
 
@@ -369,7 +370,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # State: :wait_for_available_slot
 
   def handle_event(:enter, _old_state, :wait_for_available_slot, data) do
-    Logger.info("Update Campaign #{data.deployment_campaign_id}: entering the :wait_for_available_slot state")
+    Logger.info("Deployment Campaign #{data.deployment_campaign_id}: entering the :wait_for_available_slot state")
 
     # Just wait here, we will exit this state when we receive some updates on successful/failed
     # Deployments
@@ -379,7 +380,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # State: :wait_for_target
 
   def handle_event(:enter, _old_state, :wait_for_target, data) do
-    Logger.info("Update Campaign #{data.deployment_campaign_id}: entering the :wait_for_target state")
+    Logger.info("Deployment Campaign #{data.deployment_campaign_id}: entering the :wait_for_target state")
 
     # TODO: start tracking offline targets so we can rollout them as soon as they come back online.
     # For now we just setup a state timeout and try to fetch the next target after 15 seconds
@@ -395,7 +396,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # State: :wait_for_campaign_completion
 
   def handle_event(:enter, _old_state, :wait_for_campaign_completion, data) do
-    Logger.info("Update Campaign #{data.deployment_campaign_id}: entering the :wait_for_campaign_completion state")
+    Logger.info("Deployment Campaign #{data.deployment_campaign_id}: entering the :wait_for_campaign_completion state")
 
     :keep_state_and_data
   end
@@ -403,7 +404,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # State: :campaign_failure
 
   def handle_event(:enter, _old_state, :campaign_failure, data) do
-    Logger.notice("Update campaign #{data.deployment_campaign_id} terminated with a failure")
+    Logger.notice("Deployment campaign #{data.deployment_campaign_id} terminated with a failure")
 
     _ =
       data.tenant_id
@@ -432,7 +433,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # State: :campaign_success
 
   def handle_event(:enter, _old_state, :campaign_success, data) do
-    Logger.info("Update campaign #{data.deployment_campaign_id} terminated with a success")
+    Logger.info("Deployment campaign #{data.deployment_campaign_id} terminated with a success")
 
     _ =
       data.tenant_id
