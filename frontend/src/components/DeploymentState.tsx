@@ -127,15 +127,15 @@ const DeploymentStateComponent = ({
   state,
   isReady,
 }: DeploymentStateComponentProps) => {
+  const displayedState = isReady ? state : "DEPLOYING";
+
   return (
     <div className="d-flex align-items-center">
       <Icon
         icon={displaySpinner(state, isReady) ? "spinner" : "circle"}
-        className={`me-2 ${stateColors[state]} ${displaySpinner(state, isReady) ? "fa-spin" : ""}`}
+        className={`me-2 ${stateColors[displayedState]} ${displaySpinner(state, isReady) ? "fa-spin" : ""}`}
       />
-      <FormattedMessage
-        id={isReady ? stateMessages[state].id : stateMessages["DEPLOYING"].id}
-      />
+      <FormattedMessage id={stateMessages[displayedState].id} />
     </div>
   );
 };
