@@ -19,7 +19,13 @@
 #
 
 defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
-  @moduledoc false
+  @moduledoc """
+  Executor for lazy deployment campaigns with support for multiple operation types.
+
+  This module implements a GenStateMachine that manages the execution of deployment campaigns.
+  It supports different operation types (deploy, upgrade, start, stop, delete) through a
+  modular architecture that allows easy extension for future operations.
+  """
   use GenStateMachine, restart: :transient, callback_mode: [:handle_event_function, :state_enter]
 
   alias __MODULE__, as: State
@@ -29,8 +35,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   require Logger
 
   defstruct [
+    :operation_type,
     :available_slots,
     :release,
+    :target_release,
     :containers,
     :networks,
     :volumes,
@@ -107,12 +115,15 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
       tenant_id
       |> Core.get_deployment_campaign!(deployment_campaign_id)
       |> Ash.load!(
-        [release: [containers: [:networks, :volumes, :image]]],
+        [:target_release, release: [containers: [:networks, :volumes, :image]]],
         tenant: tenant_id
       )
       |> Ash.load!(:total_target_count)
 
+    operation_type = deployment_campaign.operation_type
+
     release = deployment_campaign.release
+    target_release = deployment_campaign.target_release
 
     containers = Core.get_release_containers(tenant_id, release)
 
@@ -135,7 +146,9 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     deployment_mechanism = deployment_campaign.deployment_mechanism.value
 
     data = %State{
+      operation_type: operation_type,
       release: release,
+      target_release: target_release,
       volumes: volumes,
       networks: networks,
       images: images,
@@ -221,11 +234,22 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   def handle_event(:internal, :fetch_next_target, :deployment, data) do
-    case Core.fetch_next_valid_target(data.tenant_id, data.deployment_campaign_id) do
+    target_response =
+      if data.operation_type == :deploy do
+        Core.fetch_next_valid_target(data.tenant_id, data.deployment_campaign_id)
+      else
+        Core.fetch_next_valid_target_with_application_deployed(
+          data.tenant_id,
+          data.deployment_campaign_id,
+          data.release.application_id
+        )
+      end
+
+    case target_response do
       {:ok, target} ->
         # Do we have an available slot?
         if slot_available?(data) do
-          {:keep_state_and_data, internal_event({:deployment_target, target})}
+          {:keep_state_and_data, internal_event({:operation_target, target})}
         else
           # Wait for a slot to be available
           {:next_state, :wait_for_available_slot, data}
@@ -250,11 +274,16 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     end
   end
 
-  def handle_event(:internal, {:deployment_target, target}, :deployment, data) do
+  def handle_event(:internal, {:operation_target, target}, :deployment, data) do
     # We occupy a slot since we're rolling out a deployment
     new_data = occupy_slot(data)
 
-    case Core.deploy(target, new_data.release, new_data.deployment_mechanism) do
+    case Core.do_operation(
+           target,
+           new_data.release,
+           new_data.deployment_mechanism,
+           new_data.operation_type
+         ) do
       {:ok, :already_deployed} ->
         {:keep_state, new_data, internal_event({:already_deployed, target})}
 
