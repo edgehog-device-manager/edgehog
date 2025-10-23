@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,15 +20,14 @@
 
 alias Edgehog.Astarte
 alias Edgehog.Containers.Application
-alias Edgehog.Containers.Container
-alias Edgehog.Containers.ContainerNetwork
 alias Edgehog.Containers.Deployment
-alias Edgehog.Containers.Image
 alias Edgehog.Containers.ImageCredentials
 alias Edgehog.Containers.Network
 alias Edgehog.Containers.Release
-alias Edgehog.Containers.ReleaseContainers
+alias Edgehog.Containers.Volume
 alias Edgehog.Devices.Device
+alias Edgehog.Devices.HardwareType
+alias Edgehog.Devices.SystemModel
 alias Edgehog.Tenants
 
 require Logger
@@ -158,7 +157,7 @@ end
 
 # Feature Application Management
 
-app_without_releases =
+_app_without_releases =
   Ash.create!(
     Application,
     %{
@@ -219,7 +218,7 @@ app_nginx =
     tenant: tenant
   )
 
-app_nginx_8080 =
+_app_nginx_8080 =
   Ash.create!(
     Application,
     %{
@@ -244,7 +243,7 @@ app_nginx_8080 =
     tenant: tenant
   )
 
-app_nginx_8081 =
+_app_nginx_8081 =
   Ash.create!(
     Application,
     %{
@@ -276,7 +275,7 @@ self_hosted_credentials =
     tenant: tenant
   )
 
-app_test_dev_self_hosted =
+_app_test_dev_self_hosted =
   Ash.create!(
     Application,
     %{
@@ -309,7 +308,7 @@ image_credentials =
     tenant: tenant
   )
 
-app_with_credentials =
+_app_with_credentials =
   Ash.create!(
     Application,
     %{
@@ -327,6 +326,292 @@ app_with_credentials =
             privileged: false,
             network_mode: "bridge",
             port_bindings: []
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_capabilities =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Linux Capabilities",
+      description: "Demonstrates capability add/drop settings.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            cap_add: ["CAP_SYS_ADMIN", "CAP_NET_ADMIN"],
+            cap_drop: ["CAP_CHOWN"]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_cpu_limits =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with CPU Limits",
+      description: "Demonstrates containers with CPU quota and period settings.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            cpu_period: 100_000,
+            cpu_quota: 200_000,
+            cpu_realtime_period: 1500,
+            cpu_realtime_runtime: 1000
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_device_mappings =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Device Mappings",
+      description: "Demonstrates mapping of host devices into containers.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            device_mappings: [
+              %{
+                path_on_host: "/dev/zero",
+                path_in_container: "/dev/myzero",
+                cgroup_permissions: "mrw"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+hardware_type =
+  Ash.create!(
+    HardwareType,
+    %{
+      name: "test_hardware_type",
+      handle: "test-hardware-type",
+      part_numbers: ["HW001", "HW002"]
+    },
+    tenant: tenant
+  )
+
+system_model =
+  Ash.create!(
+    SystemModel,
+    %{
+      name: "test_system_model",
+      handle: "test-system-model",
+      hardware_type_id: hardware_type.id,
+      part_numbers: ["SM001", "SM002"]
+    },
+    tenant: tenant
+  )
+
+_application_with_system_model =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with System Model",
+      description: "Application that specifies a required system model for deployment. \
+This ensures the app can only be installed on compatible hardware configurations \
+matching the associated system model, improving deployment reliability and hardware compatibility validation.",
+      initial_release: %{
+        version: "1.0.0",
+        required_system_models: [%{id: system_model.id}]
+      }
+    },
+    tenant: tenant
+  )
+
+volume1 =
+  Ash.create!(
+    Volume,
+    %{
+      label: "volume1",
+      options: %{device: "tmpfs", o: "size=100m", type: "tmpfs"}
+    },
+    tenant: tenant
+  )
+
+volume2 =
+  Ash.create!(
+    Volume,
+    %{
+      label: "volume2"
+    },
+    tenant: tenant
+  )
+
+_app_with_volumes =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Volumes",
+      description: "Application demonstrating how to attach multiple volumes to a single container. \
+Each volume is mounted inside the container at a specific target path, allowing data persistence \
+and shared storage between containers or across deployments.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            volumes: [
+              %{
+                id: volume1.id,
+                target: "test/volume1"
+              },
+              %{
+                id: volume2.id,
+                target: "test/volume2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+network1 = Ash.create!(Network, %{label: "network1"}, tenant: tenant)
+
+_app_with_networks =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Networks",
+      description: "Application demonstrating how to connect a container to one or more user-defined networks. \
+This setup allows fine-grained control over container communication, network isolation, and service discovery.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            networks: [%{id: network1.id}]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_memory_limits =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Memory Limits",
+      description: "Demonstrates memory and swap configuration options.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            memory: 512 * 1024 * 1024,
+            memory_reservation: 256 * 1024 * 1024,
+            memory_swap: 1024 * 1024 * 1024,
+            memory_swappiness: 60
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_env_vars =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Environment Variables",
+      description: "Demonstrates passing environment variables to containers.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "httpd:latest"},
+            env: [%{key: "MODE", value: "production"}, %{key: "DEBUG", value: "false"}]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_multiple_containers =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Multiple Containers",
+      description: "An app that demonstrates multi-container composition.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            hostname: "frontend",
+            port_bindings: ["8080:80"],
+            restart_policy: :unless_stopped,
+            privileged: false,
+            network_mode: "bridge"
+          },
+          %{
+            image: %{reference: "redis:7"},
+            hostname: "cache",
+            restart_policy: :always,
+            privileged: false,
+            network_mode: "bridge"
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_tmpfs =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Tmpfs Mount",
+      description: "Container configured with tmpfs options.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            tmpfs: ["/tmp=rw,size=64m"]
+          }
+        ]
+      }
+    },
+    tenant: tenant
+  )
+
+_app_with_readonly_rootfs =
+  Ash.create!(
+    Application,
+    %{
+      name: "App with Read-only Root Filesystem",
+      description: "Demonstrates container with read-only root filesystem.",
+      initial_release: %{
+        version: "1.0.0",
+        containers: [
+          %{
+            image: %{reference: "nginx:latest"},
+            read_only_rootfs: true
           }
         ]
       }
