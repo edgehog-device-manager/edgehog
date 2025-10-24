@@ -22,14 +22,10 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocoding do
   @moduledoc false
   @behaviour Edgehog.Geolocation.GeocodingProvider
 
-  use Tesla
-
   alias Edgehog.Config
+  alias Edgehog.EdgehogTeslaClient
   alias Edgehog.Geolocation.Location
   alias Edgehog.Geolocation.Position
-
-  plug Tesla.Middleware.BaseUrl, "https://maps.googleapis.com/maps/api/geocode/json"
-  plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeocodingProvider
   def reverse_geocode(%Position{} = position) do
@@ -37,7 +33,11 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeocoding do
 
     with {:ok, api_key} <- Config.google_geocoding_api_key(),
          query_params = [key: api_key, latlng: "#{latitude},#{longitude}"],
-         {:ok, response} <- get("", query: query_params) do
+         {:ok, response} <-
+           EdgehogTeslaClient.get(
+             "https://maps.googleapis.com/maps/api/geocode/json",
+             query: query_params
+           ) do
       results = Map.get(response.body, "results", [])
 
       if Enum.empty?(results) do

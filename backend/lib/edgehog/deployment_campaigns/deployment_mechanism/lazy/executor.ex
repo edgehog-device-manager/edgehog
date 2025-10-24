@@ -231,7 +231,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
           {:next_state, :wait_for_available_slot, data}
         end
 
-      {:error, %Ash.Error.Query.NotFound{}} ->
+      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{}]}} ->
         # Are we finished?
         cond do
           # There are still some targets but none of them are online, wait for them

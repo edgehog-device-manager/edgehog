@@ -22,7 +22,8 @@ defmodule Edgehog.Devices.SystemModel do
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    auto_cleanup: false
 
   alias Edgehog.Devices.SystemModel.Changes
   alias Edgehog.Devices.SystemModel.Validations

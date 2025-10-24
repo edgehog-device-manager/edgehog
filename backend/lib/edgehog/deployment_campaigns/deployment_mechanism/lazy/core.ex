@@ -436,7 +436,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
       {:ok, _deployment} ->
         true
 
-      {:error, %Ash.Error.Query.NotFound{}} ->
+      {:error, %Ash.Error.Invalid{errors: [%Ash.Error.Query.NotFound{}]}} ->
         false
 
       {:error, other_reason} ->

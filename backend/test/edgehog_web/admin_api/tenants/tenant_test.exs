@@ -155,16 +155,24 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
       conn =
         post(conn, path, params)
 
-      assert %{"errors" => [error]} = json_response(conn, 400)
+      assert %{"errors" => errors} = json_response(conn, 400)
 
-      assert %{
-               "code" => "invalid_body",
-               "detail" =>
-                 ~s(Required properties are missing: ["base_api_url", "realm_name", "realm_private_key"], at ["data", "attributes", "astarte_config"].),
-               "source" => %{"pointer" => "/data/attributes/astarte_config"},
-               "status" => "400",
-               "title" => "InvalidBody"
-             } = error
+      assert length(errors) == 3
+
+      expected_pointers = [
+        "/data/attributes/astarte_config/base_api_url",
+        "/data/attributes/astarte_config/realm_name",
+        "/data/attributes/astarte_config/realm_private_key"
+      ]
+
+      received_pointers = Enum.map(errors, fn error -> error["source"]["pointer"] end)
+
+      assert Enum.uniq(received_pointers) == Enum.uniq(expected_pointers)
+
+      assert Enum.all?(errors, fn error ->
+               error["status"] == "400" && error["title"] == "Required" &&
+                 error["code"] == "required"
+             end)
     end
 
     test "renders error for invalid astarte_config realm private key", %{conn: conn, path: path} do

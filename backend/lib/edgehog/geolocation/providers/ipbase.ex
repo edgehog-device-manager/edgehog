@@ -22,14 +22,10 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
   @moduledoc false
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
-  use Tesla
-
   alias Edgehog.Config
   alias Edgehog.Devices.Device
+  alias Edgehog.EdgehogTeslaClient
   alias Edgehog.Geolocation.Position
-
-  plug Tesla.Middleware.BaseUrl, "https://api.ipbase.com/v2/info"
-  plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
   def geolocate(%Device{} = device) do
@@ -61,7 +57,10 @@ defmodule Edgehog.Geolocation.Providers.IPBase do
 
   defp geolocate_ip(ip_address, timestamp) do
     with {:ok, api_key} <- Config.ipbase_api_key(),
-         {:ok, %{body: body}} <- get("", query: [apikey: api_key, ip: ip_address]),
+         {:ok, %{body: body}} <-
+           EdgehogTeslaClient.get("https://api.ipbase.com/v2/info",
+             query: [apikey: api_key, ip: ip_address]
+           ),
          {:ok, geolocation_data} <- parse_response_body(body) do
       position = %Position{
         latitude: geolocation_data.latitude,

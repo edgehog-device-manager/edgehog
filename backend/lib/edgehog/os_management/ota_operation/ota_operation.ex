@@ -24,7 +24,8 @@ defmodule Edgehog.OSManagement.OTAOperation do
     domain: Edgehog.OSManagement,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    auto_cleanup: false
 
   alias Edgehog.Changes.PublishNotification
   alias Edgehog.OSManagement.OTAOperation.Changes
