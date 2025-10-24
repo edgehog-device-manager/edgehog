@@ -49,6 +49,7 @@ defmodule Edgehog.DeploymentCampaigns do
       create DeploymentCampaign, :create_deployment_campaign, :create do
         relay_id_translations input: [
                                 release_id: :release,
+                                target_release_id: :release,
                                 channel_id: :channel
                               ]
       end

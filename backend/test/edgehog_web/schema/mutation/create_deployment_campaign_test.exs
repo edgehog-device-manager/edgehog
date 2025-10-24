@@ -295,6 +295,127 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
                code: "invalid_attribute"
              } = error
     end
+
+    test "creates deployment campaign with upgrade operation type and target release", %{
+      tenant: tenant
+    } do
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      application = application_fixture(tenant: tenant)
+
+      release =
+        release_fixture(
+          application_id: application.id,
+          version: "1.0.0",
+          system_models: 1,
+          tenant: tenant
+        )
+
+      target_release =
+        release_fixture(
+          application_id: application.id,
+          version: "1.1.0",
+          system_models: 1,
+          tenant: tenant
+        )
+
+      _device =
+        [release_id: release.id, tenant: tenant]
+        |> device_fixture_compatible_with_release()
+        |> add_tags(["foobar"])
+
+      release_id = AshGraphql.Resource.encode_relay_id(release)
+      target_release_id = AshGraphql.Resource.encode_relay_id(target_release)
+      channel_id = AshGraphql.Resource.encode_relay_id(channel)
+
+      campaign_name = "Test upgrade campaign"
+
+      deployment_campaign_data =
+        [
+          name: campaign_name,
+          release_id: release_id,
+          target_release_id: target_release_id,
+          channel_id: channel_id,
+          operation_type: "UPGRADE",
+          tenant: tenant
+        ]
+        |> create_deployment_campaign_mutation()
+        |> extract_result!()
+
+      assert ^campaign_name = deployment_campaign_data["name"]
+      assert "IDLE" = deployment_campaign_data["status"]
+      assert deployment_campaign_data["operationType"] == "UPGRADE"
+      assert deployment_campaign_data["release"]["id"] == release_id
+      assert deployment_campaign_data["targetRelease"]["id"] == target_release_id
+    end
+
+    test "fails when upgrade operation type is used with smaller target release", %{
+      tenant: tenant
+    } do
+      target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+      application = application_fixture(tenant: tenant)
+
+      release =
+        release_fixture(
+          application_id: application.id,
+          version: "2.0.0",
+          system_models: 1,
+          tenant: tenant
+        )
+
+      target_release =
+        release_fixture(
+          application_id: application.id,
+          version: "1.1.0",
+          system_models: 1,
+          tenant: tenant
+        )
+
+      _device =
+        [release_id: release.id, tenant: tenant]
+        |> device_fixture_compatible_with_release()
+        |> add_tags(["foobar"])
+
+      release_id = AshGraphql.Resource.encode_relay_id(release)
+      target_release_id = AshGraphql.Resource.encode_relay_id(target_release)
+      channel_id = AshGraphql.Resource.encode_relay_id(channel)
+
+      campaign_name = "Test upgrade campaign"
+
+      error =
+        [
+          name: campaign_name,
+          release_id: release_id,
+          target_release_id: target_release_id,
+          channel_id: channel_id,
+          operation_type: "UPGRADE",
+          tenant: tenant
+        ]
+        |> create_deployment_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               path: ["createDeploymentCampaign"],
+               fields: [:target_release_id],
+               message: "must be a newer release than the currently installed version",
+               code: "invalid_attribute"
+             } = error
+    end
+
+    test "fails when upgrade operation type is used without target_release_id", %{tenant: tenant} do
+      error =
+        [operation_type: "UPGRADE", tenant: tenant]
+        |> create_deployment_campaign_mutation()
+        |> extract_error!()
+
+      assert %{
+               path: ["createDeploymentCampaign"],
+               fields: [:target_release_id],
+               message: "is required for upgrade operations",
+               code: "invalid_attribute"
+             } = error
+    end
   end
 
   defp create_deployment_campaign_mutation(opts) do
@@ -306,6 +427,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
           name
           status
           outcome
+          operationType
           deploymentMechanism {
             ... on Lazy {
               maxFailurePercentage
@@ -315,6 +437,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
             }
           }
           release {
+            id
+            version
+          }
+          targetRelease {
             id
             version
           }
@@ -356,6 +482,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
+    {target_release_id, opts} = Keyword.pop(opts, :target_release_id)
+
+    {operation_type, opts} = Keyword.pop(opts, :operation_type)
+
     {deployment_mechanism, opts} =
       Keyword.pop_lazy(opts, :deployment_mechanism, fn ->
         %{
@@ -366,12 +496,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
         }
       end)
 
-    input = %{
-      "name" => name,
-      "releaseId" => release_id,
-      "channelId" => channel_id,
-      "deploymentMechanism" => deployment_mechanism
-    }
+    input =
+      %{
+        "name" => name,
+        "releaseId" => release_id,
+        "channelId" => channel_id,
+        "deploymentMechanism" => deployment_mechanism
+      }
+      |> maybe_add_field("targetReleaseId", target_release_id)
+      |> maybe_add_field("operationType", operation_type)
 
     variables = %{"input" => input}
 
@@ -379,6 +512,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
+
+  defp maybe_add_field(map, _key, nil), do: map
+  defp maybe_add_field(map, key, value), do: Map.put(map, key, value)
 
   defp extract_error!(result) do
     assert is_nil(result[:data]["createDeploymentCampaign"])
