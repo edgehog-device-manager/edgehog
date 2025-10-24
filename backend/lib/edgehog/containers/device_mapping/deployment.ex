@@ -28,6 +28,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceMapping.Changes
+  alias Edgehog.Containers.ManualActions
   alias Edgehog.Devices.Device
 
   graphql do
@@ -98,6 +99,11 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
       change set_attribute(:last_message, arg(:message))
       change set_attribute(:state, :error)
     end
+
+    destroy :destroy_if_dangling do
+      require_atomic? false
+      manual ManualActions.DestroyIfDangling
+    end
   end
 
   attributes do
@@ -131,6 +137,10 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
 
   calculations do
     calculate :is_ready, :boolean, expr(state in [:present, :not_present])
+
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :container_deployments]}
   end
 
   identities do
