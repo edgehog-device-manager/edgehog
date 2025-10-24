@@ -30,6 +30,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.OSManagement
   alias Edgehog.Triggers.DeviceConnected
   alias Edgehog.Triggers.DeviceDisconnected
+  alias Edgehog.Triggers.DeviceRegistered
   alias Edgehog.Triggers.IncomingData
   alias Edgehog.Triggers.TriggerPayload
 
@@ -75,6 +76,14 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
     Device
     |> Ash.Changeset.for_create(:from_device_connected_event, params)
+    |> Ash.create(tenant: tenant)
+  end
+
+  defp handle_event(%DeviceRegistered{}, tenant, realm_id, device_id, _timestamp) do
+    params = %{realm_id: realm_id, device_id: device_id}
+
+    Device
+    |> Ash.Changeset.for_create(:from_device_registered_event, params)
     |> Ash.create(tenant: tenant)
   end
 

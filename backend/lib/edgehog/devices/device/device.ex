@@ -101,6 +101,19 @@ defmodule Edgehog.Devices.Device do
       change set_attribute(:last_connection, arg(:timestamp))
     end
 
+    create :from_device_registered_event do
+      upsert? true
+      upsert_identity :unique_realm_device_id
+      upsert_fields [:updated_at]
+
+      accept [:realm_id]
+      argument :device_id, :string, allow_nil?: false
+
+      # Only if created
+      change set_attribute(:device_id, arg(:device_id))
+      change set_attribute(:name, arg(:device_id))
+    end
+
     create :from_device_disconnected_event do
       upsert? true
       upsert_identity :unique_realm_device_id

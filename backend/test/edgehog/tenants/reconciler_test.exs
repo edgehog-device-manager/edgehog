@@ -36,11 +36,12 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # its pid to allow mocks call from it
       Mox.set_mox_global()
 
-      # Mock the Astarte version check to support trigger delivery policies
+      # Mock the Astarte version check to support trigger delivery policies and
+      # device registration and deletion triggers
       Tesla.Mock.mock_global(fn
         %{method: :get, url: url} ->
           if String.ends_with?(url, "/version") do
-            %Tesla.Env{status: 200, body: %{"data" => "1.2.0"}}
+            %Tesla.Env{status: 200, body: %{"data" => "1.3.0"}}
           else
             %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
           end
@@ -111,11 +112,12 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       # its pid to allow mocks call from it
       Mox.set_mox_global()
 
-      # Mock the Astarte version check to support trigger delivery policies
+      # Mock the Astarte version check to support trigger delivery policies and
+      # device registration and deletion triggers
       Tesla.Mock.mock_global(fn
         %{method: :get, url: url} ->
           if String.ends_with?(url, "/version") do
-            %Tesla.Env{status: 200, body: %{"data" => "1.2.0"}}
+            %Tesla.Env{status: 200, body: %{"data" => "1.3.0"}}
           else
             %Tesla.Env{status: 404, body: %{"errors" => %{"detail" => "Not found"}}}
           end
@@ -186,7 +188,12 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       end)
 
       interface_count = length(Reconciler.Core.list_required_interfaces())
-      trigger_count = "foo" |> Reconciler.Core.list_required_triggers(false) |> length()
+
+      # NOTE: edgehog-registration trigger cannot be installed on astarte
+      # 1.0.0, only from astarte 1.3 onwards device registration (and
+      # deletion) triggers are supported.
+      trigger_count =
+        "foo" |> Reconciler.Core.list_required_triggers(false) |> length() |> Kernel.-(1)
 
       test_pid = self()
       ref = make_ref()

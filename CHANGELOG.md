@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 ## Changed 
 - Added a default image for devices that don’t have an associated system model image, replacing the plain grey placeholder
+- with astarte versions >= 1.3, devices are available in edgehog upon registration, without waiting for their first connection
 
 ## [0.10.0-alpha.6] - 2025-10-16
 ### Added
