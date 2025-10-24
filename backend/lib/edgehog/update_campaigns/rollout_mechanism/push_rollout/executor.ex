@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -387,7 +387,7 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
-  def handle_event(:info, {:ota_operation_updated, ota_operation}, _state, data) do
+  def handle_event(:info, %{payload: {:ota_operation_updated, ota_operation}}, _state, data) do
     # Event generated from PubSub when an OTAOperation is updated
     additional_actions =
       cond do

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ defmodule Edgehog.OSManagementTest do
   alias Edgehog.Error.AstarteAPIError
   alias Edgehog.OSManagement
   alias Edgehog.OSManagement.EphemeralImageMock
-  alias Edgehog.PubSub
 
   describe "ota_operations" do
     import Edgehog.BaseImagesFixtures
@@ -74,7 +73,7 @@ defmodule Edgehog.OSManagementTest do
     } do
       base_image = base_image_fixture(tenant: tenant)
 
-      assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
+      assert :ok = Phoenix.PubSub.subscribe(Edgehog.PubSub, "ota_operations:*")
 
       expect(OTARequestV1Mock, :update, fn _client, _device_id, _uuid, _url -> :ok end)
 
@@ -84,7 +83,7 @@ defmodule Edgehog.OSManagementTest do
                  tenant: tenant
                )
 
-      assert_receive {:ota_operation_created, ^ota_operation}
+      assert_receive %{payload: {:ota_operation_created, ^ota_operation}}
     end
 
     test "create_managed_ota_operation/2 fails if the Astarte request fails", %{

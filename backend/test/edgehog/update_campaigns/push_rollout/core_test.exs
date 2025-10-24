@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -659,7 +659,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       # Generate a publish on the PubSub
       OSManagement.update_ota_operation_status!(ota_operation, "Acknowledged")
 
-      assert_receive {:ota_operation_updated, %OTAOperation{status: :acknowledged}}
+      assert_receive %{payload: {:ota_operation_updated, %OTAOperation{status: :acknowledged}}}
     end
   end
 

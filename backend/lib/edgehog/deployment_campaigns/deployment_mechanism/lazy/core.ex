@@ -27,7 +27,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   alias Edgehog.DeploymentCampaigns.DeploymentCampaign
   alias Edgehog.DeploymentCampaigns.DeploymentTarget
   alias Edgehog.Error.AstarteAPIError
-  alias Edgehog.PubSub
 
   @doc """
   Fetches a deployment campaign by its ID and tenant ID, raising an error if not found.
@@ -247,7 +246,11 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     - :ok if the subscription is successful, otherwise raises an error.
   """
   def subscribe_to_deployment_updates!(deployment_id) do
-    with {:error, reason} <- PubSub.subscribe_to_events_for({:deployment, deployment_id}) do
+    with {:error, reason} <-
+           Phoenix.PubSub.subscribe(
+             Edgehog.PubSub,
+             "deployments:#{deployment_id}"
+           ) do
       raise reason
     end
   end
@@ -262,7 +265,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     - :ok if the subscription is successful, otherwise raises an error.
   """
   def unsubscribe_to_deployment_updates!(deployment_id) do
-    PubSub.unsubscribe_to_events_for({:deployment, deployment_id})
+    Phoenix.PubSub.unsubscribe(
+      Edgehog.PubSub,
+      "deployments:#{deployment_id}"
+    )
   end
 
   @doc """

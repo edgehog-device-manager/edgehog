@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
   alias Edgehog.Astarte.Device.OTARequestV1Mock
   alias Edgehog.OSManagement.EphemeralImageMock
   alias Edgehog.OSManagement.OTAOperation
-  alias Edgehog.PubSub
 
   describe "createManualOtaOperation mutation" do
     test "creates OTA operation with valid data", %{tenant: tenant} do
@@ -98,7 +97,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
     end
 
     test "publishes on PubSub aftering creating the OTA operation", %{tenant: tenant} do
-      assert :ok = PubSub.subscribe_to_events_for(:ota_operations)
+      assert :ok = Phoenix.PubSub.subscribe(Edgehog.PubSub, "ota_operations:*")
 
       expect(EphemeralImageMock, :upload, fn _, _, _ -> {:ok, "base_image_url"} end)
 
@@ -108,7 +107,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
       ota_operation = [tenant: tenant] |> create_ota_operation_mutation() |> extract_result!()
 
-      assert_receive {:ota_operation_created, %OTAOperation{} = ota_operation_event}
+      assert_receive %{
+        payload: {:ota_operation_created, %OTAOperation{} = ota_operation_event}
+      }
 
       assert AshGraphql.Resource.encode_relay_id(ota_operation_event) == ota_operation["id"]
     end
