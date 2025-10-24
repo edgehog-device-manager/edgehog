@@ -23,6 +23,12 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes.ComputeDeployme
   Change to compute deployment targets.
 
   It starts from the channel of the campaign and finds the suitable targets for the campaign.
+
+  For deploy operations, all devices in the channel that match the system model requirements
+  are included as targets.
+
+  For other operations (start, stop, upgrade, delete), only devices that already have the
+  specified release deployed are included as targets.
   """
   use Ash.Resource.Change
 
@@ -37,9 +43,11 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes.ComputeDeployme
 
     with {:ok, release} <- fetch_release(changeset, tenant),
          {:ok, channel} <- fetch_channel(changeset, tenant) do
+      operation_type = Ash.Changeset.get_attribute(changeset, :operation_type)
       channel = Ash.load!(channel, deployable_devices: [release: release])
 
-      deployable_devices = channel.deployable_devices
+      deployable_devices =
+        filter_devices_by_operation(channel.deployable_devices, operation_type, release, tenant)
 
       if Enum.empty?(deployable_devices) do
         changeset
@@ -104,4 +112,24 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign.Changes.ComputeDeployme
   end
 
   defp start_campaign_executor(transaction_result), do: transaction_result
+
+  # For deploy operations, return all deployable devices
+  defp filter_devices_by_operation(devices, :deploy, _release, _tenant) do
+    devices
+  end
+
+  # For other operations (start, stop, upgrade, delete), filter devices that have the release deployed
+  defp filter_devices_by_operation(devices, _operation_type, release, tenant) do
+    devices_with_release = Ash.load!(devices, [:application_deployments], tenant: tenant)
+
+    Enum.filter(devices_with_release, fn device ->
+      has_release_deployed?(device, release)
+    end)
+  end
+
+  defp has_release_deployed?(device, release) do
+    Enum.any?(device.application_deployments, fn deployment ->
+      deployment.release_id == release.id
+    end)
+  end
 end
