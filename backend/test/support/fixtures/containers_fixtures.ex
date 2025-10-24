@@ -289,7 +289,13 @@ defmodule Edgehog.ContainersFixtures do
       end)
 
     {release_id, opts} =
-      Keyword.pop_lazy(opts, :release_id, fn -> release_fixture(tenant: tenant).id end)
+      Keyword.pop_lazy(opts, :release_id, fn ->
+        release_opts = Keyword.get(opts, :release_opts, [])
+        release_opts = Keyword.put(release_opts, :tenant, tenant)
+        release_fixture(release_opts).id
+      end)
+
+    opts = Keyword.delete(opts, :release_opts)
 
     params =
       Enum.into(opts, %{

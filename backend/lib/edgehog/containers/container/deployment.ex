@@ -28,6 +28,7 @@ defmodule Edgehog.Containers.Container.Deployment do
   alias Edgehog.Containers.Container.Calculations
   alias Edgehog.Containers.Container.Changes
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.ManualActions
   alias Edgehog.Devices.Device
 
   graphql do
@@ -120,6 +121,12 @@ defmodule Edgehog.Containers.Container.Deployment do
       require_atomic? false
       change Changes.MaybeNotifyUpwards
     end
+
+    destroy :destroy_if_dangling do
+      require_atomic? false
+      change Changes.MaybeDeleteChildren
+      manual ManualActions.DestroyIfDangling
+    end
   end
 
   attributes do
@@ -181,6 +188,10 @@ defmodule Edgehog.Containers.Container.Deployment do
 
   calculations do
     calculate :is_ready, :boolean, Calculations.Ready
+
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :deployments]}
   end
 
   identities do

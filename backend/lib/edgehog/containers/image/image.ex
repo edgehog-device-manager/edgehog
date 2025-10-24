@@ -26,8 +26,8 @@ defmodule Edgehog.Containers.Image do
 
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Image.Calculations
-  alias Edgehog.Containers.Image.ManualActions
   alias Edgehog.Containers.ImageCredentials
+  alias Edgehog.Containers.ManualActions
 
   graphql do
     type :image
