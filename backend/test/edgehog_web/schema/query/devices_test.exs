@@ -703,7 +703,7 @@ defmodule EdgehogWeb.Schema.Query.DevicesTest do
 
     variables =
       %{
-        "filter" => opts[:filter],
+        "filter" => opts[:filter] || %{},
         "sort" => opts[:sort] || []
       }
 

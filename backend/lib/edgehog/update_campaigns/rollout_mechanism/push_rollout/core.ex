@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   @moduledoc false
   alias Astarte.Client.APIError
   alias Edgehog.OSManagement
-  alias Edgehog.PubSub
   alias Edgehog.UpdateCampaigns
   alias Edgehog.UpdateCampaigns.UpdateCampaign
   alias Edgehog.UpdateCampaigns.UpdateTarget
@@ -247,7 +246,8 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Core do
   Subscribes to receive the events for the OTA Operation with the given id. Raises in case of failure.
   """
   def subscribe_to_ota_operation_updates!(ota_operation_id) do
-    with {:error, reason} <- PubSub.subscribe_to_events_for({:ota_operation, ota_operation_id}) do
+    with {:error, reason} <-
+           Phoenix.PubSub.subscribe(Edgehog.PubSub, "ota_operations:#{ota_operation_id}") do
       raise reason
     end
   end

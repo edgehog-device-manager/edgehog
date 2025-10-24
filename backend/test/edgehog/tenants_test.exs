@@ -26,7 +26,6 @@ defmodule Edgehog.TenantsTest do
 
   alias Ash.Error.Changes.Required
   alias Ash.Error.Invalid
-  alias Ash.Error.Query.NotFound
   alias Edgehog.Astarte
   alias Edgehog.BaseImages.StorageMock
   alias Edgehog.OSManagement.EphemeralImageMock
@@ -300,7 +299,7 @@ defmodule Edgehog.TenantsTest do
 
     test "deletes the tenant", %{tenant: tenant} do
       assert :ok = Tenants.destroy_tenant(tenant)
-      assert_raise NotFound, fn -> Tenants.fetch_tenant_by_slug!(tenant.slug) end
+      assert_raise Invalid, fn -> Tenants.fetch_tenant_by_slug!(tenant.slug) end
     end
 
     test "cascading deletes associated realm", %{tenant: tenant} do
@@ -309,7 +308,7 @@ defmodule Edgehog.TenantsTest do
 
       assert :ok = Tenants.destroy_tenant(tenant)
 
-      {:error, %NotFound{}} =
+      {:error, %Invalid{}} =
         Astarte.fetch_realm_by_name(realm.name, tenant: tenant)
     end
 
@@ -341,7 +340,6 @@ defmodule Edgehog.TenantsTest do
         assert tenant_id == manual_ota_operation.tenant_id
         assert ota_operation_id == manual_ota_operation.id
         assert url == manual_ota_operation.base_image_url
-
         :ok
       end)
 

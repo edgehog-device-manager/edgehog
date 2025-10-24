@@ -22,15 +22,11 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
   @moduledoc false
   @behaviour Edgehog.Geolocation.GeolocationProvider
 
-  use Tesla
-
   alias Edgehog.Astarte.Device.WiFiScanResult
   alias Edgehog.Config
   alias Edgehog.Devices.Device
+  alias Edgehog.EdgehogTeslaClient
   alias Edgehog.Geolocation.Position
-
-  plug Tesla.Middleware.BaseUrl, "https://www.googleapis.com/geolocation/v1/geolocate"
-  plug Tesla.Middleware.JSON
 
   @impl Edgehog.Geolocation.GeolocationProvider
   def geolocate(%Device{} = device) do
@@ -80,7 +76,12 @@ defmodule Edgehog.Geolocation.Providers.GoogleGeolocation do
     }
 
     with {:ok, api_key} <- Config.google_geolocation_api_key(),
-         {:ok, %{body: body}} <- post("", body_params, query: [key: api_key]),
+         {:ok, %{body: body}} <-
+           EdgehogTeslaClient.post(
+             "https://www.googleapis.com/geolocation/v1/geolocate",
+             body_params,
+             query: [key: api_key]
+           ),
          {:coords, %{"location" => %{"lat" => latitude, "lng" => longitude}}}
          when is_number(latitude) and is_number(longitude) <- {:coords, body} do
       timestamp = List.first(wifi_scan_results).timestamp

@@ -25,7 +25,6 @@ defmodule Edgehog.Astarte.RealmTest do
   import Edgehog.TenantsFixtures
 
   alias Ash.Error.Invalid
-  alias Ash.Error.Query.NotFound
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
 
@@ -109,7 +108,7 @@ defmodule Edgehog.Astarte.RealmTest do
     test "returns error for non-existing realm" do
       tenant = tenant_fixture()
 
-      assert {:error, %NotFound{}} =
+      assert {:error, %Invalid{}} =
                Astarte.fetch_realm_by_name("nonexisting", tenant: tenant)
     end
   end
@@ -119,8 +118,8 @@ defmodule Edgehog.Astarte.RealmTest do
     realm = realm_fixture(tenant: tenant)
     assert :ok = Astarte.destroy_realm(realm)
 
-    assert {:error, %Invalid{errors: [%NotFound{}]}} =
-             Ash.get(Realm, realm.id, tenant: tenant)
+    assert {:error, %Invalid{}} =
+             Astarte.fetch_realm_by_name(realm.name, tenant: tenant)
   end
 
   defp create_realm(opts) do

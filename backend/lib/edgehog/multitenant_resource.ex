@@ -22,7 +22,7 @@ defmodule Edgehog.MultitenantResource do
   @moduledoc false
   alias Edgehog.Tenants.Tenant
 
-  @custom_opts [:tenant_id_in_primary_key?]
+  @custom_opts [:tenant_id_in_primary_key?, :auto_cleanup]
 
   defmacro __using__(opts) do
     quote do
@@ -49,8 +49,10 @@ defmodule Edgehog.MultitenantResource do
       postgres do
         repo Edgehog.Repo
 
-        references do
-          reference :tenant, on_delete: :delete
+        if unquote(Keyword.get(opts, :auto_cleanup, true)) do
+          references do
+            reference :tenant, on_delete: :delete
+          end
         end
 
         # We have to create a unique index on `[:id, :tenant_id]` to be able to use composite
