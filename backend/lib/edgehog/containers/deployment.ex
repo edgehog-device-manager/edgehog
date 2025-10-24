@@ -22,9 +22,9 @@ defmodule Edgehog.Containers.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Changes.PublishNotification
   alias Edgehog.Containers.Deployment.Calculations
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.Deployment.Types.DeploymentState
@@ -66,7 +66,6 @@ defmodule Edgehog.Containers.Deployment do
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.Relate
       change Changes.SendRequest
-      change {PublishNotification, event_type: :deployment_created}
     end
 
     create :just_create do
@@ -85,7 +84,6 @@ defmodule Edgehog.Containers.Deployment do
 
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.Relate
-      change {PublishNotification, event_type: :deployment_created}
     end
 
     if @testing do
@@ -157,7 +155,6 @@ defmodule Edgehog.Containers.Deployment do
       require_atomic? false
 
       change Changes.SendDeploymentToDevice
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :upgrade_release do
@@ -177,35 +174,30 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:state, :sent)
 
       require_atomic? false
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_started do
       change set_attribute(:state, :started)
 
       require_atomic? false
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_starting do
       require_atomic? false
 
       change Changes.MarkAsStarting
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
 
       require_atomic? false
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_stopping do
       require_atomic? false
 
       change Changes.MarkAsStopping
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :mark_as_errored do
@@ -217,14 +209,12 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:state, :error)
 
       require_atomic? false
-      change {PublishNotification, event_type: :deployment_error}
     end
 
     update :mark_as_deleting do
       change set_attribute(:state, :deleting)
 
       require_atomic? false
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     update :maybe_run_ready_actions do
@@ -232,7 +222,6 @@ defmodule Edgehog.Containers.Deployment do
       change Changes.MaybePublishDeploymentReady
 
       require_atomic? false
-      change {PublishNotification, event_type: :deployment_updated}
     end
 
     read :filter_by_release do
@@ -292,6 +281,56 @@ defmodule Edgehog.Containers.Deployment do
 
   identities do
     identity :release_instance, [:device_id, :release_id]
+  end
+
+  pub_sub do
+    prefix "deployments"
+    module EdgehogWeb.Endpoint
+
+    publish :deploy, [[:id, "*"]]
+    publish :just_create, [[:id, "*"]]
+
+    publish :mark_as_sent, [[:id, "*"]]
+    publish :mark_as_started, [[:id, "*"]]
+    publish :mark_as_starting, [[:id, "*"]]
+    publish :mark_as_stopped, [[:id, "*"]]
+    publish :mark_as_stopping, [[:id, "*"]]
+    publish :mark_as_errored, [[:id, "*"]]
+    publish :mark_as_deleting, [[:id, "*"]]
+    publish :maybe_run_ready_actions, [[:id, "*"]]
+
+    transform fn notification ->
+      deployment = notification.data
+      action = notification.action.name
+
+      event_type =
+        cond do
+          Map.get(notification.metadata || %{}, :custom_event) == :deployment_ready ->
+            :deployment_ready
+
+          action in [:deploy, :just_create] ->
+            :deployment_created
+
+          action in [
+            :mark_as_sent,
+            :mark_as_started,
+            :mark_as_starting,
+            :mark_as_stopped,
+            :mark_as_stopping,
+            :mark_as_deleting,
+            :maybe_run_ready_actions
+          ] ->
+            :deployment_updated
+
+          action == :mark_as_errored ->
+            :deployment_error
+
+          true ->
+            :unknown_event
+        end
+
+      {event_type, deployment}
+    end
   end
 
   postgres do
