@@ -352,17 +352,22 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   end
 
   @doc """
-  Fetches the deployment target associated with a given deployment ID.
+  Fetches the deployment target associated with a given deployment ID and campaign ID.
 
   ## Parameters
     - tenant_id: The ID of the tenant.
+    - deployment_campaign_id: The ID of the deployment campaign.
     - deployment_id: The ID of the deployment.
 
   ## Returns
-    - The deployment target struct associated with the deployment ID.
+    - The deployment target struct associated with the deployment ID and campaign ID.
   """
-  def get_target_for_deployment!(tenant_id, deployment_id) do
-    DeploymentCampaigns.fetch_target_by_deployment!(deployment_id, tenant: tenant_id)
+  def get_target_for_deployment!(tenant_id, deployment_campaign_id, deployment_id) do
+    DeploymentCampaigns.fetch_target_by_deployment_and_campaign!(
+      deployment_id,
+      deployment_campaign_id,
+      tenant: tenant_id
+    )
   end
 
   @doc """
@@ -439,8 +444,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
         {:error, :not_implemented}
 
       :start ->
-        # Placeholder for future start operation
-        {:error, :not_implemented}
+        start(target, release)
 
       :stop ->
         # Placeholder for future stop operation
@@ -471,7 +475,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     # the necessary resources, the next time, if not completely deployed, reties
     # to send all the informations but fails as the resources are already
     # present.
-    if already_deployed?(target, release) do
+    if application_deployed?(target, release) do
       {:ok, :already_deployed}
     else
       {:ok, target} = do_deploy(target, release, deployment_mechanism)
@@ -495,7 +499,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     DeploymentCampaigns.deploy_to_target(target, release)
   end
 
-  defp already_deployed?(target, release) do
+  defp application_deployed?(target, release) do
     device =
       target
       |> Ash.load!(:device)
@@ -511,6 +515,73 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
       {:error, other_reason} ->
         raise other_reason
     end
+  end
+
+  @doc """
+  Starts the release on the target device.
+
+  ## Parameters
+    - target: The deployment target struct.
+    - release: The release struct to be started.
+
+  ## Returns
+    - `{:ok, target}` if the start command is successfully sent.
+    - `{:ok, :already_started}` if the deployment is already in a started state.
+    - `{:error, :deployment_not_found}` if the deployment doesn't exist on the target.
+    - `{:error, :deployment_deleting}` if the deployment is being deleted.
+    - `{:error, :deployment_transitioning}` if the deployment is in a transitional state.
+    - `{:error, reason}` for any other errors.
+  """
+  def start(target, release) do
+    if application_deployed?(target, release) do
+      {:ok, updated_target} = do_start(target, release)
+
+      deployment =
+        updated_target
+        |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
+        |> Map.get(:deployment)
+
+      cond do
+        # Check if already started
+        deployment.state == :started ->
+          {:ok, :already_started}
+
+        # Check if being deleted
+        deployment.state == :deleting ->
+          {:error, :deployment_deleting}
+
+        # Check if in a transitional state
+        deployment.state in [:starting, :stopping] ->
+          {:error, :deployment_transitioning}
+
+        # Start the deployment
+        true ->
+          deployment_result =
+            deployment
+            |> Ash.Changeset.for_update(:start, %{}, tenant: updated_target.tenant_id)
+            |> Ash.update()
+
+          with {:ok, _deployment} <- deployment_result do
+            {:ok, updated_target}
+          end
+      end
+    else
+      {:error, :deployment_not_found}
+    end
+  end
+
+  defp do_start(target, release) do
+    target = update_target_latest_attempt!(target)
+
+    device =
+      target
+      |> Ash.load!(:device)
+      |> Map.get(:device)
+
+    {:ok, deployment} =
+      Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id)
+
+    DeploymentCampaigns.set_target_deployment(target, deployment.id, tenant: target.tenant_id)
   end
 
   @doc """

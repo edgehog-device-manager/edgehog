@@ -86,6 +86,11 @@ defmodule Edgehog.DeploymentCampaigns do
         get_by: [:deployment_id],
         not_found_error?: true
 
+      define :fetch_target_by_deployment_and_campaign,
+        action: :read,
+        get_by: [:deployment_id, :deployment_campaign_id],
+        not_found_error?: true
+
       define :mark_target_as_in_progress, action: :mark_as_in_progress
       define :mark_target_as_failed, action: :mark_as_failed
       define :mark_target_as_successful, action: :mark_as_successful
@@ -97,6 +102,8 @@ defmodule Edgehog.DeploymentCampaigns do
         args: [:latest_attempt]
 
       define :deploy_to_target, action: :deploy, args: [:release]
+
+      define :set_target_deployment, action: :set_deployment, args: [:deployment_id]
     end
   end
 end
