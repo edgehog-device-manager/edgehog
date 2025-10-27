@@ -42,7 +42,7 @@ declare global {
   /* eslint-disable no-var */
   var jest: typeof vi;
 }
-global.jest = vi;
+globalThis.jest = vi;
 // runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {
   cleanup();
