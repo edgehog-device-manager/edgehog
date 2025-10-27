@@ -85,7 +85,7 @@ const messages = defineMessages({
   portBindingsFormat: {
     id: "validation.portBindings.format",
     defaultMessage:
-      "Port Bindings must be comma-separated values like '8080:80, 443:443'.",
+      "Port Bindings must be comma-separated values in the format [HOST:]CONTAINER[/PROTOCOL]",
   },
   bindsInvalid: {
     id: "validation.binds.format",
@@ -234,6 +234,11 @@ const envSchema = yup
   })
   .default("{}");
 
+const ipv4PortRegex =
+  /^(\d{1,5}(-\d{1,5})?(:(\d{1,5}(-\d{1,5})?))?(\/(tcp|udp))?|(\d{1,3}\.){3}\d{1,3}:\d{1,5}(-\d{1,5})?:\d{1,5}(-\d{1,5})?(\/(tcp|udp))?)$/;
+const ipv6PortRegex =
+  /^(\[?[0-9a-fA-F:]+\]?:\d{1,5}(-\d{1,5})?:\d{1,5}(-\d{1,5})?(\/(tcp|udp))?)$/;
+
 const portBindingsSchema = yup
   .string()
   .nullable()
@@ -243,7 +248,11 @@ const portBindingsSchema = yup
     message: messages.portBindingsFormat.id,
     test: (value) =>
       !value ||
-      value.split(", ").every((v) => /^[0-9]+:[0-9]+$/.test(v.trim())),
+      value
+        .split(", ")
+        .every(
+          (v) => ipv4PortRegex.test(v.trim()) || ipv6PortRegex.test(v.trim()),
+        ),
   });
 
 const bindingsSchema = yup

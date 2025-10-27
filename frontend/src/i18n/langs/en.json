@@ -2540,7 +2540,7 @@
     "defaultMessage": "{label} must be a positive number."
   },
   "validation.portBindings.format": {
-    "defaultMessage": "Port Bindings must be comma-separated values like '8080:80, 443:443'."
+    "defaultMessage": "Port Bindings must be comma-separated values in the format [HOST:]CONTAINER[/PROTOCOL]"
   },
   "validation.required": {
     "defaultMessage": "Required."

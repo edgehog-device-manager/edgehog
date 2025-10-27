@@ -1018,7 +1018,7 @@ const ContainerForm = ({
             {...register(`containers.${index}.portBindings` as const)}
             type="text"
             isInvalid={!!errors.containers?.[index]?.portBindings}
-            placeholder="e.g., 8080:80, 443:443"
+            placeholder="e.g., 8080:80, 6060:6060/udp, 127.0.0.1:8001:8001"
           />
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.portBindings?.message && (
