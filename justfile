@@ -125,6 +125,36 @@ _create-edgehog-tenant:
            }
          }'
 
+# Check if Astarte is running and start it if needed
+[private]
+_ensure-astarte-running:
+    #!/usr/bin/env bash
+    echo "🔍 Checking if Astarte is running..."
+    if curl -sf http://api.astarte.localhost/appengine/health >/dev/null && \
+       curl -sf http://api.astarte.localhost/realmmanagement/health >/dev/null && \
+       curl -sf http://api.astarte.localhost/pairing/health >/dev/null && \
+       curl -sf http://api.astarte.localhost/housekeeping/health >/dev/null; then
+        echo "✅ Astarte is already running."
+    else
+        echo "⚠️  Astarte is not running. Starting Astarte..."
+        just _check-astarte-prereqs
+        just _configure-system
+        just _init-astarte
+        just _wait-astarte
+        echo "🏠 Checking if realm exists..."
+        if ! astartectl housekeeping realms list --astarte-url http://api.astarte.localhost -k astarte/compose/astarte-keys/housekeeping_private.pem | grep -q "test"; then
+            echo "🏠 Realm does not exist, creating it..."
+            just _create-astarte-realm
+        else
+            echo "✅ Realm already exists."
+        fi
+    fi
+
+# Provision only Edgehog (will start Astarte if not running)
+provision-edgehog: _check-system-prereqs _ensure-astarte-running _init-edgehog _wait-edgehog _create-edgehog-tenant
+    @echo "🎉 Edgehog has been provisioned with the test tenant."
+    @just open-dashboards
+
 # Provision a new Edgehog tenant with Astarte backend
 provision-tenant: _check-system-prereqs _check-astarte-prereqs _configure-system _init-astarte _wait-astarte _create-astarte-realm _init-edgehog _wait-edgehog _create-edgehog-tenant
     @echo "🎉 The Edgehog cluster has been provisioned and the tenant is ready."
@@ -137,6 +167,17 @@ deprovision-tenant: _check-system-prereqs && _clean-resources
     docker compose down -v
     @if [ -d astarte ]; then echo "🛑 Deprovisioning Astarte..."; (cd astarte && docker compose down -v); fi
     @echo "✅ The Edgehog cluster has been deprovisioned."
+
+# Deprovision only Edgehog and device runtime, leave Astarte running
+deprovision-edgehog:
+    @echo "🧹 Deprovisioning Edgehog and device runtime..."
+    @echo "🛑 Stopping Edgehog services..."
+    docker compose down -v
+    @echo "🧹 Cleaning up device runtime files..."
+    -rm -rf edgehog-device-runtime/.store/
+    -rm -rf edgehog-device-runtime/.updates/
+    -rm -rf edgehog-device-runtime/
+    @echo "✅ Edgehog and device runtime have been deprovisioned. Astarte is still running."
 
 # Initialize device runtime repository
 [private]
@@ -242,8 +283,10 @@ help:
     @echo ""
     @echo "Main commands:"
     @echo "  provision-tenant    Set up Edgehog with Astarte backend"
+    @echo "  provision-edgehog   Set up Edgehog (will start Astarte if not running)"
     @echo "  connect-device      Connect a simulated device to Edgehog"
     @echo "  deprovision-tenant  Tear down Edgehog and Astarte services"
+    @echo "  deprovision-edgehog Tear down Edgehog and device runtime (keep Astarte)"
     @echo ""
     @echo "Utility commands:"
     @echo "  status              Show the status of running services"
