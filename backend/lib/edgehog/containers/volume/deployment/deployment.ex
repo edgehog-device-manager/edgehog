@@ -18,34 +18,33 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image.Deployment do
+defmodule Edgehog.Containers.Volume.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Changes.MaybeNotifyUpwards
-  alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Image
-  alias Edgehog.Containers.Image.Changes
-  alias Edgehog.Containers.ManualActions
+  alias Edgehog.Containers.Validations
+  alias Edgehog.Containers.Volume
+  alias Edgehog.Containers.Volume.Deployment.Changes
   alias Edgehog.Devices.Device
 
   graphql do
-    type :image_deployment
+    type :volume_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:image_id, :device_id, :state]]
+    defaults [:read, :destroy, create: [:volume_id, :device_id, :state]]
 
     create :deploy do
       description """
-      Deploys an image on a device.
+      Deploys an image on a device, the status according to device triggers.
       """
 
-      argument :image, :struct do
-        constraints instance_of: Image
+      argument :volume, :struct do
+        constraints instance_of: Volume
         allow_nil? false
       end
 
@@ -55,7 +54,7 @@ defmodule Edgehog.Containers.Image.Deployment do
       end
 
       change set_attribute(:state, :created)
-      change manage_relationship(:image, type: :append)
+      change manage_relationship(:volume, type: :append)
       change manage_relationship(:device, type: :append)
     end
 
@@ -72,24 +71,24 @@ defmodule Edgehog.Containers.Image.Deployment do
 
       require_atomic? false
 
-      change Changes.DeployImageOnDevice
+      change Changes.DeployVolumeOnDevice
     end
 
     update :mark_as_sent do
       change set_attribute(:state, :sent)
     end
 
-    update :mark_as_unpulled do
+    update :mark_as_available do
       require_atomic? false
 
-      change set_attribute(:state, :unpulled)
+      change set_attribute(:state, :available)
       change MaybeNotifyUpwards
     end
 
-    update :mark_as_pulled do
+    update :mark_as_unavailable do
       require_atomic? false
 
-      change set_attribute(:state, :pulled)
+      change set_attribute(:state, :unavailable)
       change MaybeNotifyUpwards
     end
 
@@ -104,7 +103,7 @@ defmodule Edgehog.Containers.Image.Deployment do
 
     destroy :destroy_if_dangling do
       require_atomic? false
-      manual ManualActions.DestroyIfDangling
+      validate Validations.Dangling
     end
   end
 
@@ -115,7 +114,7 @@ defmodule Edgehog.Containers.Image.Deployment do
 
     attribute :state, :atom,
       constraints: [
-        one_of: [:created, :sent, :pulled, :unpulled, :error]
+        one_of: [:created, :sent, :available, :unavailable, :error]
       ],
       public?: true
 
@@ -123,19 +122,22 @@ defmodule Edgehog.Containers.Image.Deployment do
   end
 
   relationships do
-    belongs_to :image, Edgehog.Containers.Image do
+    belongs_to :volume, Edgehog.Containers.Volume do
       attribute_type :uuid
     end
 
     belongs_to :device, Edgehog.Devices.Device
 
-    has_many :container_deployments, Edgehog.Containers.Container.Deployment do
-      destination_attribute :image_deployment_id
+    many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      through Edgehog.Containers.ContainerDeploymentVolumeDeployment
+      source_attribute_on_join_resource :volume_deployment_id
+      destination_attribute_on_join_resource :container_deployment_id
+      public? true
     end
   end
 
   calculations do
-    calculate :is_ready, :boolean, expr(state in [:pulled, :unpulled])
+    calculate :is_ready, :boolean, expr(state in [:available, :unavailable])
 
     calculate :dangling?,
               :boolean,
@@ -143,15 +145,10 @@ defmodule Edgehog.Containers.Image.Deployment do
   end
 
   identities do
-    identity :image_instance, [:image_id, :device_id]
+    identity :volume_instance, [:volume_id, :device_id]
   end
 
   postgres do
-    table "image_deployments"
-
-    references do
-      reference :image, on_delete: :delete
-      reference :device, on_delete: :delete
-    end
+    table "application_volume_deployments"
   end
 end

@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.DeviceMapping do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
+  alias Edgehog.Containers.Validations
 
   graphql do
     type :device_mapping
@@ -37,6 +38,13 @@ defmodule Edgehog.Containers.DeviceMapping do
       create: [:path_on_host, :path_in_container, :cgroup_permissions],
       update: [:path_on_host, :path_in_container, :cgroup_permissions]
     ]
+
+    destroy :destroy_if_dangling do
+      description "Destroys the network if it's dangling (not referenced by any container)"
+
+      require_atomic? false
+      validate Validations.Dangling
+    end
   end
 
   attributes do
@@ -64,6 +72,12 @@ defmodule Edgehog.Containers.DeviceMapping do
       attribute_type :uuid
       public? true
     end
+  end
+
+  calculations do
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
   postgres do

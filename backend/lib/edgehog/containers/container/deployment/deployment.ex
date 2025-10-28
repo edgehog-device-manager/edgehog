@@ -25,10 +25,10 @@ defmodule Edgehog.Containers.Container.Deployment do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Container.Calculations
-  alias Edgehog.Containers.Container.Changes
+  alias Edgehog.Containers.Container.Deployment.Calculations
+  alias Edgehog.Containers.Container.Deployment.Changes
   alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.ManualActions
+  alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
 
   graphql do
@@ -124,8 +124,8 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     destroy :destroy_if_dangling do
       require_atomic? false
+      validate Validations.Dangling
       change Changes.MaybeDeleteChildren
-      manual ManualActions.DestroyIfDangling
     end
   end
 

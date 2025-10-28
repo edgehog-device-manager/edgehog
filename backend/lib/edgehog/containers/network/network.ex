@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Network do
 
   alias Edgehog.Containers.ContainerNetwork
   alias Edgehog.Containers.Network.Calculations
+  alias Edgehog.Containers.Validations
 
   graphql do
     type :network
@@ -33,11 +34,13 @@ defmodule Edgehog.Containers.Network do
   end
 
   actions do
-    defaults [:read, create: [:label, :driver, :internal, :enable_ipv6, :options]]
+    defaults [:read, :destroy, create: [:label, :driver, :internal, :enable_ipv6, :options]]
 
-    destroy :destroy do
-      description "Deletes a volume if not used by any container."
-      primary? true
+    destroy :destroy_if_dangling do
+      description "Destroys the network if it's dangling (not referenced by any container)"
+
+      require_atomic? false
+      validate Validations.Dangling
     end
   end
 
@@ -92,6 +95,10 @@ defmodule Edgehog.Containers.Network do
 
   calculations do
     calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
+
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
   identities do
