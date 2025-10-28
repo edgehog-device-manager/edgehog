@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.10.0-alpha.7] - 2025-10-28
 ## Changed 
 - Added a default image for devices that don’t have an associated system model image, replacing the plain grey placeholder
+- Containers now allow to specify binds.
+- Frontend validation for port bindings support the full docker specification: [docker documentation](https://docs.docker.com/reference/compose-file/services/#ports).
+- Adds garbage collection utilities for container resources
 
 ## [0.10.0-alpha.6] - 2025-10-16
 ### Added
