@@ -51,6 +51,7 @@ const DEPLOYMENTS_TABLE_FRAGMENT = graphql`
         node {
           id
           state
+          isReady
           device {
             id
             name
@@ -139,7 +140,10 @@ const columns = [
       />
     ),
     cell: ({ row }) => (
-      <DeploymentStateComponent state={row.original.state as DeploymentState} />
+      <DeploymentStateComponent
+        state={row.original.state as DeploymentState}
+        isReady={row.original.isReady}
+      />
     ),
   }),
 ];
