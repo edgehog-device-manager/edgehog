@@ -46,7 +46,10 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
         &%{
           container: &1,
           device: device,
-          deployment: deployment
+          deployment: deployment,
+          # Needed for container_instance identity
+          container_id: &1.id,
+          device_id: &1.id
         }
       )
 

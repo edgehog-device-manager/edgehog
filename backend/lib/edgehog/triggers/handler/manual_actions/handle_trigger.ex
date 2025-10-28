@@ -318,7 +318,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
             # The device is removing the deployment, remove it!
             nil ->
-              Containers.destroy_deployment!(deployment, tenant: tenant)
+              deployment
+              |> Ash.Changeset.for_destroy(:destroy_and_gc, %{}, tenant: tenant)
+              |> Ash.destroy()
+
               {:ok, deployment}
           end
         end

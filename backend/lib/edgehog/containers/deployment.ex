@@ -232,6 +232,11 @@ defmodule Edgehog.Containers.Deployment do
 
       filter expr(release_id == ^arg(:release_id))
     end
+
+    destroy :destroy_and_gc do
+      require_atomic? false
+      change Changes.MaybeDeleteChildren
+    end
   end
 
   attributes do

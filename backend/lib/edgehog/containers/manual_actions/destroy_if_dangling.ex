@@ -18,19 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image.ManualActions.DestroyIfDangling do
-  @moduledoc false
+defmodule Edgehog.Containers.ManualActions.DestroyIfDangling do
+  @moduledoc """
+  Is the given resource dangling (`dangling?` calculation returns true)? -> delete it!
+  """
 
   use Ash.Resource.ManualDestroy
 
   @impl Ash.Resource.ManualDestroy
   def destroy(changeset, _opts, %{tenant: tenant}) do
-    image = changeset.data
+    resource = changeset.data
 
-    with {:ok, image} <- Ash.load(image, :dangling?) do
-      if image.dangling?, do: Ash.destroy(image, tenant: tenant)
+    with {:ok, resource} <- Ash.load(resource, :dangling?) do
+      if resource.dangling? do
+        with :ok <- Ash.destroy(resource, tenant: tenant) do
+          {:ok, resource}
+        end
+      else
+        {:error, :not_dangling}
+      end
     end
-
-    {:ok, image}
   end
 end

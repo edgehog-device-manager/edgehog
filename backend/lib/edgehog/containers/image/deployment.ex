@@ -29,6 +29,7 @@ defmodule Edgehog.Containers.Image.Deployment do
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Image.Changes
+  alias Edgehog.Containers.ManualActions
   alias Edgehog.Devices.Device
 
   graphql do
@@ -100,6 +101,11 @@ defmodule Edgehog.Containers.Image.Deployment do
       change set_attribute(:last_message, arg(:message))
       change set_attribute(:state, :error)
     end
+
+    destroy :destroy_if_dangling do
+      require_atomic? false
+      manual ManualActions.DestroyIfDangling
+    end
   end
 
   attributes do
@@ -124,12 +130,16 @@ defmodule Edgehog.Containers.Image.Deployment do
     belongs_to :device, Edgehog.Devices.Device
 
     has_many :container_deployments, Edgehog.Containers.Container.Deployment do
-      destination_attribute :id
+      destination_attribute :image_deployment_id
     end
   end
 
   calculations do
     calculate :is_ready, :boolean, expr(state in [:pulled, :unpulled])
+
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :container_deployments]}
   end
 
   identities do

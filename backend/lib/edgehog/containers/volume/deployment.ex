@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
   alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Volume
   alias Edgehog.Containers.Volume.Changes
   alias Edgehog.Devices.Device
@@ -99,6 +100,11 @@ defmodule Edgehog.Containers.Volume.Deployment do
       change set_attribute(:last_message, arg(:message))
       change set_attribute(:state, :error)
     end
+
+    destroy :destroy_if_dangling do
+      require_atomic? false
+      manual ManualActions.DestroyIfDangling
+    end
   end
 
   attributes do
@@ -132,6 +138,10 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
   calculations do
     calculate :is_ready, :boolean, expr(state in [:available, :unavailable])
+
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :container_deployments]}
   end
 
   identities do
