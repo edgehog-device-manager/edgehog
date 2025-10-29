@@ -26,6 +26,7 @@ import type {
   MultiValueRemoveProps,
 } from "react-select";
 import CreatableSelect from "react-select/creatable";
+import { useCallback } from "react";
 
 import Icon from "components/Icon";
 import Tag from "components/Tag";
@@ -81,6 +82,8 @@ type MultiSelectBaseProps<Option> = {
   getOptionValue?: (option: Option) => string;
   isOptionDisabled?: (option: Option) => boolean;
   onBlur?: () => void;
+  onMenuScrollToBottom?: () => void;
+  onInputChange?: (searchText: string) => void;
 };
 
 type MultiSelectCreatableProps =
@@ -103,9 +106,18 @@ const MultiSelect = <Option,>({
   disabled = false,
   invalid = false,
   loading = false,
+  onMenuScrollToBottom = undefined,
+  onInputChange = undefined,
   ...restProps
 }: MultiSelectProps<Option>) => {
   const SelectComponent = creatable ? CreatableSelect : Select;
+
+  const handleInputChange = useCallback(
+    (searchText: string) => {
+      onInputChange && onInputChange(searchText);
+    },
+    [onInputChange],
+  );
 
   return (
     <SelectComponent
@@ -116,6 +128,8 @@ const MultiSelect = <Option,>({
       components={customComponents}
       className={`multi-select ${invalid ? "is-invalid" : ""}`}
       classNamePrefix="multi-select"
+      onMenuScrollToBottom={onMenuScrollToBottom}
+      onInputChange={handleInputChange}
     />
   );
 };
