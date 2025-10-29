@@ -467,6 +467,12 @@ defmodule Edgehog.Devices.Device do
       public? true
     end
 
+    has_many :container_deplomyents, Edgehog.Containers.Container.Deployment
+    has_many :network_deplomyents, Edgehog.Containers.Network.Deployment
+    has_many :volume_deplomyents, Edgehog.Containers.Volume.Deployment
+    has_many :image_deplomyents, Edgehog.Containers.Image.Deployment
+    has_many :device_mapping_deplomyents, Edgehog.Containers.DeviceMapping.Deployment
+
     many_to_many :application_releases, Edgehog.Containers.Release do
       through Edgehog.Containers.Deployment
       join_relationship :application_deployments
