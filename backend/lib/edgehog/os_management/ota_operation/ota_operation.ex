@@ -24,9 +24,9 @@ defmodule Edgehog.OSManagement.OTAOperation do
     domain: Edgehog.OSManagement,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Changes.PublishNotification
   alias Edgehog.OSManagement.OTAOperation.Changes
   alias Edgehog.OSManagement.OTAOperation.ManualActions
   alias Edgehog.OSManagement.OTAOperation.Status
@@ -67,7 +67,6 @@ defmodule Edgehog.OSManagement.OTAOperation do
       accept [:base_image_url, :device_id]
 
       change Changes.SendUpdateRequest
-      change {PublishNotification, event_type: :ota_operation_created}
     end
 
     create :manual do
@@ -95,7 +94,6 @@ defmodule Edgehog.OSManagement.OTAOperation do
       change set_attribute(:manual?, true)
       change Changes.HandleEphemeralImageUpload
       change Changes.SendUpdateRequest
-      change {PublishNotification, event_type: :ota_operation_created}
     end
 
     destroy :destroy do
@@ -107,12 +105,11 @@ defmodule Edgehog.OSManagement.OTAOperation do
     end
 
     update :mark_as_timed_out do
-      # Needed because PublishNotification and HandleEphemeralImageDeletion are not atomic
+      # Needed because HandleEphemeralImageDeletion are not atomic
       require_atomic? false
 
       change set_attribute(:status, :failure)
       change set_attribute(:status_code, :request_timeout)
-      change {PublishNotification, event_type: :ota_operation_updated}
 
       change Changes.HandleEphemeralImageDeletion do
         where attribute_equals(:manual?, true)
@@ -126,10 +123,8 @@ defmodule Edgehog.OSManagement.OTAOperation do
     update :update_status do
       accept [:status, :status_progress, :status_code, :message]
 
-      # Needed because PublishNotification and HandleEphemeralImageDeletion are not atomic
+      # Needed because and HandleEphemeralImageDeletion are not atomic
       require_atomic? false
-
-      change {PublishNotification, event_type: :ota_operation_updated}
 
       change Changes.HandleEphemeralImageDeletion do
         where [attribute_equals(:manual?, true), attribute_in(:status, @terminal_statuses)]
@@ -222,7 +217,37 @@ defmodule Edgehog.OSManagement.OTAOperation do
     calculate :finished?, :boolean, expr(status == :success or status == :failure)
   end
 
-  # TODO: notifiers to replace the old PubSub
+  pub_sub do
+    prefix "ota_operations"
+    module EdgehogWeb.Endpoint
+
+    publish :create_managed, [[:id, "*"]]
+    publish :manual, [[:id, "*"]]
+    publish :mark_as_timed_out, [[:id, "*"]]
+    publish :update_status, [[:id, "*"]]
+
+    transform fn notification ->
+      ota_operation = notification.data
+      action = notification.action.name
+
+      event_type =
+        cond do
+          action in [:create_managed, :manual] ->
+            :ota_operation_created
+
+          action in [
+            :mark_as_timed_out,
+            :update_status
+          ] ->
+            :ota_operation_updated
+
+          true ->
+            :unknown_event
+        end
+
+      {event_type, ota_operation}
+    end
+  end
 
   postgres do
     table "ota_operations"

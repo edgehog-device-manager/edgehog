@@ -449,7 +449,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
-  def handle_event(:info, {:deployment_ready, deployment}, _state, data) do
+  def handle_event(:info, %{payload: {:deployment_ready, deployment}}, _state, data) do
     # We always cancel the retry timeout for every kind of update we see on an Deployment.
     # This ensures we don't resend the request even if we accidentally miss the acknowledge.
     # If the timeout does not exist, this is a no-op anyway.
@@ -464,11 +464,11 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   # Ignore deployment_updated events
-  def handle_event(:info, {:deployment_updated, _deployment}, _state, _data) do
+  def handle_event(:info, %{payload: {:deployment_updated, _deployment}}, _state, _data) do
     :keep_state_and_data
   end
 
-  def handle_event(:info, {:deployment_error, deployment}, _state, data) do
+  def handle_event(:info, %{payload: {:deployment_error, deployment}}, _state, data) do
     # We always cancel the retry timeout for every kind of update we see on an Deployment.
     # This ensures we don't resend the request even if we accidentally miss the acknowledge.
     # If the timeout does not exist, this is a no-op anyway.

@@ -24,8 +24,6 @@ defmodule Edgehog.Containers.Deployment.Changes.MaybePublishDeploymentReady do
   """
   use Ash.Resource.Change
 
-  alias Edgehog.PubSub
-
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     changeset
@@ -33,8 +31,15 @@ defmodule Edgehog.Containers.Deployment.Changes.MaybePublishDeploymentReady do
     |> Ash.Changeset.after_transaction(fn _changeset, transaction_result ->
       with {:ok, deployment} <- transaction_result,
            {:ok, deployment} <- Ash.load(deployment, :is_ready) do
-        if deployment.is_ready,
-          do: PubSub.publish!(:deployment_ready, deployment)
+        if deployment.is_ready do
+          Ash.Notifier.notify(%Ash.Notifier.Notification{
+            data: deployment,
+            for: [Ash.Notifier.PubSub],
+            action: %{type: :update, name: :maybe_run_ready_actions},
+            resource: Edgehog.Containers.Deployment,
+            metadata: %{custom_event: :deployment_ready}
+          })
+        end
 
         {:ok, deployment}
       end
