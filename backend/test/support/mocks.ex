@@ -151,3 +151,7 @@ Mox.defmock(Edgehog.Astarte.Device.AvailableVolumesMock,
 Mox.defmock(Edgehog.Astarte.Device.AvailableNetworksMock,
   for: Edgehog.Astarte.Device.AvailableNetworks.Behaviour
 )
+
+Mox.defmock(Edgehog.Astarte.Device.AvailableDeviceMappingsMock,
+  for: Edgehog.Astarte.Device.AvailableDeviceMappings.Behaviour
+)
