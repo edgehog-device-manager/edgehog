@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -91,6 +91,7 @@ defmodule Edgehog.Devices.Device do
       argument :timestamp, :datetime, allow_nil?: false
 
       change Changes.InitializeFromDeviceStatus
+      change Changes.SetupReconciler
 
       # Only if created
       change set_attribute(:device_id, arg(:device_id))
@@ -124,6 +125,7 @@ defmodule Edgehog.Devices.Device do
       argument :timestamp, :datetime, allow_nil?: false
 
       change Changes.InitializeFromDeviceStatus
+      change Changes.TearDownReconciler
 
       # Only if created
       change set_attribute(:device_id, arg(:device_id))
@@ -530,6 +532,11 @@ defmodule Edgehog.Devices.Device do
     calculate :available_containers, {:array, Types.ContainerStatus} do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :available_containers}
+    end
+
+    calculate :available_device_mappings, {:array, Types.DeviceMappingStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_device_mappings}
     end
 
     calculate :battery_status, {:array, BatterySlot} do

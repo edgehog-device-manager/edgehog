@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -74,10 +74,10 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                      )
 
   @available_device_mappings Application.compile_env(
-                       :edgehog,
-                       :astarte_available_device_mappings_module,
-                       Edgehog.Astarte.Device.AvailableDeviceMappings
-                     )
+                               :edgehog,
+                               :astarte_available_device_mappings_module,
+                               Edgehog.Astarte.Device.AvailableDeviceMappings
+                             )
 
   @base_image Application.compile_env(
                 :edgehog,

@@ -36,10 +36,10 @@ defmodule Edgehog.Astarte.Device.AvailableVolumes do
     end
   end
 
-  defp parse_volume_properties({volume_id, created}) do
+  defp parse_volume_properties({volume_id, properties}) do
     %VolumeStatus{
       id: volume_id,
-      created: created
+      created: properties["created"]
     }
   end
 end

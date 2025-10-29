@@ -58,10 +58,13 @@ config :edgehog,
        :astarte_available_deployments_module,
        Edgehog.Astarte.Device.AvailableDeploymentsMock
 
+config :edgehog,
+       :astarte_available_device_mappings_module,
+       Edgehog.Astarte.Device.AvailableDeviceMappingsMock
+
 config :edgehog, :astarte_available_images_module, Edgehog.Astarte.Device.AvailableImagesMock
 config :edgehog, :astarte_available_networks_module, Edgehog.Astarte.Device.AvailableNetworksMock
 config :edgehog, :astarte_available_volumes_module, Edgehog.Astarte.Device.AvailableVolumesMock
-config :edgehog, :astarte_available_device_mappings_module, Edgehog.Astarte.Device.AvailableDeviceMappingsMock
 config :edgehog, :astarte_base_image_module, Edgehog.Astarte.Device.BaseImageMock
 config :edgehog, :astarte_battery_status_module, Edgehog.Astarte.Device.BatteryStatusMock
 

@@ -278,6 +278,42 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
              } = device
     end
 
+    test "disconnection events stop the device container reconciler", ctx do
+      %{
+        conn: conn,
+        path: path,
+        realm: realm,
+        tenant: tenant
+      } = ctx
+
+      device =
+        device_fixture(
+          realm_id: realm.id,
+          online: true,
+          last_connection: DateTime.add(utc_now_second(), -10, :minute),
+          last_disconnection: DateTime.add(utc_now_second(), -50, :minute),
+          tenant: tenant
+        )
+
+      timestamp = utc_now_second()
+      event = disconnection_trigger(device.device_id, timestamp)
+
+      Registry.register(Edgehog.Containers.Reconciler.Registry, tenant.tenant_id, self())
+
+      stub(DeviceStatusMock, :get, fn _client, _device_id -> flunk() end)
+      assert conn |> post(path, event) |> response(200)
+
+      assert {:ok, device} = fetch_device(realm, device.device_id, tenant)
+
+      assert %Device{
+               online: false,
+               last_disconnection: ^timestamp
+             } = device
+
+      device_id = device.id
+      assert_receive {:"$gen_cast", {:stop, %Edgehog.Devices.Device{id: ^device_id}}}, 1000
+    end
+
     test "creates an unexisting device when receiving an unhandled event", ctx do
       %{
         conn: conn,
