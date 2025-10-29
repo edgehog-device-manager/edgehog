@@ -285,11 +285,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
            new_data.deployment_mechanism,
            new_data.operation_type
          ) do
-      {:ok, :already_deployed} ->
-        {:keep_state, new_data, internal_event({:already_deployed, target})}
-
-      {:ok, :already_started} ->
-        {:keep_state, new_data, internal_event({:already_deployed, target})}
+      {:ok, :already_in_desired_state} ->
+        {:keep_state, new_data, internal_event({:already_in_desired_state, target})}
 
       {:ok, %DeploymentTarget{} = target} ->
         {:keep_state, new_data, internal_event({:deployed, target})}
@@ -303,7 +300,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     end
   end
 
-  def handle_event(:internal, {:already_deployed, target}, :deployment, data) do
+  def handle_event(:internal, {:already_in_desired_state, target}, :deployment, data) do
     # The target already has the operation completed, just log and mark it as successful
     log_operation_already_completed(data.operation_type, target.device_id)
     _ = Core.mark_target_as_successful!(target)
