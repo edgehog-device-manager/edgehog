@@ -43,7 +43,7 @@ const IMAGE_CREDENTIALS_QUERY = graphql`
   query ImageCredentials_imageCredentials_Query(
     $first: Int
     $after: String
-    $filter: ImageCredentialsFilterInput
+    $filter: ImageCredentialsFilterInput = {}
   ) {
     ...ImageCredentialsTable_imageCredentials_Fragment
       @arguments(filter: $filter)

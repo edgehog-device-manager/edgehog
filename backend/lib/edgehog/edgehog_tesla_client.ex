@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,16 +18,32 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Repo do
-  use AshPostgres.Repo, otp_app: :edgehog
+defmodule Edgehog.EdgehogTeslaClient do
+  @moduledoc false
 
-  require Ecto.Query
-
-  def installed_extensions do
-    ["ash-functions"]
+  def client do
+    Tesla.client(middleware(), adapter())
   end
 
-  def min_pg_version do
-    %Version{major: 13, minor: 0, patch: 0}
+  defp middleware do
+    [
+      Tesla.Middleware.KeepRequest,
+      Tesla.Middleware.PathParams,
+      Tesla.Middleware.JSON
+    ]
+  end
+
+  defp adapter do
+    :edgehog
+    |> Application.get_env(__MODULE__, [])
+    |> Keyword.get(:adapter)
+  end
+
+  def get(url, opts \\ []) do
+    Tesla.get(client(), url, opts)
+  end
+
+  def post(url, body, opts \\ []) do
+    Tesla.post(client(), url, body, opts)
   end
 end

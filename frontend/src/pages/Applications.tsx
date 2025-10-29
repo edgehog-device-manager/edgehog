@@ -40,7 +40,7 @@ const GET_APPLICATIONS_QUERY = graphql`
   query Applications_getApplications_Query(
     $first: Int
     $after: String
-    $filter: ApplicationFilterInput
+    $filter: ApplicationFilterInput = {}
   ) {
     ...ApplicationsTable_ApplicationFragment @arguments(filter: $filter)
   }

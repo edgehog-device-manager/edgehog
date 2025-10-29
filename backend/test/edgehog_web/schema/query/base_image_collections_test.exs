@@ -73,7 +73,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageCollectionsTest do
 
     variables =
       %{
-        "filter" => opts[:filter],
+        "filter" => opts[:filter] || %{},
         "sort" => opts[:sort] || []
       }
 

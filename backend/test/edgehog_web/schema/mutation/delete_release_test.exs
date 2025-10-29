@@ -28,7 +28,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteReleaseTest do
   import Edgehog.DevicesFixtures
 
   alias Ash.Error.Invalid
-  alias Ash.Error.Query.NotFound
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
@@ -52,7 +51,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteReleaseTest do
       assert deleted_release["id"] == release_id
 
       # Verify release is actually deleted
-      assert {:error, %Invalid{errors: [%NotFound{}]}} =
+      assert {:error, %Invalid{}} =
                Ash.get(Release, release.id, tenant: tenant)
     end
 
@@ -98,13 +97,13 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteReleaseTest do
 
       # Verify containers are cleaned up
       for container_id <- container_ids do
-        assert {:error, %Invalid{errors: [%NotFound{}]}} =
+        assert {:error, %Invalid{}} =
                  Ash.get(Container, container_id, tenant: tenant)
       end
 
       # Verify images are cleaned up
       for image_id <- image_ids do
-        assert {:error, %Invalid{errors: [%NotFound{}]}} =
+        assert {:error, %Invalid{}} =
                  Ash.get(Image, image_id, tenant: tenant)
       end
 

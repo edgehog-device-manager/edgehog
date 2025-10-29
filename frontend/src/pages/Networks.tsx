@@ -39,7 +39,7 @@ const GET_NETWORKS_QUERY = graphql`
   query Networks_getNetworks_Query(
     $first: Int
     $after: String
-    $filter: NetworkFilterInput
+    $filter: NetworkFilterInput = {}
   ) {
     ...NetworksTable_NetworkFragment @arguments(filter: $filter)
   }

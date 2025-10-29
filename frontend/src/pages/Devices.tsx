@@ -36,7 +36,7 @@ const GET_DEVICES_QUERY = graphql`
   query Devices_getDevices_Query(
     $first: Int
     $after: String
-    $filter: DeviceFilterInput
+    $filter: DeviceFilterInput = {}
   ) {
     ...DevicesTable_DeviceFragment @arguments(filter: $filter)
   }

@@ -37,7 +37,7 @@ const GET_DEPLOYMENTS_QUERY = graphql`
   query Deployments_getDeployments_Query(
     $first: Int
     $after: String
-    $filter: DeploymentFilterInput
+    $filter: DeploymentFilterInput = {}
   ) {
     ...DeploymentsTable_DeploymentFragment @arguments(filter: $filter)
   }

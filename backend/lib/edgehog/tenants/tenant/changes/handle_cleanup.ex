@@ -22,23 +22,37 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.BaseImages
+  alias Edgehog.Assets
   alias Edgehog.BaseImages.BaseImage
-  alias Edgehog.Devices
+  alias Edgehog.BaseImages.BucketStorage
   alias Edgehog.Devices.SystemModel
-  alias Edgehog.OSManagement
+  alias Edgehog.OSManagement.EphemeralImage
   alias Edgehog.OSManagement.OTAOperation
 
   require Ash.Query
   require Logger
 
+  @ephemeral_image_module Application.compile_env(
+                            :edgehog,
+                            :os_management_ephemeral_image_module,
+                            EphemeralImage
+                          )
+
+  @storage_module Application.compile_env(
+                    :edgehog,
+                    :base_images_storage_module,
+                    BucketStorage
+                  )
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     tenant = changeset.data
 
-    system_models = Ash.read!(SystemModel, tenant: tenant)
+    system_models =
+      Ash.read!(SystemModel, tenant: tenant)
 
-    base_images = Ash.read!(BaseImage, tenant: tenant)
+    base_images =
+      Ash.read!(BaseImage, tenant: tenant)
 
     manual_otas =
       OTAOperation
@@ -48,9 +62,9 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
     Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
       with {:ok, tenant} <- result do
         try do
-          cleanup_system_models(system_models, tenant)
-          cleanup_base_images(base_images, tenant)
-          cleanup_ephimeral_images(manual_otas, tenant)
+          cleanup_system_models(system_models)
+          cleanup_base_images(base_images)
+          cleanup_ephimeral_images(manual_otas, tenant.tenant_id)
         catch
           signal, error ->
             Logger.error("""
@@ -59,27 +73,39 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
             """)
         end
 
-        # Return :ok if the cleanup does not fully succeeds
         {:ok, tenant}
       end
     end)
   end
 
-  defp cleanup_system_models(system_models, tenant) do
-    for system_model <- system_models do
-      Devices.delete_system_model!(system_model, tenant: tenant)
-    end
+  defp cleanup_system_models(system_models) do
+    Enum.each(system_models, fn system_model ->
+      current_picture_url = system_model.picture_url
+
+      unless current_picture_url == nil do
+        maybe_delete_old_picture(system_model, current_picture_url, true)
+      end
+    end)
   end
 
-  defp cleanup_base_images(base_images, tenant) do
-    for image <- base_images do
-      BaseImages.delete_base_image!(image, tenant: tenant)
-    end
+  defp cleanup_base_images(base_images) do
+    Enum.each(base_images, fn base_image ->
+      delete_old_file(base_image)
+    end)
   end
 
-  defp cleanup_ephimeral_images(manual_otas, tenant) do
-    for ota <- manual_otas do
-      OSManagement.delete_ota_operation!(ota, tenant: tenant)
-    end
+  defp cleanup_ephimeral_images(ota_ids, tenant_id) do
+    Enum.each(ota_ids, fn ota_operation ->
+      _ =
+        @ephemeral_image_module.delete(tenant_id, ota_operation.id, ota_operation.base_image_url)
+    end)
+  end
+
+  defp maybe_delete_old_picture(system_model, old_picture_url, true) do
+    _ = Assets.delete_system_model_picture(system_model, old_picture_url)
+  end
+
+  defp delete_old_file(base_image) do
+    _ = @storage_module.delete(base_image)
   end
 end

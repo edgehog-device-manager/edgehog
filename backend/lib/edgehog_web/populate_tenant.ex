@@ -24,6 +24,7 @@ defmodule EdgehogWeb.PopulateTenant do
 
   import Plug.Conn
 
+  alias Ash.Error.Query.NotFound
   alias Edgehog.Tenants
 
   def init(opts), do: opts
@@ -35,11 +36,18 @@ defmodule EdgehogWeb.PopulateTenant do
       {:ok, tenant} ->
         Ash.PlugHelpers.set_tenant(conn, tenant)
 
-      {:error, %Ash.Error.Query.NotFound{}} ->
+      {:error, %Ash.Error.Invalid{errors: [%NotFound{} | _]}} ->
         conn
         |> put_status(:forbidden)
         |> Phoenix.Controller.put_view(EdgehogWeb.ErrorView)
-        |> Phoenix.Controller.render(:"403")
+        |> Phoenix.Controller.render("403.json")
+        |> halt()
+
+      {:error, %NotFound{}} ->
+        conn
+        |> put_status(:forbidden)
+        |> Phoenix.Controller.put_view(EdgehogWeb.ErrorView)
+        |> Phoenix.Controller.render("403.json")
         |> halt()
     end
   end

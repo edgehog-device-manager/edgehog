@@ -57,7 +57,7 @@ const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
     $baseImageCollectionId: ID!
     $first: Int
     $after: String
-    $filter: BaseImageFilterInput
+    $filter: BaseImageFilterInput = {}
   ) {
     baseImageCollection(id: $baseImageCollectionId) {
       id

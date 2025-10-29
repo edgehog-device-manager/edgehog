@@ -39,7 +39,7 @@ const GET_BASE_IMAGE_COLLECTIONS_QUERY = graphql`
   query BaseImageCollections_getBaseImageCollections_Query(
     $first: Int
     $after: String
-    $filter: BaseImageCollectionFilterInput
+    $filter: BaseImageCollectionFilterInput = {}
   ) {
     ...BaseImageCollectionsTable_BaseImageCollectionFragment
       @arguments(filter: $filter)

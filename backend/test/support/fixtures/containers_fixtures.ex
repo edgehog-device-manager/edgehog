@@ -20,7 +20,7 @@
 
 defmodule Edgehog.ContainersFixtures do
   @moduledoc """
-  This module defines test helpers for creating 
+  This module defines test helpers for creating
   entities via the `Edgehog.Containers` context.
   """
   alias Edgehog.AstarteFixtures
