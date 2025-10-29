@@ -280,6 +280,26 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   end
 
   @doc """
+  Fetches the next valid deployment target for a given deployment campaign
+  that has the specified application already deployed.
+
+  ## Parameters
+    - tenant_id: The ID of the tenant.
+    - deployment_campaign_id: The ID of the deployment campaign.
+    - application_id: The ID of the application the operation is targeting.
+
+  ## Returns
+    - the next valid target for the campaign.
+  """
+  def fetch_next_valid_target_with_application_deployed(tenant_id, deployment_campaign_id, application_id) do
+    DeploymentCampaigns.fetch_next_valid_target_with_application_deployed(
+      deployment_campaign_id,
+      application_id,
+      tenant: tenant_id
+    )
+  end
+
+  @doc """
   Checks whether a deployment campaign has idle targets
 
   ## Parameters
@@ -383,6 +403,49 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
 
     with {:ok, _deployment} <- deployment_result do
       :ok
+    end
+  end
+
+  @doc """
+  Executes the specified operation on a target device using the lazy deployment mechanism.
+
+  ## Parameters
+
+  - `target` - The target device where the operation will be performed
+  - `release` - The release/software package to be deployed or operated on
+  - `deployment_mechanism` - The deployment mechanism configuration
+  - `operation_type` - The type of operation to perform (`:deploy`, `:upgrade`, `:start`, `:stop`, `:delete`)
+
+  ## Returns
+
+  - `{:ok, result}` - When the operation succeeds (currently only for `:deploy`)
+  - `{:error, :not_implemented}` - For operations that are not yet implemented
+  - `{:error, reason}` - When the operation fails
+
+  """
+  def do_operation(target, release, deployment_mechanism, operation_type) do
+    case operation_type do
+      :deploy ->
+        deploy(target, release, deployment_mechanism)
+
+      :upgrade ->
+        # Placeholder for future upgrade operation
+        {:error, :not_implemented}
+
+      :start ->
+        # Placeholder for future start operation
+        {:error, :not_implemented}
+
+      :stop ->
+        # Placeholder for future stop operation
+        {:error, :not_implemented}
+
+      :delete ->
+        # Placeholder for future delete operation
+        {:error, :not_implemented}
+
+      _ ->
+        deploy(target, release, deployment_mechanism)
     end
   end
 
