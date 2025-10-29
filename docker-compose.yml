@@ -19,13 +19,13 @@
 #
 
 services:
-  postgresql:
+  postgres:
     image: postgres:18.0
     environment:
       POSTGRES_USER: edgehog
       POSTGRES_PASSWORD: edgehog
     volumes:
-      - postgresql-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
 
   pgadmin:
     image: dpage/pgadmin4:9.6.0
@@ -40,7 +40,7 @@ services:
       - source: pgadmin_servers.json
         target: /pgadmin4/servers.json
     depends_on:
-      - postgresql
+      - postgres
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.edgehog-pgadmin.rule=Host(`pgadmin.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
@@ -56,7 +56,7 @@ services:
     environment:
       DATABASE_USERNAME: edgehog
       DATABASE_PASSWORD: edgehog
-      DATABASE_HOSTNAME: postgresql
+      DATABASE_HOSTNAME: postgres
       DATABASE_NAME: postgres
       SECRET_KEY_BASE: KKtB6BEPk1NVk6EmBfQCafphxLj7EW1M+BGPIFCT8X2LTywTFuGC6lM3yc8e3VKH
       SEEDS_REALM_PRIVATE_KEY_FILE: /keys/realm_private.pem
@@ -76,7 +76,7 @@ services:
       - ${SEEDS_TENANT_PRIVATE_KEY_FILE}:/keys/tenant_private.pem:z
       - ${SEEDS_REALM_PRIVATE_KEY_FILE}:/keys/realm_private.pem:z
     depends_on:
-      - postgresql
+      - postgres
       - minio
       - minio-init
     labels:
@@ -203,7 +203,7 @@ configs:
           "1": {
             "Name": "Edgehog",
             "Group": "Servers",
-            "Host": "postgresql",
+            "Host": "postgres",
             "Port": 5432,
             "MaintenanceDB": "postgres",
             "Username": "edgehog",
@@ -214,7 +214,7 @@ configs:
       }
 
 volumes:
-  postgresql-data:
+  postgres-data:
   pgadmin-data:
   minio-data-v2:
     driver: local
