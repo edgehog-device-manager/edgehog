@@ -44,6 +44,7 @@ import DeploymentStateComponent, {
 } from "components/DeploymentState";
 import DeploymentReadiness from "components/DeploymentReadiness";
 import ContainerStatusList from "components/ContainerStatusList";
+import "components/DeployedApplicationsTable.scss";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -160,7 +161,7 @@ const ActionButtons = ({
     {state === "STOPPED" || state === "ERROR" ? (
       <Button
         onClick={onStart}
-        className="btn p-0 text-success border-0 bg-transparent"
+        className="btn p-0 text-success border-0 bg-transparent icon-click"
         title={intl.formatMessage({
           id: "components.DeployedApplicationsTable.startButtonTitle",
           defaultMessage: "Start Deployment",
@@ -171,7 +172,7 @@ const ActionButtons = ({
     ) : state === "STARTED" ? (
       <Button
         onClick={onStop}
-        className="btn p-0 text-danger border-0 bg-transparent"
+        className="btn p-0 text-danger border-0 bg-transparent icon-click"
         title={intl.formatMessage({
           id: "components.DeployedApplicationsTable.stopButtonTitle",
           defaultMessage: "Stop Deployment",
@@ -622,7 +623,7 @@ const DeployedApplicationsTable = ({
               handleShowUpgradeModal();
             }}
             disabled={getValue().state === "DELETING"}
-            className="btn p-0 border-0 bg-transparent ms-4"
+            className="btn p-0 border-0 bg-transparent ms-4 icon-click"
             title={intl.formatMessage({
               id: "components.DeployedApplicationsTable.upgradeButtonTitle",
               defaultMessage: "Upgrade Deployment",
@@ -633,7 +634,7 @@ const DeployedApplicationsTable = ({
 
           <Button
             disabled={getValue().state === "DELETING"}
-            className="btn p-0 border-0 bg-transparent ms-4"
+            className="btn p-0 border-0 bg-transparent ms-4 icon-click"
             title={intl.formatMessage({
               id: "components.DeployedApplicationsTable.deleteButtonTitle",
               defaultMessage: "Delete Deployment",
