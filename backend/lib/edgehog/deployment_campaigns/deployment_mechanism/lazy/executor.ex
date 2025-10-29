@@ -288,6 +288,9 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
       {:ok, :already_deployed} ->
         {:keep_state, new_data, internal_event({:already_deployed, target})}
 
+      {:ok, :already_started} ->
+        {:keep_state, new_data, internal_event({:already_deployed, target})}
+
       {:ok, %DeploymentTarget{} = target} ->
         {:keep_state, new_data, internal_event({:deployed, target})}
 
@@ -301,9 +304,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   def handle_event(:internal, {:already_deployed, target}, :deployment, data) do
-    # The target already has the same version as the target release, we consider this
-    # a success.
-    Logger.info("Device #{target.device_id} was already updated.")
+    # The target already has the operation completed, just log and mark it as successful
+    log_operation_already_completed(data.operation_type, target.device_id)
     _ = Core.mark_target_as_successful!(target)
 
     # We free up the slot since the target is considered completed
@@ -481,11 +483,11 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   def handle_event(:internal, {:deployment_success, deployment}, _state, data) do
-    Logger.info("Device #{deployment.device_id} updated successfully")
+    log_operation_success(data.operation_type, deployment.device_id)
 
     _ =
       data.tenant_id
-      |> Core.get_target_for_deployment!(deployment.id)
+      |> Core.get_target_for_deployment!(data.deployment_campaign_id, deployment.id)
       |> Core.mark_target_as_successful!()
 
     # The Deployment has finished, so we free up a slot
@@ -495,11 +497,15 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   def handle_event(:internal, {:deployment_failure, deployment}, state, data) do
-    Logger.notice("Device #{deployment.device_id} failed to update: #{deployment.last_error_message}")
+    log_operation_failure(
+      data.operation_type,
+      deployment.device_id,
+      deployment.last_error_message
+    )
 
     _ =
       data.tenant_id
-      |> Core.get_target_for_deployment!(deployment.id)
+      |> Core.get_target_for_deployment!(data.deployment_campaign_id, deployment.id)
       |> Core.mark_target_as_failed!()
 
     # Since the target was occupying a slot and we're marking it as failed, free up the slot
@@ -658,5 +664,23 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
 
   defp targets_in_progress?(data) do
     data.in_progress_count > 0
+  end
+
+  # Logging helpers
+
+  defp log_operation_already_completed(:deploy, device_id) do
+    Logger.info("Device #{device_id} was already deployed.")
+  end
+
+  defp log_operation_already_completed(operation_type, device_id) do
+    Logger.info("Device #{device_id}: #{operation_type} operation already completed.")
+  end
+
+  defp log_operation_success(operation_type, device_id) do
+    Logger.info("Device #{device_id} #{operation_type} operation completed successfully")
+  end
+
+  defp log_operation_failure(operation_type, device_id, error_message) do
+    Logger.notice("Device #{device_id} #{operation_type} operation failed: #{error_message}")
   end
 end

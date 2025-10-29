@@ -179,6 +179,19 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
       change set_attribute(:status, :in_progress)
       change Changes.Deploy
     end
+
+    update :set_deployment do
+      description """
+      Links an existing deployment to this target.
+      The target is marked as :in_progress.
+      """
+
+      accept [:deployment_id]
+
+      require_atomic? false
+
+      change set_attribute(:status, :in_progress)
+    end
   end
 
   attributes do
