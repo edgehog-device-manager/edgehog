@@ -115,6 +115,8 @@ defmodule Edgehog.Containers.Deployment do
       Sends a :start command to the release on the device.
       """
 
+      validate Validations.IsReady
+
       manual {ManualActions.SendDeploymentCommand, command: :start}
     end
 
@@ -123,6 +125,8 @@ defmodule Edgehog.Containers.Deployment do
       Sends a :stop command to the release on the device.
       """
 
+      validate Validations.IsReady
+
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
 
@@ -130,6 +134,8 @@ defmodule Edgehog.Containers.Deployment do
       description """
       Sends a :delete command to the release on the device.
       """
+
+      validate Validations.IsReady
 
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
@@ -158,6 +164,8 @@ defmodule Edgehog.Containers.Deployment do
       argument :target, :uuid do
         allow_nil? false
       end
+
+      validate Validations.IsReady
 
       validate SameApplication
       validate IsUpgrade
