@@ -49,7 +49,9 @@ defmodule EdgehogWeb.Router do
     forward "/", EdgehogWeb.AdminAPI
   end
 
-  forward "/graphiql", Absinthe.Plug.GraphiQL, schema: EdgehogWeb.Schema
+  forward "/graphiql", Absinthe.Plug.GraphiQL,
+    schema: EdgehogWeb.Schema,
+    interface: :playground
 
   scope "/tenants/:tenant_slug" do
     scope "/api" do
