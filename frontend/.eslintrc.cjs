@@ -39,5 +39,6 @@ module.exports = {
     ],
     "@typescript-eslint/no-explicit-any": ["warn"],
     "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    "testing-library/no-manual-cleanup": "off",
   },
 };

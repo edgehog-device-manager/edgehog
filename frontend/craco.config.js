@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-module.exports = {
+export default {
   babel: {
     plugins: [
       ["relay", { artifactDirectory: "./src/api/__generated__" }],

@@ -170,9 +170,9 @@ const transformInputData = (
     hardwareType: hardwareType?.name || "",
     partNumbers:
       partNumbers.edges && partNumbers.edges.length > 0
-        ? data.partNumbers.edges?.map(({ node }) => ({
+        ? (data.partNumbers.edges?.map(({ node }) => ({
             value: node.partNumber,
-          })) ?? []
+          })) ?? [])
         : [{ value: "" }], // default with at least one empty part number
   };
 };

@@ -74,7 +74,7 @@ const BaseImageSelect = forwardRef<HTMLSelectElement, BaseImageSelectProps>(
             defaultMessage: "Select a Base Image",
           })}
         </option>
-        {baseImages.map((baseImage) => (
+        {baseImages.map((baseImage: BaseImage) => (
           <option key={baseImage.id} value={baseImage.id}>
             {baseImage.name}
           </option>
@@ -94,17 +94,20 @@ const BaseImageSelectContent = forwardRef<
   HTMLSelectElement,
   BaseImageSelectContentProps
 >(({ baseImagesQuery, notFoundComponent, ...selectProps }, ref) => {
-  const { baseImageCollection } = usePreloadedQuery(
-    GET_BASE_IMAGES_QUERY,
-    baseImagesQuery,
-  );
+  const { baseImageCollection } =
+    usePreloadedQuery<BaseImageSelect_getBaseImages_Query>(
+      GET_BASE_IMAGES_QUERY,
+      baseImagesQuery,
+    );
 
   if (baseImageCollection === null) {
     return notFoundComponent;
   }
 
   const baseImages =
-    baseImageCollection.baseImages.edges?.map((edge) => edge.node) ?? [];
+    baseImageCollection.baseImages.edges?.map(
+      (edge: { node: BaseImage }) => edge.node,
+    ) ?? [];
 
   return <BaseImageSelect {...selectProps} baseImages={baseImages} ref={ref} />;
 });
