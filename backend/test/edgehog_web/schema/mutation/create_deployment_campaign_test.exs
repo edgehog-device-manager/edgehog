@@ -319,10 +319,18 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeploymentCampaignTest do
           tenant: tenant
         )
 
-      _device =
+      device =
         [release_id: release.id, tenant: tenant]
         |> device_fixture_compatible_with_release()
         |> add_tags(["foobar"])
+
+      # Deploy the source release to the device so it can be upgraded
+      _deployment =
+        deployment_fixture(
+          device_id: device.id,
+          release_id: release.id,
+          tenant: tenant
+        )
 
       release_id = AshGraphql.Resource.encode_relay_id(release)
       target_release_id = AshGraphql.Resource.encode_relay_id(target_release)
