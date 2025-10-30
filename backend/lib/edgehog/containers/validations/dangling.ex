@@ -18,28 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image.Calculations.Dangling do
-  @moduledoc false
-  use Ash.Resource.Calculation
+defmodule Edgehog.Containers.Validations.Dangling do
+  @moduledoc """
+  Validates the action by running the `dangling?` calculation.
+  true -> :ok
+  false -> {:error, :not_dangling}
+  """
 
-  import Ash.Expr
+  use Ash.Resource.Validation
 
-  require Ash.Query
+  @impl Ash.Resource.Validation
+  def validate(changeset, _opts, _context) do
+    resource = changeset.data
 
-  @impl Ash.Resource.Calculation
-  def calculate(records, _opts, context) do
-    image_ids = Enum.map(records, & &1.id)
-    tenant = Map.get(context, :tenant)
+    with {:ok, resource} <- Ash.load(resource, :dangling?) do
+      dangling? = Map.get(resource, :dangling?)
 
-    containers =
-      Edgehog.Containers.Container
-      |> Ash.Query.filter(expr(image_id in ^image_ids))
-      |> Ash.read!(tenant: tenant)
-
-    referenced_image_ids = Enum.map(containers, & &1.image_id)
-
-    Enum.map(records, fn image ->
-      image.id not in referenced_image_ids
-    end)
+      if dangling?,
+        do: :ok,
+        else: {:error, :resource_in_use}
+    end
   end
 end

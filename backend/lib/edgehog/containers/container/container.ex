@@ -24,8 +24,8 @@ defmodule Edgehog.Containers.Container do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Container.Changes
   alias Edgehog.Containers.Container.EnvEncoding
-  alias Edgehog.Containers.Container.ManualActions
   alias Edgehog.Containers.Container.Types.EnvVar
   alias Edgehog.Containers.Container.Validations.BindsFormat
   alias Edgehog.Containers.Container.Validations.CpuPeriodQuotaConsistency
@@ -33,6 +33,7 @@ defmodule Edgehog.Containers.Container do
   alias Edgehog.Containers.ContainerVolume
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Types.RestartPolicy
+  alias Edgehog.Containers.Validations
 
   graphql do
     type :container
@@ -206,7 +207,9 @@ defmodule Edgehog.Containers.Container do
     destroy :destroy_if_dangling do
       description "Destroys the container if it's dangling (not referenced by any release)"
 
-      manual ManualActions.DestroyIfDangling
+      require_atomic? false
+      validate Validations.Dangling
+      change Changes.MaybeDestroyChildren
     end
   end
 
@@ -381,9 +384,9 @@ defmodule Edgehog.Containers.Container do
   calculations do
     calculate :env_encoding, :vector, EnvEncoding
 
-    calculate :dangling?, :boolean, Edgehog.Containers.Container.Calculations.Dangling do
-      description "Returns true if this container has no releases referring to it"
-    end
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :releases]}
   end
 
   postgres do

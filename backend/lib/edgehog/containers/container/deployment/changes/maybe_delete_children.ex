@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Container.Changes.MaybeDeleteChildren do
+defmodule Edgehog.Containers.Container.Deployment.Changes.MaybeDeleteChildren do
   @moduledoc """
   Trigger Image, Volume, Network and DeviceMappings deletion if dangling
   """

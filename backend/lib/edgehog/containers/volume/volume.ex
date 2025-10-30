@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Volume do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Validations
   alias Edgehog.Containers.Volume.Calculations
 
   graphql do
@@ -34,13 +35,16 @@ defmodule Edgehog.Containers.Volume do
   actions do
     defaults [
       :read,
+      :destroy,
       create: [:label, :driver, :options],
       update: [:driver, :options]
     ]
 
-    destroy :destroy do
-      description "Deletes a volume if not used by any container."
-      primary? true
+    destroy :destroy_if_dangling do
+      description "Destroys the volume if it's dangling (not referenced by any container)"
+
+      require_atomic? false
+      validate Validations.Dangling
     end
   end
 
@@ -79,6 +83,10 @@ defmodule Edgehog.Containers.Volume do
 
   calculations do
     calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
+
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
   identities do

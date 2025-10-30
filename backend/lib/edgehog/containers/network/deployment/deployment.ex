@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Volume.Deployment do
+defmodule Edgehog.Containers.Network.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
@@ -26,25 +26,25 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
   alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.ManualActions
-  alias Edgehog.Containers.Volume
-  alias Edgehog.Containers.Volume.Changes
+  alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Network.Deployment.Changes
+  alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
 
   graphql do
-    type :volume_deployment
+    type :network_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:volume_id, :device_id, :state]]
+    defaults [:read, :destroy, create: [:network_id, :device_id, :state]]
 
     create :deploy do
       description """
-      Deploys an image on a device, the status according to device triggers.
+      Deploys a network on a device.
       """
 
-      argument :volume, :struct do
-        constraints instance_of: Volume
+      argument :network, :struct do
+        constraints instance_of: Network
         allow_nil? false
       end
 
@@ -54,8 +54,8 @@ defmodule Edgehog.Containers.Volume.Deployment do
       end
 
       change set_attribute(:state, :created)
-      change manage_relationship(:volume, type: :append)
       change manage_relationship(:device, type: :append)
+      change manage_relationship(:network, type: :append)
     end
 
     update :send_deployment do
@@ -71,7 +71,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
       require_atomic? false
 
-      change Changes.DeployVolumeOnDevice
+      change Changes.DeployNetworkOnDevice
     end
 
     update :mark_as_sent do
@@ -80,14 +80,12 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
     update :mark_as_available do
       require_atomic? false
-
       change set_attribute(:state, :available)
       change MaybeNotifyUpwards
     end
 
     update :mark_as_unavailable do
       require_atomic? false
-
       change set_attribute(:state, :unavailable)
       change MaybeNotifyUpwards
     end
@@ -103,7 +101,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
     destroy :destroy_if_dangling do
       require_atomic? false
-      manual ManualActions.DestroyIfDangling
+      validate Validations.Dangling
     end
   end
 
@@ -122,15 +120,15 @@ defmodule Edgehog.Containers.Volume.Deployment do
   end
 
   relationships do
-    belongs_to :volume, Edgehog.Containers.Volume do
+    belongs_to :network, Network do
       attribute_type :uuid
     end
 
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device, Device
 
     many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
-      through Edgehog.Containers.ContainerDeploymentVolumeDeployment
-      source_attribute_on_join_resource :volume_deployment_id
+      through Edgehog.Containers.ContainerDeploymentNetworkDeployment
+      source_attribute_on_join_resource :network_deployment_id
       destination_attribute_on_join_resource :container_deployment_id
       public? true
     end
@@ -145,10 +143,15 @@ defmodule Edgehog.Containers.Volume.Deployment do
   end
 
   identities do
-    identity :volume_instance, [:volume_id, :device_id]
+    identity :network_instance, [:network_id, :device_id]
   end
 
   postgres do
-    table "application_volume_deployments"
+    table "network_deployments"
+
+    references do
+      reference :network, on_delete: :delete
+      reference :device, on_delete: :delete
+    end
   end
 end

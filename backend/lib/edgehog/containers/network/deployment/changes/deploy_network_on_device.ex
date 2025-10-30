@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Volume.Changes.DeployVolumeOnDevice do
+defmodule Edgehog.Containers.Network.Deployment.Changes.DeployNetworkOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
@@ -28,16 +28,17 @@ defmodule Edgehog.Containers.Volume.Changes.DeployVolumeOnDevice do
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    volume_deployment = changeset.data
+    network_deployment = changeset.data
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    with {:ok, volume_deployment} <-
-           Ash.load(volume_deployment, [:volume, :device, :state], tenant: tenant) do
-      volume = volume_deployment.volume
-      device = volume_deployment.device
+    with {:ok, network_deployment} <-
+           Ash.load(network_deployment, [:network, :device], tenant: tenant) do
+      network = network_deployment.network
+      device = network_deployment.device
 
-      with {:ok, _device} <- Devices.send_create_volume_request(device, volume, deployment) do
-        maybe_update_state(changeset, volume_deployment.state)
+      with {:ok, _device} <-
+             Devices.send_create_network_request(device, network, deployment, tenant: tenant) do
+        maybe_update_state(changeset, network_deployment.state)
       end
     end
   end

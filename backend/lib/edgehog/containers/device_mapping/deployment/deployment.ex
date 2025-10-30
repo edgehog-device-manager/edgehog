@@ -27,8 +27,8 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
   alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
-  alias Edgehog.Containers.DeviceMapping.Changes
-  alias Edgehog.Containers.ManualActions
+  alias Edgehog.Containers.DeviceMapping.Deployment.Changes
+  alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
 
   graphql do
@@ -102,7 +102,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
 
     destroy :destroy_if_dangling do
       require_atomic? false
-      manual ManualActions.DestroyIfDangling
+      validate Validations.Dangling
     end
   end
 

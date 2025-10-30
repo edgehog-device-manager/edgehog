@@ -18,33 +18,34 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Network.Deployment do
+defmodule Edgehog.Containers.Image.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Changes.MaybeNotifyUpwards
+  alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.ManualActions
-  alias Edgehog.Containers.Network
-  alias Edgehog.Containers.Network.Changes
+  alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Image.Deployment.Changes
+  alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
 
   graphql do
-    type :network_deployment
+    type :image_deployment
   end
 
   actions do
-    defaults [:read, :destroy, create: [:network_id, :device_id, :state]]
+    defaults [:read, :destroy, create: [:image_id, :device_id, :state]]
 
     create :deploy do
       description """
-      Deploys a network on a device.
+      Deploys an image on a device.
       """
 
-      argument :network, :struct do
-        constraints instance_of: Network
+      argument :image, :struct do
+        constraints instance_of: Image
         allow_nil? false
       end
 
@@ -54,8 +55,8 @@ defmodule Edgehog.Containers.Network.Deployment do
       end
 
       change set_attribute(:state, :created)
+      change manage_relationship(:image, type: :append)
       change manage_relationship(:device, type: :append)
-      change manage_relationship(:network, type: :append)
     end
 
     update :send_deployment do
@@ -71,22 +72,24 @@ defmodule Edgehog.Containers.Network.Deployment do
 
       require_atomic? false
 
-      change Changes.DeployNetworkOnDevice
+      change Changes.DeployImageOnDevice
     end
 
     update :mark_as_sent do
       change set_attribute(:state, :sent)
     end
 
-    update :mark_as_available do
+    update :mark_as_unpulled do
       require_atomic? false
-      change set_attribute(:state, :available)
+
+      change set_attribute(:state, :unpulled)
       change MaybeNotifyUpwards
     end
 
-    update :mark_as_unavailable do
+    update :mark_as_pulled do
       require_atomic? false
-      change set_attribute(:state, :unavailable)
+
+      change set_attribute(:state, :pulled)
       change MaybeNotifyUpwards
     end
 
@@ -101,7 +104,7 @@ defmodule Edgehog.Containers.Network.Deployment do
 
     destroy :destroy_if_dangling do
       require_atomic? false
-      manual ManualActions.DestroyIfDangling
+      validate Validations.Dangling
     end
   end
 
@@ -112,7 +115,7 @@ defmodule Edgehog.Containers.Network.Deployment do
 
     attribute :state, :atom,
       constraints: [
-        one_of: [:created, :sent, :available, :unavailable, :error]
+        one_of: [:created, :sent, :pulled, :unpulled, :error]
       ],
       public?: true
 
@@ -120,22 +123,19 @@ defmodule Edgehog.Containers.Network.Deployment do
   end
 
   relationships do
-    belongs_to :network, Network do
+    belongs_to :image, Edgehog.Containers.Image do
       attribute_type :uuid
     end
 
-    belongs_to :device, Device
+    belongs_to :device, Edgehog.Devices.Device
 
-    many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
-      through Edgehog.Containers.ContainerDeploymentNetworkDeployment
-      source_attribute_on_join_resource :network_deployment_id
-      destination_attribute_on_join_resource :container_deployment_id
-      public? true
+    has_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      destination_attribute :image_deployment_id
     end
   end
 
   calculations do
-    calculate :is_ready, :boolean, expr(state in [:available, :unavailable])
+    calculate :is_ready, :boolean, expr(state in [:pulled, :unpulled])
 
     calculate :dangling?,
               :boolean,
@@ -143,14 +143,14 @@ defmodule Edgehog.Containers.Network.Deployment do
   end
 
   identities do
-    identity :network_instance, [:network_id, :device_id]
+    identity :image_instance, [:image_id, :device_id]
   end
 
   postgres do
-    table "network_deployments"
+    table "image_deployments"
 
     references do
-      reference :network, on_delete: :delete
+      reference :image, on_delete: :delete
       reference :device, on_delete: :delete
     end
   end

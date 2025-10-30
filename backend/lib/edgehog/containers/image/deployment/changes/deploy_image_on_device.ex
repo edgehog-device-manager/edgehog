@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Image.Changes.DeployImageOnDevice do
+defmodule Edgehog.Containers.Image.Deployment.Changes.DeployImageOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 

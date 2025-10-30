@@ -25,9 +25,8 @@ defmodule Edgehog.Containers.Image do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Image.Calculations
   alias Edgehog.Containers.ImageCredentials
-  alias Edgehog.Containers.ManualActions
+  alias Edgehog.Containers.Validations
 
   graphql do
     type :image
@@ -40,7 +39,8 @@ defmodule Edgehog.Containers.Image do
     destroy :destroy_if_dangling do
       description "Destroys the image if it's dangling (not referenced by any container)"
 
-      manual ManualActions.DestroyIfDangling
+      require_atomic? false
+      validate Validations.Dangling
     end
   end
 
@@ -74,9 +74,9 @@ defmodule Edgehog.Containers.Image do
   end
 
   calculations do
-    calculate :dangling?, :boolean, Calculations.Dangling do
-      description "Returns true if this image has no containers referring to it"
-    end
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
   identities do

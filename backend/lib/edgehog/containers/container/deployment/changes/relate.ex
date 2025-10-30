@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Container.Changes.Relate do
+defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
   @moduledoc false
 
   use Ash.Resource.Change
