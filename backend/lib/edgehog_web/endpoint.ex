@@ -20,6 +20,7 @@
 
 defmodule EdgehogWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :edgehog
+  use AshGraphql.Subscription.Endpoint
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -29,6 +30,10 @@ defmodule EdgehogWeb.Endpoint do
     key: "_edgehog_key",
     signing_salt: "AfvaMYQN"
   ]
+
+  socket "/socket", EdgehogWeb.GqlSocket,
+    websocket: true,
+    longpoll: false
 
   plug PlugHeartbeat, path: "/health"
   plug PromEx.Plug, prom_ex_module: Edgehog.PromEx
