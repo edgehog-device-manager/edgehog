@@ -18,16 +18,22 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Types.DeploymentState do
-  @moduledoc false
+defmodule Edgehog.Containers.Deployment.Changes.AppendEvent do
+  @moduledoc """
+  Appends an event with the given argument details.
+  """
 
-  use Ash.Type.Enum,
-    values: [
-      pending: "The deployment has been created in the database layer, the device yet has to receive it.",
-      sent: "The deployment description has been sent to the device.",
-      started: "The deployment is started on the device.",
-      stopped: "The deployment is stopped on the device."
-    ]
+  use Ash.Resource.Change
 
-  def graphql_type(_), do: :application_deployment_state
+  @impl Ash.Resource.Change
+  def change(changeset, _opts, _context) do
+    deployment = changeset.data
+
+    event =
+      changeset
+      |> Ash.Changeset.get_argument(:event)
+      |> Map.put(:deployment_id, deployment.id)
+
+    Ash.Changeset.manage_relationship(changeset, :events, event, type: :create)
+  end
 end

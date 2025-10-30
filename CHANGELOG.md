@@ -6,8 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 ### Changed 
+- The deployment state does no longer incorporate events, instead events are available in the `events` field of deployments. Users can access them in a _log_ fashion.
+- Removed `last_message` field in deployment.
 - With Astarte versions >= 1.3, devices are available in Edgehog upon registration, without waiting for their first connection
-
 
 ## [0.10.0-alpha.7] - 2025-10-28
 ### Changed 

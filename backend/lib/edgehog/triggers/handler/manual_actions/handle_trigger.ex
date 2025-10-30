@@ -275,38 +275,10 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
       "message" => message
     } = event.value
 
-    with {:ok, deployment} <-
-           Containers.fetch_deployment(deployment_id,
-             tenant: tenant,
-             load: [device: [:device_id]]
-           ) do
-      case state do
-        "Starting" ->
-          Containers.mark_deployment_as_starting(deployment, tenant: tenant)
+    with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
+      event = %{type: state, message: message}
 
-        "Started" ->
-          Containers.mark_deployment_as_started(deployment, tenant: tenant)
-
-        "Stopping" ->
-          Containers.mark_deployment_as_stopping(deployment, tenant: tenant)
-
-        "Stopped" ->
-          Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
-
-        "Error" ->
-          Containers.mark_deployment_as_errored(deployment, message, tenant: tenant)
-
-        "Deleting" ->
-          Containers.mark_deployment_as_deleting(deployment, tenant: tenant)
-
-        "Updating" ->
-          # TODO: we do not have a real state to represent deployment update, it
-          # should stay on its previous state. We just log the event and return
-          # the unmodified deployment.
-          Logger.info("Device #{inspect(deployment.device.device_id)} updating deployment #{inspect(deployment.id)}")
-
-          {:ok, deployment}
-      end
+      Containers.append_deployment_event(deployment, %{event: event}, tenant: tenant)
     end
   end
 

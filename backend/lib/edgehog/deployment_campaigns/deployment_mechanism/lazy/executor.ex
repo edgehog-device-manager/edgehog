@@ -465,12 +465,13 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     {:keep_state_and_data, actions}
   end
 
-  # Ignore deployment_updated events
+  # Ignore deployment_updated events, when everything will be ready the resource
+  # will emit a `:deployment_ready` event
   def handle_event(:info, %{payload: {:deployment_updated, _deployment}}, _state, _data) do
     :keep_state_and_data
   end
 
-  def handle_event(:info, %{payload: {:deployment_error, deployment}}, _state, data) do
+  def handle_event(:info, %{payload: {:deployment_timeout, deployment}}, _state, data) do
     # We always cancel the retry timeout for every kind of update we see on an Deployment.
     # This ensures we don't resend the request even if we accidentally miss the acknowledge.
     # If the timeout does not exist, this is a no-op anyway.
@@ -497,10 +498,16 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   end
 
   def handle_event(:internal, {:deployment_failure, deployment}, state, data) do
+    latest_error_message =
+      case Core.get_latest_error_for_deployment!(deployment.tenant_id, deployment.id) do
+        %{message: message} -> message
+        nil -> "Could not find any error event."
+      end
+
     log_operation_failure(
       data.operation_type,
       deployment.device_id,
-      deployment.last_error_message
+      latest_error_message
     )
 
     _ =
@@ -589,8 +596,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   def handle_event(:internal, {:retry_threshold_exceeded, target}, _state, data) do
     Logger.notice("Device #{target.device_id} update failed: no more retries left")
 
-    # Just mark the Deployment as failed with request_timeout. The associated target will
-    # be marked as failed when it receives the :deployment_updated message from the PubSub
     _ = Core.mark_deployment_as_timed_out!(data.tenant_id, target.deployment_id)
 
     :keep_state_and_data

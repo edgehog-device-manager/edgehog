@@ -37,6 +37,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
 
+  require Ash.Query
+
   describe "process_event for device events" do
     setup %{conn: conn, tenant: tenant} do
       cluster = cluster_fixture()
@@ -433,6 +435,94 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
     end
   end
 
+  describe "deployment events" do
+    setup %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id)
+
+      {:ok, cluster: cluster, realm: realm, device: device, deployment: deployment}
+    end
+
+    test "do not update the state", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant,
+        deployment: deployment
+      } = context
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+          path: "/" <> deployment.id,
+          value: %{
+            "status" => "Error",
+            "message" => "error message"
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      # Deployment must be reloaded from the db
+      new_deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+
+      assert deployment.state == new_deployment.state
+    end
+
+    for event <- [:starting, :stopping, :error] do
+      test "A new #{event} gets created on interface publish", context do
+        %{
+          conn: conn,
+          realm: realm,
+          device: device,
+          tenant: tenant,
+          deployment: deployment
+        } = context
+
+        event_value = event_value(unquote(event), "test_event_message")
+        timestamp = DateTime.to_iso8601(DateTime.utc_now())
+
+        deployment_event = %{
+          device_id: device.device_id,
+          event: %{
+            type: "incoming_data",
+            interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+            path: "/" <> deployment.id,
+            value: event_value
+          },
+          timestamp: timestamp
+        }
+
+        path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+        conn
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, deployment_event)
+        |> response(200)
+
+        assert [event] =
+                 deployment
+                 |> Ash.load!(:events)
+                 |> Map.fetch!(:events)
+
+        assert unquote(event) = event.type
+        assert "test_event_message" = event.message
+      end
+    end
+  end
+
   describe "process_event for deployment updates" do
     setup %{tenant: tenant} do
       cluster = cluster_fixture()
@@ -442,7 +532,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       {:ok, cluster: cluster, realm: realm, device: device}
     end
 
-    test "deployment events update the state", context do
+    test "deployment events get queued", context do
       %{
         conn: conn,
         realm: realm,
@@ -474,35 +564,11 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment =
+        Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant, load: :events)
 
-      assert deployment.state == :error
-      assert deployment.last_error_message == "error message"
-
-      deployment_event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
-          path: "/" <> deployment.id,
-          value: %{
-            "status" => "Starting",
-            "message" => ""
-          }
-        },
-        timestamp: DateTime.to_iso8601(DateTime.utc_now())
-      }
-
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
-
-      conn
-      |> put_req_header("astarte-realm", realm.name)
-      |> post(path, deployment_event)
-      |> response(200)
-
-      deployment = Edgehog.Containers.fetch_deployment!(deployment.id, tenant: tenant)
-
-      assert deployment.state == :starting
+      assert [event] = deployment.events
+      assert event.type == :error
     end
 
     test "Starting status does not update a Started deployment", context do
@@ -668,43 +734,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       deployment = Ash.get!(Deployment, deployment.id, tenant: tenant, load: :is_ready)
       assert deployment.is_ready
-    end
-
-    test "Stopped status updates a Stopping deployment", context do
-      %{
-        conn: conn,
-        realm: realm,
-        device: device,
-        tenant: tenant
-      } = context
-
-      deployment = deployment_fixture(tenant: tenant, device_id: device.id, state: :stopping)
-
-      deployment_event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
-          path: "/" <> deployment.id,
-          value: %{
-            "status" => "Stopped",
-            "message" => nil
-          }
-        },
-        timestamp: DateTime.to_iso8601(DateTime.utc_now())
-      }
-
-      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
-
-      conn
-      |> put_req_header("astarte-realm", realm.name)
-      |> post(path, deployment_event)
-      |> response(200)
-
-      # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
-
-      assert deployment.state == :stopped
     end
 
     test "AvailableDeployments triggers update deployment status", context do
@@ -1059,4 +1088,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   defp set_ready(%Container.Deployment{} = deployment), do: Containers.mark_container_deployment_as_created!(deployment)
 
   defp set_ready(%Deployment{} = deployment), do: Containers.mark_deployment_as_stopped!(deployment)
+
+  defp event_value(event, message), do: %{"status" => event |> to_string() |> String.capitalize(), "message" => message}
 end

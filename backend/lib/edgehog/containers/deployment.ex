@@ -39,14 +39,14 @@ defmodule Edgehog.Containers.Deployment do
   graphql do
     type :deployment
 
-    paginate_relationship_with container_deployments: :relay
+    paginate_relationship_with container_deployments: :relay, events: :relay
   end
 
   actions do
     defaults [
       :read,
       :destroy,
-      create: [:device_id, :release_id, :state, :last_error_message]
+      create: [:device_id, :release_id, :state]
     ]
 
     create :deploy do
@@ -182,39 +182,26 @@ defmodule Edgehog.Containers.Deployment do
       require_atomic? false
     end
 
-    update :mark_as_starting do
-      require_atomic? false
-
-      change Changes.MarkAsStarting
-    end
-
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
 
       require_atomic? false
     end
 
-    update :mark_as_stopping do
-      require_atomic? false
+    update :mark_as_timed_out do
+      change set_attribute(:timed_out, true)
 
-      change Changes.MarkAsStopping
+      require_atomic? false
     end
 
-    update :mark_as_errored do
-      argument :message, :string do
+    update :append_event do
+      require_atomic? false
+
+      argument :event, :map do
         allow_nil? false
       end
 
-      change set_attribute(:last_error_message, arg(:message))
-      change set_attribute(:state, :error)
-
-      require_atomic? false
-    end
-
-    update :mark_as_deleting do
-      change set_attribute(:state, :deleting)
-
-      require_atomic? false
+      change Changes.AppendEvent
     end
 
     update :maybe_run_ready_actions do
@@ -244,7 +231,9 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
-    attribute :last_error_message, :string do
+    attribute :timed_out, :boolean do
+      allow_nil? false
+      default false
       public? true
     end
 
@@ -271,6 +260,10 @@ defmodule Edgehog.Containers.Deployment do
       destination_attribute_on_join_resource :container_deployment_id
       public? true
     end
+
+    has_many :events, Edgehog.Containers.Deployment.Event do
+      public? true
+    end
   end
 
   calculations do
@@ -292,11 +285,9 @@ defmodule Edgehog.Containers.Deployment do
 
     publish :mark_as_sent, [[:id, "*"]]
     publish :mark_as_started, [[:id, "*"]]
-    publish :mark_as_starting, [[:id, "*"]]
     publish :mark_as_stopped, [[:id, "*"]]
-    publish :mark_as_stopping, [[:id, "*"]]
-    publish :mark_as_errored, [[:id, "*"]]
-    publish :mark_as_deleting, [[:id, "*"]]
+    publish :mark_as_timed_out, [[:id, "*"]]
+    publish :append_event, [[:id, "*"]]
     publish :maybe_run_ready_actions, [[:id, "*"]]
 
     transform fn notification ->
@@ -314,16 +305,16 @@ defmodule Edgehog.Containers.Deployment do
           action in [
             :mark_as_sent,
             :mark_as_started,
-            :mark_as_starting,
             :mark_as_stopped,
-            :mark_as_stopping,
-            :mark_as_deleting,
+            :append_event,
             :maybe_run_ready_actions
           ] ->
             :deployment_updated
 
-          action == :mark_as_errored ->
-            :deployment_error
+          action in [
+            :mark_as_timed_out
+          ] ->
+            :deployment_timeout
 
           true ->
             :unknown_event
