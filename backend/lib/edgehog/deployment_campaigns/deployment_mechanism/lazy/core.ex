@@ -450,8 +450,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
         start(target, release)
 
       :stop ->
-        # Placeholder for future stop operation
-        {:error, :not_implemented}
+        stop(target, release)
 
       :delete ->
         # Placeholder for future delete operation
@@ -470,7 +469,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     - deployment_mechanism: The deployment mechanism settings.
 
   ## Returns
-    - `{:ok, :already_deployed}`, if the release is already deployed to the target.
+    - `{:ok, :already_in_desired_state}`, if the release is already deployed to the target.
     - The result of the deployment operation otherwise.
   """
   def deploy(target, release, deployment_mechanism) do
@@ -479,7 +478,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     # to send all the informations but fails as the resources are already
     # present.
     if application_deployed?(target, release) do
-      {:ok, :already_deployed}
+      {:ok, :already_in_desired_state}
     else
       {:ok, target} = do_deploy(target, release, deployment_mechanism)
 
@@ -537,7 +536,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
 
   ## Returns
     - `{:ok, target}` if the start command is successfully sent.
-    - `{:ok, :already_started}` if the deployment is already in a started state.
+    - `{:ok, :already_in_desired_state}` if the deployment is already in a started state.
     - `{:error, :deployment_not_found}` if the deployment doesn't exist on the target.
     - `{:error, :deployment_deleting}` if the deployment is being deleted.
     - `{:error, :deployment_transitioning}` if the deployment is in a transitional state.
@@ -545,7 +544,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   """
   def start(target, release) do
     if application_deployed?(target, release) do
-      {:ok, updated_target} = do_start(target, release)
+      {:ok, updated_target} = link_target_deployment(target, release)
 
       deployment =
         updated_target
@@ -555,7 +554,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
       cond do
         # Check if already started
         deployment.state == :started ->
-          {:ok, :already_started}
+          {:ok, :already_in_desired_state}
 
         # Check if being deleted
         deployment.state == :deleting ->
@@ -581,7 +580,60 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
     end
   end
 
-  defp do_start(target, release) do
+  @doc """
+  Stops the release on the target device.
+
+  ## Parameters
+    - target: The deployment target struct.
+    - release: The release struct to be stopped.
+
+  ## Returns
+    - `{:ok, target}` if the stop command is successfully sent.
+    - `{:ok, :already_in_desired_state}` if the deployment is already in a stopped state.
+    - `{:error, :deployment_not_found}` if the deployment doesn't exist on the target.
+    - `{:error, :deployment_deleting}` if the deployment is being deleted.
+    - `{:error, :deployment_transitioning}` if the deployment is in a transitional state.
+    - `{:error, reason}` for any other errors.
+  """
+  def stop(target, release) do
+    if application_deployed?(target, release) do
+      {:ok, updated_target} = link_target_deployment(target, release)
+
+      deployment =
+        updated_target
+        |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
+        |> Map.get(:deployment)
+
+      cond do
+        # Check if already stopped
+        deployment.state == :stopped ->
+          {:ok, :already_in_desired_state}
+
+        # Check if being deleted
+        deployment.state == :deleting ->
+          {:error, :deployment_deleting}
+
+        # Check if in a transitional state
+        deployment.state in [:starting, :stopping] ->
+          {:error, :deployment_transitioning}
+
+        # Stop the deployment
+        true ->
+          deployment_result =
+            deployment
+            |> Ash.Changeset.for_update(:stop, %{}, tenant: updated_target.tenant_id)
+            |> Ash.update()
+
+          with {:ok, _deployment} <- deployment_result do
+            {:ok, updated_target}
+          end
+      end
+    else
+      {:error, :deployment_not_found}
+    end
+  end
+
+  defp link_target_deployment(target, release) do
     target = update_target_latest_attempt!(target)
 
     device =
