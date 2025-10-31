@@ -86,9 +86,9 @@ defmodule Edgehog.DeploymentCampaigns do
         get_by: [:deployment_id],
         not_found_error?: true
 
-      define :fetch_target_by_deployment_and_campaign,
+      define :fetch_target_by_device_and_campaign,
         action: :read,
-        get_by: [:deployment_id, :deployment_campaign_id],
+        get_by: [:device_id, :deployment_campaign_id],
         not_found_error?: true
 
       define :mark_target_as_in_progress, action: :mark_as_in_progress

@@ -281,6 +281,7 @@ defmodule Edgehog.Containers.Deployment do
     module EdgehogWeb.Endpoint
 
     publish :deploy, [[:id, "*"]]
+    publish :destroy_and_gc, [[:id, "*"]]
     publish :just_create, [[:id, "*"]]
 
     publish :mark_as_sent, [[:id, "*"]]
@@ -315,6 +316,9 @@ defmodule Edgehog.Containers.Deployment do
             :mark_as_timed_out
           ] ->
             :deployment_timeout
+
+          action == :destroy_and_gc ->
+            :deployment_deleted
 
           true ->
             :unknown_event

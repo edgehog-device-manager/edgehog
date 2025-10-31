@@ -457,10 +457,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
         # but upgrades require both deployment and start actions.
         # Therefore, we explicitly trigger the :start operation here if a retry occurred.
         target =
-          Core.get_target_for_deployment!(
+          Core.get_target_for_deployment_by_device!(
             data.tenant_id,
             data.deployment_campaign_id,
-            deployment.id
+            deployment.device_id
           )
 
         if target.retry_count > 0 do
@@ -493,6 +493,20 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     :keep_state_and_data
   end
 
+  def handle_event(:info, %{payload: {:deployment_deleted, deployment}}, _state, data) do
+    # We always cancel the retry timeout for every kind of update we see on an Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({:deployment_success, deployment})
+    ]
+
+    Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+    {:keep_state_and_data, actions}
+  end
+
   def handle_event(:info, %{payload: {:deployment_timeout, deployment}}, _state, data) do
     # We always cancel the retry timeout for every kind of update we see on an Deployment.
     # This ensures we don't resend the request even if we accidentally miss the acknowledge.
@@ -502,6 +516,8 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
       internal_event({:deployment_failure, deployment})
     ]
 
+    Core.unsubscribe_to_deployment_updates!(deployment.id)
+
     {:keep_state_and_data, actions}
   end
 
@@ -510,7 +526,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
 
     _ =
       data.tenant_id
-      |> Core.get_target_for_deployment!(data.deployment_campaign_id, deployment.id)
+      |> Core.get_target_for_deployment_by_device!(
+        data.deployment_campaign_id,
+        deployment.device_id
+      )
       |> Core.mark_target_as_successful!()
 
     # The Deployment has finished, so we free up a slot
@@ -534,7 +553,10 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
 
     _ =
       data.tenant_id
-      |> Core.get_target_for_deployment!(data.deployment_campaign_id, deployment.id)
+      |> Core.get_target_for_deployment_by_device!(
+        data.deployment_campaign_id,
+        deployment.device_id
+      )
       |> Core.mark_target_as_failed!()
 
     # Since the target was occupying a slot and we're marking it as failed, free up the slot
