@@ -29,11 +29,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
   alias Edgehog.Triggers.DeviceConnected
+  alias Edgehog.Triggers.DeviceDeletionFinished
   alias Edgehog.Triggers.DeviceDisconnected
   alias Edgehog.Triggers.DeviceRegistered
   alias Edgehog.Triggers.IncomingData
   alias Edgehog.Triggers.TriggerPayload
 
+  require Ash.Query
   require Logger
 
   @available_containers "io.edgehog.devicemanager.apps.AvailableContainers"
@@ -85,6 +87,16 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     Device
     |> Ash.Changeset.for_create(:from_device_registered_event, params)
     |> Ash.create(tenant: tenant)
+  end
+
+  defp handle_event(%DeviceDeletionFinished{}, tenant, realm_id, device_id, _timestamp) do
+    device_query = Ash.Query.filter(Device, device_id == ^device_id and realm_id == ^realm_id)
+
+    # here uniqueness is guaranteed by :unique_realm_device_id identity on
+    # Devices
+    with {:ok, device} <- Ash.read_one(device_query, tenant: tenant, not_found_error?: true) do
+      Ash.destroy(device)
+    end
   end
 
   defp handle_event(%DeviceDisconnected{}, tenant, realm_id, device_id, timestamp) do

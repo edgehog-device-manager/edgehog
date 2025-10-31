@@ -42,6 +42,12 @@ defmodule Edgehog.Triggers.Event do
           tag_value: "device_disconnected",
           cast_tag?: false
         ],
+        device_deleted: [
+          type: Edgehog.Triggers.DeviceDeletionFinished,
+          tag: :type,
+          tag_value: "device_deletion_finished",
+          cast_tag?: false
+        ],
         incoming_data: [
           type: Edgehog.Triggers.IncomingData,
           tag: :type,
