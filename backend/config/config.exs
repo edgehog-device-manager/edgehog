@@ -68,6 +68,8 @@ config :ash, :default_belongs_to_type, :integer
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
+config :ash_graphql, :subscriptions, true
+
 config :edgehog, Edgehog.Mailer, adapter: Swoosh.Adapters.Local
 
 # Prometheus metrics

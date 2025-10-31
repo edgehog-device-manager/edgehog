@@ -51,7 +51,8 @@ defmodule EdgehogWeb.Router do
 
   forward "/graphiql", Absinthe.Plug.GraphiQL,
     schema: EdgehogWeb.Schema,
-    interface: :playground
+    interface: :playground,
+    socket: EdgehogWeb.GqlSocket
 
   scope "/tenants/:tenant_slug" do
     scope "/api" do
