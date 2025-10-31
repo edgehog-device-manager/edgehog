@@ -262,7 +262,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentTarget do
 
     references do
       reference :device, on_delete: :delete
-      reference :deployment, on_delete: :delete
+      reference :deployment, on_delete: :nilify
       reference :deployment_campaign, on_delete: :delete
     end
   end

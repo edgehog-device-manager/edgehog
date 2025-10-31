@@ -449,17 +449,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
   def handle_event(:info, %{payload: {:deployment_ready, deployment}}, _state, data) do
-    # We always cancel the retry timeout for every kind of update we see on an Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [
-      cancel_retry_timeout(data.tenant_id, deployment.id),
-      internal_event({:deployment_success, deployment})
-    ]
-
-    Core.unsubscribe_to_deployment_updates!(deployment.id)
-
-    {:keep_state_and_data, actions}
+    conclude_deployment(data, deployment)
   end
 
   # Ignore deployment_updated events, when everything will be ready the resource
@@ -468,25 +458,30 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     :keep_state_and_data
   end
 
-  def handle_event(:info, %{payload: {:deployment_timeout, deployment}}, _state, data) do
-    # We always cancel the retry timeout for every kind of update we see on an Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [
-      cancel_retry_timeout(data.tenant_id, deployment.id),
-      internal_event({:deployment_failure, deployment})
-    ]
+  def handle_event(:info, %{payload: {:deployment_deleted, deployment}}, _state, data) do
+    conclude_deployment(data, deployment)
+  end
 
-    {:keep_state_and_data, actions}
+  def handle_event(:info, %{payload: {:deployment_timeout, deployment}}, _state, data) do
+    conclude_deployment(data, deployment, false)
   end
 
   def handle_event(:internal, {:deployment_success, deployment}, _state, data) do
     log_operation_success(data.operation_type, deployment.device_id)
 
-    _ =
+    if data.operation_type == :delete do
       data.tenant_id
-      |> Core.get_target_for_deployment!(data.deployment_campaign_id, deployment.id)
+      |> Core.get_target_for_deployment_by_device!(
+        data.deployment_campaign_id,
+        deployment.device_id
+      )
       |> Core.mark_target_as_successful!()
+    else
+      _ =
+        data.tenant_id
+        |> Core.get_target_for_deployment!(data.deployment_campaign_id, deployment.id)
+        |> Core.mark_target_as_successful!()
+    end
 
     # The Deployment has finished, so we free up a slot
     new_data = free_up_slot(data)
@@ -618,6 +613,22 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
 
   defp internal_event(payload) do
     {:next_event, :internal, payload}
+  end
+
+  defp conclude_deployment(data, %Edgehog.Containers.Deployment{} = deployment, successful? \\ true) do
+    result = if successful?, do: :deployment_success, else: :deployment_failure
+
+    # We always cancel the retry timeout for every kind of update we see on an Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({result, deployment})
+    ]
+
+    Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+    {:keep_state_and_data, actions}
   end
 
   defp terminate_executor(deployment_campaign_id) do
