@@ -24,7 +24,7 @@ defmodule Edgehog.Containers.Container do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Container.Changes
+  alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Container.EnvEncoding
   alias Edgehog.Containers.Container.Types.EnvVar
   alias Edgehog.Containers.Container.Validations.BindsFormat
@@ -209,7 +209,7 @@ defmodule Edgehog.Containers.Container do
 
       require_atomic? false
       validate Validations.Dangling
-      change Changes.MaybeDestroyChildren
+      change {Changes.MaybeDestroyChildren, children: [:image, :device_mappings]}
     end
   end
 

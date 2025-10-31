@@ -60,7 +60,7 @@ defmodule Edgehog.Containers.Release do
       require_atomic? false
 
       change Changes.CheckDeployments
-      change Changes.CleanupContainers
+      change {Edgehog.Containers.Changes.MaybeDestroyChildren, children: [:containers]}
     end
   end
 
