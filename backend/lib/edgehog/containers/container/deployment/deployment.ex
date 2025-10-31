@@ -125,7 +125,14 @@ defmodule Edgehog.Containers.Container.Deployment do
     destroy :destroy_if_dangling do
       require_atomic? false
       validate Validations.Dangling
-      change Changes.MaybeDeleteChildren
+
+      change {Edgehog.Containers.Changes.MaybeDestroyChildren,
+              children: [
+                :image_deployment,
+                :volume_deployments,
+                :network_deployments,
+                :device_mapping_deployments
+              ]}
     end
   end
 
