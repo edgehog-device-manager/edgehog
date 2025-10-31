@@ -282,6 +282,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     case Core.do_operation(
            target,
            new_data.release,
+           new_data.target_release,
            new_data.deployment_mechanism,
            new_data.operation_type
          ) do
@@ -449,17 +450,26 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
   def handle_event(:info, %{payload: {:deployment_ready, deployment}}, _state, data) do
-    # We always cancel the retry timeout for every kind of update we see on an Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [
-      cancel_retry_timeout(data.tenant_id, deployment.id),
-      internal_event({:deployment_success, deployment})
-    ]
+    case {data.operation_type, deployment.state} do
+      {:upgrade, :stopped} ->
+        # When an upgrade action is triggered, the new release deployment is both deployed and started.
+        # We don’t want to trigger the :deployment_success event while the new deployment is in
+        # the :stopped (deployed) state, but only when it transitions to the :started state.
+        :keep_state_and_data
 
-    Core.unsubscribe_to_deployment_updates!(deployment.id)
+      _ ->
+        # We always cancel the retry timeout for every kind of update we see on an Deployment.
+        # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+        # If the timeout does not exist, this is a no-op anyway.sss
+        actions = [
+          cancel_retry_timeout(data.tenant_id, deployment.id),
+          internal_event({:deployment_success, deployment})
+        ]
 
-    {:keep_state_and_data, actions}
+        Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+        {:keep_state_and_data, actions}
+    end
   end
 
   # Ignore deployment_updated events, when everything will be ready the resource
