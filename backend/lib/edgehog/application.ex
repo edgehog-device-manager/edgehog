@@ -53,6 +53,8 @@ defmodule Edgehog.Application do
       EdgehogWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Edgehog.PubSub},
+      # Ash GraphQL subscription batcher
+      AshGraphql.Subscription.Batcher,
       # Start Finch
       {Finch, name: EdgehogFinch},
       # Start the Campaigns supervisor
@@ -60,7 +62,9 @@ defmodule Edgehog.Application do
       # Start the Tenant Reconciler Supervisor
       {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start the Endpoint (http/https)
-      Endpoint
+      Endpoint,
+      # Start Absinthe Subscriptions AFTER Endpoint is up
+      {Absinthe.Subscription, EdgehogWeb.Endpoint}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
