@@ -219,7 +219,7 @@ defmodule Edgehog.Containers.Deployment do
 
     destroy :destroy_and_gc do
       require_atomic? false
-      change Changes.MaybeDeleteChildren
+      change {Edgehog.Containers.Changes.MaybeDestroyChildren, children: [:container_deployments]}
     end
   end
 
