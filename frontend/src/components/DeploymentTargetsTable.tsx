@@ -46,7 +46,19 @@ const DEPLOYMENT_TARGETS_TABLE_FRAGMENT = graphql`
     deployment {
       state
       isReady
-      lastErrorMessage
+      events(
+        filter: { type: { eq: ERROR } }
+        sort: [{ field: INSERTED_AT, order: DESC }]
+        first: 1
+      ) {
+        edges {
+          node {
+            message
+            type
+            insertedAt
+          }
+        }
+      }
     }
   }
 `;
@@ -121,7 +133,8 @@ const columns = [
     },
   ),
   columnHelper.accessor(
-    (deploymentTarget) => deploymentTarget.deployment?.lastErrorMessage ?? null,
+    (deploymentTarget) =>
+      deploymentTarget.deployment?.events?.edges?.[0]?.node?.message ?? null,
     {
       id: "lastErrorMessage",
       header: () => (
@@ -205,7 +218,6 @@ const DeploymentTargetsTable = ({
     DEPLOYMENT_TARGETS_TABLE_FRAGMENT,
     deploymentTargetsRef,
   );
-
   return (
     <InfiniteTable
       className={className}

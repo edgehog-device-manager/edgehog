@@ -45,16 +45,10 @@ const parseDeploymentState = (
       return "SENT";
     case "STARTED":
       return "STARTED";
-    case "STARTING":
-      return "STARTING";
+
     case "STOPPED":
       return "STOPPED";
-    case "STOPPING":
-      return "STOPPING";
-    case "ERROR":
-      return "ERROR";
-    case "DELETING":
-      return "DELETING";
+
     default:
       return "DEPLOYING";
   }
