@@ -52,7 +52,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.CoreTest do
         :ok
       end)
 
-      assert :ok = Core.retry_target_deployment(target)
+      assert :ok = Core.retry_target_operation(target, :deploy)
     end
 
     test "fails if Astarte API replies with a failure", ctx do
@@ -64,7 +64,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.CoreTest do
         {:error, %AstarteAPIError{status: 500, response: "Internal server error"}}
       end)
 
-      assert {:error, reason} = Core.retry_target_deployment(target)
+      assert {:error, reason} = Core.retry_target_operation(target, :deploy)
 
       assert %Invalid{
                errors: [
