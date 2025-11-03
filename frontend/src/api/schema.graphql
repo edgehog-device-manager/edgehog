@@ -19,9 +19,9 @@ input ContainerCreateWithNestedVolumesInput {
 }
 
 input ContainerCreateWithNestedDeviceMappingsInput {
-  cgroupPermissions: String!
-  pathInContainer: String!
   pathOnHost: String!
+  pathInContainer: String!
+  cgroupPermissions: String!
 }
 
 input DeploymentCampaignDeploymentMechanismLazyInput {
@@ -89,17 +89,17 @@ input UpdateCampaignRolloutMechanismPushInput {
   "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
   maxFailurePercentage: Float
 
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean
-
-  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
-  maxInProgressUpdates: Int
+  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
+  otaRequestTimeoutSeconds: Int
 
   "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
   otaRequestRetries: Int
 
-  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
-  otaRequestTimeoutSeconds: Int
+  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
+  maxInProgressUpdates: Int
+
+  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
+  forceDowngrade: Boolean
 }
 
 "An object representing the properties of a Push Rollout Mechanism."
@@ -1058,27 +1058,27 @@ input ReleaseCreateContainersInput {
   image: ContainerCreateWithNestedImageInput
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
-  volumes: [ContainerCreateWithNestedVolumesInput!]
   binds: [String!]
+  volumes: [ContainerCreateWithNestedVolumesInput!]
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  portBindings: [String!]
+  restartPolicy: String
+  networkMode: String
+  privileged: Boolean
+  extraHosts: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
-  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  networkMode: String
-  portBindings: [String!]
-  privileged: Boolean
-  readOnlyRootfs: Boolean
-  restartPolicy: String
-  storageOpt: [String!]
-  tmpfs: [String!]
   volumeDriver: String
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  storageOpt: [String!]
+  readOnlyRootfs: Boolean
+  tmpfs: [String!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
