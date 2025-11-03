@@ -400,19 +400,46 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   end
 
   @doc """
-  Retries the deployment associated with the target.
+  Retries the operation associated with the target based on the operation type.
 
   ## Parameters
+    - target: The deployment target to retry.
+    - operation_type: The type of operation to retry.
 
   ## Returns
     - `:ok` if the retry operation is successful.
+    - `{:error, reason}` if the retry operation fails.
   """
-  def retry_target_deployment(target) do
+  def retry_target_operation(target, operation_type) do
+    case operation_type do
+      :deploy ->
+        do_retry_target_operation(target, :send_deployment)
+
+      :upgrade ->
+        # Placeholder for future upgrade operation
+        {:error, :not_implemented}
+
+      :start ->
+        do_retry_target_operation(target, :start)
+
+      :stop ->
+        do_retry_target_operation(target, :stop)
+
+      :delete ->
+        # Placeholder for future delete operation
+        {:error, :not_implemented}
+
+      _ ->
+        do_retry_target_operation(target, :send_deployment)
+    end
+  end
+
+  defp do_retry_target_operation(target, update_action) do
     deployment_result =
       target
-      |> Ash.load!(:deployment)
+      |> Ash.load!(:deployment, tenant: target.tenant_id)
       |> Map.get(:deployment)
-      |> Ash.Changeset.for_update(:send_deployment)
+      |> Ash.Changeset.for_update(update_action)
       |> Ash.update(tenant: target.tenant_id)
 
     with {:ok, _deployment} <- deployment_result do

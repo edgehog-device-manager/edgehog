@@ -564,7 +564,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
       |> Core.increase_retry_count!()
       |> Core.update_target_latest_attempt!(DateTime.utc_now())
 
-    case Core.retry_target_deployment(target) do
+    case Core.retry_target_operation(target, data.operation_type) do
       :ok ->
         # Setup a timeout for the Deployment retry
         action = setup_retry_timeout(data.tenant_id, target, data.deployment_mechanism)
