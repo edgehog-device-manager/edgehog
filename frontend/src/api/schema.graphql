@@ -5,7 +5,7 @@ schema {
 
 input ContainerCreateWithNestedImageInput {
   id: ID
-  reference: String!
+  reference: String
   imageCredentialsId: ID
 }
 
@@ -15,7 +15,7 @@ input ContainerCreateWithNestedNetworksInput {
 
 input ContainerCreateWithNestedVolumesInput {
   id: ID
-  target: String!
+  target: String
 }
 
 input ContainerCreateWithNestedDeviceMappingsInput {
@@ -26,11 +26,11 @@ input ContainerCreateWithNestedDeviceMappingsInput {
 
 input DeploymentCampaignDeploymentMechanismLazyInput {
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
-  a failure.
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
   """
-  maxFailurePercentage: Float
+  maxInProgressDeployments: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -41,17 +41,17 @@ input DeploymentCampaignDeploymentMechanismLazyInput {
   createRequestRetries: Int
 
   """
-  The maximum number of in progress deployments. The Update Campaign will
-  have at most this number of Deployments that are started but not yet
-  finished (either successfully or not).
-  """
-  maxInProgressDeployments: Int
-
-  """
   The timeout (in seconds) Edgehog has to wait before considering a
   Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
   requestTimeoutSeconds: Int
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Lazy Deployment Mechanism."
@@ -86,11 +86,11 @@ type Lazy {
 }
 
 input UpdateCampaignRolloutMechanismPushInput {
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean
-
   "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
   maxFailurePercentage: Float
+
+  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
+  forceDowngrade: Boolean
 
   "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
   maxInProgressUpdates: Int
@@ -118,6 +118,87 @@ type PushRollout {
 
   "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
   otaRequestTimeoutSeconds: Int!
+}
+
+"""
+Describes the position of a device.
+
+The field holds information about the GPS coordinates of the device,
+which are estimated by means of Edgehog's geolocation modules and the
+data published by the device.
+"""
+type Position {
+  "The latitude coordinate."
+  latitude: Float!
+
+  "The longitude coordinate."
+  longitude: Float!
+
+  "The accuracy of the measurement, in meters."
+  accuracy: Float
+
+  "The altitude coordinate."
+  altitude: Float
+
+  "The accuracy of the altitude measurement, in meters."
+  altitudeAccuracy: Float
+
+  "The measured heading."
+  heading: Float
+
+  "The measured speed."
+  speed: Float
+
+  "The date and time at which the measurement was made."
+  timestamp: DateTime!
+
+  "Describes how the position was calculated."
+  source: String
+}
+
+"Describes a network interface of a device."
+type NetworkInterface {
+  "The identifier of the network interface."
+  name: String!
+
+  "The normalized physical address."
+  macAddress: String
+
+  "The connection technology."
+  technology: NetworkInterfaceTechnology
+}
+
+"""
+Describes the place where a device is located.
+
+The field holds information about the device's address, which is
+estimated by means of Edgehog's geolocation modules and the data
+published by the device.
+"""
+type Location {
+  "The formatted address associated with the location."
+  formattedAddress: String!
+
+  "The date and time at which the location was measured."
+  timestamp: DateTime!
+
+  "Describes how the location was calculated."
+  source: String
+}
+
+"Describes a battery slot of a device."
+type BatterySlot {
+  "Battery level measurement absolute error [0.0-100.0]."
+  levelAbsoluteError: Float
+
+  "Battery level estimated percentage [0.0%-100.0%]."
+  levelPercentage: Float
+
+  "The identifier of the battery slot."
+  slot: String!
+
+  "The current status of the battery."
+  status: BatterySlotStatus
 }
 
 "Describes a modem of a device."
@@ -159,87 +240,6 @@ type Modem {
   technology: ModemTechnology
 }
 
-"Describes a battery slot of a device."
-type BatterySlot {
-  "Battery level measurement absolute error [0.0-100.0]."
-  levelAbsoluteError: Float
-
-  "Battery level estimated percentage [0.0%-100.0%]."
-  levelPercentage: Float
-
-  "The identifier of the battery slot."
-  slot: String!
-
-  "The current status of the battery."
-  status: BatterySlotStatus
-}
-
-"""
-Describes the place where a device is located.
-
-The field holds information about the device's address, which is
-estimated by means of Edgehog's geolocation modules and the data
-published by the device.
-"""
-type Location {
-  "The formatted address associated with the location."
-  formattedAddress: String!
-
-  "The date and time at which the location was measured."
-  timestamp: DateTime!
-
-  "Describes how the location was calculated."
-  source: String
-}
-
-"Describes a network interface of a device."
-type NetworkInterface {
-  "The identifier of the network interface."
-  name: String!
-
-  "The normalized physical address."
-  macAddress: String
-
-  "The connection technology."
-  technology: NetworkInterfaceTechnology
-}
-
-"""
-Describes the position of a device.
-
-The field holds information about the GPS coordinates of the device,
-which are estimated by means of Edgehog's geolocation modules and the
-data published by the device.
-"""
-type Position {
-  "The latitude coordinate."
-  latitude: Float!
-
-  "The longitude coordinate."
-  longitude: Float!
-
-  "The accuracy of the measurement, in meters."
-  accuracy: Float
-
-  "The altitude coordinate."
-  altitude: Float
-
-  "The accuracy of the altitude measurement, in meters."
-  altitudeAccuracy: Float
-
-  "The measured heading."
-  heading: Float
-
-  "The measured speed."
-  speed: Float
-
-  "The date and time at which the measurement was made."
-  timestamp: DateTime!
-
-  "Describes how the position was calculated."
-  source: String
-}
-
 input DeploymentMechanismInput {
   lazy: DeploymentCampaignDeploymentMechanismLazyInput
 }
@@ -253,39 +253,23 @@ input RolloutMechanismInput {
 union RolloutMechanism = PushRollout
 
 enum DeploymentTargetStatus {
+  "Something went wrong while deploying the target."
+  FAILED
+
   "The deployment target is waiting for the deployment to start."
   IDLE
 
   "The deployment is in progress."
   IN_PROGRESS
 
-  "Something went wrong while deploying the target."
-  FAILED
-
   "The release has been successfully deployed to the target."
   SUCCESSFUL
 }
 
-enum CampaignStatus {
-  "The campaign has been created but is not being rolled-out yet."
-  IDLE
-
-  "The campaign is being rolled-out."
-  IN_PROGRESS
-
-  "The campaign has finished."
-  FINISHED
-}
-
-enum CampaignOutcome {
-  "The campaign has finished succesfully."
-  SUCCESS
-
-  "The campaign has finished with a failure."
-  FAILURE
-}
-
 enum OperationType {
+  "Delete a deployment."
+  DELETE
+
   "Deploy an application."
   DEPLOY
 
@@ -297,88 +281,63 @@ enum OperationType {
 
   "Upgrade an existing deployment."
   UPGRADE
+}
 
-  "Delete a deployment."
-  DELETE
+enum CampaignOutcome {
+  "The campaign has finished with a failure."
+  FAILURE
+
+  "The campaign has finished succesfully."
+  SUCCESS
+}
+
+enum CampaignStatus {
+  "The campaign has finished."
+  FINISHED
+
+  "The campaign has been created but is not being rolled-out yet."
+  IDLE
+
+  "The campaign is being rolled-out."
+  IN_PROGRESS
 }
 
 enum UpdateTargetStatus {
+  "The update target has failed to be updated."
+  FAILED
+
   "The update campaign is waiting for the OTA Request to be sent."
   IDLE
 
   "The update target is in progress."
   IN_PROGRESS
 
-  "The update target has failed to be updated."
-  FAILED
-
   "The update target was successfully updated."
   SUCCESSFUL
 }
 
+enum UpdateCampaignOutcome {
+  "The update campaign has finished with a failure."
+  FAILURE
+
+  "The update campaign has finished succesfully."
+  SUCCESS
+}
+
 enum UpdateCampaignStatus {
+  "The update campaign has finished."
+  FINISHED
+
   "The update campaign has been created but is not being rolled-out yet."
   IDLE
 
   "The update campaign is being rolled-out."
   IN_PROGRESS
-
-  "The update campaign has finished."
-  FINISHED
-}
-
-enum UpdateCampaignOutcome {
-  "The update campaign has finished succesfully."
-  SUCCESS
-
-  "The update campaign has finished with a failure."
-  FAILURE
-}
-
-enum OtaOperationStatus {
-  "The OTA operation was created and is waiting an acknowledgment from the device"
-  PENDING
-
-  "The OTA operation was acknowledged from the device"
-  ACKNOWLEDGED
-
-  "The device is downloading the update"
-  DOWNLOADING
-
-  "The device is deploying the update"
-  DEPLOYING
-
-  "The device deployed the update"
-  DEPLOYED
-
-  "The device is in the process of rebooting"
-  REBOOTING
-
-  "A recoverable error happened during the OTA operation"
-  ERROR
-
-  "The OTA operation ended with a failure. This is a final state of the OTA Operation"
-  FAILURE
-
-  "The OTA operation ended successfully. This is a final state of the OTA Operation"
-  SUCCESS
 }
 
 enum OtaOperationStatusCode {
-  "The OTA Operation timed out while sending the request to the device"
-  REQUEST_TIMEOUT
-
-  "The OTA Operation contained invalid data"
-  INVALID_REQUEST
-
-  "An OTA Operation is already in progress on the device"
-  UPDATE_ALREADY_IN_PROGRESS
-
-  "A network error was encountered"
-  NETWORK_ERROR
-
-  "An IO error was encountered"
-  IO_ERROR
+  "The OTA Operation was canceled"
+  CANCELED
 
   "An internal error was encountered"
   INTERNAL_ERROR
@@ -386,11 +345,52 @@ enum OtaOperationStatusCode {
   "The OTA Operation failed due to an invalid base image"
   INVALID_BASE_IMAGE
 
+  "The OTA Operation contained invalid data"
+  INVALID_REQUEST
+
+  "An IO error was encountered"
+  IO_ERROR
+
+  "A network error was encountered"
+  NETWORK_ERROR
+
+  "The OTA Operation timed out while sending the request to the device"
+  REQUEST_TIMEOUT
+
   "A system rollback has occurred"
   SYSTEM_ROLLBACK
 
-  "The OTA Operation was canceled"
-  CANCELED
+  "An OTA Operation is already in progress on the device"
+  UPDATE_ALREADY_IN_PROGRESS
+}
+
+enum OtaOperationStatus {
+  "The OTA operation was acknowledged from the device"
+  ACKNOWLEDGED
+
+  "The device deployed the update"
+  DEPLOYED
+
+  "The device is deploying the update"
+  DEPLOYING
+
+  "The device is downloading the update"
+  DOWNLOADING
+
+  "A recoverable error happened during the OTA operation"
+  ERROR
+
+  "The OTA operation ended with a failure. This is a final state of the OTA Operation"
+  FAILURE
+
+  "The OTA operation was created and is waiting an acknowledgment from the device"
+  PENDING
+
+  "The device is in the process of rebooting"
+  REBOOTING
+
+  "The OTA operation ended successfully. This is a final state of the OTA Operation"
+  SUCCESS
 }
 
 enum ForwarderSessionStatus {
@@ -401,15 +401,87 @@ enum ForwarderSessionStatus {
   CONNECTING
 }
 
-enum DeviceLedBehavior {
-  "Blink for 60 seconds."
-  BLINK
+enum NetworkInterfaceTechnology {
+  "Bluetooth."
+  BLUETOOTH
 
-  "Double blink for 60 seconds."
-  DOUBLE_BLINK
+  "Cellular."
+  CELLULAR
 
-  "Slow blink for 60 seconds."
-  SLOW_BLINK
+  "Ethernet."
+  ETHERNET
+
+  "WiFi."
+  WIFI
+}
+
+enum BatterySlotStatus {
+  "The battery is charging."
+  CHARGING
+
+  "The battery is discharging."
+  DISCHARGING
+
+  "The battery is either in a charging or in an idle state, since the hardware doesn't allow to distinguish between them."
+  EITHER_IDLE_OR_CHARGING
+
+  "The battery is in a failed state."
+  FAILURE
+
+  "The battery is idle."
+  IDLE
+
+  "The battery is removed."
+  REMOVED
+
+  "The battery status cannot be determined."
+  UNKNOWN
+}
+
+enum ModemRegistrationStatus {
+  "Not registered, modem is not currently searching a new operator to register to."
+  NOT_REGISTERED
+
+  "Registered, home network."
+  REGISTERED
+
+  "Registered, roaming."
+  REGISTERED_ROAMING
+
+  "Registration denied."
+  REGISTRATION_DENIED
+
+  "Not registered, but modem is currently searching a new operator to register to."
+  SEARCHING_OPERATOR
+
+  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
+  UNKNOWN
+}
+
+enum ModemTechnology {
+  "E-UTRAN."
+  EUTRAN
+
+  "GSM."
+  GSM
+
+  "GSM Compact."
+  GSM_COMPACT
+
+  "GSM with EGPRS."
+  GSM_EGPRS
+
+  "UTRAN."
+  UTRAN
+
+  "UTRAN with HSDPA."
+  UTRAN_HSDPA
+
+  "UTRAN with HSDPA and HSUPA."
+  UTRAN_HSDPA_HSUPA
+
+  "UTRAN with HSUPA."
+  UTRAN_HSUPA
 }
 
 enum DeviceCapability {
@@ -468,87 +540,38 @@ enum DeviceCapability {
   WIFI
 }
 
-enum ModemRegistrationStatus {
-  "Not registered, modem is not currently searching a new operator to register to."
-  NOT_REGISTERED
+enum DeviceLedBehavior {
+  "Blink for 60 seconds."
+  BLINK
 
-  "Registered, home network."
-  REGISTERED
+  "Double blink for 60 seconds."
+  DOUBLE_BLINK
 
-  "Not registered, but modem is currently searching a new operator to register to."
-  SEARCHING_OPERATOR
-
-  "Registration denied."
-  REGISTRATION_DENIED
-
-  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
-  UNKNOWN
-
-  "Registered, roaming."
-  REGISTERED_ROAMING
+  "Slow blink for 60 seconds."
+  SLOW_BLINK
 }
 
-enum ModemTechnology {
-  "GSM."
-  GSM
+enum DeploymentEventType {
+  "The deployment is getting deleted."
+  DELETING
 
-  "GSM Compact."
-  GSM_COMPACT
+  "The deployment encountered an error."
+  ERROR
 
-  "UTRAN."
-  UTRAN
+  "The deployment is started."
+  STARTED
 
-  "GSM with EGPRS."
-  GSM_EGPRS
+  "The deployment is starting."
+  STARTING
 
-  "UTRAN with HSDPA."
-  UTRAN_HSDPA
+  "The deployment is stopped."
+  STOPPED
 
-  "UTRAN with HSUPA."
-  UTRAN_HSUPA
+  "The deployment is stopping."
+  STOPPING
 
-  "UTRAN with HSDPA and HSUPA."
-  UTRAN_HSDPA_HSUPA
-
-  "E-UTRAN."
-  EUTRAN
-}
-
-enum BatterySlotStatus {
-  "The battery is charging."
-  CHARGING
-
-  "The battery is discharging."
-  DISCHARGING
-
-  "The battery is idle."
-  IDLE
-
-  "The battery is either in a charging or in an idle state, since the hardware doesn't allow to distinguish between them."
-  EITHER_IDLE_OR_CHARGING
-
-  "The battery is in a failed state."
-  FAILURE
-
-  "The battery is removed."
-  REMOVED
-
-  "The battery status cannot be determined."
-  UNKNOWN
-}
-
-enum NetworkInterfaceTechnology {
-  "Ethernet."
-  ETHERNET
-
-  "Bluetooth."
-  BLUETOOTH
-
-  "Cellular."
-  CELLULAR
-
-  "WiFi."
-  WIFI
+  "The deployment is getting updated."
+  UPDATING
 }
 
 enum ApplicationDeploymentState {
@@ -558,23 +581,11 @@ enum ApplicationDeploymentState {
   "The deployment description has been sent to the device."
   SENT
 
-  "The device is deleting the deployment."
-  DELETING
-
-  "The device reported an error. Check `last_error_message` for the error message."
-  ERROR
-
   "The deployment is started on the device."
   STARTED
 
-  "The device is starting the deployment."
-  STARTING
-
   "The deployment is stopped on the device."
   STOPPED
-
-  "The device is stopping the deployment."
-  STOPPING
 }
 
 input ContainerEnvVarInput {
@@ -2238,6 +2249,116 @@ type Image {
   ): [Container!]!
 }
 
+enum DeploymentEventSortField {
+  ID
+  TYPE
+  MESSAGE
+  INSERTED_AT
+  UPDATED_AT
+}
+
+":deployment_event connection"
+type DeploymentEventConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":deployment_event edges"
+  edges: [DeploymentEventEdge!]
+}
+
+":deployment_event edge"
+type DeploymentEventEdge {
+  "Cursor"
+  cursor: String!
+
+  ":deployment_event node"
+  node: DeploymentEvent!
+}
+
+input DeploymentEventFilterUpdatedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeploymentEventFilterInsertedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeploymentEventFilterMessage {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeploymentEventFilterType {
+  isNil: Boolean
+  eq: DeploymentEventType
+  notEq: DeploymentEventType
+  in: [DeploymentEventType!]
+  lessThan: DeploymentEventType
+  greaterThan: DeploymentEventType
+  lessThanOrEqual: DeploymentEventType
+  greaterThanOrEqual: DeploymentEventType
+}
+
+input DeploymentEventFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentEventFilterInput {
+  and: [DeploymentEventFilterInput!]
+  or: [DeploymentEventFilterInput!]
+  not: [DeploymentEventFilterInput!]
+  id: DeploymentEventFilterId
+  type: DeploymentEventFilterType
+  message: DeploymentEventFilterMessage
+  insertedAt: DeploymentEventFilterInsertedAt
+  updatedAt: DeploymentEventFilterUpdatedAt
+}
+
+input DeploymentEventSortInput {
+  order: SortOrder
+  field: DeploymentEventSortField!
+}
+
+type DeploymentEvent {
+  id: ID!
+  type: DeploymentEventType!
+  message: String
+  insertedAt: DateTime!
+  updatedAt: DateTime!
+}
+
 "The result of the :upgrade_deployment mutation"
 type UpgradeDeploymentResult {
   "The successful result of the mutation"
@@ -2295,7 +2416,7 @@ input DeployReleaseInput {
 enum DeploymentSortField {
   ID
   STATE
-  LAST_ERROR_MESSAGE
+  TIMED_OUT
   DEVICE_ID
   RELEASE_ID
 }
@@ -2343,17 +2464,15 @@ input DeploymentFilterDeviceId {
   greaterThanOrEqual: Int
 }
 
-input DeploymentFilterLastErrorMessage {
+input DeploymentFilterTimedOut {
   isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
 }
 
 input DeploymentFilterState {
@@ -2384,12 +2503,13 @@ input DeploymentFilterInput {
   not: [DeploymentFilterInput!]
   id: DeploymentFilterId
   state: DeploymentFilterState
-  lastErrorMessage: DeploymentFilterLastErrorMessage
+  timedOut: DeploymentFilterTimedOut
   deviceId: DeploymentFilterDeviceId
   releaseId: DeploymentFilterReleaseId
   device: DeviceFilterInput
   release: ReleaseFilterInput
   containerDeployments: ContainerDeploymentFilterInput
+  events: DeploymentEventFilterInput
 }
 
 input DeploymentSortInput {
@@ -2400,7 +2520,7 @@ input DeploymentSortInput {
 type Deployment implements Node {
   id: ID!
   state: ApplicationDeploymentState
-  lastErrorMessage: String
+  timedOut: Boolean!
   deviceId: Int
   releaseId: ID
   device: Device
@@ -2424,6 +2544,25 @@ type Deployment implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerDeploymentConnection!
+  events(
+    "How to sort the records in the response"
+    sort: [DeploymentEventSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentEventFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentEventConnection!
   isReady: Boolean
 }
 
@@ -5454,6 +5593,12 @@ input CreateDeploymentCampaignInput {
   "The ID of the release that will be distributed in the deployment campaign."
   releaseId: ID!
 
+  """
+  The ID of the target release for upgrade operations.
+  Required when operation_type is :upgrade.
+  """
+  targetReleaseId: ID
+
   "The ID of the channel that will be targeted by the deployment campaign."
   channelId: ID!
 }
@@ -6117,7 +6262,7 @@ type RootMutationType {
   Requests a forwarder session for the specified device.
   Returns the session token.
   """
-  requestForwarderSession(input: RequestForwarderSessionInput): String!
+  requestForwarderSession(input: RequestForwarderSessionInput!): String!
 
   "Updates a device."
   updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult

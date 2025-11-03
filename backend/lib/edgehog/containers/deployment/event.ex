@@ -49,7 +49,9 @@ defmodule Edgehog.Containers.Deployment.Event do
       public? true
     end
 
-    timestamps()
+    timestamps do
+      public? true
+    end
   end
 
   relationships do
