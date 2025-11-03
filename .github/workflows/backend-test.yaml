@@ -47,9 +47,11 @@ defaults:
     working-directory: backend
 
 jobs:
-  lint:
-    name: Lint
+  build:
+    name: Build
     runs-on: ubuntu-22.04
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -70,16 +72,48 @@ jobs:
           path: |
             backend/deps
             backend/_build
-          key: "${{ runner.os }}-\
+          key: |
+            ${{ runner.os }}-\
             otp-${{ steps.beam.outputs.otp-version }}-\
             elixir-${{ steps.beam.outputs.elixir-version }}-\
-            ${{ hashFiles('backend/mix.lock') }}"
+            ${{ hashFiles('backend/mix.lock') }}
 
       - name: Install and compile dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
-          mix deps.get --only test
-          mix deps.compile
+          mix deps.get
+          mix compile --warnings-as-errors --force
+
+      - name: Save compiled code
+        id: upload
+        uses: actions/upload-artifact@v5
+        with:
+          name: compiled-code
+          path: |
+            backend/deps/
+            backend/_build/
+
+  lint:
+    name: Lint
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+
+      - name: Install OTP and Elixir
+        uses: erlef/setup-beam@v1
+        id: beam
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Fetch compiled code
+        uses: actions/download-artifact@v5
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          path: backend/
 
       - name: Check formatting
         run: mix format --check-formatted
@@ -89,9 +123,6 @@ jobs:
 
       - name: Check for unused dependencies
         run: mix do deps.get, deps.unlock --check-unused
-
-      - name: Compile with --warnings-as-errors
-        run: mix compile --warnings-as-errors --force
 
       # Don't cache PLTs based on mix.lock hash, as Dialyzer can incrementally update even old ones
       # Cache key based on Elixir & Erlang version (also useful when running in matrix)
@@ -125,6 +156,7 @@ jobs:
 
   test-coverage:
     name: Build and Test
+    needs: build
     strategy:
       matrix:
         postgres: [13, 14, 15, 16, 17, 18]
@@ -157,23 +189,11 @@ jobs:
           version-file: .tool-versions
           version-type: strict
 
-      - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v3
+      - name: Fetch compiled code
+        uses: actions/download-artifact@v5
         with:
-          path: |
-            backend/deps
-            backend/_build
-          key: "${{ runner.os }}-\
-            otp-${{ steps.beam.outputs.otp-version }}-\
-            elixir-${{ steps.beam.outputs.elixir-version }}-\
-            ${{ hashFiles('backend/mix.lock') }}"
-
-      - name: Install and compile dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-          mix deps.get --only test
-          mix deps.compile
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          path: backend/
 
       # Only send upload coverage from a single test in the matrix
       - name: Test and upload coverage
@@ -186,6 +206,7 @@ jobs:
 
   integration-minio:
     name: Integration tests using MinIO
+    needs: build
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -243,23 +264,11 @@ jobs:
           version-file: .tool-versions
           version-type: strict
 
-      - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v3
+      - name: Fetch compiled code
+        uses: actions/download-artifact@v5
         with:
-          path: |
-            backend/deps
-            backend/_build
-          key: "${{ runner.os }}-\
-            otp-${{ steps.beam.outputs.otp-version }}-\
-            elixir-${{ steps.beam.outputs.elixir-version }}-\
-            ${{ hashFiles('backend/mix.lock') }}"
-
-      - name: Install and compile dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-          mix deps.get --only test
-          mix deps.compile
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          path: backend/
 
       - name: Test
         env:
@@ -276,6 +285,7 @@ jobs:
 
   integration-azurite:
     name: Integration tests using Azurite
+    needs: build
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -324,23 +334,11 @@ jobs:
           version-file: .tool-versions
           version-type: strict
 
-      - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v3
+      - name: Fetch compiled code
+        uses: actions/download-artifact@v5
         with:
-          path: |
-            backend/deps
-            backend/_build
-          key: "${{ runner.os }}-\
-            otp-${{ steps.beam.outputs.otp-version }}-\
-            elixir-${{ steps.beam.outputs.elixir-version }}-\
-            ${{ hashFiles('backend/mix.lock') }}"
-
-      - name: Install and compile dependencies
-        if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: |
-          mix deps.get --only test
-          mix deps.compile
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          path: backend/
 
       - name: Test
         env:
