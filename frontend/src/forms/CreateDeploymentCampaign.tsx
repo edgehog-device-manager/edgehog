@@ -24,8 +24,10 @@ import { graphql, useFragment } from "react-relay/hooks";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Select from "react-select";
+import semver from "semver";
 
 import type { CreateDeploymentCampaign_OptionsFragment$key } from "api/__generated__/CreateDeploymentCampaign_OptionsFragment.graphql";
+import type { OperationType } from "api/__generated__/DeploymentCampaignCreate_CreateDeploymentCampaign_Mutation.graphql";
 
 import Button from "components/Button";
 import Col from "components/Col";
@@ -85,7 +87,9 @@ const FormRow = ({
 type DeploymentCampaignData = {
   channelId: string;
   releaseId: string;
+  targetReleaseId: string;
   name: string;
+  operationType: OperationType;
   deploymentMechanism: {
     lazy: {
       maxFailurePercentage: number;
@@ -101,6 +105,8 @@ type FormData = {
   channelId: string;
   applicationId: string;
   releaseId: string;
+  targetReleaseId: string;
+  operationType: string;
   maxFailurePercentage: number | string;
   maxInProgressDeployments: number | string;
   createRequestRetries: number;
@@ -118,6 +124,8 @@ const initialData: FormData = {
   channelId: "",
   applicationId: "",
   releaseId: "",
+  targetReleaseId: "",
+  operationType: "",
   maxFailurePercentage: "",
   maxInProgressDeployments: "",
   createRequestRetries: 3,
@@ -129,6 +137,8 @@ const transformOutputData = (data: FormData): DeploymentCampaignData => {
     name,
     channelId,
     releaseId,
+    targetReleaseId,
+    operationType,
     maxFailurePercentage,
     maxInProgressDeployments,
     createRequestRetries,
@@ -139,6 +149,8 @@ const transformOutputData = (data: FormData): DeploymentCampaignData => {
     name,
     channelId,
     releaseId,
+    targetReleaseId,
+    operationType: operationType as OperationType,
     deploymentMechanism: {
       lazy: {
         maxFailurePercentage:
@@ -174,7 +186,15 @@ const CreateDeploymentCampaignForm = ({
       name: yup.string().required(),
       applicationId: yup.string().required(),
       releaseId: yup.string().required(),
+      targetReleaseId: yup
+        .string()
+        .when("operationType", ([operationType], schema) =>
+          operationType === "UPGRADE"
+            ? schema.required()
+            : schema.notRequired(),
+        ),
       channelId: yup.string().required(),
+      operationType: yup.string().required(),
       maxInProgressDeployments: numberSchema
         .integer()
         .positive()
@@ -235,6 +255,8 @@ const CreateDeploymentCampaignForm = ({
   const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
 
   const selectedApp = watch("applicationId");
+  const selectedRelease = watch("releaseId");
+  const selectedOperationType = watch("operationType");
 
   const applicationOptions: SelectOption[] = useMemo(() => {
     return (
@@ -256,6 +278,28 @@ const CreateDeploymentCampaignForm = ({
     );
   }, [selectedApp, applications?.edges]);
 
+  const targetReleaseOptions: SelectOption[] = useMemo(() => {
+    if (!selectedApp || !selectedRelease) return [];
+
+    const app = applications?.edges?.find((a) => a.node.id === selectedApp);
+    const selectedReleaseNode = app?.node?.releases?.edges?.find(
+      ({ node }) => node.id === selectedRelease,
+    )?.node;
+
+    if (!selectedReleaseNode) return [];
+
+    return (
+      app?.node?.releases?.edges
+        ?.filter(({ node }) =>
+          semver.gt(node.version, selectedReleaseNode.version || "0.0.0"),
+        )
+        ?.map(({ node }) => ({
+          value: node.id,
+          label: node.version,
+        })) ?? []
+    );
+  }, [selectedApp, selectedRelease, applications?.edges]);
+
   const channelOptions: SelectOption[] = useMemo(() => {
     return (
       channels?.edges?.map(({ node }) => ({
@@ -265,9 +309,60 @@ const CreateDeploymentCampaignForm = ({
     );
   }, [channels?.edges]);
 
+  const operationTypesOptions: SelectOption[] = [
+    { value: "DEPLOY", label: "Deploy" },
+    { value: "START", label: "Start" },
+    { value: "STOP", label: "Stop" },
+    { value: "UPGRADE", label: "Upgrade" },
+    { value: "DELETE", label: "Delete" },
+  ];
+
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
+        <FormRow
+          id="create-deployment-campaign-form-operation-type"
+          label={
+            <FormattedMessage
+              id="forms.CreateDeploymentCampaign.operationTypeLabel"
+              defaultMessage="Operation type"
+            />
+          }
+        >
+          <Controller
+            name="operationType"
+            control={control}
+            render={({ field }) => (
+              <>
+                <Select
+                  {...field}
+                  value={
+                    operationTypesOptions.find(
+                      (opt) => opt.value === field.value,
+                    ) || null
+                  }
+                  onChange={(option) => field.onChange(option?.value || "")}
+                  options={operationTypesOptions}
+                  isClearable
+                  placeholder={intl.formatMessage({
+                    id: "forms.CreateDeploymentCampaign.operationTypeOption",
+                    defaultMessage: "Select an operation type...",
+                  })}
+                  noOptionsMessage={() =>
+                    intl.formatMessage({
+                      id: "forms.CreateDeploymentCampaign.noOperationTypesAvailable",
+                      defaultMessage: "No operation types available",
+                    })
+                  }
+                  className={errors.operationType && "is-invalid"}
+                />
+
+                <FormFeedback feedback={errors.operationType?.message} />
+              </>
+            )}
+          />
+        </FormRow>
+
         <FormRow
           id="create-deployment-campaign-form-name"
           label={
@@ -383,6 +478,51 @@ const CreateDeploymentCampaignForm = ({
             )}
           />
         </FormRow>
+        {selectedOperationType === "UPGRADE" && (
+          <FormRow
+            id="create-deployment-campaign-form-target-release"
+            label={
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.targetReleaseLabel"
+                defaultMessage="Target Release"
+              />
+            }
+          >
+            <Controller
+              name="targetReleaseId"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <Select
+                    {...field}
+                    value={
+                      releaseOptions.find((opt) => opt.value === field.value) ||
+                      null
+                    }
+                    onChange={(option) => field.onChange(option?.value || "")}
+                    options={targetReleaseOptions}
+                    isClearable
+                    isDisabled={!selectedApp}
+                    placeholder={intl.formatMessage({
+                      id: "forms.CreateDeploymentCampaign.targetReleaseOption",
+                      defaultMessage: "Search or select a target release...",
+                    })}
+                    noOptionsMessage={() =>
+                      intl.formatMessage({
+                        id: "forms.CreateDeploymentCampaign.noTargetReleasesAvailable",
+                        defaultMessage: "No releases available",
+                      })
+                    }
+                    className={errors.targetReleaseId && "is-invalid"}
+                  />
+
+                  <FormFeedback feedback={errors.targetReleaseId?.message} />
+                </>
+              )}
+            />
+          </FormRow>
+        )}
+
         <FormRow
           id="create-deployment-campaign-form-channel"
           label={
@@ -516,10 +656,18 @@ const CreateDeploymentCampaignForm = ({
         <div className="d-flex justify-content-end align-items-center">
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
-            <FormattedMessage
-              id="forms.CreateDeploymentCampaign.submitButton"
-              defaultMessage="Create"
-            />
+            {selectedOperationType ? (
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.submitWithType"
+                defaultMessage="Create {type} campaign"
+                values={{ type: selectedOperationType.toLowerCase() }}
+              />
+            ) : (
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.submitButton"
+                defaultMessage="Create"
+              />
+            )}
           </Button>
         </div>
       </Stack>
