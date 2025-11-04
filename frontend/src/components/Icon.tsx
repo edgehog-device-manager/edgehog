@@ -25,6 +25,7 @@ import {
   faArrowAltCircleUp,
   faArrowDown,
   faArrowUp,
+  faArrowRight,
   faBug,
   faCheck,
   faCircle,
@@ -52,6 +53,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const icons = {
   arrowDown: faArrowDown,
   arrowUp: faArrowUp,
+  arrowRight: faArrowRight,
   bug: faBug,
   caretDown: faAngleDown,
   caretUp: faAngleUp,

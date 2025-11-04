@@ -681,6 +681,9 @@
     "defaultMessage": "Deployment Campaign Name",
     "description": "Title for the Name column of the Deployment Campaigns table"
   },
+  "components.DeploymentCampaignsTable.operationTypeTitle": {
+    "defaultMessage": "Operation type"
+  },
   "components.DeploymentCampaignsTable.outcomeTitle": {
     "defaultMessage": "Outcome"
   },
@@ -1300,11 +1303,23 @@
   "forms.CreateDeploymentCampaign.noChannelsFoundMatching": {
     "defaultMessage": "No channels found matching \"{inputValue}\""
   },
+  "forms.CreateDeploymentCampaign.noOperationTypesAvailable": {
+    "defaultMessage": "No operation types available"
+  },
   "forms.CreateDeploymentCampaign.noReleasesAvailable": {
     "defaultMessage": "No releases available"
   },
   "forms.CreateDeploymentCampaign.noReleasesFoundMatching": {
     "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "forms.CreateDeploymentCampaign.noTargetReleasesAvailable": {
+    "defaultMessage": "No releases available"
+  },
+  "forms.CreateDeploymentCampaign.operationTypeLabel": {
+    "defaultMessage": "Operation type"
+  },
+  "forms.CreateDeploymentCampaign.operationTypeOption": {
+    "defaultMessage": "Select an operation type..."
   },
   "forms.CreateDeploymentCampaign.releaseLabel": {
     "defaultMessage": "Release"
@@ -1320,6 +1335,15 @@
   },
   "forms.CreateDeploymentCampaign.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateDeploymentCampaign.submitWithType": {
+    "defaultMessage": "Create {type} campaign"
+  },
+  "forms.CreateDeploymentCampaign.targetReleaseLabel": {
+    "defaultMessage": "Target Release"
+  },
+  "forms.CreateDeploymentCampaign.targetReleaseOption": {
+    "defaultMessage": "Search or select a target release..."
   },
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
@@ -1525,6 +1549,9 @@
   "forms.DeploymentCampaignForm.deploymentChannelLabel": {
     "defaultMessage": "Channel"
   },
+  "forms.DeploymentCampaignForm.operationTypeLabel": {
+    "defaultMessage": "Operation Type"
+  },
   "forms.DeploymentCampaignForm.outcomeLabel": {
     "defaultMessage": "Outcome"
   },
@@ -1545,6 +1572,9 @@
   },
   "forms.DeploymentCampaignForm.statusLabel": {
     "defaultMessage": "Status"
+  },
+  "forms.DeploymentCampaignForm.targetReleaseLabel": {
+    "defaultMessage": "Target Release"
   },
   "forms.ReleaseCreate.reuseReleaseButton": {
     "defaultMessage": "Reuse Release"

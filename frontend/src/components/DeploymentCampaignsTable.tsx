@@ -34,6 +34,7 @@ import DeploymentCampaignStatus from "components/DeploymentCampaignStatus";
 import { createColumnHelper } from "components/Table";
 import InfiniteTable from "components/InfiniteTable";
 import { Link, Route } from "Navigation";
+import Icon from "components/Icon";
 
 const DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST = 40;
 const DEPLOYMENT_CAMPAIGNS_TO_LOAD_NEXT = 10;
@@ -51,6 +52,7 @@ const DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT = graphql`
           id
           name
           status
+          operationType
           ...DeploymentCampaignStatus_DeploymentCampaignStatusFragment
           outcome
           ...DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment
@@ -61,6 +63,10 @@ const DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT = graphql`
               id
               name
             }
+          }
+          targetRelease {
+            id
+            version
           }
           channel {
             name
@@ -95,6 +101,18 @@ const columns = [
         {getValue()}
       </Link>
     ),
+  }),
+  columnHelper.accessor("operationType", {
+    header: () => (
+      <FormattedMessage
+        id="components.DeploymentCampaignsTable.operationTypeTitle"
+        defaultMessage="Operation type"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value.charAt(0) + value.slice(1).toLowerCase();
+    },
   }),
   columnHelper.accessor("status", {
     header: () => (
@@ -153,15 +171,31 @@ const columns = [
       />
     ),
     cell: ({ row, getValue }) => (
-      <Link
-        route={Route.release}
-        params={{
-          applicationId: row.original.release?.application?.id || "",
-          releaseId: row.original.release?.id || "",
-        }}
-      >
-        {getValue()}
-      </Link>
+      <>
+        <Link
+          route={Route.release}
+          params={{
+            applicationId: row.original.release?.application?.id || "",
+            releaseId: row.original.release?.id || "",
+          }}
+        >
+          {getValue()}
+        </Link>
+        {row.original.operationType == "UPGRADE" && (
+          <>
+            <Icon icon={"arrowRight"} className="ms-2 me-2" />
+            <Link
+              route={Route.release}
+              params={{
+                applicationId: row.original.release?.application?.id || "",
+                releaseId: row.original.targetRelease?.id || "",
+              }}
+            >
+              {row.original.targetRelease?.version}
+            </Link>
+          </>
+        )}
+      </>
     ),
   }),
 ];

@@ -39,6 +39,7 @@ const DEPLOYMENT_CAMPAIGN_FORM_FRAGMENT = graphql`
   fragment DeploymentCampaignForm_DeploymentCampaignFragment on DeploymentCampaign {
     ...DeploymentCampaignStatus_DeploymentCampaignStatusFragment
     ...DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment
+    operationType
     channel {
       id
       name
@@ -50,6 +51,10 @@ const DEPLOYMENT_CAMPAIGN_FORM_FRAGMENT = graphql`
         id
         name
       }
+    }
+    targetRelease {
+      id
+      version
     }
     deploymentMechanism {
       __typename
@@ -160,10 +165,31 @@ const DeploymentCampaign = ({
     deploymentCampaignRef,
   );
 
-  const { release, channel, deploymentMechanism } = deploymentCampaign;
+  const {
+    release,
+    channel,
+    deploymentMechanism,
+    operationType,
+    targetRelease,
+  } = deploymentCampaign;
+
+  const formattedOperationType =
+    operationType?.charAt(0) + operationType?.slice(1).toLowerCase();
+
   return (
     <Row>
       <Col lg>
+        <FormRow
+          label={
+            <FormattedMessage
+              id="forms.DeploymentCampaignForm.operationTypeLabel"
+              defaultMessage="Operation Type"
+            />
+          }
+        >
+          {formattedOperationType}
+        </FormRow>
+
         <FormRow
           label={
             <FormattedMessage
@@ -225,6 +251,27 @@ const DeploymentCampaign = ({
             {release?.version}
           </Link>
         </FormRow>
+
+        {operationType === "UPGRADE" && targetRelease && (
+          <FormRow
+            label={
+              <FormattedMessage
+                id="forms.DeploymentCampaignForm.targetReleaseLabel"
+                defaultMessage="Target Release"
+              />
+            }
+          >
+            <Link
+              route={Route.release}
+              params={{
+                applicationId: release?.application?.id || "",
+                releaseId: targetRelease?.id || "",
+              }}
+            >
+              {targetRelease?.version}
+            </Link>
+          </FormRow>
+        )}
 
         <FormRow
           label={
