@@ -282,6 +282,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     case Core.do_operation(
            target,
            new_data.release,
+           new_data.target_release,
            new_data.deployment_mechanism,
            new_data.operation_type
          ) do
@@ -449,17 +450,41 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
 
   def handle_event(:info, %{payload: {:deployment_ready, deployment}}, _state, data) do
-    # We always cancel the retry timeout for every kind of update we see on an Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [
-      cancel_retry_timeout(data.tenant_id, deployment.id),
-      internal_event({:deployment_success, deployment})
-    ]
+    case {data.operation_type, deployment.state} do
+      {:upgrade, :stopped} ->
+        # This part of code handles retries for upgrade operations.
+        # In Core.retry_target_operation/2, the :send_deployment action is triggered,
+        # but upgrades require both deployment and start actions.
+        # Therefore, we explicitly trigger the :start operation here if a retry occurred.
+        target =
+          Core.get_target_for_deployment!(
+            data.tenant_id,
+            data.deployment_campaign_id,
+            deployment.id
+          )
 
-    Core.unsubscribe_to_deployment_updates!(deployment.id)
+        if target.retry_count > 0 do
+          Core.retry_target_operation(target, :start)
+        end
 
-    {:keep_state_and_data, actions}
+        # When an upgrade is triggered, the new release deployment must be both deployed and started.
+        # We avoid triggering the :deployment_success event while the deployment is only in the
+        # :stopped (deployed) state — it should trigger only once the deployment transitions to :started.
+        :keep_state_and_data
+
+      _ ->
+        # We always cancel the retry timeout for every kind of update we see on an Deployment.
+        # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+        # If the timeout does not exist, this is a no-op anyway.
+        actions = [
+          cancel_retry_timeout(data.tenant_id, deployment.id),
+          internal_event({:deployment_success, deployment})
+        ]
+
+        Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+        {:keep_state_and_data, actions}
+    end
   end
 
   # Ignore deployment_updated events, when everything will be ready the resource
