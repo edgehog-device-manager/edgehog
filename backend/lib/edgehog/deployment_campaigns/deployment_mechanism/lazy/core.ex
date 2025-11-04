@@ -416,8 +416,17 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
         do_retry_target_operation(target, :send_deployment)
 
       :upgrade ->
-        # Placeholder for future upgrade operation
-        {:error, :not_implemented}
+        deployment = Ash.load!(target, :deployment, tenant: target.tenant_id).deployment
+
+        case deployment.state do
+          :stopped ->
+            # Deployment is already deployed but not started; retry starting
+            do_retry_target_operation(target, :start)
+
+          _ ->
+            # Deployment not yet deployed or in an unexpected state; retry deployment
+            do_retry_target_operation(target, :send_deployment)
+        end
 
       :start ->
         do_retry_target_operation(target, :start)
@@ -464,14 +473,13 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   - `{:error, reason}` - When the operation fails
 
   """
-  def do_operation(target, release, deployment_mechanism, operation_type) do
+  def do_operation(target, release, target_release, deployment_mechanism, operation_type) do
     case operation_type do
       :deploy ->
         deploy(target, release, deployment_mechanism)
 
       :upgrade ->
-        # Placeholder for future upgrade operation
-        {:error, :not_implemented}
+        upgrade(target, release, target_release)
 
       :start ->
         start(target, release)
@@ -672,6 +680,69 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
       Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id)
 
     DeploymentCampaigns.set_target_deployment(target, deployment.id, tenant: target.tenant_id)
+  end
+
+  @doc """
+  Upgrades the release on the target device to a new target release.
+
+  ## Parameters
+    - target: The deployment target struct.
+    - release: The current release struct to be upgraded from.
+    - target_release: The target release struct to upgrade to.
+
+  ## Returns
+    - `{:ok, target}` if the upgrade command is successfully sent.
+    - `{:ok, :already_in_desired_state}` if the target release is already deployed.
+    - `{:error, :deployment_not_found}` if the current deployment doesn't exist on the target.
+    - `{:error, :deployment_deleting}` if the deployment is being deleted.
+    - `{:error, :deployment_transitioning}` if the deployment is in a transitional state.
+    - `{:error, reason}` for any other errors.
+  """
+  def upgrade(target, release, target_release) do
+    cond do
+      application_deployed?(target, target_release) ->
+        {:ok, :already_in_desired_state}
+
+      application_deployed?(target, release) ->
+        do_upgrade(target, release, target_release)
+
+      true ->
+        {:error, :deployment_not_found}
+    end
+  end
+
+  defp do_upgrade(target, release, target_release) do
+    target = update_target_latest_attempt!(target)
+
+    device =
+      target
+      |> Ash.load!(:device)
+      |> Map.get(:device)
+
+    {:ok, current_deployment} =
+      Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id)
+
+    cond do
+      current_deployment.state == :deleting ->
+        {:error, :deployment_deleting}
+
+      current_deployment.state in [:starting, :stopping] ->
+        {:error, :deployment_transitioning}
+
+      true ->
+        upgrade_result =
+          current_deployment
+          |> Ash.Changeset.for_update(:upgrade_release, %{target: target_release.id}, tenant: target.tenant_id)
+          |> Ash.update()
+
+        case upgrade_result do
+          {:ok, new_deployment} ->
+            DeploymentCampaigns.set_target_deployment(target, new_deployment.id, tenant: target.tenant_id)
+
+          {:error, reason} ->
+            {:error, reason}
+        end
+    end
   end
 
   @doc """
