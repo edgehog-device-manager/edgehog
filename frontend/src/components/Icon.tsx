@@ -47,6 +47,7 @@ import {
   faEyeSlash,
   faTriangleExclamation,
   faObjectGroup,
+  faCircleQuestion,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -79,6 +80,7 @@ const icons = {
   hidePassword: faEyeSlash,
   warning: faTriangleExclamation,
   channels: faObjectGroup,
+  faCircleQuestion: faCircleQuestion,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;
