@@ -38,30 +38,34 @@ import type { BaseImageCollectionCreate_createBaseImageCollection_Mutation } fro
 import Alert from "components/Alert";
 import Button from "components/Button";
 import Center from "components/Center";
-import CreateBaseImageCollectionForm from "forms/CreateBaseImageCollection";
 import type { BaseImageCollectionData } from "forms/CreateBaseImageCollection";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
+import { RECORDS_TO_LOAD_FIRST } from "constants";
+import CreateBaseImageCollectionForm from "forms/CreateBaseImageCollection";
 import { Link, Route, useNavigate } from "Navigation";
 
 const CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY = graphql`
-  query BaseImageCollectionCreate_getOptions_Query {
-    systemModels {
-      __typename
+  query BaseImageCollectionCreate_getOptions_Query(
+    $first: Int
+    $after: String
+    $filter: SystemModelFilterInput = {}
+  ) {
+    systemModels(first: $first, after: $after, filter: $filter) {
       count
     }
     baseImageCollections {
       edges {
         node {
+          name
           systemModel {
             id
-            name
           }
         }
       }
     }
-    ...CreateBaseImageCollection_OptionsFragment
+    ...CreateBaseImageCollection_OptionsFragment @arguments(filter: $filter)
   }
 `;
 
@@ -77,14 +81,20 @@ const CREATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
   }
 `;
 
+type BaseImageCollectionRecord = NonNullable<
+  NonNullable<
+    BaseImageCollectionCreate_getOptions_Query$data["baseImageCollections"]
+  >["edges"]
+>[number]["node"];
+
 type BaseImageCollectionProps = {
   baseImageCollectionOptions: BaseImageCollectionCreate_getOptions_Query$data;
-  usedSystemModelIds?: string[];
+  baseImageCollections?: BaseImageCollectionRecord[];
 };
 
 const BaseImageCollection = ({
   baseImageCollectionOptions,
-  usedSystemModelIds = [],
+  baseImageCollections = [],
 }: BaseImageCollectionProps) => {
   const navigate = useNavigate();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
@@ -169,7 +179,7 @@ const BaseImageCollection = ({
         optionsRef={baseImageCollectionOptions}
         onSubmit={handleCreateBaseImageCollection}
         isLoading={isCreatingBaseImageCollection}
-        usedSystemModelIds={usedSystemModelIds}
+        baseImageCollections={baseImageCollections}
       />
     </>
   );
@@ -215,13 +225,19 @@ const BaseImageCollectionWrapper = ({
     return <NoSystemModels />;
   }
 
-  const usedSystemModelIds =
-    baseImageCollections?.edges?.map((edge) => edge.node.systemModel.id) ?? [];
+  const baseImageCollectionsData =
+    baseImageCollections?.edges?.map((edge) => {
+      const baseImageCollection: BaseImageCollectionRecord = {
+        name: edge.node.name,
+        systemModel: { id: edge.node.systemModel.id },
+      };
+      return baseImageCollection;
+    }) ?? [];
 
   return (
     <BaseImageCollection
       baseImageCollectionOptions={baseImageCollectionOptions}
-      usedSystemModelIds={usedSystemModelIds}
+      baseImageCollections={baseImageCollectionsData}
     />
   );
 };
@@ -233,7 +249,11 @@ const BaseImageCollectionCreatePage = () => {
     );
 
   const fetchBaseImageCollectionOptions = useCallback(
-    () => getBaseImageCollectionOptions({}, { fetchPolicy: "network-only" }),
+    () =>
+      getBaseImageCollectionOptions(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "network-only" },
+      ),
     [getBaseImageCollectionOptions],
   );
 
@@ -279,4 +299,5 @@ const BaseImageCollectionCreatePage = () => {
   );
 };
 
+export type { BaseImageCollectionRecord };
 export default BaseImageCollectionCreatePage;
