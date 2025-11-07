@@ -251,7 +251,7 @@ const CreateBaseImageCollectionForm = ({
           id="create-base-image-collection-form-name"
           label={
             <FormattedMessage
-              id="components.CreateBaseImageCollectionForm.nameLabel"
+              id="forms.CreateBaseImageCollection.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -267,7 +267,7 @@ const CreateBaseImageCollectionForm = ({
           id="create-base-image-collection-form-handle"
           label={
             <FormattedMessage
-              id="components.CreateBaseImageCollectionForm.handleLabel"
+              id="forms.CreateBaseImageCollection.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -283,7 +283,7 @@ const CreateBaseImageCollectionForm = ({
           id="create-base-image-collection-form-system-model"
           label={
             <FormattedMessage
-              id="components.CreateBaseImageCollectionForm.systemModelLabel"
+              id="forms.CreateBaseImageCollection.systemModelLabel"
               defaultMessage="System Model"
             />
           }
@@ -328,7 +328,7 @@ const CreateBaseImageCollectionForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.CreateBaseImageCollectionForm.submitButton"
+              id="forms.CreateBaseImageCollection.submitButton"
               defaultMessage="Create"
             />
           </Button>

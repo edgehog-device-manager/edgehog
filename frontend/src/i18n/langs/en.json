@@ -454,18 +454,6 @@
   "components.CreateApplication.submitButton": {
     "defaultMessage": "Create"
   },
-  "components.CreateBaseImageCollectionForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.CreateBaseImageCollectionForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateBaseImageCollectionForm.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateBaseImageCollectionForm.systemModelLabel": {
-    "defaultMessage": "System Model"
-  },
   "components.CreateDeviceGroup.handleLabel": {
     "defaultMessage": "Handle"
   },
@@ -1605,11 +1593,23 @@
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateBaseImageCollection.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateBaseImageCollection.nameLabel": {
+    "defaultMessage": "Name"
+  },
   "forms.CreateBaseImageCollection.noSystemModelsAvailable": {
     "defaultMessage": "No system models available"
   },
   "forms.CreateBaseImageCollection.noSystemModelsFoundMatching": {
     "defaultMessage": "No system models found matching \"{inputValue}\""
+  },
+  "forms.CreateBaseImageCollection.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateBaseImageCollection.systemModelLabel": {
+    "defaultMessage": "System Model"
   },
   "forms.CreateBaseImageCollection.systemModelOption": {
     "defaultMessage": "Search or select a system model..."
