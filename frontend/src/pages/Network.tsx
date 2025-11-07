@@ -19,7 +19,7 @@
 */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Row, Col, Stack } from "react-bootstrap";
+import { Form, Stack } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -46,6 +46,7 @@ import Spinner from "components/Spinner";
 import Button from "components/Button";
 import DeleteModal from "components/DeleteModal";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
+import { FormRowWithMargin as FormRow } from "components/FormRow";
 
 const GET_NETWORK_QUERY = graphql`
   query Network_getNetwork_Query($networkId: ID!) {
@@ -68,23 +69,6 @@ const DELETE_NETWORK_MUTATION = graphql`
     }
   }
 `;
-
-const FormRow = ({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <Form.Group as={Row} controlId={id} className="mb-4">
-    <Form.Label column sm={3} className="fw-bold">
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
-);
 
 interface NetworkContentProps {
   network: NonNullable<Network_getNetwork_Query$data["network"]>;

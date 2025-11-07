@@ -18,7 +18,6 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import type { ReactNode } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
@@ -31,6 +30,7 @@ import Col from "components/Col";
 import Row from "components/Row";
 import DeploymentCampaignOutcome from "components/DeploymentCampaignOutcome";
 import DeploymentCampaignStatus from "components/DeploymentCampaignStatus";
+import { SimpleFormRow as FormRow } from "components/FormRow";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
@@ -69,23 +69,6 @@ const DEPLOYMENT_CAMPAIGN_FORM_FRAGMENT = graphql`
     }
   }
 `;
-
-const FormRow = ({
-  label,
-  children,
-}: {
-  label: ReactNode;
-  children: ReactNode;
-}) => (
-  <Row>
-    <Col sm={4} lg>
-      {label}
-    </Col>
-    <Col sm={8} lg>
-      {children}
-    </Col>
-  </Row>
-);
 
 type RolloutMechanismColProps = {
   rolloutMechanism: DeploymentCampaignForm_DeploymentCampaignFragment$data["deploymentMechanism"];

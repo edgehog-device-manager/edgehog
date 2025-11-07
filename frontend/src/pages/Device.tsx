@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2025 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@ import BatteryTable from "components/BatteryTable";
 import NetworkInterfacesTable from "components/NetworkInterfacesTable";
 import BaseImageForm from "forms/BaseImageForm";
 import MultiSelect from "components/MultiSelect";
+import { FormRow as BaseFormRow, FormRowProps } from "components/FormRow";
 import assets from "assets";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
@@ -435,17 +436,8 @@ const GET_FORWARDER_SESSION_QUERY = graphql`
 
 const TTYD_PORT = 7681;
 
-const FormRow: (params: {
-  id: string;
-  label: JSX.Element;
-  children: JSX.Element;
-}) => JSX.Element = ({ id, label, children }) => (
-  <Form.Group as={Row} controlId={id}>
-    <Form.Label column sm={4}>
-      {label}
-    </Form.Label>
-    <Col sm={8}>{children}</Col>
-  </Form.Group>
+const FormRow = (props: FormRowProps) => (
+  <BaseFormRow {...props} labelCol={4} valueCol={8} />
 );
 
 const FormValue = (params: { children: React.ReactNode }) => {

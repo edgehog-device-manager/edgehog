@@ -18,7 +18,7 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
@@ -42,9 +42,7 @@ import type {
 } from "api/__generated__/CreateRelease_getApplicationsWithReleases_Query.graphql";
 
 import Button from "components/Button";
-import Col from "components/Col";
 import Form from "components/Form";
-import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import Alert from "components/Alert";
@@ -67,6 +65,7 @@ import MonacoJsonEditor from "components/MonacoJsonEditor";
 import ConfirmModal from "components/ConfirmModal";
 import FormFeedback from "forms/FormFeedback";
 import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
+import { FormRow } from "components/FormRow";
 
 import type { KeyValue } from "forms/index";
 
@@ -245,23 +244,6 @@ const NetworksErrors = ({ errors }: { errors: unknown }) => {
   }
   return null;
 };
-
-const FormRow = ({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <Form.Group as={Row} controlId={id}>
-    <Form.Label column sm={3}>
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
-);
 
 type ReleaseContainerNode = NonNullable<
   ReleaseNode["containers"]["edges"]

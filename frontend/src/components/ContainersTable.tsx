@@ -32,31 +32,17 @@ import type {
   ContainersTable_ContainerFragment$key,
 } from "api/__generated__/ContainersTable_ContainerFragment.graphql";
 
-import Col from "components/Col";
 import Form from "components/Form";
-import Row from "components/Row";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import MultiSelect from "./MultiSelect";
 import InfiniteScroll from "./InfiniteScroll";
 import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
+import { FormRow as BaseFormRow, FormRowProps } from "components/FormRow";
 import { restartPolicyOptions } from "forms/CreateRelease";
 import { RECORDS_TO_LOAD_NEXT } from "constants";
 
-const FormRow = ({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <Form.Group as={Row} controlId={id} className="mb-2">
-    <Form.Label column sm={3}>
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
+const FormRow = (props: FormRowProps) => (
+  <BaseFormRow {...props} className="mb-2" />
 );
 
 /* eslint-disable relay/unused-fields */

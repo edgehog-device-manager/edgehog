@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2025 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -26,12 +26,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import type { CreateChannel_OptionsFragment$key } from "api/__generated__/CreateChannel_OptionsFragment.graphql";
 
 import Button from "components/Button";
-import Col from "components/Col";
 import Form from "components/Form";
 import MultiSelect from "components/MultiSelect";
-import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import { FormRow } from "components/FormRow";
 import { channelHandleSchema, yup, messages } from "forms";
 import { graphql, useFragment } from "react-relay/hooks";
 
@@ -50,23 +49,6 @@ const CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
     }
   }
 `;
-
-const FormRow = ({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <Form.Group as={Row} controlId={id}>
-    <Form.Label column sm={3}>
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
-);
 
 // react-hook-form returns targetGroups validation error as Array<Record<string, FieldError>> type
 // ignoring eventual minimum length validation error type.
