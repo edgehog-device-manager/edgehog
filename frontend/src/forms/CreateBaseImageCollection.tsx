@@ -18,24 +18,35 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useMemo } from "react";
-import { useForm } from "react-hook-form";
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
+import Select from "react-select";
 
 import Button from "components/Button";
 import Form from "components/Form";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 import { handleSchema, yup } from "forms";
+import { BaseImageCollectionRecord } from "pages/BaseImageCollectionCreate";
 
-import type { CreateBaseImageCollection_OptionsFragment$key } from "api/__generated__/CreateBaseImageCollection_OptionsFragment.graphql";
+import type {
+  CreateBaseImageCollection_OptionsFragment$data,
+  CreateBaseImageCollection_OptionsFragment$key,
+} from "api/__generated__/CreateBaseImageCollection_OptionsFragment.graphql";
+import type { CreateBaseImageCollection_PaginationQuery } from "api/__generated__/CreateBaseImageCollection_PaginationQuery.graphql";
 
 const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
-  fragment CreateBaseImageCollection_OptionsFragment on RootQueryType {
-    systemModels {
+  fragment CreateBaseImageCollection_OptionsFragment on RootQueryType
+  @refetchable(queryName: "CreateBaseImageCollection_PaginationQuery")
+  @argumentDefinitions(filter: { type: "SystemModelFilterInput" }) {
+    systemModels(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateBaseImageCollection_systemModels") {
       edges {
         node {
           id
@@ -45,6 +56,18 @@ const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
     }
   }
 `;
+
+type SystemModelRecord = NonNullable<
+  NonNullable<
+    CreateBaseImageCollection_OptionsFragment$data["systemModels"]
+  >["edges"]
+>[number]["node"];
+
+type FormData = {
+  name: string;
+  handle: string;
+  systemModel: SystemModelRecord;
+};
 
 type BaseImageCollectionData = {
   name: string;
@@ -56,56 +79,173 @@ const baseImageCollectionSchema = yup
   .object({
     name: yup.string().required(),
     handle: handleSchema.required(),
-    systemModelId: yup.string().required(),
+    systemModel: yup
+      .object({ id: yup.string().required(), name: yup.string().required() })
+      .required(),
   })
   .required();
 
-const initialData: BaseImageCollectionData = {
+const initialData: FormData = {
   name: "",
   handle: "",
-  systemModelId: "",
+  systemModel: { id: "", name: "" },
+};
+
+const transformOutputData = (data: FormData): BaseImageCollectionData => {
+  const baseImageCollection: BaseImageCollectionData = {
+    name: data.name,
+    handle: data.handle,
+    systemModelId: data.systemModel.id,
+  };
+  return baseImageCollection;
 };
 
 type Props = {
   optionsRef: CreateBaseImageCollection_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionData) => void;
-  usedSystemModelIds?: string[];
+  baseImageCollections?: BaseImageCollectionRecord[];
 };
 
 const CreateBaseImageCollectionForm = ({
   optionsRef,
   isLoading = false,
   onSubmit,
-  usedSystemModelIds = [],
+  baseImageCollections = [],
 }: Props) => {
   const intl = useIntl();
-  const { systemModels } = useFragment(
-    CREATE_BASE_IMAGE_COLLECTION_FRAGMENT,
-    optionsRef,
-  );
+
   const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
+    CreateBaseImageCollection_PaginationQuery,
+    CreateBaseImageCollection_OptionsFragment$key
+  >(CREATE_BASE_IMAGE_COLLECTION_FRAGMENT, optionsRef);
+
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { name: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextBaseImageCollectionOptions = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const systemModels = useMemo(() => {
+    return (
+      paginationData.systemModels?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is SystemModelRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<BaseImageCollectionData>({
+  } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: initialData,
     resolver: yupResolver(baseImageCollectionSchema),
   });
 
+  const isSystemModelUsedByOtherBaseImageCollection = (
+    systemModel: SystemModelRecord,
+  ) =>
+    baseImageCollections.find(
+      (baseImageCollection: BaseImageCollectionRecord) =>
+        baseImageCollection.systemModel.id === systemModel.id,
+    ) !== undefined;
+
   // Sort system models: available first, used ones last
   const systemModelOptions = useMemo(() => {
-    const nodes = systemModels?.edges?.map((edge) => edge.node) ?? [];
-    return nodes.sort((model1, model2) => {
-      const model1Used = usedSystemModelIds.includes(model1.id);
-      const model2Used = usedSystemModelIds.includes(model2.id);
+    return systemModels.sort((model1, model2) => {
+      const model1Used = isSystemModelUsedByOtherBaseImageCollection(model1);
+      const model2Used = isSystemModelUsedByOtherBaseImageCollection(model2);
       return Number(model1Used) - Number(model2Used);
     });
-  }, [systemModels, usedSystemModelIds]);
+  }, [systemModels]);
+
+  const getSystemModelLabel = useCallback(
+    (systemModel: SystemModelRecord) => {
+      const usedInBaseImageCollection = baseImageCollections.find(
+        (baseImageCollection) =>
+          baseImageCollection.systemModel.id === systemModel.id,
+      );
+
+      if (usedInBaseImageCollection) {
+        return intl.formatMessage(
+          {
+            id: "forms.CreateBaseImageCollection.systemModelWithBaseImageCollectionLabel",
+            defaultMessage:
+              "{systemModelName} (used for {baseImageCollectionName})",
+            description:
+              "System model label of select option with base image collection name it is used for.",
+          },
+          {
+            systemModelName: systemModel.name,
+            baseImageCollectionName: usedInBaseImageCollection?.name ?? "",
+          },
+        );
+      } else {
+        return systemModel.name;
+      }
+    },
+    [intl],
+  );
+  const getSystemModelValue = (systemModel: SystemModelRecord) =>
+    systemModel.id;
+  const noSystemModelOptionsMessage = (inputValue: string) =>
+    inputValue
+      ? intl.formatMessage(
+          {
+            id: "forms.CreateBaseImageCollection.noSystemModelsFoundMatching",
+            defaultMessage: 'No system models found matching "{inputValue}"',
+          },
+          { inputValue },
+        )
+      : intl.formatMessage({
+          id: "forms.CreateBaseImageCollection.noSystemModelsAvailable",
+          defaultMessage: "No system models available",
+        });
+
+  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
         <FormRow
           id="create-base-image-collection-form-name"
@@ -148,41 +288,39 @@ const CreateBaseImageCollectionForm = ({
             />
           }
         >
-          <Form.Select
-            {...register("systemModelId")}
-            isInvalid={!!errors.systemModelId}
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "components.CreateBaseImageCollectionForm.systemModelOption",
-                defaultMessage: "Select a System Model",
-              })}
-            </option>
-
-            {systemModelOptions.map((systemModel) => {
-              const isUsed = usedSystemModelIds.includes(systemModel.id);
-              return (
-                <option
-                  key={systemModel.id}
-                  value={systemModel.id}
-                  disabled={isUsed}
-                >
-                  {isUsed
-                    ? intl.formatMessage(
-                        {
-                          id: "components.CreateBaseImageCollectionForm.systemModelOptionUsed",
-                          defaultMessage: "{name} (already used)",
-                        },
-                        { name: systemModel.name },
-                      )
-                    : systemModel.name}
-                </option>
-              );
-            })}
-          </Form.Select>
+          <Controller
+            name="systemModel"
+            control={control}
+            render={({
+              field: { value, onChange },
+              fieldState: { invalid },
+            }) => (
+              <Select
+                value={value}
+                onChange={onChange}
+                className={invalid ? "is-invalid" : ""}
+                placeholder={intl.formatMessage({
+                  id: "forms.CreateBaseImageCollection.systemModelOption",
+                  defaultMessage: "Search or select a system model...",
+                })}
+                options={systemModelOptions}
+                getOptionLabel={getSystemModelLabel}
+                getOptionValue={getSystemModelValue}
+                noOptionsMessage={({ inputValue }) =>
+                  noSystemModelOptionsMessage(inputValue)
+                }
+                isOptionDisabled={isSystemModelUsedByOtherBaseImageCollection}
+                isLoading={isLoadingNext}
+                onMenuScrollToBottom={
+                  hasNext ? loadNextBaseImageCollectionOptions : undefined
+                }
+                onInputChange={(text) => setSearchText(text)}
+              />
+            )}
+          />
           <Form.Control.Feedback type="invalid">
-            {errors.systemModelId?.message && (
-              <FormattedMessage id={errors.systemModelId?.message} />
+            {errors.systemModel && (
+              <FormattedMessage id={errors.systemModel?.id?.message} />
             )}
           </Form.Control.Feedback>
         </FormRow>

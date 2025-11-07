@@ -466,12 +466,6 @@
   "components.CreateBaseImageCollectionForm.systemModelLabel": {
     "defaultMessage": "System Model"
   },
-  "components.CreateBaseImageCollectionForm.systemModelOption": {
-    "defaultMessage": "Select a System Model"
-  },
-  "components.CreateBaseImageCollectionForm.systemModelOptionUsed": {
-    "defaultMessage": "{name} (already used)"
-  },
   "components.CreateDeviceGroup.handleLabel": {
     "defaultMessage": "Handle"
   },
@@ -1610,6 +1604,19 @@
   },
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "forms.CreateBaseImageCollection.noSystemModelsAvailable": {
+    "defaultMessage": "No system models available"
+  },
+  "forms.CreateBaseImageCollection.noSystemModelsFoundMatching": {
+    "defaultMessage": "No system models found matching \"{inputValue}\""
+  },
+  "forms.CreateBaseImageCollection.systemModelOption": {
+    "defaultMessage": "Search or select a system model..."
+  },
+  "forms.CreateBaseImageCollection.systemModelWithBaseImageCollectionLabel": {
+    "defaultMessage": "{systemModelName} (used for {baseImageCollectionName})",
+    "description": "System model label of select option with base image collection name it is used for."
   },
   "forms.CreateChannel.handleLabel": {
     "defaultMessage": "Handle"
