@@ -41,9 +41,7 @@ import { createColumnHelper } from "components/Table";
 import Icon from "components/Icon";
 import DeleteModal from "./DeleteModal";
 import InfiniteTable from "./InfiniteTable";
-
-const RELEASES_TO_LOAD_FIRST = 40;
-const RELEASES_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -189,14 +187,14 @@ const ReleasesTable = ({
         if (text === "") {
           refetch(
             {
-              first: RELEASES_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: RELEASES_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: { version: { ilike: "%${text}%" } },
             },
             { fetchPolicy: "network-only" },
@@ -213,7 +211,7 @@ const ReleasesTable = ({
   }, [debounceRefetch, searchText]);
 
   const loadNextReleases = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(RELEASES_TO_LOAD_NEXT);
+    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
   }, [hasNext, isLoadingNext, loadNext]);
 
   const releases: TableRecord[] = useMemo(() => {

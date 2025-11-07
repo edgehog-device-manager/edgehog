@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2025 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import UpdateCampaignsTable from "components/UpdateCampaignsTable";
 import { Link, Route } from "Navigation";
-
-const UPDATE_CAMPAIGNS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_UPDATE_CAMPAIGNS_QUERY = graphql`
   query UpdateCampaigns_getUpdateCampaigns_Query(
@@ -90,7 +89,7 @@ const UpdateCampaignsPage = () => {
   const fetchUpdateCampaigns = useCallback(
     () =>
       getUpdateCampaigns(
-        { first: UPDATE_CAMPAIGNS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getUpdateCampaigns],

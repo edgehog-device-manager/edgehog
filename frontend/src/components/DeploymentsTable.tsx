@@ -35,9 +35,7 @@ import DeploymentStateComponent, {
 import InfiniteTable from "components/InfiniteTable";
 import { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
-
-const DEPLOYMENTS_TO_LOAD_FIRST = 40;
-const DEPLOYMENTS_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -178,14 +176,14 @@ const DeploymentsTable = ({
         if (text === "") {
           refetch(
             {
-              first: DEPLOYMENTS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: DEPLOYMENTS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: {
                 or: [
                   {
@@ -221,7 +219,7 @@ const DeploymentsTable = ({
 
   const loadNextDevices = useCallback(() => {
     if (hasNext && !isLoadingNext) {
-      loadNext(DEPLOYMENTS_TO_LOAD_NEXT);
+      loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 

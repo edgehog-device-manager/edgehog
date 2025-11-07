@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024-2025 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -40,8 +40,7 @@ import MultiSelect from "./MultiSelect";
 import InfiniteScroll from "./InfiniteScroll";
 import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
 import { restartPolicyOptions } from "forms/CreateRelease";
-
-const CONTAINERS_TO_LOAD_NEXT = 5;
+import { RECORDS_TO_LOAD_NEXT } from "constants";
 
 const FormRow = ({
   id,
@@ -886,7 +885,7 @@ const ContainersTable = ({
   >(CONTAINERS_TABLE_FRAGMENT, containersRef);
 
   const loadNextContainers = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(CONTAINERS_TO_LOAD_NEXT);
+    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
   }, [hasNext, isLoadingNext, loadNext]);
 
   const containers: ContainerRecord[] = useMemo(() => {

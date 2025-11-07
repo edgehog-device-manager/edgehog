@@ -29,8 +29,7 @@ import Center from "components/Center";
 import DevicesTable from "components/DevicesTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
-
-const DEVICES_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_DEVICES_QUERY = graphql`
   query Devices_getDevices_Query(
@@ -70,7 +69,7 @@ const DevicesPage = () => {
   const fetchDevices = useCallback(
     () =>
       getDevices(
-        { first: DEVICES_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getDevices],

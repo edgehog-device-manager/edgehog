@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024-2025 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,9 +32,7 @@ import { Link, Route } from "Navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import InfiniteTable from "./InfiniteTable";
 import _ from "lodash";
-
-const IMAGE_CREDENTIALS_TO_LOAD_FIRST = 40;
-const IMAGE_CREDENTIALS_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -117,14 +115,14 @@ const ImageCredentialsTable = ({
         if (text === "") {
           refetch(
             {
-              first: IMAGE_CREDENTIALS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: IMAGE_CREDENTIALS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: {
                 or: [
                   { label: { ilike: `%${text}%` } },
@@ -146,7 +144,7 @@ const ImageCredentialsTable = ({
   }, [debounceRefetch, searchText]);
 
   const loadNextImageCredentials = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(IMAGE_CREDENTIALS_TO_LOAD_NEXT);
+    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
   }, [hasNext, isLoadingNext, loadNext]);
 
   const imageCredentials: TableRecord[] = useMemo(() => {

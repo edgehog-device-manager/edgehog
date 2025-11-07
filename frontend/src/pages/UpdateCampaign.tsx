@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -46,8 +46,7 @@ import UpdateCampaignStatsChart from "components/UpdateCampaignStatsChart";
 import UpdateTargetsTabs from "components/UpdateTargetsTabs";
 import UpdateCampaignForm from "forms/UpdateCampaignForm";
 import { Link, Route } from "Navigation";
-
-const UPDATE_TARGETS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_UPDATE_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getUpdateCampaign_Query(
@@ -106,7 +105,7 @@ const UpdateCampaignRefresh = ({
       subscriptionRef.current = fetchQuery(
         relayEnvironment,
         GET_UPDATE_CAMPAIGN_QUERY,
-        { updateCampaignId: id, first: UPDATE_TARGETS_TO_LOAD_FIRST },
+        { updateCampaignId: id, first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ).subscribe({
         complete: () => {
@@ -189,7 +188,7 @@ const UpdateCampaignPage = () => {
 
   const fetchUpdateCampaign = useCallback(() => {
     getUpdateCampaign(
-      { updateCampaignId, first: UPDATE_TARGETS_TO_LOAD_FIRST },
+      { updateCampaignId, first: RECORDS_TO_LOAD_FIRST },
       { fetchPolicy: "network-only" },
     );
   }, [getUpdateCampaign, updateCampaignId]);

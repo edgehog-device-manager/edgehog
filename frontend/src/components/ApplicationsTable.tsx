@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -37,9 +37,7 @@ import DeleteModal from "components/DeleteModal";
 import Button from "components/Button";
 import Icon from "components/Icon";
 import InfiniteTable from "./InfiniteTable";
-
-const APPLICATIONS_TO_LOAD_FIRST = 40;
-const APPLICATIONS_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -103,14 +101,14 @@ const ApplicationsTable = ({
         if (text === "") {
           refetch(
             {
-              first: APPLICATIONS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: APPLICATIONS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: {
                 or: [{ name: { ilike: `%${text}%` } }],
               },
@@ -129,7 +127,7 @@ const ApplicationsTable = ({
   }, [debounceRefetch, searchText]);
 
   const loadNextApplications = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(APPLICATIONS_TO_LOAD_NEXT);
+    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
   }, [hasNext, isLoadingNext, loadNext]);
 
   const applications: TableRecord[] = useMemo(() => {

@@ -35,9 +35,7 @@ import { createColumnHelper } from "components/Table";
 import InfiniteTable from "components/InfiniteTable";
 import { Link, Route } from "Navigation";
 import Icon from "components/Icon";
-
-const DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST = 40;
-const DEPLOYMENT_CAMPAIGNS_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -237,14 +235,14 @@ const DeploymentCampaignsTable = ({
       if (text === "") {
         refetch(
           {
-            first: DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST,
+            first: RECORDS_TO_LOAD_FIRST,
           },
           { fetchPolicy: "network-only" },
         );
       } else {
         refetch(
           {
-            first: DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST,
+            first: RECORDS_TO_LOAD_FIRST,
             filter: {
               or: [
                 { name: { ilike: `%${text}%` } },
@@ -281,7 +279,7 @@ const DeploymentCampaignsTable = ({
 
   const loadNextDeploymentCampaigns = useCallback(() => {
     if (hasNext && !isLoadingNext) {
-      loadNext(DEPLOYMENT_CAMPAIGNS_TO_LOAD_NEXT);
+      loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 

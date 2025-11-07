@@ -32,8 +32,7 @@ import Spinner from "components/Spinner";
 import NetworksTable from "components/NetworksTable";
 import Button from "components/Button";
 import { Link, Route } from "Navigation";
-
-const NETWORKS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_NETWORKS_QUERY = graphql`
   query Networks_getNetworks_Query(
@@ -83,7 +82,7 @@ const NetworksPage = () => {
   const fetchNetworks = useCallback(
     () =>
       getNetworks(
-        { first: NETWORKS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getNetworks],

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2025 SECO Mind Srl
+  Copyright 2022 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import DeviceGroupsTable from "components/DeviceGroupsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
-
-const DEVICE_GROUPS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_DEVICE_GROUPS_QUERY = graphql`
   query DeviceGroups_getDeviceGroups_Query(
@@ -88,7 +87,7 @@ const DevicesPage = () => {
   const fetchDeviceGroups = useCallback(
     () =>
       getDeviceGroups(
-        { first: DEVICE_GROUPS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getDeviceGroups],
