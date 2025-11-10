@@ -48,6 +48,7 @@ import {
   faTriangleExclamation,
   faObjectGroup,
   faCircleQuestion,
+  faRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -81,6 +82,7 @@ const icons = {
   warning: faTriangleExclamation,
   channels: faObjectGroup,
   faCircleQuestion: faCircleQuestion,
+  rotate: faRotate,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;

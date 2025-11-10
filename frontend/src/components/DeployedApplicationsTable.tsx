@@ -27,6 +27,7 @@ import Select, { SingleValue } from "react-select";
 import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
 import type { DeployedApplicationsTable_deployedApplications$key } from "api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
 
+import type { DeployedApplicationsTable_sendDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_sendDeployment_Mutation.graphql";
 import type { DeployedApplicationsTable_startDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_startDeployment_Mutation.graphql";
 import type { DeployedApplicationsTable_stopDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
 import type { DeployedApplicationsTable_deleteDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_deleteDeployment_Mutation.graphql";
@@ -96,6 +97,20 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const SEND_DEPLOYMENT_MUTATION = graphql`
+  mutation DeployedApplicationsTable_sendDeployment_Mutation($id: ID!) {
+    sendDeployment(id: $id) {
+      result {
+        id
+        state
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
 const START_DEPLOYMENT_MUTATION = graphql`
   mutation DeployedApplicationsTable_startDeployment_Mutation($id: ID!) {
     startDeployment(id: $id) {
@@ -151,18 +166,30 @@ const ActionButtons = ({
   state,
   onStart,
   onStop,
+  onRedeploy,
   disabled,
 }: {
   intl: ReturnType<typeof useIntl>;
   state: DeploymentState;
   onStart: () => void;
   onStop: () => void;
+  onRedeploy: () => void;
   disabled: boolean;
 }) => (
   <div>
-    {state === "STOPPED" || state === "ERROR" ? (
+    {disabled ? (
       <Button
-        disabled={disabled}
+        className={"btn p-0 border-0 bg-transparent ms-4 icon-click"}
+        title={intl.formatMessage({
+          id: "components.DeployedApplicationsTable.sendButtonTitle",
+          defaultMessage: "Redeploy Application",
+        })}
+        onClick={onRedeploy}
+      >
+        <Icon className="text-dark" icon={"rotate"} />
+      </Button>
+    ) : state === "STOPPED" || state === "ERROR" ? (
+      <Button
         onClick={onStart}
         className="btn p-0 text-success border-0 bg-transparent icon-click"
         title={intl.formatMessage({
@@ -174,7 +201,6 @@ const ActionButtons = ({
       </Button>
     ) : state === "STARTED" ? (
       <Button
-        disabled={disabled}
         onClick={onStop}
         className="btn p-0 text-danger border-0 bg-transparent icon-click"
         title={intl.formatMessage({
@@ -278,6 +304,10 @@ const DeployedApplicationsTable = ({
     );
   }, [upgradeReleaseOptions, upgradeTargetRelease?.id]);
 
+  const [sendDeployment] =
+    useMutation<DeployedApplicationsTable_sendDeployment_Mutation>(
+      SEND_DEPLOYMENT_MUTATION,
+    );
   const [startDeployment] =
     useMutation<DeployedApplicationsTable_startDeployment_Mutation>(
       START_DEPLOYMENT_MUTATION,
@@ -349,6 +379,44 @@ const DeployedApplicationsTable = ({
           ),
         ),
     })) || [];
+
+  const handleSendDeployedApplication = useCallback(
+    (deploymentId: string) => {
+      if (isOnline) {
+        sendDeployment({
+          variables: { id: deploymentId },
+          onCompleted: (data, errors) => {
+            if (errors) {
+              const errorFeedback = errors
+                .map(({ fields, message }) =>
+                  fields.length ? `${fields.join(" ")} ${message}` : message,
+                )
+                .join(". \n");
+              return setErrorFeedback(errorFeedback);
+            }
+            onDeploymentChange(); // Trigger data refresh
+            setErrorFeedback(null);
+          },
+          onError: () => {
+            setErrorFeedback(
+              <FormattedMessage
+                id="components.DeployedApplicationsTable.sendErrorFeedback"
+                defaultMessage="Could not send the Application to the device, please try again."
+              />,
+            );
+          },
+        });
+      } else {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.DeployedApplicationsTable.sendErrorOffline"
+            defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
+          />,
+        );
+      }
+    },
+    [isOnline, sendDeployment, setErrorFeedback, onDeploymentChange],
+  );
 
   const handleStartDeployedApplication = useCallback(
     (deploymentId: string) => {
@@ -620,6 +688,7 @@ const DeployedApplicationsTable = ({
             state={getValue().state}
             onStart={() => handleStartDeployedApplication(getValue().id)}
             onStop={() => handleStopDeployedApplication(getValue().id)}
+            onRedeploy={() => handleSendDeployedApplication(getValue().id)}
           />
 
           <Button
