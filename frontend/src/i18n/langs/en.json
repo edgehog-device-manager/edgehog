@@ -1,16 +1,4 @@
 {
-  "Device.baseImage.buildId": {
-    "defaultMessage": "Build identifier"
-  },
-  "Device.baseImage.fingerprint": {
-    "defaultMessage": "Fingerprint"
-  },
-  "Device.baseImage.name": {
-    "defaultMessage": "Name"
-  },
-  "Device.baseImage.version": {
-    "defaultMessage": "Version"
-  },
   "Device.checkMyDevice": {
     "defaultMessage": "Check my Device"
   },
@@ -23,21 +11,6 @@
   "Device.groups": {
     "defaultMessage": "Groups"
   },
-  "Device.hardwareInfo.cpuArchitecture": {
-    "defaultMessage": "CPU architecture"
-  },
-  "Device.hardwareInfo.cpuModel": {
-    "defaultMessage": "CPU model code"
-  },
-  "Device.hardwareInfo.cpuModelName": {
-    "defaultMessage": "CPU model name"
-  },
-  "Device.hardwareInfo.cpuVendor": {
-    "defaultMessage": "CPU vendor"
-  },
-  "Device.hardwareInfo.memoryTotalBytes": {
-    "defaultMessage": "Total memory"
-  },
   "Device.hardwareType": {
     "defaultMessage": "Hardware Type"
   },
@@ -47,41 +20,14 @@
   "Device.name": {
     "defaultMessage": "Name"
   },
-  "Device.osInfo.name": {
-    "defaultMessage": "OS name"
-  },
-  "Device.osInfo.version": {
-    "defaultMessage": "OS version"
-  },
   "Device.remoteTerminal.label": {
     "defaultMessage": "Remote Terminal"
   },
   "Device.remoteTerminal.openTerminalButton": {
     "defaultMessage": "Open"
   },
-  "Device.runtimeInfo.environment": {
-    "defaultMessage": "Environment"
-  },
-  "Device.runtimeInfo.name": {
-    "defaultMessage": "Name"
-  },
-  "Device.runtimeInfo.url": {
-    "defaultMessage": "URL"
-  },
-  "Device.runtimeInfo.version": {
-    "defaultMessage": "Version"
-  },
   "Device.systemModel": {
     "defaultMessage": "System Model"
-  },
-  "Device.systemStatus.memoryFreeBytes": {
-    "defaultMessage": "Free Memory"
-  },
-  "Device.systemStatus.taskCount": {
-    "defaultMessage": "Active Tasks"
-  },
-  "Device.systemStatus.uptimeMilliseconds": {
-    "defaultMessage": "Last boot at"
   },
   "Device.tags": {
     "defaultMessage": "Tags"
@@ -769,6 +715,123 @@
   },
   "components.DeviceMappingsFormInput.pathOnHostLabel": {
     "defaultMessage": "Path On Host"
+  },
+  "components.DeviceTabs.ApplicationsTab": {
+    "defaultMessage": "Applications"
+  },
+  "components.DeviceTabs.ApplicationsTab.DeployedApplications": {
+    "defaultMessage": "Deployed Applications"
+  },
+  "components.DeviceTabs.ApplicationsTab.InstallNewApp": {
+    "defaultMessage": "Add Available Applications"
+  },
+  "components.DeviceTabs.BaseImageTab": {
+    "defaultMessage": "Base Image"
+  },
+  "components.DeviceTabs.BaseImageTab.buildId": {
+    "defaultMessage": "Build identifier"
+  },
+  "components.DeviceTabs.BaseImageTab.fingerprint": {
+    "defaultMessage": "Fingerprint"
+  },
+  "components.DeviceTabs.BaseImageTab.name": {
+    "defaultMessage": "Name"
+  },
+  "components.DeviceTabs.BaseImageTab.version": {
+    "defaultMessage": "Version"
+  },
+  "components.DeviceTabs.BatteryTab": {
+    "defaultMessage": "Battery"
+  },
+  "components.DeviceTabs.CellularConnectionTab": {
+    "defaultMessage": "Cellular Connection"
+  },
+  "components.DeviceTabs.HardwareInfoTab": {
+    "defaultMessage": "Hardware Info"
+  },
+  "components.DeviceTabs.HardwareInfoTab.cpuArchitecture": {
+    "defaultMessage": "CPU architecture"
+  },
+  "components.DeviceTabs.HardwareInfoTab.cpuModel": {
+    "defaultMessage": "CPU model code"
+  },
+  "components.DeviceTabs.HardwareInfoTab.cpuModelName": {
+    "defaultMessage": "CPU model name"
+  },
+  "components.DeviceTabs.HardwareInfoTab.cpuVendor": {
+    "defaultMessage": "CPU vendor"
+  },
+  "components.DeviceTabs.HardwareInfoTab.memoryTotalBytes": {
+    "defaultMessage": "Total memory"
+  },
+  "components.DeviceTabs.LocationTab": {
+    "defaultMessage": "Geolocation"
+  },
+  "components.DeviceTabs.LocationTab.lastUpdateAt": {
+    "defaultMessage": "Last known location, updated at {date}"
+  },
+  "components.DeviceTabs.NetworkInterfacesTab": {
+    "defaultMessage": "Network Interfaces"
+  },
+  "components.DeviceTabs.OSInfoTab": {
+    "defaultMessage": "Operating System"
+  },
+  "components.DeviceTabs.OSInfoTab.name": {
+    "defaultMessage": "OS name"
+  },
+  "components.DeviceTabs.OSInfoTab.version": {
+    "defaultMessage": "OS version"
+  },
+  "components.DeviceTabs.RuntimeInfoTab": {
+    "defaultMessage": "Runtime"
+  },
+  "components.DeviceTabs.RuntimeInfoTab.environment": {
+    "defaultMessage": "Environment"
+  },
+  "components.DeviceTabs.RuntimeInfoTab.name": {
+    "defaultMessage": "Name"
+  },
+  "components.DeviceTabs.RuntimeInfoTab.url": {
+    "defaultMessage": "URL"
+  },
+  "components.DeviceTabs.RuntimeInfoTab.version": {
+    "defaultMessage": "Version"
+  },
+  "components.DeviceTabs.SoftwareUpdateTab": {
+    "defaultMessage": "Software Updates"
+  },
+  "components.DeviceTabs.SoftwareUpdateTab.manualOTAUpdate": {
+    "defaultMessage": "Manual OTA Update"
+  },
+  "components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback": {
+    "defaultMessage": "Could not start the OTA update, please try again."
+  },
+  "components.DeviceTabs.SoftwareUpdateTab.updatesHistory": {
+    "defaultMessage": "History"
+  },
+  "components.DeviceTabs.SoftwareUpdateTab.updatingTo": {
+    "defaultMessage": "Updating to image <a>{baseImageName}</a>"
+  },
+  "components.DeviceTabs.StorageUsageTab": {
+    "defaultMessage": "Storage"
+  },
+  "components.DeviceTabs.SystemStatusTab": {
+    "defaultMessage": "System Status"
+  },
+  "components.DeviceTabs.SystemStatusTab.lastUpdateAt": {
+    "defaultMessage": "Last updated at {date}"
+  },
+  "components.DeviceTabs.SystemStatusTab.memoryFreeBytes": {
+    "defaultMessage": "Free Memory"
+  },
+  "components.DeviceTabs.SystemStatusTab.taskCount": {
+    "defaultMessage": "Active Tasks"
+  },
+  "components.DeviceTabs.SystemStatusTab.uptimeMilliseconds": {
+    "defaultMessage": "Last boot at"
+  },
+  "components.DeviceTabs.WiFiScanResultsTab": {
+    "defaultMessage": "WiFi APs"
   },
   "components.DevicesGroupsTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
@@ -2448,47 +2511,14 @@
   "pages.Deployments.title": {
     "defaultMessage": "Deployments"
   },
-  "pages.Device.ApplicationsTab": {
-    "defaultMessage": "Applications"
-  },
-  "pages.Device.ApplicationsTab.DeployedApplications": {
-    "defaultMessage": "Deployed Applications"
-  },
-  "pages.Device.ApplicationsTab.InstallNewApp": {
-    "defaultMessage": "Add Available Applications"
-  },
-  "pages.Device.BatteryStatusTab": {
-    "defaultMessage": "Battery"
-  },
-  "pages.Device.CellularConnectionTab": {
-    "defaultMessage": "Cellular Connection"
-  },
   "pages.Device.DeviceCellularConnectionTab.noModems.message": {
     "defaultMessage": "The device has not detected any modems yet."
   },
   "pages.Device.DeviceCellularConnectionTab.noModems.title": {
     "defaultMessage": "No modem"
   },
-  "pages.Device.NetworkInterfacesTab": {
-    "defaultMessage": "Network Interfaces"
-  },
-  "pages.Device.SoftwareUpdateTab": {
-    "defaultMessage": "Software Updates"
-  },
-  "pages.Device.SoftwareUpdateTab.manualOTAUpdate": {
-    "defaultMessage": "Manual OTA Update"
-  },
   "pages.Device.SoftwareUpdateTab.noPreviousUpdates": {
     "defaultMessage": "No previous updates"
-  },
-  "pages.Device.SoftwareUpdateTab.updatesHistory": {
-    "defaultMessage": "History"
-  },
-  "pages.Device.SoftwareUpdateTab.updatingTo": {
-    "defaultMessage": "Updating to image <a>{baseImageName}</a>"
-  },
-  "pages.Device.baseImageTab": {
-    "defaultMessage": "Base Image"
   },
   "pages.Device.deviceNotFound.message": {
     "defaultMessage": "Return to the device list."
@@ -2496,43 +2526,13 @@
   "pages.Device.deviceNotFound.title": {
     "defaultMessage": "Device not found."
   },
-  "pages.Device.geolocationTab": {
-    "defaultMessage": "Geolocation"
-  },
-  "pages.Device.hardwareInfoTab": {
-    "defaultMessage": "Hardware Info"
-  },
-  "pages.Device.location.lastUpdateAt": {
-    "defaultMessage": "Last known location, updated at {date}"
-  },
   "pages.Device.openRemoteTerminalErrorFeedback": {
     "defaultMessage": "Could not access the remote terminal, please try again.",
     "description": "Feedback for unknown error while opening a remote terminal session"
   },
-  "pages.Device.osInfoTab": {
-    "defaultMessage": "Operating System"
-  },
-  "pages.Device.otaUpdateCreationErrorFeedback": {
-    "defaultMessage": "Could not start the OTA update, please try again."
-  },
-  "pages.Device.runtimeInfoTab": {
-    "defaultMessage": "Runtime"
-  },
-  "pages.Device.storageTab": {
-    "defaultMessage": "Storage"
-  },
-  "pages.Device.systemStatus.lastUpdateAt": {
-    "defaultMessage": "Last updated at {date}"
-  },
-  "pages.Device.systemStatusTab": {
-    "defaultMessage": "System Status"
-  },
   "pages.Device.updateDeviceErrorFeedback": {
     "defaultMessage": "Could not update the device, please try again.",
     "description": "Feedback for unknown error while updating a device"
-  },
-  "pages.Device.wifiScanResultsTab": {
-    "defaultMessage": "WiFi APs"
   },
   "pages.Device.wifiScanResultsTab.noResults.message": {
     "defaultMessage": "The device has not detected any WiFi AP yet."
