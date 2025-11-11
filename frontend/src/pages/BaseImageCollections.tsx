@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2025 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import BaseImageCollectionsTable from "components/BaseImageCollectionsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
-
-const BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_BASE_IMAGE_COLLECTIONS_QUERY = graphql`
   query BaseImageCollections_getBaseImageCollections_Query(
@@ -93,7 +92,7 @@ const BaseImageCollectionsPage = () => {
   const fetchBaseImageCollections = useCallback(
     () =>
       getBaseImageCollections(
-        { first: BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getBaseImageCollections],

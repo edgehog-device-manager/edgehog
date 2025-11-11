@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2025 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,9 +32,7 @@ import type {
 import { createColumnHelper } from "components/Table";
 import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "Navigation";
-
-const HARDWARE_TYPES_TO_LOAD_FIRST = 40;
-const HARDWARE_TYPES_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -138,14 +136,14 @@ const HardwareTypesTable = ({ className, hardwareTypesRef }: Props) => {
         if (text === "") {
           refetch(
             {
-              first: HARDWARE_TYPES_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: HARDWARE_TYPES_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: {
                 or: [
                   { name: { ilike: `%${text}%` } },
@@ -175,7 +173,7 @@ const HardwareTypesTable = ({ className, hardwareTypesRef }: Props) => {
 
   const loadNextHardwareTypes = useCallback(() => {
     if (hasNext && !isLoadingNext) {
-      loadNext(HARDWARE_TYPES_TO_LOAD_NEXT);
+      loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 

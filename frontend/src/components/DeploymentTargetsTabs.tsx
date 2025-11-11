@@ -36,8 +36,7 @@ import DeploymentTargetsTable, {
 } from "components/DeploymentTargetsTable";
 import type { ColumnId } from "components/DeploymentTargetsTable";
 import DeploymentTargetStatus from "components/DeploymentTargetStatus";
-
-const DEPLOYMENT_TARGETS_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_NEXT } from "constants";
 
 const DEPLOYMENT_TARGETS_SUCCESSFUL_FRAGMENT = graphql`
   fragment DeploymentTargetsTabs_SuccessfulFragment on DeploymentCampaign
@@ -203,7 +202,7 @@ const DeploymentTargetsTabs = ({ deploymentCampaignRef }: Props) => {
 
   const loadNextDeploymentTargets = useCallback(() => {
     if (currentTabFragment?.hasNext && !currentTabFragment?.isLoadingNext) {
-      currentTabFragment.loadNext(DEPLOYMENT_TARGETS_TO_LOAD_NEXT);
+      currentTabFragment.loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [currentTabFragment]);
 

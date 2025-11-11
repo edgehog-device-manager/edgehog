@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024-2025 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -44,8 +44,7 @@ import ContainersTable from "components/ContainersTable";
 import ReleaseDevicesTable from "components/ReleaseDevicesTable";
 import ReleaseSystemModelsTable from "components/ReleaseSystemModelsTable";
 import Tabs, { Tab } from "components/Tabs";
-
-const CONTAINERS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -203,7 +202,7 @@ const ReleasePage = () => {
   const fetchRelease = useCallback(
     () =>
       getRelease(
-        { releaseId, first: CONTAINERS_TO_LOAD_FIRST },
+        { releaseId, first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ),
     [getRelease, releaseId],

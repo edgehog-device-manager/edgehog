@@ -31,23 +31,7 @@ import Spinner from "components/Spinner";
 
 import { yup, envSchema } from "forms";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
-
-const FormRow = ({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <Form.Group as={Row} controlId={id} className="mb-4">
-    <Form.Label column sm={3} className="fw-bold">
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
-);
+import { FormRowWithMargin as FormRow } from "components/FormRow";
 
 type VolumeData = {
   label: string;

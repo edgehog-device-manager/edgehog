@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2025 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -27,12 +27,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import type { UpdateHardwareType_HardwareTypeFragment$key } from "api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
 
 import Button from "components/Button";
-import Col from "components/Col";
 import Form from "components/Form";
 import Icon from "components/Icon";
-import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import { FormRow } from "components/FormRow";
 import { hardwareTypeHandleSchema, messages, yup } from "forms";
 
 const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
@@ -49,23 +48,6 @@ const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
     }
   }
 `;
-
-const FormRow = ({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <Form.Group as={Row} controlId={id}>
-    <Form.Label column sm={3}>
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
-);
 
 type HardwareTypeData = {
   name: string;

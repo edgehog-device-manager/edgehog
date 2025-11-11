@@ -32,9 +32,7 @@ import type {
 import { Link, Route } from "Navigation";
 import { createColumnHelper } from "components/Table";
 import InfiniteTable from "./InfiniteTable";
-
-const NETWORKS_TO_LOAD_FIRST = 40;
-const NETWORKS_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -131,14 +129,14 @@ const NetworksTable = ({
         if (text === "") {
           refetch(
             {
-              first: NETWORKS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: NETWORKS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: {
                 or: [
                   { label: { ilike: `%${text}%` } },
@@ -160,7 +158,7 @@ const NetworksTable = ({
   }, [debounceRefetch, searchText]);
 
   const loadNextVolumes = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(NETWORKS_TO_LOAD_NEXT);
+    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
   }, [hasNext, isLoadingNext, loadNext]);
 
   const volumes: TableRecord[] = useMemo(() => {

@@ -32,8 +32,7 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import DeploymentCampaignsTable from "components/DeploymentCampaignsTable";
 import { Link, Route } from "Navigation";
-
-const DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_DEPLOYMENT_CAMPAIGNS_QUERY = graphql`
   query DeploymentCampaigns_getDeploymentCampaigns_Query(
@@ -91,7 +90,7 @@ const DeploymentCampaignsPage = () => {
   const fetchDeploymentCampaigns = useCallback(
     () =>
       getDeploymentCampaigns(
-        { first: DEPLOYMENT_CAMPAIGNS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getDeploymentCampaigns],

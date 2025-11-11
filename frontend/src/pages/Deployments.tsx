@@ -30,8 +30,7 @@ import Center from "components/Center";
 import DeploymentsTable from "components/DeploymentsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
-
-const DEPLOYMENTS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_DEPLOYMENTS_QUERY = graphql`
   query Deployments_getDeployments_Query(
@@ -79,7 +78,7 @@ const DeploymentsPage = () => {
   const fetchDeployments = useCallback(
     () =>
       getDeployments(
-        { first: DEPLOYMENTS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getDeployments],

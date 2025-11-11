@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2025 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,9 +32,8 @@ import type {
 import { createColumnHelper } from "components/Table";
 import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "Navigation";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
-const BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST = 40;
-const BASE_IMAGE_COLLECTIONS_TO_LOAD_NEXT = 10;
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT = graphql`
@@ -131,14 +130,14 @@ const BaseImageCollectionsTable = ({
         if (text === "") {
           refetch(
             {
-              first: BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: BASE_IMAGE_COLLECTIONS_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: {
                 or: [
                   { name: { ilike: `%${text}%` } },
@@ -168,7 +167,7 @@ const BaseImageCollectionsTable = ({
 
   const loadNextBaseImageCollections = useCallback(() => {
     if (hasNext && !isLoadingNext) {
-      loadNext(BASE_IMAGE_COLLECTIONS_TO_LOAD_NEXT);
+      loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024-2025 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ import ReleasesTable from "components/ReleasesTable";
 import Button from "components/Button";
 import ApplicationDevicesTable from "components/ApplicationDevicesTable";
 import Tabs, { Tab } from "components/Tabs";
-
-const RELEASES_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_APPLICATION_QUERY = graphql`
   query Application_getApplication_Query(
@@ -227,7 +226,7 @@ const ApplicationPage = () => {
   const fetchApplication = useCallback(
     () =>
       getApplication(
-        { applicationId, first: RELEASES_TO_LOAD_FIRST },
+        { applicationId, first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ),
     [getApplication, applicationId],

@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import Tab from "react-bootstrap/Tab";
 import Form from "components/Form";
 import Result from "components/Result";
 import Stack from "components/Stack";
+import { FormRow } from "components/FormRow";
 
 import type {
   CellularConnectionTabs_cellularConnection$data,
@@ -133,19 +134,6 @@ const ModemNavItem = ({ modem }: { modem: Modem }) => {
     </Nav.Item>
   );
 };
-
-const FormRow: (params: {
-  id: string;
-  label: JSX.Element;
-  children: JSX.Element;
-}) => JSX.Element = ({ id, label, children }) => (
-  <Form.Group as={Row} controlId={id}>
-    <Form.Label column sm={3}>
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
-);
 
 const ModemTab = ({ modem }: { modem: Modem }) => {
   const intl = useIntl();

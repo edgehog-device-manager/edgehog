@@ -32,8 +32,7 @@ import Spinner from "components/Spinner";
 import VolumesTable from "components/VolumesTable";
 import Button from "components/Button";
 import { Link, Route } from "Navigation";
-
-const VOLUMES_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_VOLUMES_QUERY = graphql`
   query Volumes_getVolumes_Query(
@@ -80,7 +79,7 @@ const VolumesPage = () => {
   const fetchVolumes = useCallback(
     () =>
       getVolumes(
-        { first: VOLUMES_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getVolumes],

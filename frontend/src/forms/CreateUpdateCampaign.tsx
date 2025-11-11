@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2025 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import type { ReactNode } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { useForm } from "react-hook-form";
@@ -26,11 +25,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import BaseImageSelect from "components/BaseImageSelect";
 import Button from "components/Button";
-import Col from "components/Col";
 import Form from "components/Form";
-import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import { FormRow } from "components/FormRow";
 import { numberSchema, yup } from "forms";
 import FormFeedback from "forms/FormFeedback";
 
@@ -56,23 +54,6 @@ const UPDATE_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
     }
   }
 `;
-
-const FormRow = ({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label?: ReactNode;
-  children: ReactNode;
-}) => (
-  <Form.Group as={Row} controlId={id}>
-    <Form.Label column sm={3}>
-      {label}
-    </Form.Label>
-    <Col sm={9}>{children}</Col>
-  </Form.Group>
-);
 
 type UpdateCampaignData = {
   channelId: string;
@@ -405,16 +386,25 @@ const CreateBaseImageCollectionForm = ({
           />
           <FormFeedback feedback={errors.otaRequestRetries?.message} />
         </FormRow>
-        <FormRow id="create-update-campaign-form-force-downgrade">
+        <FormRow
+          id="create-update-campaign-form-force-downgrade"
+          label={
+            <FormattedMessage
+              id="forms.CreateUpdateCampaign.forceDowngradeLabel"
+              defaultMessage="Force Downgrade"
+            />
+          }
+        >
           <Form.Check
+            type="checkbox"
             {...register("forceDowngrade")}
-            label={
-              <FormattedMessage
-                id="forms.CreateUpdateCampaign.forceDowngradeLabel"
-                defaultMessage="Force Downgrade"
-              />
-            }
+            isInvalid={!!errors.forceDowngrade}
           />
+          <Form.Control.Feedback type="invalid">
+            {errors.forceDowngrade?.message && (
+              <FormattedMessage id={errors.forceDowngrade.message} />
+            )}
+          </Form.Control.Feedback>
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">

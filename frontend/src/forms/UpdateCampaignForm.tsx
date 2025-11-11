@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import type { ReactNode } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
@@ -32,6 +31,7 @@ import Form from "components/Form";
 import Row from "components/Row";
 import UpdateCampaignOutcome from "components/UpdateCampaignOutcome";
 import UpdateCampaignStatus from "components/UpdateCampaignStatus";
+import { SimpleFormRow as FormRow } from "components/FormRow";
 import { Link, Route } from "Navigation";
 
 // We use graphql fields below in columns configuration
@@ -64,23 +64,6 @@ const UPDATE_CAMPAIGN_FORM_FRAGMENT = graphql`
     }
   }
 `;
-
-const FormRow = ({
-  label,
-  children,
-}: {
-  label: ReactNode;
-  children: ReactNode;
-}) => (
-  <Row>
-    <Col sm={4} lg>
-      {label}
-    </Col>
-    <Col sm={8} lg>
-      {children}
-    </Col>
-  </Row>
-);
 
 type RolloutMechanismColProps = {
   rolloutMechanism: UpdateCampaignForm_UpdateCampaignFragment$data["rolloutMechanism"];

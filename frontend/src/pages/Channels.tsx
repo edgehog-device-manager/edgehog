@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2025 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
 import ChannelsTable from "components/ChannelsTable";
-
-const CHANNELS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_CHANNELS_QUERY = graphql`
   query Channels_getChannels_Query(
@@ -83,7 +82,7 @@ const ChannelsPage = () => {
   const fetchChannels = useCallback(
     () =>
       getChannels(
-        { first: CHANNELS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getChannels],

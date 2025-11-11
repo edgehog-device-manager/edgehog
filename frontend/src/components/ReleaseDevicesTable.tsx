@@ -36,8 +36,7 @@ import InfiniteScroll from "components/InfiniteScroll";
 import InfiniteTable from "components/InfiniteTable";
 import { createColumnHelper } from "components/Table";
 import { Link, Route } from "Navigation";
-
-const DEVICES_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -83,7 +82,7 @@ const ReleaseDevicesTable = ({
   >(RELEASE_DEVICES_TABLE_FRAGMENT, releaseDevicesRef);
 
   const loadNextContainers = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(DEVICES_TO_LOAD_NEXT);
+    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
   }, [hasNext, isLoadingNext, loadNext]);
 
   const deployments: TableRecord[] = useMemo(() => {

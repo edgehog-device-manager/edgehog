@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2025 SECO Mind Srl
+  Copyright 2023 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -34,8 +34,7 @@ import NavLink from "react-bootstrap/NavLink";
 import UpdateTargetsTable, { columnIds } from "components/UpdateTargetsTable";
 import type { ColumnId } from "components/UpdateTargetsTable";
 import UpdateTargetStatus from "components/UpdateTargetStatus";
-
-const UPDATE_TARGETS_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_NEXT } from "constants";
 
 const UPDATE_TARGETS_SUCCESSFUL_FRAGMENT = graphql`
   fragment UpdateTargetsTabs_SuccessfulFragment on UpdateCampaign
@@ -206,7 +205,7 @@ const UpdateTargetsTabs = ({ updateCampaignRef }: Props) => {
 
   const loadNextUpdateTargets = useCallback(() => {
     if (currentTabFragment?.hasNext && !currentTabFragment?.isLoadingNext) {
-      currentTabFragment.loadNext(UPDATE_TARGETS_TO_LOAD_NEXT);
+      currentTabFragment.loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [currentTabFragment]);
 

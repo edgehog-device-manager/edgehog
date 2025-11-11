@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -33,8 +33,7 @@ import Spinner from "components/Spinner";
 import ApplicationsTable from "components/ApplicationsTable";
 import Button from "components/Button";
 import { Link, Route } from "Navigation";
-
-const APPLICATIONS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const GET_APPLICATIONS_QUERY = graphql`
   query Applications_getApplications_Query(
@@ -102,7 +101,7 @@ const ApplicationsPage = () => {
   const fetchApplications = useCallback(
     () =>
       getApplications(
-        { first: APPLICATIONS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getApplications],

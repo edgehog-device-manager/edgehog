@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2024-2025 SECO Mind Srl
+  Copyright 2024 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -36,8 +36,7 @@ import ImageCredentialsTable from "components/ImageCredentialsTable";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route } from "Navigation";
-
-const IMAGE_CREDENTIALS_TO_LOAD_FIRST = 40;
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
 const IMAGE_CREDENTIALS_QUERY = graphql`
   query ImageCredentials_imageCredentials_Query(
@@ -98,7 +97,7 @@ const ImageCredentialsPage = () => {
   const fetchImageCredentials = useCallback(
     () =>
       getImageCredentials(
-        { first: IMAGE_CREDENTIALS_TO_LOAD_FIRST },
+        { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
     [getImageCredentials],

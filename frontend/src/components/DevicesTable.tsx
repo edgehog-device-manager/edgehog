@@ -35,9 +35,7 @@ import InfiniteTable from "./InfiniteTable";
 import LastSeen from "components/LastSeen";
 import { Link, Route } from "Navigation";
 import Tag from "components/Tag";
-
-const DEVICES_TO_LOAD_FIRST = 40;
-const DEVICES_TO_LOAD_NEXT = 10;
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -202,14 +200,14 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
         if (text === "") {
           refetch(
             {
-              first: DEVICES_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
             },
             { fetchPolicy: "network-only" },
           );
         } else {
           refetch(
             {
-              first: DEVICES_TO_LOAD_FIRST,
+              first: RECORDS_TO_LOAD_FIRST,
               filter: {
                 or: [
                   { name: { ilike: `%${text}%` } },
@@ -232,7 +230,7 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
 
   const loadNextDevices = useCallback(() => {
     if (hasNext && !isLoadingNext) {
-      loadNext(DEVICES_TO_LOAD_NEXT);
+      loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 
