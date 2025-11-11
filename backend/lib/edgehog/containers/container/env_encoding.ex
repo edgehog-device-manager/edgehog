@@ -22,7 +22,12 @@ defmodule Edgehog.Containers.Container.EnvEncoding do
   @moduledoc false
   use Ash.Resource.Calculation
 
-  @impl Ash.Resource.Calculation
+  alias Ash.Resource.Calculation
+
+  @impl Calculation
+  def load(_query, _opts, _context), do: [:env]
+
+  @impl Calculation
   def calculate(records, _opts, _context) do
     Enum.map(records, &encode_env(&1.env))
   end

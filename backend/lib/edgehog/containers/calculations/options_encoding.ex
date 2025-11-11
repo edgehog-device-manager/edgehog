@@ -18,18 +18,26 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Network.Calculations.OptionsEncoding do
-  @moduledoc false
+defmodule Edgehog.Containers.Calculations.OptionsEncoding do
+  @moduledoc """
+  Encodes options map to an array of "key=value" strings.
+  """
+
   use Ash.Resource.Calculation
 
-  @impl Ash.Resource.Calculation
+  alias Ash.Resource.Calculation
+
+  @impl Calculation
+  def load(_query, _opts, _context), do: [:options]
+
+  @impl Calculation
   def calculate(records, _opts, _context) do
     Enum.map(records, &encode_options(&1.options))
   end
 
   defp encode_options(options) do
-    for {key, value} <- options do
+    Enum.map(options, fn {key, value} ->
       to_string(key) <> "=" <> to_string(value)
-    end
+    end)
   end
 end

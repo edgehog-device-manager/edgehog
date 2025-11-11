@@ -25,7 +25,6 @@ defmodule Edgehog.Containers.Network do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.ContainerNetwork
-  alias Edgehog.Containers.Network.Calculations
   alias Edgehog.Containers.Validations
 
   graphql do
@@ -94,7 +93,9 @@ defmodule Edgehog.Containers.Network do
   end
 
   calculations do
-    calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
+    calculate :options_encoding,
+              {:array, :string},
+              Edgehog.Containers.Calculations.OptionsEncoding
 
     calculate :dangling?,
               :boolean,
