@@ -25,7 +25,6 @@ defmodule Edgehog.Containers.Volume do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Validations
-  alias Edgehog.Containers.Volume.Calculations
 
   graphql do
     type :volume
@@ -82,7 +81,9 @@ defmodule Edgehog.Containers.Volume do
   end
 
   calculations do
-    calculate :options_encoding, {:array, :string}, Calculations.OptionsEncoding
+    calculate :options_encoding,
+              {:array, :string},
+              Edgehog.Containers.Calculations.OptionsEncoding
 
     calculate :dangling?,
               :boolean,
