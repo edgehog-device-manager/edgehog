@@ -135,7 +135,11 @@ defmodule Edgehog.Tenants.Reconciler do
   defp reconcile_triggers(rm_client, trigger_url, policies_support, astarte_version, tenant) do
     trigger_url
     |> Core.list_required_triggers(policies_support)
-    |> Enum.each(&Core.reconcile_trigger!(rm_client, &1, astarte_version, tenant))
+    |> Enum.each(&reconcile_trigger!(rm_client, &1, astarte_version, tenant))
+  end
+
+  defp reconcile_trigger!(rm_client, trigger, astarte_version, tenant) do
+    Task.start(fn -> Core.reconcile_trigger!(rm_client, trigger, astarte_version, tenant) end)
   end
 
   defp schedule_reconciliation(time) do
