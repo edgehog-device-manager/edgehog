@@ -355,19 +355,19 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   end
 
   @doc """
-  Fetches the deployment target associated with a given deployment ID and campaign ID.
+  Fetches the deployment target associated with a given device ID and campaign ID.
 
   ## Parameters
     - tenant_id: The ID of the tenant.
     - deployment_campaign_id: The ID of the deployment campaign.
-    - deployment_id: The ID of the deployment.
+    - device_id: The ID of the device.
 
   ## Returns
-    - The deployment target struct associated with the deployment ID and campaign ID.
+    - The deployment target struct associated with the device ID and campaign ID.
   """
-  def get_target_for_deployment!(tenant_id, deployment_campaign_id, deployment_id) do
-    DeploymentCampaigns.fetch_target_by_deployment_and_campaign!(
-      deployment_id,
+  def get_target_for_deployment_by_device!(tenant_id, deployment_campaign_id, device_id) do
+    DeploymentCampaigns.fetch_target_by_device_and_campaign!(
+      device_id,
       deployment_campaign_id,
       tenant: tenant_id
     )
@@ -435,8 +435,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
         do_retry_target_operation(target, :stop)
 
       :delete ->
-        # Placeholder for future delete operation
-        {:error, :not_implemented}
+        do_retry_target_operation(target, :delete)
 
       _ ->
         do_retry_target_operation(target, :send_deployment)
@@ -488,8 +487,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
         stop(target, release)
 
       :delete ->
-        # Placeholder for future delete operation
-        {:error, :not_implemented}
+        delete(target, release)
 
       _ ->
         deploy(target, release, deployment_mechanism)
@@ -662,6 +660,49 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
           with {:ok, _deployment} <- deployment_result do
             {:ok, updated_target}
           end
+      end
+    else
+      {:error, :deployment_not_found}
+    end
+  end
+
+  @doc """
+  Deletes the deployment of the release to the target
+
+  ## Parameters
+    - target: The deployment target struct.
+    - release: The release struct referenced in the deployment to be deployed.
+
+  ## Returns
+    - `{:ok, target}` if the delete command is successfully sent.
+    - `{:error, :deployment_transitioning}` if the deployment is in a transitional state.
+    - `{:error, :deployement_not_found}`, if the deployment doesn't exist n the target.
+    - `{:error, reason}` for any other errors.
+  """
+  def delete(target, release) do
+    if application_deployed?(target, release) do
+      {:ok, updated_target} = link_target_deployment(target, release)
+
+      deployment =
+        updated_target
+        |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
+        |> Map.get(:deployment)
+
+      if deployment.state in [:starting, :stopping] do
+        {:error, :deployment_transitioning}
+      else
+        # Subscribe here since after deletion the deployment record is gone
+        subscribe_to_deployment_updates!(deployment.id)
+
+        # Delete the deployment
+        deployment_result =
+          deployment
+          |> Ash.Changeset.for_update(:delete, %{}, tenant: updated_target.tenant_id)
+          |> Ash.update()
+
+        with {:ok, _deployment} <- deployment_result do
+          {:ok, updated_target}
+        end
       end
     else
       {:error, :deployment_not_found}
