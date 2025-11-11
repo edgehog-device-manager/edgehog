@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ on:
       - ".github/workflows/frontend-test.yaml"
     branches:
       - "main"
-      - 'release-*'
+      - "release-*"
   # Run on pull requests matching apps
   pull_request:
     paths:
@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: .tool-versions
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
         working-directory: frontend
@@ -58,6 +58,15 @@ jobs:
       - name: Check formatting
         working-directory: frontend
         run: npm run check-format
+      - name: Extract and verify translations
+        working-directory: frontend
+        run: |
+          cp src/i18n/langs/en.json src/i18n/langs/en.json.bak
+          npm run i18n:extract
+          diff -I '^--' src/i18n/langs/en.json.bak src/i18n/langs/en.json
+      - name: Compare keys ordering and line count for all language files
+        working-directory: frontend
+        run: npm run i18n:check
       - name: Check linting
         working-directory: frontend
         run: npm run check-lint
