@@ -57,6 +57,7 @@ defmodule Edgehog.Tenants.Tenant do
 
       index :read
       post :provision
+      delete :destroy
     end
   end
 
