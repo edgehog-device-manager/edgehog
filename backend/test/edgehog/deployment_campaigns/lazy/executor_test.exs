@@ -58,7 +58,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
 
       [target] = deployment_campaign.deployment_targets
       _ = Core.mark_target_as_failed!(target)
-      _ = Core.mark_deployment_campaign_as_failed!(deployment_campaign)
+      _ = Core.mark_campaign_as_failed!(deployment_campaign)
 
       %{pid: pid, ref: ref} = start_and_monitor_executor!(deployment_campaign)
 
@@ -73,7 +73,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
 
       [target] = deployment_campaign.deployment_targets
       _ = Core.mark_target_as_successful!(target)
-      _ = Core.mark_deployment_campaign_as_successful!(deployment_campaign)
+      _ = Core.mark_campaign_as_successful!(deployment_campaign)
 
       %{pid: pid, ref: ref} = start_and_monitor_executor!(deployment_campaign)
 
