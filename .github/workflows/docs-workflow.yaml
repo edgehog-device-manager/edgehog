@@ -49,23 +49,23 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout the source
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: edgehog
         show-progress: false
     - name: Checkout the docs repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: edgehog-device-manager/docs
         path: docs
         show-progress: false
     - name: Checkout the interfaces repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: edgehog-device-manager/edgehog-astarte-interfaces
         path: edgehog-astarte-interfaces
         show-progress: false
-    - uses: actions/setup-node@v3
+    - uses: actions/setup-node@v6
       with:
         node-version-file: edgehog/.tool-versions
 
@@ -103,11 +103,11 @@ jobs:
       working-directory: ./edgehog/backend
       run: mix openapi.spec.yaml --spec EdgehogWeb.AdminAPI
     - name: Checkout Swagger UI
-      uses: actions/checkout@v2
+      uses: actions/checkout@v5
       with:
         repository: swagger-api/swagger-ui
         path: ./edgehog/backend/swagger-ui
-        ref: 'v5.17.14'
+        ref: 'v5.30.2'
     - name: Copy all Swagger UI files
       working-directory: ./edgehog/backend
       run: |
@@ -132,7 +132,7 @@ jobs:
 
     # Upload as an artifact the generated HTML
     - name: Upload HTML documentation
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: docs_html
         path: ./docs
