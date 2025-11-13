@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -61,6 +61,8 @@ defmodule Edgehog.Application do
       Edgehog.Campaigns.Supervisor,
       # Start the Tenant Reconciler Supervisor
       {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
+      # Start Containers reconciler
+      {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
       # Start the Endpoint (http/https)
       Endpoint,
       # Start Absinthe Subscriptions AFTER Endpoint is up

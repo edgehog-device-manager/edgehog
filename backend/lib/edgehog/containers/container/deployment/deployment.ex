@@ -117,6 +117,13 @@ defmodule Edgehog.Containers.Container.Deployment do
       change set_attribute(:state, :error)
     end
 
+    update :set_state do
+      accept [:state]
+
+      require_atomic? false
+      change Changes.MaybeNotifyUpwards
+    end
+
     update :maybe_notify_upwards do
       require_atomic? false
       change Changes.MaybeNotifyUpwards

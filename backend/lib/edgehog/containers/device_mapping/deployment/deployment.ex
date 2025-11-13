@@ -100,6 +100,13 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
       change set_attribute(:state, :error)
     end
 
+    update :set_state do
+      accept [:state]
+
+      require_atomic? false
+      change MaybeNotifyUpwards
+    end
+
     destroy :destroy_if_dangling do
       require_atomic? false
       validate Validations.Dangling

@@ -186,4 +186,13 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "Whether the network has been created."
     field :created, :boolean
   end
+
+  @desc "Describe the available device mappings on the device."
+  object :device_mapping_status do
+    @desc "The device mapping id."
+    field :id, :string
+
+    @desc "Whether the device referenced in the mapping is present or not."
+    field :present, :boolean
+  end
 end

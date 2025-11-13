@@ -18,28 +18,28 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.AvailableVolumes do
+defmodule Edgehog.Astarte.Device.AvailableDeviceMappings do
   @moduledoc false
-  @behaviour Edgehog.Astarte.Device.AvailableVolumes.Behaviour
+  @behaviour Edgehog.Astarte.Device.AvailableDeviceMappings.Behaviour
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.AvailableVolumes.VolumeStatus
+  alias Edgehog.Astarte.Device.AvailableDeviceMappings.DeviceMappingStatus
 
-  @interface "io.edgehog.devicemanager.apps.AvailableVolumes"
+  @interface "io.edgehog.devicemanager.apps.AvailableDeviceMappings"
 
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_datastream_data(client, device_id, @interface) do
-      volumes = Enum.map(data, &parse_volume_properties/1)
+      device_mappings = Enum.map(data, &parse_device_mapping_properties/1)
 
-      {:ok, volumes}
+      {:ok, device_mappings}
     end
   end
 
-  defp parse_volume_properties({volume_id, properties}) do
-    %VolumeStatus{
-      id: volume_id,
-      created: properties["created"]
+  defp parse_device_mapping_properties({device_mapping_id, properties}) do
+    %DeviceMappingStatus{
+      id: device_mapping_id,
+      present: properties["present"]
     }
   end
 end

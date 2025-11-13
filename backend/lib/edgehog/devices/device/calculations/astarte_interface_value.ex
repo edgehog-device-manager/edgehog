@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,6 +73,12 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                        Edgehog.Astarte.Device.AvailableVolumes
                      )
 
+  @available_device_mappings Application.compile_env(
+                               :edgehog,
+                               :astarte_available_device_mappings_module,
+                               Edgehog.Astarte.Device.AvailableDeviceMappings
+                             )
+
   @base_image Application.compile_env(
                 :edgehog,
                 :astarte_base_image_module,
@@ -126,6 +132,7 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
   defp value_id_to_fetch_fun(:available_images), do: &@available_images.get/2
   defp value_id_to_fetch_fun(:available_volumes), do: &@available_volumes.get/2
   defp value_id_to_fetch_fun(:available_networks), do: &@available_networks.get/2
+  defp value_id_to_fetch_fun(:available_device_mappings), do: &@available_device_mappings.get/2
   defp value_id_to_fetch_fun(:base_image_info), do: &@base_image.get/2
   defp value_id_to_fetch_fun(:hardware_info), do: &@hardware_info.get/2
   defp value_id_to_fetch_fun(:modem_properties), do: &@cellular_connection.get_modem_properties/2

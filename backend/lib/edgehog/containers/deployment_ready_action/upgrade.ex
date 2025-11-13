@@ -48,6 +48,7 @@ defmodule Edgehog.Containers.DeploymentReadyAction.Upgrade do
 
     references do
       reference :deployment_ready_action, on_delete: :delete
+      reference :upgrade_target, on_delete: :delete
     end
   end
 end
