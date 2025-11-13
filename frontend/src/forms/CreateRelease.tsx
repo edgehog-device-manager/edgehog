@@ -692,14 +692,14 @@ const ContainerForm = ({
               {...register(`containers.${index}.image.reference` as const)}
               isInvalid={!!errors.containers?.[index]?.image?.reference}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.image?.reference?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].image.reference.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.image?.reference?.message && (
-              <FormattedMessage
-                id={errors.containers[index].image.reference.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
@@ -733,14 +733,15 @@ const ContainerForm = ({
                 );
               }}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.image?.imageCredentialsId
+                ?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].image.imageCredentialsId.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.image?.imageCredentialsId?.message && (
-              <FormattedMessage
-                id={errors.containers[index].image.imageCredentialsId.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
@@ -757,14 +758,14 @@ const ContainerForm = ({
               {...register(`containers.${index}.hostname` as const)}
               isInvalid={!!errors.containers?.[index]?.hostname}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.hostname?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].hostname.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.hostname?.message && (
-              <FormattedMessage
-                id={errors.containers[index].hostname.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
@@ -781,14 +782,14 @@ const ContainerForm = ({
               {...register(`containers.${index}.networkMode` as const)}
               isInvalid={!!errors.containers?.[index]?.networkMode}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.networkMode?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].networkMode.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.networkMode?.message && (
-              <FormattedMessage
-                id={errors.containers[index].networkMode.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
@@ -836,13 +837,13 @@ const ContainerForm = ({
                 );
               }}
             />
-          </FieldHelp>
 
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.networks && (
-              <NetworksErrors errors={errors.containers[index].networks} />
-            )}
-          </Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.networks && (
+                <NetworksErrors errors={errors.containers[index].networks} />
+              )}
+            </Form.Control.Feedback>
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -860,14 +861,14 @@ const ContainerForm = ({
               type="text"
               isInvalid={!!errors.containers?.[index]?.portBindings}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.portBindings?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].portBindings.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.portBindings?.message && (
-              <FormattedMessage
-                id={errors.containers[index].portBindings.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
@@ -885,13 +886,14 @@ const ContainerForm = ({
               type="text"
               isInvalid={!!errors.containers?.[index]?.binds}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.binds?.message && (
+                <FormattedMessage id={errors.containers[index].binds.message} />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.binds?.message && (
-              <FormattedMessage id={errors.containers[index].binds.message} />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
+
         <FormRow
           id={`containers-${index}-restartPolicy`}
           label={
@@ -924,15 +926,16 @@ const ContainerForm = ({
                 );
               }}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.restartPolicy?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].restartPolicy.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.restartPolicy?.message && (
-              <FormattedMessage
-                id={errors.containers[index].restartPolicy.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
+
         <FormRow
           id={`containers-${index}-volumes`}
           label={
@@ -1090,10 +1093,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.memory}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.memory?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.memory?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1113,10 +1116,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.memoryReservation}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.memoryReservation?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.memoryReservation?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1136,10 +1139,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.memorySwap}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.memorySwap?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.memorySwap?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1159,10 +1162,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.memorySwappiness}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.memorySwappiness?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.memorySwappiness?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1182,10 +1185,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.cpuPeriod}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.cpuPeriod?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.cpuPeriod?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1205,10 +1208,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.cpuQuota}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.cpuQuota?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.cpuQuota?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1228,10 +1231,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.cpuRealtimePeriod}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.cpuRealtimePeriod?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.cpuRealtimePeriod?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1251,10 +1254,10 @@ const ContainerForm = ({
               })}
               isInvalid={!!errors.containers?.[index]?.cpuRealtimeRuntime}
             />
+            <FormFeedback
+              feedback={errors.containers?.[index]?.cpuRealtimeRuntime?.message}
+            />
           </FieldHelp>
-          <FormFeedback
-            feedback={errors.containers?.[index]?.cpuRealtimeRuntime?.message}
-          />
         </FormRow>
 
         <FormRow
@@ -1272,15 +1275,15 @@ const ContainerForm = ({
               {...register(`containers.${index}.privileged` as const)}
               isInvalid={!!errors.containers?.[index]?.privileged}
             />
-          </FieldHelp>
 
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.privileged?.message && (
-              <FormattedMessage
-                id={errors.containers[index].privileged.message}
-              />
-            )}
-          </Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.privileged?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].privileged.message}
+                />
+              )}
+            </Form.Control.Feedback>
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -1298,14 +1301,14 @@ const ContainerForm = ({
               {...register(`containers.${index}.readOnlyRootfs` as const)}
               isInvalid={!!errors.containers?.[index]?.readOnlyRootfs}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.readOnlyRootfs?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].readOnlyRootfs.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.readOnlyRootfs?.message && (
-              <FormattedMessage
-                id={errors.containers[index].readOnlyRootfs.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
@@ -1482,14 +1485,14 @@ const ContainerForm = ({
               {...register(`containers.${index}.volumeDriver` as const)}
               isInvalid={!!errors.containers?.[index]?.volumeDriver}
             />
+            <Form.Control.Feedback type="invalid">
+              {errors.containers?.[index]?.volumeDriver?.message && (
+                <FormattedMessage
+                  id={errors.containers[index].volumeDriver.message}
+                />
+              )}
+            </Form.Control.Feedback>
           </FieldHelp>
-          <Form.Control.Feedback type="invalid">
-            {errors.containers?.[index]?.volumeDriver?.message && (
-              <FormattedMessage
-                id={errors.containers[index].volumeDriver.message}
-              />
-            )}
-          </Form.Control.Feedback>
         </FormRow>
 
         <FormRow
