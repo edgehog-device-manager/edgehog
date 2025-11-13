@@ -624,6 +624,15 @@
   "components.DeployedApplicationsTable.selectOption": {
     "defaultMessage": "Select a Release Version"
   },
+  "components.DeployedApplicationsTable.sendButtonTitle": {
+    "defaultMessage": "Redeploy Application"
+  },
+  "components.DeployedApplicationsTable.sendErrorFeedback": {
+    "defaultMessage": "Could not send the Application to the device, please try again."
+  },
+  "components.DeployedApplicationsTable.sendErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
+  },
   "components.DeployedApplicationsTable.startButtonTitle": {
     "defaultMessage": "Start Deployment"
   },

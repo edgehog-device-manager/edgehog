@@ -19,18 +19,18 @@ input ContainerCreateWithNestedVolumesInput {
 }
 
 input ContainerCreateWithNestedDeviceMappingsInput {
-  pathOnHost: String!
-  pathInContainer: String!
   cgroupPermissions: String!
+  pathInContainer: String!
+  pathOnHost: String!
 }
 
 input DeploymentCampaignDeploymentMechanismLazyInput {
   """
-  The maximum number of in progress deployments. The Update Campaign will
-  have at most this number of Deployments that are started but not yet
-  finished (either successfully or not).
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
   """
-  maxInProgressDeployments: Int
+  maxFailurePercentage: Float
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -41,17 +41,17 @@ input DeploymentCampaignDeploymentMechanismLazyInput {
   createRequestRetries: Int
 
   """
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressDeployments: Int
+
+  """
   The timeout (in seconds) Edgehog has to wait before considering a
   Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
   requestTimeoutSeconds: Int
-
-  """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Lazy Deployment Mechanism."
@@ -86,20 +86,20 @@ type Lazy {
 }
 
 input UpdateCampaignRolloutMechanismPushInput {
+  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
+  forceDowngrade: Boolean
+
   "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
   maxFailurePercentage: Float
-
-  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
-  otaRequestTimeoutSeconds: Int
-
-  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
-  otaRequestRetries: Int
 
   "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
   maxInProgressUpdates: Int
 
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean
+  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
+  otaRequestRetries: Int
+
+  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
+  otaRequestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Push Rollout Mechanism."
@@ -1058,27 +1058,27 @@ input ReleaseCreateContainersInput {
   image: ContainerCreateWithNestedImageInput
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
-  binds: [String!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
-  portBindings: [String!]
-  restartPolicy: String
-  networkMode: String
-  privileged: Boolean
-  extraHosts: [String!]
+  binds: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
+  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  volumeDriver: String
-  storageOpt: [String!]
+  networkMode: String
+  portBindings: [String!]
+  privileged: Boolean
   readOnlyRootfs: Boolean
+  restartPolicy: String
+  storageOpt: [String!]
   tmpfs: [String!]
+  volumeDriver: String
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -2370,6 +2370,15 @@ type UpgradeDeploymentResult {
 
 input UpgradeDeploymentInput {
   target: ID!
+}
+
+"The result of the :send_deployment mutation"
+type SendDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
 }
 
 "The result of the :delete_deployment mutation"
@@ -6322,6 +6331,12 @@ type RootMutationType {
 
   "Sends a :delete command to the release on the device."
   deleteDeployment(id: ID!): DeleteDeploymentResult
+
+  """
+  Sends the deployment to the device.
+  Deploys the necessary resources and sends the deployment request.
+  """
+  sendDeployment(id: ID!): SendDeploymentResult
 
   upgradeDeployment(
     id: ID!

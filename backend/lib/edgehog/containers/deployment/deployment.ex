@@ -154,6 +154,7 @@ defmodule Edgehog.Containers.Deployment do
 
       require_atomic? false
 
+      validate {Validations.IsReady, [readiness: false]}
       change Changes.SendDeploymentToDevice
     end
 
