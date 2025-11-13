@@ -66,7 +66,7 @@ import ConfirmModal from "components/ConfirmModal";
 import FormFeedback from "forms/FormFeedback";
 import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
 import { FormRow } from "components/FormRow";
-
+import FieldHelp from "components/FieldHelp";
 import type { KeyValue } from "forms/index";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
@@ -713,29 +713,31 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            control={control}
-            name={`containers.${index}.env`}
-            render={({ field, fieldState: _fieldState }) => (
-              <MonacoJsonEditor
-                value={
-                  field.value && typeof field.value !== "string"
-                    ? envToString(field.value)
-                    : (field.value ?? "")
-                }
-                onChange={(value) => {
-                  field.onChange(value ?? "");
-                  markUserInteraction();
-                }}
-                defaultValue={
-                  field.value && typeof field.value !== "string"
-                    ? envToString(field.value)
-                    : (field.value ?? "{}")
-                }
-                additionalValidation={envValidation}
-              />
-            )}
-          />
+          <FieldHelp id="env">
+            <Controller
+              control={control}
+              name={`containers.${index}.env`}
+              render={({ field }) => (
+                <MonacoJsonEditor
+                  value={
+                    field.value && typeof field.value !== "string"
+                      ? envToString(field.value)
+                      : (field.value ?? "")
+                  }
+                  onChange={(value) => {
+                    field.onChange(value ?? "");
+                    markUserInteraction();
+                  }}
+                  defaultValue={
+                    field.value && typeof field.value !== "string"
+                      ? envToString(field.value)
+                      : (field.value ?? "{}")
+                  }
+                  additionalValidation={envValidation}
+                />
+              )}
+            />
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -747,84 +749,85 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            control={control}
-            name={`containers.${index}.extraHosts`}
-            render={({ field }) => {
-              const extraHosts = field.value || [];
+          <FieldHelp id="extraHosts">
+            <Controller
+              control={control}
+              name={`containers.${index}.extraHosts`}
+              render={({ field }) => {
+                const extraHosts = field.value || [];
 
-              const handleAddExtraHost = () => {
-                field.onChange([...extraHosts, ""]);
-                markUserInteraction();
-              };
+                const handleAddExtraHost = () => {
+                  field.onChange([...extraHosts, ""]);
+                  markUserInteraction();
+                };
 
-              const handleDeleteExtraHost = (i: number) => {
-                field.onChange(extraHosts.filter((_, idx) => idx !== i));
-                markUserInteraction();
-              };
+                const handleDeleteExtraHost = (i: number) => {
+                  field.onChange(extraHosts.filter((_, idx) => idx !== i));
+                  markUserInteraction();
+                };
 
-              const handleChangeHost = (i: number, value: string) => {
-                const updated = [...extraHosts];
-                updated[i] = value;
-                field.onChange(updated);
-                markUserInteraction();
-              };
+                const handleChangeHost = (i: number, value: string) => {
+                  const updated = [...extraHosts];
+                  updated[i] = value;
+                  field.onChange(updated);
+                  markUserInteraction();
+                };
 
-              return (
-                <div className="p-3 mb-3 bg-light border rounded">
-                  <Stack gap={3}>
-                    {extraHosts.map((host, i) => {
-                      const hostError =
-                        errors.containers?.[index]?.extraHosts?.[i]?.message;
+                return (
+                  <div className="p-3 mb-3 bg-light border rounded">
+                    <Stack gap={3}>
+                      {extraHosts.map((host, i) => {
+                        const hostError =
+                          errors.containers?.[index]?.extraHosts?.[i]?.message;
 
-                      return (
-                        <Stack direction="horizontal" gap={3} key={i}>
-                          <Stack>
-                            <Form.Control
-                              value={host}
-                              onChange={(e) =>
-                                handleChangeHost(i, e.target.value)
-                              }
-                              isInvalid={!!hostError}
-                              placeholder="e.g., myhost:127.0.0.1"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                              {errors.containers?.[index]?.extraHosts?.[i]
-                                ?.message && (
-                                <FormattedMessage
-                                  id={
-                                    errors.containers[index].extraHosts[i]
-                                      .message
-                                  }
-                                />
-                              )}
-                            </Form.Control.Feedback>
+                        return (
+                          <Stack direction="horizontal" gap={3} key={i}>
+                            <Stack>
+                              <Form.Control
+                                value={host}
+                                onChange={(e) =>
+                                  handleChangeHost(i, e.target.value)
+                                }
+                                isInvalid={!!hostError}
+                              />
+                              <Form.Control.Feedback type="invalid">
+                                {errors.containers?.[index]?.extraHosts?.[i]
+                                  ?.message && (
+                                  <FormattedMessage
+                                    id={
+                                      errors.containers[index].extraHosts[i]
+                                        .message
+                                    }
+                                  />
+                                )}
+                              </Form.Control.Feedback>
+                            </Stack>
+                            <Button
+                              className="mb-auto"
+                              variant="shadow-danger"
+                              onClick={() => handleDeleteExtraHost(i)}
+                            >
+                              <Icon className="text-danger" icon={"delete"} />
+                            </Button>
                           </Stack>
-                          <Button
-                            className="mb-auto"
-                            variant="shadow-danger"
-                            onClick={() => handleDeleteExtraHost(i)}
-                          >
-                            <Icon className="text-danger" icon={"delete"} />
-                          </Button>
-                        </Stack>
-                      );
-                    })}
-                    <Button
-                      className="me-auto"
-                      variant="outline-primary"
-                      onClick={handleAddExtraHost}
-                    >
-                      <FormattedMessage
-                        id="forms.CreateRelease.addExtraHostButton"
-                        defaultMessage="Add Extra Host"
-                      />
-                    </Button>
-                  </Stack>
-                </div>
-              );
-            }}
-          />
+                        );
+                      })}
+                      <Button
+                        className="me-auto"
+                        variant="outline-primary"
+                        onClick={handleAddExtraHost}
+                      >
+                        <FormattedMessage
+                          id="forms.CreateRelease.addExtraHostButton"
+                          defaultMessage="Add Extra Host"
+                        />
+                      </Button>
+                    </Stack>
+                  </div>
+                );
+              }}
+            />
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -836,11 +839,12 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            {...register(`containers.${index}.image.reference` as const)}
-            isInvalid={!!errors.containers?.[index]?.image?.reference}
-            placeholder="e.g., my-image:latest"
-          />
+          <FieldHelp id="imageReference">
+            <Form.Control
+              {...register(`containers.${index}.image.reference` as const)}
+              isInvalid={!!errors.containers?.[index]?.image?.reference}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.image?.reference?.message && (
               <FormattedMessage
@@ -859,28 +863,29 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            control={control}
-            name={`containers.${index}.image.imageCredentialsId`}
-            render={({ field }) => {
-              const selectedOption =
-                imageCredentials.find((opt) => opt.value === field.value) ||
-                null;
+          <FieldHelp id="imageCredentials">
+            <Controller
+              control={control}
+              name={`containers.${index}.image.imageCredentialsId`}
+              render={({ field }) => {
+                const selectedOption =
+                  imageCredentials.find((opt) => opt.value === field.value) ||
+                  null;
 
-              return (
-                <Select
-                  value={selectedOption}
-                  onChange={(option) => {
-                    field.onChange(option ? option.value : null);
-                    markUserInteraction();
-                  }}
-                  options={imageCredentials}
-                  isClearable
-                />
-              );
-            }}
-          />
-
+                return (
+                  <Select
+                    value={selectedOption}
+                    onChange={(option) => {
+                      field.onChange(option ? option.value : null);
+                      markUserInteraction();
+                    }}
+                    options={imageCredentials}
+                    isClearable
+                  />
+                );
+              }}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.image?.imageCredentialsId?.message && (
               <FormattedMessage
@@ -899,11 +904,12 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            {...register(`containers.${index}.hostname` as const)}
-            isInvalid={!!errors.containers?.[index]?.hostname}
-            placeholder="Optional"
-          />
+          <FieldHelp id="hostname">
+            <Form.Control
+              {...register(`containers.${index}.hostname` as const)}
+              isInvalid={!!errors.containers?.[index]?.hostname}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.hostname?.message && (
               <FormattedMessage
@@ -922,11 +928,12 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            {...register(`containers.${index}.networkMode` as const)}
-            isInvalid={!!errors.containers?.[index]?.networkMode}
-            placeholder="e.g., bridge"
-          />
+          <FieldHelp id="networkMode">
+            <Form.Control
+              {...register(`containers.${index}.networkMode` as const)}
+              isInvalid={!!errors.containers?.[index]?.networkMode}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.networkMode?.message && (
               <FormattedMessage
@@ -945,41 +952,44 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            name={`containers.${index}.networks`}
-            control={control}
-            render={({
-              field: { value, onChange, onBlur },
-              fieldState: { invalid },
-            }) => {
-              const mappedValue: Option[] = (value || []).map(
-                (v: ContainerCreateWithNestedNetworksInput) => {
-                  const id = v.id ?? "";
-                  return (
-                    networks.find((n) => n.value === id) || {
-                      value: id,
-                      label: id,
-                    }
-                  );
-                },
-              );
+          <FieldHelp id="networks">
+            <Controller
+              name={`containers.${index}.networks`}
+              control={control}
+              render={({
+                field: { value, onChange, onBlur },
+                fieldState: { invalid },
+              }) => {
+                const mappedValue: Option[] = (value || []).map(
+                  (v: ContainerCreateWithNestedNetworksInput) => {
+                    const id = v.id ?? "";
+                    return (
+                      networks.find((n) => n.value === id) || {
+                        value: id,
+                        label: id,
+                      }
+                    );
+                  },
+                );
 
-              return (
-                <MultiSelect
-                  invalid={invalid}
-                  value={mappedValue}
-                  onChange={(selected) => {
-                    onChange(selected.map((s) => ({ id: s.value })));
-                    markUserInteraction();
-                  }}
-                  onBlur={onBlur}
-                  options={networks}
-                  getOptionValue={(option) => option.value}
-                  getOptionLabel={(option) => option.label}
-                />
-              );
-            }}
-          />
+                return (
+                  <MultiSelect
+                    invalid={invalid}
+                    value={mappedValue}
+                    onChange={(selected) => {
+                      onChange(selected.map((s) => ({ id: s.value })));
+                      markUserInteraction();
+                    }}
+                    onBlur={onBlur}
+                    options={networks}
+                    getOptionValue={(option) => option.value}
+                    getOptionLabel={(option) => option.label}
+                  />
+                );
+              }}
+            />
+          </FieldHelp>
+
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.networks && (
               <NetworksErrors errors={errors.containers[index].networks} />
@@ -996,12 +1006,13 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            {...register(`containers.${index}.portBindings` as const)}
-            type="text"
-            isInvalid={!!errors.containers?.[index]?.portBindings}
-            placeholder="e.g., 8080:80, 6060:6060/udp, 127.0.0.1:8001:8001"
-          />
+          <FieldHelp id="portBindings">
+            <Form.Control
+              {...register(`containers.${index}.portBindings` as const)}
+              type="text"
+              isInvalid={!!errors.containers?.[index]?.portBindings}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.portBindings?.message && (
               <FormattedMessage
@@ -1020,12 +1031,13 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            {...register(`containers.${index}.binds` as const)}
-            type="text"
-            isInvalid={!!errors.containers?.[index]?.binds}
-            placeholder="e.g., /data:/data, /config:/config:ro"
-          />
+          <FieldHelp id="binds">
+            <Form.Control
+              {...register(`containers.${index}.binds` as const)}
+              type="text"
+              isInvalid={!!errors.containers?.[index]?.binds}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.binds?.message && (
               <FormattedMessage id={errors.containers[index].binds.message} />
@@ -1041,28 +1053,30 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            control={control}
-            name={`containers.${index}.restartPolicy`}
-            render={({ field }) => {
-              const selectedOption =
-                restartPolicyOptions.find((opt) => opt.value === field.value) ||
-                null;
+          <FieldHelp id="restartPolicy">
+            <Controller
+              control={control}
+              name={`containers.${index}.restartPolicy`}
+              render={({ field }) => {
+                const selectedOption =
+                  restartPolicyOptions.find(
+                    (opt) => opt.value === field.value,
+                  ) || null;
 
-              return (
-                <Select
-                  value={selectedOption}
-                  onChange={(option) => {
-                    field.onChange(option ? option.value : null);
-                    markUserInteraction();
-                  }}
-                  options={restartPolicyOptions}
-                  isClearable
-                />
-              );
-            }}
-          />
-
+                return (
+                  <Select
+                    value={selectedOption}
+                    onChange={(option) => {
+                      field.onChange(option ? option.value : null);
+                      markUserInteraction();
+                    }}
+                    options={restartPolicyOptions}
+                    isClearable
+                  />
+                );
+              }}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.restartPolicy?.message && (
               <FormattedMessage
@@ -1080,132 +1094,135 @@ const ContainerForm = ({
             />
           }
         >
-          <div className="p-3 mb-3 bg-light border rounded">
-            <Stack gap={3}>
-              {volumesForm.fields.map((volume, volIndex) => {
-                const selectedIds = volumesValues
-                  .map((v, i) => (i !== volIndex ? v.id : null))
-                  .filter(Boolean) as string[];
+          <FieldHelp id="volumes">
+            <div className="p-3 mb-3 bg-light border rounded">
+              <Stack gap={3}>
+                {volumesForm.fields.map((volume, volIndex) => {
+                  const selectedIds = volumesValues
+                    .map((v, i) => (i !== volIndex ? v.id : null))
+                    .filter(Boolean) as string[];
 
-                const availableOptions = volumes?.filter(
-                  (vol) => !selectedIds.includes(vol.value),
-                );
+                  const availableOptions = volumes?.filter(
+                    (vol) => !selectedIds.includes(vol.value),
+                  );
 
-                const fieldErrors =
-                  errors.containers?.[index]?.volumes?.[volIndex];
+                  const fieldErrors =
+                    errors.containers?.[index]?.volumes?.[volIndex];
 
-                return (
-                  <Stack
-                    direction="horizontal"
-                    gap={3}
-                    key={volume.id}
-                    className="align-items-start"
-                  >
+                  return (
                     <Stack
                       direction="horizontal"
                       gap={3}
+                      key={volume.id}
                       className="align-items-start"
                     >
-                      <FormRow
-                        id={`containers-${index}-volumeId`}
-                        label={
-                          <FormattedMessage
-                            id="forms.CreateRelease.volumeSelectLabel"
-                            defaultMessage="Volume:"
-                          />
-                        }
+                      <Stack
+                        direction="horizontal"
+                        gap={3}
+                        className="align-items-start"
                       >
-                        <div style={{ width: "250px", margin: "0 auto" }}>
-                          <Controller
-                            name={`containers.${index}.volumes.${volIndex}.id`}
-                            control={control}
-                            render={({ field }) => {
-                              return (
-                                <Select
-                                  name={field.name}
-                                  value={
-                                    availableOptions.find(
-                                      (opt) => opt.value === field.value,
-                                    ) || null
-                                  }
-                                  onChange={(selected) => {
-                                    field.onChange(selected?.value);
-                                    markUserInteraction();
-                                  }}
-                                  onBlur={field.onBlur}
-                                  options={availableOptions}
-                                  noOptionsMessage={() => (
-                                    <FormattedMessage
-                                      id="forms.CreateRelease.noVolumesMessage"
-                                      defaultMessage="No volumes available"
-                                    />
-                                  )}
-                                  className="basic-single"
-                                  classNamePrefix="select"
-                                  isSearchable
-                                />
-                              );
-                            }}
-                          />
-                        </div>
+                        <FormRow
+                          id={`containers-${index}-volumeId`}
+                          label={
+                            <FormattedMessage
+                              id="forms.CreateRelease.volumeSelectLabel"
+                              defaultMessage="Volume:"
+                            />
+                          }
+                        >
+                          <div style={{ width: "250px", margin: "0 auto" }}>
+                            <Controller
+                              name={`containers.${index}.volumes.${volIndex}.id`}
+                              control={control}
+                              render={({ field }) => {
+                                return (
+                                  <Select
+                                    name={field.name}
+                                    value={
+                                      availableOptions.find(
+                                        (opt) => opt.value === field.value,
+                                      ) || null
+                                    }
+                                    onChange={(selected) => {
+                                      field.onChange(selected?.value);
+                                      markUserInteraction();
+                                    }}
+                                    onBlur={field.onBlur}
+                                    options={availableOptions}
+                                    noOptionsMessage={() => (
+                                      <FormattedMessage
+                                        id="forms.CreateRelease.noVolumesMessage"
+                                        defaultMessage="No volumes available"
+                                      />
+                                    )}
+                                    className="basic-single"
+                                    classNamePrefix="select"
+                                    isSearchable
+                                  />
+                                );
+                              }}
+                            />
+                          </div>
 
-                        <Form.Control.Feedback type="invalid">
-                          {fieldErrors?.id?.message && (
-                            <FormattedMessage id={fieldErrors.id.message} />
-                          )}
-                        </Form.Control.Feedback>
-                      </FormRow>
+                          <Form.Control.Feedback type="invalid">
+                            {fieldErrors?.id?.message && (
+                              <FormattedMessage id={fieldErrors.id.message} />
+                            )}
+                          </Form.Control.Feedback>
+                        </FormRow>
 
-                      <FormRow
-                        id={`containers-${index}-volumeTarget-${volIndex}`}
-                        label={
-                          <FormattedMessage
-                            id="forms.CreateRelease.volumeTargetLabel"
-                            defaultMessage="Target:"
+                        <FormRow
+                          id={`containers-${index}-volumeTarget-${volIndex}`}
+                          label={
+                            <FormattedMessage
+                              id="forms.CreateRelease.volumeTargetLabel"
+                              defaultMessage="Target:"
+                            />
+                          }
+                        >
+                          <Form.Control
+                            {...register(
+                              `containers.${index}.volumes.${volIndex}.target` as const,
+                            )}
+                            isInvalid={!!fieldErrors?.target}
                           />
-                        }
+                          <Form.Control.Feedback type="invalid">
+                            {fieldErrors?.target?.message && (
+                              <FormattedMessage
+                                id={fieldErrors.target.message}
+                              />
+                            )}
+                          </Form.Control.Feedback>
+                        </FormRow>
+                      </Stack>
+
+                      <Button
+                        variant="shadow-danger"
+                        type="button"
+                        onClick={() => volumesForm.remove(volIndex)}
+                        className="align-self-start"
                       >
-                        <Form.Control
-                          {...register(
-                            `containers.${index}.volumes.${volIndex}.target` as const,
-                          )}
-                          placeholder="Target"
-                          isInvalid={!!fieldErrors?.target}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          {fieldErrors?.target?.message && (
-                            <FormattedMessage id={fieldErrors.target.message} />
-                          )}
-                        </Form.Control.Feedback>
-                      </FormRow>
+                        <Icon className="text-danger" icon={"delete"} />
+                      </Button>
                     </Stack>
+                  );
+                })}
 
-                    <Button
-                      variant="shadow-danger"
-                      type="button"
-                      onClick={() => volumesForm.remove(volIndex)}
-                      className="align-self-start"
-                    >
-                      <Icon className="text-danger" icon={"delete"} />
-                    </Button>
-                  </Stack>
-                );
-              })}
-
-              <div>
-                <Button
-                  variant="outline-primary"
-                  onClick={() => volumesForm.append({ id: "", target: "" })}
-                  disabled={!canAddVolume}
-                >
-                  <FormattedMessage
-                    id="forms.CreateRelease.addVolumeButton"
-                    defaultMessage="Add Volume"
-                  />
-                </Button>
-              </div>
-            </Stack>
-          </div>
+                <div>
+                  <Button
+                    variant="outline-primary"
+                    onClick={() => volumesForm.append({ id: "", target: "" })}
+                    disabled={!canAddVolume}
+                  >
+                    <FormattedMessage
+                      id="forms.CreateRelease.addVolumeButton"
+                      defaultMessage="Add Volume"
+                    />
+                  </Button>
+                </div>
+              </Stack>
+            </div>
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -1217,14 +1234,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.memory` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.memory}
-            placeholder="e.g., 104857600 for 100MB"
-          />
+          <FieldHelp id="memory">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.memory` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.memory}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.memory?.message}
           />
@@ -1239,14 +1257,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.memoryReservation` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.memoryReservation}
-            placeholder="e.g., 104857600 for 100MB"
-          />
+          <FieldHelp id="memoryReservation">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.memoryReservation` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.memoryReservation}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.memoryReservation?.message}
           />
@@ -1261,14 +1280,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.memorySwap` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.memorySwap}
-            placeholder="e.g., 209715200 for 200MB"
-          />
+          <FieldHelp id="memorySwap">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.memorySwap` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.memorySwap}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.memorySwap?.message}
           />
@@ -1283,14 +1303,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.memorySwappiness` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.memorySwappiness}
-            placeholder="e.g., 60"
-          />
+          <FieldHelp id="memorySwappiness">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.memorySwappiness` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.memorySwappiness}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.memorySwappiness?.message}
           />
@@ -1305,14 +1326,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.cpuPeriod` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.cpuPeriod}
-            placeholder="e.g., 100000"
-          />
+          <FieldHelp id="cpuPeriod">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.cpuPeriod` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.cpuPeriod}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.cpuPeriod?.message}
           />
@@ -1327,14 +1349,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.cpuQuota` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.cpuQuota}
-            placeholder="e.g., 50000"
-          />
+          <FieldHelp id="cpuQuota">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.cpuQuota` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.cpuQuota}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.cpuQuota?.message}
           />
@@ -1349,14 +1372,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.cpuRealtimePeriod` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.cpuRealtimePeriod}
-            placeholder="e.g., 1000000"
-          />
+          <FieldHelp id="cpuRealtimePeriod">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.cpuRealtimePeriod` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.cpuRealtimePeriod}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.cpuRealtimePeriod?.message}
           />
@@ -1371,14 +1395,15 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            type="number"
-            {...register(`containers.${index}.cpuRealtimeRuntime` as const, {
-              valueAsNumber: true,
-            })}
-            isInvalid={!!errors.containers?.[index]?.cpuRealtimeRuntime}
-            placeholder="e.g., 950000"
-          />
+          <FieldHelp id="cpuRealtimeRuntime">
+            <Form.Control
+              type="number"
+              {...register(`containers.${index}.cpuRealtimeRuntime` as const, {
+                valueAsNumber: true,
+              })}
+              isInvalid={!!errors.containers?.[index]?.cpuRealtimeRuntime}
+            />
+          </FieldHelp>
           <FormFeedback
             feedback={errors.containers?.[index]?.cpuRealtimeRuntime?.message}
           />
@@ -1393,11 +1418,14 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Check
-            type="checkbox"
-            {...register(`containers.${index}.privileged` as const)}
-            isInvalid={!!errors.containers?.[index]?.privileged}
-          />
+          <FieldHelp id="privileged">
+            <Form.Check
+              type="checkbox"
+              {...register(`containers.${index}.privileged` as const)}
+              isInvalid={!!errors.containers?.[index]?.privileged}
+            />
+          </FieldHelp>
+
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.privileged?.message && (
               <FormattedMessage
@@ -1416,11 +1444,13 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Check
-            type="checkbox"
-            {...register(`containers.${index}.readOnlyRootfs` as const)}
-            isInvalid={!!errors.containers?.[index]?.readOnlyRootfs}
-          />
+          <FieldHelp id="readOnlyRootfs">
+            <Form.Check
+              type="checkbox"
+              {...register(`containers.${index}.readOnlyRootfs` as const)}
+              isInvalid={!!errors.containers?.[index]?.readOnlyRootfs}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.readOnlyRootfs?.message && (
               <FormattedMessage
@@ -1439,29 +1469,31 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            control={control}
-            name={`containers.${index}.storageOpt`}
-            render={({ field, fieldState }) => (
-              <>
-                <MonacoJsonEditor
-                  value={field.value ?? ""}
-                  onChange={(value) => {
-                    field.onChange(value ?? "");
-                    markUserInteraction();
-                  }}
-                  defaultValue={field.value || "[]"}
-                  initialLines={1}
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.error && (
-                  <Form.Control.Feedback type="invalid" className="d-block">
-                    <FormattedMessage id={fieldState.error.message} />
-                  </Form.Control.Feedback>
-                )}
-              </>
-            )}
-          />
+          <FieldHelp id="storageOpt">
+            <Controller
+              control={control}
+              name={`containers.${index}.storageOpt`}
+              render={({ field, fieldState }) => (
+                <>
+                  <MonacoJsonEditor
+                    value={field.value ?? ""}
+                    onChange={(value) => {
+                      field.onChange(value ?? "");
+                      markUserInteraction();
+                    }}
+                    defaultValue={field.value || "[]"}
+                    initialLines={1}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.error && (
+                    <Form.Control.Feedback type="invalid" className="d-block">
+                      <FormattedMessage id={fieldState.error.message} />
+                    </Form.Control.Feedback>
+                  )}
+                </>
+              )}
+            />
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -1473,29 +1505,31 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            control={control}
-            name={`containers.${index}.tmpfs`}
-            render={({ field, fieldState }) => (
-              <>
-                <MonacoJsonEditor
-                  value={field.value ?? ""}
-                  onChange={(value) => {
-                    field.onChange(value ?? "");
-                    markUserInteraction();
-                  }}
-                  defaultValue={field.value || "[]"}
-                  initialLines={1}
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.error && (
-                  <Form.Control.Feedback type="invalid" className="d-block">
-                    <FormattedMessage id={fieldState.error.message} />
-                  </Form.Control.Feedback>
-                )}
-              </>
-            )}
-          />
+          <FieldHelp id="tmpfs">
+            <Controller
+              control={control}
+              name={`containers.${index}.tmpfs`}
+              render={({ field, fieldState }) => (
+                <>
+                  <MonacoJsonEditor
+                    value={field.value ?? ""}
+                    onChange={(value) => {
+                      field.onChange(value ?? "");
+                      markUserInteraction();
+                    }}
+                    defaultValue={field.value || "[]"}
+                    initialLines={1}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.error && (
+                    <Form.Control.Feedback type="invalid" className="d-block">
+                      <FormattedMessage id={fieldState.error.message} />
+                    </Form.Control.Feedback>
+                  )}
+                </>
+              )}
+            />
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -1507,31 +1541,39 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            name={`containers.${index}.capAdd`}
-            control={control}
-            render={({
-              field: { value, onChange, onBlur },
-              fieldState: { invalid },
-            }) => {
-              const options = CapAddList.map((cap) => ({ id: cap, name: cap }));
+          <FieldHelp id="capAdd">
+            <Controller
+              name={`containers.${index}.capAdd`}
+              control={control}
+              render={({
+                field: { value, onChange, onBlur },
+                fieldState: { invalid },
+              }) => {
+                const options = CapAddList.map((cap) => ({
+                  id: cap,
+                  name: cap,
+                }));
 
-              return (
-                <MultiSelect
-                  invalid={invalid}
-                  value={(value || []).map((v: string) => ({ id: v, name: v }))}
-                  onChange={(selected) => {
-                    onChange(selected.map((s) => s.id));
-                    markUserInteraction();
-                  }}
-                  onBlur={onBlur}
-                  options={options}
-                  getOptionValue={(option) => option.id}
-                  getOptionLabel={(option) => option.name}
-                />
-              );
-            }}
-          />
+                return (
+                  <MultiSelect
+                    invalid={invalid}
+                    value={(value || []).map((v: string) => ({
+                      id: v,
+                      name: v,
+                    }))}
+                    onChange={(selected) => {
+                      onChange(selected.map((s) => s.id));
+                      markUserInteraction();
+                    }}
+                    onBlur={onBlur}
+                    options={options}
+                    getOptionValue={(option) => option.id}
+                    getOptionLabel={(option) => option.name}
+                  />
+                );
+              }}
+            />
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -1543,34 +1585,39 @@ const ContainerForm = ({
             />
           }
         >
-          <Controller
-            name={`containers.${index}.capDrop`}
-            control={control}
-            render={({
-              field: { value, onChange, onBlur },
-              fieldState: { invalid },
-            }) => {
-              const options = CapDropList.map((cap) => ({
-                id: cap,
-                name: cap,
-              }));
+          <FieldHelp id="capDrop">
+            <Controller
+              name={`containers.${index}.capDrop`}
+              control={control}
+              render={({
+                field: { value, onChange, onBlur },
+                fieldState: { invalid },
+              }) => {
+                const options = CapDropList.map((cap) => ({
+                  id: cap,
+                  name: cap,
+                }));
 
-              return (
-                <MultiSelect
-                  invalid={invalid}
-                  value={(value || []).map((v: string) => ({ id: v, name: v }))}
-                  onChange={(selected) => {
-                    onChange(selected.map((s) => s.id));
-                    markUserInteraction();
-                  }}
-                  onBlur={onBlur}
-                  options={options}
-                  getOptionValue={(option) => option.id}
-                  getOptionLabel={(option) => option.name}
-                />
-              );
-            }}
-          />
+                return (
+                  <MultiSelect
+                    invalid={invalid}
+                    value={(value || []).map((v: string) => ({
+                      id: v,
+                      name: v,
+                    }))}
+                    onChange={(selected) => {
+                      onChange(selected.map((s) => s.id));
+                      markUserInteraction();
+                    }}
+                    onBlur={onBlur}
+                    options={options}
+                    getOptionValue={(option) => option.id}
+                    getOptionLabel={(option) => option.name}
+                  />
+                );
+              }}
+            />
+          </FieldHelp>
         </FormRow>
 
         <FormRow
@@ -1582,11 +1629,12 @@ const ContainerForm = ({
             />
           }
         >
-          <Form.Control
-            {...register(`containers.${index}.volumeDriver` as const)}
-            isInvalid={!!errors.containers?.[index]?.volumeDriver}
-            placeholder="e.g., local"
-          />
+          <FieldHelp id="volumeDriver">
+            <Form.Control
+              {...register(`containers.${index}.volumeDriver` as const)}
+              isInvalid={!!errors.containers?.[index]?.volumeDriver}
+            />
+          </FieldHelp>
           <Form.Control.Feedback type="invalid">
             {errors.containers?.[index]?.volumeDriver?.message && (
               <FormattedMessage
@@ -1605,12 +1653,14 @@ const ContainerForm = ({
             />
           }
         >
-          <div className="p-3 mb-3 bg-light border rounded">
-            <DeviceMappingsFormInput
-              editableProps={dmFormInputProps}
-              readOnlyProps={null}
-            />
-          </div>
+          <FieldHelp id="deviceMappings">
+            <div className="p-3 mb-3 bg-light border rounded">
+              <DeviceMappingsFormInput
+                editableProps={dmFormInputProps}
+                readOnlyProps={null}
+              />
+            </div>
+          </FieldHelp>
         </FormRow>
 
         <div className="d-flex justify-content-start align-items-center">

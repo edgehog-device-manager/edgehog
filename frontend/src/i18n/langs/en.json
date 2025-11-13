@@ -1227,6 +1227,240 @@
   "device.otaOperationStatus.Success": {
     "defaultMessage": "Success"
   },
+  "fieldExplanation.binds.description": {
+    "defaultMessage": "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol is TCP by default"
+  },
+  "fieldExplanation.binds.example": {
+    "defaultMessage": "/data:/data, /config:/config:ro"
+  },
+  "fieldExplanation.binds.title": {
+    "defaultMessage": "Binds"
+  },
+  "fieldExplanation.capAdd.description": {
+    "defaultMessage": "Add Linux kernel capabilities to the container, e.g., 'NET_ADMIN' for network management."
+  },
+  "fieldExplanation.capAdd.example": {
+    "defaultMessage": "[\"NET_ADMIN\", \"SYS_ADMIN\"]"
+  },
+  "fieldExplanation.capAdd.title": {
+    "defaultMessage": "Add Capabilities (Cap Add)"
+  },
+  "fieldExplanation.capDrop.description": {
+    "defaultMessage": "Remove default Linux kernel capabilities to improve container security."
+  },
+  "fieldExplanation.capDrop.example": {
+    "defaultMessage": "[\"MKNOD\", \"SETPCAP\"]"
+  },
+  "fieldExplanation.capDrop.title": {
+    "defaultMessage": "Drop Capabilities (Cap Drop)"
+  },
+  "fieldExplanation.cpuPeriod.description": {
+    "defaultMessage": "Duration of a CPU scheduling period. Used with CPU Quota to limit CPU usage."
+  },
+  "fieldExplanation.cpuPeriod.example": {
+    "defaultMessage": "100000"
+  },
+  "fieldExplanation.cpuPeriod.title": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "fieldExplanation.cpuQuota.description": {
+    "defaultMessage": "CPU time allowed per period. Example: quota 50000 with period 100000 → 50% of one CPU."
+  },
+  "fieldExplanation.cpuQuota.example": {
+    "defaultMessage": "50000"
+  },
+  "fieldExplanation.cpuQuota.title": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "fieldExplanation.cpuRealtimePeriod.description": {
+    "defaultMessage": "Scheduling period for CPU time dedicated to real-time tasks. Set to 0 to allocate no time allocated to real-time tasks."
+  },
+  "fieldExplanation.cpuRealtimePeriod.example": {
+    "defaultMessage": "1000000"
+  },
+  "fieldExplanation.cpuRealtimePeriod.title": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "fieldExplanation.cpuRealtimeRuntime.description": {
+    "defaultMessage": "Max real-time CPU time within the real-time period. Cannot exceed the real-time period."
+  },
+  "fieldExplanation.cpuRealtimeRuntime.example": {
+    "defaultMessage": "950000"
+  },
+  "fieldExplanation.cpuRealtimeRuntime.title": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "fieldExplanation.deviceMappings.description": {
+    "defaultMessage": "Maps host devices to container paths with specific access permissions."
+  },
+  "fieldExplanation.deviceMappings.example": {
+    "defaultMessage": "[(\"pathOnHost\":\"/dev/sda1\",\"pathInContainer\":\"/dev/storage\",\"cGroupPermissions\":\"mrw\")]"
+  },
+  "fieldExplanation.deviceMappings.title": {
+    "defaultMessage": "Device Mappings"
+  },
+  "fieldExplanation.env.description": {
+    "defaultMessage": "JSON array of environment variables in 'KEY=VALUE' format, used to pass config to the containerized app."
+  },
+  "fieldExplanation.env.example": {
+    "defaultMessage": "[\"NODE_ENV=production\", \"PORT=8080\"]"
+  },
+  "fieldExplanation.env.title": {
+    "defaultMessage": "Environment Variables (JSON String)"
+  },
+  "fieldExplanation.exampleTitle": {
+    "defaultMessage": "Example:"
+  },
+  "fieldExplanation.extraHosts.description": {
+    "defaultMessage": "List of hostname/IP mappings added to the container's /etc/hosts for custom DNS resolution. 'host-gateway' resolves to the host IP."
+  },
+  "fieldExplanation.extraHosts.example": {
+    "defaultMessage": "[\"database:192.168.1.5\", \"gateway:host-gateway\"]"
+  },
+  "fieldExplanation.extraHosts.title": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "fieldExplanation.hostname.description": {
+    "defaultMessage": "The network hostname to assign to the container, which must comply with RFC 1123."
+  },
+  "fieldExplanation.hostname.example": {
+    "defaultMessage": "web-server-1"
+  },
+  "fieldExplanation.hostname.title": {
+    "defaultMessage": "Hostname"
+  },
+  "fieldExplanation.imageCredentials.description": {
+    "defaultMessage": "Select credentials needed to pull this image from a private registry. Leave empty for public images."
+  },
+  "fieldExplanation.imageCredentials.title": {
+    "defaultMessage": "Image Credentials"
+  },
+  "fieldExplanation.imageReference.description": {
+    "defaultMessage": "The complete reference for the container image you want to use, including registry, repository, and tag."
+  },
+  "fieldExplanation.imageReference.example": {
+    "defaultMessage": "my-image:latest or registry.example.com/my-app:v1.0"
+  },
+  "fieldExplanation.imageReference.title": {
+    "defaultMessage": "Image Reference"
+  },
+  "fieldExplanation.memory.description": {
+    "defaultMessage": "Maximum physical memory the container can use. Set 0 for unlimited memory."
+  },
+  "fieldExplanation.memory.example": {
+    "defaultMessage": "104857600 (100MB)"
+  },
+  "fieldExplanation.memory.title": {
+    "defaultMessage": "Memory Limit (bytes)"
+  },
+  "fieldExplanation.memoryReservation.description": {
+    "defaultMessage": "Allows you to specify a soft limit smaller than Memory which is activated when Docker detects contention or low memory on the host machine. If you use Memory Reservation, it must be set lower than Memory for it to take precedence. Because it is a soft limit, it doesn't guarantee that the container doesn't exceed the limit."
+  },
+  "fieldExplanation.memoryReservation.example": {
+    "defaultMessage": "104857600 (100MB)"
+  },
+  "fieldExplanation.memoryReservation.title": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "fieldExplanation.memorySwap.description": {
+    "defaultMessage": "The total amount of memory plus swap the container can use. If memorySwap is set to a positive value, both Memory and Memory Swap must be set. Memory controls the amount of physical memory, and Memory Swap represents the combined limit of memory and swap. For example, if memory='300m' and memorySwap='1g', the container can use 300MB of memory and 700MB of swap (1GB - 300MB)."
+  },
+  "fieldExplanation.memorySwap.example": {
+    "defaultMessage": "1073741824 (1GB)"
+  },
+  "fieldExplanation.memorySwap.title": {
+    "defaultMessage": "Memory + Swap Limit (bytes)"
+  },
+  "fieldExplanation.memorySwappiness.description": {
+    "defaultMessage": "Controls kernel swap behavior. 0 = avoid swapping, 100 = swap aggressively."
+  },
+  "fieldExplanation.memorySwappiness.example": {
+    "defaultMessage": "60"
+  },
+  "fieldExplanation.memorySwappiness.title": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "fieldExplanation.networkMode.description": {
+    "defaultMessage": "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is taken as a custom network's name to which this container should connect to. If you are using a different container engine than docker, there could be other values."
+  },
+  "fieldExplanation.networkMode.example": {
+    "defaultMessage": "bridge"
+  },
+  "fieldExplanation.networkMode.title": {
+    "defaultMessage": "Network Mode"
+  },
+  "fieldExplanation.networks.description": {
+    "defaultMessage": "Select custom networks the container should connect to, usually for inter-service communication."
+  },
+  "fieldExplanation.networks.title": {
+    "defaultMessage": "Attached Networks"
+  },
+  "fieldExplanation.portBindings.description": {
+    "defaultMessage": "Maps host ports to container ports for external access. Format: host_port:container_port."
+  },
+  "fieldExplanation.portBindings.example": {
+    "defaultMessage": "8080:80,443:443"
+  },
+  "fieldExplanation.portBindings.title": {
+    "defaultMessage": "Port Bindings"
+  },
+  "fieldExplanation.privileged.description": {
+    "defaultMessage": "Run container with extended privileges, giving full host resource access (like root)."
+  },
+  "fieldExplanation.privileged.title": {
+    "defaultMessage": "Privileged Mode"
+  },
+  "fieldExplanation.readOnlyRootfs.description": {
+    "defaultMessage": "Prevents modification of system files by making the container's root filesystem read-only."
+  },
+  "fieldExplanation.readOnlyRootfs.title": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "fieldExplanation.restartPolicy.description": {
+    "defaultMessage": "Defines container restart behavior. Options: 'no' (never restart), 'always', 'unless-stopped', 'on-failure'."
+  },
+  "fieldExplanation.restartPolicy.example": {
+    "defaultMessage": "unless-stopped"
+  },
+  "fieldExplanation.restartPolicy.title": {
+    "defaultMessage": "Restart Policy"
+  },
+  "fieldExplanation.storageOpt.description": {
+    "defaultMessage": "Options for the storage driver, e.g., limit writable layer size."
+  },
+  "fieldExplanation.storageOpt.example": {
+    "defaultMessage": "[\"size=100G\"]"
+  },
+  "fieldExplanation.storageOpt.title": {
+    "defaultMessage": "Storage Options"
+  },
+  "fieldExplanation.tmpfs.description": {
+    "defaultMessage": "In-memory filesystems mounted at specified paths. Data is fast but lost on container restart."
+  },
+  "fieldExplanation.tmpfs.example": {
+    "defaultMessage": "[\"/tmp:size=64m\"]"
+  },
+  "fieldExplanation.tmpfs.title": {
+    "defaultMessage": "Tmpfs Mounts"
+  },
+  "fieldExplanation.volumeDriver.description": {
+    "defaultMessage": "Driver/plugin used to manage and mount volumes."
+  },
+  "fieldExplanation.volumeDriver.example": {
+    "defaultMessage": "local"
+  },
+  "fieldExplanation.volumeDriver.title": {
+    "defaultMessage": "Volume Driver"
+  },
+  "fieldExplanation.volumes.description": {
+    "defaultMessage": "Attach an existing volume to a path inside the container. This allows the container to persist data or share it with other containers. You only need to select the volume and provide the container path where it will be mounted."
+  },
+  "fieldExplanation.volumes.example": {
+    "defaultMessage": "my-named-volume:/app/data"
+  },
+  "fieldExplanation.volumes.title": {
+    "defaultMessage": "Volume Mounts"
+  },
   "forms.CreateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
