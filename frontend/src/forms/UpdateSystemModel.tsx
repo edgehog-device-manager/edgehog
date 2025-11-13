@@ -34,7 +34,7 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
-import { systemModelHandleSchema, messages, yup } from "forms";
+import { messages, yup, handleSchema } from "forms";
 
 import type {
   UpdateSystemModel_SystemModelFragment$key,
@@ -119,7 +119,7 @@ const getDescriptionByLocale = (
 const systemModelSchema = yup
   .object({
     name: yup.string().required(),
-    handle: systemModelHandleSchema.required(),
+    handle: handleSchema.required(),
     description: yup.string(),
     hardwareType: yup.string().required(),
     partNumbers: yup

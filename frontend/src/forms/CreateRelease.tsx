@@ -54,9 +54,23 @@ import {
   tmpfsOptSchema,
   storageOptSchema,
   extraHostsSchema,
-  optionalNumberSchema,
-  messages,
   bindingsSchema,
+  imageSchema,
+  nullableTrimString,
+  memorySchema,
+  memoryReservationSchema,
+  memorySwapSchema,
+  memorySwappinessSchema,
+  capAddSchema,
+  capDropSchema,
+  networksSchema,
+  volumesSchema,
+  deviceMappingsSchema,
+  cpuPeriodSchema,
+  cpuQuotaSchema,
+  cpuRealtimePeriodSchema,
+  cpuRealtimeRuntimeSchema,
+  requiredSystemModelsSchema,
 } from "forms/index";
 import MultiSelect from "components/MultiSelect";
 import Select, { SingleValue } from "react-select";
@@ -349,7 +363,7 @@ export const CapAddList = [
 ] as const;
 
 // Yup schema for form validation
-const applicationSchema = (intl: any) =>
+const applicationSchema = () =>
   yup
     .object({
       version: yup.string().required(),
@@ -358,200 +372,34 @@ const applicationSchema = (intl: any) =>
           yup.object({
             env: envSchema,
             extraHosts: extraHostsSchema,
-            image: yup.object({
-              reference: yup.string().required(),
-              imageCredentialsId: yup.string().nullable(),
-            }),
-            hostname: yup
-              .string()
-              .nullable()
-              .transform((value) => value?.trim()),
+            image: imageSchema,
+            hostname: nullableTrimString,
             privileged: yup.boolean().nullable(),
-            restartPolicy: yup
-              .string()
-              .nullable()
-              .transform((value) => value?.trim()),
-            networkMode: yup
-              .string()
-              .nullable()
-              .transform((value) => value?.trim()),
+            restartPolicy: nullableTrimString,
+            networkMode: nullableTrimString,
             portBindings: portBindingsSchema,
             binds: bindingsSchema,
-            memory: optionalNumberSchema
-              .min(6 * 1024 * 1024)
-              .integer()
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.memoryLabel",
-                  defaultMessage: "Memory (bytes)",
-                }),
-              ),
-
-            memoryReservation: optionalNumberSchema
-              .integer()
-              .min(0)
-              .max(yup.ref("memory"))
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.memoryReservationLabel",
-                  defaultMessage: "Memory Reservation (bytes)",
-                }),
-              ),
-            memorySwap: optionalNumberSchema
-              .integer()
-              .test(
-                "memorySwap-valid",
-                intl.formatMessage({
-                  id: "forms.CreateRelease.memorySwapInvalid",
-                  defaultMessage:
-                    "Memory Swap must be greater than/equal to Memory.",
-                }),
-                function (value) {
-                  const memory = this.parent.memory;
-                  if (
-                    value === undefined ||
-                    value === null ||
-                    memory === undefined ||
-                    memory === null
-                  ) {
-                    return true;
-                  }
-                  return value >= memory;
-                },
-              )
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.memorySwapLabel",
-                  defaultMessage: "Memory Swap (bytes)",
-                }),
-              ),
-            memorySwappiness: optionalNumberSchema
-              .integer()
-              .min(0)
-              .max(100)
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.memorySwappinessLabel",
-                  defaultMessage: "Memory Swappiness (0-100)",
-                }),
-              ),
-            cpuPeriod: optionalNumberSchema
-              .integer()
-              .min(1_000)
-              .max(1_000_000)
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.cpuPeriodLabel",
-                  defaultMessage: "CPU Period (microseconds)",
-                }),
-              ),
-            cpuQuota: optionalNumberSchema
-              .integer()
-              .min(1_000)
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.cpuQuotaLabel",
-                  defaultMessage: "CPU Quota (microseconds)",
-                }),
-              )
-              .test({
-                name: "cpuQuotaPeriod",
-                message: messages.cpuQuotaPeriod.id,
-                test: function (cpuQuota) {
-                  const { cpuPeriod } = this.parent;
-                  const bothEmpty = cpuQuota == null && cpuPeriod == null;
-                  const bothSet = cpuQuota != null && cpuPeriod != null;
-                  return bothEmpty || bothSet;
-                },
-              }),
-            cpuRealtimePeriod: optionalNumberSchema
-              .integer()
-              .min(1000)
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.cpuRealtimePeriodLabel",
-                  defaultMessage: "CPU Real-Time Period (microseconds)",
-                }),
-              ),
-            cpuRealtimeRuntime: optionalNumberSchema
-              .integer()
-              .max(yup.ref("cpuRealtimePeriod"))
-              .nullable()
-              .label(
-                intl.formatMessage({
-                  id: "forms.CreateRelease.cpuRealtimeRuntimeLabel",
-                  defaultMessage: "CPU Real-Time Runtime (microseconds)",
-                }),
-              ),
-
+            memory: memorySchema,
+            memoryReservation: memoryReservationSchema,
+            memorySwap: memorySwapSchema,
+            memorySwappiness: memorySwappinessSchema,
+            cpuPeriod: cpuPeriodSchema,
+            cpuQuota: cpuQuotaSchema,
+            cpuRealtimePeriod: cpuRealtimePeriodSchema,
+            cpuRealtimeRuntime: cpuRealtimeRuntimeSchema,
             readOnlyRootfs: yup.boolean().nullable(),
             storageOpt: storageOptSchema,
             tmpfs: tmpfsOptSchema,
-            capAdd: yup
-              .array()
-              .of(yup.string().required().oneOf(CapAddList))
-              .nullable(),
-            capDrop: yup
-              .array()
-              .of(yup.string().required().oneOf(CapDropList))
-              .nullable(),
-            volumeDriver: yup
-              .string()
-              .nullable()
-              .transform((value) => value?.trim()),
-            networks: yup
-              .array(
-                yup
-                  .object({
-                    id: yup.string(),
-                  })
-                  .required(),
-              )
-              .nullable(),
-            volumes: yup
-              .array(
-                yup
-                  .object({
-                    id: yup.string(),
-                    target: yup.string().required(),
-                  })
-                  .required(),
-              )
-              .distinctOnProperty("target")
-              .nullable(),
-            deviceMappings: yup
-              .array(
-                yup
-                  .object({
-                    pathInContainer: yup
-                      .string()
-                      .transform((value) => value?.trim())
-                      .required(),
-                    pathOnHost: yup
-                      .string()
-                      .transform((value) => value?.trim())
-                      .required(),
-                    cgroupPermissions: yup
-                      .string()
-                      .transform((value) => value?.trim())
-                      .required(),
-                  })
-                  .required(),
-              )
-              .nullable(),
+            capAdd: capAddSchema,
+            capDrop: capDropSchema,
+            volumeDriver: nullableTrimString,
+            networks: networksSchema,
+            volumes: volumesSchema,
+            deviceMappings: deviceMappingsSchema,
           }),
         )
         .nullable(),
-      requiredSystemModels: yup.array(
-        yup.object({ id: yup.string().required() }),
-      ),
+      requiredSystemModels: requiredSystemModelsSchema,
     })
     .required();
 
@@ -1743,7 +1591,7 @@ const CreateRelease = ({
   } = useForm<ReleaseInputData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(applicationSchema(intl)),
+    resolver: yupResolver(applicationSchema()),
   });
 
   const { fields, append, remove } = useFieldArray({

@@ -1,13 +1,13 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2024 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,9 @@ import { defineMessages } from "react-intl";
 import semverValid from "semver/functions/valid";
 import semverValidRange from "semver/ranges/valid";
 
+import { CapAddList, CapDropList } from "forms/CreateRelease";
+
+/* ----------------------------- Field Explanations ----------------------------- */
 const fieldExplanations = defineMessages({
   imageReferenceTitle: {
     id: "fieldExplanation.imageReference.title",
@@ -72,7 +75,6 @@ const fieldExplanations = defineMessages({
     id: "fieldExplanation.restartPolicy.example",
     defaultMessage: "unless-stopped",
   },
-
   networkModeTitle: {
     id: "fieldExplanation.networkMode.title",
     defaultMessage: "Network Mode",
@@ -367,6 +369,7 @@ const fieldExplanations = defineMessages({
   },
 });
 
+/* ----------------------------- Validation Messages ----------------------------- */
 const messages = defineMessages({
   required: {
     id: "validation.required",
@@ -450,6 +453,10 @@ const messages = defineMessages({
     defaultMessage:
       'Must be a valid JSON array of strings in the format "key=value", e.g. ["size=120G"]',
   },
+  memorySwap: {
+    id: "validation.memorySwapInvalid",
+    defaultMessage: "Memory Swap must be greater than/equal to Memory.",
+  },
   cpuQuotaPeriod: {
     id: "validation.cpuQuotaPeriod.format",
     defaultMessage:
@@ -457,13 +464,46 @@ const messages = defineMessages({
   },
 });
 
+/* ----------------------------- Labels ----------------------------- */
+const labels = {
+  memory: {
+    id: "labels.memoryLabel",
+    defaultMessage: "Memory (bytes)",
+  },
+  memoryReservation: {
+    id: "labels.memoryReservationLabel",
+    defaultMessage: "Memory Reservation (bytes)",
+  },
+  memorySwap: {
+    id: "labels.memorySwapLabel",
+    defaultMessage: "Memory Swap (bytes)",
+  },
+  memorySwappiness: {
+    id: "fieldExplanation.memorySwappiness.title",
+    defaultMessage: "Memory Swappiness (0-100)",
+  },
+  cpuPeriod: {
+    id: "labels.cpuPeriodLabel",
+    defaultMessage: "CPU Period (µs)",
+  },
+  cpuQuota: {
+    id: "labels.cpuQuotaLabel",
+    defaultMessage: "CPU Quota (µs)",
+  },
+  cpuRealtimePeriod: {
+    id: "labels.cpuRealtimePeriodLabel",
+    defaultMessage: "CPU Realtime Period (µs)",
+  },
+  cpuRealtimeRuntime: {
+    id: "labels.cpuRealtimeRuntimeLabel",
+    defaultMessage: "CPU Realtime Runtime (µs)",
+  },
+};
+
+/* ----------------------------- Yup Locale ----------------------------- */
 yup.setLocale({
-  mixed: {
-    required: messages.required.id,
-  },
-  array: {
-    min: messages.arrayMin.id,
-  },
+  mixed: { required: messages.required.id },
+  array: { min: messages.arrayMin.id },
   number: {
     integer: (values) => ({ messageId: messages.numberInteger.id, values }),
     min: (values) => ({ messageId: messages.numberMin.id, values }),
@@ -472,22 +512,87 @@ yup.setLocale({
   },
 });
 
-const systemModelHandleSchema = yup
+/* ----------------------------- Reusable Schemas ----------------------------- */
+const handleSchema = yup
   .string()
   .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
 
-const hardwareTypeHandleSchema = yup
+const nullableTrimString = yup
   .string()
-  .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
+  .nullable()
+  .transform((value) => value?.trim());
 
-const deviceGroupHandleSchema = yup
-  .string()
-  .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
+const numberSchema = yup
+  .number()
+  .typeError((values) => ({ messageId: messages.number.id, values }));
 
-const baseImageCollectionHandleSchema = yup
-  .string()
-  .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
+const optionalNumberSchema = yup
+  .number()
+  .transform((value, originalValue) => {
+    if (originalValue === "" || originalValue == null || Number.isNaN(value))
+      return undefined;
+    return value;
+  })
+  .typeError((values) => ({ messageId: messages.number.id, values }));
 
+/* ----------------------------- Array Helpers ----------------------------- */
+type ArrayType = any[] | null | undefined;
+
+function distinctOnProperty<
+  TIn extends ArrayType,
+  TContext,
+  TDefault = undefined,
+  TFlags extends yup.Flags = "",
+>(this: yup.ArraySchema<TIn, TContext, TDefault, TFlags>, property: string) {
+  return this.test("distinct-on-property", (array, context) => {
+    if (!array) return true;
+
+    const errors: yup.ValidationError[] = [];
+    const duplicateProperties = array
+      .filter(
+        (e, i) => array.findIndex((e2) => e2[property] === e[property]) !== i,
+      )
+      .map((e) => e[property]);
+
+    for (let i = 0; i < array.length; ++i) {
+      const element = array[i];
+      if (
+        element[property] !== "" &&
+        duplicateProperties.includes(element[property])
+      ) {
+        errors.push(
+          new yup.ValidationError(
+            messages.unique.id,
+            element,
+            `${context.path}[${i}].${property}`,
+          ),
+        );
+      }
+    }
+
+    if (errors.length > 0)
+      return context.createError({ message: () => errors });
+
+    return true;
+  });
+}
+
+yup.addMethod(yup.array, "distinctOnProperty", distinctOnProperty);
+
+declare module "yup" {
+  interface ArraySchema<
+    TIn extends ArrayType,
+    TContext,
+    TDefault = undefined,
+    TFlags extends yup.Flags = "",
+  > {
+    distinctOnProperty(
+      property: string,
+    ): ArraySchema<TIn, TContext, TDefault, TFlags>;
+  }
+}
+
+/* ----------------------------- Component Specific Schemas ----------------------------- */
 const baseImageFileSchema = yup.mixed().test({
   name: "fileRequired",
   message: messages.baseImageFileSchema.id,
@@ -506,24 +611,6 @@ const baseImageStartingVersionRequirementSchema = yup.string().test({
   test: (value) => semverValidRange(value) !== null,
 });
 
-const channelHandleSchema = yup
-  .string()
-  .matches(/^[a-z][a-z\d-]*$/, messages.handleFormat.id);
-
-const numberSchema = yup
-  .number()
-  .typeError((values) => ({ messageId: messages.number.id, values }));
-
-const optionalNumberSchema = yup
-  .number()
-  .transform((value, originalValue) => {
-    if (originalValue === "" || originalValue == null || Number.isNaN(value)) {
-      return undefined;
-    }
-    return value;
-  })
-  .typeError((values) => ({ messageId: messages.number.id, values }));
-
 interface KeyValueMaybeNested {
   key: string;
   value: any;
@@ -540,6 +627,7 @@ const isValidJson = (value: string) => {
     return false;
   }
 };
+
 const isNotNested = (
   value: KeyValueMaybeNested[] | string,
 ): value is KeyValueMaybeNested[] => {
@@ -558,9 +646,8 @@ const envSchema = yup
   .transform((value) => (typeof value === "string" ? value?.trim() : value))
   .transform((value) => {
     if (typeof value === "string" && isValidJson(value)) {
-      const obj = JSON.parse(value);
-      return Object.entries(obj).map(
-        ([key, val]) => ({ key: key, value: val }) as KeyValueMaybeNested,
+      return Object.entries(JSON.parse(value)).map(
+        ([key, val]) => ({ key, value: val }) as KeyValueMaybeNested,
       );
     }
     return value;
@@ -626,30 +713,20 @@ const tmpfsOptSchema = yup
     message: messages.tmpfsFormat.id,
     test: (value) => {
       if (!value) return true;
-
-      let parsed;
+      let parsed: unknown;
       try {
         parsed = JSON.parse(value);
       } catch {
         return false;
       }
-
       if (
         !Array.isArray(parsed) ||
         !parsed.every((item) => typeof item === "string")
-      ) {
+      )
         return false;
-      }
-
-      const tmpfsRegex = /^\/[A-Za-z0-9/_-]+=[A-Za-z0-9,=:_-]+$/;
-
-      for (const entry of parsed) {
-        if (!tmpfsRegex.test(entry)) {
-          return false;
-        }
-      }
-
-      return true;
+      return parsed.every((entry) =>
+        /^\/[A-Za-z0-9/_-]+=[A-Za-z0-9,=:_-]+$/.test(entry),
+      );
     },
   });
 
@@ -671,19 +748,11 @@ const storageOptSchema = yup
       if (
         !Array.isArray(parsed) ||
         !parsed.every((item) => typeof item === "string")
-      ) {
+      )
         return false;
-      }
-
-      const keyValueRegex = /^[A-Za-z0-9_.-]+=[A-Za-z0-9_.:-]+$/;
-
-      for (const entry of parsed) {
-        if (!keyValueRegex.test(entry)) {
-          return false;
-        }
-      }
-
-      return true;
+      return parsed.every((entry) =>
+        /^[A-Za-z0-9_.-]+=[A-Za-z0-9_.:-]+$/.test(entry),
+      );
     },
   });
 
@@ -706,83 +775,150 @@ const extraHostsSchema = yup
       }),
   );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ArrayType = any[] | null | undefined;
+const memorySchema = optionalNumberSchema
+  .integer()
+  .min(6 * 1024 * 1024)
+  .nullable()
+  .label(labels.memory.defaultMessage);
 
-function distinctOnProperty<
-  TIn extends ArrayType,
-  TContext,
-  TDefault = undefined,
-  TFlags extends yup.Flags = "",
->(this: yup.ArraySchema<TIn, TContext, TDefault, TFlags>, property: string) {
-  return this.test("distinct-on-property", (array, context) => {
-    if (!array) {
-      return true;
-    }
+const memoryReservationSchema = optionalNumberSchema
+  .integer()
+  .min(0)
+  .max(yup.ref("memory"))
+  .nullable()
+  .label(labels.memoryReservation.defaultMessage);
 
-    const errors: yup.ValidationError[] = [];
-    const duplicateProperties = array
-      .filter(
-        (e, i) => array.findIndex((e2) => e2[property] === e[property]) !== i,
-      )
-      .map((e) => e[property]);
-    for (let i = 0; i < array.length; ++i) {
-      const element = array[i];
-      if (
-        element[property] !== "" &&
-        duplicateProperties.includes(element[property])
-      ) {
-        errors.push(
-          new yup.ValidationError(
-            messages.unique.id,
-            element,
-            `${context.path}[${i}].${property}`,
-          ),
-        );
-      }
-    }
+const memorySwapSchema = optionalNumberSchema
+  .integer()
+  .nullable()
+  .test(
+    "memorySwap-valid",
+    messages.memorySwap.defaultMessage,
+    function (value) {
+      const memory = this.parent.memory;
+      if (value == null || memory == null) return true;
+      return value >= memory;
+    },
+  )
+  .label(labels.memorySwap.defaultMessage);
 
-    if (errors.length > 0) {
-      return context.createError({ message: () => errors });
-    }
+const memorySwappinessSchema = optionalNumberSchema
+  .integer()
+  .min(0)
+  .max(100)
+  .nullable()
+  .label(labels.memorySwappiness.defaultMessage);
 
-    return true;
+const cpuPeriodSchema = optionalNumberSchema
+  .integer()
+  .min(1_000)
+  .max(1_000_000)
+  .nullable()
+  .label(labels.cpuPeriod.defaultMessage);
+
+const cpuQuotaSchema = optionalNumberSchema
+  .integer()
+  .min(1_000)
+  .nullable()
+  .label(labels.cpuQuota.defaultMessage)
+  .test({
+    name: "cpuQuotaPeriod",
+    message: messages.cpuQuotaPeriod.id,
+    test: function (cpuQuota) {
+      const { cpuPeriod } = this.parent;
+      const bothEmpty = cpuQuota == null && cpuPeriod == null;
+      const bothSet = cpuQuota != null && cpuPeriod != null;
+      return bothEmpty || bothSet;
+    },
   });
-}
 
-yup.addMethod(yup.array, "distinctOnProperty", distinctOnProperty);
+const cpuRealtimePeriodSchema = optionalNumberSchema
+  .integer()
+  .min(1000)
+  .nullable()
+  .label(labels.cpuRealtimePeriod.defaultMessage);
 
-declare module "yup" {
-  interface ArraySchema<
-    TIn extends ArrayType,
-    TContext,
-    TDefault = undefined,
-    TFlags extends yup.Flags = "",
-  > {
-    distinctOnProperty(
-      property: string,
-    ): ArraySchema<TIn, TContext, TDefault, TFlags>;
-  }
-}
+const cpuRealtimeRuntimeSchema = optionalNumberSchema
+  .integer()
+  .max(yup.ref("cpuRealtimePeriod"))
+  .nullable()
+  .label(labels.cpuRealtimeRuntime.defaultMessage);
+
+const capAddSchema = yup
+  .array()
+  .of(yup.string().required().oneOf(CapAddList))
+  .nullable();
+const capDropSchema = yup
+  .array()
+  .of(yup.string().required().oneOf(CapDropList))
+  .nullable();
+
+const networksSchema = yup
+  .array(yup.object({ id: yup.string().required() }).required())
+  .nullable();
+
+const volumesSchema = yup
+  .array(
+    yup
+      .object({
+        id: yup.string(),
+        target: yup.string().required(),
+      })
+      .required(),
+  )
+  .distinctOnProperty("target")
+  .nullable();
+
+const deviceMappingsSchema = yup
+  .array(
+    yup
+      .object({
+        pathInContainer: nullableTrimString.required(),
+        pathOnHost: nullableTrimString.required(),
+        cgroupPermissions: nullableTrimString.required(),
+      })
+      .required(),
+  )
+  .nullable();
+
+const imageSchema = yup.object({
+  reference: yup.string().required(),
+  imageCredentialsId: yup.string().nullable(),
+});
+
+const requiredSystemModelsSchema = yup.array(
+  yup.object({ id: yup.string().required() }),
+);
 
 export {
-  deviceGroupHandleSchema,
-  systemModelHandleSchema,
-  hardwareTypeHandleSchema,
-  baseImageCollectionHandleSchema,
+  yup,
+  messages,
+  fieldExplanations,
+  handleSchema,
   baseImageFileSchema,
   baseImageVersionSchema,
   baseImageStartingVersionRequirementSchema,
-  channelHandleSchema,
   numberSchema,
+  nullableTrimString,
+  imageSchema,
   envSchema,
   portBindingsSchema,
   bindingsSchema,
-  extraHostsSchema,
-  messages,
-  yup,
   tmpfsOptSchema,
   storageOptSchema,
-  optionalNumberSchema,
-  fieldExplanations,
+  extraHostsSchema,
+  memorySchema,
+  memoryReservationSchema,
+  memorySwapSchema,
+  memorySwappinessSchema,
+  cpuPeriodSchema,
+  cpuQuotaSchema,
+  cpuRealtimePeriodSchema,
+  cpuRealtimeRuntimeSchema,
+  capAddSchema,
+  capDropSchema,
+  networksSchema,
+  volumesSchema,
+  deviceMappingsSchema,
+  requiredSystemModelsSchema,
 };

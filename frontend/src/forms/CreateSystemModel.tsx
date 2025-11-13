@@ -36,7 +36,7 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
-import { systemModelHandleSchema, messages, yup } from "forms";
+import { messages, yup, handleSchema } from "forms";
 import assets from "assets";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
@@ -81,7 +81,7 @@ type FormData = {
 const systemModelSchema = yup
   .object({
     name: yup.string().required(),
-    handle: systemModelHandleSchema.required(),
+    handle: handleSchema.required(),
     description: yup.string(),
     hardwareTypeId: yup.string().required(),
     partNumbers: yup

@@ -30,7 +30,7 @@ import MultiSelect from "components/MultiSelect";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
-import { channelHandleSchema, yup, messages } from "forms";
+import { yup, messages, handleSchema } from "forms";
 
 import type { UpdateChannel_ChannelFragment$key } from "api/__generated__/UpdateChannel_ChannelFragment.graphql";
 import type {
@@ -117,7 +117,7 @@ type ChannelData = {
 const channelSchema = yup
   .object({
     name: yup.string().required(),
-    handle: channelHandleSchema.required(),
+    handle: handleSchema.required(),
     targetGroups: yup.array().ensure().min(1, messages.required.id),
   })
   .required();
