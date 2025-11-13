@@ -465,7 +465,7 @@ const messages = defineMessages({
 });
 
 /* ----------------------------- Labels ----------------------------- */
-const labels = {
+const labels = defineMessages({
   memory: {
     id: "labels.memoryLabel",
     defaultMessage: "Memory (bytes)",
@@ -498,7 +498,7 @@ const labels = {
     id: "labels.cpuRealtimeRuntimeLabel",
     defaultMessage: "CPU Realtime Runtime (µs)",
   },
-};
+});
 
 /* ----------------------------- Yup Locale ----------------------------- */
 yup.setLocale({

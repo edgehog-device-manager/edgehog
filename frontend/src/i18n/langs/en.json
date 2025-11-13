@@ -1657,9 +1657,6 @@
   "forms.CreateRelease.memoryReservationLabel": {
     "defaultMessage": "Memory Reservation (bytes)"
   },
-  "forms.CreateRelease.memorySwapInvalid": {
-    "defaultMessage": "Memory Swap must be greater than/equal to Memory."
-  },
   "forms.CreateRelease.memorySwapLabel": {
     "defaultMessage": "Memory Swap (bytes)"
   },
@@ -1993,6 +1990,27 @@
   },
   "froms.CreateUpdateCampaign.submitButton": {
     "defaultMessage": "Create"
+  },
+  "labels.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (µs)"
+  },
+  "labels.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (µs)"
+  },
+  "labels.cpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Realtime Period (µs)"
+  },
+  "labels.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Realtime Runtime (µs)"
+  },
+  "labels.memoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "labels.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "labels.memorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
   },
   "modem.RegistrationStatus.NotRegistered": {
     "defaultMessage": "Not Registered"
@@ -2787,6 +2805,9 @@
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
+  },
+  "validation.memorySwapInvalid": {
+    "defaultMessage": "Memory Swap must be greater than/equal to Memory."
   },
   "validation.number": {
     "defaultMessage": "{label} must be a number."
