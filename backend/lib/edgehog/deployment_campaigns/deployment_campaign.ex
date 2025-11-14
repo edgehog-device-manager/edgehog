@@ -218,7 +218,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentCampaign do
   end
 
   postgres do
-    table "deployment_campaign"
+    table "deployment_campaigns"
 
     references do
       reference :channel,
