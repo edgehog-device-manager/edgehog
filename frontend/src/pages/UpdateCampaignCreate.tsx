@@ -42,21 +42,32 @@ import Center from "components/Center";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
-import CreateUpdateCampaignForm from "forms/CreateUpdateCampaign";
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 import type { UpdateCampaignData } from "forms/CreateUpdateCampaign";
+import CreateUpdateCampaignForm from "forms/CreateUpdateCampaign";
 import { Link, Route, useNavigate } from "Navigation";
 
 const GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY = graphql`
-  query UpdateCampaignCreate_getOptions_Query {
-    baseImageCollections {
-      __typename
+  query UpdateCampaignCreate_getOptions_Query(
+    $first: Int
+    $after: String
+    $filterBaseImageCollections: BaseImageCollectionFilterInput = {}
+    $filterChannels: ChannelFilterInput = {}
+  ) {
+    baseImageCollections(
+      first: $first
+      after: $after
+      filter: $filterBaseImageCollections
+    ) {
       count
     }
-    channels {
-      __typename
+    channels(first: $first, after: $after, filter: $filterChannels) {
       count
     }
-    ...CreateUpdateCampaign_OptionsFragment
+    ...CreateUpdateCampaign_BaseImageCollOptionsFragment
+      @arguments(filter: $filterBaseImageCollections)
+    ...CreateUpdateCampaign_ChannelOptionsFragment
+      @arguments(filter: $filterChannels)
   }
 `;
 
@@ -234,7 +245,11 @@ const UpdateCampaignCreatePage = () => {
     );
 
   const fetchCreateUpdateCampaignOptions = useCallback(
-    () => getCreateUpdateCampaignOptions({}, { fetchPolicy: "network-only" }),
+    () =>
+      getCreateUpdateCampaignOptions(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "network-only" },
+      ),
     [getCreateUpdateCampaignOptions],
   );
 
