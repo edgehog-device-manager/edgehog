@@ -229,13 +229,13 @@ const CreateSystemModelForm = ({
     inputValue
       ? intl.formatMessage(
           {
-            id: "forms.CreateSystemModelForm.noHardwareTypesFoundMatching",
+            id: "forms.CreateSystemModel.noHardwareTypesFoundMatching",
             defaultMessage: 'No hardware types found matching "{inputValue}"',
           },
           { inputValue },
         )
       : intl.formatMessage({
-          id: "forms.CreateSystemModelForm.noHardwareTypesAvailable",
+          id: "forms.CreateSystemModel.noHardwareTypesAvailable",
           defaultMessage: "No hardware types available",
         });
 
@@ -317,7 +317,7 @@ const CreateSystemModelForm = ({
                 id="system-model-form-name"
                 label={
                   <FormattedMessage
-                    id="components.CreateSystemModelForm.nameLabel"
+                    id="forms.CreateSystemModel.nameLabel"
                     defaultMessage="Name"
                   />
                 }
@@ -333,7 +333,7 @@ const CreateSystemModelForm = ({
                 id="system-model-form-handle"
                 label={
                   <FormattedMessage
-                    id="components.CreateSystemModelForm.handleLabel"
+                    id="forms.CreateSystemModel.handleLabel"
                     defaultMessage="Handle"
                   />
                 }
@@ -353,7 +353,7 @@ const CreateSystemModelForm = ({
                 label={
                   <>
                     <FormattedMessage
-                      id="components.CreateSystemModelForm.descriptionLabel"
+                      id="forms.CreateSystemModel.descriptionLabel"
                       defaultMessage="Description"
                     />
                     <span className="small text-muted"> ({locale})</span>
@@ -366,7 +366,7 @@ const CreateSystemModelForm = ({
                 id="system-model-form-hardware-type"
                 label={
                   <FormattedMessage
-                    id="components.CreateSystemModelForm.hardwareTypeLabel"
+                    id="forms.CreateSystemModel.hardwareTypeLabel"
                     defaultMessage="Hardware Type"
                   />
                 }
@@ -410,7 +410,7 @@ const CreateSystemModelForm = ({
                 id="system-model-form-part-numbers"
                 label={
                   <FormattedMessage
-                    id="components.CreateSystemModelForm.partNumbersLabel"
+                    id="forms.CreateSystemModel.partNumbersLabel"
                     defaultMessage="Part Numbers"
                   />
                 }
@@ -446,7 +446,7 @@ const CreateSystemModelForm = ({
                     onClick={handleAddPartNumber}
                   >
                     <FormattedMessage
-                      id="components.CreateSystemModelForm.addPartNumberButton"
+                      id="forms.CreateSystemModel.addPartNumberButton"
                       defaultMessage="Add part number"
                     />
                   </Button>
@@ -463,14 +463,14 @@ const CreateSystemModelForm = ({
               onClick={() => reset()}
             >
               <FormattedMessage
-                id="components.CreateSystemModelForm.resetButton"
+                id="forms.CreateSystemModel.resetButton"
                 defaultMessage="Reset"
               />
             </Button>
             <Button variant="primary" type="submit" disabled={isLoading}>
               {isLoading && <Spinner size="sm" className="me-2" />}
               <FormattedMessage
-                id="components.CreateSystemModelForm.submitButton"
+                id="forms.CreateSystemModel.submitButton"
                 defaultMessage="Create"
               />
             </Button>
