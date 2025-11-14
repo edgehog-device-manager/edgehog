@@ -39,6 +39,7 @@ const IMAGE_CREDENTIAL_FRAGMENT = graphql`
     id
     label
     username
+    serveraddress
   }
 `;
 
@@ -49,7 +50,7 @@ interface Props {
 }
 
 const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
-  const { id, label, username } = useFragment(
+  const { id, label, username, serveraddress } = useFragment(
     IMAGE_CREDENTIAL_FRAGMENT,
     imageCredentialRef,
   );
@@ -59,8 +60,9 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
       id,
       label,
       username,
+      serveraddress,
     }),
-    [id, label, username],
+    [id, label, username, serveraddress],
   );
 
   const {
@@ -113,6 +115,27 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
           <Form.Control.Feedback type="invalid">
             {errors.username?.message && (
               <FormattedMessage id={errors.username?.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+        <FormRow
+          id="image-credential-form-serveraddress"
+          label={
+            <FormattedMessage
+              id="forms.UpdateImageCredential.ServeraddressLabel"
+              defaultMessage="Server Address"
+            />
+          }
+        >
+          <Form.Control
+            {...register("serveraddress")}
+            readOnly
+            isInvalid={!!errors.serveraddress}
+          />
+
+          <Form.Control.Feedback type="invalid">
+            {errors.serveraddress?.message && (
+              <FormattedMessage id={errors.serveraddress?.message} />
             )}
           </Form.Control.Feedback>
         </FormRow>
