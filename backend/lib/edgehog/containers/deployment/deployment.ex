@@ -265,6 +265,19 @@ defmodule Edgehog.Containers.Deployment do
     has_many :events, Edgehog.Containers.Deployment.Event do
       public? true
     end
+
+    has_one :deployment_target, Edgehog.DeploymentCampaigns.DeploymentTarget do
+      description """
+      The deployment target of a deployment campaign that created this deployment.
+      Only returns targets for deploy and upgrade operation campaigns.
+      Returns nil for other operation types (start, stop, delete).
+      """
+
+      public? true
+
+      # Filter to only include deploy and upgrade operation types
+      filter expr(deployment_campaign.operation_type in [:deploy, :upgrade])
+    end
   end
 
   calculations do
