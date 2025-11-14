@@ -18,33 +18,41 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
-import { useForm } from "react-hook-form";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import Select from "react-select";
 
-import BaseImageSelect from "components/BaseImageSelect";
+import {
+  CreateUpdateCampaign_BaseImageCollOptionsFragment$data,
+  CreateUpdateCampaign_BaseImageCollOptionsFragment$key,
+} from "api/__generated__/CreateUpdateCampaign_BaseImageCollOptionsFragment.graphql";
+import type { CreateUpdateCampaign_BaseImageCollPaginationQuery } from "api/__generated__/CreateUpdateCampaign_BaseImageCollPaginationQuery.graphql";
+import {
+  CreateUpdateCampaign_ChannelOptionsFragment$data,
+  CreateUpdateCampaign_ChannelOptionsFragment$key,
+} from "api/__generated__/CreateUpdateCampaign_ChannelOptionsFragment.graphql";
+import type { CreateUpdateCampaign_ChannelPaginationQuery } from "api/__generated__/CreateUpdateCampaign_ChannelPaginationQuery.graphql";
+
+import BaseImageSelect, { BaseImageRecord } from "components/BaseImageSelect";
 import Button from "components/Button";
 import Form from "components/Form";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 import { numberSchema, yup } from "forms";
 import FormFeedback from "forms/FormFeedback";
 
-import type { CreateUpdateCampaign_OptionsFragment$key } from "api/__generated__/CreateUpdateCampaign_OptionsFragment.graphql";
-
-const UPDATE_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
-  fragment CreateUpdateCampaign_OptionsFragment on RootQueryType {
-    baseImageCollections {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
-    channels {
+const UPDATE_CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
+  fragment CreateUpdateCampaign_BaseImageCollOptionsFragment on RootQueryType
+  @refetchable(queryName: "CreateUpdateCampaign_BaseImageCollPaginationQuery")
+  @argumentDefinitions(filter: { type: "BaseImageCollectionFilterInput" }) {
+    baseImageCollections(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateUpdateCampaign_baseImageCollections") {
       edges {
         node {
           id
@@ -54,6 +62,34 @@ const UPDATE_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
     }
   }
 `;
+
+const UPDATE_CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT = graphql`
+  fragment CreateUpdateCampaign_ChannelOptionsFragment on RootQueryType
+  @refetchable(queryName: "CreateUpdateCampaign_ChannelPaginationQuery")
+  @argumentDefinitions(filter: { type: "ChannelFilterInput" }) {
+    channels(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateUpdateCampaign_channels") {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+type BaseImageCollectionRecord = NonNullable<
+  NonNullable<
+    CreateUpdateCampaign_BaseImageCollOptionsFragment$data["baseImageCollections"]
+  >["edges"]
+>[number]["node"];
+
+type ChannelRecord = NonNullable<
+  NonNullable<
+    CreateUpdateCampaign_ChannelOptionsFragment$data["channels"]
+  >["edges"]
+>[number]["node"];
 
 type UpdateCampaignData = {
   channelId: string;
@@ -72,9 +108,9 @@ type UpdateCampaignData = {
 
 type FormData = {
   name: string;
-  channelId: string;
-  baseImageCollectionId: string;
-  baseImageId: string;
+  channel: ChannelRecord;
+  baseImageCollection: BaseImageCollectionRecord;
+  baseImage: BaseImageRecord;
   maxFailurePercentage: number | string;
   maxInProgressUpdates: number | string;
   otaRequestRetries: number;
@@ -84,9 +120,9 @@ type FormData = {
 
 const initialData: FormData = {
   name: "",
-  channelId: "",
-  baseImageCollectionId: "",
-  baseImageId: "",
+  channel: { id: "", name: "" },
+  baseImageCollection: { id: "", name: "" },
+  baseImage: { id: "", name: "", version: "" },
   maxFailurePercentage: "",
   maxInProgressUpdates: "",
   otaRequestRetries: 3,
@@ -98,9 +134,15 @@ const updateCampaignSchema = (intl: any) =>
   yup
     .object({
       name: yup.string().required(),
-      baseImageCollectionId: yup.string().required(),
-      baseImageId: yup.string().required(),
-      channelId: yup.string().required(),
+      baseImageCollection: yup
+        .object({ id: yup.string().required(), name: yup.string().required() })
+        .required(),
+      baseImage: yup
+        .object({ id: yup.string().required(), name: yup.string() })
+        .required(),
+      channel: yup
+        .object({ id: yup.string().required(), name: yup.string().required() })
+        .required(),
       maxInProgressUpdates: numberSchema
         .integer()
         .positive()
@@ -144,8 +186,8 @@ const updateCampaignSchema = (intl: any) =>
 const transformOutputData = (data: FormData): UpdateCampaignData => {
   const {
     name,
-    baseImageId,
-    channelId,
+    baseImage,
+    channel,
     maxFailurePercentage,
     maxInProgressUpdates,
     otaRequestRetries,
@@ -155,8 +197,8 @@ const transformOutputData = (data: FormData): UpdateCampaignData => {
 
   return {
     name,
-    baseImageId,
-    channelId,
+    baseImageId: baseImage.id,
+    channelId: channel.id,
     rolloutMechanism: {
       push: {
         maxFailurePercentage:
@@ -176,7 +218,8 @@ const transformOutputData = (data: FormData): UpdateCampaignData => {
 };
 
 type Props = {
-  updateCampaignOptionsRef: CreateUpdateCampaign_OptionsFragment$key;
+  updateCampaignOptionsRef: CreateUpdateCampaign_BaseImageCollOptionsFragment$key &
+    CreateUpdateCampaign_ChannelOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: UpdateCampaignData) => void;
 };
@@ -189,6 +232,7 @@ const CreateUpdateCampaignForm = ({
   const intl = useIntl();
 
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -200,19 +244,170 @@ const CreateUpdateCampaignForm = ({
     resolver: yupResolver(updateCampaignSchema(intl)),
   });
 
-  const baseImageCollectionId = watch("baseImageCollectionId");
+  const selectedBaseImageCollection = watch("baseImageCollection");
 
-  const { baseImageCollections, channels } = useFragment(
-    UPDATE_CAMPAIGN_OPTIONS_FRAGMENT,
-    updateCampaignOptionsRef,
+  const {
+    data: baseImageCollPaginationData,
+    loadNext: loadNextBaseImageColls,
+    hasNext: hasNextBaseImageColl,
+    isLoadingNext: isLoadingNextBaseImageColl,
+    refetch: refetchBaseImageColls,
+  } = usePaginationFragment<
+    CreateUpdateCampaign_BaseImageCollPaginationQuery,
+    CreateUpdateCampaign_BaseImageCollOptionsFragment$key
+  >(UPDATE_CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT, updateCampaignOptionsRef);
+
+  const [searchBaseImageCollText, setSearchBaseImageCollText] = useState<
+    string | null
+  >(null);
+
+  const debounceBaseImageCollRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetchBaseImageColls(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetchBaseImageColls(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { name: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetchBaseImageColls],
   );
+
+  useEffect(() => {
+    if (searchBaseImageCollText !== null) {
+      debounceBaseImageCollRefetch(searchBaseImageCollText);
+    }
+  }, [debounceBaseImageCollRefetch, searchBaseImageCollText]);
+
+  const loadNextBaseImageCollOptions = useCallback(() => {
+    if (hasNextBaseImageColl && !isLoadingNextBaseImageColl) {
+      loadNextBaseImageColls(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [
+    hasNextBaseImageColl,
+    isLoadingNextBaseImageColl,
+    loadNextBaseImageColls,
+  ]);
+
+  const baseImageCollections = useMemo(() => {
+    return (
+      baseImageCollPaginationData.baseImageCollections?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is BaseImageCollectionRecord => node != null) ?? []
+    );
+  }, [baseImageCollPaginationData]);
+
+  const getBaseImageCollLabel = (
+    baseImageCollection: BaseImageCollectionRecord,
+  ) => baseImageCollection.name;
+  const getBaseImageCollValue = (
+    baseImageCollection: BaseImageCollectionRecord,
+  ) => baseImageCollection.id;
+  const noBaseImageCollOptionsMessage = (inputValue: string) =>
+    inputValue
+      ? intl.formatMessage(
+          {
+            id: "forms.CreateUpdateCampaign.noBaseImageCollsFoundMatching",
+            defaultMessage:
+              'No base image collections found matching "{inputValue}"',
+          },
+          { inputValue },
+        )
+      : intl.formatMessage({
+          id: "forms.CreateUpdateCampaign.noBaseImageCollsAvailable",
+          defaultMessage: "No base image collections available",
+        });
+
+  const {
+    data: channelPaginationData,
+    loadNext: loadNextChannels,
+    hasNext: hasNextChannel,
+    isLoadingNext: isLoadingNextChannel,
+    refetch: refetchChannels,
+  } = usePaginationFragment<
+    CreateUpdateCampaign_ChannelPaginationQuery,
+    CreateUpdateCampaign_ChannelOptionsFragment$key
+  >(UPDATE_CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT, updateCampaignOptionsRef);
+
+  const [searchChannelText, setSearchChannelText] = useState<string | null>(
+    null,
+  );
+
+  const debounceChannelRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetchChannels(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetchChannels(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { name: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetchChannels],
+  );
+
+  useEffect(() => {
+    if (searchChannelText !== null) {
+      debounceChannelRefetch(searchChannelText);
+    }
+  }, [debounceChannelRefetch, searchChannelText]);
+
+  const loadNextChannelOptions = useCallback(() => {
+    if (hasNextChannel && !isLoadingNextChannel) {
+      loadNextChannels(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNextChannel, isLoadingNextChannel, loadNextChannels]);
+
+  const channels = useMemo(() => {
+    return (
+      channelPaginationData.channels?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is ChannelRecord => node != null) ?? []
+    );
+  }, [channelPaginationData]);
+
+  const getChannelLabel = (channel: ChannelRecord) => channel.name;
+  const getChannelValue = (channel: ChannelRecord) => channel.id;
+  const noChannelOptionsMessage = (inputValue: string) =>
+    inputValue
+      ? intl.formatMessage(
+          {
+            id: "forms.CreateUpdateCampaign.noChannelsFoundMatching",
+            defaultMessage: 'No channels found matching "{inputValue}"',
+          },
+          { inputValue },
+        )
+      : intl.formatMessage({
+          id: "forms.CreateUpdateCampaign.noChannelsAvailable",
+          defaultMessage: "No channels available",
+        });
 
   const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
 
-  const {
-    onChange: onBaseImageCollectionChange,
-    ...baseImageCollectionFieldProps
-  } = register("baseImageCollectionId");
+  const { onChange: onBaseImageCollectionChange } = register(
+    "baseImageCollection",
+  );
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -238,32 +433,46 @@ const CreateUpdateCampaignForm = ({
             />
           }
         >
-          <Form.Select
-            {...baseImageCollectionFieldProps}
-            onChange={(e) => {
-              onBaseImageCollectionChange(e);
-              resetField("baseImageId");
-            }}
-            isInvalid={!!errors.baseImageCollectionId}
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "forms.CreateUpdateCampaign.baseImageCollectionOption",
-                defaultMessage: "Select a Base Image Collection",
-              })}
-            </option>
-            {baseImageCollections?.edges?.map(
-              ({ node: baseImageCollection }) => (
-                <option
-                  key={baseImageCollection.id}
-                  value={baseImageCollection.id}
-                >
-                  {baseImageCollection.name}
-                </option>
-              ),
+          <Controller
+            name="baseImageCollection"
+            control={control}
+            render={({
+              field: { value, onChange },
+              fieldState: { invalid },
+            }) => (
+              <Select
+                value={value}
+                onChange={(e) => {
+                  onChange(e);
+                  onBaseImageCollectionChange({ target: e });
+                  resetField("baseImage");
+                }}
+                className={invalid ? "is-invalid" : ""}
+                placeholder={intl.formatMessage({
+                  id: "forms.CreateUpdateCampaign.baseImageCollectionOption",
+                  defaultMessage: "Search or select a base image collection...",
+                })}
+                options={baseImageCollections}
+                getOptionLabel={getBaseImageCollLabel}
+                getOptionValue={getBaseImageCollValue}
+                noOptionsMessage={({ inputValue }) =>
+                  noBaseImageCollOptionsMessage(inputValue)
+                }
+                isLoading={isLoadingNextBaseImageColl}
+                onMenuScrollToBottom={
+                  hasNextBaseImageColl
+                    ? loadNextBaseImageCollOptions
+                    : undefined
+                }
+                onInputChange={(text) => setSearchBaseImageCollText(text)}
+              />
             )}
-          </Form.Select>
-          <FormFeedback feedback={errors.baseImageCollectionId?.message} />
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.baseImageCollection && (
+              <FormattedMessage id={errors.baseImageCollection?.id?.message} />
+            )}
+          </Form.Control.Feedback>
         </FormRow>
         <FormRow
           id="create-update-campaign-form-base-image"
@@ -273,13 +482,41 @@ const CreateUpdateCampaignForm = ({
               defaultMessage="Base Image"
             />
           }
+          valueColClassName="align-content-center"
         >
-          <BaseImageSelect
-            baseImageCollectionId={baseImageCollectionId}
-            {...register("baseImageId")}
-            isInvalid={!!errors.baseImageId}
-          />
-          <FormFeedback feedback={errors.baseImageId?.message} />
+          {selectedBaseImageCollection?.id ? (
+            <>
+              <Controller
+                name="baseImage"
+                control={control}
+                render={({
+                  field: { value, onChange },
+                  fieldState: { invalid },
+                }) => (
+                  <BaseImageSelect
+                    selectedBaseImageCollection={selectedBaseImageCollection}
+                    controllerProps={{
+                      value: value,
+                      invalid: invalid,
+                      onChange: onChange,
+                    }}
+                  />
+                )}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.baseImage && (
+                  <FormattedMessage id={errors.baseImage?.id?.message} />
+                )}
+              </Form.Control.Feedback>
+            </>
+          ) : (
+            <div className="d-flex align-content-center fst-italic text-muted">
+              <FormattedMessage
+                id="forms.CreateUpdateCampaign.selectBaseImageCollection"
+                defaultMessage="Select a base image collection..."
+              />
+            </div>
+          )}
         </FormRow>
         <FormRow
           id="create-update-campaign-form-channel"
@@ -290,23 +527,40 @@ const CreateUpdateCampaignForm = ({
             />
           }
         >
-          <Form.Select
-            {...register("channelId")}
-            isInvalid={!!errors.channelId}
-          >
-            <option value="" disabled>
-              {intl.formatMessage({
-                id: "forms.CreateUpdateCampaign.channelOption",
-                defaultMessage: "Select a Channel",
-              })}
-            </option>
-            {channels?.edges?.map(({ node: channel }) => (
-              <option key={channel.id} value={channel.id}>
-                {channel.name}
-              </option>
-            ))}
-          </Form.Select>
-          <FormFeedback feedback={errors.channelId?.message} />
+          <Controller
+            name="channel"
+            control={control}
+            render={({
+              field: { value, onChange },
+              fieldState: { invalid },
+            }) => (
+              <Select
+                value={value}
+                onChange={onChange}
+                className={invalid ? "is-invalid" : ""}
+                placeholder={intl.formatMessage({
+                  id: "forms.CreateUpdateCampaign.channelOption",
+                  defaultMessage: "Search or select a channel...",
+                })}
+                options={channels}
+                getOptionLabel={getChannelLabel}
+                getOptionValue={getChannelValue}
+                noOptionsMessage={({ inputValue }) =>
+                  noChannelOptionsMessage(inputValue)
+                }
+                isLoading={isLoadingNextChannel}
+                onMenuScrollToBottom={
+                  hasNextChannel ? loadNextChannelOptions : undefined
+                }
+                onInputChange={(text) => setSearchChannelText(text)}
+              />
+            )}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.channel && (
+              <FormattedMessage id={errors.channel?.id?.message} />
+            )}
+          </Form.Control.Feedback>
         </FormRow>
         <FormRow
           id="create-update-campaign-form-max-in-progress-updates"
@@ -422,6 +676,6 @@ const CreateUpdateCampaignForm = ({
   );
 };
 
-export type { UpdateCampaignData };
+export type { UpdateCampaignData, BaseImageCollectionRecord };
 
 export default CreateUpdateCampaignForm;

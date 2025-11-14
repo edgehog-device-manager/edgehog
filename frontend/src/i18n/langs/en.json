@@ -174,8 +174,14 @@
   "components.BaseImageSelect.ErrorFallback.reloadButton": {
     "defaultMessage": "Reload"
   },
-  "components.BaseImageSelect.selectBaseImageOptionPlaceholder": {
-    "defaultMessage": "Select a Base Image"
+  "components.BaseImageSelect.baseImageOption": {
+    "defaultMessage": "Search or select a base image..."
+  },
+  "components.BaseImageSelect.noBaseImagesAvailable": {
+    "defaultMessage": "No base images available"
+  },
+  "components.BaseImageSelect.noBaseImagesFoundMatching": {
+    "defaultMessage": "No base images found matching \"{inputValue}\""
   },
   "components.BaseImagesTable.releaseDisplayNameTitle": {
     "defaultMessage": "Release Name",
@@ -1788,7 +1794,7 @@
     "defaultMessage": "Base Image Collection"
   },
   "forms.CreateUpdateCampaign.baseImageCollectionOption": {
-    "defaultMessage": "Select a Base Image Collection"
+    "defaultMessage": "Search or select a base image collection..."
   },
   "forms.CreateUpdateCampaign.baseImageLabel": {
     "defaultMessage": "Base Image"
@@ -1797,7 +1803,7 @@
     "defaultMessage": "Channel"
   },
   "forms.CreateUpdateCampaign.channelOption": {
-    "defaultMessage": "Select a Channel"
+    "defaultMessage": "Search or select a channel..."
   },
   "forms.CreateUpdateCampaign.forceDowngradeLabel": {
     "defaultMessage": "Force Downgrade"
@@ -1814,6 +1820,18 @@
   "forms.CreateUpdateCampaign.nameLabel": {
     "defaultMessage": "Name"
   },
+  "forms.CreateUpdateCampaign.noBaseImageCollsAvailable": {
+    "defaultMessage": "No base image collections available"
+  },
+  "forms.CreateUpdateCampaign.noBaseImageCollsFoundMatching": {
+    "defaultMessage": "No base image collections found matching \"{inputValue}\""
+  },
+  "forms.CreateUpdateCampaign.noChannelsAvailable": {
+    "defaultMessage": "No channels available"
+  },
+  "forms.CreateUpdateCampaign.noChannelsFoundMatching": {
+    "defaultMessage": "No channels found matching \"{inputValue}\""
+  },
   "forms.CreateUpdateCampaign.otaRequestRetriesLabel": {
     "defaultMessage": "Request Retries"
   },
@@ -1822,6 +1840,9 @@
   },
   "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
+  },
+  "forms.CreateUpdateCampaign.selectBaseImageCollection": {
+    "defaultMessage": "Select a base image collection..."
   },
   "forms.DeploymentCampaignForm.applicationLabel": {
     "defaultMessage": "Application"
