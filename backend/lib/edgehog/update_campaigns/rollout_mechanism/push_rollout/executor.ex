@@ -381,40 +381,6 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     terminate_executor(data.update_campaign_id)
   end
 
-  # Common event handling
-
-  # Note that external (e.g. :info) and timeout events are always handled after the internal
-  # events enqueued with the :next_event action. This means that we can be sure an :info event
-  # or a timeout won't be handled, e.g., between a rollout and the handling of its error
-
-  def handle_event(:info, %{payload: {:ota_operation_updated, ota_operation}}, _state, data) do
-    # Event generated from PubSub when an OTAOperation is updated
-    additional_actions =
-      cond do
-        Core.ota_operation_successful?(ota_operation) ->
-          [internal_event({:ota_operation_success, ota_operation})]
-
-        Core.ota_operation_failed?(ota_operation) ->
-          [internal_event({:ota_operation_failure, ota_operation})]
-
-        Core.ota_operation_acknowledged?(ota_operation) ->
-          # Handle this explicitly so we log a message
-          Logger.info("Device #{ota_operation.device_id} acknowledged the update")
-          []
-
-        true ->
-          # All other updates are no-ops for now
-          []
-      end
-
-    # We always cancel the retry timeout for every kind of update we see on an OTA Operation.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [cancel_retry_timeout(data.tenant_id, ota_operation.id) | additional_actions]
-
-    {:keep_state_and_data, actions}
-  end
-
   def handle_event(:internal, {:ota_operation_success, ota_operation}, _state, data) do
     Logger.info("Device #{ota_operation.device_id} updated successfully")
 
@@ -522,6 +488,47 @@ defmodule Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout.Executor do
     _ = Core.mark_ota_operation_as_timed_out!(data.tenant_id, target.ota_operation_id)
 
     :keep_state_and_data
+  end
+
+  # Common event handling
+
+  # Note that external (e.g. :info) and timeout events are always handled after the internal
+  # events enqueued with the :next_event action. This means that we can be sure an :info event
+  # or a timeout won't be handled, e.g., between a rollout and the handling of its error
+  def handle_event(:info, %Phoenix.Socket.Broadcast{} = notification, _state, data) do
+    case notification.payload.action.type do
+      :update -> handle_update(notification, data)
+      _ -> :keep_state_and_data
+    end
+  end
+
+  defp handle_update(notification, data) do
+    ota_operation = notification.payload.data
+
+    additional_actions =
+      cond do
+        Core.ota_operation_successful?(ota_operation) ->
+          [internal_event({:ota_operation_success, ota_operation})]
+
+        Core.ota_operation_failed?(ota_operation) ->
+          [internal_event({:ota_operation_failure, ota_operation})]
+
+        Core.ota_operation_acknowledged?(ota_operation) ->
+          # Handle this explicitly so we log a message
+          Logger.info("Device #{ota_operation.device_id} acknowledged the update")
+          []
+
+        true ->
+          # All other updates are no-ops for now
+          []
+      end
+
+    # We always cancel the retry timeout for every kind of update we see on an OTA Operation.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
+    actions = [cancel_retry_timeout(data.tenant_id, ota_operation.id) | additional_actions]
+
+    {:keep_state_and_data, actions}
   end
 
   # Internal helpers

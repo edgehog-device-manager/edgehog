@@ -223,30 +223,9 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
     publish :create_managed, [[:id, "*"]]
     publish :manual, [[:id, "*"]]
+
     publish :mark_as_timed_out, [[:id, "*"]]
     publish :update_status, [[:id, "*"]]
-
-    transform fn notification ->
-      ota_operation = notification.data
-      action = notification.action.name
-
-      event_type =
-        cond do
-          action in [:create_managed, :manual] ->
-            :ota_operation_created
-
-          action in [
-            :mark_as_timed_out,
-            :update_status
-          ] ->
-            :ota_operation_updated
-
-          true ->
-            :unknown_event
-        end
-
-      {event_type, ota_operation}
-    end
   end
 
   postgres do

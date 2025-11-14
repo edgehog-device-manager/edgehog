@@ -659,7 +659,12 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       # Generate a publish on the PubSub
       OSManagement.update_ota_operation_status!(ota_operation, "Acknowledged")
 
-      assert_receive %{payload: {:ota_operation_updated, %OTAOperation{status: :acknowledged}}}
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "update_status",
+        payload: %Ash.Notifier.Notification{
+          data: %OTAOperation{status: :acknowledged}
+        }
+      }
     end
   end
 

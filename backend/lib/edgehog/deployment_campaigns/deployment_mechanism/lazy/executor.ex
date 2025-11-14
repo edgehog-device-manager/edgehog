@@ -443,84 +443,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     terminate_executor(data.deployment_campaign_id)
   end
 
-  # Common event handling
-
-  # Note that external (e.g. :info) and timeout events are always handled after the internal
-  # events enqueued with the :next_event action. This means that we can be sure an :info event
-  # or a timeout won't be handled, e.g., between a rollout and the handling of its error
-
-  def handle_event(:info, %{payload: {:deployment_ready, deployment}}, _state, data) do
-    case {data.operation_type, deployment.state} do
-      {:upgrade, :stopped} ->
-        # This part of code handles retries for upgrade operations.
-        # In Core.retry_target_operation/2, the :send_deployment action is triggered,
-        # but upgrades require both deployment and start actions.
-        # Therefore, we explicitly trigger the :start operation here if a retry occurred.
-        target =
-          Core.get_target_for_deployment_by_device!(
-            data.tenant_id,
-            data.deployment_campaign_id,
-            deployment.device_id
-          )
-
-        if target.retry_count > 0 do
-          Core.retry_target_operation(target, :start)
-        end
-
-        # When an upgrade is triggered, the new release deployment must be both deployed and started.
-        # We avoid triggering the :deployment_success event while the deployment is only in the
-        # :stopped (deployed) state — it should trigger only once the deployment transitions to :started.
-        :keep_state_and_data
-
-      _ ->
-        # We always cancel the retry timeout for every kind of update we see on an Deployment.
-        # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-        # If the timeout does not exist, this is a no-op anyway.
-        actions = [
-          cancel_retry_timeout(data.tenant_id, deployment.id),
-          internal_event({:deployment_success, deployment})
-        ]
-
-        Core.unsubscribe_to_deployment_updates!(deployment.id)
-
-        {:keep_state_and_data, actions}
-    end
-  end
-
-  # Ignore deployment_updated events, when everything will be ready the resource
-  # will emit a `:deployment_ready` event
-  def handle_event(:info, %{payload: {:deployment_updated, _deployment}}, _state, _data) do
-    :keep_state_and_data
-  end
-
-  def handle_event(:info, %{payload: {:deployment_deleted, deployment}}, _state, data) do
-    # We always cancel the retry timeout for every kind of update we see on an Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [
-      cancel_retry_timeout(data.tenant_id, deployment.id),
-      internal_event({:deployment_success, deployment})
-    ]
-
-    Core.unsubscribe_to_deployment_updates!(deployment.id)
-
-    {:keep_state_and_data, actions}
-  end
-
-  def handle_event(:info, %{payload: {:deployment_timeout, deployment}}, _state, data) do
-    # We always cancel the retry timeout for every kind of update we see on an Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [
-      cancel_retry_timeout(data.tenant_id, deployment.id),
-      internal_event({:deployment_failure, deployment})
-    ]
-
-    Core.unsubscribe_to_deployment_updates!(deployment.id)
-
-    {:keep_state_and_data, actions}
-  end
-
   def handle_event(:internal, {:deployment_success, deployment}, _state, data) do
     log_operation_success(data.operation_type, deployment.device_id)
 
@@ -643,6 +565,115 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Executor do
     _ = Core.mark_deployment_as_timed_out!(data.tenant_id, target.deployment_id)
 
     :keep_state_and_data
+  end
+
+  # Common event handling
+
+  # Note that external (e.g. :info) and timeout events are always handled after the internal
+  # events enqueued with the :next_event action. This means that we can be sure an :info event
+  # or a timeout won't be handled, e.g., between a rollout and the handling of its error
+
+  def handle_event(:info, %Phoenix.Socket.Broadcast{} = notification, _state, data) do
+    case notification.payload.action.type do
+      :update -> handle_update(notification, data)
+      :destroy -> handle_destroy(notification, data)
+      _ -> :keep_state_and_data
+    end
+  end
+
+  defp handle_update(notification, data) do
+    case notification.payload.action.name do
+      :maybe_run_ready_actions -> handle_maybe_run_ready_actions(notification, data)
+      :mark_as_timed_out -> handle_mark_as_timed_out(notification, data)
+      _ -> :keep_state_and_data
+    end
+  end
+
+  defp handle_maybe_run_ready_actions(notification, data) do
+    case Map.get(notification.payload.metadata || %{}, :custom_event) do
+      :deployment_ready ->
+        handle_ready(notification.payload.data, data)
+
+      _ ->
+        :keep_state_and_data
+    end
+  end
+
+  defp handle_ready(deployment, data) do
+    case {data.operation_type, deployment.state} do
+      {:upgrade, :stopped} ->
+        # This part of code handles retries for upgrade operations.
+        # In Core.retry_target_operation/2, the :send_deployment action is triggered,
+        # but upgrades require both deployment and start actions.
+        # Therefore, we explicitly trigger the :start operation here if a retry occurred.
+        target =
+          Core.get_target_for_deployment_by_device!(
+            data.tenant_id,
+            data.deployment_campaign_id,
+            deployment.device_id
+          )
+
+        if target.retry_count > 0 do
+          Core.retry_target_operation(target, :start)
+        end
+
+        # When an upgrade is triggered, the new release deployment must be both deployed and started.
+        # We avoid triggering the :deployment_success event while the deployment is only in the
+        # :stopped (deployed) state — it should trigger only once the deployment transitions to :started.
+        :keep_state_and_data
+
+      _ ->
+        # We always cancel the retry timeout for every kind of update we see on an Deployment.
+        # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+        # If the timeout does not exist, this is a no-op anyway.
+        actions = [
+          cancel_retry_timeout(data.tenant_id, deployment.id),
+          internal_event({:deployment_success, deployment})
+        ]
+
+        Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+        {:keep_state_and_data, actions}
+    end
+  end
+
+  defp handle_mark_as_timed_out(notification, data) do
+    # We always cancel the retry timeout for every kind of update we see on an Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
+    deployment = notification.payload.data
+
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({:deployment_failure, deployment})
+    ]
+
+    Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+    {:keep_state_and_data, actions}
+  end
+
+  defp handle_destroy(notification, data) do
+    case notification.payload.action.name do
+      :destroy_and_gc -> handle_destroy_and_gc(notification, data)
+      _ -> :keep_state_and_data
+    end
+  end
+
+  defp handle_destroy_and_gc(notification, data) do
+    # We always cancel the retry timeout for every kind of update we see on an Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
+    deployment = notification.payload.data
+
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({:deployment_success, deployment})
+    ]
+
+    Core.unsubscribe_to_deployment_updates!(deployment.id)
+
+    {:keep_state_and_data, actions}
   end
 
   # Action helpers
