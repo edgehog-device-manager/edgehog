@@ -541,9 +541,6 @@
   "components.CreateSystemModelForm.hardwareTypeLabel": {
     "defaultMessage": "Hardware Type"
   },
-  "components.CreateSystemModelForm.hardwareTypeOption": {
-    "defaultMessage": "Select a Hardware Type"
-  },
   "components.CreateSystemModelForm.nameLabel": {
     "defaultMessage": "Name"
   },
@@ -1770,6 +1767,15 @@
   },
   "forms.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
+  },
+  "forms.CreateSystemModel.hardwareTypeOption": {
+    "defaultMessage": "Search or select a hardware type..."
+  },
+  "forms.CreateSystemModelForm.noHardwareTypesAvailable": {
+    "defaultMessage": "No hardware types available"
+  },
+  "forms.CreateSystemModelForm.noHardwareTypesFoundMatching": {
+    "defaultMessage": "No hardware types found matching \"{inputValue}\""
   },
   "forms.CreateUpdateCampaign.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"

@@ -18,13 +18,19 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useCallback } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
+import Select from "react-select";
 
-import type { CreateSystemModel_OptionsFragment$key } from "api/__generated__/CreateSystemModel_OptionsFragment.graphql";
+import type {
+  CreateSystemModel_OptionsFragment$data,
+  CreateSystemModel_OptionsFragment$key,
+} from "api/__generated__/CreateSystemModel_OptionsFragment.graphql";
+import type { CreateSystemModel_PaginationQuery } from "api/__generated__/CreateSystemModel_PaginationQuery.graphql";
 
 import Button from "components/Button";
 import CloseButton from "components/CloseButton";
@@ -36,12 +42,16 @@ import Row from "components/Row";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 import { messages, yup, handleSchema } from "forms";
 import assets from "assets";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
-  fragment CreateSystemModel_OptionsFragment on RootQueryType {
-    hardwareTypes {
+  fragment CreateSystemModel_OptionsFragment on RootQueryType
+  @refetchable(queryName: "CreateSystemModel_PaginationQuery")
+  @argumentDefinitions(filter: { type: "HardwareTypeFilterInput" }) {
+    hardwareTypes(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateSystemModel_hardwareTypes") {
       edges {
         node {
           id
@@ -54,6 +64,10 @@ const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
     }
   }
 `;
+
+type HardwareTypeRecord = NonNullable<
+  NonNullable<CreateSystemModel_OptionsFragment$data["hardwareTypes"]>["edges"]
+>[number]["node"];
 
 type SystemModelChanges = {
   name: string;
@@ -73,7 +87,7 @@ type FormData = {
   name: string;
   handle: string;
   description: string;
-  hardwareTypeId: string;
+  hardwareType: HardwareTypeRecord;
   partNumbers: PartNumber[];
   pictureFile?: FileList | null;
 };
@@ -83,7 +97,9 @@ const systemModelSchema = yup
     name: yup.string().required(),
     handle: handleSchema.required(),
     description: yup.string(),
-    hardwareTypeId: yup.string().required(),
+    hardwareType: yup
+      .object({ id: yup.string().required(), name: yup.string().required() })
+      .required(),
     partNumbers: yup
       .array()
       .required()
@@ -110,7 +126,7 @@ const transformOutputData = (
   const systemModel: SystemModelChanges = {
     name: data.name,
     handle: data.handle,
-    hardwareTypeId: data.hardwareTypeId,
+    hardwareTypeId: data.hardwareType.id,
     partNumbers: data.partNumbers.map((pn) => pn.value),
   };
 
@@ -134,7 +150,7 @@ const initialData: FormData = {
   name: "",
   handle: "",
   description: "",
-  hardwareTypeId: "",
+  hardwareType: { id: "", name: "" },
   partNumbers: [{ value: "" }],
 };
 
@@ -150,10 +166,80 @@ const CreateSystemModelForm = ({
   onSubmit,
 }: Props) => {
   const intl = useIntl();
+
   const {
-    hardwareTypes,
-    tenantInfo: { defaultLocale: locale },
-  } = useFragment(CREATE_SYSTEM_MODEL_FRAGMENT, optionsRef);
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
+    CreateSystemModel_PaginationQuery,
+    CreateSystemModel_OptionsFragment$key
+  >(CREATE_SYSTEM_MODEL_FRAGMENT, optionsRef);
+
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { name: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextSystemModelOptions = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const hardwareTypes = useMemo(() => {
+    return (
+      paginationData.hardwareTypes?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is HardwareTypeRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
+  const getHardwareTypeLabel = (ht: HardwareTypeRecord) => ht.name;
+  const getHardwareTypeValue = (ht: HardwareTypeRecord) => ht.id;
+  const noHardwareTypeOptionsMessage = (inputValue: string) =>
+    inputValue
+      ? intl.formatMessage(
+          {
+            id: "forms.CreateSystemModelForm.noHardwareTypesFoundMatching",
+            defaultMessage: 'No hardware types found matching "{inputValue}"',
+          },
+          { inputValue },
+        )
+      : intl.formatMessage({
+          id: "forms.CreateSystemModelForm.noHardwareTypesAvailable",
+          defaultMessage: "No hardware types available",
+        });
+
+  const { defaultLocale: locale } = paginationData.tenantInfo;
 
   const {
     control,
@@ -285,25 +371,38 @@ const CreateSystemModelForm = ({
                   />
                 }
               >
-                <Form.Select
-                  {...register("hardwareTypeId")}
-                  isInvalid={!!errors.hardwareTypeId}
-                >
-                  <option value="" disabled>
-                    {intl.formatMessage({
-                      id: "components.CreateSystemModelForm.hardwareTypeOption",
-                      defaultMessage: "Select a Hardware Type",
-                    })}
-                  </option>
-                  {hardwareTypes?.edges?.map(({ node: hardwareType }) => (
-                    <option key={hardwareType.id} value={hardwareType.id}>
-                      {hardwareType.name}
-                    </option>
-                  ))}
-                </Form.Select>
+                <Controller
+                  name="hardwareType"
+                  control={control}
+                  render={({
+                    field: { value, onChange },
+                    fieldState: { invalid },
+                  }) => (
+                    <Select
+                      value={value}
+                      onChange={onChange}
+                      className={invalid ? "is-invalid" : ""}
+                      placeholder={intl.formatMessage({
+                        id: "forms.CreateSystemModel.hardwareTypeOption",
+                        defaultMessage: "Search or select a hardware type...",
+                      })}
+                      options={hardwareTypes}
+                      getOptionLabel={getHardwareTypeLabel}
+                      getOptionValue={getHardwareTypeValue}
+                      noOptionsMessage={({ inputValue }) =>
+                        noHardwareTypeOptionsMessage(inputValue)
+                      }
+                      isLoading={isLoadingNext}
+                      onMenuScrollToBottom={
+                        hasNext ? loadNextSystemModelOptions : undefined
+                      }
+                      onInputChange={(text) => setSearchText(text)}
+                    />
+                  )}
+                />
                 <Form.Control.Feedback type="invalid">
-                  {errors.hardwareTypeId?.message && (
-                    <FormattedMessage id={errors.hardwareTypeId?.message} />
+                  {errors.hardwareType && (
+                    <FormattedMessage id={errors.hardwareType?.id?.message} />
                   )}
                 </Form.Control.Feedback>
               </FormRow>
