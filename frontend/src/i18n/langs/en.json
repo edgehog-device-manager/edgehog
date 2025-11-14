@@ -529,30 +529,6 @@
   "components.CreateNetworkForm.submitButton": {
     "defaultMessage": "Create"
   },
-  "components.CreateSystemModelForm.addPartNumberButton": {
-    "defaultMessage": "Add part number"
-  },
-  "components.CreateSystemModelForm.descriptionLabel": {
-    "defaultMessage": "Description"
-  },
-  "components.CreateSystemModelForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.CreateSystemModelForm.hardwareTypeLabel": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.CreateSystemModelForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateSystemModelForm.partNumbersLabel": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.CreateSystemModelForm.resetButton": {
-    "defaultMessage": "Reset"
-  },
-  "components.CreateSystemModelForm.submitButton": {
-    "defaultMessage": "Create"
-  },
   "components.CreateVolumeForm.driverLabel": {
     "defaultMessage": "Driver"
   },
@@ -1768,14 +1744,38 @@
   "forms.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateSystemModel.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "forms.CreateSystemModel.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "forms.CreateSystemModel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateSystemModel.hardwareTypeLabel": {
+    "defaultMessage": "Hardware Type"
+  },
   "forms.CreateSystemModel.hardwareTypeOption": {
     "defaultMessage": "Search or select a hardware type..."
   },
-  "forms.CreateSystemModelForm.noHardwareTypesAvailable": {
+  "forms.CreateSystemModel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateSystemModel.noHardwareTypesAvailable": {
     "defaultMessage": "No hardware types available"
   },
-  "forms.CreateSystemModelForm.noHardwareTypesFoundMatching": {
+  "forms.CreateSystemModel.noHardwareTypesFoundMatching": {
     "defaultMessage": "No hardware types found matching \"{inputValue}\""
+  },
+  "forms.CreateSystemModel.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "forms.CreateSystemModel.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.CreateSystemModel.submitButton": {
+    "defaultMessage": "Create"
   },
   "forms.CreateUpdateCampaign.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
