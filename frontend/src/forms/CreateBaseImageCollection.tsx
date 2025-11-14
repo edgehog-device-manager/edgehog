@@ -29,7 +29,7 @@ import Form from "components/Form";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
-import { baseImageCollectionHandleSchema, yup } from "forms";
+import { handleSchema, yup } from "forms";
 
 import type { CreateBaseImageCollection_OptionsFragment$key } from "api/__generated__/CreateBaseImageCollection_OptionsFragment.graphql";
 
@@ -55,7 +55,7 @@ type BaseImageCollectionData = {
 const baseImageCollectionSchema = yup
   .object({
     name: yup.string().required(),
-    handle: baseImageCollectionHandleSchema.required(),
+    handle: handleSchema.required(),
     systemModelId: yup.string().required(),
   })
   .required();

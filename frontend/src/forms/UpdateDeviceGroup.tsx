@@ -29,7 +29,7 @@ import Form from "components/Form";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
-import { deviceGroupHandleSchema, yup } from "forms";
+import { handleSchema, yup } from "forms";
 
 import type { UpdateDeviceGroup_DeviceGroupFragment$key } from "api/__generated__/UpdateDeviceGroup_DeviceGroupFragment.graphql";
 
@@ -50,7 +50,7 @@ type DeviceGroupData = {
 const deviceGroupSchema = yup
   .object({
     name: yup.string().required(),
-    handle: deviceGroupHandleSchema.required(),
+    handle: handleSchema.required(),
     selector: yup.string().required(),
   })
   .required();
