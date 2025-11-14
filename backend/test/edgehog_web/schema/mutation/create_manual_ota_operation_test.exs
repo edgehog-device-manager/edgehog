@@ -107,8 +107,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
       ota_operation = [tenant: tenant] |> create_ota_operation_mutation() |> extract_result!()
 
-      assert_receive %{
-        payload: {:ota_operation_created, %OTAOperation{} = ota_operation_event}
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "manual",
+        payload: %Ash.Notifier.Notification{data: %OTAOperation{} = ota_operation_event}
       }
 
       assert AshGraphql.Resource.encode_relay_id(ota_operation_event) == ota_operation["id"]

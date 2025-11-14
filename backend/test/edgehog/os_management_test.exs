@@ -83,7 +83,12 @@ defmodule Edgehog.OSManagementTest do
                  tenant: tenant
                )
 
-      assert_receive %{payload: {:ota_operation_created, ^ota_operation}}
+      assert_receive %Phoenix.Socket.Broadcast{
+        event: "create_managed",
+        payload: %Ash.Notifier.Notification{
+          data: ^ota_operation
+        }
+      }
     end
 
     test "create_managed_ota_operation/2 fails if the Astarte request fails", %{

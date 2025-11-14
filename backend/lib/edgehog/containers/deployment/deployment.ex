@@ -282,7 +282,6 @@ defmodule Edgehog.Containers.Deployment do
     module EdgehogWeb.Endpoint
 
     publish :deploy, [[:id, "*"]]
-    publish :destroy_and_gc, [[:id, "*"]]
     publish :just_create, [[:id, "*"]]
 
     publish :mark_as_sent, [[:id, "*"]]
@@ -291,42 +290,7 @@ defmodule Edgehog.Containers.Deployment do
     publish :mark_as_timed_out, [[:id, "*"]]
     publish :append_event, [[:id, "*"]]
     publish :maybe_run_ready_actions, [[:id, "*"]]
-
-    transform fn notification ->
-      deployment = notification.data
-      action = notification.action.name
-
-      event_type =
-        cond do
-          Map.get(notification.metadata || %{}, :custom_event) == :deployment_ready ->
-            :deployment_ready
-
-          action in [:deploy, :just_create] ->
-            :deployment_created
-
-          action in [
-            :mark_as_sent,
-            :mark_as_started,
-            :mark_as_stopped,
-            :append_event,
-            :maybe_run_ready_actions
-          ] ->
-            :deployment_updated
-
-          action in [
-            :mark_as_timed_out
-          ] ->
-            :deployment_timeout
-
-          action == :destroy_and_gc ->
-            :deployment_deleted
-
-          true ->
-            :unknown_event
-        end
-
-      {event_type, deployment}
-    end
+    publish :destroy_and_gc, [[:id, "*"]]
   end
 
   postgres do
