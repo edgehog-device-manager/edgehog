@@ -45,14 +45,18 @@ import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
 import { Link, Route, useNavigate } from "Navigation";
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 
-const CREATE_SYSTEM_MODEL_PAGE_QUERY = graphql`
-  query SystemModelCreate_getOptions_Query {
-    hardwareTypes {
-      __typename
+const GET_CREATE_SYSTEM_MODEL_OPTIONS_QUERY = graphql`
+  query SystemModelCreate_getOptions_Query(
+    $first: Int
+    $after: String
+    $filter: HardwareTypeFilterInput = {}
+  ) {
+    hardwareTypes(first: $first, after: $after, filter: $filter) {
       count
     }
-    ...CreateSystemModel_OptionsFragment
+    ...CreateSystemModel_OptionsFragment @arguments(filter: $filter)
   }
 `;
 
@@ -197,7 +201,7 @@ const SystemModelWrapper = ({
   getCreateSystemModelOptionsQuery,
 }: SystemModelWrapperProps) => {
   const systemModelOptions = usePreloadedQuery(
-    CREATE_SYSTEM_MODEL_PAGE_QUERY,
+    GET_CREATE_SYSTEM_MODEL_OPTIONS_QUERY,
     getCreateSystemModelOptionsQuery,
   );
   const { hardwareTypes } = systemModelOptions;
@@ -210,11 +214,15 @@ const SystemModelWrapper = ({
 const SystemModelCreatePage = () => {
   const [getCreateSystemModelOptionsQuery, getCreateSystemModelOptions] =
     useQueryLoader<SystemModelCreate_getOptions_Query>(
-      CREATE_SYSTEM_MODEL_PAGE_QUERY,
+      GET_CREATE_SYSTEM_MODEL_OPTIONS_QUERY,
     );
 
   const fetchCreateSystemModelOptions = useCallback(
-    () => getCreateSystemModelOptions({}, { fetchPolicy: "network-only" }),
+    () =>
+      getCreateSystemModelOptions(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "network-only" },
+      ),
     [getCreateSystemModelOptions],
   );
 

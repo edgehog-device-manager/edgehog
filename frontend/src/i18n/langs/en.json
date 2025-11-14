@@ -174,8 +174,14 @@
   "components.BaseImageSelect.ErrorFallback.reloadButton": {
     "defaultMessage": "Reload"
   },
-  "components.BaseImageSelect.selectBaseImageOptionPlaceholder": {
-    "defaultMessage": "Select a Base Image"
+  "components.BaseImageSelect.baseImageOption": {
+    "defaultMessage": "Search or select a base image..."
+  },
+  "components.BaseImageSelect.noBaseImagesAvailable": {
+    "defaultMessage": "No base images available"
+  },
+  "components.BaseImageSelect.noBaseImagesFoundMatching": {
+    "defaultMessage": "No base images found matching \"{inputValue}\""
   },
   "components.BaseImagesTable.releaseDisplayNameTitle": {
     "defaultMessage": "Release Name",
@@ -451,24 +457,6 @@
   "components.CreateApplication.submitButton": {
     "defaultMessage": "Create"
   },
-  "components.CreateBaseImageCollectionForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.CreateBaseImageCollectionForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateBaseImageCollectionForm.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateBaseImageCollectionForm.systemModelLabel": {
-    "defaultMessage": "System Model"
-  },
-  "components.CreateBaseImageCollectionForm.systemModelOption": {
-    "defaultMessage": "Select a System Model"
-  },
-  "components.CreateBaseImageCollectionForm.systemModelOptionUsed": {
-    "defaultMessage": "{name} (already used)"
-  },
   "components.CreateDeviceGroup.handleLabel": {
     "defaultMessage": "Handle"
   },
@@ -524,33 +512,6 @@
     "defaultMessage": "Options"
   },
   "components.CreateNetworkForm.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateSystemModelForm.addPartNumberButton": {
-    "defaultMessage": "Add part number"
-  },
-  "components.CreateSystemModelForm.descriptionLabel": {
-    "defaultMessage": "Description"
-  },
-  "components.CreateSystemModelForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.CreateSystemModelForm.hardwareTypeLabel": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.CreateSystemModelForm.hardwareTypeOption": {
-    "defaultMessage": "Select a Hardware Type"
-  },
-  "components.CreateSystemModelForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateSystemModelForm.partNumbersLabel": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.CreateSystemModelForm.resetButton": {
-    "defaultMessage": "Reset"
-  },
-  "components.CreateSystemModelForm.submitButton": {
     "defaultMessage": "Create"
   },
   "components.CreateVolumeForm.driverLabel": {
@@ -1491,6 +1452,31 @@
   "forms.CreateBaseImage.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateBaseImageCollection.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateBaseImageCollection.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateBaseImageCollection.noSystemModelsAvailable": {
+    "defaultMessage": "No system models available"
+  },
+  "forms.CreateBaseImageCollection.noSystemModelsFoundMatching": {
+    "defaultMessage": "No system models found matching \"{inputValue}\""
+  },
+  "forms.CreateBaseImageCollection.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateBaseImageCollection.systemModelLabel": {
+    "defaultMessage": "System Model"
+  },
+  "forms.CreateBaseImageCollection.systemModelOption": {
+    "defaultMessage": "Search or select a system model..."
+  },
+  "forms.CreateBaseImageCollection.systemModelWithBaseImageCollectionLabel": {
+    "defaultMessage": "{systemModelName} (used for {baseImageCollectionName})",
+    "description": "System model label of select option with base image collection name it is used for."
+  },
   "forms.CreateChannel.handleLabel": {
     "defaultMessage": "Handle"
   },
@@ -1747,11 +1733,44 @@
   "forms.CreateRelease.volumesLabel": {
     "defaultMessage": "Volumes"
   },
+  "forms.CreateSystemModel.addPartNumberButton": {
+    "defaultMessage": "Add part number"
+  },
+  "forms.CreateSystemModel.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "forms.CreateSystemModel.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateSystemModel.hardwareTypeLabel": {
+    "defaultMessage": "Hardware Type"
+  },
+  "forms.CreateSystemModel.hardwareTypeOption": {
+    "defaultMessage": "Search or select a hardware type..."
+  },
+  "forms.CreateSystemModel.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateSystemModel.noHardwareTypesAvailable": {
+    "defaultMessage": "No hardware types available"
+  },
+  "forms.CreateSystemModel.noHardwareTypesFoundMatching": {
+    "defaultMessage": "No hardware types found matching \"{inputValue}\""
+  },
+  "forms.CreateSystemModel.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "forms.CreateSystemModel.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.CreateSystemModel.submitButton": {
+    "defaultMessage": "Create"
+  },
   "forms.CreateUpdateCampaign.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
   "forms.CreateUpdateCampaign.baseImageCollectionOption": {
-    "defaultMessage": "Select a Base Image Collection"
+    "defaultMessage": "Search or select a base image collection..."
   },
   "forms.CreateUpdateCampaign.baseImageLabel": {
     "defaultMessage": "Base Image"
@@ -1760,7 +1779,7 @@
     "defaultMessage": "Channel"
   },
   "forms.CreateUpdateCampaign.channelOption": {
-    "defaultMessage": "Select a Channel"
+    "defaultMessage": "Search or select a channel..."
   },
   "forms.CreateUpdateCampaign.forceDowngradeLabel": {
     "defaultMessage": "Force Downgrade"
@@ -1777,6 +1796,18 @@
   "forms.CreateUpdateCampaign.nameLabel": {
     "defaultMessage": "Name"
   },
+  "forms.CreateUpdateCampaign.noBaseImageCollsAvailable": {
+    "defaultMessage": "No base image collections available"
+  },
+  "forms.CreateUpdateCampaign.noBaseImageCollsFoundMatching": {
+    "defaultMessage": "No base image collections found matching \"{inputValue}\""
+  },
+  "forms.CreateUpdateCampaign.noChannelsAvailable": {
+    "defaultMessage": "No channels available"
+  },
+  "forms.CreateUpdateCampaign.noChannelsFoundMatching": {
+    "defaultMessage": "No channels found matching \"{inputValue}\""
+  },
   "forms.CreateUpdateCampaign.otaRequestRetriesLabel": {
     "defaultMessage": "Request Retries"
   },
@@ -1785,6 +1816,9 @@
   },
   "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
+  },
+  "forms.CreateUpdateCampaign.selectBaseImageCollection": {
+    "defaultMessage": "Select a base image collection..."
   },
   "forms.DeploymentCampaignForm.applicationLabel": {
     "defaultMessage": "Application"

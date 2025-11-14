@@ -21,6 +21,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
+import type { PreloadedQuery } from "react-relay/hooks";
 import {
   ConnectionHandler,
   graphql,
@@ -28,27 +29,31 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
 
-import type { ChannelCreate_getDeviceGroups_Query } from "api/__generated__/ChannelCreate_getDeviceGroups_Query.graphql";
 import type { ChannelCreate_createChannel_Mutation } from "api/__generated__/ChannelCreate_createChannel_Mutation.graphql";
+import type { ChannelCreate_getDeviceGroups_Query } from "api/__generated__/ChannelCreate_getDeviceGroups_Query.graphql";
+
 import Alert from "components/Alert";
 import Center from "components/Center";
-import CreateChannelForm from "forms/CreateChannel";
 import type { ChannelData } from "forms/CreateChannel";
 import Page from "components/Page";
 import Spinner from "components/Spinner";
 import { Link, Route, useNavigate } from "Navigation";
 import Result from "components/Result";
 import Button from "components/Button";
+import { RECORDS_TO_LOAD_FIRST } from "constants";
+import CreateChannelForm from "forms/CreateChannel";
 
 const GET_CREATE_CHANNEL_OPTIONS_QUERY = graphql`
-  query ChannelCreate_getDeviceGroups_Query {
-    deviceGroups {
-      __typename
+  query ChannelCreate_getDeviceGroups_Query(
+    $first: Int
+    $after: String
+    $filter: DeviceGroupFilterInput = {}
+  ) {
+    deviceGroups(first: $first, after: $after, filter: $filter) {
       count
     }
-    ...CreateChannel_OptionsFragment
+    ...CreateChannel_OptionsFragment @arguments(filter: $filter)
   }
 `;
 
@@ -218,7 +223,11 @@ const ChannelCreatePage = () => {
     );
 
   const fetchCreateChannelOptions = useCallback(
-    () => getCreateChannelOptions({}, { fetchPolicy: "network-only" }),
+    () =>
+      getCreateChannelOptions(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "network-only" },
+      ),
     [getCreateChannelOptions],
   );
 
