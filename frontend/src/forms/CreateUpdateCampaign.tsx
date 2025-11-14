@@ -94,54 +94,8 @@ const initialData: FormData = {
   forceDowngrade: false,
 };
 
-const transformOutputData = (data: FormData): UpdateCampaignData => {
-  const {
-    name,
-    baseImageId,
-    channelId,
-    maxFailurePercentage,
-    maxInProgressUpdates,
-    otaRequestRetries,
-    otaRequestTimeoutSeconds,
-    forceDowngrade,
-  } = data;
-
-  return {
-    name,
-    baseImageId,
-    channelId,
-    rolloutMechanism: {
-      push: {
-        maxFailurePercentage:
-          typeof maxFailurePercentage === "string"
-            ? parseFloat(maxFailurePercentage)
-            : maxFailurePercentage,
-        maxInProgressUpdates:
-          typeof maxInProgressUpdates === "string"
-            ? parseInt(maxInProgressUpdates)
-            : maxInProgressUpdates,
-        otaRequestRetries,
-        otaRequestTimeoutSeconds,
-        forceDowngrade,
-      },
-    },
-  };
-};
-
-type Props = {
-  updateCampaignOptionsRef: CreateUpdateCampaign_OptionsFragment$key;
-  isLoading?: boolean;
-  onSubmit: (data: UpdateCampaignData) => void;
-};
-
-const CreateBaseImageCollectionForm = ({
-  updateCampaignOptionsRef,
-  isLoading = false,
-  onSubmit,
-}: Props) => {
-  const intl = useIntl();
-
-  const updateCampaignSchema = yup
+const updateCampaignSchema = (intl: any) =>
+  yup
     .object({
       name: yup.string().required(),
       baseImageCollectionId: yup.string().required(),
@@ -187,6 +141,53 @@ const CreateBaseImageCollectionForm = ({
     })
     .required();
 
+const transformOutputData = (data: FormData): UpdateCampaignData => {
+  const {
+    name,
+    baseImageId,
+    channelId,
+    maxFailurePercentage,
+    maxInProgressUpdates,
+    otaRequestRetries,
+    otaRequestTimeoutSeconds,
+    forceDowngrade,
+  } = data;
+
+  return {
+    name,
+    baseImageId,
+    channelId,
+    rolloutMechanism: {
+      push: {
+        maxFailurePercentage:
+          typeof maxFailurePercentage === "string"
+            ? parseFloat(maxFailurePercentage)
+            : maxFailurePercentage,
+        maxInProgressUpdates:
+          typeof maxInProgressUpdates === "string"
+            ? parseInt(maxInProgressUpdates)
+            : maxInProgressUpdates,
+        otaRequestRetries,
+        otaRequestTimeoutSeconds,
+        forceDowngrade,
+      },
+    },
+  };
+};
+
+type Props = {
+  updateCampaignOptionsRef: CreateUpdateCampaign_OptionsFragment$key;
+  isLoading?: boolean;
+  onSubmit: (data: UpdateCampaignData) => void;
+};
+
+const CreateUpdateCampaignForm = ({
+  updateCampaignOptionsRef,
+  isLoading = false,
+  onSubmit,
+}: Props) => {
+  const intl = useIntl();
+
   const {
     register,
     handleSubmit,
@@ -196,7 +197,7 @@ const CreateBaseImageCollectionForm = ({
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(updateCampaignSchema),
+    resolver: yupResolver(updateCampaignSchema(intl)),
   });
 
   const baseImageCollectionId = watch("baseImageCollectionId");
@@ -423,4 +424,4 @@ const CreateBaseImageCollectionForm = ({
 
 export type { UpdateCampaignData };
 
-export default CreateBaseImageCollectionForm;
+export default CreateUpdateCampaignForm;
