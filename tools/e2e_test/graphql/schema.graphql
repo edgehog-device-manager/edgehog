@@ -1,0 +1,6607 @@
+schema {
+  subscription: RootSubscriptionType
+  mutation: RootMutationType
+  query: RootQueryType
+}
+
+input ContainerCreateWithNestedImageInput {
+  id: ID
+  reference: String
+  imageCredentialsId: ID
+}
+
+input ContainerCreateWithNestedNetworksInput {
+  id: ID
+}
+
+input ContainerCreateWithNestedVolumesInput {
+  id: ID
+  target: String
+}
+
+input ContainerCreateWithNestedDeviceMappingsInput {
+  pathOnHost: String!
+  pathInContainer: String!
+  cgroupPermissions: String!
+}
+
+input CampaignCampaignMechanismFirmwareUpgradeInput {
+  baseImageId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Update Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress updates. The Update Campaign will have
+  at most this number of OTA Operations that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  update of a specific target (and considering it an error). Note that the
+  update is retried only if the OTA Request doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+
+  """
+  This boolean flag determines if the Base Image will be pushed to the
+  Device even if it already has a greater version of the Base Image.
+  """
+  forceDowngrade: Boolean
+}
+
+"An object representing the properties of a Firmware Upgrade campaign mechanism."
+type FirmwareUpgrade {
+  """
+  This boolean flag determines if the Base Image will be pushed to the
+  Device even if it already has a greater version of the Base Image.
+  """
+  forceDowngrade: Boolean!
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Update Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress updates. The Update Campaign will have
+  at most this number of OTA Operations that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  update of a specific target (and considering it an error). Note that the
+  update is retried only if the OTA Request doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  baseImageId: Int!
+
+  "The base image distributed by the update campaign."
+  baseImage: BaseImage!
+}
+
+input CampaignCampaignMechanismDeploymentUpgradeInput {
+  releaseId: ID
+
+  targetReleaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Upgrade deployment campaign mechanism."
+type DeploymentUpgrade {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  targetReleaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+
+  "The release used for upgrading by the deployment campaign."
+  targetRelease: Release
+}
+
+input CampaignCampaignMechanismDeploymentDeleteInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Delete deployment campaign mechanism."
+type DeploymentDelete {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+}
+
+input CampaignCampaignMechanismDeploymentStopInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Stop deployment campaign mechanism."
+type DeploymentStop {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+}
+
+input CampaignCampaignMechanismDeploymentStartInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Start deployment campaign mechanism."
+type DeploymentStart {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+}
+
+input CampaignCampaignMechanismDeploymentDeployInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Deploy deployment campaign mechanism."
+type DeploymentDeploy {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+}
+
+"""
+Describes the position of a device.
+
+The field holds information about the GPS coordinates of the device,
+which are estimated by means of Edgehog's geolocation modules and the
+data published by the device.
+"""
+type Position {
+  "The latitude coordinate."
+  latitude: Float!
+
+  "The longitude coordinate."
+  longitude: Float!
+
+  "The accuracy of the measurement, in meters."
+  accuracy: Float
+
+  "The altitude coordinate."
+  altitude: Float
+
+  "The accuracy of the altitude measurement, in meters."
+  altitudeAccuracy: Float
+
+  "The measured heading."
+  heading: Float
+
+  "The measured speed."
+  speed: Float
+
+  "The date and time at which the measurement was made."
+  timestamp: DateTime!
+
+  "Describes how the position was calculated."
+  source: String
+}
+
+"Describes a network interface of a device."
+type NetworkInterface {
+  "The identifier of the network interface."
+  name: String!
+
+  "The normalized physical address."
+  macAddress: String
+
+  "The connection technology."
+  technology: NetworkInterfaceTechnology
+}
+
+"""
+Describes the place where a device is located.
+
+The field holds information about the device's address, which is
+estimated by means of Edgehog's geolocation modules and the data
+published by the device.
+"""
+type Location {
+  "The formatted address associated with the location."
+  formattedAddress: String!
+
+  "The date and time at which the location was measured."
+  timestamp: DateTime!
+
+  "Describes how the location was calculated."
+  source: String
+}
+
+"Describes a battery slot of a device."
+type BatterySlot {
+  "Battery level measurement absolute error [0.0-100.0]."
+  levelAbsoluteError: Float
+
+  "Battery level estimated percentage [0.0%-100.0%]."
+  levelPercentage: Float
+
+  "The identifier of the battery slot."
+  slot: String!
+
+  "The current status of the battery."
+  status: BatterySlotStatus
+}
+
+"Describes a modem of a device."
+type Modem {
+  "The operator apn address."
+  apn: String
+
+  "Carrier operator name."
+  carrier: String
+
+  "Unique identifier of the cell."
+  cellId: Int
+
+  "The modem IMEI code."
+  imei: String
+
+  "The SIM IMSI code."
+  imsi: String
+
+  "The Local Area Code."
+  localAreaCode: Int
+
+  "The cell tower's Mobile Country Code (MCC)."
+  mobileCountryCode: Int
+
+  "The cell tower's Mobile Network Code."
+  mobileNetworkCode: Int
+
+  "The GSM\/LTE registration status of the modem."
+  registrationStatus: ModemRegistrationStatus
+
+  "Signal strength in dBm."
+  rssi: Float
+
+  "The identifier of the modem."
+  slot: String!
+
+  "The access technology of the serving cell."
+  technology: ModemTechnology
+}
+
+input CampaignMechanismInput {
+  deploymentDelete: CampaignCampaignMechanismDeploymentDeleteInput
+  deploymentDeploy: CampaignCampaignMechanismDeploymentDeployInput
+  deploymentStart: CampaignCampaignMechanismDeploymentStartInput
+  deploymentStop: CampaignCampaignMechanismDeploymentStopInput
+  deploymentUpgrade: CampaignCampaignMechanismDeploymentUpgradeInput
+  firmwareUpgrade: CampaignCampaignMechanismFirmwareUpgradeInput
+}
+
+union CampaignMechanism = DeploymentDelete | DeploymentDeploy | DeploymentStart | DeploymentStop | DeploymentUpgrade | FirmwareUpgrade
+
+enum CampaignTargetStatus {
+  "Something went wrong while attempting operation on the target."
+  FAILED
+
+  "The campaign target is waiting for the campaign to start."
+  IDLE
+
+  "The campaign is in progress."
+  IN_PROGRESS
+
+  "The operation has executed successfully on the target."
+  SUCCESSFUL
+}
+
+enum CampaignOutcome {
+  "The campaign has finished with a failure."
+  FAILURE
+
+  "The campaign has finished successfully."
+  SUCCESS
+}
+
+enum CampaignStatus {
+  "The campaign has finished."
+  FINISHED
+
+  "The campaign has been created but is not being rolled-out yet."
+  IDLE
+
+  "The campaign is being rolled-out."
+  IN_PROGRESS
+}
+
+enum OtaOperationStatusCode {
+  "The OTA Operation was canceled"
+  CANCELED
+
+  "An internal error was encountered"
+  INTERNAL_ERROR
+
+  "The OTA Operation failed due to an invalid base image"
+  INVALID_BASE_IMAGE
+
+  "The OTA Operation contained invalid data"
+  INVALID_REQUEST
+
+  "An IO error was encountered"
+  IO_ERROR
+
+  "A network error was encountered"
+  NETWORK_ERROR
+
+  "The OTA Operation timed out while sending the request to the device"
+  REQUEST_TIMEOUT
+
+  "A system rollback has occurred"
+  SYSTEM_ROLLBACK
+
+  "An OTA Operation is already in progress on the device"
+  UPDATE_ALREADY_IN_PROGRESS
+}
+
+enum OtaOperationStatus {
+  "The OTA operation was acknowledged from the device"
+  ACKNOWLEDGED
+
+  "The device deployed the update"
+  DEPLOYED
+
+  "The device is deploying the update"
+  DEPLOYING
+
+  "The device is downloading the update"
+  DOWNLOADING
+
+  "A recoverable error happened during the OTA operation"
+  ERROR
+
+  "The OTA operation ended with a failure. This is a final state of the OTA Operation"
+  FAILURE
+
+  "The OTA operation was created and is waiting an acknowledgment from the device"
+  PENDING
+
+  "The device is in the process of rebooting"
+  REBOOTING
+
+  "The OTA operation ended successfully. This is a final state of the OTA Operation"
+  SUCCESS
+}
+
+enum ForwarderSessionStatus {
+  "The device is connected to the forwarder."
+  CONNECTED
+
+  "The device is connecting to the forwarder."
+  CONNECTING
+}
+
+enum NetworkInterfaceTechnology {
+  "Bluetooth."
+  BLUETOOTH
+
+  "Cellular."
+  CELLULAR
+
+  "Ethernet."
+  ETHERNET
+
+  "WiFi."
+  WIFI
+}
+
+enum BatterySlotStatus {
+  "The battery is charging."
+  CHARGING
+
+  "The battery is discharging."
+  DISCHARGING
+
+  "The battery is either in a charging or in an idle state, since the hardware doesn't allow to distinguish between them."
+  EITHER_IDLE_OR_CHARGING
+
+  "The battery is in a failed state."
+  FAILURE
+
+  "The battery is idle."
+  IDLE
+
+  "The battery is removed."
+  REMOVED
+
+  "The battery status cannot be determined."
+  UNKNOWN
+}
+
+enum ModemRegistrationStatus {
+  "Not registered, modem is not currently searching a new operator to register to."
+  NOT_REGISTERED
+
+  "Registered, home network."
+  REGISTERED
+
+  "Registered, roaming."
+  REGISTERED_ROAMING
+
+  "Registration denied."
+  REGISTRATION_DENIED
+
+  "Not registered, but modem is currently searching a new operator to register to."
+  SEARCHING_OPERATOR
+
+  "Unknown (e.g. out of GERAN\/UTRAN\/E-UTRAN coverage)."
+  UNKNOWN
+}
+
+enum ModemTechnology {
+  "E-UTRAN."
+  EUTRAN
+
+  "GSM."
+  GSM
+
+  "GSM Compact."
+  GSM_COMPACT
+
+  "GSM with EGPRS."
+  GSM_EGPRS
+
+  "UTRAN."
+  UTRAN
+
+  "UTRAN with HSDPA."
+  UTRAN_HSDPA
+
+  "UTRAN with HSDPA and HSUPA."
+  UTRAN_HSDPA_HSUPA
+
+  "UTRAN with HSUPA."
+  UTRAN_HSUPA
+}
+
+enum DeviceCapability {
+  "The device provides information about its base image."
+  BASE_IMAGE
+
+  "The device provides information about its battery status."
+  BATTERY_STATUS
+
+  "The device provides information about its cellular connection."
+  CELLULAR_CONNECTION
+
+  "The device supports commands, for example the rebooting command."
+  COMMANDS
+
+  "The device supports running applications using containers."
+  CONTAINER_MANAGEMENT
+
+  "The device can be geolocated."
+  GEOLOCATION
+
+  "The device provides information about its hardware."
+  HARDWARE_INFO
+
+  "The device can be asked to blink its LED in a specific pattern."
+  LED_BEHAVIORS
+
+  "The device can provide information about its network interfaces."
+  NETWORK_INTERFACE_INFO
+
+  "The device provides information about its operating system."
+  OPERATING_SYSTEM
+
+  "The device supports remote terminal sessions."
+  REMOTE_TERMINAL
+
+  "The device provides information about its runtime."
+  RUNTIME_INFO
+
+  "The device can be updated remotely."
+  SOFTWARE_UPDATES
+
+  "The device provides information about its storage units."
+  STORAGE
+
+  "The device provides information about its system."
+  SYSTEM_INFO
+
+  "The device provides information about its system status."
+  SYSTEM_STATUS
+
+  "The device telemetry can be configured."
+  TELEMETRY_CONFIG
+
+  "The device provides information about surrounding WiFi APs."
+  WIFI
+}
+
+enum DeviceLedBehavior {
+  "Blink for 60 seconds."
+  BLINK
+
+  "Double blink for 60 seconds."
+  DOUBLE_BLINK
+
+  "Slow blink for 60 seconds."
+  SLOW_BLINK
+}
+
+enum DeploymentEventType {
+  "The deployment is getting deleted."
+  DELETING
+
+  "The deployment encountered an error."
+  ERROR
+
+  "The deployment is started."
+  STARTED
+
+  "The deployment is starting."
+  STARTING
+
+  "The deployment is stopped."
+  STOPPED
+
+  "The deployment is stopping."
+  STOPPING
+
+  "The deployment is getting updated."
+  UPDATING
+}
+
+enum ApplicationDeploymentState {
+  "The deployment has been created in the database layer, the device yet has to receive it."
+  PENDING
+
+  "The deployment description has been sent to the device."
+  SENT
+
+  "The deployment is started on the device."
+  STARTED
+
+  "The deployment is stopped on the device."
+  STOPPED
+}
+
+input ContainerEnvVarInput {
+  value: String!
+  key: String!
+}
+
+type ContainerEnvVar {
+  value: String!
+  key: String!
+}
+
+input LocalizedAttributeUpdateInput {
+  value: String
+  languageTag: String!
+}
+
+input LocalizedAttributeInput {
+  value: String!
+  languageTag: String!
+}
+
+type LocalizedAttribute {
+  value: String!
+  languageTag: String!
+}
+
+"The result of the :delete_base_image_collection mutation"
+type DeleteBaseImageCollectionResult {
+  "The record that was successfully deleted"
+  result: BaseImageCollection
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_base_image_collection mutation"
+type UpdateBaseImageCollectionResult {
+  "The successful result of the mutation"
+  result: BaseImageCollection
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateBaseImageCollectionInput {
+  "The display name of the base image collection."
+  name: String
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+}
+
+"The result of the :create_base_image_collection mutation"
+type CreateBaseImageCollectionResult {
+  "The successful result of the mutation"
+  result: BaseImageCollection
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateBaseImageCollectionInput {
+  "The display name of the base image collection."
+  name: String!
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The ID of the system model that is targeted by the base image collection"
+  systemModelId: ID!
+}
+
+enum BaseImageCollectionSortField {
+  ID
+  NAME
+  HANDLE
+}
+
+":base_image_collection connection"
+type BaseImageCollectionConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":base_image_collection edges"
+  edges: [BaseImageCollectionEdge!]
+}
+
+":base_image_collection edge"
+type BaseImageCollectionEdge {
+  "Cursor"
+  cursor: String!
+
+  ":base_image_collection node"
+  node: BaseImageCollection!
+}
+
+input BaseImageCollectionFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input BaseImageCollectionFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input BaseImageCollectionFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input BaseImageCollectionFilterInput {
+  and: [BaseImageCollectionFilterInput!]
+
+  or: [BaseImageCollectionFilterInput!]
+
+  not: [BaseImageCollectionFilterInput!]
+
+  id: BaseImageCollectionFilterId
+
+  "The display name of the base image collection."
+  name: BaseImageCollectionFilterName
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: BaseImageCollectionFilterHandle
+
+  "The system model associated with the base image collection."
+  systemModel: SystemModelFilterInput
+
+  "The base images associated with the base image collection."
+  baseImages: BaseImageFilterInput
+}
+
+input BaseImageCollectionSortInput {
+  order: SortOrder
+  field: BaseImageCollectionSortField!
+}
+
+"""
+Represents a collection of Base Images.
+
+A base image collection represents the collection of all Base Images that can run on a specific System Model.
+"""
+type BaseImageCollection implements Node {
+  id: ID!
+
+  "The display name of the base image collection."
+  name: String!
+
+  """
+  The identifier of the base image collection.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The system model associated with the base image collection."
+  systemModel: SystemModel!
+
+  "The base images associated with the base image collection."
+  baseImages(
+    "How to sort the records in the response"
+    sort: [BaseImageSortInput]
+
+    "A filter to limit the results"
+    filter: BaseImageFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): BaseImageConnection!
+}
+
+"The result of the :delete_base_image mutation"
+type DeleteBaseImageResult {
+  "The record that was successfully deleted"
+  result: BaseImage
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_base_image mutation"
+type UpdateBaseImageResult {
+  "The successful result of the mutation"
+  result: BaseImage
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateBaseImageInput {
+  "The starting version requirement for the base image."
+  startingVersionRequirement: String
+
+  "A list of descriptions in different languages."
+  localizedDescriptions: [LocalizedAttributeUpdateInput!]
+
+  "A list of release display names in different languages."
+  localizedReleaseDisplayNames: [LocalizedAttributeUpdateInput!]
+}
+
+"The result of the :create_base_image mutation"
+type CreateBaseImageResult {
+  "The successful result of the mutation"
+  result: BaseImage
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateBaseImageInput {
+  "The base image version."
+  version: String!
+
+  "The starting version requirement for the base image."
+  startingVersionRequirement: String
+
+  "The ID of the base image collection this base image will belong to."
+  baseImageCollectionId: ID!
+
+  "The base image file, which will be uploaded to the storage."
+  file: Upload!
+
+  "A list of descriptions in different languages."
+  localizedDescriptions: [LocalizedAttributeInput!]
+
+  "A list of release display names in different languages."
+  localizedReleaseDisplayNames: [LocalizedAttributeInput!]
+}
+
+enum BaseImageSortField {
+  ID
+  VERSION
+  STARTING_VERSION_REQUIREMENT
+  URL
+}
+
+":base_image connection"
+type BaseImageConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":base_image edges"
+  edges: [BaseImageEdge!]
+}
+
+":base_image edge"
+type BaseImageEdge {
+  "Cursor"
+  cursor: String!
+
+  ":base_image node"
+  node: BaseImage!
+}
+
+input BaseImageFilterUrl {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input BaseImageFilterStartingVersionRequirement {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input BaseImageFilterVersion {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input BaseImageFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input BaseImageFilterInput {
+  and: [BaseImageFilterInput!]
+
+  or: [BaseImageFilterInput!]
+
+  not: [BaseImageFilterInput!]
+
+  id: BaseImageFilterId
+
+  "The base image version."
+  version: BaseImageFilterVersion
+
+  "The starting version requirement for the base image."
+  startingVersionRequirement: BaseImageFilterStartingVersionRequirement
+
+  "The url where the base image can be downloaded."
+  url: BaseImageFilterUrl
+
+  "The base image collection that this base image belongs to."
+  baseImageCollection: BaseImageCollectionFilterInput
+}
+
+input BaseImageSortInput {
+  order: SortOrder
+  field: BaseImageSortField!
+}
+
+"""
+Represents an uploaded Base Image.
+
+A base image represents a downloadable base image that can be installed on a device
+"""
+type BaseImage implements Node {
+  id: ID!
+
+  "The base image version."
+  version: String!
+
+  "The starting version requirement for the base image."
+  startingVersionRequirement: String
+
+  "The url where the base image can be downloaded."
+  url: String!
+
+  "The base image collection that this base image belongs to."
+  baseImageCollection: BaseImageCollection!
+
+  "A list of descriptions in different languages."
+  localizedDescriptions(preferredLanguageTags: [String!]): [LocalizedAttribute!]
+
+  "A list of release display names in different languages."
+  localizedReleaseDisplayNames(preferredLanguageTags: [String!]): [LocalizedAttribute!]
+
+  "Derived Base Image Name from version and localized release display name"
+  name: String
+}
+
+"A relay page info"
+type PageInfo {
+  "When paginating backwards, are there more items?"
+  hasPreviousPage: Boolean!
+
+  "When paginating forwards, are there more items?"
+  hasNextPage: Boolean!
+
+  "When paginating backwards, the cursor to continue"
+  startCursor: String
+
+  "When paginating forwards, the cursor to continue"
+  endCursor: String
+}
+
+"A relay node"
+interface Node {
+  "A unique identifier"
+  id: ID!
+}
+
+enum SortOrder {
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+}
+
+"An error generated by a failed mutation"
+type MutationError {
+  "The human readable error message"
+  message: String
+
+  "A shorter error message, with vars not replaced"
+  shortMessage: String
+
+  "Replacements for the short message"
+  vars: Json
+
+  "An error code for the given error"
+  code: String
+
+  "The field or fields that produced the error"
+  fields: [String!]
+}
+
+input ApplicationCreateInitialReleaseInput {
+  version: String!
+  containers: [ReleaseCreateContainersInput!]
+  requiredSystemModels: [ReleaseCreateRequiredSystemModelsInput!]
+}
+
+input ReleaseCreateContainersInput {
+  env: [ContainerEnvVarInput!]
+  id: ID
+  memory: Int
+  image: ContainerCreateWithNestedImageInput
+  hostname: String
+  networks: [ContainerCreateWithNestedNetworksInput!]
+  volumes: [ContainerCreateWithNestedVolumesInput!]
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  portBindings: [String!]
+  restartPolicy: String
+  networkMode: String
+  privileged: Boolean
+  extraHosts: [String!]
+  capAdd: [String!]
+  capDrop: [String!]
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealtimePeriod: Int
+  cpuRealtimeRuntime: Int
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
+  volumeDriver: String
+  storageOpt: [String!]
+  readOnlyRootfs: Boolean
+  tmpfs: [String!]
+  binds: [String!]
+}
+
+input ReleaseCreateRequiredSystemModelsInput {
+  id: ID
+}
+
+enum ContainerVolumeSortField {
+  TARGET
+  VOLUME_ID
+}
+
+":container_volume connection"
+type ContainerVolumeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container_volume edges"
+  edges: [ContainerVolumeEdge!]
+}
+
+":container_volume edge"
+type ContainerVolumeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container_volume node"
+  node: ContainerVolume!
+}
+
+input ContainerVolumeFilterVolumeId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerVolumeFilterTarget {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerVolumeFilterInput {
+  and: [ContainerVolumeFilterInput!]
+  or: [ContainerVolumeFilterInput!]
+  not: [ContainerVolumeFilterInput!]
+  target: ContainerVolumeFilterTarget
+  volumeId: ContainerVolumeFilterVolumeId
+  volume: VolumeFilterInput
+}
+
+input ContainerVolumeSortInput {
+  order: SortOrder
+  field: ContainerVolumeSortField!
+}
+
+type ContainerVolume {
+  "A unique identifier"
+  id: ID!
+
+  target: String!
+
+  volumeId: ID!
+
+  volume: Volume!
+}
+
+enum DeviceMappingDeploymentSortField {
+  ID
+  STATE
+  DEVICE_MAPPING_ID
+}
+
+":device_mapping_deployment connection"
+type DeviceMappingDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_mapping_deployment edges"
+  edges: [DeviceMappingDeploymentEdge!]
+}
+
+":device_mapping_deployment edge"
+type DeviceMappingDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_mapping_deployment node"
+  node: DeviceMappingDeployment!
+}
+
+input DeviceMappingDeploymentFilterDeviceMappingId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeviceMappingDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input DeviceMappingDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeviceMappingDeploymentFilterInput {
+  and: [DeviceMappingDeploymentFilterInput!]
+  or: [DeviceMappingDeploymentFilterInput!]
+  not: [DeviceMappingDeploymentFilterInput!]
+  id: DeviceMappingDeploymentFilterId
+  state: DeviceMappingDeploymentFilterState
+  deviceMappingId: DeviceMappingDeploymentFilterDeviceMappingId
+  deviceMapping: DeviceMappingFilterInput
+  containerDeployments: ContainerDeploymentFilterInput
+}
+
+input DeviceMappingDeploymentSortInput {
+  order: SortOrder
+  field: DeviceMappingDeploymentSortField!
+}
+
+type DeviceMappingDeployment {
+  id: ID!
+  state: String
+  deviceMappingId: ID
+  deviceMapping: DeviceMapping
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
+}
+
+enum DeviceMappingSortField {
+  ID
+  PATH_ON_HOST
+  PATH_IN_CONTAINER
+  CGROUP_PERMISSIONS
+  CONTAINER_ID
+}
+
+":device_mapping connection"
+type DeviceMappingConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_mapping edges"
+  edges: [DeviceMappingEdge!]
+}
+
+":device_mapping edge"
+type DeviceMappingEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_mapping node"
+  node: DeviceMapping!
+}
+
+input DeviceMappingFilterContainerId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeviceMappingFilterCgroupPermissions {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceMappingFilterPathInContainer {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceMappingFilterPathOnHost {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceMappingFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeviceMappingFilterInput {
+  and: [DeviceMappingFilterInput!]
+  or: [DeviceMappingFilterInput!]
+  not: [DeviceMappingFilterInput!]
+  id: DeviceMappingFilterId
+  pathOnHost: DeviceMappingFilterPathOnHost
+  pathInContainer: DeviceMappingFilterPathInContainer
+  cgroupPermissions: DeviceMappingFilterCgroupPermissions
+  containerId: DeviceMappingFilterContainerId
+  container: ContainerFilterInput
+}
+
+input DeviceMappingSortInput {
+  order: SortOrder
+  field: DeviceMappingSortField!
+}
+
+type DeviceMapping {
+  id: ID!
+  pathOnHost: String!
+  pathInContainer: String!
+  cgroupPermissions: String!
+  containerId: ID
+  container: Container
+}
+
+enum VolumeDeploymentSortField {
+  ID
+  STATE
+  VOLUME_ID
+}
+
+":volume_deployment connection"
+type VolumeDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":volume_deployment edges"
+  edges: [VolumeDeploymentEdge!]
+}
+
+":volume_deployment edge"
+type VolumeDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":volume_deployment node"
+  node: VolumeDeployment!
+}
+
+input VolumeDeploymentFilterVolumeId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input VolumeDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input VolumeDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input VolumeDeploymentFilterInput {
+  and: [VolumeDeploymentFilterInput!]
+  or: [VolumeDeploymentFilterInput!]
+  not: [VolumeDeploymentFilterInput!]
+  id: VolumeDeploymentFilterId
+  state: VolumeDeploymentFilterState
+  volumeId: VolumeDeploymentFilterVolumeId
+  volume: VolumeFilterInput
+  containerDeployments: ContainerDeploymentFilterInput
+}
+
+input VolumeDeploymentSortInput {
+  order: SortOrder
+  field: VolumeDeploymentSortField!
+}
+
+type VolumeDeployment {
+  id: ID!
+  state: String
+  volumeId: ID
+  volume: Volume
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
+}
+
+"The result of the :delete_volume mutation"
+type DeleteVolumeResult {
+  "The record that was successfully deleted"
+  result: Volume
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :create_volume mutation"
+type CreateVolumeResult {
+  "The successful result of the mutation"
+  result: Volume
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateVolumeInput {
+  label: String!
+  driver: String
+  options: JsonString
+}
+
+enum VolumeSortField {
+  ID
+  LABEL
+  DRIVER
+  OPTIONS
+}
+
+":volume connection"
+type VolumeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":volume edges"
+  edges: [VolumeEdge!]
+}
+
+":volume edge"
+type VolumeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":volume node"
+  node: Volume!
+}
+
+input VolumeFilterOptions {
+  isNil: Boolean
+  eq: JsonString
+  notEq: JsonString
+  in: [JsonString!]
+  lessThan: JsonString
+  greaterThan: JsonString
+  lessThanOrEqual: JsonString
+  greaterThanOrEqual: JsonString
+}
+
+input VolumeFilterDriver {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input VolumeFilterLabel {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input VolumeFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input VolumeFilterInput {
+  and: [VolumeFilterInput!]
+  or: [VolumeFilterInput!]
+  not: [VolumeFilterInput!]
+  id: VolumeFilterId
+  label: VolumeFilterLabel
+  driver: VolumeFilterDriver
+  options: VolumeFilterOptions
+  devices: DeviceFilterInput
+}
+
+input VolumeSortInput {
+  order: SortOrder
+  field: VolumeSortField!
+}
+
+type Volume implements Node {
+  id: ID!
+  label: String!
+  driver: String!
+  options: JsonString!
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
+}
+
+enum NetworkDeploymentSortField {
+  ID
+  STATE
+  NETWORK_ID
+}
+
+":network_deployment connection"
+type NetworkDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":network_deployment edges"
+  edges: [NetworkDeploymentEdge!]
+}
+
+":network_deployment edge"
+type NetworkDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":network_deployment node"
+  node: NetworkDeployment!
+}
+
+input NetworkDeploymentFilterNetworkId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input NetworkDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input NetworkDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input NetworkDeploymentFilterInput {
+  and: [NetworkDeploymentFilterInput!]
+  or: [NetworkDeploymentFilterInput!]
+  not: [NetworkDeploymentFilterInput!]
+  id: NetworkDeploymentFilterId
+  state: NetworkDeploymentFilterState
+  networkId: NetworkDeploymentFilterNetworkId
+  network: NetworkFilterInput
+  containerDeployments: ContainerDeploymentFilterInput
+}
+
+input NetworkDeploymentSortInput {
+  order: SortOrder
+  field: NetworkDeploymentSortField!
+}
+
+type NetworkDeployment {
+  id: ID!
+  state: String
+  networkId: ID
+  network: Network
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
+}
+
+"The result of the :delete_network mutation"
+type DeleteNetworkResult {
+  "The record that was successfully deleted"
+  result: Network
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :create_network mutation"
+type CreateNetworkResult {
+  "The successful result of the mutation"
+  result: Network
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateNetworkInput {
+  label: String
+  driver: String
+  internal: Boolean
+  enableIpv6: Boolean
+  options: JsonString
+}
+
+enum NetworkSortField {
+  ID
+  LABEL
+  DRIVER
+  INTERNAL
+  ENABLE_IPV6
+  OPTIONS
+}
+
+":network connection"
+type NetworkConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":network edges"
+  edges: [NetworkEdge!]
+}
+
+":network edge"
+type NetworkEdge {
+  "Cursor"
+  cursor: String!
+
+  ":network node"
+  node: Network!
+}
+
+input NetworkFilterOptions {
+  isNil: Boolean
+  eq: JsonString
+  notEq: JsonString
+  in: [JsonString!]
+  lessThan: JsonString
+  greaterThan: JsonString
+  lessThanOrEqual: JsonString
+  greaterThanOrEqual: JsonString
+}
+
+input NetworkFilterEnableIpv6 {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input NetworkFilterInternal {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input NetworkFilterDriver {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input NetworkFilterLabel {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input NetworkFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input NetworkFilterInput {
+  and: [NetworkFilterInput!]
+  or: [NetworkFilterInput!]
+  not: [NetworkFilterInput!]
+  id: NetworkFilterId
+  label: NetworkFilterLabel
+  driver: NetworkFilterDriver
+  internal: NetworkFilterInternal
+  enableIpv6: NetworkFilterEnableIpv6
+  options: NetworkFilterOptions
+  containers: ContainerFilterInput
+  devices: DeviceFilterInput
+}
+
+input NetworkSortInput {
+  order: SortOrder
+  field: NetworkSortField!
+}
+
+type Network implements Node {
+  id: ID!
+  label: String
+  driver: String!
+  internal: Boolean!
+  enableIpv6: Boolean!
+  options: JsonString!
+  containers(
+    "How to sort the records in the response"
+    sort: [ContainerSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerConnection!
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
+}
+
+"The result of the :delete_release mutation"
+type DeleteReleaseResult {
+  "The record that was successfully deleted"
+  result: Release
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :create_release mutation"
+type CreateReleaseResult {
+  "The successful result of the mutation"
+  result: Release
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateReleaseInput {
+  version: String!
+  applicationId: ID
+  containers: [ReleaseCreateContainersInput!]
+  requiredSystemModels: [ReleaseCreateRequiredSystemModelsInput!]
+}
+
+enum ReleaseSortField {
+  ID
+  VERSION
+  APPLICATION_ID
+}
+
+":release connection"
+type ReleaseConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":release edges"
+  edges: [ReleaseEdge!]
+}
+
+":release edge"
+type ReleaseEdge {
+  "Cursor"
+  cursor: String!
+
+  ":release node"
+  node: Release!
+}
+
+input ReleaseFilterApplicationId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ReleaseFilterVersion {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ReleaseFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ReleaseFilterInput {
+  and: [ReleaseFilterInput!]
+  or: [ReleaseFilterInput!]
+  not: [ReleaseFilterInput!]
+  id: ReleaseFilterId
+  version: ReleaseFilterVersion
+  applicationId: ReleaseFilterApplicationId
+  application: ApplicationFilterInput
+  deployments: DeploymentFilterInput
+  containers: ContainerFilterInput
+  systemModels: SystemModelFilterInput
+}
+
+input ReleaseSortInput {
+  order: SortOrder
+  field: ReleaseSortField!
+}
+
+type Release implements Node {
+  id: ID!
+  version: String!
+  applicationId: ID
+  application: Application
+  deployments(
+    "How to sort the records in the response"
+    sort: [DeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentConnection!
+  containers(
+    "How to sort the records in the response"
+    sort: [ContainerSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerConnection!
+  systemModels(
+    "How to sort the records in the response"
+    sort: [SystemModelSortInput]
+
+    "A filter to limit the results"
+    filter: SystemModelFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [SystemModel!]!
+}
+
+"The result of the :delete_image_credentials mutation"
+type DeleteImageCredentialsResult {
+  "The record that was successfully deleted"
+  result: ImageCredentials
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :create_image_credentials mutation"
+type CreateImageCredentialsResult {
+  "The successful result of the mutation"
+  result: ImageCredentials
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateImageCredentialsInput {
+  label: String!
+  username: String!
+  password: String!
+}
+
+enum ImageCredentialsSortField {
+  ID
+  LABEL
+  USERNAME
+}
+
+":image_credentials connection"
+type ImageCredentialsConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":image_credentials edges"
+  edges: [ImageCredentialsEdge!]
+}
+
+":image_credentials edge"
+type ImageCredentialsEdge {
+  "Cursor"
+  cursor: String!
+
+  ":image_credentials node"
+  node: ImageCredentials!
+}
+
+input ImageCredentialsFilterUsername {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ImageCredentialsFilterLabel {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ImageCredentialsFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ImageCredentialsFilterInput {
+  and: [ImageCredentialsFilterInput!]
+  or: [ImageCredentialsFilterInput!]
+  not: [ImageCredentialsFilterInput!]
+  id: ImageCredentialsFilterId
+  label: ImageCredentialsFilterLabel
+  username: ImageCredentialsFilterUsername
+}
+
+input ImageCredentialsSortInput {
+  order: SortOrder
+  field: ImageCredentialsSortField!
+}
+
+"""
+Contains the credentials used to pull an image from a device.
+
+Credentials are uniquely identified trough their `:id`, a unique
+`name` field is also provided. The module stores `username` and
+`password`
+"""
+type ImageCredentials implements Node {
+  id: ID!
+  label: String!
+  username: String!
+}
+
+input ImageDeploymentFilterImageId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ImageDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input ImageDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ImageDeploymentFilterInput {
+  and: [ImageDeploymentFilterInput!]
+  or: [ImageDeploymentFilterInput!]
+  not: [ImageDeploymentFilterInput!]
+  id: ImageDeploymentFilterId
+  state: ImageDeploymentFilterState
+  imageId: ImageDeploymentFilterImageId
+  image: ImageFilterInput
+}
+
+type ImageDeployment {
+  id: ID!
+  state: String
+  imageId: ID
+  image: Image
+}
+
+input ImageFilterImageCredentialsId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ImageFilterReference {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ImageFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ImageFilterInput {
+  and: [ImageFilterInput!]
+  or: [ImageFilterInput!]
+  not: [ImageFilterInput!]
+  id: ImageFilterId
+  reference: ImageFilterReference
+  imageCredentialsId: ImageFilterImageCredentialsId
+  credentials: ImageCredentialsFilterInput
+  devices: DeviceFilterInput
+  containers: ContainerFilterInput
+}
+
+type Image {
+  id: ID!
+  reference: String!
+  imageCredentialsId: ID
+  credentials: ImageCredentials
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
+  containers(
+    "How to sort the records in the response"
+    sort: [ContainerSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [Container!]!
+}
+
+enum DeploymentEventSortField {
+  ID
+  TYPE
+  MESSAGE
+  INSERTED_AT
+  UPDATED_AT
+}
+
+":deployment_event connection"
+type DeploymentEventConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":deployment_event edges"
+  edges: [DeploymentEventEdge!]
+}
+
+":deployment_event edge"
+type DeploymentEventEdge {
+  "Cursor"
+  cursor: String!
+
+  ":deployment_event node"
+  node: DeploymentEvent!
+}
+
+input DeploymentEventFilterUpdatedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeploymentEventFilterInsertedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeploymentEventFilterMessage {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeploymentEventFilterType {
+  isNil: Boolean
+  eq: DeploymentEventType
+  notEq: DeploymentEventType
+  in: [DeploymentEventType!]
+  lessThan: DeploymentEventType
+  greaterThan: DeploymentEventType
+  lessThanOrEqual: DeploymentEventType
+  greaterThanOrEqual: DeploymentEventType
+}
+
+input DeploymentEventFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentEventFilterInput {
+  and: [DeploymentEventFilterInput!]
+  or: [DeploymentEventFilterInput!]
+  not: [DeploymentEventFilterInput!]
+  id: DeploymentEventFilterId
+  type: DeploymentEventFilterType
+  message: DeploymentEventFilterMessage
+  insertedAt: DeploymentEventFilterInsertedAt
+  updatedAt: DeploymentEventFilterUpdatedAt
+}
+
+input DeploymentEventSortInput {
+  order: SortOrder
+  field: DeploymentEventSortField!
+}
+
+type DeploymentEvent {
+  id: ID!
+  type: DeploymentEventType!
+  message: String
+  addInfo: [String!]
+  insertedAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"The result of the :upgrade_deployment mutation"
+type UpgradeDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpgradeDeploymentInput {
+  target: ID!
+}
+
+"The result of the :send_deployment mutation"
+type SendDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :delete_deployment mutation"
+type DeleteDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :stop_deployment mutation"
+type StopDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :start_deployment mutation"
+type StartDeploymentResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :deploy_release mutation"
+type DeployReleaseResult {
+  "The successful result of the mutation"
+  result: Deployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input DeployReleaseInput {
+  releaseId: ID
+  deviceId: ID!
+}
+
+enum DeploymentSortField {
+  ID
+  STATE
+  TIMED_OUT
+  DEVICE_ID
+  RELEASE_ID
+}
+
+":deployment connection"
+type DeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":deployment edges"
+  edges: [DeploymentEdge!]
+}
+
+":deployment edge"
+type DeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":deployment node"
+  node: Deployment!
+}
+
+input DeploymentFilterReleaseId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentFilterDeviceId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeploymentFilterTimedOut {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input DeploymentFilterState {
+  isNil: Boolean
+  eq: ApplicationDeploymentState
+  notEq: ApplicationDeploymentState
+  in: [ApplicationDeploymentState]
+  lessThan: ApplicationDeploymentState
+  greaterThan: ApplicationDeploymentState
+  lessThanOrEqual: ApplicationDeploymentState
+  greaterThanOrEqual: ApplicationDeploymentState
+}
+
+input DeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input DeploymentFilterInput {
+  and: [DeploymentFilterInput!]
+
+  or: [DeploymentFilterInput!]
+
+  not: [DeploymentFilterInput!]
+
+  id: DeploymentFilterId
+
+  state: DeploymentFilterState
+
+  timedOut: DeploymentFilterTimedOut
+
+  deviceId: DeploymentFilterDeviceId
+
+  releaseId: DeploymentFilterReleaseId
+
+  device: DeviceFilterInput
+
+  release: ReleaseFilterInput
+
+  containerDeployments: ContainerDeploymentFilterInput
+
+  events: DeploymentEventFilterInput
+
+  """
+  The deployment target of a deployment campaign that created this deployment.
+  Only returns targets for deploy and upgrade operation campaigns.
+  Returns nil for other operation types (start, stop, delete).
+  """
+  campaignTarget: CampaignTargetFilterInput
+}
+
+input DeploymentSortInput {
+  order: SortOrder
+  field: DeploymentSortField!
+}
+
+type Deployment implements Node {
+  id: ID!
+
+  state: ApplicationDeploymentState
+
+  timedOut: Boolean!
+
+  deviceId: Int
+
+  releaseId: ID
+
+  device: Device
+
+  release: Release
+
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerDeploymentConnection!
+
+  events(
+    "How to sort the records in the response"
+    sort: [DeploymentEventSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentEventFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentEventConnection!
+
+  """
+  The deployment target of a deployment campaign that created this deployment.
+  Only returns targets for deploy and upgrade operation campaigns.
+  Returns nil for other operation types (start, stop, delete).
+  """
+  campaignTarget: CampaignTarget
+
+  isReady: Boolean
+}
+
+enum ContainerDeploymentSortField {
+  ID
+  STATE
+  CONTAINER_ID
+  DEVICE_ID
+  IMAGE_DEPLOYMENT_ID
+}
+
+":container_deployment connection"
+type ContainerDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container_deployment edges"
+  edges: [ContainerDeploymentEdge!]
+}
+
+":container_deployment edge"
+type ContainerDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container_deployment node"
+  node: ContainerDeployment!
+}
+
+input ContainerDeploymentFilterImageDeploymentId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerDeploymentFilterDeviceId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerDeploymentFilterContainerId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input ContainerDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerDeploymentFilterInput {
+  and: [ContainerDeploymentFilterInput!]
+  or: [ContainerDeploymentFilterInput!]
+  not: [ContainerDeploymentFilterInput!]
+  id: ContainerDeploymentFilterId
+  state: ContainerDeploymentFilterState
+  containerId: ContainerDeploymentFilterContainerId
+  deviceId: ContainerDeploymentFilterDeviceId
+  imageDeploymentId: ContainerDeploymentFilterImageDeploymentId
+  container: ContainerFilterInput
+  device: DeviceFilterInput
+  imageDeployment: ImageDeploymentFilterInput
+  networkDeployments: NetworkDeploymentFilterInput
+  volumeDeployments: VolumeDeploymentFilterInput
+  deviceMappingDeployments: DeviceMappingDeploymentFilterInput
+}
+
+input ContainerDeploymentSortInput {
+  order: SortOrder
+  field: ContainerDeploymentSortField!
+}
+
+type ContainerDeployment {
+  id: ID!
+  state: String
+  containerId: ID
+  deviceId: Int
+  imageDeploymentId: ID
+  container: Container
+  device: Device
+  imageDeployment: ImageDeployment
+  networkDeployments(
+    "How to sort the records in the response"
+    sort: [NetworkDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: NetworkDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): NetworkDeploymentConnection!
+  volumeDeployments(
+    "How to sort the records in the response"
+    sort: [VolumeDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: VolumeDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): VolumeDeploymentConnection!
+  deviceMappingDeployments(
+    "How to sort the records in the response"
+    sort: [DeviceMappingDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceMappingDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceMappingDeploymentConnection!
+}
+
+enum ContainerSortField {
+  ID
+  RESTART_POLICY
+  HOSTNAME
+  PRIVILEGED
+  NETWORK_MODE
+  CPU_PERIOD
+  CPU_QUOTA
+  CPU_REALTIME_PERIOD
+  CPU_REALTIME_RUNTIME
+  MEMORY
+  MEMORY_RESERVATION
+  MEMORY_SWAP
+  MEMORY_SWAPPINESS
+  VOLUME_DRIVER
+  READ_ONLY_ROOTFS
+  IMAGE_ID
+}
+
+":container connection"
+type ContainerConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container edges"
+  edges: [ContainerEdge!]
+}
+
+":container edge"
+type ContainerEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container node"
+  node: Container!
+}
+
+input ContainerFilterImageId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerFilterReadOnlyRootfs {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input ContainerFilterVolumeDriver {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterMemorySwappiness {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterMemorySwap {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterMemoryReservation {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterMemory {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuRealtimeRuntime {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuRealtimePeriod {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuQuota {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterCpuPeriod {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ContainerFilterNetworkMode {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterPrivileged {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input ContainerFilterHostname {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterRestartPolicy {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+}
+
+input ContainerFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ContainerFilterInput {
+  and: [ContainerFilterInput!]
+  or: [ContainerFilterInput!]
+  not: [ContainerFilterInput!]
+  id: ContainerFilterId
+  restartPolicy: ContainerFilterRestartPolicy
+  hostname: ContainerFilterHostname
+  privileged: ContainerFilterPrivileged
+  networkMode: ContainerFilterNetworkMode
+  cpuPeriod: ContainerFilterCpuPeriod
+  cpuQuota: ContainerFilterCpuQuota
+  cpuRealtimePeriod: ContainerFilterCpuRealtimePeriod
+  cpuRealtimeRuntime: ContainerFilterCpuRealtimeRuntime
+  memory: ContainerFilterMemory
+  memoryReservation: ContainerFilterMemoryReservation
+  memorySwap: ContainerFilterMemorySwap
+  memorySwappiness: ContainerFilterMemorySwappiness
+  volumeDriver: ContainerFilterVolumeDriver
+  readOnlyRootfs: ContainerFilterReadOnlyRootfs
+  imageId: ContainerFilterImageId
+  image: ImageFilterInput
+  releases: ReleaseFilterInput
+  networks: NetworkFilterInput
+  devices: DeviceFilterInput
+  containerVolumes: ContainerVolumeFilterInput
+  deviceMappings: DeviceMappingFilterInput
+}
+
+input ContainerSortInput {
+  order: SortOrder
+  field: ContainerSortField!
+}
+
+type Container {
+  id: ID!
+  restartPolicy: String
+  portBindings: [String!]!
+  hostname: String!
+  env: [ContainerEnvVar!]!
+  privileged: Boolean
+  networkMode: String!
+  extraHosts: [String!]!
+  capAdd: [String!]!
+  capDrop: [String!]!
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealtimePeriod: Int
+  cpuRealtimeRuntime: Int
+  memory: Int
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
+  volumeDriver: String!
+  storageOpt: [String!]!
+  readOnlyRootfs: Boolean!
+  tmpfs: [String!]!
+  binds: [String!]!
+  imageId: ID!
+  image: Image!
+  releases(
+    "How to sort the records in the response"
+    sort: [ReleaseSortInput]
+
+    "A filter to limit the results"
+    filter: ReleaseFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ReleaseConnection!
+  networks(
+    "How to sort the records in the response"
+    sort: [NetworkSortInput]
+
+    "A filter to limit the results"
+    filter: NetworkFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): NetworkConnection!
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection!
+  containerVolumes(
+    "How to sort the records in the response"
+    sort: [ContainerVolumeSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerVolumeFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerVolumeConnection!
+  deviceMappings(
+    "How to sort the records in the response"
+    sort: [DeviceMappingSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceMappingFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceMappingConnection!
+}
+
+"The result of the :delete_application mutation"
+type DeleteApplicationResult {
+  "The record that was successfully deleted"
+  result: Application
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :create_application mutation"
+type CreateApplicationResult {
+  "The successful result of the mutation"
+  result: Application
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateApplicationInput {
+  name: String!
+  description: String
+  initialRelease: ApplicationCreateInitialReleaseInput
+  systemModelId: ID
+}
+
+enum ApplicationSortField {
+  ID
+  NAME
+  DESCRIPTION
+}
+
+":application connection"
+type ApplicationConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":application edges"
+  edges: [ApplicationEdge!]
+}
+
+":application edge"
+type ApplicationEdge {
+  "Cursor"
+  cursor: String!
+
+  ":application node"
+  node: Application!
+}
+
+input ApplicationFilterDescription {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ApplicationFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ApplicationFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input ApplicationFilterInput {
+  and: [ApplicationFilterInput!]
+  or: [ApplicationFilterInput!]
+  not: [ApplicationFilterInput!]
+  id: ApplicationFilterId
+  name: ApplicationFilterName
+  description: ApplicationFilterDescription
+  releases: ReleaseFilterInput
+}
+
+input ApplicationSortInput {
+  order: SortOrder
+  field: ApplicationSortField!
+}
+
+type Application implements Node {
+  id: ID!
+  name: String!
+  description: String
+  releases(
+    "How to sort the records in the response"
+    sort: [ReleaseSortInput]
+
+    "A filter to limit the results"
+    filter: ReleaseFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ReleaseConnection!
+}
+
+enum SystemModelPartNumberSortField {
+  ID
+  PART_NUMBER
+}
+
+":system_model_part_number connection"
+type SystemModelPartNumberConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":system_model_part_number edges"
+  edges: [SystemModelPartNumberEdge!]
+}
+
+":system_model_part_number edge"
+type SystemModelPartNumberEdge {
+  "Cursor"
+  cursor: String!
+
+  ":system_model_part_number node"
+  node: SystemModelPartNumber!
+}
+
+input SystemModelPartNumberFilterPartNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelPartNumberFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input SystemModelPartNumberFilterInput {
+  and: [SystemModelPartNumberFilterInput!]
+
+  or: [SystemModelPartNumberFilterInput!]
+
+  not: [SystemModelPartNumberFilterInput!]
+
+  id: SystemModelPartNumberFilterId
+
+  "The part number identifier."
+  partNumber: SystemModelPartNumberFilterPartNumber
+
+  systemModel: SystemModelFilterInput
+}
+
+input SystemModelPartNumberSortInput {
+  order: SortOrder
+  field: SystemModelPartNumberSortField!
+}
+
+type SystemModelPartNumber {
+  id: ID!
+
+  "The part number identifier."
+  partNumber: String!
+
+  systemModel: SystemModel
+}
+
+"The result of the :delete_system_model mutation"
+type DeleteSystemModelResult {
+  "The record that was successfully deleted"
+  result: SystemModel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_system_model mutation"
+type UpdateSystemModelResult {
+  "The successful result of the mutation"
+  result: SystemModel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateSystemModelInput {
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The display name of the system model."
+  name: String
+
+  "A URL to a picture representing the system model."
+  pictureUrl: String
+
+  "The list of part numbers associated with the system model."
+  partNumbers: [String!]
+
+  "A picture representing the system model that will be uploaded to a bucket."
+  pictureFile: Upload
+
+  """
+  A list of descriptions in different languages.
+
+  If a language already exists it is updated. If a null value is passed, the language
+  is deleted.
+  """
+  localizedDescriptions: [LocalizedAttributeUpdateInput!]
+}
+
+"The result of the :create_system_model mutation"
+type CreateSystemModelResult {
+  "The successful result of the mutation"
+  result: SystemModel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateSystemModelInput {
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the system model."
+  name: String!
+
+  "A URL to a picture representing the system model."
+  pictureUrl: String
+
+  "The ID of the hardware type that can be used by devices of this model"
+  hardwareTypeId: ID!
+
+  "The list of part numbers associated with the system model."
+  partNumbers: [String!]!
+
+  "A picture representing the system model that will be uploaded to a bucket."
+  pictureFile: Upload
+
+  "A list of descriptions in different languages."
+  localizedDescriptions: [LocalizedAttributeInput!]
+}
+
+enum SystemModelSortField {
+  ID
+  HANDLE
+  NAME
+  PICTURE_URL
+}
+
+":system_model connection"
+type SystemModelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":system_model edges"
+  edges: [SystemModelEdge!]
+}
+
+":system_model edge"
+type SystemModelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":system_model node"
+  node: SystemModel!
+}
+
+input SystemModelFilterPictureUrl {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input SystemModelFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input SystemModelFilterInput {
+  and: [SystemModelFilterInput!]
+
+  or: [SystemModelFilterInput!]
+
+  not: [SystemModelFilterInput!]
+
+  id: SystemModelFilterId
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: SystemModelFilterHandle
+
+  "The display name of the system model."
+  name: SystemModelFilterName
+
+  "A URL to a picture representing the system model."
+  pictureUrl: SystemModelFilterPictureUrl
+
+  "The list of part numbers associated with the system model."
+  partNumbers: SystemModelPartNumberFilterInput
+
+  "The Hardware type associated with the System Model"
+  hardwareType: HardwareTypeFilterInput
+
+  "The various application releases that require the system model to be deployed."
+  releases: ReleaseFilterInput
+}
+
+input SystemModelSortInput {
+  order: SortOrder
+  field: SystemModelSortField!
+}
+
+"""
+A system model corresponds to what the users thinks as functionally
+equivalent devices (e.g. two revisions of a device containing two different
+embedded chips but having the same enclosure and the same functionality).
+Each SystemModel must be associated to a specific HardwareType.
+"""
+type SystemModel implements Node {
+  id: ID!
+
+  """
+  The identifier of the system model.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the system model."
+  name: String!
+
+  "A URL to a picture representing the system model."
+  pictureUrl: String
+
+  "The list of part numbers associated with the system model."
+  partNumbers(
+    "How to sort the records in the response"
+    sort: [SystemModelPartNumberSortInput]
+
+    "A filter to limit the results"
+    filter: SystemModelPartNumberFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): SystemModelPartNumberConnection!
+
+  "The Hardware type associated with the System Model"
+  hardwareType: HardwareType
+
+  "The various application releases that require the system model to be deployed."
+  releases(
+    "How to sort the records in the response"
+    sort: [ReleaseSortInput]
+
+    "A filter to limit the results"
+    filter: ReleaseFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [Release!]!
+
+  "A list of descriptions in different languages."
+  localizedDescriptions(preferredLanguageTags: [String!]): [LocalizedAttribute!]
+}
+
+enum HardwareTypePartNumberSortField {
+  ID
+  PART_NUMBER
+}
+
+":hardware_type_part_number connection"
+type HardwareTypePartNumberConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":hardware_type_part_number edges"
+  edges: [HardwareTypePartNumberEdge!]
+}
+
+":hardware_type_part_number edge"
+type HardwareTypePartNumberEdge {
+  "Cursor"
+  cursor: String!
+
+  ":hardware_type_part_number node"
+  node: HardwareTypePartNumber!
+}
+
+input HardwareTypePartNumberFilterPartNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input HardwareTypePartNumberFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input HardwareTypePartNumberFilterInput {
+  and: [HardwareTypePartNumberFilterInput!]
+
+  or: [HardwareTypePartNumberFilterInput!]
+
+  not: [HardwareTypePartNumberFilterInput!]
+
+  id: HardwareTypePartNumberFilterId
+
+  "The part number identifier."
+  partNumber: HardwareTypePartNumberFilterPartNumber
+
+  hardwareType: HardwareTypeFilterInput
+}
+
+input HardwareTypePartNumberSortInput {
+  order: SortOrder
+  field: HardwareTypePartNumberSortField!
+}
+
+type HardwareTypePartNumber {
+  id: ID!
+
+  "The part number identifier."
+  partNumber: String!
+
+  hardwareType: HardwareType
+}
+
+"The result of the :delete_hardware_type mutation"
+type DeleteHardwareTypeResult {
+  "The record that was successfully deleted"
+  result: HardwareType
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_hardware_type mutation"
+type UpdateHardwareTypeResult {
+  "The successful result of the mutation"
+  result: HardwareType
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateHardwareTypeInput {
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The display name of the hardware type."
+  name: String
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers: [String!]
+}
+
+"The result of the :create_hardware_type mutation"
+type CreateHardwareTypeResult {
+  "The successful result of the mutation"
+  result: HardwareType
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateHardwareTypeInput {
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the hardware type."
+  name: String!
+
+  partNumbers: [String!]!
+}
+
+enum HardwareTypeSortField {
+  ID
+  HANDLE
+  NAME
+}
+
+":hardware_type connection"
+type HardwareTypeConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":hardware_type edges"
+  edges: [HardwareTypeEdge!]
+}
+
+":hardware_type edge"
+type HardwareTypeEdge {
+  "Cursor"
+  cursor: String!
+
+  ":hardware_type node"
+  node: HardwareType!
+}
+
+input HardwareTypeFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input HardwareTypeFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input HardwareTypeFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input HardwareTypeFilterInput {
+  and: [HardwareTypeFilterInput!]
+
+  or: [HardwareTypeFilterInput!]
+
+  not: [HardwareTypeFilterInput!]
+
+  id: HardwareTypeFilterId
+
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: HardwareTypeFilterHandle
+
+  "The display name of the hardware type."
+  name: HardwareTypeFilterName
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers: HardwareTypePartNumberFilterInput
+}
+
+input HardwareTypeSortInput {
+  order: SortOrder
+  field: HardwareTypeSortField!
+}
+
+"""
+Denotes a type of hardware that devices can have.
+
+It refers to the physical components embedded in a device.
+This can represent, e.g., multiple revisions of a PCB (each with a
+different part number) which are functionally equivalent from the device
+point of view.
+"""
+type HardwareType implements Node {
+  id: ID!
+
+  """
+  The identifier of the hardware type.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the hardware type."
+  name: String!
+
+  "The list of part numbers associated with the hardware type."
+  partNumbers(
+    "How to sort the records in the response"
+    sort: [HardwareTypePartNumberSortInput]
+
+    "A filter to limit the results"
+    filter: HardwareTypePartNumberFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): HardwareTypePartNumberConnection!
+}
+
+type device_changed_result {
+  created: Device
+  updated: Device
+}
+
+"The result of the :set_device_led_behavior mutation"
+type SetDeviceLedBehaviorResult {
+  "The successful result of the mutation"
+  result: Device
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input SetDeviceLedBehaviorInput {
+  "The led behavior."
+  behavior: DeviceLedBehavior!
+}
+
+"The result of the :remove_device_tags mutation"
+type RemoveDeviceTagsResult {
+  "The successful result of the mutation"
+  result: Device
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input RemoveDeviceTagsInput {
+  tags: [String!]!
+}
+
+"The result of the :add_device_tags mutation"
+type AddDeviceTagsResult {
+  "The successful result of the mutation"
+  result: Device
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input AddDeviceTagsInput {
+  tags: [String!]!
+}
+
+"The result of the :update_device mutation"
+type UpdateDeviceResult {
+  "The successful result of the mutation"
+  result: Device
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateDeviceInput {
+  "The display name of the device."
+  name: String
+}
+
+enum DeviceSortField {
+  ID
+  DEVICE_ID
+  NAME
+  ONLINE
+  LAST_CONNECTION
+  LAST_DISCONNECTION
+  LAST_SEEN_IP
+  SERIAL_NUMBER
+  PART_NUMBER
+}
+
+":device connection"
+type DeviceConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device edges"
+  edges: [DeviceEdge!]
+}
+
+":device edge"
+type DeviceEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device node"
+  node: Device!
+}
+
+input DeviceFilterPartNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterSerialNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterLastSeenIp {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterLastDisconnection {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeviceFilterLastConnection {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input DeviceFilterOnline {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+}
+
+input DeviceFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterDeviceId {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeviceFilterInput {
+  and: [DeviceFilterInput!]
+
+  or: [DeviceFilterInput!]
+
+  not: [DeviceFilterInput!]
+
+  id: DeviceFilterId
+
+  "The Astarte device ID of the device."
+  deviceId: DeviceFilterDeviceId
+
+  "The display name of the device."
+  name: DeviceFilterName
+
+  "Whether the device is connected or not to Astarte"
+  online: DeviceFilterOnline
+
+  "The date at which the device last connected to Astarte."
+  lastConnection: DeviceFilterLastConnection
+
+  "The date at which the device last disconnected from Astarte."
+  lastDisconnection: DeviceFilterLastDisconnection
+
+  "The IP address at which the device last connected to Astarte."
+  lastSeenIp: DeviceFilterLastSeenIp
+
+  "The serial number of the device."
+  serialNumber: DeviceFilterSerialNumber
+
+  partNumber: DeviceFilterPartNumber
+
+  "The system model of the device"
+  systemModel: SystemModelFilterInput
+
+  "The tags of the device"
+  tags: TagFilterInput
+
+  "The groups the device belongs to."
+  deviceGroups: DeviceGroupFilterInput
+
+  "The existing OTA operations for this device"
+  otaOperations: OtaOperationFilterInput
+
+  applicationDeployments: DeploymentFilterInput
+}
+
+input DeviceSortInput {
+  order: SortOrder
+  field: DeviceSortField!
+}
+
+"""
+Denotes a device instance that connects and exchanges data.
+
+Each Device is associated to a specific SystemModel, which in turn is
+associated to a specific HardwareType.
+A Device also exposes info about its connection status and some sets of data read by its operating system.
+"""
+type Device implements Node {
+  id: ID!
+
+  "The Astarte device ID of the device."
+  deviceId: String!
+
+  "The display name of the device."
+  name: String!
+
+  "Whether the device is connected or not to Astarte"
+  online: Boolean!
+
+  "The date at which the device last connected to Astarte."
+  lastConnection: DateTime
+
+  "The date at which the device last disconnected from Astarte."
+  lastDisconnection: DateTime
+
+  "The IP address at which the device last connected to Astarte."
+  lastSeenIp: String
+
+  "The serial number of the device."
+  serialNumber: String
+
+  partNumber: String
+
+  "The system model of the device"
+  systemModel: SystemModel
+
+  "The tags of the device"
+  tags(
+    "How to sort the records in the response"
+    sort: [TagSortInput]
+
+    "A filter to limit the results"
+    filter: TagFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): TagConnection!
+
+  "The groups the device belongs to."
+  deviceGroups(
+    "How to sort the records in the response"
+    sort: [DeviceGroupSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceGroupFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [DeviceGroup!]!
+
+  "The existing OTA operations for this device"
+  otaOperations(
+    "How to sort the records in the response"
+    sort: [OtaOperationSortInput]
+
+    "A filter to limit the results"
+    filter: OtaOperationFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): OtaOperationConnection!
+
+  applicationDeployments(
+    "How to sort the records in the response"
+    sort: [DeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentConnection!
+
+  availableImages: [ImageStatus!]
+
+  availableVolumes: [VolumeStatus!]
+
+  availableNetworks: [NetworkStatus!]
+
+  "The capabilities that the device can support."
+  capabilities: [DeviceCapability!]!
+
+  cellularConnection: [Modem!]
+
+  availableDeployments: [DeploymentStatus!]
+
+  baseImage: BaseImageInfo
+
+  availableContainers: [ContainerStatus!]
+
+  availableDeviceMappings: [DeviceMappingStatus!]
+
+  batteryStatus: [BatterySlot!]
+
+  hardwareInfo: HardwareInfo
+
+  """
+  Describes the place where the device is located.
+
+  The field holds information about the device's address, which is
+  estimated by means of Edgehog's geolocation modules and the data
+  published by the device.
+  """
+  location: Location
+
+  networkInterfaces: [NetworkInterface!]
+
+  osInfo: OsInfo
+
+  """
+  Describes the position of a device.
+
+  The field holds information about the GPS coordinates of the device,
+  which are estimated by means of Edgehog's geolocation modules and the
+  data published by the device.
+  """
+  position: Position
+
+  runtimeInfo: RuntimeInfo
+
+  storageUsage: [StorageUnit!]
+
+  systemStatus: SystemStatus
+
+  wifiScanResults: [WifiScanResult!]
+}
+
+input RequestForwarderSessionInput {
+  deviceId: ID!
+}
+
+"The details of a forwarder session."
+type ForwarderSession {
+  "The token that identifies the session."
+  id: ID!
+
+  "The token that identifies the session."
+  token: String!
+
+  "The status of the session."
+  status: ForwarderSessionStatus!
+
+  "The hostname of the forwarder instance."
+  forwarderHostname: String!
+
+  "The port of the forwarder instance."
+  forwarderPort: Int!
+
+  "Indicates if TLS is used when the device connects to the forwarder."
+  secure: Boolean!
+}
+
+"The details of a forwarder instance."
+type ForwarderConfig {
+  "A unique identifier"
+  id: ID!
+
+  "The hostname of the forwarder instance."
+  hostname: String!
+
+  "The port of the forwarder instance."
+  port: Int!
+
+  "Indicates if TLS should used when connecting to the forwarder."
+  secureSessions: Boolean!
+}
+
+"The result of the :delete_device_group mutation"
+type DeleteDeviceGroupResult {
+  "The record that was successfully deleted"
+  result: DeviceGroup
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_device_group mutation"
+type UpdateDeviceGroupResult {
+  "The successful result of the mutation"
+  result: DeviceGroup
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateDeviceGroupInput {
+  "The display name of the device group."
+  name: String
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String
+}
+
+"The result of the :create_device_group mutation"
+type CreateDeviceGroupResult {
+  "The successful result of the mutation"
+  result: DeviceGroup
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateDeviceGroupInput {
+  "The display name of the device group."
+  name: String!
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String!
+}
+
+enum DeviceGroupSortField {
+  ID
+  NAME
+  HANDLE
+  SELECTOR
+}
+
+":device_group connection"
+type DeviceGroupConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_group edges"
+  edges: [DeviceGroupEdge!]
+}
+
+":device_group edge"
+type DeviceGroupEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_group node"
+  node: DeviceGroup!
+}
+
+input DeviceGroupFilterSelector {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceGroupFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceGroupFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceGroupFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input DeviceGroupFilterInput {
+  and: [DeviceGroupFilterInput!]
+
+  or: [DeviceGroupFilterInput!]
+
+  not: [DeviceGroupFilterInput!]
+
+  id: DeviceGroupFilterId
+
+  "The display name of the device group."
+  name: DeviceGroupFilterName
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: DeviceGroupFilterHandle
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: DeviceGroupFilterSelector
+
+  "The devices belonging to the group."
+  devices: DeviceFilterInput
+
+  "The channel associated with the group, if present."
+  channel: ChannelFilterInput
+}
+
+input DeviceGroupSortInput {
+  order: SortOrder
+  field: DeviceGroupSortField!
+}
+
+type DeviceGroup implements Node {
+  id: ID!
+
+  "The display name of the device group."
+  name: String!
+
+  """
+  The identifier of the device group.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  """
+  The Selector that will determine which devices belong to the device group.
+
+  This must be a valid selector expression, consult the Selector section of the Edgehog documentation for more information about Selectors.
+  """
+  selector: String!
+
+  "The devices belonging to the group."
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [Device!]!
+
+  "The channel associated with the group, if present."
+  channel: Channel
+}
+
+enum TagSortField {
+  ID
+  NAME
+}
+
+":tag connection"
+type TagConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":tag edges"
+  edges: [TagEdge!]
+}
+
+":tag edge"
+type TagEdge {
+  "Cursor"
+  cursor: String!
+
+  ":tag node"
+  node: Tag!
+}
+
+input TagFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input TagFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input TagFilterInput {
+  and: [TagFilterInput!]
+  or: [TagFilterInput!]
+  not: [TagFilterInput!]
+  id: TagFilterId
+  name: TagFilterName
+}
+
+input TagSortInput {
+  order: SortOrder
+  field: TagSortField!
+}
+
+"A Tag that can be applied to a resource."
+type Tag {
+  id: ID!
+  name: String!
+}
+
+"The result of the :create_manual_ota_operation mutation"
+type CreateManualOtaOperationResult {
+  "The successful result of the mutation"
+  result: OtaOperation
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateManualOtaOperationInput {
+  "The ID identifying the Device the OTA Operation will be sent to"
+  deviceId: ID!
+
+  "The base image file, which will be uploaded to the storage."
+  baseImageFile: Upload!
+}
+
+enum OtaOperationSortField {
+  ID
+  BASE_IMAGE_URL
+  STATUS
+  STATUS_PROGRESS
+  STATUS_CODE
+  MESSAGE
+  CREATED_AT
+  UPDATED_AT
+}
+
+":ota_operation connection"
+type OtaOperationConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":ota_operation edges"
+  edges: [OtaOperationEdge!]
+}
+
+":ota_operation edge"
+type OtaOperationEdge {
+  "Cursor"
+  cursor: String!
+
+  ":ota_operation node"
+  node: OtaOperation!
+}
+
+input OtaOperationFilterUpdatedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input OtaOperationFilterCreatedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input OtaOperationFilterMessage {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input OtaOperationFilterStatusCode {
+  isNil: Boolean
+  eq: OtaOperationStatusCode
+  notEq: OtaOperationStatusCode
+  in: [OtaOperationStatusCode]
+  lessThan: OtaOperationStatusCode
+  greaterThan: OtaOperationStatusCode
+  lessThanOrEqual: OtaOperationStatusCode
+  greaterThanOrEqual: OtaOperationStatusCode
+}
+
+input OtaOperationFilterStatusProgress {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input OtaOperationFilterStatus {
+  isNil: Boolean
+  eq: OtaOperationStatus
+  notEq: OtaOperationStatus
+  in: [OtaOperationStatus!]
+  lessThan: OtaOperationStatus
+  greaterThan: OtaOperationStatus
+  lessThanOrEqual: OtaOperationStatus
+  greaterThanOrEqual: OtaOperationStatus
+}
+
+input OtaOperationFilterBaseImageUrl {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input OtaOperationFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input OtaOperationFilterInput {
+  and: [OtaOperationFilterInput!]
+
+  or: [OtaOperationFilterInput!]
+
+  not: [OtaOperationFilterInput!]
+
+  id: OtaOperationFilterId
+
+  "The URL of the base image being installed on the device"
+  baseImageUrl: OtaOperationFilterBaseImageUrl
+
+  "The current status of the operation"
+  status: OtaOperationFilterStatus
+
+  "The percentage progress [0-100] for the current status"
+  statusProgress: OtaOperationFilterStatusProgress
+
+  "The current status code of the operation"
+  statusCode: OtaOperationFilterStatusCode
+
+  "A message with additional details about the current status"
+  message: OtaOperationFilterMessage
+
+  "The creation timestamp of the operation"
+  createdAt: OtaOperationFilterCreatedAt
+
+  "The timestamp of the last update to the operation"
+  updatedAt: OtaOperationFilterUpdatedAt
+
+  "The device targeted from the operation"
+  device: DeviceFilterInput
+
+  """
+  The update target of an update campaign that created the managed
+  ota operation, if any.
+  """
+  campaignTarget: CampaignTargetFilterInput
+}
+
+input OtaOperationSortInput {
+  order: SortOrder
+  field: OtaOperationSortField!
+}
+
+"An OTA update operation"
+type OtaOperation {
+  id: ID!
+
+  "The URL of the base image being installed on the device"
+  baseImageUrl: String!
+
+  "The current status of the operation"
+  status: OtaOperationStatus!
+
+  "The percentage progress [0-100] for the current status"
+  statusProgress: Int!
+
+  "The current status code of the operation"
+  statusCode: OtaOperationStatusCode
+
+  "A message with additional details about the current status"
+  message: String
+
+  "The creation timestamp of the operation"
+  createdAt: DateTime!
+
+  "The timestamp of the last update to the operation"
+  updatedAt: DateTime!
+
+  "The device targeted from the operation"
+  device: Device!
+
+  """
+  The update target of an update campaign that created the managed
+  ota operation, if any.
+  """
+  campaignTarget: CampaignTarget
+}
+
+type TenantInfo {
+  id: ID!
+
+  "The tenant name."
+  name: String!
+
+  "The tenant slug."
+  slug: String!
+
+  "The default locale supported by the tenant."
+  defaultLocale: String!
+}
+
+"The result of the :delete_channel mutation"
+type DeleteChannelResult {
+  "The record that was successfully deleted"
+  result: Channel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_channel mutation"
+type UpdateChannelResult {
+  "The successful result of the mutation"
+  result: Channel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateChannelInput {
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String
+
+  "The display name of the channel."
+  name: String
+
+  "The IDs of the target groups that are targeted by this channel."
+  targetGroupIds: [ID!]
+}
+
+"The result of the :create_channel mutation"
+type CreateChannelResult {
+  "The successful result of the mutation"
+  result: Channel
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateChannelInput {
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the channel."
+  name: String!
+
+  "The IDs of the target groups that are targeted by this channel."
+  targetGroupIds: [ID!]
+}
+
+enum ChannelSortField {
+  ID
+  HANDLE
+  NAME
+}
+
+":channel connection"
+type ChannelConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":channel edges"
+  edges: [ChannelEdge!]
+}
+
+":channel edge"
+type ChannelEdge {
+  "Cursor"
+  cursor: String!
+
+  ":channel node"
+  node: Channel!
+}
+
+input ChannelFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ChannelFilterHandle {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input ChannelFilterId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input ChannelFilterInput {
+  and: [ChannelFilterInput!]
+
+  or: [ChannelFilterInput!]
+
+  not: [ChannelFilterInput!]
+
+  id: ChannelFilterId
+
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: ChannelFilterHandle
+
+  "The display name of the channel."
+  name: ChannelFilterName
+
+  "The device groups targeted by the channel."
+  targetGroups: DeviceGroupFilterInput
+
+  campaigns: CampaignFilterInput
+}
+
+input ChannelSortInput {
+  order: SortOrder
+  field: ChannelSortField!
+}
+
+"""
+Represents an Channel.
+
+An Channel represents a set of device groups that can be targeted in an Campaign.
+"""
+type Channel implements Node {
+  id: ID!
+
+  """
+  The identifier of the channel.
+
+  It should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and the hyphen - symbol.
+  """
+  handle: String!
+
+  "The display name of the channel."
+  name: String!
+
+  "The device groups targeted by the channel."
+  targetGroups(
+    "How to sort the records in the response"
+    sort: [DeviceGroupSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceGroupFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceGroupConnection!
+
+  campaigns(
+    "How to sort the records in the response"
+    sort: [CampaignSortInput]
+
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): CampaignConnection!
+}
+
+enum CampaignTargetSortField {
+  ID
+  STATUS
+  RETRY_COUNT
+  LATEST_ATTEMPT
+  COMPLETION_TIMESTAMP
+}
+
+":campaign_target connection"
+type CampaignTargetConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":campaign_target edges"
+  edges: [CampaignTargetEdge!]
+}
+
+":campaign_target edge"
+type CampaignTargetEdge {
+  "Cursor"
+  cursor: String!
+
+  ":campaign_target node"
+  node: CampaignTarget!
+}
+
+input CampaignTargetFilterCompletionTimestamp {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input CampaignTargetFilterLatestAttempt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input CampaignTargetFilterRetryCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int!]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input CampaignTargetFilterStatus {
+  isNil: Boolean
+  eq: CampaignTargetStatus
+  notEq: CampaignTargetStatus
+  in: [CampaignTargetStatus!]
+  lessThan: CampaignTargetStatus
+  greaterThan: CampaignTargetStatus
+  lessThanOrEqual: CampaignTargetStatus
+  greaterThanOrEqual: CampaignTargetStatus
+}
+
+input CampaignTargetFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input CampaignTargetFilterInput {
+  and: [CampaignTargetFilterInput!]
+
+  or: [CampaignTargetFilterInput!]
+
+  not: [CampaignTargetFilterInput!]
+
+  id: CampaignTargetFilterId
+
+  "The status of the campaign target."
+  status: CampaignTargetFilterStatus
+
+  """
+  The number of retries of the campaign target. This indicated how many times
+  Edgehog retried to send all the necessary information about an operation towards
+  the device without receiving acks.
+  """
+  retryCount: CampaignTargetFilterRetryCount
+
+  "The timestamp of the latest attempt to deploy to the campaign target."
+  latestAttempt: CampaignTargetFilterLatestAttempt
+
+  """
+  The timestamp when the campaign target completed its update, either with
+  a success or a failure.
+  """
+  completionTimestamp: CampaignTargetFilterCompletionTimestamp
+
+  campaign: CampaignFilterInput
+
+  device: DeviceFilterInput
+
+  deployment: DeploymentFilterInput
+
+  otaOperation: OtaOperationFilterInput
+}
+
+input CampaignTargetSortInput {
+  order: SortOrder
+  field: CampaignTargetSortField!
+}
+
+"""
+Represents a CampaignTarget.
+
+Campaign targets are the targets of a Campaign, which is composed
+by the target device and the state of the target in the linked
+Campaign
+"""
+type CampaignTarget {
+  id: ID!
+
+  "The status of the campaign target."
+  status: CampaignTargetStatus!
+
+  """
+  The number of retries of the campaign target. This indicated how many times
+  Edgehog retried to send all the necessary information about an operation towards
+  the device without receiving acks.
+  """
+  retryCount: Int!
+
+  "The timestamp of the latest attempt to deploy to the campaign target."
+  latestAttempt: DateTime
+
+  """
+  The timestamp when the campaign target completed its update, either with
+  a success or a failure.
+  """
+  completionTimestamp: DateTime
+
+  campaign: Campaign!
+
+  device: Device!
+
+  deployment: Deployment
+
+  otaOperation: OtaOperation
+}
+
+"The result of the :create_campaign mutation"
+type CreateCampaignResult {
+  "The successful result of the mutation"
+  result: Campaign
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateCampaignInput {
+  name: String!
+
+  "The campaign mechanism to carry the campaign."
+  campaignMechanism: CampaignMechanismInput!
+
+  "The ID of the channel that will be targeted by the campaign."
+  channelId: ID!
+}
+
+enum CampaignSortField {
+  ID
+  NAME
+  STATUS
+  OUTCOME
+  TOTAL_TARGET_COUNT
+  IDLE_TARGET_COUNT
+  IN_PROGRESS_TARGET_COUNT
+  FAILED_TARGET_COUNT
+  SUCCESSFUL_TARGET_COUNT
+}
+
+":campaign connection"
+type CampaignConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":campaign edges"
+  edges: [CampaignEdge!]
+}
+
+":campaign edge"
+type CampaignEdge {
+  "Cursor"
+  cursor: String!
+
+  ":campaign node"
+  node: Campaign!
+}
+
+input CampaignFilterSuccessfulTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input CampaignFilterFailedTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input CampaignFilterInProgressTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input CampaignFilterIdleTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input CampaignFilterTotalTargetCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+}
+
+input CampaignFilterOutcome {
+  isNil: Boolean
+  eq: CampaignOutcome
+  notEq: CampaignOutcome
+  in: [CampaignOutcome]
+  lessThan: CampaignOutcome
+  greaterThan: CampaignOutcome
+  lessThanOrEqual: CampaignOutcome
+  greaterThanOrEqual: CampaignOutcome
+}
+
+input CampaignFilterStatus {
+  isNil: Boolean
+  eq: CampaignStatus
+  notEq: CampaignStatus
+  in: [CampaignStatus!]
+  lessThan: CampaignStatus
+  greaterThan: CampaignStatus
+  lessThanOrEqual: CampaignStatus
+  greaterThanOrEqual: CampaignStatus
+}
+
+input CampaignFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input CampaignFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
+input CampaignFilterInput {
+  and: [CampaignFilterInput!]
+
+  or: [CampaignFilterInput!]
+
+  not: [CampaignFilterInput!]
+
+  id: CampaignFilterId
+
+  name: CampaignFilterName
+
+  "The status of the campaign."
+  status: CampaignFilterStatus
+
+  "The outcome of the campaign."
+  outcome: CampaignFilterOutcome
+
+  "The channel associated with the campaign."
+  channel: ChannelFilterInput
+
+  "The campaign targets belonging to the campaign."
+  campaignTargets: CampaignTargetFilterInput
+
+  "The total number of campaign targets."
+  totalTargetCount: CampaignFilterTotalTargetCount
+
+  "The number of campaign targets with an idle status."
+  idleTargetCount: CampaignFilterIdleTargetCount
+
+  "The number of campaign targets with an in-progress status."
+  inProgressTargetCount: CampaignFilterInProgressTargetCount
+
+  "The number of campaign targets with a failed status."
+  failedTargetCount: CampaignFilterFailedTargetCount
+
+  "The number of campaign targets with a successful status."
+  successfulTargetCount: CampaignFilterSuccessfulTargetCount
+}
+
+input CampaignSortInput {
+  order: SortOrder
+  field: CampaignSortField!
+}
+
+type Campaign implements Node {
+  id: ID!
+
+  name: String!
+
+  "The status of the campaign."
+  status: CampaignStatus!
+
+  "The outcome of the campaign."
+  outcome: CampaignOutcome
+
+  "The campaign mechanism to carry the campaign."
+  campaignMechanism: CampaignMechanism!
+
+  "The channel associated with the campaign."
+  channel: Channel!
+
+  "The campaign targets belonging to the campaign."
+  campaignTargets(
+    "How to sort the records in the response"
+    sort: [CampaignTargetSortInput]
+
+    "A filter to limit the results"
+    filter: CampaignTargetFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): CampaignTargetConnection!
+
+  "The total number of campaign targets."
+  totalTargetCount: Int!
+
+  "The number of campaign targets with an idle status."
+  idleTargetCount: Int!
+
+  "The number of campaign targets with an in-progress status."
+  inProgressTargetCount: Int!
+
+  "The number of campaign targets with a failed status."
+  failedTargetCount: Int!
+
+  "The number of campaign targets with a successful status."
+  successfulTargetCount: Int!
+}
+
+type RootQueryType {
+  "Returns the desired campaign."
+  campaign(
+    "The id of the record"
+    id: ID!
+  ): Campaign
+
+  "Returns all update campaigns."
+  updateCampaigns(
+    "How to sort the records in the response"
+    sort: [CampaignSortInput]
+
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+
+    types: [String!]
+  ): CampaignConnection
+
+  "Returns all deployment campaigns."
+  deploymentCampaigns(
+    "How to sort the records in the response"
+    sort: [CampaignSortInput]
+
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+
+    types: [String!]
+  ): CampaignConnection
+
+  "Returns all available campaigns."
+  campaigns(
+    "How to sort the records in the response"
+    sort: [CampaignSortInput]
+
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): CampaignConnection
+
+  "Returns a single channel."
+  channel(
+    "The id of the record"
+    id: ID!
+  ): Channel
+
+  "Returns a list of channels."
+  channels(
+    "How to sort the records in the response"
+    sort: [ChannelSortInput]
+
+    "A filter to limit the results"
+    filter: ChannelFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ChannelConnection
+
+  "Retrieves the current tenant."
+  tenantInfo: TenantInfo!
+
+  "Returns the list of device tags associated to some device group."
+  existingDeviceTags(
+    "How to sort the records in the response"
+    sort: [TagSortInput]
+
+    "A filter to limit the results"
+    filter: TagFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): TagConnection
+
+  "Returns a single device group."
+  deviceGroup(
+    "The id of the record"
+    id: ID!
+  ): DeviceGroup
+
+  "Returns a list of device groups."
+  deviceGroups(
+    "How to sort the records in the response"
+    sort: [DeviceGroupSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceGroupFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceGroupConnection
+
+  """
+  Fetches the forwarder config, if available.
+  Without a configuration, forwarding functionalities are not available.
+  """
+  forwarderConfig: ForwarderConfig
+
+  "Fetches a forwarder session by its token and the device ID."
+  forwarderSession(token: String!, deviceId: ID!): ForwarderSession
+
+  "Returns a single device."
+  device(
+    "The id of the record"
+    id: ID!
+  ): Device
+
+  "Returns a list of devices."
+  devices(
+    "How to sort the records in the response"
+    sort: [DeviceSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceConnection
+
+  "Returns a single hardware type."
+  hardwareType(
+    "The id of the record"
+    id: ID!
+  ): HardwareType
+
+  "Returns a list of hardware types."
+  hardwareTypes(
+    "How to sort the records in the response"
+    sort: [HardwareTypeSortInput]
+
+    "A filter to limit the results"
+    filter: HardwareTypeFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): HardwareTypeConnection
+
+  "Returns a single system model."
+  systemModel(
+    "The id of the record"
+    id: ID!
+  ): SystemModel
+
+  "Returns a list of system models."
+  systemModels(
+    "How to sort the records in the response"
+    sort: [SystemModelSortInput]
+
+    "A filter to limit the results"
+    filter: SystemModelFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): SystemModelConnection
+
+  "Returns all the available applications."
+  applications(
+    "How to sort the records in the response"
+    sort: [ApplicationSortInput]
+
+    "A filter to limit the results"
+    filter: ApplicationFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ApplicationConnection
+
+  "Returns the desired application."
+  application(
+    "The id of the record"
+    id: ID!
+  ): Application
+
+  "Returns all available deployments."
+  deployments(
+    "How to sort the records in the response"
+    sort: [DeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentConnection
+
+  "Returns the desired deployment."
+  deployment(
+    "The id of the record"
+    id: ID!
+  ): Deployment
+
+  "Returns the desired image credentials."
+  imageCredentials(
+    "The id of the record"
+    id: ID!
+  ): ImageCredentials
+
+  "Returns all available image credentials."
+  listImageCredentials(
+    "How to sort the records in the response"
+    sort: [ImageCredentialsSortInput]
+
+    "A filter to limit the results"
+    filter: ImageCredentialsFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ImageCredentialsConnection
+
+  "Returns the desired release."
+  release(
+    "The id of the record"
+    id: ID!
+  ): Release
+
+  "Returns the desired network."
+  network(
+    "The id of the record"
+    id: ID!
+  ): Network
+
+  "Returns all available networks."
+  networks(
+    "How to sort the records in the response"
+    sort: [NetworkSortInput]
+
+    "A filter to limit the results"
+    filter: NetworkFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): NetworkConnection
+
+  "Returns the desired volume."
+  volume(
+    "The id of the record"
+    id: ID!
+  ): Volume
+
+  "Returns all available volumes."
+  volumes(
+    "How to sort the records in the response"
+    sort: [VolumeSortInput]
+
+    "A filter to limit the results"
+    filter: VolumeFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): VolumeConnection
+
+  "Retrieves a Node from its global id"
+  node(
+    "The Node unique identifier"
+    id: ID!
+  ): Node!
+
+  "Returns a single base image."
+  baseImage(
+    "The id of the record"
+    id: ID!
+  ): BaseImage
+
+  "Returns a single base image collection."
+  baseImageCollection(
+    "The id of the record"
+    id: ID!
+  ): BaseImageCollection
+
+  "Returns a list of base image collections."
+  baseImageCollections(
+    "How to sort the records in the response"
+    sort: [BaseImageCollectionSortInput]
+
+    "A filter to limit the results"
+    filter: BaseImageCollectionFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): BaseImageCollectionConnection
+}
+
+type RootMutationType {
+  "Creates a new campaign."
+  createCampaign(input: CreateCampaignInput!): CreateCampaignResult
+
+  "Creates a new channel."
+  createChannel(input: CreateChannelInput!): CreateChannelResult
+
+  "Updates an channel."
+  updateChannel(id: ID!, input: UpdateChannelInput): UpdateChannelResult
+
+  "Deletes an channel."
+  deleteChannel(id: ID!): DeleteChannelResult
+
+  "Initiates an OTA update with a user provided OS image"
+  createManualOtaOperation(input: CreateManualOtaOperationInput!): CreateManualOtaOperationResult
+
+  "Creates a new device group."
+  createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupResult
+
+  "Updates a device group."
+  updateDeviceGroup(id: ID!, input: UpdateDeviceGroupInput): UpdateDeviceGroupResult
+
+  "Deletes a device group."
+  deleteDeviceGroup(id: ID!): DeleteDeviceGroupResult
+
+  """
+  Requests a forwarder session for the specified device.
+  Returns the session token.
+  """
+  requestForwarderSession(input: RequestForwarderSessionInput!): String!
+
+  "Updates a device."
+  updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult
+
+  "Add tags to a device."
+  addDeviceTags(id: ID!, input: AddDeviceTagsInput!): AddDeviceTagsResult
+
+  "Remove tags from a device."
+  removeDeviceTags(id: ID!, input: RemoveDeviceTagsInput!): RemoveDeviceTagsResult
+
+  "Sets led behavior."
+  setDeviceLedBehavior(id: ID!, input: SetDeviceLedBehaviorInput!): SetDeviceLedBehaviorResult
+
+  "Creates a hardware type."
+  createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypeResult
+
+  "Updates a hardware type."
+  updateHardwareType(id: ID!, input: UpdateHardwareTypeInput): UpdateHardwareTypeResult
+
+  "Deletes a hardware type."
+  deleteHardwareType(id: ID!): DeleteHardwareTypeResult
+
+  "Creates a system model."
+  createSystemModel(input: CreateSystemModelInput!): CreateSystemModelResult
+
+  "Updates an system model."
+  updateSystemModel(id: ID!, input: UpdateSystemModelInput): UpdateSystemModelResult
+
+  "Deletes a system model."
+  deleteSystemModel(id: ID!): DeleteSystemModelResult
+
+  "Create a new application."
+  createApplication(input: CreateApplicationInput!): CreateApplicationResult
+
+  deleteApplication(id: ID!): DeleteApplicationResult
+
+  "Deploy the application on a device"
+  deployRelease(input: DeployReleaseInput!): DeployReleaseResult
+
+  "Sends a :start command to the release on the device."
+  startDeployment(id: ID!): StartDeploymentResult
+
+  "Sends a :stop command to the release on the device."
+  stopDeployment(id: ID!): StopDeploymentResult
+
+  "Sends a :delete command to the release on the device."
+  deleteDeployment(id: ID!): DeleteDeploymentResult
+
+  """
+  Sends the deployment to the device.
+  Deploys the necessary resources and sends the deployment request.
+  """
+  sendDeployment(id: ID!): SendDeploymentResult
+
+  upgradeDeployment(id: ID!, input: UpgradeDeploymentInput!): UpgradeDeploymentResult
+
+  "Create image credentials."
+  createImageCredentials(input: CreateImageCredentialsInput!): CreateImageCredentialsResult
+
+  deleteImageCredentials(id: ID!): DeleteImageCredentialsResult
+
+  "Create a new release."
+  createRelease(input: CreateReleaseInput!): CreateReleaseResult
+
+  "Delete a release and cleanup dangling resources"
+  deleteRelease(id: ID!): DeleteReleaseResult
+
+  "Create a new network."
+  createNetwork(input: CreateNetworkInput): CreateNetworkResult
+
+  "Delete a network if not used by any container."
+  deleteNetwork(id: ID!): DeleteNetworkResult
+
+  "Create a new volume."
+  createVolume(input: CreateVolumeInput!): CreateVolumeResult
+
+  "Delete a volume if not used by any container."
+  deleteVolume(id: ID!): DeleteVolumeResult
+
+  "Create a new base image in a base image collection."
+  createBaseImage(input: CreateBaseImageInput!): CreateBaseImageResult
+
+  "Updates a base image."
+  updateBaseImage(id: ID!, input: UpdateBaseImageInput): UpdateBaseImageResult
+
+  "Deletes a base image."
+  deleteBaseImage(id: ID!): DeleteBaseImageResult
+
+  "Creates a new base image collection."
+  createBaseImageCollection(input: CreateBaseImageCollectionInput!): CreateBaseImageCollectionResult
+
+  "Updates a base image collection."
+  updateBaseImageCollection(id: ID!, input: UpdateBaseImageCollectionInput): UpdateBaseImageCollectionResult
+
+  "Deletes a base image collection."
+  deleteBaseImageCollection(id: ID!): DeleteBaseImageCollectionResult
+}
+
+type RootSubscriptionType {
+  deviceChanged(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_changed_result
+}
+
+"""
+The `Json` scalar type represents arbitrary json string data, represented as UTF-8
+character sequences. The Json type is most often used to represent a free-form
+human-readable json string.
+"""
+scalar JsonString
+
+"""
+The `Json` scalar type represents arbitrary json string data, represented as UTF-8
+character sequences. The Json type is most often used to represent a free-form
+human-readable json string.
+"""
+scalar Json
+
+"""
+The `DateTime` scalar type represents a date and time in the UTC
+timezone. The DateTime appears in a JSON response as an ISO8601 formatted
+string, including UTC timezone ("Z"). The parsed date and time string will
+be converted to UTC if there is an offset.
+"""
+scalar DateTime
+
+"Represents an uploaded file."
+scalar Upload
+
+"""
+Describes hardware-related info of a device.
+
+It exposes data read by a device's operating system about the underlying hardware.
+"""
+type HardwareInfo {
+  "The architecture of the CPU."
+  cpuArchitecture: String
+
+  "The reference code of the CPU model."
+  cpuModel: String
+
+  "The display name of the CPU model."
+  cpuModelName: String
+
+  "The vendor's name."
+  cpuVendor: String
+
+  "The Bytes count of memory."
+  memoryTotalBytes: Int
+}
+
+"Describes the current usage of a storage unit on a device."
+type StorageUnit {
+  "The label of the storage unit."
+  label: String!
+
+  "The total number of bytes of the storage unit."
+  totalBytes: Int
+
+  "The number of free bytes of the storage unit."
+  freeBytes: Int
+}
+
+"Describes the information on the system's base image for a device."
+type BaseImageInfo {
+  "The name of the image."
+  name: String
+
+  "The version of the image."
+  version: String
+
+  "Human readable build identifier of the image."
+  buildId: String
+
+  "A unique string that identifies the release, usually the image hash."
+  fingerprint: String
+}
+
+"Describes an operating system of a device."
+type OsInfo {
+  "The name of the operating system."
+  name: String
+
+  "The version of the operating system."
+  version: String
+}
+
+"Describes the current status of the operating system of a device."
+type SystemStatus {
+  "The identifier of the performed boot sequence."
+  bootId: String
+
+  "The number of free bytes of memory."
+  memoryFreeBytes: Int
+
+  "The number of running tasks on the system."
+  taskCount: Int
+
+  "The number of milliseconds since the last system boot."
+  uptimeMilliseconds: Int
+
+  "The date at which the system status was read."
+  timestamp: DateTime!
+}
+
+"Describes the list of WiFi Access Points found by the device."
+type WifiScanResult {
+  "The channel used by the Access Point."
+  channel: Int
+
+  "Indicates whether the device is connected to the Access Point."
+  connected: Boolean
+
+  "The ESSID advertised by the Access Point."
+  essid: String
+
+  "The MAC address advertised by the Access Point."
+  macAddress: String
+
+  "The power of the radio signal, measured in dBm."
+  rssi: Int
+
+  "The date at which the device found the Access Point."
+  timestamp: DateTime!
+}
+
+"Describes the status of a container on a device."
+type ContainerStatus {
+  "The identifier of the container."
+  id: String
+
+  "The status of the container."
+  status: String
+}
+
+"Describes an Edgehog runtime."
+type RuntimeInfo {
+  "The name of the Edgehog runtime."
+  name: String
+
+  "The version of the Edgehog runtime."
+  version: String
+
+  "The environment of the Edgehog runtime."
+  environment: String
+
+  "The URL that uniquely identifies the Edgehog runtime implementation."
+  url: String
+}
+
+"Describe the available images on the device."
+type ImageStatus {
+  "The image id."
+  id: String
+
+  "Whether the image is pulled or not."
+  pulled: Boolean
+}
+
+"Describes the status of a deployment on a device."
+type DeploymentStatus {
+  "The deployment id."
+  id: String
+
+  "The deployment status, can be :stopped or :started"
+  status: String
+}
+
+"Describes the status of a volume on a device."
+type VolumeStatus {
+  "The volume id."
+  id: String
+
+  "The volume status, whether it was created or not."
+  created: Boolean
+}
+
+"Describe the available networks on the device."
+type NetworkStatus {
+  "The network id."
+  id: String
+
+  "Whether the network has been created."
+  created: Boolean
+}
+
+"Describe the available device mappings on the device."
+type DeviceMappingStatus {
+  "The device mapping id."
+  id: String
+
+  "Whether the device referenced in the mapping is present or not."
+  present: Boolean
+}
