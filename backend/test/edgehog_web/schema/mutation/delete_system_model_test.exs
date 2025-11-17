@@ -73,7 +73,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
 
       result = delete_system_model_mutation(tenant: tenant, id: id)
 
-      assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
+      assert %{fields: [:id], message: "could not be found"} = extract_error!(result) |> dbg()
     end
   end
 
