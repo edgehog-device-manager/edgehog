@@ -114,6 +114,73 @@ const initialData: FormData = {
   requestTimeoutSeconds: 300,
 };
 
+const deploymentCampaignSchema = (intl: any) =>
+  yup
+    .object({
+      name: yup.string().required(),
+      application: yup
+        .object({ id: yup.string().required(), name: yup.string().required() })
+        .required(),
+      release: yup
+        .object({
+          id: yup.string().required(),
+          version: yup.string().required(),
+        })
+        .required(),
+      targetRelease: yup
+        .object({
+          id: yup.string().required(),
+          version: yup.string().required(),
+        })
+        .when("operationType", ([operationType], schema) =>
+          operationType === "UPGRADE"
+            ? schema.required()
+            : schema.notRequired(),
+        ),
+      channel: yup
+        .object({ id: yup.string().required(), name: yup.string().required() })
+        .required(),
+      operationType: yup.string().required(),
+      maxInProgressDeployments: numberSchema
+        .integer()
+        .positive()
+        .label(
+          intl.formatMessage({
+            id: "forms.CreateDeploymentCampaign.maxInProgressDeploymentsLabel",
+            defaultMessage: "Max Pending Operations",
+          }),
+        ),
+      maxFailurePercentage: numberSchema
+        .min(0)
+        .max(100)
+        .label(
+          intl.formatMessage({
+            id: "forms.CreateDeploymentCampaign.maxFailurePercentageValidationLabel",
+            defaultMessage: "Max Failures",
+          }),
+        ),
+      requestTimeoutSeconds: numberSchema
+        .positive()
+        .integer()
+        .min(30)
+        .label(
+          intl.formatMessage({
+            id: "forms.CreateDeploymentCampaign.requestTimeoutSecondsValidationLabel",
+            defaultMessage: "Request Timeout",
+          }),
+        ),
+      createRequestRetries: numberSchema
+        .integer()
+        .min(0)
+        .label(
+          intl.formatMessage({
+            id: "forms.CreateDeploymentCampaign.createRequestRetriesLabel",
+            defaultMessage: "Request Retries",
+          }),
+        ),
+    })
+    .required();
+
 const transformOutputData = (data: FormData): DeploymentCampaignData => {
   const {
     name,
@@ -163,60 +230,6 @@ const CreateDeploymentCampaignForm = ({
 }: Props) => {
   const intl = useIntl();
 
-  const deploymentCampaignSchema = yup
-    .object({
-      name: yup.string().required(),
-      applicationId: yup.string().required(),
-      releaseId: yup.string().required(),
-      targetReleaseId: yup
-        .string()
-        .when("operationType", ([operationType], schema) =>
-          operationType === "UPGRADE"
-            ? schema.required()
-            : schema.notRequired(),
-        ),
-      channelId: yup.string().required(),
-      operationType: yup.string().required(),
-      maxInProgressDeployments: numberSchema
-        .integer()
-        .positive()
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.maxInProgressDeploymentsLabel",
-            defaultMessage: "Max Pending Operations",
-          }),
-        ),
-      maxFailurePercentage: numberSchema
-        .min(0)
-        .max(100)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.maxFailurePercentageValidationLabel",
-            defaultMessage: "Max Failures",
-          }),
-        ),
-      requestTimeoutSeconds: numberSchema
-        .positive()
-        .integer()
-        .min(30)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.requestTimeoutSecondsValidationLabel",
-            defaultMessage: "Request Timeout",
-          }),
-        ),
-      createRequestRetries: numberSchema
-        .integer()
-        .min(0)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.createRequestRetriesLabel",
-            defaultMessage: "Request Retries",
-          }),
-        ),
-    })
-    .required();
-
   const {
     register,
     handleSubmit,
@@ -226,7 +239,7 @@ const CreateDeploymentCampaignForm = ({
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(deploymentCampaignSchema),
+    resolver: yupResolver(deploymentCampaignSchema(intl)),
   });
 
   const { applications, channels } = useFragment(
