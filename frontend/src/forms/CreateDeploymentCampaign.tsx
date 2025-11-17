@@ -18,15 +18,24 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { useMemo } from "react";
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Select from "react-select";
-import semver from "semver";
 
-import type { CreateDeploymentCampaign_OptionsFragment$key } from "api/__generated__/CreateDeploymentCampaign_OptionsFragment.graphql";
+import {
+  CreateDeploymentCampaign_ApplicationOptionsFragment$data,
+  CreateDeploymentCampaign_ApplicationOptionsFragment$key,
+} from "api/__generated__/CreateDeploymentCampaign_ApplicationOptionsFragment.graphql";
+import type { CreateDeploymentCampaign_ApplicationPaginationQuery } from "api/__generated__/CreateDeploymentCampaign_ApplicationPaginationQuery.graphql";
+import {
+  CreateDeploymentCampaign_ChannelOptionsFragment$data,
+  CreateDeploymentCampaign_ChannelOptionsFragment$key,
+} from "api/__generated__/CreateDeploymentCampaign_ChannelOptionsFragment.graphql";
+import { CreateDeploymentCampaign_ChannelPaginationQuery } from "api/__generated__/CreateDeploymentCampaign_ChannelPaginationQuery.graphql";
 import type { OperationType } from "api/__generated__/DeploymentCampaignCreate_CreateDeploymentCampaign_Mutation.graphql";
 
 import Button from "components/Button";
@@ -34,28 +43,17 @@ import Form from "components/Form";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
+import ReleaseSelectWrapper, { ReleaseRecord } from "components/ReleaseSelect";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 import { numberSchema, yup } from "forms";
 import FormFeedback from "forms/FormFeedback";
 
-const DEPLOYMENT_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
-  fragment CreateDeploymentCampaign_OptionsFragment on RootQueryType {
-    applications {
-      edges {
-        node {
-          id
-          name
-          releases {
-            edges {
-              node {
-                id
-                version
-              }
-            }
-          }
-        }
-      }
-    }
-    channels {
+const DEPLOYMENT_CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
+  fragment CreateDeploymentCampaign_ApplicationOptionsFragment on RootQueryType
+  @refetchable(queryName: "CreateDeploymentCampaign_ApplicationPaginationQuery")
+  @argumentDefinitions(filter: { type: "ApplicationFilterInput" }) {
+    applications(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateDeploymentCampaign_applications") {
       edges {
         node {
           id
@@ -66,10 +64,38 @@ const DEPLOYMENT_CAMPAIGN_OPTIONS_FRAGMENT = graphql`
   }
 `;
 
+const DEPLOYMENT_CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT = graphql`
+  fragment CreateDeploymentCampaign_ChannelOptionsFragment on RootQueryType
+  @refetchable(queryName: "CreateDeploymentCampaign_ChannelPaginationQuery")
+  @argumentDefinitions(filter: { type: "ChannelFilterInput" }) {
+    channels(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateDeploymentCampaign_channels") {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+type ApplicationRecord = NonNullable<
+  NonNullable<
+    CreateDeploymentCampaign_ApplicationOptionsFragment$data["applications"]
+  >["edges"]
+>[number]["node"];
+
+type ChannelRecord = NonNullable<
+  NonNullable<
+    CreateDeploymentCampaign_ChannelOptionsFragment$data["channels"]
+  >["edges"]
+>[number]["node"];
+
 type DeploymentCampaignData = {
   channelId: string;
   releaseId: string;
-  targetReleaseId: string;
+  targetReleaseId?: string;
   name: string;
   operationType: OperationType;
   deploymentMechanism: {
@@ -84,10 +110,10 @@ type DeploymentCampaignData = {
 
 type FormData = {
   name: string;
-  channelId: string;
-  applicationId: string;
-  releaseId: string;
-  targetReleaseId: string;
+  channel: ChannelRecord;
+  application: ApplicationRecord;
+  release: ReleaseRecord;
+  targetRelease?: ReleaseRecord;
   operationType: string;
   maxFailurePercentage: number | string;
   maxInProgressDeployments: number | string;
@@ -103,10 +129,9 @@ type SelectOption = {
 
 const initialData: FormData = {
   name: "",
-  channelId: "",
-  applicationId: "",
-  releaseId: "",
-  targetReleaseId: "",
+  channel: { id: "", name: "" },
+  application: { id: "", name: "" },
+  release: { id: "", version: "" },
   operationType: "",
   maxFailurePercentage: "",
   maxInProgressDeployments: "",
@@ -132,11 +157,12 @@ const deploymentCampaignSchema = (intl: any) =>
           id: yup.string().required(),
           version: yup.string().required(),
         })
-        .when("operationType", ([operationType], schema) =>
-          operationType === "UPGRADE"
+        .default(undefined)
+        .when("operationType", ([operationType], schema) => {
+          return operationType === "UPGRADE"
             ? schema.required()
-            : schema.notRequired(),
-        ),
+            : schema.notRequired();
+        }),
       channel: yup
         .object({ id: yup.string().required(), name: yup.string().required() })
         .required(),
@@ -184,9 +210,9 @@ const deploymentCampaignSchema = (intl: any) =>
 const transformOutputData = (data: FormData): DeploymentCampaignData => {
   const {
     name,
-    channelId,
-    releaseId,
-    targetReleaseId,
+    channel,
+    release,
+    targetRelease,
     operationType,
     maxFailurePercentage,
     maxInProgressDeployments,
@@ -194,11 +220,10 @@ const transformOutputData = (data: FormData): DeploymentCampaignData => {
     requestTimeoutSeconds,
   } = data;
 
-  return {
+  const requiredOutput = {
     name,
-    channelId,
-    releaseId,
-    targetReleaseId,
+    channelId: channel.id,
+    releaseId: release.id,
     operationType: operationType as OperationType,
     deploymentMechanism: {
       lazy: {
@@ -215,10 +240,19 @@ const transformOutputData = (data: FormData): DeploymentCampaignData => {
       },
     },
   };
+
+  if (targetRelease) {
+    return {
+      ...requiredOutput,
+      targetReleaseId: targetRelease.id,
+    };
+  }
+  return requiredOutput;
 };
 
 type Props = {
-  deploymentCampaignOptionsRef: CreateDeploymentCampaign_OptionsFragment$key;
+  deploymentCampaignOptionsRef: CreateDeploymentCampaign_ApplicationOptionsFragment$key &
+    CreateDeploymentCampaign_ChannelOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: DeploymentCampaignData) => void;
 };
@@ -236,73 +270,175 @@ const CreateDeploymentCampaignForm = ({
     formState: { errors },
     watch,
     control,
+    resetField,
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: initialData,
     resolver: yupResolver(deploymentCampaignSchema(intl)),
   });
 
-  const { applications, channels } = useFragment(
-    DEPLOYMENT_CAMPAIGN_OPTIONS_FRAGMENT,
+  const onFormSubmit = (data: FormData) => {
+    onSubmit(transformOutputData(data));
+  };
+
+  const selectedApp = watch("application");
+  const selectedRelease = watch("release");
+  const selectedOperationType = watch("operationType");
+
+  const {
+    data: applicationPaginationData,
+    loadNext: loadNextApplications,
+    hasNext: hasNextApplication,
+    isLoadingNext: isLoadingNextApplication,
+    refetch: refetchApplications,
+  } = usePaginationFragment<
+    CreateDeploymentCampaign_ApplicationPaginationQuery,
+    CreateDeploymentCampaign_ApplicationOptionsFragment$key
+  >(
+    DEPLOYMENT_CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT,
     deploymentCampaignOptionsRef,
   );
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const [searchApplicationText, setSearchApplicationText] = useState<
+    string | null
+  >(null);
 
-  const selectedApp = watch("applicationId");
-  const selectedRelease = watch("releaseId");
-  const selectedOperationType = watch("operationType");
+  const debounceApplicationRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetchApplications(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetchApplications(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { name: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetchApplications],
+  );
 
-  const applicationOptions: SelectOption[] = useMemo(() => {
+  useEffect(() => {
+    if (searchApplicationText !== null) {
+      debounceApplicationRefetch(searchApplicationText);
+    }
+  }, [debounceApplicationRefetch, searchApplicationText]);
+
+  const loadNextApplicationOptions = useCallback(() => {
+    if (hasNextApplication && !isLoadingNextApplication) {
+      loadNextApplications(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNextApplication, isLoadingNextApplication, loadNextApplications]);
+
+  const applicationOptions = useMemo(() => {
     return (
-      applications?.edges?.map((app) => ({
-        value: app.node.id,
-        label: app.node.name,
-      })) ?? []
+      applicationPaginationData.applications?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is ApplicationRecord => node != null) ?? []
     );
-  }, [applications?.edges]);
+  }, [applicationPaginationData]);
 
-  const releaseOptions: SelectOption[] = useMemo(() => {
-    if (!selectedApp) return [];
-    const app = applications?.edges?.find((a) => a.node.id === selectedApp);
-    return (
-      app?.node?.releases?.edges?.map(({ node }) => ({
-        value: node.id,
-        label: node.version,
-      })) ?? []
-    );
-  }, [selectedApp, applications?.edges]);
-
-  const targetReleaseOptions: SelectOption[] = useMemo(() => {
-    if (!selectedApp || !selectedRelease) return [];
-
-    const app = applications?.edges?.find((a) => a.node.id === selectedApp);
-    const selectedReleaseNode = app?.node?.releases?.edges?.find(
-      ({ node }) => node.id === selectedRelease,
-    )?.node;
-
-    if (!selectedReleaseNode) return [];
-
-    return (
-      app?.node?.releases?.edges
-        ?.filter(({ node }) =>
-          semver.gt(node.version, selectedReleaseNode.version || "0.0.0"),
+  const getApplicationLabel = (application: ApplicationRecord) =>
+    application.name;
+  const getApplicationValue = (application: ApplicationRecord) =>
+    application.id;
+  const noApplicationOptionsMessage = (inputValue: string) =>
+    inputValue
+      ? intl.formatMessage(
+          {
+            id: "forms.CreateDeploymentCampaign.noApplicationsFoundMatching",
+            defaultMessage: 'No applications found matching "{inputValue}"',
+          },
+          { inputValue },
         )
-        ?.map(({ node }) => ({
-          value: node.id,
-          label: node.version,
-        })) ?? []
-    );
-  }, [selectedApp, selectedRelease, applications?.edges]);
+      : intl.formatMessage({
+          id: "forms.CreateDeploymentCampaign.noApplicationsAvailable",
+          defaultMessage: "No applications available",
+        });
 
-  const channelOptions: SelectOption[] = useMemo(() => {
+  const { onChange: onApplicationChange } = register("application");
+
+  const {
+    data: channelPaginationData,
+    loadNext: loadNextChannels,
+    hasNext: hasNextChannel,
+    isLoadingNext: isLoadingNextChannel,
+    refetch: refetchChannels,
+  } = usePaginationFragment<
+    CreateDeploymentCampaign_ChannelPaginationQuery,
+    CreateDeploymentCampaign_ChannelOptionsFragment$key
+  >(DEPLOYMENT_CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT, deploymentCampaignOptionsRef);
+
+  const [searchChannelText, setSearchChannelText] = useState<string | null>(
+    null,
+  );
+
+  const debounceChannelRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetchChannels(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetchChannels(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { name: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetchChannels],
+  );
+
+  useEffect(() => {
+    if (searchChannelText !== null) {
+      debounceChannelRefetch(searchChannelText);
+    }
+  }, [debounceChannelRefetch, searchChannelText]);
+
+  const loadNextChannelOptions = useCallback(() => {
+    if (hasNextChannel && !isLoadingNextChannel) {
+      loadNextChannels(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNextChannel, isLoadingNextChannel, loadNextChannels]);
+
+  const channels = useMemo(() => {
     return (
-      channels?.edges?.map(({ node }) => ({
-        value: node.id,
-        label: node.name,
-      })) ?? []
+      channelPaginationData.channels?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is ChannelRecord => node != null) ?? []
     );
-  }, [channels?.edges]);
+  }, [channelPaginationData]);
+
+  const getChannelLabel = (channel: ChannelRecord) => channel.name;
+  const getChannelValue = (channel: ChannelRecord) => channel.id;
+  const noChannelOptionsMessage = (inputValue: string) =>
+    inputValue
+      ? intl.formatMessage(
+          {
+            id: "forms.CreateDeploymentCampaign.noChannelsFoundMatching",
+            defaultMessage: 'No channels found matching "{inputValue}"',
+          },
+          { inputValue },
+        )
+      : intl.formatMessage({
+          id: "forms.CreateDeploymentCampaign.noChannelsAvailable",
+          defaultMessage: "No channels available",
+        });
 
   const operationTypesOptions: SelectOption[] = [
     { value: "DEPLOY", label: "Deploy" },
@@ -381,47 +517,45 @@ const CreateDeploymentCampaignForm = ({
           }
         >
           <Controller
-            name="applicationId"
+            name="application"
             control={control}
-            render={({ field }) => (
-              <>
-                <Select
-                  {...field}
-                  value={
-                    applicationOptions.find(
-                      (opt) => opt.value === field.value,
-                    ) || null
-                  }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  options={applicationOptions}
-                  isClearable
-                  placeholder={intl.formatMessage({
-                    id: "forms.CreateDeploymentCampaign.applicationOption",
-                    defaultMessage: "Search or select an application...",
-                  })}
-                  noOptionsMessage={({ inputValue }) =>
-                    inputValue
-                      ? intl.formatMessage(
-                          {
-                            id: "forms.CreateDeploymentCampaign.noApplicationsFoundMatching",
-                            defaultMessage:
-                              'No applications found matching "{inputValue}"',
-                          },
-                          { inputValue },
-                        )
-                      : intl.formatMessage({
-                          id: "forms.CreateDeploymentCampaign.noApplicationsAvailable",
-                          defaultMessage: "No applications available",
-                        })
-                  }
-                  className={errors.applicationId && "is-invalid"}
-                />
-
-                <FormFeedback feedback={errors.applicationId?.message} />
-              </>
+            render={({
+              field: { value, onChange },
+              fieldState: { invalid },
+            }) => (
+              <Select
+                value={value}
+                onChange={(e) => {
+                  onChange(e);
+                  onApplicationChange({ target: e });
+                  resetField("release");
+                }}
+                className={invalid ? "is-invalid" : ""}
+                placeholder={intl.formatMessage({
+                  id: "forms.CreateDeploymentCampaign.applicationOption",
+                  defaultMessage: "Search or select an application...",
+                })}
+                options={applicationOptions}
+                getOptionLabel={getApplicationLabel}
+                getOptionValue={getApplicationValue}
+                noOptionsMessage={({ inputValue }) =>
+                  noApplicationOptionsMessage(inputValue)
+                }
+                isLoading={isLoadingNextApplication}
+                onMenuScrollToBottom={
+                  hasNextApplication ? loadNextApplicationOptions : undefined
+                }
+                onInputChange={(text) => setSearchApplicationText(text)}
+              />
             )}
           />
+          <Form.Control.Feedback type="invalid">
+            {errors.application && (
+              <FormattedMessage id={errors.application?.id?.message} />
+            )}
+          </Form.Control.Feedback>
         </FormRow>
+
         <FormRow
           id="create-deployment-campaign-form-release"
           label={
@@ -431,48 +565,41 @@ const CreateDeploymentCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="releaseId"
-            control={control}
-            render={({ field }) => (
-              <>
-                <Select
-                  {...field}
-                  value={
-                    releaseOptions.find((opt) => opt.value === field.value) ||
-                    null
-                  }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  options={releaseOptions}
-                  isClearable
-                  isDisabled={!selectedApp}
-                  placeholder={intl.formatMessage({
-                    id: "forms.CreateDeploymentCampaign.releaseOption",
-                    defaultMessage: "Search or select a release...",
-                  })}
-                  noOptionsMessage={({ inputValue }) =>
-                    inputValue
-                      ? intl.formatMessage(
-                          {
-                            id: "forms.CreateDeploymentCampaign.noReleasesFoundMatching",
-                            defaultMessage:
-                              'No releases found matching "{inputValue}"',
-                          },
-                          { inputValue },
-                        )
-                      : intl.formatMessage({
-                          id: "forms.CreateDeploymentCampaign.noReleasesAvailable",
-                          defaultMessage: "No releases available",
-                        })
-                  }
-                  className={errors.releaseId && "is-invalid"}
-                />
-
-                <FormFeedback feedback={errors.releaseId?.message} />
-              </>
-            )}
-          />
+          {selectedApp?.id ? (
+            <>
+              <Controller
+                name="release"
+                control={control}
+                render={({
+                  field: { value, onChange },
+                  fieldState: { invalid },
+                }) => (
+                  <ReleaseSelectWrapper
+                    selectedApp={selectedApp}
+                    controllerProps={{
+                      value: value,
+                      invalid: invalid,
+                      onChange: onChange,
+                    }}
+                  />
+                )}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.release && (
+                  <FormattedMessage id={errors.release?.id?.message} />
+                )}
+              </Form.Control.Feedback>
+            </>
+          ) : (
+            <div className="d-flex align-content-center fst-italic text-muted">
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.selectApplication"
+                defaultMessage="Select an application..."
+              />
+            </div>
+          )}
         </FormRow>
+
         {selectedOperationType === "UPGRADE" && (
           <FormRow
             id="create-deployment-campaign-form-target-release"
@@ -483,38 +610,41 @@ const CreateDeploymentCampaignForm = ({
               />
             }
           >
-            <Controller
-              name="targetReleaseId"
-              control={control}
-              render={({ field }) => (
-                <>
-                  <Select
-                    {...field}
-                    value={
-                      releaseOptions.find((opt) => opt.value === field.value) ||
-                      null
-                    }
-                    onChange={(option) => field.onChange(option?.value || "")}
-                    options={targetReleaseOptions}
-                    isClearable
-                    isDisabled={!selectedApp}
-                    placeholder={intl.formatMessage({
-                      id: "forms.CreateDeploymentCampaign.targetReleaseOption",
-                      defaultMessage: "Search or select a target release...",
-                    })}
-                    noOptionsMessage={() =>
-                      intl.formatMessage({
-                        id: "forms.CreateDeploymentCampaign.noTargetReleasesAvailable",
-                        defaultMessage: "No releases available",
-                      })
-                    }
-                    className={errors.targetReleaseId && "is-invalid"}
-                  />
-
-                  <FormFeedback feedback={errors.targetReleaseId?.message} />
-                </>
-              )}
-            />
+            {selectedApp?.id && selectedRelease?.id ? (
+              <>
+                <Controller
+                  name="targetRelease"
+                  control={control}
+                  render={({
+                    field: { value, onChange },
+                    fieldState: { invalid },
+                  }) => (
+                    <ReleaseSelectWrapper
+                      isTarget={true}
+                      selectedApp={selectedApp}
+                      selectedRelease={selectedRelease}
+                      controllerProps={{
+                        value: value,
+                        invalid: invalid,
+                        onChange: onChange,
+                      }}
+                    />
+                  )}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.release && (
+                    <FormattedMessage id={errors.targetRelease?.id?.message} />
+                  )}
+                </Form.Control.Feedback>
+              </>
+            ) : (
+              <div className="d-flex align-content-center fst-italic text-muted">
+                <FormattedMessage
+                  id="forms.CreateDeploymentCampaign.selectApplicationAndRelease"
+                  defaultMessage="Select an application and a release..."
+                />
+              </div>
+            )}
           </FormRow>
         )}
 
@@ -528,46 +658,41 @@ const CreateDeploymentCampaignForm = ({
           }
         >
           <Controller
-            name="channelId"
+            name="channel"
             control={control}
-            render={({ field }) => (
-              <>
-                <Select
-                  {...field}
-                  value={
-                    channelOptions.find((opt) => opt.value === field.value) ||
-                    null
-                  }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  options={channelOptions}
-                  isClearable
-                  placeholder={intl.formatMessage({
-                    id: "forms.CreateDeploymentCampaign.channelOption",
-                    defaultMessage: "Search or select a channel...",
-                  })}
-                  noOptionsMessage={({ inputValue }) =>
-                    inputValue
-                      ? intl.formatMessage(
-                          {
-                            id: "forms.CreateDeploymentCampaign.noChannelsFoundMatching",
-                            defaultMessage:
-                              'No channels found matching "{inputValue}"',
-                          },
-                          { inputValue },
-                        )
-                      : intl.formatMessage({
-                          id: "forms.CreateDeploymentCampaign.noChannelsAvailable",
-                          defaultMessage: "No channels available",
-                        })
-                  }
-                  className={errors.channelId && "is-invalid"}
-                />
-
-                <FormFeedback feedback={errors.channelId?.message} />
-              </>
+            render={({
+              field: { value, onChange },
+              fieldState: { invalid },
+            }) => (
+              <Select
+                value={value}
+                onChange={onChange}
+                className={invalid ? "is-invalid" : ""}
+                placeholder={intl.formatMessage({
+                  id: "forms.CreateDeploymentCampaign.channelOption",
+                  defaultMessage: "Search or select a channel...",
+                })}
+                options={channels}
+                getOptionLabel={getChannelLabel}
+                getOptionValue={getChannelValue}
+                noOptionsMessage={({ inputValue }) =>
+                  noChannelOptionsMessage(inputValue)
+                }
+                isLoading={isLoadingNextChannel}
+                onMenuScrollToBottom={
+                  hasNextChannel ? loadNextChannelOptions : undefined
+                }
+                onInputChange={(text) => setSearchChannelText(text)}
+              />
             )}
           />
+          <Form.Control.Feedback type="invalid">
+            {errors.channel && (
+              <FormattedMessage id={errors.channel?.id?.message} />
+            )}
+          </Form.Control.Feedback>
         </FormRow>
+
         <FormRow
           id="create-deployment-campaign-form-max-in-progress-updates"
           label={
@@ -585,6 +710,7 @@ const CreateDeploymentCampaignForm = ({
           />
           <FormFeedback feedback={errors.maxInProgressDeployments?.message} />
         </FormRow>
+
         <FormRow
           id="create-deployment-campaign-form-max-failure-percentage"
           label={
@@ -670,6 +796,6 @@ const CreateDeploymentCampaignForm = ({
   );
 };
 
-export type { DeploymentCampaignData };
+export type { ApplicationRecord, DeploymentCampaignData };
 
 export default CreateDeploymentCampaignForm;

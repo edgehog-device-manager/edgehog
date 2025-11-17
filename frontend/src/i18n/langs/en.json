@@ -943,6 +943,21 @@
     "defaultMessage": "Status",
     "description": "Title for the Status column of the devices table"
   },
+  "components.ReleaseSelect.ErrorFallback.message": {
+    "defaultMessage": "Failed to load Releases list."
+  },
+  "components.ReleaseSelect.ErrorFallback.reloadButton": {
+    "defaultMessage": "Reload"
+  },
+  "components.ReleaseSelect.noReleasesAvailable": {
+    "defaultMessage": "No releases available"
+  },
+  "components.ReleaseSelect.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "components.ReleaseSelect.releaseOption": {
+    "defaultMessage": "Search or select a release..."
+  },
   "components.ReleaseSystemModelsTable.noSystemModels": {
     "defaultMessage": "No supported system model specified. This release can be applied to any device."
   },
@@ -1682,15 +1697,6 @@
   "forms.CreateDeploymentCampaign.noOperationTypesAvailable": {
     "defaultMessage": "No operation types available"
   },
-  "forms.CreateDeploymentCampaign.noReleasesAvailable": {
-    "defaultMessage": "No releases available"
-  },
-  "forms.CreateDeploymentCampaign.noReleasesFoundMatching": {
-    "defaultMessage": "No releases found matching \"{inputValue}\""
-  },
-  "forms.CreateDeploymentCampaign.noTargetReleasesAvailable": {
-    "defaultMessage": "No releases available"
-  },
   "forms.CreateDeploymentCampaign.operationTypeLabel": {
     "defaultMessage": "Operation type"
   },
@@ -1700,14 +1706,17 @@
   "forms.CreateDeploymentCampaign.releaseLabel": {
     "defaultMessage": "Release"
   },
-  "forms.CreateDeploymentCampaign.releaseOption": {
-    "defaultMessage": "Search or select a release..."
-  },
   "forms.CreateDeploymentCampaign.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
   },
   "forms.CreateDeploymentCampaign.requestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
+  },
+  "forms.CreateDeploymentCampaign.selectApplication": {
+    "defaultMessage": "Select an application..."
+  },
+  "forms.CreateDeploymentCampaign.selectApplicationAndRelease": {
+    "defaultMessage": "Select an application and a release..."
   },
   "forms.CreateDeploymentCampaign.submitButton": {
     "defaultMessage": "Create"
@@ -1717,9 +1726,6 @@
   },
   "forms.CreateDeploymentCampaign.targetReleaseLabel": {
     "defaultMessage": "Target Release"
-  },
-  "forms.CreateDeploymentCampaign.targetReleaseOption": {
-    "defaultMessage": "Search or select a target release..."
   },
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
