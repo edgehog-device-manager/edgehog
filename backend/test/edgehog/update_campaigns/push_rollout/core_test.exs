@@ -95,7 +95,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     assert target.latest_attempt == latest_attempt
   end
 
-  describe "pending_ota_request_timeout_ms/3" do
+  describe "pending_request_timeout_ms/3" do
     setup %{tenant: tenant} do
       target = target_fixture(tenant: tenant)
 
@@ -106,7 +106,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       rollout_mechanism = push_rollout_fixture()
 
       assert_raise MatchError, fn ->
-        Core.pending_ota_request_timeout_ms(ctx.target, rollout_mechanism)
+        Core.pending_request_timeout_ms(ctx.target, rollout_mechanism)
       end
     end
 
@@ -119,7 +119,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       rollout_mechanism = push_rollout_fixture(ota_request_timeout_seconds: 5)
       time_of_check = DateTime.add(latest_attempt, 3, :second)
 
-      assert Core.pending_ota_request_timeout_ms(target, rollout_mechanism, time_of_check) == 2000
+      assert Core.pending_request_timeout_ms(target, rollout_mechanism, time_of_check) == 2000
     end
 
     test "returns 0 if the timeout is already expired", ctx do
@@ -131,7 +131,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       rollout_mechanism = push_rollout_fixture(ota_request_timeout_seconds: 5)
       time_of_check = DateTime.add(latest_attempt, 10, :second)
 
-      assert Core.pending_ota_request_timeout_ms(target, rollout_mechanism, time_of_check) == 0
+      assert Core.pending_request_timeout_ms(target, rollout_mechanism, time_of_check) == 0
     end
   end
 
@@ -227,19 +227,19 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
   end
 
-  describe "get_target_for_ota_operation!/2" do
+  describe "get_target_for_operation!/3" do
     setup %{tenant: tenant} do
       target =
         [tenant: tenant]
         |> target_fixture()
-        |> Ash.load!(Core.default_preloads_for_target())
+        |> Ash.load!([:update_campaign | Core.default_preloads_for_target()])
 
       base_image = base_image_fixture(tenant: tenant)
 
       %{target: target, base_image: base_image}
     end
 
-    test "returns target with an OTA Operation if existing", ctx do
+    test "returns target with an operation if existing", ctx do
       %{
         base_image: base_image,
         target: target,
@@ -250,12 +250,22 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       target_id = target.id
 
       assert %UpdateTarget{id: ^target_id} =
-               Core.get_target_for_ota_operation!(tenant.tenant_id, target.ota_operation_id)
+               Core.get_target_for_operation!(
+                 tenant.tenant_id,
+                 target.update_campaign.id,
+                 target.device_id
+               )
     end
 
     test "raises with non-existing linked target", %{tenant: tenant} do
+      update_campaign = update_campaign_fixture(tenant: tenant)
+
       assert_raise Invalid, fn ->
-        Core.get_target_for_ota_operation!(tenant.tenant_id, Ecto.UUID.generate())
+        Core.get_target_for_operation!(
+          tenant.tenant_id,
+          update_campaign.id,
+          "non_existing_device_id"
+        )
       end
     end
   end
@@ -313,17 +323,17 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
   end
 
-  describe "available_update_slots/2" do
+  describe "available_slots/2" do
     test "returns the number of available update slots given the current in progress count" do
       rollout = push_rollout_fixture(max_in_progress_updates: 10)
       in_progress = 7
-      assert Core.available_update_slots(rollout, in_progress) == 3
+      assert Core.available_slots(rollout, in_progress) == 3
     end
 
     test "returns 0 if there are more in progress updates than allowed" do
       rollout = push_rollout_fixture(max_in_progress_updates: 5)
       in_progress = 7
-      assert Core.available_update_slots(rollout, in_progress) == 0
+      assert Core.available_slots(rollout, in_progress) == 0
     end
   end
 
@@ -493,7 +503,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
   end
 
-  test "mark_ota_operation_as_timed_out!/2", %{tenant: tenant} do
+  test "mark_operation_as_timed_out!/2", %{tenant: tenant} do
     base_image = base_image_fixture(tenant: tenant)
 
     {:ok, target} =
@@ -503,7 +513,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       |> Core.start_target_update(base_image)
 
     ota_operation =
-      Core.mark_ota_operation_as_timed_out!(tenant.tenant_id, target.ota_operation_id)
+      Core.mark_operation_as_timed_out!(tenant.tenant_id, target.ota_operation_id)
 
     assert ota_operation.status == :failure
     assert ota_operation.status_code == :request_timeout
@@ -650,11 +660,11 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
   end
 
-  describe "subscribe_to_ota_operation_updates/1" do
+  describe "subscribe_to_operation_updates/1" do
     test "makes the process receive OTA Operation updates", %{tenant: tenant} do
       ota_operation = managed_ota_operation_fixture(tenant: tenant)
 
-      Core.subscribe_to_ota_operation_updates!(ota_operation.id)
+      Core.subscribe_to_operation_updates!(ota_operation.id)
 
       # Generate a publish on the PubSub
       OSManagement.update_ota_operation_status!(ota_operation, "Acknowledged")
@@ -880,40 +890,40 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
     end
   end
 
-  test "mark_update_campaign_as_in_progress!/1", %{tenant: tenant} do
+  test "mark_campaign_in_progress!/1", %{tenant: tenant} do
     now = DateTime.utc_now()
 
     assert %UpdateCampaign{status: :in_progress, start_timestamp: ^now} =
              3
              |> update_campaign_with_targets_fixture(tenant: tenant)
-             |> Core.mark_update_campaign_as_in_progress!(now)
+             |> Core.mark_campaign_in_progress!(now)
   end
 
-  test "mark_update_campaign_as_failed!/1", %{tenant: tenant} do
+  test "mark_campaign_as_failed!/1", %{tenant: tenant} do
     now = DateTime.utc_now()
 
     assert %UpdateCampaign{status: :finished, outcome: :failure, completion_timestamp: ^now} =
              3
              |> update_campaign_with_targets_fixture(tenant: tenant)
-             |> Core.mark_update_campaign_as_failed!(now)
+             |> Core.mark_campaign_as_failed!(now)
   end
 
-  test "mark_update_campaign_as_successful!/1", %{tenant: tenant} do
+  test "mark_campaign_as_successful!/1", %{tenant: tenant} do
     now = DateTime.utc_now()
 
     assert %UpdateCampaign{status: :finished, outcome: :success, completion_timestamp: ^now} =
              3
              |> update_campaign_with_targets_fixture(tenant: tenant)
-             |> Core.mark_update_campaign_as_successful!(now)
+             |> Core.mark_campaign_as_successful!(now)
   end
 
-  describe "list_targets_with_pending_ota_operation/1" do
+  describe "list_in_progress_targets/1" do
     test "returns empty list if no target has pending ota operations", %{tenant: tenant} do
       update_campaign =
         5 |> update_campaign_with_targets_fixture(tenant: tenant) |> Ash.load!(:update_targets)
 
       assert [] ==
-               Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign.id)
+               Core.list_in_progress_targets(tenant.tenant_id, update_campaign.id)
     end
 
     test "returns target if it has a pending OTA Operation", %{tenant: tenant} do
@@ -927,7 +937,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
                |> Core.start_target_update(update_campaign.base_image)
 
       assert [pending_ota_operation_target] =
-               Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign.id)
+               Core.list_in_progress_targets(tenant.tenant_id, update_campaign.id)
 
       assert pending_ota_operation_target.id == target.id
     end
@@ -948,7 +958,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
                |> OSManagement.update_ota_operation_status(:acknowledged)
 
       assert [] ==
-               Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign.id)
+               Core.list_in_progress_targets(tenant.tenant_id, update_campaign.id)
     end
   end
 

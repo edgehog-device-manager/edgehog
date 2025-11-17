@@ -65,7 +65,7 @@ defmodule Edgehog.DeploymentCampaigns.Resumer.CoreTest do
       %DeploymentCampaign{id: deployment_campaign_id, tenant_id: tenant_id} =
         20
         |> deployment_campaign_with_targets_fixture(tenant: tenant)
-        |> Lazy.Core.mark_deployment_campaign_in_progress!()
+        |> Lazy.Core.mark_campaign_in_progress!()
 
       assert [deployment_campaign] = Enum.to_list(stream_resumable_deployment_campaigns())
 
