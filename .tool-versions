@@ -7,3 +7,4 @@ nodejs 24.11.0
 postgres 18.0
 dprint 0.50.2
 typos 1.40.0
+gleam 1.13.0
