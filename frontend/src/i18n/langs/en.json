@@ -433,6 +433,9 @@
   "components.ContainersTable.tmpfsLabel": {
     "defaultMessage": "Tmpfs"
   },
+  "components.ContainersTable.volumeDriver": {
+    "defaultMessage": "Volume Driver"
+  },
   "components.ContainersTable.volumeDriverLabel": {
     "defaultMessage": "Driver"
   },

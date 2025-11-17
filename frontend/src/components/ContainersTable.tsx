@@ -78,6 +78,7 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
           readOnlyRootfs
           capAdd
           capDrop
+          volumeDriver
           image {
             reference
             credentials {
@@ -760,6 +761,18 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
           checked={container.readOnlyRootfs === true}
           readOnly
         />
+      </FormRow>
+
+      <FormRow
+        id={`containers-${index}-volumeDriver`}
+        label={
+          <FormattedMessage
+            id="components.ContainersTable.volumeDriver"
+            defaultMessage="Volume Driver"
+          />
+        }
+      >
+        <Form.Control value={container.volumeDriver ?? ""} readOnly />
       </FormRow>
 
       <FormRow
