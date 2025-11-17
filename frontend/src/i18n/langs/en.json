@@ -791,6 +791,18 @@
     "defaultMessage": "Selector",
     "description": "Title for the Selector column of the device groups table"
   },
+  "components.DeviceMappingsFormInput.addDeviceMappingButton": {
+    "defaultMessage": "Add Device Mapping"
+  },
+  "components.DeviceMappingsFormInput.cgroupPermissionsLabel": {
+    "defaultMessage": "Container Group Permissions"
+  },
+  "components.DeviceMappingsFormInput.pathInContainerLabel": {
+    "defaultMessage": "Path In Container"
+  },
+  "components.DeviceMappingsFormInput.pathOnHostLabel": {
+    "defaultMessage": "Path On Host"
+  },
   "components.DevicesGroupsTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
     "description": "Title for the Device ID column of the devices table"
@@ -1470,6 +1482,135 @@
   "fieldExplanation.volumes.title": {
     "defaultMessage": "Volume Mounts"
   },
+  "forms.ContainerForm.addExtraHostButton": {
+    "defaultMessage": "Add Extra Host"
+  },
+  "forms.ContainerForm.addVolumeButton": {
+    "defaultMessage": "Add Volume"
+  },
+  "forms.ContainerForm.bindsLabel": {
+    "defaultMessage": "Binds"
+  },
+  "forms.ContainerForm.capAddLabel": {
+    "defaultMessage": "Cap Add"
+  },
+  "forms.ContainerForm.capDropLabel": {
+    "defaultMessage": "Cap Drop"
+  },
+  "forms.ContainerForm.containerTitle": {
+    "defaultMessage": "Container {containerNumber}"
+  },
+  "forms.ContainerForm.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "forms.ContainerForm.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "forms.ContainerForm.cpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "forms.ContainerForm.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.ContainerForm.deviceMappingsLabel": {
+    "defaultMessage": "Device Mappings"
+  },
+  "forms.ContainerForm.deviceMappingsSection": {
+    "defaultMessage": "Device Mappings"
+  },
+  "forms.ContainerForm.envLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "forms.ContainerForm.extraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "forms.ContainerForm.hostnameLabel": {
+    "defaultMessage": "Hostname"
+  },
+  "forms.ContainerForm.imageConfigSection": {
+    "defaultMessage": "Image Configuration"
+  },
+  "forms.ContainerForm.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "forms.ContainerForm.imageReferenceLabel": {
+    "defaultMessage": "Image Reference"
+  },
+  "forms.ContainerForm.importedLabel": {
+    "defaultMessage": "Imported"
+  },
+  "forms.ContainerForm.memoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "forms.ContainerForm.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "forms.ContainerForm.memorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
+  },
+  "forms.ContainerForm.memorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "forms.ContainerForm.modifiedLabel": {
+    "defaultMessage": "Modified"
+  },
+  "forms.ContainerForm.networkConfigSection": {
+    "defaultMessage": "Network Configuration"
+  },
+  "forms.ContainerForm.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "forms.ContainerForm.networksLabel": {
+    "defaultMessage": "Networks"
+  },
+  "forms.ContainerForm.noVolumesMessage": {
+    "defaultMessage": "No volumes available"
+  },
+  "forms.ContainerForm.portBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "forms.ContainerForm.privilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "forms.ContainerForm.readOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "forms.ContainerForm.removeContainerButton": {
+    "defaultMessage": "Remove Container"
+  },
+  "forms.ContainerForm.resourceLimitsSection": {
+    "defaultMessage": "Resource Limits"
+  },
+  "forms.ContainerForm.restartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "forms.ContainerForm.runtimeSection": {
+    "defaultMessage": "Runtime & Environment"
+  },
+  "forms.ContainerForm.securitySection": {
+    "defaultMessage": "Security & Capabilities"
+  },
+  "forms.ContainerForm.storageConfigSection": {
+    "defaultMessage": "Storage Configuration"
+  },
+  "forms.ContainerForm.storageOptLabel": {
+    "defaultMessage": "Storage Options"
+  },
+  "forms.ContainerForm.tmpfsLabel": {
+    "defaultMessage": "Tmpfs Mounts"
+  },
+  "forms.ContainerForm.volumeDriverLabel": {
+    "defaultMessage": "Volume Driver"
+  },
+  "forms.ContainerForm.volumeSelectLabel": {
+    "defaultMessage": "Volume:"
+  },
+  "forms.ContainerForm.volumeTargetLabel": {
+    "defaultMessage": "Target:"
+  },
+  "forms.ContainerForm.volumesLabel": {
+    "defaultMessage": "Volumes"
+  },
   "forms.CreateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
@@ -1591,125 +1732,20 @@
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
-  "forms.CreateRelease.addDeviceMappingButton": {
-    "defaultMessage": "Add Device Mapping"
-  },
-  "forms.CreateRelease.addExtraHostButton": {
-    "defaultMessage": "Add Extra Host"
-  },
-  "forms.CreateRelease.addVolumeButton": {
-    "defaultMessage": "Add Volume"
-  },
-  "forms.CreateRelease.bindsLabel": {
-    "defaultMessage": "Binds"
-  },
-  "forms.CreateRelease.capAddLabel": {
-    "defaultMessage": "Cap Add"
-  },
-  "forms.CreateRelease.capDropLabel": {
-    "defaultMessage": "Cap Drop"
-  },
-  "forms.CreateRelease.cgroupPermissionsLabel": {
-    "defaultMessage": "Container Group Permissions"
-  },
   "forms.CreateRelease.confirmButton": {
     "defaultMessage": "Confirm"
   },
   "forms.CreateRelease.confirmPrompt": {
     "defaultMessage": "Choose a release from which you want to copy containers and their configurations."
   },
-  "forms.CreateRelease.containerTitle": {
-    "defaultMessage": "Container {containerNumber}"
-  },
   "forms.CreateRelease.containersTitle": {
     "defaultMessage": "Containers"
-  },
-  "forms.CreateRelease.cpuPeriodLabel": {
-    "defaultMessage": "CPU Period (microseconds)"
-  },
-  "forms.CreateRelease.cpuQuotaLabel": {
-    "defaultMessage": "CPU Quota (microseconds)"
-  },
-  "forms.CreateRelease.cpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Real-Time Period (microseconds)"
-  },
-  "forms.CreateRelease.cpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
-  },
-  "forms.CreateRelease.deviceMappingsLabel": {
-    "defaultMessage": "Device Mappings"
-  },
-  "forms.CreateRelease.envLabel": {
-    "defaultMessage": "Environment (JSON String)"
-  },
-  "forms.CreateRelease.extraHostsLabel": {
-    "defaultMessage": "Extra Hosts"
-  },
-  "forms.CreateRelease.hostnameLabel": {
-    "defaultMessage": "Hostname"
-  },
-  "forms.CreateRelease.imageCredentialsLabel": {
-    "defaultMessage": "Image Credentials"
-  },
-  "forms.CreateRelease.imageReferenceLabel": {
-    "defaultMessage": "Image Reference"
   },
   "forms.CreateRelease.importSuccessMessage": {
     "defaultMessage": "Release configuration has been successfully imported!"
   },
-  "forms.CreateRelease.importedLabel": {
-    "defaultMessage": "Imported"
-  },
-  "forms.CreateRelease.memoryLabel": {
-    "defaultMessage": "Memory (bytes)"
-  },
-  "forms.CreateRelease.memoryReservationLabel": {
-    "defaultMessage": "Memory Reservation (bytes)"
-  },
-  "forms.CreateRelease.memorySwapInvalid": {
-    "defaultMessage": "Memory Swap must be greater than/equal to Memory."
-  },
-  "forms.CreateRelease.memorySwapLabel": {
-    "defaultMessage": "Memory Swap (bytes)"
-  },
-  "forms.CreateRelease.memorySwappinessLabel": {
-    "defaultMessage": "Memory Swappiness (0-100)"
-  },
-  "forms.CreateRelease.modifiedLabel": {
-    "defaultMessage": "Modified"
-  },
-  "forms.CreateRelease.networkModeLabel": {
-    "defaultMessage": "Network Mode"
-  },
-  "forms.CreateRelease.networksLabel": {
-    "defaultMessage": "Networks"
-  },
   "forms.CreateRelease.noContainersFeedback": {
     "defaultMessage": "The release does not include any container."
-  },
-  "forms.CreateRelease.noVolumesMessage": {
-    "defaultMessage": "No volumes available"
-  },
-  "forms.CreateRelease.pathInContainerLabel": {
-    "defaultMessage": "Path In Container"
-  },
-  "forms.CreateRelease.pathOnHostLabel": {
-    "defaultMessage": "Path On Host"
-  },
-  "forms.CreateRelease.portBindingsLabel": {
-    "defaultMessage": "Port Bindings"
-  },
-  "forms.CreateRelease.privilegedLabel": {
-    "defaultMessage": "Privileged"
-  },
-  "forms.CreateRelease.readOnlyRootfsLabel": {
-    "defaultMessage": "Read-Only Root Filesystem"
-  },
-  "forms.CreateRelease.removeContainerButton": {
-    "defaultMessage": "Remove Container"
-  },
-  "forms.CreateRelease.restartPolicyLabel": {
-    "defaultMessage": "Restart Policy"
   },
   "forms.CreateRelease.reuseResourcesModalTitle": {
     "defaultMessage": "Reuse Resources Modal"
@@ -1720,32 +1756,14 @@
   "forms.CreateRelease.selectRelease": {
     "defaultMessage": "Select Release"
   },
-  "forms.CreateRelease.storageOptLabel": {
-    "defaultMessage": "Storage Options"
-  },
   "forms.CreateRelease.submitButton": {
     "defaultMessage": "Create"
   },
   "forms.CreateRelease.supportedSystemModelsLabels": {
     "defaultMessage": "Supported System Models"
   },
-  "forms.CreateRelease.tmpfsLabel": {
-    "defaultMessage": "Tmpfs Mounts"
-  },
   "forms.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
-  },
-  "forms.CreateRelease.volumeDriverLabel": {
-    "defaultMessage": "Volume Driver"
-  },
-  "forms.CreateRelease.volumeSelectLabel": {
-    "defaultMessage": "Volume:"
-  },
-  "forms.CreateRelease.volumeTargetLabel": {
-    "defaultMessage": "Target:"
-  },
-  "forms.CreateRelease.volumesLabel": {
-    "defaultMessage": "Volumes"
   },
   "forms.CreateUpdateCampaign.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -2002,6 +2020,27 @@
   },
   "froms.CreateUpdateCampaign.submitButton": {
     "defaultMessage": "Create"
+  },
+  "labels.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (µs)"
+  },
+  "labels.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (µs)"
+  },
+  "labels.cpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Realtime Period (µs)"
+  },
+  "labels.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Realtime Runtime (µs)"
+  },
+  "labels.memoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "labels.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "labels.memorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
   },
   "modem.RegistrationStatus.NotRegistered": {
     "defaultMessage": "Not Registered"
@@ -2796,6 +2835,9 @@
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
+  },
+  "validation.memorySwapInvalid": {
+    "defaultMessage": "Memory Swap must be greater than/equal to Memory."
   },
   "validation.number": {
     "defaultMessage": "{label} must be a number."

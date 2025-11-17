@@ -93,19 +93,19 @@ const DeviceMappingsFormInput = ({
           <Row className="mb-3">
             <Col>
               <FormattedMessage
-                id="forms.CreateRelease.pathInContainerLabel"
+                id="components.DeviceMappingsFormInput.pathInContainerLabel"
                 defaultMessage="Path In Container"
               />
             </Col>
             <Col>
               <FormattedMessage
-                id="forms.CreateRelease.pathOnHostLabel"
+                id="components.DeviceMappingsFormInput.pathOnHostLabel"
                 defaultMessage="Path On Host"
               />
             </Col>
             <Col>
               <FormattedMessage
-                id="forms.CreateRelease.cgroupPermissionsLabel"
+                id="components.DeviceMappingsFormInput.cgroupPermissionsLabel"
                 defaultMessage="Container Group Permissions"
               />
             </Col>
@@ -206,7 +206,7 @@ const DeviceMappingsFormInput = ({
           disabled={!editableProps?.canAddDeviceMapping}
         >
           <FormattedMessage
-            id="forms.CreateRelease.addDeviceMappingButton"
+            id="components.DeviceMappingsFormInput.addDeviceMappingButton"
             defaultMessage="Add Device Mapping"
           />
         </Button>

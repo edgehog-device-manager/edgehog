@@ -31,7 +31,7 @@ import MultiSelect from "components/MultiSelect";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
-import { channelHandleSchema, yup, messages } from "forms";
+import { yup, messages, handleSchema } from "forms";
 import { graphql, useFragment } from "react-relay/hooks";
 
 const CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
@@ -97,7 +97,7 @@ type FormData = {
 const channelSchema = yup
   .object({
     name: yup.string().required(),
-    handle: channelHandleSchema.required(),
+    handle: handleSchema.required(),
     targetGroups: yup.array().ensure().min(1, messages.required.id),
   })
   .required();

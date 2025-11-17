@@ -29,7 +29,7 @@ import Icon from "components/Icon";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
-import { hardwareTypeHandleSchema, messages, yup } from "forms";
+import { handleSchema, messages, yup } from "forms";
 
 type HardwareTypeData = {
   name: string;
@@ -48,7 +48,7 @@ type FormData = {
 const hardwareTypeSchema = yup
   .object({
     name: yup.string().required(),
-    handle: hardwareTypeHandleSchema.required(),
+    handle: handleSchema.required(),
     partNumbers: yup
       .array()
       .required()
