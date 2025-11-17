@@ -606,6 +606,9 @@
   "components.DeployedApplicationsTable.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the deployment, please try again."
   },
+  "components.DeployedApplicationsTable.deploymentCampaignNameTitle": {
+    "defaultMessage": "Deployment Campaign"
+  },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },

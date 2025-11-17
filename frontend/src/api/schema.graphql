@@ -2508,17 +2508,35 @@ input DeploymentFilterId {
 
 input DeploymentFilterInput {
   and: [DeploymentFilterInput!]
+
   or: [DeploymentFilterInput!]
+
   not: [DeploymentFilterInput!]
+
   id: DeploymentFilterId
+
   state: DeploymentFilterState
+
   timedOut: DeploymentFilterTimedOut
+
   deviceId: DeploymentFilterDeviceId
+
   releaseId: DeploymentFilterReleaseId
+
   device: DeviceFilterInput
+
   release: ReleaseFilterInput
+
   containerDeployments: ContainerDeploymentFilterInput
+
   events: DeploymentEventFilterInput
+
+  """
+  The deployment target of a deployment campaign that created this deployment.
+  Only returns targets for deploy and upgrade operation campaigns.
+  Returns nil for other operation types (start, stop, delete).
+  """
+  deploymentTarget: DeploymentTargetFilterInput
 }
 
 input DeploymentSortInput {
@@ -2528,12 +2546,19 @@ input DeploymentSortInput {
 
 type Deployment implements Node {
   id: ID!
+
   state: ApplicationDeploymentState
+
   timedOut: Boolean!
+
   deviceId: Int
+
   releaseId: ID
+
   device: Device
+
   release: Release
+
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -2553,6 +2578,7 @@ type Deployment implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerDeploymentConnection!
+
   events(
     "How to sort the records in the response"
     sort: [DeploymentEventSortInput]
@@ -2572,6 +2598,14 @@ type Deployment implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeploymentEventConnection!
+
+  """
+  The deployment target of a deployment campaign that created this deployment.
+  Only returns targets for deploy and upgrade operation campaigns.
+  Returns nil for other operation types (start, stop, delete).
+  """
+  deploymentTarget: DeploymentTarget
+
   isReady: Boolean
 }
 
@@ -4207,6 +4241,8 @@ type Device implements Node {
   baseImage: BaseImageInfo
 
   availableContainers: [ContainerStatus!]
+
+  availableDeviceMappings: [DeviceMappingStatus!]
 
   batteryStatus: [BatterySlot!]
 
@@ -6572,4 +6608,13 @@ type NetworkStatus {
 
   "Whether the network has been created."
   created: Boolean
+}
+
+"Describe the available device mappings on the device."
+type DeviceMappingStatus {
+  "The device mapping id."
+  id: String
+
+  "Whether the device referenced in the mapping is present or not."
+  present: Boolean
 }
