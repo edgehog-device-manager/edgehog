@@ -72,9 +72,9 @@ defmodule Edgehog.UpdateCampaigns do
         get?: true,
         not_found_error?: true
 
-      define :fetch_target_by_ota_operation,
+      define :fetch_target_by_device_and_campaign,
         action: :read,
-        get_by: [:ota_operation_id],
+        get_by: [:device_id, :update_campaign_id],
         not_found_error?: true
 
       define :list_targets_with_pending_ota_operation,

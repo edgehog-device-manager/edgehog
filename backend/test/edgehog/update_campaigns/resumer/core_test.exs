@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ defmodule Edgehog.UpdateCampaigns.Resumer.CoreTest do
       %UpdateCampaign{id: update_campaign_id, tenant_id: tenant_id} =
         20
         |> update_campaign_with_targets_fixture(tenant: tenant)
-        |> PushRollout.Core.mark_update_campaign_as_in_progress!()
+        |> PushRollout.Core.mark_campaign_in_progress!()
 
       assert [update_campaign] = Enum.to_list(stream_resumable_update_campaigns())
 

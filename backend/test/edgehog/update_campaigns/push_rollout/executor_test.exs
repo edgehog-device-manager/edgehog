@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
       [target] = update_campaign.update_targets
       _ = Core.mark_target_as_failed!(target)
-      _ = Core.mark_update_campaign_as_failed!(update_campaign)
+      _ = Core.mark_campaign_as_failed!(update_campaign)
 
       %{pid: pid, ref: ref} = start_and_monitor_executor!(update_campaign)
 
@@ -84,7 +84,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
       [target] = update_campaign.update_targets
       _ = Core.mark_target_as_successful!(target)
-      _ = Core.mark_update_campaign_as_successful!(update_campaign)
+      _ = Core.mark_campaign_as_successful!(update_campaign)
 
       %{pid: pid, ref: ref} = start_and_monitor_executor!(update_campaign)
 
@@ -448,7 +448,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
       ota_operation_ids =
         tenant.tenant_id
-        |> Core.list_targets_with_pending_ota_operation(update_campaign_id)
+        |> Core.list_in_progress_targets(update_campaign_id)
         |> Enum.map(& &1.ota_operation_id)
 
       failing_target_count = max_failed_targets_for_success(target_count, max_failure_percentage)
@@ -541,7 +541,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
       {failing_targets, remaining_targets} =
         tenant.tenant_id
-        |> Core.list_targets_with_pending_ota_operation(update_campaign_id)
+        |> Core.list_in_progress_targets(update_campaign_id)
         |> Enum.split(failing_target_count)
 
       # Produce failing_target_count failures
@@ -689,7 +689,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       wait_for_state(pid, :wait_for_campaign_completion)
 
       [target] =
-        Core.list_targets_with_pending_ota_operation(tenant.tenant_id, update_campaign_id)
+        Core.list_in_progress_targets(tenant.tenant_id, update_campaign_id)
 
       update_ota_operation_status!(tenant, target.ota_operation_id, :failure)
 
@@ -819,7 +819,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
 
   defp mark_all_pending_ota_operations_with_status(tenant, update_campaign_id, status) do
     tenant.tenant_id
-    |> Core.list_targets_with_pending_ota_operation(update_campaign_id)
+    |> Core.list_in_progress_targets(update_campaign_id)
     |> Enum.each(fn target ->
       update_ota_operation_status!(tenant, target.ota_operation_id, status)
     end)
