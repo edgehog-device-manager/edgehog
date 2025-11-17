@@ -92,6 +92,10 @@ jobs:
     - name: Extract GraphQL Schema
       working-directory: ./edgehog/backend
       run: mix absinthe.schema.sdl --schema EdgehogWeb.Schema
+    - name: Setup Node.js 22 for SpectaQL
+      uses: actions/setup-node@v6
+      with:
+        node-version: "22"
     - name: Install SpectaQL
       run: npm install -g spectaql
     - name: Build SpectaQL Docs
