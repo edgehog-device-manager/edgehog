@@ -16,16 +16,28 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-mod image_credentials;
-mod suite;
-
 use clap::Parser;
-use suite::client::EdgehogClient;
-use suite::config::Config;
 
-#[tokio::main]
-async fn main() -> eyre::Result<()> {
-    let config = Config::parse();
-    let client = EdgehogClient::create(&config)?;
-    image_credentials::run_test(client).await
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+pub struct Config {
+    /// Edgehog api host name, e.g. api.edgehog.localhost
+    #[arg(
+        long,
+        default_value = "api.edgehog.localhost",
+        env = "EDGEHOG_TEST_HOSTNAME"
+    )]
+    pub hostname: String,
+
+    /// Scheme to run graphql queries, e.g. http
+    #[arg(long, default_value = "http", env = "EDGEHOG_TEST_SCHEME")]
+    pub scheme: String,
+
+    /// tenant jwt to authorize requests
+    #[arg(long, env = "EDGEHOG_TEST_BEARER")]
+    pub bearer: String,
+
+    /// tenant slug
+    #[arg(long, default_value = "test", env = "EDGEHOG_TEST_TENANT")]
+    pub tenant: String,
 }
