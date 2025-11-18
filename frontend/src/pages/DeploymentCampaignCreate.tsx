@@ -42,21 +42,28 @@ import Center from "components/Center";
 import Page from "components/Page";
 import Result from "components/Result";
 import Spinner from "components/Spinner";
+import { RECORDS_TO_LOAD_FIRST } from "constants";
 import CreateDeploymentCampaignForm from "forms/CreateDeploymentCampaign";
 import type { DeploymentCampaignData } from "forms/CreateDeploymentCampaign";
 import { Link, Route, useNavigate } from "Navigation";
 
 const GET_CREATE_DEPLOYMENT_CAMPAIGN_OPTIONS_QUERY = graphql`
-  query DeploymentCampaignCreate_getOptions_Query {
-    applications {
-      __typename
+  query DeploymentCampaignCreate_getOptions_Query(
+    $first: Int
+    $after: String
+    $filterApplications: ApplicationFilterInput = {}
+    $filterChannels: ChannelFilterInput = {}
+  ) {
+    applications(first: $first, after: $after, filter: $filterApplications) {
       count
     }
-    channels {
-      __typename
+    channels(first: $first, after: $after, filter: $filterChannels) {
       count
     }
-    ...CreateDeploymentCampaign_OptionsFragment
+    ...CreateDeploymentCampaign_ApplicationOptionsFragment
+      @arguments(filter: $filterApplications)
+    ...CreateDeploymentCampaign_ChannelOptionsFragment
+      @arguments(filter: $filterChannels)
   }
 `;
 
@@ -245,7 +252,10 @@ const DeploymentCampaignCreatePage = () => {
 
   const fetchCreateDeploymentCampaignOptions = useCallback(
     () =>
-      getCreateDeploymentCampaignOptions({}, { fetchPolicy: "network-only" }),
+      getCreateDeploymentCampaignOptions(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "network-only" },
+      ),
     [getCreateDeploymentCampaignOptions],
   );
 

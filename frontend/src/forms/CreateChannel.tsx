@@ -18,12 +18,18 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useMemo, useCallback } from "react";
+import _ from "lodash";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useIntl, FormattedMessage } from "react-intl";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
-import type { CreateChannel_OptionsFragment$key } from "api/__generated__/CreateChannel_OptionsFragment.graphql";
+import type {
+  CreateChannel_OptionsFragment$data,
+  CreateChannel_OptionsFragment$key,
+} from "api/__generated__/CreateChannel_OptionsFragment.graphql";
+import type { CreateChannel_PaginationQuery } from "api/__generated__/CreateChannel_PaginationQuery.graphql";
 
 import Button from "components/Button";
 import Form from "components/Form";
@@ -31,12 +37,15 @@ import MultiSelect from "components/MultiSelect";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
 import { FormRow } from "components/FormRow";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
 import { yup, messages, handleSchema } from "forms";
-import { graphql, useFragment } from "react-relay/hooks";
 
-const CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
-  fragment CreateChannel_OptionsFragment on RootQueryType {
-    deviceGroups {
+const CREATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
+  fragment CreateChannel_OptionsFragment on RootQueryType
+  @refetchable(queryName: "CreateChannel_PaginationQuery")
+  @argumentDefinitions(filter: { type: "DeviceGroupFilterInput" }) {
+    deviceGroups(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateChannel_deviceGroups") {
       edges {
         node {
           id
@@ -49,6 +58,10 @@ const CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
     }
   }
 `;
+
+type DeviceGroupRecord = NonNullable<
+  NonNullable<CreateChannel_OptionsFragment$data["deviceGroups"]>["edges"]
+>[number]["node"];
 
 // react-hook-form returns targetGroups validation error as Array<Record<string, FieldError>> type
 // ignoring eventual minimum length validation error type.
@@ -70,16 +83,8 @@ const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
   return null;
 };
 
-type TargetGroup = {
-  readonly id: string;
-  readonly name: string;
-  readonly channel: {
-    readonly name: string;
-  } | null;
-};
-
-const getTargetGroupValue = (targetGroup: TargetGroup) => targetGroup.id;
-const isTargetGroupUsedByOtherChannel = (targetGroup: TargetGroup) =>
+const getTargetGroupValue = (targetGroup: DeviceGroupRecord) => targetGroup.id;
+const isTargetGroupUsedByOtherChannel = (targetGroup: DeviceGroupRecord) =>
   targetGroup.channel !== null;
 
 type ChannelData = {
@@ -91,7 +96,7 @@ type ChannelData = {
 type FormData = {
   name: string;
   handle: string;
-  targetGroups: TargetGroup[];
+  targetGroups: DeviceGroupRecord[];
 };
 
 const channelSchema = yup
@@ -122,11 +127,67 @@ type Props = {
   onSubmit: (data: ChannelData) => void;
 };
 
-const CreateChannel = ({ queryRef, isLoading = false, onSubmit }: Props) => {
-  const { deviceGroups: targetGroups } = useFragment(
-    CREATE_UPDATE_CHANNEL_OPTIONS_FRAGMENT,
-    queryRef,
+const CreateChannelForm = ({
+  queryRef,
+  isLoading = false,
+  onSubmit,
+}: Props) => {
+  const {
+    data: paginationData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+    refetch,
+  } = usePaginationFragment<
+    CreateChannel_PaginationQuery,
+    CreateChannel_OptionsFragment$key
+  >(CREATE_CHANNEL_OPTIONS_FRAGMENT, queryRef);
+
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { name: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
   );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextChannelOptions = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const targetGroups = useMemo(() => {
+    return (
+      paginationData.deviceGroups?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is DeviceGroupRecord => node != null) ?? []
+    );
+  }, [paginationData]);
+
   const {
     register,
     handleSubmit,
@@ -139,8 +200,9 @@ const CreateChannel = ({ queryRef, isLoading = false, onSubmit }: Props) => {
   });
 
   const intl = useIntl();
+
   const getTargetGroupLabel = useCallback(
-    (targetGroup: TargetGroup) => {
+    (targetGroup: DeviceGroupRecord) => {
       if (targetGroup.channel === null) {
         return targetGroup.name;
       }
@@ -162,20 +224,18 @@ const CreateChannel = ({ queryRef, isLoading = false, onSubmit }: Props) => {
 
   const targetGroupOptions = useMemo(() => {
     // move disabled options to the end
-    return [...(targetGroups?.edges?.map((edge) => edge.node) || [])].sort(
-      (group1, group2) => {
-        const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
-        const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
+    return [...targetGroups].sort((group1, group2) => {
+      const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
+      const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
 
-        if (group1Disabled === group2Disabled) {
-          return 0;
-        }
-        if (group1Disabled) {
-          return 1;
-        }
-        return -1;
-      },
-    );
+      if (group1Disabled === group2Disabled) {
+        return 0;
+      }
+      if (group1Disabled) {
+        return 1;
+      }
+      return -1;
+    });
   }, [targetGroups]);
 
   const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
@@ -240,6 +300,11 @@ const CreateChannel = ({ queryRef, isLoading = false, onSubmit }: Props) => {
                 getOptionLabel={getTargetGroupLabel}
                 getOptionValue={getTargetGroupValue}
                 isOptionDisabled={isTargetGroupUsedByOtherChannel}
+                loading={isLoadingNext}
+                onMenuScrollToBottom={
+                  hasNext ? loadNextChannelOptions : undefined
+                }
+                onInputChange={(text) => setSearchText(text)}
               />
             )}
           />
@@ -265,4 +330,4 @@ const CreateChannel = ({ queryRef, isLoading = false, onSubmit }: Props) => {
 
 export type { ChannelData };
 
-export default CreateChannel;
+export default CreateChannelForm;

@@ -30,6 +30,7 @@ export interface FormRowProps {
   layout?: FormRowVariant;
   className?: string;
   labelClassName?: string;
+  valueColClassName?: string;
   labelCol?: number;
   valueCol?: number;
 }
@@ -49,6 +50,7 @@ export const FormRow = ({
   layout = "form-group",
   className,
   labelClassName,
+  valueColClassName,
   labelCol = 3,
   valueCol = 9,
 }: FormRowProps) => {
@@ -70,7 +72,9 @@ export const FormRow = ({
       <Form.Label column sm={labelCol} className={labelClassName}>
         {label}
       </Form.Label>
-      <Col sm={valueCol}>{children}</Col>
+      <Col sm={valueCol} className={valueColClassName}>
+        {children}
+      </Col>
     </Form.Group>
   );
 };

@@ -18,100 +18,199 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { forwardRef, Suspense, useCallback, useEffect, useMemo } from "react";
-import type { ReactElement, ComponentProps } from "react";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { FallbackProps } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useQueryLoader, usePreloadedQuery } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
+import {
+  graphql,
+  PreloadedQuery,
+  usePaginationFragment,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
+import Select from "react-select";
 
-import type {
-  BaseImageSelect_getBaseImages_Query,
-  BaseImageSelect_getBaseImages_Query$data,
-} from "api/__generated__/BaseImageSelect_getBaseImages_Query.graphql";
+import {
+  BaseImageSelect_BaseImagesFragment$data,
+  BaseImageSelect_BaseImagesFragment$key,
+} from "api/__generated__/BaseImageSelect_BaseImagesFragment.graphql";
+import { BaseImageSelect_BaseImagesPaginationQuery } from "api/__generated__/BaseImageSelect_BaseImagesPaginationQuery.graphql";
+import { BaseImageSelect_getBaseImageCollection_Query } from "api/__generated__/BaseImageSelect_getBaseImageCollection_Query.graphql";
 
 import Button from "components/Button";
-import Form from "components/Form";
 import Spinner from "components/Spinner";
 import Stack from "components/Stack";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
+import { BaseImageCollectionRecord } from "forms/CreateUpdateCampaign";
 
-type SelectProps = ComponentProps<typeof Form.Select>;
-type BaseImage = NonNullable<
-  NonNullable<
-    BaseImageSelect_getBaseImages_Query$data["baseImageCollection"]
-  >["baseImages"]["edges"]
->[number]["node"];
-
-const GET_BASE_IMAGES_QUERY = graphql`
-  query BaseImageSelect_getBaseImages_Query($baseImageCollectionId: ID!) {
+const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
+  query BaseImageSelect_getBaseImageCollection_Query(
+    $baseImageCollectionId: ID!
+    $first: Int
+    $after: String
+    $filter: BaseImageFilterInput = {}
+  ) {
     baseImageCollection(id: $baseImageCollectionId) {
-      baseImages {
-        edges {
-          node {
-            id
-            name
-          }
+      ...BaseImageSelect_BaseImagesFragment
+        @arguments(first: $first, after: $after, filter: $filter)
+    }
+  }
+`;
+
+const BASE_IMAGE_SELECT_OPTIONS_FRAGMENT = graphql`
+  fragment BaseImageSelect_BaseImagesFragment on BaseImageCollection
+  @refetchable(queryName: "BaseImageSelect_BaseImagesPaginationQuery")
+  @argumentDefinitions(
+    first: { type: Int }
+    after: { type: String }
+    filter: { type: "BaseImageFilterInput" }
+  ) {
+    baseImages(first: $first, after: $after, filter: $filter)
+      @connection(key: "CreateUpdateCampaign_baseImages") {
+      edges {
+        node {
+          id
+          name
+          version
         }
       }
     }
   }
 `;
 
+export type BaseImageRecord = NonNullable<
+  NonNullable<BaseImageSelect_BaseImagesFragment$data["baseImages"]>["edges"]
+>[number]["node"];
+
 type BaseImageSelectProps = {
-  baseImages?: readonly BaseImage[];
-} & SelectProps;
+  updateCampaignBaseImageOptionsRef: BaseImageSelect_BaseImagesFragment$key | null;
+  controllerProps: ControllerProps;
+};
 
-const BaseImageSelect = forwardRef<HTMLSelectElement, BaseImageSelectProps>(
-  ({ baseImages = [], ...selectProps }, ref) => {
-    const intl = useIntl();
+const BaseImageSelect = ({
+  updateCampaignBaseImageOptionsRef,
+  controllerProps,
+}: BaseImageSelectProps) => {
+  const intl = useIntl();
 
+  const {
+    data: paginationData,
+    loadNext: loadNext,
+    hasNext: hasNext,
+    isLoadingNext: isLoadingNext,
+    refetch: refetch,
+  } = usePaginationFragment<
+    BaseImageSelect_BaseImagesPaginationQuery,
+    BaseImageSelect_BaseImagesFragment$key
+  >(BASE_IMAGE_SELECT_OPTIONS_FRAGMENT, updateCampaignBaseImageOptionsRef);
+
+  const [searchText, setSearchText] = useState<string | null>(null);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { version: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextOptions = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const baseImages = useMemo(() => {
     return (
-      <Form.Select {...selectProps} ref={ref}>
-        <option value="" disabled>
-          {intl.formatMessage({
-            id: "components.BaseImageSelect.selectBaseImageOptionPlaceholder",
-            defaultMessage: "Select a Base Image",
-          })}
-        </option>
-        {baseImages.map((baseImage: BaseImage) => (
-          <option key={baseImage.id} value={baseImage.id}>
-            {baseImage.name}
-          </option>
-        ))}
-      </Form.Select>
+      paginationData?.baseImages?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is BaseImageRecord => node != null) ?? []
     );
-  },
-);
-BaseImageSelect.displayName = "BaseImageSelect";
+  }, [paginationData]);
+
+  const getBaseImageLabel = (baseImage: BaseImageRecord) =>
+    baseImage.name || baseImage.version;
+  const getBaseImageValue = (baseImage: BaseImageRecord) => baseImage.id;
+  const noBaseImageOptionsMessage = (inputValue: string) =>
+    inputValue
+      ? intl.formatMessage(
+          {
+            id: "components.BaseImageSelect.noBaseImagesFoundMatching",
+            defaultMessage: 'No base images found matching "{inputValue}"',
+          },
+          { inputValue },
+        )
+      : intl.formatMessage({
+          id: "components.BaseImageSelect.noBaseImagesAvailable",
+          defaultMessage: "No base images available",
+        });
+
+  return (
+    <Select
+      value={controllerProps.value}
+      onChange={controllerProps.onChange}
+      className={controllerProps.invalid ? "is-invalid" : ""}
+      placeholder={intl.formatMessage({
+        id: "components.BaseImageSelect.baseImageOption",
+        defaultMessage: "Search or select a base image...",
+      })}
+      options={baseImages}
+      getOptionLabel={getBaseImageLabel}
+      getOptionValue={getBaseImageValue}
+      noOptionsMessage={({ inputValue }) =>
+        noBaseImageOptionsMessage(inputValue)
+      }
+      isLoading={isLoadingNext}
+      onMenuScrollToBottom={hasNext ? loadNextOptions : undefined}
+      onInputChange={(text) => setSearchText(text)}
+    />
+  );
+};
 
 type BaseImageSelectContentProps = {
-  baseImagesQuery: PreloadedQuery<BaseImageSelect_getBaseImages_Query>;
-  notFoundComponent: ReactElement;
-} & SelectProps;
+  baseImageCollectionQuery: PreloadedQuery<BaseImageSelect_getBaseImageCollection_Query>;
+  controllerProps: ControllerProps;
+};
 
-const BaseImageSelectContent = forwardRef<
-  HTMLSelectElement,
-  BaseImageSelectContentProps
->(({ baseImagesQuery, notFoundComponent, ...selectProps }, ref) => {
-  const { baseImageCollection } =
-    usePreloadedQuery<BaseImageSelect_getBaseImages_Query>(
-      GET_BASE_IMAGES_QUERY,
-      baseImagesQuery,
-    );
+const BaseImageSelectContent = ({
+  baseImageCollectionQuery,
+  controllerProps,
+}: BaseImageSelectContentProps) => {
+  const { baseImageCollection } = usePreloadedQuery(
+    GET_BASE_IMAGE_COLLECTION_QUERY,
+    baseImageCollectionQuery,
+  );
 
-  if (baseImageCollection === null) {
-    return notFoundComponent;
-  }
-
-  const baseImages =
-    baseImageCollection.baseImages.edges?.map(
-      (edge: { node: BaseImage }) => edge.node,
-    ) ?? [];
-
-  return <BaseImageSelect {...selectProps} baseImages={baseImages} ref={ref} />;
-});
-BaseImageSelectContent.displayName = "BaseImageSelectContent";
+  return (
+    <BaseImageSelect
+      updateCampaignBaseImageOptionsRef={baseImageCollection}
+      controllerProps={controllerProps}
+    />
+  );
+};
 
 const ErrorFallback = ({ resetErrorBoundary }: FallbackProps) => (
   <Stack direction="horizontal">
@@ -130,59 +229,53 @@ const ErrorFallback = ({ resetErrorBoundary }: FallbackProps) => (
   </Stack>
 );
 
+type ControllerProps = {
+  value: BaseImageRecord;
+  invalid: boolean;
+  onChange: (...event: any[]) => void;
+};
+
 type BaseImageSelectWrapperProps = {
-  baseImageCollectionId?: string;
-} & SelectProps;
+  selectedBaseImageCollection: BaseImageCollectionRecord;
+  controllerProps: ControllerProps;
+};
 
-const BaseImageSelectWrapper = forwardRef<
-  HTMLSelectElement,
-  BaseImageSelectWrapperProps
->((props, ref) => {
-  const { baseImageCollectionId, ...selectProps } = props;
+const BaseImageSelectWrapper = ({
+  selectedBaseImageCollection,
+  controllerProps,
+}: BaseImageSelectWrapperProps) => {
+  const [getBaseImageCollectionQuery, getBaseImageCollection] =
+    useQueryLoader<BaseImageSelect_getBaseImageCollection_Query>(
+      GET_BASE_IMAGE_COLLECTION_QUERY,
+    );
 
-  const [getBaseImagesQuery, getBaseImages] =
-    useQueryLoader<BaseImageSelect_getBaseImages_Query>(GET_BASE_IMAGES_QUERY);
+  const fetchBaseImageCollection = useCallback(() => {
+    getBaseImageCollection(
+      {
+        baseImageCollectionId: selectedBaseImageCollection.id,
+        first: RECORDS_TO_LOAD_FIRST,
+      },
+      { fetchPolicy: "network-only" },
+    );
+  }, [getBaseImageCollection, selectedBaseImageCollection]);
 
-  const fetchBaseImages = useCallback(() => {
-    baseImageCollectionId &&
-      getBaseImages({ baseImageCollectionId }, { fetchPolicy: "network-only" });
-  }, [getBaseImages, baseImageCollectionId]);
-
-  useEffect(fetchBaseImages, [fetchBaseImages]);
-
-  const notFound = useMemo(
-    () => (
-      <ErrorFallback
-        resetErrorBoundary={fetchBaseImages}
-        error={new Error("Base Image Collection not found")}
-      />
-    ),
-    [fetchBaseImages],
-  );
-
-  if (!baseImageCollectionId) {
-    return <BaseImageSelect {...selectProps} ref={ref} disabled />;
-  }
+  useEffect(fetchBaseImageCollection, [fetchBaseImageCollection]);
 
   return (
     <ErrorBoundary
-      resetKeys={[baseImageCollectionId]}
-      onReset={fetchBaseImages}
+      onReset={fetchBaseImageCollection}
       FallbackComponent={ErrorFallback}
     >
       <Suspense fallback={<Spinner />}>
-        {getBaseImagesQuery && (
+        {getBaseImageCollectionQuery && (
           <BaseImageSelectContent
-            {...selectProps}
-            baseImagesQuery={getBaseImagesQuery}
-            notFoundComponent={notFound}
-            ref={ref}
+            baseImageCollectionQuery={getBaseImageCollectionQuery}
+            controllerProps={controllerProps}
           />
         )}
       </Suspense>
     </ErrorBoundary>
   );
-});
-BaseImageSelectWrapper.displayName = "BaseImageSelectWrapper";
+};
 
 export default BaseImageSelectWrapper;
