@@ -23,6 +23,7 @@ import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import Collapse from "react-bootstrap/Collapse";
 import Button from "react-bootstrap/Button";
+import { Stack } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
@@ -191,13 +192,13 @@ const VolumeDetails = ({
   };
 
   return (
-    <div className="mt-3">
-      <h5>
+    <div className="mt-1">
+      <div className="mb-2">
         <FormattedMessage
           id="components.ContainersTable.volumesLabel"
           defaultMessage="Volumes"
         />
-      </h5>
+      </div>
 
       {!containerVolumes?.edges?.length ? (
         <p className="fst-italic">
@@ -218,7 +219,7 @@ const VolumeDetails = ({
             >
               <Button
                 variant="light"
-                className="w-100 d-flex align-items-center fw-bold"
+                className="w-100 d-flex align-items-center"
                 onClick={() => toggleVolume(volIndex)}
                 aria-expanded={isOpen}
               >
@@ -317,13 +318,13 @@ const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
   };
 
   return (
-    <div className="mt-3">
-      <h5>
+    <div className="mt-1">
+      <div className="mb-2">
         <FormattedMessage
           id="components.ContainersTable.networksLabel"
           defaultMessage="Networks"
         />
-      </h5>
+      </div>
 
       {!networks?.edges?.length ? (
         <p className="fst-italic">
@@ -344,7 +345,7 @@ const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
             >
               <Button
                 variant="light"
-                className="w-100 d-flex align-items-center fw-bold"
+                className="w-100 d-flex align-items-center"
                 onClick={() => toggleNetwork(netIndex)}
                 aria-expanded={isOpen}
               >
@@ -456,12 +457,12 @@ const DeviceMappingDetails = ({
   const dmFormInputProps = { deviceMappings: deviceMappings };
   return (
     <div className="mt-3">
-      <h5>
+      <h6>
         <FormattedMessage
           id="components.ContainersTable.deviceMappingsLabel"
           defaultMessage="Device Mappings"
         />
-      </h5>
+      </h6>
 
       {!deviceMappings?.edges?.length ? (
         <p className="fst-italic">
@@ -505,365 +506,432 @@ type ContainerDetailsProps = {
 const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
   return (
     <div style={styles.detailsWrapper}>
-      <FormRow
-        id={`containers-${index}-env`}
-        label={
+      {/* Image Configuration Section */}
+      <div className="border-bottom pb-3 mt-2">
+        <h6 className="mb-3">
           <FormattedMessage
-            id="components.ContainersTable.envLabel"
-            defaultMessage="Environment (JSON String)"
+            id="forms.ContainersTable.imageConfigSection"
+            defaultMessage="Image Configuration"
           />
-        }
-      >
-        <MonacoJsonEditor
-          value={formatEnvJson(container.env)}
-          onChange={() => {}}
-          defaultValue={formatEnvJson(container.env)}
-          readonly={true}
-          initialLines={1}
-        />
-      </FormRow>
+        </h6>
+        <Stack gap={2}>
+          <FormRow
+            id={`containers-${index}-image-reference`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.imageReferenceLabel"
+                defaultMessage="Image Reference"
+              />
+            }
+          >
+            <Form.Control value={container.image?.reference ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-extraHosts`}
-        label={
+          <FormRow
+            id={`containers-${index}-image-credentials`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.imageCredentialsLabel"
+                defaultMessage="Image Credentials"
+              />
+            }
+          >
+            <Form.Control
+              value={
+                container.image?.credentials
+                  ? `${container.image.credentials.label} (${container.image.credentials.username})`
+                  : ""
+              }
+              readOnly
+            />
+          </FormRow>
+        </Stack>
+      </div>
+      {/* Network Configuration Section */}
+      <div className="border-bottom pb-3">
+        <h6 className="mt-3 mb-3">
           <FormattedMessage
-            id="components.ContainersTable.extraHostsLabel"
-            defaultMessage="Extra Hosts"
+            id="forms.ContainersTable.networkConfigSection"
+            defaultMessage="Network Configuration"
           />
-        }
-      >
-        <Form.Control value={container.extraHosts?.join(", ") ?? ""} readOnly />
-      </FormRow>
+        </h6>
+        <Stack gap={2}>
+          <FormRow
+            id={`containers-${index}-hostname`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.hostnameLabel"
+                defaultMessage="Hostname"
+              />
+            }
+          >
+            <Form.Control value={container.hostname ?? ""} readOnly />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-networkMode`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.networkModeLabel"
+                defaultMessage="Network Mode"
+              />
+            }
+          >
+            <Form.Control value={container.networkMode ?? ""} readOnly />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-extraHosts`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.extraHostsLabel"
+                defaultMessage="Extra Hosts"
+              />
+            }
+          >
+            <Form.Control
+              value={container.extraHosts?.join(", ") ?? ""}
+              readOnly
+            />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-portBindings`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.portBindingsLabel"
+                defaultMessage="Port Bindings"
+              />
+            }
+          >
+            <Form.Control
+              value={formatBindingsList(container.portBindings)}
+              readOnly
+            />
+          </FormRow>
+          <NetworkDetails
+            networks={container.networks}
+            containerIndex={index}
+          />
+        </Stack>
+      </div>
+      {/* Storage Configuration Section */}
+      <div className="border-bottom pb-3">
+        <h6 className="mt-3 mb-3">
+          <FormattedMessage
+            id="forms.ContainersTable.storageConfigSection"
+            defaultMessage="Storage Configuration"
+          />
+        </h6>
+        <Stack gap={2}>
+          <FormRow
+            id={`containers-${index}-binds`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.bindsLabel"
+                defaultMessage="Binds"
+              />
+            }
+          >
+            <Form.Control
+              value={formatBindingsList(container.binds)}
+              readOnly
+            />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-volumeDriver`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.volumeDriver"
+                defaultMessage="Volume Driver"
+              />
+            }
+          >
+            <Form.Control value={container.volumeDriver ?? ""} readOnly />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-storageOpt`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.storageOptLabel"
+                defaultMessage="Storage Options"
+              />
+            }
+          >
+            <MonacoJsonEditor
+              value={container.storageOpt.join("\n")}
+              onChange={() => {}}
+              defaultValue={container.storageOpt.join("\n")}
+              readonly={true}
+              initialLines={1}
+            />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-tmpfs`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.tmpfsLabel"
+                defaultMessage="Tmpfs"
+              />
+            }
+          >
+            <MonacoJsonEditor
+              value={container.tmpfs.join("\n")}
+              onChange={() => {}}
+              defaultValue={container.tmpfs.join("\n")}
+              readonly={true}
+              initialLines={1}
+            />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-readOnlyRootfs`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.readOnlyRootfsLabel"
+                defaultMessage="Read-Only Root Filesystem"
+              />
+            }
+          >
+            <Form.Check
+              type="checkbox"
+              checked={container.readOnlyRootfs === true}
+              readOnly
+            />
+          </FormRow>
+          <VolumeDetails
+            containerVolumes={container.containerVolumes}
+            containerIndex={index}
+          />
+        </Stack>
+      </div>
+      {/* Resource Limits Section */}
+      <div className="border-bottom pb-3">
+        <h6 className="mt-3 mb-3">
+          <FormattedMessage
+            id="forms.ContainersTable.resourceLimitsSection"
+            defaultMessage="Resource Limits"
+          />
+        </h6>
+        <Stack gap={2}>
+          <FormRow
+            id={`containers-${index}-memory`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.memoryLabel"
+                defaultMessage="Memory (bytes)"
+              />
+            }
+          >
+            <Form.Control value={container.memory ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-image-reference`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.imageReferenceLabel"
-            defaultMessage="Image Reference"
-          />
-        }
-      >
-        <Form.Control value={container.image?.reference ?? ""} readOnly />
-      </FormRow>
+          <FormRow
+            id={`containers-${index}-memoryReservation`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.memoryReservationLabel"
+                defaultMessage="Memory Reservation (bytes)"
+              />
+            }
+          >
+            <Form.Control value={container.memoryReservation ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-image-credentials`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.imageCredentialsLabel"
-            defaultMessage="Image Credentials"
-          />
-        }
-      >
-        <Form.Control
-          value={
-            container.image?.credentials
-              ? `${container.image.credentials.label} (${container.image.credentials.username})`
-              : ""
-          }
-          readOnly
-        />
-      </FormRow>
+          <FormRow
+            id={`containers-${index}-memorySwap`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.memorySwapLabel"
+                defaultMessage="Memory + Swap (bytes)"
+              />
+            }
+          >
+            <Form.Control value={container.memorySwap ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-hostname`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.hostnameLabel"
-            defaultMessage="Hostname"
-          />
-        }
-      >
-        <Form.Control value={container.hostname ?? ""} readOnly />
-      </FormRow>
+          <FormRow
+            id={`containers-${index}-memorySwappiness`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.memorySwappinessLabel"
+                defaultMessage="Memory Swappiness (0-100)"
+              />
+            }
+          >
+            <Form.Control value={container.memorySwappiness ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-networkMode`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.networkModeLabel"
-            defaultMessage="Network Mode"
-          />
-        }
-      >
-        <Form.Control value={container.networkMode ?? ""} readOnly />
-      </FormRow>
+          <FormRow
+            id={`containers-${index}-cpuPeriod`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.cpuPeriodLabel"
+                defaultMessage="CPU Period (microseconds)"
+              />
+            }
+          >
+            <Form.Control value={container.cpuPeriod ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-portBindings`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.portBindingsLabel"
-            defaultMessage="Port Bindings"
-          />
-        }
-      >
-        <Form.Control
-          value={formatBindingsList(container.portBindings)}
-          readOnly
-        />
-      </FormRow>
+          <FormRow
+            id={`containers-${index}-cpuQuota`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.cpuQuotaLabel"
+                defaultMessage="CPU Quota (microseconds)"
+              />
+            }
+          >
+            <Form.Control value={container.cpuQuota ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-binds`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.bindsLabel"
-            defaultMessage="Binds"
-          />
-        }
-      >
-        <Form.Control value={formatBindingsList(container.binds)} readOnly />
-      </FormRow>
+          <FormRow
+            id={`containers-${index}-cpuRealtimePeriod`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.cpuRealtimePeriodLabel"
+                defaultMessage="CPU Real Time Period (microseconds)"
+              />
+            }
+          >
+            <Form.Control value={container.cpuRealtimePeriod ?? ""} readOnly />
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-restartPolicy`}
-        label={
+          <FormRow
+            id={`containers-${index}-cpuRealtimeRuntime`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.cpuRealtimeRuntimeLabel"
+                defaultMessage="CPU Realtime Runtime (microseconds)"
+              />
+            }
+          >
+            <Form.Control value={container.cpuRealtimeRuntime ?? ""} readOnly />
+          </FormRow>
+        </Stack>
+      </div>
+      {/* Security & Capabilities Section */}
+      <div className="border-bottom pb-3">
+        <h6 className="mt-3 mb-3">
           <FormattedMessage
-            id="components.ContainersTable.restartPolicyLabel"
-            defaultMessage="Restart Policy"
+            id="forms.ContainersTable.securitySection"
+            defaultMessage="Security & Capabilities"
           />
-        }
-      >
-        <Form.Control
-          value={
-            restartPolicyOptions.find(
-              (opt) => opt.value === container.restartPolicy,
-            )?.label ?? ""
-          }
-          readOnly
-        />
-      </FormRow>
+        </h6>
+        <Stack gap={2}>
+          <FormRow
+            id={`containers-${index}-privileged`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.privilegedLabel"
+                defaultMessage="Privileged"
+              />
+            }
+          >
+            <Form.Check
+              type="checkbox"
+              checked={container.privileged === true}
+              readOnly
+            />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-capAdd`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.capAdd"
+                defaultMessage="Cap Add"
+              />
+            }
+          >
+            {(container.capAdd || []).length > 0 ? (
+              <MultiSelect
+                value={(container.capAdd || []).map((cap) => ({
+                  id: cap,
+                  name: cap,
+                }))}
+                getOptionValue={(option) => option.id}
+                getOptionLabel={(option) => option.name}
+                disabled={true}
+              />
+            ) : (
+              <Form.Control
+                value={(container.capAdd ?? []).join(", ")}
+                readOnly
+              />
+            )}
+          </FormRow>
 
-      <FormRow
-        id={`containers-${index}-memory`}
-        label={
+          <FormRow
+            id={`containers-${index}-capDrop`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.capDrop"
+                defaultMessage="Cap Drop"
+              />
+            }
+          >
+            {(container.capDrop || []).length > 0 ? (
+              <MultiSelect
+                value={(container.capDrop || []).map((cap) => ({
+                  id: cap,
+                  name: cap,
+                }))}
+                getOptionValue={(option) => option.id}
+                getOptionLabel={(option) => option.name}
+                disabled={true}
+              />
+            ) : (
+              <Form.Control
+                value={(container.capDrop ?? []).join(", ")}
+                readOnly
+              />
+            )}
+          </FormRow>
+        </Stack>
+      </div>
+      {/* Runtime & Environment Section */}
+      <div className="border-bottom pb-3">
+        <h6 className="mt-3 mb-3">
           <FormattedMessage
-            id="components.ContainersTable.memoryLabel"
-            defaultMessage="Memory (in bytes)"
+            id="forms.ContainersTable.runtimeSection"
+            defaultMessage="Runtime & Environment"
           />
-        }
-      >
-        <Form.Control value={container.memory ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-memorySwap`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.memorySwapLabel"
-            defaultMessage="Memory + Swap (in bytes)"
-          />
-        }
-      >
-        <Form.Control value={container.memorySwap ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-memoryReservation`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.memoryReservationLabel"
-            defaultMessage="Memory Reservation (in bytes)"
-          />
-        }
-      >
-        <Form.Control value={container.memoryReservation ?? ""} readOnly />
-      </FormRow>
-      <FormRow
-        id={`containers-${index}-memorySwappiness`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.memorySwappinessLabel"
-            defaultMessage="Memory Swappiness (0-100)"
-          />
-        }
-      >
-        <Form.Control value={container.memorySwappiness ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-cpuPeriod`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.cpuPeriodLabel"
-            defaultMessage="CPU Period (in microseconds)"
-          />
-        }
-      >
-        <Form.Control value={container.cpuPeriod ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-cpuQuota`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.cpuQuotaLabel"
-            defaultMessage="CPU Quota (in microseconds)"
-          />
-        }
-      >
-        <Form.Control value={container.cpuQuota ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-cpuRealtimePeriod`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.cpuRealtimePeriodLabel"
-            defaultMessage="CPU Real Time Period (in microseconds)"
-          />
-        }
-      >
-        <Form.Control value={container.cpuRealtimePeriod ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-cpuRealtimeRuntime`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.cpuRealtimeRuntimeLabel"
-            defaultMessage="CPU Realtime Runtime (in microseconds)"
-          />
-        }
-      >
-        <Form.Control value={container.cpuRealtimeRuntime ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-privileged`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.privilegedLabel"
-            defaultMessage="Privileged"
-          />
-        }
-      >
-        <Form.Check
-          type="checkbox"
-          checked={container.privileged === true}
-          readOnly
-        />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-readOnlyRootfs`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.readOnlyRootfsLabel"
-            defaultMessage="Read-Only Root Filesystem"
-          />
-        }
-      >
-        <Form.Check
-          type="checkbox"
-          checked={container.readOnlyRootfs === true}
-          readOnly
-        />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-volumeDriver`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.volumeDriver"
-            defaultMessage="Volume Driver"
-          />
-        }
-      >
-        <Form.Control value={container.volumeDriver ?? ""} readOnly />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-storageOpt`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.storageOptLabel"
-            defaultMessage="Storage Options"
-          />
-        }
-      >
-        <MonacoJsonEditor
-          value={container.storageOpt.join("\n")}
-          onChange={() => {}}
-          defaultValue={container.storageOpt.join("\n")}
-          readonly={true}
-          initialLines={1}
-        />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-tmpfs`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.tmpfsLabel"
-            defaultMessage="Tmpfs"
-          />
-        }
-      >
-        <MonacoJsonEditor
-          value={container.tmpfs.join("\n")}
-          onChange={() => {}}
-          defaultValue={container.tmpfs.join("\n")}
-          readonly={true}
-          initialLines={1}
-        />
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-capAdd`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.capAdd"
-            defaultMessage="Cap Add"
-          />
-        }
-      >
-        {(container.capAdd || []).length > 0 ? (
-          <MultiSelect
-            value={(container.capAdd || []).map((cap) => ({
-              id: cap,
-              name: cap,
-            }))}
-            getOptionValue={(option) => option.id}
-            getOptionLabel={(option) => option.name}
-            disabled={true}
-          />
-        ) : (
-          <div className="text-muted fst-italic">None</div>
-        )}
-      </FormRow>
-
-      <FormRow
-        id={`containers-${index}-capDrop`}
-        label={
-          <FormattedMessage
-            id="components.ContainersTable.capDrop"
-            defaultMessage="Cap Drop"
-          />
-        }
-      >
-        {(container.capDrop || []).length > 0 ? (
-          <MultiSelect
-            value={(container.capDrop || []).map((cap) => ({
-              id: cap,
-              name: cap,
-            }))}
-            getOptionValue={(option) => option.id}
-            getOptionLabel={(option) => option.name}
-            disabled={true}
-          />
-        ) : (
-          <div className="text-muted fst-italic">None</div>
-        )}
-      </FormRow>
-
-      <NetworkDetails networks={container.networks} containerIndex={index} />
-      <VolumeDetails
-        containerVolumes={container.containerVolumes}
-        containerIndex={index}
-      />
+        </h6>
+        <Stack gap={2}>
+          <FormRow
+            id={`containers-${index}-restartPolicy`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.restartPolicyLabel"
+                defaultMessage="Restart Policy"
+              />
+            }
+          >
+            <Form.Control
+              value={
+                restartPolicyOptions.find(
+                  (opt) => opt.value === container.restartPolicy,
+                )?.label ?? ""
+              }
+              readOnly
+            />
+          </FormRow>
+          <FormRow
+            id={`containers-${index}-env`}
+            label={
+              <FormattedMessage
+                id="components.ContainersTable.envLabel"
+                defaultMessage="Environment (JSON String)"
+              />
+            }
+          >
+            <MonacoJsonEditor
+              value={formatEnvJson(container.env)}
+              onChange={() => {}}
+              defaultValue={formatEnvJson(container.env)}
+              readonly={true}
+              initialLines={1}
+            />
+          </FormRow>
+        </Stack>
+      </div>
       <DeviceMappingDetails deviceMappings={container.deviceMappings} />
     </div>
   );
