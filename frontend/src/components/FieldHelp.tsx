@@ -68,19 +68,24 @@ interface FieldHelpProps {
   id: FieldKey;
   size?: number;
   children: React.ReactNode;
+  itemsAlignment?: "baseline" | "center" | "start" | "end";
 }
 
-const FieldHelp = ({ id, size = 16, children }: FieldHelpProps) => {
+const FieldHelp = ({
+  id,
+  size = 16,
+  children,
+  itemsAlignment = "baseline",
+}: FieldHelpProps) => {
   const explanation = getFieldExplanation(id);
 
   return (
-    <div className="d-flex justify-content-center align-items-center gap-2">
+    <div
+      className={`d-flex justify-content-center align-items-${itemsAlignment} gap-2`}
+    >
       <div className="flex-grow-1 w-100">{children}</div>
 
-      <div
-        data-tooltip-id={`tooltip-${id}`}
-        className="d-inline-flex align-items-center"
-      >
+      <div data-tooltip-id={`tooltip-${id}`}>
         <Icon
           icon={"faCircleQuestion"}
           style={{
