@@ -114,6 +114,7 @@ defmodule Edgehog.Containers.Deployment do
       """
 
       validate Validations.IsReady
+      validate {Validations.NoConflictingCampaign, action_type: :start}
 
       manual {ManualActions.SendDeploymentCommand, command: :start}
     end
@@ -124,6 +125,7 @@ defmodule Edgehog.Containers.Deployment do
       """
 
       validate Validations.IsReady
+      validate {Validations.NoConflictingCampaign, action_type: :stop}
 
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
@@ -134,6 +136,7 @@ defmodule Edgehog.Containers.Deployment do
       """
 
       validate Validations.IsReady
+      validate {Validations.NoConflictingCampaign, action_type: :delete}
 
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
@@ -164,6 +167,7 @@ defmodule Edgehog.Containers.Deployment do
       end
 
       validate Validations.IsReady
+      validate {Validations.NoConflictingCampaign, action_type: :upgrade}
 
       validate SameApplication
       validate IsUpgrade
