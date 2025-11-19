@@ -252,20 +252,30 @@ status:
     @-echo -n "Astarte Housekeeping API: " && curl -sf http://api.astarte.localhost/housekeeping/health >/dev/null && echo "✅ OK" || echo "❌ Down"
     @-echo -n "Edgehog Admin API: " && curl -sf http://api.edgehog.localhost/admin-api/v1/swagger >/dev/null && echo "✅ OK" || echo "❌ Down"
 
+open_astarte_dashboard:
+    astarte_realm_jwt=$(cat backend/priv/repo/seeds/keys/realm_jwt.txt 2>/dev/null || echo "missing")
+    if [ "$astarte_realm_jwt" != "missing" ]; then
+        python3 -m webbrowser "http://dashboard.astarte.localhost/auth?realm=test#access_token=$astarte_realm_jwt"
+        echo "✅ Astarte dashboard opened in browser"
+    else
+        echo "❌ Astarte JWT token not found. Run 'just provision-tenant' first."
+    fi
+
+open_edgehog_dashboard:
+    edgehog_tenant_jwt=$(cat backend/priv/repo/seeds/keys/tenant_jwt.txt 2>/dev/null || echo "missing")
+    if [ "$edgehog_tenant_jwt" != "missing" ]; then
+        python3 -m webbrowser "http://edgehog.localhost/login?tenantSlug=test&authToken=$edgehog_tenant_jwt"
+        echo "✅ Edgehog dashboard opened in browser"
+    else
+        echo "❌ Edgehog JWT token not found. Run 'just provision-tenant' first."
+    fi
+
 # Open web interfaces in browser
 open-dashboards:
     #!/usr/bin/env bash
     echo "🌐 Opening dashboards..."
-    astarte_realm_jwt=$(cat backend/priv/repo/seeds/keys/realm_jwt.txt 2>/dev/null || echo "missing")
-    edgehog_tenant_jwt=$(cat backend/priv/repo/seeds/keys/tenant_jwt.txt 2>/dev/null || echo "missing")
-    
-    if [ "$astarte_realm_jwt" != "missing" ] && [ "$edgehog_tenant_jwt" != "missing" ]; then
-        python3 -m webbrowser "http://dashboard.astarte.localhost/auth?realm=test#access_token=$astarte_realm_jwt"
-        python3 -m webbrowser "http://edgehog.localhost/login?tenantSlug=test&authToken=$edgehog_tenant_jwt"
-        echo "✅ Dashboards opened in browser"
-    else
-        echo "❌ JWT tokens not found. Run 'just provision-tenant' first."
-    fi
+    @-just open_astarte_dashboard
+    @-just open_edgehog_dashboard
 
 # Show logs for all services
 logs:
