@@ -864,7 +864,7 @@ const CreateRelease = ({
                 id: id ?? undefined,
               })),
               containers: mappedContainers,
-              version: "", // Keep the current version as it shouldn't be imported
+              version: formValues.version || "", // Preserve the current version
             };
 
             // Reset the form and wait for it to complete
