@@ -1181,7 +1181,7 @@ const ContainerForm = ({
                 />
               }
             >
-              <FieldHelp id="env">
+              <FieldHelp id="env" itemsAlignment="center">
                 <Controller
                   control={control}
                   name={`containers.${index}.env`}
@@ -1227,7 +1227,7 @@ const ContainerForm = ({
               />
             }
           >
-            <FieldHelp id="deviceMappings">
+            <FieldHelp id="deviceMappings" itemsAlignment="center">
               <div className="p-3 mb-3 bg-light border rounded">
                 <DeviceMappingsFormInput
                   editableProps={dmFormInputProps}
