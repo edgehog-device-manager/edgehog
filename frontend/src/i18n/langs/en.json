@@ -290,16 +290,16 @@
     "defaultMessage": "Cap Drop"
   },
   "components.ContainersTable.cpuPeriodLabel": {
-    "defaultMessage": "CPU Period (in microseconds)"
+    "defaultMessage": "CPU Period (microseconds)"
   },
   "components.ContainersTable.cpuQuotaLabel": {
-    "defaultMessage": "CPU Quota (in microseconds)"
+    "defaultMessage": "CPU Quota (microseconds)"
   },
   "components.ContainersTable.cpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Real Time Period (in microseconds)"
+    "defaultMessage": "CPU Real Time Period (microseconds)"
   },
   "components.ContainersTable.cpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Realtime Runtime (in microseconds)"
+    "defaultMessage": "CPU Realtime Runtime (microseconds)"
   },
   "components.ContainersTable.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
@@ -320,13 +320,13 @@
     "defaultMessage": "Image Reference"
   },
   "components.ContainersTable.memoryLabel": {
-    "defaultMessage": "Memory (in bytes)"
+    "defaultMessage": "Memory (bytes)"
   },
   "components.ContainersTable.memoryReservationLabel": {
-    "defaultMessage": "Memory Reservation (in bytes)"
+    "defaultMessage": "Memory Reservation (bytes)"
   },
   "components.ContainersTable.memorySwapLabel": {
-    "defaultMessage": "Memory + Swap (in bytes)"
+    "defaultMessage": "Memory + Swap (bytes)"
   },
   "components.ContainersTable.memorySwappinessLabel": {
     "defaultMessage": "Memory Swappiness (0-100)"
@@ -1655,6 +1655,24 @@
   },
   "forms.ContainerForm.volumesLabel": {
     "defaultMessage": "Volumes"
+  },
+  "forms.ContainersTable.imageConfigSection": {
+    "defaultMessage": "Image Configuration"
+  },
+  "forms.ContainersTable.networkConfigSection": {
+    "defaultMessage": "Network Configuration"
+  },
+  "forms.ContainersTable.resourceLimitsSection": {
+    "defaultMessage": "Resource Limits"
+  },
+  "forms.ContainersTable.runtimeSection": {
+    "defaultMessage": "Runtime & Environment"
+  },
+  "forms.ContainersTable.securitySection": {
+    "defaultMessage": "Security & Capabilities"
+  },
+  "forms.ContainersTable.storageConfigSection": {
+    "defaultMessage": "Storage Configuration"
   },
   "forms.CreateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
