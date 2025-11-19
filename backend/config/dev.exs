@@ -20,6 +20,10 @@
 
 import Config
 
+url_host = System.get_env("URL_HOST", "localhost")
+url_port = System.get_env("URL_PORT", "4000")
+url_scheme = System.get_env("URL_SCHEME", "http")
+
 config :azurex, Azurex.Blob.Config,
   api_url: "http://localhost:10000/devstoreaccount1",
   default_container: "edgehog",
@@ -35,6 +39,8 @@ config :edgehog, Edgehog.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+# Mimic production environment variables, default to phoenix defaults.
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -43,8 +49,16 @@ config :edgehog, Edgehog.Repo,
 # with esbuild to bundle .js and .css sources.
 config :edgehog, EdgehogWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
-  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  # Change to `ip: {127, 0, 0, 1}` to deny access from other machines.
+  http: [
+    ip: {0, 0, 0, 0},
+    port: String.to_integer(System.get_env("PORT") || "4000")
+  ],
+  url: [
+    host: url_host,
+    scheme: url_scheme,
+    port: url_port
+  ],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
