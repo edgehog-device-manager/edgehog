@@ -122,6 +122,7 @@ const MonacoEditor = ({
             horizontal: "hidden",
             alwaysConsumeMouseWheel: false,
           },
+          renderLineHighlight: "none",
         }}
       />
       {languageError && (
