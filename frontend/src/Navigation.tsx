@@ -68,6 +68,7 @@ enum Route {
   networksEdit = "/networks/:networkId",
   networksNew = "/networks/new",
   deployments = "/deployments",
+  deploymentEdit = "/devices/:deviceId/deployment/:deploymentId",
   deploymentCampaigns = "/deployment-campaigns",
   deploymentCampaignsNew = "/deployment-campaigns/new",
   deploymentCampaignsEdit = "/deployment-campaigns/:deploymentCampaignId",
@@ -137,6 +138,18 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { deviceId: params.deviceId },
+          }
+        : null;
+    case Route.deploymentEdit:
+      return params &&
+        typeof params["deploymentId"] === "string" &&
+        typeof params["deviceId"] === "string"
+        ? {
+            route,
+            params: {
+              deploymentId: params.deploymentId,
+              deviceId: params.deviceId,
+            },
           }
         : null;
 
@@ -317,6 +330,10 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.devicesEdit]: {
     id: "navigation.routeTitle.DevicesEdit",
     defaultMessage: "Device Details",
+  },
+  [Route.deploymentEdit]: {
+    id: "navigation.routeTitle.DeploymentEdit",
+    defaultMessage: "Deployment Details",
   },
   [Route.deviceGroups]: {
     id: "navigation.routeTitle.DeviceGroups",

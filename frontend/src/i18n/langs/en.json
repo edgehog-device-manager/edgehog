@@ -519,6 +519,9 @@
   "components.DeployedApplicationsTable.deploymentCampaignNameTitle": {
     "defaultMessage": "Deployment Campaign"
   },
+  "components.DeployedApplicationsTable.deploymentDetailsButtonTitle": {
+    "defaultMessage": "Deployment Details"
+  },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },
@@ -616,6 +619,33 @@
   "components.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
+  "components.DeploymentDetails.PathMappings": {
+    "defaultMessage": "Path On Host → Path In Container"
+  },
+  "components.DeploymentDetails.deviceMappingState": {
+    "defaultMessage": "State"
+  },
+  "components.DeploymentDetails.eventMessage": {
+    "defaultMessage": "Message"
+  },
+  "components.DeploymentDetails.eventTimestamp": {
+    "defaultMessage": "Timestamp"
+  },
+  "components.DeploymentDetails.eventType": {
+    "defaultMessage": "Type"
+  },
+  "components.DeploymentDetails.networkLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.DeploymentDetails.networkState": {
+    "defaultMessage": "State"
+  },
+  "components.DeploymentDetails.volumeLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.DeploymentDetails.volumeState": {
+    "defaultMessage": "State"
+  },
   "components.DeploymentReadiness.notReady": {
     "defaultMessage": "Deploying"
   },
@@ -684,9 +714,9 @@
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the deployments table"
   },
-  "components.DeploymentsTable.nameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Name column of the deployments table"
+  "components.DeploymentsTable.deploymentOnDeviceTitle": {
+    "defaultMessage": "Deployment on Device",
+    "description": "Title for the Deployment on Device column of the deployments table"
   },
   "components.DeploymentsTable.releaseVersionTitle": {
     "defaultMessage": "Release Version",
@@ -1262,6 +1292,36 @@
   },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
+  },
+  "components.deploymentDetails.Status": {
+    "defaultMessage": "Status:"
+  },
+  "components.deploymentDetails.applicationName": {
+    "defaultMessage": "Application Name:"
+  },
+  "components.deploymentDetails.containersTab": {
+    "defaultMessage": "Containers"
+  },
+  "components.deploymentDetails.eventsTab": {
+    "defaultMessage": "Events"
+  },
+  "components.deploymentDetails.imageStatus": {
+    "defaultMessage": "Image Status:"
+  },
+  "components.deploymentDetails.noDeviceMappingsMessage": {
+    "defaultMessage": "No Device Mappings"
+  },
+  "components.deploymentDetails.noNetworksMessage": {
+    "defaultMessage": "No Networks"
+  },
+  "components.deploymentDetails.noVolumesMessage": {
+    "defaultMessage": "No Volumes"
+  },
+  "components.deploymentDetails.readiness": {
+    "defaultMessage": "Readiness:"
+  },
+  "components.deploymentDetails.releaseVersion": {
+    "defaultMessage": "Release Version:"
   },
   "components.deploymentTargetStatus.Failed": {
     "defaultMessage": "Failed"
@@ -2253,6 +2313,9 @@
   "navigation.routeTitle.DeploymentCampaignsNew": {
     "defaultMessage": "Create Campaign"
   },
+  "navigation.routeTitle.DeploymentEdit": {
+    "defaultMessage": "Deployment Details"
+  },
   "navigation.routeTitle.Deployments": {
     "defaultMessage": "Deployments"
   },
@@ -2492,6 +2555,12 @@
   },
   "pages.Channels.title": {
     "defaultMessage": "Channels"
+  },
+  "pages.Deployment.deploymentNotFound.message": {
+    "defaultMessage": "Return to the device page."
+  },
+  "pages.Deployment.deploymentNotFound.title": {
+    "defaultMessage": "Deployment not found."
   },
   "pages.DeploymentApplication.noApplication.createButton": {
     "defaultMessage": "Create Application"

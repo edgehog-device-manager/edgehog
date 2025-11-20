@@ -101,6 +101,17 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
 
       case Route.devicesEdit:
         return [{ route: Route.devices }, currentRoute];
+      case Route.deploymentEdit:
+        return [
+          { route: Route.devices },
+          {
+            route: Route.devicesEdit,
+            params: {
+              deviceId: currentRoute.params?.deviceId,
+            },
+          },
+          currentRoute,
+        ];
 
       case Route.deviceGroupsEdit:
       case Route.deviceGroupsNew:

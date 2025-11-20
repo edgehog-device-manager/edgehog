@@ -78,15 +78,18 @@ const columns = [
   columnHelper.accessor("device.name", {
     header: () => (
       <FormattedMessage
-        id="components.DeploymentsTable.nameTitle"
-        defaultMessage="Device Name"
-        description="Title for the Name column of the deployments table"
+        id="components.DeploymentsTable.deploymentOnDeviceTitle"
+        defaultMessage="Deployment on Device"
+        description="Title for the Deployment on Device column of the deployments table"
       />
     ),
     cell: ({ row, getValue }) => (
       <Link
-        route={Route.devicesEdit}
-        params={{ deviceId: row.original.device?.id || "" }}
+        route={Route.deploymentEdit}
+        params={{
+          deviceId: row.original.device?.id || "",
+          deploymentId: row.original.id,
+        }}
       >
         {getValue()}
       </Link>
