@@ -131,6 +131,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
   relationships do
     belongs_to :volume, Edgehog.Containers.Volume do
       attribute_type :uuid
+      public? true
     end
 
     belongs_to :device, Edgehog.Devices.Device
