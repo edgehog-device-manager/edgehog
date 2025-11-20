@@ -23,6 +23,7 @@ import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
 import { useCallback, useState, useMemo } from "react";
 import semver from "semver";
 import Select, { SingleValue } from "react-select";
+import { Modal } from "react-bootstrap";
 
 import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
 import type { DeployedApplicationsTable_deployedApplications$key } from "api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
@@ -45,7 +46,9 @@ import DeploymentStateComponent, {
 } from "components/DeploymentState";
 import DeploymentReadiness from "components/DeploymentReadiness";
 import ContainerStatusList from "components/ContainerStatusList";
+import DeploymentDetails from "components/DeploymentDetails";
 import "components/DeployedApplicationsTable.scss";
+import "components/Modal.scss";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -84,7 +87,9 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
               name
             }
           }
-          containerDeployments {
+          ...DeploymentDetails_events
+          ...DeploymentDetails_containerDeployments
+          containerDeployments(first: $first, after: $after) {
             edges {
               node {
                 id
@@ -269,11 +274,18 @@ const DeployedApplicationsTable = ({
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showDeploymentDetails, setShowDeploymentDetails] =
+    useState<boolean>(false);
+  const [fullscreen, setFullscreen] = useState<true | undefined>(undefined);
 
   const [selectedDeployment, setSelectedDeployment] = useState<
     (typeof deployments)[0] | null
   >(null);
 
+  const deploymentRef =
+    data.applicationDeployments.edges?.find(
+      (edge) => edge.node?.id == selectedDeployment?.id,
+    )?.node ?? null;
   // Track expanded state for container status lists
   const [expandedContainerLists, setExpandedContainerLists] = useState<
     Set<string>
@@ -750,6 +762,20 @@ const DeployedApplicationsTable = ({
           >
             <Icon className="text-danger" icon={"delete"} />
           </Button>
+
+          <Button
+            className="btn btn-link border-0 bg-transparent ms-4 p-0 text-decoration-none"
+            title={intl.formatMessage({
+              id: "components.DeployedApplicationsTable.deploymentDetailsButtonTitle",
+              defaultMessage: "Deployment Details",
+            })}
+            onClick={() => {
+              setSelectedDeployment(getValue());
+              setShowDeploymentDetails(true);
+            }}
+          >
+            <Icon className="text-secondary" icon={"faEllipsisVertical"} />
+          </Button>
         </div>
       ),
     }),
@@ -889,6 +915,33 @@ const DeployedApplicationsTable = ({
           />
         </ConfirmModal>
       )}
+      <Modal
+        show={showDeploymentDetails}
+        size="lg"
+        centered
+        fullscreen={fullscreen}
+        onHide={() => setShowDeploymentDetails(false)}
+        className="fixed-modal"
+      >
+        <Modal.Header closeButton>
+          <Icon
+            className="m-3 inline-block transition-transform duration-300 ease-in-out"
+            icon={fullscreen ? "faCompress" : "faExpand"}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+            onClick={() => setFullscreen((prev) => (prev ? undefined : true))}
+          />
+
+          <Modal.Title>Deployment Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {deploymentRef && <DeploymentDetails deploymentRef={deploymentRef} />}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

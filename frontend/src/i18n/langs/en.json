@@ -519,6 +519,9 @@
   "components.DeployedApplicationsTable.deploymentCampaignNameTitle": {
     "defaultMessage": "Deployment Campaign"
   },
+  "components.DeployedApplicationsTable.deploymentDetailsButtonTitle": {
+    "defaultMessage": "Deployment Details"
+  },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },
@@ -615,6 +618,15 @@
   },
   "components.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
+  },
+  "components.DeploymentDetails.eventMessage": {
+    "defaultMessage": "Message"
+  },
+  "components.DeploymentDetails.eventTimestamp": {
+    "defaultMessage": "Timestamp"
+  },
+  "components.DeploymentDetails.eventType": {
+    "defaultMessage": "Type"
   },
   "components.DeploymentReadiness.notReady": {
     "defaultMessage": "Deploying"
@@ -1262,6 +1274,30 @@
   },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
+  },
+  "components.deploymentDetails.applicationName": {
+    "defaultMessage": "Application Name"
+  },
+  "components.deploymentDetails.containerDeploymentsTab": {
+    "defaultMessage": "Container Deployments"
+  },
+  "components.deploymentDetails.deploymentStatus": {
+    "defaultMessage": "Deployment Status"
+  },
+  "components.deploymentDetails.eventsTab": {
+    "defaultMessage": "Events"
+  },
+  "components.deploymentDetails.imageStatus": {
+    "defaultMessage": "Image Deployment Status:"
+  },
+  "components.deploymentDetails.readiness": {
+    "defaultMessage": "Readiness"
+  },
+  "components.deploymentDetails.releaseVersion": {
+    "defaultMessage": "Release Version"
+  },
+  "components.deploymentDetails.status": {
+    "defaultMessage": "Status:"
   },
   "components.deploymentTargetStatus.Failed": {
     "defaultMessage": "Failed"
