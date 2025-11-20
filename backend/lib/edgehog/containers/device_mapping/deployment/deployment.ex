@@ -130,6 +130,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
   relationships do
     belongs_to :device_mapping, DeviceMapping do
       attribute_type :uuid
+      public? true
     end
 
     belongs_to :device, Device

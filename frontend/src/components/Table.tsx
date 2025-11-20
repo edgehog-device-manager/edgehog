@@ -60,6 +60,7 @@ export type TableProps<T extends RowData> = {
   columns: ColumnDef<T, any>[];
   data: readonly T[];
   className?: string;
+  headerStyle?: React.CSSProperties;
   maxPageRows?: number;
   hiddenColumns?: string[];
   sortBy?: SortingState;
@@ -72,6 +73,7 @@ const Table = <T extends RowData>({
   columns,
   data,
   className,
+  headerStyle,
   hiddenColumns = [],
   sortBy = [],
   maxPageRows = 10,
@@ -141,6 +143,7 @@ const Table = <T extends RowData>({
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
+                  style={headerStyle}
                   key={header.id}
                   colSpan={header.colSpan}
                   onClick={header.column.getToggleSortingHandler()}
@@ -166,7 +169,7 @@ const Table = <T extends RowData>({
           {table.getRowModel().rows.map((row) => (
             <tr {...(getRowProps ? getRowProps(row) : {})} key={row.id}>
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td key={cell.id} style={headerStyle}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

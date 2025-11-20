@@ -49,6 +49,9 @@ import {
   faObjectGroup,
   faCircleQuestion,
   faRotate,
+  faExpand,
+  faCompress,
+  faEllipsisVertical,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -83,6 +86,9 @@ const icons = {
   channels: faObjectGroup,
   faCircleQuestion: faCircleQuestion,
   rotate: faRotate,
+  faExpand: faExpand,
+  faCompress: faCompress,
+  faEllipsisVertical: faEllipsisVertical,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;

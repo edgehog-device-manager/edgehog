@@ -128,6 +128,7 @@ defmodule Edgehog.Containers.Network.Deployment do
 
   relationships do
     belongs_to :network, Network do
+      public? true
       attribute_type :uuid
     end
 
