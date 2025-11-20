@@ -2419,6 +2419,7 @@ type DeploymentEvent {
   id: ID!
   type: DeploymentEventType!
   message: String
+  addInfo: [String!]
   insertedAt: DateTime!
   updatedAt: DateTime!
 }

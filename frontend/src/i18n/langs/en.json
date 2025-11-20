@@ -652,6 +652,12 @@
   "components.DeploymentDetails.volumeState": {
     "defaultMessage": "State"
   },
+  "components.DeploymentEventMessage.noMessage": {
+    "defaultMessage": "No message in event."
+  },
+  "components.DeploymentEventMessage.noShortMessage": {
+    "defaultMessage": "No short message. Click to show extended info."
+  },
   "components.DeploymentReadiness.notReady": {
     "defaultMessage": "Deploying"
   },
