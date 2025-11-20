@@ -2731,7 +2731,7 @@
     "defaultMessage": "Could not create the release, please try again."
   },
   "pages.ReleaseCreate.title": {
-    "defaultMessage": "Create Release"
+    "defaultMessage": "Create Release for {applicationName}"
   },
   "pages.SystemModel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>.",

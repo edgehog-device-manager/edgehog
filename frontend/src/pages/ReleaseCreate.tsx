@@ -46,7 +46,10 @@ import Spinner from "components/Spinner";
 import Center from "components/Center";
 
 const CREATE_RELEASE_PAGE_QUERY = graphql`
-  query ReleaseCreate_getOptions_Query {
+  query ReleaseCreate_getOptions_Query($applicationId: ID!) {
+    application(id: $applicationId) {
+      name
+    }
     ...CreateRelease_ImageCredentialsOptionsFragment
     ...CreateRelease_NetworksOptionsFragment
     ...CreateRelease_VolumesOptionsFragment
@@ -184,25 +187,55 @@ const ReleaseWrapper = ({
     getReleaseOptionsQuery,
   );
 
+  const intl = useIntl();
+  const applicationName = releaseOptions.application?.name ?? "";
+
   return (
-    <Release
-      releaseOptions={releaseOptions}
-      showModal={showModal}
-      onToggleModal={onToggleModal}
-    />
+    <Page>
+      <Page.Header
+        title={
+          <FormattedMessage
+            id="pages.ReleaseCreate.title"
+            defaultMessage="Create Release for {applicationName}"
+            values={{ applicationName }}
+          />
+        }
+      >
+        <Button
+          variant="secondary"
+          title={intl.formatMessage({
+            id: "forms.ReleaseCreate.reuseReleaseTitleButton",
+            defaultMessage: "Copy configuration from an existing release",
+          })}
+          onClick={() => onToggleModal(true)}
+        >
+          <FormattedMessage
+            id="forms.ReleaseCreate.reuseReleaseButton"
+            defaultMessage="Reuse Release"
+          />
+        </Button>
+      </Page.Header>
+      <Page.Main>
+        <Release
+          releaseOptions={releaseOptions}
+          showModal={showModal}
+          onToggleModal={onToggleModal}
+        />
+      </Page.Main>
+    </Page>
   );
 };
 
 const ReleaseCreatePage = () => {
-  const intl = useIntl();
+  const { applicationId = "" } = useParams();
   const [showModal, setShowModal] = useState(false);
 
   const [getReleaseOptionsQuery, getReleaseOptions] =
     useQueryLoader<ReleaseCreate_getOptions_Query>(CREATE_RELEASE_PAGE_QUERY);
 
   const fetchReleaseOptions = useCallback(
-    () => getReleaseOptions({}, { fetchPolicy: "network-only" }),
-    [getReleaseOptions],
+    () => getReleaseOptions({ applicationId }, { fetchPolicy: "network-only" }),
+    [getReleaseOptions, applicationId],
   );
 
   useEffect(fetchReleaseOptions, [fetchReleaseOptions]);
@@ -224,37 +257,11 @@ const ReleaseCreatePage = () => {
         onReset={fetchReleaseOptions}
       >
         {getReleaseOptionsQuery && (
-          <Page>
-            <Page.Header
-              title={
-                <FormattedMessage
-                  id="pages.ReleaseCreate.title"
-                  defaultMessage="Create Release"
-                />
-              }
-            >
-              <Button
-                variant="secondary"
-                title={intl.formatMessage({
-                  id: "forms.ReleaseCreate.reuseReleaseTitleButton",
-                  defaultMessage: "Copy configuration from an existing release",
-                })}
-                onClick={() => setShowModal(true)}
-              >
-                <FormattedMessage
-                  id="forms.ReleaseCreate.reuseReleaseButton"
-                  defaultMessage="Reuse Release"
-                />
-              </Button>
-            </Page.Header>
-            <Page.Main>
-              <ReleaseWrapper
-                getReleaseOptionsQuery={getReleaseOptionsQuery}
-                showModal={showModal}
-                onToggleModal={setShowModal}
-              />
-            </Page.Main>
-          </Page>
+          <ReleaseWrapper
+            getReleaseOptionsQuery={getReleaseOptionsQuery}
+            showModal={showModal}
+            onToggleModal={setShowModal}
+          />
         )}
       </ErrorBoundary>
     </Suspense>
