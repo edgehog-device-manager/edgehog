@@ -131,6 +131,7 @@ defmodule Edgehog.Containers.Image.Deployment do
 
   relationships do
     belongs_to :image, Edgehog.Containers.Image do
+      public? true
       attribute_type :uuid
     end
 
