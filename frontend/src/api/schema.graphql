@@ -26,11 +26,11 @@ input ContainerCreateWithNestedDeviceMappingsInput {
 
 input DeploymentCampaignDeploymentMechanismLazyInput {
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
-  a failure.
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
   """
-  maxFailurePercentage: Float
+  maxInProgressDeployments: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -41,17 +41,17 @@ input DeploymentCampaignDeploymentMechanismLazyInput {
   createRequestRetries: Int
 
   """
-  The maximum number of in progress deployments. The Update Campaign will
-  have at most this number of Deployments that are started but not yet
-  finished (either successfully or not).
-  """
-  maxInProgressDeployments: Int
-
-  """
   The timeout (in seconds) Edgehog has to wait before considering a
   Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
   requestTimeoutSeconds: Int
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Lazy Deployment Mechanism."
@@ -86,11 +86,11 @@ type Lazy {
 }
 
 input UpdateCampaignRolloutMechanismPushInput {
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean
-
   "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
   maxFailurePercentage: Float
+
+  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
+  forceDowngrade: Boolean
 
   "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
   maxInProgressUpdates: Int
@@ -227,7 +227,7 @@ type Modem {
   "The cell tower's Mobile Network Code."
   mobileNetworkCode: Int
 
-  "The GSM/LTE registration status of the modem."
+  "The GSM\/LTE registration status of the modem."
   registrationStatus: ModemRegistrationStatus
 
   "Signal strength in dBm."
@@ -454,7 +454,7 @@ enum ModemRegistrationStatus {
   "Not registered, but modem is currently searching a new operator to register to."
   SEARCHING_OPERATOR
 
-  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
+  "Unknown (e.g. out of GERAN\/UTRAN\/E-UTRAN coverage)."
   UNKNOWN
 }
 
@@ -992,9 +992,7 @@ type BaseImage implements Node {
   localizedDescriptions(preferredLanguageTags: [String!]): [LocalizedAttribute!]
 
   "A list of release display names in different languages."
-  localizedReleaseDisplayNames(
-    preferredLanguageTags: [String!]
-  ): [LocalizedAttribute!]
+  localizedReleaseDisplayNames(preferredLanguageTags: [String!]): [LocalizedAttribute!]
 }
 
 "A relay page info"
@@ -2035,6 +2033,7 @@ input CreateImageCredentialsInput {
   label: String!
   username: String!
   password: String!
+  serveraddress: String
 }
 
 enum ImageCredentialsSortField {
@@ -5912,7 +5911,10 @@ type DeploymentCampaign implements Node {
 
 type RootQueryType {
   "Returns the desired deployment campaign."
-  deploymentCampaign("The id of the record" id: ID!): DeploymentCampaign
+  deploymentCampaign(
+    "The id of the record"
+    id: ID!
+  ): DeploymentCampaign
 
   "Returns all available deployment campaigns."
   deploymentCampaigns(
@@ -5936,7 +5938,10 @@ type RootQueryType {
   ): DeploymentCampaignConnection
 
   "Returns a single update campaign."
-  updateCampaign("The id of the record" id: ID!): UpdateCampaign
+  updateCampaign(
+    "The id of the record"
+    id: ID!
+  ): UpdateCampaign
 
   "Returns a list of update campaigns."
   updateCampaigns(
@@ -5960,7 +5965,10 @@ type RootQueryType {
   ): UpdateCampaignConnection
 
   "Returns a single channel."
-  channel("The id of the record" id: ID!): Channel
+  channel(
+    "The id of the record"
+    id: ID!
+  ): Channel
 
   "Returns a list of channels."
   channels(
@@ -6008,7 +6016,10 @@ type RootQueryType {
   ): TagConnection
 
   "Returns a single device group."
-  deviceGroup("The id of the record" id: ID!): DeviceGroup
+  deviceGroup(
+    "The id of the record"
+    id: ID!
+  ): DeviceGroup
 
   "Returns a list of device groups."
   deviceGroups(
@@ -6041,7 +6052,10 @@ type RootQueryType {
   forwarderSession(token: String!, deviceId: ID!): ForwarderSession
 
   "Returns a single device."
-  device("The id of the record" id: ID!): Device
+  device(
+    "The id of the record"
+    id: ID!
+  ): Device
 
   "Returns a list of devices."
   devices(
@@ -6065,7 +6079,10 @@ type RootQueryType {
   ): DeviceConnection
 
   "Returns a single hardware type."
-  hardwareType("The id of the record" id: ID!): HardwareType
+  hardwareType(
+    "The id of the record"
+    id: ID!
+  ): HardwareType
 
   "Returns a list of hardware types."
   hardwareTypes(
@@ -6089,7 +6106,10 @@ type RootQueryType {
   ): HardwareTypeConnection
 
   "Returns a single system model."
-  systemModel("The id of the record" id: ID!): SystemModel
+  systemModel(
+    "The id of the record"
+    id: ID!
+  ): SystemModel
 
   "Returns a list of system models."
   systemModels(
@@ -6134,7 +6154,10 @@ type RootQueryType {
   ): ApplicationConnection
 
   "Returns the desired application."
-  application("The id of the record" id: ID!): Application
+  application(
+    "The id of the record"
+    id: ID!
+  ): Application
 
   "Returns all available dpeloyments."
   deployments(
@@ -6158,10 +6181,16 @@ type RootQueryType {
   ): DeploymentConnection
 
   "Returns the desired deployment."
-  deployment("The id of the record" id: ID!): Deployment
+  deployment(
+    "The id of the record"
+    id: ID!
+  ): Deployment
 
   "Returns the desired image credentials."
-  imageCredentials("The id of the record" id: ID!): ImageCredentials
+  imageCredentials(
+    "The id of the record"
+    id: ID!
+  ): ImageCredentials
 
   "Returns all available image credentials."
   listImageCredentials(
@@ -6185,10 +6214,16 @@ type RootQueryType {
   ): ImageCredentialsConnection
 
   "Returns the desired release."
-  release("The id of the record" id: ID!): Release
+  release(
+    "The id of the record"
+    id: ID!
+  ): Release
 
   "Returns the desired network."
-  network("The id of the record" id: ID!): Network
+  network(
+    "The id of the record"
+    id: ID!
+  ): Network
 
   "Returns all available networks."
   networks(
@@ -6212,7 +6247,10 @@ type RootQueryType {
   ): NetworkConnection
 
   "Returns the desired volume."
-  volume("The id of the record" id: ID!): Volume
+  volume(
+    "The id of the record"
+    id: ID!
+  ): Volume
 
   "Returns all available volumes."
   volumes(
@@ -6236,13 +6274,22 @@ type RootQueryType {
   ): VolumeConnection
 
   "Retrieves a Node from its global id"
-  node("The Node unique identifier" id: ID!): Node!
+  node(
+    "The Node unique identifier"
+    id: ID!
+  ): Node!
 
   "Returns a single base image."
-  baseImage("The id of the record" id: ID!): BaseImage
+  baseImage(
+    "The id of the record"
+    id: ID!
+  ): BaseImage
 
   "Returns a single base image collection."
-  baseImageCollection("The id of the record" id: ID!): BaseImageCollection
+  baseImageCollection(
+    "The id of the record"
+    id: ID!
+  ): BaseImageCollection
 
   "Returns a list of base image collections."
   baseImageCollections(
@@ -6268,14 +6315,10 @@ type RootQueryType {
 
 type RootMutationType {
   "Creates a new deployment campaign."
-  createDeploymentCampaign(
-    input: CreateDeploymentCampaignInput!
-  ): CreateDeploymentCampaignResult
+  createDeploymentCampaign(input: CreateDeploymentCampaignInput!): CreateDeploymentCampaignResult
 
   "Creates a new update campaign."
-  createUpdateCampaign(
-    input: CreateUpdateCampaignInput!
-  ): CreateUpdateCampaignResult
+  createUpdateCampaign(input: CreateUpdateCampaignInput!): CreateUpdateCampaignResult
 
   "Creates a new channel."
   createChannel(input: CreateChannelInput!): CreateChannelResult
@@ -6287,18 +6330,13 @@ type RootMutationType {
   deleteChannel(id: ID!): DeleteChannelResult
 
   "Initiates an OTA update with a user provided OS image"
-  createManualOtaOperation(
-    input: CreateManualOtaOperationInput!
-  ): CreateManualOtaOperationResult
+  createManualOtaOperation(input: CreateManualOtaOperationInput!): CreateManualOtaOperationResult
 
   "Creates a new device group."
   createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupResult
 
   "Updates a device group."
-  updateDeviceGroup(
-    id: ID!
-    input: UpdateDeviceGroupInput
-  ): UpdateDeviceGroupResult
+  updateDeviceGroup(id: ID!, input: UpdateDeviceGroupInput): UpdateDeviceGroupResult
 
   "Deletes a device group."
   deleteDeviceGroup(id: ID!): DeleteDeviceGroupResult
@@ -6316,25 +6354,16 @@ type RootMutationType {
   addDeviceTags(id: ID!, input: AddDeviceTagsInput!): AddDeviceTagsResult
 
   "Remove tags from a device."
-  removeDeviceTags(
-    id: ID!
-    input: RemoveDeviceTagsInput!
-  ): RemoveDeviceTagsResult
+  removeDeviceTags(id: ID!, input: RemoveDeviceTagsInput!): RemoveDeviceTagsResult
 
   "Sets led behavior."
-  setDeviceLedBehavior(
-    id: ID!
-    input: SetDeviceLedBehaviorInput!
-  ): SetDeviceLedBehaviorResult
+  setDeviceLedBehavior(id: ID!, input: SetDeviceLedBehaviorInput!): SetDeviceLedBehaviorResult
 
   "Creates a hardware type."
   createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypeResult
 
   "Updates a hardware type."
-  updateHardwareType(
-    id: ID!
-    input: UpdateHardwareTypeInput
-  ): UpdateHardwareTypeResult
+  updateHardwareType(id: ID!, input: UpdateHardwareTypeInput): UpdateHardwareTypeResult
 
   "Deletes a hardware type."
   deleteHardwareType(id: ID!): DeleteHardwareTypeResult
@@ -6343,10 +6372,7 @@ type RootMutationType {
   createSystemModel(input: CreateSystemModelInput!): CreateSystemModelResult
 
   "Updates an system model."
-  updateSystemModel(
-    id: ID!
-    input: UpdateSystemModelInput
-  ): UpdateSystemModelResult
+  updateSystemModel(id: ID!, input: UpdateSystemModelInput): UpdateSystemModelResult
 
   "Deletes a system model."
   deleteSystemModel(id: ID!): DeleteSystemModelResult
@@ -6374,15 +6400,10 @@ type RootMutationType {
   """
   sendDeployment(id: ID!): SendDeploymentResult
 
-  upgradeDeployment(
-    id: ID!
-    input: UpgradeDeploymentInput!
-  ): UpgradeDeploymentResult
+  upgradeDeployment(id: ID!, input: UpgradeDeploymentInput!): UpgradeDeploymentResult
 
   "Create image credentials."
-  createImageCredentials(
-    input: CreateImageCredentialsInput!
-  ): CreateImageCredentialsResult
+  createImageCredentials(input: CreateImageCredentialsInput!): CreateImageCredentialsResult
 
   deleteImageCredentials(id: ID!): DeleteImageCredentialsResult
 
@@ -6414,15 +6435,10 @@ type RootMutationType {
   deleteBaseImage(id: ID!): DeleteBaseImageResult
 
   "Creates a new base image collection."
-  createBaseImageCollection(
-    input: CreateBaseImageCollectionInput!
-  ): CreateBaseImageCollectionResult
+  createBaseImageCollection(input: CreateBaseImageCollectionInput!): CreateBaseImageCollectionResult
 
   "Updates a base image collection."
-  updateBaseImageCollection(
-    id: ID!
-    input: UpdateBaseImageCollectionInput
-  ): UpdateBaseImageCollectionResult
+  updateBaseImageCollection(id: ID!, input: UpdateBaseImageCollectionInput): UpdateBaseImageCollectionResult
 
   "Deletes a base image collection."
   deleteBaseImageCollection(id: ID!): DeleteBaseImageCollectionResult

@@ -36,6 +36,7 @@ const IMAGE_CREDENTIAL_FRAGMENT = graphql`
     id
     label
     username
+    serveraddress
   }
 `;
 
@@ -43,6 +44,7 @@ type FormData = {
   id: string;
   label: string;
   username: string;
+  serveraddress: string;
 };
 
 const imageCredentialSchema = yup
@@ -50,6 +52,7 @@ const imageCredentialSchema = yup
     id: yup.string().required(),
     label: yup.string().required(),
     username: yup.string().required(),
+    serveraddress: yup.string(),
   })
   .required();
 
@@ -70,8 +73,9 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
       id,
       label,
       username,
+      serveraddress
     }),
-    [id, label, username],
+    [id, label, username, serveraddress],
   );
 
   const {
@@ -124,6 +128,27 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
           <Form.Control.Feedback type="invalid">
             {errors.username?.message && (
               <FormattedMessage id={errors.username?.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+        <FormRow
+          id="image-credential-form-serveraddress"
+          label={
+            <FormattedMessage
+              id="forms.UpdateImageCredential.ServeraddressLabel"
+              defaultMessage="Server Address"
+            />
+          }
+        >
+          <Form.Control
+            {...register("serveraddress")}
+            readOnly
+            isInvalid={!!errors.serveraddress}
+          />
+
+          <Form.Control.Feedback type="invalid">
+            {errors.serveraddress?.message && (
+              <FormattedMessage id={errors.serveraddress?.message} />
             )}
           </Form.Control.Feedback>
         </FormRow>

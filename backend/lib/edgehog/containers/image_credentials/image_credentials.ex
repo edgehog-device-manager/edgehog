@@ -45,7 +45,7 @@ defmodule Edgehog.Containers.ImageCredentials do
 
     create :create do
       primary? true
-      accept [:label, :username, :password]
+      accept [:label, :username, :password, :serveraddress]
     end
   end
 
@@ -66,6 +66,8 @@ defmodule Edgehog.Containers.ImageCredentials do
       sensitive? true
       allow_nil? false
     end
+
+    attribute :serveraddress, :string
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
