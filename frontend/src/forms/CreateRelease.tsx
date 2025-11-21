@@ -485,7 +485,7 @@ const CreateRelease = ({
     resolver: yupResolver(applicationSchema()),
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append } = useFieldArray({
     control,
     name: "containers",
   });
@@ -510,15 +510,17 @@ const CreateRelease = ({
     >(null);
 
   const [showImportSuccess, setShowImportSuccess] = useState(false);
-  const [importedData, setImportedData] = useState<ReleaseInputData | null>(
-    null,
-  );
   const [justImported, setJustImported] = useState(false);
   const isImportingRef = useRef(false);
-  const userHasInteractedRef = useRef(false);
+  const importedContainersSnapshotRef = useRef<ContainerInput[]>([]);
 
   // Watch all form values to detect changes
   const formValues = useWatch({ control });
+
+  // Helper function to check if a specific container is imported
+  const isContainerImported = (containerIndex: number): boolean => {
+    return containerIndex < importedContainersSnapshotRef.current.length;
+  };
 
   // Helper function to check if a specific container is modified
   const isContainerModified = (containerIndex: number): boolean => {
@@ -527,32 +529,52 @@ const CreateRelease = ({
       return false;
     }
 
-    // Only show modified if user has actually interacted with the form
-    if (!userHasInteractedRef.current) {
+    if (!isContainerImported(containerIndex)) {
       return false;
     }
 
-    if (
-      !importedData?.containers?.[containerIndex] ||
-      !formValues?.containers?.[containerIndex]
-    ) {
+    const importedContainer =
+      importedContainersSnapshotRef.current[containerIndex];
+    const currentContainer = formValues?.containers?.[containerIndex];
+
+    if (!importedContainer || !currentContainer) {
       return false;
     }
 
-    // Simple JSON comparison - only after user interaction
-    const importedContainer = importedData.containers[containerIndex];
-    const currentContainer = formValues.containers[containerIndex];
-
+    // Simple JSON comparison - check if this specific container has changed
     return (
       JSON.stringify(importedContainer) !== JSON.stringify(currentContainer)
     );
   };
 
-  // Helper function to mark user interaction
-  const markUserInteraction = () => {
-    if (!isImportingRef.current && !justImported) {
-      userHasInteractedRef.current = true;
+  // Wrapper for remove that also updates imported containers tracking
+  const handleRemoveContainer = (index: number) => {
+    // Get current containers
+    const currentContainers = formValues.containers || [];
+
+    // Create new array without the removed container
+    const newContainers = currentContainers.filter((_, i) => i !== index);
+
+    // Update imported containers data if needed
+    if (index < importedContainersSnapshotRef.current.length) {
+      const newSnapshot = [...importedContainersSnapshotRef.current];
+      newSnapshot.splice(index, 1);
+      importedContainersSnapshotRef.current = newSnapshot;
     }
+
+    // Reset the containers field with the new array to clear any cached state
+    reset(
+      {
+        version: formValues.version || "",
+        requiredSystemModels: formValues.requiredSystemModels || [],
+        containers: newContainers,
+      },
+      {
+        keepErrors: false,
+        keepDirty: true,
+        keepTouched: false,
+      },
+    );
   };
 
   const parseJsonToStringArray = (jsonStr: string | undefined): string[] => {
@@ -624,8 +646,6 @@ const CreateRelease = ({
 
           onSubmit(submitData);
         })}
-        onChange={markUserInteraction}
-        onInput={markUserInteraction}
       >
         <Stack gap={2}>
           {showImportSuccess && (
@@ -690,7 +710,6 @@ const CreateRelease = ({
                     value={mappedValue}
                     onChange={(selected) => {
                       onChange(selected.map(({ value }) => ({ id: value })));
-                      markUserInteraction();
                     }}
                     onBlur={onBlur}
                     options={systemModelsOptions}
@@ -719,30 +738,21 @@ const CreateRelease = ({
           </Stack>
 
           {fields.map((field, index) => {
-            // Check if this container was imported (either by index or by checking if any containers were imported)
-            const hasImportedContainers = Boolean(
-              importedData?.containers?.length,
-            );
-            const isThisContainerImported =
-              hasImportedContainers &&
-              index < (importedData?.containers?.length || 0);
-
             return (
               <ContainerForm
                 key={field.id}
                 index={index}
                 register={register}
                 errors={errors}
-                remove={remove}
+                remove={handleRemoveContainer}
                 imageCredentials={imageCredentialsOptions}
                 networks={networkOptions}
                 volumes={volumeOptions}
                 control={control}
-                isImported={isThisContainerImported}
+                isImported={isContainerImported(index)}
                 isModified={
-                  isThisContainerImported && isContainerModified(index)
+                  isContainerImported(index) && isContainerModified(index)
                 }
-                markUserInteraction={markUserInteraction}
               />
             );
           })}
@@ -864,7 +874,7 @@ const CreateRelease = ({
                 id: id ?? undefined,
               })),
               containers: mappedContainers,
-              version: "", // Keep the current version as it shouldn't be imported
+              version: formValues.version || "", // Preserve the current version
             };
 
             // Reset the form and wait for it to complete
@@ -882,16 +892,22 @@ const CreateRelease = ({
             setJustImported(true);
             setShowImportSuccess(true);
 
-            // Immediately set imported data so tags can show
-            setImportedData(newFormData);
+            // Store the imported containers snapshot
+            importedContainersSnapshotRef.current = mappedContainers;
 
             // Use requestAnimationFrame to wait for the reset to complete
             requestAnimationFrame(() => {
               requestAnimationFrame(() => {
+                // After form has settled, take a snapshot of the actual form values
+                // This ensures we compare against what the form actually contains
+                const settledContainers = control._formValues.containers || [];
+                importedContainersSnapshotRef.current = JSON.parse(
+                  JSON.stringify(settledContainers),
+                );
+
                 // Clear flags after form reset is complete
                 isImportingRef.current = false;
                 setJustImported(false);
-                userHasInteractedRef.current = false; // Reset interaction flag
               });
             });
 

@@ -66,7 +66,6 @@ type ContainerFormProps = {
   control: Control<ReleaseInputData>;
   isImported?: boolean;
   isModified?: boolean;
-  markUserInteraction: () => void;
 };
 
 // react-hook-form returns targetGroups validation error as Array<Record<string, FieldError>> type
@@ -124,7 +123,6 @@ const ContainerForm = ({
   control,
   isImported = false,
   isModified = false,
-  markUserInteraction,
 }: ContainerFormProps) => {
   const volumesForm = useFieldArray({
     control,
@@ -255,7 +253,6 @@ const ContainerForm = ({
                         value={selectedOption}
                         onChange={(option) => {
                           field.onChange(option ? option.value : null);
-                          markUserInteraction();
                         }}
                         options={imageCredentials}
                         isClearable
@@ -352,7 +349,6 @@ const ContainerForm = ({
                         value={mappedValue}
                         onChange={(selected) => {
                           onChange(selected.map((s) => ({ id: s.value })));
-                          markUserInteraction();
                         }}
                         onBlur={onBlur}
                         options={networks}
@@ -390,14 +386,10 @@ const ContainerForm = ({
 
                     const handleAddExtraHost = () => {
                       field.onChange([...extraHosts, ""]);
-
-                      markUserInteraction();
                     };
 
                     const handleDeleteExtraHost = (i: number) => {
                       field.onChange(extraHosts.filter((_, idx) => idx !== i));
-
-                      markUserInteraction();
                     };
 
                     const handleChangeHost = (i: number, value: string) => {
@@ -406,8 +398,6 @@ const ContainerForm = ({
                       updated[i] = value;
 
                       field.onChange(updated);
-
-                      markUserInteraction();
                     };
 
                     return (
@@ -597,7 +587,6 @@ const ContainerForm = ({
                                         }
                                         onChange={(selected) => {
                                           field.onChange(selected?.value);
-                                          markUserInteraction();
                                         }}
                                         onBlur={field.onBlur}
                                         options={availableOptions}
@@ -711,7 +700,6 @@ const ContainerForm = ({
                         value={field.value ?? ""}
                         onChange={(value) => {
                           field.onChange(value ?? "");
-                          markUserInteraction();
                         }}
                         defaultValue={field.value || "[]"}
                         initialLines={1}
@@ -750,7 +738,6 @@ const ContainerForm = ({
                         value={field.value ?? ""}
                         onChange={(value) => {
                           field.onChange(value ?? "");
-                          markUserInteraction();
                         }}
                         defaultValue={field.value || "[]"}
                         initialLines={1}
@@ -1069,7 +1056,6 @@ const ContainerForm = ({
                         }))}
                         onChange={(selected) => {
                           onChange(selected.map((s) => s.id));
-                          markUserInteraction();
                         }}
                         onBlur={onBlur}
                         options={options}
@@ -1113,7 +1099,6 @@ const ContainerForm = ({
                         }))}
                         onChange={(selected) => {
                           onChange(selected.map((s) => s.id));
-                          markUserInteraction();
                         }}
                         onBlur={onBlur}
                         options={options}
@@ -1161,7 +1146,6 @@ const ContainerForm = ({
                         value={selectedOption}
                         onChange={(option) => {
                           field.onChange(option ? option.value : null);
-                          markUserInteraction();
                         }}
                         options={restartPolicyOptions}
                         isClearable
@@ -1194,7 +1178,6 @@ const ContainerForm = ({
                       }
                       onChange={(value) => {
                         field.onChange(value ?? "");
-                        markUserInteraction();
                       }}
                       defaultValue={
                         field.value && typeof field.value !== "string"
