@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Reconciler.CoreTest do
   use Edgehog.DataCase, async: true
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
   alias Edgehog.Astarte.Device.AvailableContainers.ContainerStatus
@@ -588,6 +589,28 @@ defmodule Edgehog.Containers.Reconciler.CoreTest do
         |> Map.get(:state)
 
       assert :stopped = new_state
+    end
+  end
+
+  describe "online_devices/1" do
+    setup do
+      tenant = tenant_fixture()
+
+      {:ok, %{tenant: tenant}}
+    end
+
+    test "list online devices", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant, online: true)
+
+      assert {1, stream} = Reconciler.Core.online_devices(tenant)
+
+      read_device =
+        stream
+        |> Stream.take(1)
+        |> Enum.at(0)
+
+      assert device.id == read_device.id
+      assert device.device_id == read_device.device_id
     end
   end
 end

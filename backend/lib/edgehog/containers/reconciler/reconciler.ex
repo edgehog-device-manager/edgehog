@@ -75,7 +75,14 @@ defmodule Edgehog.Containers.Reconciler do
 
   @impl GenServer
   def init(args) do
-    state = Map.new(args)
+    tenant = Keyword.fetch!(args, :tenant)
+    {online_devices_n, online_devices} = Core.online_devices(tenant)
+
+    state =
+      online_devices
+      |> Enum.reduce(%{}, &do_register_device/2)
+      |> Map.put(:tenant, tenant)
+      |> Map.put(:online, online_devices_n)
 
     {:ok, state}
   end
@@ -84,9 +91,7 @@ defmodule Edgehog.Containers.Reconciler do
   def handle_cast({:register, device}, state) do
     tenant = Map.get(state, :tenant, nil)
 
-    Logger.info("Starting timeout for device #{device.device_id}")
-    timer_ref = Process.send_after(self(), {:reconcile, device.id}, @reconcile_timeout)
-    new_state = Map.put(state, device.id, timer_ref)
+    new_state = do_register_device(device, state)
 
     # When called, reconcile the device state with astarte
     reconcile(device.id, tenant)
@@ -133,5 +138,11 @@ defmodule Edgehog.Containers.Reconciler do
 
   defp name(tenant) do
     {:via, Registry, {Edgehog.Containers.Reconciler.Registry, tenant.tenant_id}}
+  end
+
+  defp do_register_device(device, state) do
+    Logger.info("Starting timeout for device #{device.device_id}")
+    timer_ref = Process.send_after(self(), {:reconcile, device.id}, @reconcile_timeout)
+    Map.put(state, device.id, timer_ref)
   end
 end
