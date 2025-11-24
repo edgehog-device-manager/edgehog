@@ -104,7 +104,7 @@ _init-edgehog:
 _create-edgehog-tenant edgehog-hostname="api.edgehog.localhost":
     #!/usr/bin/env bash
     admin_jwt=$(cat backend/priv/repo/seeds/keys/admin_jwt.txt)
-    curl -sf -X POST "http://{{edgehog-hostname}}/admin-api/v1/tenants" \
+    curl --fail-with-body -X POST "http://{{edgehog-hostname}}/admin-api/v1/tenants" \
          -H "Content-Type: application/vnd.api+json" \
          -H "Accept: application/vnd.api+json" \
          -H "Authorization: Bearer $admin_jwt" \
