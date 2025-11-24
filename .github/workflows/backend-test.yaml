@@ -25,6 +25,7 @@ on:
   push:
     paths:
       - "backend/**"
+      - "tools/e2e_test/**"
       - ".tool-versions"
       - ".github/workflows/backend-test.yaml"
     branches:
@@ -34,6 +35,7 @@ on:
   pull_request:
     paths:
       - "backend/**"
+      - "tools/e2e_test/**"
       - ".tool-versions"
       - ".github/workflows/backend-test.yaml"
 
@@ -280,4 +282,59 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Build Docker image
-        run: docker build .
+        run: docker build . -t edgehogdevicemanager/edgehog-backend:latest
+      - uses: ./.github/actions/export-container
+
+  e2e-test:
+    name: End to end
+    runs-on: ubuntu-24.04
+    needs: build-docker-image
+    env:
+      CARGO_TERM_COLOR: always
+      SCCACHE_GHA_ENABLED: "true"
+      RUSTC_WRAPPER: "sccache"
+      RUST_LOG: "debug"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          show-progress: false
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1.15.2
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: extractions/setup-just@v3
+      - name: Install astartectl
+        uses: jaxxstorm/action-install-gh-release@v1.10.0
+        with:
+          repo: astarte-platform/astartectl
+      # Cache astarte docker images
+      - name: Cache Docker images.
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}
+      - name: Init Astarte repo
+        shell: bash
+        run: |
+          just _check-system-prereqs _check-astarte-prereqs _configure-system _init-astarte
+      - uses: ./.github/actions/import-container
+      - name: Init edgehog
+        run: |
+          docker compose up -d
+      - name: Provision astarte realm
+        timeout-minutes: 2
+        run: |
+          just _wait-astarte _create-astarte-realm
+      # Skipping `_wait-for-edgehog`: the previous step should be way longer
+      # than what is needed.
+      - name: Provision edgehog tenant
+        timeout-minutes: 2
+        run: |
+          just _create-edgehog-tenant
+      - name: Check containers
+        if: ${{ failure() }}
+        run: |
+          docker compose logs
+      - name: Run e2e test suite
+        working-directory: tools/e2e_test
+        run: |
+          cargo test
