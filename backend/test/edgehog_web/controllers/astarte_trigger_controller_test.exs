@@ -33,6 +33,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Reconciler
+  alias Edgehog.Containers.ReconcilerMock
   alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
@@ -55,6 +57,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       conn = put_req_header(conn, "astarte-realm", realm.name)
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+      stub(ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
+      stub(ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
+      stub(ReconcilerMock, :start_link, fn _opts -> :ok end)
 
       {:ok, conn: conn, cluster: cluster, realm: realm, device: device, path: path}
     end
@@ -285,6 +290,12 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
         realm: realm,
         tenant: tenant
       } = ctx
+
+      stub(
+        ReconcilerMock,
+        :stop_device,
+        &Reconciler.stop_device/2
+      )
 
       device =
         device_fixture(

@@ -148,6 +148,9 @@ defmodule Edgehog.TenantsTest do
   describe "Tenants.provision_tenant/1" do
     setup do
       stub(ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
+      stub(Edgehog.Containers.ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
+      stub(Edgehog.Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
+      stub(Edgehog.Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
       :ok
     end
 
@@ -291,9 +294,12 @@ defmodule Edgehog.TenantsTest do
     import Edgehog.OSManagementFixtures
     import Edgehog.UpdateCampaignsFixtures
 
-    alias Edgehog.Astarte
+    alias Edgehog.Containers.ReconcilerMock
 
     setup do
+      stub(ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
+      stub(ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
+      stub(ReconcilerMock, :start_link, fn _opts -> :ok end)
       %{tenant: tenant_fixture()}
     end
 

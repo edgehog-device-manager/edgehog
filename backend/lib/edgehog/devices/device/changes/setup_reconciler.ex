@@ -27,6 +27,8 @@ defmodule Edgehog.Devices.Device.Changes.SetupReconciler do
 
   alias Edgehog.Containers.Reconciler
 
+  @reconciler_module Application.compile_env(:edgehog, :container_reconciler, Reconciler)
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
@@ -39,7 +41,7 @@ defmodule Edgehog.Devices.Device.Changes.SetupReconciler do
     device = Ash.load!(device, :tenant)
     tenant = device.tenant
 
-    Reconciler.register_device(device, tenant)
+    @reconciler_module.register_device(device, tenant)
   end
 
   defp maybe_start_reconciler(other), do: other
