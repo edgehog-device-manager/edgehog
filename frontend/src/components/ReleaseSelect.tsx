@@ -159,7 +159,7 @@ const ReleaseSelect = ({
     }
 
     return releases;
-  }, [paginationData]);
+  }, [paginationData, isTarget, selectedApp, selectedRelease]);
 
   const getReleaseLabel = (release: ReleaseRecord) => release.version;
   const getReleaseValue = (release: ReleaseRecord) => release.id;
@@ -186,6 +186,7 @@ const ReleaseSelect = ({
         id: "components.ReleaseSelect.releaseOption",
         defaultMessage: "Search or select a release...",
       })}
+      isClearable
       options={releaseOptions}
       getOptionLabel={getReleaseLabel}
       getOptionValue={getReleaseValue}
@@ -278,6 +279,17 @@ const ReleaseSelectWrapper = ({
   }, [getApplication, selectedApp]);
 
   useEffect(fetchApplication, [fetchApplication]);
+
+  // Clear selected target release if selectedRelease is >= currently selected target release
+  useEffect(() => {
+    if (
+      controllerProps.value &&
+      selectedRelease &&
+      semver.gte(selectedRelease.version, controllerProps.value.version)
+    ) {
+      controllerProps.onChange(null);
+    }
+  }, [selectedRelease, controllerProps.value, controllerProps]);
 
   return (
     <ErrorBoundary onReset={fetchApplication} FallbackComponent={ErrorFallback}>
