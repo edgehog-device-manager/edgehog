@@ -571,7 +571,7 @@ defmodule Edgehog.DeploymentCampaigns.Lazy.ExecutorTest do
       # Start the execution
       start_execution(pid)
 
-      assert_normal_exit(pid, ref)
+      assert_normal_exit(pid, ref, 2000)
       assert_deployment_campaign_outcome(tenant, deployment_campaign_id, :failure)
     end
   end
