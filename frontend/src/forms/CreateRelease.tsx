@@ -588,6 +588,12 @@ const CreateRelease = ({
     }
   };
 
+  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
+
+  const handleRequestRemove = (index: number) => {
+    setRemoveIndex(index);
+  };
+
   return (
     <>
       <form
@@ -753,6 +759,7 @@ const CreateRelease = ({
                 isModified={
                   isContainerImported(index) && isContainerModified(index)
                 }
+                onRequestRemove={handleRequestRemove}
               />
             );
           })}
@@ -773,6 +780,41 @@ const CreateRelease = ({
                 defaultMessage="Add Container"
               />
             </Button>
+            {removeIndex !== null && (
+              <ConfirmModal
+                confirmLabel={
+                  <FormattedMessage
+                    id="forms.CreateRelease.confirmRemoveLabel"
+                    defaultMessage="Remove"
+                  />
+                }
+                onCancel={() => setRemoveIndex(null)}
+                onConfirm={() => {
+                  handleRemoveContainer(removeIndex);
+                  setRemoveIndex(null);
+                }}
+                title={
+                  <FormattedMessage
+                    id="forms.CreateRelease.confirmRemoveTitle"
+                    defaultMessage="Remove Container"
+                  />
+                }
+                confirmVariant="danger"
+              >
+                <p>
+                  <FormattedMessage
+                    id="forms.CreateRelease.confirmRemoveDescription"
+                    defaultMessage="Are you sure you want to remove <bold>Container {number}</bold>?"
+                    values={{
+                      number: removeIndex + 1,
+                      bold: (chunks: React.ReactNode) => (
+                        <strong>{chunks}</strong>
+                      ),
+                    }}
+                  />
+                </p>
+              </ConfirmModal>
+            )}
           </div>
 
           <div className="d-flex justify-content-end align-items-center">

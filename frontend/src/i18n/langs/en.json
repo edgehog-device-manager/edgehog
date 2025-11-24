@@ -1817,6 +1817,15 @@
   "forms.CreateRelease.confirmPrompt": {
     "defaultMessage": "Choose a release from which you want to copy containers and their configurations."
   },
+  "forms.CreateRelease.confirmRemoveDescription": {
+    "defaultMessage": "Are you sure you want to remove <bold>Container {number}</bold>?"
+  },
+  "forms.CreateRelease.confirmRemoveLabel": {
+    "defaultMessage": "Remove"
+  },
+  "forms.CreateRelease.confirmRemoveTitle": {
+    "defaultMessage": "Remove Container"
+  },
   "forms.CreateRelease.containersTitle": {
     "defaultMessage": "Containers"
   },
