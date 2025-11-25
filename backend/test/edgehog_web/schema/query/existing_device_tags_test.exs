@@ -107,7 +107,7 @@ defmodule EdgehogWeb.Schema.Query.ExistingDeviceTagsTest do
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
     assert %{data: %{"existingDeviceTags" => %{"edges" => tags}}} = result
-    assert tags != nil
+    assert tags
 
     tags
   end

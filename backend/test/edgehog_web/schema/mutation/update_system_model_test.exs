@@ -448,7 +448,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateSystemModelTest do
     refute :errors in Map.keys(result)
     refute "errors" in Map.keys(result[:data])
 
-    assert system_model != nil
+    assert system_model
 
     system_model
   end

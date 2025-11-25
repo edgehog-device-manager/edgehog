@@ -86,7 +86,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
       for id <- data.volumeIds do
         volume_binds = Map.fetch!(binds_by_source, id)
-        assert Enum.find(volume_binds, fn %{target: target} -> target == volume_target end)
+        assert Enum.any?(volume_binds, fn %{target: target} -> target == volume_target end)
       end
 
       :ok
@@ -220,7 +220,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     assert %{data: %{"deployRelease" => %{"result" => deployment}}} = result
 
-    assert deployment != nil
+    assert deployment
 
     deployment
   end

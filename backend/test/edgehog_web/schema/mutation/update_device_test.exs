@@ -100,7 +100,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeviceTest do
              }
            } = result
 
-    assert device != nil
+    assert device
 
     device
   end

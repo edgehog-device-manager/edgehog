@@ -206,7 +206,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
 
     refute Map.get(result, :errors)
 
-    assert update_campaigns != nil
+    assert update_campaigns
 
     update_campaigns
   end

@@ -260,7 +260,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
 
     refute Map.get(result, :errors)
 
-    assert base_image != nil
+    assert base_image
 
     base_image
   end

@@ -87,7 +87,7 @@ defmodule EdgehogWeb.Schema.Query.ChannelTest do
 
     refute Map.get(result, :errors)
 
-    assert channel != nil
+    assert channel
 
     channel
   end

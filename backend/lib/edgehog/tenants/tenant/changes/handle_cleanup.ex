@@ -82,7 +82,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
     Enum.each(system_models, fn system_model ->
       current_picture_url = system_model.picture_url
 
-      unless current_picture_url == nil do
+      if current_picture_url != nil do
         maybe_delete_old_picture(system_model, current_picture_url, true)
       end
     end)

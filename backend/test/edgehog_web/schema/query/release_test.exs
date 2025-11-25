@@ -96,7 +96,7 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
 
     for edge <- deployments_edges do
       device_node = get_in(edge, ["node", "device"])
-      assert device_node["id"] != nil
+      assert device_node["id"]
     end
 
     system_model_ids = release |> get_in(["release", "system_models"]) |> Enum.map(& &1["id"])
@@ -156,7 +156,7 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
   def extract_result!(result) do
     refute :errors in Map.keys(result)
     assert %{data: data} = result
-    assert data != nil
+    assert data
 
     data
   end

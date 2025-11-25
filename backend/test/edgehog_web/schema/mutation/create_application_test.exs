@@ -160,7 +160,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplicationTest do
            } = result
 
     refute :errors in Map.keys(result)
-    assert application != nil
+    assert application
 
     application
   end

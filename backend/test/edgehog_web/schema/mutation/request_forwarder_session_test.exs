@@ -157,7 +157,7 @@ defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
 
     refute Map.get(result, :errors)
 
-    assert session_token != nil
+    assert session_token
 
     session_token
   end

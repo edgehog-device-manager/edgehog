@@ -122,7 +122,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteSystemModelTest do
              }
            } = result
 
-    assert system_model != nil
+    assert system_model
 
     system_model
   end

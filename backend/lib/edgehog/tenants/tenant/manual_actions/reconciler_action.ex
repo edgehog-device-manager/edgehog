@@ -30,11 +30,8 @@ defmodule Edgehog.Tenants.Tenant.ManualActions.ReconcilerAction do
   def run(input, _opts, _context) do
     tenant = input.arguments.tenant
 
-    result =
-      case input.action.name do
-        :reconcile -> @reconciler_module.reconcile_tenant(tenant)
-      end
-
+    :reconcile = input.action.name
+    result = @reconciler_module.reconcile_tenant(tenant)
     {:ok, result}
   end
 end

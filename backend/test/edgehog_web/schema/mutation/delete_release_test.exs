@@ -202,7 +202,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteReleaseTest do
            } = result
 
     refute :errors in Map.keys(result)
-    assert release != nil
+    assert release
 
     release
   end

@@ -66,7 +66,7 @@ defmodule Edgehog.Application do
       # Start the Endpoint (http/https)
       Endpoint,
       # Start Absinthe Subscriptions AFTER Endpoint is up
-      {Absinthe.Subscription, EdgehogWeb.Endpoint}
+      {Absinthe.Subscription, Endpoint}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -79,7 +79,7 @@ defmodule Edgehog.Application do
   # whenever the application is updated.
   @impl Application
   def config_change(changed, _new, removed) do
-    EdgehogWeb.Endpoint.config_change(changed, removed)
+    Endpoint.config_change(changed, removed)
     :ok
   end
 end

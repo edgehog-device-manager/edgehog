@@ -30,7 +30,7 @@ defmodule Edgehog.Tenants.Reconciler do
 
   require Logger
 
-  @reconcile_interval :timer.minutes(10)
+  @reconcile_interval to_timeout(minute: 10)
   @minimum_astarte_version_with_policies_support "1.1.1"
 
   def start_link(opts) do

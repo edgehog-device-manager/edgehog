@@ -25,6 +25,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
   import Edgehog.TenantsFixtures
 
   alias Astarte.Client.APIError
+  alias Edgehog.Astarte.Interface.MockDataLayer
   alias Edgehog.Tenants.Reconciler.Core
 
   @astarte_resources_dir "priv/astarte_resources"
@@ -120,7 +121,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
+      MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:error, api_error(status: 404)}
       end)
@@ -139,7 +140,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
+      MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => interface_map}}
       end)
@@ -158,7 +159,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
+      MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => put_minor_version(interface_map, minor + 1)}}
       end)
@@ -177,7 +178,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      Edgehog.Astarte.Interface.MockDataLayer
+      MockDataLayer
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => put_minor_version(interface_map, minor - 1)}}
       end)
@@ -194,7 +195,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
         interface_map: interface_map
       } = ctx
 
-      expect(Edgehog.Astarte.Interface.MockDataLayer, :get, fn _client, _interface_name, _major ->
+      expect(MockDataLayer, :get, fn _client, _interface_name, _major ->
         {:error, api_error(status: 500)}
       end)
 

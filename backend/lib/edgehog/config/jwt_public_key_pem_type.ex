@@ -25,7 +25,7 @@ defmodule Edgehog.Config.JWTPublicKeyPEMType do
   alias JOSE.JWK
 
   @impl Skogsra.Type
-  @spec cast(term()) :: {:ok, JOSE.JWK.t()} | :error | no_return()
+  @spec cast(term()) :: {:ok, JWK.t()} | :error | no_return()
   def cast(value)
 
   def cast(value) when is_binary(value) do

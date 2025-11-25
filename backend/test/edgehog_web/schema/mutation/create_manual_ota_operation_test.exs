@@ -184,7 +184,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
     refute Map.get(result, :errors)
 
-    assert ota_operation != nil
+    assert ota_operation
 
     ota_operation
   end

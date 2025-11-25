@@ -127,7 +127,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteVolumeTest do
 
     refute Map.get(result, :errors)
 
-    assert volume != nil
+    assert volume
 
     volume
   end

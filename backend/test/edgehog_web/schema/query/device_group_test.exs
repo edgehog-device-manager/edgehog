@@ -124,7 +124,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceGroupTest do
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
     assert %{data: %{"deviceGroup" => device_group}} = result
-    assert device_group != nil
+    assert device_group
 
     device_group
   end

@@ -130,12 +130,12 @@ defmodule Edgehog.Containers.Image.Deployment do
   end
 
   relationships do
-    belongs_to :image, Edgehog.Containers.Image do
+    belongs_to :image, Image do
       public? true
       attribute_type :uuid
     end
 
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device, Device
 
     has_many :container_deployments, Edgehog.Containers.Container.Deployment do
       destination_attribute :image_deployment_id

@@ -88,7 +88,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateImageCredentialsTest do
            } = result
 
     refute :errors in Map.keys(result)
-    assert image_credentials != nil
+    assert image_credentials
 
     image_credentials
   end

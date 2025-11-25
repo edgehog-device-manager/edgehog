@@ -1009,7 +1009,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
     assert %{data: %{"device" => device}} = result
-    assert device != nil
+    assert device
 
     device
   end

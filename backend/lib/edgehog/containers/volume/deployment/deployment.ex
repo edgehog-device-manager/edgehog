@@ -129,12 +129,12 @@ defmodule Edgehog.Containers.Volume.Deployment do
   end
 
   relationships do
-    belongs_to :volume, Edgehog.Containers.Volume do
+    belongs_to :volume, Volume do
       attribute_type :uuid
       public? true
     end
 
-    belongs_to :device, Edgehog.Devices.Device
+    belongs_to :device, Device
 
     many_to_many :container_deployments, Edgehog.Containers.Container.Deployment do
       through Edgehog.Containers.ContainerDeploymentVolumeDeployment
