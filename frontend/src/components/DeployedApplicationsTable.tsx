@@ -191,7 +191,7 @@ const ActionButtons = ({
   <div>
     {disabled ? (
       <Button
-        className={"btn p-0 border-0 bg-transparent ms-4 icon-click"}
+        className={"btn p-0 border-0 bg-transparent icon-click"}
         title={intl.formatMessage({
           id: "components.DeployedApplicationsTable.sendButtonTitle",
           defaultMessage: "Redeploy Application",
