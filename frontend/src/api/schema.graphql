@@ -2421,12 +2421,14 @@ input CreateImageCredentialsInput {
   label: String!
   username: String!
   password: String!
+  serveraddress: String
 }
 
 enum ImageCredentialsSortField {
   ID
   LABEL
   USERNAME
+  SERVERADDRESS
 }
 
 ":image_credentials connection"
@@ -2448,6 +2450,19 @@ type ImageCredentialsEdge {
 
   ":image_credentials node"
   node: ImageCredentials!
+}
+
+input ImageCredentialsFilterServeraddress {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
 }
 
 input ImageCredentialsFilterUsername {
@@ -2494,6 +2509,7 @@ input ImageCredentialsFilterInput {
   id: ImageCredentialsFilterId
   label: ImageCredentialsFilterLabel
   username: ImageCredentialsFilterUsername
+  serveraddress: ImageCredentialsFilterServeraddress
 }
 
 input ImageCredentialsSortInput {
@@ -2512,6 +2528,7 @@ type ImageCredentials implements Node {
   id: ID!
   label: String!
   username: String!
+  serveraddress: String
 }
 
 input ImageDeploymentFilterImageId {
