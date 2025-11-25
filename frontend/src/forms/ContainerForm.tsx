@@ -66,6 +66,7 @@ type ContainerFormProps = {
   control: Control<ReleaseInputData>;
   isImported?: boolean;
   isModified?: boolean;
+  onRequestRemove: (index: number) => void;
 };
 
 // react-hook-form returns targetGroups validation error as Array<Record<string, FieldError>> type
@@ -116,13 +117,13 @@ const ContainerForm = ({
   index,
   register,
   errors,
-  remove,
   imageCredentials,
   networks,
   volumes,
   control,
   isImported = false,
   isModified = false,
+  onRequestRemove,
 }: ContainerFormProps) => {
   const volumesForm = useFieldArray({
     control,
@@ -1225,7 +1226,7 @@ const ContainerForm = ({
         <div className="d-flex justify-content-start align-items-center">
           <Button
             variant="danger"
-            onClick={() => remove(index)}
+            onClick={() => onRequestRemove(index)}
             className="mt-3"
           >
             <FormattedMessage
