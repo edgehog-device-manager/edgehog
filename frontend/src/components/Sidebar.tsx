@@ -100,7 +100,7 @@ const Sidebar = () => (
       }
       icon="devices"
       route={Route.devices}
-      activeRoutes={[Route.devices, Route.devicesEdit]}
+      activeRoutes={[Route.devices, Route.devicesEdit, Route.deploymentEdit]}
     />
     <SidebarItem
       label={

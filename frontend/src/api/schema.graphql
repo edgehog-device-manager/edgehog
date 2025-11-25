@@ -1163,6 +1163,7 @@ type ContainerVolume {
 enum DeviceMappingDeploymentSortField {
   ID
   STATE
+  DEVICE_MAPPING_ID
 }
 
 ":device_mapping_deployment connection"
@@ -1184,6 +1185,17 @@ type DeviceMappingDeploymentEdge {
 
   ":device_mapping_deployment node"
   node: DeviceMappingDeployment!
+}
+
+input DeviceMappingDeploymentFilterDeviceMappingId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
 }
 
 input DeviceMappingDeploymentFilterState {
@@ -1214,6 +1226,8 @@ input DeviceMappingDeploymentFilterInput {
   not: [DeviceMappingDeploymentFilterInput!]
   id: DeviceMappingDeploymentFilterId
   state: DeviceMappingDeploymentFilterState
+  deviceMappingId: DeviceMappingDeploymentFilterDeviceMappingId
+  deviceMapping: DeviceMappingFilterInput
   containerDeployments: ContainerDeploymentFilterInput
 }
 
@@ -1225,6 +1239,8 @@ input DeviceMappingDeploymentSortInput {
 type DeviceMappingDeployment {
   id: ID!
   state: String
+  deviceMappingId: ID
+  deviceMapping: DeviceMapping
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -1359,6 +1375,7 @@ type DeviceMapping {
 enum VolumeDeploymentSortField {
   ID
   STATE
+  VOLUME_ID
 }
 
 ":volume_deployment connection"
@@ -1380,6 +1397,17 @@ type VolumeDeploymentEdge {
 
   ":volume_deployment node"
   node: VolumeDeployment!
+}
+
+input VolumeDeploymentFilterVolumeId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
 }
 
 input VolumeDeploymentFilterState {
@@ -1410,6 +1438,8 @@ input VolumeDeploymentFilterInput {
   not: [VolumeDeploymentFilterInput!]
   id: VolumeDeploymentFilterId
   state: VolumeDeploymentFilterState
+  volumeId: VolumeDeploymentFilterVolumeId
+  volume: VolumeFilterInput
   containerDeployments: ContainerDeploymentFilterInput
 }
 
@@ -1421,6 +1451,8 @@ input VolumeDeploymentSortInput {
 type VolumeDeployment {
   id: ID!
   state: String
+  volumeId: ID
+  volume: Volume
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -1581,6 +1613,7 @@ type Volume implements Node {
 enum NetworkDeploymentSortField {
   ID
   STATE
+  NETWORK_ID
 }
 
 ":network_deployment connection"
@@ -1602,6 +1635,17 @@ type NetworkDeploymentEdge {
 
   ":network_deployment node"
   node: NetworkDeployment!
+}
+
+input NetworkDeploymentFilterNetworkId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
 }
 
 input NetworkDeploymentFilterState {
@@ -1632,6 +1676,8 @@ input NetworkDeploymentFilterInput {
   not: [NetworkDeploymentFilterInput!]
   id: NetworkDeploymentFilterId
   state: NetworkDeploymentFilterState
+  networkId: NetworkDeploymentFilterNetworkId
+  network: NetworkFilterInput
   containerDeployments: ContainerDeploymentFilterInput
 }
 
@@ -1643,6 +1689,8 @@ input NetworkDeploymentSortInput {
 type NetworkDeployment {
   id: ID!
   state: String
+  networkId: ID
+  network: Network
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -2128,6 +2176,17 @@ type ImageCredentials implements Node {
   username: String!
 }
 
+input ImageDeploymentFilterImageId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+}
+
 input ImageDeploymentFilterState {
   isNil: Boolean
   eq: String
@@ -2156,11 +2215,15 @@ input ImageDeploymentFilterInput {
   not: [ImageDeploymentFilterInput!]
   id: ImageDeploymentFilterId
   state: ImageDeploymentFilterState
+  imageId: ImageDeploymentFilterImageId
+  image: ImageFilterInput
 }
 
 type ImageDeployment {
   id: ID!
   state: String
+  imageId: ID
+  image: Image
 }
 
 input ImageFilterImageCredentialsId {

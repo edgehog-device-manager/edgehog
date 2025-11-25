@@ -34,7 +34,7 @@ import type { DeployedApplicationsTable_deleteDeployment_Mutation } from "api/__
 import type { DeployedApplicationsTable_upgradeDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_upgradeDeployment_Mutation.graphql";
 
 import Icon from "components/Icon";
-import { Link, Route } from "Navigation";
+import { Link, Route, useNavigate } from "Navigation";
 import Table, { createColumnHelper } from "components/Table";
 import Button from "components/Button";
 import ConfirmModal from "components/ConfirmModal";
@@ -59,6 +59,10 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
           id
           state
           isReady
+          device {
+            id
+            name
+          }
           release {
             id
             version
@@ -84,7 +88,9 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
               name
             }
           }
-          containerDeployments {
+          ...DeploymentDetails_events
+          ...DeploymentDetails_containerDeployments
+          containerDeployments(first: $first, after: $after) {
             edges {
               node {
                 id
@@ -263,6 +269,7 @@ const DeployedApplicationsTable = ({
   >(DEPLOYED_APPLICATIONS_TABLE_FRAGMENT, deviceRef);
 
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const [upgradeTargetRelease, setUpgradeTargetRelease] =
     useState<UpgradeTargetRelease | null>(null);
@@ -362,6 +369,7 @@ const DeployedApplicationsTable = ({
       applicationName: edge.node.release?.application?.name || "Unknown",
       releaseId: edge.node.release?.id || "Unknown",
       releaseVersion: edge.node.release?.version || "N/A",
+      deviceId: edge.node.device?.id || "Unknown",
       state: parseDeploymentState(edge.node.state || undefined),
       isReady: edge.node.isReady,
       containerDeployments:
@@ -749,6 +757,43 @@ const DeployedApplicationsTable = ({
             }}
           >
             <Icon className="text-danger" icon={"delete"} />
+          </Button>
+
+          <Button
+            className="btn btn-link border-0 bg-transparent ms-4 p-0 text-decoration-none d-inline-flex align-items-center"
+            title={intl.formatMessage({
+              id: "components.DeployedApplicationsTable.deploymentDetailsButtonTitle",
+              defaultMessage: "Deployment Details",
+            })}
+            onClick={() => {
+              setSelectedDeployment(getValue());
+              navigate({
+                route: Route.deploymentEdit,
+                params: {
+                  deploymentId: row.original.id,
+                  deviceId: row.original.deviceId,
+                },
+              });
+            }}
+          >
+            <Icon
+              icon="faCircleInfo"
+              style={{
+                color: "white",
+                backgroundColor: "gray",
+                borderRadius: "50%",
+                padding: "1px",
+                cursor: "pointer",
+                boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+                transition: "transform 0.3s, box-shadow 0.3s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.2)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            />
           </Button>
         </div>
       ),
