@@ -45,8 +45,15 @@ defmodule Edgehog.Containers.Reconciler do
     :device_id
   ]
 
-  # 10s
-  @reconcile_timeout 10 * 1000
+  # median time per device to setup the reconciliation timer. This is just an
+  # euristic based on online articles about database performance (which affect
+  # task setup as the device number is read from the database).
+  @comp_time_per_device 200
+
+  # 10 minutes
+  @ten_min 10 * 60 * 1000
+  # 5 minmutes
+  @five_min 5 * 60 * 1000
 
   # APIs
   def start_link(args) do
@@ -124,7 +131,7 @@ defmodule Edgehog.Containers.Reconciler do
     Logger.info("Reconciling device #{device_id} with astarte contianer interfaces")
 
     reconcile(device_id, tenant)
-    timer_ref = Process.send_after(self(), {:reconcile, device_id}, @reconcile_timeout)
+    timer_ref = Process.send_after(self(), {:reconcile, device_id}, reconcile_timeout(tenant))
     new_state = Map.put(state, device_id, timer_ref)
 
     {:noreply, new_state}
@@ -142,7 +149,26 @@ defmodule Edgehog.Containers.Reconciler do
 
   defp do_register_device(device, state) do
     Logger.info("Starting timeout for device #{device.device_id}")
-    timer_ref = Process.send_after(self(), {:reconcile, device.id}, @reconcile_timeout)
+    tenant = Map.fetch!(state, :tenant)
+    timer_ref = Process.send_after(self(), {:reconcile, device.id}, reconcile_timeout(tenant))
     Map.put(state, device.id, timer_ref)
+  end
+
+  # This seems to be spawning _Hawkes processes_ I wont investigate more, this
+  # seems to be uniform enough with a variable window of time for
+  # reconciliation.
+  defp reconcile_timeout(tenant) do
+    {online_devices_n, _} = Core.online_devices(tenant)
+    mean_time = online_devices_n * @comp_time_per_device
+
+    max = max(@ten_min, mean_time)
+    min = max(@five_min, mean_time / 2)
+
+    rand = :rand.uniform()
+
+    # Random number between min and max
+    timeout = min + (max - min) * rand
+
+    timeout |> Float.round(0) |> ceil()
   end
 end
