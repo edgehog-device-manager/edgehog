@@ -60,11 +60,11 @@ _wait-astarte:
 
 # Wait for Edgehog services to be ready
 [private]
-_wait-edgehog:
+_wait-edgehog edgehog-host="api.edgehog.localhost":
     #!/usr/bin/env bash
     echo "⏳ Waiting for Edgehog services to be ready..."
     while true; do
-        if curl -sf http://api.edgehog.localhost/admin-api/v1/swagger >/dev/null; then
+        if curl -sf http://{{edgehog-host}}/admin-api/v1/swagger >/dev/null; then
             echo "✅ Edgehog services are ready."
             break
         fi
@@ -101,10 +101,10 @@ _init-edgehog:
 
 # Create Edgehog tenant
 [private]
-_create-edgehog-tenant:
+_create-edgehog-tenant edgehog-hostname="api.edgehog.localhost":
     #!/usr/bin/env bash
     admin_jwt=$(cat backend/priv/repo/seeds/keys/admin_jwt.txt)
-    curl -sf -X POST "http://api.edgehog.localhost/admin-api/v1/tenants" \
+    curl -sf -X POST "http://{{edgehog-hostname}}/admin-api/v1/tenants" \
          -H "Content-Type: application/vnd.api+json" \
          -H "Accept: application/vnd.api+json" \
          -H "Authorization: Bearer $admin_jwt" \
@@ -149,6 +149,66 @@ _ensure-astarte-running:
             echo "✅ Realm already exists."
         fi
     fi
+
+# Init an edgehog dev environment
+[private]
+_edgehog-dev-backend: 
+    #!/usr/bin/env bash
+    @echo "🚀 Initializing Edgehog backend in dev environment..."
+    export EDGEHOG_IP=$(docker network inspect astarte --format="{{{{(index .IPAM.Config 0).Gateway}}")
+    export SEEDS_REALM_PRIVATE_KEY_FILE=./priv/repo/seeds/keys/realm_private.pem
+    export SEEDS_TENANT_PRIVATE_KEY_FILE=./priv/repo/seeds/keys/tenant_private.pem
+    # Init edgehog services
+    docker compose down -v
+    docker compose up -d edgehog-device-forwarder minio minio-init registry registry-auth registry-init
+    # Init postgres locally, edgehog has to be able to reach it seamlessly
+    (docker run --name postgres -d -e "POSTGRES_HOST_AUTH_METHOD=trust" -p 5432:5432 --rm postgres && sleep 3) || true # skip if already up
+    # `astarte` netowrk gateway ip, a.k.a. edgehog's IP
+    export DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN=edgehog.localhost
+    export DATABASE_USERNAME=edgehog
+    export DATABASE_PASSWORD=edgehog
+    export DATABASE_HOSTNAME=postgres.edgehog.localhost
+    export DATABASE_NAME=postgres
+    export SECRET_KEY_BASE=KKtB6BEPk1NVk6EmBfQCafphxLj7EW1M+BGPIFCT8X2LTywTFuGC6lM3yc8e3VKH
+    export SEEDS_REALM_ORIGINAL_FILE=${SEEDS_REALM_PRIVATE_KEY_FILE}
+    export SEEDS_TENANT_ORIGINAL_FILE=${SEEDS_TENANT_PRIVATE_KEY_FILE}
+    export URL_HOST=${EDGEHOG_IP}
+    export URL_PORT=4000
+    export URL_SCHEME=http
+    export EDGEHOG_FORWARDER_HOSTNAME=device-forwarder.edgehog.localhost
+    export EDGEHOG_FORWARDER_PORT=80
+    export EDGEHOG_FORWARDER_SECURE_SESSIONS="false"
+    export ADMIN_JWT_PUBLIC_KEY_PATH=./priv/repo/seeds/keys/admin_public.pem
+    cd backend
+    # Setup database. Do not seed the database.
+    mix ash.reset
+    # Run server
+    iex -S mix phx.server
+
+_provision-edgehog-tenant base_url="localhost:4000": (_wait-edgehog base_url) (_create-edgehog-tenant base_url)
+
+[parallel]
+_init-dev-backend: _edgehog-dev-backend _provision-edgehog-tenant
+
+dev-backend:
+    #!/usr/bin/env bash
+    if curl -sf http://api.astarte.localhost/appengine/health >/dev/null && \
+       curl -sf http://api.astarte.localhost/realmmanagement/health >/dev/null && \
+       curl -sf http://api.astarte.localhost/pairing/health >/dev/null && \
+       curl -sf http://api.astarte.localhost/housekeeping/health >/dev/null; then
+        just _init-dev-backend
+    else
+       just provision-realm _init-dev-backend
+    fi
+
+dev-frontend: (_wait-edgehog "localhost:4000")
+    #!/usr/bin/env bash
+    @echo "🚀 Initializing Edgehog frontend in dev environment..."
+    cd frontend
+    npm run start
+
+provision-realm: _check-system-prereqs _check-astarte-prereqs _configure-system _init-astarte _wait-astarte _create-astarte-realm
+    @echo "🎉 Astarte has been provisioned with the test realm."
 
 # Provision only Edgehog (will start Astarte if not running)
 provision-edgehog: _check-system-prereqs _ensure-astarte-running _init-edgehog _wait-edgehog _create-edgehog-tenant
@@ -252,20 +312,31 @@ status:
     @-echo -n "Astarte Housekeeping API: " && curl -sf http://api.astarte.localhost/housekeeping/health >/dev/null && echo "✅ OK" || echo "❌ Down"
     @-echo -n "Edgehog Admin API: " && curl -sf http://api.edgehog.localhost/admin-api/v1/swagger >/dev/null && echo "✅ OK" || echo "❌ Down"
 
+open_astarte_dashboard:
+    #!/usr/bin/env bash
+    astarte_realm_jwt=$(cat backend/priv/repo/seeds/keys/realm_jwt.txt 2>/dev/null || echo "missing")
+    if [ "$astarte_realm_jwt" != "missing" ]; then
+       python3 -m webbrowser "http://dashboard.astarte.localhost/auth?realm=test#access_token=$astarte_realm_jwt"
+       echo "✅ Astarte dashboard opened in browser"
+    else
+       echo "❌ Astarte JWT token not found. Run 'just provision-tenant' first."
+    fi
+
+open_edgehog_dashboard:
+    #!/usr/bin/env bash
+    edgehog_tenant_jwt=$(cat backend/priv/repo/seeds/keys/tenant_jwt.txt 2>/dev/null || echo "missing")
+    if [ "$edgehog_tenant_jwt" != "missing" ]; then
+        python3 -m webbrowser "http://edgehog.localhost/login?tenantSlug=test&authToken=$edgehog_tenant_jwt"
+        echo "✅ Edgehog dashboard opened in browser"
+    else
+        echo "❌ Edgehog JWT token not found. Run 'just provision-tenant' first."
+    fi
+
 # Open web interfaces in browser
 open-dashboards:
-    #!/usr/bin/env bash
-    echo "🌐 Opening dashboards..."
-    astarte_realm_jwt=$(cat backend/priv/repo/seeds/keys/realm_jwt.txt 2>/dev/null || echo "missing")
-    edgehog_tenant_jwt=$(cat backend/priv/repo/seeds/keys/tenant_jwt.txt 2>/dev/null || echo "missing")
-    
-    if [ "$astarte_realm_jwt" != "missing" ] && [ "$edgehog_tenant_jwt" != "missing" ]; then
-        python3 -m webbrowser "http://dashboard.astarte.localhost/auth?realm=test#access_token=$astarte_realm_jwt"
-        python3 -m webbrowser "http://edgehog.localhost/login?tenantSlug=test&authToken=$edgehog_tenant_jwt"
-        echo "✅ Dashboards opened in browser"
-    else
-        echo "❌ JWT tokens not found. Run 'just provision-tenant' first."
-    fi
+    @echo "🌐 Opening dashboards..."
+    @-just open_astarte_dashboard
+    @-just open_edgehog_dashboard
 
 # Show logs for all services
 logs:
