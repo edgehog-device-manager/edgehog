@@ -138,7 +138,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
 
     refute Map.get(result, :errors)
 
-    assert base_image != nil
+    assert base_image
 
     base_image
   end

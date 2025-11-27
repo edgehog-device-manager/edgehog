@@ -59,7 +59,7 @@ defmodule Edgehog.MultitenantResource do
         # like `devices_tags`) don't have a single :id primary key. Those resources manually add
         # `:tenant_id` in their primary key, which is why we check for that to avoid creating
         # the index
-        unless unquote(Keyword.get(opts, :tenant_id_in_primary_key?, false)) do
+        if !unquote(Keyword.get(opts, :tenant_id_in_primary_key?, false)) do
           custom_indexes do
             # Assumptions:
             # - There is a primary key and it's called :id

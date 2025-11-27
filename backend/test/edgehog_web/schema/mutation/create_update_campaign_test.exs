@@ -428,7 +428,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateUpdateCampaignTest do
 
     refute Map.get(result, :errors)
 
-    assert update_campaign != nil
+    assert update_campaign
 
     update_campaign
   end

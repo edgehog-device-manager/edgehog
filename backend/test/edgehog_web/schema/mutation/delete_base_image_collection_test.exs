@@ -107,7 +107,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageCollectionTest do
 
     refute Map.get(result, :errors)
 
-    assert base_image_collection != nil
+    assert base_image_collection
 
     base_image_collection
   end

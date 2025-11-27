@@ -127,7 +127,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteNetworkTest do
 
     refute Map.get(result, :errors)
 
-    assert network != nil
+    assert network
 
     network
   end

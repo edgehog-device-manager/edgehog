@@ -142,7 +142,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentCampaignTest do
 
     refute Map.get(result, :errors)
 
-    assert deployment_campaigns != nil
+    assert deployment_campaigns
 
     remove_nodes(deployment_campaigns)
   end

@@ -57,7 +57,7 @@ defmodule Edgehog.DeploymentCampaigns do
   end
 
   resources do
-    resource Edgehog.DeploymentCampaigns.DeploymentCampaign do
+    resource DeploymentCampaign do
       define :fetch_campaign, action: :read, get_by: [:id]
       define :mark_campaign_in_progress, action: :mark_as_in_progress
       define :mark_campaign_failed, action: :mark_as_failed

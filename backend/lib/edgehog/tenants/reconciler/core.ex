@@ -20,7 +20,6 @@
 
 defmodule Edgehog.Tenants.Reconciler.Core do
   @moduledoc false
-  alias Astarte.Client
   alias Astarte.Client.RealmManagement
   alias Edgehog.Astarte.DeliveryPolicies
   alias Edgehog.Astarte.Interface
@@ -60,7 +59,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end)
   end
 
-  def reconcile_interface!(%Client.RealmManagement{} = client, required_interface) do
+  def reconcile_interface!(%RealmManagement{} = client, required_interface) do
     %{
       "interface_name" => interface_name,
       "version_major" => required_major,
@@ -83,7 +82,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end
   end
 
-  def reconcile_delivery_policy!(%Client.RealmManagement{} = client, required_policy) do
+  def reconcile_delivery_policy!(%RealmManagement{} = client, required_policy) do
     %{
       "name" => policy_name
     } = required_policy
@@ -104,7 +103,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     end
   end
 
-  def reconcile_trigger!(%Client.RealmManagement{} = client, required_trigger, astarte_version, tenant) do
+  def reconcile_trigger!(%RealmManagement{} = client, required_trigger, astarte_version, tenant) do
     if trigger_compatible?(astarte_version, required_trigger) do
       do_reconcile_trigger(client, required_trigger)
     else

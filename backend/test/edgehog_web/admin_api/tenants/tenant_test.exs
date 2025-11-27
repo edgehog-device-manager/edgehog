@@ -134,7 +134,7 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
       required_data = ["name", "slug", "public_key", "astarte_config"]
 
       for required <- required_data do
-        assert Enum.find(
+        assert Enum.any?(
                  errors,
                  &(&1["detail"] == "is required" and
                      &1["source"] == %{"pointer" => "/data/attributes/#{required}"})

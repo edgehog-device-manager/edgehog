@@ -465,7 +465,7 @@ defmodule Edgehog.Devices.Device do
       writable? false
     end
 
-    has_many :application_deployments, Edgehog.Containers.Deployment do
+    has_many :application_deployments, Deployment do
       public? true
     end
 
@@ -475,8 +475,8 @@ defmodule Edgehog.Devices.Device do
     has_many :image_deplomyents, Edgehog.Containers.Image.Deployment
     has_many :device_mapping_deplomyents, Edgehog.Containers.DeviceMapping.Deployment
 
-    many_to_many :application_releases, Edgehog.Containers.Release do
-      through Edgehog.Containers.Deployment
+    many_to_many :application_releases, Release do
+      through Deployment
       join_relationship :application_deployments
     end
   end

@@ -27,6 +27,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
   import ExUnit.CaptureLog
 
   alias Astarte.Client.APIError
+  alias Edgehog.Astarte.Interface.MockDataLayer
   alias Edgehog.Tenants.Reconciler
 
   describe "reconcile_all" do
@@ -64,7 +65,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       test_pid = self()
       ref = make_ref()
 
-      Edgehog.Astarte.Interface.MockDataLayer
+      MockDataLayer
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
@@ -137,7 +138,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       test_pid = self()
       ref = make_ref()
 
-      Edgehog.Astarte.Interface.MockDataLayer
+      MockDataLayer
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
@@ -198,7 +199,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       test_pid = self()
       ref = make_ref()
 
-      Edgehog.Astarte.Interface.MockDataLayer
+      MockDataLayer
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)

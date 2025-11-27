@@ -173,7 +173,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentsTest do
   def extract_result!(result) do
     refute :errors in Map.keys(result)
     assert %{data: data} = result
-    assert data != nil
+    assert data
 
     data
   end

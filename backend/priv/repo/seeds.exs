@@ -152,7 +152,7 @@ if status == :default do
   |> String.trim_trailing("\n")
   |> Logger.warning()
 else
-  Edgehog.Tenants.reconcile_tenant(tenant)
+  Tenants.reconcile_tenant(tenant)
 end
 
 # Feature Application Management

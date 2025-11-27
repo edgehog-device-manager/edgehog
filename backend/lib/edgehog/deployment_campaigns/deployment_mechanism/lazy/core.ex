@@ -822,7 +822,7 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
   def pending_request_timeout_ms(target, mechanism, now \\ DateTime.utc_now()) do
     %DeploymentTarget{latest_attempt: %DateTime{} = latest_attempt} = target
 
-    absolute_timeout_ms = :timer.seconds(mechanism.request_timeout_seconds)
+    absolute_timeout_ms = to_timeout(second: mechanism.request_timeout_seconds)
     elapsed_from_latest_request_ms = DateTime.diff(now, latest_attempt, :millisecond)
 
     max(0, absolute_timeout_ms - elapsed_from_latest_request_ms)

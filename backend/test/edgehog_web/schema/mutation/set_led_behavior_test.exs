@@ -127,7 +127,7 @@ defmodule EdgehogWeb.Schema.Mutation.SetLedBehaviorTest do
              }
            } = result
 
-    assert device != nil
+    assert device
 
     device
   end

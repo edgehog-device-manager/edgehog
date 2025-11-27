@@ -97,7 +97,7 @@ defmodule EdgehogWeb.Schema.Query.HardwareTypeTest do
              }
            } = result
 
-    assert hardware_type != nil
+    assert hardware_type
 
     hardware_type
   end

@@ -69,7 +69,7 @@ defmodule EdgehogWeb.Schema.Query.ListApplicationsTest do
   defp extract_result!(result) do
     refute :errors in Map.keys(result)
     assert %{data: data} = result
-    assert data != nil
+    assert data
 
     data
   end

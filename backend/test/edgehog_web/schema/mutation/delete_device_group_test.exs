@@ -105,7 +105,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteDeviceGroupTest do
              }
            } = result
 
-    assert device_group != nil
+    assert device_group
 
     device_group
   end

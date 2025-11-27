@@ -367,7 +367,7 @@ defmodule Edgehog.Campaigns.Executors.LazyBatch do
       # that are currently in progress. If all the remaining targets reach a final state, we will
       # terminate while handling the relative :operation_completion internal event. Otherwise,
       # the executor will terminate after the grace period.
-      action = {:state_timeout, :timer.hours(1), :terminate_executor}
+      action = {:state_timeout, to_timeout(hour: 1), :terminate_executor}
       {:keep_state_and_data, action}
     else
       # If we don't have any other in progress updates, we just terminate right away
@@ -655,7 +655,7 @@ defmodule Edgehog.Campaigns.Executors.LazyBatch do
       end
 
       def handle_event(event_type, event_content, state, data) do
-        LazyBatch.handle_event(
+        Data.handle_event(
           event_type,
           event_content,
           state,
@@ -666,22 +666,22 @@ defmodule Edgehog.Campaigns.Executors.LazyBatch do
       # Helper Functions - delegated to LazyBatch module
 
       defdelegate setup_retry_timeout(tenant_id, target, mechanism, core_module),
-        to: LazyBatch
+        to: Data
 
       defdelegate cancel_retry_timeout(tenant_id, operation_id),
-        to: LazyBatch
+        to: Data
 
-      defdelegate internal_event(payload), to: LazyBatch
-      defdelegate terminate_executor(campaign_id), to: LazyBatch
-      defdelegate occupy_slot(data), to: LazyBatch
-      defdelegate free_up_slot(data), to: LazyBatch
-      defdelegate add_failure(data), to: LazyBatch
+      defdelegate internal_event(payload), to: Data
+      defdelegate terminate_executor(campaign_id), to: Data
+      defdelegate occupy_slot(data), to: Data
+      defdelegate free_up_slot(data), to: Data
+      defdelegate add_failure(data), to: Data
 
       defdelegate failure_threshold_exceeded?(data, core_module),
-        to: LazyBatch
+        to: Data
 
-      defdelegate slot_available?(data), to: LazyBatch
-      defdelegate targets_in_progress?(data), to: LazyBatch
+      defdelegate slot_available?(data), to: Data
+      defdelegate targets_in_progress?(data), to: Data
     end
   end
 end

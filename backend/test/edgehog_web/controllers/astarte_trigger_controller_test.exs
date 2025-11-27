@@ -322,7 +322,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
              } = device
 
       device_id = device.id
-      assert_receive {:"$gen_cast", {:stop, %Edgehog.Devices.Device{id: ^device_id}}}, 1000
+      assert_receive {:"$gen_cast", {:stop, %Device{id: ^device_id}}}, 1000
     end
 
     test "creates an unexisting device when receiving an unhandled event", ctx do
@@ -535,7 +535,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       # Deployment must be reloaded from the db
-      new_deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      new_deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
 
       assert deployment.state == new_deployment.state
     end
@@ -624,7 +624,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       # Deployment must be reloaded from the db
       deployment =
-        Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant, load: :events)
+        Ash.get!(Deployment, deployment.id, tenant: tenant, load: :events)
 
       assert [event] = deployment.events
       assert event.type == :error
@@ -662,7 +662,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       # Deployment must be reloaded from the db
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
 
       assert deployment.state == :started
     end

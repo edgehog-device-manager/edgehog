@@ -239,7 +239,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateDeviceGroupTest do
 
     refute :errors in Map.keys(result)
 
-    assert device_group != nil
+    assert device_group
 
     device_group
   end

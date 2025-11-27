@@ -126,7 +126,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteChannelTest do
 
     refute Map.get(result, :errors)
 
-    assert channel != nil
+    assert channel
 
     channel
   end

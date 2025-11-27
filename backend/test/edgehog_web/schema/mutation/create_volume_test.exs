@@ -87,7 +87,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateVolumeTest do
            } = result
 
     refute :errors in Map.keys(result)
-    assert volume != nil
+    assert volume
 
     volume
   end

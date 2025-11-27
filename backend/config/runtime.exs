@@ -72,7 +72,7 @@ if config_env() in [:prod, :test] do
   allowed_storage_types = ["s3", "azure"]
   storage_type = "STORAGE_TYPE" |> System.get_env("s3") |> String.downcase(:ascii)
 
-  unless storage_type in allowed_storage_types do
+  if storage_type not in allowed_storage_types do
     raise "Invalid storage type provided: #{inspect(storage_type)}. Allowed values are #{inspect(allowed_storage_types)}."
   end
 

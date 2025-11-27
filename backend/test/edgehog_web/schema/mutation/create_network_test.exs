@@ -75,7 +75,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateNetworkTest do
            } = result
 
     refute :errors in Map.keys(result)
-    assert network != nil
+    assert network
 
     network
   end

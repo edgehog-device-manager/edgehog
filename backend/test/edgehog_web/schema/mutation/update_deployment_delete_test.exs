@@ -96,7 +96,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentDelete do
            } = result
 
     refute :errors in Map.keys(result)
-    assert deployment != nil
+    assert deployment
 
     deployment
   end

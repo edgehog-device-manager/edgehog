@@ -32,10 +32,8 @@ defmodule Edgehog.Containers.ManualActions.RunReadyAction do
     ready_action = changeset.data
     action_type = ready_action.action_type
 
-    extra_loads =
-      case action_type do
-        :upgrade_deployment -> [upgrade_deployment: [:upgrade_target]]
-      end
+    :upgrade_deployment = action_type
+    extra_loads = [upgrade_deployment: [:upgrade_target]]
 
     # We always load the device
     loads = extra_loads ++ [deployment: [:device]]

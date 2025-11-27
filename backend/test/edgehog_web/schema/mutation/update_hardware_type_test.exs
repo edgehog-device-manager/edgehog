@@ -264,7 +264,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateHardwareTypeTest do
              }
            } = result
 
-    assert hardware_type != nil
+    assert hardware_type
 
     hardware_type
   end

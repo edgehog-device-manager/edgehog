@@ -54,7 +54,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       {:ok, deployment_0_0_1} =
         [release_id: release_0_0_1.id, tenant: tenant]
         |> deployment_fixture()
-        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
+        |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
 
@@ -78,7 +78,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       {:ok, deployment_0_0_1} =
         [release_id: release_0_0_1.id, tenant: tenant]
         |> deployment_fixture()
-        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
+        |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
       expect(CreateDeploymentRequestMock, :send_create_deployment_request, fn _, _, _ -> :ok end)
       expect(DeploymentUpdateMock, :update, fn _, _, _ -> :ok end)
@@ -107,7 +107,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       {:ok, deployment_0_0_1} =
         [release_id: release_0_0_1.id, tenant: tenant]
         |> deployment_fixture()
-        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
+        |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
       release_0_0_2_b = release_fixture(version: release_0_0_2.version, tenant: tenant)
 
@@ -124,7 +124,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       {:ok, deployment_0_0_2} =
         [release_id: release_0_0_2.id, tenant: tenant]
         |> deployment_fixture()
-        |> Edgehog.Containers.mark_deployment_as_stopped(tenant: tenant)
+        |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
       [tenant: tenant, deployment: deployment_0_0_2, target: release_0_0_1]
       |> send_deployment_upgrade_mutation()
@@ -189,7 +189,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
              }
            } = result
 
-    assert result != nil
+    assert result
 
     result
   end

@@ -149,7 +149,7 @@ defmodule EdgehogWeb.Schema.Query.SystemModelTest do
     assert %{data: %{"systemModel" => system_model}} = result
 
     refute :errors in Map.keys(result)
-    assert system_model != nil
+    assert system_model
 
     system_model
   end

@@ -129,8 +129,8 @@ defmodule Edgehog.CapabilitiesTest do
         "io.edgehog.devicemanager.OTAResponse" => %InterfaceVersion{major: 0, minor: 1}
       }
 
-      assert :software_updates not in Capabilities.from_introspection(partial_introspection_1)
-      assert :software_updates not in Capabilities.from_introspection(partial_introspection_2)
+      refute :software_updates in Capabilities.from_introspection(partial_introspection_1)
+      refute :software_updates in Capabilities.from_introspection(partial_introspection_2)
     end
 
     test "returns only geolocation if no interface is supported by the device" do

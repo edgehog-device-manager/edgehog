@@ -296,7 +296,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
 
       assert {:ok, target} = Core.start_target_update(target, base_image)
       assert target.status == :in_progress
-      assert target.ota_operation_id != nil
+      assert target.ota_operation_id
     end
 
     test "fails if Astarte API replies with a failure", ctx do
@@ -698,7 +698,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.CoreTest do
       for error <- known_errors do
         msg = Core.error_message(error, ctx.device_id)
         assert msg =~ ctx.device_id
-        assert not (msg =~ "failed with unknown error")
+        refute msg =~ "failed with unknown error"
       end
     end
 

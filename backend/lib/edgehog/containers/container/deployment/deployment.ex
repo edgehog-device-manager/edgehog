@@ -158,16 +158,16 @@ defmodule Edgehog.Containers.Container.Deployment do
   end
 
   relationships do
-    belongs_to :container, Edgehog.Containers.Container do
+    belongs_to :container, Container do
       attribute_type :uuid
       public? true
     end
 
-    belongs_to :device, Edgehog.Devices.Device do
+    belongs_to :device, Device do
       public? true
     end
 
-    many_to_many :deployments, Edgehog.Containers.Deployment do
+    many_to_many :deployments, Deployment do
       through Edgehog.Containers.DeploymentContainerDeployment
       source_attribute_on_join_resource :container_deployment_id
       destination_attribute_on_join_resource :deployment_id

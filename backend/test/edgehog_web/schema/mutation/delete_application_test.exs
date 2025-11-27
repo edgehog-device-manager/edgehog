@@ -107,7 +107,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteApplicationTest do
 
     refute Map.get(result, :errors)
 
-    assert application != nil
+    assert application
 
     application
   end
