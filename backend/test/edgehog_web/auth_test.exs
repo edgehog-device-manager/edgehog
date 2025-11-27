@@ -23,6 +23,7 @@ defmodule EdgehogWeb.AuthTest do
   use EdgehogWeb.ConnCase, async: false
 
   alias Edgehog.Config
+  alias Edgehog.Containers.ReconcilerMock
 
   @query """
   {
@@ -31,6 +32,14 @@ defmodule EdgehogWeb.AuthTest do
     }
   }
   """
+
+  setup do
+    stub(ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
+    stub(ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
+    stub(ReconcilerMock, :start_link, fn _opts -> :ok end)
+
+    :ok
+  end
 
   test "unauthenticated request returns 401", %{conn: conn, api_path: api_path} do
     conn = get(conn, api_path, query: @query)

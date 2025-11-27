@@ -27,6 +27,8 @@ defmodule Edgehog.Devices.Device.Changes.TearDownReconciler do
 
   alias Edgehog.Containers.Reconciler
 
+  @reconciler_module Application.compile_env(:edgehog, :container_reconciler, Reconciler)
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     Ash.Changeset.after_action(changeset, fn _changeset, device ->
@@ -35,7 +37,7 @@ defmodule Edgehog.Devices.Device.Changes.TearDownReconciler do
         |> Ash.load!(:tenant)
         |> Map.get(:tenant, nil)
 
-      Reconciler.stop_device(device, tenant)
+      @reconciler_module.stop_device(device, tenant)
 
       {:ok, device}
     end)

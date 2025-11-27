@@ -56,6 +56,9 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
   }
 
   setup do
+    stub(Edgehog.Containers.ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
+    stub(Edgehog.Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
+    stub(Edgehog.Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
     {:ok, path: ~p"/admin-api/v1/tenants"}
   end
 

@@ -135,6 +135,7 @@ Mox.defmock(Edgehog.OSManagement.EphemeralImageMock,
 Mox.defmock(Edgehog.BaseImages.StorageMock, for: Edgehog.BaseImages.Storage)
 
 Mox.defmock(Edgehog.Tenants.ReconcilerMock, for: Edgehog.Tenants.Reconciler.Behaviour)
+Mox.defmock(Edgehog.Containers.ReconcilerMock, for: Edgehog.Containers.Reconciler.Behaviour)
 
 Mox.defmock(Edgehog.Astarte.Device.AvailableImagesMock,
   for: Edgehog.Astarte.Device.AvailableImages.Behaviour

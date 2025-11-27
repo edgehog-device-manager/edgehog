@@ -18,29 +18,24 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Tenants.Tenant.Changes.StartContainersReconciler do
+defmodule Edgehog.Containers.Reconciler.Behaviour do
   @moduledoc """
-  Starts the container reconciler for the current tenant.
+  Behavior for the reconciler. It should implment
+  - a `start_link` to start the reconciler.
+  - a `register_device` to start a device timer in the reconciler.
+  - a `stop_device` to stop a device timer in the reconciler.
   """
 
-  use Ash.Resource.Change
+  alias Edgehog.Devices.Device
+  alias Edgehog.Tenants.Tenant
 
-  alias Edgehog.Containers.Reconciler
-
-  @reconciler_module Application.compile_env(:edgehog, :container_reconciler, Reconciler)
-
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
-    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
-      with {:ok, tenant} <- result do
-        start_reconciler(tenant)
-      end
-
-      result
-    end)
-  end
-
-  defp start_reconciler(tenant) do
-    @reconciler_module.start_link(tenant: tenant)
-  end
+  @callback start_link(args :: Keyword.t()) :: GenServer.on_start()
+  @callback stop_device(
+              device :: Device.t(),
+              tenant :: Tenant.t()
+            ) :: :ok
+  @callback register_device(
+              device :: Device.t(),
+              tenant :: Tenant.t()
+            ) :: :ok
 end

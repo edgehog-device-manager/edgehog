@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Reconciler.Core do
   alias Edgehog.Containers
   alias Edgehog.Devices
 
+  require Ash.Query
   require Logger
 
   @spec reconcile(%{device_id: integer(), tenant: Edgehog.Tenants.Tenant.t()}) ::
@@ -41,6 +42,26 @@ defmodule Edgehog.Containers.Reconciler.Core do
 
       :ok
     end
+  end
+
+  @doc """
+  Returns online the number of online devices and a stream that contains them.
+  """
+  def online_devices(tenant) do
+    online_devices =
+      Devices.Device
+      |> Ash.Query.for_read(:read, %{})
+      |> Ash.Query.filter(online: true)
+      |> Ash.Query.sort(last_connection: :asc)
+      |> Ash.stream!(tenant: tenant)
+
+    online_devices_n =
+      Devices.Device
+      |> Ash.Query.filter(online: true)
+      |> Ash.count(tenant: tenant)
+
+    with {:ok, online_devices_n} <- online_devices_n,
+         do: {online_devices_n, online_devices}
   end
 
   def reconcile_images(device, tenant) do
