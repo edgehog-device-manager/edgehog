@@ -1137,6 +1137,9 @@
   "components.StorageTable.totalSpaceTitle": {
     "defaultMessage": "Total Space"
   },
+  "components.StringArrayFormInput.addButton": {
+    "defaultMessage": "Add Item"
+  },
   "components.SystemModelsTable.handleTitle": {
     "defaultMessage": "Handle"
   },
@@ -1354,10 +1357,10 @@
     "defaultMessage": "Success"
   },
   "fieldExplanation.binds.description": {
-    "defaultMessage": "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol is TCP by default"
+    "defaultMessage": "Maps host directories to container directories for persistent storage or sharing. Format: /host/path:/container/path[:ro|rw]"
   },
   "fieldExplanation.binds.example": {
-    "defaultMessage": "/data:/data, /config:/config:ro"
+    "defaultMessage": "/data:/data or /config:/config:ro"
   },
   "fieldExplanation.binds.title": {
     "defaultMessage": "Binds"
@@ -1441,7 +1444,7 @@
     "defaultMessage": "List of hostname/IP mappings added to the container's /etc/hosts for custom DNS resolution. 'host-gateway' resolves to the host IP."
   },
   "fieldExplanation.extraHosts.example": {
-    "defaultMessage": "[\"database:192.168.1.5\", \"gateway:host-gateway\"]"
+    "defaultMessage": "\"database:192.168.1.5\" or \"gateway:host-gateway\""
   },
   "fieldExplanation.extraHosts.title": {
     "defaultMessage": "Extra Hosts"
@@ -1507,7 +1510,7 @@
     "defaultMessage": "Memory Swappiness (0-100)"
   },
   "fieldExplanation.networkMode.description": {
-    "defaultMessage": "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is taken as a custom network's name to which this container should connect to. If you are using a different container engine than docker, there could be other values."
+    "defaultMessage": "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is treated as the name of a user-defined network. Other container engines may support additional modes."
   },
   "fieldExplanation.networkMode.example": {
     "defaultMessage": "bridge"
@@ -1522,10 +1525,10 @@
     "defaultMessage": "Attached Networks"
   },
   "fieldExplanation.portBindings.description": {
-    "defaultMessage": "Maps host ports to container ports for external access. Format: host_port:container_port."
+    "defaultMessage": "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol defaults to TCP."
   },
   "fieldExplanation.portBindings.example": {
-    "defaultMessage": "8080:80,443:443"
+    "defaultMessage": "\"8080:80\" or \"8080:443/udp\""
   },
   "fieldExplanation.portBindings.title": {
     "defaultMessage": "Port Bindings"
@@ -1552,19 +1555,19 @@
     "defaultMessage": "Restart Policy"
   },
   "fieldExplanation.storageOpt.description": {
-    "defaultMessage": "Options for the storage driver, e.g., limit writable layer size."
+    "defaultMessage": "Driver-specific storage options, such as limiting the size of the writable layer."
   },
   "fieldExplanation.storageOpt.example": {
-    "defaultMessage": "[\"size=100G\"]"
+    "defaultMessage": "\"size=100G\""
   },
   "fieldExplanation.storageOpt.title": {
     "defaultMessage": "Storage Options"
   },
   "fieldExplanation.tmpfs.description": {
-    "defaultMessage": "In-memory filesystems mounted at specified paths. Data is fast but lost on container restart."
+    "defaultMessage": "In-memory filesystems mounted at specified container paths. Data is fast but lost on container restart."
   },
   "fieldExplanation.tmpfs.example": {
-    "defaultMessage": "[\"/tmp:size=64m\"]"
+    "defaultMessage": "\"/tmp:size=64m\""
   },
   "fieldExplanation.tmpfs.title": {
     "defaultMessage": "Tmpfs Mounts"
@@ -1587,8 +1590,20 @@
   "fieldExplanation.volumes.title": {
     "defaultMessage": "Volume Mounts"
   },
+  "forms.ContainerForm.addBindsButton": {
+    "defaultMessage": "Add Binds"
+  },
   "forms.ContainerForm.addExtraHostButton": {
     "defaultMessage": "Add Extra Host"
+  },
+  "forms.ContainerForm.addPortBindingButton": {
+    "defaultMessage": "Add Port Binding"
+  },
+  "forms.ContainerForm.addStorageOptButton": {
+    "defaultMessage": "Add Storage Option"
+  },
+  "forms.ContainerForm.addTmpfsButton": {
+    "defaultMessage": "Add Tmpfs Mount"
   },
   "forms.ContainerForm.addVolumeButton": {
     "defaultMessage": "Add Volume"
@@ -2961,7 +2976,7 @@
     "defaultMessage": "The version must follow the Semantic Versioning spec"
   },
   "validation.binds.format": {
-    "defaultMessage": "Each bind must be in the format hostDir:containerDir[:options], separated by commas."
+    "defaultMessage": "Invalid bind mount format. Use '/host/path:/container/path[:ro|rw]'."
   },
   "validation.cpuQuotaPeriod.format": {
     "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
@@ -2973,7 +2988,7 @@
     "defaultMessage": "Must be a valid JSON string."
   },
   "validation.extraHosts.format": {
-    "defaultMessage": "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)"
+    "defaultMessage": "Invalid extra host format. Use 'hostname:IP' or 'hostname:host-gateway'."
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
@@ -2997,16 +3012,16 @@
     "defaultMessage": "{label} must be a positive number."
   },
   "validation.portBindings.format": {
-    "defaultMessage": "Port Bindings must be comma-separated values in the format [HOST:]CONTAINER[/PROTOCOL]"
+    "defaultMessage": "Invalid port binding format. Use [host_port:]container_port[/protocol]."
   },
   "validation.required": {
     "defaultMessage": "Required."
   },
   "validation.storage.format": {
-    "defaultMessage": "Must be a valid JSON array of strings in the format \"key=value\", e.g. [\"size=120G\"]"
+    "defaultMessage": "Invalid storage option format. Use 'key=value'."
   },
   "validation.tmpfs.format": {
-    "defaultMessage": "Must be a valid JSON array of strings in the format \"/path=option1,option2\", e.g. [\"/run=rw,size=64m\"]"
+    "defaultMessage": "Invalid tmpfs mount format. Use '/container/path=option1,option2'."
   },
   "validation.unique": {
     "defaultMessage": "Duplicate value."

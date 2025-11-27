@@ -256,13 +256,13 @@ type ContainerInput = {
   networkMode?: string;
   networks?: ContainerCreateWithNestedNetworksInput[];
   extraHosts?: string[];
-  portBindings?: string;
+  portBindings?: string[];
   // Storage Configuration
-  binds?: string;
+  binds?: string[];
   volumes?: ContainerCreateWithNestedVolumesInput[];
   volumeDriver?: string;
-  storageOpt?: string;
-  tmpfs?: string;
+  storageOpt?: string[];
+  tmpfs?: string[];
   readOnlyRootfs?: boolean;
   // Resource Limits
   memory?: number;
@@ -292,18 +292,8 @@ export type ReleaseInputData = {
 
 type ReleaseSubmitData = {
   version: string;
-  containers?: ContainerSubmit[] | null;
+  containers?: ContainerInput[] | null;
   requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
-};
-
-type ContainerSubmit = Omit<
-  ContainerInput,
-  "portBindings" | "tmpfs" | "storageOpt" | "binds"
-> & {
-  portBindings?: string[];
-  tmpfs?: string[];
-  storageOpt?: string[];
-  binds?: string[];
 };
 
 export const CapDropList = [
@@ -577,17 +567,6 @@ const CreateRelease = ({
     );
   };
 
-  const parseJsonToStringArray = (jsonStr: string | undefined): string[] => {
-    if (!jsonStr) return [];
-    try {
-      const parsed = JSON.parse(jsonStr);
-      return Array.isArray(parsed) ? parsed.map(String) : [];
-    } catch {
-      console.error("Invalid JSON:", jsonStr);
-      return [];
-    }
-  };
-
   const [removeIndex, setRemoveIndex] = useState<number | null>(null);
 
   const handleRequestRemove = (index: number) => {
@@ -612,19 +591,13 @@ const CreateRelease = ({
               networkMode: container.networkMode || undefined,
               networks: container.networks || undefined,
               extraHosts: container.extraHosts || undefined,
-              portBindings: container.portBindings
-                ? (container.portBindings
-                    .split(",")
-                    .map((v) => v.trim()) as string[])
-                : undefined,
+              portBindings: container.portBindings || undefined,
               // Storage Configuration
-              binds: container.binds
-                ? (container.binds.split(",").map((v) => v.trim()) as string[])
-                : undefined,
+              binds: container.binds || undefined,
               volumes: container.volumes || undefined,
               volumeDriver: container.volumeDriver || undefined,
-              storageOpt: parseJsonToStringArray(container.storageOpt),
-              tmpfs: parseJsonToStringArray(container.tmpfs),
+              storageOpt: container.storageOpt || undefined,
+              tmpfs: container.tmpfs || undefined,
               readOnlyRootfs: container.readOnlyRootfs || undefined,
               // Resource Limits
               memory: container.memory || undefined,
@@ -871,19 +844,16 @@ const CreateRelease = ({
                     c.networks?.edges?.map((n: any) => ({ id: n.node.id })) ??
                     undefined,
                   extraHosts: c.extraHosts ? [...c.extraHosts] : undefined,
-                  portBindings: c.portBindings?.join(",") || undefined,
-
-                  binds: c.binds?.join(",") || undefined,
+                  portBindings: c.extraHosts ? [...c.portBindings] : undefined,
+                  binds: c.extraHosts ? [...c.binds] : undefined,
                   volumes:
                     c.containerVolumes?.edges?.map((v: any) => ({
                       id: v.node.volume.id,
                       target: v.node.target,
                     })) ?? undefined,
                   volumeDriver: c.volumeDriver || undefined,
-                  storageOpt: c.storageOpt
-                    ? JSON.stringify(c.storageOpt)
-                    : undefined,
-                  tmpfs: c.tmpfs ? JSON.stringify(c.tmpfs) : undefined,
+                  storageOpt: c.storageOpt ? [...c.storageOpt] : undefined,
+                  tmpfs: c.tmpfs ? [...c.tmpfs] : undefined,
                   readOnlyRootfs: c.readOnlyRootfs || undefined,
                   // Resource Limits
                   memory: c.memory || undefined,

@@ -34,6 +34,7 @@ import type {
 } from "api/__generated__/ContainersTable_ContainerFragment.graphql";
 
 import Form from "components/Form";
+import StringArrayFormInput from "components/StringArrayFormInput";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import MultiSelect from "./MultiSelect";
 import InfiniteScroll from "./InfiniteScroll";
@@ -147,13 +148,6 @@ const styles = {
   detailsWrapper: {
     padding: 12,
   },
-};
-
-const formatBindingsList = (
-  portBindings: readonly string[] | null | undefined,
-) => {
-  if (!portBindings || portBindings.length === 0) return "";
-  return portBindings.join(", ");
 };
 
 const formatJson = (jsonString: unknown) => {
@@ -587,9 +581,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
               />
             }
           >
-            <Form.Control
-              value={container.extraHosts?.join(", ") ?? ""}
-              readOnly
+            <StringArrayFormInput
+              value={Array.from(container.extraHosts ?? [])}
+              mode="details"
             />
           </FormRow>
           <FormRow
@@ -601,9 +595,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
               />
             }
           >
-            <Form.Control
-              value={formatBindingsList(container.portBindings)}
-              readOnly
+            <StringArrayFormInput
+              value={Array.from(container.portBindings ?? [])}
+              mode="details"
             />
           </FormRow>
           <NetworkDetails
@@ -630,9 +624,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
               />
             }
           >
-            <Form.Control
-              value={formatBindingsList(container.binds)}
-              readOnly
+            <StringArrayFormInput
+              value={Array.from(container.binds ?? [])}
+              mode="details"
             />
           </FormRow>
           <FormRow
@@ -655,12 +649,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
               />
             }
           >
-            <MonacoJsonEditor
-              value={container.storageOpt.join("\n")}
-              onChange={() => {}}
-              defaultValue={container.storageOpt.join("\n")}
-              readonly={true}
-              initialLines={1}
+            <StringArrayFormInput
+              value={Array.from(container.storageOpt ?? [])}
+              mode="details"
             />
           </FormRow>
           <FormRow
@@ -672,12 +663,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
               />
             }
           >
-            <MonacoJsonEditor
-              value={container.tmpfs.join("\n")}
-              onChange={() => {}}
-              defaultValue={container.tmpfs.join("\n")}
-              readonly={true}
-              initialLines={1}
+            <StringArrayFormInput
+              value={Array.from(container.tmpfs ?? [])}
+              mode="details"
             />
           </FormRow>
           <FormRow

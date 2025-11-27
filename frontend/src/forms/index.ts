@@ -82,7 +82,7 @@ const fieldExplanations = defineMessages({
   networkModeDescription: {
     id: "fieldExplanation.networkMode.description",
     defaultMessage:
-      "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is taken as a custom network's name to which this container should connect to. If you are using a different container engine than docker, there could be other values.",
+      "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is treated as the name of a user-defined network. Other container engines may support additional modes.",
   },
   networkModeExample: {
     id: "fieldExplanation.networkMode.example",
@@ -104,11 +104,11 @@ const fieldExplanations = defineMessages({
   portBindingsDescription: {
     id: "fieldExplanation.portBindings.description",
     defaultMessage:
-      "Maps host ports to container ports for external access. Format: host_port:container_port.",
+      "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol defaults to TCP.",
   },
   portBindingsExample: {
     id: "fieldExplanation.portBindings.example",
-    defaultMessage: "8080:80,443:443",
+    defaultMessage: '"8080:80" or "8080:443/udp"',
   },
   bindsTitle: {
     id: "fieldExplanation.binds.title",
@@ -117,11 +117,11 @@ const fieldExplanations = defineMessages({
   bindsDescription: {
     id: "fieldExplanation.binds.description",
     defaultMessage:
-      "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol is TCP by default",
+      "Maps host directories to container directories for persistent storage or sharing. Format: /host/path:/container/path[:ro|rw]",
   },
   bindsExample: {
     id: "fieldExplanation.binds.example",
-    defaultMessage: "/data:/data, /config:/config:ro",
+    defaultMessage: "/data:/data or /config:/config:ro",
   },
   extraHostsTitle: {
     id: "fieldExplanation.extraHosts.title",
@@ -134,7 +134,7 @@ const fieldExplanations = defineMessages({
   },
   extraHostsExample: {
     id: "fieldExplanation.extraHosts.example",
-    defaultMessage: '["database:192.168.1.5", "gateway:host-gateway"]',
+    defaultMessage: '"database:192.168.1.5" or "gateway:host-gateway"',
   },
   memoryTitle: {
     id: "fieldExplanation.memory.title",
@@ -296,11 +296,11 @@ const fieldExplanations = defineMessages({
   storageOptDescription: {
     id: "fieldExplanation.storageOpt.description",
     defaultMessage:
-      "Options for the storage driver, e.g., limit writable layer size.",
+      "Driver-specific storage options, such as limiting the size of the writable layer.",
   },
   storageOptExample: {
     id: "fieldExplanation.storageOpt.example",
-    defaultMessage: '["size=100G"]',
+    defaultMessage: '"size=100G"',
   },
   tmpfsTitle: {
     id: "fieldExplanation.tmpfs.title",
@@ -309,11 +309,11 @@ const fieldExplanations = defineMessages({
   tmpfsDescription: {
     id: "fieldExplanation.tmpfs.description",
     defaultMessage:
-      "In-memory filesystems mounted at specified paths. Data is fast but lost on container restart.",
+      "In-memory filesystems mounted at specified container paths. Data is fast but lost on container restart.",
   },
   tmpfsExample: {
     id: "fieldExplanation.tmpfs.example",
-    defaultMessage: '["/tmp:size=64m"]',
+    defaultMessage: '"/tmp:size=64m"',
   },
   capAddTitle: {
     id: "fieldExplanation.capAdd.title",
@@ -432,26 +432,26 @@ const messages = defineMessages({
   portBindingsFormat: {
     id: "validation.portBindings.format",
     defaultMessage:
-      "Port Bindings must be comma-separated values in the format [HOST:]CONTAINER[/PROTOCOL]",
+      "Invalid port binding format. Use [host_port:]container_port[/protocol].",
   },
   bindsInvalid: {
     id: "validation.binds.format",
     defaultMessage:
-      "Each bind must be in the format hostDir:containerDir[:options], separated by commas.",
+      "Invalid bind mount format. Use '/host/path:/container/path[:ro|rw]'.",
   },
   extraHostsFormat: {
     id: "validation.extraHosts.format",
-    defaultMessage: "Must be in the form hostname:IP (e.g., myhost:127.0.0.1)",
+    defaultMessage:
+      "Invalid extra host format. Use 'hostname:IP' or 'hostname:host-gateway'.",
   },
   tmpfsFormat: {
     id: "validation.tmpfs.format",
     defaultMessage:
-      'Must be a valid JSON array of strings in the format "/path=option1,option2", e.g. ["/run=rw,size=64m"]',
+      "Invalid tmpfs mount format. Use '/container/path=option1,option2'.",
   },
   storageFormat: {
     id: "validation.storage.format",
-    defaultMessage:
-      'Must be a valid JSON array of strings in the format "key=value", e.g. ["size=120G"]',
+    defaultMessage: "Invalid storage option format. Use 'key=value'.",
   },
   memorySwap: {
     id: "validation.memorySwapInvalid",
@@ -671,90 +671,72 @@ const ipv6PortRegex =
   /^(\[?[0-9a-fA-F:]+\]?:\d{1,5}(-\d{1,5})?:\d{1,5}(-\d{1,5})?(\/(tcp|udp))?)$/;
 
 const portBindingsSchema = yup
-  .string()
+  .array()
   .nullable()
-  .transform((value) => value?.trim().replace(/\s*,\s*/g, ", "))
-  .test({
-    name: "is-valid-port-bindings",
-    message: messages.portBindingsFormat.id,
-    test: (value) =>
-      !value ||
-      value
-        .split(", ")
-        .every(
-          (v) => ipv4PortRegex.test(v.trim()) || ipv6PortRegex.test(v.trim()),
-        ),
-  });
+  .of(
+    yup
+      .string()
+      .required()
+      .test({
+        name: "is-valid-port-bindings",
+        message: messages.portBindingsFormat.id,
+        test: (value) =>
+          !value ||
+          ipv4PortRegex.test(value.trim()) ||
+          ipv6PortRegex.test(value.trim()),
+      }),
+  );
 
 const bindingsSchema = yup
-  .string()
+  .array()
   .nullable()
-  .transform((value) => value?.trim().replace(/\s*,\s*/g, ", "))
-  .test({
-    name: "is-valid-bindings",
-    message: messages.bindsInvalid.id,
-    test: (value) =>
-      !value ||
-      value.split(", ").every((v) => {
-        const parts = v.trim().split(":");
-        return (
-          (parts.length === 2 || parts.length === 3) &&
-          parts.every((p) => p.trim() !== "")
-        );
+  .of(
+    yup
+      .string()
+      .required()
+      .test({
+        name: "is-valid-bindings",
+        message: messages.bindsInvalid.id,
+        test: (value) => {
+          if (value.includes(",")) return false;
+          const parts = value.trim().split(":");
+          return (
+            (parts.length === 2 || parts.length === 3) &&
+            parts.every((p) => p.trim() !== "")
+          );
+        },
       }),
-  });
+  );
 
 const tmpfsOptSchema = yup
-  .string()
+  .array()
   .nullable()
-  .transform((value) => value?.trim())
-  .test({
-    name: "is-json-array-of-tmpfs",
-    message: messages.tmpfsFormat.id,
-    test: (value) => {
-      if (!value) return true;
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(value);
-      } catch {
-        return false;
-      }
-      if (
-        !Array.isArray(parsed) ||
-        !parsed.every((item) => typeof item === "string")
-      )
-        return false;
-      return parsed.every((entry) =>
-        /^\/[A-Za-z0-9/_-]+=[A-Za-z0-9,=:_-]+$/.test(entry),
-      );
-    },
-  });
+  .of(
+    yup
+      .string()
+      .required()
+      .test({
+        name: "is-valid-tmpfs-opt",
+        message: messages.tmpfsFormat.id,
+        test: (value) =>
+          !value || /^\/[A-Za-z0-9/_-]+=[A-Za-z0-9,=:_-]+$/.test(value.trim()),
+      }),
+  );
 
 const storageOptSchema = yup
-  .string()
+  .array()
   .nullable()
-  .transform((value) => value?.trim())
-  .test({
-    name: "is-json-array-of-storage-opts",
-    message: messages.storageFormat.id,
-    test: (value) => {
-      if (!value) return true;
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(value);
-      } catch {
-        return false;
-      }
-      if (
-        !Array.isArray(parsed) ||
-        !parsed.every((item) => typeof item === "string")
-      )
-        return false;
-      return parsed.every((entry) =>
-        /^[A-Za-z0-9_.-]+=[A-Za-z0-9_.:-]+$/.test(entry),
-      );
-    },
-  });
+  .of(
+    yup
+      .string()
+      .required()
+      .test({
+        name: "is-valid-storage-opt",
+        message: messages.storageFormat.id,
+        test: (value) =>
+          !value || /^[A-Za-z0-9_.-]+=[A-Za-z0-9_.:-]+$/.test(value.trim()),
+      }),
+  );
 
 const extraHostsSchema = yup
   .array()
