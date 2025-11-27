@@ -29,9 +29,10 @@ import Form from "components/Form";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 
-import { yup, envSchema } from "forms";
+import { yup, optionsSchema } from "forms";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "components/FormRow";
+import { optionsValidation } from "./CreateNetwork";
 
 type VolumeData = {
   label: string;
@@ -43,7 +44,7 @@ const volumeSchema = yup
   .object({
     label: yup.string().required(),
     driver: yup.string().nullable(),
-    options: envSchema.nullable().notRequired(),
+    options: optionsSchema.nullable().notRequired(),
   })
   .required();
 
@@ -136,6 +137,7 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
                 field.onChange(value ?? "");
               }}
               defaultValue={field.value || "{}"}
+              additionalValidation={optionsValidation}
             />
           )}
         />
