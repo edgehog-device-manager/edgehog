@@ -289,10 +289,8 @@ defmodule Edgehog.Containers.Reconciler.Core do
   end
 
   defp reconcile_deployment?(state, status) do
-    case {state, status} do
-      {:started, "Started"} -> :ok
-      {:stopped, "Stopped"} -> :ok
-      _ -> :reconcile
-    end
+    if state == status,
+      do: :ok,
+      else: :reconcile
   end
 end
