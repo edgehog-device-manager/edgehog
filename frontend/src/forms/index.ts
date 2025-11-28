@@ -665,6 +665,34 @@ const envSchema = yup
   })
   .default("{}");
 
+const optionsSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json",
+    message: messages.envInvalidJson.id,
+    test: (value) => {
+      if (!value) return true;
+      return isValidJson(value);
+    },
+  })
+  .test({
+    name: "no-nested-values",
+    test: (value) => {
+      if (!value) return true;
+      if (!isValidJson(value)) return true;
+
+      const parsed = JSON.parse(value);
+      if (typeof parsed !== "object" || Array.isArray(parsed)) {
+        return false;
+      }
+      return Object.values(parsed).every((v) =>
+        ["string", "number", "boolean"].includes(typeof v),
+      );
+    },
+  });
+
 const ipv4PortRegex =
   /^(\d{1,5}(-\d{1,5})?(:(\d{1,5}(-\d{1,5})?))?(\/(tcp|udp))?|(\d{1,3}\.){3}\d{1,3}:\d{1,5}(-\d{1,5})?:\d{1,5}(-\d{1,5})?(\/(tcp|udp))?)$/;
 const ipv6PortRegex =
@@ -921,4 +949,5 @@ export {
   volumesSchema,
   deviceMappingsSchema,
   requiredSystemModelsSchema,
+  optionsSchema,
 };
