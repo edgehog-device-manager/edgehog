@@ -29,10 +29,9 @@ import Form from "components/Form";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 
-import { yup, optionsSchema } from "forms";
+import { yup, optionsSchema, optionsValidation } from "forms";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "components/FormRow";
-import { optionsValidation } from "./CreateNetwork";
 
 type VolumeData = {
   label: string;
