@@ -31,6 +31,7 @@ import InfiniteTable from "components/InfiniteTable";
 import DeploymentStateComponent from "components/DeploymentState";
 import DeploymentReadiness from "components/DeploymentReadiness";
 import { Link, Route } from "Navigation";
+import DeploymentEventMessage from "components/DeploymentEventMessage";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -56,6 +57,7 @@ const DEPLOYMENT_TARGETS_TABLE_FRAGMENT = graphql`
             message
             type
             insertedAt
+            addInfo
           }
         }
       }
@@ -134,7 +136,7 @@ const columns = [
   ),
   columnHelper.accessor(
     (deploymentTarget) =>
-      deploymentTarget.deployment?.events?.edges?.[0]?.node?.message ?? null,
+      deploymentTarget.deployment?.events?.edges?.[0]?.node ?? null,
     {
       id: "lastErrorMessage",
       header: () => (
@@ -144,7 +146,10 @@ const columns = [
           description="Title for the Last Error Message column of the Deployment Targets table"
         />
       ),
-      cell: ({ getValue }) => getValue(),
+      cell: ({ getValue }) => {
+        const event = getValue();
+        return event ? <DeploymentEventMessage event={event} /> : null;
+      },
     },
   ),
   columnHelper.accessor("latestAttempt", {
