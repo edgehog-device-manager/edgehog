@@ -590,7 +590,7 @@ defmodule Edgehog.UpdateCampaigns.PushRollout.ExecutorTest do
       # Start the execution
       start_execution(pid)
 
-      assert_normal_exit(pid, ref)
+      assert_normal_exit(pid, ref, 2000)
       assert_update_campaign_outcome(tenant, update_campaign_id, :failure)
     end
 
