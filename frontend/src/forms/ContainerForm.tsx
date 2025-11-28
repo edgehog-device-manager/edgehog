@@ -49,6 +49,7 @@ import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
 import { FormRow } from "components/FormRow";
 import MultiSelect from "components/MultiSelect";
 import FieldHelp from "components/FieldHelp";
+import StringArrayFormInput from "components/StringArrayFormInput";
 
 type Option = {
   value: string;
@@ -382,85 +383,23 @@ const ContainerForm = ({
                 <Controller
                   control={control}
                   name={`containers.${index}.extraHosts`}
-                  render={({ field }) => {
-                    const extraHosts = field.value || [];
-
-                    const handleAddExtraHost = () => {
-                      field.onChange([...extraHosts, ""]);
-                    };
-
-                    const handleDeleteExtraHost = (i: number) => {
-                      field.onChange(extraHosts.filter((_, idx) => idx !== i));
-                    };
-
-                    const handleChangeHost = (i: number, value: string) => {
-                      const updated = [...extraHosts];
-
-                      updated[i] = value;
-
-                      field.onChange(updated);
-                    };
-
-                    return (
-                      <div className="p-3 mb-3 bg-light border rounded">
-                        <Stack gap={3}>
-                          {extraHosts.map((host, i) => {
-                            const hostError =
-                              errors.containers?.[index]?.extraHosts?.[i]
-                                ?.message;
-
-                            return (
-                              <Stack direction="horizontal" gap={3} key={i}>
-                                <Stack>
-                                  <Form.Control
-                                    value={host}
-                                    onChange={(e) =>
-                                      handleChangeHost(i, e.target.value)
-                                    }
-                                    isInvalid={!!hostError}
-                                  />
-
-                                  <Form.Control.Feedback type="invalid">
-                                    {errors.containers?.[index]?.extraHosts?.[i]
-                                      ?.message && (
-                                      <FormattedMessage
-                                        id={
-                                          errors.containers[index].extraHosts[i]
-                                            .message
-                                        }
-                                      />
-                                    )}
-                                  </Form.Control.Feedback>
-                                </Stack>
-
-                                <Button
-                                  className="mb-auto"
-                                  variant="shadow-danger"
-                                  onClick={() => handleDeleteExtraHost(i)}
-                                >
-                                  <Icon
-                                    className="text-danger"
-                                    icon={"delete"}
-                                  />
-                                </Button>
-                              </Stack>
-                            );
-                          })}
-
-                          <Button
-                            className="me-auto"
-                            variant="outline-primary"
-                            onClick={handleAddExtraHost}
-                          >
-                            <FormattedMessage
-                              id="forms.ContainerForm.addExtraHostButton"
-                              defaultMessage="Add Extra Host"
-                            />
-                          </Button>
-                        </Stack>
-                      </div>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <StringArrayFormInput
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      errors={
+                        Array.isArray(errors.containers?.[index]?.extraHosts)
+                          ? errors.containers[index].extraHosts
+                          : undefined
+                      }
+                      addButtonLabel={
+                        <FormattedMessage
+                          id="forms.ContainerForm.addExtraHostButton"
+                          defaultMessage="Add Extra Host"
+                        />
+                      }
+                    />
+                  )}
                 />
               </FieldHelp>
             </FormRow>
@@ -475,19 +414,27 @@ const ContainerForm = ({
               }
             >
               <FieldHelp id="portBindings">
-                <Form.Control
-                  {...register(`containers.${index}.portBindings` as const)}
-                  type="text"
-                  isInvalid={!!errors.containers?.[index]?.portBindings}
-                />
-
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.portBindings?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].portBindings.message}
+                <Controller
+                  control={control}
+                  name={`containers.${index}.portBindings`}
+                  render={({ field }) => (
+                    <StringArrayFormInput
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      errors={
+                        Array.isArray(errors.containers?.[index]?.portBindings)
+                          ? errors.containers[index].portBindings
+                          : undefined
+                      }
+                      addButtonLabel={
+                        <FormattedMessage
+                          id="forms.ContainerForm.addPortBindingButton"
+                          defaultMessage="Add Port Binding"
+                        />
+                      }
                     />
                   )}
-                </Form.Control.Feedback>
+                />
               </FieldHelp>
             </FormRow>
           </Stack>
@@ -512,19 +459,27 @@ const ContainerForm = ({
               }
             >
               <FieldHelp id="binds">
-                <Form.Control
-                  {...register(`containers.${index}.binds` as const)}
-                  type="text"
-                  isInvalid={!!errors.containers?.[index]?.binds}
-                />
-
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.binds?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].binds.message}
+                <Controller
+                  control={control}
+                  name={`containers.${index}.binds`}
+                  render={({ field }) => (
+                    <StringArrayFormInput
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      errors={
+                        Array.isArray(errors.containers?.[index]?.binds)
+                          ? errors.containers[index].binds
+                          : undefined
+                      }
+                      addButtonLabel={
+                        <FormattedMessage
+                          id="forms.ContainerForm.addBindsButton"
+                          defaultMessage="Add Binds"
+                        />
+                      }
                     />
                   )}
-                </Form.Control.Feedback>
+                />
               </FieldHelp>
             </FormRow>
 
@@ -538,7 +493,7 @@ const ContainerForm = ({
               }
             >
               <FieldHelp id="volumes">
-                <div className="p-3 mb-3 bg-light border rounded">
+                <div className="p-3 bg-light border rounded">
                   <Stack gap={3}>
                     {volumesForm.fields.map((volume, volIndex) => {
                       const selectedIds = volumesValues
@@ -695,26 +650,22 @@ const ContainerForm = ({
                 <Controller
                   control={control}
                   name={`containers.${index}.storageOpt`}
-                  render={({ field, fieldState }) => (
-                    <>
-                      <MonacoJsonEditor
-                        value={field.value ?? ""}
-                        onChange={(value) => {
-                          field.onChange(value ?? "");
-                        }}
-                        defaultValue={field.value || "[]"}
-                        initialLines={1}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.error && (
-                        <Form.Control.Feedback
-                          type="invalid"
-                          className="d-block"
-                        >
-                          <FormattedMessage id={fieldState.error.message} />
-                        </Form.Control.Feedback>
-                      )}
-                    </>
+                  render={({ field }) => (
+                    <StringArrayFormInput
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      errors={
+                        Array.isArray(errors.containers?.[index]?.storageOpt)
+                          ? errors.containers[index].storageOpt
+                          : undefined
+                      }
+                      addButtonLabel={
+                        <FormattedMessage
+                          id="forms.ContainerForm.addStorageOptButton"
+                          defaultMessage="Add Storage Option"
+                        />
+                      }
+                    />
                   )}
                 />
               </FieldHelp>
@@ -733,26 +684,22 @@ const ContainerForm = ({
                 <Controller
                   control={control}
                   name={`containers.${index}.tmpfs`}
-                  render={({ field, fieldState }) => (
-                    <>
-                      <MonacoJsonEditor
-                        value={field.value ?? ""}
-                        onChange={(value) => {
-                          field.onChange(value ?? "");
-                        }}
-                        defaultValue={field.value || "[]"}
-                        initialLines={1}
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.error && (
-                        <Form.Control.Feedback
-                          type="invalid"
-                          className="d-block"
-                        >
-                          <FormattedMessage id={fieldState.error.message} />
-                        </Form.Control.Feedback>
-                      )}
-                    </>
+                  render={({ field }) => (
+                    <StringArrayFormInput
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      errors={
+                        Array.isArray(errors.containers?.[index]?.tmpfs)
+                          ? errors.containers[index].tmpfs
+                          : undefined
+                      }
+                      addButtonLabel={
+                        <FormattedMessage
+                          id="forms.ContainerForm.addTmpfsButton"
+                          defaultMessage="Add Tmpfs Mount"
+                        />
+                      }
+                    />
                   )}
                 />
               </FieldHelp>
@@ -1212,7 +1159,7 @@ const ContainerForm = ({
             }
           >
             <FieldHelp id="deviceMappings" itemsAlignment="center">
-              <div className="p-3 mb-3 bg-light border rounded">
+              <div className="p-3 bg-light border rounded">
                 <DeviceMappingsFormInput
                   editableProps={dmFormInputProps}
                   readOnlyProps={null}
