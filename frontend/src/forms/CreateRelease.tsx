@@ -23,6 +23,7 @@ import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Collapse } from "react-bootstrap";
 
 import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "@/api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
 import type { CreateRelease_NetworksOptionsFragment$key } from "@/api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
@@ -75,6 +76,8 @@ import Select, { SingleValue } from "react-select";
 import ConfirmModal from "@/components/ConfirmModal";
 import { FormRow } from "@/components/FormRow";
 import ContainerForm from "@/forms/ContainerForm";
+import Icon from "@/components/Icon";
+import Tag from "@/components/Tag";
 import type { KeyValue } from "@/forms/index";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
@@ -475,7 +478,7 @@ const CreateRelease = ({
     resolver: yupResolver(applicationSchema()),
   });
 
-  const { fields, append } = useFieldArray({
+  const { fields: containersFields, append } = useFieldArray({
     control,
     name: "containers",
   });
@@ -552,6 +555,14 @@ const CreateRelease = ({
       importedContainersSnapshotRef.current = newSnapshot;
     }
 
+    // Update open container forms
+    setOpenIndexes((current) =>
+      current
+        .sort()
+        .filter((v) => v !== index)
+        .map((value) => (value > index ? value - 1 : value)),
+    );
+
     // Reset the containers field with the new array to clear any cached state
     reset(
       {
@@ -571,6 +582,17 @@ const CreateRelease = ({
 
   const handleRequestRemove = (index: number) => {
     setRemoveIndex(index);
+  };
+
+  const [openIndexes, setOpenIndexes] = useState<number[]>(
+    containersFields.map((_, index) => index),
+  );
+  const toggleIndex = (index: number) => {
+    setOpenIndexes((current) =>
+      current.includes(index)
+        ? current.filter((i) => i !== index)
+        : [...current, index],
+    );
   };
 
   return (
@@ -706,7 +728,7 @@ const CreateRelease = ({
                 defaultMessage="Containers"
               />
             </h5>
-            {fields.length === 0 && (
+            {containersFields.length === 0 && (
               <p>
                 <FormattedMessage
                   id="forms.CreateRelease.noContainersFeedback"
@@ -715,25 +737,66 @@ const CreateRelease = ({
               </p>
             )}
           </Stack>
-
-          {fields.map((field, index) => {
+          {containersFields.map((field, index) => {
             return (
-              <ContainerForm
-                key={field.id}
-                index={index}
-                register={register}
-                errors={errors}
-                remove={handleRemoveContainer}
-                imageCredentials={imageCredentialsOptions}
-                networks={networkOptions}
-                volumes={volumeOptions}
-                control={control}
-                isImported={isContainerImported(index)}
-                isModified={
-                  isContainerImported(index) && isContainerModified(index)
-                }
-                onRequestRemove={handleRequestRemove}
-              />
+              <div key={field.id ?? index} className="mb-3 border rounded">
+                <Button
+                  variant="light"
+                  className="w-100 d-flex align-items-center fw-bold"
+                  onClick={() => toggleIndex(index)}
+                >
+                  <h5 className="d-flex align-items-center gap-2 mb-0">
+                    <FormattedMessage
+                      id="forms.ContainerForm.containerTitle"
+                      defaultMessage="Container {containerNumber}"
+                      values={{
+                        containerNumber: index + 1,
+                      }}
+                    />
+                    {isContainerImported(index) && (
+                      <Tag className="bg-secondary">
+                        <FormattedMessage
+                          id="forms.ContainerForm.importedLabel"
+                          defaultMessage="Imported"
+                        />
+                      </Tag>
+                    )}
+                    {isContainerModified(index) && (
+                      <Tag className="bg-secondary">
+                        <FormattedMessage
+                          id="forms.ContainerForm.modifiedLabel"
+                          defaultMessage="Modified"
+                        />
+                      </Tag>
+                    )}
+                  </h5>
+                  <span className="ms-auto">
+                    <Icon
+                      icon="chevronDown"
+                      className={
+                        "status-chevron-icon " +
+                        (openIndexes.includes(index) ? "closed" : "")
+                      }
+                    />
+                  </span>
+                </Button>
+                <Collapse in={openIndexes.includes(index)}>
+                  <div className="p-3 border-top">
+                    <ContainerForm
+                      key={field.id}
+                      index={index}
+                      register={register}
+                      errors={errors}
+                      remove={handleRemoveContainer}
+                      imageCredentials={imageCredentialsOptions}
+                      networks={networkOptions}
+                      volumes={volumeOptions}
+                      control={control}
+                      onRequestRemove={handleRequestRemove}
+                    />
+                  </div>
+                </Collapse>
+              </div>
             );
           })}
 
@@ -742,10 +805,14 @@ const CreateRelease = ({
               variant="secondary"
               onClick={() => {
                 append({ image: { reference: "" } });
+                const newIndex = containersFields.length;
                 setTimeout(() => {
-                  const newIndex = fields.length;
-                  setFocus(`containers.${newIndex}.image.reference`);
+                  toggleIndex(containersFields.length);
                 }, 0);
+                // Separate timeout waits for the end of the collapse transition
+                setTimeout(() => {
+                  setFocus(`containers.${newIndex}.image.reference`);
+                }, 100);
               }}
             >
               <FormattedMessage
@@ -920,6 +987,11 @@ const CreateRelease = ({
                 // Clear flags after form reset is complete
                 isImportingRef.current = false;
                 setJustImported(false);
+
+                // Set all containers to be opened once the import is completed
+                setOpenIndexes(
+                  importedContainersSnapshotRef.current.map((_v, i) => i),
+                );
               });
             });
 
