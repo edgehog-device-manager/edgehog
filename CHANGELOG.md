@@ -4,11 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [0.10.0-alpha.8] - 2025-10-28
+### Added
+- Support for stop campaigns: a deployment campaign can send a `stop` operation on a target release on all devices in a channel.
+- Support for start campaigns: a deployment campaign can send a `start` operation on a target release on all devices in a channel.
+- Support for upgrade campaigns: a deployment campaign can  `update` a container to a newer version on all devices in a channel.
+- Support for delete campaigns: a deployment campaign can send a `delete` message on a target release on all devices in a channel.
+- Reconciliation logic: container information gets reconciled with astarte if some messages get lost. The polling system acts on time windows to avoid traffic spikes in astarte.
+- Retry mechanism: users can manually retry to send necessary messages to a device to deploy a container.
 ### Changed 
 - The deployment state does no longer incorporate events, instead events are available in the `events` field of deployments. Users can access them in a _log_ fashion.
 - Removed `last_message` field in deployment.
-- With Astarte versions >= 1.3, devices are available in Edgehog upon registration, without waiting for their first connection
+- With Astarte versions >= 1.3, devices are available in Edgehog upon registration, without waiting for their first connection.
+### Fixed
+- Type error on network and volume options prevented users from using advanced driver options both on volumes and networks.
+- Update messages were sent each time a deployment with some ready actions was stopped. This prevented updated releases from actually being stopped.
 
 ## [0.10.0-alpha.7] - 2025-10-28
 ### Changed 
