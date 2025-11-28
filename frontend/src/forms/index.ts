@@ -535,6 +535,34 @@ const optionalNumberSchema = yup
   })
   .typeError((values) => ({ messageId: messages.number.id, values }));
 
+const optionsSchema = yup
+  .string()
+  .nullable()
+  .transform((value) => value?.trim())
+  .test({
+    name: "is-json",
+    message: messages.envInvalidJson.id,
+    test: (value) => {
+      if (!value) return true;
+      return isValidJson(value);
+    },
+  })
+  .test({
+    name: "no-nested-values",
+    test: (value) => {
+      if (!value) return true;
+      if (!isValidJson(value)) return true;
+
+      const parsed = JSON.parse(value);
+      if (typeof parsed !== "object" || Array.isArray(parsed)) {
+        return false;
+      }
+      return Object.values(parsed).every((v) =>
+        ["string", "number", "boolean"].includes(typeof v),
+      );
+    },
+  });
+
 /* ----------------------------- Array Helpers ----------------------------- */
 type ArrayType = any[] | null | undefined;
 
@@ -664,34 +692,6 @@ const envSchema = yup
     test: (value) => (value ? isNotNested(value) : true),
   })
   .default("{}");
-
-const optionsSchema = yup
-  .string()
-  .nullable()
-  .transform((value) => value?.trim())
-  .test({
-    name: "is-json",
-    message: messages.envInvalidJson.id,
-    test: (value) => {
-      if (!value) return true;
-      return isValidJson(value);
-    },
-  })
-  .test({
-    name: "no-nested-values",
-    test: (value) => {
-      if (!value) return true;
-      if (!isValidJson(value)) return true;
-
-      const parsed = JSON.parse(value);
-      if (typeof parsed !== "object" || Array.isArray(parsed)) {
-        return false;
-      }
-      return Object.values(parsed).every((v) =>
-        ["string", "number", "boolean"].includes(typeof v),
-      );
-    },
-  });
 
 const ipv4PortRegex =
   /^(\d{1,5}(-\d{1,5})?(:(\d{1,5}(-\d{1,5})?))?(\/(tcp|udp))?|(\d{1,3}\.){3}\d{1,3}:\d{1,5}(-\d{1,5})?:\d{1,5}(-\d{1,5})?(\/(tcp|udp))?)$/;
@@ -900,6 +900,30 @@ const requiredSystemModelsSchema = yup.array(
   yup.object({ id: yup.string().required() }),
 );
 
+/* ------------------------ Reusable Validation Functions ------------------------ */
+const optionsValidation = (input: any): void => {
+  if (!input) return;
+
+  const parsed =
+    typeof input === "object" && !Array.isArray(input)
+      ? input
+      : JSON.parse(input);
+
+  if (typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new TypeError("Expected an object with key-value pairs");
+  }
+
+  for (const [key, value] of Object.entries(parsed)) {
+    if (!["string", "number", "boolean"].includes(typeof value)) {
+      throw new TypeError(
+        `Value for '${key}' must be a one of: string, number or boolean. Got: ${
+          Array.isArray(value) ? "array" : typeof value
+        }`,
+      );
+    }
+  }
+};
+
 export {
   yup,
   messages,
@@ -932,4 +956,5 @@ export {
   deviceMappingsSchema,
   requiredSystemModelsSchema,
   optionsSchema,
+  optionsValidation,
 };

@@ -29,7 +29,7 @@ import Form from "components/Form";
 import Row from "components/Row";
 import Spinner from "components/Spinner";
 
-import { yup, optionsSchema } from "forms";
+import { yup, optionsSchema, optionsValidation } from "forms";
 import MonacoJsonEditor from "components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "components/FormRow";
 
@@ -71,29 +71,6 @@ const ErrorMessage = ({ error }: { error?: FieldError }) => {
       <FormattedMessage id={error.message} defaultMessage={error.message} />
     </Form.Control.Feedback>
   );
-};
-
-export const optionsValidation = (input: any): void => {
-  if (!input) return;
-
-  const parsed =
-    typeof input === "object" && !Array.isArray(input)
-      ? input
-      : JSON.parse(input);
-
-  if (typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new TypeError("Expected an object with key-value pairs");
-  }
-
-  for (const [key, value] of Object.entries(parsed)) {
-    if (!["string", "number", "boolean"].includes(typeof value)) {
-      throw new TypeError(
-        `Value for '${key}' must be a one of: string, number or boolean. Got: ${
-          Array.isArray(value) ? "array" : typeof value
-        }`,
-      );
-    }
-  }
 };
 
 const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
