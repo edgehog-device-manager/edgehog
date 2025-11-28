@@ -51,6 +51,7 @@ defmodule Edgehog.Containers.ManualActions.RunReadyAction do
              action.upgrade_deployment.upgrade_target,
              action.deployment
            ) do
+      _ = Ash.destroy(action)
       :ok
     end
   end
