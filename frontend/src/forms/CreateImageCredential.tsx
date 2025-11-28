@@ -36,6 +36,7 @@ type ImageCredentialData = {
   label: string;
   username: string;
   password: string;
+  serveraddress: string;
 };
 
 const imageCredentialSchema = yup
@@ -43,6 +44,7 @@ const imageCredentialSchema = yup
     label: yup.string().required(),
     username: yup.string().required(),
     password: yup.string().required(),
+    serveraddress: yup.string(),
   })
   .required();
 
@@ -50,6 +52,7 @@ const initialData: ImageCredentialData = {
   label: "",
   username: "",
   password: "",
+  serveraddress: "",
 };
 
 interface Props {
@@ -156,6 +159,27 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
               )}
             </Form.Control.Feedback>
           </InputGroup>
+        </FormRow>
+
+        <FormRow
+          id="image-credential-form-serveraddress"
+          label={
+            <FormattedMessage
+              id="components.CreateImageCredentialForm.ServeraddressLabel"
+              defaultMessage="Server Address"
+            />
+          }
+        >
+          <Form.Control
+            {...register("serveraddress")}
+            autoComplete="off"
+            isInvalid={!!errors.serveraddress}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.serveraddress?.message && (
+              <FormattedMessage id={errors.serveraddress?.message} />
+            )}
+          </Form.Control.Feedback>
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">
