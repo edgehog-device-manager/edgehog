@@ -127,4 +127,21 @@ For detailed information on managing credentials, see the [Image Credentials Man
 
 ## Applications
 
+Applications are a core Edgehog concept that organize container deployments across devices. Unlike Docker, which has no equivalent concept, applications in Edgehog provide a structured way to manage container lifecycle and updates.
+
+### Key Characteristics
+
+- **Centralized management**: Applications are [managed directly](./applications_management.md) in Edgehog, providing a single point of control for container deployments
+- **Release-based structure**: Each application consists of an ordered list of releases, where each release defines a specific configuration of containers, volumes, and networks
+- **Device-agnostic**: Devices do not have a direct notion of applications. Instead, they receive individual releases to deploy
+- **Upgrade-driven workflow**: Devices can be instructed to perform upgrades, transitioning from one release to another within an application
+
+### How Applications Work
+
+Applications serve as logical groupings that track the evolution of your containerized workloads. When creating an application, you only need to provide a name and description. The actual container definitions are added later through releases.
+
+When you want to deploy containers to a device, you select a specific release from an application. The device then deploys that release configuration without awareness of the broader application context.
+
+For detailed information on creating and managing applications, see the [Applications Management](./applications_management.md) page.
+
 ## Deployments
