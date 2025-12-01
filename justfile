@@ -180,6 +180,7 @@ _edgehog-dev-backend:
     export EDGEHOG_FORWARDER_SECURE_SESSIONS="false"
     export ADMIN_JWT_PUBLIC_KEY_PATH=./priv/repo/seeds/keys/admin_public.pem
     cd backend
+    mix deps.get
     # Setup database. Do not seed the database.
     mix ash.reset
     # Run server
@@ -205,6 +206,7 @@ dev-frontend: (_wait-edgehog "localhost:4000")
     #!/usr/bin/env bash
     @echo "🚀 Initializing Edgehog frontend in dev environment..."
     cd frontend
+    npm install
     npm run start
 
 provision-realm: _check-system-prereqs _check-astarte-prereqs _configure-system _init-astarte _wait-astarte _create-astarte-realm
