@@ -21,7 +21,7 @@ button.
 
 This page allows creating a new hardware type, once created it can be edited at a later time.
 
-![Create Hardware Type Screenshot](assets/create_hardware_type.png)
+![Create Hardware Type Screenshot](assets/hardware_type_create.png)
 
 ## Update Hardware Type
 
