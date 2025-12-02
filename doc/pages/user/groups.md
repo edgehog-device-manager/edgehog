@@ -23,10 +23,9 @@ When creating a group, the following information must be provided:
 - Handle: an handle matching the `^[a-z][a-z\d\-]*$` regular expression.
 - Selector: a [Selector](core_concepts.html#selector) that will determine which Devices belong to
   this group (i.e. all Devices that match the Selector)
-  
+
 ## Deleting a group
 
 To delete a group, just press the Delete icon next to it in the group list.
 
-Note that deleting a group means that all automatic operations based on that group (e.g. Update
-Channel auto-assignment) will cease to work.
+Note that deleting a group means that all automatic operations based on that group (e.g. Channel auto-assignment) will cease to work.

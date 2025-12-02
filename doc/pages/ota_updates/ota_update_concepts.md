@@ -40,21 +40,23 @@ For example, when the Version Requirement `>= 2.0.0 and < 3.0.0` is used to defi
 `Supported starting versions` of Base Image `foo`, it identifies a subset of Base Images
 within the same Base Image Collection that can be updated to the Base Image `foo`.
 
-## Update Channel
+## Channel
 
-An Update Channel represents the subscription of a Device to a specific set of Base Images.
-To assign a Device to a specific Update Channel (other than the default one) the device must
-belong to a [Group](core_concepts.html#group) and that Group has to be assigned to the Target Groups of the Update
-Channel.
+A Channel is an aggregation of [Groups](core_concepts-1.html#group) that can be targeted in campaigns
+(either update or deployment campaigns).
 
-The same Base Image can be associated with multiple Update Channels. This guarantees
-that once testers in the `beta` Update Channel validate the Base Image, the exact same Base Image
-will be used to update devices in the `default` Update Channel.
+To assign a Device to a specific Channel (other than the default one) the device must
+belong to a [Group](core_concepts-1.html#group) and that Group has to be assigned to the Target Groups of the Channel.
+
+Channels enable structured rollouts across device groups. For example, the same Base Image can be associated
+with multiple Channels. This guarantees that once testers in the `beta` Channel validate the Base Image,
+the exact same Base Image will be used to update devices in the `default` Channel. The same applies
+to deployment campaigns targeting container releases.
 
 ## Update Campaign
 
 An Update Campaign is the operation that tracks the distribution of a specific Base Image to all
-devices belonging to an Update Channel.
+devices belonging to a Channel.
 
 An Update Campaign can define additional constraints about which devices can be updated (e.g.
 minimum current version, force downgrade, etc).
@@ -69,11 +71,11 @@ interacting with them.
 It also defines other details like how many devices are updated at a time, how many errors should be
 supported before aborting the campaign etc.
 
-There are currently two main Mechanisms available: Push and Optional*. The Push mechanism pushes the
+There are currently two main Mechanisms available: Push and Optional\*. The Push mechanism pushes the
 update towards the device unconditionally, while the Optional mechanism waits for a confirmation on
 the Device side (usually given by a user) before starting to download the update.
 
-*_The Optional rollout mechanism is planned for a future release_
+\*_The Optional rollout mechanism is planned for a future release_
 
 ## OTA Operation
 
@@ -83,12 +85,12 @@ due to a timeout).
 
 ## Update Target
 
-An Update Target is the target of an Update Campaign, which is composed by the targeted device, 
+An Update Target is the target of an Update Campaign, which is composed by the targeted device,
 the status of the target in the linked Update Campaign, OTA Operation and additional metadata.
 
-## Maintenance Window*
+## Maintenance Window\*
 
-*_This feature is planned for a future release_
+\*_This feature is planned for a future release_
 
 Each Device can have an optional Maintenance Window. This is used by Update Campaign to determine
 which Devices can be updated at a specific time.
