@@ -121,6 +121,18 @@ For detailed information on managing credentials, see the [Image Credentials Man
 
 ## Networks
 
+In Edgehog, networks correspond directly to Docker networks. They are [managed through Edgehog](./network_management.md), allowing users to create reusable network specifications that can be referenced by multiple containers during the deployment process.
+
+For each network, Edgehog allows you to configure:
+
+- **Label** – A human-readable identifier for the network.
+- **Driver** – The Docker network driver to use (e.g., `bridge`, `overlay`).
+- **Options** – A set of driver-specific configuration parameters.
+- **Enable IPv6** – Whether the network should support IPv6 addressing.
+- **Internal** – Whether the network should be isolated from external access.
+
+For more detailed information on creating and managing networks, refer to the [Network Management](./network_management.md) page.
+
 ## Containers
 
 ## Release
