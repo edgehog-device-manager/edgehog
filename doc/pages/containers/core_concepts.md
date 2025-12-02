@@ -155,6 +155,10 @@ For more detailed information on creating and managing networks, refer to the [N
 
 ## Containers
 
+In Edgehog, the concept of a container is the same as in Docker. In fact, they directly map to a Docker container under the hood. The key difference is that Edgehog manages containers **indirectly**, relying on [application releases](./applications_management.md#container-creation) instead.
+
+In practice, this translates to Edgehog containers being a _wrapper_ used to configure an image: all the volumes, networks, device mappings, binds, and everything else necessary for a given deployment of an image, are defined in a container.
+
 ## Releases
 
 Releases are an Edgehog concept which represent a set of containers that provide a useful way of organizing a scope. They follow semantic versioning, so that the user is able to know when a specific update can contain breaking changes. Releases are managed directly (take a look at [Release creation process](./applications_management.md#release-creation-process)).
@@ -167,7 +171,7 @@ Each release contains:
 
 - **Version**: a version number following the [Semantic Versioning](https://semver.org) spec. The version number must be unique.
 - **Supported System Models**: a list of supported system models that specify multiple types of devices that can be compatible: if some required system models are specified by the release, the device needs to match one of those. The idea is that different releases of the same app may have different compatibility requirements.
-- **Containers**: a set of containers (see [Containers](./applications_management.md#containers)).
+- **Containers**: a set of containers (see [Containers](#containers)).
 
 ## Applications
 
