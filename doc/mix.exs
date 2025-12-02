@@ -82,7 +82,7 @@ defmodule Doc.MixProject do
       "pages/containers/network_management.md",
       "pages/containers/image_credentials_management.md",
       "pages/containers/applications_management.md",
-      "pages/containers/campaigns.md",
+      "pages/containers/deployment_campaigns.md",
       "pages/tutorials/edgehog_in_5_minutes.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
