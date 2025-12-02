@@ -42,11 +42,11 @@ within the same Base Image Collection that can be updated to the Base Image `foo
 
 ## Channel
 
-A Channel is an aggregation of [Groups](core_concepts.html#group) that can be targeted in campaigns
+A Channel is an aggregation of [Groups](core_concepts-1.html#group) that can be targeted in campaigns
 (either update or deployment campaigns).
 
 To assign a Device to a specific Channel (other than the default one) the device must
-belong to a [Group](core_concepts.html#group) and that Group has to be assigned to the Target Groups of the Channel.
+belong to a [Group](core_concepts-1.html#group) and that Group has to be assigned to the Target Groups of the Channel.
 
 Channels enable structured rollouts across device groups. For example, the same Base Image can be associated
 with multiple Channels. This guarantees that once testers in the `beta` Channel validate the Base Image,

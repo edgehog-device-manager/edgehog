@@ -21,7 +21,7 @@ demonstrates the usage of an OTA update mechanism.
 ## Managed OTA Updates
 
 Edgehog provides a mechanism to roll-out OTA updates to devices automatically, based on their [System
-Model](core_concepts.html#system-model) and their membership to specific [Groups](core_concepts.html#group).
+Model](core_concepts.html#system-model) and their membership to specific [Groups](core_concepts-1.html#group).
 
 To push updates towards Devices, an Update Campaign must be created. It's important to note that an Update
 Campaign can only send updates for the same Base Image Collection. Special operations, such as
