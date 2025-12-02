@@ -123,7 +123,19 @@ For detailed information on managing credentials, see the [Image Credentials Man
 
 ## Containers
 
-## Release
+## Releases
+
+Releases are an Edgehog concept which represent a set of containers that provide a useful way of organizing a scope. They follow semantic versioning, so that the user is able to know when a specific update can contain breaking changes. Releases are managed directly (take a look at [Release creation process](./applications_management.md#release-creation-process)).
+
+There are no restrictions on what can happen underneath as they are just a logical framework to organize different versions of the same application. For example, release `1.2.9` of an application can contain a `backend` container and a `postgres` database, release `2.0.0` an upgraded version of the `backend` and an instance of `scylla db`.
+
+### Release Components
+
+Each release contains:
+
+- **Version**: a version number following the [Semantic Versioning](https://semver.org) spec. The version number must be unique.
+- **Supported System Models**: a list of supported system models that specify multiple types of devices that can be compatible: if some required system models are specified by the release, the device needs to match one of those. The idea is that different releases of the same app may have different compatibility requirements.
+- **Containers**: a set of containers (see [Containers](./applications_management.md#containers)).
 
 ## Applications
 
