@@ -28,7 +28,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
 
   require Logger
 
-  @minimum_astarte_version_with_registration_triggers_support "1.3.0"
+  @minimum_astarte_version_with_registration_triggers_support "1.3.0-rc.0"
 
   @interfaces AstarteResources.load_interfaces()
   @delivery_policies AstarteResources.load_delivery_policies()
