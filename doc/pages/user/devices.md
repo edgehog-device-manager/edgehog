@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021 - 2025 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -25,9 +25,10 @@ Clicking on a Device's name brings to a page dedicated to that Device to display
 
 ## Adding a Device
 
-Each Device will become visible in Edgehog automatically the first time it connects to Astarte.
-Indeed, Astarte informs Edgehog about the Device's presence and activity via Astarte Triggers, which
-should be configured to relay the appropriate events.
+Each Device will become visible in Edgehog automatically once it connects to Astarte. Starting from
+Astarte release 1.3, new triggers automatically add devices to Edgehog when they are registered to Astarte.
+Astarte informs Edgehog about the Device's presence and activity via Astarte Triggers, which should
+be configured to relay the appropriate events.
 
 ## Associating a Device to a System Model
 
@@ -144,3 +145,12 @@ Depending on the data exposed by the Device, the coordinates can be estimated fr
 
 Based on the available data, Edgehog's geolocation modules try to find to best estimate by relying
 on the most up-to-date info and using the ones that provide the most accuracy.
+
+### Applications
+
+This section allows you to manage containerized workloads deployed to that specific Device. Users can manually deploy Application Releases on a Device and handle the lifecycle operation of that Deployment.
+
+![Device Applications Screenshot](assets/device_applications.png)
+
+For more information about the core concepts behind applications and deployments, see the
+[Container Core Concepts](core_concepts-2.html) page.
