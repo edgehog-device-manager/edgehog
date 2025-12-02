@@ -72,7 +72,7 @@ To create image credentials in Edgehog:
    - **Password**: Provide the registry password or token
 4. Click **Save** to store the credentials
 
-![Creating Image Credentials](assets/create_image_credentials.png)
+![Creating Image Credentials](assets/image_credentials_create.png)
 
 > **Important**: Credentials cannot be modified after creation. If you need to change a username or password, you must delete the existing credential and create a new one.
 
@@ -89,7 +89,7 @@ When creating a container in a release:
 3. Choose the appropriate credentials from the dropdown list
 4. Complete the container configuration
 
-![Selecting Credentials During Container Creation](assets/container_creation_image_credentials.png)
+![Selecting Credentials During Container Creation](assets/image_credentials_container_creation.png)
 
 ## Supported Registry Types
 

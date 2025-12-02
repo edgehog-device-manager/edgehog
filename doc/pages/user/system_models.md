@@ -50,7 +50,7 @@ icon on the right of each of them allows deleting them.
 
 ## Create System Model
 
-![Create System Model Screenshot](assets/create_system_model.png)
+![Create System Model Screenshot](assets/system_model_create.png)
 
 The Create System Model page allows creating a new System Model.
 

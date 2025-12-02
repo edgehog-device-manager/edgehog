@@ -145,3 +145,32 @@ When you want to deploy containers to a device, you select a specific release fr
 For detailed information on creating and managing applications, see the [Applications Management](./applications_management.md) page.
 
 ## Deployments
+
+Deployments are a core Edgehog concept that link devices to specific application releases. Unlike Docker, which has no equivalent concept, deployments in Edgehog represent the operational unit for managing containerized workloads on individual devices.
+
+### Key Characteristics
+
+- **Device-Release binding**: A deployment connects a specific device to a particular release from an application
+- **Centralized management**: Deployments are [managed directly](../user/devices.md) through the device interface in Edgehog
+- **Action-oriented**: Deployments are the minimum unit on which users can execute lifecycle operations
+- **Stateful tracking**: Each deployment tracks the current state of the release on the device
+
+### Deployment Actions
+
+- ![Start action](assets/deployments_start.png) **Start**: Launch the containers defined in the deployed release
+- ![Stop action](assets/deployments_stop.png) **Stop**: Halt running containers without removing them
+- ![Upgrade action](assets/deployments_upgrade.png) **Upgrade**: Deploy another specified release from the same application (the old version is still kept)
+- ![Redeploy action](assets/deployments_redeploy.png) **Redeploy**: Re-create and restart the deployment, useful when resources are not ready or in an inconsistent state
+- ![Delete action](assets/deployments_delete.png) **Delete**: Remove the deployment and all associated containers from the device
+
+![Deployment details](assets/deployments_info.png) Additionally, users can open a dedicated deployment details page to view comprehensive information about the deployment, including:
+
+- Current container status and runtime configurations
+- Events history
+- Network and volume bindings
+
+### How Deployments Work
+
+When you deploy a release to a device, Edgehog creates a deployment that binds that device to the specific release configuration. The device receives instructions to pull images, create volumes and networks, and start containers according to the release specification.
+
+All container lifecycle management on a device happens through its deployment. This abstraction allows Edgehog to maintain consistent control over containerized workloads across your device fleet, regardless of the underlying container runtime.
