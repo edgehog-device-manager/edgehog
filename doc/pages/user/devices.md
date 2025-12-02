@@ -55,7 +55,7 @@ Attributes are mostly automatically populated but the `custom` namespace attribu
 freely from the Device page.
 
 Tags and attributes can be used to determine the membership of a Device to a specific
-[group](groups.html), which in turn can be used to assign a Device to a specific Update Channel when
+[group](groups.html), which in turn can be used to assign a Device to a specific Channel when
 receiving [OTA Updates](ota_updates.html).
 
 ## Device info

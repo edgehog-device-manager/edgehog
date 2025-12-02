@@ -8,7 +8,7 @@
 
 As mentioned in the [OTA Update concepts](ota_update_concepts.html), Update Campaign is the operation
 that tracks the distribution of a specific [Base Image](ota_update_concepts.html#base-image) to all devices
-belonging to an [Update Channel](ota_update_concepts.html#update-channel).
+belonging to a [Channel](ota_update_concepts.html#channel).
 
 Note that an Update Campaign can only send updates for the same
 [Base Image Collection](ota_update_concepts.html#base-image-collection), and special operations
@@ -36,7 +36,7 @@ The Create Update Campaign page allows creating a new Update Campaign.
 When creating an Update Campaign, the following information must be provided
 
 - Base Image: the target Base Image for the Update Campaign.
-- Update Channel: the target Update Channel for the Update Campaign.
+- Channel: the target Channel for the Update Campaign.
 - [Roll-out Mechanism](#roll-out-mechanism) properties.
 
 The Update Campaign information can be provided using the form, and pressing the "Create" button saves
@@ -45,17 +45,17 @@ the Update Campaign.
 Once created, the Update Campaign will start rolling out updates towards the devices, and its
 progress can be checked from the Edgehog Dashboard or through Edgehog GraphQL API.
 
-Note that the campaign will "snapshot" the Devices belonging to the Update Channel when it's
-started, and will target only those. If additional Devices are added to the Update Channel (either
+Note that the campaign will "snapshot" the Devices belonging to the Channel when it's
+started, and will target only those. If additional Devices are added to the Channel (either
 manually or automatically via auto-assignment) _after_ the Update Campaign is created, they won't
 receive the Base Image and will require a separate campaign to be started.
 
-Only a single Update Campaign can be started for a given System Model and Update Channel
+Only a single Update Campaign can be started for a given System Model and Channel
 combination, so creating a new Update Campaign while another one is already running will implicitly
-cancel* the old one. This means that Devices that didn't yet receive the Base Image of the old Update
+cancel\* the old one. This means that Devices that didn't yet receive the Base Image of the old Update
 Campaign will directly receive the new one, without any intermediate step.
 
-*_Implicit Cancellation feature is planned for a future release_
+\*_Implicit Cancellation feature is planned for a future release_
 
 ### Roll-out mechanism
 
@@ -69,9 +69,9 @@ provide automatic updates where the user should not have the choice of refusing 
 The properties of this Roll-out Mechanism are:
 
 - Max Pending Operations: the maximum number of pending [OTA Operations](ota_update_concepts.html#ota-operation).
-  The Update Campaign will have at most this number of OTA Operations that are started 
+  The Update Campaign will have at most this number of OTA Operations that are started
   but not yet finished (either successfully or not).
-- Max Failures: the maximum percentage of failures allowed over the number of total targets. If the failures 
+- Max Failures: the maximum percentage of failures allowed over the number of total targets. If the failures
   exceed this threshold, the Update Campaign terminates with a failure.
 - Request Retries: the number of times an update must be retried on a specific Device before considering it
   a failure. Note that the update is retried only if the OTA Request doesn't get acknowledged from the device.
@@ -79,9 +79,9 @@ The properties of this Roll-out Mechanism are:
 - Force Downgrade (optional): when checked forces downgrading a Device which is currently using a later version
   of the Base Image.
 
-##### `optional`*
+##### `optional`\*
 
-*_The Optional rollout mechanism is planned for a future release_
+\*_The Optional rollout mechanism is planned for a future release_
 
 This Roll-out mechanism just pushes a message towards the Device informing that an update is
 available. The update is downloaded to the device only after the user accepts the update. The update
@@ -92,7 +92,7 @@ the update at the same time.
 
 ![Update Campaign Page Screenshot](assets/update_campaign.png)
 
-The Update Campaign page shows the information about a specific Update Campaign and Devices associated 
+The Update Campaign page shows the information about a specific Update Campaign and Devices associated
 with it in table below.
 
-Clicking on the Base Image Collection, Base Image, Update Channel or Device name bring to the corresponding page.
+Clicking on the Base Image Collection, Base Image, Channel or Device name bring to the corresponding page.

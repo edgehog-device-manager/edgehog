@@ -31,7 +31,7 @@ Update](#manual-ota-updates).
 Once created, the Update Campaign will start rolling out updates towards the devices, and its
 progress can be checked from the Edgehog Dashboard or through Edgehog GraphQL API.
 
-Note that the campaign will "snapshot" the Devices belonging to the Update Channel when it's
+Note that the campaign will "snapshot" the Devices belonging to the Channel when it's
 started, and will [target](ota_update_concepts.html#update-target) only those.
 
 Once started, the Update Campaign waits for device to come online, at which point it initiates the OTA Update.
@@ -40,6 +40,7 @@ For example, `Max Pending Operations` setting may postpone some OTA Operations.
 
 Before actual push to the Device corresponding [Update Target](ota_update_concepts.html#update-target)
 is verified for fulfillment of Base Image and Roll-out mechanism criteria. For example:
+
 - Devices having same Base Image version will be silently marked as successful.
 - Devices with Base Images that don't meet [Version Requirement](ota_update_concepts.html#version-requirement)
   of distributed Base Image will be marked as failed, unless the `Force Downgrade` option
