@@ -1,27 +1,27 @@
 /*
-  This file is part of Edgehog.
+ * This file is part of Edgehog.
+ *
+ * Copyright 2021, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-  Copyright 2021 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
-
-import brand from "assets/images/brand.png";
-import login_brand from "assets/images/login_brand.png";
-import logo from "assets/images/logo.png";
-import devices from "assets/images/devices.svg";
+import brand from "@/assets/images/brand.png";
+import login_brand from "@/assets/images/login_brand.png";
+import logo from "@/assets/images/logo.png";
+import devices from "@/assets/images/devices.svg";
 
 const assets = {
   images: {

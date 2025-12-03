@@ -1,37 +1,37 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2024 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2024, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { Suspense, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
 import { ErrorBoundary } from "react-error-boundary";
 
-import type { ApplicationCreate_createApplication_Mutation } from "api/__generated__/ApplicationCreate_createApplication_Mutation.graphql";
+import type { ApplicationCreate_createApplication_Mutation } from "@/api/__generated__/ApplicationCreate_createApplication_Mutation.graphql";
 
-import Alert from "components/Alert";
-import Page from "components/Page";
-import CreateApplicationForm from "forms/CreateApplication";
-import type { ApplicationData } from "forms/CreateApplication";
-import { Route, useNavigate } from "Navigation";
-import Center from "components/Center";
-import Spinner from "components/Spinner";
+import Alert from "@/components/Alert";
+import Page from "@/components/Page";
+import CreateApplicationForm from "@/forms/CreateApplication";
+import type { ApplicationData } from "@/forms/CreateApplication";
+import { Route, useNavigate } from "@/Navigation";
+import Center from "@/components/Center";
+import Spinner from "@/components/Spinner";
 
 const CREATE_APPLICATION_MUTATION = graphql`
   mutation ApplicationCreate_createApplication_Mutation(

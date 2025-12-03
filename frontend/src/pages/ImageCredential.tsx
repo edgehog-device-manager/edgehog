@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2024-2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2024, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { ReactNode, Suspense, useCallback, useEffect, useState } from "react";
 import { Alert } from "react-bootstrap";
@@ -31,19 +31,19 @@ import {
 } from "react-relay";
 import { useParams } from "react-router-dom";
 
-import type { ImageCredential_deleteImageCredentialDelete_Mutation } from "api/__generated__/ImageCredential_deleteImageCredentialDelete_Mutation.graphql";
+import type { ImageCredential_deleteImageCredentialDelete_Mutation } from "@/api/__generated__/ImageCredential_deleteImageCredentialDelete_Mutation.graphql";
 import {
   ImageCredential_imageCredential_Query,
   ImageCredential_imageCredential_Query$data,
-} from "api/__generated__/ImageCredential_imageCredential_Query.graphql";
+} from "@/api/__generated__/ImageCredential_imageCredential_Query.graphql";
 
-import Center from "components/Center";
-import DeleteModal from "components/DeleteModal";
-import Page from "components/Page";
-import Result from "components/Result";
-import Spinner from "components/Spinner";
-import UpdateImageCredentialForm from "forms/UpdateImageCredential";
-import { Link, Route, useNavigate } from "Navigation";
+import Center from "@/components/Center";
+import DeleteModal from "@/components/DeleteModal";
+import Page from "@/components/Page";
+import Result from "@/components/Result";
+import Spinner from "@/components/Spinner";
+import UpdateImageCredentialForm from "@/forms/UpdateImageCredential";
+import { Link, Route, useNavigate } from "@/Navigation";
 
 const IMAGE_CREDENTIAL_QUERY = graphql`
   query ImageCredential_imageCredential_Query($imageCredentialId: ID!) {

@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2023 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2023-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -29,23 +29,23 @@ import Select from "react-select";
 import {
   CreateUpdateCampaign_BaseImageCollOptionsFragment$data,
   CreateUpdateCampaign_BaseImageCollOptionsFragment$key,
-} from "api/__generated__/CreateUpdateCampaign_BaseImageCollOptionsFragment.graphql";
-import type { CreateUpdateCampaign_BaseImageCollPaginationQuery } from "api/__generated__/CreateUpdateCampaign_BaseImageCollPaginationQuery.graphql";
+} from "@/api/__generated__/CreateUpdateCampaign_BaseImageCollOptionsFragment.graphql";
+import type { CreateUpdateCampaign_BaseImageCollPaginationQuery } from "@/api/__generated__/CreateUpdateCampaign_BaseImageCollPaginationQuery.graphql";
 import {
   CreateUpdateCampaign_ChannelOptionsFragment$data,
   CreateUpdateCampaign_ChannelOptionsFragment$key,
-} from "api/__generated__/CreateUpdateCampaign_ChannelOptionsFragment.graphql";
-import type { CreateUpdateCampaign_ChannelPaginationQuery } from "api/__generated__/CreateUpdateCampaign_ChannelPaginationQuery.graphql";
+} from "@/api/__generated__/CreateUpdateCampaign_ChannelOptionsFragment.graphql";
+import type { CreateUpdateCampaign_ChannelPaginationQuery } from "@/api/__generated__/CreateUpdateCampaign_ChannelPaginationQuery.graphql";
 
-import BaseImageSelect, { BaseImageRecord } from "components/BaseImageSelect";
-import Button from "components/Button";
-import Form from "components/Form";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import { FormRow } from "components/FormRow";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
-import { numberSchema, yup } from "forms";
-import FormFeedback from "forms/FormFeedback";
+import BaseImageSelect, { BaseImageRecord } from "@/components/BaseImageSelect";
+import Button from "@/components/Button";
+import Form from "@/components/Form";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import { FormRow } from "@/components/FormRow";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { numberSchema, yup } from "@/forms";
+import FormFeedback from "@/forms/FormFeedback";
 
 const UPDATE_CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
   fragment CreateUpdateCampaign_BaseImageCollOptionsFragment on RootQueryType

@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2024 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2024, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -33,17 +33,17 @@ import { useParams } from "react-router-dom";
 import type {
   ReleaseCreate_getOptions_Query,
   ReleaseCreate_getOptions_Query$data,
-} from "api/__generated__/ReleaseCreate_getOptions_Query.graphql";
-import type { ReleaseCreate_createRelease_Mutation } from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
+} from "@/api/__generated__/ReleaseCreate_getOptions_Query.graphql";
+import type { ReleaseCreate_createRelease_Mutation } from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
-import Alert from "components/Alert";
-import Button from "components/Button";
-import Page from "components/Page";
-import CreateRelease from "forms/CreateRelease";
-import type { ReleaseSubmitData } from "forms/CreateRelease";
-import { Route, useNavigate } from "Navigation";
-import Spinner from "components/Spinner";
-import Center from "components/Center";
+import Alert from "@/components/Alert";
+import Button from "@/components/Button";
+import Page from "@/components/Page";
+import CreateRelease from "@/forms/CreateRelease";
+import type { ReleaseSubmitData } from "@/forms/CreateRelease";
+import { Route, useNavigate } from "@/Navigation";
+import Spinner from "@/components/Spinner";
+import Center from "@/components/Center";
 
 const CREATE_RELEASE_PAGE_QUERY = graphql`
   query ReleaseCreate_getOptions_Query($applicationId: ID!) {

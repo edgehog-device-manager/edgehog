@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
@@ -27,29 +27,29 @@ import {
   ContainerCreateWithNestedDeviceMappingsInput,
   ContainerCreateWithNestedNetworksInput,
   ContainerCreateWithNestedVolumesInput,
-} from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
+} from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
 import type {
   EnvironmentVariable,
   ReleaseInputData,
-} from "forms/CreateRelease";
+} from "@/forms/CreateRelease";
 import {
   CapAddList,
   CapDropList,
   restartPolicyOptions,
-} from "forms/CreateRelease";
-import Button from "components/Button";
-import Form from "components/Form";
-import Stack from "components/Stack";
-import Tag from "components/Tag";
-import Icon from "components/Icon";
-import MonacoJsonEditor from "components/MonacoJsonEditor";
-import FormFeedback from "forms/FormFeedback";
-import DeviceMappingsFormInput from "components/DeviceMappingsFormInput";
-import { FormRow } from "components/FormRow";
-import MultiSelect from "components/MultiSelect";
-import FieldHelp from "components/FieldHelp";
-import StringArrayFormInput from "components/StringArrayFormInput";
+} from "@/forms/CreateRelease";
+import Button from "@/components/Button";
+import Form from "@/components/Form";
+import Stack from "@/components/Stack";
+import Tag from "@/components/Tag";
+import Icon from "@/components/Icon";
+import MonacoJsonEditor from "@/components/MonacoJsonEditor";
+import FormFeedback from "@/forms/FormFeedback";
+import DeviceMappingsFormInput from "@/components/DeviceMappingsFormInput";
+import { FormRow } from "@/components/FormRow";
+import MultiSelect from "@/components/MultiSelect";
+import FieldHelp from "@/components/FieldHelp";
+import StringArrayFormInput from "@/components/StringArrayFormInput";
 
 type Option = {
   value: string;
