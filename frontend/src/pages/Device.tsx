@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2021 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2021-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import React, {
   Suspense,
@@ -41,46 +41,46 @@ import type { PayloadError } from "relay-runtime";
 import { FormattedMessage } from "react-intl";
 import _ from "lodash";
 
-import type { Device_connectionStatus$key } from "api/__generated__/Device_connectionStatus.graphql";
-import type { Device_getDevice_Query } from "api/__generated__/Device_getDevice_Query.graphql";
-import type { Device_updateDevice_Mutation } from "api/__generated__/Device_updateDevice_Mutation.graphql";
-import type { Device_addDeviceTags_Mutation } from "api/__generated__/Device_addDeviceTags_Mutation.graphql";
-import type { Device_removeDeviceTags_Mutation } from "api/__generated__/Device_removeDeviceTags_Mutation.graphql";
-import type { Device_requestForwarderSession_Mutation } from "api/__generated__/Device_requestForwarderSession_Mutation.graphql";
-import type { Device_getForwarderSession_Query } from "api/__generated__/Device_getForwarderSession_Query.graphql";
-import type { Device_getExistingDeviceTags_Query } from "api/__generated__/Device_getExistingDeviceTags_Query.graphql";
-import { Link, Route } from "Navigation";
-import Alert from "components/Alert";
-import Button from "components/Button";
-import Center from "components/Center";
-import ConnectionStatus from "components/ConnectionStatus";
-import Col from "components/Col";
-import Figure from "components/Figure";
-import Form from "components/Form";
-import LastSeen from "components/LastSeen";
-import LedBehaviorDropdown from "components/LedBehaviorDropdown";
-import Page from "components/Page";
-import Result from "components/Result";
-import Row from "components/Row";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import Tabs from "components/Tabs";
-import MultiSelect from "components/MultiSelect";
-import { FormRow as BaseFormRow, FormRowProps } from "components/FormRow";
-import assets from "assets";
-import DeviceHardwareInfoTab from "components/DeviceTabs/HardwareInfoTab";
-import DeviceOSInfoTab from "components/DeviceTabs/OSInfoTab";
-import DeviceRuntimeInfoTab from "components/DeviceTabs/RuntimeInfoTab";
-import DeviceBaseImageTab from "components/DeviceTabs/BaseImageTab";
-import DeviceSystemStatusTab from "components/DeviceTabs/SystemStatusTab";
-import DeviceStorageUsageTab from "components/DeviceTabs/StorageUsageTab";
-import DeviceBatteryTab from "components/DeviceTabs/BatteryTab";
-import DeviceCellularConnectionTab from "components/DeviceTabs/CellularConnectionTab";
-import DeviceNetworkInterfacesTab from "components/DeviceTabs/NetworkInterfacesTab";
-import DeviceLocationTab from "components/DeviceTabs/LocationTab";
-import DeviceWiFiScanResultsTab from "components/DeviceTabs/WiFiScanResultsTab";
-import DeviceSoftwareUpdateTab from "components/DeviceTabs/SoftwareUpdateTab";
-import DeviceApplicationsTab from "components/DeviceTabs/ApplicationsTab";
+import type { Device_connectionStatus$key } from "@/api/__generated__/Device_connectionStatus.graphql";
+import type { Device_getDevice_Query } from "@/api/__generated__/Device_getDevice_Query.graphql";
+import type { Device_updateDevice_Mutation } from "@/api/__generated__/Device_updateDevice_Mutation.graphql";
+import type { Device_addDeviceTags_Mutation } from "@/api/__generated__/Device_addDeviceTags_Mutation.graphql";
+import type { Device_removeDeviceTags_Mutation } from "@/api/__generated__/Device_removeDeviceTags_Mutation.graphql";
+import type { Device_requestForwarderSession_Mutation } from "@/api/__generated__/Device_requestForwarderSession_Mutation.graphql";
+import type { Device_getForwarderSession_Query } from "@/api/__generated__/Device_getForwarderSession_Query.graphql";
+import type { Device_getExistingDeviceTags_Query } from "@/api/__generated__/Device_getExistingDeviceTags_Query.graphql";
+import { Link, Route } from "@/Navigation";
+import Alert from "@/components/Alert";
+import Button from "@/components/Button";
+import Center from "@/components/Center";
+import ConnectionStatus from "@/components/ConnectionStatus";
+import Col from "@/components/Col";
+import Figure from "@/components/Figure";
+import Form from "@/components/Form";
+import LastSeen from "@/components/LastSeen";
+import LedBehaviorDropdown from "@/components/LedBehaviorDropdown";
+import Page from "@/components/Page";
+import Result from "@/components/Result";
+import Row from "@/components/Row";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import Tabs from "@/components/Tabs";
+import MultiSelect from "@/components/MultiSelect";
+import { FormRow as BaseFormRow, FormRowProps } from "@/components/FormRow";
+import assets from "@/assets";
+import DeviceHardwareInfoTab from "@/components/DeviceTabs/HardwareInfoTab";
+import DeviceOSInfoTab from "@/components/DeviceTabs/OSInfoTab";
+import DeviceRuntimeInfoTab from "@/components/DeviceTabs/RuntimeInfoTab";
+import DeviceBaseImageTab from "@/components/DeviceTabs/BaseImageTab";
+import DeviceSystemStatusTab from "@/components/DeviceTabs/SystemStatusTab";
+import DeviceStorageUsageTab from "@/components/DeviceTabs/StorageUsageTab";
+import DeviceBatteryTab from "@/components/DeviceTabs/BatteryTab";
+import DeviceCellularConnectionTab from "@/components/DeviceTabs/CellularConnectionTab";
+import DeviceNetworkInterfacesTab from "@/components/DeviceTabs/NetworkInterfacesTab";
+import DeviceLocationTab from "@/components/DeviceTabs/LocationTab";
+import DeviceWiFiScanResultsTab from "@/components/DeviceTabs/WiFiScanResultsTab";
+import DeviceSoftwareUpdateTab from "@/components/DeviceTabs/SoftwareUpdateTab";
+import DeviceApplicationsTab from "@/components/DeviceTabs/ApplicationsTab";
 
 const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
   fragment Device_connectionStatus on Device {

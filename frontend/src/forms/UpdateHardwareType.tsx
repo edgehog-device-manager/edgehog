@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2021 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2021-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { useCallback, useMemo, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -24,15 +24,15 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import type { UpdateHardwareType_HardwareTypeFragment$key } from "api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
+import type { UpdateHardwareType_HardwareTypeFragment$key } from "@/api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
 
-import Button from "components/Button";
-import Form from "components/Form";
-import Icon from "components/Icon";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import { FormRow } from "components/FormRow";
-import { handleSchema, messages, yup } from "forms";
+import Button from "@/components/Button";
+import Form from "@/components/Form";
+import Icon from "@/components/Icon";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import { FormRow } from "@/components/FormRow";
+import { handleSchema, messages, yup } from "@/forms";
 
 const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
   fragment UpdateHardwareType_HardwareTypeFragment on HardwareType {

@@ -1,34 +1,34 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { graphql, useRefetchableFragment } from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
 
-import type { ApplicationsTab_deployedApplications$key } from "api/__generated__/ApplicationsTab_deployedApplications.graphql";
-import type { ApplicationsTab_deployedApplications_RefetchQuery } from "api/__generated__/ApplicationsTab_deployedApplications_RefetchQuery.graphql";
+import type { ApplicationsTab_deployedApplications$key } from "@/api/__generated__/ApplicationsTab_deployedApplications.graphql";
+import type { ApplicationsTab_deployedApplications_RefetchQuery } from "@/api/__generated__/ApplicationsTab_deployedApplications_RefetchQuery.graphql";
 
-import AddAvailableApplications from "components/AddAvailableApplications";
-import DeployedApplicationsTable from "components/DeployedApplicationsTable";
-import Alert from "components/Alert";
-import { Tab } from "components/Tabs";
+import AddAvailableApplications from "@/components/AddAvailableApplications";
+import DeployedApplicationsTable from "@/components/DeployedApplicationsTable";
+import Alert from "@/components/Alert";
+import { Tab } from "@/components/Tabs";
 
 // TODO: the fragment is defined on the RootQueryType so it can specify
 // which query to run, otherwise Relay would automatically use the `node`

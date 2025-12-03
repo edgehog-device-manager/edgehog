@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2021 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2021-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import React, { useCallback, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -24,27 +24,27 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import Button from "components/Button";
-import CloseButton from "components/CloseButton";
-import Col from "components/Col";
-import Figure from "components/Figure";
-import Form from "components/Form";
-import Icon from "components/Icon";
-import Row from "components/Row";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import { FormRow } from "components/FormRow";
-import { messages, yup, handleSchema } from "forms";
+import Button from "@/components/Button";
+import CloseButton from "@/components/CloseButton";
+import Col from "@/components/Col";
+import Figure from "@/components/Figure";
+import Form from "@/components/Form";
+import Icon from "@/components/Icon";
+import Row from "@/components/Row";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import { FormRow } from "@/components/FormRow";
+import { messages, yup, handleSchema } from "@/forms";
 
 import type {
   UpdateSystemModel_SystemModelFragment$key,
   UpdateSystemModel_SystemModelFragment$data,
-} from "api/__generated__/UpdateSystemModel_SystemModelFragment.graphql";
+} from "@/api/__generated__/UpdateSystemModel_SystemModelFragment.graphql";
 import type {
   UpdateSystemModel_OptionsFragment$key,
   UpdateSystemModel_OptionsFragment$data,
-} from "api/__generated__/UpdateSystemModel_OptionsFragment.graphql";
-import assets from "assets";
+} from "@/api/__generated__/UpdateSystemModel_OptionsFragment.graphql";
+import assets from "@/assets";
 
 const UPDATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment UpdateSystemModel_SystemModelFragment on SystemModel {

@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2023 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2023-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -34,22 +34,22 @@ import { FormattedMessage } from "react-intl";
 import type {
   BaseImageCollection_getBaseImageCollection_Query,
   BaseImageCollection_getBaseImageCollection_Query$data,
-} from "api/__generated__/BaseImageCollection_getBaseImageCollection_Query.graphql";
-import type { BaseImageCollection_updateBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollection_updateBaseImageCollection_Mutation.graphql";
-import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";
+} from "@/api/__generated__/BaseImageCollection_getBaseImageCollection_Query.graphql";
+import type { BaseImageCollection_updateBaseImageCollection_Mutation } from "@/api/__generated__/BaseImageCollection_updateBaseImageCollection_Mutation.graphql";
+import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "@/api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";
 
-import { Link, Route, useNavigate } from "Navigation";
-import Alert from "components/Alert";
-import BaseImagesTable from "components/BaseImagesTable";
-import Button from "components/Button";
-import Center from "components/Center";
-import DeleteModal from "components/DeleteModal";
-import Page from "components/Page";
-import Result from "components/Result";
-import Spinner from "components/Spinner";
-import UpdateBaseImageCollectionForm from "forms/UpdateBaseImageCollection";
-import type { BaseImageCollectionChanges } from "forms/UpdateBaseImageCollection";
-import { RECORDS_TO_LOAD_FIRST } from "constants";
+import { Link, Route, useNavigate } from "@/Navigation";
+import Alert from "@/components/Alert";
+import BaseImagesTable from "@/components/BaseImagesTable";
+import Button from "@/components/Button";
+import Center from "@/components/Center";
+import DeleteModal from "@/components/DeleteModal";
+import Page from "@/components/Page";
+import Result from "@/components/Result";
+import Spinner from "@/components/Spinner";
+import UpdateBaseImageCollectionForm from "@/forms/UpdateBaseImageCollection";
+import type { BaseImageCollectionChanges } from "@/forms/UpdateBaseImageCollection";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCollection_getBaseImageCollection_Query(

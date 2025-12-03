@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2023 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2023-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import _ from "lodash";
 import { useMemo, useCallback, useState, useEffect } from "react";
@@ -28,17 +28,17 @@ import { graphql, usePaginationFragment } from "react-relay/hooks";
 import type {
   CreateChannel_OptionsFragment$data,
   CreateChannel_OptionsFragment$key,
-} from "api/__generated__/CreateChannel_OptionsFragment.graphql";
-import type { CreateChannel_PaginationQuery } from "api/__generated__/CreateChannel_PaginationQuery.graphql";
+} from "@/api/__generated__/CreateChannel_OptionsFragment.graphql";
+import type { CreateChannel_PaginationQuery } from "@/api/__generated__/CreateChannel_PaginationQuery.graphql";
 
-import Button from "components/Button";
-import Form from "components/Form";
-import MultiSelect from "components/MultiSelect";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import { FormRow } from "components/FormRow";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
-import { yup, messages, handleSchema } from "forms";
+import Button from "@/components/Button";
+import Form from "@/components/Form";
+import MultiSelect from "@/components/MultiSelect";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import { FormRow } from "@/components/FormRow";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { yup, messages, handleSchema } from "@/forms";
 
 const CREATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
   fragment CreateChannel_OptionsFragment on RootQueryType

@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2023-2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2023-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
@@ -35,15 +35,15 @@ import Select from "react-select";
 import {
   BaseImageSelect_BaseImagesFragment$data,
   BaseImageSelect_BaseImagesFragment$key,
-} from "api/__generated__/BaseImageSelect_BaseImagesFragment.graphql";
-import { BaseImageSelect_BaseImagesPaginationQuery } from "api/__generated__/BaseImageSelect_BaseImagesPaginationQuery.graphql";
-import { BaseImageSelect_getBaseImageCollection_Query } from "api/__generated__/BaseImageSelect_getBaseImageCollection_Query.graphql";
+} from "@/api/__generated__/BaseImageSelect_BaseImagesFragment.graphql";
+import { BaseImageSelect_BaseImagesPaginationQuery } from "@/api/__generated__/BaseImageSelect_BaseImagesPaginationQuery.graphql";
+import { BaseImageSelect_getBaseImageCollection_Query } from "@/api/__generated__/BaseImageSelect_getBaseImageCollection_Query.graphql";
 
-import Button from "components/Button";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
-import { BaseImageCollectionRecord } from "forms/CreateUpdateCampaign";
+import Button from "@/components/Button";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { BaseImageCollectionRecord } from "@/forms/CreateUpdateCampaign";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageSelect_getBaseImageCollection_Query(

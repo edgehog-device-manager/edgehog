@@ -1,33 +1,33 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { ReactNode, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useMutation } from "react-relay/hooks";
 
-import type { NetworkCreate_networkCreate_Mutation } from "api/__generated__/NetworkCreate_networkCreate_Mutation.graphql";
+import type { NetworkCreate_networkCreate_Mutation } from "@/api/__generated__/NetworkCreate_networkCreate_Mutation.graphql";
 
-import Alert from "components/Alert";
-import Page from "components/Page";
-import { Route, useNavigate } from "Navigation";
-import CreateNetworkForm, { NetworkData } from "forms/CreateNetwork";
+import Alert from "@/components/Alert";
+import Page from "@/components/Page";
+import { Route, useNavigate } from "@/Navigation";
+import CreateNetworkForm, { NetworkData } from "@/forms/CreateNetwork";
 
 const CREATE_NETWORK_MUTATION = graphql`
   mutation NetworkCreate_networkCreate_Mutation($input: CreateNetworkInput!) {
