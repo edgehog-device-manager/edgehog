@@ -38,15 +38,15 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
                          |> X509.PrivateKey.to_pem()
                          |> String.trim()
 
-  describe "POST /admin-api/v1/tenants" do
-    setup do
-      stub(Edgehog.Tenants.ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
-      stub(Edgehog.Containers.ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
-      stub(Edgehog.Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
-      stub(Edgehog.Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
-      {:ok, path: ~p"/admin-api/v1/tenants"}
-    end
+  setup do
+    stub(Edgehog.Tenants.ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
+    stub(Edgehog.Containers.ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
+    stub(Edgehog.Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
+    stub(Edgehog.Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
+    {:ok, path: ~p"/admin-api/v1/tenants"}
+  end
 
+  describe "POST /admin-api/v1/tenants" do
     test "creates tenant with valid data", %{conn: conn, path: path} do
       tenant_name = unique_tenant_name()
       tenant_slug = unique_tenant_slug()
@@ -221,6 +221,26 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
                "status" => "400",
                "title" => "InvalidAttribute"
              } = error
+    end
+  end
+
+  describe "DELETE " do
+    setup do
+      tenant = tenant_fixture()
+
+      %{tenant: tenant}
+    end
+
+    test "deletes a tenant with valid id", %{conn: conn, path: path, tenant: tenant} do
+      path = path <> "/#{tenant.tenant_id}"
+      conn = delete(conn, path, %{})
+
+      assert %{"data" => %{"attributes" => tenant_attrs}} = json_response(conn, 200)
+
+      assert tenant_attrs["name"] == tenant.name
+      assert tenant_attrs["slug"] == tenant.slug
+      assert tenant_attrs["default_locale"] == tenant.default_locale
+      assert tenant_attrs["public_key"] == tenant.public_key
     end
   end
 
