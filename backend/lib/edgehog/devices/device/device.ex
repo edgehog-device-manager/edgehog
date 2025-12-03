@@ -62,6 +62,34 @@ defmodule Edgehog.Devices.Device do
     paginate_relationship_with application_deployments: :relay,
                                ota_operations: :relay,
                                tags: :relay
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :device_created do
+        action_types :create
+      end
+
+      subscribe :device_updated do
+        action_types :update
+      end
+
+      subscribe :device_connected do
+        actions [:from_device_connected_event]
+      end
+
+      subscribe :device_disconnected do
+        actions [:from_device_disconnected_event]
+      end
+
+      subscribe :device_tags_updated do
+        actions [:add_tags, :remove_tags]
+      end
+
+      subscribe :device_deleted do
+        action_types :destroy
+      end
+    end
   end
 
   actions do
