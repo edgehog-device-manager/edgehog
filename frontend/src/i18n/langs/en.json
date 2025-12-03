@@ -1910,8 +1910,8 @@
   "forms.CreateRelease.noContainersFeedback": {
     "defaultMessage": "The release does not include any container."
   },
-  "forms.CreateRelease.reuseResourcesModalTitle": {
-    "defaultMessage": "Reuse Resources Modal"
+  "forms.CreateRelease.reuseResourcesTitle": {
+    "defaultMessage": "Reuse Resources"
   },
   "forms.CreateRelease.selectApplication": {
     "defaultMessage": "Select Application"

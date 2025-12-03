@@ -805,8 +805,8 @@ const CreateRelease = ({
       {showModal && (
         <ConfirmModal
           title={intl.formatMessage({
-            id: "forms.CreateRelease.reuseResourcesModalTitle",
-            defaultMessage: "Reuse Resources Modal",
+            id: "forms.CreateRelease.reuseResourcesTitle",
+            defaultMessage: "Reuse Resources",
           })}
           confirmLabel={
             <FormattedMessage
