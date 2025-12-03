@@ -19,12 +19,62 @@
 */
 
 import "api/relay";
-import { Environment, Network, RecordSource, Store } from "relay-runtime";
-import type { FetchFunction, Variables, UploadableMap } from "relay-runtime";
+import {
+  Environment,
+  Network,
+  RecordSource,
+  Store,
+  Observable,
+} from "relay-runtime";
+import type {
+  FetchFunction,
+  Variables,
+  UploadableMap,
+  RequestParameters,
+  SubscribeFunction,
+} from "relay-runtime";
 import type { TaskScheduler } from "relay-runtime";
 import ReactDOM from "react-dom";
 
 import type { Session } from "contexts/Session";
+
+// Phoenix WebSocket V2 message format types
+type PhoenixJoinRef = string | null;
+type PhoenixRef = string | null;
+type PhoenixTopic = string;
+type PhoenixEvent =
+  | "phx_join"
+  | "phx_leave"
+  | "phx_reply"
+  | "phx_close"
+  | "phx_error"
+  | "heartbeat"
+  | "doc"
+  | "subscription:data";
+
+interface PhoenixPayload {
+  status?: "ok" | "error";
+  response?: {
+    subscriptionId?: string;
+    errors?: Array<{ message: string; locations?: unknown[]; path?: string[] }>;
+    [key: string]: unknown;
+  };
+  result?: {
+    data?: unknown;
+    errors?: Array<{ message: string; locations?: unknown[]; path?: string[] }>;
+  };
+  subscriptionId?: string;
+  [key: string]: unknown;
+}
+
+// Phoenix V2 WebSocket message: [join_ref, ref, topic, event, payload]
+type PhoenixMessage = [
+  PhoenixJoinRef,
+  PhoenixRef,
+  PhoenixTopic,
+  PhoenixEvent,
+  PhoenixPayload,
+];
 
 const applicationMetatag: HTMLElement = document.head.querySelector(
   "[name=application-name]",
@@ -132,6 +182,91 @@ const relayScheduler: TaskScheduler = {
   },
 };
 
+const createSubscribeFunction = (session: Session): SubscribeFunction => {
+  return (operation: RequestParameters, variables: Variables) => {
+    return Observable.create((sink) => {
+      if (!session) {
+        sink.error(new Error("Session is null"));
+        return;
+      }
+
+      const wsProtocol = backendUrl.startsWith("https") ? "wss" : "ws";
+      const wsBaseUrl = backendUrl.replace(/^https?:/, wsProtocol + ":");
+      const wsUrl = new URL(
+        `tenants/${session.tenantSlug}/socket/websocket`,
+        wsBaseUrl,
+      );
+      wsUrl.searchParams.set("vsn", "2.0.0");
+      wsUrl.searchParams.set("Authorization", `Bearer ${session.authToken}`);
+      wsUrl.searchParams.set("tenant", session.tenantSlug);
+
+      const socket = new WebSocket(wsUrl.toString());
+      const refId = () => Math.random().toString(36).substring(7);
+      let heartbeat: number | null = null;
+      let topic: string | null = null;
+
+      const send = (ref: string, event: PhoenixEvent, payload: PhoenixPayload = {}) =>
+        socket.send(JSON.stringify([null, ref, "__absinthe__:control", event, payload]));
+
+      socket.onopen = () => {
+        heartbeat = setInterval(() => {
+          if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify([null, refId(), "phoenix", "heartbeat", {}]));
+          }
+        }, 30000);
+
+        send("1", "phx_join");
+      };
+
+      socket.onmessage = (event) => {
+        const [, ref, , eventName, payload]: PhoenixMessage = JSON.parse(event.data);
+
+        if (eventName === "phx_reply" && ref === "1" && payload.status === "ok") {
+          send("2", "doc", { query: operation.text, variables });
+        } else if (eventName === "phx_reply" && ref === "2") {
+          if (payload.status === "ok" && payload.response?.subscriptionId) {
+            topic = payload.response.subscriptionId;
+            socket.send(JSON.stringify([null, "3", topic, "phx_join", {}]));
+          } else {
+            sink.error(new Error(JSON.stringify(payload.response?.errors || "Subscription failed")));
+          }
+        } else if (eventName === "subscription:data") {
+          const data = payload.result;
+          if (data?.errors) {
+            sink.error(new Error(JSON.stringify(data.errors)));
+          } else if (data?.data) {
+            sink.next({ data: data.data as Record<string, unknown>, errors: [] });
+          }
+        } else if (eventName === "phx_close") {
+          sink.complete();
+        }
+      };
+
+      socket.onerror = () => sink.error(new Error("WebSocket connection error"));
+
+      socket.onclose = (event) => {
+        if (heartbeat) clearInterval(heartbeat);
+        if (!event.wasClean && event.code !== 1000) {
+          sink.error(new Error(event.reason || `Connection closed (${event.code})`));
+        } else {
+          sink.complete();
+        }
+      };
+
+      return () => {
+        if (heartbeat) clearInterval(heartbeat);
+        if (socket.readyState === WebSocket.OPEN) {
+          if (topic) socket.send(JSON.stringify([null, refId(), topic, "phx_leave", {}]));
+          send(refId(), "phx_leave");
+        }
+        if (socket.readyState !== WebSocket.CLOSED && socket.readyState !== WebSocket.CLOSING) {
+          socket.close(1000);
+        }
+      };
+    });
+  };
+};
+
 const relayEnvironment = (session: Session) => {
   const fetchRelay: FetchFunction = async (
     operation,
@@ -160,8 +295,10 @@ const relayEnvironment = (session: Session) => {
         );
   };
 
+  const subscribeRelay = createSubscribeFunction(session);
+
   return new Environment({
-    network: Network.create(fetchRelay),
+    network: Network.create(fetchRelay, subscribeRelay),
     store: new Store(new RecordSource()),
     scheduler: relayScheduler,
   });
