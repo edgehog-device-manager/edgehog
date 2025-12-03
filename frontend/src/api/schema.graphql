@@ -1,4 +1,5 @@
 schema {
+  subscription: RootSubscriptionType
   mutation: RootMutationType
   query: RootQueryType
 }
@@ -3965,6 +3966,10 @@ type HardwareType implements Node {
   ): HardwareTypePartNumberConnection!
 }
 
+type device_created_result {
+  created: Device
+}
+
 "The result of the :set_device_led_behavior mutation"
 type SetDeviceLedBehaviorResult {
   "The successful result of the mutation"
@@ -6489,6 +6494,13 @@ type RootMutationType {
 
   "Deletes a base image collection."
   deleteBaseImageCollection(id: ID!): DeleteBaseImageCollectionResult
+}
+
+type RootSubscriptionType {
+  deviceCreated(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_created_result
 }
 
 """

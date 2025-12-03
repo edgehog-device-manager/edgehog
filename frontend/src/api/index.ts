@@ -19,12 +19,66 @@
  */
 
 import "@/api/relay";
-import { Environment, Network, RecordSource, Store } from "relay-runtime";
-import type { FetchFunction, Variables, UploadableMap } from "relay-runtime";
-import type { TaskScheduler } from "relay-runtime";
+
+import {
+  Environment,
+  Network,
+  RecordSource,
+  Store,
+  Observable,
+  TaskScheduler,
+} from "relay-runtime";
+import type {
+  FetchFunction,
+  Variables,
+  UploadableMap,
+  RequestParameters,
+  SubscribeFunction,
+} from "relay-runtime";
+
 import ReactDOM from "react-dom";
 
 import type { Session } from "@/contexts/Session";
+
+// Phoenix WebSocket V2 message format types
+type PhoenixJoinRef = string | null;
+type PhoenixRef = string | null;
+type PhoenixTopic = string;
+type PhoenixEvent =
+  | "phx_join"
+  | "phx_leave"
+  | "phx_reply"
+  | "phx_close"
+  | "phx_error"
+  | "heartbeat"
+  | "doc"
+  | "message"
+  | "subscription:data";
+
+interface PhoenixPayload {
+  status?: "ok" | "error";
+  response?: {
+    subscriptionId?: string;
+    errors?: Array<{ message: string; locations?: unknown[]; path?: string[] }>;
+    reason?: string;
+    [key: string]: unknown;
+  };
+  result?: {
+    data?: unknown;
+    errors?: Array<{ message: string; locations?: unknown[]; path?: string[] }>;
+  };
+  subscriptionId?: string;
+  [key: string]: unknown;
+}
+
+// Phoenix V2 WebSocket message: [join_ref, ref, topic, event, payload]
+type PhoenixMessage = [
+  PhoenixJoinRef,
+  PhoenixRef,
+  PhoenixTopic,
+  PhoenixEvent,
+  PhoenixPayload,
+];
 
 const applicationMetatag: HTMLElement = document.head.querySelector(
   "[name=application-name]",
@@ -132,6 +186,98 @@ const relayScheduler: TaskScheduler = {
   },
 };
 
+const createSubscribeFunction = (session: Session): SubscribeFunction => {
+  return (operation: RequestParameters, variables: Variables) => {
+    return Observable.create((sink) => {
+      if (!session) return sink.error(new Error("No session"));
+
+      const protocol = backendUrl.startsWith("https") ? "wss:" : "ws:";
+      const url = new URL(
+        "socket/websocket",
+        backendUrl.replace(/^https?:/, protocol),
+      );
+      url.searchParams.set("vsn", "2.0.0");
+      url.searchParams.set("Authorization", `Bearer ${session.authToken}`);
+      url.searchParams.set("tenant", session.tenantSlug);
+
+      const ws = new WebSocket(url.toString());
+
+      let refCounter = 0;
+      const topic = "__absinthe__:control";
+      let heartbeat: number | undefined;
+      let joinRef: string | null = null;
+
+      interface SendParams {
+        ref: PhoenixRef;
+        topic: PhoenixTopic;
+        event: PhoenixEvent;
+        payload: PhoenixPayload;
+      }
+
+      const send = (
+        ref: SendParams["ref"],
+        topic: SendParams["topic"],
+        event: SendParams["event"],
+        payload: SendParams["payload"],
+      ): void => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify([null, ref, topic, event, payload]));
+        }
+      };
+
+      ws.onopen = () => {
+        joinRef = String(++refCounter);
+        send(joinRef, topic, "phx_join", {});
+
+        heartbeat = setInterval(
+          () => send(null, "phoenix", "heartbeat", {}),
+          30000,
+        );
+      };
+
+      ws.onmessage = (e) => {
+        const [, msgRef, , event, payload]: PhoenixMessage = JSON.parse(e.data);
+
+        if (
+          event === "phx_reply" &&
+          msgRef === joinRef &&
+          payload.status === "ok"
+        ) {
+          const queryRef = String(++refCounter);
+          send(queryRef, topic, "doc", {
+            query: operation.text,
+            variables,
+          });
+        } else if (
+          event === "phx_reply" &&
+          msgRef === joinRef &&
+          payload.status === "error"
+        ) {
+          sink.error(
+            new Error(
+              `Channel join failed: ${JSON.stringify(payload.response)}`,
+            ),
+          );
+        } else if (event === "subscription:data" && payload.result) {
+          const result = payload.result;
+          if (result.errors) {
+            sink.error(new Error(JSON.stringify(result.errors)));
+          } else {
+            sink.next({ data: result.data as any, errors: [] });
+          }
+        }
+      };
+
+      ws.onerror = () => sink.error(new Error("WebSocket error"));
+
+      return () => {
+        if (heartbeat) clearInterval(heartbeat);
+        if (ws.readyState < 2) ws.close();
+      };
+    });
+  };
+};
+
 const relayEnvironment = (session: Session) => {
   const fetchRelay: FetchFunction = async (
     operation,
@@ -160,8 +306,10 @@ const relayEnvironment = (session: Session) => {
         );
   };
 
+  const subscribeRelay = createSubscribeFunction(session);
+
   return new Environment({
-    network: Network.create(fetchRelay),
+    network: Network.create(fetchRelay, subscribeRelay),
     store: new Store(new RecordSource()),
     scheduler: relayScheduler,
   });
