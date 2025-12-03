@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0-alpha.9] - 2025-12-03
+### Added
+- Initial draft of the documentation for the container management system.
+### Changed
+- Astarte `1.3.0-rc.0` is now the first version allowed for device registration
+  and deletion triggers.
+### Fixed
+- `422` answer when trying to delete a tenant. The API now correctly handles the
+  `tenant_id`.
+
 ## [0.10.0-alpha.8] - 2025-10-28
 ### Added
 - Support for stop campaigns: a deployment campaign can send a `stop` operation on a target release on all devices in a channel.
