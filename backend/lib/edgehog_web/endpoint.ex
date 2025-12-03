@@ -32,8 +32,8 @@ defmodule EdgehogWeb.Endpoint do
   ]
 
   socket "/socket", EdgehogWeb.GqlSocket,
-    websocket: true,
-    longpoll: false
+    websocket: [connect_info: [:peer_data, :x_headers], check_origin: false],
+    longpoll: [connect_info: [:peer_data, :x_headers]]
 
   plug PlugHeartbeat, path: "/health"
   plug PromEx.Plug, prom_ex_module: Edgehog.PromEx
