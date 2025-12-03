@@ -57,7 +57,7 @@ defmodule Edgehog.Tenants.Tenant do
 
       index :read
       post :provision
-      delete :destroy
+      delete :destroy, route: "/:tenant_id"
     end
   end
 
