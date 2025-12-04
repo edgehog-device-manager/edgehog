@@ -20,7 +20,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  useSubscription,
+} from "react-relay/hooks";
+import { ConnectionHandler, commitLocalUpdate } from "relay-runtime";
+import { useRelayEnvironment } from "react-relay";
 import _ from "lodash";
 
 import type { DevicesTable_PaginationQuery } from "api/__generated__/DevicesTable_PaginationQuery.graphql";
@@ -64,6 +70,37 @@ const DEVICES_TABLE_FRAGMENT = graphql`
               node {
                 name
               }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const DEVICE_CREATED_SUBSCRIPTION = graphql`
+  subscription DevicesTable_deviceCreated_Subscription {
+    deviceCreated {
+      created {
+        id
+        deviceId
+        name
+        online
+        lastConnection
+        lastDisconnection
+        systemModel {
+          id
+          name
+          hardwareType {
+            id
+            name
+          }
+        }
+        tags {
+          edges {
+            node {
+              id
+              name
             }
           }
         }
@@ -192,7 +229,53 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
     DevicesTable_DeviceFragment$key
   >(DEVICES_TABLE_FRAGMENT, devicesRef);
 
+  const relayEnvironment = useRelayEnvironment();
   const [searchText, setSearchText] = useState<string | null>(null);
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: DEVICE_CREATED_SUBSCRIPTION,
+        variables: {},
+        onNext: (data: any) => {
+          const created = data.deviceCreated?.created;
+          if (created) {
+            if (!searchText) {
+              refetch(
+                {
+                  first: RECORDS_TO_LOAD_FIRST,
+                },
+                { fetchPolicy: "store-and-network" },
+              );
+            }
+
+            const updater = (store: any) => {
+              const newDevice = store.get(created.id);
+              if (newDevice) {
+                const root = store.getRoot();
+                const connection = ConnectionHandler.getConnection(
+                  root,
+                  "DevicesTable_devices",
+                );
+                if (connection) {
+                  const edge = ConnectionHandler.createEdge(
+                    store,
+                    connection,
+                    newDevice,
+                    "DeviceEdge",
+                  );
+                  ConnectionHandler.insertEdgeBefore(connection, edge);
+                }
+              }
+            };
+
+            commitLocalUpdate(relayEnvironment, updater);
+          }
+        },
+      }),
+      [refetch, searchText, relayEnvironment],
+    ),
+  );
 
   const debounceRefetch = useMemo(
     () =>
