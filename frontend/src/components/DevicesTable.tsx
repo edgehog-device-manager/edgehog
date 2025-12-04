@@ -20,7 +20,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  useSubscription,
+} from "react-relay/hooks";
+
+import { ConnectionHandler } from "relay-runtime";
 import _ from "lodash";
 
 import type { DevicesTable_PaginationQuery } from "@/api/__generated__/DevicesTable_PaginationQuery.graphql";
@@ -64,6 +70,37 @@ const DEVICES_TABLE_FRAGMENT = graphql`
               node {
                 name
               }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const DEVICE_CREATED_SUBSCRIPTION = graphql`
+  subscription DevicesTable_deviceCreated_Subscription {
+    deviceCreated {
+      created {
+        id
+        deviceId
+        name
+        online
+        lastConnection
+        lastDisconnection
+        systemModel {
+          id
+          name
+          hardwareType {
+            id
+            name
+          }
+        }
+        tags {
+          edges {
+            node {
+              id
+              name
             }
           }
         }
@@ -194,6 +231,70 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
 
   const [searchText, setSearchText] = useState<string | null>(null);
 
+  const normalizedSearchText = useMemo(
+    () => (searchText ?? "").trim(),
+    [searchText],
+  );
+
+  const currentFilter = useMemo(() => {
+    if (normalizedSearchText === "") return {};
+
+    return {
+      or: [
+        { name: { ilike: `%${normalizedSearchText}%` } },
+        { deviceId: { ilike: `%${normalizedSearchText}%` } },
+      ],
+    };
+  }, [normalizedSearchText]);
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: DEVICE_CREATED_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const deviceCreated = store.getRootField("deviceCreated");
+          const newDevice = deviceCreated?.getLinkedRecord("created");
+          if (!newDevice) return;
+
+          if (normalizedSearchText !== "") {
+            const search = normalizedSearchText.toLowerCase();
+            const name = String(newDevice.getValue("name") ?? "").toLowerCase();
+            const deviceId = String(
+              newDevice.getValue("deviceId") ?? "",
+            ).toLowerCase();
+
+            if (!name.includes(search) && !deviceId.includes(search)) return;
+          }
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "DevicesTable_devices",
+            { filter: currentFilter },
+          );
+          if (!connection) return;
+
+          const newDeviceId = newDevice.getDataID();
+          const edges = connection.getLinkedRecords("edges") ?? [];
+          const alreadyPresent = edges.some(
+            (edge) => edge.getLinkedRecord("node")?.getDataID() === newDeviceId,
+          );
+          if (alreadyPresent) return;
+
+          const edge = ConnectionHandler.createEdge(
+            store,
+            connection,
+            newDevice,
+            "DeviceEdge",
+          );
+
+          ConnectionHandler.insertEdgeBefore(connection, edge);
+        },
+      }),
+      [currentFilter, normalizedSearchText],
+    ),
+  );
+
   const debounceRefetch = useMemo(
     () =>
       _.debounce((text: string) => {
@@ -201,6 +302,7 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
           refetch(
             {
               first: RECORDS_TO_LOAD_FIRST,
+              filter: {},
             },
             { fetchPolicy: "network-only" },
           );
