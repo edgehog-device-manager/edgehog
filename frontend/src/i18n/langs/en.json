@@ -1590,47 +1590,8 @@
   "fieldExplanation.volumes.title": {
     "defaultMessage": "Volume Mounts"
   },
-  "forms.ContainerForm.addBindsButton": {
-    "defaultMessage": "Add Binds"
-  },
-  "forms.ContainerForm.addExtraHostButton": {
-    "defaultMessage": "Add Extra Host"
-  },
-  "forms.ContainerForm.addPortBindingButton": {
-    "defaultMessage": "Add Port Binding"
-  },
-  "forms.ContainerForm.addStorageOptButton": {
-    "defaultMessage": "Add Storage Option"
-  },
-  "forms.ContainerForm.addTmpfsButton": {
-    "defaultMessage": "Add Tmpfs Mount"
-  },
-  "forms.ContainerForm.addVolumeButton": {
-    "defaultMessage": "Add Volume"
-  },
-  "forms.ContainerForm.bindsLabel": {
-    "defaultMessage": "Binds"
-  },
-  "forms.ContainerForm.capAddLabel": {
-    "defaultMessage": "Cap Add"
-  },
-  "forms.ContainerForm.capDropLabel": {
-    "defaultMessage": "Cap Drop"
-  },
   "forms.ContainerForm.containerTitle": {
     "defaultMessage": "Container {containerNumber}"
-  },
-  "forms.ContainerForm.cpuPeriodLabel": {
-    "defaultMessage": "CPU Period (microseconds)"
-  },
-  "forms.ContainerForm.cpuQuotaLabel": {
-    "defaultMessage": "CPU Quota (microseconds)"
-  },
-  "forms.ContainerForm.cpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Real-Time Period (microseconds)"
-  },
-  "forms.ContainerForm.cpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
   },
   "forms.ContainerForm.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
@@ -1638,97 +1599,136 @@
   "forms.ContainerForm.deviceMappingsSection": {
     "defaultMessage": "Device Mappings"
   },
-  "forms.ContainerForm.envLabel": {
-    "defaultMessage": "Environment (JSON String)"
-  },
-  "forms.ContainerForm.extraHostsLabel": {
-    "defaultMessage": "Extra Hosts"
-  },
-  "forms.ContainerForm.hostnameLabel": {
-    "defaultMessage": "Hostname"
-  },
-  "forms.ContainerForm.imageConfigSection": {
-    "defaultMessage": "Image Configuration"
-  },
   "forms.ContainerForm.imageCredentialsLabel": {
     "defaultMessage": "Image Credentials"
   },
   "forms.ContainerForm.imageReferenceLabel": {
     "defaultMessage": "Image Reference"
   },
+  "forms.ContainerForm.imageSection": {
+    "defaultMessage": "Image Configuration"
+  },
   "forms.ContainerForm.importedLabel": {
     "defaultMessage": "Imported"
-  },
-  "forms.ContainerForm.memoryLabel": {
-    "defaultMessage": "Memory (bytes)"
-  },
-  "forms.ContainerForm.memoryReservationLabel": {
-    "defaultMessage": "Memory Reservation (bytes)"
-  },
-  "forms.ContainerForm.memorySwapLabel": {
-    "defaultMessage": "Memory Swap (bytes)"
-  },
-  "forms.ContainerForm.memorySwappinessLabel": {
-    "defaultMessage": "Memory Swappiness (0-100)"
   },
   "forms.ContainerForm.modifiedLabel": {
     "defaultMessage": "Modified"
   },
-  "forms.ContainerForm.networkConfigSection": {
-    "defaultMessage": "Network Configuration"
+  "forms.ContainerForm.networkAddExtraHostButton": {
+    "defaultMessage": "Add Extra Host"
+  },
+  "forms.ContainerForm.networkAddPortBindingButton": {
+    "defaultMessage": "Add Port Binding"
+  },
+  "forms.ContainerForm.networkExtraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "forms.ContainerForm.networkHostnameLabel": {
+    "defaultMessage": "Hostname"
   },
   "forms.ContainerForm.networkModeLabel": {
     "defaultMessage": "Network Mode"
   },
-  "forms.ContainerForm.networksLabel": {
+  "forms.ContainerForm.networkMultiselectLabel": {
     "defaultMessage": "Networks"
   },
-  "forms.ContainerForm.noVolumesMessage": {
-    "defaultMessage": "No volumes available"
-  },
-  "forms.ContainerForm.portBindingsLabel": {
+  "forms.ContainerForm.networkPortBindingsLabel": {
     "defaultMessage": "Port Bindings"
   },
-  "forms.ContainerForm.privilegedLabel": {
-    "defaultMessage": "Privileged"
-  },
-  "forms.ContainerForm.readOnlyRootfsLabel": {
-    "defaultMessage": "Read-Only Root Filesystem"
+  "forms.ContainerForm.networkSection": {
+    "defaultMessage": "Network Configuration"
   },
   "forms.ContainerForm.removeContainerButton": {
     "defaultMessage": "Remove Container"
   },
+  "forms.ContainerForm.resourceLimitsCpuPeriodLabel": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "forms.ContainerForm.resourceLimitsCpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "forms.ContainerForm.resourceLimitsCpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "forms.ContainerForm.resourceLimitsCpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.ContainerForm.resourceLimitsMemoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "forms.ContainerForm.resourceLimitsMemoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "forms.ContainerForm.resourceLimitsMemorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
+  },
+  "forms.ContainerForm.resourceLimitsMemorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
   "forms.ContainerForm.resourceLimitsSection": {
     "defaultMessage": "Resource Limits"
   },
-  "forms.ContainerForm.restartPolicyLabel": {
+  "forms.ContainerForm.runtimeEnvironmentEnvLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "forms.ContainerForm.runtimeEnvironmentRestartPolicyLabel": {
     "defaultMessage": "Restart Policy"
   },
-  "forms.ContainerForm.runtimeSection": {
+  "forms.ContainerForm.runtimeEnvironmentSection": {
     "defaultMessage": "Runtime & Environment"
   },
-  "forms.ContainerForm.securitySection": {
+  "forms.ContainerForm.securityCapabilitiesCapAddLabel": {
+    "defaultMessage": "Cap Add"
+  },
+  "forms.ContainerForm.securityCapabilitiesCapDropLabel": {
+    "defaultMessage": "Cap Drop"
+  },
+  "forms.ContainerForm.securityCapabilitiesPrivilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "forms.ContainerForm.securityCapabilitiesSection": {
     "defaultMessage": "Security & Capabilities"
   },
-  "forms.ContainerForm.storageConfigSection": {
-    "defaultMessage": "Storage Configuration"
+  "forms.ContainerForm.storageAddBindsButton": {
+    "defaultMessage": "Add Binds"
+  },
+  "forms.ContainerForm.storageAddStorageOptButton": {
+    "defaultMessage": "Add Storage Option"
+  },
+  "forms.ContainerForm.storageAddTmpfsButton": {
+    "defaultMessage": "Add Tmpfs Mount"
+  },
+  "forms.ContainerForm.storageAddVolumeButton": {
+    "defaultMessage": "Add Volume"
+  },
+  "forms.ContainerForm.storageBindsLabel": {
+    "defaultMessage": "Binds"
+  },
+  "forms.ContainerForm.storageNoVolumesMessage": {
+    "defaultMessage": "No volumes available"
   },
   "forms.ContainerForm.storageOptLabel": {
     "defaultMessage": "Storage Options"
   },
-  "forms.ContainerForm.tmpfsLabel": {
+  "forms.ContainerForm.storageReadOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "forms.ContainerForm.storageSection": {
+    "defaultMessage": "Storage Configuration"
+  },
+  "forms.ContainerForm.storageTmpfsLabel": {
     "defaultMessage": "Tmpfs Mounts"
   },
-  "forms.ContainerForm.volumeDriverLabel": {
+  "forms.ContainerForm.storageVolumeDriverLabel": {
     "defaultMessage": "Volume Driver"
   },
-  "forms.ContainerForm.volumeSelectLabel": {
+  "forms.ContainerForm.storageVolumeSelectLabel": {
     "defaultMessage": "Volume:"
   },
-  "forms.ContainerForm.volumeTargetLabel": {
+  "forms.ContainerForm.storageVolumeTargetLabel": {
     "defaultMessage": "Target:"
   },
-  "forms.ContainerForm.volumesLabel": {
+  "forms.ContainerForm.storageVolumesLabel": {
     "defaultMessage": "Volumes"
   },
   "forms.ContainersTable.imageConfigSection": {
