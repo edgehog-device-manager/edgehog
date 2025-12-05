@@ -706,9 +706,6 @@ defmodule Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy.Core do
       if deployment.state in [:starting, :stopping] do
         {:error, :deployment_transitioning}
       else
-        # Subscribe here since after deletion the deployment record is gone
-        subscribe_to_operation_updates!(deployment.id)
-
         # Delete the deployment
         deployment_result =
           deployment
