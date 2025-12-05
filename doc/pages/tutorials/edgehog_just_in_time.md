@@ -102,6 +102,45 @@ Your device will start sending telemetry data to Edgehog. Watch it appear in the
 
 > **Note:** If you encounter issues with the device runtime, check the [OS requirements documentation](https://github.com/edgehog-device-manager/edgehog-device-runtime/blob/main/doc/os_requirements.md) for system-specific setup details.
 
+### Reconnecting the Same Device
+
+Already have a device configured but want to restart it with a clean state? Use:
+
+```sh
+$ just reconnect-device
+```
+
+This command:
+
+- ✅ Uses your existing device configuration (no re-registration needed)
+- 🧹 Cleans device state (`.store/` and `.updates/` directories)
+- 🚀 Starts the device runtime with existing build artifacts
+- ⚡ Fast startup - no compilation or registration overhead!
+
+If no device is configured yet, it will automatically run `just connect-device` to set everything up.
+
+### Connecting a New Device
+
+Want to test with multiple devices? Register and connect a new device with:
+
+```sh
+$ just new-device
+```
+
+This command:
+
+- 📝 Registers a new device with Astarte (new device ID and credentials)
+- 🧹 Cleans previous device state
+- ⚙️ Generates fresh device configuration
+- 🚀 Starts the device runtime
+- ⚡ Reuses compiled runtime - faster than full `connect-device`!
+
+This is perfect for testing scenarios with multiple devices without waiting for a full recompilation.
+
+> **Running Multiple Devices**: You can run multiple devices simultaneously by using separate terminals! Once a device is running, it has its own runtime context in memory. Simply open a new terminal, run `just new-device` to register a different device (which overwrites the config file), and both devices will run in parallel. Each device maintains its own state since they have unique device IDs.
+
+> **Important**: Remember that all simulated devices are running on the same physical hardware (your PC/laptop). Features that require exclusive access to the same hardware resources may conflict or fail when running multiple devices simultaneously.
+
 ## Development Workflows
 
 ### Running Backend in Development Mode

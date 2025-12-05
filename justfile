@@ -290,6 +290,45 @@ connect-device: _check-rust-prereqs _check-astarte-prereqs _init-device-runtime 
     @echo "💡 TODO: run 'ttyd -W bash' to support Edgehog's remote terminal functionality"
     cd edgehog-device-runtime && RUST_LOG=debug cargo run --features "forwarder,containers,vendored"
 
+# Reconnect device without re-registering (uses existing config and build)
+reconnect-device: _check-rust-prereqs
+    #!/usr/bin/env bash
+    if [ ! -d edgehog-device-runtime ]; then
+        echo "⚠️  Device runtime not initialized."
+        echo "🚀 Running 'just connect-device' to initialize and connect a device..."
+        just connect-device
+        exit 0
+    fi
+    if [ ! -f edgehog-device-runtime/edgehog-config.toml ]; then
+        echo "⚠️  Device not registered."
+        echo "🚀 Running 'just connect-device' to register and connect a device..."
+        just connect-device
+        exit 0
+    fi
+    echo "🧹 Cleaning device state..."
+    rm -rf edgehog-device-runtime/.store/
+    rm -rf edgehog-device-runtime/.updates/
+    echo "🚀 Reconnecting Edgehog Device Runtime (using existing config)..."
+    echo "💡 TODO: run 'ttyd -W bash' to support Edgehog's remote terminal functionality"
+    cd edgehog-device-runtime && RUST_LOG=debug cargo run --features "forwarder,containers,vendored"
+
+# Register a new device and connect (reuses compiled runtime - fast!)
+new-device: _check-rust-prereqs _check-astarte-prereqs
+    #!/usr/bin/env bash
+    if [ ! -d edgehog-device-runtime ]; then
+        echo "⚠️  Device runtime not initialized."
+        echo "🚀 Running 'just connect-device' to initialize, compile, and connect a device..."
+        just connect-device
+        exit 0
+    fi
+    echo "🧹 Cleaning device state..."
+    rm -rf edgehog-device-runtime/.store/
+    rm -rf edgehog-device-runtime/.updates/
+    just _register-device
+    echo "🚀 Starting new device with fresh registration..."
+    echo "💡 TODO: run 'ttyd -W bash' to support Edgehog's remote terminal functionality"
+    cd edgehog-device-runtime && RUST_LOG=debug cargo run --features "forwarder,containers,vendored"
+
 # Clean up all generated files and directories
 [private]
 _clean-resources:
@@ -358,6 +397,8 @@ help:
     @echo "  provision-tenant    Set up Edgehog with Astarte backend"
     @echo "  provision-edgehog   Set up Edgehog (will start Astarte if not running)"
     @echo "  connect-device      Connect a simulated device to Edgehog"
+    @echo "  reconnect-device    Reconnect same device (no re-registration, fast)"
+    @echo "  new-device          Register & connect a new device (no recompile, fast)"
     @echo "  deprovision-tenant  Tear down Edgehog and Astarte services"
     @echo "  deprovision-edgehog Tear down Edgehog and device runtime (keep Astarte)"
     @echo ""
