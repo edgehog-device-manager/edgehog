@@ -1,13 +1,19 @@
-<!--
+## [ Change title ]
+Describe the big picture of your changes here to communicate to the maintainers
+why we should accept this pull request. If it fixes a bug or resolves a feature
+request, be sure to link to that issue.
 
-**Please, carefully describe what the PR does and why you are opening it.**
+## Checklist
+_Put an `x` in the boxes that apply. You can also fill these out after creating
+the PR. If you're unsure about any of them, don't hesitate to ask. We're here to
+help! This is simply a reminder of what we are going to look for before merging
+your code._
 
-Short check list:
+- [ ] I have read the CONTRIBUTING.md
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] I have added necessary documentation (if appropriate)
 
-* [ ] Please, make sure to read CONTRIBUTING.md and CODE_OF_CONDUCT.md
-* [ ] Make sure to open your PR against the right branch: master / release-VERSION
-* [ ] Make sure to sign-off all your commits
-* [ ] GPG signing is appreciated
-* [ ] Make sure the code follows coding style (use automated formatting, such as `mix format`)
-
--->
+## Further comments (optional)
+If this is a relatively large or complex change, kick off the discussion by
+explaining why you chose the solution you did and what alternatives you
+considered, etc...
