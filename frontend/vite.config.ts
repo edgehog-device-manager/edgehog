@@ -13,6 +13,9 @@ export default defineConfig((env) => {
     build: {
       outDir: "build",
     },
+    optimizeDeps: {
+      exclude: ["@apollo/client"],
+    },
     plugins: [
       react(),
       viteTsconfigPaths(),
