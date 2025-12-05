@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2024 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2024, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import React, { useCallback, useState, useMemo } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
@@ -24,8 +24,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay/hooks";
 import Select, { SingleValue } from "react-select";
 
-import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from "api/__generated__/AddAvailableApplications_GetApplicationsWithReleases_Query.graphql";
-import type { AddAvailableApplications_DeployRelease_Mutation } from "api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
+import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from "@/api/__generated__/AddAvailableApplications_GetApplicationsWithReleases_Query.graphql";
+import type { AddAvailableApplications_DeployRelease_Mutation } from "@/api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
 
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
   query AddAvailableApplications_GetApplicationsWithReleases_Query(

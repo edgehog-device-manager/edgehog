@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2022 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2022-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -34,19 +34,19 @@ import { FormattedMessage } from "react-intl";
 import type {
   DeviceGroup_getDeviceGroup_Query,
   DeviceGroup_getDeviceGroup_Query$data,
-} from "api/__generated__/DeviceGroup_getDeviceGroup_Query.graphql";
-import type { DeviceGroup_updateDeviceGroup_Mutation } from "api/__generated__/DeviceGroup_updateDeviceGroup_Mutation.graphql";
-import type { DeviceGroup_deleteDeviceGroup_Mutation } from "api/__generated__/DeviceGroup_deleteDeviceGroup_Mutation.graphql";
-import { Link, Route, useNavigate } from "Navigation";
-import Alert from "components/Alert";
-import Center from "components/Center";
-import DeleteModal from "components/DeleteModal";
-import DevicesGroupsTable from "components/DevicesGroupsTable";
-import Page from "components/Page";
-import Result from "components/Result";
-import Spinner from "components/Spinner";
-import UpdateDeviceGroupForm from "forms/UpdateDeviceGroup";
-import type { DeviceGroupData } from "forms/UpdateDeviceGroup";
+} from "@/api/__generated__/DeviceGroup_getDeviceGroup_Query.graphql";
+import type { DeviceGroup_updateDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroup_updateDeviceGroup_Mutation.graphql";
+import type { DeviceGroup_deleteDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroup_deleteDeviceGroup_Mutation.graphql";
+import { Link, Route, useNavigate } from "@/Navigation";
+import Alert from "@/components/Alert";
+import Center from "@/components/Center";
+import DeleteModal from "@/components/DeleteModal";
+import DevicesGroupsTable from "@/components/DevicesGroupsTable";
+import Page from "@/components/Page";
+import Result from "@/components/Result";
+import Spinner from "@/components/Spinner";
+import UpdateDeviceGroupForm from "@/forms/UpdateDeviceGroup";
+import type { DeviceGroupData } from "@/forms/UpdateDeviceGroup";
 
 const GET_DEVICE_GROUP_QUERY = graphql`
   query DeviceGroup_getDeviceGroup_Query($deviceGroupId: ID!) {

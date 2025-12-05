@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import React, { useEffect, useState, useRef } from "react";
 import type { Subscription } from "relay-runtime";
@@ -29,15 +29,15 @@ import {
   usePaginationFragment,
 } from "react-relay/hooks";
 
-import type { SoftwareUpdateTab_PaginationQuery } from "api/__generated__/SoftwareUpdateTab_PaginationQuery.graphql";
-import type { SoftwareUpdateTab_otaOperations$key } from "api/__generated__/SoftwareUpdateTab_otaOperations.graphql";
-import type { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "api/__generated__/SoftwareUpdateTab_createManualOtaOperation_Mutation.graphql";
+import type { SoftwareUpdateTab_PaginationQuery } from "@/api/__generated__/SoftwareUpdateTab_PaginationQuery.graphql";
+import type { SoftwareUpdateTab_otaOperations$key } from "@/api/__generated__/SoftwareUpdateTab_otaOperations.graphql";
+import type { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "@/api/__generated__/SoftwareUpdateTab_createManualOtaOperation_Mutation.graphql";
 
-import Alert from "components/Alert";
-import OperationTable from "components/OperationTable";
-import Spinner from "components/Spinner";
-import { Tab } from "components/Tabs";
-import BaseImageForm from "forms/BaseImageForm";
+import Alert from "@/components/Alert";
+import OperationTable from "@/components/OperationTable";
+import Spinner from "@/components/Spinner";
+import { Tab } from "@/components/Tabs";
+import BaseImageForm from "@/forms/BaseImageForm";
 
 const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
   fragment SoftwareUpdateTab_otaOperations on Device

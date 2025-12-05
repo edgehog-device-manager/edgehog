@@ -1,74 +1,74 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2021 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2021-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { Navigate, useRoutes } from "react-router-dom";
 
-import Footer from "components/Footer";
-import Sidebar from "components/Sidebar";
-import Topbar from "components/Topbar";
-import { useAuth } from "contexts/Auth";
-import { Route } from "Navigation";
-import Application from "pages/Application";
-import ApplicationCreatePage from "pages/ApplicationCreate";
-import Applications from "pages/Applications";
-import AttemptLogin from "pages/AttemptLogin";
-import BaseImage from "pages/BaseImage";
-import BaseImageCollection from "pages/BaseImageCollection";
-import BaseImageCollectionCreate from "pages/BaseImageCollectionCreate";
-import BaseImageCollections from "pages/BaseImageCollections";
-import BaseImageCreate from "pages/BaseImageCreate";
-import Device from "pages/Device";
-import DeviceGroup from "pages/DeviceGroup";
-import DeviceGroupsNew from "pages/DeviceGroupCreate";
-import DeviceGroups from "pages/DeviceGroups";
-import Devices from "pages/Devices";
-import HardwareType from "pages/HardwareType";
-import HardwareTypeCreate from "pages/HardwareTypeCreate";
-import HardwareTypes from "pages/HardwareTypes";
-import ImageCredential from "pages/ImageCredential";
-import ImageCredentialCreate from "pages/ImageCredentialCreate";
-import ImageCredentials from "pages/ImageCredentials";
-import Login from "pages/Login";
-import Logout from "pages/Logout";
-import Release from "pages/Release";
-import ReleaseCreatePage from "pages/ReleaseCreate";
-import SystemModel from "pages/SystemModel";
-import SystemModelCreate from "pages/SystemModelCreate";
-import SystemModels from "pages/SystemModels";
-import UpdateCampaign from "pages/UpdateCampaign";
-import UpdateCampaignCreate from "pages/UpdateCampaignCreate";
-import UpdateCampaigns from "pages/UpdateCampaigns";
-import ChannelsEdit from "pages/Channel";
-import ChannelsCreate from "pages/ChannelCreate";
-import Channels from "pages/Channels";
-import Volumes from "pages/Volumes";
-import Volume from "pages/Volume";
-import VolumeCreatePage from "pages/VolumeCreate";
-import Networks from "pages/Networks";
-import Network from "pages/Network";
-import NetworkCreatePage from "pages/NetworkCreate";
-import DeploymentsPage from "pages/Deployments";
-import DeploymentCampaignsPage from "pages/DeploymentCampaigns";
-import DeploymentCampaign from "pages/DeploymentCampaign";
-import DeploymentCampaignCreate from "pages/DeploymentCampaignCreate";
-import Deployment from "pages/Deployment";
+import Footer from "@/components/Footer";
+import Sidebar from "@/components/Sidebar";
+import Topbar from "@/components/Topbar";
+import { useAuth } from "@/contexts/Auth";
+import { Route } from "@/Navigation";
+import Application from "@/pages/Application";
+import ApplicationCreatePage from "@/pages/ApplicationCreate";
+import Applications from "@/pages/Applications";
+import AttemptLogin from "@/pages/AttemptLogin";
+import BaseImage from "@/pages/BaseImage";
+import BaseImageCollection from "@/pages/BaseImageCollection";
+import BaseImageCollectionCreate from "@/pages/BaseImageCollectionCreate";
+import BaseImageCollections from "@/pages/BaseImageCollections";
+import BaseImageCreate from "@/pages/BaseImageCreate";
+import Device from "@/pages/Device";
+import DeviceGroup from "@/pages/DeviceGroup";
+import DeviceGroupsNew from "@/pages/DeviceGroupCreate";
+import DeviceGroups from "@/pages/DeviceGroups";
+import Devices from "@/pages/Devices";
+import HardwareType from "@/pages/HardwareType";
+import HardwareTypeCreate from "@/pages/HardwareTypeCreate";
+import HardwareTypes from "@/pages/HardwareTypes";
+import ImageCredential from "@/pages/ImageCredential";
+import ImageCredentialCreate from "@/pages/ImageCredentialCreate";
+import ImageCredentials from "@/pages/ImageCredentials";
+import Login from "@/pages/Login";
+import Logout from "@/pages/Logout";
+import Release from "@/pages/Release";
+import ReleaseCreatePage from "@/pages/ReleaseCreate";
+import SystemModel from "@/pages/SystemModel";
+import SystemModelCreate from "@/pages/SystemModelCreate";
+import SystemModels from "@/pages/SystemModels";
+import UpdateCampaign from "@/pages/UpdateCampaign";
+import UpdateCampaignCreate from "@/pages/UpdateCampaignCreate";
+import UpdateCampaigns from "@/pages/UpdateCampaigns";
+import ChannelsEdit from "@/pages/Channel";
+import ChannelsCreate from "@/pages/ChannelCreate";
+import Channels from "@/pages/Channels";
+import Volumes from "@/pages/Volumes";
+import Volume from "@/pages/Volume";
+import VolumeCreatePage from "@/pages/VolumeCreate";
+import Networks from "@/pages/Networks";
+import Network from "@/pages/Network";
+import NetworkCreatePage from "@/pages/NetworkCreate";
+import DeploymentsPage from "@/pages/Deployments";
+import DeploymentCampaignsPage from "@/pages/DeploymentCampaigns";
+import DeploymentCampaign from "@/pages/DeploymentCampaign";
+import DeploymentCampaignCreate from "@/pages/DeploymentCampaignCreate";
+import Deployment from "@/pages/Deployment";
 
 import { bugs, repository, version } from "../package.json";
 

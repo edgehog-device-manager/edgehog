@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2024 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2024, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { useState, useRef } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
@@ -24,27 +24,27 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
-import type { CreateRelease_NetworksOptionsFragment$key } from "api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
-import type { CreateRelease_VolumesOptionsFragment$key } from "api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
-import type { CreateRelease_SystemModelsOptionsFragment$key } from "api/__generated__/CreateRelease_SystemModelsOptionsFragment.graphql";
+import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "@/api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
+import type { CreateRelease_NetworksOptionsFragment$key } from "@/api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
+import type { CreateRelease_VolumesOptionsFragment$key } from "@/api/__generated__/CreateRelease_VolumesOptionsFragment.graphql";
+import type { CreateRelease_SystemModelsOptionsFragment$key } from "@/api/__generated__/CreateRelease_SystemModelsOptionsFragment.graphql";
 import {
   ContainerCreateWithNestedDeviceMappingsInput,
   ContainerCreateWithNestedNetworksInput,
   ContainerCreateWithNestedVolumesInput,
   ReleaseCreateRequiredSystemModelsInput,
-} from "api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
+} from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
 import type {
   CreateRelease_getApplicationsWithReleases_Query,
   CreateRelease_getApplicationsWithReleases_Query$data,
-} from "api/__generated__/CreateRelease_getApplicationsWithReleases_Query.graphql";
+} from "@/api/__generated__/CreateRelease_getApplicationsWithReleases_Query.graphql";
 
-import Button from "components/Button";
-import Form from "components/Form";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import Alert from "components/Alert";
+import Button from "@/components/Button";
+import Form from "@/components/Form";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import Alert from "@/components/Alert";
 import {
   yup,
   envSchema,
@@ -69,13 +69,13 @@ import {
   volumesSchema,
   deviceMappingsSchema,
   requiredSystemModelsSchema,
-} from "forms/index";
-import MultiSelect from "components/MultiSelect";
+} from "@/forms/index";
+import MultiSelect from "@/components/MultiSelect";
 import Select, { SingleValue } from "react-select";
-import ConfirmModal from "components/ConfirmModal";
-import { FormRow } from "components/FormRow";
-import ContainerForm from "forms/ContainerForm";
-import type { KeyValue } from "forms/index";
+import ConfirmModal from "@/components/ConfirmModal";
+import { FormRow } from "@/components/FormRow";
+import ContainerForm from "@/forms/ContainerForm";
+import type { KeyValue } from "@/forms/index";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {

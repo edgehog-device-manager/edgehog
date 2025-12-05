@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { useState, useMemo, useCallback } from "react";
 import { FormattedMessage } from "react-intl";
@@ -25,18 +25,18 @@ import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
 
-import type { DeploymentTargetStatus as DeploymentTargetStatusType } from "api/__generated__/DeploymentTargetsTabs_SuccessfulFragment.graphql";
-import type { DeploymentTargetsTabs_SuccessfulFragment$key } from "api/__generated__/DeploymentTargetsTabs_SuccessfulFragment.graphql";
-import type { DeploymentTargetsTabs_FailedFragment$key } from "api/__generated__/DeploymentTargetsTabs_FailedFragment.graphql";
-import type { DeploymentTargetsTabs_InProgressFragment$key } from "api/__generated__/DeploymentTargetsTabs_InProgressFragment.graphql";
-import type { DeploymentTargetsTabs_IdleFragment$key } from "api/__generated__/DeploymentTargetsTabs_IdleFragment.graphql";
+import type { DeploymentTargetStatus as DeploymentTargetStatusType } from "@/api/__generated__/DeploymentTargetsTabs_SuccessfulFragment.graphql";
+import type { DeploymentTargetsTabs_SuccessfulFragment$key } from "@/api/__generated__/DeploymentTargetsTabs_SuccessfulFragment.graphql";
+import type { DeploymentTargetsTabs_FailedFragment$key } from "@/api/__generated__/DeploymentTargetsTabs_FailedFragment.graphql";
+import type { DeploymentTargetsTabs_InProgressFragment$key } from "@/api/__generated__/DeploymentTargetsTabs_InProgressFragment.graphql";
+import type { DeploymentTargetsTabs_IdleFragment$key } from "@/api/__generated__/DeploymentTargetsTabs_IdleFragment.graphql";
 
 import DeploymentTargetsTable, {
   columnIds,
-} from "components/DeploymentTargetsTable";
-import type { ColumnId } from "components/DeploymentTargetsTable";
-import DeploymentTargetStatus from "components/DeploymentTargetStatus";
-import { RECORDS_TO_LOAD_NEXT } from "constants";
+} from "@/components/DeploymentTargetsTable";
+import type { ColumnId } from "@/components/DeploymentTargetsTable";
+import DeploymentTargetStatus from "@/components/DeploymentTargetStatus";
+import { RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 const DEPLOYMENT_TARGETS_SUCCESSFUL_FRAGMENT = graphql`
   fragment DeploymentTargetsTabs_SuccessfulFragment on DeploymentCampaign

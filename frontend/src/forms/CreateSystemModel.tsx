@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2021 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2021-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -29,22 +29,22 @@ import Select from "react-select";
 import type {
   CreateSystemModel_OptionsFragment$data,
   CreateSystemModel_OptionsFragment$key,
-} from "api/__generated__/CreateSystemModel_OptionsFragment.graphql";
-import type { CreateSystemModel_PaginationQuery } from "api/__generated__/CreateSystemModel_PaginationQuery.graphql";
+} from "@/api/__generated__/CreateSystemModel_OptionsFragment.graphql";
+import type { CreateSystemModel_PaginationQuery } from "@/api/__generated__/CreateSystemModel_PaginationQuery.graphql";
 
-import Button from "components/Button";
-import CloseButton from "components/CloseButton";
-import Col from "components/Col";
-import Figure from "components/Figure";
-import Form from "components/Form";
-import Icon from "components/Icon";
-import Row from "components/Row";
-import Spinner from "components/Spinner";
-import Stack from "components/Stack";
-import { FormRow } from "components/FormRow";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
-import { messages, yup, handleSchema } from "forms";
-import assets from "assets";
+import Button from "@/components/Button";
+import CloseButton from "@/components/CloseButton";
+import Col from "@/components/Col";
+import Figure from "@/components/Figure";
+import Form from "@/components/Form";
+import Icon from "@/components/Icon";
+import Row from "@/components/Row";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import { FormRow } from "@/components/FormRow";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { messages, yup, handleSchema } from "@/forms";
+import assets from "@/assets";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment CreateSystemModel_OptionsFragment on RootQueryType

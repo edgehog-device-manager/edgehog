@@ -1,33 +1,33 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2022-2024 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2022-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
 
-import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "api/__generated__/DeviceGroupCreate_createDeviceGroup_Mutation.graphql";
-import Alert from "components/Alert";
-import Page from "components/Page";
-import DeviceGroupCreateForm from "forms/CreateDeviceGroup";
-import type { DeviceGroupData } from "forms/CreateDeviceGroup";
-import { Route, useNavigate } from "Navigation";
+import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroupCreate_createDeviceGroup_Mutation.graphql";
+import Alert from "@/components/Alert";
+import Page from "@/components/Page";
+import DeviceGroupCreateForm from "@/forms/CreateDeviceGroup";
+import type { DeviceGroupData } from "@/forms/CreateDeviceGroup";
+import { Route, useNavigate } from "@/Navigation";
 
 const CREATE_DEVICE_GROUP_MUTATION = graphql`
   mutation DeviceGroupCreate_createDeviceGroup_Mutation(
