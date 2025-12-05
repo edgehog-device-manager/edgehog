@@ -1,0 +1,96 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2025 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees:
+  - octocat
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report a bug in the Edgehog cloud.
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details (optional)
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the issue here.
+      placeholder: Describe the bug you encountered and the expected result
+      value: "A bug happened!"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce this issue
+      description: Please state the various steps to reproduce the issue.
+      render: markdown
+      value: |
+        1. created a new tenant
+        2. registered a device
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: Edgehog version
+    attributes:
+      label: In what edgehog versions were you able to reproduce this bug?
+      multiple: true
+      options:
+        - "On the main branch"
+        - "v0.10.x"
+        - "v0.9.x"
+        - "Pre-v0.9.x"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & version (if applicable)
+      placeholder: e.g. Firefox 128, Chrome 120
+
+  - type: dropdown
+    id: Edgehog deployment
+    attributes:
+      label: How did you deploy edgehog?
+      multiple: true
+      options:
+        - "Through our `justfile`"
+        - "Docker compose up"
+        - "In a kubernetes cluster"
+        - "Local development"
+    validations:
+      required: false
+  - type: textarea
+    id: details
+    attributes:
+      label: Additional details
+      description: Add any details or logs you think are relevant to diagnosing and triaging this bug.
+      render: markdown
