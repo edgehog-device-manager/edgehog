@@ -59,7 +59,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: Edgehog version
+    id: edgehog-version
     attributes:
       label: In what edgehog versions were you able to reproduce this bug?
       multiple: true
@@ -77,7 +77,7 @@ body:
       placeholder: e.g. Firefox 128, Chrome 120
 
   - type: dropdown
-    id: Edgehog deployment
+    id: edgehog-deployment
     attributes:
       label: How did you deploy edgehog?
       multiple: true
