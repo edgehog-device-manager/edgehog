@@ -1,4 +1,5 @@
 schema {
+  subscription: RootSubscriptionType
   mutation: RootMutationType
   query: RootQueryType
 }
@@ -2422,6 +2423,54 @@ type DeploymentEvent {
   updatedAt: DateTime!
 }
 
+type deployment_state_changed_result {
+  updated: Deployment
+}
+
+type deployment_upgraded_result {
+  updated: Deployment
+}
+
+type deployment_event_added_result {
+  updated: Deployment
+}
+
+type deployment_timed_out_result {
+  updated: Deployment
+}
+
+type deployment_deleted_action_result {
+  updated: Deployment
+}
+
+type deployment_stopped_result {
+  updated: Deployment
+}
+
+type deployment_started_result {
+  updated: Deployment
+}
+
+type deployment_sent_result {
+  updated: Deployment
+}
+
+type deployment_deployed_result {
+  created: Deployment
+}
+
+type deployment_deleted_result {
+  destroyed: ID
+}
+
+type deployment_updated_result {
+  updated: Deployment
+}
+
+type deployment_created_result {
+  created: Deployment
+}
+
 "The result of the :upgrade_deployment mutation"
 type UpgradeDeploymentResult {
   "The successful result of the mutation"
@@ -3963,6 +4012,30 @@ type HardwareType implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): HardwareTypePartNumberConnection!
+}
+
+type device_deleted_result {
+  destroyed: ID
+}
+
+type device_tags_updated_result {
+  updated: Device
+}
+
+type device_disconnected_result {
+  created: Device
+}
+
+type device_connected_result {
+  created: Device
+}
+
+type device_updated_result {
+  updated: Device
+}
+
+type device_created_result {
+  created: Device
 }
 
 "The result of the :set_device_led_behavior mutation"
@@ -6489,6 +6562,81 @@ type RootMutationType {
 
   "Deletes a base image collection."
   deleteBaseImageCollection(id: ID!): DeleteBaseImageCollectionResult
+}
+
+type RootSubscriptionType {
+  deviceCreated(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_created_result
+  deviceUpdated(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_updated_result
+  deviceConnected(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_connected_result
+  deviceDisconnected(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_disconnected_result
+  deviceTagsUpdated(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_tags_updated_result
+  deviceDeleted(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_deleted_result
+  deploymentCreated(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_created_result
+  deploymentUpdated(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_updated_result
+  deploymentDeleted(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_deleted_result
+  deploymentDeployed(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_deployed_result
+  deploymentSent(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_sent_result
+  deploymentStarted(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_started_result
+  deploymentStopped(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_stopped_result
+  deploymentDeletedAction(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_deleted_action_result
+  deploymentTimedOut(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_timed_out_result
+  deploymentEventAdded(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_event_added_result
+  deploymentUpgraded(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_upgraded_result
+  deploymentStateChanged(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_state_changed_result
 }
 
 """
