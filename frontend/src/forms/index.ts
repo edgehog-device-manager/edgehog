@@ -566,6 +566,11 @@ const optionsSchema = yup
 /* ----------------------------- Array Helpers ----------------------------- */
 type ArrayType = any[] | null | undefined;
 
+const emptyArrayToUndefined = (value: any) => {
+  if (Array.isArray(value) && value.length === 0) return undefined;
+  return value;
+};
+
 function distinctOnProperty<
   TIn extends ArrayType,
   TContext,
@@ -686,12 +691,12 @@ const envSchema = yup
     test: (value) =>
       value && typeof value === "string" ? isValidJson(value) : true,
   })
+  .transform(emptyArrayToUndefined)
   .test({
     name: "is-not-nested",
     message: messages.envInvalidIsNested.id,
     test: (value) => (value ? isNotNested(value) : true),
-  })
-  .default("{}");
+  });
 
 const ipv4PortRegex =
   /^(\d{1,5}(-\d{1,5})?(:(\d{1,5}(-\d{1,5})?))?(\/(tcp|udp))?|(\d{1,3}\.){3}\d{1,3}:\d{1,5}(-\d{1,5})?:\d{1,5}(-\d{1,5})?(\/(tcp|udp))?)$/;
@@ -701,6 +706,7 @@ const ipv6PortRegex =
 const portBindingsSchema = yup
   .array()
   .nullable()
+  .transform(emptyArrayToUndefined)
   .of(
     yup
       .string()
@@ -718,6 +724,7 @@ const portBindingsSchema = yup
 const bindingsSchema = yup
   .array()
   .nullable()
+  .transform(emptyArrayToUndefined)
   .of(
     yup
       .string()
@@ -739,6 +746,7 @@ const bindingsSchema = yup
 const tmpfsOptSchema = yup
   .array()
   .nullable()
+  .transform(emptyArrayToUndefined)
   .of(
     yup
       .string()
@@ -754,6 +762,7 @@ const tmpfsOptSchema = yup
 const storageOptSchema = yup
   .array()
   .nullable()
+  .transform(emptyArrayToUndefined)
   .of(
     yup
       .string()
@@ -769,6 +778,7 @@ const storageOptSchema = yup
 const extraHostsSchema = yup
   .array()
   .nullable()
+  .transform(emptyArrayToUndefined)
   .of(
     yup
       .string()
@@ -865,7 +875,8 @@ const capDropSchema = yup
 
 const networksSchema = yup
   .array(yup.object({ id: yup.string().required() }).required())
-  .nullable();
+  .nullable()
+  .transform(emptyArrayToUndefined);
 
 const volumesSchema = yup
   .array(
@@ -877,7 +888,8 @@ const volumesSchema = yup
       .required(),
   )
   .distinctOnProperty("target")
-  .nullable();
+  .nullable()
+  .transform(emptyArrayToUndefined);
 
 const deviceMappingsSchema = yup
   .array(
@@ -889,7 +901,8 @@ const deviceMappingsSchema = yup
       })
       .required(),
   )
-  .nullable();
+  .nullable()
+  .transform(emptyArrayToUndefined);
 
 const imageSchema = yup.object({
   reference: yup.string().required(),
