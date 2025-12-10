@@ -1,40 +1,40 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2023 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2023-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { useState, useMemo, useCallback } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
-import type { UpdateTargetStatus as UpdateTargetStatusType } from "api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
-import type { UpdateTargetsTabs_SuccessfulFragment$key } from "api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
-import type { UpdateTargetsTabs_FailedFragment$key } from "api/__generated__/UpdateTargetsTabs_FailedFragment.graphql";
-import type { UpdateTargetsTabs_InProgressFragment$key } from "api/__generated__/UpdateTargetsTabs_InProgressFragment.graphql";
-import type { UpdateTargetsTabs_IdleFragment$key } from "api/__generated__/UpdateTargetsTabs_IdleFragment.graphql";
+import type { UpdateTargetStatus as UpdateTargetStatusType } from "@/api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
+import type { UpdateTargetsTabs_SuccessfulFragment$key } from "@/api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
+import type { UpdateTargetsTabs_FailedFragment$key } from "@/api/__generated__/UpdateTargetsTabs_FailedFragment.graphql";
+import type { UpdateTargetsTabs_InProgressFragment$key } from "@/api/__generated__/UpdateTargetsTabs_InProgressFragment.graphql";
+import type { UpdateTargetsTabs_IdleFragment$key } from "@/api/__generated__/UpdateTargetsTabs_IdleFragment.graphql";
 
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
-import UpdateTargetsTable, { columnIds } from "components/UpdateTargetsTable";
-import type { ColumnId } from "components/UpdateTargetsTable";
-import UpdateTargetStatus from "components/UpdateTargetStatus";
-import { RECORDS_TO_LOAD_NEXT } from "constants";
+import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
+import type { ColumnId } from "@/components/UpdateTargetsTable";
+import UpdateTargetStatus from "@/components/UpdateTargetStatus";
+import { RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 const UPDATE_TARGETS_SUCCESSFUL_FRAGMENT = graphql`
   fragment UpdateTargetsTabs_SuccessfulFragment on UpdateCampaign

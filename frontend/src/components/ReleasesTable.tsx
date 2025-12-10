@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2024-2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2024, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { FormattedMessage } from "react-intl";
 import {
@@ -29,19 +29,19 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "react-bootstrap";
 import _ from "lodash";
 
-import type { ReleasesTable_PaginationQuery } from "api/__generated__/ReleasesTable_PaginationQuery.graphql";
+import type { ReleasesTable_PaginationQuery } from "@/api/__generated__/ReleasesTable_PaginationQuery.graphql";
 import type {
   ReleasesTable_ReleaseFragment$data,
   ReleasesTable_ReleaseFragment$key,
-} from "api/__generated__/ReleasesTable_ReleaseFragment.graphql";
-import type { ReleasesTable_deleteRelease_Mutation } from "api/__generated__/ReleasesTable_deleteRelease_Mutation.graphql";
+} from "@/api/__generated__/ReleasesTable_ReleaseFragment.graphql";
+import type { ReleasesTable_deleteRelease_Mutation } from "@/api/__generated__/ReleasesTable_deleteRelease_Mutation.graphql";
 
-import { Link, Route } from "Navigation";
-import { createColumnHelper } from "components/Table";
-import Icon from "components/Icon";
+import { Link, Route } from "@/Navigation";
+import { createColumnHelper } from "@/components/Table";
+import Icon from "@/components/Icon";
 import DeleteModal from "./DeleteModal";
 import InfiniteTable from "./InfiniteTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "constants";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

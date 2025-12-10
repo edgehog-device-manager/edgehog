@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2023 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2023-2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -33,20 +33,20 @@ import {
 import type { PreloadedQuery } from "react-relay/hooks";
 import type { Subscription } from "relay-runtime";
 
-import type { UpdateCampaign_getUpdateCampaign_Query } from "api/__generated__/UpdateCampaign_getUpdateCampaign_Query.graphql";
-import type { UpdateCampaign_RefreshFragment$key } from "api/__generated__/UpdateCampaign_RefreshFragment.graphql";
+import type { UpdateCampaign_getUpdateCampaign_Query } from "@/api/__generated__/UpdateCampaign_getUpdateCampaign_Query.graphql";
+import type { UpdateCampaign_RefreshFragment$key } from "@/api/__generated__/UpdateCampaign_RefreshFragment.graphql";
 
-import Center from "components/Center";
-import Col from "components/Col";
-import Page from "components/Page";
-import Result from "components/Result";
-import Row from "components/Row";
-import Spinner from "components/Spinner";
-import UpdateCampaignStatsChart from "components/UpdateCampaignStatsChart";
-import UpdateTargetsTabs from "components/UpdateTargetsTabs";
-import UpdateCampaignForm from "forms/UpdateCampaignForm";
-import { Link, Route } from "Navigation";
-import { RECORDS_TO_LOAD_FIRST } from "constants";
+import Center from "@/components/Center";
+import Col from "@/components/Col";
+import Page from "@/components/Page";
+import Result from "@/components/Result";
+import Row from "@/components/Row";
+import Spinner from "@/components/Spinner";
+import UpdateCampaignStatsChart from "@/components/UpdateCampaignStatsChart";
+import UpdateTargetsTabs from "@/components/UpdateTargetsTabs";
+import UpdateCampaignForm from "@/forms/UpdateCampaignForm";
+import { Link, Route } from "@/Navigation";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const GET_UPDATE_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getUpdateCampaign_Query(

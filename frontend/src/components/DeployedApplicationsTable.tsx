@@ -1,22 +1,22 @@
 /*
-  This file is part of Edgehog.
-
-  Copyright 2024-2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+ * This file is part of Edgehog.
+ *
+ * Copyright 2024, 2025 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
@@ -24,28 +24,28 @@ import { useCallback, useState, useMemo } from "react";
 import semver from "semver";
 import Select, { SingleValue } from "react-select";
 
-import type { DeployedApplicationsTable_PaginationQuery } from "api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
-import type { DeployedApplicationsTable_deployedApplications$key } from "api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
+import type { DeployedApplicationsTable_PaginationQuery } from "@/api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
+import type { DeployedApplicationsTable_deployedApplications$key } from "@/api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
 
-import type { DeployedApplicationsTable_sendDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_sendDeployment_Mutation.graphql";
-import type { DeployedApplicationsTable_startDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_startDeployment_Mutation.graphql";
-import type { DeployedApplicationsTable_stopDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
-import type { DeployedApplicationsTable_deleteDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_deleteDeployment_Mutation.graphql";
-import type { DeployedApplicationsTable_upgradeDeployment_Mutation } from "api/__generated__/DeployedApplicationsTable_upgradeDeployment_Mutation.graphql";
+import type { DeployedApplicationsTable_sendDeployment_Mutation } from "@/api/__generated__/DeployedApplicationsTable_sendDeployment_Mutation.graphql";
+import type { DeployedApplicationsTable_startDeployment_Mutation } from "@/api/__generated__/DeployedApplicationsTable_startDeployment_Mutation.graphql";
+import type { DeployedApplicationsTable_stopDeployment_Mutation } from "@/api/__generated__/DeployedApplicationsTable_stopDeployment_Mutation.graphql";
+import type { DeployedApplicationsTable_deleteDeployment_Mutation } from "@/api/__generated__/DeployedApplicationsTable_deleteDeployment_Mutation.graphql";
+import type { DeployedApplicationsTable_upgradeDeployment_Mutation } from "@/api/__generated__/DeployedApplicationsTable_upgradeDeployment_Mutation.graphql";
 
-import Icon from "components/Icon";
-import { Link, Route, useNavigate } from "Navigation";
-import Table, { createColumnHelper } from "components/Table";
-import Button from "components/Button";
-import ConfirmModal from "components/ConfirmModal";
-import DeleteModal from "components/DeleteModal";
+import Icon from "@/components/Icon";
+import { Link, Route, useNavigate } from "@/Navigation";
+import Table, { createColumnHelper } from "@/components/Table";
+import Button from "@/components/Button";
+import ConfirmModal from "@/components/ConfirmModal";
+import DeleteModal from "@/components/DeleteModal";
 import DeploymentStateComponent, {
   type DeploymentState,
   parseDeploymentState,
-} from "components/DeploymentState";
-import DeploymentReadiness from "components/DeploymentReadiness";
-import ContainerStatusList from "components/ContainerStatusList";
-import "components/DeployedApplicationsTable.scss";
+} from "@/components/DeploymentState";
+import DeploymentReadiness from "@/components/DeploymentReadiness";
+import ContainerStatusList from "@/components/ContainerStatusList";
+import "@/components/DeployedApplicationsTable.scss";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
