@@ -69,6 +69,10 @@ defmodule Edgehog.Devices.Device do
       subscribe :device_created do
         action_types :create
       end
+
+      subscribe :device_updated do
+        action_types :update
+      end
     end
   end
 

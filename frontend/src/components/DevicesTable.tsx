@@ -109,6 +109,37 @@ const DEVICE_CREATED_SUBSCRIPTION = graphql`
   }
 `;
 
+const DEVICE_UPDATED_SUBSCRIPTION = graphql`
+  subscription DevicesTable_DeviceUpdated_Subscription {
+    deviceUpdated {
+      updated {
+        id
+        deviceId
+        name
+        online
+        lastConnection
+        lastDisconnection
+        systemModel {
+          id
+          name
+          hardwareType {
+            id
+            name
+          }
+        }
+        tags {
+          edges {
+            node {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 type TableRecord = NonNullable<
   NonNullable<DevicesTable_DeviceFragment$data["devices"]>["edges"]
 >[number]["node"];
@@ -292,6 +323,13 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
         },
       }),
       [currentFilter, normalizedSearchText],
+    ),
+  );
+
+  useSubscription(
+    useMemo(
+      () => ({ subscription: DEVICE_UPDATED_SUBSCRIPTION, variables: {} }),
+      [],
     ),
   );
 
