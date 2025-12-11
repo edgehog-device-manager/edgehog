@@ -33,6 +33,7 @@ jobs:
       pull-requests: write
       # Needs issue permission to post comments on pull request
       issues: write
+      workflows: write
 
     steps:
       - name: Fast forwarding
