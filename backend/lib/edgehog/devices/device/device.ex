@@ -436,6 +436,7 @@ defmodule Edgehog.Devices.Device do
 
     belongs_to :system_model_part_number, Edgehog.Devices.SystemModelPartNumber do
       attribute_type :string
+      attribute_public? true
       source_attribute :part_number
       destination_attribute :part_number
     end
