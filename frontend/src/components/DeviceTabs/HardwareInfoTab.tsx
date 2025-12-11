@@ -64,7 +64,7 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
     >
       <div className="mt-3">
         <Stack gap={3}>
-          {hardwareInfo.cpuArchitecture != null && (
+          {hardwareInfo?.cpuArchitecture != null && (
             <FormRow
               id="device-hardware-info-cpu-architecture"
               label={
@@ -81,7 +81,7 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
               />
             </FormRow>
           )}
-          {hardwareInfo.cpuModel != null && (
+          {hardwareInfo?.cpuModel != null && (
             <FormRow
               id="device-hardware-info-cpu-model"
               label={
@@ -98,7 +98,7 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
               />
             </FormRow>
           )}
-          {hardwareInfo.cpuModelName != null && (
+          {hardwareInfo?.cpuModelName != null && (
             <FormRow
               id="device-hardware-info-cpu-model-name"
               label={
@@ -115,7 +115,7 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
               />
             </FormRow>
           )}
-          {hardwareInfo.cpuVendor != null && (
+          {hardwareInfo?.cpuVendor != null && (
             <FormRow
               id="device-hardware-info-cpu-vendor"
               label={
@@ -132,7 +132,7 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
               />
             </FormRow>
           )}
-          {hardwareInfo.memoryTotalBytes != null && (
+          {hardwareInfo?.memoryTotalBytes != null && (
             <FormRow
               id="device-hardware-info-memory-total-bytes"
               label={
