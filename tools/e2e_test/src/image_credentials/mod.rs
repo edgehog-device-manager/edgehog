@@ -25,7 +25,7 @@ use crate::suite::client;
 pub mod mutations;
 pub mod queries;
 
-pub async fn run_test(client: client::EdgehogClient) -> eyre::Result<()> {
+pub async fn test_image_credentials(client: client::EdgehogClient) -> eyre::Result<()> {
     let username = Alphabetic.sample_string(&mut rand::rng(), 5);
     let label = Alphabetic.sample_string(&mut rand::rng(), 5);
     let password = Alphabetic.sample_string(&mut rand::rng(), 10);
@@ -63,8 +63,6 @@ pub async fn run_test(client: client::EdgehogClient) -> eyre::Result<()> {
 
     assert_eq!(image_credentials.username, username);
     assert_eq!(image_credentials.label, label);
-
-    println!("[ PASSED ] image credentials tests");
 
     Ok(())
 }
