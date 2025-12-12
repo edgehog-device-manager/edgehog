@@ -26,6 +26,9 @@
   "Device.remoteTerminal.openTerminalButton": {
     "defaultMessage": "Open"
   },
+  "Device.serialNumber": {
+    "defaultMessage": "Serial Number"
+  },
   "Device.systemModel": {
     "defaultMessage": "System Model"
   },
@@ -793,6 +796,9 @@
   },
   "components.DeviceTabs.HardwareInfoTab.memoryTotalBytes": {
     "defaultMessage": "Total memory"
+  },
+  "components.DeviceTabs.HardwareInfoTab.partNumber": {
+    "defaultMessage": "Part Number"
   },
   "components.DeviceTabs.LocationTab": {
     "defaultMessage": "Geolocation"
