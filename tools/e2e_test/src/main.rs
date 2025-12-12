@@ -19,13 +19,32 @@
 mod image_credentials;
 mod suite;
 
-use clap::Parser;
-use suite::client::EdgehogClient;
-use suite::config::Config;
-
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
-    let config = Config::parse();
-    let client = EdgehogClient::create(&config)?;
-    image_credentials::run_test(client).await
+    Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use suite::client::EdgehogClient;
+    use suite::config::Config;
+
+    fn test_config() -> Config {
+        Config {
+            hostname: "api.edgehog.localhost".to_string(),
+            scheme: "http".to_string(),
+            bearer: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJlX3RnYSI6IioiLCJpYXQiOjE3Mzg5NDgzODh9.TTiXYs1LucAnS_6RGp7pWg-S30NSt7eqL7lU8BzT5BWlHctk7NYZwC6lftA6WeEb1HKEJfPoUqWeOeZ6oYA0AA".to_string(),
+            tenant: "test".to_string()
+        }
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+    async fn image_credentials() -> eyre::Result<()> {
+        let config = test_config();
+
+        let client = EdgehogClient::create(&config)?;
+        image_credentials::test_image_credentials(client).await
+    }
 }
