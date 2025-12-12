@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.Deployment.Event do
   actions do
     defaults [
       :read,
-      create: [:deployment_id, :type, :message]
+      create: [:deployment_id, :type, :message, :add_info]
     ]
   end
 
@@ -46,6 +46,10 @@ defmodule Edgehog.Containers.Deployment.Event do
     end
 
     attribute :message, :string do
+      public? true
+    end
+
+    attribute :add_info, {:array, :string} do
       public? true
     end
 
