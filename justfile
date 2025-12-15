@@ -162,7 +162,7 @@ _edgehog-dev-backend:
     docker compose down -v
     docker compose up -d edgehog-device-forwarder minio minio-init registry registry-auth registry-init
     # Init postgres locally, edgehog has to be able to reach it seamlessly
-    (docker run --name postgres -d -e "POSTGRES_HOST_AUTH_METHOD=trust" -p 5432:5432 --rm postgres && sleep 3) || true # skip if already up
+    (docker run --name edgehog-db -d -e "POSTGRES_HOST_AUTH_METHOD=trust" -p 5432:5432 --rm postgres && sleep 3) || true # skip if already up
     # `astarte` netowrk gateway ip, a.k.a. edgehog's IP
     export DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN=edgehog.localhost
     export DATABASE_USERNAME=edgehog
