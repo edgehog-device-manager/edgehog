@@ -178,7 +178,6 @@ servers:
   # to satisfy the URL Swagger requirement.
 
   # same format as for OpenAPI Specification https://swagger.io/specification/#server-object
-
   - url: http://localhost:4000/api
     description: Local development
     # Indicates to use this server's URL as the typical GraphQL request base in the documentation
@@ -233,12 +232,12 @@ info:
 
   # A non-standard array of items to display in your Introduction Area
   # x-introItems:
-    # Can be a Title (for the Nav panel) + URL to simply add a link to somewhere
-    # - title: A silly link to our website!
-    #   url: http://yoursite.com
-    # Can be a Title (for the Nav panel) + description (for the Content panel)
-    # - title: Important thing 1
-    #   description: Some important stuff we wanted you to know. Supports `markdown`
+  # Can be a Title (for the Nav panel) + URL to simply add a link to somewhere
+  # - title: A silly link to our website!
+  #   url: http://yoursite.com
+  # Can be a Title (for the Nav panel) + description (for the Content panel)
+  # - title: Important thing 1
+  #   description: Some important stuff we wanted you to know. Supports `markdown`
 
   # If you really want to hide the "Documentation by" at the bottom of your output, you can do so here
   # Default: false

@@ -19,9 +19,7 @@ contain breaking changes. Each Base Image must have a unique version number.
 
 ## Base Image Collection
 
-A Base Image Collection is a set of Base Images associated with a specific [System
-Model](core_concepts.html#system-model) and, implicitly via the System Model, with a specific [Hardware
-Type](core_concepts.html#hardware-type). The mapping relation between Base Image Collection and System Models is 1:1,
+A Base Image Collection is a set of Base Images associated with a specific [System Model](core_concepts.html#system-model) and, implicitly via the System Model, with a specific [Hardware Type](core_concepts.html#hardware-type). The mapping relation between Base Image Collection and System Models is 1:1,
 so a Base Image Collection is associated with a single System Model and viceversa.
 
 A Base Image Collection contains all the Base Images that ran, are running or could be run on a

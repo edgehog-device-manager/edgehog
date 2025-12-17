@@ -9,8 +9,7 @@
 Edgehog allows creating groups of Devices based on tags and attributes. This makes it easy to target
 them with fleet operations.
 
-All the concepts used below are detailed in the [Core
-Concepts](core_concepts.html#tags-attributes-and-groups) page, this guide is oriented towards
+All the concepts used below are detailed in the [Core Concepts](core_concepts.html#tags-attributes-and-groups) page, this guide is oriented towards
 operational details to create a group.
 
 ## Creating a group

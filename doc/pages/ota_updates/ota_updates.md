@@ -7,8 +7,7 @@
 # OTA Updates
 
 Edgehog provides an OTA update mechanism that allows remotely updating devices. The OTA update
-mechanism is not tied to a specific platform and can be used on any [Edgehog
-runtime](devices_and_runtime.html) which implements the
+mechanism is not tied to a specific platform and can be used on any [Edgehog runtime](devices_and_runtime.html) which implements the
 [`io.edgehog.devicemanager.OTARequest`](astarte_interfaces.html#io-edgehog-devicemanager-otarequest-v1-0),
 [`io.edgehog.devicemanager.OTAEvent`](astarte_interfaces.html#io-edgehog-devicemanager-otaevent-v0-1)
 and
@@ -20,13 +19,11 @@ demonstrates the usage of an OTA update mechanism.
 
 ## Managed OTA Updates
 
-Edgehog provides a mechanism to roll-out OTA updates to devices automatically, based on their [System
-Model](core_concepts.html#system-model) and their membership to specific [Groups](core_concepts-1.html#group).
+Edgehog provides a mechanism to roll-out OTA updates to devices automatically, based on their [System Model](core_concepts.html#system-model) and their membership to specific [Groups](core_concepts-1.html#group).
 
 To push updates towards Devices, an Update Campaign must be created. It's important to note that an Update
 Campaign can only send updates for the same Base Image Collection. Special operations, such as
-converting a Device from one System Model to another, must always be done with a [Manual OTA
-Update](#manual-ota-updates).
+converting a Device from one System Model to another, must always be done with a [Manual OTA Update](#manual-ota-updates).
 
 Once created, the Update Campaign will start rolling out updates towards the devices, and its
 progress can be checked from the Edgehog Dashboard or through Edgehog GraphQL API.

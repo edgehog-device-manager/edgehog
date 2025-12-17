@@ -8,12 +8,12 @@
 
 For each hardware type the following information can be displayed and edited.
 
-* Name: a user friendly name, such as "Strawberry Pi 5"
-* Handle: a machine friendly identifier, such as "strawberry-pi-5" (it must be a lower case, alpha
-numeric string, with no spaces and dashes allowed in the middle)
-* Part Numbers: a list of part numbers, such as "STBEPI-5-MA-2GB-REV1","STBEPI-5-MB-8GB-REV1",
-"STBEPI-5-MB-8GB-REV2", etc... Multiple part numbers can be entered using the "Add Part Number"
-button.
+- Name: a user friendly name, such as "Strawberry Pi 5"
+- Handle: a machine friendly identifier, such as "strawberry-pi-5" (it must be a lower case, alpha
+  numeric string, with no spaces and dashes allowed in the middle)
+- Part Numbers: a list of part numbers, such as "STBEPI-5-MA-2GB-REV1","STBEPI-5-MB-8GB-REV1",
+  "STBEPI-5-MB-8GB-REV2", etc... Multiple part numbers can be entered using the "Add Part Number"
+  button.
 
 ![Hardware Types Screenshot](assets/hardware_types.png)
 

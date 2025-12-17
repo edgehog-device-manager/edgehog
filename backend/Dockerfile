@@ -7,7 +7,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,10 +26,10 @@
 #
 # This file is based on these images:
 #
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20250929-slim - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.18.4-erlang-28.1-debian-bullseye-20250929-slim
+# - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
+# - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20250929-slim - for the release image
+# - https://pkgs.org/ - resource for finding needed packages
+# - Ex: hexpm/elixir:1.18.4-erlang-28.1-debian-bullseye-20250929-slim
 #
 ARG ELIXIR_VERSION=1.18.4
 ARG OTP_VERSION=28.1

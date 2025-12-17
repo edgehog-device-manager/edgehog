@@ -30,15 +30,13 @@ multiple tenants (e.g. in a SaaS scenario).
 
 To interact with the other side of the domain (i.e. devices), Edgehog is built upon
 [Astarte](https://github.com/astarte-platform/astarte) and it exchanges data with it using two of
-its mechanisms: its [REST API](https://docs.astarte-platform.org/latest/api/index.html) and [Astarte
-Triggers](https://docs.astarte-platform.org/latest/060-triggers.html). Each Edgehog tenant is mapped
+its mechanisms: its [REST API](https://docs.astarte-platform.org/latest/api/index.html) and [Astarte Triggers](https://docs.astarte-platform.org/latest/060-triggers.html). Each Edgehog tenant is mapped
 to an Astarte Realm, and it owns the credentials to interact with all the Realm APIs for that
 specific Realm.
 
 ### Edgehog Astarte Interfaces
 
-The interaction between Edgehog and Astarte is defined by a [set of
-interfaces](https://github.com/edgehog-device-manager/edgehog-astarte-interfaces) that define which
+The interaction between Edgehog and Astarte is defined by a [set of interfaces](https://github.com/edgehog-device-manager/edgehog-astarte-interfaces) that define which
 data is sent both from Edgehog to the Devices and from the Devices towards Edgehog. Additionally,
 connection and disconnection triggers ar installed in the Astarte Realm, and point to the triggers
 endpoint of the Edgehog tenant.

@@ -9,8 +9,7 @@
 Device attributes can be populated using external sources using Attribute Value Sources. These
 provide mechanisms to automatically update some device attributes according to some rules.
 
-All the concepts used below are detailed in the [Core
-Concepts](core_concepts.html#tags-attributes-and-groups) page, this guide is oriented towards
+All the concepts used below are detailed in the [Core Concepts](core_concepts.html#tags-attributes-and-groups) page, this guide is oriented towards
 operational details to use Attribute Value Sources.
 
 ## Populating attributes using Astarte values

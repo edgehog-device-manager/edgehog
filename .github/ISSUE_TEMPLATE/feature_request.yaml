@@ -19,7 +19,7 @@
 #
 
 name: Feature request
-description:  Submit a feature request or idea for this project
+description: Submit a feature request or idea for this project
 title: "[Feature Request / Suggestion]: "
 labels: ["enhancement"]
 body:

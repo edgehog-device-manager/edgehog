@@ -55,9 +55,9 @@ Through the Volume Management section, you can:
 3. Fill out the volume configuration form:
 
    - **Label** – Provide a descriptive name for the volume. **(Required)**
-   - **Driver** – Select a Docker-supported volume driver.  
+   - **Driver** – Select a Docker-supported volume driver.\
      **(Optional; defaults to `local` if not set)**
-   - **Options** – Enter a JSON object containing driver-specific configuration options.  
+   - **Options** – Enter a JSON object containing driver-specific configuration options.\
      **(Optional; e.g., NFS configuration, mount flags, custom driver parameters)**
 
 4. Click **Create** to save the volume.

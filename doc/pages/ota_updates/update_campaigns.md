@@ -12,8 +12,7 @@ belonging to a [Channel](ota_update_concepts.html#channel).
 
 Note that an Update Campaign can only send updates for the same
 [Base Image Collection](ota_update_concepts.html#base-image-collection), and special operations
-(like converting a Device from a one System Model to another) must always be done with a [Manual OTA
-Update](ota_updates.html#manual-ota-updates).
+(like converting a Device from a one System Model to another) must always be done with a [Manual OTA Update](ota_updates.html#manual-ota-updates).
 
 The following sections will illustrate all the pages that can be used to list, create and view Update Campaigns.
 

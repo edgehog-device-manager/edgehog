@@ -15,8 +15,7 @@ This guide presents the batch operations which can be performed using Edgehog.
 
 ## Maintenance Window Setting
 
-Using the Edgehog API or its frontend, it is possible to set the same [Maintenance
-Window](core_concepts.html#maintenance-window) to all devices belonging to a Group.
+Using the Edgehog API or its frontend, it is possible to set the same [Maintenance Window](core_concepts.html#maintenance-window) to all devices belonging to a Group.
 
 When performing the operation, the following information must be provided
 

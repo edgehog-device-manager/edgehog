@@ -212,17 +212,17 @@ Set runtime behavior and environment variables.
 - **Restart Policy** – Define what happens if the container exits.
   Supported policies:
 
-  - `No` (default)  
+  - `No` (default)\
     Don’t automatically restart the container.
 
-  - `On Failure`  
+  - `On Failure`\
     Restart only if container exits with a non‑zero status.
 
-  - `Always`  
-    Always restart if the container stops.  
+  - `Always`\
+    Always restart if the container stops.\
     If manually stopped, it’s restarted only when the Docker daemon restarts or you manually start it again.
 
-  - `Unless Stopped`  
+  - `Unless Stopped`\
     Like `always`, except if the container is stopped (manually or otherwise), it isn’t restarted after a Docker daemon restart.
 
 - **Environment Variables** – JSON array of environment variables in `"key": "value"` format

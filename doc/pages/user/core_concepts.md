@@ -74,8 +74,7 @@ Attributes are namespaced key-value pairs that can be attached to Devices. The n
 by prepending the namespace to the key using a colon as separator (i.e. `namespace:key`). This
 ensures that the same key in different namespaces can be addressed unambiguously.
 
-The attribute keys are always strings, while values support all the types [supported by Astarte
-Interfaces](https://docs.astarte-platform.org/latest/030-interface.html#supported-data-types).
+The attribute keys are always strings, while values support all the types [supported by Astarte Interfaces](https://docs.astarte-platform.org/latest/030-interface.html#supported-data-types).
 
 The majority of attributes are automatically populated using different mechanisms depending on the
 namespaces, but there's also the possibility of manually defining custom attributes for a specific
@@ -156,6 +155,7 @@ Created with the syntax `attributes["<namespace>:<key>"] <operator> <value>`, it
 the value of the chosen attribute satisfies the expression.
 
 The supported operators are:
+
 - `==` and `!=` for all value types
 - `>`, `>=`, `<`, `<=` for numeric or `datetime` values
 
@@ -177,9 +177,9 @@ of the values supported using special syntax:
 
 - `"<value>" in attributes["<namespace>:<key>"]`: returns `true` if `value` is included in the
   chosen attribute. Note that the attribute must be an array for the expression to be valid.
-  
+
 #### Examples
-  
+
 To provide some examples, here is a Selector to target all out of order Devices in Milan:
 
 ```

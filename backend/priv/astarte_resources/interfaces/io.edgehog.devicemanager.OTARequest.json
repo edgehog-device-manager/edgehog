@@ -1,34 +1,34 @@
 {
-    "interface_name": "io.edgehog.devicemanager.OTARequest",
-    "version_major": 1,
-    "version_minor": 0,
-    "type": "datastream",
-    "ownership": "server",
-    "aggregation": "object",
-    "mappings": [
-        {
-            "endpoint": "/request/operation",
-            "type": "string",
-            "database_retention_policy": "use_ttl",
-            "database_retention_ttl": 31556952,
-            "description": "OTA Request operation",
-            "doc": "Value is one of the following strings:\n\n - `Update`: push an OTA update operation.\n - `Cancel`: cancel an OTA update if it can still be cancelled."
-        },
-        {
-            "endpoint": "/request/url",
-            "type": "string",
-            "database_retention_policy": "use_ttl",
-            "database_retention_ttl": 31556952,
-            "description": "File URL",
-            "doc": "If the operation is Update, this will contain the URL that can be used to download the Update.\n If the operation is Cancel, this will be an empty string.\n Note that the URL will be valid only until the OTA update is active (i.e. it didn't reach a Failure or Success state), after that it's possible that the URL can become invalid."
-        },
-        {
-            "endpoint": "/request/uuid",
-            "type": "string",
-            "database_retention_policy": "use_ttl",
-            "database_retention_ttl": 31556952,
-            "description": "Request identifier",
-            "doc": "A UUID that uniquely identifies the OTA request. It must be stored when receiving an Update operation so that it can be matched against in case a Cancel operation is received."
-        }
-    ]
+  "interface_name": "io.edgehog.devicemanager.OTARequest",
+  "version_major": 1,
+  "version_minor": 0,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "mappings": [
+    {
+      "endpoint": "/request/operation",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "OTA Request operation",
+      "doc": "Value is one of the following strings:\n\n - `Update`: push an OTA update operation.\n - `Cancel`: cancel an OTA update if it can still be cancelled."
+    },
+    {
+      "endpoint": "/request/url",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "File URL",
+      "doc": "If the operation is Update, this will contain the URL that can be used to download the Update.\n If the operation is Cancel, this will be an empty string.\n Note that the URL will be valid only until the OTA update is active (i.e. it didn't reach a Failure or Success state), after that it's possible that the URL can become invalid."
+    },
+    {
+      "endpoint": "/request/uuid",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 31556952,
+      "description": "Request identifier",
+      "doc": "A UUID that uniquely identifies the OTA request. It must be stored when receiving an Update operation so that it can be matched against in case a Cancel operation is received."
+    }
+  ]
 }

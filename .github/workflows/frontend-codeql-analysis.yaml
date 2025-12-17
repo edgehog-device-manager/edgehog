@@ -30,7 +30,7 @@ on:
       - "frontend/**"
       - ".github/workflows/frontend-codeql-analysis.yaml"
   schedule:
-    - cron: '33 5 * * 6'
+    - cron: "33 5 * * 6"
 
 jobs:
   analyze:
@@ -43,18 +43,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript' ]
+        language: ["javascript"]
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-      with:
-        show-progress: false
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          show-progress: false
 
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3

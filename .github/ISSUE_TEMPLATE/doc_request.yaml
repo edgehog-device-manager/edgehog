@@ -19,7 +19,7 @@
 #
 
 name: Documentation request
-description:  Suggest an improvement or addition to the documentation
+description: Suggest an improvement or addition to the documentation
 title: "[Docs]: "
 labels: ["documentation"]
 body:

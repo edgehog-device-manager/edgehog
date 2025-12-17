@@ -119,21 +119,25 @@ For detailed information on managing credentials, see the [Image Credentials Man
 
 ## Volumes
 
-Volumes represent Docker-managed storage that persists data independently of the container lifecycle. 
+Volumes represent Docker-managed storage that persists data independently of the container lifecycle.
 They are created and managed directly through the application's [volumes management section](./volume_management.md).
 
 ### Volume Structure
+
 Each volume consists of the following fields:
+
 - **Label**: A user-defined name used to identify the volume within the application
 - **Driver**: Specifies which Docker volume driver should be used. The default driver is usually local
 - **Options**: A set of key-value pairs that provide custom configuration for the selected driver
 
 ### Volume Purpose and Relationship to Containers
+
 While volumes can exist independently, a volume is not meaningful unless it is attached to at least one [container](core_concepts-2.html#containers).
 
 The purpose of a volume is to provide persistent storage for containerized applications, so it becomes valuable only when linked to a container’s filesystem.
 
 ### Volumes vs. Bind Mounts
+
 Docker provides two main ways to persist data: volumes and bind mounts, and it's important to understand the difference.
 
 With a **bind mount**, a file or directory from the host machine is mounted directly into the container.
