@@ -53,7 +53,8 @@ defmodule Doc.MixProject do
         Architecture: ~r"/architecture/",
         "Admin Guide": ~r"/admin/",
         "Integrating with Edgehog": ~r"/integrating/",
-        Tutorials: ~r"/tutorials/"
+        Tutorials: ~r"/tutorials/",
+        "Developer guide": ~r"/devguide/"
       ],
       groups_for_modules: [],
       javascript_config_path: "../versions.js"
@@ -84,7 +85,8 @@ defmodule Doc.MixProject do
       "pages/containers/applications_management.md",
       "pages/containers/deployment_campaigns.md",
       "pages/tutorials/edgehog_in_5_minutes.md",
-      "pages/tutorials/edgehog_just_in_time.md",
+      "pages/devguide/edgehog_just_in_time.md",
+      "pages/devguide/typos_and_formatting.md",
       "pages/architecture/overview.md",
       "pages/integrating/interacting_with_edgehog.md",
       "pages/integrating/astarte_interfaces.md",
