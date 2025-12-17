@@ -225,7 +225,7 @@ defmodule Edgehog.Devices.Device do
 
       argument :deployment, :struct do
         constraints instance_of: Deployment
-        description "The Deployment the device has to instanciate."
+        description "The Deployment the device has to instantiate."
         allow_nil? false
       end
 

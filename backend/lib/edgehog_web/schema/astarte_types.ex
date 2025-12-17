@@ -174,7 +174,7 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The volume id."
     field :id, :string
 
-    @desc "The volume status, wheather it was created or not."
+    @desc "The volume status, whether it was created or not."
     field :created, :boolean
   end
 

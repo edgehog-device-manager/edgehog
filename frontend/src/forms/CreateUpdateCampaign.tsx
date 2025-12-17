@@ -666,7 +666,7 @@ const CreateUpdateCampaignForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="froms.CreateUpdateCampaign.submitButton"
+              id="forms.CreateUpdateCampaign.submitButton"
               defaultMessage="Create"
             />
           </Button>

@@ -30,7 +30,7 @@ defmodule Edgehog.Astarte.Device.StorageUsage do
   def get(%AppEngine{} = client, device_id) do
     # TODO: right now we request the whole interface at once and longinteger
     # values are returned as strings by Astarte, since the interface is of
-    # type Object Aggregrate.
+    # type Object Aggregate.
     # For details, see https://github.com/astarte-platform/astarte/issues/630
     with {:ok, %{"data" => data}} <-
            AppEngine.Devices.get_datastream_data(client, device_id, @interface, query: [limit: 1]) do

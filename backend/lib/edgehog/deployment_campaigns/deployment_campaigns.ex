@@ -20,7 +20,7 @@
 
 defmodule Edgehog.DeploymentCampaigns do
   @moduledoc """
-  Deployment Campaings context.
+  Deployment Campaigns context.
 
   This module provides the necessary code interfaces and GraphQL mutations (and
   queries) to interact with deployment campaigns.

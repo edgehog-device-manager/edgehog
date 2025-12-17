@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Containers.Reconciler.Behaviour do
   @moduledoc """
-  Behavior for the reconciler. It should implment
+  Behavior for the reconciler. It should implement
   - a `start_link` to start the reconciler.
   - a `register_device` to start a device timer in the reconciler.
   - a `stop_device` to stop a device timer in the reconciler.

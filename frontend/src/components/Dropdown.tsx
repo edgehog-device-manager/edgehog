@@ -19,7 +19,7 @@
 */
 
 import React from "react";
-import BoostrapDropdown from "react-bootstrap/Dropdown";
+import BootstrapDropdown from "react-bootstrap/Dropdown";
 
 import "./Dropdown.scss";
 
@@ -36,15 +36,15 @@ const Dropdown = ({
   className = "",
   toggle,
 }: Props) => (
-  <BoostrapDropdown align={align} className={`Dropdown ${className}`}>
-    <BoostrapDropdown.Toggle as="div">{toggle}</BoostrapDropdown.Toggle>
-    <BoostrapDropdown.Menu className="shadow border-end-0 border-bottom-0 border-start-0 border-primary rounded-0">
+  <BootstrapDropdown align={align} className={`Dropdown ${className}`}>
+    <BootstrapDropdown.Toggle as="div">{toggle}</BootstrapDropdown.Toggle>
+    <BootstrapDropdown.Menu className="shadow border-end-0 border-bottom-0 border-start-0 border-primary rounded-0">
       {children}
-    </BoostrapDropdown.Menu>
-  </BoostrapDropdown>
+    </BootstrapDropdown.Menu>
+  </BootstrapDropdown>
 );
 
-Dropdown.Divider = BoostrapDropdown.Divider;
-Dropdown.Item = BoostrapDropdown.Item;
+Dropdown.Divider = BootstrapDropdown.Divider;
+Dropdown.Item = BootstrapDropdown.Item;
 
 export default Dropdown;

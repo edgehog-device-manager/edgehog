@@ -473,7 +473,7 @@ const DeviceContent = ({
     REMOVE_DEVICE_TAGS_MUTATION,
   );
 
-  const handleUpdatDeviceName = useMemo(
+  const handleUpdateDeviceName = useMemo(
     () =>
       _.debounce(
         (newDeviceName: string) => {
@@ -505,9 +505,9 @@ const DeviceContent = ({
   const handleDeviceNameChange = useCallback(
     (newDeviceName: string) => {
       setDeviceDraftName(newDeviceName);
-      handleUpdatDeviceName(newDeviceName);
+      handleUpdateDeviceName(newDeviceName);
     },
-    [handleUpdatDeviceName],
+    [handleUpdateDeviceName],
   );
 
   const isValidNewTag = useCallback(

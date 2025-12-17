@@ -33,7 +33,7 @@
       "database_retention_ttl": 600,
       "reliability": "guaranteed",
       "description": "Image reference to be pulled",
-      "doc": "Name of the image to pull. It should be in the form [regitry-host[:port]/][image-repo/]image-name[:(tag|digest)]"
+      "doc": "Name of the image to pull. It should be in the form [registry-host[:port]/][image-repo/]image-name[:(tag|digest)]"
     },
     {
       "endpoint": "/image/registryAuth",

@@ -51,14 +51,14 @@ const LoginPage = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [validated, setValidated] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
-  const [isLoggingIn, setIsLogginIn] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const auth = useAuth();
   const intl = useIntl();
   const navigate = useNavigate();
 
   const handleLogin = useCallback(
     (formData: FormData) => {
-      setIsLogginIn(true);
+      setIsLoggingIn(true);
       const session = _.pick(formData, ["tenantSlug", "authToken"]);
       const persistConfig = formData.keepMeLoggedIn;
       auth.login(session, persistConfig).then((success) => {
@@ -71,7 +71,7 @@ const LoginPage = () => {
               defaultMessage="Could not login, please make sure the credentials are valid."
             />,
           );
-          setIsLogginIn(false);
+          setIsLoggingIn(false);
         }
       });
     },

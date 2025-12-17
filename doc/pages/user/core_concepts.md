@@ -43,7 +43,7 @@ A System Model is associated with a specific Hardware Type, so two devices imple
 functionality but using different Hardware Types will belong to two different System Models. This
 makes it so that the System Model is the fundamental identifier when it comes to software updates.
 
-A System Model has one or more System Model Part Numbers asociated with it, allowing to track newer
+A System Model has one or more System Model Part Numbers associated with it, allowing to track newer
 versions of a product which do not change its main functionality. Usually (but not necessarily) the
 System Model's Part Number is delivered along with the device, or on the box containing it.
 

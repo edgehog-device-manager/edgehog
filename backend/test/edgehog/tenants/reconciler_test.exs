@@ -33,7 +33,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
   describe "reconcile_all" do
     setup do
       # We have to use Mox in global mode because the Interfaces and Triggers mocks are
-      # called by an anoymous task launched by the reconciler and we can't easily recover
+      # called by an anonymous task launched by the reconciler and we can't easily recover
       # its pid to allow mocks call from it
       Mox.set_mox_global()
 
@@ -109,7 +109,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
   describe "reconcile_tenant/1" do
     setup do
       # We have to use Mox in global mode because the Interfaces and Triggers mocks are
-      # called by an anoymous task launched by the reconciler and we can't easily recover
+      # called by an anonymous task launched by the reconciler and we can't easily recover
       # its pid to allow mocks call from it
       Mox.set_mox_global()
 

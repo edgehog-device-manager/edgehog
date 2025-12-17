@@ -137,7 +137,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
       localized_release_display_names = [
         %{language_tag: "en-US", value: "Initial version"},
         %{language_tag: "it", value: "Versione iniziale"},
-        %{language_tag: "fr", value: "Version initiale"}
+        %{language_tag: "fr", value: "Version initial"}
       ]
 
       base_image =
@@ -176,7 +176,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
 
       assert %{"languageTag" => "it", "value" => "Versione iniziale"} in localized_release_display_names
 
-      assert %{"languageTag" => "fr", "value" => "Version initiale"} in localized_release_display_names
+      assert %{"languageTag" => "fr", "value" => "Version initial"} in localized_release_display_names
     end
 
     test "returns filtered localized release display names with preferredLanguageTags", ctx do
@@ -202,7 +202,7 @@ defmodule EdgehogWeb.Schema.Query.BaseImageTest do
 
       assert %{
                "languageTag" => "fr",
-               "value" => "Version initiale"
+               "value" => "Version initial"
              } in localized_release_display_names
     end
 

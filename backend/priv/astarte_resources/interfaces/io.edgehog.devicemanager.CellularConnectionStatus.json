@@ -60,7 +60,7 @@
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 5184000,
       "explicit_timestamp": true,
-      "description": "Signal strenght of the device in dBm."
+      "description": "Signal strength of the device in dBm."
     },
     {
       "endpoint": "/%{id}/technology",

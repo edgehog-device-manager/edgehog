@@ -69,7 +69,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
           signal, error ->
             Logger.error("""
             Tenant cleanup was not completed:
-            recived signal #{inspect(signal)} with the following error: #{inspect({error})}
+            received signal #{inspect(signal)} with the following error: #{inspect({error})}
             """)
         end
 

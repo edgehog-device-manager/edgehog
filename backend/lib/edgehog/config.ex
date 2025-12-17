@@ -125,7 +125,7 @@ defmodule Edgehog.Config do
   def database_enable_ssl?, do: database_enable_ssl!()
 
   @doc """
-  Reutrns whether to verify the ssl connection witht he database or not.
+  Returns whether to verify the ssl connection with he database or not.
   """
   @spec database_ssl_verify?() :: boolean()
   def database_ssl_verify?, do: database_ssl_verify!()

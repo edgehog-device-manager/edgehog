@@ -65,7 +65,7 @@ const relayMockResolvers: MockPayloadGenerator.MockResolvers = {
     return {
       id: btoa(`Device:${id}`),
       deviceId: "DqL4H107S42WBEHmDrvPLQ",
-      name: "Thingie",
+      name: "Thingy",
       capabilities: [
         "HARDWARE_INFO",
         "BASE_IMAGE",

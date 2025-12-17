@@ -41,7 +41,7 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
   @doc """
   Starts an executor for the given campaign in the `ExecutorRegistry` registry,
   with id `{tenant, campaign_id, type}` where `type` is the type of campaign (for
-  now only `:ot_update` campaign types are supported).
+  now only `:ota_update` campaign types are supported).
 
 
   """

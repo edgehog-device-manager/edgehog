@@ -145,7 +145,7 @@ $ kubectl create secret generic -n edgehog edgehog-device-forwarder-secret-key-b
 
 #### S3 Credentials (Google Cloud)
 
-To create an S3-compatbile bucket on Google Cloud to be used with Edgehog, the following steps have
+To create an S3-compatible bucket on Google Cloud to be used with Edgehog, the following steps have
 to be performed:
 
 - [Create a service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts#creating) in your

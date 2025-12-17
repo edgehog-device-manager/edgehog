@@ -46,7 +46,7 @@ defmodule Edgehog.Containers.Reconciler do
   ]
 
   # median time per device to setup the reconciliation timer. This is just an
-  # euristic based on online articles about database performance (which affect
+  # heuristic based on online articles about database performance (which affect
   # task setup as the device number is read from the database).
   @comp_time_per_device 200
 
@@ -128,7 +128,7 @@ defmodule Edgehog.Containers.Reconciler do
 
   @impl GenServer
   def handle_info({:reconcile, device_id}, %{tenant: tenant} = state) do
-    Logger.info("Reconciling device #{device_id} with astarte contianer interfaces")
+    Logger.info("Reconciling device #{device_id} with astarte container interfaces")
 
     reconcile(device_id, tenant)
     timer_ref = Process.send_after(self(), {:reconcile, device_id}, reconcile_timeout(tenant))

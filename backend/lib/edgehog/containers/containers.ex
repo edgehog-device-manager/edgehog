@@ -82,7 +82,7 @@ defmodule Edgehog.Containers do
       end
 
       list Deployment, :deployments, :read do
-        description "Returns all available dpeloyments."
+        description "Returns all available deployments."
         paginate_with :keyset
         relay? true
       end

@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Repo.Migrations.RemoveOldStateValues do
   @moduledoc """
-  Updates values in the `deployment` table. Old state values might interfer with the correct behavior of edgehog, as incorrect states cannot be displayed by graphql (and fail matches in trigger handling).
+  Updates values in the `deployment` table. Old state values might interfere with the correct behavior of edgehog, as incorrect states cannot be displayed by graphql (and fail matches in trigger handling).
   This migraiton sets the most plausible actual state of deployments, relying on the fact that the container reconciler will eventually run for interesting (online) devices and will solve the actual state of applications.
 
   Rationale:

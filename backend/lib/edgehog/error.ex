@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Error do
   @moduledoc """
-  Error utilites to match device errors when communicating with astarte.
+  Error utilities to match device errors when communicating with astarte.
   """
 
   alias Astarte.Client.APIError

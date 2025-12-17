@@ -46,7 +46,7 @@ defmodule Edgehog.OSManagement.OTAOperation.StatusCode do
   def match("InternalError"), do: {:ok, :internal_error}
   def match("InvalidBaseImage"), do: {:ok, :invalid_base_image}
   def match("SystemRollback"), do: {:ok, :system_rollback}
-  # Fallback to the default (overriden) `match/1` implementation so we still accept
+  # Fallback to the default (overridden) `match/1` implementation so we still accept
   # atom inputs etc
   def match(term), do: super(term)
 end

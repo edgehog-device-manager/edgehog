@@ -507,7 +507,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         release
         |> extract_containers!()
         |> extract_device_mappings!()
-        |> Enum.flat_map(&Enum.map(&1, fn dev_mapp -> Map.delete(dev_mapp, "id") end))
+        |> Enum.flat_map(&Enum.map(&1, fn dev_map -> Map.delete(dev_map, "id") end))
 
       assert Enum.sort([params]) == Enum.sort(result_device_mappings)
     end

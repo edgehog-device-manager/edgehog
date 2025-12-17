@@ -205,7 +205,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
     has_one :update_target, Edgehog.UpdateCampaigns.UpdateTarget do
       description """
-      The update target of an update campaing that created the managed
+      The update target of an update campaign that created the managed
       ota operation, if any.
       """
 

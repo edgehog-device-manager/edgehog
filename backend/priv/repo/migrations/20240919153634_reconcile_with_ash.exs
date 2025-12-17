@@ -298,7 +298,7 @@ defmodule Edgehog.Repo.Migrations.ReconcileWithAsh do
     # When we drop the index we don't pass and explicit name because it was generated with the
     # Ecto default name. When we create it we pass it explicitly to match what Ash migrations
     # expect.
-    # So in this block we mainly swap colums around to adhere to what Ash generates
+    # So in this block we mainly swap columns around to adhere to what Ash generates
 
     drop_if_exists unique_index(:base_image_collections, [:handle, :tenant_id])
 

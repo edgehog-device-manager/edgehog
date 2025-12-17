@@ -93,7 +93,7 @@ defmodule Edgehog.StorageTest do
     assert {:ok, %{status_code: 404}} = result
   end
 
-  test "Ephimeral Images can be uploaded and read" do
+  test "Ephemeral Images can be uploaded and read" do
     tenant = Edgehog.TenantsFixtures.tenant_fixture()
     file = temporary_file_fixture()
     device_id = [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)

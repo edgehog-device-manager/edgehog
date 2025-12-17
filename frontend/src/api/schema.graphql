@@ -287,7 +287,7 @@ enum CampaignOutcome {
   "The campaign has finished with a failure."
   FAILURE
 
-  "The campaign has finished succesfully."
+  "The campaign has finished successfully."
   SUCCESS
 }
 
@@ -320,7 +320,7 @@ enum UpdateCampaignOutcome {
   "The update campaign has finished with a failure."
   FAILURE
 
-  "The update campaign has finished succesfully."
+  "The update campaign has finished successfully."
   SUCCESS
 }
 
@@ -4846,7 +4846,7 @@ input OtaOperationFilterInput {
   device: DeviceFilterInput
 
   """
-  The update target of an update campaing that created the managed
+  The update target of an update campaign that created the managed
   ota operation, if any.
   """
   updateTarget: UpdateTargetFilterInput
@@ -4886,7 +4886,7 @@ type OtaOperation {
   device: Device!
 
   """
-  The update target of an update campaing that created the managed
+  The update target of an update campaign that created the managed
   ota operation, if any.
   """
   updateTarget: UpdateTarget
@@ -6199,7 +6199,7 @@ type RootQueryType {
   "Returns the desired application."
   application("The id of the record" id: ID!): Application
 
-  "Returns all available dpeloyments."
+  "Returns all available deployments."
   deployments(
     "How to sort the records in the response"
     sort: [DeploymentSortInput]
@@ -6660,7 +6660,7 @@ type VolumeStatus {
   "The volume id."
   id: String
 
-  "The volume status, wheather it was created or not."
+  "The volume status, whether it was created or not."
   created: Boolean
 }
 

@@ -62,7 +62,7 @@ it("correctly confirms by typing Enter", async () => {
   expect(props.onConfirm).toHaveBeenCalledTimes(1);
 });
 
-it("correctly dimisses with the cancel button", async () => {
+it("correctly dismisses with the cancel button", async () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
@@ -76,7 +76,7 @@ it("correctly dimisses with the cancel button", async () => {
   expect(props.onConfirm).not.toHaveBeenCalled();
 });
 
-it("correctly dimisses by typing Esc", async () => {
+it("correctly dismisses by typing Esc", async () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",

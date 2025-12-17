@@ -32,7 +32,7 @@ Note that the campaign will "snapshot" the Devices belonging to the Channel when
 started, and will [target](ota_update_concepts.html#update-target) only those.
 
 Once started, the Update Campaign waits for device to come online, at which point it initiates the OTA Update.
-[Roll-out mechanim](update_campaigns.html#roll-out-mechanism) properties can affect this process.
+[Roll-out mechanism](update_campaigns.html#roll-out-mechanism) properties can affect this process.
 For example, `Max Pending Operations` setting may postpone some OTA Operations.
 
 Before actual push to the Device corresponding [Update Target](ota_update_concepts.html#update-target)

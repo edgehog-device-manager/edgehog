@@ -128,7 +128,7 @@ defmodule Edgehog.SelectorTest do
                 lhs: %TagFilter{operator: :in, tag: "foo"},
                 rhs: %TagFilter{operator: :not_in, tag: "bar"}
               }} ==
-               Selector.parse(~s/"foo" in tags aNd "bar" not in tags/)
+               Selector.parse(~s/"foo" in tags and "bar" not in tags/)
 
       assert {:ok,
               %BinaryOp{

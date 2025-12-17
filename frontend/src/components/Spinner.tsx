@@ -19,17 +19,17 @@
 */
 
 import React from "react";
-import BoostrapSpinner from "react-bootstrap/Spinner";
+import BootstrapSpinner from "react-bootstrap/Spinner";
 
-type BoostrapSpinnerProps = React.ComponentProps<typeof BoostrapSpinner>;
+type BootstrapSpinnerProps = React.ComponentProps<typeof BootstrapSpinner>;
 
 type Props = Pick<
-  BoostrapSpinnerProps,
+  BootstrapSpinnerProps,
   "className" | "size" | "variant" | "as" | "aria-hidden"
 >;
 
 const Spinner = (props: Props) => {
-  return <BoostrapSpinner animation="border" role="status" {...props} />;
+  return <BootstrapSpinner animation="border" role="status" {...props} />;
 };
 
 export default Spinner;

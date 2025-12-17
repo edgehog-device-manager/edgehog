@@ -2015,6 +2015,9 @@
   "forms.CreateUpdateCampaign.selectBaseImageCollection": {
     "defaultMessage": "Select a base image collection..."
   },
+  "forms.CreateUpdateCampaign.submitButton": {
+    "defaultMessage": "Create"
+  },
   "forms.DeploymentCampaignForm.applicationLabel": {
     "defaultMessage": "Application"
   },
@@ -2228,9 +2231,6 @@
   },
   "forms.UpdateSystemModel.submitButton": {
     "defaultMessage": "Update"
-  },
-  "froms.CreateUpdateCampaign.submitButton": {
-    "defaultMessage": "Create"
   },
   "labels.cpuPeriodLabel": {
     "defaultMessage": "CPU Period (µs)"
