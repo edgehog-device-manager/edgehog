@@ -389,6 +389,11 @@ logs-astarte:
     @echo "📋 Showing Astarte service logs..."
     @if [ -d astarte ]; then (cd astarte && docker compose logs --tail=50 -f); else echo "❌ Astarte not initialized"; fi
 
+avoid-nitpick:
+    dprint fmt
+    typos -w
+    @echo "🤓 everything should be good now."
+
 # Show available recipes with descriptions
 help:
     @echo "🚀 Edgehog Development Tasks"
