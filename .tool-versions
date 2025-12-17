@@ -5,3 +5,4 @@ erlang 28.1
 elixir 1.18.4-otp-28
 nodejs 24.11.0
 postgres 18.0
+dprint 0.50.2
