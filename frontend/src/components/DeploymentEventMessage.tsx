@@ -19,14 +19,11 @@
 */
 
 import { useCallback, useMemo, useState } from "react";
-import { Collapse } from "react-bootstrap";
 import { FormattedMessage } from "react-intl";
 
 import { DeploymentTargetsTable_DeploymentTargetsFragment$data } from "@/api/__generated__/DeploymentTargetsTable_DeploymentTargetsFragment.graphql";
 
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
-import "./DeploymentEventMessage.scss";
+import CollapseItem from "@/components/CollapseItem";
 
 type DeploymentEventMessageProps = {
   event: NonNullable<
@@ -39,53 +36,55 @@ type DeploymentEventMessageProps = {
 const DeploymentEventMessage = ({ event }: DeploymentEventMessageProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleIsOpen = useCallback(() => setIsOpen((o) => !o), []);
-  const addInfo = useMemo(
-    () =>
-      event.addInfo && event.addInfo.length > 0 ? (
-        <pre className="deployment-event-message-wrap add-info">
-          {event.addInfo.map(
-            (line, index) => " ".repeat(2 * index) + line + "\n",
-          )}
-        </pre>
-      ) : (
-        <></>
-      ),
-    [event],
-  );
+  const addInfo = useMemo(() => {
+    if (!event.addInfo || event.addInfo.length === 0) return null;
 
-  return (
-    <>
-      {event.addInfo && event.addInfo.length > 0 ? (
-        <div className="deployment-event-message">
-          <div className="deployment-event-message-wrap">
-            <Button
-              onClick={toggleIsOpen}
-              className="pt-0 pb-2 d-flex align-items-center justify-content-start deployment-event-message-button"
-            >
-              {event.message ?? (
-                <FormattedMessage
-                  id="components.DeploymentEventMessage.noShortMessage"
-                  defaultMessage="No short message. Click to show extended info."
-                />
-              )}
-              <Icon
-                icon="chevronDown"
-                className={"status-chevron-icon " + (isOpen ? "closed" : "")}
-              />
-            </Button>
+    return (
+      <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+        {event.addInfo.map((line, index) => (
+          <div
+            key={index}
+            style={{
+              paddingLeft: `${index * 16}px`,
+            }}
+          >
+            {line}
           </div>
-          <Collapse in={isOpen}>{addInfo}</Collapse>
-          <div className="ghost-spacer">{addInfo}</div>
-        </div>
-      ) : (
-        (event.message ?? (
+        ))}
+      </pre>
+    );
+  }, [event.addInfo]);
+
+  if (!event.addInfo || event.addInfo.length === 0) {
+    return (
+      <>
+        {event.message ?? (
           <FormattedMessage
             id="components.DeploymentEventMessage.noMessage"
             defaultMessage="No message in event."
           />
-        ))
-      )}
-    </>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <CollapseItem
+      title={
+        event.message ?? (
+          <FormattedMessage
+            id="components.DeploymentEventMessage.noShortMessage"
+            defaultMessage="No short message. Click to show extended info."
+          />
+        )
+      }
+      type="flat"
+      open={isOpen}
+      onToggle={toggleIsOpen}
+      isInsideTable
+    >
+      <div className="mt-1 p-1 bg-light">{addInfo}</div>
+    </CollapseItem>
   );
 };
 

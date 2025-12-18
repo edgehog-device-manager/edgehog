@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2024, 2025 SECO Mind Srl
+ * Copyright 2024 - 2025 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Collapse } from "react-bootstrap";
 
 import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "@/api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
 import type { CreateRelease_NetworksOptionsFragment$key } from "@/api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
@@ -76,9 +75,11 @@ import Select, { SingleValue } from "react-select";
 import ConfirmModal from "@/components/ConfirmModal";
 import { FormRow } from "@/components/FormRow";
 import ContainerForm from "@/forms/ContainerForm";
-import Icon from "@/components/Icon";
 import Tag from "@/components/Tag";
 import type { KeyValue } from "@/forms/index";
+import CollapseItem, {
+  useCollapsibleSections,
+} from "@/components/CollapseItem";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -584,16 +585,11 @@ const CreateRelease = ({
     setRemoveIndex(index);
   };
 
-  const [openIndexes, setOpenIndexes] = useState<number[]>(
-    containersFields.map((_, index) => index),
-  );
-  const toggleIndex = (index: number) => {
-    setOpenIndexes((current) =>
-      current.includes(index)
-        ? current.filter((i) => i !== index)
-        : [...current, index],
-    );
-  };
+  const {
+    toggleSection: toggleIndex,
+    isSectionOpen,
+    setOpenSections: setOpenIndexes,
+  } = useCollapsibleSections<number>(containersFields.map((_, index) => index));
 
   return (
     <>
@@ -739,13 +735,13 @@ const CreateRelease = ({
           </Stack>
           {containersFields.map((field, index) => {
             return (
-              <div key={field.id ?? index} className="mb-3 border rounded">
-                <Button
-                  variant="light"
-                  className="w-100 d-flex align-items-center fw-bold"
-                  onClick={() => toggleIndex(index)}
-                >
-                  <h5 className="d-flex align-items-center gap-2 mb-0">
+              <CollapseItem
+                key={field.id ?? index}
+                type="card-parent"
+                open={isSectionOpen(index)}
+                onToggle={() => toggleIndex(index)}
+                title={
+                  <span className="d-flex align-items-center gap-2">
                     <FormattedMessage
                       id="forms.ContainerForm.containerTitle"
                       defaultMessage="Container {containerNumber}"
@@ -769,34 +765,24 @@ const CreateRelease = ({
                         />
                       </Tag>
                     )}
-                  </h5>
-                  <span className="ms-auto">
-                    <Icon
-                      icon="chevronDown"
-                      className={
-                        "status-chevron-icon " +
-                        (openIndexes.includes(index) ? "closed" : "")
-                      }
-                    />
                   </span>
-                </Button>
-                <Collapse in={openIndexes.includes(index)}>
-                  <div className="p-3 border-top">
-                    <ContainerForm
-                      key={field.id}
-                      index={index}
-                      register={register}
-                      errors={errors}
-                      remove={handleRemoveContainer}
-                      imageCredentials={imageCredentialsOptions}
-                      networks={networkOptions}
-                      volumes={volumeOptions}
-                      control={control}
-                      onRequestRemove={handleRequestRemove}
-                    />
-                  </div>
-                </Collapse>
-              </div>
+                }
+              >
+                <div className="p-3">
+                  <ContainerForm
+                    key={field.id}
+                    index={index}
+                    register={register}
+                    errors={errors}
+                    remove={handleRemoveContainer}
+                    imageCredentials={imageCredentialsOptions}
+                    networks={networkOptions}
+                    volumes={volumeOptions}
+                    control={control}
+                    onRequestRemove={handleRequestRemove}
+                  />
+                </div>
+              </CollapseItem>
             );
           })}
 

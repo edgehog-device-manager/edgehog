@@ -18,15 +18,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { useState } from "react";
-import { Col, Collapse, Container, Row } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 
 import ContainerStatus, {
   parseContainerState,
 } from "@/components/ContainerStatus";
-import Icon from "@/components/Icon";
 import Tag from "@/components/Tag";
+import CollapseItem from "@/components/CollapseItem";
 
 interface ContainerDeployment {
   id: string;
@@ -49,8 +49,6 @@ const ContainerStatusList = ({
   isExpanded: externalIsExpanded,
   onToggleExpanded,
 }: Props) => {
-  const intl = useIntl();
-
   const [internalIsExpanded, setInternalIsExpanded] = useState(false);
 
   const isExpanded =
@@ -87,106 +85,87 @@ const ContainerStatusList = ({
   const removingCount = statusCounts.REMOVING || 0;
 
   return (
-    <div>
-      <div
-        className="d-flex align-items-center cursor-pointer user-select-none"
-        onClick={toggleExpanded}
-        style={{ cursor: "pointer" }}
-        role="button"
-        aria-expanded={isExpanded}
-        title={
-          isExpanded
-            ? intl.formatMessage({
-                id: "components.ContainerStatusList.collapseContainerList",
-                defaultMessage: "Collapse container list",
-              })
-            : intl.formatMessage({
-                id: "components.ContainerStatusList.expandContainerList",
-                defaultMessage: "Expand container list",
-              })
-        }
-      >
-        <Tag className="bg-secondary me-1 small">{totalContainers}</Tag>
+    <CollapseItem
+      title={
+        <div className="d-flex align-items-center">
+          <Tag className="bg-secondary me-1 small">{totalContainers}</Tag>
 
-        {runningCount > 0 && (
-          <Tag className="bg-success me-1 small">
-            <FormattedMessage
-              id="components.ContainerStatusList.runningCount"
-              defaultMessage="{count} running"
-              values={{ count: runningCount }}
-            />
-          </Tag>
-        )}
+          {runningCount > 0 && (
+            <Tag className="bg-success me-1 small">
+              <FormattedMessage
+                id="components.ContainerStatusList.runningCount"
+                defaultMessage="{count} running"
+                values={{ count: runningCount }}
+              />
+            </Tag>
+          )}
 
-        {exitedCount > 0 && (
-          <Tag className="bg-secondary me-1 small">
-            <FormattedMessage
-              id="components.ContainerStatusList.exitedCount"
-              defaultMessage="{count} exited"
-              values={{ count: exitedCount }}
-            />
-          </Tag>
-        )}
+          {exitedCount > 0 && (
+            <Tag className="bg-secondary me-1 small">
+              <FormattedMessage
+                id="components.ContainerStatusList.exitedCount"
+                defaultMessage="{count} exited"
+                values={{ count: exitedCount }}
+              />
+            </Tag>
+          )}
 
-        {deadCount > 0 && (
-          <Tag className="bg-danger me-1 small">
-            <FormattedMessage
-              id="components.ContainerStatusList.deadCount"
-              defaultMessage="{count} dead"
-              values={{ count: deadCount }}
-            />
-          </Tag>
-        )}
+          {deadCount > 0 && (
+            <Tag className="bg-danger me-1 small">
+              <FormattedMessage
+                id="components.ContainerStatusList.deadCount"
+                defaultMessage="{count} dead"
+                values={{ count: deadCount }}
+              />
+            </Tag>
+          )}
 
-        {(restartingCount > 0 || removingCount > 0) && (
-          <Tag className="bg-warning me-1 small">
-            <FormattedMessage
-              id="components.ContainerStatusList.processingCount"
-              defaultMessage="{count} processing"
-              values={{ count: restartingCount + removingCount }}
-            />
-          </Tag>
-        )}
-
-        <Icon
-          icon={isExpanded ? "caretUp" : "caretDown"}
-          className="text-secondary ms-2"
-          size="sm"
-        />
-      </div>
-
-      <Collapse in={isExpanded}>
-        <div className="mt-2">
-          {containerDeployments.map((containerDeployment) => (
-            <Container key={containerDeployment.id}>
-              <Row className="justify-content-between align-items-center">
-                <Col>
-                  <small className="text-muted">
-                    <FormattedMessage
-                      id="components.ContainerStatusList.containerReference"
-                      defaultMessage="{reference}"
-                      values={{
-                        reference:
-                          containerDeployment.container?.image?.reference ||
-                          "Unknown",
-                      }}
-                    />
-                  </small>
-                </Col>
-
-                <Col>
-                  <ContainerStatus
-                    state={parseContainerState(
-                      containerDeployment.state || undefined,
-                    )}
-                  />
-                </Col>
-              </Row>
-            </Container>
-          ))}
+          {(restartingCount > 0 || removingCount > 0) && (
+            <Tag className="bg-warning me-1 small">
+              <FormattedMessage
+                id="components.ContainerStatusList.processingCount"
+                defaultMessage="{count} processing"
+                values={{ count: restartingCount + removingCount }}
+              />
+            </Tag>
+          )}
         </div>
-      </Collapse>
-    </div>
+      }
+      type="flat"
+      open={isExpanded}
+      onToggle={toggleExpanded}
+      isInsideTable
+    >
+      <div className="mt-2">
+        {containerDeployments.map((containerDeployment) => (
+          <Container key={containerDeployment.id}>
+            <Row className="justify-content-between align-items-center">
+              <Col>
+                <small className="text-muted">
+                  <FormattedMessage
+                    id="components.ContainerStatusList.containerReference"
+                    defaultMessage="{reference}"
+                    values={{
+                      reference:
+                        containerDeployment.container?.image?.reference ||
+                        "Unknown",
+                    }}
+                  />
+                </small>
+              </Col>
+
+              <Col>
+                <ContainerStatus
+                  state={parseContainerState(
+                    containerDeployment.state || undefined,
+                  )}
+                />
+              </Col>
+            </Row>
+          </Container>
+        ))}
+      </div>
+    </CollapseItem>
   );
 };
 

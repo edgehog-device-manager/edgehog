@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2024, 2025 SECO Mind Srl
+ * Copyright 2024 - 2025 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
-import Collapse from "react-bootstrap/Collapse";
-import Button from "react-bootstrap/Button";
 import { Stack } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 import type { ContainersTable_PaginationQuery } from "@/api/__generated__/ContainersTable_PaginationQuery.graphql";
 import type {
@@ -42,6 +38,9 @@ import DeviceMappingsFormInput from "@/components/DeviceMappingsFormInput";
 import { FormRow as BaseFormRow, FormRowProps } from "@/components/FormRow";
 import { restartPolicyOptions } from "@/forms/CreateRelease";
 import { RECORDS_TO_LOAD_NEXT } from "@/constants";
+import CollapseItem, {
+  useCollapsibleSections,
+} from "@/components/CollapseItem";
 
 const FormRow = (props: FormRowProps) => (
   <BaseFormRow {...props} className="mb-2" />
@@ -173,17 +172,10 @@ const VolumeDetails = ({
   containerVolumes,
   containerIndex,
 }: volumeDetailsProps) => {
-  const [openVolumeIndexes, setOpenVolumeIndexes] = useState<number[]>(
-    containerVolumes.edges?.map((_, index) => index) ?? [],
-  );
-
-  const toggleVolume = (index: number) => {
-    setOpenVolumeIndexes((current) =>
-      current.includes(index)
-        ? current.filter((i) => i !== index)
-        : [...current, index],
+  const { toggleSection: toggleVolume, isSectionOpen } =
+    useCollapsibleSections<number>(
+      containerVolumes.edges?.map((_, index) => index) ?? [],
     );
-  };
 
   return (
     <div className="mt-1">
@@ -204,85 +196,67 @@ const VolumeDetails = ({
       ) : (
         containerVolumes.edges.map((volEdge, volIndex) => {
           const mount = volEdge.node;
-          const isOpen = openVolumeIndexes.includes(volIndex);
 
           return (
-            <div
-              key={mount?.volume.id ?? volIndex}
-              className="mb-2 border rounded bg-light"
-            >
-              <Button
-                variant="light"
-                className="w-100 d-flex align-items-center"
-                onClick={() => toggleVolume(volIndex)}
-                aria-expanded={isOpen}
+            <div key={mount?.volume.id ?? volIndex}>
+              <CollapseItem
+                title={mount?.volume.label ?? `Volume ${volIndex}`}
+                open={isSectionOpen(volIndex)}
+                onToggle={() => toggleVolume(volIndex)}
               >
-                {mount?.volume.label}
-                <span className="ms-auto">
-                  {isOpen ? (
-                    <FontAwesomeIcon icon={faChevronUp} />
-                  ) : (
-                    <FontAwesomeIcon icon={faChevronDown} />
-                  )}
-                </span>
-              </Button>
-
-              <Collapse in={isOpen}>
-                <div className="p-2 border-top">
-                  <FormRow
-                    id={`containers-${containerIndex}-volume-${volIndex}-target`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.targetLabel"
-                        defaultMessage="Target"
-                      />
-                    }
-                  >
-                    <Form.Control value={mount?.target ?? ""} readOnly />
-                  </FormRow>
-
-                  <FormRow
-                    id={`containers-${containerIndex}-volume-${volIndex}-label`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.volumeLabelLabel"
-                        defaultMessage="Label"
-                      />
-                    }
-                  >
-                    <Form.Control value={mount?.volume.label ?? ""} readOnly />
-                  </FormRow>
-
-                  <FormRow
-                    id={`containers-${containerIndex}-volume-${volIndex}-driver`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.volumeDriverLabel"
-                        defaultMessage="Driver"
-                      />
-                    }
-                  >
-                    <Form.Control value={mount?.volume.driver ?? ""} readOnly />
-                  </FormRow>
-                  <FormRow
-                    id="volumeOptions"
-                    label={
-                      <FormattedMessage
-                        id="pages.volume.options"
-                        defaultMessage="Options"
-                      />
-                    }
-                  >
-                    <MonacoJsonEditor
-                      value={formatJson(mount?.volume.options)}
-                      onChange={() => {}}
-                      defaultValue={formatJson(mount?.volume.options)}
-                      readonly={true}
-                      initialLines={1}
+                <FormRow
+                  id={`containers-${containerIndex}-volume-${volIndex}-target`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.targetLabel"
+                      defaultMessage="Target"
                     />
-                  </FormRow>
-                </div>
-              </Collapse>
+                  }
+                >
+                  <Form.Control value={mount?.target ?? ""} readOnly />
+                </FormRow>
+
+                <FormRow
+                  id={`containers-${containerIndex}-volume-${volIndex}-label`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.volumeLabelLabel"
+                      defaultMessage="Label"
+                    />
+                  }
+                >
+                  <Form.Control value={mount?.volume.label ?? ""} readOnly />
+                </FormRow>
+
+                <FormRow
+                  id={`containers-${containerIndex}-volume-${volIndex}-driver`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.volumeDriverLabel"
+                      defaultMessage="Driver"
+                    />
+                  }
+                >
+                  <Form.Control value={mount?.volume.driver ?? ""} readOnly />
+                </FormRow>
+                <FormRow
+                  id="volumeOptions"
+                  label={
+                    <FormattedMessage
+                      id="pages.volume.options"
+                      defaultMessage="Options"
+                    />
+                  }
+                >
+                  <MonacoJsonEditor
+                    value={formatJson(mount?.volume.options)}
+                    onChange={() => {}}
+                    defaultValue={formatJson(mount?.volume.options)}
+                    readonly={true}
+                    initialLines={1}
+                  />
+                </FormRow>
+              </CollapseItem>
             </div>
           );
         })
@@ -299,17 +273,10 @@ type networkDetailsProps = {
 };
 
 const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
-  const [openNetworkIndexes, setOpenNetworkIndexes] = useState<number[]>(
-    networks.edges?.map((_, index) => index) ?? [],
-  );
-
-  const toggleNetwork = (index: number) => {
-    setOpenNetworkIndexes((current) =>
-      current.includes(index)
-        ? current.filter((i) => i !== index)
-        : [...current, index],
+  const { toggleSection: toggleNetwork, isSectionOpen } =
+    useCollapsibleSections<number>(
+      networks.edges?.map((_, index) => index) ?? [],
     );
-  };
 
   return (
     <div className="mt-1">
@@ -330,106 +297,88 @@ const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
       ) : (
         networks.edges.map((netEdge, netIndex) => {
           const net = netEdge.node;
-          const isOpen = openNetworkIndexes.includes(netIndex);
 
           return (
-            <div
-              key={net?.id ?? netIndex}
-              className="mb-2 border rounded bg-light"
-            >
-              <Button
-                variant="light"
-                className="w-100 d-flex align-items-center"
-                onClick={() => toggleNetwork(netIndex)}
-                aria-expanded={isOpen}
+            <div key={net?.id ?? netIndex}>
+              <CollapseItem
+                title={net.label ?? `Network ${netIndex}`}
+                open={isSectionOpen(netIndex)}
+                onToggle={() => toggleNetwork(netIndex)}
               >
-                {net?.label}
-                <span className="ms-auto">
-                  {isOpen ? (
-                    <FontAwesomeIcon icon={faChevronUp} />
-                  ) : (
-                    <FontAwesomeIcon icon={faChevronDown} />
-                  )}
-                </span>
-              </Button>
-
-              <Collapse in={isOpen}>
-                <div className="p-2 border-top">
-                  <FormRow
-                    id={`containers-${containerIndex}-network-${netIndex}-label`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.networkLabelLabel"
-                        defaultMessage="Label"
-                      />
-                    }
-                  >
-                    <Form.Control value={net?.label ?? ""} readOnly />
-                  </FormRow>
-
-                  <FormRow
-                    id={`containers-${containerIndex}-network-${netIndex}-driver`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.networkDriverLabel"
-                        defaultMessage="Driver"
-                      />
-                    }
-                  >
-                    <Form.Control value={net?.driver ?? ""} readOnly />
-                  </FormRow>
-
-                  <FormRow
-                    id={`containers-${containerIndex}-network-${netIndex}-internal`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.networkInternalLabel"
-                        defaultMessage="Internal"
-                      />
-                    }
-                  >
-                    <Form.Check
-                      type="checkbox"
-                      checked={net?.internal === true}
-                      readOnly
+                <FormRow
+                  id={`containers-${containerIndex}-network-${netIndex}-label`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.networkLabelLabel"
+                      defaultMessage="Label"
                     />
-                  </FormRow>
+                  }
+                >
+                  <Form.Control value={net?.label ?? ""} readOnly />
+                </FormRow>
 
-                  <FormRow
-                    id={`containers-${containerIndex}-network-${netIndex}-enableipv6`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.networkEnableIPv6Label"
-                        defaultMessage="Enable IPv6"
-                      />
-                    }
-                  >
-                    <Form.Check
-                      type="checkbox"
-                      checked={net?.enableIpv6 === true}
-                      readOnly
+                <FormRow
+                  id={`containers-${containerIndex}-network-${netIndex}-driver`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.networkDriverLabel"
+                      defaultMessage="Driver"
                     />
-                  </FormRow>
+                  }
+                >
+                  <Form.Control value={net?.driver ?? ""} readOnly />
+                </FormRow>
 
-                  <FormRow
-                    id={`containers-${containerIndex}-network-${netIndex}-options`}
-                    label={
-                      <FormattedMessage
-                        id="components.ContainersTable.networkOptionsLabel"
-                        defaultMessage="Options (JSON)"
-                      />
-                    }
-                  >
-                    <MonacoJsonEditor
-                      value={formatJson(net?.options)}
-                      onChange={() => {}}
-                      defaultValue={formatJson(net?.options)}
-                      readonly={true}
-                      initialLines={1}
+                <FormRow
+                  id={`containers-${containerIndex}-network-${netIndex}-internal`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.networkInternalLabel"
+                      defaultMessage="Internal"
                     />
-                  </FormRow>
-                </div>
-              </Collapse>
+                  }
+                >
+                  <Form.Check
+                    type="checkbox"
+                    checked={net?.internal === true}
+                    readOnly
+                  />
+                </FormRow>
+
+                <FormRow
+                  id={`containers-${containerIndex}-network-${netIndex}-enableipv6`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.networkEnableIPv6Label"
+                      defaultMessage="Enable IPv6"
+                    />
+                  }
+                >
+                  <Form.Check
+                    type="checkbox"
+                    checked={net?.enableIpv6 === true}
+                    readOnly
+                  />
+                </FormRow>
+
+                <FormRow
+                  id={`containers-${containerIndex}-network-${netIndex}-options`}
+                  label={
+                    <FormattedMessage
+                      id="components.ContainersTable.networkOptionsLabel"
+                      defaultMessage="Options (JSON)"
+                    />
+                  }
+                >
+                  <MonacoJsonEditor
+                    value={formatJson(net?.options)}
+                    onChange={() => {}}
+                    defaultValue={formatJson(net?.options)}
+                    readonly={true}
+                    initialLines={1}
+                  />
+                </FormRow>
+              </CollapseItem>
             </div>
           );
         })
@@ -448,18 +397,23 @@ type DeviceMappingDetailsProps = {
 const DeviceMappingDetails = ({
   deviceMappings,
 }: DeviceMappingDetailsProps) => {
-  const dmFormInputProps = { deviceMappings: deviceMappings };
+  const dmFormInputProps = { deviceMappings };
+  const [open, setOpen] = useState(true);
+
   return (
-    <div className="mt-3">
-      <h6>
+    <CollapseItem
+      type="flat"
+      title={
         <FormattedMessage
           id="components.ContainersTable.deviceMappingsLabel"
           defaultMessage="Device Mappings"
         />
-      </h6>
-
+      }
+      open={open}
+      onToggle={() => setOpen((o) => !o)}
+    >
       {!deviceMappings?.edges?.length ? (
-        <p className="fst-italic">
+        <p className="fst-italic mb-0">
           <FormattedMessage
             id="components.ContainersTable.noDeviceMappings"
             defaultMessage="No device mappings assigned."
@@ -474,7 +428,7 @@ const DeviceMappingDetails = ({
           />
         </div>
       )}
-    </div>
+    </CollapseItem>
   );
 };
 
@@ -497,17 +451,40 @@ type ContainerDetailsProps = {
   container: ContainerRecord;
   index: number;
 };
+
+type ContainerSection =
+  | "image"
+  | "network"
+  | "storage"
+  | "resourceLimits"
+  | "security"
+  | "runtime";
+
 const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
+  const { toggleSection, isSectionOpen } =
+    useCollapsibleSections<ContainerSection>([
+      "image",
+      "network",
+      "storage",
+      "resourceLimits",
+      "security",
+      "runtime",
+    ]);
+
   return (
     <div style={styles.detailsWrapper}>
       {/* Image Configuration Section */}
-      <div className="border-bottom pb-3 mt-2">
-        <h6 className="mb-3">
+      <CollapseItem
+        type="flat"
+        open={isSectionOpen("image")}
+        onToggle={() => toggleSection("image")}
+        title={
           <FormattedMessage
             id="forms.ContainersTable.imageConfigSection"
             defaultMessage="Image Configuration"
           />
-        </h6>
+        }
+      >
         <Stack gap={2}>
           <FormRow
             id={`containers-${index}-image-reference`}
@@ -540,15 +517,20 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             />
           </FormRow>
         </Stack>
-      </div>
+      </CollapseItem>
+
       {/* Network Configuration Section */}
-      <div className="border-bottom pb-3">
-        <h6 className="mt-3 mb-3">
+      <CollapseItem
+        type="flat"
+        open={isSectionOpen("network")}
+        onToggle={() => toggleSection("network")}
+        title={
           <FormattedMessage
             id="forms.ContainersTable.networkConfigSection"
             defaultMessage="Network Configuration"
           />
-        </h6>
+        }
+      >
         <Stack gap={2}>
           <FormRow
             id={`containers-${index}-hostname`}
@@ -605,15 +587,20 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             containerIndex={index}
           />
         </Stack>
-      </div>
+      </CollapseItem>
+
       {/* Storage Configuration Section */}
-      <div className="border-bottom pb-3">
-        <h6 className="mt-3 mb-3">
+      <CollapseItem
+        type="flat"
+        open={isSectionOpen("storage")}
+        onToggle={() => toggleSection("storage")}
+        title={
           <FormattedMessage
             id="forms.ContainersTable.storageConfigSection"
             defaultMessage="Storage Configuration"
           />
-        </h6>
+        }
+      >
         <Stack gap={2}>
           <FormRow
             id={`containers-${index}-binds`}
@@ -688,15 +675,20 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             containerIndex={index}
           />
         </Stack>
-      </div>
+      </CollapseItem>
+
       {/* Resource Limits Section */}
-      <div className="border-bottom pb-3">
-        <h6 className="mt-3 mb-3">
+      <CollapseItem
+        type="flat"
+        open={isSectionOpen("resourceLimits")}
+        onToggle={() => toggleSection("resourceLimits")}
+        title={
           <FormattedMessage
             id="forms.ContainersTable.resourceLimitsSection"
             defaultMessage="Resource Limits"
           />
-        </h6>
+        }
+      >
         <Stack gap={2}>
           <FormRow
             id={`containers-${index}-memory`}
@@ -794,15 +786,20 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             <Form.Control value={container.cpuRealtimeRuntime ?? ""} readOnly />
           </FormRow>
         </Stack>
-      </div>
+      </CollapseItem>
+
       {/* Security & Capabilities Section */}
-      <div className="border-bottom pb-3">
-        <h6 className="mt-3 mb-3">
+      <CollapseItem
+        type="flat"
+        open={isSectionOpen("security")}
+        onToggle={() => toggleSection("security")}
+        title={
           <FormattedMessage
             id="forms.ContainersTable.securitySection"
             defaultMessage="Security & Capabilities"
           />
-        </h6>
+        }
+      >
         <Stack gap={2}>
           <FormRow
             id={`containers-${index}-privileged`}
@@ -873,15 +870,20 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             )}
           </FormRow>
         </Stack>
-      </div>
+      </CollapseItem>
+
       {/* Runtime & Environment Section */}
-      <div className="border-bottom pb-3">
-        <h6 className="mt-3 mb-3">
+      <CollapseItem
+        type="flat"
+        open={isSectionOpen("runtime")}
+        onToggle={() => toggleSection("runtime")}
+        title={
           <FormattedMessage
             id="forms.ContainersTable.runtimeSection"
             defaultMessage="Runtime & Environment"
           />
-        </h6>
+        }
+      >
         <Stack gap={2}>
           <FormRow
             id={`containers-${index}-restartPolicy`}
@@ -919,7 +921,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             />
           </FormRow>
         </Stack>
-      </div>
+      </CollapseItem>
       <DeviceMappingDetails deviceMappings={container.deviceMappings} />
     </div>
   );
@@ -947,16 +949,8 @@ const ContainersTable = ({
     return data.containers?.edges?.map((edge) => edge?.node) ?? [];
   }, [data]);
 
-  const [openIndexes, setOpenIndexes] = useState<number[]>(
-    containers.map((_, index) => index),
-  );
-  const toggleIndex = (index: number) => {
-    setOpenIndexes((current) =>
-      current.includes(index)
-        ? current.filter((i) => i !== index)
-        : [...current, index],
-    );
-  };
+  const { toggleSection: toggleIndex, isSectionOpen } =
+    useCollapsibleSections<number>(containers.map((_, index) => index));
 
   if (containers.length === 0) {
     return (
@@ -974,33 +968,20 @@ const ContainersTable = ({
   return (
     <div className={className}>
       {containers.map((container, index) => (
-        <div key={container.id ?? index} className="mb-3 border rounded">
-          <Button
-            variant="light"
-            className="w-100 d-flex align-items-center fw-bold"
-            onClick={() => toggleIndex(index)}
+        <InfiniteScroll
+          className={className}
+          loading={isLoadingNext}
+          onLoadMore={hasNext ? loadNextContainers : undefined}
+        >
+          <CollapseItem
+            type="card-parent"
+            title={container.image.reference}
+            open={isSectionOpen(index)}
+            onToggle={() => toggleIndex(index)}
           >
-            {container.image.reference}
-            <span className="ms-auto">
-              {openIndexes.includes(index) ? (
-                <FontAwesomeIcon icon={faChevronUp} />
-              ) : (
-                <FontAwesomeIcon icon={faChevronDown} />
-              )}
-            </span>
-          </Button>
-          <InfiniteScroll
-            className={className}
-            loading={isLoadingNext}
-            onLoadMore={hasNext ? loadNextContainers : undefined}
-          >
-            <Collapse in={openIndexes.includes(index)}>
-              <div className="p-3 border-top">
-                <ContainerDetails container={container} index={index} />
-              </div>
-            </Collapse>
-          </InfiniteScroll>
-        </div>
+            <ContainerDetails container={container} index={index} />
+          </CollapseItem>
+        </InfiniteScroll>
       ))}
     </div>
   );

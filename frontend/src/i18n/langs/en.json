@@ -228,6 +228,12 @@
     "defaultMessage": "Target Groups",
     "description": "Title for the Target Groups column of the channels table"
   },
+  "components.CollapseItem.collapseList": {
+    "defaultMessage": "Collapse list"
+  },
+  "components.CollapseItem.expandList": {
+    "defaultMessage": "Expand list"
+  },
   "components.ConfirmModal.cancelButton": {
     "defaultMessage": "Cancel",
     "description": "Title for the button to cancel and dismiss a confirmation modal"
@@ -262,9 +268,6 @@
   "components.ContainerStatus.unknown": {
     "defaultMessage": "Unknown"
   },
-  "components.ContainerStatusList.collapseContainerList": {
-    "defaultMessage": "Collapse container list"
-  },
   "components.ContainerStatusList.containerReference": {
     "defaultMessage": "{reference}"
   },
@@ -273,9 +276,6 @@
   },
   "components.ContainerStatusList.exitedCount": {
     "defaultMessage": "{count} exited"
-  },
-  "components.ContainerStatusList.expandContainerList": {
-    "defaultMessage": "Expand container list"
   },
   "components.ContainerStatusList.noContainers": {
     "defaultMessage": "No containers"

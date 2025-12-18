@@ -74,7 +74,7 @@ const StringArrayFormInput: React.FC<StringArrayFormInputProps> = ({
   }
 
   return (
-    <div className="p-3 bg-light border rounded">
+    <div className="p-3 border rounded">
       <Stack gap={3}>
         {value.map((item: string, i: number) => {
           const itemError = errors?.[i]?.message;

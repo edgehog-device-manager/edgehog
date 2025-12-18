@@ -18,8 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from "react";
-import { Card, Col, Collapse, Row, Tab, Tabs } from "react-bootstrap";
+import { Card, Col, Row, Tab, Tabs } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, usePaginationFragment } from "react-relay";
 
@@ -47,17 +46,13 @@ import type {
 } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
-import ContainerStatus, {
-  parseContainerState,
-} from "@/components/ContainerStatus";
 import Table, { createColumnHelper } from "@/components/Table";
 import { Link, Route } from "@/Navigation";
-import Button from "./Button";
 import DeploymentReadiness from "./DeploymentReadiness";
 import DeploymentStateComponent, {
   parseDeploymentState,
 } from "./DeploymentState";
-import Icon from "./Icon";
+import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
 
 const DEPLOYMENT_DETAILS_EVENTS_PAGINATION_FRAGMENT = graphql`
   fragment DeploymentDetails_events on Deployment
@@ -363,35 +358,17 @@ const CollapsibleTable = ({
   data,
   headerStyle,
 }: CollapsibleTableProps) => {
-  const [open, setOpen] = useState(true);
+  const { open, toggle } = useCollapseToggle(true);
 
   return (
-    <Card className="mb-2 shadow-sm">
-      <Card.Header className="p-0">
-        <Button
-          variant="light"
-          className="w-100 d-flex align-items-center fw-semibold p-2"
-          onClick={() => setOpen(!open)}
-          style={{ fontSize: "0.85rem" }}
-        >
-          {title}
-          <span className="ms-auto">
-            {open ? <Icon icon="caretUp" /> : <Icon icon="caretDown" />}
-          </span>
-        </Button>
-      </Card.Header>
-
-      <Collapse in={open}>
-        <div className="p-2 border-top">
-          <Table
-            columns={columns}
-            data={data}
-            hideSearch
-            headerStyle={headerStyle}
-          />
-        </div>
-      </Collapse>
-    </Card>
+    <CollapseItem title={title} open={open} onToggle={toggle}>
+      <Table
+        columns={columns}
+        data={data}
+        hideSearch
+        headerStyle={headerStyle}
+      />
+    </CollapseItem>
   );
 };
 
@@ -407,6 +384,8 @@ const ContainerDeploymentItem = ({
   imageDeployment,
   containerState,
 }: ContainerDeploymentItemProps) => {
+  const { open, toggle } = useCollapseToggle(true);
+
   const networkData = useFragment<DeploymentDetails_networkDeployments$key>(
     DEPLOYMENT_DETAILS_NETWORK_DEPLOYMENTS_FRAGMENT,
     containerRef,
@@ -433,100 +412,84 @@ const ContainerDeploymentItem = ({
     deviceMappingData?.deviceMappingDeployments?.edges?.map((e) => e.node) ??
     [];
 
-  const [open, setOpen] = useState(true);
-
   return (
-    <div className="mb-2 border rounded">
-      <Button
-        variant="light"
-        className="w-100 d-flex align-items-center fw-semibold p-2"
-        onClick={() => setOpen(!open)}
-        style={{ fontSize: "0.9rem" }}
-      >
-        <span>{imageDeployment?.image?.reference}</span>
-
-        <span className="ms-auto d-inline-flex gap-2 justify-content-center align-items-center">
-          <ContainerStatus
-            state={parseContainerState(containerState || undefined)}
+    <CollapseItem
+      title={imageDeployment?.image?.reference}
+      type="card-parent"
+      open={open}
+      onToggle={toggle}
+      containerStatus={containerState}
+    >
+      {imageDeployment && (
+        <Row className="mb-3 ">
+          <span className="d-flex gap-2 small">
+            <strong>
+              <FormattedMessage
+                id={"components.deploymentDetails.imageStatus"}
+                defaultMessage={" Image Status: "}
+              />
+            </strong>
+            {imageDeployment.state}
+          </span>
+        </Row>
+      )}
+      {networkNodes.length > 0 ? (
+        <CollapsibleTable
+          title={`Networks`}
+          columns={networkColumns}
+          data={networkNodes}
+          headerStyle={{ fontSize: "0.8rem", width: "50%" }}
+        />
+      ) : (
+        <p
+          className="fst-italic ms-1"
+          style={{ fontSize: "0.85rem", opacity: 0.7 }}
+        >
+          <FormattedMessage
+            id={"components.deploymentDetails.noNetworksMessage"}
+            defaultMessage={"No Networks"}
           />
-          {open ? <Icon icon="caretUp" /> : <Icon icon="caretDown" />}
-        </span>
-      </Button>
+        </p>
+      )}
 
-      <Collapse in={open}>
-        <div className="p-2 border-top">
-          {imageDeployment && (
-            <Row className="mb-3 ">
-              <span className="d-flex gap-2 small">
-                <strong>
-                  <FormattedMessage
-                    id={"components.deploymentDetails.imageStatus"}
-                    defaultMessage={" Image Status: "}
-                  />
-                </strong>
-                {imageDeployment.state}
-              </span>
-            </Row>
-          )}
-          {networkNodes.length > 0 ? (
-            <CollapsibleTable
-              title={`Networks`}
-              columns={networkColumns}
-              data={networkNodes}
-              headerStyle={{ fontSize: "0.8rem", width: "50%" }}
-            />
-          ) : (
-            <p
-              className="fst-italic ms-1"
-              style={{ fontSize: "0.85rem", opacity: 0.7 }}
-            >
-              <FormattedMessage
-                id={"components.deploymentDetails.noNetworksMessage"}
-                defaultMessage={"No Networks"}
-              />
-            </p>
-          )}
+      {volumeNodes.length > 0 ? (
+        <CollapsibleTable
+          title={`Volumes`}
+          columns={volumeColumns}
+          data={volumeNodes}
+          headerStyle={{ fontSize: "0.8rem", width: "50%" }}
+        />
+      ) : (
+        <p
+          className="fst-italic ms-1"
+          style={{ fontSize: "0.85rem", opacity: 0.7 }}
+        >
+          <FormattedMessage
+            id={"components.deploymentDetails.noVolumesMessage"}
+            defaultMessage={"No Volumes"}
+          />
+        </p>
+      )}
 
-          {volumeNodes.length > 0 ? (
-            <CollapsibleTable
-              title={`Volumes`}
-              columns={volumeColumns}
-              data={volumeNodes}
-              headerStyle={{ fontSize: "0.8rem", width: "50%" }}
-            />
-          ) : (
-            <p
-              className="fst-italic ms-1"
-              style={{ fontSize: "0.85rem", opacity: 0.7 }}
-            >
-              <FormattedMessage
-                id={"components.deploymentDetails.noVolumesMessage"}
-                defaultMessage={"No Volumes"}
-              />
-            </p>
-          )}
-
-          {deviceMapNodes.length > 0 ? (
-            <CollapsibleTable
-              title={`Device Mappings`}
-              columns={deviceMappingColumns}
-              data={deviceMapNodes}
-              headerStyle={{ fontSize: "0.8rem", width: "50%" }}
-            />
-          ) : (
-            <p
-              className="fst-italic ms-1"
-              style={{ fontSize: "0.85rem", opacity: 0.7 }}
-            >
-              <FormattedMessage
-                id={"components.deploymentDetails.noDeviceMappingsMessage"}
-                defaultMessage={"No Device Mappings"}
-              />
-            </p>
-          )}
-        </div>
-      </Collapse>
-    </div>
+      {deviceMapNodes.length > 0 ? (
+        <CollapsibleTable
+          title={`Device Mappings`}
+          columns={deviceMappingColumns}
+          data={deviceMapNodes}
+          headerStyle={{ fontSize: "0.8rem", width: "50%" }}
+        />
+      ) : (
+        <p
+          className="fst-italic ms-1"
+          style={{ fontSize: "0.85rem", opacity: 0.7 }}
+        >
+          <FormattedMessage
+            id={"components.deploymentDetails.noDeviceMappingsMessage"}
+            defaultMessage={"No Device Mappings"}
+          />
+        </p>
+      )}
+    </CollapseItem>
   );
 };
 
