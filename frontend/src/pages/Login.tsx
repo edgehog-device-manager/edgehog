@@ -86,7 +86,7 @@ const LoginPage = () => {
       if (form.checkValidity() === false) {
         return setValidated(true);
       }
-      handleLogin(formData);
+      handleLogin({ ...formData, authToken: formData.authToken.trim() });
     },
     [formData, handleLogin],
   );
