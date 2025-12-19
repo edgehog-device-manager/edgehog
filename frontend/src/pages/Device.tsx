@@ -101,6 +101,8 @@ const GET_DEVICE_QUERY = graphql`
       name
       online
       capabilities
+      partNumber
+      serialNumber
       systemModel {
         name
         pictureUrl
@@ -747,6 +749,40 @@ const DeviceContent = ({
                       readOnly
                     />
                   </FormRow>
+                  {device.serialNumber && (
+                    <FormRow
+                      id="form-device-serialNumber"
+                      label={
+                        <FormattedMessage
+                          id="Device.serialNumber"
+                          defaultMessage="Serial Number"
+                        />
+                      }
+                    >
+                      <Form.Control
+                        type="text"
+                        value={device.serialNumber}
+                        readOnly
+                      />
+                    </FormRow>
+                  )}
+                  {device.partNumber && (
+                    <FormRow
+                      id="device-hardware-info-part-number"
+                      label={
+                        <FormattedMessage
+                          id="Device.partNumber"
+                          defaultMessage="Part Number"
+                        />
+                      }
+                    >
+                      <Form.Control
+                        type="text"
+                        value={device.partNumber}
+                        readOnly
+                      />
+                    </FormRow>
+                  )}
                   {device.systemModel && (
                     <>
                       <FormRow

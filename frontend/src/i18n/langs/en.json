@@ -20,11 +20,17 @@
   "Device.name": {
     "defaultMessage": "Name"
   },
+  "Device.partNumber": {
+    "defaultMessage": "Part Number"
+  },
   "Device.remoteTerminal.label": {
     "defaultMessage": "Remote Terminal"
   },
   "Device.remoteTerminal.openTerminalButton": {
     "defaultMessage": "Open"
+  },
+  "Device.serialNumber": {
+    "defaultMessage": "Serial Number"
   },
   "Device.systemModel": {
     "defaultMessage": "System Model"

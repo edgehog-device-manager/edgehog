@@ -4032,6 +4032,7 @@ enum DeviceSortField {
   LAST_CONNECTION
   LAST_DISCONNECTION
   SERIAL_NUMBER
+  PART_NUMBER
 }
 
 ":device connection"
@@ -4053,6 +4054,19 @@ type DeviceEdge {
 
   ":device node"
   node: Device!
+}
+
+input DeviceFilterPartNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
 }
 
 input DeviceFilterSerialNumber {
@@ -4165,6 +4179,8 @@ input DeviceFilterInput {
   "The serial number of the device."
   serialNumber: DeviceFilterSerialNumber
 
+  partNumber: DeviceFilterPartNumber
+
   "The system model of the device"
   systemModel: SystemModelFilterInput
 
@@ -4212,6 +4228,8 @@ type Device implements Node {
 
   "The serial number of the device."
   serialNumber: String
+
+  partNumber: String
 
   "The system model of the device"
   systemModel: SystemModel
