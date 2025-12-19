@@ -3967,6 +3967,10 @@ type HardwareType implements Node {
   ): HardwareTypePartNumberConnection!
 }
 
+type device_updated_result {
+  updated: Device
+}
+
 type device_created_result {
   created: Device
 }
@@ -6520,6 +6524,10 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: DeviceFilterInput
   ): device_created_result
+  deviceUpdated(
+    "A filter to limit the results"
+    filter: DeviceFilterInput
+  ): device_updated_result
 }
 
 """
