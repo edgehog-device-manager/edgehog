@@ -32,9 +32,7 @@ defmodule EdgehogWeb.Schema do
       Edgehog.Labeling,
       Edgehog.OSManagement,
       Edgehog.Tenants,
-      Edgehog.Campaigns,
-      Edgehog.UpdateCampaigns,
-      Edgehog.DeploymentCampaigns
+      Edgehog.Campaigns
     ],
     relay_ids?: true
 

@@ -1,0 +1,213 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2025 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+defimpl Edgehog.Campaigns.CampaignMechanism.Core,
+  for: Edgehog.Campaigns.CampaignMechanism.DeploymentDelete do
+  @moduledoc """
+  Core implementation for Delete Operation on deployment campaign execution.
+
+  This module implements the `Edgehog.Campaigns.CampaignMechanism.Core` behavior for deployment campaigns,
+  providing the business logic for managing container deployments across target devices.
+  """
+
+  alias Edgehog.Campaigns
+  alias Edgehog.Campaigns.CampaignMechanism.Helpers
+
+  # Operation Tracking
+
+  @doc """
+  Returns the deployment ID as the operation identifier for tracking.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct.
+    - target: The deployment target struct.
+
+  ## Returns
+    - The deployment ID from the target.
+  """
+  def get_operation_id(_mechanism, target), do: target.deployment_id
+
+  @doc """
+  Marks a deployment operation as timed out.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct.
+    - operation_id: The ID of the deployment operation.
+    - tenant_id: The ID of the tenant.
+
+  ## Returns
+    - The updated deployment struct marked as timed out.
+  """
+  def mark_operation_as_timed_out!(_mechanism, operation_id, tenant_id) do
+    Helpers.mark_deployment_as_timed_out!(operation_id, tenant_id)
+  end
+
+  @doc """
+  Subscribes to deployment operation updates via PubSub.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct.
+    - operation_id: The ID of the deployment operation.
+
+  ## Returns
+    - `:ok` on success.
+    - Raises an error on failure.
+  """
+  def subscribe_to_operation_updates!(_mechanism, operation_id) do
+    Helpers.subscribe_to_deployment_updates!(operation_id)
+  end
+
+  @doc """
+  Unsubscribes from deployment operation updates via PubSub.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct.
+    - operation_id: The ID of the deployment operation.
+
+  ## Returns
+    - `:ok`
+  """
+  def unsubscribe_to_operation_updates!(_mechanism, operation_id) do
+    Helpers.unsubscribe_from_deployment_updates!(operation_id)
+  end
+
+  # Target Management
+
+  @doc """
+  Fetches the next valid target that has the application deployed.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct containing release info.
+    - campaign_id: The ID of the campaign.
+    - tenant_id: The ID of the tenant.
+
+  ## Returns
+    - `{:ok, target}` if a valid target is found.
+    - `{:error, reason}` if no valid target is available.
+  """
+  def fetch_next_valid_target(mechanism, campaign_id, tenant_id) do
+    Campaigns.fetch_next_valid_target_with_application_deployed(
+      campaign_id,
+      mechanism.release.application_id,
+      tenant: tenant_id
+    )
+  end
+
+  # Operation Execution
+
+  @doc """
+  Executes the delete operation for the target.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct containing the release.
+    - target: The deployment target struct.
+
+  ## Returns
+    - `{:ok, target}` if the delete command is successfully sent.
+    - `{:error, reason}` if the operation fails.
+  """
+  def do_operation(mechanism, target) do
+    delete(target, mechanism.release)
+  end
+
+  @doc """
+  Retries the delete operation for a target.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct.
+    - target: The deployment target struct.
+
+  ## Returns
+    - `:ok` if the retry is successful.
+    - `{:error, reason}` if the retry fails.
+  """
+  def retry_operation(_mechanism, target) do
+    Helpers.do_retry_target_operation(target, :delete)
+  end
+
+  # Mechanism Configuration
+
+  @doc """
+  Loads and returns the full mechanism configuration from a campaign.
+
+  ## Parameters
+    - mechanism: The campaign mechanism struct.
+    - campaign: The campaign struct to load the mechanism from.
+
+  ## Returns
+    - The fully loaded deployment delete mechanism with release data.
+  """
+  def get_mechanism(_mechanism, campaign) do
+    mechanism =
+      campaign
+      |> Ash.load!(
+        campaign_mechanism: [
+          deployment_delete: [release: [containers: [:networks, :volumes, :image]]]
+        ]
+      )
+      |> Map.get(:campaign_mechanism)
+
+    mechanism.value
+  end
+
+  # Delete Operation
+
+  @doc """
+  Deletes the deployment of the release to the target.
+
+  ## Parameters
+    - target: The deployment target struct.
+    - release: The release struct referenced in the deployment to be deleted.
+
+  ## Returns
+    - `{:ok, target}` if the delete command is successfully sent.
+    - `{:error, :deployment_transitioning}` if the deployment is in a transitional state.
+    - `{:error, :deployment_not_found}` if the deployment doesn't exist on the target.
+    - `{:error, reason}` for any other errors.
+  """
+  def delete(target, release) do
+    if Helpers.application_deployed?(target, release) do
+      {:ok, updated_target} =
+        target
+        |> Campaigns.update_target_latest_attempt!(DateTime.utc_now())
+        |> Helpers.link_target_deployment(release)
+
+      deployment =
+        updated_target
+        |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
+        |> Map.get(:deployment)
+
+      if deployment.state in [:starting, :stopping] do
+        {:error, :deployment_transitioning}
+      else
+        deployment_result =
+          deployment
+          |> Ash.Changeset.for_update(:delete, %{}, tenant: updated_target.tenant_id)
+          |> Ash.update()
+
+        with {:ok, _deployment} <- deployment_result do
+          {:ok, updated_target}
+        end
+      end
+    else
+      {:error, :deployment_not_found}
+    end
+  end
+end
