@@ -25,7 +25,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
 
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.StorageMock
-  alias Edgehog.UpdateCampaignsFixtures
+  alias Edgehog.CampaignsFixtures
 
   require Ash.Query
 
@@ -83,14 +83,16 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
       base_image: base_image,
       id: id
     } do
-      UpdateCampaignsFixtures.update_campaign_fixture(
+      CampaignsFixtures.campaign_fixture(
         tenant: tenant,
-        base_image_id: base_image.id
+        base_image_id: base_image.id,
+        mechanism_type: :firmware_upgrade
       )
 
       result = delete_base_image_mutation(tenant: tenant, id: id)
 
-      assert %{fields: [:id], message: "would leave records behind"} = extract_error!(result)
+      assert %{fields: [:id], message: "Base image is currently in use by at least one campaign"} =
+               extract_error!(result)
     end
   end
 

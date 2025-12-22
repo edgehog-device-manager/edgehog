@@ -292,7 +292,6 @@ defmodule Edgehog.TenantsTest do
     import Edgehog.DevicesFixtures
     import Edgehog.GroupsFixtures
     import Edgehog.OSManagementFixtures
-    import Edgehog.UpdateCampaignsFixtures
 
     alias Edgehog.Containers.ReconcilerMock
 
@@ -334,8 +333,20 @@ defmodule Edgehog.TenantsTest do
       manual_ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
 
       channel = channel_fixture(tenant: tenant)
-      update_campaign = update_campaign_fixture(base_image_id: base_image.id, tenant: tenant)
-      update_target = target_fixture(base_image_id: base_image.id, tenant: tenant)
+
+      update_campaign =
+        campaign_fixture(
+          base_image_id: base_image.id,
+          mechanism_type: :firmware_upgrade,
+          tenant: tenant
+        )
+
+      update_target =
+        target_fixture(
+          base_image_id: base_image.id,
+          mechanism_type: :firmware_upgrade,
+          tenant: tenant
+        )
 
       expect(StorageMock, :delete, fn to_delete ->
         assert to_delete.id == base_image.id
@@ -368,8 +379,8 @@ defmodule Edgehog.TenantsTest do
       refute entry_exists?(Edgehog.OSManagement.OTAOperation, manual_ota_operation.id, tenant)
 
       refute entry_exists?(Edgehog.Campaigns.Channel, channel.id, tenant)
-      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateCampaign, update_campaign.id, tenant)
-      refute entry_exists?(Edgehog.UpdateCampaigns.UpdateTarget, update_target.id, tenant)
+      refute entry_exists?(Edgehog.Campaigns.Campaign, update_campaign.id, tenant)
+      refute entry_exists?(Edgehog.Campaigns.CampaignTarget, update_target.id, tenant)
     end
   end
 
