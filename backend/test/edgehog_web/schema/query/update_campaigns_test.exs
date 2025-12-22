@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 - 2025 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,18 +25,17 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
   import Edgehog.CampaignsFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
-  import Edgehog.UpdateCampaignsFixtures
 
   describe "updateCampaigns query" do
     setup %{tenant: tenant} do
-      target_group = device_group_fixture(selector: ~s<"foobar" in tags>, tenant: tenant)
+      target_group = device_group_fixture(selector: ~s<"foo" in tags>, tenant: tenant)
       channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
       base_image = base_image_fixture(tenant: tenant)
 
       device =
         [base_image_id: base_image.id, tenant: tenant]
         |> device_fixture_compatible_with_base_image()
-        |> add_tags(["foobar"])
+        |> add_tags(["foo"])
 
       context = %{
         channel: channel,
@@ -60,10 +59,11 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       } = ctx
 
       update_campaign =
-        update_campaign_fixture(
+        campaign_fixture(
+          tenant: tenant,
           base_image_id: base_image.id,
           channel_id: channel.id,
-          tenant: tenant
+          mechanism_type: :firmware_upgrade
         )
 
       [update_campaign_data] =
@@ -72,43 +72,50 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
       assert update_campaign_data["name"] == update_campaign.name
       assert update_campaign_data["status"] == "IDLE"
       assert update_campaign_data["outcome"] == nil
-      assert update_campaign_data["baseImage"]["version"] == base_image.version
-      assert update_campaign_data["baseImage"]["url"] == base_image.url
+
+      assert update_campaign_data["campaignMechanism"]["baseImage"]["version"] ==
+               base_image.version
+
+      assert update_campaign_data["campaignMechanism"]["baseImage"]["url"] == base_image.url
       assert update_campaign_data["channel"]["name"] == channel.name
       assert update_campaign_data["channel"]["handle"] == channel.handle
-      assert response_rollout_mechanism = update_campaign_data["rolloutMechanism"]
+      assert response_campaign_mechanism = update_campaign_data["campaignMechanism"]
 
-      assert response_rollout_mechanism["maxFailurePercentage"] ==
-               update_campaign.rollout_mechanism.value.max_failure_percentage
+      assert response_campaign_mechanism["maxFailurePercentage"] ==
+               update_campaign.campaign_mechanism.value.max_failure_percentage
 
-      assert response_rollout_mechanism["maxInProgressUpdates"] ==
-               update_campaign.rollout_mechanism.value.max_in_progress_updates
+      assert response_campaign_mechanism["maxInProgressOperations"] ==
+               update_campaign.campaign_mechanism.value.max_in_progress_operations
 
-      assert response_rollout_mechanism["otaRequestRetries"] ==
-               update_campaign.rollout_mechanism.value.ota_request_retries
+      assert response_campaign_mechanism["requestRetries"] ==
+               update_campaign.campaign_mechanism.value.request_retries
 
-      assert response_rollout_mechanism["otaRequestTimeoutSeconds"] ==
-               update_campaign.rollout_mechanism.value.ota_request_timeout_seconds
+      assert response_campaign_mechanism["requestTimeoutSeconds"] ==
+               update_campaign.campaign_mechanism.value.request_timeout_seconds
 
-      assert response_rollout_mechanism["forceDowngrade"] ==
-               update_campaign.rollout_mechanism.value.force_downgrade
+      assert response_campaign_mechanism["forceDowngrade"] ==
+               update_campaign.campaign_mechanism.value.force_downgrade
 
-      assert [target] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
+      assert [target] = extract_nodes!(update_campaign_data["campaignTargets"]["edges"])
       assert target["status"] == "IDLE"
 
       assert target["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
     end
 
-    test "returns all UpdateTarget fields", %{tenant: tenant} do
+    test "returns all campaignTarget fields", %{tenant: tenant} do
       now = DateTime.utc_now()
-      target = [now: now, tenant: tenant] |> failed_target_fixture() |> Ash.load!(:ota_operation)
+
+      target =
+        [now: now, tenant: tenant, mechanism_type: :firmware_upgrade]
+        |> failed_target_fixture()
+        |> Ash.load!(:ota_operation)
 
       document = """
       query {
         updateCampaigns {
           edges {
             node {
-              updateTargets {
+              campaignTargets {
                 edges {
                   node {
                     id
@@ -134,7 +141,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
         |> extract_result!()
         |> extract_nodes!()
 
-      assert [update_target] = extract_nodes!(update_campaign_data["updateTargets"]["edges"])
+      assert [update_target] = extract_nodes!(update_campaign_data["campaignTargets"]["edges"])
 
       assert update_target["id"] == AshGraphql.Resource.encode_relay_id(target)
       assert update_target["status"] == "FAILED"
@@ -149,36 +156,37 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
 
   defp update_campaigns_query(opts) do
     default_document = """
-    query {
-      updateCampaigns {
-        edges {
-          node {
-            name
-            status
-            outcome
-            rolloutMechanism {
-              ... on PushRollout {
-                maxFailurePercentage
-                maxInProgressUpdates
-                otaRequestRetries
-                otaRequestTimeoutSeconds
-                forceDowngrade
-              }
-            }
-            baseImage {
-              version
-              url
-            }
-            channel {
+      query {
+        updateCampaigns {
+          edges {
+            node {
               name
-              handle
-            }
-            updateTargets {
-              edges {
-                node {
-                  status
-                  device {
-                    id
+              status
+              outcome
+              campaignMechanism {
+                ... on FirmwareUpgrade {
+                  maxFailurePercentage
+                  maxInProgressOperations
+                  requestRetries
+                  requestTimeoutSeconds
+                  forceDowngrade
+                  baseImage {
+                    version
+                    url
+                  }
+                }
+              }
+              channel {
+                name
+                handle
+              }
+              campaignTargets {
+                edges {
+                  node {
+                    status
+                    device {
+                      id
+                    }
                   }
                 }
               }
@@ -186,7 +194,6 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
           }
         }
       }
-    }
     """
 
     tenant = Keyword.fetch!(opts, :tenant)

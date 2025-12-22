@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2025 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
       allow_nil? false
     end
 
-    has_one :update_target, Edgehog.UpdateCampaigns.UpdateTarget do
+    has_one :campaign_target, Edgehog.Campaigns.CampaignTarget do
       description """
       The update target of an update campaign that created the managed
       ota operation, if any.

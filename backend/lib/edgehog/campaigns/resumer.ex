@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023 - 2026  SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ defmodule Edgehog.Campaigns.Resumer do
   end
 
   def resume(campaigns_stream) do
-    Logger.info("Resuming Update Campaigns")
+    Logger.info("Resuming Campaigns")
 
-    # For each resumable update campaign, we start its executor. `start_executor!/1` already
+    # For each resumable campaign, we start its executor. `start_executor!/1` already
     # handles the case where the executor is already running (if, e.g., we crashed and we're
     # restarted again).
     Enum.each(campaigns_stream, &ExecutorSupervisor.start_executor!/1)
-    Logger.info("Finished resuming Update Campaigns")
+    Logger.info("Finished resuming Campaigns")
 
     :ok
   end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ config :edgehog, EdgehogWeb.Endpoint,
   live_view: [signing_salt: "aiSLZVyY"]
 
 config :edgehog, :ash_domains, [
-  Edgehog.DeploymentCampaigns,
   Edgehog.Astarte,
   Edgehog.BaseImages,
   Edgehog.Campaigns,
@@ -105,8 +104,7 @@ config :edgehog, :ash_domains, [
   Edgehog.Labeling,
   Edgehog.OSManagement,
   Edgehog.Tenants,
-  Edgehog.Triggers,
-  Edgehog.UpdateCampaigns
+  Edgehog.Triggers
 ]
 
 config :edgehog, :edgehog_forwarder, %{

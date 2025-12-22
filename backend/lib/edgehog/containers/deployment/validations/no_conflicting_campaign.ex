@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,11 +32,18 @@ defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
   @impl Validation
   def init(opts) do
     case Keyword.fetch(opts, :action_type) do
-      {:ok, action_type} when action_type in [:start, :stop, :delete, :upgrade] ->
+      {:ok, action_type}
+      when action_type in [
+             :deployment_start,
+             :deployment_stop,
+             :deployment_delete,
+             :deployment_upgrade
+           ] ->
         {:ok, action_type}
 
       {:ok, invalid_type} ->
-        {:error, "Invalid action_type: #{inspect(invalid_type)}. Must be one of [:start, :stop, :delete, :upgrade]"}
+        {:error,
+         "Invalid action_type: #{inspect(invalid_type)}. Must be one of [:deployment_start, :deployment_stop, :deployment_delete, :deployment_upgrade]"}
 
       :error ->
         {:error, "action_type is required"}
@@ -48,8 +55,8 @@ defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
     deployment = changeset.data
     tenant = Ash.Changeset.get_data(changeset, :tenant_id)
 
-    case fetch_deployment_target(deployment.id, tenant) do
-      {:ok, %{deployment_campaign: campaign}} when is_map(campaign) ->
+    case fetch_campaign_target(deployment.id, tenant) do
+      {:ok, %{campaign: campaign}} when is_map(campaign) ->
         check_campaign_conflict(campaign, deployment, action_type)
 
       {:ok, nil} ->
@@ -65,25 +72,26 @@ defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
   end
 
   defp check_campaign_conflict(campaign, deployment, action_type) do
-    if campaign.operation_type == :upgrade and
+    if campaign.campaign_mechanism.type == :deployment_upgrade and
          deployment.state == :stopped and
-         action_type == :start do
+         action_type == :deployment_start do
       # This part of code handles retries for upgrade operations.
       :ok
     else
-      if campaign.status == :in_progress and campaign.operation_type != action_type do
-        {:error, "This deployment is locked due to an ongoing #{format_operation_type(campaign.operation_type)} campaign"}
+      if campaign.status == :in_progress and campaign.campaign_mechanism.type != action_type do
+        {:error,
+         "This deployment is locked due to an ongoing #{format_operation_type(campaign.campaign_mechanism.type)} campaign"}
       else
         :ok
       end
     end
   end
 
-  defp fetch_deployment_target(deployment_id, tenant) do
-    case Edgehog.DeploymentCampaigns.DeploymentTarget
+  defp fetch_campaign_target(deployment_id, tenant) do
+    case Edgehog.Campaigns.CampaignTarget
          |> Ash.Query.for_read(:read, %{}, tenant: tenant)
          |> Ash.Query.filter(deployment_id == ^deployment_id)
-         |> Ash.Query.load(deployment_campaign: [:status, :operation_type])
+         |> Ash.Query.load(campaign: [:status])
          |> Ash.Query.sort(inserted_at: :desc)
          |> Ash.Query.limit(1)
          |> Ash.read() do

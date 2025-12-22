@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -253,6 +253,8 @@ defmodule Edgehog.ContainersFixtures do
           system_models
       end
 
+    required_system_models = Keyword.get(opts, :required_system_models, [])
+
     {version, opts} = Keyword.pop_lazy(opts, :version, fn -> unique_release_version() end)
 
     params =
@@ -260,7 +262,7 @@ defmodule Edgehog.ContainersFixtures do
         application_id: application_id,
         containers: containers,
         version: version,
-        required_system_models: system_models
+        required_system_models: required_system_models ++ system_models
       })
 
     Ash.create!(Release, params, tenant: tenant)

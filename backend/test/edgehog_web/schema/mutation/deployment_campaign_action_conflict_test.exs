@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
   import Ash.Expr
   import Edgehog.CampaignsFixtures
   import Edgehog.ContainersFixtures
-  import Edgehog.DeploymentCampaignsFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.GroupsFixtures
 
@@ -65,7 +64,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
 
       # Create a campaign with upgrade operation type and target_release_id
       _campaign =
-        create_in_progress_campaign(tenant, :upgrade, deployment, target_release_id: target_release.id)
+        create_in_progress_campaign(tenant, :deployment_upgrade, deployment, target_release_id: target_release.id)
 
       expect(DeploymentCommandMock, :send_deployment_command, 1, fn _, _, _ -> :ok end)
 
@@ -102,7 +101,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
       deployment: deployment
     } do
       # Create a campaign with stop operation type
-      _campaign = create_in_progress_campaign(tenant, :stop, deployment)
+      _campaign = create_in_progress_campaign(tenant, :deployment_stop, deployment)
 
       result = send_start_deployment_mutation(tenant: tenant, deployment: deployment)
 
@@ -111,7 +110,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
                errors: [%{message: message}]
              } = result
 
-      assert message =~ "This deployment is locked due to an ongoing stop campaign"
+      assert message =~ "This deployment is locked due to an ongoing deployment_stop campaign"
     end
 
     test "start action succeeds when campaign with start operation is in progress", %{
@@ -119,7 +118,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
       deployment: deployment
     } do
       # Create a campaign with the same operation type (start)
-      _campaign = create_in_progress_campaign(tenant, :start, deployment)
+      _campaign = create_in_progress_campaign(tenant, :deployment_start, deployment)
 
       expect(DeploymentCommandMock, :send_deployment_command, 1, fn _, _, _ -> :ok end)
 
@@ -139,7 +138,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
       deployment: deployment
     } do
       # Create a campaign that is idle (not in progress)
-      _campaign = create_idle_campaign(tenant, :stop, deployment)
+      _campaign = create_idle_campaign(tenant, :deployment_stop, deployment)
 
       expect(DeploymentCommandMock, :send_deployment_command, 1, fn _, _, _ -> :ok end)
 
@@ -154,7 +153,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
              } = result
     end
 
-    test "stop action fails when deployment is part of in-progress delete campaign", %{
+    test "stop action fails when deployment is part of in-progress deployment_delete campaign", %{
       tenant: tenant,
       deployment: deployment
     } do
@@ -163,7 +162,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
         Edgehog.Containers.mark_deployment_as_started(deployment, tenant: tenant)
 
       # Create a campaign with delete operation type
-      _campaign = create_in_progress_campaign(tenant, :delete, deployment)
+      _campaign = create_in_progress_campaign(tenant, :deployment_delete, deployment)
 
       result = send_stop_deployment_mutation(tenant: tenant, deployment: deployment)
 
@@ -172,15 +171,16 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
                errors: [%{message: message}]
              } = result
 
-      assert message =~ "This deployment is locked due to an ongoing delete campaign"
+      assert message =~ "This deployment is locked due to an ongoing deployment_delete campaign"
     end
 
-    test "delete action fails when deployment is part of in-progress start campaign", %{
-      tenant: tenant,
-      deployment: deployment
-    } do
+    test "delete action fails when deployment is part of in-progress deployment_start campaign",
+         %{
+           tenant: tenant,
+           deployment: deployment
+         } do
       # Create a campaign with start operation type
-      _campaign = create_in_progress_campaign(tenant, :start, deployment)
+      _campaign = create_in_progress_campaign(tenant, :deployment_start, deployment)
 
       result = send_delete_deployment_mutation(tenant: tenant, deployment: deployment)
 
@@ -189,13 +189,14 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
                errors: [%{message: message}]
              } = result
 
-      assert message =~ "This deployment is locked due to an ongoing start campaign"
+      assert message =~ "This deployment is locked due to an ongoing deployment_start campaign"
     end
 
-    test "upgrade action fails when deployment is part of in-progress stop campaign", %{
-      tenant: tenant,
-      deployment: deployment
-    } do
+    test "upgrade action fails when deployment is part of in-progress deployment_stop campaign",
+         %{
+           tenant: tenant,
+           deployment: deployment
+         } do
       # Load deployment with release to get the application
       deployment = Ash.load!(deployment, [release: :application], tenant: tenant)
       application_id = deployment.release.application_id
@@ -209,7 +210,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
         )
 
       # Create a campaign with stop operation type
-      _campaign = create_in_progress_campaign(tenant, :stop, deployment)
+      _campaign = create_in_progress_campaign(tenant, :deployment_stop, deployment)
 
       result =
         send_upgrade_deployment_mutation(
@@ -223,7 +224,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
                errors: [%{message: message}]
              } = result
 
-      assert message =~ "This deployment is locked due to an ongoing stop campaign"
+      assert message =~ "This deployment is locked due to an ongoing deployment_stop campaign"
     end
 
     test "all actions succeed when campaign is finished", %{
@@ -231,7 +232,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
       deployment: deployment
     } do
       # Create a campaign that is finished
-      _campaign = create_finished_campaign(tenant, :stop, deployment)
+      _campaign = create_finished_campaign(tenant, :deployment_stop, deployment)
 
       expect(DeploymentCommandMock, :send_deployment_command, 1, fn _, _, _ -> :ok end)
 
@@ -290,10 +291,10 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
 
     # Create a campaign for this channel
     campaign =
-      deployment_campaign_fixture(
+      campaign_fixture(
         [
           tenant: tenant,
-          operation_type: operation_type,
+          mechanism_type: operation_type,
           release_id: deployment.release_id,
           channel_id: channel.id
         ] ++ opts
@@ -301,8 +302,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
 
     # Find and link the deployment target to the deployment
     target =
-      Edgehog.DeploymentCampaigns.DeploymentTarget
-      |> Ash.Query.filter(expr(deployment_campaign_id == ^campaign.id and device_id == ^deployment.device_id))
+      Edgehog.Campaigns.CampaignTarget
+      |> Ash.Query.filter(expr(campaign_id == ^campaign.id and device_id == ^deployment.device_id))
       |> Ash.read_one!(tenant: tenant)
 
     # Link the deployment to the target

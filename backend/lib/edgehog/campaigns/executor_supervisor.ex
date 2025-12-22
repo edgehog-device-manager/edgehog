@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,13 +22,9 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
   @moduledoc false
   use DynamicSupervisor
 
+  alias Edgehog.Campaigns.Campaign
+  alias Edgehog.Campaigns.CampaignMechanism
   alias Edgehog.Campaigns.ExecutorRegistry
-  alias Edgehog.DeploymentCampaigns.DeploymentCampaign
-  alias Edgehog.DeploymentCampaigns.DeploymentMechanism.Lazy
-  alias Edgehog.UpdateCampaigns.RolloutMechanism.PushRollout
-  alias Edgehog.UpdateCampaigns.UpdateCampaign
-
-  require Logger
 
   @mix_env Mix.env()
 
@@ -40,23 +36,15 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
 
   @doc """
   Starts an executor for the given campaign in the `ExecutorRegistry` registry,
-  with id `{tenant, campaign_id, type}` where `type` is the type of campaign (for
-  now only `:ota_update` campaign types are supported).
-
-
+  with id `{campaign_id, tenant_id, mechanism_type}` where `mechanism_type` is the
+  type of campaign.
   """
-  def start_executor!(campaign)
 
-  def start_executor!(%UpdateCampaign{id: id, rollout_mechanism: %{value: rollout}, tenant_id: tenant_id} = _campaign),
-    do: do_start_executor!(id, rollout, tenant_id, :ota_update)
+  def start_executor!(%Campaign{id: campaign_id, campaign_mechanism: %{type: mechanism_type}, tenant_id: tenant_id}),
+    do: do_start_executor!(tenant_id, campaign_id, mechanism_type)
 
-  def start_executor!(
-        %DeploymentCampaign{id: id, deployment_mechanism: %{value: mechanism}, tenant_id: tenant_id} = _campaign
-      ),
-      do: do_start_executor!(id, mechanism, tenant_id, :deployment)
-
-  defp do_start_executor!(campaign_id, rollout_mechanism, tenant_id, type) do
-    executor_id = {tenant_id, campaign_id, type}
+  defp do_start_executor!(tenant_id, campaign_id, mechanism_type) do
+    executor_id = {tenant_id, campaign_id, mechanism_type}
     name = {:via, Registry, {ExecutorRegistry, executor_id}}
 
     base_args = [
@@ -65,13 +53,13 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
       tenant_id: tenant_id
     ]
 
-    rollout_mechanism
+    mechanism_type
     |> executor_child_spec(base_args)
     |> Supervisor.child_spec(id: executor_id)
     |> start_child!(executor_id)
   end
 
-  defp start_child!(child_spec, {tenant_id, campaign_id, type}) do
+  defp start_child!(child_spec, {tenant_id, campaign_id, mechanism_type}) do
     case DynamicSupervisor.start_child(__MODULE__, child_spec) do
       {:ok, pid} ->
         pid
@@ -81,38 +69,35 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
 
       {:error, reason} ->
         msg =
-          "(tenant #{tenant_id}) Campaign executor for campaign #{campaign_id} of type #{inspect(type)} failed to start: " <>
+          "(tenant #{tenant_id}) Campaign executor for campaign #{campaign_id} of mechanism_type #{inspect(mechanism_type)} failed to start: " <>
             "#{inspect(reason)}"
 
         raise msg
     end
   end
 
-  defp executor_child_spec(%PushRollout{} = rollout_mechanism, base_args) do
+  defp executor_child_spec(mechanism_type, base_args) do
     # During tests we add `:wait_for_start_execution` to avoid having the executor running
     # without us being ready to test it
-    args = base_args ++ executor_test_args(rollout_mechanism)
+    args = base_args ++ executor_test_args()
 
-    {PushRollout.Executor, args}
-  end
-
-  defp executor_child_spec(%Lazy{} = mechanism, base_args) do
-    # During tests we add `:wait_for_start_execution` to avoid having the executor running
-    # without us being ready to test it
-    args = base_args ++ executor_test_args(mechanism)
-
-    {Lazy.Executor, args}
+    case mechanism_type do
+      :deployment_deploy -> {CampaignMechanism.DeploymentDeploy.Executor, args}
+      :deployment_start -> {CampaignMechanism.DeploymentStart.Executor, args}
+      :deployment_stop -> {CampaignMechanism.DeploymentStop.Executor, args}
+      :deployment_delete -> {CampaignMechanism.DeploymentDelete.Executor, args}
+      :deployment_upgrade -> {CampaignMechanism.DeploymentUpgrade.Executor, args}
+      :firmware_upgrade -> {CampaignMechanism.FirmwareUpgrade.Executor, args}
+    end
   end
 
   case @mix_env do
     # Pass additional executor-specific test args only in the test env
     :test ->
-      defp executor_test_args(%PushRollout{} = _rollout_mechanism), do: [wait_for_start_execution: true]
-
-      defp executor_test_args(%Lazy{} = _rollout_mechanism), do: [wait_for_start_execution: true]
+      defp executor_test_args, do: [wait_for_start_execution: true]
 
     _other ->
-      defp executor_test_args(_rollout), do: []
+      defp executor_test_args, do: []
   end
 
   # Callbacks

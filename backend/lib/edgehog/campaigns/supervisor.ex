@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,20 +48,13 @@ defmodule Edgehog.Campaigns.Supervisor do
       defp children, do: @base_children
 
     _other ->
-      defp children, do: @base_children ++ [update_campaigns_resumer()]
+      defp children, do: @base_children ++ [campaigns_resumer()]
 
-      defp update_campaigns_resumer do
-        update_campaigns_stream =
-          Edgehog.UpdateCampaigns.UpdateCampaign
+      defp campaigns_resumer do
+        campaigns_stream =
+          Edgehog.Campaigns.Campaign
           |> Ash.Query.for_read(:read_all_resumable)
           |> Ash.stream!()
-
-        deployment_campaign_stream =
-          Edgehog.DeploymentCampaigns.DeploymentCampaign
-          |> Ash.Query.for_read(:read_all_resumable)
-          |> Ash.stream!()
-
-        campaigns_stream = Stream.concat(update_campaigns_stream, deployment_campaign_stream)
 
         {Edgehog.Campaigns.Resumer, campaigns_stream}
       end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ defmodule Edgehog.Containers.Deployment do
       """
 
       validate Validations.IsReady
-      validate {Validations.NoConflictingCampaign, action_type: :start}
+      validate {Validations.NoConflictingCampaign, action_type: :deployment_start}
 
       manual {ManualActions.SendDeploymentCommand, command: :start}
     end
@@ -125,7 +125,7 @@ defmodule Edgehog.Containers.Deployment do
       """
 
       validate Validations.IsReady
-      validate {Validations.NoConflictingCampaign, action_type: :stop}
+      validate {Validations.NoConflictingCampaign, action_type: :deployment_stop}
 
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
@@ -136,7 +136,7 @@ defmodule Edgehog.Containers.Deployment do
       """
 
       validate Validations.IsReady
-      validate {Validations.NoConflictingCampaign, action_type: :delete}
+      validate {Validations.NoConflictingCampaign, action_type: :deployment_delete}
 
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
@@ -167,7 +167,7 @@ defmodule Edgehog.Containers.Deployment do
       end
 
       validate Validations.IsReady
-      validate {Validations.NoConflictingCampaign, action_type: :upgrade}
+      validate {Validations.NoConflictingCampaign, action_type: :deployment_upgrade}
 
       validate SameApplication
       validate IsUpgrade
@@ -270,7 +270,7 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
-    has_one :deployment_target, Edgehog.DeploymentCampaigns.DeploymentTarget do
+    has_one :campaign_target, Edgehog.Campaigns.CampaignTarget do
       description """
       The deployment target of a deployment campaign that created this deployment.
       Only returns targets for deploy and upgrade operation campaigns.
@@ -280,7 +280,7 @@ defmodule Edgehog.Containers.Deployment do
       public? true
 
       # Filter to only include deploy and upgrade operation types
-      filter expr(deployment_campaign.operation_type in [:deploy, :upgrade])
+      filter expr(campaign.campaign_mechanism[:type] in [:deployment_deploy, :deployment_upgrade])
     end
   end
 
