@@ -80,7 +80,7 @@ const DEVICES_TABLE_FRAGMENT = graphql`
 
 const DEVICE_CREATED_SUBSCRIPTION = graphql`
   subscription DevicesTable_deviceCreated_Subscription {
-    deviceCreated {
+    deviceChanged {
       created {
         id
         deviceId
@@ -111,7 +111,7 @@ const DEVICE_CREATED_SUBSCRIPTION = graphql`
 
 const DEVICE_UPDATED_SUBSCRIPTION = graphql`
   subscription DevicesTable_DeviceUpdated_Subscription {
-    deviceUpdated {
+    deviceChanged {
       updated {
         id
         deviceId

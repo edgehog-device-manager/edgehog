@@ -66,12 +66,8 @@ defmodule Edgehog.Devices.Device do
     subscriptions do
       pubsub EdgehogWeb.Endpoint
 
-      subscribe :device_created do
-        action_types :create
-      end
-
-      subscribe :device_updated do
-        action_types :update
+      subscribe :device_changed do
+        action_types [:create, :update]
       end
     end
   end

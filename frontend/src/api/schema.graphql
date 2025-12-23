@@ -3967,12 +3967,9 @@ type HardwareType implements Node {
   ): HardwareTypePartNumberConnection!
 }
 
-type device_updated_result {
-  updated: Device
-}
-
-type device_created_result {
+type device_changed_result {
   created: Device
+  updated: Device
 }
 
 "The result of the :set_device_led_behavior mutation"
@@ -6520,14 +6517,10 @@ type RootMutationType {
 }
 
 type RootSubscriptionType {
-  deviceCreated(
+  deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput
-  ): device_created_result
-  deviceUpdated(
-    "A filter to limit the results"
-    filter: DeviceFilterInput
-  ): device_updated_result
+  ): device_changed_result
 }
 
 """
