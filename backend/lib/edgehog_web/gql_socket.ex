@@ -29,11 +29,11 @@ defmodule EdgehogWeb.GqlSocket do
          {:ok, claims} <- verify_jwt(token, tenant) do
       socket =
         socket
-        |> assign(:current_tenant, tenant)
+        |> assign(:tenant, tenant)
         |> assign(:claims, claims)
         |> Absinthe.Phoenix.Socket.put_options(
           context: %{
-            current_tenant: tenant,
+            tenant: tenant,
             claims: claims
           }
         )
