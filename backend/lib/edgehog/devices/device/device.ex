@@ -85,7 +85,8 @@ defmodule Edgehog.Devices.Device do
         :online,
         :realm_id,
         :last_connection,
-        :last_disconnection
+        :last_disconnection,
+        :last_seen_ip
       ]
     end
 
@@ -281,7 +282,7 @@ defmodule Edgehog.Devices.Device do
     end
 
     update :from_device_status do
-      accept [:online, :last_connection, :last_disconnection]
+      accept [:online, :last_connection, :last_disconnection, :last_seen_ip]
     end
 
     update :set_led_behavior do
@@ -426,6 +427,11 @@ defmodule Edgehog.Devices.Device do
     attribute :last_disconnection, :utc_datetime do
       public? true
       description "The date at which the device last disconnected from Astarte."
+    end
+
+    attribute :last_seen_ip, :string do
+      public? true
+      description "The IP address at which the device last connected to Astarte."
     end
 
     attribute :serial_number, :string do

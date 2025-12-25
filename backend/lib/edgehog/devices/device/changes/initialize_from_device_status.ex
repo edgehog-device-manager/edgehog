@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2025 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ defmodule Edgehog.Devices.Device.Changes.InitializeFromDeviceStatus do
   @moduledoc false
   use Ash.Resource.Change
 
-  @device_status_attributes [:last_connection, :last_disconnection, :online]
+  @device_status_attributes [:last_connection, :last_disconnection, :online, :last_seen_ip]
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
