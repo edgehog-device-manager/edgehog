@@ -45,7 +45,7 @@ defmodule Edgehog.Campaigns.Channel do
 
     error_handler {ErrorHandler, :handle_error, []}
 
-    paginate_relationship_with target_groups: :relay, update_campaigns: :relay
+    paginate_relationship_with target_groups: :relay, campaigns: :relay
   end
 
   actions do
@@ -155,9 +155,7 @@ defmodule Edgehog.Campaigns.Channel do
     # This is needed to ensure foreign key references are applied when deleting
     # base images so we can render a nice looking error instead of crashing, see
     # https://github.com/ash-project/ash_postgres/blob/0ccb35a713b9097c4aac6fde996dbb4d1c00cccb/lib/data_layer.ex#L2370
-    has_many :update_campaigns, Edgehog.UpdateCampaigns.UpdateCampaign
-
-    has_many :deployment_campaigns, Edgehog.DeploymentCampaigns.DeploymentCampaign do
+    has_many :campaigns, Edgehog.Campaigns.Campaign do
       public? true
     end
   end

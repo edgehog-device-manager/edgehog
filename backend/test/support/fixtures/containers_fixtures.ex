@@ -253,6 +253,8 @@ defmodule Edgehog.ContainersFixtures do
           system_models
       end
 
+    required_system_models = Keyword.get(opts, :required_system_models, [])
+
     {version, opts} = Keyword.pop_lazy(opts, :version, fn -> unique_release_version() end)
 
     params =
@@ -260,7 +262,7 @@ defmodule Edgehog.ContainersFixtures do
         application_id: application_id,
         containers: containers,
         version: version,
-        required_system_models: system_models
+        required_system_models: required_system_models ++ system_models
       })
 
     Ash.create!(Release, params, tenant: tenant)
