@@ -52,6 +52,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           online: false,
           last_connection: DateTime.add(utc_now_second(), -50, :minute),
           last_disconnection: DateTime.add(utc_now_second(), -10, :minute),
+          last_seen_ip: "198.51.100.25",
           tenant: tenant
         )
 
@@ -166,6 +167,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           online: false,
           last_connection: DateTime.add(utc_now_second(), -50, :minute),
           last_disconnection: DateTime.add(utc_now_second(), -10, :minute),
+          last_seen_ip: "198.51.100.25",
           tenant: tenant
         )
 
@@ -266,6 +268,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           online: true,
           last_connection: DateTime.add(utc_now_second(), -10, :minute),
           last_disconnection: DateTime.add(utc_now_second(), -50, :minute),
+          last_seen_ip: "198.51.100.25",
           tenant: tenant
         )
 
@@ -303,6 +306,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           online: true,
           last_connection: DateTime.add(utc_now_second(), -10, :minute),
           last_disconnection: DateTime.add(utc_now_second(), -50, :minute),
+          last_seen_ip: "198.51.100.25",
           tenant: tenant
         )
 
