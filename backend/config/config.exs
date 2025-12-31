@@ -94,7 +94,6 @@ config :edgehog, EdgehogWeb.Endpoint,
   live_view: [signing_salt: "aiSLZVyY"]
 
 config :edgehog, :ash_domains, [
-  Edgehog.DeploymentCampaigns,
   Edgehog.Astarte,
   Edgehog.BaseImages,
   Edgehog.Campaigns,
@@ -105,8 +104,7 @@ config :edgehog, :ash_domains, [
   Edgehog.Labeling,
   Edgehog.OSManagement,
   Edgehog.Tenants,
-  Edgehog.Triggers,
-  Edgehog.UpdateCampaigns
+  Edgehog.Triggers
 ]
 
 config :edgehog, :edgehog_forwarder, %{

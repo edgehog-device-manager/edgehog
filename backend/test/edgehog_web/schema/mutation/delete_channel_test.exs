@@ -22,7 +22,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteChannelTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.CampaignsFixtures
-  import Edgehog.UpdateCampaignsFixtures
 
   alias Edgehog.Campaigns.Channel
 
@@ -73,8 +72,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteChannelTest do
       channel: channel,
       id: id
     } do
-      update_campaign_fixture(
+      campaign_fixture(
         tenant: tenant,
+        mechanism_type: :firmware_upgrade,
         channel_id: channel.id
       )
 
