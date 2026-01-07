@@ -205,6 +205,16 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       argument :preferred_language_tags, {:array, :string}
     end
+
+    calculate :name, :string do
+      public? true
+      description "Derived Base Image Name from version and localized release display name"
+
+      # TODO: Currently, we assume only one translation exists and take it directly.
+      # In the future, when multiple translations are available, this should accept a `locale` argument to
+      # select the appropriate one.
+      calculation {Edgehog.BaseImages.BaseImage.Calculations.CalculateBaseImageName, []}
+    end
   end
 
   identities do
