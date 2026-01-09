@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import type {
   DeploymentCampaignCreate_getOptions_Query,
   DeploymentCampaignCreate_getOptions_Query$data,
 } from "@/api/__generated__/DeploymentCampaignCreate_getOptions_Query.graphql";
-import type { DeploymentCampaignCreate_CreateDeploymentCampaign_Mutation } from "@/api/__generated__/DeploymentCampaignCreate_CreateDeploymentCampaign_Mutation.graphql";
+import type { DeploymentCampaignCreate_CreateCampaign_Mutation } from "@/api/__generated__/DeploymentCampaignCreate_CreateCampaign_Mutation.graphql";
 
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
@@ -47,7 +47,7 @@ import CreateDeploymentCampaignForm from "@/forms/CreateDeploymentCampaign";
 import type { DeploymentCampaignData } from "@/forms/CreateDeploymentCampaign";
 import { Link, Route, useNavigate } from "@/Navigation";
 
-const GET_CREATE_DEPLOYMENT_CAMPAIGN_OPTIONS_QUERY = graphql`
+const GET_CREATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   query DeploymentCampaignCreate_getOptions_Query(
     $first: Int
     $after: String
@@ -67,11 +67,11 @@ const GET_CREATE_DEPLOYMENT_CAMPAIGN_OPTIONS_QUERY = graphql`
   }
 `;
 
-const CREATE_DEPLOYMENT_CAMPAIGN_MUTATION = graphql`
-  mutation DeploymentCampaignCreate_CreateDeploymentCampaign_Mutation(
-    $input: CreateDeploymentCampaignInput!
+const CREATE_CAMPAIGN_MUTATION = graphql`
+  mutation DeploymentCampaignCreate_CreateCampaign_Mutation(
+    $input: CreateCampaignInput!
   ) {
-    createDeploymentCampaign(input: $input) {
+    createCampaign(input: $input) {
       result {
         id
       }
@@ -80,28 +80,25 @@ const CREATE_DEPLOYMENT_CAMPAIGN_MUTATION = graphql`
 `;
 
 type DeploymentCampaignProps = {
-  deploymentCampaignOptions: DeploymentCampaignCreate_getOptions_Query$data;
+  campaignOptions: DeploymentCampaignCreate_getOptions_Query$data;
 };
 
-const DeploymentCampaign = ({
-  deploymentCampaignOptions,
-}: DeploymentCampaignProps) => {
+const DeploymentCampaign = ({ campaignOptions }: DeploymentCampaignProps) => {
   const navigate = useNavigate();
   const [errorFeedback, setErrorFeedback] = useState<ReactNode>(null);
 
-  const [CreateDeploymentCampaign, isCreatingDeploymentCampaign] =
-    useMutation<DeploymentCampaignCreate_CreateDeploymentCampaign_Mutation>(
-      CREATE_DEPLOYMENT_CAMPAIGN_MUTATION,
+  const [createCampaign, isCreatingCampaign] =
+    useMutation<DeploymentCampaignCreate_CreateCampaign_Mutation>(
+      CREATE_CAMPAIGN_MUTATION,
     );
 
-  const handleCreateDeploymentCampaign = useCallback(
-    (deploymentCampaign: DeploymentCampaignData) => {
-      CreateDeploymentCampaign({
-        variables: { input: deploymentCampaign },
+  const handleCreateCampaign = useCallback(
+    (campaign: DeploymentCampaignData) => {
+      createCampaign({
+        variables: { input: campaign },
         onCompleted(data, errors) {
-          if (data.createDeploymentCampaign?.result) {
-            const deploymentCampaignId =
-              data.createDeploymentCampaign.result.id;
+          if (data.createCampaign?.result) {
+            const deploymentCampaignId = data.createCampaign.result.id;
             navigate({
               route: Route.deploymentCampaignsEdit,
               params: { deploymentCampaignId },
@@ -125,28 +122,26 @@ const DeploymentCampaign = ({
           );
         },
         updater(store, data) {
-          if (!data?.createDeploymentCampaign?.result) {
+          if (!data?.createCampaign?.result) {
             return;
           }
 
-          const deploymentCampaign = store
-            .getRootField("createDeploymentCampaign")
+          const campaign = store
+            .getRootField("createCampaign")
             .getLinkedRecord("result");
           const root = store.getRoot();
 
-          const deploymentCampaigns = root.getLinkedRecords(
-            "deploymentCampaigns",
-          );
-          if (deploymentCampaigns) {
+          const campaigns = root.getLinkedRecords("deploymentCampaigns");
+          if (campaigns) {
             root.setLinkedRecords(
-              [...deploymentCampaigns, deploymentCampaign],
+              [...campaigns, campaign],
               "deploymentCampaigns",
             );
           }
         },
       });
     },
-    [CreateDeploymentCampaign, navigate],
+    [createCampaign, navigate],
   );
 
   return (
@@ -160,9 +155,9 @@ const DeploymentCampaign = ({
         {errorFeedback}
       </Alert>
       <CreateDeploymentCampaignForm
-        deploymentCampaignOptionsRef={deploymentCampaignOptions}
-        onSubmit={handleCreateDeploymentCampaign}
-        isLoading={isCreatingDeploymentCampaign}
+        campaignOptionsRef={campaignOptions}
+        onSubmit={handleCreateCampaign}
+        isLoading={isCreatingCampaign}
       />
     </>
   );
@@ -217,17 +212,17 @@ const NoChannels = () => (
 );
 
 type DeploymentCampaignWrapperProps = {
-  getCreateDeploymentCampaignOptionsQuery: PreloadedQuery<DeploymentCampaignCreate_getOptions_Query>;
+  getCreateCampaignOptionsQuery: PreloadedQuery<DeploymentCampaignCreate_getOptions_Query>;
 };
 
 const DeploymentCampaignWrapper = ({
-  getCreateDeploymentCampaignOptionsQuery,
+  getCreateCampaignOptionsQuery,
 }: DeploymentCampaignWrapperProps) => {
-  const deploymentCampaignOptions = usePreloadedQuery(
-    GET_CREATE_DEPLOYMENT_CAMPAIGN_OPTIONS_QUERY,
-    getCreateDeploymentCampaignOptionsQuery,
+  const campaignOptions = usePreloadedQuery(
+    GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
+    getCreateCampaignOptionsQuery,
   );
-  const { channels, applications } = deploymentCampaignOptions;
+  const { channels, applications } = campaignOptions;
 
   if (applications?.count === 0) {
     return <NoApplications />;
@@ -237,31 +232,25 @@ const DeploymentCampaignWrapper = ({
     return <NoChannels />;
   }
 
-  return (
-    <DeploymentCampaign deploymentCampaignOptions={deploymentCampaignOptions} />
-  );
+  return <DeploymentCampaign campaignOptions={campaignOptions} />;
 };
 
 const DeploymentCampaignCreatePage = () => {
-  const [
-    getCreateDeploymentCampaignOptionsQuery,
-    getCreateDeploymentCampaignOptions,
-  ] = useQueryLoader<DeploymentCampaignCreate_getOptions_Query>(
-    GET_CREATE_DEPLOYMENT_CAMPAIGN_OPTIONS_QUERY,
-  );
+  const [getCreateCampaignOptionsQuery, getCreateCampaignOptions] =
+    useQueryLoader<DeploymentCampaignCreate_getOptions_Query>(
+      GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
+    );
 
-  const fetchCreateDeploymentCampaignOptions = useCallback(
+  const fetchCreateCampaignOptions = useCallback(
     () =>
-      getCreateDeploymentCampaignOptions(
+      getCreateCampaignOptions(
         { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ),
-    [getCreateDeploymentCampaignOptions],
+    [getCreateCampaignOptions],
   );
 
-  useEffect(fetchCreateDeploymentCampaignOptions, [
-    fetchCreateDeploymentCampaignOptions,
-  ]);
+  useEffect(fetchCreateCampaignOptions, [fetchCreateCampaignOptions]);
 
   return (
     <Suspense
@@ -277,9 +266,9 @@ const DeploymentCampaignCreatePage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchCreateDeploymentCampaignOptions}
+        onReset={fetchCreateCampaignOptions}
       >
-        {getCreateDeploymentCampaignOptionsQuery && (
+        {getCreateCampaignOptionsQuery && (
           <Page>
             <Page.Header
               title={
@@ -291,9 +280,7 @@ const DeploymentCampaignCreatePage = () => {
             />
             <Page.Main>
               <DeploymentCampaignWrapper
-                getCreateDeploymentCampaignOptionsQuery={
-                  getCreateDeploymentCampaignOptionsQuery
-                }
+                getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
               />
             </Page.Main>
           </Page>

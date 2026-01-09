@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import {
 import type { PreloadedQuery } from "react-relay/hooks";
 import type { Subscription } from "relay-runtime";
 
-import type { UpdateCampaign_getUpdateCampaign_Query } from "@/api/__generated__/UpdateCampaign_getUpdateCampaign_Query.graphql";
+import type { UpdateCampaign_getCampaign_Query } from "@/api/__generated__/UpdateCampaign_getCampaign_Query.graphql";
 import type { UpdateCampaign_RefreshFragment$key } from "@/api/__generated__/UpdateCampaign_RefreshFragment.graphql";
 
 import Center from "@/components/Center";
@@ -42,21 +42,18 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
-import UpdateCampaignStatsChart from "@/components/UpdateCampaignStatsChart";
+import CampaignStatsChart from "@/components/CampaignStatsChart";
 import UpdateTargetsTabs from "@/components/UpdateTargetsTabs";
 import UpdateCampaignForm from "@/forms/UpdateCampaignForm";
 import { Link, Route } from "@/Navigation";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
-const GET_UPDATE_CAMPAIGN_QUERY = graphql`
-  query UpdateCampaign_getUpdateCampaign_Query(
-    $updateCampaignId: ID!
-    $first: Int!
-  ) {
-    updateCampaign(id: $updateCampaignId) {
+const GET_CAMPAIGN_QUERY = graphql`
+  query UpdateCampaign_getCampaign_Query($campaignId: ID!, $first: Int!) {
+    campaign(id: $campaignId) {
       name
-      ...UpdateCampaignForm_UpdateCampaignFragment
-      ...UpdateCampaignStatsChart_UpdateCampaignStatsChartFragment
+      ...UpdateCampaignForm_CampaignFragment
+      ...CampaignStatsChart_CampaignStatsChartFragment
       ...UpdateCampaign_RefreshFragment
       ...UpdateTargetsTabs_SuccessfulFragment @arguments(first: $first)
       ...UpdateTargetsTabs_FailedFragment @arguments(first: $first)
@@ -66,24 +63,19 @@ const GET_UPDATE_CAMPAIGN_QUERY = graphql`
   }
 `;
 
-const UPDATE_CAMPAIGN_REFRESH_FRAGMENT = graphql`
-  fragment UpdateCampaign_RefreshFragment on UpdateCampaign {
+const CAMPAIGN_REFRESH_FRAGMENT = graphql`
+  fragment UpdateCampaign_RefreshFragment on Campaign {
     id
     status
   }
 `;
 
 type UpdateCampaignRefreshProps = {
-  updateCampaignRef: UpdateCampaign_RefreshFragment$key;
+  campaignRef: UpdateCampaign_RefreshFragment$key;
 };
-const UpdateCampaignRefresh = ({
-  updateCampaignRef,
-}: UpdateCampaignRefreshProps) => {
+const UpdateCampaignRefresh = ({ campaignRef }: UpdateCampaignRefreshProps) => {
   const relayEnvironment = useRelayEnvironment();
-  const { id, status } = useFragment(
-    UPDATE_CAMPAIGN_REFRESH_FRAGMENT,
-    updateCampaignRef,
-  );
+  const { id, status } = useFragment(CAMPAIGN_REFRESH_FRAGMENT, campaignRef);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // TODO: use GraphQL subscription (when available) to get updates about Update Campaign
@@ -104,8 +96,8 @@ const UpdateCampaignRefresh = ({
       setIsRefreshing(true);
       subscriptionRef.current = fetchQuery(
         relayEnvironment,
-        GET_UPDATE_CAMPAIGN_QUERY,
-        { updateCampaignId: id, first: RECORDS_TO_LOAD_FIRST },
+        GET_CAMPAIGN_QUERY,
+        { campaignId: id, first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ).subscribe({
         complete: () => {
@@ -126,18 +118,15 @@ const UpdateCampaignRefresh = ({
 };
 
 type UpdateCampaignContentProps = {
-  getUpdateCampaignQuery: PreloadedQuery<UpdateCampaign_getUpdateCampaign_Query>;
+  getCampaignQuery: PreloadedQuery<UpdateCampaign_getCampaign_Query>;
 };
 
 const UpdateCampaignContent = ({
-  getUpdateCampaignQuery,
+  getCampaignQuery,
 }: UpdateCampaignContentProps) => {
-  const { updateCampaign } = usePreloadedQuery(
-    GET_UPDATE_CAMPAIGN_QUERY,
-    getUpdateCampaignQuery,
-  );
+  const { campaign } = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
 
-  if (!updateCampaign) {
+  if (!campaign) {
     return (
       <Result.NotFound
         title={
@@ -159,20 +148,20 @@ const UpdateCampaignContent = ({
 
   return (
     <Page>
-      <Page.Header title={updateCampaign.name}>
-        <UpdateCampaignRefresh updateCampaignRef={updateCampaign} />
+      <Page.Header title={campaign.name}>
+        <UpdateCampaignRefresh campaignRef={campaign} />
       </Page.Header>
       <Page.Main>
         <Row>
           <Col lg={9}>
-            <UpdateCampaignForm updateCampaignRef={updateCampaign} />
+            <UpdateCampaignForm campaignRef={campaign} />
           </Col>
           <Col lg={3}>
-            <UpdateCampaignStatsChart updateCampaignRef={updateCampaign} />
+            <CampaignStatsChart campaignRef={campaign} />
           </Col>
         </Row>
         <hr className="bg-secondary border-2 border-top border-secondary" />
-        <UpdateTargetsTabs updateCampaignRef={updateCampaign} />
+        <UpdateTargetsTabs campaignRef={campaign} />
       </Page.Main>
     </Page>
   );
@@ -181,19 +170,17 @@ const UpdateCampaignContent = ({
 const UpdateCampaignPage = () => {
   const { updateCampaignId = "" } = useParams();
 
-  const [getUpdateCampaignQuery, getUpdateCampaign] =
-    useQueryLoader<UpdateCampaign_getUpdateCampaign_Query>(
-      GET_UPDATE_CAMPAIGN_QUERY,
-    );
+  const [getCampaignQuery, getCampaign] =
+    useQueryLoader<UpdateCampaign_getCampaign_Query>(GET_CAMPAIGN_QUERY);
 
-  const fetchUpdateCampaign = useCallback(() => {
-    getUpdateCampaign(
-      { updateCampaignId, first: RECORDS_TO_LOAD_FIRST },
+  const fetchCampaign = useCallback(() => {
+    getCampaign(
+      { campaignId: updateCampaignId, first: RECORDS_TO_LOAD_FIRST },
       { fetchPolicy: "network-only" },
     );
-  }, [getUpdateCampaign, updateCampaignId]);
+  }, [getCampaign, updateCampaignId]);
 
-  useEffect(fetchUpdateCampaign, [fetchUpdateCampaign]);
+  useEffect(fetchCampaign, [fetchCampaign]);
 
   return (
     <Suspense
@@ -209,12 +196,10 @@ const UpdateCampaignPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchUpdateCampaign}
+        onReset={fetchCampaign}
       >
-        {getUpdateCampaignQuery && (
-          <UpdateCampaignContent
-            getUpdateCampaignQuery={getUpdateCampaignQuery}
-          />
+        {getCampaignQuery && (
+          <UpdateCampaignContent getCampaignQuery={getCampaignQuery} />
         )}
       </ErrorBoundary>
     </Suspense>

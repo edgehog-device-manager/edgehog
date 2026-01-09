@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,56 +22,57 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  UpdateCampaignForm_UpdateCampaignFragment$data,
-  UpdateCampaignForm_UpdateCampaignFragment$key,
-} from "@/api/__generated__/UpdateCampaignForm_UpdateCampaignFragment.graphql";
+  UpdateCampaignForm_CampaignFragment$data,
+  UpdateCampaignForm_CampaignFragment$key,
+} from "@/api/__generated__/UpdateCampaignForm_CampaignFragment.graphql";
 
 import Col from "@/components/Col";
 import Form from "@/components/Form";
 import Row from "@/components/Row";
-import UpdateCampaignOutcome from "@/components/UpdateCampaignOutcome";
-import UpdateCampaignStatus from "@/components/UpdateCampaignStatus";
+import CampaignOutcome from "@/components/CampaignOutcome";
+import CampaignStatus from "@/components/CampaignStatus";
 import { SimpleFormRow as FormRow } from "@/components/FormRow";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
-const UPDATE_CAMPAIGN_FORM_FRAGMENT = graphql`
-  fragment UpdateCampaignForm_UpdateCampaignFragment on UpdateCampaign {
-    ...UpdateCampaignStatus_UpdateCampaignStatusFragment
-    ...UpdateCampaignOutcome_UpdateCampaignOutcomeFragment
-    baseImage {
-      id
-      name
-      baseImageCollection {
-        id
-        name
-      }
-    }
+const CAMPAIGN_FORM_FRAGMENT = graphql`
+  fragment UpdateCampaignForm_CampaignFragment on Campaign {
+    ...CampaignStatus_CampaignStatusFragment
+    ...CampaignOutcome_CampaignOutcomeFragment
     channel {
       id
       name
     }
-    rolloutMechanism {
+    campaignMechanism {
       __typename
-      ... on PushRollout {
+      ... on FirmwareUpgrade {
         maxFailurePercentage
-        maxInProgressUpdates
-        otaRequestRetries
-        otaRequestTimeoutSeconds
+        maxInProgressOperations
+        requestRetries
+        requestTimeoutSeconds
         forceDowngrade
+        baseImage {
+          id
+          name
+          baseImageCollection {
+            id
+            name
+          }
+        }
       }
     }
   }
 `;
 
-type RolloutMechanismColProps = {
-  rolloutMechanism: UpdateCampaignForm_UpdateCampaignFragment$data["rolloutMechanism"];
+type CampaignMechanismColProps = {
+  campaignMechanism: UpdateCampaignForm_CampaignFragment$data["campaignMechanism"];
 };
-const RolloutMechanismCol = ({
-  rolloutMechanism,
-}: RolloutMechanismColProps) => {
-  if (rolloutMechanism.__typename !== "PushRollout") {
+
+const CampaignMechanismCol = ({
+  campaignMechanism,
+}: CampaignMechanismColProps) => {
+  if (campaignMechanism.__typename !== "FirmwareUpgrade") {
     return null;
   }
 
@@ -85,7 +86,7 @@ const RolloutMechanismCol = ({
           />
         }
       >
-        {rolloutMechanism.maxInProgressUpdates}
+        {campaignMechanism.maxInProgressOperations}
       </FormRow>
       <FormRow
         label={
@@ -100,7 +101,7 @@ const RolloutMechanismCol = ({
           />
         }
       >
-        {rolloutMechanism.maxFailurePercentage}
+        {campaignMechanism.maxFailurePercentage}
       </FormRow>
       <FormRow
         label={
@@ -115,7 +116,7 @@ const RolloutMechanismCol = ({
           />
         }
       >
-        {rolloutMechanism.otaRequestTimeoutSeconds}
+        {campaignMechanism.requestTimeoutSeconds}
       </FormRow>
       <FormRow
         label={
@@ -125,7 +126,7 @@ const RolloutMechanismCol = ({
           />
         }
       >
-        {rolloutMechanism.otaRequestRetries}
+        {campaignMechanism.requestRetries}
       </FormRow>
       <FormRow
         label={
@@ -135,24 +136,28 @@ const RolloutMechanismCol = ({
           />
         }
       >
-        <Form.Check checked={rolloutMechanism.forceDowngrade} disabled />
+        <Form.Check checked={campaignMechanism.forceDowngrade} disabled />
       </FormRow>
     </Col>
   );
 };
 
 type UpdateCampaignProps = {
-  updateCampaignRef: UpdateCampaignForm_UpdateCampaignFragment$key;
+  campaignRef: UpdateCampaignForm_CampaignFragment$key;
 };
 
-const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
-  const updateCampaign = useFragment(
-    UPDATE_CAMPAIGN_FORM_FRAGMENT,
-    updateCampaignRef,
-  );
+const UpdateCampaign = ({ campaignRef }: UpdateCampaignProps) => {
+  const campaign = useFragment(CAMPAIGN_FORM_FRAGMENT, campaignRef);
 
-  const { baseImage, channel, rolloutMechanism } = updateCampaign;
+  const { channel, campaignMechanism } = campaign;
+
+  if (campaignMechanism.__typename !== "FirmwareUpgrade") {
+    return null;
+  }
+
+  const { baseImage } = campaignMechanism;
   const { baseImageCollection } = baseImage;
+
   return (
     <Row>
       <Col lg>
@@ -164,7 +169,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
             />
           }
         >
-          <UpdateCampaignStatus updateCampaignRef={updateCampaign} />
+          <CampaignStatus campaignRef={campaign} />
         </FormRow>
         <FormRow
           label={
@@ -174,7 +179,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
             />
           }
         >
-          <UpdateCampaignOutcome updateCampaignRef={updateCampaign} />
+          <CampaignOutcome campaignRef={campaign} />
         </FormRow>
         <FormRow
           label={
@@ -222,7 +227,7 @@ const UpdateCampaign = ({ updateCampaignRef }: UpdateCampaignProps) => {
           </Link>
         </FormRow>
       </Col>
-      <RolloutMechanismCol rolloutMechanism={rolloutMechanism} />
+      <CampaignMechanismCol campaignMechanism={campaignMechanism} />
     </Row>
   );
 };

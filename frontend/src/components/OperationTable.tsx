@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2022-2025 SECO Mind Srl
+ * Copyright 2022 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ const OPERATION_TABLE_FRAGMENT = graphql`
           createdAt
           status
           updatedAt
-          updateTarget {
-            updateCampaign {
+          campaignTarget {
+            campaign {
               id
               name
             }
@@ -113,7 +113,7 @@ const columns = [
     ),
     cell: ({ getValue }) => <OperationStatus status={getValue()} />,
   }),
-  columnHelper.accessor("updateTarget.updateCampaign.name", {
+  columnHelper.accessor("campaignTarget.campaign.name", {
     header: () => (
       <FormattedMessage
         id="components.OperationTable.updateCampaignNameTitle"
@@ -124,7 +124,7 @@ const columns = [
       <Link
         route={Route.updateCampaignsEdit}
         params={{
-          updateCampaignId: row.original.updateTarget?.updateCampaign.id ?? "",
+          updateCampaignId: row.original.campaignTarget?.campaign.id ?? "",
         }}
       >
         {getValue()}

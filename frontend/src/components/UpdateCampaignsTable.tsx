@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import _ from "lodash";
 
 import type { UpdateCampaignsTable_PaginationQuery } from "@/api/__generated__/UpdateCampaignsTable_PaginationQuery.graphql";
 import type {
-  UpdateCampaignsTable_UpdateCampaignFragment$data,
-  UpdateCampaignsTable_UpdateCampaignFragment$key,
-} from "@/api/__generated__/UpdateCampaignsTable_UpdateCampaignFragment.graphql";
+  UpdateCampaignsTable_CampaignFragment$data,
+  UpdateCampaignsTable_CampaignFragment$key,
+} from "@/api/__generated__/UpdateCampaignsTable_CampaignFragment.graphql";
 
-import UpdateCampaignOutcome from "@/components/UpdateCampaignOutcome";
-import UpdateCampaignStatus from "@/components/UpdateCampaignStatus";
+import CampaignOutcome from "@/components/CampaignOutcome";
+import CampaignStatus from "@/components/CampaignStatus";
 import { createColumnHelper } from "@/components/Table";
 import InfiniteTable from "@/components/InfiniteTable";
 import { Link, Route } from "@/Navigation";
@@ -38,10 +38,10 @@ import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
-const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
-  fragment UpdateCampaignsTable_UpdateCampaignFragment on RootQueryType
+const CAMPAIGNS_TABLE_FRAGMENT = graphql`
+  fragment UpdateCampaignsTable_CampaignFragment on RootQueryType
   @refetchable(queryName: "UpdateCampaignsTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "UpdateCampaignFilterInput" }) {
+  @argumentDefinitions(filter: { type: "CampaignFilterInput" }) {
     updateCampaigns(first: $first, after: $after, filter: $filter)
       @connection(key: "UpdateCampaignsTable_updateCampaigns") {
       edges {
@@ -49,13 +49,17 @@ const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
           id
           name
           status
-          ...UpdateCampaignStatus_UpdateCampaignStatusFragment
+          ...CampaignStatus_CampaignStatusFragment
           outcome
-          ...UpdateCampaignOutcome_UpdateCampaignOutcomeFragment
-          baseImage {
-            name
-            baseImageCollection {
-              name
+          ...CampaignOutcome_CampaignOutcomeFragment
+          campaignMechanism {
+            ... on FirmwareUpgrade {
+              baseImage {
+                name
+                baseImageCollection {
+                  name
+                }
+              }
             }
           }
           channel {
@@ -69,7 +73,7 @@ const UPDATE_CAMPAIGNS_TABLE_FRAGMENT = graphql`
 
 type TableRecord = NonNullable<
   NonNullable<
-    UpdateCampaignsTable_UpdateCampaignFragment$data["updateCampaigns"]
+    UpdateCampaignsTable_CampaignFragment$data["updateCampaigns"]
   >["edges"]
 >[number]["node"];
 
@@ -99,9 +103,7 @@ const columns = [
         defaultMessage="Status"
       />
     ),
-    cell: ({ row }) => (
-      <UpdateCampaignStatus updateCampaignRef={row.original} />
-    ),
+    cell: ({ row }) => <CampaignStatus campaignRef={row.original} />,
   }),
   columnHelper.accessor("outcome", {
     header: () => (
@@ -110,9 +112,7 @@ const columns = [
         defaultMessage="Outcome"
       />
     ),
-    cell: ({ row }) => (
-      <UpdateCampaignOutcome updateCampaignRef={row.original} />
-    ),
+    cell: ({ row }) => <CampaignOutcome campaignRef={row.original} />,
   }),
   columnHelper.accessor("channel.name", {
     header: () => (
@@ -123,16 +123,19 @@ const columns = [
       />
     ),
   }),
-  columnHelper.accessor("baseImage.baseImageCollection.name", {
-    header: () => (
-      <FormattedMessage
-        id="components.UpdateCampaignsTable.baseImageCollectionNameTitle"
-        defaultMessage="Base Image Collection"
-        description="Title for the Base Image Collection column of the Update Campaigns table"
-      />
-    ),
-  }),
-  columnHelper.accessor("baseImage.name", {
+  columnHelper.accessor(
+    "campaignMechanism.baseImage.baseImageCollection.name",
+    {
+      header: () => (
+        <FormattedMessage
+          id="components.UpdateCampaignsTable.baseImageCollectionNameTitle"
+          defaultMessage="Base Image Collection"
+          description="Title for the Base Image Collection column of the Update Campaigns table"
+        />
+      ),
+    },
+  ),
+  columnHelper.accessor("campaignMechanism.baseImage.name", {
     header: () => (
       <FormattedMessage
         id="components.UpdateCampaignsTable.baseImageTitle"
@@ -143,12 +146,15 @@ const columns = [
   }),
 ];
 
-type Props = {
+type UpdateCampaignsTableProps = {
   className?: string;
-  updateCampaignsData: UpdateCampaignsTable_UpdateCampaignFragment$key;
+  campaignsData: UpdateCampaignsTable_CampaignFragment$key;
 };
 
-const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
+const UpdateCampaignsTable = ({
+  className,
+  campaignsData,
+}: UpdateCampaignsTableProps) => {
   const {
     data: paginationData,
     loadNext,
@@ -157,8 +163,8 @@ const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
     refetch,
   } = usePaginationFragment<
     UpdateCampaignsTable_PaginationQuery,
-    UpdateCampaignsTable_UpdateCampaignFragment$key
-  >(UPDATE_CAMPAIGNS_TABLE_FRAGMENT, updateCampaignsData);
+    UpdateCampaignsTable_CampaignFragment$key
+  >(CAMPAIGNS_TABLE_FRAGMENT, campaignsData);
   const [searchText, setSearchText] = useState<string | null>(null);
 
   const debounceRefetch = useMemo(() => {
@@ -192,14 +198,6 @@ const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
               or: [
                 { name: { ilike: `%${text}%` } },
                 {
-                  baseImage: {
-                    version: { ilike: `%${text}%` },
-                    baseImageCollection: {
-                      name: { ilike: `%${text}%` },
-                    },
-                  },
-                },
-                {
                   channel: {
                     name: { ilike: `%${text}%` },
                   },
@@ -225,13 +223,13 @@ const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
     }
   }, [debounceRefetch, searchText]);
 
-  const loadNextUpdateCampaigns = useCallback(() => {
+  const loadNextCampaigns = useCallback(() => {
     if (hasNext && !isLoadingNext) {
       loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 
-  const updateCampaigns = useMemo(() => {
+  const campaigns = useMemo(() => {
     return (
       paginationData.updateCampaigns?.edges
         ?.map((edge) => edge?.node)
@@ -247,9 +245,9 @@ const UpdateCampaignsTable = ({ className, updateCampaignsData }: Props) => {
     <InfiniteTable
       className={className}
       columns={columns}
-      data={updateCampaigns}
+      data={campaigns}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextUpdateCampaigns : undefined}
+      onLoadMore={hasNext ? loadNextCampaigns : undefined}
       setSearchText={setSearchText}
     />
   );

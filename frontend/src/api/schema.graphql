@@ -25,13 +25,104 @@ input ContainerCreateWithNestedDeviceMappingsInput {
   pathOnHost: String!
 }
 
-input DeploymentCampaignDeploymentMechanismLazyInput {
+input CampaignCampaignMechanismFirmwareUpgradeInput {
+  baseImageId: ID
+
   """
   The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
+  If the failures exceed this threshold, the Update Campaign terminates with
   a failure.
   """
   maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress updates. The Update Campaign will have
+  at most this number of OTA Operations that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  update of a specific target (and considering it an error). Note that the
+  update is retried only if the OTA Request doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+
+  """
+  This boolean flag determines if the Base Image will be pushed to the
+  Device even if it already has a greater version of the Base Image.
+  """
+  forceDowngrade: Boolean
+}
+
+"An object representing the properties of a Firmware Upgrade campaign mechanism."
+type FirmwareUpgrade {
+  """
+  This boolean flag determines if the Base Image will be pushed to the
+  Device even if it already has a greater version of the Base Image.
+  """
+  forceDowngrade: Boolean!
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Update Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress updates. The Update Campaign will have
+  at most this number of OTA Operations that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  update of a specific target (and considering it an error). Note that the
+  update is retried only if the OTA Request doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  baseImageId: Int!
+
+  "The base image distributed by the update campaign."
+  baseImage: BaseImage!
+}
+
+input CampaignCampaignMechanismDeploymentUpgradeInput {
+  releaseId: ID
+
+  targetReleaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -39,14 +130,7 @@ input DeploymentCampaignDeploymentMechanismLazyInput {
   deployment is retried only if the Deployment doesn't get acknowledged from the
   device.
   """
-  createRequestRetries: Int
-
-  """
-  The maximum number of in progress deployments. The Update Campaign will
-  have at most this number of Deployments that are started but not yet
-  finished (either successfully or not).
-  """
-  maxInProgressDeployments: Int
+  requestRetries: Int
 
   """
   The timeout (in seconds) Edgehog has to wait before considering a
@@ -55,8 +139,285 @@ input DeploymentCampaignDeploymentMechanismLazyInput {
   requestTimeoutSeconds: Int
 }
 
-"An object representing the properties of a Lazy Deployment Mechanism."
-type Lazy {
+"An object representing the properties of a Upgrade deployment campaign mechanism."
+type DeploymentUpgrade {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  targetReleaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+
+  "The release used for upgrading by the deployment campaign."
+  targetRelease: Release
+}
+
+input CampaignCampaignMechanismDeploymentDeleteInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Delete deployment campaign mechanism."
+type DeploymentDelete {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+}
+
+input CampaignCampaignMechanismDeploymentStopInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Stop deployment campaign mechanism."
+type DeploymentStop {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+}
+
+input CampaignCampaignMechanismDeploymentStartInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Start deployment campaign mechanism."
+type DeploymentStart {
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float!
+
+  """
+  The maximum number of in progress operations. The Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int!
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int!
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int!
+
+  releaseId: ID
+
+  "The release deployed by the mechanism."
+  release: Release
+}
+
+input CampaignCampaignMechanismDeploymentDeployInput {
+  releaseId: ID
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress deployments. The Update Campaign will
+  have at most this number of Deployments that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  deploy of a specific target (and considering it an error). Note that the
+  deployment is retried only if the Deployment doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+}
+
+"An object representing the properties of a Deploy deployment campaign mechanism."
+type DeploymentDeploy {
   """
   The maximum percentage of failures allowed over the number of total targets.
   If the failures exceed this threshold, the Deployment Campaign terminates with
@@ -69,7 +430,7 @@ type Lazy {
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
-  maxInProgressDeployments: Int!
+  maxInProgressOperations: Int!
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -77,48 +438,18 @@ type Lazy {
   deployment is retried only if the Deployment doesn't get acknowledged from the
   device.
   """
-  createRequestRetries: Int!
+  requestRetries: Int!
 
   """
   The timeout (in seconds) Edgehog has to wait before considering a
   Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
   requestTimeoutSeconds: Int!
-}
 
-input UpdateCampaignRolloutMechanismPushInput {
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean
+  releaseId: ID
 
-  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
-  maxFailurePercentage: Float
-
-  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
-  maxInProgressUpdates: Int
-
-  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
-  otaRequestRetries: Int
-
-  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
-  otaRequestTimeoutSeconds: Int
-}
-
-"An object representing the properties of a Push Rollout Mechanism."
-type PushRollout {
-  "This boolean flag determines if the Base Image will be pushed to the Device even if it already has a greater version of the Base Image."
-  forceDowngrade: Boolean!
-
-  "The maximum percentage of failures allowed over the number of total targets. If the failures exceed this threshold, the Update Campaign terminates with a failure."
-  maxFailurePercentage: Float!
-
-  "The maximum number of in progress updates. The Update Campaign will have at most this number of OTA Operations that are started but not yet finished (either successfully or not)."
-  maxInProgressUpdates: Int!
-
-  "The number of attempts that have to be tried before giving up on the update of a specific target (and considering it an error). Note that the update is retried only if the OTA Request doesn't get acknowledged from the device."
-  otaRequestRetries: Int!
-
-  "The timeout (in seconds) Edgehog has to wait before considering an OTA Request lost (and possibly retry). It must be at least 30 seconds."
-  otaRequestTimeoutSeconds: Int!
+  "The release deployed by the mechanism."
+  release: Release
 }
 
 """
@@ -241,47 +572,35 @@ type Modem {
   technology: ModemTechnology
 }
 
-input DeploymentMechanismInput {
-  lazy: DeploymentCampaignDeploymentMechanismLazyInput
+input CampaignMechanismInput {
+  deploymentDelete: CampaignCampaignMechanismDeploymentDeleteInput
+  deploymentDeploy: CampaignCampaignMechanismDeploymentDeployInput
+  deploymentStart: CampaignCampaignMechanismDeploymentStartInput
+  deploymentStop: CampaignCampaignMechanismDeploymentStopInput
+  deploymentUpgrade: CampaignCampaignMechanismDeploymentUpgradeInput
+  firmwareUpgrade: CampaignCampaignMechanismFirmwareUpgradeInput
 }
 
-union DeploymentMechanism = Lazy
+union CampaignMechanism =
+  | DeploymentDelete
+  | DeploymentDeploy
+  | DeploymentStart
+  | DeploymentStop
+  | DeploymentUpgrade
+  | FirmwareUpgrade
 
-input RolloutMechanismInput {
-  push: UpdateCampaignRolloutMechanismPushInput
-}
-
-union RolloutMechanism = PushRollout
-
-enum DeploymentTargetStatus {
-  "Something went wrong while deploying the target."
+enum CampaignTargetStatus {
+  "Something went wrong while attempting operation on the target."
   FAILED
 
-  "The deployment target is waiting for the deployment to start."
+  "The campaign target is waiting for the campaign to start."
   IDLE
 
-  "The deployment is in progress."
+  "The campaign is in progress."
   IN_PROGRESS
 
-  "The release has been successfully deployed to the target."
+  "The operation has executed successfully on the target."
   SUCCESSFUL
-}
-
-enum OperationType {
-  "Delete a deployment."
-  DELETE
-
-  "Deploy an application."
-  DEPLOY
-
-  "Start deployments."
-  START
-
-  "Stop deployments."
-  STOP
-
-  "Upgrade an existing deployment."
-  UPGRADE
 }
 
 enum CampaignOutcome {
@@ -300,39 +619,6 @@ enum CampaignStatus {
   IDLE
 
   "The campaign is being rolled-out."
-  IN_PROGRESS
-}
-
-enum UpdateTargetStatus {
-  "The update target has failed to be updated."
-  FAILED
-
-  "The update campaign is waiting for the OTA Request to be sent."
-  IDLE
-
-  "The update target is in progress."
-  IN_PROGRESS
-
-  "The update target was successfully updated."
-  SUCCESSFUL
-}
-
-enum UpdateCampaignOutcome {
-  "The update campaign has finished with a failure."
-  FAILURE
-
-  "The update campaign has finished successfully."
-  SUCCESS
-}
-
-enum UpdateCampaignStatus {
-  "The update campaign has finished."
-  FINISHED
-
-  "The update campaign has been created but is not being rolled-out yet."
-  IDLE
-
-  "The update campaign is being rolled-out."
   IN_PROGRESS
 }
 
@@ -996,6 +1282,9 @@ type BaseImage implements Node {
   localizedReleaseDisplayNames(
     preferredLanguageTags: [String!]
   ): [LocalizedAttribute!]
+
+  "Derived Base Image Name from version and localized release display name"
+  name: String
 }
 
 "A relay page info"
@@ -2601,7 +2890,7 @@ input DeploymentFilterInput {
   Only returns targets for deploy and upgrade operation campaigns.
   Returns nil for other operation types (start, stop, delete).
   """
-  deploymentTarget: DeploymentTargetFilterInput
+  campaignTarget: CampaignTargetFilterInput
 }
 
 input DeploymentSortInput {
@@ -2669,7 +2958,7 @@ type Deployment implements Node {
   Only returns targets for deploy and upgrade operation campaigns.
   Returns nil for other operation types (start, stop, delete).
   """
-  deploymentTarget: DeploymentTarget
+  campaignTarget: CampaignTarget
 
   isReady: Boolean
 }
@@ -4033,6 +4322,7 @@ enum DeviceSortField {
   ONLINE
   LAST_CONNECTION
   LAST_DISCONNECTION
+  LAST_SEEN_IP
   SERIAL_NUMBER
   PART_NUMBER
 }
@@ -4072,6 +4362,19 @@ input DeviceFilterPartNumber {
 }
 
 input DeviceFilterSerialNumber {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input DeviceFilterLastSeenIp {
   isNil: Boolean
   eq: String
   notEq: String
@@ -4178,6 +4481,9 @@ input DeviceFilterInput {
   "The date at which the device last disconnected from Astarte."
   lastDisconnection: DeviceFilterLastDisconnection
 
+  "The IP address at which the device last connected to Astarte."
+  lastSeenIp: DeviceFilterLastSeenIp
+
   "The serial number of the device."
   serialNumber: DeviceFilterSerialNumber
 
@@ -4227,6 +4533,9 @@ type Device implements Node {
 
   "The date at which the device last disconnected from Astarte."
   lastDisconnection: DateTime
+
+  "The IP address at which the device last connected to Astarte."
+  lastSeenIp: String
 
   "The serial number of the device."
   serialNumber: String
@@ -4874,7 +5183,7 @@ input OtaOperationFilterInput {
   The update target of an update campaign that created the managed
   ota operation, if any.
   """
-  updateTarget: UpdateTargetFilterInput
+  campaignTarget: CampaignTargetFilterInput
 }
 
 input OtaOperationSortInput {
@@ -4914,7 +5223,7 @@ type OtaOperation {
   The update target of an update campaign that created the managed
   ota operation, if any.
   """
-  updateTarget: UpdateTarget
+  campaignTarget: CampaignTarget
 }
 
 type TenantInfo {
@@ -5073,7 +5382,7 @@ input ChannelFilterInput {
   "The device groups targeted by the channel."
   targetGroups: DeviceGroupFilterInput
 
-  deploymentCampaigns: DeploymentCampaignFilterInput
+  campaigns: CampaignFilterInput
 }
 
 input ChannelSortInput {
@@ -5120,409 +5429,12 @@ type Channel implements Node {
     last: Int
   ): DeviceGroupConnection!
 
-  deploymentCampaigns(
+  campaigns(
     "How to sort the records in the response"
-    sort: [DeploymentCampaignSortInput]
+    sort: [CampaignSortInput]
 
     "A filter to limit the results"
-    filter: DeploymentCampaignFilterInput
-
-    "The number of records to return."
-    limit: Int
-
-    "The number of records to skip."
-    offset: Int
-  ): [DeploymentCampaign!]!
-}
-
-enum UpdateTargetSortField {
-  ID
-  STATUS
-  RETRY_COUNT
-  LATEST_ATTEMPT
-  COMPLETION_TIMESTAMP
-}
-
-":update_target connection"
-type UpdateTargetConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":update_target edges"
-  edges: [UpdateTargetEdge!]
-}
-
-":update_target edge"
-type UpdateTargetEdge {
-  "Cursor"
-  cursor: String!
-
-  ":update_target node"
-  node: UpdateTarget!
-}
-
-input UpdateTargetFilterCompletionTimestamp {
-  isNil: Boolean
-  eq: DateTime
-  notEq: DateTime
-  in: [DateTime]
-  lessThan: DateTime
-  greaterThan: DateTime
-  lessThanOrEqual: DateTime
-  greaterThanOrEqual: DateTime
-}
-
-input UpdateTargetFilterLatestAttempt {
-  isNil: Boolean
-  eq: DateTime
-  notEq: DateTime
-  in: [DateTime]
-  lessThan: DateTime
-  greaterThan: DateTime
-  lessThanOrEqual: DateTime
-  greaterThanOrEqual: DateTime
-}
-
-input UpdateTargetFilterRetryCount {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int!]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateTargetFilterStatus {
-  isNil: Boolean
-  eq: UpdateTargetStatus
-  notEq: UpdateTargetStatus
-  in: [UpdateTargetStatus!]
-  lessThan: UpdateTargetStatus
-  greaterThan: UpdateTargetStatus
-  lessThanOrEqual: UpdateTargetStatus
-  greaterThanOrEqual: UpdateTargetStatus
-}
-
-input UpdateTargetFilterId {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int!]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateTargetFilterInput {
-  and: [UpdateTargetFilterInput!]
-
-  or: [UpdateTargetFilterInput!]
-
-  not: [UpdateTargetFilterInput!]
-
-  id: UpdateTargetFilterId
-
-  "The status of the update target."
-  status: UpdateTargetFilterStatus
-
-  "The retry count of the update target. This indicates how many times Edgehog has tried to send an OTA update towards the device without receiving an ack."
-  retryCount: UpdateTargetFilterRetryCount
-
-  "The timestamp of the latest attempt to update the update target."
-  latestAttempt: UpdateTargetFilterLatestAttempt
-
-  "The timestamp when the update target completed its update, either with a success or a failure."
-  completionTimestamp: UpdateTargetFilterCompletionTimestamp
-
-  "The update campaign that is targeting the update target."
-  updateCampaign: UpdateCampaignFilterInput
-
-  "The target device."
-  device: DeviceFilterInput
-
-  "The OTA operation that tracks the update target in-progress update."
-  otaOperation: OtaOperationFilterInput
-}
-
-input UpdateTargetSortInput {
-  order: SortOrder
-  field: UpdateTargetSortField!
-}
-
-"""
-Represents an UpdateTarget.
-
-An Update Target is the target of an Update Campaign, which is composed by the targeted device and the status of the target in the linked Update Campaign.
-"""
-type UpdateTarget {
-  id: ID!
-
-  "The status of the update target."
-  status: UpdateTargetStatus!
-
-  "The retry count of the update target. This indicates how many times Edgehog has tried to send an OTA update towards the device without receiving an ack."
-  retryCount: Int!
-
-  "The timestamp of the latest attempt to update the update target."
-  latestAttempt: DateTime
-
-  "The timestamp when the update target completed its update, either with a success or a failure."
-  completionTimestamp: DateTime
-
-  "The update campaign that is targeting the update target."
-  updateCampaign: UpdateCampaign!
-
-  "The target device."
-  device: Device!
-
-  "The OTA operation that tracks the update target in-progress update."
-  otaOperation: OtaOperation
-}
-
-"The result of the :create_update_campaign mutation"
-type CreateUpdateCampaignResult {
-  "The successful result of the mutation"
-  result: UpdateCampaign
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
-input CreateUpdateCampaignInput {
-  "The name of the update campaign."
-  name: String!
-
-  "The rollout mechanism used in the update campaign."
-  rolloutMechanism: RolloutMechanismInput!
-
-  "The ID of the base image that will be distributed in the update campaign."
-  baseImageId: ID!
-
-  "The ID of the channel that will be targeted by the update campaign."
-  channelId: ID!
-}
-
-enum UpdateCampaignSortField {
-  ID
-  NAME
-  STATUS
-  OUTCOME
-  TOTAL_TARGET_COUNT
-  IDLE_TARGET_COUNT
-  IN_PROGRESS_TARGET_COUNT
-  FAILED_TARGET_COUNT
-  SUCCESSFUL_TARGET_COUNT
-}
-
-":update_campaign connection"
-type UpdateCampaignConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":update_campaign edges"
-  edges: [UpdateCampaignEdge!]
-}
-
-":update_campaign edge"
-type UpdateCampaignEdge {
-  "Cursor"
-  cursor: String!
-
-  ":update_campaign node"
-  node: UpdateCampaign!
-}
-
-input UpdateCampaignFilterSuccessfulTargetCount {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateCampaignFilterFailedTargetCount {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateCampaignFilterInProgressTargetCount {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateCampaignFilterIdleTargetCount {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateCampaignFilterTotalTargetCount {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateCampaignFilterOutcome {
-  isNil: Boolean
-  eq: UpdateCampaignOutcome
-  notEq: UpdateCampaignOutcome
-  in: [UpdateCampaignOutcome]
-  lessThan: UpdateCampaignOutcome
-  greaterThan: UpdateCampaignOutcome
-  lessThanOrEqual: UpdateCampaignOutcome
-  greaterThanOrEqual: UpdateCampaignOutcome
-}
-
-input UpdateCampaignFilterStatus {
-  isNil: Boolean
-  eq: UpdateCampaignStatus
-  notEq: UpdateCampaignStatus
-  in: [UpdateCampaignStatus!]
-  lessThan: UpdateCampaignStatus
-  greaterThan: UpdateCampaignStatus
-  lessThanOrEqual: UpdateCampaignStatus
-  greaterThanOrEqual: UpdateCampaignStatus
-}
-
-input UpdateCampaignFilterName {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  like: String
-  ilike: String
-}
-
-input UpdateCampaignFilterId {
-  isNil: Boolean
-  eq: Int
-  notEq: Int
-  in: [Int!]
-  lessThan: Int
-  greaterThan: Int
-  lessThanOrEqual: Int
-  greaterThanOrEqual: Int
-}
-
-input UpdateCampaignFilterInput {
-  and: [UpdateCampaignFilterInput!]
-
-  or: [UpdateCampaignFilterInput!]
-
-  not: [UpdateCampaignFilterInput!]
-
-  id: UpdateCampaignFilterId
-
-  "The name of the update campaign."
-  name: UpdateCampaignFilterName
-
-  "The status of the update campaign."
-  status: UpdateCampaignFilterStatus
-
-  "The outcome of the update campaign, present only when it's finished."
-  outcome: UpdateCampaignFilterOutcome
-
-  "The base image distributed by the update campaign."
-  baseImage: BaseImageFilterInput
-
-  "The channel targeted by the update campaign."
-  channel: ChannelFilterInput
-
-  "The update targets belonging to the update campaign."
-  updateTargets: UpdateTargetFilterInput
-
-  "The total number of update targets."
-  totalTargetCount: UpdateCampaignFilterTotalTargetCount
-
-  "The number of update targets with an idle status."
-  idleTargetCount: UpdateCampaignFilterIdleTargetCount
-
-  "The number of update targets with an in-progress status."
-  inProgressTargetCount: UpdateCampaignFilterInProgressTargetCount
-
-  "The number of update targets with a failed status."
-  failedTargetCount: UpdateCampaignFilterFailedTargetCount
-
-  "The number of update targets with a successful status."
-  successfulTargetCount: UpdateCampaignFilterSuccessfulTargetCount
-}
-
-input UpdateCampaignSortInput {
-  order: SortOrder
-  field: UpdateCampaignSortField!
-}
-
-"""
-Represents an UpdateCampaign.
-
-An Update Campaign is the operation that tracks the distribution of a specific Base Image to all devices belonging to a Channel.
-"""
-type UpdateCampaign implements Node {
-  id: ID!
-
-  "The name of the update campaign."
-  name: String!
-
-  "The status of the update campaign."
-  status: UpdateCampaignStatus!
-
-  "The outcome of the update campaign, present only when it's finished."
-  outcome: UpdateCampaignOutcome
-
-  "The rollout mechanism used in the update campaign."
-  rolloutMechanism: RolloutMechanism!
-
-  "The base image distributed by the update campaign."
-  baseImage: BaseImage!
-
-  "The channel targeted by the update campaign."
-  channel: Channel!
-
-  "The update targets belonging to the update campaign."
-  updateTargets(
-    "How to sort the records in the response"
-    sort: [UpdateTargetSortInput]
-
-    "A filter to limit the results"
-    filter: UpdateTargetFilterInput
+    filter: CampaignFilterInput
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -5535,25 +5447,10 @@ type UpdateCampaign implements Node {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): UpdateTargetConnection!
-
-  "The total number of update targets."
-  totalTargetCount: Int!
-
-  "The number of update targets with an idle status."
-  idleTargetCount: Int!
-
-  "The number of update targets with an in-progress status."
-  inProgressTargetCount: Int!
-
-  "The number of update targets with a failed status."
-  failedTargetCount: Int!
-
-  "The number of update targets with a successful status."
-  successfulTargetCount: Int!
+  ): CampaignConnection!
 }
 
-enum DeploymentTargetSortField {
+enum CampaignTargetSortField {
   ID
   STATUS
   RETRY_COUNT
@@ -5561,28 +5458,28 @@ enum DeploymentTargetSortField {
   COMPLETION_TIMESTAMP
 }
 
-":deployment_target connection"
-type DeploymentTargetConnection {
+":campaign_target connection"
+type CampaignTargetConnection {
   "Total count on all pages"
   count: Int
 
   "Page information"
   pageInfo: PageInfo!
 
-  ":deployment_target edges"
-  edges: [DeploymentTargetEdge!]
+  ":campaign_target edges"
+  edges: [CampaignTargetEdge!]
 }
 
-":deployment_target edge"
-type DeploymentTargetEdge {
+":campaign_target edge"
+type CampaignTargetEdge {
   "Cursor"
   cursor: String!
 
-  ":deployment_target node"
-  node: DeploymentTarget!
+  ":campaign_target node"
+  node: CampaignTarget!
 }
 
-input DeploymentTargetFilterCompletionTimestamp {
+input CampaignTargetFilterCompletionTimestamp {
   isNil: Boolean
   eq: DateTime
   notEq: DateTime
@@ -5593,7 +5490,7 @@ input DeploymentTargetFilterCompletionTimestamp {
   greaterThanOrEqual: DateTime
 }
 
-input DeploymentTargetFilterLatestAttempt {
+input CampaignTargetFilterLatestAttempt {
   isNil: Boolean
   eq: DateTime
   notEq: DateTime
@@ -5604,7 +5501,7 @@ input DeploymentTargetFilterLatestAttempt {
   greaterThanOrEqual: DateTime
 }
 
-input DeploymentTargetFilterRetryCount {
+input CampaignTargetFilterRetryCount {
   isNil: Boolean
   eq: Int
   notEq: Int
@@ -5615,18 +5512,18 @@ input DeploymentTargetFilterRetryCount {
   greaterThanOrEqual: Int
 }
 
-input DeploymentTargetFilterStatus {
+input CampaignTargetFilterStatus {
   isNil: Boolean
-  eq: DeploymentTargetStatus
-  notEq: DeploymentTargetStatus
-  in: [DeploymentTargetStatus!]
-  lessThan: DeploymentTargetStatus
-  greaterThan: DeploymentTargetStatus
-  lessThanOrEqual: DeploymentTargetStatus
-  greaterThanOrEqual: DeploymentTargetStatus
+  eq: CampaignTargetStatus
+  notEq: CampaignTargetStatus
+  in: [CampaignTargetStatus!]
+  lessThan: CampaignTargetStatus
+  greaterThan: CampaignTargetStatus
+  lessThanOrEqual: CampaignTargetStatus
+  greaterThanOrEqual: CampaignTargetStatus
 }
 
-input DeploymentTargetFilterId {
+input CampaignTargetFilterId {
   isNil: Boolean
   eq: ID
   notEq: ID
@@ -5637,111 +5534,110 @@ input DeploymentTargetFilterId {
   greaterThanOrEqual: ID
 }
 
-input DeploymentTargetFilterInput {
-  and: [DeploymentTargetFilterInput!]
+input CampaignTargetFilterInput {
+  and: [CampaignTargetFilterInput!]
 
-  or: [DeploymentTargetFilterInput!]
+  or: [CampaignTargetFilterInput!]
 
-  not: [DeploymentTargetFilterInput!]
+  not: [CampaignTargetFilterInput!]
 
-  id: DeploymentTargetFilterId
+  id: CampaignTargetFilterId
 
-  "The status of the update target."
-  status: DeploymentTargetFilterStatus
+  "The status of the campaign target."
+  status: CampaignTargetFilterStatus
 
   """
-  The number of retries of the deployment target. This indicated how many times
-  Edgehog retried to send all the necessary information about a deployment towards
+  The number of retries of the campaign target. This indicated how many times
+  Edgehog retried to send all the necessary information about an operation towards
   the device without receiving acks.
   """
-  retryCount: DeploymentTargetFilterRetryCount
+  retryCount: CampaignTargetFilterRetryCount
 
-  "The timestamp of the latest attempt to deploy to the update target."
-  latestAttempt: DeploymentTargetFilterLatestAttempt
+  "The timestamp of the latest attempt to deploy to the campaign target."
+  latestAttempt: CampaignTargetFilterLatestAttempt
 
-  "The timestamp when the update target completed its update, either with a success or a failure."
-  completionTimestamp: DeploymentTargetFilterCompletionTimestamp
+  """
+  The timestamp when the campaign target completed its update, either with
+  a success or a failure.
+  """
+  completionTimestamp: CampaignTargetFilterCompletionTimestamp
 
-  deploymentCampaign: DeploymentCampaignFilterInput
+  campaign: CampaignFilterInput
 
   device: DeviceFilterInput
 
   deployment: DeploymentFilterInput
+
+  otaOperation: OtaOperationFilterInput
 }
 
-input DeploymentTargetSortInput {
+input CampaignTargetSortInput {
   order: SortOrder
-  field: DeploymentTargetSortField!
+  field: CampaignTargetSortField!
 }
 
 """
-Represents a DeploymentTarget.
+Represents a CampaignTarget.
 
-Deployment targets are the targets of a Deployment Campaign, which is composed by the target device and the state of the target in the linked Deployment Campaign.
+Campaign targets are the targets of a Campaign, which is composed
+by the target device and the state of the target in the linked
+Campaign
 """
-type DeploymentTarget {
+type CampaignTarget {
   id: ID!
 
-  "The status of the update target."
-  status: DeploymentTargetStatus!
+  "The status of the campaign target."
+  status: CampaignTargetStatus!
 
   """
-  The number of retries of the deployment target. This indicated how many times
-  Edgehog retried to send all the necessary information about a deployment towards
+  The number of retries of the campaign target. This indicated how many times
+  Edgehog retried to send all the necessary information about an operation towards
   the device without receiving acks.
   """
   retryCount: Int!
 
-  "The timestamp of the latest attempt to deploy to the update target."
+  "The timestamp of the latest attempt to deploy to the campaign target."
   latestAttempt: DateTime
 
-  "The timestamp when the update target completed its update, either with a success or a failure."
+  """
+  The timestamp when the campaign target completed its update, either with
+  a success or a failure.
+  """
   completionTimestamp: DateTime
 
-  deploymentCampaign: DeploymentCampaign!
+  campaign: Campaign!
 
   device: Device!
 
   deployment: Deployment
+
+  otaOperation: OtaOperation
 }
 
-"The result of the :create_deployment_campaign mutation"
-type CreateDeploymentCampaignResult {
+"The result of the :create_campaign mutation"
+type CreateCampaignResult {
   "The successful result of the mutation"
-  result: DeploymentCampaign
+  result: Campaign
 
   "Any errors generated, if the mutation failed"
   errors: [MutationError!]!
 }
 
-input CreateDeploymentCampaignInput {
+input CreateCampaignInput {
   name: String!
 
-  "The deployment mechanism to carry the campaign."
-  deploymentMechanism: DeploymentMechanismInput!
+  "The campaign mechanism to carry the campaign."
+  campaignMechanism: CampaignMechanismInput!
 
-  "The type of operation to perform in the deployment campaign."
-  operationType: OperationType
-
-  "The ID of the release that will be distributed in the deployment campaign."
-  releaseId: ID!
-
-  """
-  The ID of the target release for upgrade operations.
-  Required when operation_type is :upgrade.
-  """
-  targetReleaseId: ID
-
-  "The ID of the channel that will be targeted by the deployment campaign."
+  "The ID of the channel that will be targeted by the campaign."
   channelId: ID!
 }
 
-enum DeploymentCampaignSortField {
+enum CampaignSortField {
   ID
   NAME
   STATUS
   OUTCOME
-  OPERATION_TYPE
   TOTAL_TARGET_COUNT
   IDLE_TARGET_COUNT
   IN_PROGRESS_TARGET_COUNT
@@ -5749,28 +5645,28 @@ enum DeploymentCampaignSortField {
   SUCCESSFUL_TARGET_COUNT
 }
 
-":deployment_campaign connection"
-type DeploymentCampaignConnection {
+":campaign connection"
+type CampaignConnection {
   "Total count on all pages"
   count: Int
 
   "Page information"
   pageInfo: PageInfo!
 
-  ":deployment_campaign edges"
-  edges: [DeploymentCampaignEdge!]
+  ":campaign edges"
+  edges: [CampaignEdge!]
 }
 
-":deployment_campaign edge"
-type DeploymentCampaignEdge {
+":campaign edge"
+type CampaignEdge {
   "Cursor"
   cursor: String!
 
-  ":deployment_campaign node"
-  node: DeploymentCampaign!
+  ":campaign node"
+  node: Campaign!
 }
 
-input DeploymentCampaignFilterSuccessfulTargetCount {
+input CampaignFilterSuccessfulTargetCount {
   isNil: Boolean
   eq: Int
   notEq: Int
@@ -5781,7 +5677,7 @@ input DeploymentCampaignFilterSuccessfulTargetCount {
   greaterThanOrEqual: Int
 }
 
-input DeploymentCampaignFilterFailedTargetCount {
+input CampaignFilterFailedTargetCount {
   isNil: Boolean
   eq: Int
   notEq: Int
@@ -5792,7 +5688,7 @@ input DeploymentCampaignFilterFailedTargetCount {
   greaterThanOrEqual: Int
 }
 
-input DeploymentCampaignFilterInProgressTargetCount {
+input CampaignFilterInProgressTargetCount {
   isNil: Boolean
   eq: Int
   notEq: Int
@@ -5803,7 +5699,7 @@ input DeploymentCampaignFilterInProgressTargetCount {
   greaterThanOrEqual: Int
 }
 
-input DeploymentCampaignFilterIdleTargetCount {
+input CampaignFilterIdleTargetCount {
   isNil: Boolean
   eq: Int
   notEq: Int
@@ -5814,7 +5710,7 @@ input DeploymentCampaignFilterIdleTargetCount {
   greaterThanOrEqual: Int
 }
 
-input DeploymentCampaignFilterTotalTargetCount {
+input CampaignFilterTotalTargetCount {
   isNil: Boolean
   eq: Int
   notEq: Int
@@ -5825,18 +5721,7 @@ input DeploymentCampaignFilterTotalTargetCount {
   greaterThanOrEqual: Int
 }
 
-input DeploymentCampaignFilterOperationType {
-  isNil: Boolean
-  eq: OperationType
-  notEq: OperationType
-  in: [OperationType!]
-  lessThan: OperationType
-  greaterThan: OperationType
-  lessThanOrEqual: OperationType
-  greaterThanOrEqual: OperationType
-}
-
-input DeploymentCampaignFilterOutcome {
+input CampaignFilterOutcome {
   isNil: Boolean
   eq: CampaignOutcome
   notEq: CampaignOutcome
@@ -5847,7 +5732,7 @@ input DeploymentCampaignFilterOutcome {
   greaterThanOrEqual: CampaignOutcome
 }
 
-input DeploymentCampaignFilterStatus {
+input CampaignFilterStatus {
   isNil: Boolean
   eq: CampaignStatus
   notEq: CampaignStatus
@@ -5858,7 +5743,7 @@ input DeploymentCampaignFilterStatus {
   greaterThanOrEqual: CampaignStatus
 }
 
-input DeploymentCampaignFilterName {
+input CampaignFilterName {
   isNil: Boolean
   eq: String
   notEq: String
@@ -5871,7 +5756,7 @@ input DeploymentCampaignFilterName {
   ilike: String
 }
 
-input DeploymentCampaignFilterId {
+input CampaignFilterId {
   isNil: Boolean
   eq: ID
   notEq: ID
@@ -5882,92 +5767,74 @@ input DeploymentCampaignFilterId {
   greaterThanOrEqual: ID
 }
 
-input DeploymentCampaignFilterInput {
-  and: [DeploymentCampaignFilterInput!]
+input CampaignFilterInput {
+  and: [CampaignFilterInput!]
 
-  or: [DeploymentCampaignFilterInput!]
+  or: [CampaignFilterInput!]
 
-  not: [DeploymentCampaignFilterInput!]
+  not: [CampaignFilterInput!]
 
-  id: DeploymentCampaignFilterId
+  id: CampaignFilterId
 
-  name: DeploymentCampaignFilterName
+  name: CampaignFilterName
 
-  "The status of the deployment campaign."
-  status: DeploymentCampaignFilterStatus
+  "The status of the campaign."
+  status: CampaignFilterStatus
 
-  "The outcome of the deployment campaign."
-  outcome: DeploymentCampaignFilterOutcome
-
-  "The type of operation to perform in the deployment campaign."
-  operationType: DeploymentCampaignFilterOperationType
-
-  "The release distributed by the deployment campaign."
-  release: ReleaseFilterInput
-
-  "The release used for upgrading by the deployment campaign."
-  targetRelease: ReleaseFilterInput
+  "The outcome of the campaign."
+  outcome: CampaignFilterOutcome
 
   "The channel associated with the campaign."
   channel: ChannelFilterInput
 
-  "The depployment targets belonging to the deployment campaign."
-  deploymentTargets: DeploymentTargetFilterInput
+  "The campaign targets belonging to the campaign."
+  campaignTargets: CampaignTargetFilterInput
 
-  "The total number of deployment targets."
-  totalTargetCount: DeploymentCampaignFilterTotalTargetCount
+  "The total number of campaign targets."
+  totalTargetCount: CampaignFilterTotalTargetCount
 
-  "The number of deployment targets with an idle status."
-  idleTargetCount: DeploymentCampaignFilterIdleTargetCount
+  "The number of campaign targets with an idle status."
+  idleTargetCount: CampaignFilterIdleTargetCount
 
-  "The number of deployment targets with an in-progress status."
-  inProgressTargetCount: DeploymentCampaignFilterInProgressTargetCount
+  "The number of campaign targets with an in-progress status."
+  inProgressTargetCount: CampaignFilterInProgressTargetCount
 
-  "The number of deployment targets with a failed status."
-  failedTargetCount: DeploymentCampaignFilterFailedTargetCount
+  "The number of campaign targets with a failed status."
+  failedTargetCount: CampaignFilterFailedTargetCount
 
-  "The number of deployment targets with a successful status."
-  successfulTargetCount: DeploymentCampaignFilterSuccessfulTargetCount
+  "The number of campaign targets with a successful status."
+  successfulTargetCount: CampaignFilterSuccessfulTargetCount
 }
 
-input DeploymentCampaignSortInput {
+input CampaignSortInput {
   order: SortOrder
-  field: DeploymentCampaignSortField!
+  field: CampaignSortField!
 }
 
-type DeploymentCampaign implements Node {
+type Campaign implements Node {
   id: ID!
 
   name: String!
 
-  "The status of the deployment campaign."
+  "The status of the campaign."
   status: CampaignStatus!
 
-  "The outcome of the deployment campaign."
+  "The outcome of the campaign."
   outcome: CampaignOutcome
 
-  "The deployment mechanism to carry the campaign."
-  deploymentMechanism: DeploymentMechanism!
-
-  "The type of operation to perform in the deployment campaign."
-  operationType: OperationType!
-
-  "The release distributed by the deployment campaign."
-  release: Release
-
-  "The release used for upgrading by the deployment campaign."
-  targetRelease: Release
+  "The campaign mechanism to carry the campaign."
+  campaignMechanism: CampaignMechanism!
 
   "The channel associated with the campaign."
   channel: Channel!
 
-  "The depployment targets belonging to the deployment campaign."
-  deploymentTargets(
+  "The campaign targets belonging to the campaign."
+  campaignTargets(
     "How to sort the records in the response"
-    sort: [DeploymentTargetSortInput]
+    sort: [CampaignTargetSortInput]
 
     "A filter to limit the results"
-    filter: DeploymentTargetFilterInput
+    filter: CampaignTargetFilterInput
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -5980,59 +5847,35 @@ type DeploymentCampaign implements Node {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): DeploymentTargetConnection!
+  ): CampaignTargetConnection!
 
-  "The total number of deployment targets."
+  "The total number of campaign targets."
   totalTargetCount: Int!
 
-  "The number of deployment targets with an idle status."
+  "The number of campaign targets with an idle status."
   idleTargetCount: Int!
 
-  "The number of deployment targets with an in-progress status."
+  "The number of campaign targets with an in-progress status."
   inProgressTargetCount: Int!
 
-  "The number of deployment targets with a failed status."
+  "The number of campaign targets with a failed status."
   failedTargetCount: Int!
 
-  "The number of deployment targets with a successful status."
+  "The number of campaign targets with a successful status."
   successfulTargetCount: Int!
 }
 
 type RootQueryType {
-  "Returns the desired deployment campaign."
-  deploymentCampaign("The id of the record" id: ID!): DeploymentCampaign
+  "Returns the desired campaign."
+  campaign("The id of the record" id: ID!): Campaign
 
-  "Returns all available deployment campaigns."
-  deploymentCampaigns(
-    "How to sort the records in the response"
-    sort: [DeploymentCampaignSortInput]
-
-    "A filter to limit the results"
-    filter: DeploymentCampaignFilterInput
-
-    "The number of records to return from the beginning. Maximum 250"
-    first: Int
-
-    "Show records before the specified keyset."
-    before: String
-
-    "Show records after the specified keyset."
-    after: String
-
-    "The number of records to return to the end. Maximum 250"
-    last: Int
-  ): DeploymentCampaignConnection
-
-  "Returns a single update campaign."
-  updateCampaign("The id of the record" id: ID!): UpdateCampaign
-
-  "Returns a list of update campaigns."
+  "Returns all update campaigns."
   updateCampaigns(
     "How to sort the records in the response"
-    sort: [UpdateCampaignSortInput]
+    sort: [CampaignSortInput]
 
     "A filter to limit the results"
-    filter: UpdateCampaignFilterInput
+    filter: CampaignFilterInput
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -6045,7 +5888,53 @@ type RootQueryType {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
-  ): UpdateCampaignConnection
+
+    types: [String!]
+  ): CampaignConnection
+
+  "Returns all deployment campaigns."
+  deploymentCampaigns(
+    "How to sort the records in the response"
+    sort: [CampaignSortInput]
+
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+
+    types: [String!]
+  ): CampaignConnection
+
+  "Returns all available campaigns."
+  campaigns(
+    "How to sort the records in the response"
+    sort: [CampaignSortInput]
+
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): CampaignConnection
 
   "Returns a single channel."
   channel("The id of the record" id: ID!): Channel
@@ -6355,15 +6244,8 @@ type RootQueryType {
 }
 
 type RootMutationType {
-  "Creates a new deployment campaign."
-  createDeploymentCampaign(
-    input: CreateDeploymentCampaignInput!
-  ): CreateDeploymentCampaignResult
-
-  "Creates a new update campaign."
-  createUpdateCampaign(
-    input: CreateUpdateCampaignInput!
-  ): CreateUpdateCampaignResult
+  "Creates a new campaign."
+  createCampaign(input: CreateCampaignInput!): CreateCampaignResult
 
   "Creates a new channel."
   createChannel(input: CreateChannelInput!): CreateChannelResult

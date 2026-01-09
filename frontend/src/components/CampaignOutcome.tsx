@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,43 +22,40 @@ import { defineMessages, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  CampaignOutcome as DeploymentCampaignOutcomeEnum,
-  DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment$key,
-} from "@/api/__generated__/DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment.graphql";
+  CampaignOutcome as CampaignOutcomeEnum,
+  CampaignOutcome_CampaignOutcomeFragment$key,
+} from "@/api/__generated__/CampaignOutcome_CampaignOutcomeFragment.graphql";
 
 import Icon from "@/components/Icon";
 
-const DEPLOYMENT_CAMPAIGN_OUTCOME_FRAGMENT = graphql`
-  fragment DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment on DeploymentCampaign {
+const CAMPAIGN_OUTCOME_FRAGMENT = graphql`
+  fragment CampaignOutcome_CampaignOutcomeFragment on Campaign {
     outcome
   }
 `;
 
-const colors: Record<DeploymentCampaignOutcomeEnum, string> = {
+const colors: Record<CampaignOutcomeEnum, string> = {
   SUCCESS: "text-success",
   FAILURE: "text-danger",
 };
 
-const messages = defineMessages<DeploymentCampaignOutcomeEnum>({
+const messages = defineMessages<CampaignOutcomeEnum>({
   SUCCESS: {
-    id: "components.DeploymentCampaignOutcome.Success",
+    id: "components.CampaignOutcome.Success",
     defaultMessage: "Success",
   },
   FAILURE: {
-    id: "components.DeploymentCampaignOutcome.Failure",
+    id: "components.CampaignOutcome.Failure",
     defaultMessage: "Failure",
   },
 });
 
 interface Props {
-  deploymentCampaignRef: DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment$key;
+  campaignRef: CampaignOutcome_CampaignOutcomeFragment$key;
 }
 
-const DeploymentCampaignOutcome = ({ deploymentCampaignRef }: Props) => {
-  const { outcome } = useFragment(
-    DEPLOYMENT_CAMPAIGN_OUTCOME_FRAGMENT,
-    deploymentCampaignRef,
-  );
+const CampaignOutcome = ({ campaignRef }: Props) => {
+  const { outcome } = useFragment(CAMPAIGN_OUTCOME_FRAGMENT, campaignRef);
 
   return (
     outcome && (
@@ -72,4 +69,4 @@ const DeploymentCampaignOutcome = ({ deploymentCampaignRef }: Props) => {
   );
 };
 
-export default DeploymentCampaignOutcome;
+export default CampaignOutcome;

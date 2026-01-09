@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 
-import type { DeploymentCampaigns_getDeploymentCampaigns_Query } from "@/api/__generated__/DeploymentCampaigns_getDeploymentCampaigns_Query.graphql";
+import type { DeploymentCampaigns_getCampaigns_Query } from "@/api/__generated__/DeploymentCampaigns_getCampaigns_Query.graphql";
 
 import Button from "@/components/Button";
 import Center from "@/components/Center";
@@ -34,28 +34,24 @@ import DeploymentCampaignsTable from "@/components/DeploymentCampaignsTable";
 import { Link, Route } from "@/Navigation";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
-const GET_DEPLOYMENT_CAMPAIGNS_QUERY = graphql`
-  query DeploymentCampaigns_getDeploymentCampaigns_Query(
+const GET_CAMPAIGNS_QUERY = graphql`
+  query DeploymentCampaigns_getCampaigns_Query(
     $first: Int
     $after: String
-    $filter: DeploymentCampaignFilterInput = {}
+    $filter: CampaignFilterInput = {}
   ) {
-    ...DeploymentCampaignsTable_DeploymentCampaignFragment
-      @arguments(filter: $filter)
+    ...DeploymentCampaignsTable_CampaignFragment @arguments(filter: $filter)
   }
 `;
 
 interface DeploymentCampaignsContentProps {
-  getDeploymentCampaignsQuery: PreloadedQuery<DeploymentCampaigns_getDeploymentCampaigns_Query>;
+  getCampaignsQuery: PreloadedQuery<DeploymentCampaigns_getCampaigns_Query>;
 }
 
 const DeploymentCampaignsContent = ({
-  getDeploymentCampaignsQuery,
+  getCampaignsQuery,
 }: DeploymentCampaignsContentProps) => {
-  const campaigns = usePreloadedQuery(
-    GET_DEPLOYMENT_CAMPAIGNS_QUERY,
-    getDeploymentCampaignsQuery,
-  );
+  const campaigns = usePreloadedQuery(GET_CAMPAIGNS_QUERY, getCampaignsQuery);
 
   return (
     <Page>
@@ -75,28 +71,26 @@ const DeploymentCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <DeploymentCampaignsTable deploymentCampaignsData={campaigns} />
+        <DeploymentCampaignsTable campaignsData={campaigns} />
       </Page.Main>
     </Page>
   );
 };
 
 const DeploymentCampaignsPage = () => {
-  const [getDeploymentCampaignsQuery, getDeploymentCampaigns] =
-    useQueryLoader<DeploymentCampaigns_getDeploymentCampaigns_Query>(
-      GET_DEPLOYMENT_CAMPAIGNS_QUERY,
-    );
+  const [getCampaignsQuery, getCampaigns] =
+    useQueryLoader<DeploymentCampaigns_getCampaigns_Query>(GET_CAMPAIGNS_QUERY);
 
-  const fetchDeploymentCampaigns = useCallback(
+  const fetchCampaigns = useCallback(
     () =>
-      getDeploymentCampaigns(
+      getCampaigns(
         { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
-    [getDeploymentCampaigns],
+    [getCampaigns],
   );
 
-  useEffect(fetchDeploymentCampaigns, [fetchDeploymentCampaigns]);
+  useEffect(fetchCampaigns, [fetchCampaigns]);
 
   return (
     <Suspense
@@ -112,12 +106,10 @@ const DeploymentCampaignsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchDeploymentCampaigns}
+        onReset={fetchCampaigns}
       >
-        {getDeploymentCampaignsQuery && (
-          <DeploymentCampaignsContent
-            getDeploymentCampaignsQuery={getDeploymentCampaignsQuery}
-          />
+        {getCampaignsQuery && (
+          <DeploymentCampaignsContent getCampaignsQuery={getCampaignsQuery} />
         )}
       </ErrorBoundary>
     </Suspense>

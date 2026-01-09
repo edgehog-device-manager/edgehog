@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023, 2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import { graphql, useFragment } from "react-relay/hooks";
 import type {
   OtaOperationStatus,
   OtaOperationStatusCode,
-  UpdateTargetsTable_UpdateTargetsFragment$data,
-  UpdateTargetsTable_UpdateTargetsFragment$key,
-} from "@/api/__generated__/UpdateTargetsTable_UpdateTargetsFragment.graphql";
+  UpdateTargetsTable_TargetsFragment$data,
+  UpdateTargetsTable_TargetsFragment$key,
+} from "@/api/__generated__/UpdateTargetsTable_TargetsFragment.graphql";
 
 import Icon from "@/components/Icon";
 import { createColumnHelper } from "@/components/Table";
@@ -35,8 +35,8 @@ import InfiniteTable from "./InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
-const UPDATE_TARGETS_TABLE_FRAGMENT = graphql`
-  fragment UpdateTargetsTable_UpdateTargetsFragment on UpdateTarget
+const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
+  fragment UpdateTargetsTable_TargetsFragment on CampaignTarget
   @relay(plural: true) {
     device {
       id
@@ -158,7 +158,7 @@ const operationStatusCodeMessages = defineMessages<OtaOperationStatusCode>({
   },
 });
 
-type TableRecord = UpdateTargetsTable_UpdateTargetsFragment$data[number];
+type TableRecord = UpdateTargetsTable_TargetsFragment$data[number];
 const columnIds = [
   "deviceName",
   "otaOperationStatus",
@@ -190,7 +190,7 @@ const columns = [
     ),
   }),
   columnHelper.accessor(
-    (updateTarget) => updateTarget.otaOperation?.status ?? null,
+    (campaignTarget) => campaignTarget.otaOperation?.status ?? null,
     {
       id: "otaOperationStatus",
       header: () => (
@@ -207,7 +207,7 @@ const columns = [
     },
   ),
   columnHelper.accessor(
-    (updateTarget) => updateTarget.otaOperation?.statusProgress ?? null,
+    (campaignTarget) => campaignTarget.otaOperation?.statusProgress ?? null,
     {
       id: "otaOperationStatusProgress",
       header: () => (
@@ -224,7 +224,7 @@ const columns = [
     },
   ),
   columnHelper.accessor(
-    (updateTarget) => updateTarget.otaOperation?.statusCode ?? null,
+    (campaignTarget) => campaignTarget.otaOperation?.statusCode ?? null,
     {
       id: "otaOperationStatusCode",
       header: () => (
@@ -297,23 +297,23 @@ const columns = [
 type Props = {
   className?: string;
   hiddenColumns?: ColumnId[];
-  updateTargetsRef: UpdateTargetsTable_UpdateTargetsFragment$key;
+  campaignTargetsRef: UpdateTargetsTable_TargetsFragment$key;
   isLoadingNext: boolean;
   hasNext: boolean;
-  loadNextUpdateTargets: () => void;
+  loadNextCampaignTargets: () => void;
 };
 
 const UpdateTargetsTable = ({
   className,
-  updateTargetsRef,
+  campaignTargetsRef,
   hiddenColumns = [],
   isLoadingNext,
   hasNext,
-  loadNextUpdateTargets,
+  loadNextCampaignTargets,
 }: Props) => {
   const updateTargets = useFragment(
-    UPDATE_TARGETS_TABLE_FRAGMENT,
-    updateTargetsRef,
+    CAMPAIGN_TARGETS_TABLE_FRAGMENT,
+    campaignTargetsRef,
   );
 
   return (
@@ -322,7 +322,7 @@ const UpdateTargetsTable = ({
       columns={columns}
       data={[...updateTargets]}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextUpdateTargets : undefined}
+      onLoadMore={hasNext ? loadNextCampaignTargets : undefined}
       hiddenColumns={hiddenColumns}
       hideSearch
     />

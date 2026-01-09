@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
 import Chart from "react-apexcharts";
 
-import type { DeploymentCampaignStatsChart_DeploymentCampaignStatsChartFragment$key } from "@/api/__generated__/DeploymentCampaignStatsChart_DeploymentCampaignStatsChartFragment.graphql";
+import type { CampaignStatsChart_CampaignStatsChartFragment$key } from "@/api/__generated__/CampaignStatsChart_CampaignStatsChartFragment.graphql";
 
-import { statusMessages } from "@/components/DeploymentTargetStatus";
+import { statusMessages } from "@/components/CampaignTargetStatus";
 
-const DEPLOYMENT_CAMPAIGN_PROGRESS_BAR_FRAGMENT = graphql`
-  fragment DeploymentCampaignStatsChart_DeploymentCampaignStatsChartFragment on DeploymentCampaign {
+const CAMPAIGN_PROGRESS_BAR_FRAGMENT = graphql`
+  fragment CampaignStatsChart_CampaignStatsChartFragment on Campaign {
     idleTargetCount
     inProgressTargetCount
     failedTargetCount
@@ -37,19 +37,16 @@ const DEPLOYMENT_CAMPAIGN_PROGRESS_BAR_FRAGMENT = graphql`
 `;
 
 type Props = {
-  deploymentCampaignRef: DeploymentCampaignStatsChart_DeploymentCampaignStatsChartFragment$key;
+  campaignRef: CampaignStatsChart_CampaignStatsChartFragment$key;
 };
 
-const DeploymentCampaignStatsChart = ({ deploymentCampaignRef }: Props) => {
+const CampaignStatsChart = ({ campaignRef }: Props) => {
   const {
     successfulTargetCount,
     failedTargetCount,
     inProgressTargetCount,
     idleTargetCount,
-  } = useFragment(
-    DEPLOYMENT_CAMPAIGN_PROGRESS_BAR_FRAGMENT,
-    deploymentCampaignRef,
-  );
+  } = useFragment(CAMPAIGN_PROGRESS_BAR_FRAGMENT, campaignRef);
 
   const intl = useIntl();
   const chartOptions: ComponentProps<typeof Chart>["options"] = {
@@ -60,10 +57,10 @@ const DeploymentCampaignStatsChart = ({ deploymentCampaignRef }: Props) => {
       intl.formatMessage(statusMessages.IDLE),
     ],
     colors: [
-      "var(--deployment-target-status_color_successful)",
-      "var(--deployment-target-status_color_failed)",
-      "var(--deployment-target-status_color_in-progress)",
-      "var(--deployment-target-status_color_idle)",
+      `var(--campaign-target-status_color_successful)`,
+      `var(--campaign-target-status_color_failed)`,
+      `var(--campaign-target-status_color_in-progress)`,
+      `var(--campaign-target-status_color_idle)`,
     ],
     dataLabels: {
       enabled: true,
@@ -110,4 +107,4 @@ const DeploymentCampaignStatsChart = ({ deploymentCampaignRef }: Props) => {
   );
 };
 
-export default DeploymentCampaignStatsChart;
+export default CampaignStatsChart;

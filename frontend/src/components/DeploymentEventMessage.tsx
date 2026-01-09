@@ -21,14 +21,14 @@
 import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 
-import { DeploymentTargetsTable_DeploymentTargetsFragment$data } from "@/api/__generated__/DeploymentTargetsTable_DeploymentTargetsFragment.graphql";
+import { DeploymentTargetsTable_CampaignTargetsFragment$data } from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetsFragment.graphql";
 
 import CollapseItem from "@/components/CollapseItem";
 
 type DeploymentEventMessageProps = {
   event: NonNullable<
     NonNullable<
-      DeploymentTargetsTable_DeploymentTargetsFragment$data[number]["deployment"]
+      DeploymentTargetsTable_CampaignTargetsFragment$data[number]["deployment"]
     >["events"]["edges"]
   >[number]["node"];
 };

@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,48 +22,45 @@ import { defineMessages, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  CampaignStatus as DeploymentCampaignStatusEnum,
-  DeploymentCampaignStatus_DeploymentCampaignStatusFragment$key,
-} from "@/api/__generated__/DeploymentCampaignStatus_DeploymentCampaignStatusFragment.graphql";
+  CampaignStatus as CampaignStatusEnum,
+  CampaignStatus_CampaignStatusFragment$key,
+} from "@/api/__generated__/CampaignStatus_CampaignStatusFragment.graphql";
 
 import Icon from "@/components/Icon";
 
-const DEPLOYMENT_CAMPAIGN_STATUS_FRAGMENT = graphql`
-  fragment DeploymentCampaignStatus_DeploymentCampaignStatusFragment on DeploymentCampaign {
+const CAMPAIGN_STATUS_FRAGMENT = graphql`
+  fragment CampaignStatus_CampaignStatusFragment on Campaign {
     status
   }
 `;
 
-const colors: Record<DeploymentCampaignStatusEnum, string> = {
+const colors: Record<CampaignStatusEnum, string> = {
   IDLE: "text-muted",
   IN_PROGRESS: "text-warning",
   FINISHED: "text-success",
 };
 
-const messages = defineMessages<DeploymentCampaignStatusEnum>({
+const messages = defineMessages<CampaignStatusEnum>({
   IDLE: {
-    id: "components.DeploymentCampaignStatus.Idle",
+    id: "components.CampaignStatus.Idle",
     defaultMessage: "Idle",
   },
   IN_PROGRESS: {
-    id: "components.DeploymentCampaignStatus.InProgress",
+    id: "components.CampaignStatus.InProgress",
     defaultMessage: "In progress",
   },
   FINISHED: {
-    id: "components.DeploymentCampaignStatus.Finished",
+    id: "components.CampaignStatus.Finished",
     defaultMessage: "Finished",
   },
 });
 
 type Props = {
-  deploymentCampaignRef: DeploymentCampaignStatus_DeploymentCampaignStatusFragment$key;
+  campaignRef: CampaignStatus_CampaignStatusFragment$key;
 };
 
-const DeploymentCampaignStatus = ({ deploymentCampaignRef }: Props) => {
-  const { status } = useFragment(
-    DEPLOYMENT_CAMPAIGN_STATUS_FRAGMENT,
-    deploymentCampaignRef,
-  );
+const CampaignStatus = ({ campaignRef }: Props) => {
+  const { status } = useFragment(CAMPAIGN_STATUS_FRAGMENT, campaignRef);
 
   return (
     <div className="d-flex align-items-center">
@@ -75,4 +72,4 @@ const DeploymentCampaignStatus = ({ deploymentCampaignRef }: Props) => {
   );
 };
 
-export default DeploymentCampaignStatus;
+export default CampaignStatus;

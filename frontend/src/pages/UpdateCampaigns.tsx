@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 
-import type { UpdateCampaigns_getUpdateCampaigns_Query } from "@/api/__generated__/UpdateCampaigns_getUpdateCampaigns_Query.graphql";
+import type { UpdateCampaigns_getCampaigns_Query } from "@/api/__generated__/UpdateCampaigns_getCampaigns_Query.graphql";
 
 import Button from "@/components/Button";
 import Center from "@/components/Center";
@@ -34,26 +34,26 @@ import UpdateCampaignsTable from "@/components/UpdateCampaignsTable";
 import { Link, Route } from "@/Navigation";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
-const GET_UPDATE_CAMPAIGNS_QUERY = graphql`
-  query UpdateCampaigns_getUpdateCampaigns_Query(
+const GET_CAMPAIGNS_QUERY = graphql`
+  query UpdateCampaigns_getCampaigns_Query(
     $first: Int
     $after: String
-    $filter: UpdateCampaignFilterInput = {}
+    $filter: CampaignFilterInput = {}
   ) {
-    ...UpdateCampaignsTable_UpdateCampaignFragment @arguments(filter: $filter)
+    ...UpdateCampaignsTable_CampaignFragment @arguments(filter: $filter)
   }
 `;
 
 type UpdateCampaignsContentProps = {
-  getUpdateCampaignsQuery: PreloadedQuery<UpdateCampaigns_getUpdateCampaigns_Query>;
+  getCampaignsQuery: PreloadedQuery<UpdateCampaigns_getCampaigns_Query>;
 };
 
 const UpdateCampaignsContent = ({
-  getUpdateCampaignsQuery,
+  getCampaignsQuery,
 }: UpdateCampaignsContentProps) => {
-  const updateCampaignsData = usePreloadedQuery(
-    GET_UPDATE_CAMPAIGNS_QUERY,
-    getUpdateCampaignsQuery,
+  const campaignsData = usePreloadedQuery(
+    GET_CAMPAIGNS_QUERY,
+    getCampaignsQuery,
   );
 
   return (
@@ -74,28 +74,26 @@ const UpdateCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <UpdateCampaignsTable updateCampaignsData={updateCampaignsData} />
+        <UpdateCampaignsTable campaignsData={campaignsData} />
       </Page.Main>
     </Page>
   );
 };
 
 const UpdateCampaignsPage = () => {
-  const [getUpdateCampaignsQuery, getUpdateCampaigns] =
-    useQueryLoader<UpdateCampaigns_getUpdateCampaigns_Query>(
-      GET_UPDATE_CAMPAIGNS_QUERY,
-    );
+  const [getCampaignsQuery, getCampaigns] =
+    useQueryLoader<UpdateCampaigns_getCampaigns_Query>(GET_CAMPAIGNS_QUERY);
 
-  const fetchUpdateCampaigns = useCallback(
+  const fetchCampaigns = useCallback(
     () =>
-      getUpdateCampaigns(
+      getCampaigns(
         { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "store-and-network" },
       ),
-    [getUpdateCampaigns],
+    [getCampaigns],
   );
 
-  useEffect(fetchUpdateCampaigns, [fetchUpdateCampaigns]);
+  useEffect(fetchCampaigns, [fetchCampaigns]);
 
   return (
     <Suspense
@@ -111,12 +109,10 @@ const UpdateCampaignsPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchUpdateCampaigns}
+        onReset={fetchCampaigns}
       >
-        {getUpdateCampaignsQuery && (
-          <UpdateCampaignsContent
-            getUpdateCampaignsQuery={getUpdateCampaignsQuery}
-          />
+        {getCampaignsQuery && (
+          <UpdateCampaignsContent getCampaignsQuery={getCampaignsQuery} />
         )}
       </ErrorBoundary>
     </Suspense>

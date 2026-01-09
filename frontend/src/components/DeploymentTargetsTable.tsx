@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import { FormattedDate, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  DeploymentTargetsTable_DeploymentTargetsFragment$data,
-  DeploymentTargetsTable_DeploymentTargetsFragment$key,
-} from "@/api/__generated__/DeploymentTargetsTable_DeploymentTargetsFragment.graphql";
+  DeploymentTargetsTable_CampaignTargetsFragment$data,
+  DeploymentTargetsTable_CampaignTargetsFragment$key,
+} from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetsFragment.graphql";
 
 import { createColumnHelper } from "@/components/Table";
 import InfiniteTable from "@/components/InfiniteTable";
@@ -35,8 +35,8 @@ import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
-const DEPLOYMENT_TARGETS_TABLE_FRAGMENT = graphql`
-  fragment DeploymentTargetsTable_DeploymentTargetsFragment on DeploymentTarget
+const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
+  fragment DeploymentTargetsTable_CampaignTargetsFragment on CampaignTarget
   @relay(plural: true) {
     device {
       id
@@ -65,8 +65,7 @@ const DEPLOYMENT_TARGETS_TABLE_FRAGMENT = graphql`
   }
 `;
 
-type TableRecord =
-  DeploymentTargetsTable_DeploymentTargetsFragment$data[number];
+type TableRecord = DeploymentTargetsTable_CampaignTargetsFragment$data[number];
 const columnIds = [
   "deviceName",
   "state",
@@ -98,7 +97,7 @@ const columns = [
     ),
   }),
   columnHelper.accessor(
-    (deploymentTarget) => deploymentTarget.deployment?.state ?? null,
+    (campaignTarget) => campaignTarget.deployment?.state ?? null,
     {
       id: "state",
       header: () => (
@@ -118,7 +117,7 @@ const columns = [
     },
   ),
   columnHelper.accessor(
-    (deploymentTarget) => deploymentTarget.deployment?.isReady ?? null,
+    (campaignTarget) => campaignTarget.deployment?.isReady ?? null,
     {
       id: "readiness",
       header: () => (
@@ -135,8 +134,8 @@ const columns = [
     },
   ),
   columnHelper.accessor(
-    (deploymentTarget) =>
-      deploymentTarget.deployment?.events?.edges?.[0]?.node ?? null,
+    (campaignTarget) =>
+      campaignTarget.deployment?.events?.edges?.[0]?.node ?? null,
     {
       id: "lastErrorMessage",
       header: () => (
@@ -205,31 +204,31 @@ const columns = [
 type Props = {
   className?: string;
   hiddenColumns?: ColumnId[];
-  deploymentTargetsRef: DeploymentTargetsTable_DeploymentTargetsFragment$key;
+  campaignTargetsRef: DeploymentTargetsTable_CampaignTargetsFragment$key;
   isLoadingNext: boolean;
   hasNext: boolean;
-  loadNextDeploymentTargets: () => void;
+  loadNextCampaignTargets: () => void;
 };
 
 const DeploymentTargetsTable = ({
   className,
-  deploymentTargetsRef,
+  campaignTargetsRef,
   hiddenColumns = [],
   isLoadingNext,
   hasNext,
-  loadNextDeploymentTargets,
+  loadNextCampaignTargets,
 }: Props) => {
-  const deploymentTargets = useFragment(
-    DEPLOYMENT_TARGETS_TABLE_FRAGMENT,
-    deploymentTargetsRef,
+  const campaignTargets = useFragment(
+    CAMPAIGN_TARGETS_TABLE_FRAGMENT,
+    campaignTargetsRef,
   );
   return (
     <InfiniteTable
       className={className}
       columns={columns}
-      data={[...deploymentTargets]}
+      data={[...campaignTargets]}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextDeploymentTargets : undefined}
+      onLoadMore={hasNext ? loadNextCampaignTargets : undefined}
       hiddenColumns={hiddenColumns}
       hideSearch
     />

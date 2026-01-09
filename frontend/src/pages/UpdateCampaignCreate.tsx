@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import type {
   UpdateCampaignCreate_getOptions_Query,
   UpdateCampaignCreate_getOptions_Query$data,
 } from "@/api/__generated__/UpdateCampaignCreate_getOptions_Query.graphql";
-import type { UpdateCampaignCreate_createUpdateCampaign_Mutation } from "@/api/__generated__/UpdateCampaignCreate_createUpdateCampaign_Mutation.graphql";
+import type { UpdateCampaignCreate_createCampaign_Mutation } from "@/api/__generated__/UpdateCampaignCreate_createCampaign_Mutation.graphql";
 
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
@@ -47,7 +47,7 @@ import type { UpdateCampaignData } from "@/forms/CreateUpdateCampaign";
 import CreateUpdateCampaignForm from "@/forms/CreateUpdateCampaign";
 import { Link, Route, useNavigate } from "@/Navigation";
 
-const GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY = graphql`
+const GET_CREATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   query UpdateCampaignCreate_getOptions_Query(
     $first: Int
     $after: String
@@ -71,11 +71,11 @@ const GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   }
 `;
 
-const CREATE_UPDATE_CAMPAIGN_MUTATION = graphql`
-  mutation UpdateCampaignCreate_createUpdateCampaign_Mutation(
-    $input: CreateUpdateCampaignInput!
+const CREATE_CAMPAIGN_MUTATION = graphql`
+  mutation UpdateCampaignCreate_createCampaign_Mutation(
+    $input: CreateCampaignInput!
   ) {
-    createUpdateCampaign(input: $input) {
+    createCampaign(input: $input) {
       result {
         id
       }
@@ -84,25 +84,25 @@ const CREATE_UPDATE_CAMPAIGN_MUTATION = graphql`
 `;
 
 type UpdateCampaignProps = {
-  updateCampaignOptions: UpdateCampaignCreate_getOptions_Query$data;
+  campaignOptions: UpdateCampaignCreate_getOptions_Query$data;
 };
 
-const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
+const UpdateCampaign = ({ campaignOptions }: UpdateCampaignProps) => {
   const navigate = useNavigate();
   const [errorFeedback, setErrorFeedback] = useState<ReactNode>(null);
 
-  const [createUpdateCampaign, isCreatingUpdateCampaign] =
-    useMutation<UpdateCampaignCreate_createUpdateCampaign_Mutation>(
-      CREATE_UPDATE_CAMPAIGN_MUTATION,
+  const [createCampaign, isCreatingUpdateCampaign] =
+    useMutation<UpdateCampaignCreate_createCampaign_Mutation>(
+      CREATE_CAMPAIGN_MUTATION,
     );
 
-  const handleCreateUpdateCampaign = useCallback(
+  const handleCreateCampaign = useCallback(
     (updateCampaign: UpdateCampaignData) => {
-      createUpdateCampaign({
+      createCampaign({
         variables: { input: updateCampaign },
         onCompleted(data, errors) {
-          if (data.createUpdateCampaign?.result) {
-            const updateCampaignId = data.createUpdateCampaign.result.id;
+          if (data.createCampaign?.result) {
+            const updateCampaignId = data.createCampaign.result.id;
             navigate({
               route: Route.updateCampaignsEdit,
               params: { updateCampaignId },
@@ -126,12 +126,12 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
           );
         },
         updater(store, data) {
-          if (!data?.createUpdateCampaign?.result) {
+          if (!data?.createCampaign?.result) {
             return;
           }
 
           const updateCampaign = store
-            .getRootField("createUpdateCampaign")
+            .getRootField("createCampaign")
             .getLinkedRecord("result");
           const root = store.getRoot();
 
@@ -145,7 +145,7 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
         },
       });
     },
-    [createUpdateCampaign, navigate],
+    [createCampaign, navigate],
   );
 
   return (
@@ -159,8 +159,8 @@ const UpdateCampaign = ({ updateCampaignOptions }: UpdateCampaignProps) => {
         {errorFeedback}
       </Alert>
       <CreateUpdateCampaignForm
-        updateCampaignOptionsRef={updateCampaignOptions}
-        onSubmit={handleCreateUpdateCampaign}
+        campaignOptionsRef={campaignOptions}
+        onSubmit={handleCreateCampaign}
         isLoading={isCreatingUpdateCampaign}
       />
     </>
@@ -216,17 +216,17 @@ const NoChannels = () => (
 );
 
 type UpdateCampaignWrapperProps = {
-  getCreateUpdateCampaignOptionsQuery: PreloadedQuery<UpdateCampaignCreate_getOptions_Query>;
+  getCreateCampaignOptionsQuery: PreloadedQuery<UpdateCampaignCreate_getOptions_Query>;
 };
 
 const UpdateCampaignWrapper = ({
-  getCreateUpdateCampaignOptionsQuery,
+  getCreateCampaignOptionsQuery,
 }: UpdateCampaignWrapperProps) => {
-  const updateCampaignOptions = usePreloadedQuery(
-    GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY,
-    getCreateUpdateCampaignOptionsQuery,
+  const campaignOptions = usePreloadedQuery(
+    GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
+    getCreateCampaignOptionsQuery,
   );
-  const { baseImageCollections, channels } = updateCampaignOptions;
+  const { baseImageCollections, channels } = campaignOptions;
 
   if (baseImageCollections?.count === 0) {
     return <NoBaseImageCollections />;
@@ -235,27 +235,25 @@ const UpdateCampaignWrapper = ({
     return <NoChannels />;
   }
 
-  return <UpdateCampaign updateCampaignOptions={updateCampaignOptions} />;
+  return <UpdateCampaign campaignOptions={campaignOptions} />;
 };
 
 const UpdateCampaignCreatePage = () => {
-  const [getCreateUpdateCampaignOptionsQuery, getCreateUpdateCampaignOptions] =
+  const [getCreateCampaignOptionsQuery, getCreateCampaignOptions] =
     useQueryLoader<UpdateCampaignCreate_getOptions_Query>(
-      GET_CREATE_UPDATE_CAMPAIGN_OPTIONS_QUERY,
+      GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
     );
 
-  const fetchCreateUpdateCampaignOptions = useCallback(
+  const fetchCreateCampaignOptions = useCallback(
     () =>
-      getCreateUpdateCampaignOptions(
+      getCreateCampaignOptions(
         { first: RECORDS_TO_LOAD_FIRST },
         { fetchPolicy: "network-only" },
       ),
-    [getCreateUpdateCampaignOptions],
+    [getCreateCampaignOptions],
   );
 
-  useEffect(fetchCreateUpdateCampaignOptions, [
-    fetchCreateUpdateCampaignOptions,
-  ]);
+  useEffect(fetchCreateCampaignOptions, [fetchCreateCampaignOptions]);
 
   return (
     <Suspense
@@ -271,9 +269,9 @@ const UpdateCampaignCreatePage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchCreateUpdateCampaignOptions}
+        onReset={fetchCreateCampaignOptions}
       >
-        {getCreateUpdateCampaignOptionsQuery && (
+        {getCreateCampaignOptionsQuery && (
           <Page>
             <Page.Header
               title={
@@ -285,9 +283,7 @@ const UpdateCampaignCreatePage = () => {
             />
             <Page.Main>
               <UpdateCampaignWrapper
-                getCreateUpdateCampaignOptionsQuery={
-                  getCreateUpdateCampaignOptionsQuery
-                }
+                getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
               />
             </Page.Main>
           </Page>

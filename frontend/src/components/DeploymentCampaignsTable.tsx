@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import _ from "lodash";
 
 import type { DeploymentCampaignsTable_PaginationQuery } from "@/api/__generated__/DeploymentCampaignsTable_PaginationQuery.graphql";
 import type {
-  DeploymentCampaignsTable_DeploymentCampaignFragment$data,
-  DeploymentCampaignsTable_DeploymentCampaignFragment$key,
-} from "@/api/__generated__/DeploymentCampaignsTable_DeploymentCampaignFragment.graphql";
+  DeploymentCampaignsTable_CampaignFragment$data,
+  DeploymentCampaignsTable_CampaignFragment$key,
+} from "@/api/__generated__/DeploymentCampaignsTable_CampaignFragment.graphql";
 
-import DeploymentCampaignOutcome from "@/components/DeploymentCampaignOutcome";
-import DeploymentCampaignStatus from "@/components/DeploymentCampaignStatus";
+import CampaignOutcome from "@/components/CampaignOutcome";
+import CampaignStatus from "@/components/CampaignStatus";
 import { createColumnHelper } from "@/components/Table";
 import InfiniteTable from "@/components/InfiniteTable";
 import { Link, Route } from "@/Navigation";
@@ -39,10 +39,10 @@ import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
-const DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT = graphql`
-  fragment DeploymentCampaignsTable_DeploymentCampaignFragment on RootQueryType
+const CAMPAIGNS_TABLE_FRAGMENT = graphql`
+  fragment DeploymentCampaignsTable_CampaignFragment on RootQueryType
   @refetchable(queryName: "DeploymentCampaignsTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "DeploymentCampaignFilterInput" }) {
+  @argumentDefinitions(filter: { type: "CampaignFilterInput" }) {
     deploymentCampaigns(first: $first, after: $after, filter: $filter)
       @connection(key: "DeploymentCampaignsTable_deploymentCampaigns") {
       edges {
@@ -50,24 +50,88 @@ const DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT = graphql`
           id
           name
           status
-          operationType
-          ...DeploymentCampaignStatus_DeploymentCampaignStatusFragment
+          ...CampaignStatus_CampaignStatusFragment
           outcome
-          ...DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment
-          release {
-            id
-            version
-            application {
-              id
-              name
-            }
-          }
-          targetRelease {
-            id
-            version
-          }
+          ...CampaignOutcome_CampaignOutcomeFragment
           channel {
             name
+          }
+          campaignMechanism {
+            __typename
+            ... on DeploymentDeploy {
+              maxFailurePercentage
+              maxInProgressOperations
+              requestRetries
+              requestTimeoutSeconds
+              release {
+                id
+                version
+                application {
+                  id
+                  name
+                }
+              }
+            }
+            ... on DeploymentStart {
+              maxFailurePercentage
+              maxInProgressOperations
+              requestRetries
+              requestTimeoutSeconds
+              release {
+                id
+                version
+                application {
+                  id
+                  name
+                }
+              }
+            }
+            ... on DeploymentStop {
+              maxFailurePercentage
+              maxInProgressOperations
+              requestRetries
+              requestTimeoutSeconds
+              release {
+                id
+                version
+                application {
+                  id
+                  name
+                }
+              }
+            }
+            ... on DeploymentDelete {
+              maxFailurePercentage
+              maxInProgressOperations
+              requestRetries
+              requestTimeoutSeconds
+              release {
+                id
+                version
+                application {
+                  id
+                  name
+                }
+              }
+            }
+            ... on DeploymentUpgrade {
+              maxFailurePercentage
+              maxInProgressOperations
+              requestRetries
+              requestTimeoutSeconds
+              release {
+                id
+                version
+                application {
+                  id
+                  name
+                }
+              }
+              targetRelease {
+                id
+                version
+              }
+            }
           }
         }
       }
@@ -75,9 +139,17 @@ const DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const CAMPAIGN_MECHANISM_LABELS: Record<string, string> = {
+  DeploymentDeploy: "Deploy",
+  DeploymentStart: "Start",
+  DeploymentStop: "Stop",
+  DeploymentDelete: "Delete",
+  DeploymentUpgrade: "Upgrade",
+};
+
 type TableRecord = NonNullable<
   NonNullable<
-    DeploymentCampaignsTable_DeploymentCampaignFragment$data["deploymentCampaigns"]
+    DeploymentCampaignsTable_CampaignFragment$data["deploymentCampaigns"]
   >["edges"]
 >[number]["node"];
 
@@ -100,7 +172,7 @@ const columns = [
       </Link>
     ),
   }),
-  columnHelper.accessor("operationType", {
+  columnHelper.accessor("campaignMechanism.__typename", {
     header: () => (
       <FormattedMessage
         id="components.DeploymentCampaignsTable.operationTypeTitle"
@@ -109,7 +181,7 @@ const columns = [
     ),
     cell: ({ getValue }) => {
       const value = getValue();
-      return value.charAt(0) + value.slice(1).toLowerCase();
+      return CAMPAIGN_MECHANISM_LABELS[value] ?? value;
     },
   }),
   columnHelper.accessor("status", {
@@ -119,9 +191,7 @@ const columns = [
         defaultMessage="Status"
       />
     ),
-    cell: ({ row }) => (
-      <DeploymentCampaignStatus deploymentCampaignRef={row.original} />
-    ),
+    cell: ({ row }) => <CampaignStatus campaignRef={row.original} />,
   }),
   columnHelper.accessor("outcome", {
     header: () => (
@@ -130,9 +200,7 @@ const columns = [
         defaultMessage="Outcome"
       />
     ),
-    cell: ({ row }) => (
-      <DeploymentCampaignOutcome deploymentCampaignRef={row.original} />
-    ),
+    cell: ({ row }) => <CampaignOutcome campaignRef={row.original} />,
   }),
   columnHelper.accessor("channel.name", {
     header: () => (
@@ -143,7 +211,7 @@ const columns = [
       />
     ),
   }),
-  columnHelper.accessor("release.application.name", {
+  columnHelper.accessor("campaignMechanism.release.application.name", {
     header: () => (
       <FormattedMessage
         id="components.DeploymentCampaignsTable.applicationNameTitle"
@@ -151,62 +219,82 @@ const columns = [
         description="Title for the Application Name column of the Deployment Campaigns table"
       />
     ),
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.application}
-        params={{ applicationId: row.original.release?.application?.id || "" }}
-      >
-        {getValue()}
-      </Link>
-    ),
-  }),
-  columnHelper.accessor("release.version", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentCampaignsTable.releaseNameTitle"
-        defaultMessage="Release Version"
-        description="Title for the Release column of the Deployment Campaigns table"
-      />
-    ),
-    cell: ({ row, getValue }) => (
-      <>
+    cell: ({ row, getValue }) => {
+      const mechanism = row.original.campaignMechanism;
+
+      if (!mechanism || !("release" in mechanism)) {
+        return null;
+      }
+
+      return (
         <Link
-          route={Route.release}
+          route={Route.application}
           params={{
-            applicationId: row.original.release?.application?.id || "",
-            releaseId: row.original.release?.id || "",
+            applicationId: mechanism.release?.application?.id || "",
           }}
         >
           {getValue()}
         </Link>
-        {row.original.operationType == "UPGRADE" && (
-          <>
-            <Icon icon={"arrowRight"} className="ms-2 me-2" />
-            <Link
-              route={Route.release}
-              params={{
-                applicationId: row.original.release?.application?.id || "",
-                releaseId: row.original.targetRelease?.id || "",
-              }}
-            >
-              {row.original.targetRelease?.version}
-            </Link>
-          </>
-        )}
-      </>
+      );
+    },
+  }),
+
+  columnHelper.accessor("campaignMechanism.release.version", {
+    header: () => (
+      <FormattedMessage
+        id="components.DeploymentCampaignsTable.releaseVersionTitle"
+        defaultMessage="Release Version"
+        description="Title for the Release column of the Deployment Campaigns table"
+      />
     ),
+    cell: ({ row, getValue }) => {
+      const mechanism = row.original.campaignMechanism;
+
+      if (!mechanism || !("release" in mechanism)) {
+        return null;
+      }
+
+      return (
+        <>
+          <Link
+            route={Route.release}
+            params={{
+              applicationId: mechanism.release?.application?.id || "",
+              releaseId: mechanism.release?.id || "",
+            }}
+          >
+            {getValue()}
+          </Link>
+
+          {mechanism?.__typename === "DeploymentUpgrade" && (
+            <>
+              <Icon icon="arrowRight" className="ms-2 me-2" />
+              <Link
+                route={Route.release}
+                params={{
+                  applicationId: mechanism.release?.application?.id || "",
+                  releaseId: mechanism.targetRelease?.id || "",
+                }}
+              >
+                {mechanism.targetRelease?.version}
+              </Link>
+            </>
+          )}
+        </>
+      );
+    },
   }),
 ];
 
-type Props = {
+type DeploymentCampaignsTableProps = {
   className?: string;
-  deploymentCampaignsData: DeploymentCampaignsTable_DeploymentCampaignFragment$key;
+  campaignsData: DeploymentCampaignsTable_CampaignFragment$key;
 };
 
 const DeploymentCampaignsTable = ({
   className,
-  deploymentCampaignsData,
-}: Props) => {
+  campaignsData,
+}: DeploymentCampaignsTableProps) => {
   const {
     data: paginationData,
     loadNext,
@@ -215,8 +303,8 @@ const DeploymentCampaignsTable = ({
     refetch,
   } = usePaginationFragment<
     DeploymentCampaignsTable_PaginationQuery,
-    DeploymentCampaignsTable_DeploymentCampaignFragment$key
-  >(DEPLOYMENT_CAMPAIGNS_TABLE_FRAGMENT, deploymentCampaignsData);
+    DeploymentCampaignsTable_CampaignFragment$key
+  >(CAMPAIGNS_TABLE_FRAGMENT, campaignsData);
   const [searchText, setSearchText] = useState<string | null>(null);
 
   const debounceRefetch = useMemo(() => {
@@ -246,11 +334,6 @@ const DeploymentCampaignsTable = ({
             filter: {
               or: [
                 { name: { ilike: `%${text}%` } },
-                {
-                  release: {
-                    version: { ilike: `%${text}%` },
-                  },
-                },
                 {
                   channel: {
                     name: { ilike: `%${text}%` },

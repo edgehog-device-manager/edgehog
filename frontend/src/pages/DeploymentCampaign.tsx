@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import {
 import type { PreloadedQuery } from "react-relay/hooks";
 import type { Subscription } from "relay-runtime";
 
-import type { DeploymentCampaign_getDeploymentCampaign_Query } from "@/api/__generated__/DeploymentCampaign_getDeploymentCampaign_Query.graphql";
+import type { DeploymentCampaign_getCampaign_Query } from "@/api/__generated__/DeploymentCampaign_getCampaign_Query.graphql";
 import type { DeploymentCampaign_RefreshFragment$key } from "@/api/__generated__/DeploymentCampaign_RefreshFragment.graphql";
 
 import Center from "@/components/Center";
@@ -42,22 +42,21 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
-import DeploymentCampaignStatsChart from "@/components/DeploymentCampaignStatsChart";
+import CampaignStatsChart from "@/components/CampaignStatsChart";
 import DeploymentCampaignForm from "@/forms/DeploymentCampaignForm";
 import { Link, Route } from "@/Navigation";
 import DeploymentTargetsTabs from "@/components/DeploymentTargetsTabs";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
-const DEPLOYMENT_TARGETS_INITIAL_LOAD = 40;
-
-const GET_DEPLOYMENT_CAMPAIGN_QUERY = graphql`
-  query DeploymentCampaign_getDeploymentCampaign_Query(
+const GET_CAMPAIGN_QUERY = graphql`
+  query DeploymentCampaign_getCampaign_Query(
     $deploymentCampaignId: ID!
     $first: Int!
   ) {
-    deploymentCampaign(id: $deploymentCampaignId) {
+    campaign(id: $deploymentCampaignId) {
       name
-      ...DeploymentCampaignForm_DeploymentCampaignFragment
-      ...DeploymentCampaignStatsChart_DeploymentCampaignStatsChartFragment
+      ...DeploymentCampaignForm_CampaignFragment
+      ...CampaignStatsChart_CampaignStatsChartFragment
       ...DeploymentCampaign_RefreshFragment
       ...DeploymentTargetsTabs_SuccessfulFragment @arguments(first: $first)
       ...DeploymentTargetsTabs_FailedFragment @arguments(first: $first)
@@ -67,24 +66,22 @@ const GET_DEPLOYMENT_CAMPAIGN_QUERY = graphql`
   }
 `;
 
-const DEPLOYMENT_CAMPAIGN_REFRESH_FRAGMENT = graphql`
-  fragment DeploymentCampaign_RefreshFragment on DeploymentCampaign {
+const CAMPAIGN_REFRESH_FRAGMENT = graphql`
+  fragment DeploymentCampaign_RefreshFragment on Campaign {
     id
     status
   }
 `;
 
 type DeploymentCampaignRefreshProps = {
-  deploymentCampaignRef: DeploymentCampaign_RefreshFragment$key;
+  campaignRef: DeploymentCampaign_RefreshFragment$key;
 };
+
 const DeploymentCampaignRefresh = ({
-  deploymentCampaignRef,
+  campaignRef,
 }: DeploymentCampaignRefreshProps) => {
   const relayEnvironment = useRelayEnvironment();
-  const { id, status } = useFragment(
-    DEPLOYMENT_CAMPAIGN_REFRESH_FRAGMENT,
-    deploymentCampaignRef,
-  );
+  const { id, status } = useFragment(CAMPAIGN_REFRESH_FRAGMENT, campaignRef);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // TODO: use GraphQL subscription (when available) to get deployments about Deployment Campaign
@@ -105,10 +102,10 @@ const DeploymentCampaignRefresh = ({
       setIsRefreshing(true);
       subscriptionRef.current = fetchQuery(
         relayEnvironment,
-        GET_DEPLOYMENT_CAMPAIGN_QUERY,
+        GET_CAMPAIGN_QUERY,
         {
           deploymentCampaignId: id,
-          first: DEPLOYMENT_TARGETS_INITIAL_LOAD,
+          first: RECORDS_TO_LOAD_FIRST,
         },
         { fetchPolicy: "network-only" },
       ).subscribe({
@@ -130,18 +127,15 @@ const DeploymentCampaignRefresh = ({
 };
 
 type DeploymentCampaignContentProps = {
-  getDeploymentCampaignQuery: PreloadedQuery<DeploymentCampaign_getDeploymentCampaign_Query>;
+  getCampaignQuery: PreloadedQuery<DeploymentCampaign_getCampaign_Query>;
 };
 
 const DeploymentCampaignContent = ({
-  getDeploymentCampaignQuery,
+  getCampaignQuery,
 }: DeploymentCampaignContentProps) => {
-  const { deploymentCampaign } = usePreloadedQuery(
-    GET_DEPLOYMENT_CAMPAIGN_QUERY,
-    getDeploymentCampaignQuery,
-  );
+  const { campaign } = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
 
-  if (!deploymentCampaign) {
+  if (!campaign) {
     return (
       <Result.NotFound
         title={
@@ -163,24 +157,20 @@ const DeploymentCampaignContent = ({
 
   return (
     <Page>
-      <Page.Header title={deploymentCampaign.name}>
-        <DeploymentCampaignRefresh deploymentCampaignRef={deploymentCampaign} />
+      <Page.Header title={campaign.name}>
+        <DeploymentCampaignRefresh campaignRef={campaign} />
       </Page.Header>
       <Page.Main>
         <Row>
           <Col lg={9}>
-            <DeploymentCampaignForm
-              deploymentCampaignRef={deploymentCampaign}
-            />
+            <DeploymentCampaignForm campaignRef={campaign} />
           </Col>
           <Col lg={3}>
-            <DeploymentCampaignStatsChart
-              deploymentCampaignRef={deploymentCampaign}
-            />
+            <CampaignStatsChart campaignRef={campaign} />
           </Col>
         </Row>
         <hr className="bg-secondary border-2 border-top border-secondary" />
-        <DeploymentTargetsTabs deploymentCampaignRef={deploymentCampaign} />
+        <DeploymentTargetsTabs campaignRef={campaign} />
       </Page.Main>
     </Page>
   );
@@ -189,22 +179,20 @@ const DeploymentCampaignContent = ({
 const DeploymentCampaignPage = () => {
   const { deploymentCampaignId = "" } = useParams();
 
-  const [getDeploymentCampaignQuery, getDeploymentCampaign] =
-    useQueryLoader<DeploymentCampaign_getDeploymentCampaign_Query>(
-      GET_DEPLOYMENT_CAMPAIGN_QUERY,
-    );
+  const [getCampaignQuery, getCampaign] =
+    useQueryLoader<DeploymentCampaign_getCampaign_Query>(GET_CAMPAIGN_QUERY);
 
-  const fetchDeploymentCampaign = useCallback(() => {
-    getDeploymentCampaign(
+  const fetchCampaign = useCallback(() => {
+    getCampaign(
       {
         deploymentCampaignId,
-        first: DEPLOYMENT_TARGETS_INITIAL_LOAD,
+        first: RECORDS_TO_LOAD_FIRST,
       },
       { fetchPolicy: "network-only" },
     );
-  }, [getDeploymentCampaign, deploymentCampaignId]);
+  }, [getCampaign, deploymentCampaignId]);
 
-  useEffect(fetchDeploymentCampaign, [fetchDeploymentCampaign]);
+  useEffect(fetchCampaign, [fetchCampaign]);
 
   return (
     <Suspense
@@ -220,12 +208,10 @@ const DeploymentCampaignPage = () => {
             <Page.LoadingError onRetry={props.resetErrorBoundary} />
           </Center>
         )}
-        onReset={fetchDeploymentCampaign}
+        onReset={fetchCampaign}
       >
-        {getDeploymentCampaignQuery && (
-          <DeploymentCampaignContent
-            getDeploymentCampaignQuery={getDeploymentCampaignQuery}
-          />
+        {getCampaignQuery && (
+          <DeploymentCampaignContent getCampaignQuery={getCampaignQuery} />
         )}
       </ErrorBoundary>
     </Suspense>

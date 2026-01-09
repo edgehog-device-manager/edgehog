@@ -183,6 +183,21 @@
   "components.BatteryTable.statusTitle": {
     "defaultMessage": "Status"
   },
+  "components.CampaignOutcome.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.CampaignOutcome.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.CampaignStatus.Finished": {
+    "defaultMessage": "Finished"
+  },
+  "components.CampaignStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.CampaignStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
   "components.CellularConnectionTabs.Modem.APN": {
     "defaultMessage": "APN"
   },
@@ -585,21 +600,6 @@
   "components.DeployedApplicationsTable.upgradeErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
-  "components.DeploymentCampaignOutcome.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "components.DeploymentCampaignOutcome.Success": {
-    "defaultMessage": "Success"
-  },
-  "components.DeploymentCampaignStatus.Finished": {
-    "defaultMessage": "Finished"
-  },
-  "components.DeploymentCampaignStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.DeploymentCampaignStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
   "components.DeploymentCampaignsTable.applicationNameTitle": {
     "defaultMessage": "Application Name",
     "description": "Title for the Application Name column of the Deployment Campaigns table"
@@ -618,7 +618,7 @@
   "components.DeploymentCampaignsTable.outcomeTitle": {
     "defaultMessage": "Outcome"
   },
-  "components.DeploymentCampaignsTable.releaseNameTitle": {
+  "components.DeploymentCampaignsTable.releaseVersionTitle": {
     "defaultMessage": "Release Version",
     "description": "Title for the Release column of the Deployment Campaigns table"
   },
@@ -1167,21 +1167,6 @@
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
   },
-  "components.UpdateCampaignOutcome.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "components.UpdateCampaignOutcome.Success": {
-    "defaultMessage": "Success"
-  },
-  "components.UpdateCampaignStatus.Finished": {
-    "defaultMessage": "Finished"
-  },
-  "components.UpdateCampaignStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.UpdateCampaignStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
     "description": "Title for the Base Image Collection column of the Update Campaigns table"
@@ -1308,6 +1293,18 @@
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
   },
+  "components.campaignTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.campaignTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.campaignTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.campaignTargetStatus.Successful": {
+    "defaultMessage": "Successful"
+  },
   "components.deploymentDetails.Status": {
     "defaultMessage": "Status:"
   },
@@ -1337,30 +1334,6 @@
   },
   "components.deploymentDetails.releaseVersion": {
     "defaultMessage": "Release Version:"
-  },
-  "components.deploymentTargetStatus.Failed": {
-    "defaultMessage": "Failed"
-  },
-  "components.deploymentTargetStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.deploymentTargetStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "components.deploymentTargetStatus.Successful": {
-    "defaultMessage": "Successful"
-  },
-  "components.updateTargetStatus.Failed": {
-    "defaultMessage": "Failed"
-  },
-  "components.updateTargetStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.updateTargetStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "components.updateTargetStatus.Successful": {
-    "defaultMessage": "Successful"
   },
   "device.otaOperationStatus.Failure": {
     "defaultMessage": "Failure"
@@ -1835,16 +1808,13 @@
   "forms.CreateDeploymentCampaign.channelOption": {
     "defaultMessage": "Search or select a channel..."
   },
-  "forms.CreateDeploymentCampaign.createRequestRetriesLabel": {
-    "defaultMessage": "Request Retries"
-  },
   "forms.CreateDeploymentCampaign.maxFailurePercentageLabel": {
     "defaultMessage": "Max Failures <muted>(%)</muted>"
   },
   "forms.CreateDeploymentCampaign.maxFailurePercentageValidationLabel": {
     "defaultMessage": "Max Failures"
   },
-  "forms.CreateDeploymentCampaign.maxInProgressDeploymentsLabel": {
+  "forms.CreateDeploymentCampaign.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
   },
   "forms.CreateDeploymentCampaign.nameLabel": {
@@ -1873,6 +1843,9 @@
   },
   "forms.CreateDeploymentCampaign.releaseLabel": {
     "defaultMessage": "Release"
+  },
+  "forms.CreateDeploymentCampaign.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
   },
   "forms.CreateDeploymentCampaign.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
@@ -1997,7 +1970,7 @@
   "forms.CreateUpdateCampaign.maxFailurePercentageValidationLabel": {
     "defaultMessage": "Max Failures"
   },
-  "forms.CreateUpdateCampaign.maxInProgressUpdatesLabel": {
+  "forms.CreateUpdateCampaign.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
   },
   "forms.CreateUpdateCampaign.nameLabel": {
@@ -2018,10 +1991,13 @@
   "forms.CreateUpdateCampaign.otaRequestRetriesLabel": {
     "defaultMessage": "Request Retries"
   },
-  "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsLabel": {
+  "forms.CreateUpdateCampaign.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.CreateUpdateCampaign.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
   },
-  "forms.CreateUpdateCampaign.otaRequestTimeoutSecondsValidationLabel": {
+  "forms.CreateUpdateCampaign.requestTimeoutSecondsValidationLabel": {
     "defaultMessage": "Request Timeout"
   },
   "forms.CreateUpdateCampaign.selectBaseImageCollection": {
@@ -2033,8 +2009,17 @@
   "forms.DeploymentCampaignForm.applicationLabel": {
     "defaultMessage": "Application"
   },
-  "forms.DeploymentCampaignForm.deploymentChannelLabel": {
+  "forms.DeploymentCampaignForm.campaignMechanism.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "forms.DeploymentCampaignForm.campaignMechanism.requestTimeoutSeconds": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.DeploymentCampaignForm.channelLabel": {
     "defaultMessage": "Channel"
+  },
+  "forms.DeploymentCampaignForm.maxInProgressOperations": {
+    "defaultMessage": "Max Pending Operations"
   },
   "forms.DeploymentCampaignForm.operationTypeLabel": {
     "defaultMessage": "Operation Type"
@@ -2045,17 +2030,8 @@
   "forms.DeploymentCampaignForm.releaseLabel": {
     "defaultMessage": "Release"
   },
-  "forms.DeploymentCampaignForm.rolloutMechanism.maxFailurePercentageLabel": {
-    "defaultMessage": "Max Failures <muted>(%)</muted>"
-  },
-  "forms.DeploymentCampaignForm.rolloutMechanism.maxInProgressDeploymentsLabel": {
-    "defaultMessage": "Max Pending Operations"
-  },
-  "forms.DeploymentCampaignForm.rolloutMechanism.otaRequestRetriesLabel": {
+  "forms.DeploymentCampaignForm.requestRetries": {
     "defaultMessage": "Request Retries"
-  },
-  "forms.DeploymentCampaignForm.rolloutMechanism.otaRequestTimeoutSeconds": {
-    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
   },
   "forms.DeploymentCampaignForm.statusLabel": {
     "defaultMessage": "Status"

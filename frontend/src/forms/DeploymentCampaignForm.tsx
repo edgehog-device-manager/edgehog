@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,61 +22,124 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  DeploymentCampaignForm_DeploymentCampaignFragment$data,
-  DeploymentCampaignForm_DeploymentCampaignFragment$key,
-} from "@/api/__generated__/DeploymentCampaignForm_DeploymentCampaignFragment.graphql";
+  DeploymentCampaignForm_CampaignFragment$data,
+  DeploymentCampaignForm_CampaignFragment$key,
+} from "@/api/__generated__/DeploymentCampaignForm_CampaignFragment.graphql";
 
 import Col from "@/components/Col";
 import Row from "@/components/Row";
-import DeploymentCampaignOutcome from "@/components/DeploymentCampaignOutcome";
-import DeploymentCampaignStatus from "@/components/DeploymentCampaignStatus";
+import CampaignOutcome from "@/components/CampaignOutcome";
+import CampaignStatus from "@/components/CampaignStatus";
 import { SimpleFormRow as FormRow } from "@/components/FormRow";
 import { Link, Route } from "@/Navigation";
+import { OperationType } from "./CreateDeploymentCampaign";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
-const DEPLOYMENT_CAMPAIGN_FORM_FRAGMENT = graphql`
-  fragment DeploymentCampaignForm_DeploymentCampaignFragment on DeploymentCampaign {
-    ...DeploymentCampaignStatus_DeploymentCampaignStatusFragment
-    ...DeploymentCampaignOutcome_DeploymentCampaignOutcomeFragment
-    operationType
+const CAMPAIGN_FORM_FRAGMENT = graphql`
+  fragment DeploymentCampaignForm_CampaignFragment on Campaign {
+    ...CampaignStatus_CampaignStatusFragment
+    ...CampaignOutcome_CampaignOutcomeFragment
     channel {
       id
       name
     }
-    release {
-      id
-      version
-      application {
-        id
-        name
-      }
-    }
-    targetRelease {
-      id
-      version
-    }
-    deploymentMechanism {
+    campaignMechanism {
       __typename
-      ... on DeploymentMechanism {
-        ... on Lazy {
-          maxFailurePercentage
-          maxInProgressDeployments
-          createRequestRetries
-          requestTimeoutSeconds
+      ... on DeploymentDeploy {
+        maxFailurePercentage
+        maxInProgressOperations
+        requestRetries
+        requestTimeoutSeconds
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+      }
+      ... on DeploymentStart {
+        maxFailurePercentage
+        maxInProgressOperations
+        requestRetries
+        requestTimeoutSeconds
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+      }
+      ... on DeploymentStop {
+        maxFailurePercentage
+        maxInProgressOperations
+        requestRetries
+        requestTimeoutSeconds
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+      }
+      ... on DeploymentDelete {
+        maxFailurePercentage
+        maxInProgressOperations
+        requestRetries
+        requestTimeoutSeconds
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+      }
+      ... on DeploymentUpgrade {
+        maxFailurePercentage
+        maxInProgressOperations
+        requestRetries
+        requestTimeoutSeconds
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+        targetRelease {
+          id
+          version
         }
       }
     }
   }
 `;
 
-type RolloutMechanismColProps = {
-  rolloutMechanism: DeploymentCampaignForm_DeploymentCampaignFragment$data["deploymentMechanism"];
+const MECHANISM_TO_OPERATION: Record<string, OperationType> = {
+  DeploymentDeploy: "Deploy",
+  DeploymentStart: "Start",
+  DeploymentStop: "Stop",
+  DeploymentUpgrade: "Upgrade",
+  DeploymentDelete: "Delete",
 };
-const RolloutMechanismCol = ({
-  rolloutMechanism,
-}: RolloutMechanismColProps) => {
-  if (rolloutMechanism.__typename !== "Lazy") {
+
+type CampaignMechanismColProps = {
+  campaignMechanism: DeploymentCampaignForm_CampaignFragment$data["campaignMechanism"];
+};
+
+const CampaignMechanismCol = ({
+  campaignMechanism,
+}: CampaignMechanismColProps) => {
+  if (campaignMechanism.__typename === "%other") {
     return null;
   }
 
@@ -85,17 +148,18 @@ const RolloutMechanismCol = ({
       <FormRow
         label={
           <FormattedMessage
-            id="forms.DeploymentCampaignForm.rolloutMechanism.maxInProgressDeploymentsLabel"
+            id="forms.DeploymentCampaignForm.maxInProgressOperations"
             defaultMessage="Max Pending Operations"
           />
         }
       >
-        {rolloutMechanism.maxInProgressDeployments}
+        {campaignMechanism.maxInProgressOperations}
       </FormRow>
+
       <FormRow
         label={
           <FormattedMessage
-            id="forms.DeploymentCampaignForm.rolloutMechanism.maxFailurePercentageLabel"
+            id="forms.DeploymentCampaignForm.campaignMechanism.maxFailurePercentageLabel"
             defaultMessage="Max Failures <muted>(%)</muted>"
             values={{
               muted: (chunks: React.ReactNode) => (
@@ -105,12 +169,13 @@ const RolloutMechanismCol = ({
           />
         }
       >
-        {rolloutMechanism.maxFailurePercentage}
+        {campaignMechanism.maxFailurePercentage}
       </FormRow>
+
       <FormRow
         label={
           <FormattedMessage
-            id="forms.DeploymentCampaignForm.rolloutMechanism.otaRequestTimeoutSeconds"
+            id="forms.DeploymentCampaignForm.campaignMechanism.requestTimeoutSeconds"
             defaultMessage="Request Timeout <muted>(seconds)</muted>"
             values={{
               muted: (chunks: React.ReactNode) => (
@@ -120,44 +185,41 @@ const RolloutMechanismCol = ({
           />
         }
       >
-        {rolloutMechanism.requestTimeoutSeconds}
+        {campaignMechanism.requestTimeoutSeconds}
       </FormRow>
+
       <FormRow
         label={
           <FormattedMessage
-            id="forms.DeploymentCampaignForm.rolloutMechanism.otaRequestRetriesLabel"
+            id="forms.DeploymentCampaignForm.requestRetries"
             defaultMessage="Request Retries"
           />
         }
       >
-        {rolloutMechanism.createRequestRetries}
+        {campaignMechanism.requestRetries}
       </FormRow>
     </Col>
   );
 };
 
 type DeploymentCampaignProps = {
-  deploymentCampaignRef: DeploymentCampaignForm_DeploymentCampaignFragment$key;
+  campaignRef: DeploymentCampaignForm_CampaignFragment$key;
 };
 
-const DeploymentCampaign = ({
-  deploymentCampaignRef,
-}: DeploymentCampaignProps) => {
-  const deploymentCampaign = useFragment(
-    DEPLOYMENT_CAMPAIGN_FORM_FRAGMENT,
-    deploymentCampaignRef,
-  );
+const DeploymentCampaign = ({ campaignRef }: DeploymentCampaignProps) => {
+  const campaign = useFragment(CAMPAIGN_FORM_FRAGMENT, campaignRef);
 
-  const {
-    release,
-    channel,
-    deploymentMechanism,
-    operationType,
-    targetRelease,
-  } = deploymentCampaign;
+  const { channel, campaignMechanism } = campaign;
 
-  const formattedOperationType =
-    operationType?.charAt(0) + operationType?.slice(1).toLowerCase();
+  const operationType = MECHANISM_TO_OPERATION[campaignMechanism.__typename];
+
+  const release =
+    "release" in campaignMechanism ? campaignMechanism.release : null;
+
+  const targetRelease =
+    campaignMechanism.__typename === "DeploymentUpgrade"
+      ? campaignMechanism.targetRelease
+      : null;
 
   return (
     <Row>
@@ -170,7 +232,7 @@ const DeploymentCampaign = ({
             />
           }
         >
-          {formattedOperationType}
+          {operationType}
         </FormRow>
 
         <FormRow
@@ -181,10 +243,9 @@ const DeploymentCampaign = ({
             />
           }
         >
-          <DeploymentCampaignStatus
-            deploymentCampaignRef={deploymentCampaign}
-          />
+          <CampaignStatus campaignRef={campaign} />
         </FormRow>
+
         <FormRow
           label={
             <FormattedMessage
@@ -193,73 +254,75 @@ const DeploymentCampaign = ({
             />
           }
         >
-          <DeploymentCampaignOutcome
-            deploymentCampaignRef={deploymentCampaign}
-          />
+          <CampaignOutcome campaignRef={campaign} />
         </FormRow>
 
-        <FormRow
-          label={
-            <FormattedMessage
-              id="forms.DeploymentCampaignForm.applicationLabel"
-              defaultMessage="Application"
-            />
-          }
-        >
-          <Link
-            route={Route.application}
-            params={{
-              applicationId: release?.application?.id || "",
-            }}
-          >
-            {release?.application?.name}
-          </Link>
-        </FormRow>
-
-        <FormRow
-          label={
-            <FormattedMessage
-              id="forms.DeploymentCampaignForm.releaseLabel"
-              defaultMessage="Release"
-            />
-          }
-        >
-          <Link
-            route={Route.release}
-            params={{
-              applicationId: release?.application?.id || "",
-              releaseId: release?.id || "",
-            }}
-          >
-            {release?.version}
-          </Link>
-        </FormRow>
-
-        {operationType === "UPGRADE" && targetRelease && (
-          <FormRow
-            label={
-              <FormattedMessage
-                id="forms.DeploymentCampaignForm.targetReleaseLabel"
-                defaultMessage="Target Release"
-              />
-            }
-          >
-            <Link
-              route={Route.release}
-              params={{
-                applicationId: release?.application?.id || "",
-                releaseId: targetRelease?.id || "",
-              }}
+        {release?.application && (
+          <>
+            <FormRow
+              label={
+                <FormattedMessage
+                  id="forms.DeploymentCampaignForm.applicationLabel"
+                  defaultMessage="Application"
+                />
+              }
             >
-              {targetRelease?.version}
-            </Link>
-          </FormRow>
+              <Link
+                route={Route.application}
+                params={{ applicationId: release.application.id }}
+              >
+                {release.application.name}
+              </Link>
+            </FormRow>
+
+            <FormRow
+              label={
+                <FormattedMessage
+                  id="forms.DeploymentCampaignForm.releaseLabel"
+                  defaultMessage="Release"
+                />
+              }
+            >
+              <Link
+                route={Route.release}
+                params={{
+                  applicationId: release.application.id,
+                  releaseId: release.id,
+                }}
+              >
+                {release.version}
+              </Link>
+            </FormRow>
+          </>
         )}
 
+        {campaignMechanism.__typename === "DeploymentUpgrade" &&
+          targetRelease &&
+          release?.application && (
+            <FormRow
+              label={
+                <FormattedMessage
+                  id="forms.DeploymentCampaignForm.targetReleaseLabel"
+                  defaultMessage="Target Release"
+                />
+              }
+            >
+              <Link
+                route={Route.release}
+                params={{
+                  applicationId: release?.application.id ?? "",
+                  releaseId: targetRelease.id,
+                }}
+              >
+                {targetRelease.version}
+              </Link>
+            </FormRow>
+          )}
+
         <FormRow
           label={
             <FormattedMessage
-              id="forms.DeploymentCampaignForm.deploymentChannelLabel"
+              id="forms.DeploymentCampaignForm.channelLabel"
               defaultMessage="Channel"
             />
           }
@@ -269,7 +332,8 @@ const DeploymentCampaign = ({
           </Link>
         </FormRow>
       </Col>
-      <RolloutMechanismCol rolloutMechanism={deploymentMechanism} />
+
+      <CampaignMechanismCol campaignMechanism={campaignMechanism} />
     </Row>
   );
 };

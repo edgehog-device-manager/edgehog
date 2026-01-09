@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2024, 2025 SECO Mind Srl
+ * Copyright 2024 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,8 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
               }
             }
           }
-          deploymentTarget {
-            deploymentCampaign {
+          campaignTarget {
+            campaign {
               id
               name
             }
@@ -385,7 +385,7 @@ const DeployedApplicationsTable = ({
               }
             : null,
         })) || [],
-      deploymentTarget: edge.node.deploymentTarget,
+      campaignTarget: edge.node.campaignTarget,
       upgradeTargetReleases:
         edge.node.release?.application?.releases?.edges?.filter((releaseEdge) =>
           semver.gt(
@@ -632,29 +632,26 @@ const DeployedApplicationsTable = ({
         </Link>
       ),
     }),
-    columnHelper.accessor(
-      (row) => row.deploymentTarget?.deploymentCampaign?.name,
-      {
-        id: "deploymentCampaignName",
-        header: () => (
-          <FormattedMessage
-            id="components.DeployedApplicationsTable.deploymentCampaignNameTitle"
-            defaultMessage="Deployment Campaign"
-          />
-        ),
-        cell: ({ row, getValue }) => (
-          <Link
-            route={Route.deploymentCampaignsEdit}
-            params={{
-              deploymentCampaignId:
-                row.original.deploymentTarget?.deploymentCampaign?.id ?? "",
-            }}
-          >
-            {getValue()}
-          </Link>
-        ),
-      },
-    ),
+    columnHelper.accessor((row) => row.campaignTarget?.campaign?.name, {
+      id: "deploymentCampaignName",
+      header: () => (
+        <FormattedMessage
+          id="components.DeployedApplicationsTable.deploymentCampaignNameTitle"
+          defaultMessage="Deployment Campaign"
+        />
+      ),
+      cell: ({ row, getValue }) => (
+        <Link
+          route={Route.deploymentCampaignsEdit}
+          params={{
+            deploymentCampaignId:
+              row.original.campaignTarget?.campaign?.id ?? "",
+          }}
+        >
+          {getValue()}
+        </Link>
+      ),
+    }),
     columnHelper.accessor("state", {
       header: () => (
         <FormattedMessage

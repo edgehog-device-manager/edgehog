@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,17 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Select from "react-select";
 
-import {
+import type {
   CreateDeploymentCampaign_ApplicationOptionsFragment$data,
   CreateDeploymentCampaign_ApplicationOptionsFragment$key,
 } from "@/api/__generated__/CreateDeploymentCampaign_ApplicationOptionsFragment.graphql";
 import type { CreateDeploymentCampaign_ApplicationPaginationQuery } from "@/api/__generated__/CreateDeploymentCampaign_ApplicationPaginationQuery.graphql";
-import {
+import type {
   CreateDeploymentCampaign_ChannelOptionsFragment$data,
   CreateDeploymentCampaign_ChannelOptionsFragment$key,
 } from "@/api/__generated__/CreateDeploymentCampaign_ChannelOptionsFragment.graphql";
-import { CreateDeploymentCampaign_ChannelPaginationQuery } from "@/api/__generated__/CreateDeploymentCampaign_ChannelPaginationQuery.graphql";
-import type { OperationType } from "@/api/__generated__/DeploymentCampaignCreate_CreateDeploymentCampaign_Mutation.graphql";
+import type { CreateDeploymentCampaign_ChannelPaginationQuery } from "@/api/__generated__/CreateDeploymentCampaign_ChannelPaginationQuery.graphql";
+import type { CampaignMechanismInput } from "@/api/__generated__/DeploymentCampaignCreate_CreateCampaign_Mutation.graphql";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
@@ -50,7 +50,7 @@ import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { numberSchema, yup } from "@/forms";
 import FormFeedback from "@/forms/FormFeedback";
 
-const DEPLOYMENT_CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
+const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   fragment CreateDeploymentCampaign_ApplicationOptionsFragment on RootQueryType
   @refetchable(queryName: "CreateDeploymentCampaign_ApplicationPaginationQuery")
   @argumentDefinitions(filter: { type: "ApplicationFilterInput" }) {
@@ -66,7 +66,7 @@ const DEPLOYMENT_CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   }
 `;
 
-const DEPLOYMENT_CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT = graphql`
+const CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT = graphql`
   fragment CreateDeploymentCampaign_ChannelOptionsFragment on RootQueryType
   @refetchable(queryName: "CreateDeploymentCampaign_ChannelPaginationQuery")
   @argumentDefinitions(filter: { type: "ChannelFilterInput" }) {
@@ -82,6 +82,15 @@ const DEPLOYMENT_CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT = graphql`
   }
 `;
 
+type OperationType = "Deploy" | "Start" | "Stop" | "Upgrade" | "Delete";
+
+type DeploymentAction =
+  | "deploymentDeploy"
+  | "deploymentStart"
+  | "deploymentStop"
+  | "deploymentUpgrade"
+  | "deploymentDelete";
+
 type ApplicationRecord = NonNullable<
   NonNullable<
     CreateDeploymentCampaign_ApplicationOptionsFragment$data["applications"]
@@ -96,18 +105,8 @@ type ChannelRecord = NonNullable<
 
 type DeploymentCampaignData = {
   channelId: string;
-  releaseId: string;
-  targetReleaseId?: string;
   name: string;
-  operationType: OperationType;
-  deploymentMechanism: {
-    lazy: {
-      maxFailurePercentage: number;
-      maxInProgressDeployments: number;
-      createRequestRetries: number;
-      requestTimeoutSeconds: number;
-    };
-  };
+  campaignMechanism: CampaignMechanismInput;
 };
 
 type FormData = {
@@ -116,17 +115,33 @@ type FormData = {
   application: ApplicationRecord;
   release: ReleaseRecord;
   targetRelease?: ReleaseRecord;
-  operationType: string;
+  operationType: OperationType | "";
   maxFailurePercentage: number | string;
-  maxInProgressDeployments: number | string;
-  createRequestRetries: number;
+  maxInProgressOperations: number | string;
+  requestRetries: number;
+  requestTimeoutSeconds: number;
+};
+
+type DeploymentConfig = {
+  releaseId: string;
+  targetReleaseId?: string;
+  maxFailurePercentage: number;
+  maxInProgressOperations: number;
+  requestRetries: number;
   requestTimeoutSeconds: number;
 };
 
 type SelectOption = {
-  value: string;
+  value: OperationType;
   label: string;
-  disabled?: boolean;
+};
+
+const OPERATION_TO_MECHANISM: Record<OperationType, DeploymentAction> = {
+  Deploy: "deploymentDeploy",
+  Start: "deploymentStart",
+  Stop: "deploymentStop",
+  Upgrade: "deploymentUpgrade",
+  Delete: "deploymentDelete",
 };
 
 const initialData: FormData = {
@@ -136,12 +151,12 @@ const initialData: FormData = {
   release: { id: "", version: "" },
   operationType: "",
   maxFailurePercentage: "",
-  maxInProgressDeployments: "",
-  createRequestRetries: 3,
+  maxInProgressOperations: "",
+  requestRetries: 3,
   requestTimeoutSeconds: 300,
 };
 
-const deploymentCampaignSchema = (intl: any) =>
+const campaignSchema = (intl: ReturnType<typeof useIntl>) =>
   yup
     .object({
       name: yup.string().required(),
@@ -169,12 +184,12 @@ const deploymentCampaignSchema = (intl: any) =>
         .object({ id: yup.string().required(), name: yup.string().required() })
         .required(),
       operationType: yup.string().required(),
-      maxInProgressDeployments: numberSchema
+      maxInProgressOperations: numberSchema
         .integer()
         .positive()
         .label(
           intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.maxInProgressDeploymentsLabel",
+            id: "forms.CreateDeploymentCampaign.maxInProgressOperationsLabel",
             defaultMessage: "Max Pending Operations",
           }),
         ),
@@ -197,12 +212,12 @@ const deploymentCampaignSchema = (intl: any) =>
             defaultMessage: "Request Timeout",
           }),
         ),
-      createRequestRetries: numberSchema
+      requestRetries: numberSchema
         .integer()
         .min(0)
         .label(
           intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.createRequestRetriesLabel",
+            id: "forms.CreateDeploymentCampaign.requestRetriesLabel",
             defaultMessage: "Request Retries",
           }),
         ),
@@ -217,50 +232,46 @@ const transformOutputData = (data: FormData): DeploymentCampaignData => {
     targetRelease,
     operationType,
     maxFailurePercentage,
-    maxInProgressDeployments,
-    createRequestRetries,
+    maxInProgressOperations,
+    requestRetries,
     requestTimeoutSeconds,
   } = data;
 
-  const requiredOutput = {
-    name,
-    channelId: channel.id,
+  const mechanismKey = OPERATION_TO_MECHANISM[operationType as OperationType];
+
+  const deploymentConfig: DeploymentConfig = {
     releaseId: release.id,
-    operationType: operationType as OperationType,
-    deploymentMechanism: {
-      lazy: {
-        maxFailurePercentage:
-          typeof maxFailurePercentage === "string"
-            ? parseFloat(maxFailurePercentage)
-            : maxFailurePercentage,
-        maxInProgressDeployments:
-          typeof maxInProgressDeployments === "string"
-            ? parseInt(maxInProgressDeployments)
-            : maxInProgressDeployments,
-        createRequestRetries,
-        requestTimeoutSeconds,
-      },
-    },
+    maxFailurePercentage:
+      typeof maxFailurePercentage === "string"
+        ? parseFloat(maxFailurePercentage)
+        : maxFailurePercentage,
+    maxInProgressOperations:
+      typeof maxInProgressOperations === "string"
+        ? parseInt(maxInProgressOperations)
+        : maxInProgressOperations,
+    requestRetries,
+    requestTimeoutSeconds,
+    ...(targetRelease && { targetReleaseId: targetRelease.id }),
   };
 
-  if (targetRelease) {
-    return {
-      ...requiredOutput,
-      targetReleaseId: targetRelease.id,
-    };
-  }
-  return requiredOutput;
+  return {
+    name,
+    channelId: channel.id,
+    campaignMechanism: {
+      [mechanismKey]: deploymentConfig,
+    },
+  };
 };
 
 type Props = {
-  deploymentCampaignOptionsRef: CreateDeploymentCampaign_ApplicationOptionsFragment$key &
+  campaignOptionsRef: CreateDeploymentCampaign_ApplicationOptionsFragment$key &
     CreateDeploymentCampaign_ChannelOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: DeploymentCampaignData) => void;
 };
 
 const CreateDeploymentCampaignForm = ({
-  deploymentCampaignOptionsRef,
+  campaignOptionsRef,
   isLoading = false,
   onSubmit,
 }: Props) => {
@@ -276,7 +287,7 @@ const CreateDeploymentCampaignForm = ({
   } = useForm<FormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(deploymentCampaignSchema(intl)),
+    resolver: yupResolver(campaignSchema(intl)),
   });
 
   const onFormSubmit = (data: FormData) => {
@@ -296,10 +307,7 @@ const CreateDeploymentCampaignForm = ({
   } = usePaginationFragment<
     CreateDeploymentCampaign_ApplicationPaginationQuery,
     CreateDeploymentCampaign_ApplicationOptionsFragment$key
-  >(
-    DEPLOYMENT_CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT,
-    deploymentCampaignOptionsRef,
-  );
+  >(CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT, campaignOptionsRef);
 
   const [searchApplicationText, setSearchApplicationText] = useState<
     string | null
@@ -377,7 +385,7 @@ const CreateDeploymentCampaignForm = ({
   } = usePaginationFragment<
     CreateDeploymentCampaign_ChannelPaginationQuery,
     CreateDeploymentCampaign_ChannelOptionsFragment$key
-  >(DEPLOYMENT_CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT, deploymentCampaignOptionsRef);
+  >(CAMPAIGN_CHANNEL_OPTIONS_FRAGMENT, campaignOptionsRef);
 
   const [searchChannelText, setSearchChannelText] = useState<string | null>(
     null,
@@ -443,11 +451,11 @@ const CreateDeploymentCampaignForm = ({
         });
 
   const operationTypesOptions: SelectOption[] = [
-    { value: "DEPLOY", label: "Deploy" },
-    { value: "START", label: "Start" },
-    { value: "STOP", label: "Stop" },
-    { value: "UPGRADE", label: "Upgrade" },
-    { value: "DELETE", label: "Delete" },
+    { value: "Deploy", label: "Deploy" },
+    { value: "Start", label: "Start" },
+    { value: "Stop", label: "Stop" },
+    { value: "Upgrade", label: "Upgrade" },
+    { value: "Delete", label: "Delete" },
   ];
 
   return (
@@ -602,7 +610,7 @@ const CreateDeploymentCampaignForm = ({
           )}
         </FormRow>
 
-        {selectedOperationType === "UPGRADE" && (
+        {selectedOperationType === "Upgrade" && (
           <FormRow
             id="create-deployment-campaign-form-target-release"
             label={
@@ -699,18 +707,18 @@ const CreateDeploymentCampaignForm = ({
           id="create-deployment-campaign-form-max-in-progress-updates"
           label={
             <FormattedMessage
-              id="forms.CreateDeploymentCampaign.maxInProgressDeploymentsLabel"
+              id="forms.CreateDeploymentCampaign.maxInProgressOperationsLabel"
               defaultMessage="Max Pending Operations"
             />
           }
         >
           <Form.Control
-            {...register("maxInProgressDeployments")}
+            {...register("maxInProgressOperations")}
             type="number"
             min="1"
-            isInvalid={!!errors.maxInProgressDeployments}
+            isInvalid={!!errors.maxInProgressOperations}
           />
-          <FormFeedback feedback={errors.maxInProgressDeployments?.message} />
+          <FormFeedback feedback={errors.maxInProgressOperations?.message} />
         </FormRow>
 
         <FormRow
@@ -762,18 +770,18 @@ const CreateDeploymentCampaignForm = ({
           id="create-deployment-campaign-form-ota-request-retries"
           label={
             <FormattedMessage
-              id="forms.CreateDeploymentCampaign.createRequestRetriesLabel"
+              id="forms.CreateDeploymentCampaign.requestRetriesLabel"
               defaultMessage="Request Retries"
             />
           }
         >
           <Form.Control
-            {...register("createRequestRetries")}
+            {...register("requestRetries")}
             type="number"
             min="0"
-            isInvalid={!!errors.createRequestRetries}
+            isInvalid={!!errors.requestRetries}
           />
-          <FormFeedback feedback={errors.createRequestRetries?.message} />
+          <FormFeedback feedback={errors.requestRetries?.message} />
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">
@@ -798,6 +806,11 @@ const CreateDeploymentCampaignForm = ({
   );
 };
 
-export type { ApplicationRecord, DeploymentCampaignData };
+export type {
+  ApplicationRecord,
+  DeploymentCampaignData,
+  OperationType,
+  DeploymentAction,
+};
 
 export default CreateDeploymentCampaignForm;
