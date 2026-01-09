@@ -36,7 +36,6 @@ defmodule Edgehog.Containers.DeploymentTest do
   end
 
   test "destroy_if_dangling removes the container_deployment only if danlging", %{
-    tenant: tenant,
     deployment: deployment
   } do
     deployment = Ash.load!(deployment, :container_deployments)
@@ -53,7 +52,6 @@ defmodule Edgehog.Containers.DeploymentTest do
   end
 
   test "destroy_and_gc garbage collects", %{
-    tenant: tenant,
     deployment: deployment
   } do
     deployment =
