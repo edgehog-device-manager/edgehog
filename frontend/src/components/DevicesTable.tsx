@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ const DEVICES_TABLE_FRAGMENT = graphql`
 `;
 
 const DEVICE_CREATED_SUBSCRIPTION = graphql`
-  subscription DevicesTable_deviceCreated_Subscription {
+  subscription DevicesTable_deviceChanged_created_Subscription {
     deviceChanged {
       created {
         id
@@ -110,7 +110,7 @@ const DEVICE_CREATED_SUBSCRIPTION = graphql`
 `;
 
 const DEVICE_UPDATED_SUBSCRIPTION = graphql`
-  subscription DevicesTable_DeviceUpdated_Subscription {
+  subscription DevicesTable_deviceChanged_updated_Subscription {
     deviceChanged {
       updated {
         id
@@ -284,8 +284,8 @@ const DevicesTable = ({ className, devicesRef }: Props) => {
         subscription: DEVICE_CREATED_SUBSCRIPTION,
         variables: {},
         updater: (store) => {
-          const deviceCreated = store.getRootField("deviceCreated");
-          const newDevice = deviceCreated?.getLinkedRecord("created");
+          const deviceChanged = store.getRootField("deviceChanged");
+          const newDevice = deviceChanged?.getLinkedRecord("created");
           if (!newDevice) return;
 
           if (normalizedSearchText !== "") {
