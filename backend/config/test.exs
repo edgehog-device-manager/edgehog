@@ -45,6 +45,7 @@ config :edgehog, Edgehog.Repo,
 config :edgehog, EdgehogWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "cJMfZ0TGL4Dy0e4kzSn5SrODWbgzWJ7E0rfWMKWvrtdiUjuYDrOQstMY/36V2ccd",
+  pubsub_server: Edgehog.PubSub,
   server: false
 
 # Mocks for tests

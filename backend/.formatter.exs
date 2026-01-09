@@ -16,5 +16,9 @@
   ],
   plugins: [Spark.Formatter, Styler],
   inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],
-  subdirectories: ["priv/*/migrations"]
+  subdirectories: ["priv/*/migrations"],
+  locals_without_parens: [
+    assert_created: 2,
+    assert_updated: 2
+  ]
 ]

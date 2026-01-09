@@ -197,7 +197,7 @@ const createSubscribeFunction = (session: Session): SubscribeFunction => {
         backendUrl.replace(/^https?:/, protocol),
       );
       url.searchParams.set("vsn", "2.0.0");
-      url.searchParams.set("Authorization", `Bearer ${session.authToken}`);
+      url.searchParams.set("token", session.authToken);
       url.searchParams.set("tenant", session.tenantSlug);
 
       const ws = new WebSocket(url.toString());
