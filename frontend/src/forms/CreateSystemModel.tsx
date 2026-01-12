@@ -397,6 +397,7 @@ const CreateSystemModelForm = ({
                         hasNext ? loadNextSystemModelOptions : undefined
                       }
                       onInputChange={(text) => setSearchText(text)}
+                      isClearable
                     />
                   )}
                 />
