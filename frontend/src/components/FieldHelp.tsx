@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,17 +75,23 @@ const FieldHelp = ({
   id,
   size = 16,
   children,
-  itemsAlignment = "baseline",
+  itemsAlignment,
 }: FieldHelpProps) => {
   const explanation = getFieldExplanation(id);
 
+  const iconWrapperStyle = itemsAlignment
+    ? { alignSelf: itemsAlignment }
+    : { height: "38px" };
+
   return (
-    <div
-      className={`d-flex justify-content-center align-items-${itemsAlignment} gap-2`}
-    >
+    <div className={`d-flex justify-content-center gap-2`}>
       <div className="flex-grow-1 w-100">{children}</div>
 
-      <div data-tooltip-id={`tooltip-${id}`}>
+      <div
+        data-tooltip-id={`tooltip-${id}`}
+        className="d-flex align-items-center"
+        style={iconWrapperStyle}
+      >
         <Icon
           icon={"faCircleQuestion"}
           style={{

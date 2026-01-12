@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -380,7 +380,7 @@ const ContainerForm = ({
                 />
               }
             >
-              <FieldHelp id="extraHosts">
+              <FieldHelp id="extraHosts" itemsAlignment="center">
                 <Controller
                   control={control}
                   name={`containers.${index}.extraHosts`}
@@ -414,7 +414,7 @@ const ContainerForm = ({
                 />
               }
             >
-              <FieldHelp id="portBindings">
+              <FieldHelp id="portBindings" itemsAlignment="center">
                 <Controller
                   control={control}
                   name={`containers.${index}.portBindings`}
@@ -463,7 +463,7 @@ const ContainerForm = ({
                 />
               }
             >
-              <FieldHelp id="binds">
+              <FieldHelp id="binds" itemsAlignment="center">
                 <Controller
                   control={control}
                   name={`containers.${index}.binds`}
@@ -497,7 +497,7 @@ const ContainerForm = ({
                 />
               }
             >
-              <FieldHelp id="volumes">
+              <FieldHelp id="volumes" itemsAlignment="center">
                 <div className="p-3 border rounded">
                   <Stack gap={3}>
                     {volumesForm.fields.map((volume, volIndex) => {
@@ -651,7 +651,7 @@ const ContainerForm = ({
                 />
               }
             >
-              <FieldHelp id="storageOpt">
+              <FieldHelp id="storageOpt" itemsAlignment="center">
                 <Controller
                   control={control}
                   name={`containers.${index}.storageOpt`}
@@ -685,7 +685,7 @@ const ContainerForm = ({
                 />
               }
             >
-              <FieldHelp id="tmpfs">
+              <FieldHelp id="tmpfs" itemsAlignment="center">
                 <Controller
                   control={control}
                   name={`containers.${index}.tmpfs`}
@@ -720,11 +720,16 @@ const ContainerForm = ({
               }
             >
               <FieldHelp id="readOnlyRootfs">
-                <Form.Check
-                  type="checkbox"
-                  {...register(`containers.${index}.readOnlyRootfs` as const)}
-                  isInvalid={!!errors.containers?.[index]?.readOnlyRootfs}
-                />
+                <div
+                  className="d-flex align-items-center"
+                  style={{ minHeight: "38px" }}
+                >
+                  <Form.Check
+                    type="checkbox"
+                    {...register(`containers.${index}.readOnlyRootfs` as const)}
+                    isInvalid={!!errors.containers?.[index]?.readOnlyRootfs}
+                  />
+                </div>
                 <FormFeedback
                   feedback={errors.containers?.[index]?.readOnlyRootfs?.message}
                 />
@@ -975,11 +980,16 @@ const ContainerForm = ({
               }
             >
               <FieldHelp id="privileged">
-                <Form.Check
-                  type="checkbox"
-                  {...register(`containers.${index}.privileged` as const)}
-                  isInvalid={!!errors.containers?.[index]?.privileged}
-                />
+                <div
+                  className="d-flex align-items-center"
+                  style={{ minHeight: "38px" }}
+                >
+                  <Form.Check
+                    type="checkbox"
+                    {...register(`containers.${index}.privileged` as const)}
+                    isInvalid={!!errors.containers?.[index]?.privileged}
+                  />
+                </div>
                 <FormFeedback
                   feedback={errors.containers?.[index]?.privileged?.message}
                 />
