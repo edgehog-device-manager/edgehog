@@ -45,11 +45,15 @@ defmodule Edgehog.Application do
     # We inject this here so that the non-web part of the application doesn't depend on the web part
     Application.put_env(:edgehog, :tenant_to_trigger_url_fun, tenant_to_trigger_url_fun)
 
+    clustering_opts = [Config.clustering_topologies!(), [name: Edgehog.Cluster.Supervisor]]
+
     children = [
       # Prometheus metrics
       Edgehog.PromEx,
       # Start the Ecto repository
       Edgehog.Repo,
+      # Clustering supervisor
+      {Cluster.Supervisor, clustering_opts},
       # Start the Telemetry supervisor
       EdgehogWeb.Telemetry,
       # Start the Oban supervisor
