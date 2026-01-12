@@ -127,7 +127,8 @@ defmodule Edgehog.MixProject do
       {:ymlr, "~> 5.1"},
       {:sourceror, "~> 1.10", only: [:dev, :test]},
       {:phoenix_pubsub, "~> 2.0"},
-      {:absinthe_phoenix, "~> 2.0"}
+      {:absinthe_phoenix, "~> 2.0"},
+      {:libcluster, "~> 3.5"}
     ]
   end
 
