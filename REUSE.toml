@@ -200,3 +200,9 @@ path = "frontend/vite.config.ts"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2023-2026 SECO Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/rel/env.sh.eex"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
