@@ -145,7 +145,8 @@ defmodule Edgehog.MixProject do
       # break interoperability.
       #
       # Do not upgrade this dependency unless the underlying block size behavior is verified and updated.
-      {:nimble_lz4, "1.1.0"}
+      {:nimble_lz4, "1.1.0"},
+      {:libcluster, "~> 3.5"}
     ]
   end
 
