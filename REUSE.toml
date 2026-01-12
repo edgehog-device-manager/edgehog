@@ -86,3 +86,9 @@ path = ".github/CODEOWNERS"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/rel/env.sh.eex"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
