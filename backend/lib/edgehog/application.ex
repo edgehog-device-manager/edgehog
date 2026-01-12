@@ -45,11 +45,15 @@ defmodule Edgehog.Application do
       Router.Helpers.astarte_trigger_url(Endpoint, :process_event, slug)
     end
 
+    clustering_opts = [Config.clustering_topologies!(), [name: Edgehog.Cluster.Supervisor]]
+
     children = [
       # Prometheus metrics
       Edgehog.PromEx,
       # Start the Ecto repository
       Edgehog.Repo,
+      # Clustering supervisor
+      {Cluster.Supervisor, clustering_opts},
       # Start the Telemetry supervisor
       EdgehogWeb.Telemetry,
       # Start the PubSub system
