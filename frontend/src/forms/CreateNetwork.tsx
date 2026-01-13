@@ -78,7 +78,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
     register,
     handleSubmit,
     control,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors },
   } = useForm<NetworkData>({
     mode: "onTouched",
     defaultValues: initialData,
@@ -177,11 +177,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
           sm={{ span: 10, offset: 2 }}
           className="d-flex justify-content-end"
         >
-          <Button
-            variant="primary"
-            type="submit"
-            disabled={isLoading || isSubmitting || !isValid}
-          >
+          <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
               id="components.CreateNetworkForm.submitButton"
