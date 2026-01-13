@@ -108,21 +108,6 @@ const reduceEnv = (env: EnvironmentVariable[]) =>
 const envToString = (env: EnvironmentVariable[]) =>
   JSON.stringify(reduceEnv(env));
 
-const envValidation = (envJson: any): void => {
-  if (Array.isArray(envJson)) {
-    throw new TypeError("expected an object, found: 'array'");
-  }
-  const entries = Object.entries(envJson);
-  entries.forEach(([key, value]) => {
-    const valueType = typeof value;
-    if (valueType !== "string") {
-      throw new TypeError(
-        `the value of an environment variable can only be a string. Found '${Array.isArray(value) ? "array" : valueType}' for key: '${key}'`,
-      );
-    }
-  });
-};
-
 const ContainerForm = ({
   index,
   register,
@@ -1144,7 +1129,7 @@ const ContainerForm = ({
                 <Controller
                   control={control}
                   name={`containers.${index}.env`}
-                  render={({ field, fieldState: _fieldState }) => (
+                  render={({ field, fieldState }) => (
                     <MonacoJsonEditor
                       value={
                         field.value && typeof field.value !== "string"
@@ -1159,7 +1144,7 @@ const ContainerForm = ({
                           ? envToString(field.value)
                           : (field.value ?? "{}")
                       }
-                      additionalValidation={envValidation}
+                      error={fieldState.error?.message}
                     />
                   )}
                 />

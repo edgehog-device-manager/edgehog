@@ -966,9 +966,6 @@
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
   },
-  "components.MonacoEditor.error": {
-    "defaultMessage": "{language}error: {error}"
-  },
   "components.NetworkInterfacesTable.macAddressTitle": {
     "defaultMessage": "MAC Address"
   },
@@ -2969,8 +2966,11 @@
   "validation.cpuQuotaPeriod.format": {
     "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
   },
+  "validation.env.expectedObject": {
+    "defaultMessage": "Expected an object with key-value pairs"
+  },
   "validation.env.invalidIsNested": {
-    "defaultMessage": "Environment Variables' values cannot be nested."
+    "defaultMessage": "Environment variable values cannot be nested."
   },
   "validation.env.invalidJson": {
     "defaultMessage": "Must be a valid JSON string."

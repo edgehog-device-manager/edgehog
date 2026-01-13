@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -427,7 +427,11 @@ const messages = defineMessages({
   },
   envInvalidIsNested: {
     id: "validation.env.invalidIsNested",
-    defaultMessage: "Environment Variables' values cannot be nested.",
+    defaultMessage: "Environment variable values cannot be nested.",
+  },
+  envExpectedObject: {
+    id: "validation.env.expectedObject",
+    defaultMessage: "Expected an object with key-value pairs",
   },
   portBindingsFormat: {
     id: "validation.portBindings.format",
@@ -540,26 +544,28 @@ const optionsSchema = yup
   .nullable()
   .transform((value) => value?.trim())
   .test({
-    name: "is-json",
-    message: messages.envInvalidJson.id,
-    test: (value) => {
+    name: "options-validation",
+    test: function (value) {
       if (!value) return true;
-      return isValidJson(value);
-    },
-  })
-  .test({
-    name: "no-nested-values",
-    test: (value) => {
-      if (!value) return true;
-      if (!isValidJson(value)) return true;
+
+      // Check if valid JSON
+      if (!isValidJson(value)) {
+        return this.createError({ message: messages.envInvalidJson.id });
+      }
 
       const parsed = JSON.parse(value);
+
+      // Check if it's an object (not an array)
       if (typeof parsed !== "object" || Array.isArray(parsed)) {
-        return false;
+        return this.createError({ message: messages.envExpectedObject.id });
       }
-      return Object.values(parsed).every((v) =>
-        ["string", "number", "boolean"].includes(typeof v),
-      );
+
+      // Check if values are not nested
+      if (!isNotNested(Object.values(parsed))) {
+        return this.createError({ message: messages.envInvalidIsNested.id });
+      }
+
+      return true;
     },
   });
 
@@ -656,24 +662,17 @@ const isValidJson = (value: string) => {
   }
 };
 
-const isNotNested = (
-  value: KeyValueMaybeNested[] | string,
-): value is KeyValueMaybeNested[] => {
-  return (value as KeyValueMaybeNested[])
-    .map(({ key: _, value: val }) => val)
-    .reduce(
-      (acc: boolean, curr) =>
-        acc && ["number", "boolean", "string"].includes(typeof curr),
-      true,
-    );
+const isNotNested = (value: KeyValueMaybeNested[]): boolean => {
+  return value.every(({ value: val }) =>
+    ["number", "boolean", "string"].includes(typeof val),
+  );
 };
 
 const envSchema = yup
-  .mixed<string | KeyValueMaybeNested[]>()
+  .mixed<KeyValueMaybeNested[]>()
   .nullable()
-  .transform((value) => (typeof value === "string" ? value?.trim() : value))
   .transform((value) => {
-    if (typeof value === "string" && isValidJson(value)) {
+    if (isValidJson(value)) {
       return Object.entries(JSON.parse(value)).map(
         ([key, val]) => ({ key, value: val }) as KeyValueMaybeNested,
       );
@@ -681,17 +680,33 @@ const envSchema = yup
     return value;
   })
   .test({
-    name: "is-json",
-    message: messages.envInvalidJson.id,
-    test: (value) =>
-      value && typeof value === "string" ? isValidJson(value) : true,
-  })
-  .test({
-    name: "is-not-nested",
-    message: messages.envInvalidIsNested.id,
-    test: (value) => (value ? isNotNested(value) : true),
-  })
-  .default("{}");
+    name: "env-validation",
+    test: function (value) {
+      if (!value) return true;
+
+      // If already transformed to array, check if values are not nested
+      if (Array.isArray(value)) {
+        if (!isNotNested(value)) {
+          return this.createError({ message: messages.envInvalidIsNested.id });
+        }
+        return true;
+      }
+
+      // Check if valid JSON
+      if (!isValidJson(value)) {
+        return this.createError({ message: messages.envInvalidJson.id });
+      }
+
+      const parsed = JSON.parse(value);
+
+      // Check if it's an object (not an array)
+      if (typeof parsed !== "object" || Array.isArray(parsed)) {
+        return this.createError({ message: messages.envExpectedObject.id });
+      }
+
+      return true;
+    },
+  });
 
 const ipv4PortRegex =
   /^(\d{1,5}(-\d{1,5})?(:(\d{1,5}(-\d{1,5})?))?(\/(tcp|udp))?|(\d{1,3}\.){3}\d{1,3}:\d{1,5}(-\d{1,5})?:\d{1,5}(-\d{1,5})?(\/(tcp|udp))?)$/;
@@ -900,30 +915,6 @@ const requiredSystemModelsSchema = yup.array(
   yup.object({ id: yup.string().required() }),
 );
 
-/* ------------------------ Reusable Validation Functions ------------------------ */
-const optionsValidation = (input: any): void => {
-  if (!input) return;
-
-  const parsed =
-    typeof input === "object" && !Array.isArray(input)
-      ? input
-      : JSON.parse(input);
-
-  if (typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new TypeError("Expected an object with key-value pairs");
-  }
-
-  for (const [key, value] of Object.entries(parsed)) {
-    if (!["string", "number", "boolean"].includes(typeof value)) {
-      throw new TypeError(
-        `Value for '${key}' must be a one of: string, number or boolean. Got: ${
-          Array.isArray(value) ? "array" : typeof value
-        }`,
-      );
-    }
-  }
-};
-
 export {
   yup,
   messages,
@@ -956,5 +947,4 @@ export {
   deviceMappingsSchema,
   requiredSystemModelsSchema,
   optionsSchema,
-  optionsValidation,
 };

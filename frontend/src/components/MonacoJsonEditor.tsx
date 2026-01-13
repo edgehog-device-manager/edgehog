@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
  */
 
 import MonacoEditor from "@/components/MonacoEditor";
-import { useCallback } from "react";
 
 type MonacoJsonEditorProps = {
   value: string;
@@ -28,14 +27,7 @@ type MonacoJsonEditorProps = {
   readonly?: boolean;
   initialLines?: number;
   autoFormat?: boolean;
-  /**
-   * @important The function is assumed to throw an Error if it fails to parse the
-   * text entered in the editor is correctly parsed.
-   * The Thrown error will be visualised by the editor as aid for the user.
-   * @important input text is already validated to be parsed JSON, so there is
-   * no need to validate it again. It can be safely used with this assumption.
-   * @returns only if it correctly parses */
-  additionalValidation?: (text: any) => void;
+  error?: string;
 };
 
 const MonacoJsonEditor = ({
@@ -45,18 +37,8 @@ const MonacoJsonEditor = ({
   readonly = false,
   initialLines = 5,
   autoFormat = true,
-  additionalValidation: additionalValidationProp,
+  error,
 }: MonacoJsonEditorProps) => {
-  const validationFunction = useCallback(
-    (text: any) => {
-      const json_text = JSON.parse(text);
-      if (additionalValidationProp) {
-        additionalValidationProp(json_text);
-      }
-    },
-    [additionalValidationProp],
-  );
-
   return (
     <MonacoEditor
       language={"json"}
@@ -66,8 +48,7 @@ const MonacoJsonEditor = ({
       readonly={readonly}
       initialLines={initialLines}
       autoFormat={autoFormat}
-      validationFunction={validationFunction}
-      languageForErrorString={"JSON"}
+      error={error}
     />
   );
 };

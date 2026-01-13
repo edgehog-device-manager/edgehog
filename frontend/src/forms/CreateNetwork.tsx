@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import Form from "@/components/Form";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
 
-import { yup, optionsSchema, optionsValidation } from "@/forms";
+import { yup, optionsSchema } from "@/forms";
 import MonacoJsonEditor from "@/components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
 
@@ -125,14 +125,14 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         <Controller
           control={control}
           name={"options"}
-          render={({ field, fieldState: _fieldState }) => (
+          render={({ field, fieldState }) => (
             <MonacoJsonEditor
               value={field.value ?? ""}
               onChange={(value) => {
                 field.onChange(value ?? "");
               }}
               defaultValue={field.value || "{}"}
-              additionalValidation={optionsValidation}
+              error={fieldState.error?.message}
             />
           )}
         />

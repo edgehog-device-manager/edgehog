@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,7 @@ type MonacoEditorProps = {
   readonly?: boolean;
   initialLines?: number;
   autoFormat?: boolean;
-  /**
-   * @important The function is assumed to throw an Error if it fails to parse the
-   * text entered in the editor is correctly parsed.
-   * The Thrown error will be visualised by the editor as aid for the user.
-   * @returns only if it correctly parses */
-  validationFunction?: (text: string) => void;
-  languageForErrorString?: string;
+  error?: string;
 };
 
 const MonacoEditor = ({
@@ -49,27 +43,25 @@ const MonacoEditor = ({
   readonly = false,
   initialLines = 5,
   autoFormat = true,
-  validationFunction: validationFunctionProp,
-  languageForErrorString: languageForErrorStringProp,
+  error,
 }: MonacoEditorProps) => {
   const editorRef = useRef<any>(null);
-  const validation =
-    validationFunctionProp === undefined || validationFunctionProp === null
-      ? (_text: string) => {}
-      : validationFunctionProp;
   const lineHeight = 22;
   const [height, setHeight] = useState(initialLines * lineHeight);
-  const [languageError, setLanguageError] = useState<string | null>(null);
 
   const format = useCallback(() => {
     if (editorRef.current && autoFormat && language) {
-      try {
-        const currentValue = editorRef.current.getValue();
-        validation(currentValue);
+      // Only format if it's valid JSON (for json language)
+      if (language === "json") {
+        try {
+          const currentValue = editorRef.current.getValue();
+          JSON.parse(currentValue);
+          editorRef.current.getAction("editor.action.formatDocument").run();
+        } catch {
+          // Invalid JSON, don't format
+        }
+      } else {
         editorRef.current.getAction("editor.action.formatDocument").run();
-        setLanguageError(null);
-      } catch (error: any) {
-        setLanguageError(error.message);
       }
     }
   }, [autoFormat, language]);
@@ -91,15 +83,6 @@ const MonacoEditor = ({
     });
     updateHeight();
   };
-
-  let languageForErrorString: string;
-  if (language) {
-    languageForErrorString = languageForErrorStringProp
-      ? languageForErrorStringProp
-      : language.charAt(0).toUpperCase() + language.slice(1) + " ";
-  } else {
-    languageForErrorString = "";
-  }
 
   return (
     <div className="border rounded bg-white p-2 overflow-hidden">
@@ -125,14 +108,10 @@ const MonacoEditor = ({
           renderLineHighlight: "none",
         }}
       />
-      {languageError && (
-        <p className="text-red-500 text-sm mt-2">
-          <Icon icon="warning" />
-          <FormattedMessage
-            id="components.MonacoEditor.error"
-            defaultMessage="{language}error: {error}"
-            values={{ language: languageForErrorString, error: languageError }}
-          />
+      {error && (
+        <p className="text-danger mt-2">
+          <Icon icon="warning" className="me-2" />
+          <FormattedMessage id={error} defaultMessage={error} />
         </p>
       )}
     </div>
