@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2025 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ defmodule Edgehog.OSManagementTest do
                errors
     end
 
-    test "send_update_request/2 succeeds if the Astarte request succeeds", %{
+    test "send_update_request/1 succeeds if the Astarte request succeeds", %{
       tenant: tenant,
       device: device
     } do
@@ -134,7 +134,7 @@ defmodule Edgehog.OSManagementTest do
       assert :ok = OSManagement.send_update_request(ota_operation)
     end
 
-    test "send_update_request/2 fails if the Astarte request fails", %{
+    test "send_update_request/1 fails if the Astarte request fails", %{
       tenant: tenant
     } do
       ota_operation = manual_ota_operation_fixture(tenant: tenant)
@@ -145,6 +145,42 @@ defmodule Edgehog.OSManagementTest do
 
       assert {:error, %Invalid{errors: errors}} =
                OSManagement.send_update_request(ota_operation)
+
+      assert [%AstarteAPIError{status: 503, response: "Cannot push to device"}] =
+               errors
+    end
+
+    test "send_cancel_request/1 succeeds if the Astarte request succeeds", %{
+      tenant: tenant,
+      device: device
+    } do
+      ota_operation =
+        manual_ota_operation_fixture(
+          device_id: device.id,
+          tenant: tenant
+        )
+
+      device_id = device.device_id
+      ota_operation_id = ota_operation.id
+
+      expect(OTARequestV1Mock, :cancel, fn _client, ^device_id, ^ota_operation_id ->
+        :ok
+      end)
+
+      assert :ok = OSManagement.send_cancel_request(ota_operation)
+    end
+
+    test "send_cancel_request/1 fails if the Astarte request fails", %{
+      tenant: tenant
+    } do
+      ota_operation = manual_ota_operation_fixture(tenant: tenant)
+
+      expect(OTARequestV1Mock, :cancel, fn _client, _device_id, _uuid ->
+        {:error, %APIError{status: 503, response: "Cannot push to device"}}
+      end)
+
+      assert {:error, %Invalid{errors: errors}} =
+               OSManagement.send_cancel_request(ota_operation)
 
       assert [%AstarteAPIError{status: 503, response: "Cannot push to device"}] =
                errors

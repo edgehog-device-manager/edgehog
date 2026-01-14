@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ defmodule Edgehog.OSManagement do
       create OTAOperation, :create_manual_ota_operation, :manual do
         relay_id_translations input: [device_id: :device]
       end
+
+      update OTAOperation, :cancel_ota_operation, :cancel
     end
   end
 
@@ -44,6 +46,7 @@ defmodule Edgehog.OSManagement do
       define :mark_ota_operation_as_timed_out, action: :mark_as_timed_out
       define :update_ota_operation_status, action: :update_status, args: [:status]
       define :send_update_request, args: [:ota_operation]
+      define :send_cancel_request, args: [:ota_operation]
       define :delete_ota_operation, action: :destroy
     end
   end

@@ -135,6 +135,14 @@ defmodule Edgehog.OSManagement.OTAOperation do
       end
     end
 
+    update :cancel do
+      description "Cancels an OTA update operation"
+
+      require_atomic? false
+
+      change Changes.SendCancelRequest
+    end
+
     action :send_update_request do
       argument :ota_operation, :struct do
         constraints instance_of: __MODULE__
@@ -142,6 +150,15 @@ defmodule Edgehog.OSManagement.OTAOperation do
       end
 
       run ManualActions.SendUpdateRequest
+    end
+
+    action :send_cancel_request do
+      argument :ota_operation, :struct do
+        constraints instance_of: __MODULE__
+        allow_nil? false
+      end
+
+      run ManualActions.SendCancelRequest
     end
   end
 
