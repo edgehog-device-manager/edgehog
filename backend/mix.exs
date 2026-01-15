@@ -32,13 +32,18 @@ defmodule Edgehog.MixProject do
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [
+      dialyzer: dialyzer_opts(Mix.env())
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
-      ],
-      dialyzer: dialyzer_opts(Mix.env())
+      ]
     ]
   end
 
