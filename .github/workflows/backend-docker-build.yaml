@@ -1,6 +1,6 @@
 # This file is part of Edgehog.
 #
-# Copyright 2021-2026 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Test
+name: Docker build
 on:
   workflow_call:
   workflow_dispatch:
@@ -31,30 +31,9 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  test:
+  build-docker-image:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        postgres: [13, 14, 15, 16, 17]
-    services:
-      postgres:
-        image: postgres:${{ matrix.postgres }}
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v5
-      - uses: team-alembic/staple-actions/actions/mix-test@main
-        with:
-          working-directory: backend
-          mix-env: test
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_HOST: postgres
+      - name: Build Docker image
+        run: docker build .

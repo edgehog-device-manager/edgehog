@@ -1,0 +1,63 @@
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Backend CI
+
+on:
+  # Run when pushing to stable branches
+  push:
+    paths:
+      - "backend/**"
+      - ".tool-versions"
+      - ".github/workflows/backend-test.yaml"
+    branches:
+      - "main"
+      - "release-*"
+  # Run on pull requests matching apps
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".tool-versions"
+      - ".github/workflows/backend-test.yaml"
+
+jobs:
+  warmup-cache:
+    uses: ./.github/workflows/backend-warmup-cache.yaml
+  formatter:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-formatter.yaml
+  dialyzer:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-dialyzer.yaml
+  credo:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-credo.yaml
+  test:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-test.yaml
+  coverage:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-coverage.yaml
+  minio:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-minio.yaml
+  azurite:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-azurite.yaml
+  docker-build:
+    uses: ./.github/workflows/backend-docker-build.yaml
