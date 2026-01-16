@@ -24,19 +24,13 @@ defmodule EdgehogWeb.GqlSocket do
 
   alias Edgehog.Tenants
 
-  def connect(%{"Authorization" => token, "tenant" => tenant_slug}, socket, _connect_info) do
+  def connect(%{"token" => token, "tenant" => tenant_slug}, socket, _connect_info) do
     with {:ok, tenant} <- Tenants.fetch_tenant_by_slug(tenant_slug),
          {:ok, claims} <- verify_jwt(token, tenant) do
       socket =
         socket
         |> assign(:tenant, tenant)
         |> assign(:claims, claims)
-        |> Absinthe.Phoenix.Socket.put_options(
-          context: %{
-            tenant: tenant,
-            claims: claims
-          }
-        )
 
       {:ok, socket}
     end
@@ -46,11 +40,12 @@ defmodule EdgehogWeb.GqlSocket do
     {:error, %{reason: "unauthorized", message: "Missing params"}}
   end
 
-  def id(_socket), do: nil
+  def id(socket) do
+    "gql_socket:#{socket.assigns.tenant.slug}"
+  end
 
-  defp verify_jwt(token_header, tenant) do
-    token = String.replace_prefix(token_header, "Bearer ", "")
-
+  defp verify_jwt(token, tenant) do
+    token = String.replace(token, "\\n", "")
     normalized_public_key = String.replace(tenant.public_key, "\\n", "\n")
     jwk = JOSE.JWK.from_pem(normalized_public_key)
     {_kty, jwk_map} = JOSE.JWK.to_map(jwk)

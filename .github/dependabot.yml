@@ -1,0 +1,24 @@
+---
+version: 2
+updates:
+  # Project-wise
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
+  # Frontend
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: "monthly"
+
+  # Backend
+  - package-ecosystem: hex
+    directory: "/backend"
+    schedule:
+      interval: "monthly"
