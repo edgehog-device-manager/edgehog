@@ -44,7 +44,7 @@
     "react-bootstrap": "^2.10.4",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^4.0.13",
-    "react-hook-form": "^7.52.1",
+    "react-hook-form": "^7.71.1",
     "react-intl": "^6.6.8",
     "react-leaflet": "^4.2.1",
     "react-relay": "^17.0.0",
