@@ -36,7 +36,7 @@ updates:
       interval: "monthly"
 
   # Backend
-  - package-ecosystem: hex
+  - package-ecosystem: mix
     directory: "/backend"
     schedule:
       interval: "monthly"
