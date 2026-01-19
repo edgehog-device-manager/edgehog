@@ -148,7 +148,7 @@ services:
       "
 
   registry:
-    image: registry:2
+    image: registry:3
     restart: on-failure
     environment:
       REGISTRY_AUTH: htpasswd
