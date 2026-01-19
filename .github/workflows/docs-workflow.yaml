@@ -136,7 +136,7 @@ jobs:
 
       # Upload as an artifact the generated HTML
       - name: Upload HTML documentation
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: docs_html
           path: ./docs
