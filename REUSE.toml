@@ -1,0 +1,58 @@
+version = 1
+SPDX-PackageName = "edgehog"
+SPDX-PackageSupplier = "SECO Mind Srl"
+SPDX-PackageDownloadLocation = "https://github.com/edgehog-device-manager/edgehog"
+
+[[annotations]]
+path = "doc/images/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2023 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "doc/versions.js"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "CHANGELOG.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2023 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["backend/priv/repo/seeds/keys/**.pem", "backend/priv/repo/seeds/keys/**.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023-2025 Seco Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "backend/priv/astarte_resources/interfaces/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/priv/astarte_resources/delivery_policies/**.json.eex"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/priv/astarte_resources/trigger_templates/**.json.eex"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023-2025 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/priv/resource_snapshots/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "justfile"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
