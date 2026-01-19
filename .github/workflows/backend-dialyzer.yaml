@@ -34,7 +34,7 @@ jobs:
   dialyzer:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: team-alembic/staple-actions/actions/mix-dialyzer@main
         with:
           working-directory: backend

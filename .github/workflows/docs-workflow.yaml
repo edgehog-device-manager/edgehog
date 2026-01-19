@@ -49,18 +49,18 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout the source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: edgehog
           show-progress: false
       - name: Checkout the docs repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: edgehog-device-manager/docs
           path: docs
           show-progress: false
       - name: Checkout the interfaces repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: edgehog-device-manager/edgehog-astarte-interfaces
           path: edgehog-astarte-interfaces
@@ -107,7 +107,7 @@ jobs:
         working-directory: ./edgehog/backend
         run: mix openapi.spec.yaml --spec EdgehogWeb.AdminAPI
       - name: Checkout Swagger UI
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: swagger-api/swagger-ui
           path: ./edgehog/backend/swagger-ui

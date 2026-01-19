@@ -34,7 +34,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: team-alembic/staple-actions/actions/mix-compile@main
         with:
           working-directory: backend
