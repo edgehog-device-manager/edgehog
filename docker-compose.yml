@@ -20,7 +20,7 @@
 
 services:
   postgres:
-    image: postgres:18.0
+    image: postgres:18.1
     environment:
       POSTGRES_USER: edgehog
       POSTGRES_PASSWORD: edgehog
