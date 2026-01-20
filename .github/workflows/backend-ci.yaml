@@ -24,7 +24,7 @@ on:
     paths:
       - "backend/**"
       - ".tool-versions"
-      - ".github/workflows/backend-test.yaml"
+      - ".github/workflows/backend-*.yaml"
     branches:
       - "main"
       - "release-*"
@@ -33,7 +33,7 @@ on:
     paths:
       - "backend/**"
       - ".tool-versions"
-      - ".github/workflows/backend-test.yaml"
+      - ".github/workflows/backend-*.yaml"
 
 jobs:
   warmup-cache:
