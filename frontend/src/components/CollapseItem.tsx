@@ -146,7 +146,7 @@ const CollapseItem = ({
           open={open}
           onToggle={onToggle}
           title={collapseTitle}
-          className={`w-100 d-flex align-items-center ps-0 pe-1 ${!isInsideTable ? "fw-bold" : ""}`}
+          className={`d-flex align-items-center ps-0 pe-1 ${!isInsideTable ? "fw-bold" : ""}`}
           style={{ backgroundColor: "transparent", border: "none" }}
         >
           <span className="d-flex align-items-center gap-2">
