@@ -14,7 +14,7 @@
     "@formatjs/cli": "^6.2.12",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-brands-svg-icons": "^6.5.2",
-    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@hookform/resolvers": "^2.8.3",
     "@monaco-editor/react": "^4.7.0-rc.0",
