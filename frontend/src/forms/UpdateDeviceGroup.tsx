@@ -22,16 +22,16 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { handleSchema, yup } from "@/forms";
 
 import type { UpdateDeviceGroup_DeviceGroupFragment$key } from "@/api/__generated__/UpdateDeviceGroup_DeviceGroupFragment.graphql";
+import { DeviceGroupFormData, deviceGroupSchema } from "@/forms/validation";
 
 const UPDATE_DEVICE_GROUP_FRAGMENT = graphql`
   fragment UpdateDeviceGroup_DeviceGroupFragment on DeviceGroup {
@@ -41,24 +41,10 @@ const UPDATE_DEVICE_GROUP_FRAGMENT = graphql`
   }
 `;
 
-type DeviceGroupData = {
-  name: string;
-  handle: string;
-  selector: string;
-};
-
-const deviceGroupSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    selector: yup.string().required(),
-  })
-  .required();
-
 type Props = {
   deviceGroupRef: UpdateDeviceGroup_DeviceGroupFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: DeviceGroupData) => void;
+  onSubmit: (data: DeviceGroupFormData) => void;
   onDelete: () => void;
 };
 
@@ -83,10 +69,10 @@ const UpdateDeviceGroupForm = ({
     reset,
     handleSubmit,
     formState: { errors, isDirty },
-  } = useForm<DeviceGroupData>({
+  } = useForm<DeviceGroupFormData>({
     mode: "onTouched",
     defaultValues,
-    resolver: yupResolver(deviceGroupSchema),
+    resolver: zodResolver(deviceGroupSchema),
   });
 
   const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
@@ -187,6 +173,6 @@ const UpdateDeviceGroupForm = ({
   );
 };
 
-export type { DeviceGroupData };
+export type { DeviceGroupFormData };
 
 export default UpdateDeviceGroupForm;

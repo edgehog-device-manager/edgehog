@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { InputGroup } from "react-bootstrap";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -30,23 +30,12 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import Icon from "@/components/Icon";
 import { FormRow } from "@/components/FormRow";
-import { yup } from "@/forms";
+import {
+  ImageCredentialFormData,
+  imageCredentialSchema,
+} from "@/forms/validation";
 
-type ImageCredentialData = {
-  label: string;
-  username: string;
-  password: string;
-};
-
-const imageCredentialSchema = yup
-  .object({
-    label: yup.string().required(),
-    username: yup.string().required(),
-    password: yup.string().required(),
-  })
-  .required();
-
-const initialData: ImageCredentialData = {
+const initialData: ImageCredentialFormData = {
   label: "",
   username: "",
   password: "",
@@ -54,7 +43,7 @@ const initialData: ImageCredentialData = {
 
 interface Props {
   isLoading?: boolean;
-  onSubmit: (data: ImageCredentialData) => void;
+  onSubmit: (data: ImageCredentialFormData) => void;
 }
 
 const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
@@ -62,15 +51,15 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ImageCredentialData>({
+  } = useForm<ImageCredentialFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(imageCredentialSchema),
+    resolver: zodResolver(imageCredentialSchema),
   });
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleFormSubmit = (data: ImageCredentialData) => {
+  const handleFormSubmit = (data: ImageCredentialFormData) => {
     setShowPassword(false);
     onSubmit(data);
   };
@@ -171,7 +160,5 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
     </form>
   );
 };
-
-export type { ImageCredentialData };
 
 export default CreateImageCredential;

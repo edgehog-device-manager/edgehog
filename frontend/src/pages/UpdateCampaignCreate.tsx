@@ -43,7 +43,7 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
-import type { UpdateCampaignData } from "@/forms/CreateUpdateCampaign";
+import type { UpdateCampaignOutputData } from "@/forms/CreateUpdateCampaign";
 import CreateUpdateCampaignForm from "@/forms/CreateUpdateCampaign";
 import { Link, Route, useNavigate } from "@/Navigation";
 
@@ -97,7 +97,7 @@ const UpdateCampaign = ({ campaignOptions }: UpdateCampaignProps) => {
     );
 
   const handleCreateCampaign = useCallback(
-    (updateCampaign: UpdateCampaignData) => {
+    (updateCampaign: UpdateCampaignOutputData) => {
       createCampaign({
         variables: { input: updateCampaign },
         onCompleted(data, errors) {

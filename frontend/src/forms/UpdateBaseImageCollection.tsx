@@ -22,16 +22,16 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { handleSchema, yup } from "@/forms";
 
 import type { UpdateBaseImageCollection_SystemModelFragment$key } from "@/api/__generated__/UpdateBaseImageCollection_SystemModelFragment.graphql";
+import { baseImageCollectionUpdateSchema } from "@/forms/validation";
 
 const UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   fragment UpdateBaseImageCollection_SystemModelFragment on BaseImageCollection {
@@ -43,7 +43,7 @@ const UPDATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   }
 `;
 
-type BaseImageCollectionData = {
+type BaseImageCollectionUpdateFormData = {
   name: string;
   handle: string;
   systemModel: string;
@@ -54,18 +54,10 @@ type BaseImageCollectionChanges = {
   handle: string;
 };
 
-const baseImageCollectionSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    systemModel: yup.string().required(),
-  })
-  .required();
-
 const transformOutputData = ({
   name,
   handle,
-}: BaseImageCollectionData): BaseImageCollectionChanges => ({
+}: BaseImageCollectionUpdateFormData): BaseImageCollectionChanges => ({
   name,
   handle,
 });
@@ -101,10 +93,10 @@ const UpdateBaseImageCollection = ({
     reset,
     handleSubmit,
     formState: { errors, isDirty },
-  } = useForm<BaseImageCollectionData>({
+  } = useForm<BaseImageCollectionUpdateFormData>({
     mode: "onTouched",
     defaultValues,
-    resolver: yupResolver(baseImageCollectionSchema),
+    resolver: zodResolver(baseImageCollectionUpdateSchema),
   });
 
   const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
@@ -113,7 +105,7 @@ const UpdateBaseImageCollection = ({
     setPrevDefaultValues(defaultValues);
   }
 
-  const onFormSubmit = (data: BaseImageCollectionData) =>
+  const onFormSubmit = (data: BaseImageCollectionUpdateFormData) =>
     onSubmit(transformOutputData(data));
 
   const canSubmit = !isLoading && isDirty;

@@ -27,7 +27,8 @@ import type { VolumeCreate_volumeCreate_Mutation } from "@/api/__generated__/Vol
 import Alert from "@/components/Alert";
 import Page from "@/components/Page";
 import { Route, useNavigate } from "@/Navigation";
-import CreateVolumeForm, { VolumeData } from "@/forms/CreateVolume";
+import CreateVolumeForm from "@/forms/CreateVolume";
+import { VolumeFormData } from "@/forms/validation";
 
 const CREATE_VOLUME_MUTATION = graphql`
   mutation VolumeCreate_volumeCreate_Mutation($input: CreateVolumeInput!) {
@@ -47,8 +48,8 @@ const VolumeCreatePage = () => {
     useMutation<VolumeCreate_volumeCreate_Mutation>(CREATE_VOLUME_MUTATION);
 
   const handleCreateVolume = useCallback(
-    (volume: VolumeData) => {
-      const input: VolumeData = {
+    (volume: VolumeFormData) => {
+      const input: VolumeFormData = {
         label: volume.label.trim(),
       };
       if (volume.driver && volume.driver.trim() !== "") {

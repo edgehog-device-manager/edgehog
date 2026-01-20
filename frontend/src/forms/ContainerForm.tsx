@@ -29,10 +29,7 @@ import {
   ContainerCreateWithNestedVolumesInput,
 } from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
-import type {
-  EnvironmentVariable,
-  ReleaseInputData,
-} from "@/forms/CreateRelease";
+import type { EnvironmentVariable } from "@/forms/CreateRelease";
 import Button from "@/components/Button";
 import DeviceMappingsFormInput from "@/components/DeviceMappingsFormInput";
 import FieldHelp from "@/components/FieldHelp";
@@ -44,14 +41,12 @@ import MonacoJsonEditor from "@/components/MonacoJsonEditor";
 import MultiSelect from "@/components/MultiSelect";
 import Stack from "@/components/Stack";
 import StringArrayFormInput from "@/components/StringArrayFormInput";
-import {
-  CapAddList,
-  CapDropList,
-  restartPolicyOptions,
-} from "@/forms/CreateRelease";
+import { restartPolicyOptions } from "@/forms/CreateRelease";
 import CollapseItem, {
   useCollapsibleSections,
 } from "@/components/CollapseItem";
+import { CapAddList, CapDropList } from "@/forms/validation";
+import { ReleaseFormData } from "@/forms/validation";
 
 type Option = {
   value: string;
@@ -60,13 +55,13 @@ type Option = {
 
 type ContainerFormProps = {
   index: number;
-  register: UseFormRegister<ReleaseInputData>;
-  errors: FieldErrors<ReleaseInputData>;
+  register: UseFormRegister<ReleaseFormData>;
+  errors: FieldErrors<ReleaseFormData>;
   remove: (index: number) => void;
   imageCredentials: Option[];
   networks: Option[];
   volumes: Option[];
-  control: Control<ReleaseInputData>;
+  control: Control<ReleaseFormData>;
   onRequestRemove: (index: number) => void;
 };
 
@@ -747,9 +742,9 @@ const ContainerForm = ({
             >
               <FieldHelp id="memory">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(`containers.${index}.memory` as const, {
-                    valueAsNumber: true,
+                    setValueAs: (v) => (v === "" ? undefined : Number(v)),
                   })}
                   isInvalid={!!errors.containers?.[index]?.memory}
                 />
@@ -770,11 +765,11 @@ const ContainerForm = ({
             >
               <FieldHelp id="memoryReservation">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(
                     `containers.${index}.memoryReservation` as const,
                     {
-                      valueAsNumber: true,
+                      setValueAs: (v) => (v === "" ? undefined : Number(v)),
                     },
                   )}
                   isInvalid={!!errors.containers?.[index]?.memoryReservation}
@@ -798,9 +793,9 @@ const ContainerForm = ({
             >
               <FieldHelp id="memorySwap">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(`containers.${index}.memorySwap` as const, {
-                    valueAsNumber: true,
+                    setValueAs: (v) => (v === "" ? undefined : Number(v)),
                   })}
                   isInvalid={!!errors.containers?.[index]?.memorySwap}
                 />
@@ -821,11 +816,11 @@ const ContainerForm = ({
             >
               <FieldHelp id="memorySwappiness">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(
                     `containers.${index}.memorySwappiness` as const,
                     {
-                      valueAsNumber: true,
+                      setValueAs: (v) => (v === "" ? undefined : Number(v)),
                     },
                   )}
                   isInvalid={!!errors.containers?.[index]?.memorySwappiness}
@@ -849,9 +844,9 @@ const ContainerForm = ({
             >
               <FieldHelp id="cpuPeriod">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(`containers.${index}.cpuPeriod` as const, {
-                    valueAsNumber: true,
+                    setValueAs: (v) => (v === "" ? undefined : Number(v)),
                   })}
                   isInvalid={!!errors.containers?.[index]?.cpuPeriod}
                 />
@@ -872,9 +867,9 @@ const ContainerForm = ({
             >
               <FieldHelp id="cpuQuota">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(`containers.${index}.cpuQuota` as const, {
-                    valueAsNumber: true,
+                    setValueAs: (v) => (v === "" ? undefined : Number(v)),
                   })}
                   isInvalid={!!errors.containers?.[index]?.cpuQuota}
                 />
@@ -895,11 +890,11 @@ const ContainerForm = ({
             >
               <FieldHelp id="cpuRealtimePeriod">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(
                     `containers.${index}.cpuRealtimePeriod` as const,
                     {
-                      valueAsNumber: true,
+                      setValueAs: (v) => (v === "" ? undefined : Number(v)),
                     },
                   )}
                   isInvalid={!!errors.containers?.[index]?.cpuRealtimePeriod}
@@ -923,11 +918,11 @@ const ContainerForm = ({
             >
               <FieldHelp id="cpuRealtimeRuntime">
                 <Form.Control
-                  type="number"
+                  type="text"
                   {...register(
                     `containers.${index}.cpuRealtimeRuntime` as const,
                     {
-                      valueAsNumber: true,
+                      setValueAs: (v) => (v === "" ? undefined : Number(v)),
                     },
                   )}
                   isInvalid={!!errors.containers?.[index]?.cpuRealtimeRuntime}

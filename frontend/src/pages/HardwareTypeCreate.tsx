@@ -26,7 +26,7 @@ import type { HardwareTypeCreate_createHardwareType_Mutation } from "@/api/__gen
 import Alert from "@/components/Alert";
 import Page from "@/components/Page";
 import CreateHardwareTypeForm from "@/forms/CreateHardwareType";
-import type { HardwareTypeData } from "@/forms/CreateHardwareType";
+import type { HardwareTypeOutputData } from "@/forms/CreateHardwareType";
 import { Route, useNavigate } from "@/Navigation";
 
 const CREATE_HARDWARE_TYPE_MUTATION = graphql`
@@ -51,7 +51,7 @@ const HardwareTypeCreatePage = () => {
     );
 
   const handleCreateHardwareType = useCallback(
-    (hardwareType: HardwareTypeData) => {
+    (hardwareType: HardwareTypeOutputData) => {
       createHardwareType({
         variables: { input: hardwareType },
         onCompleted(data, errors) {

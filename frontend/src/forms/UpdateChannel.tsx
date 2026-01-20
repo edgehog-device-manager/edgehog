@@ -18,11 +18,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useIntl, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
@@ -30,13 +30,14 @@ import MultiSelect from "@/components/MultiSelect";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { yup, messages, handleSchema } from "@/forms";
 
 import type { UpdateChannel_ChannelFragment$key } from "@/api/__generated__/UpdateChannel_ChannelFragment.graphql";
-import type {
-  UpdateChannel_OptionsFragment$key,
-  UpdateChannel_OptionsFragment$data,
-} from "@/api/__generated__/UpdateChannel_OptionsFragment.graphql";
+import type { UpdateChannel_OptionsFragment$key } from "@/api/__generated__/UpdateChannel_OptionsFragment.graphql";
+import {
+  ChannelUpdateFormData,
+  TargetGroupExtended,
+  updateChannelSchema,
+} from "@/forms/validation";
 
 const UPDATE_UPDATE_CHANNEL_FRAGMENT = graphql`
   fragment UpdateChannel_ChannelFragment on Channel {
@@ -94,39 +95,20 @@ const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
   }
   return null;
 };
-
-type FormData = {
-  id: string;
-  name: string;
-  handle: string;
-  targetGroups: TargetGroup[];
-};
-
-type TargetGroup = NonNullable<
-  NonNullable<UpdateChannel_OptionsFragment$data["deviceGroups"]>["edges"]
->[number]["node"];
-
-const getTargetGroupValue = (targetGroup: TargetGroup) => targetGroup.id;
-
-type ChannelData = {
+type ChannelOutputData = {
   name: string;
   handle: string;
   targetGroupIds: string[];
 };
 
-const channelSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    targetGroups: yup.array().ensure().min(1, messages.required.id),
-  })
-  .required();
+const getTargetGroupValue = (targetGroup: TargetGroupExtended) =>
+  targetGroup.id;
 
 const transformOutputData = ({
   id: _id,
   targetGroups,
   ...rest
-}: FormData): ChannelData => ({
+}: ChannelUpdateFormData): ChannelOutputData => ({
   ...rest,
   targetGroupIds: targetGroups.map((targetGroup) => targetGroup.id),
 });
@@ -135,7 +117,7 @@ type Props = {
   channelRef: UpdateChannel_ChannelFragment$key;
   optionsRef: UpdateChannel_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: ChannelData) => void;
+  onSubmit: (data: ChannelOutputData) => void;
   onDelete: () => void;
 };
 
@@ -159,13 +141,13 @@ const UpdateChannel = ({
     formState: { errors, isDirty },
     control,
     reset,
-  } = useForm<FormData>({
+  } = useForm<ChannelUpdateFormData>({
     mode: "onTouched",
     defaultValues: {
       ...channel,
       targetGroups: channel.targetGroups.edges?.map((edge) => edge.node),
     },
-    resolver: yupResolver(channelSchema),
+    resolver: zodResolver(updateChannelSchema),
   });
 
   useEffect(() => {
@@ -178,7 +160,7 @@ const UpdateChannel = ({
   const intl = useIntl();
 
   const getTargetGroupLabel = useCallback(
-    (targetGroup: TargetGroup) => {
+    (targetGroup: TargetGroupExtended) => {
       if (
         targetGroup.channel === null ||
         targetGroup.channel.id === channel.id
@@ -201,7 +183,7 @@ const UpdateChannel = ({
     [intl, channel.id],
   );
   const isTargetGroupUsedByOtherChannel = useCallback(
-    (targetGroup: TargetGroup) => {
+    (targetGroup: TargetGroupExtended) => {
       return !(
         targetGroup.channel === null || targetGroup.channel.id === channel.id
       );
@@ -227,7 +209,7 @@ const UpdateChannel = ({
     );
   }, [targetGroups, isTargetGroupUsedByOtherChannel]);
 
-  const onFormSubmit = (data: FormData) => {
+  const onFormSubmit = (data: ChannelUpdateFormData) => {
     onSubmit(transformOutputData(data));
   };
 
@@ -337,6 +319,6 @@ const UpdateChannel = ({
   );
 };
 
-export type { ChannelData };
+export type { ChannelOutputData };
 
 export default UpdateChannel;

@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
@@ -29,7 +29,10 @@ import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { yup } from "@/forms";
+import {
+  ImageCredentialUpdateFormData,
+  imageCredentialUpdateSchema,
+} from "@/forms/validation";
 
 const IMAGE_CREDENTIAL_FRAGMENT = graphql`
   fragment UpdateImageCredential_imageCredential_Fragment on ImageCredentials {
@@ -38,20 +41,6 @@ const IMAGE_CREDENTIAL_FRAGMENT = graphql`
     username
   }
 `;
-
-type FormData = {
-  id: string;
-  label: string;
-  username: string;
-};
-
-const imageCredentialSchema = yup
-  .object({
-    id: yup.string().required(),
-    label: yup.string().required(),
-    username: yup.string().required(),
-  })
-  .required();
 
 interface Props {
   imageCredentialRef: UpdateImageCredential_imageCredential_Fragment$key;
@@ -65,7 +54,7 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
     imageCredentialRef,
   );
 
-  const defaultValues = useMemo<FormData>(
+  const defaultValues = useMemo<ImageCredentialUpdateFormData>(
     () => ({
       id,
       label,
@@ -77,10 +66,10 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
   const {
     register,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<ImageCredentialUpdateFormData>({
     mode: "onTouched",
     defaultValues,
-    resolver: yupResolver(imageCredentialSchema),
+    resolver: zodResolver(imageCredentialUpdateSchema),
   });
 
   return (

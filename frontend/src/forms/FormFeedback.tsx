@@ -22,29 +22,48 @@ import type { ReactNode } from "react";
 import { FormattedMessage } from "react-intl";
 import Form from "@/components/Form";
 
+type Feedback =
+  | undefined
+  | string
+  | {
+      messageId: string;
+      values: Record<string, ReactNode>;
+    };
+
 type Props = {
-  feedback:
-    | undefined
-    | string
-    | {
-        messageId: string;
-        values: Record<string, ReactNode>;
-      };
+  feedback: Feedback;
+};
+
+const parseFeedback = (value: Feedback): Feedback => {
+  if (value == undefined) {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
 };
 
 const FormFeedback = ({ feedback }: Props) => {
-  if (feedback === undefined) {
+  const parsedFeedback = parseFeedback(feedback);
+
+  if (parsedFeedback === undefined) {
     return null;
   }
-  if (typeof feedback === "string") {
+
+  if (typeof parsedFeedback === "string") {
     return (
       <Form.Control.Feedback type="invalid">
-        <FormattedMessage id={feedback} />
+        <FormattedMessage id={parsedFeedback} />
       </Form.Control.Feedback>
     );
   }
-
-  const { messageId, values } = feedback;
+  const { messageId, values } = parsedFeedback;
   return (
     <Form.Control.Feedback type="invalid">
       <FormattedMessage id={messageId} values={values} />

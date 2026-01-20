@@ -23,7 +23,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "react-select";
 
 import type {
@@ -43,12 +43,13 @@ import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import ReleaseSelectWrapper, {
-  ReleaseRecord,
-} from "@/components/ReleaseSelect";
+import ReleaseSelectWrapper from "@/components/ReleaseSelect";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
-import { numberSchema, yup } from "@/forms";
 import FormFeedback from "@/forms/FormFeedback";
+import {
+  deploymentCampaignSchema,
+  DeploymentCampaignFormData,
+} from "@/forms/validation";
 
 const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   fragment CreateDeploymentCampaign_ApplicationOptionsFragment on RootQueryType
@@ -109,19 +110,6 @@ type DeploymentCampaignData = {
   campaignMechanism: CampaignMechanismInput;
 };
 
-type FormData = {
-  name: string;
-  channel: ChannelRecord;
-  application: ApplicationRecord;
-  release: ReleaseRecord;
-  targetRelease?: ReleaseRecord;
-  operationType: OperationType | "";
-  maxFailurePercentage: number | string;
-  maxInProgressOperations: number | string;
-  requestRetries: number;
-  requestTimeoutSeconds: number;
-};
-
 type DeploymentConfig = {
   releaseId: string;
   targetReleaseId?: string;
@@ -144,87 +132,21 @@ const OPERATION_TO_MECHANISM: Record<OperationType, DeploymentAction> = {
   Delete: "deploymentDelete",
 };
 
-const initialData: FormData = {
+const initialData: DeploymentCampaignFormData = {
   name: "",
   channel: { id: "", name: "" },
   application: { id: "", name: "" },
   release: { id: "", version: "" },
-  operationType: "",
-  maxFailurePercentage: "",
-  maxInProgressOperations: "",
+  operationType: "Deploy",
+  maxFailurePercentage: 0,
+  maxInProgressOperations: 1,
   requestRetries: 3,
   requestTimeoutSeconds: 300,
 };
 
-const campaignSchema = (intl: ReturnType<typeof useIntl>) =>
-  yup
-    .object({
-      name: yup.string().required(),
-      application: yup
-        .object({ id: yup.string().required(), name: yup.string().required() })
-        .required(),
-      release: yup
-        .object({
-          id: yup.string().required(),
-          version: yup.string().required(),
-        })
-        .required(),
-      targetRelease: yup
-        .object({
-          id: yup.string().required(),
-          version: yup.string().required(),
-        })
-        .default(undefined)
-        .when("operationType", ([operationType], schema) => {
-          return operationType === "UPGRADE"
-            ? schema.required()
-            : schema.notRequired();
-        }),
-      channel: yup
-        .object({ id: yup.string().required(), name: yup.string().required() })
-        .required(),
-      operationType: yup.string().required(),
-      maxInProgressOperations: numberSchema
-        .integer()
-        .positive()
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.maxInProgressOperationsLabel",
-            defaultMessage: "Max Pending Operations",
-          }),
-        ),
-      maxFailurePercentage: numberSchema
-        .min(0)
-        .max(100)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.maxFailurePercentageValidationLabel",
-            defaultMessage: "Max Failures",
-          }),
-        ),
-      requestTimeoutSeconds: numberSchema
-        .positive()
-        .integer()
-        .min(30)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.requestTimeoutSecondsValidationLabel",
-            defaultMessage: "Request Timeout",
-          }),
-        ),
-      requestRetries: numberSchema
-        .integer()
-        .min(0)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateDeploymentCampaign.requestRetriesLabel",
-            defaultMessage: "Request Retries",
-          }),
-        ),
-    })
-    .required();
-
-const transformOutputData = (data: FormData): DeploymentCampaignData => {
+const transformOutputData = (
+  data: DeploymentCampaignFormData,
+): DeploymentCampaignData => {
   const {
     name,
     channel,
@@ -241,14 +163,8 @@ const transformOutputData = (data: FormData): DeploymentCampaignData => {
 
   const deploymentConfig: DeploymentConfig = {
     releaseId: release.id,
-    maxFailurePercentage:
-      typeof maxFailurePercentage === "string"
-        ? parseFloat(maxFailurePercentage)
-        : maxFailurePercentage,
-    maxInProgressOperations:
-      typeof maxInProgressOperations === "string"
-        ? parseInt(maxInProgressOperations)
-        : maxInProgressOperations,
+    maxFailurePercentage,
+    maxInProgressOperations,
     requestRetries,
     requestTimeoutSeconds,
     ...(targetRelease && { targetReleaseId: targetRelease.id }),
@@ -284,13 +200,13 @@ const CreateDeploymentCampaignForm = ({
     watch,
     control,
     resetField,
-  } = useForm<FormData>({
+  } = useForm<DeploymentCampaignFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(campaignSchema(intl)),
+    resolver: zodResolver(deploymentCampaignSchema),
   });
 
-  const onFormSubmit = (data: FormData) => {
+  const onFormSubmit = (data: DeploymentCampaignFormData) => {
     onSubmit(transformOutputData(data));
   };
 
@@ -642,7 +558,7 @@ const CreateDeploymentCampaignForm = ({
                   )}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {errors.release && (
+                  {errors.targetRelease && (
                     <FormattedMessage id={errors.targetRelease?.id?.message} />
                   )}
                 </Form.Control.Feedback>
@@ -713,9 +629,10 @@ const CreateDeploymentCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("maxInProgressOperations")}
-            type="number"
-            min="1"
+            {...register("maxInProgressOperations", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.maxInProgressOperations}
           />
           <FormFeedback feedback={errors.maxInProgressOperations?.message} />
@@ -736,10 +653,10 @@ const CreateDeploymentCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("maxFailurePercentage")}
-            type="number"
-            min="0"
-            max="100"
+            {...register("maxFailurePercentage", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.maxFailurePercentage}
           />
           <FormFeedback feedback={errors.maxFailurePercentage?.message} />
@@ -759,9 +676,10 @@ const CreateDeploymentCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("requestTimeoutSeconds")}
-            type="number"
-            min="30"
+            {...register("requestTimeoutSeconds", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.requestTimeoutSeconds}
           />
           <FormFeedback feedback={errors.requestTimeoutSeconds?.message} />
@@ -776,9 +694,10 @@ const CreateDeploymentCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("requestRetries")}
-            type="number"
-            min="0"
+            {...register("requestRetries", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.requestRetries}
           />
           <FormFeedback feedback={errors.requestRetries?.message} />

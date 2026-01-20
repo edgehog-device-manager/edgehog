@@ -19,7 +19,7 @@
  */
 
 import React from "react";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, FieldError, useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
@@ -29,39 +29,17 @@ import Form from "@/components/Form";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
 
-import { yup, optionsSchema } from "@/forms";
 import MonacoJsonEditor from "@/components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
+import { NetworkFormData, networkSchema } from "@/forms/validation";
 
-type NetworkData = {
-  label: string;
-  driver?: string;
-  options?: string;
-  internal?: boolean;
-  enableIpv6?: boolean;
-};
-
-const networkSchema = yup
-  .object({
-    label: yup.string().required(),
-    driver: yup.string().nullable(),
-    options: optionsSchema.nullable(),
-    internal: yup.boolean(),
-    enableIpv6: yup.boolean(),
-  })
-  .required();
-
-const initialData: NetworkData = {
+const initialData: NetworkFormData = {
   label: "",
-  driver: "",
-  options: "",
-  internal: false,
-  enableIpv6: false,
 };
 
 interface Props {
   isLoading?: boolean;
-  onSubmit: (data: NetworkData) => void;
+  onSubmit: (data: NetworkFormData) => void;
 }
 
 const ErrorMessage = ({ error }: { error?: FieldError }) => {
@@ -79,10 +57,10 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<NetworkData>({
+  } = useForm<NetworkFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(networkSchema),
+    resolver: zodResolver(networkSchema),
   });
 
   return (
@@ -190,5 +168,4 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
   );
 });
 
-export type { NetworkData };
 export default CreateNetwork;

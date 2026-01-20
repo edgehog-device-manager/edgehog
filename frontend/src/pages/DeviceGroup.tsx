@@ -45,8 +45,9 @@ import DevicesGroupsTable from "@/components/DevicesGroupsTable";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
-import UpdateDeviceGroupForm from "@/forms/UpdateDeviceGroup";
-import type { DeviceGroupData } from "@/forms/UpdateDeviceGroup";
+import UpdateDeviceGroupForm, {
+  DeviceGroupFormData,
+} from "@/forms/UpdateDeviceGroup";
 
 const GET_DEVICE_GROUP_QUERY = graphql`
   query DeviceGroup_getDeviceGroup_Query($deviceGroupId: ID!) {
@@ -218,7 +219,7 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
     );
 
   const handleUpdateDeviceGroup = useCallback(
-    (deviceGroup: DeviceGroupData) => {
+    (deviceGroup: DeviceGroupFormData) => {
       const newDeviceGroup = { ...deviceGroup };
       updateDeviceGroup({
         variables: { deviceGroupId, input: newDeviceGroup },

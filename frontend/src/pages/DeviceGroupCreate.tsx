@@ -26,8 +26,8 @@ import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "@/api/__gener
 import Alert from "@/components/Alert";
 import Page from "@/components/Page";
 import DeviceGroupCreateForm from "@/forms/CreateDeviceGroup";
-import type { DeviceGroupData } from "@/forms/CreateDeviceGroup";
 import { Route, useNavigate } from "@/Navigation";
+import { DeviceGroupFormData } from "@/forms/validation";
 
 const CREATE_DEVICE_GROUP_MUTATION = graphql`
   mutation DeviceGroupCreate_createDeviceGroup_Mutation(
@@ -54,7 +54,7 @@ const DeviceGroupCreatePage = () => {
     );
 
   const handleCreateDeviceGroup = useCallback(
-    (deviceGroup: DeviceGroupData) => {
+    (deviceGroup: DeviceGroupFormData) => {
       const newDeviceGroup = { ...deviceGroup };
       createDeviceGroup({
         variables: { input: newDeviceGroup },

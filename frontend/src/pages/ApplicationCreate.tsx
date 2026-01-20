@@ -28,10 +28,10 @@ import type { ApplicationCreate_createApplication_Mutation } from "@/api/__gener
 import Alert from "@/components/Alert";
 import Page from "@/components/Page";
 import CreateApplicationForm from "@/forms/CreateApplication";
-import type { ApplicationData } from "@/forms/CreateApplication";
 import { Route, useNavigate } from "@/Navigation";
 import Center from "@/components/Center";
 import Spinner from "@/components/Spinner";
+import { ApplicationFormData } from "@/forms/validation";
 
 const CREATE_APPLICATION_MUTATION = graphql`
   mutation ApplicationCreate_createApplication_Mutation(
@@ -56,7 +56,7 @@ const Application = () => {
     );
 
   const handleCreateApplication = useCallback(
-    (application: ApplicationData) => {
+    (application: ApplicationFormData) => {
       const newApplication = { ...application };
 
       createApplication({

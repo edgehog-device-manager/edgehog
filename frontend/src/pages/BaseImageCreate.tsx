@@ -41,7 +41,7 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import CreateBaseImageForm from "@/forms/CreateBaseImage";
-import type { BaseImageData } from "@/forms/CreateBaseImage";
+import type { BaseImageOutputData } from "@/forms/CreateBaseImage";
 import { Link, Route, useNavigate } from "@/Navigation";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
@@ -88,7 +88,7 @@ const BaseImageCreateContent = ({
     );
 
   const handleCreateBaseImage = useCallback(
-    (baseImage: BaseImageData) => {
+    (baseImage: BaseImageOutputData) => {
       createBaseImage({
         variables: { input: baseImage },
         onCompleted(data, errors) {

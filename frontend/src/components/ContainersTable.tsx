@@ -969,6 +969,7 @@ const ContainersTable = ({
     <div className={className}>
       {containers.map((container, index) => (
         <InfiniteScroll
+          key={container.id}
           className={className}
           loading={isLoadingNext}
           onLoadMore={hasNext ? loadNextContainers : undefined}

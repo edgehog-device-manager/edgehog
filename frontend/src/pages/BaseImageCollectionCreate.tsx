@@ -38,12 +38,13 @@ import type { BaseImageCollectionCreate_createBaseImageCollection_Mutation } fro
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Center from "@/components/Center";
-import type { BaseImageCollectionData } from "@/forms/CreateBaseImageCollection";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
-import CreateBaseImageCollectionForm from "@/forms/CreateBaseImageCollection";
+import CreateBaseImageCollectionForm, {
+  BaseImageCollectionOutputData,
+} from "@/forms/CreateBaseImageCollection";
 import { Link, Route, useNavigate } from "@/Navigation";
 
 const CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY = graphql`
@@ -105,7 +106,7 @@ const BaseImageCollection = ({
     );
 
   const handleCreateBaseImageCollection = useCallback(
-    (baseImageCollection: BaseImageCollectionData) => {
+    (baseImageCollection: BaseImageCollectionOutputData) => {
       const newBaseImageCollection = { ...baseImageCollection };
       createBaseImageCollection({
         variables: { input: newBaseImageCollection },

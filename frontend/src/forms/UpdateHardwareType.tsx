@@ -22,7 +22,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import type { UpdateHardwareType_HardwareTypeFragment$key } from "@/api/__generated__/UpdateHardwareType_HardwareTypeFragment.graphql";
 
@@ -32,7 +32,8 @@ import Icon from "@/components/Icon";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { handleSchema, messages, yup } from "@/forms";
+import { HardwareTypeFormData, hardwareTypeSchema } from "@/forms/validation";
+import { HardwareTypeOutputData } from "@/forms/CreateHardwareType";
 
 const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
   fragment UpdateHardwareType_HardwareTypeFragment on HardwareType {
@@ -49,44 +50,9 @@ const UPDATE_HARDWARE_TYPE_FRAGMENT = graphql`
   }
 `;
 
-type HardwareTypeData = {
-  name: string;
-  handle: string;
-  partNumbers: string[];
-};
-
-type PartNumber = { value: string };
-
-type FormData = {
-  name: string;
-  handle: string;
-  partNumbers: PartNumber[];
-};
-
-const hardwareTypeSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    partNumbers: yup
-      .array()
-      .required()
-      .min(1)
-      .of(
-        yup
-          .object({ value: yup.string().required() })
-          .required()
-          .test("unique", messages.unique.id, (partNumber, context) => {
-            const itemIndex = context.parent.indexOf(partNumber);
-            return !context.parent.find(
-              (pn: PartNumber, index: number) =>
-                pn.value === partNumber.value && index < itemIndex,
-            );
-          }),
-      ),
-  })
-  .required();
-
-const transformOutputData = (data: FormData): HardwareTypeData => ({
+const transformOutputData = (
+  data: HardwareTypeFormData,
+): HardwareTypeOutputData => ({
   ...data,
   partNumbers: data.partNumbers.map((pn) => pn.value),
 });
@@ -94,7 +60,7 @@ const transformOutputData = (data: FormData): HardwareTypeData => ({
 type Props = {
   hardwareTypeRef: UpdateHardwareType_HardwareTypeFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: HardwareTypeData) => void;
+  onSubmit: (data: HardwareTypeOutputData) => void;
   onDelete: () => void;
 };
 
@@ -109,7 +75,7 @@ const UpdateHardwareTypeForm = ({
     hardwareTypeRef,
   );
 
-  const defaultValues = useMemo<FormData>(
+  const defaultValues = useMemo<HardwareTypeFormData>(
     () => ({
       name: hardwareType.name,
       handle: hardwareType.handle,
@@ -131,10 +97,10 @@ const UpdateHardwareTypeForm = ({
     handleSubmit,
     formState: { errors, isDirty },
     reset,
-  } = useForm<FormData>({
-    mode: "onTouched",
+  } = useForm<HardwareTypeFormData>({
+    mode: "onChange",
     defaultValues,
-    resolver: yupResolver(hardwareTypeSchema),
+    resolver: zodResolver(hardwareTypeSchema),
   });
 
   const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
@@ -165,7 +131,8 @@ const UpdateHardwareTypeForm = ({
 
   const canReset = isDirty && !isLoading;
   const canSubmit = !isLoading && isDirty;
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: HardwareTypeFormData) =>
+    onSubmit(transformOutputData(data));
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -283,7 +250,5 @@ const UpdateHardwareTypeForm = ({
     </form>
   );
 };
-
-export type { HardwareTypeData };
 
 export default UpdateHardwareTypeForm;

@@ -18,38 +18,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { yup } from "@/forms";
+import { ApplicationFormData, applicationSchema } from "@/forms/validation";
 
-type ApplicationData = {
-  name: string;
-  description: string;
-};
-
-const applicationSchema = yup
-  .object({
-    name: yup.string().required(),
-    description: yup.string(),
-  })
-  .required();
-
-const initialData: ApplicationData = {
+const initialData: ApplicationFormData = {
   name: "",
-  description: "",
 };
 
 type Props = {
   isLoading?: boolean;
-  onSubmit: (data: ApplicationData) => void;
+  onSubmit: (data: ApplicationFormData) => void;
 };
 
 const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
@@ -57,10 +43,10 @@ const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ApplicationData>({
+  } = useForm<ApplicationFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(applicationSchema),
+    resolver: zodResolver(applicationSchema),
   });
 
   return (
@@ -117,7 +103,5 @@ const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
     </form>
   );
 };
-
-export type { ApplicationData };
 
 export default CreateApplication;

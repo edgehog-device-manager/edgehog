@@ -23,7 +23,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "react-select";
 
 import type {
@@ -37,15 +37,18 @@ import type {
 } from "@/api/__generated__/CreateUpdateCampaign_ChannelOptionsFragment.graphql";
 import type { CreateUpdateCampaign_ChannelPaginationQuery } from "@/api/__generated__/CreateUpdateCampaign_ChannelPaginationQuery.graphql";
 
-import BaseImageSelect, { BaseImageRecord } from "@/components/BaseImageSelect";
+import BaseImageSelect from "@/components/BaseImageSelect";
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
-import { numberSchema, yup } from "@/forms";
 import FormFeedback from "@/forms/FormFeedback";
+import {
+  UpdateCampaignFormData,
+  updateCampaignSchema,
+} from "@/forms/validation";
 
 const CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
   fragment CreateUpdateCampaign_BaseImageCollOptionsFragment on RootQueryType
@@ -91,7 +94,7 @@ type ChannelRecord = NonNullable<
   >["edges"]
 >[number]["node"];
 
-type UpdateCampaignData = {
+type UpdateCampaignOutputData = {
   channelId: string;
   name: string;
   campaignMechanism: {
@@ -106,84 +109,22 @@ type UpdateCampaignData = {
   };
 };
 
-type FormData = {
-  name: string;
-  channel: ChannelRecord;
-  baseImageCollection: BaseImageCollectionRecord;
-  baseImage: BaseImageRecord;
-  maxFailurePercentage: number | string;
-  maxInProgressOperations: number | string;
-  requestRetries: number;
-  requestTimeoutSeconds: number;
-  forceDowngrade: boolean;
-};
-
-const initialData: FormData = {
+const initialData: UpdateCampaignFormData = {
   name: "",
+  operationType: "FirmwareUpgrade",
   channel: { id: "", name: "" },
   baseImageCollection: { id: "", name: "" },
   baseImage: { id: "", name: "", version: "" },
-  maxFailurePercentage: "",
-  maxInProgressOperations: "",
+  maxFailurePercentage: 0,
+  maxInProgressOperations: 1,
   requestRetries: 3,
   requestTimeoutSeconds: 300,
   forceDowngrade: false,
 };
 
-const campaignSchema = (intl: ReturnType<typeof useIntl>) =>
-  yup
-    .object({
-      name: yup.string().required(),
-      baseImageCollection: yup
-        .object({ id: yup.string().required(), name: yup.string().required() })
-        .required(),
-      baseImage: yup
-        .object({ id: yup.string().required(), name: yup.string() })
-        .required(),
-      channel: yup
-        .object({ id: yup.string().required(), name: yup.string().required() })
-        .required(),
-      maxInProgressOperations: numberSchema
-        .integer()
-        .positive()
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateUpdateCampaign.maxInProgressOperationsLabel",
-            defaultMessage: "Max Pending Operations",
-          }),
-        ),
-      maxFailurePercentage: numberSchema
-        .min(0)
-        .max(100)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateUpdateCampaign.maxFailurePercentageValidationLabel",
-            defaultMessage: "Max Failures",
-          }),
-        ),
-      requestTimeoutSeconds: numberSchema
-        .positive()
-        .integer()
-        .min(30)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateUpdateCampaign.requestTimeoutSecondsValidationLabel",
-            defaultMessage: "Request Timeout",
-          }),
-        ),
-      requestRetries: numberSchema
-        .integer()
-        .min(0)
-        .label(
-          intl.formatMessage({
-            id: "forms.CreateUpdateCampaign.requestRetriesLabel",
-            defaultMessage: "Request Retries",
-          }),
-        ),
-    })
-    .required();
-
-const transformOutputData = (data: FormData): UpdateCampaignData => {
+const transformOutputData = (
+  data: UpdateCampaignFormData,
+): UpdateCampaignOutputData => {
   const {
     name,
     baseImage,
@@ -201,14 +142,8 @@ const transformOutputData = (data: FormData): UpdateCampaignData => {
     campaignMechanism: {
       firmwareUpgrade: {
         baseImageId: baseImage.id,
-        maxFailurePercentage:
-          typeof maxFailurePercentage === "string"
-            ? parseFloat(maxFailurePercentage)
-            : maxFailurePercentage,
-        maxInProgressOperations:
-          typeof maxInProgressOperations === "string"
-            ? parseInt(maxInProgressOperations)
-            : maxInProgressOperations,
+        maxFailurePercentage,
+        maxInProgressOperations,
         requestRetries,
         requestTimeoutSeconds,
         forceDowngrade,
@@ -221,7 +156,7 @@ type Props = {
   campaignOptionsRef: CreateUpdateCampaign_BaseImageCollOptionsFragment$key &
     CreateUpdateCampaign_ChannelOptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: UpdateCampaignData) => void;
+  onSubmit: (data: UpdateCampaignOutputData) => void;
 };
 
 const CreateUpdateCampaignForm = ({
@@ -238,10 +173,10 @@ const CreateUpdateCampaignForm = ({
     formState: { errors },
     watch,
     resetField,
-  } = useForm<FormData>({
+  } = useForm<UpdateCampaignFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(campaignSchema(intl)),
+    resolver: zodResolver(updateCampaignSchema),
   });
 
   const selectedBaseImageCollection = watch("baseImageCollection");
@@ -403,7 +338,8 @@ const CreateUpdateCampaignForm = ({
           defaultMessage: "No channels available",
         });
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: UpdateCampaignFormData) =>
+    onSubmit(transformOutputData(data));
 
   const { onChange: onBaseImageCollectionChange } = register(
     "baseImageCollection",
@@ -563,7 +499,7 @@ const CreateUpdateCampaignForm = ({
           </Form.Control.Feedback>
         </FormRow>
         <FormRow
-          id="create-update-campaign-form-max-in-progress-updates"
+          id="create-update-campaign-form-max-in-progress-operations"
           label={
             <FormattedMessage
               id="forms.CreateUpdateCampaign.maxInProgressOperationsLabel"
@@ -572,9 +508,10 @@ const CreateUpdateCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("maxInProgressOperations")}
-            type="number"
-            min="1"
+            {...register("maxInProgressOperations", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.maxInProgressOperations}
           />
           <FormFeedback feedback={errors.maxInProgressOperations?.message} />
@@ -594,10 +531,10 @@ const CreateUpdateCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("maxFailurePercentage")}
-            type="number"
-            min="0"
-            max="100"
+            {...register("maxFailurePercentage", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.maxFailurePercentage}
           />
           <FormFeedback feedback={errors.maxFailurePercentage?.message} />
@@ -617,9 +554,10 @@ const CreateUpdateCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("requestTimeoutSeconds")}
-            type="number"
-            min="30"
+            {...register("requestTimeoutSeconds", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.requestTimeoutSeconds}
           />
           <FormFeedback feedback={errors.requestTimeoutSeconds?.message} />
@@ -634,9 +572,10 @@ const CreateUpdateCampaignForm = ({
           }
         >
           <Form.Control
-            {...register("requestRetries")}
-            type="number"
-            min="0"
+            {...register("requestRetries", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            type="text"
             isInvalid={!!errors.requestRetries}
           />
           <FormFeedback feedback={errors.requestRetries?.message} />
@@ -676,6 +615,6 @@ const CreateUpdateCampaignForm = ({
   );
 };
 
-export type { UpdateCampaignData, BaseImageCollectionRecord };
+export type { UpdateCampaignOutputData, BaseImageCollectionRecord };
 
 export default CreateUpdateCampaignForm;

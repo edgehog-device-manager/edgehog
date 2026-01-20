@@ -45,7 +45,7 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import UpdateHardwareTypeForm from "@/forms/UpdateHardwareType";
-import type { HardwareTypeData } from "@/forms/UpdateHardwareType";
+import type { HardwareTypeOutputData } from "@/forms/CreateHardwareType";
 
 const GET_HARDWARE_TYPE_QUERY = graphql`
   query HardwareType_getHardwareType_Query($hardwareTypeId: ID!) {
@@ -159,7 +159,7 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
     );
 
   const handleUpdateHardwareType = useCallback(
-    (hardwareType: HardwareTypeData) => {
+    (hardwareType: HardwareTypeOutputData) => {
       updateHardwareType({
         variables: { hardwareTypeId, input: hardwareType },
         onCompleted(data, errors) {
