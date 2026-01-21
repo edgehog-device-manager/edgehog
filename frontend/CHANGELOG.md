@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+<!-- NOTICE -->
+<!-- Starting from v0.11 changelogs are separated per-project. The changes below
+refer to both the frontend *and* the backend of edgehog -->
+
 ## [0.10.0] - 2025-12-09
 
 ### Fixed
@@ -67,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- CPU Period and CPU Quota get validated on the fronted.
+- CPU Period and CPU Quota get validated on the frontend.
 - Updated the postgres version in dev, test still run on all versions.
 - Added validation for unique volume targets
 - Deployment readiness is now a single field

@@ -18,7 +18,19 @@ SPDX-License-Identifier = "CC0-1.0"
 [[annotations]]
 path = "CHANGELOG.md"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2021-2023 SECO Mind Srl"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "backend/CHANGELOG.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "frontend/CHANGELOG.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 SECO Mind Srl"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
@@ -55,4 +67,10 @@ SPDX-License-Identifier = "Apache-2.0"
 path = "justfile"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2025 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ".github/release-please/*.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"

@@ -1,0 +1,26 @@
+{
+  "bump-minor-pre-major": true,
+  "packages": {
+    "backend": {
+      "package-name": "backend",
+      "release-type": "elixir",
+      "component": "backend",
+      "include-component-in-tag": false
+    },
+    "frontend": {
+      "package-name": "frontend",
+      "release-type": "node",
+      "component": "frontend",
+      "include-component-in-tag": false
+    }
+  },
+  "plugins": [
+    {
+      "type": "linked-versions",
+      "groupName": "edgehog",
+      "tagName": "v${version}",
+      "components": ["backend", "frontend"]
+    }
+  ],
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
