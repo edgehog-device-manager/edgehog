@@ -18,23 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.AvailableDevices do
+defmodule Edgehog.Astarte.Device.AvailableDevices.Behaviour do
   @moduledoc false
-  @behaviour Edgehog.Astarte.Device.AvailableDevices.Behaviour
 
   alias Astarte.Client.AppEngine
 
-  def get_device_list(%AppEngine{} = client) do
-    with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.list(client) do
-      {:ok, data}
-    end
-  end
+  @callback get_device_list(client :: AppEngine.t()) :: {:ok, list(String.t())} | {:error, term()}
 
-  def get_device_status(%AppEngine{} = client, device_id) do
-    with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_device_status(client, device_id) do
-      {:ok, data}
-    end
-  end
+  @callback get_device_status(client :: AppEngine.t(), device_id :: String.t()) ::
+              {:ok, map()} | {:error, term()}
 end

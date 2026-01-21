@@ -48,14 +48,21 @@ defmodule Edgehog.Astarte.DeviceFetcher.Supervisor do
 
   @impl Supervisor
   def init(_opts) do
-    children = [
-      {Task,
-       fn ->
-         Logger.info("Starting Astarte device states fetch...")
-         fetch_and_store_devices()
-         Logger.info("Astarte device states fetch completed.")
-       end}
-    ]
+    enabled? = Application.get_env(:edgehog, :device_fetcher_enabled?, true)
+
+    children =
+      if enabled? do
+        [
+          {Task,
+           fn ->
+             Logger.info("Starting Astarte device states fetch...")
+             fetch_and_store_devices()
+             Logger.info("Astarte device states fetch completed.")
+           end}
+        ]
+      else
+        []
+      end
 
     Supervisor.init(children, strategy: :one_for_one)
   end

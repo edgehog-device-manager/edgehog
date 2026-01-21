@@ -22,14 +22,29 @@ defmodule Edgehog.Astarte.DeviceFetcher.Core do
   @moduledoc false
 
   alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.AvailableDevices, as: AstarteAppEngineDevices
   alias Edgehog.Devices.Device
+
+  @available_devices Application.compile_env(
+                       :edgehog,
+                       :astarte_available_devices_module,
+                       Edgehog.Astarte.Device.AvailableDevices
+                     )
+
+  @spec get_device_list(term()) :: {:ok, list(String.t())} | {:error, term()}
+  def get_device_list(client) do
+    @available_devices.get_device_list(client)
+  end
+
+  @spec get_device_status(term(), String.t()) :: {:ok, map()} | {:error, term()}
+  def get_device_status(client, device_id) when is_binary(device_id) do
+    @available_devices.get_device_status(client, device_id)
+  end
 
   def fetch_device_from_astarte(realm, tenant) do
     realm = Ash.load!(realm, [cluster: [:base_api_url]], tenant: tenant)
 
     with {:ok, client} <- astarte_appengine_client(realm.cluster.base_api_url, realm),
-         {:ok, devices} <- AstarteAppEngineDevices.get_device_list(client) do
+         {:ok, devices} <- get_device_list(client) do
       fetch_statuses(devices, client, realm, tenant, [])
     end
   end
@@ -37,7 +52,7 @@ defmodule Edgehog.Astarte.DeviceFetcher.Core do
   def fetch_statuses([], _client, _realm, _tenant, acc), do: {:ok, acc}
 
   def fetch_statuses([device | rest], client, realm, tenant, acc) do
-    {:ok, status} = AstarteAppEngineDevices.get_device_status(client, device)
+    {:ok, status} = get_device_status(client, device)
     params = astarte_status_to_device_params(status, realm)
 
     {:ok, device_record} =
