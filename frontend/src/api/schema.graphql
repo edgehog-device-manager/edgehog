@@ -900,6 +900,12 @@ type LocalizedAttribute {
   languageTag: String!
 }
 
+type base_image_collection_result {
+  created: BaseImageCollection
+  updated: BaseImageCollection
+  destroyed: ID
+}
+
 "The result of the :delete_base_image_collection mutation"
 type DeleteBaseImageCollectionResult {
   "The record that was successfully deleted"
@@ -1090,6 +1096,12 @@ type BaseImageCollection implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): BaseImageConnection!
+}
+
+type base_image_result {
+  created: BaseImage
+  updated: BaseImage
+  destroyed: ID
 }
 
 "The result of the :delete_base_image mutation"
@@ -5014,8 +5026,8 @@ type CancelOtaOperationResult {
   errors: [MutationError!]!
 }
 
-"The result of the :create_manual_ota_operation mutation"
-type CreateManualOtaOperationResult {
+"The result of the :create_manual_ota_operation_existing_base_image mutation"
+type CreateManualOtaOperationExistingBaseImageResult {
   "The successful result of the mutation"
   result: OtaOperation
 
@@ -5023,7 +5035,24 @@ type CreateManualOtaOperationResult {
   errors: [MutationError!]!
 }
 
-input CreateManualOtaOperationInput {
+input CreateManualOtaOperationExistingBaseImageInput {
+  "The URL of the base image being installed on the device"
+  baseImageUrl: String!
+
+  "The ID identifying the Device the OTA Operation will be sent to"
+  deviceId: ID
+}
+
+"The result of the :create_manual_ota_operation_no_existing_base_image mutation"
+type CreateManualOtaOperationNoExistingBaseImageResult {
+  "The successful result of the mutation"
+  result: OtaOperation
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateManualOtaOperationNoExistingBaseImageInput {
   "The ID identifying the Device the OTA Operation will be sent to"
   deviceId: ID!
 
@@ -6266,9 +6295,14 @@ type RootMutationType {
   deleteChannel(id: ID!): DeleteChannelResult
 
   "Initiates an OTA update with a user provided OS image"
-  createManualOtaOperation(
-    input: CreateManualOtaOperationInput!
-  ): CreateManualOtaOperationResult
+  createManualOtaOperationNoExistingBaseImage(
+    input: CreateManualOtaOperationNoExistingBaseImageInput!
+  ): CreateManualOtaOperationNoExistingBaseImageResult
+
+  "Initiates an OTA update by selecting one from an available collection"
+  createManualOtaOperationExistingBaseImage(
+    input: CreateManualOtaOperationExistingBaseImageInput!
+  ): CreateManualOtaOperationExistingBaseImageResult
 
   "Cancels an OTA update operation"
   cancelOtaOperation(id: ID!): CancelOtaOperationResult
@@ -6415,6 +6449,14 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: DeviceFilterInput
   ): device_changed_result
+  baseImage(
+    "A filter to limit the results"
+    filter: BaseImageFilterInput
+  ): base_image_result
+  baseImageCollection(
+    "A filter to limit the results"
+    filter: BaseImageCollectionFilterInput
+  ): base_image_collection_result
 }
 
 """
