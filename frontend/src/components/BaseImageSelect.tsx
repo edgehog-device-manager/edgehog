@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,15 +74,18 @@ const BASE_IMAGE_SELECT_OPTIONS_FRAGMENT = graphql`
           id
           name
           version
+          url
         }
       }
     }
   }
 `;
 
-export type BaseImageRecord = NonNullable<
+type BaseImageNode = NonNullable<
   NonNullable<BaseImageSelect_BaseImagesFragment$data["baseImages"]>["edges"]
 >[number]["node"];
+type OmitUrl = Omit<BaseImageNode, "url">;
+export type BaseImageRecord = OmitUrl & { readonly url?: string };
 
 type BaseImageSelectProps = {
   updateCampaignBaseImageOptionsRef: BaseImageSelect_BaseImagesFragment$key | null;
@@ -147,7 +150,7 @@ const BaseImageSelect = ({
     return (
       paginationData?.baseImages?.edges
         ?.map((edge) => edge?.node)
-        .filter((node): node is BaseImageRecord => node != null) ?? []
+        .filter((node): node is BaseImageNode => node != null) ?? []
     );
   }, [paginationData]);
 
