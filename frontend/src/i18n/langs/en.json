@@ -114,12 +114,6 @@
     "defaultMessage": "System Model",
     "description": "Title for the System Model column of the base image collections table"
   },
-  "components.BaseImageForm.baseImageLabel": {
-    "defaultMessage": "Base image file"
-  },
-  "components.BaseImageForm.update": {
-    "defaultMessage": "Update"
-  },
   "components.BaseImageSelect.ErrorFallback.message": {
     "defaultMessage": "Failed to load Base Images list."
   },
@@ -965,6 +959,18 @@
   },
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
+  },
+  "components.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "components.ManualOtaFromFileCollection.update": {
+    "defaultMessage": "Update"
+  },
+  "components.ManualOtaFromFileForm.baseImageLabel": {
+    "defaultMessage": "Base image file"
+  },
+  "components.ManualOtaFromFileForm.update": {
+    "defaultMessage": "Update"
   },
   "components.NetworkInterfacesTable.macAddressTitle": {
     "defaultMessage": "MAC Address"
@@ -2020,6 +2026,21 @@
   },
   "forms.DeploymentCampaignForm.targetReleaseLabel": {
     "defaultMessage": "Target Release"
+  },
+  "forms.ManualOtaFromFileCollection.baseImageCollectionOption": {
+    "defaultMessage": "Search or select a base image collection..."
+  },
+  "forms.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
+    "defaultMessage": "Base Image"
+  },
+  "forms.ManualOtaFromFileCollection.noBaseImageCollsAvailable": {
+    "defaultMessage": "No base image collections available"
+  },
+  "forms.ManualOtaFromFileCollection.noBaseImageCollsFoundMatching": {
+    "defaultMessage": "No base image collections found matching \"{inputValue}\""
+  },
+  "forms.ManualOtaFromFileCollection.selectBaseImageCollection": {
+    "defaultMessage": "Select a base image collection before selecting an image..."
   },
   "forms.ReleaseCreate.reuseReleaseButton": {
     "defaultMessage": "Reuse Release"
