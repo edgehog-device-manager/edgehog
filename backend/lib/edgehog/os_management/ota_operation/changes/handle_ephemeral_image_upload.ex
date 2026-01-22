@@ -33,6 +33,9 @@ defmodule Edgehog.OSManagement.OTAOperation.Changes.HandleEphemeralImageUpload d
   @impl Ash.Resource.Change
   def change(%Ash.Changeset{valid?: false} = changeset, _opts, _context), do: changeset
 
+  def change(%Ash.Changeset{arguments: %{base_image_url: url}} = changeset, _opts, _context),
+    do: Ash.Changeset.change_attribute(changeset, :base_image_url, url)
+
   def change(changeset, _opts, _context) do
     case Ash.Changeset.fetch_argument(changeset, :base_image_file) do
       {:ok, %Plug.Upload{} = file} ->

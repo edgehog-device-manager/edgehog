@@ -31,6 +31,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
   alias Edgehog.OSManagement.OTAOperation.ManualActions
   alias Edgehog.OSManagement.OTAOperation.Status
   alias Edgehog.OSManagement.OTAOperation.StatusCode
+  alias Edgehog.OSManagement.OTAOperation.Validations
 
   @terminal_statuses [:success, :failure]
 
@@ -70,7 +71,10 @@ defmodule Edgehog.OSManagement.OTAOperation do
     end
 
     create :manual do
-      description "Initiates an OTA update with a user provided OS image"
+      description """
+      Initiates an OTA update, with a user provided OS image.
+      It can be either uploaded directly, or chosen from a base image collection via its URL.
+      """
 
       argument :device_id, :id do
         description "The ID identifying the Device the OTA Operation will be sent to"
@@ -79,8 +83,13 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
       argument :base_image_file, Edgehog.Types.Upload do
         description "The base image file, which will be uploaded to the storage."
-        allow_nil? false
       end
+
+      argument :base_image_url, :string do
+        description "The base image url, from which it will be retrieved and used."
+      end
+
+      validate Validations.BaseImageSource
 
       # Manually generate the ID since it's needed by HandleFileUpload before we hit the DB
       change set_attribute(:id, &Ash.UUID.generate/0)

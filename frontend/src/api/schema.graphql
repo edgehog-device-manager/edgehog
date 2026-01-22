@@ -5046,7 +5046,10 @@ input CreateManualOtaOperationInput {
   deviceId: ID!
 
   "The base image file, which will be uploaded to the storage."
-  baseImageFile: Upload!
+  baseImageFile: Upload
+
+  "The base image url, from which it will be retrieved and used."
+  baseImageUrl: String
 }
 
 enum OtaOperationSortField {
@@ -6283,7 +6286,10 @@ type RootMutationType {
   "Deletes an channel."
   deleteChannel(id: ID!): DeleteChannelResult
 
-  "Initiates an OTA update with a user provided OS image"
+  """
+  Initiates an OTA update, with a user provided OS image.
+  It can be either uploaded directly, or chosen from a base image collection via its URL.
+  """
   createManualOtaOperation(
     input: CreateManualOtaOperationInput!
   ): CreateManualOtaOperationResult
