@@ -114,8 +114,14 @@
     "defaultMessage": "System Model",
     "description": "Title for the System Model column of the base image collections table"
   },
+  "components.BaseImageForm.baseImageFromCollectionLabel": {
+    "defaultMessage": "Select from a collection"
+  },
   "components.BaseImageForm.baseImageLabel": {
     "defaultMessage": "Base image file"
+  },
+  "components.BaseImageForm.or": {
+    "defaultMessage": "or"
   },
   "components.BaseImageForm.update": {
     "defaultMessage": "Update"
@@ -1571,6 +1577,21 @@
   },
   "fieldExplanation.volumes.title": {
     "defaultMessage": "Volume Mounts"
+  },
+  "forms.BaseImageForm.baseImageCollectionOption": {
+    "defaultMessage": "Search or select a base image collection..."
+  },
+  "forms.BaseImageForm.baseImageFromCollectionLabel": {
+    "defaultMessage": "Base Image"
+  },
+  "forms.BaseImageForm.noBaseImageCollsAvailable": {
+    "defaultMessage": "No base image collections available"
+  },
+  "forms.BaseImageForm.noBaseImageCollsFoundMatching": {
+    "defaultMessage": "No base image collections found matching \"{inputValue}\""
+  },
+  "forms.BaseImageForm.selectBaseImageCollection": {
+    "defaultMessage": "Select a base image collection before selecting an image..."
   },
   "forms.ContainerForm.containerTitle": {
     "defaultMessage": "Container {containerNumber}"

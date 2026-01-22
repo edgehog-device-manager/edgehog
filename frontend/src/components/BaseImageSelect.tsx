@@ -74,6 +74,7 @@ const BASE_IMAGE_SELECT_OPTIONS_FRAGMENT = graphql`
           id
           name
           version
+          url
         }
       }
     }

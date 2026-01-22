@@ -125,6 +125,14 @@ const messages = defineMessages({
     id: "validation.volumeTarget.duplicate",
     defaultMessage: "Duplicate target value.",
   },
+  manualOTATooManySources: {
+     id: "validation.manualOTATooManySources.format",
+    defaultMessage: "You can only choose either a base image from an existing collection, or upload a new base image file, but not both at the same time",
+  },
+  manualOTANoSource: {
+    id: "validation.manualOTANoSource.format",
+    defaultMessage: "At least one base image is required for an update.",
+  },
 });
 
 /* ----------------------------- Constants ----------------------------- */
@@ -498,6 +506,49 @@ const baseImageCollectionUpdateSchema = baseImageCollectionSchema.extend({
 type BaseImageCollectionUpdateFormData = z.infer<
   typeof baseImageCollectionUpdateSchema
 >;
+
+const manualOTAUpdateSchema = z
+  .object({
+    fromCollection: z.object({
+    baseImageCollection: z
+      .object({ id: z.string(), name: z.string() })
+      ,
+    baseImage: z
+      .object({ id: z.string().min(1), name: z.string(), version: baseImageVersionSchema })
+      ,
+    }),
+    fromFile: baseImageFileSchema
+})//.partial()
+  .transform((val, ctx) => {
+    if (val.fromCollection && val.fromFile && val.fromFile.length > 0) {
+      console.log("both defined")
+      ctx.addIssue({
+        code: "custom",
+        message: messages.manualOTATooManySources.id,
+        path: ["fromFile"],
+        input: val,
+      })
+    }
+    else if (!(val.fromCollection || val.fromFile)) {
+      console.log("non defined")
+      ctx.addIssue({
+        code: "custom",
+        message: messages.manualOTANoSource.id,
+        path: ["fromFile"],
+        input: val,
+        })
+    }
+    else { console.log("only one defined", val)
+      console.log(ctx)
+      // if (val.fromCollection) {
+      //   val.fromFile.files = []
+      // }
+      // else if (val.fromFile) {
+      //   val.fromCollection = undefined
+      // }
+      ctx.aborted = true
+    }
+  })
 
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
@@ -905,6 +956,8 @@ export {
   baseImageUpdateSchema,
   baseImageCollectionSchema,
   baseImageCollectionUpdateSchema,
+  baseImageFileSchema,
+  manualOTAUpdateSchema,
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
   updateCampaignSchema,
