@@ -65,6 +65,8 @@ defmodule Edgehog.Application do
       {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
       # Start the Endpoint (http/https)
       Endpoint,
+      # Fetch Astarte devices
+      {Edgehog.Astarte.DeviceFetcher.Supervisor, restart: :transient},
       # Start Absinthe Subscriptions AFTER Endpoint is up
       {Absinthe.Subscription, Endpoint}
     ]

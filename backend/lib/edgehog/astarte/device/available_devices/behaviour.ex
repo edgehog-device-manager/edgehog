@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte do
+defmodule Edgehog.Astarte.Device.AvailableDevices.Behaviour do
   @moduledoc false
-  use Ash.Domain
 
-  resources do
-    resource Edgehog.Astarte.Cluster do
-      define :create_cluster, action: :create
-    end
+  alias Astarte.Client.AppEngine
 
-    resource Edgehog.Astarte.Realm do
-      define :fetch_realm_by_name, action: :read, get_by: :name, not_found_error?: true
-      define :fetch_realms, action: :read
-      define :create_realm, action: :create
-      define :destroy_realm, action: :destroy
-    end
-  end
+  @callback get_device_list(client :: AppEngine.t()) :: {:ok, list(String.t())} | {:error, term()}
+
+  @callback get_device_status(client :: AppEngine.t(), device_id :: String.t()) ::
+              {:ok, map()} | {:error, term()}
 end

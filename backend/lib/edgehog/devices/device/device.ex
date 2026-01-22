@@ -202,6 +202,29 @@ defmodule Edgehog.Devices.Device do
       change set_attribute(:online, true)
     end
 
+    create :from_astarte_data do
+      upsert? true
+      upsert_identity :unique_realm_device_id
+
+      # for fields that are interesting to us and already have the same name in
+      # the map you sent, (I dont have examples in this case)
+      upsert_fields [
+        :name,
+        :online
+      ]
+
+      accept [:realm_id]
+
+      argument :device_id, :string, allow_nil?: false
+      argument :connected, :boolean, allow_nil?: false
+
+      change Changes.InitializeFromDeviceStatus
+
+      change set_attribute(:device_id, arg(:device_id))
+      change set_attribute(:name, arg(:device_id))
+      change set_attribute(:online, arg(:connected))
+    end
+
     update :update do
       description "Updates a device."
 

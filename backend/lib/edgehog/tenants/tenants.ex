@@ -42,6 +42,7 @@ defmodule Edgehog.Tenants do
     resource Tenant do
       define :create_tenant, action: :create
       define :provision_tenant, action: :provision
+      define :fetch_all, action: :read
       define :fetch_tenant_by_slug, action: :read, get_by: :slug, not_found_error?: true
       define :reconcile_tenant, action: :reconcile, args: [:tenant]
       define :destroy_tenant, action: :destroy
