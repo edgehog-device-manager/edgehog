@@ -32,6 +32,7 @@ defmodule Edgehog.Application do
   require Logger
 
   @version Mix.Project.config()[:version]
+  @device_reconciliation_enabled Mix.env() != :test
 
   @impl Application
   def start(_type, _args) do
@@ -66,7 +67,8 @@ defmodule Edgehog.Application do
       # Start the Endpoint (http/https)
       Endpoint,
       # Fetch Astarte devices
-      {Edgehog.Astarte.DeviceFetcher.Supervisor, restart: :transient},
+      {Task.Supervisor, name: Edgehog.Devices.Reconciler.Supervisor},
+      {Edgehog.Devices.Reconciler, enabled: @device_reconciliation_enabled},
       # Start Absinthe Subscriptions AFTER Endpoint is up
       {Absinthe.Subscription, Endpoint}
     ]

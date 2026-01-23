@@ -25,10 +25,7 @@ defmodule Edgehog.Astarte.Device.AvailableDevices do
   alias Astarte.Client.AppEngine
 
   def get_device_list(%AppEngine{} = client) do
-    with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.list(client) do
-      {:ok, data}
-    end
+    AppEngine.Devices.list(client, stream: true)
   end
 
   def get_device_status(%AppEngine{} = client, device_id) do
