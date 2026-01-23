@@ -18,7 +18,7 @@
   inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],
   subdirectories: ["priv/*/migrations"],
   locals_without_parens: [
-    assert_created: 2,
-    assert_updated: 2
+    assert_created: 3,
+    assert_updated: 3
   ]
 ]
