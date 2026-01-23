@@ -41,6 +41,14 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     type :base_image_collection
 
     paginate_relationship_with base_images: :relay
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :base_image_collection do
+        action_types [:create, :update, :destroy]
+      end
+    end
   end
 
   actions do

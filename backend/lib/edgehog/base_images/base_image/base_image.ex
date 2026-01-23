@@ -42,6 +42,14 @@ defmodule Edgehog.BaseImages.BaseImage do
 
   graphql do
     type :base_image
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :base_image do
+        action_types [:create, :update, :destroy]
+      end
+    end
   end
 
   actions do
