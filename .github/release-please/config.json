@@ -1,5 +1,7 @@
 {
   "bump-minor-pre-major": true,
+  "pull-request-header": ":robot: Release ${version}",
+  "pull-request-title-pattern": "chore: release ${version}",
   "packages": {
     "backend": {
       "package-name": "backend",
