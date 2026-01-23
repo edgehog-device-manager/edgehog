@@ -40,7 +40,7 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import ChannelForm from "@/forms/UpdateChannel";
-import type { ChannelData } from "@/forms/UpdateChannel";
+import type { ChannelOutputData } from "@/forms/UpdateChannel";
 
 import type {
   Channel_getChannel_Query,
@@ -206,7 +206,7 @@ const ChannelContent = ({ queryRef, channel }: ChannelContentProps) => {
     useMutation<Channel_updateChannel_Mutation>(UPDATE_CHANNEL_MUTATION);
 
   const handleUpdateChannel = useCallback(
-    (channel: ChannelData) => {
+    (channel: ChannelOutputData) => {
       updateChannel({
         variables: { channelId, input: channel },
         onCompleted(data, errors) {

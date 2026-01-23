@@ -18,10 +18,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
@@ -29,51 +29,22 @@ import Icon from "@/components/Icon";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { handleSchema, messages, yup } from "@/forms";
+import { HardwareTypeFormData, hardwareTypeSchema } from "@/forms/validation";
 
-type HardwareTypeData = {
+type HardwareTypeOutputData = {
   name: string;
   handle: string;
   partNumbers: string[];
 };
 
-type PartNumber = { value: string };
-
-type FormData = {
-  name: string;
-  handle: string;
-  partNumbers: PartNumber[];
-};
-
-const hardwareTypeSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    partNumbers: yup
-      .array()
-      .required()
-      .min(1)
-      .of(
-        yup
-          .object({ value: yup.string().required() })
-          .required()
-          .test("unique", messages.unique.id, (partNumber, context) => {
-            const itemIndex = context.parent.indexOf(partNumber);
-            return !context.parent.find(
-              (pn: PartNumber, index: number) =>
-                pn.value === partNumber.value && index < itemIndex,
-            );
-          }),
-      ),
-  })
-  .required();
-
-const transformOutputData = (data: FormData): HardwareTypeData => ({
+const transformOutputData = (
+  data: HardwareTypeFormData,
+): HardwareTypeOutputData => ({
   ...data,
   partNumbers: data.partNumbers.map((pn) => pn.value),
 });
 
-const initialData: FormData = {
+const initialData: HardwareTypeFormData = {
   name: "",
   handle: "",
   partNumbers: [{ value: "" }],
@@ -81,7 +52,7 @@ const initialData: FormData = {
 
 type Props = {
   isLoading?: boolean;
-  onSubmit: (data: HardwareTypeData) => void;
+  onSubmit: (data: HardwareTypeOutputData) => void;
 };
 
 const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
@@ -90,10 +61,10 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<HardwareTypeFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(hardwareTypeSchema),
+    resolver: zodResolver(hardwareTypeSchema),
   });
 
   const partNumbers = useFieldArray({
@@ -101,7 +72,8 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
     name: "partNumbers",
   });
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: HardwareTypeFormData) =>
+    onSubmit(transformOutputData(data));
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -213,6 +185,6 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
   );
 };
 
-export type { HardwareTypeData };
+export type { HardwareTypeOutputData };
 
 export default CreateHardwareTypeForm;

@@ -18,29 +18,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import {
-  baseImageFileSchema,
-  baseImageVersionSchema,
-  baseImageStartingVersionRequirementSchema,
-  yup,
-} from "@/forms";
 
 import type {
   CreateBaseImage_BaseImageCollectionFragment$key,
   CreateBaseImage_BaseImageCollectionFragment$data,
 } from "@/api/__generated__/CreateBaseImage_BaseImageCollectionFragment.graphql";
 import type { CreateBaseImage_OptionsFragment$key } from "@/api/__generated__/CreateBaseImage_OptionsFragment.graphql";
+import { BaseImageFormData, baseImageSchema } from "@/forms/validation";
 
 const CREATE_BASE_IMAGE_FRAGMENT = graphql`
   fragment CreateBaseImage_BaseImageCollectionFragment on BaseImageCollection {
@@ -57,7 +51,7 @@ const CREATE_BASE_IMAGE_OPTIONS_FRAGMENT = graphql`
   }
 `;
 
-type BaseImageData = {
+type BaseImageOutputData = {
   baseImageCollectionId: string;
   file: File;
   version: string;
@@ -72,38 +66,18 @@ type BaseImageData = {
   }[];
 };
 
-type FormData = {
-  baseImageCollection: string;
-  file: FileList | null;
-  version: string;
-  startingVersionRequirement: string;
-  releaseDisplayName: string;
-  description: string;
-};
-
-const baseImageSchema = yup
-  .object({
-    baseImageCollection: yup.string().required(),
-    file: baseImageFileSchema.required(),
-    version: baseImageVersionSchema.required(),
-    startingVersionRequirement: baseImageStartingVersionRequirementSchema,
-    releaseDisplayName: yup.string(),
-    description: yup.string(),
-  })
-  .required();
-
 const transformInputData = (
   baseImageCollection: CreateBaseImage_BaseImageCollectionFragment$data,
-): FormData => ({
+): BaseImageFormData => ({
   baseImageCollection: baseImageCollection.name,
-  file: null,
+  file: undefined,
   version: "",
   startingVersionRequirement: "",
   description: "",
   releaseDisplayName: "",
 });
 
-type FormOutput = FormData & {
+type FormOutput = BaseImageFormData & {
   file: FileList;
 };
 
@@ -111,8 +85,8 @@ const transformOutputData = (
   baseImageCollection: CreateBaseImage_BaseImageCollectionFragment$data,
   locale: string,
   data: FormOutput,
-): BaseImageData => {
-  const baseImage: BaseImageData = {
+): BaseImageOutputData => {
+  const baseImage: BaseImageOutputData = {
     baseImageCollectionId: baseImageCollection.id,
     file: data.file[0],
     version: data.version,
@@ -144,7 +118,7 @@ type Props = {
   baseImageCollectionRef: CreateBaseImage_BaseImageCollectionFragment$key;
   optionsRef: CreateBaseImage_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: BaseImageData) => void;
+  onSubmit: (data: BaseImageOutputData) => void;
 };
 
 const CreateBaseImageForm = ({
@@ -165,20 +139,24 @@ const CreateBaseImageForm = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<BaseImageFormData>({
     mode: "onTouched",
     defaultValues: transformInputData(baseImageCollectionData),
-    resolver: yupResolver(baseImageSchema),
+    resolver: zodResolver(baseImageSchema),
   });
 
-  const onFormSubmit = (data: FormData) => {
+  const onFormSubmit = (data: BaseImageFormData) => {
     if (data.file instanceof FileList && data.file[0]) {
-      const baseImageData = {
+      const baseImageOutputData = {
         ...data,
         file: data.file,
       };
       onSubmit(
-        transformOutputData(baseImageCollectionData, locale, baseImageData),
+        transformOutputData(
+          baseImageCollectionData,
+          locale,
+          baseImageOutputData,
+        ),
       );
     }
   };
@@ -300,6 +278,6 @@ const CreateBaseImageForm = ({
   );
 };
 
-export type { BaseImageData };
+export type { BaseImageOutputData };
 
 export default CreateBaseImageForm;

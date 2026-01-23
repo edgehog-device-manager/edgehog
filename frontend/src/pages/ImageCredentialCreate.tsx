@@ -27,9 +27,8 @@ import type { ImageCredentialCreate_imageCredentialCreate_Mutation } from "@/api
 import Alert from "@/components/Alert";
 import Page from "@/components/Page";
 import { Route, useNavigate } from "@/Navigation";
-import CreateImageCredentialForm, {
-  ImageCredentialData,
-} from "@/forms/CreateImageCredential";
+import CreateImageCredentialForm from "@/forms/CreateImageCredential";
+import { ImageCredentialFormData } from "@/forms/validation";
 
 const CREATE_IMAGE_CREDENTIAL_MUTATION = graphql`
   mutation ImageCredentialCreate_imageCredentialCreate_Mutation(
@@ -53,7 +52,7 @@ const ImageCredentialCreatePage = () => {
     );
 
   const handleCreateImageCredential = useCallback(
-    (imageCredential: ImageCredentialData) => {
+    (imageCredential: ImageCredentialFormData) => {
       createImageCredential({
         variables: { input: imageCredential },
         onCompleted(data, errors) {

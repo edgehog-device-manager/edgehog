@@ -35,7 +35,7 @@ import type { ChannelCreate_getDeviceGroups_Query } from "@/api/__generated__/Ch
 
 import Alert from "@/components/Alert";
 import Center from "@/components/Center";
-import type { ChannelData } from "@/forms/CreateChannel";
+import type { ChannelOutputData } from "@/forms/UpdateChannel";
 import Page from "@/components/Page";
 import Spinner from "@/components/Spinner";
 import { Link, Route, useNavigate } from "@/Navigation";
@@ -84,7 +84,7 @@ const Channel = ({ getCreateChannelOptionsQuery }: ChannelProps) => {
     useMutation<ChannelCreate_createChannel_Mutation>(CREATE_CHANNEL_MUTATION);
 
   const handleCreateChannel = useCallback(
-    (channel: ChannelData) => {
+    (channel: ChannelOutputData) => {
       createChannel({
         variables: { input: channel },
         onCompleted(data, errors) {

@@ -21,9 +21,9 @@
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
 import Select from "react-select";
 
 import type {
@@ -43,8 +43,8 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
-import { messages, yup, handleSchema } from "@/forms";
 import assets from "@/assets";
+import { SystemModelFormData, systemModelSchema } from "@/forms/validation";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment CreateSystemModel_OptionsFragment on RootQueryType
@@ -69,7 +69,7 @@ type HardwareTypeRecord = NonNullable<
   NonNullable<CreateSystemModel_OptionsFragment$data["hardwareTypes"]>["edges"]
 >[number]["node"];
 
-type SystemModelChanges = {
+type SystemModelOutputData = {
   name: string;
   handle: string;
   localizedDescriptions?: {
@@ -81,49 +81,11 @@ type SystemModelChanges = {
   pictureFile?: File;
 };
 
-type PartNumber = { value: string };
-
-type FormData = {
-  name: string;
-  handle: string;
-  description: string;
-  hardwareType: HardwareTypeRecord;
-  partNumbers: PartNumber[];
-  pictureFile?: FileList | null;
-};
-
-const systemModelSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    description: yup.string(),
-    hardwareType: yup
-      .object({ id: yup.string().required(), name: yup.string().required() })
-      .required(),
-    partNumbers: yup
-      .array()
-      .required()
-      .min(1)
-      .of(
-        yup
-          .object({ value: yup.string().required() })
-          .required()
-          .test("unique", messages.unique.id, (partNumber, context) => {
-            const itemIndex = context.parent.indexOf(partNumber);
-            return !context.parent.find(
-              (pn: PartNumber, index: number) =>
-                pn.value === partNumber.value && index < itemIndex,
-            );
-          }),
-      ),
-  })
-  .required();
-
 const transformOutputData = (
   locale: string,
-  data: FormData,
-): SystemModelChanges => {
-  const systemModel: SystemModelChanges = {
+  data: SystemModelFormData,
+): SystemModelOutputData => {
+  const systemModel: SystemModelOutputData = {
     name: data.name,
     handle: data.handle,
     hardwareTypeId: data.hardwareType.id,
@@ -146,18 +108,19 @@ const transformOutputData = (
   return systemModel;
 };
 
-const initialData: FormData = {
+const initialData: SystemModelFormData = {
   name: "",
   handle: "",
   description: "",
   hardwareType: { id: "", name: "" },
   partNumbers: [{ value: "" }],
+  pictureFile: null,
 };
 
 type Props = {
   optionsRef: CreateSystemModel_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: SystemModelChanges) => void;
+  onSubmit: (data: SystemModelOutputData) => void;
 };
 
 const CreateSystemModelForm = ({
@@ -249,10 +212,10 @@ const CreateSystemModelForm = ({
     handleSubmit,
     formState: { isDirty, errors },
     watch,
-  } = useForm<FormData>({
+  } = useForm<SystemModelFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(systemModelSchema),
+    resolver: zodResolver(systemModelSchema),
   });
 
   const partNumbers = useFieldArray({
@@ -260,7 +223,7 @@ const CreateSystemModelForm = ({
     name: "partNumbers",
   });
 
-  const onFormSubmit = (data: FormData) =>
+  const onFormSubmit = (data: SystemModelFormData) =>
     onSubmit(transformOutputData(locale, data));
 
   const handleAddPartNumber = useCallback(() => {
@@ -482,6 +445,6 @@ const CreateSystemModelForm = ({
   );
 };
 
-export type { SystemModelChanges };
+export type { SystemModelOutputData };
 
 export default CreateSystemModelForm;

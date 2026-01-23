@@ -40,7 +40,7 @@ import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Center from "@/components/Center";
 import CreateSystemModelForm from "@/forms/CreateSystemModel";
-import type { SystemModelChanges } from "@/forms/CreateSystemModel";
+import type { SystemModelOutputData } from "@/forms/CreateSystemModel";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
@@ -86,7 +86,7 @@ const SystemModel = ({ systemModelOptions }: SystemModelProps) => {
     );
 
   const handleCreateSystemModel = useCallback(
-    (systemModel: SystemModelChanges) => {
+    (systemModel: SystemModelOutputData) => {
       createSystemModel({
         variables: { input: systemModel },
         onCompleted(data, errors) {

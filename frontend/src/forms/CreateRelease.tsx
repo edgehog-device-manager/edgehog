@@ -22,7 +22,7 @@ import { useState, useRef } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import type { CreateRelease_ImageCredentialsOptionsFragment$key } from "@/api/__generated__/CreateRelease_ImageCredentialsOptionsFragment.graphql";
 import type { CreateRelease_NetworksOptionsFragment$key } from "@/api/__generated__/CreateRelease_NetworksOptionsFragment.graphql";
@@ -30,6 +30,7 @@ import type { CreateRelease_VolumesOptionsFragment$key } from "@/api/__generated
 import type { CreateRelease_SystemModelsOptionsFragment$key } from "@/api/__generated__/CreateRelease_SystemModelsOptionsFragment.graphql";
 import {
   ContainerCreateWithNestedDeviceMappingsInput,
+  ContainerCreateWithNestedImageInput,
   ContainerCreateWithNestedNetworksInput,
   ContainerCreateWithNestedVolumesInput,
   ReleaseCreateRequiredSystemModelsInput,
@@ -45,41 +46,23 @@ import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import Alert from "@/components/Alert";
-import {
-  yup,
-  envSchema,
-  portBindingsSchema,
-  tmpfsOptSchema,
-  storageOptSchema,
-  extraHostsSchema,
-  bindingsSchema,
-  imageSchema,
-  nullableTrimString,
-  memorySchema,
-  memoryReservationSchema,
-  memorySwapSchema,
-  memorySwappinessSchema,
-  cpuPeriodSchema,
-  cpuRealtimePeriodSchema,
-  cpuQuotaSchema,
-  cpuRealtimeRuntimeSchema,
-  capAddSchema,
-  capDropSchema,
-  networksSchema,
-  volumesSchema,
-  deviceMappingsSchema,
-  requiredSystemModelsSchema,
-} from "@/forms/index";
 import MultiSelect from "@/components/MultiSelect";
 import Select, { SingleValue } from "react-select";
 import ConfirmModal from "@/components/ConfirmModal";
 import { FormRow } from "@/components/FormRow";
 import ContainerForm from "@/forms/ContainerForm";
 import Tag from "@/components/Tag";
-import type { KeyValue } from "@/forms/index";
+import type { KeyValue } from "@/forms/validation";
 import CollapseItem, {
   useCollapsibleSections,
 } from "@/components/CollapseItem";
+import {
+  CapAddList,
+  CapDropList,
+  ContainerInputData,
+  ReleaseFormData,
+  releaseSchema,
+} from "@/forms/validation";
 
 const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`
   fragment CreateRelease_ImageCredentialsOptionsFragment on RootQueryType {
@@ -249,12 +232,9 @@ export type EnvironmentVariable = NonNullable<
 >[number] &
   KeyValue<string>;
 
-type ContainerInput = {
+type ContainerOutput = {
   // Image Configuration
-  image: {
-    reference: string;
-    imageCredentialsId?: string;
-  }; // ContainerCreateWithNestedImageInput
+  image: ContainerCreateWithNestedImageInput;
   // Network Configuration
   hostname?: string;
   networkMode?: string;
@@ -288,106 +268,14 @@ type ContainerInput = {
   deviceMappings?: ContainerCreateWithNestedDeviceMappingsInput[];
 };
 
-export type ReleaseInputData = {
-  version: string;
-  containers?: ContainerInput[] | null;
-  requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
-};
-
 type ReleaseSubmitData = {
   version: string;
-  containers?: ContainerInput[] | null;
-  requiredSystemModels: ReleaseCreateRequiredSystemModelsInput[];
+  containers?: ContainerOutput[];
+  requiredSystemModels?: ReleaseCreateRequiredSystemModelsInput[];
 };
 
-export const CapDropList = [
-  "CAP_AUDIT_WRITE",
-  "CAP_CHOWN",
-  "CAP_DAC_OVERRIDE",
-  "CAP_FOWNER",
-  "CAP_FSETID",
-  "CAP_KILL",
-  "CAP_MKNOD",
-  "CAP_NET_BIND_SERVICE",
-  "CAP_NET_RAW",
-  "CAP_SETFCAP",
-  "CAP_SETGID",
-  "CAP_SETPCAP",
-  "CAP_SETUID",
-  "CAP_SYS_CHROOT",
-] as const;
-
-export const CapAddList = [
-  "CAP_AUDIT_CONTROL",
-  "CAP_BLOCK_SUSPEND",
-  "CAP_DAC_READ_SEARCH",
-  "CAP_IPC_LOCK",
-  "CAP_IPC_OWNER",
-  "CAP_LEASE",
-  "CAP_LINUX_IMMUTABLE",
-  "CAP_MAC_ADMIN",
-  "CAP_MAC_OVERRIDE",
-  "CAP_NET_ADMIN",
-  "CAP_NET_BROADCAST",
-  "CAP_SYS_ADMIN",
-  "CAP_SYS_BOOT",
-  "CAP_SYS_MODULE",
-  "CAP_SYS_NICE",
-  "CAP_SYS_PACCT",
-  "CAP_SYS_PTRACE",
-  "CAP_SYS_RAWIO",
-  "CAP_SYS_RESOURCE",
-  "CAP_SYS_TIME",
-  "CAP_SYS_TTY_CONFIG",
-  "CAP_SYSLOG",
-  "CAP_WAKE_ALARM",
-] as const;
-
-// Yup schema for form validation
-const applicationSchema = () =>
-  yup
-    .object({
-      version: yup.string().required(),
-      containers: yup
-        .array(
-          yup.object({
-            image: imageSchema,
-            hostname: nullableTrimString,
-            networkMode: nullableTrimString,
-            networks: networksSchema,
-            extraHosts: extraHostsSchema,
-            portBindings: portBindingsSchema,
-            binds: bindingsSchema,
-            volumes: volumesSchema,
-            volumeDriver: nullableTrimString,
-            storageOpt: storageOptSchema,
-            tmpfs: tmpfsOptSchema,
-            readOnlyRootfs: yup.boolean().nullable(),
-            memory: memorySchema,
-            memoryReservation: memoryReservationSchema,
-            memorySwap: memorySwapSchema,
-            memorySwappiness: memorySwappinessSchema,
-            cpuPeriod: cpuPeriodSchema,
-            cpuQuota: cpuQuotaSchema,
-            cpuRealtimePeriod: cpuRealtimePeriodSchema,
-            cpuRealtimeRuntime: cpuRealtimeRuntimeSchema,
-            privileged: yup.boolean().nullable(),
-            capAdd: capAddSchema,
-            capDrop: capDropSchema,
-            restartPolicy: nullableTrimString,
-            env: envSchema,
-            deviceMappings: deviceMappingsSchema,
-          }),
-        )
-        .nullable(),
-      requiredSystemModels: requiredSystemModelsSchema,
-    })
-    .required();
-
-const initialData: ReleaseInputData = {
+const initialData: ReleaseFormData = {
   version: "",
-  containers: null,
-  requiredSystemModels: [],
 };
 
 export const restartPolicyOptions = [
@@ -473,10 +361,10 @@ const CreateRelease = ({
     reset,
     setFocus,
     formState: { errors },
-  } = useForm<ReleaseInputData>({
+  } = useForm<ReleaseFormData>({
     mode: "all",
     defaultValues: initialData,
-    resolver: yupResolver(applicationSchema()),
+    resolver: zodResolver(releaseSchema),
   });
 
   const { fields: containersFields, append } = useFieldArray({
@@ -506,7 +394,7 @@ const CreateRelease = ({
   const [showImportSuccess, setShowImportSuccess] = useState(false);
   const [justImported, setJustImported] = useState(false);
   const isImportingRef = useRef(false);
-  const importedContainersSnapshotRef = useRef<ContainerInput[]>([]);
+  const importedContainersSnapshotRef = useRef<ContainerInputData[]>([]);
 
   // Watch all form values to detect changes
   const formValues = useWatch({ control });
@@ -591,59 +479,30 @@ const CreateRelease = ({
     setOpenSections: setOpenIndexes,
   } = useCollapsibleSections<number>(containersFields.map((_, index) => index));
 
+  const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => ({
+    ...data,
+    containers: data.containers?.map((container) => ({
+      ...container,
+      env: Array.isArray(container.env)
+        ? container.env.map((pair) => ({ key: pair.key, value: pair.value }))
+        : undefined,
+      volumes: container.volumes?.length ? container.volumes : undefined,
+      deviceMappings: container.deviceMappings?.length
+        ? container.deviceMappings
+        : undefined,
+      image: {
+        reference: container.image?.reference,
+        imageCredentialsId: container.image?.imageCredentialsId,
+      },
+    })),
+  });
+
+  const onFormSubmit = (data: ReleaseFormData) =>
+    onSubmit(transformOutputData(data));
+
   return (
     <>
-      <form
-        onSubmit={handleSubmit((data: ReleaseInputData) => {
-          const submitData: ReleaseSubmitData = {
-            ...data,
-            containers: data.containers?.map((container) => ({
-              // Image Configuration
-              image: {
-                reference: container.image.reference,
-                imageCredentialsId:
-                  container.image.imageCredentialsId || undefined,
-              },
-              // Network Configuration
-              hostname: container.hostname || undefined,
-              networkMode: container.networkMode || undefined,
-              networks: container.networks || undefined,
-              extraHosts: container.extraHosts || undefined,
-              portBindings: container.portBindings || undefined,
-              // Storage Configuration
-              binds: container.binds || undefined,
-              volumes: container.volumes || undefined,
-              volumeDriver: container.volumeDriver || undefined,
-              storageOpt: container.storageOpt || undefined,
-              tmpfs: container.tmpfs || undefined,
-              readOnlyRootfs: container.readOnlyRootfs || undefined,
-              // Resource Limits
-              memory: container.memory || undefined,
-              memoryReservation: container.memoryReservation || undefined,
-              memorySwap: container.memorySwap || undefined,
-              memorySwappiness: container.memorySwappiness || undefined,
-              cpuPeriod: container.cpuPeriod || undefined,
-              cpuQuota: container.cpuQuota || undefined,
-              cpuRealtimePeriod: container.cpuRealtimePeriod || undefined,
-              cpuRealtimeRuntime: container.cpuRealtimeRuntime || undefined,
-              // Security & Capabilities
-              privileged: container.privileged || undefined,
-              capAdd: container.capAdd?.length ? container.capAdd : undefined,
-              capDrop: container.capDrop?.length
-                ? container.capDrop
-                : undefined,
-              // Runtime & Environment
-              restartPolicy: container.restartPolicy || undefined,
-              env: container.env || undefined,
-              // Device Mappings
-              deviceMappings: container.deviceMappings || undefined,
-            })),
-            requiredSystemModels: data.requiredSystemModels,
-          };
-
-          onSubmit(submitData);
-        })}
-      >
+      <form onSubmit={handleSubmit(onFormSubmit)}>
         <Stack gap={2}>
           {showImportSuccess && (
             <Alert
@@ -884,46 +743,63 @@ const CreateRelease = ({
             const mappedContainers =
               release.containers?.edges?.map((containerEdge) => {
                 const c = containerEdge.node;
+
                 return {
                   // Image Configuration
-                  image: {
-                    reference: c.image.reference,
-                    imageCredentialsId: c.image?.credentials?.id || undefined,
-                  },
+                  image: c.image
+                    ? {
+                        reference: c.image.reference,
+                        imageCredentialsId: c.image?.credentials?.id,
+                      }
+                    : undefined,
                   // Network Configuration
-                  hostname: c.hostname || undefined,
-                  networkMode: c.networkMode || undefined,
+                  hostname: c.hostname ?? undefined,
+                  networkMode: c.networkMode ?? undefined,
+
                   networks:
                     c.networks?.edges?.map((n: any) => ({ id: n.node.id })) ??
                     undefined,
+
                   extraHosts: c.extraHosts ? [...c.extraHosts] : undefined,
-                  portBindings: c.extraHosts ? [...c.portBindings] : undefined,
-                  binds: c.extraHosts ? [...c.binds] : undefined,
+                  portBindings: c.portBindings
+                    ? [...c.portBindings]
+                    : undefined,
+                  binds: c.binds ? [...c.binds] : undefined,
+
                   volumes:
                     c.containerVolumes?.edges?.map((v: any) => ({
                       id: v.node.volume.id,
                       target: v.node.target,
                     })) ?? undefined,
-                  volumeDriver: c.volumeDriver || undefined,
+
+                  volumeDriver: c.volumeDriver ?? undefined,
                   storageOpt: c.storageOpt ? [...c.storageOpt] : undefined,
                   tmpfs: c.tmpfs ? [...c.tmpfs] : undefined,
-                  readOnlyRootfs: c.readOnlyRootfs || undefined,
+
+                  readOnlyRootfs: c.readOnlyRootfs ?? undefined,
                   // Resource Limits
-                  memory: c.memory || undefined,
-                  memoryReservation: c.memoryReservation || undefined,
-                  memorySwap: c.memorySwap || undefined,
-                  memorySwappiness: c.memorySwappiness || undefined,
-                  cpuPeriod: c.cpuPeriod || undefined,
-                  cpuQuota: c.cpuQuota || undefined,
-                  cpuRealtimePeriod: c.cpuRealtimePeriod || undefined,
-                  cpuRealtimeRuntime: c.cpuRealtimeRuntime || undefined,
+                  memory: c.memory ?? undefined,
+                  memoryReservation: c.memoryReservation ?? undefined,
+                  memorySwap: c.memorySwap ?? undefined,
+                  memorySwappiness: c.memorySwappiness ?? undefined,
+
+                  cpuPeriod: c.cpuPeriod ?? undefined,
+                  cpuQuota: c.cpuQuota ?? undefined,
+                  cpuRealtimePeriod: c.cpuRealtimePeriod ?? undefined,
+                  cpuRealtimeRuntime: c.cpuRealtimeRuntime ?? undefined,
                   // Security & Capabilities
-                  privileged: c.privileged || undefined,
-                  capAdd: c.capAdd ? [...c.capAdd] : undefined,
-                  capDrop: c.capDrop ? [...c.capDrop] : undefined,
+                  privileged: c.privileged ?? undefined,
+                  capAdd: c.capAdd
+                    ? (c.capAdd as (typeof CapAddList)[number][])
+                    : undefined,
+
+                  capDrop: c.capDrop
+                    ? (c.capDrop as (typeof CapDropList)[number][])
+                    : undefined,
                   // Runtime & Environment
-                  restartPolicy: c.restartPolicy || undefined,
-                  env: (c.env as EnvironmentVariable[]) || undefined,
+                  restartPolicy: c.restartPolicy ?? undefined,
+
+                  env: Array.isArray(c.env) ? c.env : undefined,
                   // Device Mappings
                   deviceMappings:
                     c.deviceMappings?.edges?.map((dm: any) => ({
@@ -934,12 +810,12 @@ const CreateRelease = ({
                 };
               }) ?? [];
 
-            const newFormData = {
-              requiredSystemModels: release.systemModels.map(({ id }) => ({
-                id: id ?? undefined,
+            const newFormData: ReleaseFormData = {
+              version: formValues.version ?? "",
+              requiredSystemModels: release.systemModels?.map(({ id }) => ({
+                id,
               })),
               containers: mappedContainers,
-              version: formValues.version || "", // Preserve the current version
             };
 
             // Reset the form and wait for it to complete

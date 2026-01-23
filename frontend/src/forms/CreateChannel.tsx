@@ -22,13 +22,10 @@ import _ from "lodash";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useIntl, FormattedMessage } from "react-intl";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
-import type {
-  CreateChannel_OptionsFragment$data,
-  CreateChannel_OptionsFragment$key,
-} from "@/api/__generated__/CreateChannel_OptionsFragment.graphql";
+import type { CreateChannel_OptionsFragment$key } from "@/api/__generated__/CreateChannel_OptionsFragment.graphql";
 import type { CreateChannel_PaginationQuery } from "@/api/__generated__/CreateChannel_PaginationQuery.graphql";
 
 import Button from "@/components/Button";
@@ -38,7 +35,12 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
-import { yup, messages, handleSchema } from "@/forms";
+import {
+  ChannelFormData,
+  channelSchema,
+  TargetGroup,
+} from "@/forms/validation";
+import { ChannelOutputData } from "./UpdateChannel";
 
 const CREATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
   fragment CreateChannel_OptionsFragment on RootQueryType
@@ -58,10 +60,6 @@ const CREATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
     }
   }
 `;
-
-type DeviceGroupRecord = NonNullable<
-  NonNullable<CreateChannel_OptionsFragment$data["deviceGroups"]>["edges"]
->[number]["node"];
 
 // react-hook-form returns targetGroups validation error as Array<Record<string, FieldError>> type
 // ignoring eventual minimum length validation error type.
@@ -83,48 +81,20 @@ const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
   return null;
 };
 
-const getTargetGroupValue = (targetGroup: DeviceGroupRecord) => targetGroup.id;
-const isTargetGroupUsedByOtherChannel = (targetGroup: DeviceGroupRecord) =>
+const getTargetGroupValue = (targetGroup: TargetGroup) => targetGroup.id;
+const isTargetGroupUsedByOtherChannel = (targetGroup: TargetGroup) =>
   targetGroup.channel !== null;
 
-type ChannelData = {
-  name: string;
-  handle: string;
-  targetGroupIds: string[];
-};
-
-type FormData = {
-  name: string;
-  handle: string;
-  targetGroups: DeviceGroupRecord[];
-};
-
-const channelSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    targetGroups: yup.array().ensure().min(1, messages.required.id),
-  })
-  .required();
-
-const initialData: FormData = {
+const initialData: ChannelFormData = {
   name: "",
   handle: "",
   targetGroups: [],
 };
 
-const transformOutputData = ({
-  targetGroups,
-  ...rest
-}: FormData): ChannelData => ({
-  ...rest,
-  targetGroupIds: targetGroups.map((targetGroup) => targetGroup.id),
-});
-
 type Props = {
   queryRef: CreateChannel_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: ChannelData) => void;
+  onSubmit: (data: ChannelOutputData) => void;
 };
 
 const CreateChannelForm = ({
@@ -184,7 +154,7 @@ const CreateChannelForm = ({
     return (
       paginationData.deviceGroups?.edges
         ?.map((edge) => edge?.node)
-        .filter((node): node is DeviceGroupRecord => node != null) ?? []
+        .filter((node): node is TargetGroup => node != null) ?? []
     );
   }, [paginationData]);
 
@@ -193,16 +163,16 @@ const CreateChannelForm = ({
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<FormData>({
+  } = useForm<ChannelFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(channelSchema),
+    resolver: zodResolver(channelSchema),
   });
 
   const intl = useIntl();
 
   const getTargetGroupLabel = useCallback(
-    (targetGroup: DeviceGroupRecord) => {
+    (targetGroup: TargetGroup) => {
       if (targetGroup.channel === null) {
         return targetGroup.name;
       }
@@ -238,7 +208,15 @@ const CreateChannelForm = ({
     });
   }, [targetGroups]);
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: ChannelFormData) => {
+    const payload: ChannelOutputData = {
+      name: data.name,
+      handle: data.handle,
+      targetGroupIds: data.targetGroups.map((tg) => tg.id),
+    };
+
+    onSubmit(payload);
+  };
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -327,7 +305,5 @@ const CreateChannelForm = ({
     </form>
   );
 };
-
-export type { ChannelData };
 
 export default CreateChannelForm;

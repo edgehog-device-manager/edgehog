@@ -18,33 +18,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { handleSchema, yup } from "@/forms";
+import { DeviceGroupFormData, deviceGroupSchema } from "@/forms/validation";
 
-type DeviceGroupData = {
-  name: string;
-  handle: string;
-  selector: string;
-};
-
-const deviceGroupSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    selector: yup.string().required(),
-  })
-  .required();
-
-const initialData: DeviceGroupData = {
+const initialData: DeviceGroupFormData = {
   name: "",
   handle: "",
   selector: "",
@@ -52,7 +37,7 @@ const initialData: DeviceGroupData = {
 
 type Props = {
   isLoading?: boolean;
-  onSubmit: (data: DeviceGroupData) => void;
+  onSubmit: (data: DeviceGroupFormData) => void;
 };
 
 const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
@@ -60,10 +45,10 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<DeviceGroupData>({
+  } = useForm<DeviceGroupFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(deviceGroupSchema),
+    resolver: zodResolver(deviceGroupSchema),
   });
 
   return (
@@ -135,7 +120,5 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
     </form>
   );
 };
-
-export type { DeviceGroupData };
 
 export default CreateDeviceGroup;

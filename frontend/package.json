@@ -16,7 +16,7 @@
     "@fortawesome/free-brands-svg-icons": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.1",
-    "@hookform/resolvers": "^2.8.3",
+    "@hookform/resolvers": "^5.2.2",
     "@monaco-editor/react": "^4.7.0-rc.0",
     "@tanstack/react-table": "^8.19.2",
     "@types/js-cookie": "^3.0.6",
@@ -63,7 +63,7 @@
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-relay-lite": "^0.8.1",
     "vite-tsconfig-paths": "^4.3.2",
-    "yup": "^1.4.0"
+    "zod": "^4.3.5"
   },
   "scripts": {
     "init": "npm run relay:compile && npm run i18n:compile",

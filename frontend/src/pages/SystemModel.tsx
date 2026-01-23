@@ -45,7 +45,7 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import UpdateSystemModelForm from "@/forms/UpdateSystemModel";
-import type { SystemModelChanges } from "@/forms/UpdateSystemModel";
+import type { SystemModelOutputData } from "@/forms/UpdateSystemModel";
 
 const GET_SYSTEM_MODEL_QUERY = graphql`
   query SystemModel_getSystemModel_Query($systemModelId: ID!) {
@@ -107,7 +107,7 @@ const SystemModelContent = ({
     );
 
   const handleUpdateSystemModel = useCallback(
-    (systemModelChanges: SystemModelChanges) => {
+    (systemModelChanges: SystemModelOutputData) => {
       updateSystemModel({
         variables: { systemModelId, input: systemModelChanges },
         onCompleted(data, errors) {

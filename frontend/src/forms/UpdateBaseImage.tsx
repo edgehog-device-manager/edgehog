@@ -22,20 +22,23 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { baseImageStartingVersionRequirementSchema, yup } from "@/forms";
 
 import type { UpdateBaseImage_BaseImageFragment$key } from "@/api/__generated__/UpdateBaseImage_BaseImageFragment.graphql";
 import type {
   UpdateBaseImage_OptionsFragment$key,
   UpdateBaseImage_OptionsFragment$data,
 } from "@/api/__generated__/UpdateBaseImage_OptionsFragment.graphql";
+import {
+  BaseImageUpdateFormData,
+  baseImageUpdateSchema,
+} from "@/forms/validation";
 
 const UPDATE_BASE_IMAGE_FRAGMENT = graphql`
   fragment UpdateBaseImage_BaseImageFragment on BaseImage {
@@ -64,14 +67,6 @@ const UPDATE_BASE_IMAGE_OPTIONS_FRAGMENT = graphql`
   }
 `;
 
-type FormData = {
-  baseImageCollection: string;
-  version: string;
-  startingVersionRequirement: string;
-  releaseDisplayName: string;
-  description: string;
-};
-
 type LocalizedAttribute = {
   languageTag: string;
   value: string;
@@ -99,17 +94,9 @@ const getLocalizedAttributeValueByLocale = (
   return localizedAttribute ? localizedAttribute.value : "";
 };
 
-const baseImageSchema = yup
-  .object({
-    startingVersionRequirement: baseImageStartingVersionRequirementSchema,
-    releaseDisplayName: yup.string(),
-    description: yup.string(),
-  })
-  .required();
-
 const transformOutputData = (
   locale: string,
-  data: FormData,
+  data: BaseImageUpdateFormData,
 ): BaseImageChanges => ({
   startingVersionRequirement: data.startingVersionRequirement,
   localizedDescriptions: [
@@ -158,7 +145,7 @@ const UpdateBaseImage = ({
     locale,
   );
 
-  const defaultValues = useMemo<FormData>(
+  const defaultValues = useMemo<BaseImageUpdateFormData>(
     () => ({
       baseImageCollection,
       version,
@@ -180,10 +167,10 @@ const UpdateBaseImage = ({
     handleSubmit,
     formState: { errors, isDirty },
     reset,
-  } = useForm<FormData>({
+  } = useForm<BaseImageUpdateFormData>({
     mode: "onTouched",
     defaultValues,
-    resolver: yupResolver(baseImageSchema),
+    resolver: zodResolver(baseImageUpdateSchema),
   });
 
   const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
@@ -192,7 +179,7 @@ const UpdateBaseImage = ({
     setPrevDefaultValues(defaultValues);
   }
 
-  const onFormSubmit = (data: FormData) =>
+  const onFormSubmit = (data: BaseImageUpdateFormData) =>
     onSubmit(transformOutputData(locale, data));
 
   const canSubmit = !isLoading && isDirty;
@@ -210,11 +197,7 @@ const UpdateBaseImage = ({
             />
           }
         >
-          <Form.Control
-            {...register("baseImageCollection")}
-            plaintext
-            readOnly
-          />
+          <Form.Control value={baseImageCollection} plaintext readOnly />
         </FormRow>
         <FormRow
           id="update-base-image-form-file"
@@ -247,7 +230,7 @@ const UpdateBaseImage = ({
             />
           }
         >
-          <Form.Control {...register("version")} plaintext readOnly />
+          <Form.Control value={version} plaintext readOnly />
         </FormRow>
         <FormRow
           id="update-base-image-form-starting-version-requirement"

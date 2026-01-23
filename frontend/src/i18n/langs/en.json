@@ -1808,9 +1808,6 @@
   "forms.CreateDeploymentCampaign.maxFailurePercentageLabel": {
     "defaultMessage": "Max Failures <muted>(%)</muted>"
   },
-  "forms.CreateDeploymentCampaign.maxFailurePercentageValidationLabel": {
-    "defaultMessage": "Max Failures"
-  },
   "forms.CreateDeploymentCampaign.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
   },
@@ -1846,9 +1843,6 @@
   },
   "forms.CreateDeploymentCampaign.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
-  },
-  "forms.CreateDeploymentCampaign.requestTimeoutSecondsValidationLabel": {
-    "defaultMessage": "Request Timeout"
   },
   "forms.CreateDeploymentCampaign.selectApplication": {
     "defaultMessage": "Select an application..."
@@ -1964,9 +1958,6 @@
   "forms.CreateUpdateCampaign.maxFailurePercentageLabel": {
     "defaultMessage": "Max Failures <muted>(%)</muted>"
   },
-  "forms.CreateUpdateCampaign.maxFailurePercentageValidationLabel": {
-    "defaultMessage": "Max Failures"
-  },
   "forms.CreateUpdateCampaign.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
   },
@@ -1988,14 +1979,8 @@
   "forms.CreateUpdateCampaign.otaRequestRetriesLabel": {
     "defaultMessage": "Request Retries"
   },
-  "forms.CreateUpdateCampaign.requestRetriesLabel": {
-    "defaultMessage": "Request Retries"
-  },
   "forms.CreateUpdateCampaign.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
-  },
-  "forms.CreateUpdateCampaign.requestTimeoutSecondsValidationLabel": {
-    "defaultMessage": "Request Timeout"
   },
   "forms.CreateUpdateCampaign.selectBaseImageCollection": {
     "defaultMessage": "Select a base image collection..."
@@ -2216,27 +2201,6 @@
   },
   "forms.UpdateSystemModel.submitButton": {
     "defaultMessage": "Update"
-  },
-  "labels.cpuPeriodLabel": {
-    "defaultMessage": "CPU Period (µs)"
-  },
-  "labels.cpuQuotaLabel": {
-    "defaultMessage": "CPU Quota (µs)"
-  },
-  "labels.cpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Realtime Period (µs)"
-  },
-  "labels.cpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Realtime Runtime (µs)"
-  },
-  "labels.memoryLabel": {
-    "defaultMessage": "Memory (bytes)"
-  },
-  "labels.memoryReservationLabel": {
-    "defaultMessage": "Memory Reservation (bytes)"
-  },
-  "labels.memorySwapLabel": {
-    "defaultMessage": "Memory Swap (bytes)"
   },
   "modem.RegistrationStatus.NotRegistered": {
     "defaultMessage": "Not Registered"
@@ -2948,9 +2912,6 @@
   "pages.volume.options": {
     "defaultMessage": "Options"
   },
-  "validation.array.min": {
-    "defaultMessage": "Does not have enough values."
-  },
   "validation.baseImageFile.required": {
     "defaultMessage": "Required."
   },
@@ -2966,38 +2927,41 @@
   "validation.cpuQuotaPeriod.format": {
     "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
   },
-  "validation.env.expectedObject": {
-    "defaultMessage": "Expected an object with key-value pairs"
-  },
-  "validation.env.invalidIsNested": {
-    "defaultMessage": "Environment variable values cannot be nested."
-  },
-  "validation.env.invalidJson": {
-    "defaultMessage": "Must be a valid JSON string."
-  },
   "validation.extraHosts.format": {
     "defaultMessage": "Invalid extra host format. Use 'hostname:IP' or 'hostname:host-gateway'."
   },
   "validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
   },
+  "validation.invalidJson": {
+    "defaultMessage": "Must be a valid JSON string."
+  },
+  "validation.json.expectedObject": {
+    "defaultMessage": "Expected an object with key-value pairs"
+  },
+  "validation.json.invalidIsNested": {
+    "defaultMessage": "Values cannot be nested."
+  },
+  "validation.memoryReservationInvalid": {
+    "defaultMessage": "Memory Reservation must be set lower than Memory in order to take precedence."
+  },
   "validation.memorySwapInvalid": {
     "defaultMessage": "Memory Swap must be greater than/equal to Memory."
   },
   "validation.number": {
-    "defaultMessage": "{label} must be a number."
+    "defaultMessage": "Must be a number."
   },
-  "validation.number.integer": {
-    "defaultMessage": "{label} must be an integer."
+  "validation.number.int": {
+    "defaultMessage": "Decimals are not allowed."
   },
   "validation.number.max": {
-    "defaultMessage": "{label} must be less than or equal to {max}."
+    "defaultMessage": "Must be less than or equal to {max}."
   },
   "validation.number.min": {
-    "defaultMessage": "{label} must be greater than or equal to {min}."
+    "defaultMessage": "Must be greater than or equal to {min}."
   },
   "validation.number.positive": {
-    "defaultMessage": "{label} must be a positive number."
+    "defaultMessage": "Must be a positive number."
   },
   "validation.portBindings.format": {
     "defaultMessage": "Invalid port binding format. Use [host_port:]container_port[/protocol]."
@@ -3013,5 +2977,8 @@
   },
   "validation.unique": {
     "defaultMessage": "Duplicate value."
+  },
+  "validation.volumeTarget.duplicate": {
+    "defaultMessage": "Duplicate target value."
   }
 }

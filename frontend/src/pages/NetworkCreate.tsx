@@ -27,7 +27,8 @@ import type { NetworkCreate_networkCreate_Mutation } from "@/api/__generated__/N
 import Alert from "@/components/Alert";
 import Page from "@/components/Page";
 import { Route, useNavigate } from "@/Navigation";
-import CreateNetworkForm, { NetworkData } from "@/forms/CreateNetwork";
+import CreateNetworkForm from "@/forms/CreateNetwork";
+import { NetworkFormData } from "@/forms/validation";
 
 const CREATE_NETWORK_MUTATION = graphql`
   mutation NetworkCreate_networkCreate_Mutation($input: CreateNetworkInput!) {
@@ -47,8 +48,8 @@ const NetworkCreatePage = () => {
     useMutation<NetworkCreate_networkCreate_Mutation>(CREATE_NETWORK_MUTATION);
 
   const handleCreateNetwork = useCallback(
-    (network: NetworkData) => {
-      const input: NetworkData = {
+    (network: NetworkFormData) => {
+      const input: NetworkFormData = {
         label: network.label.trim(),
         internal: network.internal,
         enableIpv6: network.enableIpv6,

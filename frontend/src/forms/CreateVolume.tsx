@@ -19,7 +19,7 @@
  */
 
 import React from "react";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, FieldError, useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
@@ -29,33 +29,17 @@ import Form from "@/components/Form";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
 
-import { yup, optionsSchema } from "@/forms";
 import MonacoJsonEditor from "@/components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
+import { VolumeFormData, volumeSchema } from "@/forms/validation";
 
-type VolumeData = {
-  label: string;
-  driver?: string;
-  options?: string;
-};
-
-const volumeSchema = yup
-  .object({
-    label: yup.string().required(),
-    driver: yup.string().nullable(),
-    options: optionsSchema.nullable().notRequired(),
-  })
-  .required();
-
-const initialData: VolumeData = {
+const initialData: VolumeFormData = {
   label: "",
-  driver: "",
-  options: "",
 };
 
 interface Props {
   isLoading?: boolean;
-  onSubmit: (data: VolumeData) => void;
+  onSubmit: (data: VolumeFormData) => void;
 }
 
 const ErrorMessage = ({ error }: { error?: FieldError }) => {
@@ -73,10 +57,10 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<VolumeData>({
+  } = useForm<VolumeFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(volumeSchema),
+    resolver: zodResolver(volumeSchema),
   });
 
   return (
@@ -160,5 +144,4 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
   );
 });
 
-export type { VolumeData };
 export default CreateVolume;

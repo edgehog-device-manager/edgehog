@@ -18,11 +18,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "@/components/Button";
 import CloseButton from "@/components/CloseButton";
@@ -34,7 +34,6 @@ import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { messages, yup, handleSchema } from "@/forms";
 
 import type {
   UpdateSystemModel_SystemModelFragment$key,
@@ -45,6 +44,10 @@ import type {
   UpdateSystemModel_OptionsFragment$data,
 } from "@/api/__generated__/UpdateSystemModel_OptionsFragment.graphql";
 import assets from "@/assets";
+import {
+  SystemModelUpdateFormData,
+  systemModelUpdateSchema,
+} from "@/forms/validation";
 
 const UPDATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment UpdateSystemModel_SystemModelFragment on SystemModel {
@@ -76,7 +79,7 @@ const UPDATE_SYSTEM_MODEL_OPTIONS_FRAGMENT = graphql`
   }
 `;
 
-type SystemModelChanges = Partial<{
+type SystemModelOutputData = Partial<{
   name: string;
   handle: string;
   localizedDescriptions: {
@@ -87,17 +90,6 @@ type SystemModelChanges = Partial<{
   pictureFile: File;
   pictureUrl: null;
 }>;
-
-type PartNumber = { value: string };
-
-type FormData = {
-  name: string;
-  handle: string;
-  description: string;
-  hardwareType: string;
-  partNumbers: PartNumber[];
-  pictureFile?: FileList | null;
-};
 
 type LocalizedDescriptions =
   UpdateSystemModel_SystemModelFragment$data["localizedDescriptions"];
@@ -116,57 +108,30 @@ const getDescriptionByLocale = (
   return localizedDescription ? localizedDescription.value : "";
 };
 
-const systemModelSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    description: yup.string(),
-    hardwareType: yup.string().required(),
-    partNumbers: yup
-      .array()
-      .required()
-      .min(1)
-      .of(
-        yup
-          .object({ value: yup.string().required() })
-          .required()
-          .test("unique", messages.unique.id, (partNumber, context) => {
-            const itemIndex = context.parent.indexOf(partNumber);
-            return !context.parent.find(
-              (pn: PartNumber, index: number) =>
-                pn.value === partNumber.value && index < itemIndex,
-            );
-          }),
-      ),
-  })
-  .required();
-
 const transformInputData = (
   data: UpdateSystemModel_SystemModelFragment$data,
   locale: Locale,
-): FormData => {
+): SystemModelUpdateFormData => {
   const { localizedDescriptions, partNumbers, hardwareType, ...rest } = data;
   const description = getDescriptionByLocale(localizedDescriptions, locale);
 
   return {
     ...rest,
     description,
-    hardwareType: hardwareType?.name || "",
-    partNumbers:
-      partNumbers.edges && partNumbers.edges.length > 0
-        ? (data.partNumbers.edges?.map(({ node }) => ({
-            value: node.partNumber,
-          })) ?? [])
-        : [{ value: "" }], // default with at least one empty part number
+    hardwareType: hardwareType?.name,
+    pictureFile: null,
+    partNumbers: partNumbers.edges?.map(({ node }) => ({
+      value: node.partNumber,
+    })) ?? [{ value: "" }], // default with at least one empty part number
   };
 };
 
 const transformOutputData = (
   systemModel: UpdateSystemModel_SystemModelFragment$data,
   locale: Locale,
-  data: FormData,
-): SystemModelChanges => {
-  const diff: SystemModelChanges = {};
+  data: SystemModelUpdateFormData,
+): SystemModelOutputData => {
+  const diff: SystemModelOutputData = {};
   if (systemModel.name !== data.name) {
     diff.name = data.name;
   }
@@ -210,7 +175,7 @@ type Props = {
   systemModelRef: UpdateSystemModel_SystemModelFragment$key;
   optionsRef: UpdateSystemModel_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: SystemModelChanges) => void;
+  onSubmit: (data: SystemModelOutputData) => void;
   onDelete: () => void;
 };
 
@@ -234,10 +199,10 @@ const UpdateSystemModelForm = ({
     handleSubmit,
     formState: { isDirty, errors },
     watch,
-  } = useForm<FormData>({
+  } = useForm<SystemModelUpdateFormData>({
     mode: "onTouched",
     defaultValues: transformInputData(systemModel, locale),
-    resolver: yupResolver(systemModelSchema),
+    resolver: zodResolver(systemModelUpdateSchema),
   });
 
   const partNumbers = useFieldArray({
@@ -245,7 +210,7 @@ const UpdateSystemModelForm = ({
     name: "partNumbers",
   });
 
-  const onFormSubmit = (data: FormData) =>
+  const onFormSubmit = (data: SystemModelUpdateFormData) =>
     onSubmit(transformOutputData(systemModel, locale, data));
   const canSubmit = !isLoading && isDirty;
   const canReset = isDirty && !isLoading;
@@ -455,6 +420,6 @@ const UpdateSystemModelForm = ({
   );
 };
 
-export type { SystemModelChanges };
+export type { SystemModelOutputData };
 
 export default UpdateSystemModelForm;

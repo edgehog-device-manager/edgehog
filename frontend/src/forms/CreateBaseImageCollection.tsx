@@ -23,7 +23,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "react-select";
 
 import Button from "@/components/Button";
@@ -32,7 +32,6 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
-import { handleSchema, yup } from "@/forms";
 import { BaseImageCollectionRecord } from "@/pages/BaseImageCollectionCreate";
 
 import type {
@@ -40,6 +39,10 @@ import type {
   CreateBaseImageCollection_OptionsFragment$key,
 } from "@/api/__generated__/CreateBaseImageCollection_OptionsFragment.graphql";
 import type { CreateBaseImageCollection_PaginationQuery } from "@/api/__generated__/CreateBaseImageCollection_PaginationQuery.graphql";
+import {
+  BaseImageCollectionFormData,
+  baseImageCollectionSchema,
+} from "@/forms/validation";
 
 const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   fragment CreateBaseImageCollection_OptionsFragment on RootQueryType
@@ -63,36 +66,22 @@ type SystemModelRecord = NonNullable<
   >["edges"]
 >[number]["node"];
 
-type FormData = {
-  name: string;
-  handle: string;
-  systemModel: SystemModelRecord;
-};
-
-type BaseImageCollectionData = {
+type BaseImageCollectionOutputData = {
   name: string;
   handle: string;
   systemModelId: string;
 };
 
-const baseImageCollectionSchema = yup
-  .object({
-    name: yup.string().required(),
-    handle: handleSchema.required(),
-    systemModel: yup
-      .object({ id: yup.string().required(), name: yup.string().required() })
-      .required(),
-  })
-  .required();
-
-const initialData: FormData = {
+const initialData: BaseImageCollectionFormData = {
   name: "",
   handle: "",
   systemModel: { id: "", name: "" },
 };
 
-const transformOutputData = (data: FormData): BaseImageCollectionData => {
-  const baseImageCollection: BaseImageCollectionData = {
+const transformOutputData = (
+  data: BaseImageCollectionFormData,
+): BaseImageCollectionOutputData => {
+  const baseImageCollection: BaseImageCollectionOutputData = {
     name: data.name,
     handle: data.handle,
     systemModelId: data.systemModel.id,
@@ -103,7 +92,7 @@ const transformOutputData = (data: FormData): BaseImageCollectionData => {
 type Props = {
   optionsRef: CreateBaseImageCollection_OptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: BaseImageCollectionData) => void;
+  onSubmit: (data: BaseImageCollectionOutputData) => void;
   baseImageCollections?: BaseImageCollectionRecord[];
 };
 
@@ -176,10 +165,10 @@ const CreateBaseImageCollectionForm = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<BaseImageCollectionFormData>({
     mode: "onTouched",
     defaultValues: initialData,
-    resolver: yupResolver(baseImageCollectionSchema),
+    resolver: zodResolver(baseImageCollectionSchema),
   });
 
   const isSystemModelUsedByOtherBaseImageCollection = (
@@ -242,7 +231,8 @@ const CreateBaseImageCollectionForm = ({
           defaultMessage: "No system models available",
         });
 
-  const onFormSubmit = (data: FormData) => onSubmit(transformOutputData(data));
+  const onFormSubmit = (data: BaseImageCollectionFormData) =>
+    onSubmit(transformOutputData(data));
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -338,6 +328,6 @@ const CreateBaseImageCollectionForm = ({
   );
 };
 
-export type { BaseImageCollectionData };
+export type { BaseImageCollectionOutputData };
 
 export default CreateBaseImageCollectionForm;

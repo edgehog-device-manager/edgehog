@@ -31,7 +31,7 @@ import { ContainersTable_ContainerFragment$data } from "@/api/__generated__/Cont
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Icon from "@/components/Icon";
-import { ReleaseInputData } from "@/forms/CreateRelease";
+import { ReleaseFormData } from "@/forms/validation";
 
 type DeviceMappingsData = NonNullable<
   ContainersTable_ContainerFragment$data["containers"]["edges"]
@@ -44,13 +44,13 @@ type ReadOnlyFormInputProps = {
 type EditableFormInputProps = {
   containerIndex: number;
   deviceMappingsForm: UseFieldArrayReturn<
-    ReleaseInputData,
+    ReleaseFormData,
     `containers.${number}.deviceMappings`,
     "id"
   >;
   canAddDeviceMapping: boolean;
-  errorFeedback: FieldErrors<ReleaseInputData>;
-  register: UseFormRegister<ReleaseInputData>;
+  errorFeedback: FieldErrors<ReleaseFormData>;
+  register: UseFormRegister<ReleaseFormData>;
   removeDeviceMapping: (dmIndex: number) => void;
 };
 
