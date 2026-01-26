@@ -28,7 +28,7 @@ defmodule Edgehog.Devices.Reconciler do
   require Logger
 
   def start_link(opts \\ []) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+    GenServer.start_link(__MODULE__, opts, name: name())
   end
 
   @impl GenServer
@@ -79,10 +79,36 @@ defmodule Edgehog.Devices.Reconciler do
     {:noreply, state}
   end
 
+  @impl GenServer
+  def handle_info({:EXIT, _pid, {:name_conflict, {_name, _value}, _registry, _winning_pid}}, state) do
+    _ =
+      Logger.warning(
+        "Received a :name_conflict signal from the outer space, maybe a netsplit occurred? Gracefully shutting down.",
+        tag: "RPC exit"
+      )
+
+    {:stop, :shutdown, state}
+  end
+
+  @impl GenServer
+  def handle_info({:EXIT, _pid, :shutdown}, state) do
+    _ =
+      Logger.warning(
+        "Received a :shutdown signal from the outer space, maybe the supervisor is mad? Gracefully shutting down.",
+        tag: "RPC exit"
+      )
+
+    {:stop, :shutdown, state}
+  end
+
   defp spawn_reconciliation_task(tenant) do
     Task.Supervisor.async(Reconciler.Supervisor, fn ->
       Logger.info("Reconciling tenant #{tenant.slug}")
       Reconciler.Core.reconcile(tenant)
     end)
+  end
+
+  defp name do
+    {:via, Horde.Registry, {Edgehog.Devices.Reconciler.Registry, :auto}}
   end
 end
