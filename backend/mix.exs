@@ -128,7 +128,8 @@ defmodule Edgehog.MixProject do
       {:sourceror, "~> 1.10", only: [:dev, :test]},
       {:phoenix_pubsub, "~> 2.0"},
       {:absinthe_phoenix, "~> 2.0"},
-      {:libcluster, "~> 3.5"}
+      {:libcluster, "~> 3.5"},
+      {:horde, "~> 0.10"}
     ]
   end
 
