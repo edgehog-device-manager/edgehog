@@ -416,6 +416,15 @@ spec:
 
             - name: ADMIN_JWT_PUBLIC_KEY_PATH
               value: /keys/admin_public.pem
+
+            # In case you want to deploy multiple edgehog-backend instances, it
+            # is advised to configure the clustering strategy for edgehog.
+            # - name: EDGEHOG_CLUSTERING_STRATEGY
+            #   value: kubernetes
+            # - name: EDGEHOG_CLUSTERING_KUBERNETES_SELECTOR
+            #   value: app=edgehog-backend
+            # - name: EDGEHOG_CLUSTERING_KUBERNETES_NAMESPACE
+            #   value: edgehog
           volumeMounts:
             - name: admin-public-key
               mountPath: /keys

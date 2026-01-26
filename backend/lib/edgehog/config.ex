@@ -103,13 +103,13 @@ defmodule Edgehog.Config do
     type: ClusteringStrategy,
     default: :none
 
-  @envdoc "The endpoint label to query to get other edgehog instances. Defaults to `app=edgehog`."
+  @envdoc "The endpoint label to query to get other edgehog instances. Defaults to `app=edgehog-backend`."
   app_env :edgehog_clustering_kubernetes_selector,
           :edgehog,
           :edgehog_clustering_kubernetes_selector,
           os_env: "EDGEHOG_CLUSTERING_KUBERNETES_SELECTOR",
           type: :binary,
-          default: "app=edgehog"
+          default: "app=edgehog-backend"
 
   @envdoc "The Kubernetes namespace to use when `kubernetes` Erlang clustering strategy is used. Defaults to `edgehog`."
   app_env :clustering_kubernetes_namespace, :edgehog, :clustering_kubernetes_namespace,
