@@ -71,7 +71,8 @@ defmodule Edgehog.Application do
       # Reconciler init
       Edgehog.Tenants.Reconciler.Starter,
       # Start Containers reconciler
-      {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
+      {Horde.Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
+      {Horde.Registry, keys: :unique, name: Edgehog.Devices.Reconciler.Registry},
       # Container Handlers registries
       Edgehog.Containers.Supervisor,
       # Start the Endpoint (http/https)
