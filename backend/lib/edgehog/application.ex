@@ -67,7 +67,8 @@ defmodule Edgehog.Application do
       # Start the Tenant Reconciler Supervisor
       {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start Containers reconciler
-      {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
+      {Horde.Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
+      {Horde.Registry, keys: :unique, name: Edgehog.Devices.Reconciler.Registry},
       # Start the Endpoint (http/https)
       Endpoint,
       # Fetch Astarte devices
