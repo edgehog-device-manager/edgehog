@@ -40,3 +40,9 @@ updates:
     directory: "/backend"
     schedule:
       interval: "monthly"
+
+  # Doc
+  - package-ecosystem: mix
+    directory: "/doc"
+    schedule:
+      interval: "monthly"
