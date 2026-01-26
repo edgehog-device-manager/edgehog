@@ -9,6 +9,12 @@
       "component": "backend",
       "include-component-in-tag": false
     },
+    "doc": {
+      "package-name": "doc",
+      "release-type": "elixir",
+      "component": "doc",
+      "include-component-in-tag": false
+    },
     "frontend": {
       "package-name": "frontend",
       "release-type": "node",
@@ -21,7 +27,7 @@
       "type": "linked-versions",
       "groupName": "edgehog",
       "tagName": "v${version}",
-      "components": ["backend", "frontend"]
+      "components": ["backend", "frontend", "doc"]
     }
   ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
