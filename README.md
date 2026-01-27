@@ -4,6 +4,9 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 
+![Backend CI](https://github.com/edgehog-device-manager/edgehog/actions/workflows/backend-ci.yaml/badge.svg)
+![Frontend CI](https://github.com/edgehog-device-manager/edgehog/actions/workflows/frontend-ci.yaml/badge.svg)
+
 # Edgehog
 
 **Edgehog** is an Open Source Device Manager Platform designed to manage the entire lifecycle of your IoT device fleet. Built with **Elixir** and powered by **Astarte**, it provides a robust, scalable, and secure environment for maintaining connected embedded systems.
