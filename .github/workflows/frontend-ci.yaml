@@ -1,0 +1,64 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2021 - 2025 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: Build and Test Frontend
+
+on:
+  # Run when pushing to stable branches
+  push:
+    paths:
+      - "frontend/**"
+      - ".tool-versions"
+      - ".github/workflows/frontend-ci.yaml"
+    branches:
+      - "main"
+      - "release-*"
+  # Run on pull requests matching apps
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".tool-versions"
+      - ".github/workflows/frontend-ci.yaml"
+
+jobs:
+  warmup-cache:
+    uses: ./.github/workflows/frontend-warmup-cache.yaml
+  codeql:
+    uses: ./.github/workflows/frontend-codeql-analysis.yaml
+  docker-build:
+    uses: ./.github/workflows/frontend-docker-build.yaml
+  build:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/frontend-build.yaml
+  formatter:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/frontend-format.yaml
+  translations:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/frontend-translations.yaml
+  linting:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/frontend-linting.yaml
+  types:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/frontend-types.yaml
+  coverage:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/frontend-coverage.yaml

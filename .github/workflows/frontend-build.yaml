@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: "CodeQL"
-
+name: frontend check types
 on:
   workflow_call:
   workflow_dispatch:
-  schedule:
-    - cron: "33 5 * * 6"
 permissions:
   contents: read
 defaults:
@@ -34,25 +31,21 @@ defaults:
 env:
   MIX_ENV: test
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
-  analyze:
-    name: Analyze
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["javascript"]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           show-progress: false
-      - uses: github/codeql-action/init@v4
+      - uses: actions/setup-node@v6
         with:
-          languages: ${{ matrix.language }}
-      - uses: github/codeql-action/analyze@v4
+          node-version-file: .tool-versions
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - name: Npm install
+        working-directory: frontend
+        run: npm i
+      - name: Build
+        working-directory: frontend
+        run: npm run build

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: "CodeQL"
-
+name: frontend check translations
 on:
   workflow_call:
   workflow_dispatch:
-  schedule:
-    - cron: "33 5 * * 6"
 permissions:
   contents: read
 defaults:
@@ -34,25 +31,28 @@ defaults:
 env:
   MIX_ENV: test
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
-  analyze:
-    name: Analyze
+  check-translations:
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["javascript"]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           show-progress: false
-      - uses: github/codeql-action/init@v4
+      - uses: actions/setup-node@v6
+        id: cache-npm
         with:
-          languages: ${{ matrix.language }}
-      - uses: github/codeql-action/analyze@v4
+          node-version-file: .tool-versions
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - name: npm install
+        working-directory: frontend
+        run: npm i
+      - name: Extract and verify translations
+        working-directory: frontend
+        run: |
+          cp src/i18n/langs/en.json src/i18n/langs/en.json.bak
+          npm run i18n:extract
+          diff -I '^--' src/i18n/langs/en.json.bak src/i18n/langs/en.json
+      - name: Compare keys ordering and line count for all language files
+        working-directory: frontend
+        run: npm run i18n:check
