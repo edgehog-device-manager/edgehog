@@ -900,6 +900,12 @@ type LocalizedAttribute {
   languageTag: String!
 }
 
+type base_image_collection_result {
+  created: BaseImageCollection
+  updated: BaseImageCollection
+  destroyed: ID
+}
+
 "The result of the :delete_base_image_collection mutation"
 type DeleteBaseImageCollectionResult {
   "The record that was successfully deleted"
@@ -1090,6 +1096,12 @@ type BaseImageCollection implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): BaseImageConnection!
+}
+
+type base_image_result {
+  created: BaseImage
+  updated: BaseImage
+  destroyed: ID
 }
 
 "The result of the :delete_base_image mutation"
@@ -5005,6 +5017,15 @@ type Tag {
   name: String!
 }
 
+"The result of the :cancel_ota_operation mutation"
+type CancelOtaOperationResult {
+  "The successful result of the mutation"
+  result: OtaOperation
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 "The result of the :create_manual_ota_operation mutation"
 type CreateManualOtaOperationResult {
   "The successful result of the mutation"
@@ -5239,6 +5260,12 @@ type TenantInfo {
   defaultLocale: String!
 }
 
+type channels_result {
+  created: Channel
+  updated: Channel
+  destroyed: ID
+}
+
 "The result of the :delete_channel mutation"
 type DeleteChannelResult {
   "The record that was successfully deleted"
@@ -5450,6 +5477,11 @@ type Channel implements Node {
   ): CampaignConnection!
 }
 
+type campaign_target_changed_result {
+  created: CampaignTarget
+  updated: CampaignTarget
+}
+
 enum CampaignTargetSortField {
   ID
   STATUS
@@ -5612,6 +5644,25 @@ type CampaignTarget {
   deployment: Deployment
 
   otaOperation: OtaOperation
+}
+
+type campaign_result {
+  updated: Campaign
+}
+
+type update_campaigns_result {
+  created: Campaign
+  updated: Campaign
+}
+
+type deployment_campaigns_result {
+  created: Campaign
+  updated: Campaign
+}
+
+type campaigns_result {
+  created: Campaign
+  updated: Campaign
 }
 
 "The result of the :create_campaign mutation"
@@ -6261,6 +6312,9 @@ type RootMutationType {
     input: CreateManualOtaOperationInput!
   ): CreateManualOtaOperationResult
 
+  "Cancels an OTA update operation"
+  cancelOtaOperation(id: ID!): CancelOtaOperationResult
+
   "Creates a new device group."
   createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupResult
 
@@ -6399,10 +6453,48 @@ type RootMutationType {
 }
 
 type RootSubscriptionType {
+  campaigns(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+  ): campaigns_result
+  deploymentCampaigns(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    types: [String!]
+  ): deployment_campaigns_result
+  updateCampaigns(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    types: [String!]
+  ): update_campaigns_result
+  campaign(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    id: ID!
+  ): campaign_result
+  campaignTargetChanged(
+    "A filter to limit the results"
+    filter: CampaignTargetFilterInput
+  ): campaign_target_changed_result
+  channels(
+    "A filter to limit the results"
+    filter: ChannelFilterInput
+  ): channels_result
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput
   ): device_changed_result
+  baseImage(
+    "A filter to limit the results"
+    filter: BaseImageFilterInput
+  ): base_image_result
+  baseImageCollection(
+    "A filter to limit the results"
+    filter: BaseImageCollectionFilterInput
+  ): base_image_collection_result
 }
 
 """
