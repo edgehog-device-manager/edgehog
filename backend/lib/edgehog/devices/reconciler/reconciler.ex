@@ -36,6 +36,9 @@ defmodule Edgehog.Devices.Reconciler do
     enabled = Keyword.get(opts, :enabled, true)
     state = %{enabled: enabled}
 
+    if enabled,
+      do: Phoenix.PubSub.subscribe(Edgehog.PubSub, "tenants:created")
+
     {:ok, state, {:continue, :start_reconciliation}}
   end
 
@@ -52,6 +55,14 @@ defmodule Edgehog.Devices.Reconciler do
   @impl GenServer
   def handle_continue(:start_reconciliation, %{enabled: false} = state) do
     Logger.info("Not starting device reconciliation in test environment.")
+
+    {:noreply, state}
+  end
+
+  @impl GenServer
+  def handle_info(%Phoenix.Socket.Broadcast{} = notification, state) do
+    tenant = notification.payload.data
+    spawn_reconciliation_task(tenant)
 
     {:noreply, state}
   end
