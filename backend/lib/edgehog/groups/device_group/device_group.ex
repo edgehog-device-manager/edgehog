@@ -33,6 +33,14 @@ defmodule Edgehog.Groups.DeviceGroup do
     type :device_group
 
     # TODO: paginate `device` relationship with relay
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :device_group do
+        action_types [:create, :update, :destroy]
+      end
+    end
   end
 
   actions do

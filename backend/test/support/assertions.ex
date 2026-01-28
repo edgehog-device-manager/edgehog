@@ -51,4 +51,18 @@ defmodule Edgehog.Assertions do
              } = var!(unquote(push))
     end
   end
+
+  defmacro assert_destroyed(query, destroyed_id, push) do
+    quote do
+      assert %{
+               result: %{
+                 data: %{
+                   unquote(query) => %{
+                     "destroyed" => var!(unquote(destroyed_id))
+                   }
+                 }
+               }
+             } = var!(unquote(push))
+    end
+  end
 end
