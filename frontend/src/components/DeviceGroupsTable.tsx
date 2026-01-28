@@ -20,8 +20,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  useSubscription,
+} from "react-relay/hooks";
 import _ from "lodash";
+
+import { ConnectionHandler } from "relay-runtime";
 
 import type { DeviceGroupsTable_PaginationQuery } from "@/api/__generated__/DeviceGroupsTable_PaginationQuery.graphql";
 import type {
@@ -50,6 +56,40 @@ const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
           selector
         }
       }
+    }
+  }
+`;
+
+const DEVICE_GROUP_CREATED_SUBSCRIPTION = graphql`
+  subscription DeviceGroupsTable_deviceGroupEvent_created_Subscription {
+    deviceGroup {
+      created {
+        id
+        name
+        handle
+        selector
+      }
+    }
+  }
+`;
+
+const DEVICE_GROUP_UPDATED_SUBSCRIPTION = graphql`
+  subscription DeviceGroupsTable_deviceGroupEvent_updated_Subscription {
+    deviceGroup {
+      updated {
+        id
+        name
+        handle
+        selector
+      }
+    }
+  }
+`;
+
+const DEVICE_GROUP_DESTROYED_SUBSCRIPTION = graphql`
+  subscription DeviceGroupsTable_deviceGroupEvent_destroyed_Subscription {
+    deviceGroup {
+      destroyed
     }
   }
 `;
@@ -122,6 +162,114 @@ const DeviceGroupsTable = ({
   >(DEVICE_GROUPS_TABLE_FRAGMENT, deviceGroupsRef);
   const [searchText, setSearchText] = useState<string | null>(null);
 
+  const normalizedSearchText = useMemo(
+    () => (searchText ?? "").trim(),
+    [searchText],
+  );
+
+  const connectionFilter = useMemo(() => {
+    if (normalizedSearchText === "") return undefined;
+
+    return {
+      or: [
+        { name: { ilike: `%${normalizedSearchText}%` } },
+        { handle: { ilike: `%${normalizedSearchText}%` } },
+        { selector: { ilike: `%${normalizedSearchText}%` } },
+      ],
+    };
+  }, [normalizedSearchText]);
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: DEVICE_GROUP_CREATED_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const groupEvent = store.getRootField("deviceGroup");
+          const newGroup = groupEvent?.getLinkedRecord("created");
+          if (!newGroup) return;
+
+          if (normalizedSearchText !== "") {
+            const search = normalizedSearchText.toLowerCase();
+            const name = String(newGroup.getValue("name") ?? "").toLowerCase();
+            const handle = String(
+              newGroup.getValue("handle") ?? "",
+            ).toLowerCase();
+            const selector = String(
+              newGroup.getValue("selector") ?? "",
+            ).toLowerCase();
+
+            if (
+              !name.includes(search) &&
+              !handle.includes(search) &&
+              !selector.includes(search)
+            ) {
+              return;
+            }
+          }
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "DeviceGroupsTable_deviceGroups",
+            connectionFilter ? { filter: connectionFilter } : undefined,
+          );
+          if (!connection) return;
+
+          const newGroupId = newGroup.getDataID();
+          const edges = connection.getLinkedRecords("edges") ?? [];
+          const alreadyPresent = edges.some(
+            (edge) => edge.getLinkedRecord("node")?.getDataID() === newGroupId,
+          );
+          if (alreadyPresent) return;
+
+          const edge = ConnectionHandler.createEdge(
+            store,
+            connection,
+            newGroup,
+            "DeviceGroupEdge",
+          );
+
+          ConnectionHandler.insertEdgeBefore(connection, edge);
+        },
+      }),
+      [connectionFilter, normalizedSearchText],
+    ),
+  );
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: DEVICE_GROUP_UPDATED_SUBSCRIPTION,
+        variables: {},
+      }),
+      [],
+    ),
+  );
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: DEVICE_GROUP_DESTROYED_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const groupEvent = store.getRootField("deviceGroup");
+          const destroyedId = groupEvent?.getValue("destroyed");
+          if (!destroyedId || typeof destroyedId !== "string") return;
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "DeviceGroupsTable_deviceGroups",
+            connectionFilter ? { filter: connectionFilter } : undefined,
+          );
+          if (!connection) return;
+
+          ConnectionHandler.deleteNode(connection, destroyedId);
+        },
+      }),
+      [connectionFilter],
+    ),
+  );
+
   const debounceRefetch = useMemo(
     () =>
       _.debounce((text: string) => {
@@ -153,9 +301,9 @@ const DeviceGroupsTable = ({
 
   useEffect(() => {
     if (searchText !== null) {
-      debounceRefetch(searchText);
+      debounceRefetch(normalizedSearchText);
     }
-  }, [debounceRefetch, searchText]);
+  }, [debounceRefetch, normalizedSearchText, searchText]);
 
   const loadNextDeviceGroups = useCallback(() => {
     if (hasNext && !isLoadingNext) {
