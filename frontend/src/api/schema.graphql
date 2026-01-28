@@ -900,6 +900,12 @@ type LocalizedAttribute {
   languageTag: String!
 }
 
+type base_image_collection_result {
+  created: BaseImageCollection
+  updated: BaseImageCollection
+  destroyed: ID
+}
+
 "The result of the :delete_base_image_collection mutation"
 type DeleteBaseImageCollectionResult {
   "The record that was successfully deleted"
@@ -1090,6 +1096,12 @@ type BaseImageCollection implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): BaseImageConnection!
+}
+
+type base_image_result {
+  created: BaseImage
+  updated: BaseImage
+  destroyed: ID
 }
 
 "The result of the :delete_base_image mutation"
@@ -4716,6 +4728,12 @@ type ForwarderConfig {
   secureSessions: Boolean!
 }
 
+type device_group_result {
+  created: DeviceGroup
+  updated: DeviceGroup
+  destroyed: ID
+}
+
 "The result of the :delete_device_group mutation"
 type DeleteDeviceGroupResult {
   "The record that was successfully deleted"
@@ -6411,10 +6429,22 @@ type RootMutationType {
 }
 
 type RootSubscriptionType {
+  deviceGroup(
+    "A filter to limit the results"
+    filter: DeviceGroupFilterInput
+  ): device_group_result
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput
   ): device_changed_result
+  baseImage(
+    "A filter to limit the results"
+    filter: BaseImageFilterInput
+  ): base_image_result
+  baseImageCollection(
+    "A filter to limit the results"
+    filter: BaseImageCollectionFilterInput
+  ): base_image_collection_result
 }
 
 """
