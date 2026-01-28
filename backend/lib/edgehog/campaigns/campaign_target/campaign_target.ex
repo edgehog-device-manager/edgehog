@@ -34,6 +34,7 @@ defmodule Edgehog.Campaigns.CampaignTarget do
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Campaigns.CampaignTarget.Changes
+  alias Edgehog.Campaigns.CampaignTarget.Changes.TriggerCampaignSubscription
   alias Edgehog.Containers.Release
 
   resource do
@@ -151,25 +152,34 @@ defmodule Edgehog.Campaigns.CampaignTarget do
     # Generic updates
 
     update :mark_as_in_progress do
+      require_atomic? false
+
       change set_attribute(:status, :in_progress)
+      change TriggerCampaignSubscription
     end
 
     update :mark_as_failed do
+      require_atomic? false
+
       argument :completion_timestamp, :utc_datetime_usec do
         default &DateTime.utc_now/0
       end
 
       change set_attribute(:completion_timestamp, arg(:completion_timestamp))
       change set_attribute(:status, :failed)
+      change TriggerCampaignSubscription
     end
 
     update :mark_as_successful do
+      require_atomic? false
+
       argument :completion_timestamp, :utc_datetime_usec do
         default &DateTime.utc_now/0
       end
 
       change set_attribute(:completion_timestamp, arg(:completion_timestamp))
       change set_attribute(:status, :successful)
+      change TriggerCampaignSubscription
     end
 
     update :increase_retry_count do
@@ -177,7 +187,11 @@ defmodule Edgehog.Campaigns.CampaignTarget do
     end
 
     update :update_latest_attempt do
+      require_atomic? false
+
       accept [:latest_attempt]
+
+      change TriggerCampaignSubscription
     end
 
     # Deployment related updates
@@ -199,6 +213,7 @@ defmodule Edgehog.Campaigns.CampaignTarget do
 
       change set_attribute(:status, :in_progress)
       change Changes.LinkDeployment
+      change TriggerCampaignSubscription
     end
 
     update :set_deployment do
@@ -212,6 +227,7 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       require_atomic? false
 
       change set_attribute(:status, :in_progress)
+      change TriggerCampaignSubscription
     end
 
     # Firmware upgrade related updates

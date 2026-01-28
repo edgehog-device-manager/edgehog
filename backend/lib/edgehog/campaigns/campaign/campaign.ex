@@ -37,10 +37,41 @@ defmodule Edgehog.Campaigns.Campaign do
     type :campaign
 
     paginate_relationship_with campaign_targets: :relay
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :campaigns do
+        action_types [:create, :update]
+      end
+
+      subscribe :deployment_campaigns do
+        action_types [:create, :update]
+        read_action :deployment_campaigns
+      end
+
+      subscribe :update_campaigns do
+        action_types [:create, :update]
+        read_action :update_campaigns
+      end
+
+      subscribe :campaign do
+        action_types [:update]
+        read_action :get_by_id
+        relay_id_translations id: :campaign
+      end
+    end
   end
 
   actions do
     defaults [:read]
+
+    read :get_by_id do
+      argument :id, :uuid, allow_nil?: false
+      get? true
+
+      filter expr(id == ^arg(:id))
+    end
 
     read :read_all_resumable do
       multitenancy :allow_global
@@ -48,14 +79,14 @@ defmodule Edgehog.Campaigns.Campaign do
       filter expr(status in [:idle, :in_progress, :pausing])
     end
 
-    read :update_campaign do
+    read :update_campaigns do
       argument :types, {:array, :atom}
       multitenancy :allow_global
       pagination keyset?: true
       filter expr(campaign_mechanism[:type] in [:firmware_upgrade])
     end
 
-    read :deployment_campaign do
+    read :deployment_campaigns do
       argument :types, {:array, :atom}
       multitenancy :allow_global
       pagination keyset?: true
@@ -138,6 +169,15 @@ defmodule Edgehog.Campaigns.Campaign do
 
       validate {Validations.ValidateStatus, operation: :resume}
       change Changes.StartExecution
+    end
+
+    update :trigger_subscription do
+      description """
+      This is a nop action used only to trigger subscriptions.
+      """
+
+      require_atomic? false
+      change fn changeset, _context -> changeset end
     end
 
     destroy :destroy do

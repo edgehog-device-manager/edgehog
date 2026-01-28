@@ -40,13 +40,13 @@ defmodule Edgehog.Campaigns do
         description "Returns the desired campaign."
       end
 
-      list Campaign, :update_campaigns, :update_campaign do
+      list Campaign, :update_campaigns, :update_campaigns do
         description "Returns all update campaigns."
         paginate_with :keyset
         relay? true
       end
 
-      list Campaign, :deployment_campaigns, :deployment_campaign do
+      list Campaign, :deployment_campaigns, :deployment_campaigns do
         description "Returns all deployment campaigns."
         paginate_with :keyset
         relay? true
