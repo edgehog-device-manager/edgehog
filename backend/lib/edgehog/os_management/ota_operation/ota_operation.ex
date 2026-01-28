@@ -96,6 +96,25 @@ defmodule Edgehog.OSManagement.OTAOperation do
       change Changes.SendUpdateRequest
     end
 
+    create :manual_from_collection do
+      description "Initiates an OTA update by selecting one from an available collection"
+
+      accept [:base_image_url]
+
+      argument :device_id, :id do
+        description "The ID identifying the Device the OTA Operation will be sent to"
+      end
+
+      change manage_relationship(:device_id, :device,
+               type: :append,
+               eager_validate_with: Edgehog.Devices
+             )
+
+      change set_attribute(:manual?, true)
+
+      change Changes.SendUpdateRequest
+    end
+
     destroy :destroy do
       require_atomic? false
 
@@ -240,6 +259,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
 
     publish :create_managed, [[:id, "*"]]
     publish :manual, [[:id, "*"]]
+    publish :manual_from_collection, [[:id, "*"]], event: "manual"
 
     publish :mark_as_timed_out, [[:id, "*"]]
     publish :update_status, [[:id, "*"]]

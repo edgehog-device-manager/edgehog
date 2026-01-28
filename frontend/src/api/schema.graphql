@@ -5005,8 +5005,8 @@ type Tag {
   name: String!
 }
 
-"The result of the :create_manual_ota_operation mutation"
-type CreateManualOtaOperationResult {
+"The result of the :create_manual_ota_operation_existing_base_image mutation"
+type CreateManualOtaOperationExistingBaseImageResult {
   "The successful result of the mutation"
   result: OtaOperation
 
@@ -5014,7 +5014,24 @@ type CreateManualOtaOperationResult {
   errors: [MutationError!]!
 }
 
-input CreateManualOtaOperationInput {
+input CreateManualOtaOperationExistingBaseImageInput {
+  "The URL of the base image being installed on the device"
+  baseImageUrl: String!
+
+  "The ID identifying the Device the OTA Operation will be sent to"
+  deviceId: ID
+}
+
+"The result of the :create_manual_ota_operation_no_existing_base_image mutation"
+type CreateManualOtaOperationNoExistingBaseImageResult {
+  "The successful result of the mutation"
+  result: OtaOperation
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateManualOtaOperationNoExistingBaseImageInput {
   "The ID identifying the Device the OTA Operation will be sent to"
   deviceId: ID!
 
@@ -6257,9 +6274,14 @@ type RootMutationType {
   deleteChannel(id: ID!): DeleteChannelResult
 
   "Initiates an OTA update with a user provided OS image"
-  createManualOtaOperation(
-    input: CreateManualOtaOperationInput!
-  ): CreateManualOtaOperationResult
+  createManualOtaOperationNoExistingBaseImage(
+    input: CreateManualOtaOperationNoExistingBaseImageInput!
+  ): CreateManualOtaOperationNoExistingBaseImageResult
+
+  "Initiates an OTA update by selecting one from an available collection"
+  createManualOtaOperationExistingBaseImage(
+    input: CreateManualOtaOperationExistingBaseImageInput!
+  ): CreateManualOtaOperationExistingBaseImageResult
 
   "Creates a new device group."
   createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupResult

@@ -18,24 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
+defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationExistingBaseImageTest do
   use EdgehogWeb.GraphqlCase
 
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Astarte.Device.OTARequestV1Mock
-  alias Edgehog.OSManagement.EphemeralImageMock
   alias Edgehog.OSManagement.OTAOperation
 
-  describe "createManualOtaOperation mutation" do
+  describe "createManualOtaOperationExistingBaseImage mutation" do
     test "creates OTA operation with valid data", %{tenant: tenant} do
       device = device_fixture(tenant: tenant)
       device_id = AshGraphql.Resource.encode_relay_id(device)
       astarte_device_id = device.device_id
 
       base_image_url = "https://example.com/image.bin"
-
-      expect(EphemeralImageMock, :upload, fn _, _, _ -> {:ok, base_image_url} end)
 
       expect(OTARequestV1Mock, :update, fn _client, ^astarte_device_id, _uuid, ^base_image_url ->
         :ok
@@ -45,7 +42,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
         create_ota_operation_mutation(
           tenant: tenant,
           device_id: device_id,
-          base_image_file: %Plug.Upload{path: "test/fixtures/image.bin", filename: "image.bin"}
+          base_image_url: base_image_url
         )
 
       ota_operation = extract_result!(result)
@@ -68,40 +65,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       assert %{message: "could not be found"} = extract_error!(result)
     end
 
-    test "fails if the base image upload fails", %{tenant: tenant} do
-      expect(EphemeralImageMock, :upload, fn _, _, _ ->
-        {:error, :no_space_left_in_the_internet}
-      end)
-
-      result = create_ota_operation_mutation(tenant: tenant)
-
-      assert %{fields: [:base_image_file], message: "failed to upload"} = extract_error!(result)
-    end
-
-    test "cleans up the ephemeral image if an API error is returned", %{tenant: tenant} do
-      base_image_url = "https://example.com/image.bin"
-
-      EphemeralImageMock
-      |> expect(:upload, fn _, _, _ -> {:ok, base_image_url} end)
-      |> expect(:delete, fn _, _, _ -> :ok end)
-
-      expect(OTARequestV1Mock, :update, fn _, _, _, _ ->
-        {:error, api_error(status: 418, message: "I'm a teapot")}
-      end)
-
-      result = create_ota_operation_mutation(tenant: tenant)
-
-      assert %{code: "astarte_api_error", message: message} = extract_error!(result)
-      assert message =~ "418"
-      assert message =~ "I'm a teapot"
-    end
-
     test "publishes on PubSub aftering creating the OTA operation", %{tenant: tenant} do
       assert :ok = Phoenix.PubSub.subscribe(Edgehog.PubSub, "ota_operations:*")
 
-      expect(EphemeralImageMock, :upload, fn _, _, _ -> {:ok, "base_image_url"} end)
-
-      expect(OTARequestV1Mock, :update, fn _client, _astarte_device_id, _uuid, "base_image_url" ->
+      expect(OTARequestV1Mock, :update, fn _client, _astarte_device_id, _uuid, "https://example.com/image.bin" ->
         :ok
       end)
 
@@ -118,8 +85,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
 
   defp create_ota_operation_mutation(opts) do
     default_document = """
-    mutation CreateManualOtaOperation($input: CreateManualOtaOperationInput!) {
-      createManualOtaOperation(input: $input) {
+    mutation CreateManualOtaOperationExistingBaseImage($input: CreateManualOtaOperationExistingBaseImageInput!) {
+      createManualOtaOperationExistingBaseImage(input: $input) {
         result {
           id
           baseImageUrl
@@ -143,31 +110,26 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
-    {base_image_file, opts} =
-      Keyword.pop_lazy(opts, :base_image_file, fn ->
-        %Plug.Upload{path: "/tmp/ota.bin", filename: "ota.bin"}
-      end)
+    {base_image_url, opts} =
+      Keyword.pop(opts, :base_image_file, "https://example.com/image.bin")
 
     input = %{
       "deviceId" => device_id,
-      "base_image_file" => base_image_file && "base_image_file"
+      "base_image_url" => base_image_url
     }
 
     variables = %{"input" => input}
 
     document = Keyword.get(opts, :document, default_document)
 
-    context =
-      add_upload(%{tenant: tenant}, "base_image_file", base_image_file)
-
     Absinthe.run!(document, EdgehogWeb.Schema,
       variables: variables,
-      context: context
+      context: %{tenant: tenant}
     )
   end
 
   defp extract_error!(result) do
-    assert is_nil(result[:data]["createManualOtaOperation"])
+    assert is_nil(result[:data]["createManualOtaOperationExistingBaseImage"])
     assert %{errors: [error]} = result
 
     error
@@ -176,7 +138,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
   defp extract_result!(result) do
     assert %{
              data: %{
-               "createManualOtaOperation" => %{
+               "createManualOtaOperationExistingBaseImage" => %{
                  "result" => ota_operation
                }
              }
@@ -195,15 +157,5 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
     :ok = Ash.destroy!(fixture)
 
     id
-  end
-
-  defp api_error(opts) do
-    status = Keyword.get(opts, :status, 500)
-    message = Keyword.get(opts, :message, "Generic error")
-
-    %Astarte.Client.APIError{
-      status: status,
-      response: %{"errors" => %{"detail" => message}}
-    }
   end
 end

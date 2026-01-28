@@ -31,7 +31,13 @@ defmodule Edgehog.OSManagement do
     root_level_errors? true
 
     mutations do
-      create OTAOperation, :create_manual_ota_operation, :manual do
+      create OTAOperation, :create_manual_ota_operation_no_existing_base_image, :manual do
+        relay_id_translations input: [device_id: :device]
+      end
+
+      create OTAOperation,
+             :create_manual_ota_operation_existing_base_image,
+             :manual_from_collection do
         relay_id_translations input: [device_id: :device]
       end
 
