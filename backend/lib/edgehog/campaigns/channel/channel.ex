@@ -46,6 +46,14 @@ defmodule Edgehog.Campaigns.Channel do
     error_handler {ErrorHandler, :handle_error, []}
 
     paginate_relationship_with target_groups: :relay, campaigns: :relay
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :channels do
+        action_types [:create, :update, :destroy]
+      end
+    end
   end
 
   actions do
