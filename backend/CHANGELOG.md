@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.11.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.10.0...v0.11.0) (2026-01-29)
+
+
+### Features
+
+* add calculation to expose Base Image name ([d3affa5](https://github.com/edgehog-device-manager/edgehog/commit/d3affa57af400440a26bccc6c29b3fb9c3534b23))
+* Additional information on deployment events ([ba27473](https://github.com/edgehog-device-manager/edgehog/commit/ba2747342f3b048a695f81deab856ce943aa39ab))
+* GraphQL subscription for device updates in table ([#1118](https://github.com/edgehog-device-manager/edgehog/issues/1118)) ([be6a629](https://github.com/edgehog-device-manager/edgehog/commit/be6a6295f2767cf3ae766984aedbc29833a95a06))
+* implement GraphQL subscriptions for device events ([32badc9](https://github.com/edgehog-device-manager/edgehog/commit/32badc94a5705f3003ce66c1837430863a0217e3))
+* OTA updates can be canceled ([1daed60](https://github.com/edgehog-device-manager/edgehog/commit/1daed60e4fa6af858208f4b3fe3c3863006168c3)), closes [#266](https://github.com/edgehog-device-manager/edgehog/issues/266)
+* show `partNumber` and `serialNumber` in `Device` page if available ([#1123](https://github.com/edgehog-device-manager/edgehog/issues/1123)) ([c2261bb](https://github.com/edgehog-device-manager/edgehog/commit/c2261bb7397c4ca956013d245dc16a537e308267)), closes [#226](https://github.com/edgehog-device-manager/edgehog/issues/226)
+
+
+### Bug Fixes
+
+* include tenant in socket options ([d3c8921](https://github.com/edgehog-device-manager/edgehog/commit/d3c89212ca7c4fb25cab293985da144eac3f9188))
+* unify device creation and update subscriptions ([c09e7de](https://github.com/edgehog-device-manager/edgehog/commit/c09e7de8d5570cd15f158ade835e9a332c602597))
+
 ## [0.10.0] - 2025-12-09
 
 ### Fixed
