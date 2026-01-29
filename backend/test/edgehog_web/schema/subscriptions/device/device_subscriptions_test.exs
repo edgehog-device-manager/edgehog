@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Subscriptions.Device.DeviceSubscriptionsTest do
 
   import Edgehog.DevicesFixtures
 
-  require IEx
-
   describe "Device subscription" do
     test "receive data on device creation", %{socket: socket, tenant: tenant} do
       subscribe(socket)
@@ -34,7 +32,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.Device.DeviceSubscriptionsTest do
 
       assert_push "subscription:data", push
 
-      assert_created device_data, push
+      assert_created "deviceChanged", device_data, push
 
       assert device_data["id"] == AshGraphql.Resource.encode_relay_id(device)
       assert device_data["name"] == device.name
@@ -51,7 +49,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.Device.DeviceSubscriptionsTest do
       |> Ash.update!(tenant: tenant)
 
       assert_push "subscription:data", push
-      assert_updated device_data, push
+      assert_updated "deviceChanged", device_data, push
 
       assert device_data["id"] == AshGraphql.Resource.encode_relay_id(device)
       assert device_data["name"] == new_name
