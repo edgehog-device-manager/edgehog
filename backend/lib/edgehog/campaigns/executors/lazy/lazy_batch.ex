@@ -56,6 +56,40 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
   """
   def handle_event(event_type, event_content, state, data)
 
+  # Control events
+
+  def handle_event(:cast, :pause, _state, %Data{mechanism: nil}) do
+    # Cannot pause before initialization has loaded the mechanism
+    :keep_state_and_data
+  end
+
+  def handle_event(:cast, :pause, state, data)
+      when state in [
+             :initialization,
+             :execution,
+             :wait_for_available_slot,
+             :wait_for_target,
+             :wait_for_campaign_completion
+           ] do
+    {new_data, actions} = pause_campaign(data)
+
+    {:next_state, :paused, new_data, actions}
+  end
+
+  def handle_event(:cast, :pause, _state, _data) do
+    :keep_state_and_data
+  end
+
+  def handle_event(:cast, :resume, :paused, %Data{mechanism: mechanism} = data) when mechanism != nil do
+    {new_data, actions} = resume_campaign_from_pause(data)
+
+    {:next_state, :execution, new_data, actions}
+  end
+
+  def handle_event(:cast, :resume, _state, _data) do
+    :keep_state_and_data
+  end
+
   # State: :wait_for_start_execution (for testing)
 
   def handle_event(:enter, _old_state, :wait_for_start_execution, _data) do
@@ -106,51 +140,26 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
         :in_progress ->
           # Campaign already in progress, resume it
           {:keep_state, data, internal_event(:resume_campaign)}
+
+        :paused ->
+          # Campaign explicitly paused, prepare it without starting new work
+          {:keep_state, data, internal_event(:resume_paused_campaign)}
       end
     end
   end
 
   def handle_event(:internal, :resume_campaign, :initialization, data) do
-    %Data{
-      campaign_id: campaign_id,
-      tenant_id: tenant_id,
-      mechanism: mechanism
-    } = data
+    {new_data, actions} =
+      prepare_in_progress_state(data, schedule_timeouts?: true, fetch_next?: true)
 
-    # TODO: query Astarte to verify that the cached status is consistent with our local status
-    # (possibly spawning a separate task that queries Astarte and updates deployments)
-    failed_count = MechanismCore.get_failed_target_count(mechanism, tenant_id, campaign_id)
-
-    in_progress_count =
-      MechanismCore.get_in_progress_target_count(mechanism, tenant_id, campaign_id)
-
-    available_slots = MechanismCore.available_slots(mechanism, in_progress_count)
-
-    new_data = %{
-      data
-      | failed_count: failed_count,
-        in_progress_count: in_progress_count,
-        available_slots: available_slots
-    }
-
-    timeout_actions =
-      mechanism
-      |> MechanismCore.list_in_progress_targets(tenant_id, campaign_id)
-      |> Enum.map(fn in_progress_target ->
-        operation_id = MechanismCore.get_operation_id(mechanism, in_progress_target)
-
-        # Side effect: receive updates for the target so we can track it
-        MechanismCore.subscribe_to_operation_updates!(mechanism, operation_id)
-
-        # Return the retry timeout action for the pending target
-        setup_retry_timeout(tenant_id, in_progress_target, mechanism)
-      end)
-
-    # Fetch the next target
-    actions = [internal_event(:fetch_next_target) | timeout_actions]
-
-    # Start the rollout
     {:next_state, :execution, new_data, actions}
+  end
+
+  def handle_event(:internal, :resume_paused_campaign, :initialization, data) do
+    {new_data, actions} =
+      prepare_in_progress_state(data, schedule_timeouts?: false, fetch_next?: false)
+
+    {:next_state, :paused, new_data, actions}
   end
 
   def handle_event(:internal, :start_campaign, :initialization, data) do
@@ -174,6 +183,11 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
   def handle_event(:enter, _old_state, :execution, data) do
     Logger.info("Campaign #{data.campaign_id}: entering :execution state")
 
+    :keep_state_and_data
+  end
+
+  def handle_event(:internal, :fetch_next_target, :paused, _data) do
+    # Do not start new targets while paused
     :keep_state_and_data
   end
 
@@ -213,6 +227,11 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     end
   end
 
+  def handle_event(:internal, {:execute_on_target, _target}, :paused, _data) do
+    # Drop any already enqueued rollout events while paused
+    :keep_state_and_data
+  end
+
   def handle_event(:internal, {:execute_on_target, target}, :execution, data) do
     %Data{mechanism: mechanism} = data
 
@@ -235,6 +254,17 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     end
   end
 
+  def handle_event(:internal, {:already_in_desired_state, target}, :paused, data) do
+    %Data{mechanism: mechanism} = data
+
+    Logger.info("Device #{target.device_id} already in desired state")
+    _ = MechanismCore.mark_target_as_successful!(mechanism, target)
+
+    new_data = free_up_slot(data)
+
+    {:keep_state, new_data, internal_event(:operation_completion)}
+  end
+
   def handle_event(:internal, {:already_in_desired_state, target}, :execution, data) do
     %Data{mechanism: mechanism} = data
 
@@ -247,6 +277,16 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
 
     # We stay in this state and fetch the next target
     {:keep_state, new_data, internal_event(:fetch_next_target)}
+  end
+
+  def handle_event(:internal, {:operation_started, target}, :paused, data) do
+    %{tenant_id: tenant_id, mechanism: mechanism} = data
+
+    operation_id = MechanismCore.get_operation_id(mechanism, target)
+    MechanismCore.subscribe_to_operation_updates!(mechanism, operation_id)
+
+    # Ensure no retry timers remain scheduled while paused
+    {:keep_state_and_data, cancel_retry_timeout(tenant_id, operation_id)}
   end
 
   def handle_event(:internal, {:operation_started, target}, :execution, data) do
@@ -266,6 +306,18 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     {:keep_state_and_data, actions}
   end
 
+  def handle_event(:internal, {:temporary_error, target, reason}, :paused, data) do
+    %Data{mechanism: mechanism} = data
+
+    reason
+    |> MechanismCore.error_message(mechanism, target.device_id)
+    |> Logger.notice()
+
+    new_data = free_up_slot(data)
+
+    {:keep_state, new_data, internal_event(:operation_completion)}
+  end
+
   def handle_event(:internal, {:temporary_error, target, reason}, :execution, data) do
     %Data{mechanism: mechanism} = data
 
@@ -283,6 +335,27 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
 
     # We stay in this state and fetch the next target
     {:keep_state, new_data, internal_event(:fetch_next_target)}
+  end
+
+  def handle_event(:internal, {:operation_failure, target, reason}, :paused, data) do
+    %Data{mechanism: mechanism} = data
+
+    reason
+    |> MechanismCore.error_message(mechanism, target.device_id)
+    |> Logger.notice()
+
+    _ = MechanismCore.mark_target_as_failed!(mechanism, target)
+
+    new_data =
+      data
+      |> add_failure()
+      |> free_up_slot()
+
+    if failure_threshold_exceeded?(new_data, mechanism) do
+      {:next_state, :campaign_failure, new_data}
+    else
+      {:keep_state, new_data, internal_event(:operation_completion)}
+    end
   end
 
   def handle_event(:internal, {:operation_failure, target, reason}, :execution, data) do
@@ -329,6 +402,11 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     {:keep_state_and_data, action}
   end
 
+  def handle_event(:state_timeout, _event, :paused, _data) do
+    # Ignore periodic checks while paused
+    :keep_state_and_data
+  end
+
   def handle_event(:state_timeout, :check_target, :wait_for_target, data) do
     # Check to see if we have any new targets available
     {:next_state, :execution, data, internal_event(:fetch_next_target)}
@@ -338,6 +416,14 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
 
   def handle_event(:enter, _old_state, :wait_for_campaign_completion, data) do
     Logger.info("Campaign #{data.campaign_id}: entering the :wait_for_campaign_completion state")
+
+    :keep_state_and_data
+  end
+
+  # State: :paused
+
+  def handle_event(:enter, _old_state, :paused, data) do
+    Logger.info("Campaign #{data.campaign_id}: entering the :paused state")
 
     :keep_state_and_data
   end
@@ -448,27 +534,50 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
 
   # Common Event Handlers
 
-  def handle_event(:internal, :operation_completion, state, data) do
-    cond do
-      state == :wait_for_available_slot ->
-        # If we were waiting for a free slot, we fetch the next target
-        {:next_state, :execution, data, internal_event(:fetch_next_target)}
+  def handle_event(:internal, :operation_completion, :wait_for_available_slot, data) do
+    # If we were waiting for a free slot, we fetch the next target
+    {:next_state, :execution, data, internal_event(:fetch_next_target)}
+  end
 
-      state == :wait_for_campaign_completion and not targets_in_progress?(data) ->
-        # We finished updating everything, go to the final state for the finishing touches
-        {:next_state, :campaign_success, data}
-
-      state == :campaign_failure and not targets_in_progress?(data) ->
-        # We received all the updates for the remaining targets, we can terminate
-        terminate_executor(data.campaign_id)
-
-      true ->
-        # Otherwise, we keep doing what we were doing
-        :keep_state_and_data
+  def handle_event(:internal, :operation_completion, :paused, data) do
+    if not targets_in_progress?(data) and
+         not MechanismCore.has_idle_targets?(data.mechanism, data.tenant_id, data.campaign_id) do
+      # We finished all work while paused, so we can wrap up the campaign
+      {:next_state, :campaign_success, data}
+    else
+      :keep_state_and_data
     end
   end
 
+  def handle_event(:internal, :operation_completion, :wait_for_campaign_completion, data) do
+    if targets_in_progress?(data) do
+      :keep_state_and_data
+    else
+      # We finished updating everything, go to the final state for the finishing touches
+      {:next_state, :campaign_success, data}
+    end
+  end
+
+  def handle_event(:internal, :operation_completion, :campaign_failure, data) do
+    if targets_in_progress?(data) do
+      :keep_state_and_data
+    else
+      # We received all the updates for the remaining targets, we can terminate
+      terminate_executor(data.campaign_id)
+    end
+  end
+
+  def handle_event(:internal, :operation_completion, _state, _data) do
+    # Otherwise, we keep doing what we were doing
+    :keep_state_and_data
+  end
+
   # Retry Logic
+
+  def handle_event({:timeout, {:retry, _operation_id}}, _target_id, :paused, _data) do
+    # Ignore retry timeouts while paused
+    :keep_state_and_data
+  end
 
   def handle_event({:timeout, {:retry, _operation_id}}, target_id, _state, data) do
     %Data{tenant_id: tenant_id, mechanism: mechanism} = data
@@ -480,6 +589,11 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     else
       {:keep_state_and_data, internal_event({:retry_threshold_exceeded, target})}
     end
+  end
+
+  def handle_event(:internal, {:retry_target, _target}, :paused, _data) do
+    # Avoid sending retries while paused
+    :keep_state_and_data
   end
 
   def handle_event(:internal, {:retry_target, target}, _state, data) do
@@ -534,6 +648,108 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
   end
 
   # Helper Functions
+
+  def pause_campaign(%Data{} = data) do
+    %Data{mechanism: mechanism, tenant_id: tenant_id, campaign_id: campaign_id} = data
+
+    campaign = MechanismCore.get_campaign!(mechanism, tenant_id, campaign_id)
+    _ = Campaigns.mark_campaign_paused!(campaign)
+
+    Logger.info("Campaign #{campaign_id}: pausing rollout")
+
+    {new_data, _actions} =
+      prepare_in_progress_state(data, schedule_timeouts?: false, fetch_next?: false)
+
+    actions = cancel_retry_timeouts_for_in_progress_targets(new_data)
+
+    {new_data, actions}
+  end
+
+  def resume_campaign_from_pause(%Data{} = data) do
+    %Data{mechanism: mechanism, tenant_id: tenant_id, campaign_id: campaign_id} = data
+
+    campaign = MechanismCore.get_campaign!(mechanism, tenant_id, campaign_id)
+    _ = Campaigns.mark_campaign_resumed!(campaign)
+
+    Logger.info("Campaign #{campaign_id}: resuming rollout")
+
+    prepare_in_progress_state(data, schedule_timeouts?: true, fetch_next?: true)
+  end
+
+  def prepare_in_progress_state(%Data{} = data, opts \\ []) do
+    schedule_timeouts? = Keyword.get(opts, :schedule_timeouts?, true)
+    fetch_next? = Keyword.get(opts, :fetch_next?, true)
+
+    %Data{tenant_id: tenant_id, campaign_id: campaign_id, mechanism: mechanism} = data
+
+    refreshed_data = refresh_state_metrics(data)
+
+    timeout_actions =
+      mechanism
+      |> MechanismCore.list_in_progress_targets(tenant_id, campaign_id)
+      |> Enum.map(fn in_progress_target ->
+        operation_id = MechanismCore.get_operation_id(mechanism, in_progress_target)
+
+        MechanismCore.subscribe_to_operation_updates!(mechanism, operation_id)
+
+        if schedule_timeouts? do
+          setup_retry_timeout(tenant_id, in_progress_target, mechanism)
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    actions =
+      if fetch_next? do
+        [internal_event(:fetch_next_target) | timeout_actions]
+      else
+        timeout_actions
+      end
+
+    {refreshed_data, actions}
+  end
+
+  def refresh_state_metrics(%Data{} = data) do
+    %Data{mechanism: mechanism, tenant_id: tenant_id, campaign_id: campaign_id} = data
+
+    failed_count =
+      MechanismCore.get_failed_target_count(
+        mechanism,
+        tenant_id,
+        campaign_id
+      )
+
+    in_progress_count =
+      MechanismCore.get_in_progress_target_count(
+        mechanism,
+        tenant_id,
+        campaign_id
+      )
+
+    available_slots =
+      MechanismCore.available_slots(
+        mechanism,
+        in_progress_count
+      )
+
+    %{
+      data
+      | failed_count: failed_count,
+        in_progress_count: in_progress_count,
+        available_slots: available_slots
+    }
+  end
+
+  def cancel_retry_timeouts_for_in_progress_targets(%Data{} = data) do
+    %Data{mechanism: mechanism, tenant_id: tenant_id, campaign_id: campaign_id} = data
+
+    mechanism
+    |> MechanismCore.list_in_progress_targets(tenant_id, campaign_id)
+    |> Enum.map(fn target ->
+      operation_id = MechanismCore.get_operation_id(mechanism, target)
+
+      cancel_retry_timeout(tenant_id, operation_id)
+    end)
+  end
 
   def setup_retry_timeout(tenant_id, target, mechanism) do
     # Create a generic timeout identified by the Operation (Deployment or Update) ID

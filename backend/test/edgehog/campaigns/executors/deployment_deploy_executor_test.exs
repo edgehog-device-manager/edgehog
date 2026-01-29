@@ -581,6 +581,91 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
     end
   end
 
+  describe "pause and resume deployment deploy executor" do
+    test "pause suppresses new deployment requests and resume restarts rollout", %{tenant: tenant} do
+      max_updates = 3
+
+      campaign =
+        campaign_with_targets_fixture(8,
+          mechanism_type: :deployment_deploy,
+          campaign_mechanism: [max_in_progress_operations: max_updates],
+          tenant: tenant
+        )
+
+      # Expect initial max_updates deployment requests
+      init_ref = expect_deployment_requests_and_send_sync(max_updates)
+
+      pid = start_executor!(campaign)
+
+      # Wait for initial requests
+      wait_for_sync!(repeat(init_ref, max_updates))
+
+      # Arrive at waiting for available slot
+      wait_for_state(pid, :wait_for_available_slot)
+
+      # While paused, no further deployment requests should be sent
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
+        :ok
+      end)
+
+      :gen_statem.cast(pid, :pause)
+
+      # Ensure we are in paused state
+      wait_for_state(pid, :paused)
+
+      # Mark one pending deployment as ready (freeing a slot)
+      %{tenant_id: tenant_id, id: campaign_id} = campaign
+
+      [target | _] =
+        MechanismCore.list_in_progress_targets(%DeploymentDeploy{}, tenant_id, campaign_id)
+
+      update_deployment_state!(tenant, target.deployment_id, :started)
+
+      # Stay paused and do not send new requests
+      wait_for_state(pid, :paused)
+
+      # Now resume, expect a new deployment request (to fill freed slot)
+      resume_ref = expect_deployment_requests_and_send_sync(1)
+
+      :gen_statem.cast(pid, :resume)
+
+      wait_for_sync!(resume_ref)
+
+      # Back to waiting for available slot
+      wait_for_state(pid, :wait_for_available_slot)
+    end
+
+    test "campaign can complete while paused", %{tenant: tenant} do
+      campaign =
+        campaign_with_targets_fixture(4,
+          mechanism_type: :deployment_deploy,
+          campaign_mechanism: [max_in_progress_operations: 4],
+          tenant: tenant
+        )
+
+      pid = start_executor!(campaign)
+
+      # Reach completion wait
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      :gen_statem.cast(pid, :pause)
+      wait_for_state(pid, :paused)
+
+      # Monitor the process before marking deployments as completed
+      ref = Process.monitor(pid)
+
+      # Mark all pending as stopped; should terminate with success while paused
+      %DeploymentDeploy{}
+      |> MechanismCore.list_in_progress_targets(campaign.tenant_id, campaign.id)
+      |> Enum.each(fn target ->
+        update_deployment_state!(tenant, target.deployment_id, :stopped)
+      end)
+
+      # Process should terminate normally
+      assert_normal_exit(pid, ref)
+    end
+  end
+
   defp fake_deploy(device, release, tenant) do
     deployment_fixture(
       tenant: tenant,

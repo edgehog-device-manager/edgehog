@@ -721,6 +721,90 @@ defmodule Edgehog.Campaigns.Executors.FirmwareUpgradeExecutorTest do
     end
   end
 
+  describe "pause and resume firmware upgrade executor" do
+    test "pause suppresses new OTA requests and resume restarts rollout", %{tenant: tenant} do
+      max_updates = 3
+
+      base_image = base_image_fixture(tenant: tenant)
+
+      campaign =
+        campaign_with_targets_fixture(8,
+          base_image_id: base_image.id,
+          mechanism_type: :firmware_upgrade,
+          campaign_mechanism: [max_in_progress_operations: max_updates],
+          tenant: tenant
+        )
+
+      # Expect initial max_updates OTA requests
+      init_ref = expect_ota_requests_and_send_sync(max_updates)
+
+      pid = start_executor!(campaign)
+
+      # Wait for initial requests
+      wait_for_sync!(repeat(init_ref, max_updates))
+
+      # Arrive at waiting for available slot
+      wait_for_state(pid, :wait_for_available_slot)
+
+      # While paused, no further OTA requests should be sent
+      expect(OTARequestV1Mock, :update, 0, fn _client, _device_id, _uuid, _url -> :ok end)
+
+      :gen_statem.cast(pid, :pause)
+
+      # Ensure we are in paused state
+      wait_for_state(pid, :paused)
+
+      # Mark one pending operation as success (freeing a slot)
+      %{tenant_id: tenant_id, id: campaign_id} = campaign
+
+      [target | _] =
+        MechanismCore.list_in_progress_targets(%FirmwareUpgrade{}, tenant_id, campaign_id)
+
+      update_ota_operation_status!(tenant, target.ota_operation_id, :success)
+
+      # Stay paused and do not send new requests
+      wait_for_state(pid, :paused)
+
+      # Now resume, expect a new OTA request (to fill freed slot)
+      resume_ref = expect_ota_requests_and_send_sync(1)
+
+      :gen_statem.cast(pid, :resume)
+
+      wait_for_sync!(resume_ref)
+
+      # Back to waiting for available slot
+      wait_for_state(pid, :wait_for_available_slot)
+    end
+
+    test "campaign can complete while paused", %{tenant: tenant} do
+      campaign =
+        campaign_with_targets_fixture(4,
+          mechanism_type: :firmware_upgrade,
+          campaign_mechanism: [max_in_progress_operations: 4],
+          tenant: tenant
+        )
+
+      pid = start_executor!(campaign)
+
+      # Reach completion wait
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      :gen_statem.cast(pid, :pause)
+      wait_for_state(pid, :paused)
+
+      # Mark all pending as success; should terminate with success while paused
+      %FirmwareUpgrade{}
+      |> MechanismCore.list_in_progress_targets(campaign.tenant_id, campaign.id)
+      |> Enum.each(fn target ->
+        update_ota_operation_status!(tenant, target.ota_operation_id, :success)
+      end)
+
+      # Process should terminate normally
+      ref = Process.monitor(pid)
+      assert_normal_exit(pid, ref)
+    end
+  end
+
   # Helper functions
 
   # This functions are used to coordinate the test, waiting for a specific ref or a list of

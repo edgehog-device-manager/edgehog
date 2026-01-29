@@ -144,7 +144,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core, for: Any do
   @doc """
   Return the persisted campaign status.
 
-  Expected values are `:idle`, `:in_progress` or `:finished`.
+  Expected values are `:idle`, `:in_progress`, `:paused` or `:finished`.
 
   ## Parameters
     - mechanism: The campaign mechanism (unused in default implementation).
