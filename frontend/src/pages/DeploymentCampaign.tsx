@@ -18,23 +18,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import {
-  fetchQuery,
   graphql,
-  useFragment,
   usePreloadedQuery,
-  useRelayEnvironment,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
-import type { Subscription } from "relay-runtime";
 
 import type { DeploymentCampaign_getCampaign_Query } from "@/api/__generated__/DeploymentCampaign_getCampaign_Query.graphql";
-import type { DeploymentCampaign_RefreshFragment$key } from "@/api/__generated__/DeploymentCampaign_RefreshFragment.graphql";
 
 import Center from "@/components/Center";
 import Col from "@/components/Col";
@@ -57,7 +53,6 @@ const GET_CAMPAIGN_QUERY = graphql`
       name
       ...DeploymentCampaignForm_CampaignFragment
       ...CampaignStatsChart_CampaignStatsChartFragment
-      ...DeploymentCampaign_RefreshFragment
       ...DeploymentTargetsTabs_SuccessfulFragment @arguments(first: $first)
       ...DeploymentTargetsTabs_FailedFragment @arguments(first: $first)
       ...DeploymentTargetsTabs_InProgressFragment @arguments(first: $first)
@@ -66,65 +61,21 @@ const GET_CAMPAIGN_QUERY = graphql`
   }
 `;
 
-const CAMPAIGN_REFRESH_FRAGMENT = graphql`
-  fragment DeploymentCampaign_RefreshFragment on Campaign {
-    id
-    status
+const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
+  subscription DeploymentCampaign_campaignUpdated_Subscription($id: ID!) {
+    campaign(id: $id) {
+      updated {
+        id
+        status
+        outcome
+        idleTargetCount
+        inProgressTargetCount
+        failedTargetCount
+        successfulTargetCount
+      }
+    }
   }
 `;
-
-type DeploymentCampaignRefreshProps = {
-  campaignRef: DeploymentCampaign_RefreshFragment$key;
-};
-
-const DeploymentCampaignRefresh = ({
-  campaignRef,
-}: DeploymentCampaignRefreshProps) => {
-  const relayEnvironment = useRelayEnvironment();
-  const { id, status } = useFragment(CAMPAIGN_REFRESH_FRAGMENT, campaignRef);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // TODO: use GraphQL subscription (when available) to get deployments about Deployment Campaign
-  const subscriptionRef = useRef<Subscription | null>(null);
-  useEffect(() => {
-    return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (status === "FINISHED" || isRefreshing) {
-      return;
-    }
-    const refreshTimerId = setTimeout(() => {
-      setIsRefreshing(true);
-      subscriptionRef.current = fetchQuery(
-        relayEnvironment,
-        GET_CAMPAIGN_QUERY,
-        {
-          deploymentCampaignId: id,
-          first: RECORDS_TO_LOAD_FIRST,
-        },
-        { fetchPolicy: "network-only" },
-      ).subscribe({
-        complete: () => {
-          setIsRefreshing(false);
-        },
-        error: () => {
-          setIsRefreshing(false);
-        },
-      });
-    }, 10000);
-
-    return () => {
-      clearTimeout(refreshTimerId);
-    };
-  }, [id, status, relayEnvironment, isRefreshing, setIsRefreshing]);
-
-  return isRefreshing ? <Spinner className="ms-2 mx-auto" /> : null;
-};
 
 type DeploymentCampaignContentProps = {
   getCampaignQuery: PreloadedQuery<DeploymentCampaign_getCampaign_Query>;
@@ -157,9 +108,7 @@ const DeploymentCampaignContent = ({
 
   return (
     <Page>
-      <Page.Header title={campaign.name}>
-        <DeploymentCampaignRefresh campaignRef={campaign} />
-      </Page.Header>
+      <Page.Header title={campaign.name} />
       <Page.Main>
         <Row>
           <Col lg={9}>
@@ -178,6 +127,11 @@ const DeploymentCampaignContent = ({
 
 const DeploymentCampaignPage = () => {
   const { deploymentCampaignId = "" } = useParams();
+
+  useSubscription({
+    subscription: CAMPAIGN_UPDATE_SUBSCRIPTION,
+    variables: { id: deploymentCampaignId },
+  });
 
   const [getCampaignQuery, getCampaign] =
     useQueryLoader<DeploymentCampaign_getCampaign_Query>(GET_CAMPAIGN_QUERY);

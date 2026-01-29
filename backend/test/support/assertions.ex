@@ -24,14 +24,13 @@ defmodule Edgehog.Assertions do
   """
   import ExUnit.Assertions
 
-  defmacro assert_created(created_data, push) do
+  defmacro assert_created(query, created_data, push) do
     quote do
       assert %{
                result: %{
                  data: %{
-                   "deviceChanged" => %{
-                     "created" => var!(unquote(created_data)),
-                     "updated" => nil
+                   unquote(query) => %{
+                     "created" => var!(unquote(created_data))
                    }
                  }
                }
@@ -39,14 +38,27 @@ defmodule Edgehog.Assertions do
     end
   end
 
-  defmacro assert_updated(updated_data, push) do
+  defmacro assert_updated(query, updated_data, push) do
     quote do
       assert %{
                result: %{
                  data: %{
-                   "deviceChanged" => %{
-                     "created" => nil,
+                   unquote(query) => %{
                      "updated" => var!(unquote(updated_data))
+                   }
+                 }
+               }
+             } = var!(unquote(push))
+    end
+  end
+
+  defmacro assert_destroyed(root_field, destroyed_data, push) do
+    quote do
+      assert %{
+               result: %{
+                 data: %{
+                   unquote(root_field) => %{
+                     "destroyed" => var!(unquote(destroyed_data))
                    }
                  }
                }
