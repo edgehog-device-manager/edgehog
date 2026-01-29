@@ -5005,6 +5005,15 @@ type Tag {
   name: String!
 }
 
+"The result of the :cancel_ota_operation mutation"
+type CancelOtaOperationResult {
+  "The successful result of the mutation"
+  result: OtaOperation
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 "The result of the :create_manual_ota_operation mutation"
 type CreateManualOtaOperationResult {
   "The successful result of the mutation"
@@ -6260,6 +6269,9 @@ type RootMutationType {
   createManualOtaOperation(
     input: CreateManualOtaOperationInput!
   ): CreateManualOtaOperationResult
+
+  "Cancels an OTA update operation"
+  cancelOtaOperation(id: ID!): CancelOtaOperationResult
 
   "Creates a new device group."
   createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupResult
