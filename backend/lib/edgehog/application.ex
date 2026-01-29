@@ -32,6 +32,7 @@ defmodule Edgehog.Application do
   require Logger
 
   @version Mix.Project.config()[:version]
+  @device_reconciliation_enabled Mix.env() != :test
 
   @impl Application
   def start(_type, _args) do
@@ -44,11 +45,15 @@ defmodule Edgehog.Application do
       Router.Helpers.astarte_trigger_url(Endpoint, :process_event, slug)
     end
 
+    clustering_opts = [Config.clustering_topologies!(), [name: Edgehog.Cluster.Supervisor]]
+
     children = [
       # Prometheus metrics
       Edgehog.PromEx,
       # Start the Ecto repository
       Edgehog.Repo,
+      # Clustering supervisor
+      {Cluster.Supervisor, clustering_opts},
       # Start the Telemetry supervisor
       EdgehogWeb.Telemetry,
       # Start the PubSub system
@@ -62,11 +67,13 @@ defmodule Edgehog.Application do
       # Start the Tenant Reconciler Supervisor
       {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start Containers reconciler
-      {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
+      {Horde.Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
+      {Horde.Registry, keys: :unique, name: Edgehog.Devices.Reconciler.Registry},
       # Start the Endpoint (http/https)
       Endpoint,
       # Fetch Astarte devices
-      {Edgehog.Astarte.DeviceFetcher.Supervisor, restart: :transient},
+      {Task.Supervisor, name: Edgehog.Devices.Reconciler.Supervisor},
+      {Edgehog.Devices.Reconciler, enabled: @device_reconciliation_enabled},
       # Start Absinthe Subscriptions AFTER Endpoint is up
       {Absinthe.Subscription, Endpoint}
     ]

@@ -23,58 +23,49 @@ defmodule Edgehog.DeviceFetcher.CoreTest do
 
   use Edgehog.DataCase, async: true
 
-  import Edgehog.DevicesFixtures
+  import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
   import Mox
 
   alias Edgehog.Astarte.Device.AvailableDevicesMock
-  alias Edgehog.Astarte.DeviceFetcher.Core
+  alias Edgehog.Astarte.Device.DeviceStatusMock
+  alias Edgehog.AstarteFixtures
+  alias Edgehog.Devices.Reconciler.Core
 
-  describe "list astarte devices/1" do
+  describe "Edgehog.Devices.Reconciler.Core.reconcile/1" do
     setup do
+      cluster = cluster_fixture()
       tenant = tenant_fixture()
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
 
-      {:ok, %{tenant: tenant}}
+      {:ok, %{tenant: tenant, realm: realm, cluster: cluster}}
     end
 
-    test "list astarte devices", %{tenant: tenant} do
-      device = device_fixture(tenant: tenant)
+    test "reconciles a non existent device", %{tenant: tenant} do
+      device_id = AstarteFixtures.random_device_id()
 
-      client = :client
-
-      expect(AvailableDevicesMock, :get_device_list, fn _client ->
-        {:ok, [device.device_id]}
+      stub(DeviceStatusMock, :get, fn _client, _device_id ->
+        {:ok, device_status_fixture(%{online: true})}
       end)
 
-      assert {:ok, devices} = Core.get_device_list(client)
+      expect(AvailableDevicesMock, :get_device_list, fn _client ->
+        {:ok, [device_id]}
+      end)
 
-      assert length(devices) == 1
-
-      [astarte_device_id] = devices
-
-      assert device.device_id == astarte_device_id
-    end
-
-    test "get device status", %{tenant: tenant} do
-      device = device_fixture(tenant: tenant)
-
-      client = :client
-
-      expected_device_id = device.device_id
-
-      expect(AvailableDevicesMock, :get_device_status, fn _client, ^expected_device_id ->
+      expect(AvailableDevicesMock, :get_device_status, fn _client, ^device_id ->
         {:ok,
          %{
-           "id" => device.device_id,
+           "id" => device_id,
            "connected" => true
          }}
       end)
 
-      assert {:ok, status} =
-               Core.get_device_status(client, device.device_id)
+      Core.reconcile(tenant)
 
-      assert device.device_id == status["id"]
-      assert true == status["connected"]
+      devices = Ash.read!(Edgehog.Devices.Device, tenant: tenant)
+
+      assert [device] = devices
+      assert %{device_id: ^device_id, online: true} = device
     end
   end
 end

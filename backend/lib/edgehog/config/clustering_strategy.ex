@@ -18,20 +18,29 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.AvailableDevices do
-  @moduledoc false
-  @behaviour Edgehog.Astarte.Device.AvailableDevices.Behaviour
+defmodule Edgehog.Config.ClusteringStrategy do
+  @moduledoc """
+  The clustering strategy that the node should use to discover other nodes.
+  """
 
-  alias Astarte.Client.AppEngine
+  use Skogsra.Type
 
-  def get_device_list(%AppEngine{} = client) do
-    AppEngine.Devices.list(client, stream: true)
+  @strategies [:none, :kubernetes, :docker_compose]
+  @allowed_strategies ~w(none kubernetes docker-compose)
+  @strategy_map @allowed_strategies |> Enum.zip(@strategies) |> Map.new()
+
+  @impl Skogsra.Type
+  def cast(value) when is_binary(value) do
+    Map.fetch(@strategy_map, value)
   end
 
-  def get_device_status(%AppEngine{} = client, device_id) do
-    with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_device_status(client, device_id) do
-      {:ok, data}
-    end
+  @impl Skogsra.Type
+  def cast(value) when value in @strategies do
+    {:ok, value}
+  end
+
+  @impl Skogsra.Type
+  def cast(_) do
+    :error
   end
 end

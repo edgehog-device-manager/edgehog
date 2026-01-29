@@ -26,7 +26,8 @@ defmodule Edgehog.Tenants.Tenant do
     extensions: [
       AshGraphql.Resource,
       AshJsonApi.Resource
-    ]
+    ],
+    notifiers: [Ash.Notifier.PubSub]
 
   alias Ash.Error.Invalid.TenantRequired
   alias Edgehog.Tenants.AstarteConfig
@@ -168,6 +169,14 @@ defmodule Edgehog.Tenants.Tenant do
   identities do
     identity :name, [:name]
     identity :slug, [:slug]
+  end
+
+  pub_sub do
+    prefix "tenants"
+    module EdgehogWeb.Endpoint
+
+    publish :create, ["created"]
+    publish :provision, ["created"]
   end
 
   postgres do
