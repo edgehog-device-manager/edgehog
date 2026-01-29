@@ -38,6 +38,7 @@ const colors: Record<CampaignStatusEnum, string> = {
   IDLE: "text-muted",
   IN_PROGRESS: "text-warning",
   FINISHED: "text-success",
+  PAUSED: "text-warning",
 };
 
 const messages = defineMessages<CampaignStatusEnum>({
@@ -52,6 +53,10 @@ const messages = defineMessages<CampaignStatusEnum>({
   FINISHED: {
     id: "components.CampaignStatus.Finished",
     defaultMessage: "Finished",
+  },
+  PAUSED: {
+    id: "components.CampaignStatus.Paused",
+    defaultMessage: "Paused",
   },
 });
 
