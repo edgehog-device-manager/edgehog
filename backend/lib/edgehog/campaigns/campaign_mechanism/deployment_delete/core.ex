@@ -164,26 +164,27 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
         |> Campaigns.update_target_latest_attempt!(DateTime.utc_now())
         |> Helpers.link_target_deployment(release)
 
-      deployment =
-        updated_target
-        |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
-        |> Map.get(:deployment)
-
-      if deployment.state in [:starting, :stopping] do
-        {:error, :deployment_transitioning}
-      else
-        deployment_result =
-          deployment
-          |> Ash.Changeset.for_update(:delete, %{}, tenant: updated_target.tenant_id)
-          |> Ash.update()
-
-        with {:ok, _deployment} <- deployment_result do
-          {:ok, updated_target}
-        end
-      end
+      updated_target
+      |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
+      |> Map.get(:deployment)
+      |> maybe_delete(updated_target)
     else
       {:error, :deployment_not_found}
     end
+  end
+
+  defp maybe_delete(%Deployment{state: :starting}, _updated_target), do: {:error, :deployment_starting}
+
+  defp maybe_delete(%Deployment{state: :stopping}, _updated_target), do: {:error, :deployment_stopping}
+
+  defp maybe_delete(deployment, updated_target) do
+    deployment_result =
+      deployment
+      |> Ash.Changeset.for_update(:delete, %{}, tenant: updated_target.tenant_id)
+      |> Ash.update()
+
+    with {:ok, _deployment} <- deployment_result,
+         do: {:ok, updated_target}
   end
 
   @doc """
