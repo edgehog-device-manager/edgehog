@@ -499,6 +499,27 @@ type BaseImageCollectionUpdateFormData = z.infer<
   typeof baseImageCollectionUpdateSchema
 >;
 
+const baseImageCollectionForBaseImageSelectSchema = baseImageCollectionSchema
+  .pick({ name: true })
+  .safeExtend({ id: z.string().min(1) });
+
+const baseImageSelectSchema = baseImageSchema
+  .pick({ version: true })
+  .safeExtend({
+    id: z.string().min(1),
+    name: z.string(),
+    url: z.string().min(1),
+  });
+
+const manualOtaFromCollectionSchema = z.object({
+  baseImageCollection: baseImageCollectionForBaseImageSelectSchema,
+  baseImage: baseImageSelectSchema,
+});
+
+const manualOtaFromFileSchema = z.object({
+  baseImageFile: baseImageFileSchema,
+});
+
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
 const deploymentCampaignSchema = z
@@ -542,15 +563,8 @@ type DeploymentCampaignFormData = z.infer<typeof deploymentCampaignSchema>;
 
 const updateCampaignSchema = z.object({
   name: z.string().min(1),
-  baseImageCollection: z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-  }),
-  baseImage: z.object({
-    id: z.string().min(1),
-    name: z.string(),
-    version: z.string(),
-  }),
+  baseImageCollection: baseImageCollectionForBaseImageSelectSchema,
+  baseImage: baseImageSelectSchema.partial({ url: true }),
   channel: z.object({
     id: z.string().min(1),
     name: z.string().min(1),
@@ -905,6 +919,9 @@ export {
   baseImageUpdateSchema,
   baseImageCollectionSchema,
   baseImageCollectionUpdateSchema,
+  baseImageFileSchema,
+  manualOtaFromCollectionSchema,
+  manualOtaFromFileSchema,
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
   updateCampaignSchema,

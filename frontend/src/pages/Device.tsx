@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,12 @@ import DeviceCellularConnectionTab from "@/components/DeviceTabs/CellularConnect
 import DeviceNetworkInterfacesTab from "@/components/DeviceTabs/NetworkInterfacesTab";
 import DeviceLocationTab from "@/components/DeviceTabs/LocationTab";
 import DeviceWiFiScanResultsTab from "@/components/DeviceTabs/WiFiScanResultsTab";
-import DeviceSoftwareUpdateTab from "@/components/DeviceTabs/SoftwareUpdateTab";
+import DeviceSoftwareUpdateTab, {
+  DisabledDeviceSoftwareTab,
+} from "@/components/DeviceTabs/SoftwareUpdateTab";
 import DeviceApplicationsTab from "@/components/DeviceTabs/ApplicationsTab";
+import { Device_getBaseImageCollections_Query } from "@/api/__generated__/Device_getBaseImageCollections_Query.graphql";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
   fragment Device_connectionStatus on Device {
@@ -235,6 +239,17 @@ const GET_FORWARDER_SESSION_QUERY = graphql`
       forwarderHostname
       forwarderPort
     }
+  }
+`;
+
+export const GET_BASE_IMAGE_COLL_QUERY = graphql`
+  query Device_getBaseImageCollections_Query(
+    $first: Int
+    $after: String
+    $filterBaseImageCollections: BaseImageCollectionFilterInput = {}
+  ) {
+    ...BaseImageForm_baseImageCollections_Fragment
+      @arguments(filter: $filterBaseImageCollections)
   }
 `;
 
@@ -648,6 +663,22 @@ const DeviceContent = ({
     [deviceTags],
   );
 
+  const [getBaseImageCollsQuery, getBaseImageColls] =
+    useQueryLoader<Device_getBaseImageCollections_Query>(
+      GET_BASE_IMAGE_COLL_QUERY,
+    );
+
+  const fetchBaseImageCollsQuery = useCallback(
+    () =>
+      getBaseImageColls(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "network-only" },
+      ),
+    [getBaseImageColls],
+  );
+
+  useEffect(fetchBaseImageCollsQuery, [fetchBaseImageCollsQuery]);
+
   if (!device) {
     return (
       <Result.NotFound
@@ -929,7 +960,14 @@ const DeviceContent = ({
             <DeviceNetworkInterfacesTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
-            <DeviceSoftwareUpdateTab deviceRef={device} />
+            {getBaseImageCollsQuery ? (
+              <DeviceSoftwareUpdateTab
+                deviceRef={device}
+                getBaseImageCollsQuery={getBaseImageCollsQuery}
+              />
+            ) : (
+              <DisabledDeviceSoftwareTab />
+            )}
             <DeviceApplicationsTab deviceRef={deviceData} />
           </Tabs>
         </Stack>
