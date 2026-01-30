@@ -313,7 +313,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       timestamp = utc_now_second()
       event = disconnection_trigger(device.device_id, timestamp)
 
-      Registry.register(Edgehog.Containers.Reconciler.Registry, tenant.tenant_id, self())
+      Horde.Registry.register(Edgehog.Containers.Reconciler.Registry, tenant.tenant_id, self())
 
       stub(DeviceStatusMock, :get, fn _client, _device_id -> flunk() end)
       assert conn |> post(path, event) |> response(200)
