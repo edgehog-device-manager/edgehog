@@ -51,4 +51,18 @@ defmodule Edgehog.Assertions do
              } = var!(unquote(push))
     end
   end
+
+  defmacro assert_destroyed(root_field, destroyed_data, push) do
+    quote do
+      assert %{
+               result: %{
+                 data: %{
+                   unquote(root_field) => %{
+                     "destroyed" => var!(unquote(destroyed_data))
+                   }
+                 }
+               }
+             } = var!(unquote(push))
+    end
+  end
 end

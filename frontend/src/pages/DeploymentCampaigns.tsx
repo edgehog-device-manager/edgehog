@@ -18,11 +18,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import {
+  graphql,
+  usePreloadedQuery,
+  useQueryLoader,
+  useSubscription,
+} from "react-relay/hooks";
 
 import type { DeploymentCampaigns_getCampaigns_Query } from "@/api/__generated__/DeploymentCampaigns_getCampaigns_Query.graphql";
 
@@ -41,6 +46,18 @@ const GET_CAMPAIGNS_QUERY = graphql`
     $filter: CampaignFilterInput = {}
   ) {
     ...DeploymentCampaignsTable_CampaignFragment @arguments(filter: $filter)
+  }
+`;
+
+const CAMPAIGN_UPDATED_SUBSCRIPTION = graphql`
+  subscription DeploymentCampaigns_campaign_updated_Subscription {
+    deploymentCampaigns {
+      updated {
+        id
+        status
+        outcome
+      }
+    }
   }
 `;
 
@@ -88,6 +105,16 @@ const DeploymentCampaignsPage = () => {
         { fetchPolicy: "store-and-network" },
       ),
     [getCampaigns],
+  );
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: CAMPAIGN_UPDATED_SUBSCRIPTION,
+        variables: {},
+      }),
+      [],
+    ),
   );
 
   useEffect(fetchCampaigns, [fetchCampaigns]);
