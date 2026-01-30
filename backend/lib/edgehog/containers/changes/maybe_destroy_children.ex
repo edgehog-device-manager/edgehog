@@ -38,28 +38,39 @@ defmodule Edgehog.Containers.Changes.MaybeDestroyChildren do
 
   @impl Change
   def change(changeset, opts, %{tenant: tenant}) do
-    children = Keyword.fetch!(opts, @children_key)
+    children =
+      opts
+      |> Keyword.fetch!(@children_key)
+      |> compute_children(changeset.data)
 
-    with {:ok, resource} <- Ash.load(changeset.data, children) do
-      children =
-        children
-        |> Enum.map(&Map.get(resource, &1, nil))
-        |> List.flatten()
-
-      Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
-        with {:ok, resource} <- result do
-          maybe_destroy_resources(children, tenant)
-          {:ok, resource}
-        end
-      end)
+    with {:ok, children} <- children do
+      Ash.Changeset.after_transaction(
+        changeset,
+        &maybe_destroy_children(&1, &2, children, tenant)
+      )
     end
   end
 
-  defp maybe_destroy_resources(resources, tenant) do
-    Enum.each(resources, fn resource ->
-      resource
+  defp compute_children(children_keys, resource) do
+    with {:ok, resource} <- Ash.load(resource, children_keys) do
+      children =
+        children_keys
+        |> Enum.map(&Map.get(resource, &1, nil))
+        |> List.flatten()
+
+      {:ok, children}
+    end
+  end
+
+  defp maybe_destroy_children(_changeset, {:ok, resource}, children, tenant) do
+    Enum.each(children, fn child ->
+      child
       |> Ash.Changeset.for_destroy(:destroy_if_dangling, %{})
       |> Ash.destroy(tenant: tenant)
     end)
+
+    {:ok, resource}
   end
+
+  defp maybe_destroy_children(_changeset, error, _children, _tenant), do: error
 end

@@ -25,6 +25,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Astarte
   alias Edgehog.Astarte.Realm
   alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
   alias Edgehog.OSManagement
@@ -305,25 +306,8 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
       ["", deployment_id, "status"] ->
         state = event.value
 
-        with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-          case state do
-            "Started" ->
-              Containers.mark_deployment_as_started(deployment, tenant: tenant)
-              Containers.deployment_update_resources_state(deployment, tenant: tenant)
-
-            "Stopped" ->
-              Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
-              Containers.deployment_update_resources_state(deployment, tenant: tenant)
-
-            # The device is removing the deployment, remove it!
-            nil ->
-              deployment
-              |> Ash.Changeset.for_destroy(:destroy_and_gc, %{}, tenant: tenant)
-              |> Ash.destroy()
-
-              {:ok, deployment}
-          end
-        end
+        with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant),
+             do: change_state(state, deployment, tenant)
 
       _ ->
         {:error, :unsupported_event_path}
@@ -398,4 +382,31 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   defp translate_ota_response_status_code("OTAFailed"), do: nil
   defp translate_ota_response_status_code("OTAErrorDeploy"), do: "IOError"
   defp translate_ota_response_status_code("OTAErrorBootWrongPartition"), do: "SystemRollback"
+
+  defp change_state("Started", %Deployment{} = deployment, tenant) do
+    Containers.mark_deployment_as_started(deployment, tenant: tenant)
+    Containers.deployment_update_resources_state(deployment, tenant: tenant)
+  end
+
+  defp change_state("Stopped", %Deployment{} = deployment, tenant) do
+    Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
+    Containers.deployment_update_resources_state(deployment, tenant: tenant)
+  end
+
+  defp change_state(nil, %Deployment{} = deployment, tenant) do
+    deployment
+    |> Ash.Changeset.for_destroy(:destroy_and_gc, %{}, tenant: tenant)
+    |> Ash.destroy()
+
+    {:ok, deployment}
+  end
+
+  defp change_state(state, %Deployment{} = deployment, tenant) do
+    Logger.error(
+      "Unsupported state #{inspect(state)} when handling an available_deployments event for deployment #{deployment.id}",
+      tenant: tenant.slug
+    )
+
+    {:error, :unsupported_event_value}
+  end
 end
