@@ -44,7 +44,7 @@ defmodule Edgehog.Campaigns.Campaign do
     read :read_all_resumable do
       multitenancy :allow_global
       pagination keyset?: true
-      filter expr(status in [:idle, :in_progress])
+      filter expr(status in [:idle, :in_progress, :paused])
     end
 
     read :update_campaign do
@@ -119,6 +119,26 @@ defmodule Edgehog.Campaigns.Campaign do
       change set_attribute(:completion_timestamp, arg(:completion_timestamp))
       change set_attribute(:status, :finished)
       change set_attribute(:outcome, :success)
+    end
+
+    update :mark_as_paused do
+      change set_attribute(:status, :paused)
+    end
+
+    update :mark_as_resumed do
+      change set_attribute(:status, :in_progress)
+    end
+
+    update :pause do
+      accept []
+      require_atomic? false
+      change {Changes.PauseOrResume, operation: :pause}
+    end
+
+    update :resume do
+      accept []
+      require_atomic? false
+      change {Changes.PauseOrResume, operation: :resume}
     end
 
     destroy :destroy do

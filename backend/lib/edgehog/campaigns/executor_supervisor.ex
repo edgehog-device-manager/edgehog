@@ -22,6 +22,7 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
   @moduledoc false
   use DynamicSupervisor
 
+  alias :gen_statem, as: GenStateMachine
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism
   alias Edgehog.Campaigns.ExecutorRegistry
@@ -42,6 +43,18 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
 
   def start_executor!(%Campaign{id: campaign_id, campaign_mechanism: %{type: mechanism_type}, tenant_id: tenant_id}),
     do: do_start_executor!(tenant_id, campaign_id, mechanism_type)
+
+  def pause_executor!(%Campaign{} = campaign) do
+    campaign
+    |> start_executor!()
+    |> GenStateMachine.cast(:pause)
+  end
+
+  def resume_executor!(%Campaign{} = campaign) do
+    campaign
+    |> start_executor!()
+    |> GenStateMachine.cast(:resume)
+  end
 
   defp do_start_executor!(tenant_id, campaign_id, mechanism_type) do
     executor_id = {tenant_id, campaign_id, mechanism_type}

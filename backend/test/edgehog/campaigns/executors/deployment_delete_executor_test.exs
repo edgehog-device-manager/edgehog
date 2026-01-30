@@ -537,6 +537,91 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeleteExecutorTest do
     end
   end
 
+  describe "pause and resume deployment delete executor" do
+    test "pause suppresses new delete requests and resume restarts rollout", %{tenant: tenant} do
+      max_updates = 3
+
+      campaign =
+        campaign_with_targets_fixture(8,
+          mechanism_type: :deployment_delete,
+          campaign_mechanism: [max_in_progress_operations: max_updates],
+          tenant: tenant
+        )
+
+      # Expect initial max_updates delete requests
+      init_ref = expect_deployment_delete_requests_and_send_sync(max_updates)
+
+      pid = start_executor!(campaign)
+
+      # Wait for initial requests
+      wait_for_sync!(repeat(init_ref, max_updates))
+
+      # Arrive at waiting for available slot
+      wait_for_state(pid, :wait_for_available_slot)
+
+      # While paused, no further delete requests should be sent
+      expect(DeploymentCommandMock, :send_deployment_command, 0, fn _client, _device_id, _data ->
+        :ok
+      end)
+
+      :gen_statem.cast(pid, :pause)
+
+      # Ensure we are in paused state
+      wait_for_state(pid, :paused)
+
+      # Mark one pending deployment as destroyed (freeing a slot)
+      %{tenant_id: tenant_id, id: campaign_id} = campaign
+
+      [target | _] =
+        MechanismCore.list_in_progress_targets(%DeploymentDelete{}, tenant_id, campaign_id)
+
+      trigger_destroy_and_gc!(tenant, target.deployment_id)
+
+      # Stay paused and do not send new requests
+      wait_for_state(pid, :paused)
+
+      # Now resume, expect a new delete request (to fill freed slot)
+      resume_ref = expect_deployment_delete_requests_and_send_sync(1)
+
+      :gen_statem.cast(pid, :resume)
+
+      wait_for_sync!(resume_ref)
+
+      # Back to waiting for available slot
+      wait_for_state(pid, :wait_for_available_slot)
+    end
+
+    test "campaign can complete while paused", %{tenant: tenant} do
+      campaign =
+        campaign_with_targets_fixture(4,
+          mechanism_type: :deployment_delete,
+          campaign_mechanism: [max_in_progress_operations: 4],
+          tenant: tenant
+        )
+
+      pid = start_executor!(campaign)
+
+      # Reach completion wait
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      :gen_statem.cast(pid, :pause)
+      wait_for_state(pid, :paused)
+
+      # Monitor the process before marking deployments as completed
+      ref = Process.monitor(pid)
+
+      # Mark all pending as destroyed; should terminate with success while paused
+      %DeploymentDelete{}
+      |> MechanismCore.list_in_progress_targets(campaign.tenant_id, campaign.id)
+      |> Enum.each(fn target ->
+        trigger_destroy_and_gc!(tenant, target.deployment_id)
+      end)
+
+      # Process should terminate normally
+      assert_normal_exit(pid, ref)
+    end
+  end
+
   defp max_failed_targets_for_success(target_count, max_failure_percentage) do
     # Returns the maximum number of targets that can fail and still produce a successful campaign
     floor(target_count * max_failure_percentage / 100)
