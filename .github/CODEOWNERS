@@ -1,0 +1,6 @@
+# These owners will be the default owners for everything in the repo. 
+# Order is important; the last matching pattern takes the most precedence.
+
+*           @edgehog-device-manager/cloud-devs
+/frontend/  @edgehog-device-manager/cloud-frontend-devs
+/backend/   @edgehog-device-manager/cloud-backend-devs
