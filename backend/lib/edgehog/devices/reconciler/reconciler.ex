@@ -67,6 +67,18 @@ defmodule Edgehog.Devices.Reconciler do
     {:noreply, state}
   end
 
+  @impl GenServer
+  def handle_info({ref, _result}, state) when is_reference(ref) do
+    Process.demonitor(ref, [:flush])
+
+    {:noreply, state}
+  end
+
+  @impl GenServer
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, state) when is_reference(ref) do
+    {:noreply, state}
+  end
+
   defp spawn_reconciliation_task(tenant) do
     Task.Supervisor.async(Reconciler.Supervisor, fn ->
       Logger.info("Reconciling tenant #{tenant.slug}")
