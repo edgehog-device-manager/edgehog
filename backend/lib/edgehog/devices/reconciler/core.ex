@@ -42,17 +42,30 @@ defmodule Edgehog.Devices.Reconciler.Core do
     realm = tenant.realm
     base_api_url = realm.cluster.base_api_url
 
-    with {:ok, client} <- astarte_appengine_client(base_api_url, realm),
-         {:ok, devices_stream} <- @available_devices.get_device_list(client) do
-      devices_stream
-      |> Stream.map(&{&1, @available_devices.get_device_status(client, &1)})
-      |> Stream.reject(&api_error?(&1, realm))
-      |> Stream.map(fn {_device_id, {:ok, params}} -> params end)
+    with {:ok, client} <- astarte_appengine_client(base_api_url, realm) do
+      client
+      |> @available_devices.get_device_list()
+      |> Stream.map(&map_status(&1, client))
+      |> Stream.map(&reject_api_errors(&1, realm))
+      |> Stream.map(&map_params/1)
       |> Stream.map(&astarte_status_to_device_params(&1, realm))
-      |> Stream.map(&reconcile_device(&1, tenant))
-      |> Stream.reject(&db_error?(&1, realm))
-      |> Stream.run()
+      |> Stream.map(&reconcile_devices(&1, tenant))
+      |> Enum.each(&reject_db_errors(&1, realm))
     end
+  end
+
+  defp map_params(devices) do
+    Enum.map(devices, fn {_device_id, {:ok, params}} -> params end)
+  end
+
+  defp map_status(devices, client) do
+    Enum.map(devices, fn device ->
+      {device, @available_devices.get_device_status(client, device)}
+    end)
+  end
+
+  defp reconcile_devices(devices, tenant) do
+    Enum.map(devices, &reconcile_device(&1, tenant))
   end
 
   def reconcile_device(params, tenant) do
@@ -65,12 +78,18 @@ defmodule Edgehog.Devices.Reconciler.Core do
     AppEngine.new(base_url, realm.name, private_key: realm.private_key)
   end
 
-  defp astarte_status_to_device_params(status, realm) when is_map(status) do
-    %{
-      realm_id: Map.get(realm, :id),
-      device_id: Map.get(status, "id"),
-      connected: Map.get(status, "connected")
-    }
+  defp astarte_status_to_device_params(devices, realm) do
+    Enum.map(devices, fn status ->
+      %{
+        realm_id: Map.get(realm, :id),
+        device_id: Map.get(status, "id"),
+        connected: Map.get(status, "connected")
+      }
+    end)
+  end
+
+  defp reject_api_errors(devices, realm) do
+    Enum.reject(devices, &api_error?(&1, realm))
   end
 
   defp api_error?({device_id, {:error, error}}, realm) do
@@ -90,6 +109,10 @@ defmodule Edgehog.Devices.Reconciler.Core do
     )
 
     true
+  end
+
+  defp reject_db_errors(devices, realm) do
+    Enum.reject(devices, &db_error?(&1, realm))
   end
 
   defp db_error?({:error, error}, realm) do

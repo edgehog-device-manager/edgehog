@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.DeviceFetcher.CoreTest do
+defmodule Edgehog.Devices.Reconciler.CoreTest do
   @moduledoc false
 
   use Edgehog.DataCase, async: true
@@ -49,7 +49,10 @@ defmodule Edgehog.DeviceFetcher.CoreTest do
       end)
 
       expect(AvailableDevicesMock, :get_device_list, fn _client ->
-        {:ok, [device_id]}
+        Stream.unfold([device_id], fn
+          [] -> nil
+          [h | t] -> {[h], t}
+        end)
       end)
 
       expect(AvailableDevicesMock, :get_device_status, fn _client, ^device_id ->
