@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env elixir
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,42 +19,158 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-import argparse
-import datetime
-import jwt
+Mix.install([
+  {:joken, "~> 2.6"},
+  {:jose, "~> 1.11"}
+])
 
-default_claim_payload = "*"
+defmodule GenEdgehogJwt do
+  @moduledoc """
+  Generate a valid JWT for Edgehog
+  """
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate a valid JWT for Edgehog")
-    parser.add_argument("-k", "--private-key", type=str, required=True, help="Path to the private key file for signing "\
-        "the Authorization token.")
-    parser.add_argument("-e", "--expiry", type=int, required=False, default=86400, help="Expiry of the token in seconds. "\
-        "If 0, the token never expires. Defaults to 24 hours.")
-    parser.add_argument("-t", "--token-type", required=True, choices=["tenant", "admin"], help="The type of token to "\
-        "generate. `tenant` generates a token for the Tenant GraphQL API, `admin` generates a token for the Admin REST API.")
-    args = parser.parse_args()
-    args_map = vars(args)
+  @default_claim_payload "*"
 
-    with open(args_map["private_key"], "r") as pk:
-        private_key_pem = pk.read()
+  @green IO.ANSI.green()
+  @red IO.ANSI.red()
+  @yellow IO.ANSI.yellow()
+  @blue IO.ANSI.blue()
+  @reset IO.ANSI.reset()
 
-        now = datetime.datetime.utcnow()
-        claims = {"iat": now}
-        if args_map["token_type"] == "tenant":
-            # Currently claims can have any payload, we just pass "*"
-            claims["e_tga"] = default_claim_payload
-        else:
-            # Currently claims can have any payload, we just pass "*"
-            claims["e_ara"] = default_claim_payload
-        expiry = args_map["expiry"]
-        if expiry > 0:
-            claims["exp"] = now + datetime.timedelta(seconds=expiry)
+  def run(args) do
+    if "--help" in args or "-h" in args do
+      print_help()
+      System.halt(0)
+    end
 
-        algo = None
-        if "-----BEGIN RSA PRIVATE KEY-----" in private_key_pem:
-            algo = "RS256"
-        elif "-----BEGIN EC PRIVATE KEY-----" in private_key_pem:
-            algo = "ES256"
+    {opts, _} = parse_args(args)
 
-        print(jwt.encode(claims, private_key_pem, algorithm=algo))
+    private_key_pem = File.read!(opts[:private_key])
+
+    signer =
+      case detect_algo(private_key_pem) do
+        "RS256" ->
+          Joken.Signer.create("RS256", %{"pem" => private_key_pem})
+
+        "ES256" ->
+          Joken.Signer.create("ES256", %{"pem" => private_key_pem})
+
+        _ ->
+          IO.puts("#{@red}❌ Unsupported or invalid private key format!#{@reset}")
+          System.halt(1)
+      end
+
+    claims =
+      %{}
+      |> add_type_claim(opts[:token_type])
+      |> add_expiry_claim(opts[:expiry])
+
+    case Joken.generate_and_sign(%{}, claims, signer) do
+      {:ok, token, _claims} ->
+        IO.puts("#{@green}✅ Token generated successfully!#{@reset}\n")
+        IO.puts(token)
+
+      {:error, reason} ->
+        IO.puts("#{@red}❌ Error generating token: #{inspect(reason)}#{@reset}")
+    end
+  end
+
+  defp parse_args(args) do
+    args
+    |> OptionParser.parse!(
+      switches: [private_key: :string, expiry: :integer, token_type: :string],
+      aliases: [k: :private_key, e: :expiry, t: :token_type]
+    )
+    |> validate_args()
+  rescue
+    e in OptionParser.ParseError ->
+      print_usage()
+      IO.puts("#{@red}gen-edgehog-jwt: error: #{e.message}#{@reset}")
+      System.halt(1)
+  end
+
+  defp validate_args({opts, rest}) do
+    cond do
+      !opts[:private_key] ->
+        print_usage()
+
+        IO.puts("#{@red}gen-edgehog-jwt: error: the following arguments are required: -k/--private-key#{@reset}")
+
+        System.halt(1)
+
+      !opts[:token_type] ->
+        print_usage()
+
+        IO.puts("#{@red}gen-edgehog-jwt: error: the following arguments are required: -t/--token-type#{@reset}")
+
+        System.halt(1)
+
+      opts[:token_type] not in ["tenant", "admin"] ->
+        print_usage()
+
+        IO.puts(
+          "#{@red}gen-edgehog-jwt: error: invalid token type '#{opts[:token_type]}'. Choose 'tenant' or 'admin'.#{@reset}"
+        )
+
+        System.halt(1)
+
+      true ->
+        opts = Keyword.put_new(opts, :expiry, 86_400)
+        {opts, rest}
+    end
+  end
+
+  defp detect_algo(pem) do
+    cond do
+      String.contains?(pem, "BEGIN RSA PRIVATE KEY") -> "RS256"
+      String.contains?(pem, "BEGIN EC PRIVATE KEY") -> "ES256"
+      true -> nil
+    end
+  end
+
+  defp add_type_claim(claims, "tenant"), do: Map.put(claims, "e_tga", @default_claim_payload)
+  defp add_type_claim(claims, "admin"), do: Map.put(claims, "e_ara", @default_claim_payload)
+
+  defp add_expiry_claim(claims, 0), do: claims
+
+  defp add_expiry_claim(claims, seconds) do
+    exp = DateTime.utc_now() |> DateTime.add(seconds, :second) |> DateTime.to_unix()
+    Map.put(claims, "exp", exp)
+  end
+
+  defp print_usage do
+    IO.puts("usage: gen-edgehog-jwt [-h] -k PRIVATE_KEY [-e EXPIRY] -t {tenant,admin}")
+  end
+
+  defp print_help do
+    IO.puts("""
+    #{@yellow}Usage:#{@reset}
+      #{@blue}gen-edgehog-jwt [OPTIONS]#{@reset}
+
+    #{@yellow}Description:#{@reset}
+      Generate a valid JWT token for Edgehog authentication.
+      Supports both #{@green}tenant#{@reset} and #{@green}admin#{@reset} tokens.
+
+    #{@yellow}Required Options:#{@reset}
+      #{@green}-k, --private-key PATH#{@reset}   Path to your private key file (RSA or EC)
+      #{@green}-t, --token-type TYPE#{@reset}   Token type: #{@green}tenant#{@reset} or #{@green}admin#{@reset}
+
+    #{@yellow}Optional Options:#{@reset}
+      #{@green}-e, --expiry SECONDS#{@reset}    Token expiration time in seconds (default: 86400); set to #{@green}0#{@reset} for no expiration
+      #{@green}-h, --help#{@reset}              Display this help message
+
+    #{@yellow}Examples:#{@reset}
+      #{@blue}# Generate a tenant token with default expiry (24 hours)#{@reset}
+      ./gen-edgehog-jwt -k private_key.pem -t tenant
+
+      #{@blue}# Generate an admin token with 1 hour expiry#{@reset}
+      ./gen-edgehog-jwt -k private_key.pem -t admin -e 3600
+
+      #{@blue}# Generate a token with no expiration#{@reset}
+      ./gen-edgehog-jwt -k private_key.pem -t tenant -e 0
+    """)
+  end
+end
+
+# Execute the script
+GenEdgehogJwt.run(System.argv())

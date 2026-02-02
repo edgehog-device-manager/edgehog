@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021 - 2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -806,11 +806,10 @@ $ openssl ec -in tenant_private.pem -pubout > tenant_public.pem
 
 The next step is generating a token to access Edgehog Admin Rest API. You can do so using the `gen-edgehog-jwt` tool contained in the
 `tools` directory of the [Edgehog repo](https://github.com/edgehog-device-manager/edgehog/tree/main/tools).
-Starting from the private key we generated earlier in the deployment process for the Admin API, `admin_public.pem`, this command should give you a valid auth token to access the API.
+Starting from the private key we generated earlier in the deployment process for the Admin API, `admin_public.pem`, this command should give you a valid auth token to access the API. The tool requires Elixir in your system, which you can install with `asdf install` using the [asdf](https://asdf-vm.com/) version manager.
 
 ```bash
-$ pip3 install pyjwt
-$ ./gen-edgehog-jwt -t admin -k <PATH-TO-ADMIN-PRIVATE-KEY>
+$ ./tools/gen-edgehog-jwt -t admin -k <PATH-TO-ADMIN-PRIVATE-KEY>
 ```
 
 Note that the token expires after 24 hours by default. If you want to have a token with a different expiry time, you can pass `-e <EXPIRY-SECONDS>` to the `gen-edgehog-jwt` command.
@@ -923,8 +922,7 @@ To access the tenant we can once more use the `gen-edgehog-jwt` tool contained i
 `tools` directory of the [Edgehog repo](https://github.com/edgehog-device-manager/edgehog/tree/main/tools).
 
 ```bash
-$ pip3 install pyjwt
-$ ./gen-edgehog-jwt -t tenant -k <PATH-TO-TENANT-PRIVATE-KEY>
+$ ./tools/gen-edgehog-jwt -t tenant -k <PATH-TO-TENANT-PRIVATE-KEY>
 ```
 
 Values to be replaced
