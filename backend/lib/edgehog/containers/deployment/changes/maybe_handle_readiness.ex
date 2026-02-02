@@ -18,21 +18,33 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.MaybeRunReadyActions do
+defmodule Edgehog.Containers.Deployment.Changes.MaybeHandleReadiness do
   @moduledoc false
   use Ash.Resource.Change
 
   alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     Ash.Changeset.after_transaction(changeset, fn _changeset, transaction_result ->
       with {:ok, deployment} <- transaction_result,
-           {:ok, deployment} <- Ash.load(deployment, :is_ready) do
-        if deployment.is_ready, do: Containers.run_ready_actions(deployment)
-
-        {:ok, deployment}
-      end
+           {:ok, deployment} <- Ash.load(deployment, :is_ready),
+           do: maybe_run_ready_actions(deployment)
     end)
   end
+
+  defp maybe_run_ready_actions(%Deployment{is_ready: true} = deployment) do
+    Ash.Notifier.notify(%Ash.Notifier.Notification{
+      data: deployment,
+      for: [Ash.Notifier.PubSub],
+      action: %{type: :update, name: :maybe_run_ready_actions},
+      resource: Deployment,
+      metadata: %{custom_event: :deployment_ready}
+    })
+
+    Containers.run_ready_actions(deployment)
+  end
+
+  defp maybe_run_ready_actions(deployment), do: {:ok, deployment}
 end

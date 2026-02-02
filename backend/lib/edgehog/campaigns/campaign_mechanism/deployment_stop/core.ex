@@ -165,31 +165,27 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
         |> Campaigns.update_target_latest_attempt!(DateTime.utc_now())
         |> Helpers.link_target_deployment(release)
 
-      deployment =
-        updated_target
-        |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
-        |> Map.get(:deployment)
-
-      cond do
-        deployment.state == :stopped ->
-          {:ok, :already_in_desired_state}
-
-        deployment.state == :deleting ->
-          {:error, :deployment_deleting}
-
-        true ->
-          deployment_result =
-            deployment
-            |> Ash.Changeset.for_update(:stop, %{}, tenant: updated_target.tenant_id)
-            |> Ash.update()
-
-          with {:ok, _deployment} <- deployment_result do
-            {:ok, updated_target}
-          end
-      end
+      updated_target
+      |> Ash.load!([:deployment], tenant: updated_target.tenant_id)
+      |> Map.get(:deployment)
+      |> maybe_stop(updated_target)
     else
       {:error, :deployment_not_found}
     end
+  end
+
+  defp maybe_stop(%Deployment{state: :stopped}, _updated_target), do: {:ok, :already_in_desired_state}
+
+  defp maybe_stop(%Deployment{state: :deleting}, _updated_target), do: {:ok, :deployment_deleting}
+
+  defp maybe_stop(deployment, updated_target) do
+    deployment_result =
+      deployment
+      |> Ash.Changeset.for_update(:stop, %{}, tenant: updated_target.tenant_id)
+      |> Ash.update()
+
+    with {:ok, _deployment} <- deployment_result,
+         do: {:ok, updated_target}
   end
 
   @doc """

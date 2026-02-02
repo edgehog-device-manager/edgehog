@@ -210,8 +210,7 @@ defmodule Edgehog.Containers.Deployment do
     end
 
     update :maybe_run_ready_actions do
-      change Changes.MaybeRunReadyActions
-      change Changes.MaybePublishDeploymentReady
+      change Changes.MaybeHandleReadiness
 
       require_atomic? false
     end
