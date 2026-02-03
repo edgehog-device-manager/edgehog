@@ -43,3 +43,7 @@ PN = "PN"
 
 [default.extend-identifiers]
 OTPs = "OTPs"
+
+# Exclude changelogs: they're auto generated based on commits which are linted
+[files]
+extend-exclude = ["**/CHANGELOG.md"]

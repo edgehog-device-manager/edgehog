@@ -11,7 +11,8 @@
     "**/*-lock.json",
     ".reuse/templates/*",
     "**/schema.graphql",
-    "frontend/**"
+    "frontend/**",
+    "backend/CHANGELOG.md"
   ],
   "plugins": [
     "https://plugins.dprint.dev/json-0.21.0.wasm",
