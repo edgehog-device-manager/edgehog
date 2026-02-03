@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.11.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.10.0...v0.11.0) (2026-02-03)
+
+
+### Features
+
+* add calculation to expose Base Image name ([d3affa5](https://github.com/edgehog-device-manager/edgehog/commit/d3affa57af400440a26bccc6c29b3fb9c3534b23))
+* add device group subscription ([#1198](https://github.com/edgehog-device-manager/edgehog/issues/1198)) ([adb91f4](https://github.com/edgehog-device-manager/edgehog/commit/adb91f4e5f7011cdf424b77371ebf4f8858f66d1))
+* Additional information on deployment events ([ba27473](https://github.com/edgehog-device-manager/edgehog/commit/ba2747342f3b048a695f81deab856ce943aa39ab))
+* **backend:** base_images subscriptions ([bf28b85](https://github.com/edgehog-device-manager/edgehog/commit/bf28b85f909e6cfa1a2d8faf0979a4904073df67))
+* **backend:** manual OTA with base image from collection ([1af4b8d](https://github.com/edgehog-device-manager/edgehog/commit/1af4b8d8b9f10ca480a2aacf6073e8c2f2297b1c))
+* **backend:** run tenant reconciliation at creation ([f806909](https://github.com/edgehog-device-manager/edgehog/commit/f806909c1159ffd6f9171885f8ccee96f2a6f582))
+* GraphQL subscription for device updates in table ([#1118](https://github.com/edgehog-device-manager/edgehog/issues/1118)) ([be6a629](https://github.com/edgehog-device-manager/edgehog/commit/be6a6295f2767cf3ae766984aedbc29833a95a06))
+* implement GraphQL subscriptions for device events ([32badc9](https://github.com/edgehog-device-manager/edgehog/commit/32badc94a5705f3003ce66c1837430863a0217e3))
+* OTA updates can be canceled ([1daed60](https://github.com/edgehog-device-manager/edgehog/commit/1daed60e4fa6af858208f4b3fe3c3863006168c3)), closes [#266](https://github.com/edgehog-device-manager/edgehog/issues/266)
+* show `partNumber` and `serialNumber` in `Device` page if available ([#1123](https://github.com/edgehog-device-manager/edgehog/issues/1123)) ([c2261bb](https://github.com/edgehog-device-manager/edgehog/commit/c2261bb7397c4ca956013d245dc16a537e308267)), closes [#226](https://github.com/edgehog-device-manager/edgehog/issues/226)
+
+
+### Bug Fixes
+
+* **backend:** log errors instead of crashing ([899f431](https://github.com/edgehog-device-manager/edgehog/commit/899f4315f01e67331057dcd11c4dbf0bee11c734))
+* device reconciliation not working ([ba1b025](https://github.com/edgehog-device-manager/edgehog/commit/ba1b02530283f69de9cafa5ce4a19cdb117de285))
+* Handle reconciler task replies ([bec0758](https://github.com/edgehog-device-manager/edgehog/commit/bec075870002b9e7c9213e7d9d0eeb2fd763d890))
+* include tenant in socket options ([d3c8921](https://github.com/edgehog-device-manager/edgehog/commit/d3c89212ca7c4fb25cab293985da144eac3f9188))
+* unify device creation and update subscriptions ([c09e7de](https://github.com/edgehog-device-manager/edgehog/commit/c09e7de8d5570cd15f158ade835e9a332c602597))
+
 ## [0.10.0] - 2025-12-09
 
 ### Fixed
