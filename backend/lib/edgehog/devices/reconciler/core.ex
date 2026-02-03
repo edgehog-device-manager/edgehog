@@ -45,6 +45,7 @@ defmodule Edgehog.Devices.Reconciler.Core do
     with {:ok, client} <- astarte_appengine_client(base_api_url, realm) do
       client
       |> @available_devices.get_device_list()
+      |> Stream.reject(&connection_error?/1)
       |> Stream.map(&map_status(&1, client))
       |> Stream.map(&reject_api_errors(&1, realm))
       |> Stream.map(&map_params/1)
@@ -53,6 +54,14 @@ defmodule Edgehog.Devices.Reconciler.Core do
       |> Enum.each(&reject_db_errors(&1, realm))
     end
   end
+
+  defp connection_error?({:error, error}) do
+    Logger.warning("Error while retrieving devices list from astarte: #{inspect(error)}")
+
+    true
+  end
+
+  defp connection_error?(_), do: false
 
   defp map_params(devices) do
     Enum.map(devices, fn {_device_id, {:ok, params}} -> params end)
