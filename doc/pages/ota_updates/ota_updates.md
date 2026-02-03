@@ -53,4 +53,23 @@ so they can effectively be used to change the System Model of a Device. This als
 must exercise particular attention to avoid bricking a Device, if the Device does not implement the necessary
 safety checks.
 
-![Manual OTA Update Screenshot](assets/manual_ota_update.png)
+A Manual OTA Update can be started in two ways, depending on the source of the
+Base Image: via a Base Image file from local storage, or via a Base Image already
+in a Collection.
+
+### From a File in local storage
+
+The first option is selecting a file containing the Base Image from the user's
+local storage. After the selection, the Base Image will be uploaded and
+temporarily stored by Edgehog, until the [OTA Operation](ota_update_concepts.html#ota-operation)
+is completed, regardless of the outcome.
+
+![Manual OTA Update from File Screenshot](assets/manual_ota_update_file.png)
+
+### From an existing Base Image
+
+The second option is selecting a Base Image from the ones already belonging to a
+Base Image Collection; in this case, one can simply pass the URL assigned to the
+Base Image, which will then be used for the [OTA Operation](ota_update_concepts.html#ota-operation).
+
+![Manual OTA Update from Collection Screenshot](assets/manual_ota_update_collection.png)
