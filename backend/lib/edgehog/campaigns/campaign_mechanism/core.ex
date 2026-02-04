@@ -32,6 +32,7 @@ defprotocol Edgehog.Campaigns.CampaignMechanism.Core do
   def mark_campaign_in_progress!(mechanism, campaign, now \\ DateTime.utc_now())
   def mark_campaign_as_failed!(mechanism, campaign, now \\ DateTime.utc_now())
   def mark_campaign_as_successful!(mechanism, campaign, now \\ DateTime.utc_now())
+  def mark_campaign_as_paused!(mechanism, campaign)
   def get_campaign_status(mechanism, campaign)
   def get_target_count(mechanism, tenant_id, campaign_id)
   def get_failed_target_count(mechanism, tenant_id, campaign_id)
@@ -139,19 +140,33 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core, for: Any do
     Campaigns.mark_campaign_successful!(campaign, %{completion_timestamp: now})
   end
 
-  # Campaign Data
-
   @doc """
-  Return the persisted campaign status.
-
-  Expected values are `:idle`, `:in_progress` or `:finished`.
+  Marks a campaign as paused.
 
   ## Parameters
     - mechanism: The campaign mechanism (unused in default implementation).
     - campaign: The campaign struct.
 
   ## Returns
-    - The campaign status atom (`:idle`, `:in_progress`, or `:finished`).
+    - The updated campaign struct marked as paused.
+  """
+  def mark_campaign_as_paused!(_mechanism, campaign) do
+    Campaigns.mark_campaign_paused!(campaign)
+  end
+
+  # Campaign Data
+
+  @doc """
+  Return the persisted campaign status.
+
+  Expected values are `:idle`, `:in_progress`, `:pausing`, `:paused` or `:finished`.
+
+  ## Parameters
+    - mechanism: The campaign mechanism (unused in default implementation).
+    - campaign: The campaign struct.
+
+  ## Returns
+    - The campaign status atom.
   """
   def get_campaign_status(_mechanism, campaign), do: campaign.status
 

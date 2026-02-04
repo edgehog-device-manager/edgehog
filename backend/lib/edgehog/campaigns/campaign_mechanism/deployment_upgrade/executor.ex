@@ -34,15 +34,23 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
     {:next_state, :initialization, data, internal_event(:init_data)}
   end
 
+  # Valid states from which pausing is allowed
+  @pauseable_states [
+    :execution,
+    :wait_for_available_slot,
+    :wait_for_target,
+    :wait_for_campaign_completion
+  ]
+
   # Common event handling
 
   # Note that external (e.g. :info) and timeout events are always handled after the internal
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
   @impl LazyBatch
-  def handle_info(%Phoenix.Socket.Broadcast{} = notification, _state, data) do
+  def handle_info(%Phoenix.Socket.Broadcast{} = notification, state, data) do
     case notification.payload.action.type do
-      :update -> handle_update(notification, data)
+      :update -> handle_update(notification, state, data)
       _ -> :keep_state_and_data
     end
   end
@@ -52,10 +60,11 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
     :keep_state_and_data
   end
 
-  defp handle_update(notification, data) do
+  defp handle_update(notification, state, data) do
     case notification.payload.action.name do
       :maybe_run_ready_actions -> handle_maybe_run_ready_actions(notification, data)
       :mark_as_timed_out -> handle_mark_as_timed_out(notification, data)
+      :pause -> handle_mark_as_paused(state, data)
       _ -> :keep_state_and_data
     end
   end
@@ -117,5 +126,14 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
     ]
 
     {:keep_state_and_data, actions}
+  end
+
+  defp handle_mark_as_paused(state, data) when state in @pauseable_states do
+    {:next_state, :wait_for_campaign_paused, data, []}
+  end
+
+  defp handle_mark_as_paused(_state, _data) do
+    # Ignore pause requests in non-pauseable states (terminal states, already pausing, etc.)
+    :keep_state_and_data
   end
 end

@@ -28,6 +28,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
 
   alias Ecto.Adapters.SQL
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
+  alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy
@@ -578,6 +579,120 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
 
       assert_normal_exit(pid, ref, 3000)
       assert_campaign_outcome(tenant, campaign_id, :failure)
+    end
+  end
+
+  describe "pause and resume deployment deploy executor" do
+    test "pause suppresses new deployment requests and resume restarts rollout", %{tenant: tenant} do
+      max_updates = 3
+
+      campaign =
+        campaign_with_targets_fixture(8,
+          mechanism_type: :deployment_deploy,
+          campaign_mechanism: [max_in_progress_operations: max_updates],
+          tenant: tenant
+        )
+
+      # Expect initial max_updates deployment requests
+      init_ref = expect_deployment_requests_and_send_sync(max_updates)
+
+      pid = start_executor!(campaign)
+
+      # Wait for initial requests
+      wait_for_sync!(repeat(init_ref, max_updates))
+
+      # Arrive at waiting for available slot
+      wait_for_state(pid, :wait_for_available_slot)
+
+      # While paused, no further deployment requests should be sent
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
+        :ok
+      end)
+
+      # Monitor the executor to detect termination
+      ref = Process.monitor(pid)
+
+      # Reload campaign to get in_progress status before pausing
+      campaign = Ash.get!(Campaign, campaign.id, tenant: tenant)
+
+      # Pause via the Campaigns context (triggers PubSub notification)
+      {:ok, _paused_campaign} = Campaigns.pause_campaign(campaign)
+
+      # Ensure we are in wait_for_campaign_paused state (waiting for in-progress to complete)
+      wait_for_state(pid, :wait_for_campaign_paused)
+
+      # Mark all pending deployments as done so the executor can proceed to paused state and terminate
+      %{tenant_id: tenant_id, id: campaign_id} = campaign
+
+      %DeploymentDeploy{}
+      |> MechanismCore.list_in_progress_targets(tenant_id, campaign_id)
+      |> Enum.each(fn target ->
+        update_deployment_state!(tenant, target.deployment_id, :started)
+      end)
+
+      # Wait for executor to terminate (it marks campaign as paused and exits)
+      assert_normal_exit(pid, ref)
+
+      # Now resume - expect new deployment requests for remaining targets
+      # (8 total - 3 completed = 5 remaining, capped at max_updates = 3)
+      resume_ref = expect_deployment_requests_and_send_sync(max_updates)
+
+      # Reload campaign to get paused status
+      paused_campaign = Ash.get!(Campaign, campaign.id, tenant: tenant)
+
+      # Resume via the Campaigns context (starts a NEW executor)
+      {:ok, _resumed_campaign} = Campaigns.resume_campaign(paused_campaign)
+
+      # Get the new executor's pid from the registry
+      executor_id = {tenant_id, campaign_id, :deployment_deploy}
+      [{new_pid, _}] = Registry.lookup(Edgehog.Campaigns.ExecutorRegistry, executor_id)
+
+      # Allow the new executor to use test resources
+      allow_test_resources(new_pid)
+
+      # Manually start execution for the new executor
+      start_execution(new_pid)
+
+      wait_for_sync!(repeat(resume_ref, max_updates))
+
+      # Back to waiting for available slot with the new executor
+      wait_for_state(new_pid, :wait_for_available_slot)
+    end
+
+    test "campaign can complete while paused", %{tenant: tenant} do
+      campaign =
+        campaign_with_targets_fixture(4,
+          mechanism_type: :deployment_deploy,
+          campaign_mechanism: [max_in_progress_operations: 4],
+          tenant: tenant
+        )
+
+      pid = start_executor!(campaign)
+
+      # Reach completion wait
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      # Monitor the process before pausing
+      ref = Process.monitor(pid)
+
+      # Reload campaign to get in_progress status before pausing
+      campaign = Ash.get!(Campaign, campaign.id, tenant: tenant)
+
+      # Pause via the Campaigns context (triggers PubSub notification)
+      {:ok, _paused_campaign} = Campaigns.pause_campaign(campaign)
+
+      # Executor transitions to wait_for_campaign_paused
+      wait_for_state(pid, :wait_for_campaign_paused)
+
+      # Mark all pending as stopped; executor will transition to campaign_paused, then campaign_success
+      %DeploymentDeploy{}
+      |> MechanismCore.list_in_progress_targets(campaign.tenant_id, campaign.id)
+      |> Enum.each(fn target ->
+        update_deployment_state!(tenant, target.deployment_id, :stopped)
+      end)
+
+      # Process should terminate normally (completing successfully while paused)
+      assert_normal_exit(pid, ref)
     end
   end
 

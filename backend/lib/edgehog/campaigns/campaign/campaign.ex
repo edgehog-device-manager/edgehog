@@ -22,7 +22,8 @@ defmodule Edgehog.Campaigns.Campaign do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Campaigns,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
   alias Edgehog.Campaigns.Campaign.Changes
   alias Edgehog.Campaigns.Campaign.Validations
@@ -44,7 +45,7 @@ defmodule Edgehog.Campaigns.Campaign do
     read :read_all_resumable do
       multitenancy :allow_global
       pagination keyset?: true
-      filter expr(status in [:idle, :in_progress])
+      filter expr(status in [:idle, :in_progress, :pausing])
     end
 
     read :update_campaign do
@@ -119,6 +120,24 @@ defmodule Edgehog.Campaigns.Campaign do
       change set_attribute(:completion_timestamp, arg(:completion_timestamp))
       change set_attribute(:status, :finished)
       change set_attribute(:outcome, :success)
+    end
+
+    update :mark_as_paused do
+      change set_attribute(:status, :paused)
+    end
+
+    update :pause do
+      require_atomic? false
+
+      validate {Validations.ValidateStatus, operation: :pause}
+      change set_attribute(:status, :pausing)
+    end
+
+    update :resume do
+      require_atomic? false
+
+      validate {Validations.ValidateStatus, operation: :resume}
+      change Changes.StartExecution
     end
 
     destroy :destroy do
@@ -204,6 +223,13 @@ defmodule Edgehog.Campaigns.Campaign do
       public? true
       filter expr(status == :successful)
     end
+  end
+
+  pub_sub do
+    prefix "campaigns"
+    module EdgehogWeb.Endpoint
+
+    publish :pause, [[:id, "*"]]
   end
 
   postgres do

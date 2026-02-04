@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
+defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   @moduledoc false
   use Edgehog.DataCase, async: true
 
@@ -27,17 +27,29 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL
+  alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.DeploymentCommandMock
+  alias Edgehog.Astarte.Device.DeploymentUpdateMock
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
-  alias Edgehog.Campaigns.CampaignMechanism.DeploymentStop
-  alias Edgehog.Campaigns.CampaignMechanism.DeploymentStop.Executor
+  alias Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade
+  alias Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
 
   setup do
+    # Stub the deployment request mock (for upgrade/deploy operation)
+    stub(CreateDeploymentRequestMock, :send_create_deployment_request, fn _client, _device_id, _data ->
+      :ok
+    end)
+
+    # Stub the deployment command mock (for start operation after upgrade)
     stub(DeploymentCommandMock, :send_deployment_command, fn _client, _device_id, _data ->
+      :ok
+    end)
+
+    # Stub the deployment update mock (called when deployment transitions to started - ready action)
+    stub(DeploymentUpdateMock, :update, fn _client, _device_id, _data ->
       :ok
     end)
 
@@ -45,18 +57,18 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   end
 
   describe "Executor immediately terminates" do
-    test "when a deployment stop campaign has no targets", %{tenant: tenant} do
-      campaign = campaign_fixture(tenant: tenant, mechanism_type: :deployment_stop)
+    test "when a deployment upgrade campaign has no targets", %{tenant: tenant} do
+      campaign = campaign_fixture(tenant: tenant, mechanism_type: :deployment_upgrade)
 
       %{pid: pid, ref: ref} = start_and_monitor_executor!(campaign)
 
       assert_normal_exit(pid, ref)
     end
 
-    test "when deployment stop campaign is already marked as failed", %{tenant: tenant} do
+    test "when deployment upgrade campaign is already marked as failed", %{tenant: tenant} do
       campaign =
         1
-        |> campaign_with_targets_fixture(tenant: tenant, mechanism_type: :deployment_stop)
+        |> campaign_with_targets_fixture(tenant: tenant, mechanism_type: :deployment_upgrade)
         |> Ash.load!(campaign_targets: [], campaign_mechanism: [])
 
       mechanism = campaign.campaign_mechanism.value
@@ -69,10 +81,10 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       assert_normal_exit(pid, ref)
     end
 
-    test "when deployment stop campaign is already marked as successful", %{tenant: tenant} do
+    test "when deployment upgrade campaign is already marked as successful", %{tenant: tenant} do
       campaign =
         1
-        |> campaign_with_targets_fixture(tenant: tenant, mechanism_type: :deployment_stop)
+        |> campaign_with_targets_fixture(tenant: tenant, mechanism_type: :deployment_upgrade)
         |> Ash.load!(campaign_targets: [], campaign_mechanism: [])
 
       mechanism = campaign.campaign_mechanism.value
@@ -87,16 +99,14 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     end
   end
 
-  describe "Executor resumes :in_progress deployment stop campaign" do
-    test "when it already has `max_in_progress_operations` pending stop operations", %{
-      tenant: tenant
-    } do
+  describe "Executor resumes :in_progress campaign" do
+    test "when it already has `max_in_progress_operations` pending upgrades", %{tenant: tenant} do
       target_count = Enum.random(10..20)
       max_in_progress_operations = Enum.random(2..5)
 
       campaign =
         campaign_with_targets_fixture(target_count,
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [max_in_progress_operations: max_in_progress_operations],
           tenant: tenant
         )
@@ -112,8 +122,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       # Start another executor for the same deployment campaign
       resumed_pid = start_executor!(campaign)
 
-      # Expect no new Deploy Requests
-      _ = expect_deployment_stop_requests_and_send_sync(0)
+      # Expect no new upgrade requests
+      _ = expect_upgrade_requests_and_send_sync(0)
 
       # Expect the Executor to arrive at :wait_for_available_slot
       wait_for_state(resumed_pid, :wait_for_available_slot)
@@ -124,7 +134,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
 
       campaign =
         campaign_with_targets_fixture(target_count,
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [max_in_progress_operations: target_count],
           tenant: tenant
         )
@@ -140,8 +150,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       # Start another executor for the same deployment campaign
       resumed_pid = start_executor!(campaign)
 
-      # Expect no Deploy Requests
-      _ = expect_deployment_stop_requests_and_send_sync(0)
+      # Expect no upgrade requests
+      _ = expect_upgrade_requests_and_send_sync(0)
 
       # Expect the Executor to arrive at :wait_for_campaign_completion
       wait_for_state(resumed_pid, :wait_for_campaign_completion)
@@ -149,16 +159,15 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   end
 
   describe "Executor sends" do
-    test "all target Stop Deployment Requests in parallel if there are enough available slots",
-         %{
-           tenant: tenant
-         } do
+    test "all target upgrade requests in parallel if there are enough available slots", %{
+      tenant: tenant
+    } do
       target_count = Enum.random(2..20)
 
       campaign =
         target_count
         |> campaign_with_targets_fixture(
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [max_in_progress_operations: target_count],
           tenant: tenant
         )
@@ -168,12 +177,11 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       ref = make_ref()
       target_device_ids = Enum.map(campaign.campaign_targets, & &1.device.device_id)
 
-      # Expect target_count deployment calls and send back a message for each device
+      # Expect target_count upgrade calls and send back a message for each device
       expect(
-        DeploymentCommandMock,
-        :send_deployment_command,
+        CreateDeploymentRequestMock,
+        :send_create_deployment_request,
         target_count,
-        # TODO: assert that we' receiving the correct data!
         fn _client, device_id, _data ->
           send_sync(parent, {ref, device_id})
           :ok
@@ -191,19 +199,19 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       wait_for_state(pid, :wait_for_campaign_completion)
     end
 
-    test "at most `max_in_progress_operations` Stop Deployment Requests", %{tenant: tenant} do
+    test "at most `max_in_progress_operations` upgrade requests", %{tenant: tenant} do
       target_count = Enum.random(10..20)
       max_in_progress_operations = Enum.random(2..5)
 
       campaign =
         campaign_with_targets_fixture(target_count,
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [max_in_progress_operations: max_in_progress_operations],
           tenant: tenant
         )
 
-      # Expect max_in_progress_operations Deploy Requests
-      ref = expect_deployment_stop_requests_and_send_sync(max_in_progress_operations)
+      # Expect max_in_progress_operations upgrade requests
+      ref = expect_upgrade_requests_and_send_sync(max_in_progress_operations)
 
       pid = start_executor!(campaign)
 
@@ -216,7 +224,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       wait_for_state(pid, :wait_for_available_slot)
     end
 
-    test "Stop Deployment Requests only to online targets", %{tenant: tenant} do
+    test "upgrade requests only to online targets", %{tenant: tenant} do
       target_count = Enum.random(10..20)
       # We want at least 1 offline target to test that we arrive in :wait_for_target
       offline_count = Enum.random(1..target_count)
@@ -224,7 +232,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
 
       campaign =
         target_count
-        |> campaign_with_targets_fixture(tenant: tenant, mechanism_type: :deployment_stop)
+        |> campaign_with_targets_fixture(tenant: tenant, mechanism_type: :deployment_upgrade)
         |> Ash.load!(:campaign_targets)
 
       {offline_targets, online_targets} =
@@ -236,7 +244,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       deployment_device_online_for_targets(offline_targets, false)
 
       # Expect online_count calls to the mock
-      ref = expect_deployment_stop_requests_and_send_sync(online_count)
+      ref = expect_upgrade_requests_and_send_sync(online_count)
 
       pid = start_executor!(campaign)
 
@@ -253,27 +261,24 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   describe "Executor receiving a Deployment update" do
     setup %{tenant: tenant} do
       target_count = 10
-      max_deployments = 5
+      max_upgrades = 5
 
       campaign =
         campaign_with_targets_fixture(target_count,
-          mechanism_type: :deployment_stop,
-          campaign_mechanism: [max_in_progress_operations: max_deployments],
+          mechanism_type: :deployment_upgrade,
+          campaign_mechanism: [max_in_progress_operations: max_upgrades],
           tenant: tenant
         )
 
       parent = self()
 
       expect(
-        DeploymentCommandMock,
-        :send_deployment_command,
-        max_deployments,
-        fn _client,
-           _device_id,
-           %Edgehog.Astarte.Device.DeploymentCommand.RequestData{
-             deployment_id: deployment_id,
-             command: "Stop"
-           } ->
+        CreateDeploymentRequestMock,
+        :send_create_deployment_request,
+        max_upgrades,
+        fn _client, _device_id, data ->
+          %{id: deployment_id} = data
+          # Since we don't know _which_ target will receive the request, we send it back from here
           send(parent, {:deployment_target, deployment_id})
           :ok
         end
@@ -287,7 +292,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       # Verify that all the expectations we defined until now were called
       verify!()
 
-      # Extract Deployment for a target that received the Deployment request
+      # Extract Deployment for a target that received the upgrade request
       deployment_id =
         receive do
           {:deployment_target, deployment_id} ->
@@ -302,7 +307,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       {:ok, executor_pid: pid, deployment_id: deployment_id}
     end
 
-    test "frees up slot if Deployment state is :stopped", ctx do
+    # For upgrade, we need to go through :stopped first (deployed), then :started (ready)
+    # The success state is :started
+    test "frees up slot if Deployment state is started", ctx do
       %{
         executor_pid: pid,
         deployment_id: deployment_id,
@@ -310,13 +317,32 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       } = ctx
 
       # Expect another call to the mock since a slot has freed up
-      ref = expect_deployment_stop_requests_and_send_sync()
+      ref = expect_upgrade_requests_and_send_sync()
 
-      update_deployment_state!(tenant, deployment_id, :stopped)
+      update_deployment_state!(tenant, deployment_id, :started)
 
       wait_for_sync!(ref)
 
       # Wait for the Executor to arrive at :wait_for_available_slot
+      wait_for_state(pid, :wait_for_available_slot)
+    end
+
+    test "does not free up slot if Deployment state is stopped (waiting for start)", ctx do
+      %{
+        executor_pid: pid,
+        deployment_id: deployment_id,
+        tenant: tenant
+      } = ctx
+
+      # For upgrade, :stopped means deployed but not started yet - still in progress
+      # Expect no calls to the mock
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
+        :ok
+      end)
+
+      update_deployment_state!(tenant, deployment_id, :stopped)
+
+      # Expect the executor to remain in the :wait_for_available_slot state
       wait_for_state(pid, :wait_for_available_slot)
     end
 
@@ -328,7 +354,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       } = ctx
 
       # Expect another call to the mock since a slot has freed up
-      ref = expect_deployment_stop_requests_and_send_sync()
+      ref = expect_upgrade_requests_and_send_sync()
 
       timeout_deployment!(tenant, deployment_id)
 
@@ -347,8 +373,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
         } = ctx
 
         # Expect no calls to the mock
-
-        expect(DeploymentCommandMock, :send_deployment_command, 0, fn _client, _device_id, _data ->
+        expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
           :ok
         end)
 
@@ -360,30 +385,26 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     end
   end
 
-  describe "Executor marks deployment stop campaign as successful" do
+  describe "Executor marks deployment upgrade campaign as successful" do
     setup %{tenant: tenant} do
-      target_count = 5
+      target_count = Enum.random(10..20)
       # 20 < x <= 70
       max_failure_percentage = 20 + :rand.uniform() * 50
 
-      release = release_fixture(system_models: 1, tenant: tenant)
-
       campaign =
         campaign_with_targets_fixture(target_count,
-          release_id: release.id,
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [
             max_in_progress_operations: target_count,
             max_failure_percentage: max_failure_percentage
           ],
-          tenant: tenant.tenant_id
+          tenant: tenant
         )
 
       %{pid: pid, ref: ref} =
         start_and_monitor_executor!(campaign, start_execution: false)
 
       ctx = [
-        release: release,
         executor_pid: pid,
         max_failure_percentage: max_failure_percentage,
         monitor_ref: ref,
@@ -407,28 +428,37 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       # Wait for the Executor to arrive at :wait_for_campaign_completion
       wait_for_state(pid, :wait_for_campaign_completion)
 
-      mark_all_pending_deployments_with_state(tenant, campaign_id, :stopped)
+      # For upgrade, success is when deployments reach :started state
+      mark_all_pending_deployments_with_state(tenant, campaign_id, :started)
 
       assert_normal_exit(pid, ref)
       assert_campaign_outcome(tenant, campaign_id, :success)
     end
 
-    test "if all targets already have the deployment stopped", ctx do
+    test "if all targets already have the target release deployed", ctx do
       %{
-        release: release,
         executor_pid: pid,
         monitor_ref: ref,
         campaign_id: campaign_id,
         tenant: tenant
       } = ctx
 
-      Campaign
-      |> Ash.get!(campaign_id,
-        tenant: tenant,
-        load: [campaign_targets: [:device]]
-      )
-      |> Map.get(:campaign_targets, [])
-      |> Enum.map(fn target -> fake_stop(target.device, release, tenant) end)
+      # Get the campaign with the target release
+      campaign =
+        Ash.get!(Campaign, campaign_id,
+          tenant: tenant,
+          load: [
+            campaign_targets: [:device],
+            campaign_mechanism: [deployment_upgrade: [:target_release]]
+          ]
+        )
+
+      target_release = campaign.campaign_mechanism.value.target_release
+
+      # Pre-deploy the target release to all devices
+      Enum.each(campaign.campaign_targets, fn target ->
+        fake_upgrade(target.device, target_release, tenant)
+      end)
 
       start_execution(pid)
 
@@ -452,7 +482,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       wait_for_state(pid, :wait_for_campaign_completion)
 
       deployment_ids =
-        %DeploymentStop{}
+        %DeploymentUpgrade{}
         |> MechanismCore.list_in_progress_targets(tenant.tenant_id, campaign_id)
         |> Enum.map(& &1.deployment_id)
 
@@ -462,7 +492,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
         Enum.split(deployment_ids, failing_target_count)
 
       Enum.each(failing_deployment_ids, &timeout_deployment!(tenant, &1))
-      Enum.each(successful_deployment_ids, &update_deployment_state!(tenant, &1, :stopped))
+      # For upgrade, success is :started state
+      Enum.each(successful_deployment_ids, &update_deployment_state!(tenant, &1, :started))
       assert_normal_exit(pid, ref, 6000)
       assert_campaign_outcome(tenant, campaign_id, :success)
     end
@@ -477,16 +508,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       # The minimum number of targets that have to fail to trigger a failure
       failing_target_count = min_failed_targets_for_failure(target_count, max_failure_percentage)
 
-      release =
-        release_fixture(
-          system_models: 1,
-          tenant: tenant
-        )
-
       campaign =
         campaign_with_targets_fixture(target_count,
-          release_id: release.id,
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [
             max_in_progress_operations: target_count,
             max_failure_percentage: max_failure_percentage
@@ -507,7 +531,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       {:ok, ctx}
     end
 
-    test "by failed Stop Operations on Deployments", ctx do
+    test "by failed Deployments", ctx do
       %{
         executor_pid: pid,
         failing_target_count: failing_target_count,
@@ -523,7 +547,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       wait_for_state(pid, :wait_for_campaign_completion)
 
       {failing_targets, remaining_targets} =
-        %DeploymentStop{}
+        %DeploymentUpgrade{}
         |> MechanismCore.list_in_progress_targets(tenant.tenant_id, campaign_id)
         |> Enum.split(failing_target_count)
 
@@ -542,8 +566,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       {remaining_failing_targets, remaining_successful_targets} =
         Enum.split(remaining_targets, remaining_failing_count)
 
+      # For upgrade, success is :started state
       Enum.each(remaining_successful_targets, fn target ->
-        update_deployment_state!(tenant, target.deployment_id, :stopped)
+        update_deployment_state!(tenant, target.deployment_id, :started)
       end)
 
       Enum.each(remaining_failing_targets, fn target ->
@@ -566,8 +591,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
 
       # Expect failing_target_count calls to the mock and return a non-temporary error
       expect(
-        DeploymentCommandMock,
-        :send_deployment_command,
+        CreateDeploymentRequestMock,
+        :send_create_deployment_request,
         failing_target_count,
         fn _client, _device_id, _data ->
           status = Enum.random(400..499)
@@ -583,19 +608,19 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     end
   end
 
-  describe "pause and resume deployment stop executor" do
-    test "pause suppresses new stop requests and resume restarts rollout", %{tenant: tenant} do
+  describe "pause and resume deployment upgrade executor" do
+    test "pause suppresses new upgrade requests and resume restarts rollout", %{tenant: tenant} do
       max_updates = 3
 
       campaign =
         campaign_with_targets_fixture(8,
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [max_in_progress_operations: max_updates],
           tenant: tenant
         )
 
-      # Expect initial max_updates stop requests
-      init_ref = expect_deployment_stop_requests_and_send_sync(max_updates)
+      # Expect initial max_updates upgrade requests
+      init_ref = expect_upgrade_requests_and_send_sync(max_updates)
 
       pid = start_executor!(campaign)
 
@@ -605,8 +630,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       # Arrive at waiting for available slot
       wait_for_state(pid, :wait_for_available_slot)
 
-      # While paused, no further stop requests should be sent
-      expect(DeploymentCommandMock, :send_deployment_command, 0, fn _client, _device_id, _data ->
+      # While paused, no further upgrade requests should be sent
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
         :ok
       end)
 
@@ -623,20 +648,21 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       wait_for_state(pid, :wait_for_campaign_paused)
 
       # Mark all pending deployments as done so the executor can proceed to paused state and terminate
+      # For upgrade, success is :started state
       %{tenant_id: tenant_id, id: campaign_id} = campaign
 
-      %DeploymentStop{}
+      %DeploymentUpgrade{}
       |> MechanismCore.list_in_progress_targets(tenant_id, campaign_id)
       |> Enum.each(fn target ->
-        update_deployment_state!(tenant, target.deployment_id, :stopped)
+        update_deployment_state!(tenant, target.deployment_id, :started)
       end)
 
       # Wait for executor to terminate (it marks campaign as paused and exits)
       assert_normal_exit(pid, ref)
 
-      # Now resume - expect new stop requests for remaining targets
+      # Now resume - expect new upgrade requests for remaining targets
       # (8 total - 3 completed = 5 remaining, capped at max_updates = 3)
-      resume_ref = expect_deployment_stop_requests_and_send_sync(max_updates)
+      resume_ref = expect_upgrade_requests_and_send_sync(max_updates)
 
       # Reload campaign to get paused status
       paused_campaign = Ash.get!(Campaign, campaign.id, tenant: tenant)
@@ -645,7 +671,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       {:ok, _resumed_campaign} = Campaigns.resume_campaign(paused_campaign)
 
       # Get the new executor's pid from the registry
-      executor_id = {tenant_id, campaign_id, :deployment_stop}
+      executor_id = {tenant_id, campaign_id, :deployment_upgrade}
       [{new_pid, _}] = Registry.lookup(Edgehog.Campaigns.ExecutorRegistry, executor_id)
 
       # Allow the new executor to use test resources
@@ -663,7 +689,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     test "campaign can complete while paused", %{tenant: tenant} do
       campaign =
         campaign_with_targets_fixture(4,
-          mechanism_type: :deployment_stop,
+          mechanism_type: :deployment_upgrade,
           campaign_mechanism: [max_in_progress_operations: 4],
           tenant: tenant
         )
@@ -685,11 +711,11 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
       # Executor transitions to wait_for_campaign_paused
       wait_for_state(pid, :wait_for_campaign_paused)
 
-      # Mark all pending as stopped; executor will transition to campaign_paused, then campaign_success
-      %DeploymentStop{}
+      # Mark all pending as started; executor will transition to campaign_paused, then campaign_success
+      %DeploymentUpgrade{}
       |> MechanismCore.list_in_progress_targets(campaign.tenant_id, campaign.id)
       |> Enum.each(fn target ->
-        update_deployment_state!(tenant, target.deployment_id, :stopped)
+        update_deployment_state!(tenant, target.deployment_id, :started)
       end)
 
       # Process should terminate normally (completing successfully while paused)
@@ -697,13 +723,12 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     end
   end
 
-  defp fake_stop(device, release, tenant) do
-    {:ok, deployment} = fetch_deployment(device, release)
-    update_deployment_state!(tenant, deployment.id, :stopped)
-  end
-
-  defp fetch_deployment(device, release) do
-    Ash.get(Deployment, %{device_id: device.id, release_id: release.id}, tenant: device.tenant_id)
+  defp fake_upgrade(device, target_release, tenant) do
+    deployment_fixture(
+      tenant: tenant,
+      device_id: device.id,
+      release_id: target_release.id
+    )
   end
 
   defp max_failed_targets_for_success(target_count, max_failure_percentage) do
@@ -768,6 +793,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
 
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatusMock,
+    CreateDeploymentRequestMock,
     DeploymentCommandMock
   ]
 
@@ -826,13 +852,14 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     pid
   end
 
-  defp expect_deployment_stop_requests_and_send_sync(count \\ 1) do
-    # Asserts that count Deploy Requests where sent and sends a sync message for
-    # each of them Returns the ref contained in the sync message
+  defp expect_upgrade_requests_and_send_sync(count \\ 1) do
+    # Asserts that count upgrade requests where sent and sends a sync message for
+    # each of them. Returns the ref contained in the sync message
     parent = self()
     ref = make_ref()
 
-    expect(DeploymentCommandMock, :send_deployment_command, count, fn _client, _device_id, _data ->
+    # Expect count calls to the mock
+    expect(CreateDeploymentRequestMock, :send_create_deployment_request, count, fn _client, _device_id, _data ->
       # Send the sync
       send_sync(parent, ref)
       :ok
@@ -869,7 +896,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   end
 
   defp mark_all_pending_deployments_with_state(tenant, campaign_id, state) do
-    %DeploymentStop{}
+    %DeploymentUpgrade{}
     |> MechanismCore.list_in_progress_targets(tenant.tenant_id, campaign_id)
     |> Enum.each(fn target ->
       update_deployment_state!(tenant, target.deployment_id, state)
@@ -877,7 +904,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   end
 
   defp assert_campaign_outcome(tenant, id, outcome) do
-    campaign = MechanismCore.get_campaign!(%DeploymentStop{}, tenant.tenant_id, id)
+    campaign = MechanismCore.get_campaign!(%DeploymentUpgrade{}, tenant.tenant_id, id)
     assert campaign.status == :finished
     assert campaign.outcome == outcome
   end
