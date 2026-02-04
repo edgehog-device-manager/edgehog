@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures
 
-  alias Edgehog.Config
   alias Edgehog.Tenants.ReconcilerMock
 
   @valid_pem_public_key :secp256r1
@@ -60,45 +59,6 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
     stub(Edgehog.Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
     stub(Edgehog.Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
     {:ok, path: ~p"/admin-api/v1/tenants"}
-  end
-
-  describe "disabled Admin authentication" do
-    @describetag :unconfigured
-
-    setup do
-      stub(ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
-      Config.put_disable_admin_authentication(true)
-
-      on_exit(fn ->
-        # Cleanup at the end
-        Config.reload_disable_admin_authentication()
-      end)
-
-      :ok
-    end
-
-    test "returns 201 for request without JWT", %{
-      conn: conn,
-      path: path
-    } do
-      conn = post(conn, path, @valid_tenant_config)
-
-      assert response(conn, :created)
-    end
-
-    test "returns 201 for request with random JWT", %{
-      conn: conn,
-      path: path
-    } do
-      other_private_key = X509.PrivateKey.new_ec(:secp256r1)
-
-      conn =
-        conn
-        |> authenticate_connection(other_private_key)
-        |> post(path, @valid_tenant_config)
-
-      assert response(conn, :created)
-    end
   end
 
   describe "unconfigured Admin authentication" do

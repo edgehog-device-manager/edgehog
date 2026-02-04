@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,14 +30,6 @@ defmodule Edgehog.Config do
   alias Edgehog.Geolocation
   alias Edgehog.Geolocation.Providers.GoogleGeocoding
 
-  @envdoc """
-  Disables admin authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
-  """
-  app_env :disable_admin_authentication, :edgehog, :disable_admin_authentication,
-    os_env: "DISABLE_ADMIN_AUTHENTICATION",
-    type: :boolean,
-    default: false
-
   @envdoc "The Admin API JWT public key."
   app_env :admin_jwk, :edgehog, :admin_jwk,
     os_env: "ADMIN_JWT_PUBLIC_KEY_PATH",
@@ -64,14 +56,6 @@ defmodule Edgehog.Config do
   @envdoc "Whether to verify the ssl connection with the database or not."
   app_env :database_ssl_verify, :edgehog, :database_ssl_verify,
     os_env: "DATABASE_SSL_VERIFY",
-    type: :boolean,
-    default: false
-
-  @envdoc """
-  Disables tenant authentication. CHANGING IT TO TRUE IS GENERALLY A REALLY BAD IDEA IN A PRODUCTION ENVIRONMENT, IF YOU DON'T KNOW WHAT YOU ARE DOING.
-  """
-  app_env :disable_tenant_authentication, :edgehog, :disable_tenant_authentication,
-    os_env: "DISABLE_TENANT_AUTHENTICATION",
     type: :boolean,
     default: false
 
@@ -111,12 +95,6 @@ defmodule Edgehog.Config do
     os_env: "PREFERRED_GEOCODING_PROVIDERS",
     type: GeocodingProviders,
     default: [GoogleGeocoding]
-
-  @doc """
-  Returns true if admin authentication is disabled.
-  """
-  @spec admin_authentication_disabled?() :: boolean()
-  def admin_authentication_disabled?, do: disable_admin_authentication!()
 
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
@@ -180,12 +158,6 @@ defmodule Edgehog.Config do
   end
 
   @doc """
-  Returns true if tenant authentication is disabled.
-  """
-  @spec tenant_authentication_disabled?() :: boolean()
-  def tenant_authentication_disabled?, do: disable_tenant_authentication!()
-
-  @doc """
   Returns the list of geolocation modules to use.
   """
   @spec geolocation_providers!() :: list(atom())
@@ -215,11 +187,7 @@ defmodule Edgehog.Config do
   """
   @spec validate_admin_authentication!() :: :ok | no_return()
   def validate_admin_authentication! do
-    if admin_authentication_disabled?() do
-      :ok
-    else
-      admin_jwk!()
-      :ok
-    end
+    admin_jwk!()
+    :ok
   end
 end
