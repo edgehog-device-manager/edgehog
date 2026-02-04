@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 - 2025 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,6 +36,14 @@ defmodule Edgehog.Labeling.Tag do
 
   graphql do
     type :tag
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :tag do
+        action_types [:create]
+      end
+    end
 
     paginate_relationship_with device_tags: :relay
   end
