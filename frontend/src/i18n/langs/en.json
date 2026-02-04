@@ -192,6 +192,12 @@
   "components.CampaignStatus.InProgress": {
     "defaultMessage": "In progress"
   },
+  "components.CampaignStatus.Paused": {
+    "defaultMessage": "Paused"
+  },
+  "components.CampaignStatus.Pausing": {
+    "defaultMessage": "Pausing"
+  },
   "components.CellularConnectionTabs.Modem.APN": {
     "defaultMessage": "APN"
   },
@@ -593,6 +599,12 @@
   },
   "components.DeployedApplicationsTable.upgradeErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
+  },
+  "components.DeploymentCampaign.pauseErrorFeedback": {
+    "defaultMessage": "Could not pause the campaign, please try again."
+  },
+  "components.DeploymentCampaign.resumeErrorFeedback": {
+    "defaultMessage": "Could not resume the campaign, please try again."
   },
   "components.DeploymentCampaignsTable.applicationNameTitle": {
     "defaultMessage": "Application Name",
@@ -1169,6 +1181,12 @@
   },
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
+  },
+  "components.UpdateCampaign.pauseErrorFeedback": {
+    "defaultMessage": "Could not pause the campaign, please try again."
+  },
+  "components.UpdateCampaign.resumeErrorFeedback": {
+    "defaultMessage": "Could not resume the campaign, please try again."
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
@@ -2565,6 +2583,12 @@
   "pages.DeploymentCampaign.deploymentCampaignNotFound.title": {
     "defaultMessage": "Deployment Campaign not found."
   },
+  "pages.DeploymentCampaign.pauseButton": {
+    "defaultMessage": "Pause"
+  },
+  "pages.DeploymentCampaign.resumeButton": {
+    "defaultMessage": "Resume"
+  },
   "pages.DeploymentCampaignCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Deployment Campaign, please try again."
   },
@@ -2842,6 +2866,12 @@
   },
   "pages.SystemModels.title": {
     "defaultMessage": "System Models"
+  },
+  "pages.UpdateCampaign.pauseButton": {
+    "defaultMessage": "Pause"
+  },
+  "pages.UpdateCampaign.resumeButton": {
+    "defaultMessage": "Resume"
   },
   "pages.UpdateCampaign.updateCampaignNotFound.message": {
     "defaultMessage": "Return to the Update Campaign list."

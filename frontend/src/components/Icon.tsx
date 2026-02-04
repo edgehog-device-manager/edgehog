@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2025 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import {
   faCloud,
   faCompactDisc,
   faDatabase,
+  faPause,
   faPlay,
   faPlus,
   faRocket,
@@ -67,6 +68,7 @@ const icons = {
   github: faGithub,
   models: faSwatchbook,
   os: faCompactDisc,
+  pause: faPause,
   play: faPlay,
   plus: faPlus,
   profile: faUser,
