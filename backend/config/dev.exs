@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,13 +15,19 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 import Config
 
 url_host = System.get_env("URL_HOST", "localhost")
 url_port = System.get_env("URL_PORT", "4000")
 url_scheme = System.get_env("URL_SCHEME", "http")
+
+database = %{
+  username: System.get_env("DATABASE_USERNAME", "postgres"),
+  password: System.get_env("DATABASE_PASSWORD", "postgres"),
+  hostname: System.get_env("DATABASE_HOSTNAME", "localhost"),
+  name: System.get_env("DATABASE_NAME", "edgehog_dev")
+}
 
 config :azurex, Azurex.Blob.Config,
   api_url: "http://localhost:10000/devstoreaccount1",
@@ -32,10 +37,10 @@ config :azurex, Azurex.Blob.Config,
 
 # Configure your database
 config :edgehog, Edgehog.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "edgehog_dev",
-  hostname: "localhost",
+  username: database.username,
+  password: database.password,
+  database: database.name,
+  hostname: database.hostname,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
