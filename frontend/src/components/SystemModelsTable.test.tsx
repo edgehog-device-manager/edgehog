@@ -34,17 +34,18 @@ const GET_SYSTEM_MODELS_QUERY = graphql`
     $after: String
     $filter: SystemModelFilterInput = {}
   ) @relay_test_operation {
-    ...SystemModelsTable_SystemModelsFragment @arguments(filter: $filter)
+    systemModels(first: $first, after: $after, filter: $filter) {
+      ...SystemModelsTable_SystemModelEdgeFragment
+    }
   }
 `;
 
 const ComponentWithQuery = () => {
-  const systemModels =
-    useLazyLoadQuery<SystemModelsTable_getSystemModels_Query>(
-      GET_SYSTEM_MODELS_QUERY,
-      {},
-    );
-  return <SystemModelsTable systemModelsRef={systemModels} />;
+  const data = useLazyLoadQuery<SystemModelsTable_getSystemModels_Query>(
+    GET_SYSTEM_MODELS_QUERY,
+    {},
+  );
+  return <SystemModelsTable systemModelsRef={data.systemModels!} />;
 };
 
 type SystemModel = {

@@ -1,38 +1,46 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2021-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2021-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-import { Suspense, useEffect, useCallback } from "react";
-import { FormattedMessage } from "react-intl";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
 
 import type { SystemModels_getSystemModels_Query } from "@/api/__generated__/SystemModels_getSystemModels_Query.graphql";
+import { SystemModels_PaginationQuery } from "@/api/__generated__/SystemModels_PaginationQuery.graphql";
+import { SystemModels_SystemModelsFragment$key } from "@/api/__generated__/SystemModels_SystemModelsFragment.graphql";
+
 import Button from "@/components/Button";
 import Center from "@/components/Center";
-import SystemModelsTable from "@/components/SystemModelsTable";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
+import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
+import SystemModelsTable from "@/components/SystemModelsTable";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { Link, Route } from "@/Navigation";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const GET_SYSTEM_MODELS_QUERY = graphql`
   query SystemModels_getSystemModels_Query(
@@ -43,9 +51,108 @@ const GET_SYSTEM_MODELS_QUERY = graphql`
     systemModels(first: $first, after: $after, filter: $filter) {
       count
     }
-    ...SystemModelsTable_SystemModelsFragment @arguments(filter: $filter)
+    ...SystemModels_SystemModelsFragment
   }
 `;
+
+/* eslint-disable relay/unused-fields */
+const SYSTEM_MODELS_FRAGMENT = graphql`
+  fragment SystemModels_SystemModelsFragment on RootQueryType
+  @refetchable(queryName: "SystemModels_PaginationQuery") {
+    systemModels(first: $first, after: $after, filter: $filter)
+      @connection(key: "SystemModels_systemModels") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...SystemModelsTable_SystemModelEdgeFragment
+    }
+  }
+`;
+
+interface SystemModelsLayoutContainerProps {
+  systemModelsData: SystemModels_getSystemModels_Query["response"];
+  searchText: string | null;
+}
+const SystemModelsLayoutContainer = ({
+  systemModelsData,
+  searchText,
+}: SystemModelsLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      SystemModels_PaginationQuery,
+      SystemModels_SystemModelsFragment$key
+    >(SYSTEM_MODELS_FRAGMENT, systemModelsData);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { handle: { ilike: `%${text}%` } },
+                  {
+                    partNumbers: {
+                      partNumber: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                  {
+                    hardwareType: {
+                      name: {
+                        ilike: `%${text}%`,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextSystemModels = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const systemModelsRef = data?.systemModels;
+
+  if (!systemModelsRef) {
+    return null;
+  }
+
+  return (
+    <SystemModelsTable
+      systemModelsRef={systemModelsRef}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextSystemModels : undefined}
+    />
+  );
+};
 
 type SystemModelsContentProps = {
   getSystemModelsQuery: PreloadedQuery<SystemModels_getSystemModels_Query>;
@@ -54,7 +161,8 @@ type SystemModelsContentProps = {
 const SystemModelsContent = ({
   getSystemModelsQuery,
 }: SystemModelsContentProps) => {
-  const systemModels = usePreloadedQuery(
+  const [searchText, setSearchText] = useState<string | null>(null);
+  const systemModelsData = usePreloadedQuery(
     GET_SYSTEM_MODELS_QUERY,
     getSystemModelsQuery,
   );
@@ -77,7 +185,7 @@ const SystemModelsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        {systemModels.systemModels?.count === 0 ? (
+        {systemModelsData.systemModels?.count === 0 ? (
           <Result.EmptyList
             title={
               <FormattedMessage
@@ -92,7 +200,17 @@ const SystemModelsContent = ({
             />
           </Result.EmptyList>
         ) : (
-          <SystemModelsTable systemModelsRef={systemModels} />
+          <>
+            <SearchBox
+              className="flex-grow-1 pb-2"
+              value={searchText || ""}
+              onChange={setSearchText}
+            />
+            <SystemModelsLayoutContainer
+              systemModelsData={systemModelsData}
+              searchText={searchText}
+            />
+          </>
         )}
       </Page.Main>
     </Page>
