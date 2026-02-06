@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -58,6 +58,22 @@ defmodule Edgehog.DevicesFixtures do
   Generate a unique system_model part_number.
   """
   def unique_system_model_part_number, do: "1234-rev#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a %Devices.SystemModelPartNumber{}.
+  """
+  def system_model_part_number_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        part_number: unique_system_model_part_number()
+      })
+
+    Edgehog.Devices.SystemModelPartNumber
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
+  end
 
   @doc """
   Generate a %Devices.Device{}.

@@ -1,6 +1,6 @@
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,14 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
 
   graphql do
     type :system_model_part_number
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :system_model_part_number do
+        action_types [:create, :update, :destroy]
+      end
+    end
 
     paginate_relationship_with devices: :relay
   end
