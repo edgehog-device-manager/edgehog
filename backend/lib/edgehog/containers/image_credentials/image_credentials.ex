@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,14 @@ defmodule Edgehog.Containers.ImageCredentials do
 
   graphql do
     type :image_credentials
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :image_credentials do
+        action_types [:create, :destroy]
+      end
+    end
   end
 
   actions do
