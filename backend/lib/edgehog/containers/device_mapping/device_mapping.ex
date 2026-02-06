@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,14 @@ defmodule Edgehog.Containers.DeviceMapping do
 
   graphql do
     type :device_mapping
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :device_mapping do
+        action_types [:create, :update, :destroy]
+      end
+    end
   end
 
   actions do

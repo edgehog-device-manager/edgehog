@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,6 +29,15 @@ defmodule Edgehog.Containers.Network do
 
   graphql do
     type :network
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :network do
+        action_types [:create, :update, :destroy]
+      end
+    end
+
     paginate_relationship_with containers: :relay, devices: :relay
   end
 
