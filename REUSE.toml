@@ -74,3 +74,9 @@ path = ".github/release-please/*.json"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ".github/CODEOWNERS"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Seco Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
