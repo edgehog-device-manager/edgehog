@@ -18,190 +18,63 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FormattedMessage } from "react-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
 import _ from "lodash";
-import { ConnectionHandler } from "relay-runtime";
+import { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { ApplicationsTable_PaginationQuery } from "@/api/__generated__/ApplicationsTable_PaginationQuery.graphql";
 import type {
-  ApplicationsTable_ApplicationFragment$data,
-  ApplicationsTable_ApplicationFragment$key,
-} from "@/api/__generated__/ApplicationsTable_ApplicationFragment.graphql";
-import type { ApplicationsTable_deleteApplication_Mutation } from "@/api/__generated__/ApplicationsTable_deleteApplication_Mutation.graphql";
+  ApplicationsTable_ApplicationEdgeFragment$data,
+  ApplicationsTable_ApplicationEdgeFragment$key,
+} from "@/api/__generated__/ApplicationsTable_ApplicationEdgeFragment.graphql";
 
 import { Link, Route } from "@/Navigation";
-import { createColumnHelper } from "@/components/Table";
-import DeleteModal from "@/components/DeleteModal";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
+import { createColumnHelper } from "@/components/Table";
 import InfiniteTable from "./InfiniteTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const APPLICATIONS_TABLE_FRAGMENT = graphql`
-  fragment ApplicationsTable_ApplicationFragment on RootQueryType
-  @refetchable(queryName: "ApplicationsTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "ApplicationFilterInput" }) {
-    applications(first: $first, after: $after, filter: $filter)
-      @connection(key: "ApplicationsTable_applications") {
-      edges {
-        node {
-          id
-          name
-          description
-        }
-      }
-    }
-  }
-`;
-
-const DELETE_APPLICATION_MUTATION = graphql`
-  mutation ApplicationsTable_deleteApplication_Mutation($id: ID!) {
-    deleteApplication(id: $id) {
-      result {
+  fragment ApplicationsTable_ApplicationEdgeFragment on ApplicationConnection {
+    edges {
+      node {
         id
+        name
+        description
       }
     }
   }
 `;
 
-type TableRecord = NonNullable<
-  NonNullable<
-    ApplicationsTable_ApplicationFragment$data["applications"]
-  >["edges"]
+export type TableRecord = NonNullable<
+  NonNullable<ApplicationsTable_ApplicationEdgeFragment$data>["edges"]
 >[number]["node"];
 
 type ApplicationsTableProps = {
   className?: string;
-  applicationsRef: ApplicationsTable_ApplicationFragment$key;
-  hideSearch?: boolean;
-  setErrorFeedback: (errorMessages: React.ReactNode) => void;
+  applicationsRef: ApplicationsTable_ApplicationEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
+  onDelete: (application: TableRecord) => void;
 };
 
 const ApplicationsTable = ({
   className,
   applicationsRef,
-  hideSearch = false,
-  setErrorFeedback,
+  loading = false,
+  onLoadMore,
+  onDelete,
 }: ApplicationsTableProps) => {
-  const { data, loadNext, hasNext, isLoadingNext, refetch } =
-    usePaginationFragment<
-      ApplicationsTable_PaginationQuery,
-      ApplicationsTable_ApplicationFragment$key
-    >(APPLICATIONS_TABLE_FRAGMENT, applicationsRef);
-
-  const [searchText, setSearchText] = useState<string | null>(null);
-
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [{ name: { ilike: `%${text}%` } }],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
+  const applicationsFragment = useFragment(
+    APPLICATIONS_TABLE_FRAGMENT,
+    applicationsRef || null,
   );
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextApplications = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const applications: TableRecord[] = useMemo(() => {
-    return (
-      data.applications?.edges
-        ?.map((edge) => edge?.node)
-        .filter(
-          (node): node is TableRecord => node !== undefined && node !== null,
-        ) ?? []
-    );
-  }, [data]);
-
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedApplication, setSelectedApplication] =
-    useState<TableRecord | null>(null);
-
-  const [deleteApplication, isDeletingApplication] =
-    useMutation<ApplicationsTable_deleteApplication_Mutation>(
-      DELETE_APPLICATION_MUTATION,
-    );
-
-  const handleShowDeleteModal = useCallback(() => {
-    setShowDeleteModal(true);
-  }, [setShowDeleteModal]);
-
-  const handleDeleteApplication = useCallback(
-    (applicationId: string) => {
-      deleteApplication({
-        variables: { id: applicationId },
-        onCompleted(data, errors) {
-          if (
-            !errors ||
-            errors.length === 0 ||
-            errors[0].code === "not_found"
-          ) {
-            setErrorFeedback(null);
-            setShowDeleteModal(false);
-            return;
-          }
-
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          setShowDeleteModal(false);
-        },
-        onError() {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.ApplicationsTable.deletionErrorFeedback"
-              defaultMessage="Could not delete the application, please try again."
-            />,
-          );
-          setShowDeleteModal(false);
-        },
-        updater(store, response) {
-          const deletedId = response?.deleteApplication?.result?.id;
-          if (!deletedId) return;
-
-          const root = store.getRoot();
-          const applicationConnection = ConnectionHandler.getConnection(
-            root,
-            "ApplicationsTable_applications",
-          );
-          if (applicationConnection) {
-            ConnectionHandler.deleteNode(applicationConnection, deletedId);
-          }
-        },
-      });
-    },
-    [deleteApplication],
-  );
+  const applications = useMemo<TableRecord[]>(() => {
+    return _.compact(applicationsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [applicationsFragment]);
 
   const columnHelper = createColumnHelper<TableRecord>();
   const columns = [
@@ -234,8 +107,7 @@ const ApplicationsTable = ({
         <Button
           className="btn p-0 border-0 bg-transparent ms-4"
           onClick={() => {
-            setSelectedApplication(getValue());
-            handleShowDeleteModal();
+            onDelete(getValue());
           }}
         >
           <Icon className="text-danger" icon={"delete"} />
@@ -245,41 +117,14 @@ const ApplicationsTable = ({
   ];
 
   return (
-    <div>
-      <InfiniteTable
-        className={className}
-        columns={columns}
-        data={applications}
-        loading={isLoadingNext}
-        onLoadMore={hasNext ? loadNextApplications : undefined}
-        setSearchText={hideSearch ? undefined : setSearchText}
-      />
-      {showDeleteModal && (
-        <DeleteModal
-          confirmText={selectedApplication?.name || ""}
-          onCancel={() => setShowDeleteModal(false)}
-          onConfirm={() => {
-            if (selectedApplication?.id) {
-              handleDeleteApplication(selectedApplication.id);
-            }
-          }}
-          isDeleting={isDeletingApplication}
-          title={
-            <FormattedMessage
-              id="components.ApplicationsTable.deleteModal.title"
-              defaultMessage="Delete Application"
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              id="components.ApplicationsTable.deleteModal.description"
-              defaultMessage="This action cannot be undone. This will permanently delete the application."
-            />
-          </p>
-        </DeleteModal>
-      )}
-    </div>
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={applications}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      hideSearch
+    />
   );
 };
 
