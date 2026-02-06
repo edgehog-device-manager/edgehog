@@ -717,6 +717,10 @@
     "defaultMessage": "Readiness",
     "description": "Title for the Readiness column of the Deployment Targets table"
   },
+  "components.DeploymentTargetsTable.retryCountTitle": {
+    "defaultMessage": "Retry Count",
+    "description": "Title for the Retry Count column of the Deployment Targets table"
+  },
   "components.DeploymentTargetsTable.stateTitle": {
     "defaultMessage": "State",
     "description": "Title for the State column of the Deployment Targets table"
@@ -1287,6 +1291,10 @@
   "components.UpdateTargetsTable.otaOperationStatusTitle": {
     "defaultMessage": "Operation",
     "description": "Title for the Operation Status column of the Update Targets table"
+  },
+  "components.UpdateTargetsTable.retryCountTitle": {
+    "defaultMessage": "Retry Count",
+    "description": "Title for the Retry Count column of the Update Targets table"
   },
   "components.UpdateTargetsTabs.updateTargetsLabel": {
     "defaultMessage": "Devices"

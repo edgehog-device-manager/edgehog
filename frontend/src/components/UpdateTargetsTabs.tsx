@@ -118,6 +118,7 @@ const columnMap: Record<CampaignTargetStatusType, ColumnId[]> = {
     "deviceName",
     "otaOperationStatus",
     "otaOperationStatusProgress",
+    "retryCount",
     "latestAttempt",
   ],
   SUCCESSFUL: ["deviceName", "completionTimestamp"],

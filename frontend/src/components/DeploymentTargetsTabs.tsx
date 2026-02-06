@@ -116,7 +116,13 @@ const CAMPAIGN_TARGETS_IDLE_FRAGMENT = graphql`
 
 const columnMap: Record<CampaignTargetStatusType, ColumnId[]> = {
   IDLE: ["deviceName"],
-  IN_PROGRESS: ["deviceName", "state", "readiness", "latestAttempt"],
+  IN_PROGRESS: [
+    "deviceName",
+    "state",
+    "readiness",
+    "retryCount",
+    "latestAttempt",
+  ],
   SUCCESSFUL: ["deviceName", "completionTimestamp"],
   FAILED: ["deviceName", "lastErrorMessage", "completionTimestamp"],
 };

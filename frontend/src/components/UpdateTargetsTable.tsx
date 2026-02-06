@@ -42,6 +42,7 @@ const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
       id
       name
     }
+    retryCount
     latestAttempt
     completionTimestamp
     otaOperation {
@@ -164,6 +165,7 @@ const columnIds = [
   "otaOperationStatus",
   "otaOperationStatusProgress",
   "otaOperationStatusCode",
+  "retryCount",
   "latestAttempt",
   "completionTimestamp",
 ] as const;
@@ -244,6 +246,19 @@ const columns = [
       },
     },
   ),
+  columnHelper.accessor("retryCount", {
+    header: () => (
+      <FormattedMessage
+        id="components.UpdateTargetsTable.retryCountTitle"
+        defaultMessage="Retry Count"
+        description="Title for the Retry Count column of the Update Targets table"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const retryCount = getValue();
+      return retryCount ? retryCount : "";
+    },
+  }),
   columnHelper.accessor("latestAttempt", {
     header: () => (
       <FormattedMessage

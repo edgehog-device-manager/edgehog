@@ -42,6 +42,7 @@ const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
       id
       name
     }
+    retryCount
     latestAttempt
     completionTimestamp
     deployment {
@@ -71,6 +72,7 @@ const columnIds = [
   "state",
   "readiness",
   "lastErrorMessage",
+  "retryCount",
   "latestAttempt",
   "completionTimestamp",
 ] as const;
@@ -151,6 +153,19 @@ const columns = [
       },
     },
   ),
+  columnHelper.accessor("retryCount", {
+    header: () => (
+      <FormattedMessage
+        id="components.DeploymentTargetsTable.retryCountTitle"
+        defaultMessage="Retry Count"
+        description="Title for the Retry Count column of the Deployment Targets table"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const retryCount = getValue();
+      return retryCount ? retryCount : "";
+    },
+  }),
   columnHelper.accessor("latestAttempt", {
     header: () => (
       <FormattedMessage
