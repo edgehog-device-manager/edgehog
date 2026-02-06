@@ -18,21 +18,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useEffect, useCallback } from "react";
-import { FormattedMessage } from "react-intl";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
 
 import type { UpdateCampaigns_getCampaigns_Query } from "@/api/__generated__/UpdateCampaigns_getCampaigns_Query.graphql";
+import { UpdateCampaigns_PaginationQuery } from "@/api/__generated__/UpdateCampaigns_PaginationQuery.graphql";
+import { UpdateCampaigns_UpdateCampaignsFragment$key } from "@/api/__generated__/UpdateCampaigns_UpdateCampaignsFragment.graphql";
 
 import Button from "@/components/Button";
 import Center from "@/components/Center";
 import Page from "@/components/Page";
+import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import UpdateCampaignsTable from "@/components/UpdateCampaignsTable";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { Link, Route } from "@/Navigation";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const GET_CAMPAIGNS_QUERY = graphql`
   query UpdateCampaigns_getCampaigns_Query(
@@ -40,9 +49,113 @@ const GET_CAMPAIGNS_QUERY = graphql`
     $after: String
     $filter: CampaignFilterInput = {}
   ) {
-    ...UpdateCampaignsTable_CampaignFragment @arguments(filter: $filter)
+    ...UpdateCampaigns_UpdateCampaignsFragment
   }
 `;
+
+/* eslint-disable relay/unused-fields */
+const CAMPAIGNS_FRAGMENT = graphql`
+  fragment UpdateCampaigns_UpdateCampaignsFragment on RootQueryType
+  @refetchable(queryName: "UpdateCampaigns_PaginationQuery") {
+    updateCampaigns(first: $first, after: $after, filter: $filter)
+      @connection(key: "UpdateCampaigns_updateCampaigns") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...UpdateCampaignsTable_CampaignEdgeFragment
+    }
+  }
+`;
+
+interface UpdateCampaignsLayoutContainerProps {
+  campaignsData: UpdateCampaigns_getCampaigns_Query["response"];
+  searchText: string | null;
+}
+const UpdateCampaignsLayoutContainer = ({
+  campaignsData,
+  searchText,
+}: UpdateCampaignsLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      UpdateCampaigns_PaginationQuery,
+      UpdateCampaigns_UpdateCampaignsFragment$key
+    >(CAMPAIGNS_FRAGMENT, campaignsData);
+
+  const debounceRefetch = useMemo(() => {
+    const enumStatuses = ["FINISHED", "IDLE", "IN_PROGRESS"] as const;
+    const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
+
+    const findMatches = <T extends readonly string[]>(
+      enums: T,
+      searchText: string,
+    ): T[number][] =>
+      enums.filter((value) =>
+        value.toLowerCase().includes(searchText.toLowerCase()),
+      );
+
+    return _.debounce((text: string) => {
+      if (text === "") {
+        refetch(
+          {
+            first: RECORDS_TO_LOAD_FIRST,
+          },
+          { fetchPolicy: "network-only" },
+        );
+      } else {
+        refetch(
+          {
+            first: RECORDS_TO_LOAD_FIRST,
+            filter: {
+              or: [
+                { name: { ilike: `%${text}%` } },
+                {
+                  channel: {
+                    name: { ilike: `%${text}%` },
+                  },
+                },
+                ...findMatches(enumStatuses, text).map((status) => ({
+                  status: { eq: status },
+                })),
+                ...findMatches(enumOutcomes, text).map((outcome) => ({
+                  outcome: { eq: outcome },
+                })),
+              ],
+            },
+          },
+          { fetchPolicy: "network-only" },
+        );
+      }
+    }, 500);
+  }, [refetch]);
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextUpdateCampaigns = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const updateCampaignsRef = data?.updateCampaigns || null;
+
+  if (!updateCampaignsRef) {
+    return null;
+  }
+
+  return (
+    <UpdateCampaignsTable
+      updateCampaignsRef={updateCampaignsRef}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextUpdateCampaigns : undefined}
+    />
+  );
+};
 
 type UpdateCampaignsContentProps = {
   getCampaignsQuery: PreloadedQuery<UpdateCampaigns_getCampaigns_Query>;
@@ -51,6 +164,7 @@ type UpdateCampaignsContentProps = {
 const UpdateCampaignsContent = ({
   getCampaignsQuery,
 }: UpdateCampaignsContentProps) => {
+  const [searchText, setSearchText] = useState<string | null>(null);
   const campaignsData = usePreloadedQuery(
     GET_CAMPAIGNS_QUERY,
     getCampaignsQuery,
@@ -74,7 +188,15 @@ const UpdateCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <UpdateCampaignsTable campaignsData={campaignsData} />
+        <SearchBox
+          className="flex-grow-1 pb-2"
+          value={searchText || ""}
+          onChange={setSearchText}
+        />
+        <UpdateCampaignsLayoutContainer
+          campaignsData={campaignsData}
+          searchText={searchText}
+        />{" "}
       </Page.Main>
     </Page>
   );
