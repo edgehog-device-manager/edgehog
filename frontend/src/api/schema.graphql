@@ -620,6 +620,12 @@ enum CampaignStatus {
 
   "The campaign is being rolled-out."
   IN_PROGRESS
+
+  "The campaign rollout is temporarily suspended."
+  PAUSED
+
+  "The campaign rollout is being paused."
+  PAUSING
 }
 
 enum OtaOperationStatusCode {
@@ -5644,6 +5650,24 @@ type CampaignTarget {
   otaOperation: OtaOperation
 }
 
+"The result of the :resume_campaign mutation"
+type ResumeCampaignResult {
+  "The successful result of the mutation"
+  result: Campaign
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :pause_campaign mutation"
+type PauseCampaignResult {
+  "The successful result of the mutation"
+  result: Campaign
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 "The result of the :create_campaign mutation"
 type CreateCampaignResult {
   "The successful result of the mutation"
@@ -6276,6 +6300,12 @@ type RootQueryType {
 type RootMutationType {
   "Creates a new campaign."
   createCampaign(input: CreateCampaignInput!): CreateCampaignResult
+
+  "Pauses an in-progress campaign rollout."
+  pauseCampaign(id: ID!): PauseCampaignResult
+
+  "Resumes a paused campaign rollout."
+  resumeCampaign(id: ID!): ResumeCampaignResult
 
   "Creates a new channel."
   createChannel(input: CreateChannelInput!): CreateChannelResult

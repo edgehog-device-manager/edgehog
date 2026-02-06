@@ -73,6 +73,9 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
   def handle_event(:internal, :init_data, :initialization, data) do
     %Data{mechanism: mechanism, campaign_id: campaign_id, tenant_id: tenant_id} = data
 
+    # Subscribe to campaign notifications for pause events
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "campaigns:#{campaign_id}")
+
     # TODO: when we expose the possibility of updating the Campaign,
     # specifically the rollout, we should publish changes to it via PubSub,
     # subscribing to them here, since we will allow increasing
@@ -106,8 +109,37 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
         :in_progress ->
           # Campaign already in progress, resume it
           {:keep_state, data, internal_event(:resume_campaign)}
+
+        :pausing ->
+          # Campaign was pausing, finish the pause process
+          {:keep_state, data, internal_event(:finish_pausing_campaign)}
       end
     end
+  end
+
+  def handle_event(:internal, :finish_pausing_campaign, :initialization, data) do
+    %Data{
+      campaign_id: campaign_id,
+      tenant_id: tenant_id,
+      mechanism: mechanism
+    } = data
+
+    # Initialize remaining fields and move to paused state
+    failed_count = MechanismCore.get_failed_target_count(mechanism, tenant_id, campaign_id)
+
+    in_progress_count =
+      MechanismCore.get_in_progress_target_count(mechanism, tenant_id, campaign_id)
+
+    available_slots = MechanismCore.available_slots(mechanism, in_progress_count)
+
+    new_data = %{
+      data
+      | failed_count: failed_count,
+        in_progress_count: in_progress_count,
+        available_slots: available_slots
+    }
+
+    {:next_state, :wait_for_campaign_paused, new_data}
   end
 
   def handle_event(:internal, :resume_campaign, :initialization, data) do
@@ -342,6 +374,22 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     :keep_state_and_data
   end
 
+  # State: :wait_for_campaign_paused
+
+  def handle_event(:enter, _old_state, :wait_for_campaign_paused, data) do
+    if targets_in_progress?(data) do
+      :keep_state_and_data
+    else
+      # We finished all work while paused, so we can wrap up the campaign
+      # Use state timeout to trigger the transition instead of immediate action
+      {:keep_state_and_data, {:state_timeout, 0, :check_campaign_paused}}
+    end
+  end
+
+  def handle_event(:state_timeout, :check_campaign_paused, :wait_for_campaign_paused, data) do
+    {:next_state, :campaign_paused, data}
+  end
+
   # State: :campaign_failure
 
   def handle_event(:enter, _old_state, :campaign_failure, data) do
@@ -409,6 +457,29 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     {:keep_state, new_data, internal_event(:operation_completion)}
   end
 
+  def handle_event(:enter, _old_state, :campaign_paused, data) do
+    %Data{mechanism: mechanism, campaign_id: campaign_id, tenant_id: tenant_id} = data
+
+    campaign = MechanismCore.get_campaign!(mechanism, tenant_id, campaign_id)
+
+    if not targets_in_progress?(data) and
+         not MechanismCore.has_idle_targets?(data.mechanism, data.tenant_id, data.campaign_id) do
+      # We finished all work while paused, so we can wrap up the campaign
+      # Use state timeout to trigger the transition instead of direct transition
+      {:keep_state_and_data, {:state_timeout, 0, :transition_to_success}}
+    else
+      _ = MechanismCore.mark_campaign_as_paused!(mechanism, campaign)
+
+      Logger.info("Campaign #{campaign_id} paused with success")
+
+      terminate_executor(campaign_id)
+    end
+  end
+
+  def handle_event(:state_timeout, :transition_to_success, :campaign_paused, data) do
+    {:next_state, :campaign_success, data}
+  end
+
   def handle_event(:internal, {:operation_failure_event, operation}, state, data) do
     %Data{
       tenant_id: tenant_id,
@@ -461,6 +532,10 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
       state == :campaign_failure and not targets_in_progress?(data) ->
         # We received all the updates for the remaining targets, we can terminate
         terminate_executor(data.campaign_id)
+
+      state == :wait_for_campaign_paused and not targets_in_progress?(data) ->
+        # All in-progress targets completed, finalize by transitioning to the paused state
+        {:next_state, :campaign_paused, data}
 
       true ->
         # Otherwise, we keep doing what we were doing

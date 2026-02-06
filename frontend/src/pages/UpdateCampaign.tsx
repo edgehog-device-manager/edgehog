@@ -26,6 +26,7 @@ import {
   fetchQuery,
   graphql,
   useFragment,
+  useMutation,
   usePreloadedQuery,
   useRelayEnvironment,
   useQueryLoader,
@@ -35,9 +36,13 @@ import type { Subscription } from "relay-runtime";
 
 import type { UpdateCampaign_getCampaign_Query } from "@/api/__generated__/UpdateCampaign_getCampaign_Query.graphql";
 import type { UpdateCampaign_RefreshFragment$key } from "@/api/__generated__/UpdateCampaign_RefreshFragment.graphql";
+import type { UpdateCampaign_pauseCampaign_Mutation } from "@/api/__generated__/UpdateCampaign_pauseCampaign_Mutation.graphql";
+import type { UpdateCampaign_resumeCampaign_Mutation } from "@/api/__generated__/UpdateCampaign_resumeCampaign_Mutation.graphql";
 
+import Button from "@/components/Button";
 import Center from "@/components/Center";
 import Col from "@/components/Col";
+import Icon from "@/components/Icon";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Row from "@/components/Row";
@@ -47,6 +52,7 @@ import UpdateTargetsTabs from "@/components/UpdateTargetsTabs";
 import UpdateCampaignForm from "@/forms/UpdateCampaignForm";
 import { Link, Route } from "@/Navigation";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import Alert from "@/components/Alert";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getCampaign_Query($campaignId: ID!, $first: Int!) {
@@ -67,6 +73,34 @@ const CAMPAIGN_REFRESH_FRAGMENT = graphql`
   fragment UpdateCampaign_RefreshFragment on Campaign {
     id
     status
+  }
+`;
+
+const PAUSE_CAMPAIGN_MUTATION = graphql`
+  mutation UpdateCampaign_pauseCampaign_Mutation($id: ID!) {
+    pauseCampaign(id: $id) {
+      result {
+        id
+        status
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
+const RESUME_CAMPAIGN_MUTATION = graphql`
+  mutation UpdateCampaign_resumeCampaign_Mutation($id: ID!) {
+    resumeCampaign(id: $id) {
+      result {
+        id
+        status
+      }
+      errors {
+        message
+      }
+    }
   }
 `;
 
@@ -117,6 +151,120 @@ const UpdateCampaignRefresh = ({ campaignRef }: UpdateCampaignRefreshProps) => {
   return isRefreshing ? <Spinner className="ms-2 mx-auto" /> : null;
 };
 
+type CampaignActionsProps = {
+  campaignRef: UpdateCampaign_RefreshFragment$key;
+  setErrorFeedback: (errorMessages: React.ReactNode) => void;
+};
+
+const CampaignActions = ({
+  campaignRef,
+  setErrorFeedback,
+}: CampaignActionsProps) => {
+  const { id, status } = useFragment(CAMPAIGN_REFRESH_FRAGMENT, campaignRef);
+
+  const [pauseCampaign, isPausing] =
+    useMutation<UpdateCampaign_pauseCampaign_Mutation>(PAUSE_CAMPAIGN_MUTATION);
+
+  const [resumeCampaign, isResuming] =
+    useMutation<UpdateCampaign_resumeCampaign_Mutation>(
+      RESUME_CAMPAIGN_MUTATION,
+    );
+
+  const handlePauseCampaign = useCallback(() => {
+    pauseCampaign({
+      variables: { id },
+      onCompleted(data, errors) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          setErrorFeedback(null);
+          return;
+        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.UpdateCampaign.pauseErrorFeedback"
+            defaultMessage="Could not pause the campaign, please try again."
+          />,
+        );
+      },
+    });
+  }, [id, pauseCampaign, setErrorFeedback]);
+
+  const handleResumeCampaign = useCallback(() => {
+    resumeCampaign({
+      variables: { id },
+      onCompleted(data, errors) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          setErrorFeedback(null);
+          return;
+        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.UpdateCampaign.resumeErrorFeedback"
+            defaultMessage="Could not resume the campaign, please try again."
+          />,
+        );
+      },
+    });
+  }, [id, resumeCampaign, setErrorFeedback]);
+
+  if (status === "PAUSED" || status === "PAUSING") {
+    return (
+      <Button
+        variant="success"
+        size="sm"
+        onClick={handleResumeCampaign}
+        disabled={isResuming || status === "PAUSING"}
+        className="ms-2"
+        title="Resume Campaign"
+      >
+        <Icon icon="play" className="me-2" />
+        <FormattedMessage
+          id="pages.UpdateCampaign.resumeButton"
+          defaultMessage="Resume"
+        />
+      </Button>
+    );
+  }
+
+  if (status === "IN_PROGRESS") {
+    return (
+      <Button
+        variant="warning"
+        size="sm"
+        onClick={handlePauseCampaign}
+        disabled={isPausing}
+        className="ms-2"
+        title="Pause Campaign"
+      >
+        <Icon icon="pause" className="me-2" />
+        <FormattedMessage
+          id="pages.UpdateCampaign.pauseButton"
+          defaultMessage="Pause"
+        />
+      </Button>
+    );
+  }
+
+  return null;
+};
+
 type UpdateCampaignContentProps = {
   getCampaignQuery: PreloadedQuery<UpdateCampaign_getCampaign_Query>;
 };
@@ -124,6 +272,8 @@ type UpdateCampaignContentProps = {
 const UpdateCampaignContent = ({
   getCampaignQuery,
 }: UpdateCampaignContentProps) => {
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
   const { campaign } = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
 
   if (!campaign) {
@@ -150,8 +300,20 @@ const UpdateCampaignContent = ({
     <Page>
       <Page.Header title={campaign.name}>
         <UpdateCampaignRefresh campaignRef={campaign} />
+        <CampaignActions
+          campaignRef={campaign}
+          setErrorFeedback={setErrorFeedback}
+        />
       </Page.Header>
       <Page.Main>
+        <Alert
+          show={!!errorFeedback}
+          variant="danger"
+          onClose={() => setErrorFeedback(null)}
+          dismissible
+        >
+          {errorFeedback}
+        </Alert>
         <Row>
           <Col lg={9}>
             <UpdateCampaignForm campaignRef={campaign} />

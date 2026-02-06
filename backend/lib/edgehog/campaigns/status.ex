@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ defmodule Edgehog.Campaigns.Status do
     values: [
       idle: "The campaign has been created but is not being rolled-out yet.",
       in_progress: "The campaign is being rolled-out.",
+      pausing: "The campaign rollout is being paused.",
+      paused: "The campaign rollout is temporarily suspended.",
       finished: "The campaign has finished."
     ]
 

@@ -87,6 +87,14 @@ defmodule Edgehog.Campaigns do
                               ]
       end
 
+      update Campaign, :pause_campaign, :pause do
+        description "Pauses an in-progress campaign rollout."
+      end
+
+      update Campaign, :resume_campaign, :resume do
+        description "Resumes a paused campaign rollout."
+      end
+
       create Channel, :create_channel, :create do
         relay_id_translations input: [target_group_ids: :device_group]
       end
@@ -103,8 +111,11 @@ defmodule Edgehog.Campaigns do
     resource Campaign do
       define :fetch_campaign, action: :read, get_by: [:id]
       define :mark_campaign_in_progress, action: :mark_as_in_progress
+      define :mark_campaign_paused, action: :mark_as_paused
       define :mark_campaign_failed, action: :mark_as_failed
       define :mark_campaign_successful, action: :mark_as_successful
+      define :pause_campaign, action: :pause
+      define :resume_campaign, action: :resume
     end
 
     resource CampaignTarget do

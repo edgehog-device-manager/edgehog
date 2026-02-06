@@ -37,6 +37,8 @@ const CAMPAIGN_STATUS_FRAGMENT = graphql`
 const colors: Record<CampaignStatusEnum, string> = {
   IDLE: "text-muted",
   IN_PROGRESS: "text-warning",
+  PAUSING: "text-warning",
+  PAUSED: "text-warning",
   FINISHED: "text-success",
 };
 
@@ -48,6 +50,14 @@ const messages = defineMessages<CampaignStatusEnum>({
   IN_PROGRESS: {
     id: "components.CampaignStatus.InProgress",
     defaultMessage: "In progress",
+  },
+  PAUSING: {
+    id: "components.CampaignStatus.Pausing",
+    defaultMessage: "Pausing",
+  },
+  PAUSED: {
+    id: "components.CampaignStatus.Paused",
+    defaultMessage: "Paused",
   },
   FINISHED: {
     id: "components.CampaignStatus.Finished",
@@ -62,11 +72,19 @@ type Props = {
 const CampaignStatus = ({ campaignRef }: Props) => {
   const { status } = useFragment(CAMPAIGN_STATUS_FRAGMENT, campaignRef);
 
+  // Determine icon type and animation based on status
+  const isPausing = status === "PAUSING";
+  const iconName = isPausing ? "spinner" : "circle";
+  const animationClass = isPausing ? "fa-spin" : "";
+
   return (
     <div className="d-flex align-items-center">
-      <Icon icon="circle" className={`me-2 ${colors[status]}`} />
+      <Icon
+        icon={iconName}
+        className={`me-2 ${colors[status]} ${animationClass}`}
+      />
       <span>
-        <FormattedMessage id={messages[status].id} />
+        <FormattedMessage {...messages[status]} />
       </span>
     </div>
   );

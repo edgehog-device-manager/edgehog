@@ -24,6 +24,7 @@ defmodule Edgehog.Campaigns.Resumer.ResumerTest do
   import Edgehog.CampaignsFixtures
   import Edgehog.TenantsFixtures
 
+  alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
 
@@ -58,10 +59,9 @@ defmodule Edgehog.Campaigns.Resumer.ResumerTest do
       assert campaign.status == :idle
     end
 
-    test "returns deployment campaign in stream if :in_progress Campaigns are present",
-         %{
-           tenant: tenant
-         } do
+    test "returns deployment campaign in stream if :in_progress Campaigns are present", %{
+      tenant: tenant
+    } do
       %Campaign{id: campaign_id, tenant_id: tenant_id} =
         campaign = campaign_with_targets_fixture(20, tenant: tenant)
 
@@ -73,6 +73,34 @@ defmodule Edgehog.Campaigns.Resumer.ResumerTest do
       assert campaign.tenant_id == tenant_id
       assert campaign.id == campaign_id
       assert campaign.status == :in_progress
+    end
+
+    test "doesn't return deployment campaign in stream if :paused Campaigns are present", %{
+      tenant: tenant
+    } do
+      campaign = campaign_with_targets_fixture(20, tenant: tenant)
+
+      campaign = MechanismCore.mark_campaign_in_progress!(Any, campaign, DateTime.utc_now())
+      _paused_campaign = MechanismCore.mark_campaign_as_paused!(Any, campaign)
+
+      assert [] = Enum.to_list(stream_resumable_campaigns())
+    end
+
+    test "returns deployment campaign in stream if :pausing Campaigns are present", %{
+      tenant: tenant
+    } do
+      %Campaign{id: campaign_id, tenant_id: tenant_id} =
+        campaign = campaign_with_targets_fixture(20, tenant: tenant)
+
+      campaign = MechanismCore.mark_campaign_in_progress!(Any, campaign, DateTime.utc_now())
+      _ = Campaigns.pause_campaign(campaign)
+
+      assert [campaign] = Enum.to_list(stream_resumable_campaigns())
+
+      assert campaign.tenant_id == tenant.tenant_id
+      assert campaign.tenant_id == tenant_id
+      assert campaign.id == campaign_id
+      assert campaign.status == :pausing
     end
 
     test "returns deployment campaigns for all tenants", %{tenant: tenant} do
