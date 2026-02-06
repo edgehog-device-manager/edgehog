@@ -4,13 +4,13 @@ SPDX-PackageSupplier = "SECO Mind Srl"
 SPDX-PackageDownloadLocation = "https://github.com/edgehog-device-manager/edgehog"
 
 [[annotations]]
-path = "doc/images/**"
+path = "backend/docs/images/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2021-2023 SECO Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
-path = "doc/versions.js"
+path = "backend/docs/versions.js"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2024-2026 SECO Mind Srl"
 SPDX-License-Identifier = "CC0-1.0"

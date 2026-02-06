@@ -23,6 +23,7 @@ defmodule Edgehog.MixProject do
 
   def project do
     [
+      name: "Clea Edgehog",
       app: :edgehog,
       version: "0.12.0",
       elixir: "~> 1.17",
@@ -32,7 +33,8 @@ defmodule Edgehog.MixProject do
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      dialyzer: dialyzer_opts(Mix.env())
+      dialyzer: dialyzer_opts(Mix.env()),
+      docs: docs()
     ]
   end
 
@@ -130,7 +132,64 @@ defmodule Edgehog.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:absinthe_phoenix, "~> 2.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.24", only: :dev}
+    ]
+  end
+
+  # Add here additional documentation files
+  defp docs do
+    [
+      main: "intro_user",
+      logo: "docs/images/logo-favicon.png",
+      extras: extras(),
+      assets: %{"docs/images/" => "assets"},
+      api_reference: false,
+      groups_for_extras: [
+        "User Guide": ~r"/user/",
+        "OTA Updates": ~r"/ota_updates/",
+        "Containers management": ~r"/containers/",
+        Architecture: ~r"/architecture/",
+        "Admin Guide": ~r"/admin/",
+        "Integrating with Edgehog": ~r"/integrating/",
+        Tutorials: ~r"/tutorials/",
+        "Developer guide": ~r"/devguide/"
+      ],
+      groups_for_modules: [],
+      javascript_config_path: "docs/versions.js"
+    ]
+  end
+
+  defp extras do
+    [
+      "docs/pages/user/intro_user.md",
+      "docs/pages/user/core_concepts.md",
+      "docs/pages/user/hardware_types.md",
+      "docs/pages/user/system_models.md",
+      "docs/pages/user/devices.md",
+      "docs/pages/user/devices_and_runtime.md",
+      "docs/pages/user/attribute_value_sources.md",
+      "docs/pages/user/groups.md",
+      "docs/pages/user/channels.md",
+      "docs/pages/user/batch_operations.md",
+      "docs/pages/ota_updates/ota_update_concepts.md",
+      "docs/pages/ota_updates/base_images.md",
+      "docs/pages/ota_updates/base_image_collections.md",
+      "docs/pages/ota_updates/update_campaigns.md",
+      "docs/pages/ota_updates/ota_updates.md",
+      "docs/pages/containers/core_concepts.md",
+      "docs/pages/containers/volume_management.md",
+      "docs/pages/containers/network_management.md",
+      "docs/pages/containers/image_credentials_management.md",
+      "docs/pages/containers/applications_management.md",
+      "docs/pages/containers/deployment_campaigns.md",
+      "docs/pages/tutorials/edgehog_in_5_minutes.md",
+      "docs/pages/devguide/edgehog_just_in_time.md",
+      "docs/pages/devguide/typos_and_formatting.md",
+      "docs/pages/architecture/overview.md",
+      "docs/pages/integrating/interacting_with_edgehog.md",
+      "docs/pages/integrating/astarte_interfaces.md",
+      "docs/pages/admin/deploying_with_kubernetes.md"
     ]
   end
 
