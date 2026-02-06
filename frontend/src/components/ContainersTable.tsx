@@ -1,46 +1,43 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2024 - 2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2024-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useMemo, useState } from "react";
-import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
+import _ from "lodash";
+import { useMemo, useState } from "react";
 import { Stack } from "react-bootstrap";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { ContainersTable_PaginationQuery } from "@/api/__generated__/ContainersTable_PaginationQuery.graphql";
 import type {
-  ContainersTable_ContainerFragment$data,
-  ContainersTable_ContainerFragment$key,
-} from "@/api/__generated__/ContainersTable_ContainerFragment.graphql";
+  ContainersTable_ContainerEdgeFragment$data,
+  ContainersTable_ContainerEdgeFragment$key,
+} from "@/api/__generated__/ContainersTable_ContainerEdgeFragment.graphql";
 
-import Form from "@/components/Form";
-import StringArrayFormInput from "@/components/StringArrayFormInput";
-import MonacoJsonEditor from "@/components/MonacoJsonEditor";
-import MultiSelect from "./MultiSelect";
-import InfiniteScroll from "./InfiniteScroll";
-import DeviceMappingsFormInput from "@/components/DeviceMappingsFormInput";
-import { FormRow as BaseFormRow, FormRowProps } from "@/components/FormRow";
-import { restartPolicyOptions } from "@/forms/CreateRelease";
-import { RECORDS_TO_LOAD_NEXT } from "@/constants";
 import CollapseItem, {
   useCollapsibleSections,
 } from "@/components/CollapseItem";
+import DeviceMappingsFormInput from "@/components/DeviceMappingsFormInput";
+import Form from "@/components/Form";
+import { FormRow as BaseFormRow, FormRowProps } from "@/components/FormRow";
+import MonacoJsonEditor from "@/components/MonacoJsonEditor";
+import StringArrayFormInput from "@/components/StringArrayFormInput";
+import { restartPolicyOptions } from "@/forms/CreateRelease";
+import InfiniteScroll from "./InfiniteScroll";
+import MultiSelect from "./MultiSelect";
 
 const FormRow = (props: FormRowProps) => (
   <BaseFormRow {...props} className="mb-2" />
@@ -48,79 +45,75 @@ const FormRow = (props: FormRowProps) => (
 
 /* eslint-disable relay/unused-fields */
 const CONTAINERS_TABLE_FRAGMENT = graphql`
-  fragment ContainersTable_ContainerFragment on Release
-  @refetchable(queryName: "ContainersTable_PaginationQuery") {
-    containers(first: $first, after: $after)
-      @connection(key: "ContainersTable_containers") {
-      edges {
-        node {
-          id
-          env {
-            key
-            value
+  fragment ContainersTable_ContainerEdgeFragment on ContainerConnection {
+    edges {
+      node {
+        id
+        env {
+          key
+          value
+        }
+        extraHosts
+        hostname
+        networkMode
+        portBindings
+        binds
+        restartPolicy
+        privileged
+        memory
+        memorySwap
+        memoryReservation
+        memorySwappiness
+        cpuPeriod
+        cpuQuota
+        cpuRealtimePeriod
+        cpuRealtimeRuntime
+        tmpfs
+        storageOpt
+        readOnlyRootfs
+        capAdd
+        capDrop
+        volumeDriver
+        image {
+          reference
+          credentials {
+            id
+            label
+            username
           }
-          extraHosts
-          hostname
-          networkMode
-          portBindings
-          binds
-          restartPolicy
-          privileged
-          memory
-          memorySwap
-          memoryReservation
-          memorySwappiness
-          cpuPeriod
-          cpuQuota
-          cpuRealtimePeriod
-          cpuRealtimeRuntime
-          tmpfs
-          storageOpt
-          readOnlyRootfs
-          capAdd
-          capDrop
-          volumeDriver
-          image {
-            reference
-            credentials {
+        }
+        networks {
+          edges {
+            node {
               id
+              driver
+              internal
               label
-              username
+              options
+              enableIpv6
             }
           }
-          networks {
-            edges {
-              node {
+        }
+        containerVolumes {
+          edges {
+            node {
+              target
+              volume {
                 id
-                driver
-                internal
                 label
+                driver
                 options
-                enableIpv6
               }
             }
           }
-          containerVolumes {
-            edges {
-              node {
-                target
-                volume {
-                  id
-                  label
-                  driver
-                  options
-                }
-              }
-            }
-          }
-          deviceMappings {
-            edges {
-              node {
-                id
-                pathInContainer
-                pathOnHost
-                cgroupPermissions
-              }
+        }
+        deviceMappings {
+          edges {
+            node {
+              id
+              pathInContainer
+              pathOnHost
+              cgroupPermissions
             }
           }
         }
@@ -161,9 +154,9 @@ const formatJson = (jsonString: unknown) => {
   }
 };
 
-type volumeDetailsProps = {
+type VolumeDetailsProps = {
   containerVolumes: NonNullable<
-    ContainersTable_ContainerFragment$data["containers"]["edges"]
+    ContainersTable_ContainerEdgeFragment$data["edges"]
   >[number]["node"]["containerVolumes"];
   containerIndex: number;
 };
@@ -171,7 +164,7 @@ type volumeDetailsProps = {
 const VolumeDetails = ({
   containerVolumes,
   containerIndex,
-}: volumeDetailsProps) => {
+}: VolumeDetailsProps) => {
   const { toggleSection: toggleVolume, isSectionOpen } =
     useCollapsibleSections<number>(
       containerVolumes.edges?.map((_, index) => index) ?? [],
@@ -265,14 +258,14 @@ const VolumeDetails = ({
   );
 };
 
-type networkDetailsProps = {
+type NetworkDetailsProps = {
   networks: NonNullable<
-    ContainersTable_ContainerFragment$data["containers"]["edges"]
+    ContainersTable_ContainerEdgeFragment$data["edges"]
   >[number]["node"]["networks"];
   containerIndex: number;
 };
 
-const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
+const NetworkDetails = ({ networks, containerIndex }: NetworkDetailsProps) => {
   const { toggleSection: toggleNetwork, isSectionOpen } =
     useCollapsibleSections<number>(
       networks.edges?.map((_, index) => index) ?? [],
@@ -389,7 +382,7 @@ const NetworkDetails = ({ networks, containerIndex }: networkDetailsProps) => {
 
 type DeviceMappingDetailsProps = {
   deviceMappings: NonNullable<
-    ContainersTable_ContainerFragment$data["containers"]["edges"]
+    ContainersTable_ContainerEdgeFragment$data["edges"]
   >[number]["node"]["deviceMappings"];
   containerIndex?: number;
 };
@@ -433,7 +426,7 @@ const DeviceMappingDetails = ({
 };
 
 type ContainerRecord = NonNullable<
-  ContainersTable_ContainerFragment$data["containers"]["edges"]
+  ContainersTable_ContainerEdgeFragment$data["edges"]
 >[number]["node"];
 type ContainerEnv = ContainerRecord["env"];
 
@@ -929,25 +922,24 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
 
 type ContainersTableProps = {
   className?: string;
-  containersRef: ContainersTable_ContainerFragment$key;
+  containersRef: ContainersTable_ContainerEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
 const ContainersTable = ({
   className,
   containersRef,
+  loading = false,
+  onLoadMore,
 }: ContainersTableProps) => {
-  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
-    ContainersTable_PaginationQuery,
-    ContainersTable_ContainerFragment$key
-  >(CONTAINERS_TABLE_FRAGMENT, containersRef);
-
-  const loadNextContainers = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const containers: ContainerRecord[] = useMemo(() => {
-    return data.containers?.edges?.map((edge) => edge?.node) ?? [];
-  }, [data]);
+  const containersFragment = useFragment(
+    CONTAINERS_TABLE_FRAGMENT,
+    containersRef || null,
+  );
+  const containers = useMemo<ContainerRecord[]>(() => {
+    return _.compact(containersFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [containersFragment]);
 
   const { toggleSection: toggleIndex, isSectionOpen } =
     useCollapsibleSections<number>(containers.map((_, index) => index));
@@ -971,8 +963,8 @@ const ContainersTable = ({
         <InfiniteScroll
           key={container.id}
           className={className}
-          loading={isLoadingNext}
-          onLoadMore={hasNext ? loadNextContainers : undefined}
+          loading={loading}
+          onLoadMore={onLoadMore}
         >
           <CollapseItem
             type="card-parent"

@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2025-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import { Col, Container, Row } from "react-bootstrap";
 import {
@@ -26,7 +24,7 @@ import {
 } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
-import { ContainersTable_ContainerFragment$data } from "@/api/__generated__/ContainersTable_ContainerFragment.graphql";
+import { ContainersTable_ContainerEdgeFragment$data } from "@/api/__generated__/ContainersTable_ContainerEdgeFragment.graphql";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
@@ -34,7 +32,7 @@ import Icon from "@/components/Icon";
 import { ReleaseFormData } from "@/forms/validation";
 
 type DeviceMappingsData = NonNullable<
-  ContainersTable_ContainerFragment$data["containers"]["edges"]
+  ContainersTable_ContainerEdgeFragment$data["edges"]
 >[number]["node"]["deviceMappings"];
 
 type ReadOnlyFormInputProps = {
