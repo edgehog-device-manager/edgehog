@@ -31,7 +31,19 @@ defmodule Edgehog.Containers.ImageCredentials.Base64JsonEncoding do
   @impl Calculation
   def calculate(records, _opts, _context) do
     for record <- records do
-      %{username: record.username, password: record.password}
+      auth =
+        %{
+          username: record.username,
+          password: record.password
+        }
+
+      auth =
+        case record.serveraddress do
+          nil -> auth
+          server_address -> Map.put(auth, :serveraddress, server_address)
+        end
+
+      auth
       |> JSONString.encode()
       |> Base.encode64()
     end

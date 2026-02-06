@@ -454,6 +454,9 @@
   "components.CreateHardwareTypeForm.submitButton": {
     "defaultMessage": "Create"
   },
+  "components.CreateImageCredentialForm.ServeraddressLabel": {
+    "defaultMessage": "Server Address"
+  },
   "components.CreateImageCredentialForm.labelLabel": {
     "defaultMessage": "Label"
   },
@@ -948,6 +951,9 @@
   },
   "components.ImageCredentialsTable.labelTitle": {
     "defaultMessage": "Label"
+  },
+  "components.ImageCredentialsTable.serveraddressTitle": {
+    "defaultMessage": "Server Address"
   },
   "components.ImageCredentialsTable.usernameTitle": {
     "defaultMessage": "Username"
@@ -2212,6 +2218,9 @@
   },
   "forms.UpdateHardwareType.submitButton": {
     "defaultMessage": "Update"
+  },
+  "forms.UpdateImageCredential.ServeraddressLabel": {
+    "defaultMessage": "Server Address"
   },
   "forms.UpdateImageCredential.deleteButton": {
     "defaultMessage": "Delete"
