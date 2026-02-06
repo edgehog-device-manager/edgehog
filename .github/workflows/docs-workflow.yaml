@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2026 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 name: Edgehog docs generation
 
@@ -24,7 +23,7 @@ on:
   push:
     paths:
       # Documentation pages
-      - "doc/**"
+      - "backend/docs/**"
       # Schema files
       - "backend/lib/edgehog_web/admin_api/**"
       - "backend/lib/edgehog_web/schema.ex"
@@ -77,25 +76,20 @@ jobs:
       - name: Install astarte-docs-cli
         run: npm install -g @astarte-platform/astarte-docs-cli@0.0.7
       - name: Generate Interfaces Docs
-        run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/doc/pages/integrating/astarte_interfaces.md
+        run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/backend/docs/pages/integrating/astarte_interfaces.md
       - uses: erlef/setup-beam@v1
         with:
           version-file: edgehog/.tool-versions
           version-type: strict
-      - name: Install Docs Dependencies
-        working-directory: ./edgehog/doc
-        run: mix deps.get
-      - name: Build Docs
-        working-directory: ./edgehog/doc
-        run: mix docs
+      - uses: team-alembic/staple-actions/actions/mix-docs@main
+        with:
+          working-directory: edgehog/backend
 
       # This section builds the GraphQL API docs
-      - name: Install Backend Dependencies
-        working-directory: ./edgehog/backend
-        run: mix deps.get
-      - name: Extract GraphQL Schema
-        working-directory: ./edgehog/backend
-        run: mix absinthe.schema.sdl --schema EdgehogWeb.Schema
+      - uses: team-alembic/staple-actions/actions/mix-docs@main
+        with:
+          working-directory: edgehog/backend
+          task: absinthe.schema.sdl --schema EdgehogWeb.Schema
       - name: Setup Node.js 22 for SpectaQL
         uses: actions/setup-node@v6
         with:
@@ -107,9 +101,10 @@ jobs:
         run: npx spectaql .spectaql-config.yaml -t tenant-graphql-api
 
       # This section builds the Admin REST API docs
-      - name: Extract Admin Schema
-        working-directory: ./edgehog/backend
-        run: mix openapi.spec.yaml --spec EdgehogWeb.AdminAPI
+      - uses: team-alembic/staple-actions/actions/mix-docs@main
+        with:
+          working-directory: edgehog/backend
+          task: openapi.spec.yaml --spec EdgehogWeb.AdminAPI
       - name: Checkout Swagger UI
         uses: actions/checkout@v6
         with:
@@ -117,11 +112,11 @@ jobs:
           path: ./edgehog/backend/swagger-ui
           ref: "v5.30.2"
       - name: Copy all Swagger UI files
-        working-directory: ./edgehog/backend
+        working-directory: edgehog/backend
         run: |
           cp -r swagger-ui/dist/ admin-rest-api/
           cp openapi.yaml admin-rest-api/
-          cp ../doc/swagger-ui-index.html admin-rest-api/index.html
+          cp docs/swagger-ui-index.html admin-rest-api/index.html
 
       # Copy docs over to the docs repository
       - name: Copy Docs, preserving Device SDK docs
@@ -130,9 +125,9 @@ jobs:
           rm -rf docs/$DOCS_DIRNAME
           mkdir docs/$DOCS_DIRNAME
           # Copy doc pages
-          cp -r edgehog/doc/doc/* docs/$DOCS_DIRNAME/
+          cp -r edgehog/backend/doc/* docs/$DOCS_DIRNAME/
           # Copy version dropdown config
-          cp edgehog/doc/versions.js docs/
+          cp edgehog/backend/docs/versions.js docs/
           # Copy GraphQL docs
           cp -r ./edgehog/backend/tenant-graphql-api docs/$DOCS_DIRNAME/
           # Copy Admin REST API docs
