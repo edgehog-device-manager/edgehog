@@ -18,119 +18,112 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
 import _ from "lodash";
+import { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { DeploymentCampaignsTable_PaginationQuery } from "@/api/__generated__/DeploymentCampaignsTable_PaginationQuery.graphql";
 import type {
-  DeploymentCampaignsTable_CampaignFragment$data,
-  DeploymentCampaignsTable_CampaignFragment$key,
-} from "@/api/__generated__/DeploymentCampaignsTable_CampaignFragment.graphql";
+  DeploymentCampaignsTable_CampaignEdgeFragment$data,
+  DeploymentCampaignsTable_CampaignEdgeFragment$key,
+} from "@/api/__generated__/DeploymentCampaignsTable_CampaignEdgeFragment.graphql";
 
 import CampaignOutcome from "@/components/CampaignOutcome";
 import CampaignStatus from "@/components/CampaignStatus";
-import { createColumnHelper } from "@/components/Table";
-import InfiniteTable from "@/components/InfiniteTable";
-import { Link, Route } from "@/Navigation";
 import Icon from "@/components/Icon";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import InfiniteTable from "@/components/InfiniteTable";
+import { createColumnHelper } from "@/components/Table";
+import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const CAMPAIGNS_TABLE_FRAGMENT = graphql`
-  fragment DeploymentCampaignsTable_CampaignFragment on RootQueryType
-  @refetchable(queryName: "DeploymentCampaignsTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "CampaignFilterInput" }) {
-    deploymentCampaigns(first: $first, after: $after, filter: $filter)
-      @connection(key: "DeploymentCampaignsTable_deploymentCampaigns") {
-      edges {
-        node {
-          id
+  fragment DeploymentCampaignsTable_CampaignEdgeFragment on CampaignConnection {
+    edges {
+      node {
+        id
+        name
+        status
+        ...CampaignStatus_CampaignStatusFragment
+        outcome
+        ...CampaignOutcome_CampaignOutcomeFragment
+        channel {
           name
-          status
-          ...CampaignStatus_CampaignStatusFragment
-          outcome
-          ...CampaignOutcome_CampaignOutcomeFragment
-          channel {
-            name
+        }
+        campaignMechanism {
+          __typename
+          ... on DeploymentDeploy {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
           }
-          campaignMechanism {
-            __typename
-            ... on DeploymentDeploy {
-              maxFailurePercentage
-              maxInProgressOperations
-              requestRetries
-              requestTimeoutSeconds
-              release {
+          ... on DeploymentStart {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
                 id
-                version
-                application {
-                  id
-                  name
-                }
+                name
               }
             }
-            ... on DeploymentStart {
-              maxFailurePercentage
-              maxInProgressOperations
-              requestRetries
-              requestTimeoutSeconds
-              release {
+          }
+          ... on DeploymentStop {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
                 id
-                version
-                application {
-                  id
-                  name
-                }
+                name
               }
             }
-            ... on DeploymentStop {
-              maxFailurePercentage
-              maxInProgressOperations
-              requestRetries
-              requestTimeoutSeconds
-              release {
+          }
+          ... on DeploymentDelete {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
                 id
-                version
-                application {
-                  id
-                  name
-                }
+                name
               }
             }
-            ... on DeploymentDelete {
-              maxFailurePercentage
-              maxInProgressOperations
-              requestRetries
-              requestTimeoutSeconds
-              release {
+          }
+          ... on DeploymentUpgrade {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
                 id
-                version
-                application {
-                  id
-                  name
-                }
+                name
               }
             }
-            ... on DeploymentUpgrade {
-              maxFailurePercentage
-              maxInProgressOperations
-              requestRetries
-              requestTimeoutSeconds
-              release {
-                id
-                version
-                application {
-                  id
-                  name
-                }
-              }
-              targetRelease {
-                id
-                version
-              }
+            targetRelease {
+              id
+              version
             }
           }
         }
@@ -148,9 +141,7 @@ const CAMPAIGN_MECHANISM_LABELS: Record<string, string> = {
 };
 
 type TableRecord = NonNullable<
-  NonNullable<
-    DeploymentCampaignsTable_CampaignFragment$data["deploymentCampaigns"]
-  >["edges"]
+  NonNullable<DeploymentCampaignsTable_CampaignEdgeFragment$data>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
@@ -288,104 +279,36 @@ const columns = [
 
 type DeploymentCampaignsTableProps = {
   className?: string;
-  campaignsData: DeploymentCampaignsTable_CampaignFragment$key;
+  deploymentCampaignsRef: DeploymentCampaignsTable_CampaignEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
 const DeploymentCampaignsTable = ({
   className,
-  campaignsData,
+  deploymentCampaignsRef,
+  loading = false,
+  onLoadMore,
 }: DeploymentCampaignsTableProps) => {
-  const {
-    data: paginationData,
-    loadNext,
-    hasNext,
-    isLoadingNext,
-    refetch,
-  } = usePaginationFragment<
-    DeploymentCampaignsTable_PaginationQuery,
-    DeploymentCampaignsTable_CampaignFragment$key
-  >(CAMPAIGNS_TABLE_FRAGMENT, campaignsData);
-  const [searchText, setSearchText] = useState<string | null>(null);
+  const deploymentCampaignsFragment = useFragment(
+    CAMPAIGNS_TABLE_FRAGMENT,
+    deploymentCampaignsRef || null,
+  );
 
-  const debounceRefetch = useMemo(() => {
-    const enumStatuses = ["FINISHED", "IDLE", "IN_PROGRESS"] as const;
-    const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
-
-    const findMatches = <T extends readonly string[]>(
-      enums: T,
-      searchText: string,
-    ): T[number][] =>
-      enums.filter((value) =>
-        value.toLowerCase().includes(searchText.toLowerCase()),
-      );
-
-    return _.debounce((text: string) => {
-      if (text === "") {
-        refetch(
-          {
-            first: RECORDS_TO_LOAD_FIRST,
-          },
-          { fetchPolicy: "network-only" },
-        );
-      } else {
-        refetch(
-          {
-            first: RECORDS_TO_LOAD_FIRST,
-            filter: {
-              or: [
-                { name: { ilike: `%${text}%` } },
-                {
-                  channel: {
-                    name: { ilike: `%${text}%` },
-                  },
-                },
-                ...findMatches(enumStatuses, text).map((status) => ({
-                  status: { eq: status },
-                })),
-                ...findMatches(enumOutcomes, text).map((outcome) => ({
-                  outcome: { eq: outcome },
-                })),
-              ],
-            },
-          },
-          { fetchPolicy: "network-only" },
-        );
-      }
-    }, 500);
-  }, [refetch]);
-
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextDeploymentCampaigns = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const deploymentCampaigns = useMemo(() => {
+  const deploymentCampaigns = useMemo<TableRecord[]>(() => {
     return (
-      paginationData.deploymentCampaigns?.edges
-        ?.map((edge) => edge?.node)
-        .filter((node): node is TableRecord => node != null) ?? []
+      _.compact(deploymentCampaignsFragment?.edges?.map((e) => e?.node)) ?? []
     );
-  }, [paginationData]);
-
-  if (!paginationData.deploymentCampaigns) {
-    return null;
-  }
+  }, [deploymentCampaignsFragment]);
 
   return (
     <InfiniteTable
       className={className}
       columns={columns}
       data={deploymentCampaigns}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextDeploymentCampaigns : undefined}
-      setSearchText={setSearchText}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      hideSearch
     />
   );
 };

@@ -18,21 +18,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect } from "react";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
 
+import { DeploymentCampaigns_DeploymentCampaignsFragment$key } from "@/api/__generated__/DeploymentCampaigns_DeploymentCampaignsFragment.graphql";
 import type { DeploymentCampaigns_getCampaigns_Query } from "@/api/__generated__/DeploymentCampaigns_getCampaigns_Query.graphql";
+import { DeploymentCampaigns_PaginationQuery } from "@/api/__generated__/DeploymentCampaigns_PaginationQuery.graphql";
 
 import Button from "@/components/Button";
 import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
 import DeploymentCampaignsTable from "@/components/DeploymentCampaignsTable";
+import Page from "@/components/Page";
+import SearchBox from "@/components/SearchBox";
+import Spinner from "@/components/Spinner";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { Link, Route } from "@/Navigation";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const GET_CAMPAIGNS_QUERY = graphql`
   query DeploymentCampaigns_getCampaigns_Query(
@@ -40,9 +49,113 @@ const GET_CAMPAIGNS_QUERY = graphql`
     $after: String
     $filter: CampaignFilterInput = {}
   ) {
-    ...DeploymentCampaignsTable_CampaignFragment @arguments(filter: $filter)
+    ...DeploymentCampaigns_DeploymentCampaignsFragment
   }
 `;
+
+/* eslint-disable relay/unused-fields */
+const CAMPAIGNS_FRAGMENT = graphql`
+  fragment DeploymentCampaigns_DeploymentCampaignsFragment on RootQueryType
+  @refetchable(queryName: "DeploymentCampaigns_PaginationQuery") {
+    deploymentCampaigns(first: $first, after: $after, filter: $filter)
+      @connection(key: "DeploymentCampaigns_deploymentCampaigns") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...DeploymentCampaignsTable_CampaignEdgeFragment
+    }
+  }
+`;
+
+interface DeploymentCampaignsLayoutContainerProps {
+  campaignsData: DeploymentCampaigns_getCampaigns_Query["response"];
+  searchText: string | null;
+}
+const DeploymentCampaignsLayoutContainer = ({
+  campaignsData,
+  searchText,
+}: DeploymentCampaignsLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      DeploymentCampaigns_PaginationQuery,
+      DeploymentCampaigns_DeploymentCampaignsFragment$key
+    >(CAMPAIGNS_FRAGMENT, campaignsData);
+
+  const debounceRefetch = useMemo(() => {
+    const enumStatuses = ["FINISHED", "IDLE", "IN_PROGRESS"] as const;
+    const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
+
+    const findMatches = <T extends readonly string[]>(
+      enums: T,
+      searchText: string,
+    ): T[number][] =>
+      enums.filter((value) =>
+        value.toLowerCase().includes(searchText.toLowerCase()),
+      );
+
+    return _.debounce((text: string) => {
+      if (text === "") {
+        refetch(
+          {
+            first: RECORDS_TO_LOAD_FIRST,
+          },
+          { fetchPolicy: "network-only" },
+        );
+      } else {
+        refetch(
+          {
+            first: RECORDS_TO_LOAD_FIRST,
+            filter: {
+              or: [
+                { name: { ilike: `%${text}%` } },
+                {
+                  channel: {
+                    name: { ilike: `%${text}%` },
+                  },
+                },
+                ...findMatches(enumStatuses, text).map((status) => ({
+                  status: { eq: status },
+                })),
+                ...findMatches(enumOutcomes, text).map((outcome) => ({
+                  outcome: { eq: outcome },
+                })),
+              ],
+            },
+          },
+          { fetchPolicy: "network-only" },
+        );
+      }
+    }, 500);
+  }, [refetch]);
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextDeploymentCampaigns = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const deploymentCampaignsRef = data?.deploymentCampaigns;
+
+  if (!deploymentCampaignsRef) {
+    return null;
+  }
+
+  return (
+    <DeploymentCampaignsTable
+      deploymentCampaignsRef={deploymentCampaignsRef}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextDeploymentCampaigns : undefined}
+    />
+  );
+};
 
 interface DeploymentCampaignsContentProps {
   getCampaignsQuery: PreloadedQuery<DeploymentCampaigns_getCampaigns_Query>;
@@ -51,7 +164,11 @@ interface DeploymentCampaignsContentProps {
 const DeploymentCampaignsContent = ({
   getCampaignsQuery,
 }: DeploymentCampaignsContentProps) => {
-  const campaigns = usePreloadedQuery(GET_CAMPAIGNS_QUERY, getCampaignsQuery);
+  const [searchText, setSearchText] = useState<string | null>(null);
+  const campaignsData = usePreloadedQuery(
+    GET_CAMPAIGNS_QUERY,
+    getCampaignsQuery,
+  );
 
   return (
     <Page>
@@ -71,7 +188,15 @@ const DeploymentCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <DeploymentCampaignsTable campaignsData={campaigns} />
+        <SearchBox
+          className="flex-grow-1 pb-2"
+          value={searchText || ""}
+          onChange={setSearchText}
+        />
+        <DeploymentCampaignsLayoutContainer
+          campaignsData={campaignsData}
+          searchText={searchText}
+        />
       </Page.Main>
     </Page>
   );
