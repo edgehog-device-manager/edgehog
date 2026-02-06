@@ -1,42 +1,44 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2023-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2023-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { FormattedMessage } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
 import {
   ConnectionHandler,
   graphql,
   useMutation,
+  usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
-import { FormattedMessage } from "react-intl";
+import { useParams } from "react-router-dom";
 
+import { BaseImageCollection_BaseImagesFragment$key } from "@/api/__generated__/BaseImageCollection_BaseImagesFragment.graphql";
+import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "@/api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";
 import type {
   BaseImageCollection_getBaseImageCollection_Query,
   BaseImageCollection_getBaseImageCollection_Query$data,
 } from "@/api/__generated__/BaseImageCollection_getBaseImageCollection_Query.graphql";
 import type { BaseImageCollection_updateBaseImageCollection_Mutation } from "@/api/__generated__/BaseImageCollection_updateBaseImageCollection_Mutation.graphql";
-import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "@/api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";
+import { BaseImages_PaginationQuery } from "@/api/__generated__/BaseImages_PaginationQuery.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/Alert";
@@ -46,10 +48,11 @@ import Center from "@/components/Center";
 import DeleteModal from "@/components/DeleteModal";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
+import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import UpdateBaseImageCollectionForm from "@/forms/UpdateBaseImageCollection";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import type { BaseImageCollectionChanges } from "@/forms/UpdateBaseImageCollection";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import UpdateBaseImageCollectionForm from "@/forms/UpdateBaseImageCollection";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCollection_getBaseImageCollection_Query(
@@ -63,7 +66,30 @@ const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
       name
       handle
       ...UpdateBaseImageCollection_SystemModelFragment
-      ...BaseImagesTable_BaseImagesFragment @arguments(filter: $filter)
+      ...BaseImageCollection_BaseImagesFragment
+        @arguments(first: $first, after: $after, filter: $filter)
+    }
+  }
+`;
+
+/* eslint-disable relay/unused-fields */
+const BASE_IMAGES_FRAGMENT = graphql`
+  fragment BaseImageCollection_BaseImagesFragment on BaseImageCollection
+  @refetchable(queryName: "BaseImages_PaginationQuery")
+  @argumentDefinitions(
+    first: { type: "Int" }
+    after: { type: "String" }
+    filter: { type: "BaseImageFilterInput", defaultValue: {} }
+  ) {
+    id
+    baseImages(first: $first, after: $after, filter: $filter)
+      @connection(key: "BaseImageCollection_baseImages") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...BaseImagesTable_BaseImageEdgeFragment
     }
   }
 `;
@@ -81,7 +107,8 @@ const UPDATE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
         name
         handle
         ...UpdateBaseImageCollection_SystemModelFragment
-        ...BaseImagesTable_BaseImagesFragment
+        ...BaseImageCollection_BaseImagesFragment
+          @arguments(first: $first, after: $after, filter: {})
       }
     }
   }
@@ -98,6 +125,83 @@ const DELETE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
     }
   }
 `;
+interface BaseImagesLayoutContainerProps {
+  baseImageCollectionRef: BaseImageCollection_BaseImagesFragment$key;
+  searchText: string | null;
+}
+const BaseImagesLayoutContainer = ({
+  baseImageCollectionRef,
+  searchText,
+}: BaseImagesLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      BaseImages_PaginationQuery,
+      BaseImageCollection_BaseImagesFragment$key
+    >(BASE_IMAGES_FRAGMENT, baseImageCollectionRef);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { version: { ilike: `%${text}%` } },
+                  { url: { ilike: `%${text}%` } },
+                  {
+                    startingVersionRequirement: {
+                      ilike: `%${text}%`,
+                    },
+                  },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+    return () => {
+      debounceRefetch.cancel();
+    };
+  }, [debounceRefetch, searchText]);
+
+  const loadNextBaseImages = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const baseImagesRef = data?.baseImages;
+
+  if (!baseImagesRef) {
+    return null;
+  }
+
+  return (
+    <BaseImagesTable
+      baseImagesRef={baseImagesRef}
+      baseImageCollectionId={data?.id}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextBaseImages : undefined}
+    />
+  );
+};
 
 type BaseImageCollectionContentProps = {
   baseImageCollection: NonNullable<
@@ -112,6 +216,7 @@ const BaseImageCollectionContent = ({
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const [searchText, setSearchText] = useState<string | null>(null);
 
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
@@ -176,11 +281,11 @@ const BaseImageCollectionContent = ({
     );
 
   const handleUpdateBaseImageCollection = useCallback(
-    (baseImageCollection: BaseImageCollectionChanges) => {
+    (changes: BaseImageCollectionChanges) => {
       updateBaseImageCollection({
         variables: {
           baseImageCollectionId,
-          input: baseImageCollection,
+          input: changes,
           first: 10_000,
         },
         onCompleted(data, errors) {
@@ -247,13 +352,18 @@ const BaseImageCollectionContent = ({
             />
           </Button>
         </div>
-        <BaseImagesTable
+        <SearchBox
+          className="flex-grow-1 pb-2"
+          value={searchText || ""}
+          onChange={setSearchText}
+        />
+        <BaseImagesLayoutContainer
           baseImageCollectionRef={baseImageCollection}
-          hideSearch
+          searchText={searchText}
         />
         {showDeleteModal && (
           <DeleteModal
-            confirmText={baseImageCollection.handle}
+            confirmText={baseImageCollection?.handle || ""}
             onCancel={() => setShowDeleteModal(false)}
             onConfirm={handleDeleteBaseImageCollection}
             isDeleting={isDeletingBaseImageCollection}
