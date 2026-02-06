@@ -44,6 +44,14 @@ defmodule Edgehog.OSManagement.OTAOperation do
   graphql do
     type :ota_operation
 
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :ota_operation do
+        action_types [:create, :update, :destroy]
+      end
+    end
+
     field_names inserted_at: :created_at
   end
 
