@@ -34,17 +34,18 @@ const GET_HARDWARE_TYPES_QUERY = graphql`
     $after: String
     $filter: HardwareTypeFilterInput = {}
   ) @relay_test_operation {
-    ...HardwareTypesTable_HardwareTypesFragment @arguments(filter: $filter)
+    hardwareTypes(first: $first, after: $after, filter: $filter) {
+      ...HardwareTypesTable_HardwareTypeEdgeFragment
+    }
   }
 `;
 
 const ComponentWithQuery = () => {
-  const hardwareTypes =
-    useLazyLoadQuery<HardwareTypesTable_getHardwareTypes_Query>(
-      GET_HARDWARE_TYPES_QUERY,
-      {},
-    );
-  return <HardwareTypesTable hardwareTypesRef={hardwareTypes} />;
+  const data = useLazyLoadQuery<HardwareTypesTable_getHardwareTypes_Query>(
+    GET_HARDWARE_TYPES_QUERY,
+    {},
+  );
+  return <HardwareTypesTable hardwareTypesRef={data.hardwareTypes!} />;
 };
 
 type HardwareType = {
