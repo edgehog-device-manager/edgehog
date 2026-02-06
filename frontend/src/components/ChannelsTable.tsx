@@ -1,58 +1,49 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2023-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2023-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
 import _ from "lodash";
+import { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { ChannelsTable_PaginationQuery } from "@/api/__generated__/ChannelsTable_PaginationQuery.graphql";
 import type {
-  ChannelsTable_ChannelFragment$data,
-  ChannelsTable_ChannelFragment$key,
-} from "@/api/__generated__/ChannelsTable_ChannelFragment.graphql";
+  ChannelsTable_ChannelEdgeFragment$data,
+  ChannelsTable_ChannelEdgeFragment$key,
+} from "@/api/__generated__/ChannelsTable_ChannelEdgeFragment.graphql";
 
-import { createColumnHelper } from "@/components/Table";
-import InfiniteTable from "./InfiniteTable";
 import { Link, Route } from "@/Navigation";
+import { createColumnHelper } from "@/components/Table";
 import Tag from "@/components/Tag";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import InfiniteTable from "./InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
-const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
-  fragment ChannelsTable_ChannelFragment on RootQueryType
-  @refetchable(queryName: "ChannelsTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "ChannelFilterInput" }) {
-    channels(first: $first, after: $after, filter: $filter)
-      @connection(key: "ChannelsTable_channels") {
-      edges {
-        node {
-          id
-          name
-          handle
-          targetGroups {
-            edges {
-              node {
-                name
-              }
+const CHANNELS_TABLE_FRAGMENT = graphql`
+  fragment ChannelsTable_ChannelEdgeFragment on ChannelConnection {
+    edges {
+      node {
+        id
+        name
+        handle
+        targetGroups {
+          edges {
+            node {
+              name
             }
           }
         }
@@ -62,7 +53,7 @@ const DEVICE_GROUPS_TABLE_FRAGMENT = graphql`
 `;
 
 type TableRecord = NonNullable<
-  NonNullable<ChannelsTable_ChannelFragment$data["channels"]>["edges"]
+  NonNullable<ChannelsTable_ChannelEdgeFragment$data>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
@@ -113,89 +104,33 @@ const columns = [
 
 type Props = {
   className?: string;
-  channelsRef: ChannelsTable_ChannelFragment$key;
+  channelsRef: ChannelsTable_ChannelEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
-const ChannelsTable = ({ className, channelsRef }: Props) => {
-  const {
-    data: paginationData,
-    loadNext,
-    hasNext,
-    isLoadingNext,
-    refetch,
-  } = usePaginationFragment<
-    ChannelsTable_PaginationQuery,
-    ChannelsTable_ChannelFragment$key
-  >(DEVICE_GROUPS_TABLE_FRAGMENT, channelsRef);
-  const [searchText, setSearchText] = useState<string | null>(null);
-
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { handle: { ilike: `%${text}%` } },
-                  {
-                    targetGroups: {
-                      name: {
-                        ilike: `%${text}%`,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
+const ChannelsTable = ({
+  className,
+  channelsRef,
+  loading = false,
+  onLoadMore,
+}: Props) => {
+  const channelsFragment = useFragment(
+    CHANNELS_TABLE_FRAGMENT,
+    channelsRef || null,
   );
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextChannels = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const channels = useMemo(() => {
-    return (
-      paginationData.channels?.edges
-        ?.map((edge) => edge?.node)
-        .filter((node): node is TableRecord => node != null) ?? []
-    );
-  }, [paginationData]);
-
-  if (!paginationData.channels) {
-    return null;
-  }
-
+  const channels = useMemo<TableRecord[]>(() => {
+    return _.compact(channelsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [channelsFragment]);
   return (
     <InfiniteTable
       className={className}
       columns={columns}
       data={channels}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextChannels : undefined}
-      setSearchText={setSearchText}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      hideSearch
     />
   );
 };
