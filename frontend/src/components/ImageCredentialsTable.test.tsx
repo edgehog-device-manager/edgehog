@@ -32,9 +32,10 @@ const IMAGE_CREDENTIALS_TEST_QUERY = graphql`
     $first: Int
     $after: String
     $filter: ImageCredentialsFilterInput = {}
-  ) {
-    ...ImageCredentialsTable_imageCredentials_Fragment
-      @arguments(filter: $filter)
+  ) @relay_test_operation {
+    listImageCredentials(first: $first, after: $after, filter: $filter) {
+      ...ImageCredentialsTable_ImageCredentialEdgeFragment
+    }
   }
 `;
 
@@ -66,14 +67,14 @@ const labels = {
 };
 
 const ComponentWithQuery = () => {
-  const listImageCredentialsRef =
+  const data =
     useLazyLoadQuery<ImageCredentialsTable_imageCredentials_Test_Query>(
       IMAGE_CREDENTIALS_TEST_QUERY,
       {},
     );
 
   return (
-    <ImageCredentialsTable listImageCredentialsRef={listImageCredentialsRef} />
+    <ImageCredentialsTable imageCredentialsRef={data.listImageCredentials!} />
   );
 };
 
@@ -82,6 +83,7 @@ const renderComponent = (listImageCredentials: Data) => {
   relayEnvironment.mock.queueOperationResolver((_operation) => ({
     data: { listImageCredentials },
   }));
+  relayEnvironment.mock.queuePendingOperation(IMAGE_CREDENTIALS_TEST_QUERY, {});
   renderWithProviders(<ComponentWithQuery />, { relayEnvironment });
 };
 
