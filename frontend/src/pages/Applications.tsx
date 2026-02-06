@@ -18,22 +18,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
 
+import { Applications_ApplicationsFragment$key } from "@/api/__generated__/Applications_ApplicationsFragment.graphql";
 import type { Applications_getApplications_Query } from "@/api/__generated__/Applications_getApplications_Query.graphql";
+import { Applications_PaginationQuery } from "@/api/__generated__/Applications_PaginationQuery.graphql";
 
 import Alert from "@/components/Alert";
-import Page from "@/components/Page";
-import Center from "@/components/Center";
-import Spinner from "@/components/Spinner";
-import ApplicationsTable from "@/components/ApplicationsTable";
+import ApplicationsTable, { TableRecord } from "@/components/ApplicationsTable";
 import Button from "@/components/Button";
+import Center from "@/components/Center";
+import DeleteApplicationModal from "@/components/DeleteApplicationModal";
+import Page from "@/components/Page";
+import SearchBox from "@/components/SearchBox";
+import Spinner from "@/components/Spinner";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { Link, Route } from "@/Navigation";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const GET_APPLICATIONS_QUERY = graphql`
   query Applications_getApplications_Query(
@@ -41,10 +51,95 @@ const GET_APPLICATIONS_QUERY = graphql`
     $after: String
     $filter: ApplicationFilterInput = {}
   ) {
-    ...ApplicationsTable_ApplicationFragment @arguments(filter: $filter)
+    ...Applications_ApplicationsFragment
   }
 `;
 
+/* eslint-disable relay/unused-fields */
+const APPLICATIONS_FRAGMENT = graphql`
+  fragment Applications_ApplicationsFragment on RootQueryType
+  @refetchable(queryName: "Applications_PaginationQuery") {
+    applications(first: $first, after: $after, filter: $filter)
+      @connection(key: "Applications_applications") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...ApplicationsTable_ApplicationEdgeFragment
+    }
+  }
+`;
+type SelectedApplication = TableRecord;
+
+interface ApplicationsLayoutContainerProps {
+  applicationsData: Applications_getApplications_Query["response"];
+  searchText: string | null;
+  onDelete: (application: SelectedApplication) => void;
+}
+const ApplicationsLayoutContainer = ({
+  applicationsData,
+  searchText,
+  onDelete,
+}: ApplicationsLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      Applications_PaginationQuery,
+      Applications_ApplicationsFragment$key
+    >(APPLICATIONS_FRAGMENT, applicationsData);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: {
+                or: [{ name: { ilike: `%${text}%` } }],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextApplications = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const applicationsRef = data?.applications || null;
+
+  if (!applicationsRef) {
+    return null;
+  }
+
+  return (
+    <ApplicationsTable
+      onDelete={onDelete}
+      applicationsRef={applicationsRef}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextApplications : undefined}
+    />
+  );
+};
 interface ApplicationsContentProps {
   getApplicationsQuery: PreloadedQuery<Applications_getApplications_Query>;
 }
@@ -52,9 +147,12 @@ interface ApplicationsContentProps {
 const ApplicationsContent = ({
   getApplicationsQuery,
 }: ApplicationsContentProps) => {
+  const [searchText, setSearchText] = useState<string | null>(null);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const [applicationToDelete, setApplicationToDelete] =
+    useState<SelectedApplication | null>(null);
 
-  const applicationsRef = usePreloadedQuery(
+  const applicationsData = usePreloadedQuery(
     GET_APPLICATIONS_QUERY,
     getApplicationsQuery,
   );
@@ -85,10 +183,25 @@ const ApplicationsContent = ({
         >
           {errorFeedback}
         </Alert>
-        <ApplicationsTable
-          applicationsRef={applicationsRef}
-          setErrorFeedback={setErrorFeedback}
+        <SearchBox
+          className="flex-grow-1 pb-2"
+          value={searchText || ""}
+          onChange={setSearchText}
         />
+        <ApplicationsLayoutContainer
+          applicationsData={applicationsData}
+          searchText={searchText}
+          onDelete={setApplicationToDelete}
+        />
+
+        {applicationToDelete && (
+          <DeleteApplicationModal
+            applicationToDelete={applicationToDelete}
+            onConfirm={() => setApplicationToDelete(null)}
+            onCancel={() => setApplicationToDelete(null)}
+            setErrorFeedback={setErrorFeedback}
+          />
+        )}
       </Page.Main>
     </Page>
   );
