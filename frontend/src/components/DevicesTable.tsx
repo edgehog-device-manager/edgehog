@@ -18,119 +18,44 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FormattedMessage } from "react-intl";
-import {
-  graphql,
-  usePaginationFragment,
-  useSubscription,
-} from "react-relay/hooks";
-
-import { ConnectionHandler } from "relay-runtime";
 import _ from "lodash";
+import { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { DevicesTable_PaginationQuery } from "@/api/__generated__/DevicesTable_PaginationQuery.graphql";
 import type {
-  DevicesTable_DeviceFragment$data,
-  DevicesTable_DeviceFragment$key,
-} from "@/api/__generated__/DevicesTable_DeviceFragment.graphql";
+  DevicesTable_DeviceEdgeFragment$data,
+  DevicesTable_DeviceEdgeFragment$key,
+} from "@/api/__generated__/DevicesTable_DeviceEdgeFragment.graphql";
 
 import ConnectionStatus from "@/components/ConnectionStatus";
-import { createColumnHelper } from "@/components/Table";
-import InfiniteTable from "./InfiniteTable";
 import LastSeen from "@/components/LastSeen";
-import { Link, Route } from "@/Navigation";
+import { createColumnHelper } from "@/components/Table";
 import Tag from "@/components/Tag";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { Link, Route } from "@/Navigation";
+import InfiniteTable from "./InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICES_TABLE_FRAGMENT = graphql`
-  fragment DevicesTable_DeviceFragment on RootQueryType
-  @refetchable(queryName: "DevicesTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "DeviceFilterInput" }) {
-    devices(first: $first, after: $after, filter: $filter)
-      @connection(key: "DevicesTable_devices") {
-      edges {
-        node {
-          id
-          deviceId
-          lastConnection
-          lastDisconnection
-          name
-          online
-          systemModel {
-            name
-            hardwareType {
-              name
-            }
-          }
-          tags {
-            edges {
-              node {
-                name
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const DEVICE_CREATED_SUBSCRIPTION = graphql`
-  subscription DevicesTable_deviceChanged_created_Subscription {
-    deviceChanged {
-      created {
+  fragment DevicesTable_DeviceEdgeFragment on DeviceConnection {
+    edges {
+      node {
         id
         deviceId
-        name
-        online
         lastConnection
         lastDisconnection
+        name
+        online
         systemModel {
-          id
           name
           hardwareType {
-            id
             name
           }
         }
         tags {
           edges {
             node {
-              id
-              name
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const DEVICE_UPDATED_SUBSCRIPTION = graphql`
-  subscription DevicesTable_deviceChanged_updated_Subscription {
-    deviceChanged {
-      updated {
-        id
-        deviceId
-        name
-        online
-        lastConnection
-        lastDisconnection
-        systemModel {
-          id
-          name
-          hardwareType {
-            id
-            name
-          }
-        }
-        tags {
-          edges {
-            node {
-              id
               name
             }
           }
@@ -141,7 +66,7 @@ const DEVICE_UPDATED_SUBSCRIPTION = graphql`
 `;
 
 type TableRecord = NonNullable<
-  NonNullable<DevicesTable_DeviceFragment$data["devices"]>["edges"]
+  NonNullable<DevicesTable_DeviceEdgeFragment$data>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
@@ -245,155 +170,34 @@ const columns = [
 
 type Props = {
   className?: string;
-  devicesRef: DevicesTable_DeviceFragment$key;
+  devicesRef: DevicesTable_DeviceEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
-const DevicesTable = ({ className, devicesRef }: Props) => {
-  const {
-    data: paginationData,
-    loadNext,
-    hasNext,
-    isLoadingNext,
-    refetch,
-  } = usePaginationFragment<
-    DevicesTable_PaginationQuery,
-    DevicesTable_DeviceFragment$key
-  >(DEVICES_TABLE_FRAGMENT, devicesRef);
-
-  const [searchText, setSearchText] = useState<string | null>(null);
-
-  const normalizedSearchText = useMemo(
-    () => (searchText ?? "").trim(),
-    [searchText],
+const DevicesTable = ({
+  className,
+  devicesRef,
+  loading = false,
+  onLoadMore,
+}: Props) => {
+  const devicesFragment = useFragment(
+    DEVICES_TABLE_FRAGMENT,
+    devicesRef || null,
   );
 
-  const currentFilter = useMemo(() => {
-    if (normalizedSearchText === "") return {};
-
-    return {
-      or: [
-        { name: { ilike: `%${normalizedSearchText}%` } },
-        { deviceId: { ilike: `%${normalizedSearchText}%` } },
-      ],
-    };
-  }, [normalizedSearchText]);
-
-  useSubscription(
-    useMemo(
-      () => ({
-        subscription: DEVICE_CREATED_SUBSCRIPTION,
-        variables: {},
-        updater: (store) => {
-          const deviceChanged = store.getRootField("deviceChanged");
-          const newDevice = deviceChanged?.getLinkedRecord("created");
-          if (!newDevice) return;
-
-          if (normalizedSearchText !== "") {
-            const search = normalizedSearchText.toLowerCase();
-            const name = String(newDevice.getValue("name") ?? "").toLowerCase();
-            const deviceId = String(
-              newDevice.getValue("deviceId") ?? "",
-            ).toLowerCase();
-
-            if (!name.includes(search) && !deviceId.includes(search)) return;
-          }
-
-          const connection = ConnectionHandler.getConnection(
-            store.getRoot(),
-            "DevicesTable_devices",
-            { filter: currentFilter },
-          );
-          if (!connection) return;
-
-          const newDeviceId = newDevice.getDataID();
-          const edges = connection.getLinkedRecords("edges") ?? [];
-          const alreadyPresent = edges.some(
-            (edge) => edge.getLinkedRecord("node")?.getDataID() === newDeviceId,
-          );
-          if (alreadyPresent) return;
-
-          const edge = ConnectionHandler.createEdge(
-            store,
-            connection,
-            newDevice,
-            "DeviceEdge",
-          );
-
-          ConnectionHandler.insertEdgeBefore(connection, edge);
-        },
-      }),
-      [currentFilter, normalizedSearchText],
-    ),
-  );
-
-  useSubscription(
-    useMemo(
-      () => ({ subscription: DEVICE_UPDATED_SUBSCRIPTION, variables: {} }),
-      [],
-    ),
-  );
-
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {},
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { deviceId: { ilike: `%${text}%` } },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
-
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextDevices = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const devices = useMemo(() => {
-    return (
-      paginationData.devices?.edges
-        ?.map((edge) => edge?.node)
-        .filter((node): node is TableRecord => node != null) ?? []
-    );
-  }, [paginationData]);
-
-  if (!paginationData.devices) {
-    return null;
-  }
+  const devices = useMemo<TableRecord[]>(() => {
+    return _.compact(devicesFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [devicesFragment]);
 
   return (
     <InfiniteTable
       className={className}
       columns={columns}
       data={devices}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextDevices : undefined}
-      setSearchText={setSearchText}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      hideSearch
     />
   );
 };
