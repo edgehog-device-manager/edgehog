@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-06)
+
+
+### Features
+
+* Add `Pause` and `Resume` functionality for campaigns ([#1204](https://github.com/edgehog-device-manager/edgehog/issues/1204)) ([35a9aab](https://github.com/edgehog-device-manager/edgehog/commit/35a9aab42a458358bf87a60e37453b26a7ac0228)), closes [#277](https://github.com/edgehog-device-manager/edgehog/issues/277)
+* add GraphQL subscriptions for OTA operations ([#1220](https://github.com/edgehog-device-manager/edgehog/issues/1220)) ([db679ce](https://github.com/edgehog-device-manager/edgehog/commit/db679ceebe687909871ed3fee9e59303b4397aa0))
+* Add subscriptions for HT and SMPN ([#1225](https://github.com/edgehog-device-manager/edgehog/issues/1225)) ([7d46654](https://github.com/edgehog-device-manager/edgehog/commit/7d466541e3b77f87d84884332046a677d102b441))
+
 ## [0.11.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.10.0...v0.11.0) (2026-02-03)
 
 

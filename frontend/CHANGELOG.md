@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-06)
+
+
+### Features
+
+* Add `Pause` and `Resume` functionality for campaigns ([#1204](https://github.com/edgehog-device-manager/edgehog/issues/1204)) ([35a9aab](https://github.com/edgehog-device-manager/edgehog/commit/35a9aab42a458358bf87a60e37453b26a7ac0228)), closes [#277](https://github.com/edgehog-device-manager/edgehog/issues/277)
+* **frontend:** add retry count column to campaign targets tables ([dfe0649](https://github.com/edgehog-device-manager/edgehog/commit/dfe0649be89060cd67f44e31909892549644363e))
+
 ## [0.11.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.10.0...v0.11.0) (2026-02-03)
 
 
