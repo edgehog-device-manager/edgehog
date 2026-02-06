@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2025 SECO Mind Srl
+# Copyright 2022-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -507,11 +507,11 @@ defmodule Edgehog.Devices.Device do
       public? true
     end
 
-    has_many :container_deplomyents, Edgehog.Containers.Container.Deployment
-    has_many :network_deplomyents, Edgehog.Containers.Network.Deployment
-    has_many :volume_deplomyents, Edgehog.Containers.Volume.Deployment
-    has_many :image_deplomyents, Edgehog.Containers.Image.Deployment
-    has_many :device_mapping_deplomyents, Edgehog.Containers.DeviceMapping.Deployment
+    has_many :container_deployments, Edgehog.Containers.Container.Deployment
+    has_many :network_deployments, Edgehog.Containers.Network.Deployment
+    has_many :volume_deployments, Edgehog.Containers.Volume.Deployment
+    has_many :image_deployments, Edgehog.Containers.Image.Deployment
+    has_many :device_mapping_deployments, Edgehog.Containers.DeviceMapping.Deployment
 
     many_to_many :application_releases, Release do
       through Deployment
