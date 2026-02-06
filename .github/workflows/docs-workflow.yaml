@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2026 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 name: Edgehog docs generation
 
@@ -24,7 +23,7 @@ on:
   push:
     paths:
       # Documentation pages
-      - "doc/**"
+      - "backend/docs/**"
       # Schema files
       - "backend/lib/edgehog_web/admin_api/**"
       - "backend/lib/edgehog_web/schema.ex"
@@ -51,6 +50,18 @@ jobs:
   docs:
     if: github.repository_owner == 'edgehog-device-manager'
     runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout the source
         uses: actions/checkout@v6
@@ -69,97 +80,11 @@ jobs:
           repository: edgehog-device-manager/edgehog-astarte-interfaces
           path: edgehog-astarte-interfaces
           show-progress: false
-      - uses: actions/setup-node@v6
+      - uses: .github/actions/gen-doc.yaml
         with:
-          node-version-file: edgehog/.tool-versions
-
-      # This section builds the doc pages
-      - name: Install astarte-docs-cli
-        run: npm install -g @astarte-platform/astarte-docs-cli@0.0.7
-      - name: Generate Interfaces Docs
-        run: astarte-docs interfaces gen-markdown -d ./edgehog-astarte-interfaces -o ./edgehog/doc/pages/integrating/astarte_interfaces.md
-      - uses: erlef/setup-beam@v1
+          edgehog: edgehog
+          docs: docs
+          astarte-interfaces: edgehog-astarte-interfaces
+      - uses: .github/actions/publish-doc.yaml
         with:
-          version-file: edgehog/.tool-versions
-          version-type: strict
-      - name: Install Docs Dependencies
-        working-directory: ./edgehog/doc
-        run: mix deps.get
-      - name: Build Docs
-        working-directory: ./edgehog/doc
-        run: mix docs
-
-      # This section builds the GraphQL API docs
-      - name: Install Backend Dependencies
-        working-directory: ./edgehog/backend
-        run: mix deps.get
-      - name: Extract GraphQL Schema
-        working-directory: ./edgehog/backend
-        run: mix absinthe.schema.sdl --schema EdgehogWeb.Schema
-      - name: Setup Node.js 22 for SpectaQL
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-      - name: Install SpectaQL
-        run: npm install -g spectaql
-      - name: Build SpectaQL Docs
-        working-directory: ./edgehog/backend
-        run: npx spectaql .spectaql-config.yaml -t tenant-graphql-api
-
-      # This section builds the Admin REST API docs
-      - name: Extract Admin Schema
-        working-directory: ./edgehog/backend
-        run: mix openapi.spec.yaml --spec EdgehogWeb.AdminAPI
-      - name: Checkout Swagger UI
-        uses: actions/checkout@v6
-        with:
-          repository: swagger-api/swagger-ui
-          path: ./edgehog/backend/swagger-ui
-          ref: "v5.30.2"
-      - name: Copy all Swagger UI files
-        working-directory: ./edgehog/backend
-        run: |
-          cp -r swagger-ui/dist/ admin-rest-api/
-          cp openapi.yaml admin-rest-api/
-          cp ../doc/swagger-ui-index.html admin-rest-api/index.html
-
-      # Copy docs over to the docs repository
-      - name: Copy Docs, preserving Device SDK docs
-        run: |
-          export DOCS_DIRNAME="$(echo ${{ github.ref }} | sed 's,refs/heads/,,' | sed 's/main/snapshot/g' | sed 's/release-//g')"
-          rm -rf docs/$DOCS_DIRNAME
-          mkdir docs/$DOCS_DIRNAME
-          # Copy doc pages
-          cp -r edgehog/doc/doc/* docs/$DOCS_DIRNAME/
-          # Copy version dropdown config
-          cp edgehog/doc/versions.js docs/
-          # Copy GraphQL docs
-          cp -r ./edgehog/backend/tenant-graphql-api docs/$DOCS_DIRNAME/
-          # Copy Admin REST API docs
-          cp -r ./edgehog/backend/admin-rest-api docs/$DOCS_DIRNAME/
-
-      # Upload as an artifact the generated HTML
-      - name: Upload HTML documentation
-        uses: actions/upload-artifact@v6
-        with:
-          name: docs_html
-          path: ./docs
-
-      # Commit and push changes to the docs repository
-      - name: Commit files
-        working-directory: ./docs
-        run: |
-          git config --local user.email "edgehog-machine@ispirata.com"
-          git config --local user.name "Edgehog Bot"
-          git add .
-          git commit -m "Update Documentation"
-      - name: Push changes
-        working-directory: ./docs
-        run: |
-          eval `ssh-agent -t 60 -s`
-          echo "${{ secrets.DOCS_DEPLOY_KEY }}" | ssh-add -
-          mkdir -p ~/.ssh/
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git remote add topush "git@github.com:edgehog-device-manager/docs.git"
-          git fetch topush
-          git push topush main
+          docs: docs
