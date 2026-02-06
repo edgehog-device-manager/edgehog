@@ -504,6 +504,12 @@
     "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
     "description": "Description of the action to perform to confirm the deletion modal"
   },
+  "components.DeleteReleaseModal.deleteModal.title": {
+    "defaultMessage": "Delete Release"
+  },
+  "components.DeleteReleaseModal.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the release, please try again."
+  },
   "components.DeployedApplicationsTable.actions": {
     "defaultMessage": "Actions"
   },
@@ -1097,12 +1103,6 @@
   },
   "components.ReleasesTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the release."
-  },
-  "components.ReleasesTable.deleteModal.title": {
-    "defaultMessage": "Delete Release"
-  },
-  "components.ReleasesTable.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the release, please try again."
   },
   "components.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search",
