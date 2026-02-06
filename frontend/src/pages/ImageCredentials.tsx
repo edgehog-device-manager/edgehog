@@ -18,47 +18,137 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect } from "react";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import {
   graphql,
   PreloadedQuery,
+  usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay";
 
-import type { ImageCredentials_imageCredentials_Query } from "@/api/__generated__/ImageCredentials_imageCredentials_Query.graphql";
+import type { ImageCredentials_getImageCredentials_Query } from "@/api/__generated__/ImageCredentials_getImageCredentials_Query.graphql";
+import { ImageCredentials_ImageCredentialsFragment$key } from "@/api/__generated__/ImageCredentials_ImageCredentialsFragment.graphql";
+import { ImageCredentials_PaginationQuery } from "@/api/__generated__/ImageCredentials_PaginationQuery.graphql";
 
 import Button from "@/components/Button";
 import Center from "@/components/Center";
 import ImageCredentialsTable from "@/components/ImageCredentialsTable";
 import Page from "@/components/Page";
+import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { Link, Route } from "@/Navigation";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
-const IMAGE_CREDENTIALS_QUERY = graphql`
-  query ImageCredentials_imageCredentials_Query(
+const GET_IMAGE_CREDENTIALS_QUERY = graphql`
+  query ImageCredentials_getImageCredentials_Query(
     $first: Int
     $after: String
     $filter: ImageCredentialsFilterInput = {}
   ) {
-    ...ImageCredentialsTable_imageCredentials_Fragment
-      @arguments(filter: $filter)
+    ...ImageCredentials_ImageCredentialsFragment
   }
 `;
 
+/* eslint-disable relay/unused-fields */
+const IMAGE_CREDENTIALS_FRAGMENT = graphql`
+  fragment ImageCredentials_ImageCredentialsFragment on RootQueryType
+  @refetchable(queryName: "ImageCredentials_PaginationQuery") {
+    listImageCredentials(first: $first, after: $after, filter: $filter)
+      @connection(key: "ImageCredentials_listImageCredentials") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...ImageCredentialsTable_ImageCredentialEdgeFragment
+    }
+  }
+`;
+
+interface ImageCredentialsLayoutContainerProps {
+  imageCredentialsData: ImageCredentials_getImageCredentials_Query["response"];
+  searchText: string | null;
+}
+const ImageCredentialsLayoutContainer = ({
+  imageCredentialsData,
+  searchText,
+}: ImageCredentialsLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      ImageCredentials_PaginationQuery,
+      ImageCredentials_ImageCredentialsFragment$key
+    >(IMAGE_CREDENTIALS_FRAGMENT, imageCredentialsData);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { label: { ilike: `%${text}%` } },
+                  { username: { ilike: `%${text}%` } },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
+
+  const loadNextImageCredentials = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const imageCredentialsRef = data?.listImageCredentials;
+
+  if (!imageCredentialsRef) {
+    return null;
+  }
+
+  return (
+    <ImageCredentialsTable
+      imageCredentialsRef={imageCredentialsRef}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextImageCredentials : undefined}
+    />
+  );
+};
+
 interface ImageCredentialsContentProps {
-  getImageCredentialsQuery: PreloadedQuery<ImageCredentials_imageCredentials_Query>;
+  getImageCredentialsQuery: PreloadedQuery<ImageCredentials_getImageCredentials_Query>;
 }
 
 const ImageCredentialsContent = ({
   getImageCredentialsQuery,
 }: ImageCredentialsContentProps) => {
-  const listImageCredentialsRef =
-    usePreloadedQuery<ImageCredentials_imageCredentials_Query>(
-      IMAGE_CREDENTIALS_QUERY,
+  const [searchText, setSearchText] = useState<string | null>(null);
+  const imageCredentialsData =
+    usePreloadedQuery<ImageCredentials_getImageCredentials_Query>(
+      GET_IMAGE_CREDENTIALS_QUERY,
       getImageCredentialsQuery,
     );
 
@@ -80,8 +170,14 @@ const ImageCredentialsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <ImageCredentialsTable
-          listImageCredentialsRef={listImageCredentialsRef}
+        <SearchBox
+          className="flex-grow-1 pb-2"
+          value={searchText || ""}
+          onChange={setSearchText}
+        />
+        <ImageCredentialsLayoutContainer
+          imageCredentialsData={imageCredentialsData}
+          searchText={searchText}
         />
       </Page.Main>
     </Page>
@@ -90,8 +186,8 @@ const ImageCredentialsContent = ({
 
 const ImageCredentialsPage = () => {
   const [getImageCredentialsQuery, getImageCredentials] =
-    useQueryLoader<ImageCredentials_imageCredentials_Query>(
-      IMAGE_CREDENTIALS_QUERY,
+    useQueryLoader<ImageCredentials_getImageCredentials_Query>(
+      GET_IMAGE_CREDENTIALS_QUERY,
     );
 
   const fetchImageCredentials = useCallback(
