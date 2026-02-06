@@ -19,32 +19,37 @@
  */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   graphql,
   PreloadedQuery,
+  usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useParams } from "react-router-dom";
 
+import { Release_DeploymentsFragment$key } from "@/api/__generated__/Release_DeploymentsFragment.graphql";
 import type {
   Release_getRelease_Query,
   Release_getRelease_Query$data,
 } from "@/api/__generated__/Release_getRelease_Query.graphql";
+import { ReleaseDevices_PaginationQuery } from "@/api/__generated__/ReleaseDevices_PaginationQuery.graphql";
 
-import { Link, Route } from "@/Navigation";
 import Alert from "@/components/Alert";
 import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
 import ContainersTable from "@/components/ContainersTable";
+import Page from "@/components/Page";
 import ReleaseDevicesTable from "@/components/ReleaseDevicesTable";
 import ReleaseSystemModelsTable from "@/components/ReleaseSystemModelsTable";
+import Result from "@/components/Result";
+import Spinner from "@/components/Spinner";
 import Tabs, { Tab } from "@/components/Tabs";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { Link, Route } from "@/Navigation";
+import { Containers_PaginationQuery } from "@/api/__generated__/Containers_PaginationQuery.graphql";
+import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -53,40 +58,81 @@ const GET_RELEASE_QUERY = graphql`
       application {
         name
       }
-      ...ContainersTable_ContainerFragment
+      ...Release_ContainersFragment
       ...ReleaseSystemModelsTable_SystemModelsFragment
-      ...ReleaseDevicesTable_DeploymentsFragment
+      ...Release_DeploymentsFragment
+    }
+  }
+`;
+
+/* eslint-disable relay/unused-fields */
+const DEPLOYMENTS_FRAGMENT = graphql`
+  fragment Release_DeploymentsFragment on Release
+  @refetchable(queryName: "ReleaseDevices_PaginationQuery") {
+    deployments(first: $first, after: $after)
+      @connection(key: "Release_deployments") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...ReleaseDevicesTable_DeploymentEdgeFragment
+    }
+  }
+`;
+
+/* eslint-disable relay/unused-fields */
+const CONTAINERS_FRAGMENT = graphql`
+  fragment Release_ContainersFragment on Release
+  @refetchable(queryName: "Containers_PaginationQuery") {
+    containers(first: $first, after: $after)
+      @connection(key: "Release_containers") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...ContainersTable_ContainerEdgeFragment
     }
   }
 `;
 
 type Release = NonNullable<Release_getRelease_Query$data["release"]>;
 
-interface ContainersTabProps {
-  release: Release;
+interface ContainersLayoutContainerProps {
+  releaseRef: Release_ContainersFragment$key;
 }
 
-const ContainersTab = ({ release }: ContainersTabProps) => {
-  const intl = useIntl();
+const ContainersLayoutContainer = ({
+  releaseRef,
+}: ContainersLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
+    Containers_PaginationQuery,
+    Release_ContainersFragment$key
+  >(CONTAINERS_FRAGMENT, releaseRef);
+
+  const loadNextContainers = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const containersRef = data?.containers;
+
+  if (!containersRef) {
+    return null;
+  }
 
   return (
-    <Tab
-      eventKey="containers-tab"
-      title={intl.formatMessage({
-        id: "pages.Release.containers",
-        defaultMessage: "Containers",
-      })}
-    >
-      <div className="mt-3">
-        <ContainersTable containersRef={release} />
-      </div>
-    </Tab>
+    <div className="mt-3">
+      <ContainersTable
+        containersRef={containersRef}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextContainers : undefined}
+      />
+    </div>
   );
 };
-
-interface ReleaseContentProps {
-  release: Release;
-}
 
 interface SystemModelsTabProps {
   release: Release;
@@ -110,29 +156,47 @@ const SystemModelsTab = ({ release }: SystemModelsTabProps) => {
   );
 };
 
-interface DevicesTabProps {
-  release: Release;
+interface ReleaseDevicesLayoutContainerProps {
+  releaseRef: Release_DeploymentsFragment$key;
 }
 
-const DevicesTab = ({ release }: DevicesTabProps) => {
-  const intl = useIntl();
+const ReleaseDevicesLayoutContainer = ({
+  releaseRef,
+}: ReleaseDevicesLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
+    ReleaseDevices_PaginationQuery,
+    Release_DeploymentsFragment$key
+  >(DEPLOYMENTS_FRAGMENT, releaseRef);
+
+  const loadNextDeployments = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const deploymentsRef = data?.deployments;
+
+  if (!deploymentsRef) {
+    return null;
+  }
 
   return (
-    <Tab
-      eventKey="devices-tab"
-      title={intl.formatMessage({
-        id: "pages.Release.devices",
-        defaultMessage: "Devices",
-      })}
-    >
-      <div className="mt-3">
-        <ReleaseDevicesTable releaseDevicesRef={release} />
-      </div>
-    </Tab>
+    <div className="mt-3">
+      <ReleaseDevicesTable
+        deploymentsRef={deploymentsRef}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextDeployments : undefined}
+      />
+    </div>
   );
 };
 
+interface ReleaseContentProps {
+  release: NonNullable<Release_getRelease_Query$data["release"]>;
+}
+
 const ReleaseContent = ({ release }: ReleaseContentProps) => {
+  const intl = useIntl();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   return (
@@ -154,9 +218,27 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
           defaultActiveKey="containers-tab"
           tabsOrder={["containers-tab", "system-models-tab", "devices-tab"]}
         >
-          <ContainersTab release={release} />
+          <Tab
+            eventKey="containers-tab"
+            title={intl.formatMessage({
+              id: "pages.Release.containers",
+              defaultMessage: "Containers",
+            })}
+          >
+            <ContainersLayoutContainer releaseRef={release} />
+          </Tab>
+
           <SystemModelsTab release={release} />
-          <DevicesTab release={release} />
+
+          <Tab
+            eventKey="devices-tab"
+            title={intl.formatMessage({
+              id: "pages.Release.devices",
+              defaultMessage: "Devices",
+            })}
+          >
+            <ReleaseDevicesLayoutContainer releaseRef={release} />
+          </Tab>
         </Tabs>
       </Page.Main>
     </Page>

@@ -18,30 +18,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Row, Col } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Col, Form, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
+import {
+  graphql,
+  usePaginationFragment,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
+import { useParams } from "react-router-dom";
 
+import { Application_ReleasesFragment$key } from "@/api/__generated__/Application_ReleasesFragment.graphql";
 import type {
   Application_getApplication_Query,
   Application_getApplication_Query$data,
 } from "@/api/__generated__/Application_getApplication_Query.graphql";
+import { Releases_PaginationQuery } from "@/api/__generated__/Releases_PaginationQuery.graphql";
 
 import { Link, Route } from "@/Navigation";
 import Alert from "@/components/Alert";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
-import ReleasesTable from "@/components/ReleasesTable";
-import Button from "@/components/Button";
 import ApplicationDevicesTable from "@/components/ApplicationDevicesTable";
+import Button from "@/components/Button";
+import Center from "@/components/Center";
+import DeleteReleaseModal from "@/components/DeleteReleaseModal";
+import Page from "@/components/Page";
+import type { ReleaseTableRecord } from "@/components/ReleasesTable";
+import ReleasesTable from "@/components/ReleasesTable";
+import Result from "@/components/Result";
+import SearchBox from "@/components/SearchBox";
+import Spinner from "@/components/Spinner";
 import Tabs, { Tab } from "@/components/Tabs";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 const GET_APPLICATION_QUERY = graphql`
   query Application_getApplication_Query(
@@ -53,11 +64,36 @@ const GET_APPLICATION_QUERY = graphql`
     application(id: $applicationId) {
       name
       description
-      ...ReleasesTable_ReleaseFragment @arguments(filter: $filter)
-      ...ApplicationDevicesTable_ReleaseFragment @arguments(filter: $filter)
+      ...Application_ReleasesFragment
+        @arguments(first: $first, after: $after, filter: $filter)
     }
   }
 `;
+
+/* eslint-disable relay/unused-fields */
+const RELEASES_FRAGMENT = graphql`
+  fragment Application_ReleasesFragment on Application
+  @refetchable(queryName: "Releases_PaginationQuery")
+  @argumentDefinitions(
+    first: { type: "Int" }
+    after: { type: "String" }
+    filter: { type: "ReleaseFilterInput", defaultValue: {} }
+  ) {
+    id
+    releases(first: $first, after: $after, filter: $filter)
+      @connection(key: "Application_releases") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...ReleasesTable_ReleaseEdgeFragment
+      ...ApplicationDevicesTable_ReleaseEdgeFragment
+    }
+  }
+`;
+
+type SelectedRelease = ReleaseTableRecord;
 
 interface ApplicationContentProps {
   application: NonNullable<
@@ -65,65 +101,125 @@ interface ApplicationContentProps {
   >;
 }
 
-interface ReleasesTabProps {
-  application: NonNullable<
+interface ReleasesLayoutContainerProps {
+  applicationRef: NonNullable<
     Application_getApplication_Query$data["application"]
   >;
-  setErrorFeedback: (error: React.ReactNode) => void;
+  searchText: string | null;
+  onDelete: (release: SelectedRelease) => void;
 }
 
-const ReleasesTab = ({ application, setErrorFeedback }: ReleasesTabProps) => {
-  const intl = useIntl();
+const ReleasesLayoutContainer = ({
+  applicationRef,
+  searchText,
+  onDelete,
+}: ReleasesLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      Releases_PaginationQuery,
+      Application_ReleasesFragment$key
+    >(RELEASES_FRAGMENT, applicationRef);
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: { version: { ilike: `%${text}%` } },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+
+    return () => {
+      debounceRefetch.cancel();
+    };
+  }, [debounceRefetch, searchText]);
+
+  const loadNextReleases = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const releasesRef = data?.releases;
+
+  if (!releasesRef) {
+    return null;
+  }
 
   return (
-    <Tab
-      eventKey="releases-tab"
-      title={intl.formatMessage({
-        id: "pages.Application.releases",
-        defaultMessage: "Releases",
-      })}
-    >
-      <div className="mt-3">
-        <ReleasesTable
-          releasesRef={application}
-          hideSearch
-          setErrorFeedback={setErrorFeedback}
-        />
-      </div>
-    </Tab>
+    <div className="mt-3">
+      <ReleasesTable
+        onDelete={onDelete}
+        releasesRef={releasesRef}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextReleases : undefined}
+      />
+    </div>
   );
 };
 
-interface DevicesTabProps {
-  application: NonNullable<
+interface DevicesLayoutContainerProps {
+  applicationRef: NonNullable<
     Application_getApplication_Query$data["application"]
   >;
 }
 
-const DevicesTab = ({ application }: DevicesTabProps) => {
-  const intl = useIntl();
+const DevicesLayoutContainer = ({
+  applicationRef,
+}: DevicesLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
+    Releases_PaginationQuery,
+    Application_ReleasesFragment$key
+  >(RELEASES_FRAGMENT, applicationRef);
+
+  const loadNextApplicationDevices = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const applicationDevicesRef = data?.releases;
+
+  if (!applicationDevicesRef) {
+    return null;
+  }
 
   return (
-    <Tab
-      eventKey="devices-tab"
-      title={intl.formatMessage({
-        id: "pages.Application.devices",
-        defaultMessage: "Devices",
-      })}
-    >
-      <div className="mt-3">
-        <ApplicationDevicesTable
-          applicationDevicesRef={application}
-          hideSearch
-        />
-      </div>
-    </Tab>
+    <div className="mt-3">
+      <ApplicationDevicesTable
+        applicationDevicesRef={applicationDevicesRef}
+        loading={isLoadingNext}
+        onLoadMore={hasNext ? loadNextApplicationDevices : undefined}
+      />
+    </div>
   );
 };
 
 const ApplicationContent = ({ application }: ApplicationContentProps) => {
+  const intl = useIntl();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
-
+  const [searchText, setSearchText] = useState<string | null>(null);
+  const [releaseToDelete, setReleaseToDelete] =
+    useState<SelectedRelease | null>(null);
   const { applicationId = "" } = useParams();
 
   return (
@@ -171,11 +267,42 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
           defaultActiveKey="releases-tab"
           tabsOrder={["releases-tab", "devices-tab"]}
         >
-          <ReleasesTab
-            application={application}
-            setErrorFeedback={setErrorFeedback}
-          />
-          <DevicesTab application={application} />
+          <Tab
+            eventKey="releases-tab"
+            title={intl.formatMessage({
+              id: "pages.Application.releases",
+              defaultMessage: "Releases",
+            })}
+          >
+            <SearchBox
+              className="flex-grow-1 pb-2 pt-2"
+              value={searchText || ""}
+              onChange={setSearchText}
+            />
+            <ReleasesLayoutContainer
+              applicationRef={application}
+              searchText={searchText}
+              onDelete={setReleaseToDelete}
+            />
+            {releaseToDelete && (
+              <DeleteReleaseModal
+                releaseToDelete={releaseToDelete}
+                onConfirm={() => setReleaseToDelete(null)}
+                onCancel={() => setReleaseToDelete(null)}
+                setErrorFeedback={setErrorFeedback}
+              />
+            )}
+          </Tab>
+
+          <Tab
+            eventKey="devices-tab"
+            title={intl.formatMessage({
+              id: "pages.Application.devices",
+              defaultMessage: "Devices",
+            })}
+          >
+            <DevicesLayoutContainer applicationRef={application} />
+          </Tab>
         </Tabs>
       </Page.Main>
     </Page>
@@ -226,7 +353,7 @@ const ApplicationPage = () => {
   const fetchApplication = useCallback(
     () =>
       getApplication(
-        { applicationId, first: RECORDS_TO_LOAD_FIRST },
+        { applicationId, first: 10 },
         { fetchPolicy: "network-only" },
       ),
     [getApplication, applicationId],

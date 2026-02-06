@@ -19,18 +19,19 @@
  */
 
 import React, { useCallback } from "react";
-import { useIntl } from "react-intl";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
+import { useIntl } from "react-intl";
 
 import Icon from "@/components/Icon";
 
 interface Props {
   className?: string;
   onChange?: (searchText: string) => void;
+  value?: string;
 }
 
-const SearchBox = ({ className = "", onChange }: Props) => {
+const SearchBox = ({ className = "", onChange, value }: Props) => {
   const intl = useIntl();
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -52,6 +53,7 @@ const SearchBox = ({ className = "", onChange }: Props) => {
             defaultMessage: "Search",
             description: "Placeholder for the search input of the SearchBox",
           })}
+          value={value}
           onChange={handleChange}
         />
         <InputGroup.Text className="bg-transparent">
