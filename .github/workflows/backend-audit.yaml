@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022-2026 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,17 +15,28 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
-defmodule EdgehogWeb.Auth do
-  @moduledoc false
-  alias EdgehogWeb.Auth.Pipeline
+name: Mix Audit
+on:
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+    working-directory: backend
+env:
+  MIX_ENV: test
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  def init(opts) do
-    Pipeline.init(opts)
-  end
-
-  def call(conn, opts) do
-    Pipeline.call(conn, opts)
-  end
-end
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: team-alembic/staple-actions/actions/mix-task@main
+        with:
+          task: deps.audit
+          working-directory: backend
+          mix-env: test

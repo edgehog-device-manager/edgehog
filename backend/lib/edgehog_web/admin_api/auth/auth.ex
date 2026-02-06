@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 
 defmodule EdgehogWeb.AdminAPI.Auth do
   @moduledoc false
-  alias Edgehog.Config
   alias EdgehogWeb.AdminAPI.Auth.Pipeline
 
   def init(opts) do
@@ -28,8 +27,7 @@ defmodule EdgehogWeb.AdminAPI.Auth do
   end
 
   def call(conn, opts) do
-    if Config.admin_authentication_disabled?() ||
-         conn.path_info == ["admin-api", "v1", "open_api"] do
+    if conn.path_info == ["admin-api", "v1", "open_api"] do
       conn
     else
       Pipeline.call(conn, opts)

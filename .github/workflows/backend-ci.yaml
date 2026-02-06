@@ -47,6 +47,12 @@ jobs:
   credo:
     needs: [warmup-cache]
     uses: ./.github/workflows/backend-credo.yaml
+  audit:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-audit.yaml
+  sobelow:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-sobelow.yaml
   test:
     needs: [warmup-cache]
     uses: ./.github/workflows/backend-test.yaml

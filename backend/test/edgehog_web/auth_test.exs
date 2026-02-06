@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ defmodule EdgehogWeb.AuthTest do
   # This can't be async: true since it modifies the Application env
   use EdgehogWeb.ConnCase, async: false
 
-  alias Edgehog.Config
   alias Edgehog.Containers.ReconcilerMock
 
   @query """
@@ -45,22 +44,6 @@ defmodule EdgehogWeb.AuthTest do
     conn = get(conn, api_path, query: @query)
 
     assert %{"errors" => %{"detail" => "Unauthorized"}} = json_response(conn, 401)
-  end
-
-  test "unauthenticated request with disabled authentication returns 200", %{
-    conn: conn,
-    api_path: api_path
-  } do
-    Config.put_disable_tenant_authentication(true)
-
-    on_exit(fn ->
-      # Cleanup at the end
-      Config.reload_disable_tenant_authentication()
-    end)
-
-    conn = get(conn, api_path, query: @query)
-
-    assert json_response(conn, 200)
   end
 
   test "request on unexisting tenant returns 403", %{conn: conn} do
