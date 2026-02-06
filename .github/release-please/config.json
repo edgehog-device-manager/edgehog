@@ -7,19 +7,13 @@
       "package-name": "backend",
       "release-type": "elixir",
       "component": "backend",
-      "include-component-in-tag": false
-    },
-    "doc": {
-      "package-name": "doc",
-      "release-type": "elixir",
-      "component": "doc",
-      "include-component-in-tag": false
+      "include-component-in-tag": true
     },
     "frontend": {
       "package-name": "frontend",
       "release-type": "node",
       "component": "frontend",
-      "include-component-in-tag": false
+      "include-component-in-tag": true
     }
   },
   "plugins": [
@@ -27,7 +21,7 @@
       "type": "linked-versions",
       "groupName": "edgehog",
       "tagName": "v${version}",
-      "components": ["backend", "frontend", "doc"]
+      "components": ["backend", "frontend"]
     }
   ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
