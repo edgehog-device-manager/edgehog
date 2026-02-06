@@ -1,55 +1,46 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2023-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2023-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
 import _ from "lodash";
+import { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { BaseImageCollectionsTable_PaginationQuery } from "@/api/__generated__/BaseImageCollectionsTable_PaginationQuery.graphql";
 import type {
-  BaseImageCollectionsTable_BaseImageCollectionFragment$data,
-  BaseImageCollectionsTable_BaseImageCollectionFragment$key,
-} from "@/api/__generated__/BaseImageCollectionsTable_BaseImageCollectionFragment.graphql";
+  BaseImageCollectionsTable_BaseImageCollectionEdgeFragment$data,
+  BaseImageCollectionsTable_BaseImageCollectionEdgeFragment$key,
+} from "@/api/__generated__/BaseImageCollectionsTable_BaseImageCollectionEdgeFragment.graphql";
 
+import { Link, Route } from "@/Navigation";
 import { createColumnHelper } from "@/components/Table";
 import InfiniteTable from "./InfiniteTable";
-import { Link, Route } from "@/Navigation";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT = graphql`
-  fragment BaseImageCollectionsTable_BaseImageCollectionFragment on RootQueryType
-  @refetchable(queryName: "BaseImageCollectionsTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "BaseImageCollectionFilterInput" }) {
-    baseImageCollections(first: $first, after: $after, filter: $filter)
-      @connection(key: "BaseImageCollectionsTable_baseImageCollections") {
-      edges {
-        node {
-          id
+  fragment BaseImageCollectionsTable_BaseImageCollectionEdgeFragment on BaseImageCollectionConnection {
+    edges {
+      node {
+        id
+        name
+        handle
+        systemModel {
           name
-          handle
-          systemModel {
-            name
-          }
         }
       }
     }
@@ -57,9 +48,7 @@ const BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT = graphql`
 `;
 
 type TableRecord = NonNullable<
-  NonNullable<
-    BaseImageCollectionsTable_BaseImageCollectionFragment$data["baseImageCollections"]
-  >["edges"]
+  NonNullable<BaseImageCollectionsTable_BaseImageCollectionEdgeFragment$data>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
@@ -105,92 +94,36 @@ const columns = [
 
 type Props = {
   className?: string;
-  baseImageCollectionsRef: BaseImageCollectionsTable_BaseImageCollectionFragment$key;
+  baseImageCollectionsRef: BaseImageCollectionsTable_BaseImageCollectionEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
 const BaseImageCollectionsTable = ({
   className,
   baseImageCollectionsRef,
+  loading = false,
+  onLoadMore,
 }: Props) => {
-  const {
-    data: paginationData,
-    loadNext,
-    hasNext,
-    isLoadingNext,
-    refetch,
-  } = usePaginationFragment<
-    BaseImageCollectionsTable_PaginationQuery,
-    BaseImageCollectionsTable_BaseImageCollectionFragment$key
-  >(BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT, baseImageCollectionsRef);
-  const [searchText, setSearchText] = useState<string | null>(null);
-
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { handle: { ilike: `%${text}%` } },
-                  {
-                    systemModel: {
-                      name: {
-                        ilike: `%${text}%`,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
+  const baseImageCollectionsFragment = useFragment(
+    BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT,
+    baseImageCollectionsRef || null,
   );
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextBaseImageCollections = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const baseImageCollections = useMemo(() => {
+  const baseImageCollections = useMemo<TableRecord[]>(() => {
     return (
-      paginationData.baseImageCollections?.edges
-        ?.map((edge) => edge?.node)
-        .filter((node): node is TableRecord => node != null) ?? []
+      _.compact(baseImageCollectionsFragment?.edges?.map((e) => e?.node)) ?? []
     );
-  }, [paginationData]);
-
-  if (!paginationData.baseImageCollections) {
-    return null;
-  }
+  }, [baseImageCollectionsFragment]);
 
   return (
     <InfiniteTable
       className={className}
       columns={columns}
       data={baseImageCollections}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextBaseImageCollections : undefined}
-      setSearchText={setSearchText}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      hideSearch
     />
   );
 };
