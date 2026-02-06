@@ -1,63 +1,54 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2025, 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import _ from "lodash";
+import { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { NetworksTable_PaginationQuery } from "@/api/__generated__/NetworksTable_PaginationQuery.graphql";
 import type {
-  NetworksTable_NetworkFragment$data,
-  NetworksTable_NetworkFragment$key,
-} from "@/api/__generated__/NetworksTable_NetworkFragment.graphql";
+  NetworksTable_NetworkEdgeFragment$data,
+  NetworksTable_NetworkEdgeFragment$key,
+} from "@/api/__generated__/NetworksTable_NetworkEdgeFragment.graphql";
 
 import { Link, Route } from "@/Navigation";
 import { createColumnHelper } from "@/components/Table";
 import InfiniteTable from "./InfiniteTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const NETWORKS_TABLE_FRAGMENT = graphql`
-  fragment NetworksTable_NetworkFragment on RootQueryType
-  @refetchable(queryName: "NetworksTable_PaginationQuery")
-  @argumentDefinitions(filter: { type: "NetworkFilterInput" }) {
-    networks(first: $first, after: $after, filter: $filter)
-      @connection(key: "NetworksTable_networks") {
-      edges {
-        node {
-          id
-          label
-          driver
-          internal
-          enableIpv6
-          options
-        }
+  fragment NetworksTable_NetworkEdgeFragment on NetworkConnection {
+    edges {
+      node {
+        id
+        label
+        driver
+        internal
+        enableIpv6
+        options
       }
     }
   }
 `;
 
 type TableRecord = NonNullable<
-  NonNullable<NetworksTable_NetworkFragment$data["networks"]>["edges"]
+  NonNullable<NetworksTable_NetworkEdgeFragment$data>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
@@ -107,80 +98,34 @@ const columns = [
 
 type NetworksTableProps = {
   className?: string;
-  networksRef: NetworksTable_NetworkFragment$key;
-  hideSearch?: boolean;
+  networksRef: NetworksTable_NetworkEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
 const NetworksTable = ({
   className,
   networksRef,
-  hideSearch = false,
+  loading = false,
+  onLoadMore,
 }: NetworksTableProps) => {
-  const { data, loadNext, hasNext, isLoadingNext, refetch } =
-    usePaginationFragment<
-      NetworksTable_PaginationQuery,
-      NetworksTable_NetworkFragment$key
-    >(NETWORKS_TABLE_FRAGMENT, networksRef);
-
-  const [searchText, setSearchText] = useState<string | null>(null);
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { label: { ilike: `%${text}%` } },
-                  { driver: { ilike: `%${text}%` } },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
+  const networksFragment = useFragment(
+    NETWORKS_TABLE_FRAGMENT,
+    networksRef || null,
   );
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextVolumes = useCallback(() => {
-    if (hasNext && !isLoadingNext) loadNext(RECORDS_TO_LOAD_NEXT);
-  }, [hasNext, isLoadingNext, loadNext]);
-
-  const volumes: TableRecord[] = useMemo(() => {
-    return (
-      data.networks?.edges
-        ?.map((edge) => edge?.node)
-        .filter(
-          (node): node is TableRecord => node !== undefined && node !== null,
-        ) ?? []
-    );
-  }, [data]);
-
-  if (!data.networks) return null;
+  const networks = useMemo<TableRecord[]>(() => {
+    return _.compact(networksFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [networksFragment]);
 
   return (
     <InfiniteTable
       className={className}
       columns={columns}
-      data={volumes}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextVolumes : undefined}
-      setSearchText={hideSearch ? undefined : setSearchText}
+      data={networks}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      hideSearch
     />
   );
 };
