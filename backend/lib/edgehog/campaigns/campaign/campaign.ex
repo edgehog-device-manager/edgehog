@@ -79,6 +79,7 @@ defmodule Edgehog.Campaigns.Campaign do
       filter expr(status in [:idle, :in_progress, :pausing])
     end
 
+    # TODO: allow filtering per base_image_id
     read :update_campaigns do
       argument :types, {:array, :atom}
       multitenancy :allow_global

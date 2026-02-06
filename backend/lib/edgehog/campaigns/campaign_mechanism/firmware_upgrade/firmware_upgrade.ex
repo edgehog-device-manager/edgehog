@@ -119,7 +119,6 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FirmwareUpgrade do
     belongs_to :base_image, Edgehog.BaseImages.BaseImage do
       description "The base image distributed by the update campaign."
       public? true
-      allow_nil? false
       attribute_type :id
     end
   end

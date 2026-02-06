@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.BaseImages.BaseImage.Validations.BaseImageNotInUse do
   @moduledoc false
@@ -42,6 +40,7 @@ defmodule Edgehog.BaseImages.BaseImage.Validations.BaseImageNotInUse do
           ^resource.id
         )
       )
+      |> Ash.Query.filter(status != :finished)
       |> Ash.Query.limit(1)
       |> Ash.read!()
 
@@ -50,7 +49,10 @@ defmodule Edgehog.BaseImages.BaseImage.Validations.BaseImageNotInUse do
         :ok
 
       [_] ->
-        {:error, field: :id, message: "Base image is currently in use by at least one campaign"}
+        campaign_names = Enum.map_join(campaigns, ", ", & &1.name)
+
+        {:error,
+         field: :id, message: "Base image is currently in use by the following running campaigns: #{campaign_names}"}
     end
   end
 end

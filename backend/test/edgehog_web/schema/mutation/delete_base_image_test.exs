@@ -78,21 +78,56 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteBaseImageTest do
       assert %{fields: [:id], message: "could not be found"} = extract_error!(result)
     end
 
-    test "fails if the image is used in an Update Campaign", %{
+    test "fails if the image is used in a running Update Campaign", %{
       tenant: tenant,
       base_image: base_image,
       id: id
     } do
-      CampaignsFixtures.campaign_fixture(
-        tenant: tenant,
-        base_image_id: base_image.id,
-        mechanism_type: :firmware_upgrade
-      )
+      campaign =
+        CampaignsFixtures.campaign_fixture(
+          tenant: tenant,
+          base_image_id: base_image.id,
+          mechanism_type: :firmware_upgrade
+        )
+
+      Edgehog.Campaigns.mark_campaign_in_progress(campaign)
 
       result = delete_base_image_mutation(tenant: tenant, id: id)
 
-      assert %{fields: [:id], message: "Base image is currently in use by at least one campaign"} =
+      assert %{
+               fields: [:id],
+               message: message
+             } =
                extract_error!(result)
+
+      assert ^message =
+               "Base image is currently in use by the following running campaigns: #{campaign.name}"
+    end
+
+    test "deletes an image if the image is used in a completed Update Campaign", %{
+      tenant: tenant,
+      base_image: fixture,
+      id: id
+    } do
+      CampaignsFixtures.campaign_fixture(
+        tenant: tenant,
+        base_image_id: fixture.id,
+        mechanism_type: :firmware_upgrade
+      )
+
+      expect(StorageMock, :delete, fn _ -> :ok end)
+
+      base_image =
+        [tenant: tenant, id: id]
+        |> delete_base_image_mutation()
+        |> extract_result!()
+
+      assert base_image["version"] == fixture.version
+
+      refute BaseImage
+             |> Ash.Query.filter(id == ^fixture.id)
+             |> Ash.Query.set_tenant(tenant)
+             |> Ash.exists?()
     end
   end
 
