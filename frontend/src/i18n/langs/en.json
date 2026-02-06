@@ -2125,6 +2125,9 @@
   "forms.UpdateCampaignForm.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
+  "forms.UpdateCampaignForm.baseImageDeleted": {
+    "defaultMessage": "The Base Image has been deleted"
+  },
   "forms.UpdateCampaignForm.baseImageLabel": {
     "defaultMessage": "Base Image"
   },

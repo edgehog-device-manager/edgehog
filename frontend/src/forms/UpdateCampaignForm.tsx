@@ -156,7 +156,6 @@ const UpdateCampaign = ({ campaignRef }: UpdateCampaignProps) => {
   }
 
   const { baseImage } = campaignMechanism;
-  const { baseImageCollection } = baseImage;
 
   return (
     <Row>
@@ -181,39 +180,61 @@ const UpdateCampaign = ({ campaignRef }: UpdateCampaignProps) => {
         >
           <CampaignOutcome campaignRef={campaign} />
         </FormRow>
-        <FormRow
-          label={
-            <FormattedMessage
-              id="forms.UpdateCampaignForm.baseImageCollectionLabel"
-              defaultMessage="Base Image Collection"
-            />
-          }
-        >
-          <Link
-            route={Route.baseImageCollectionsEdit}
-            params={{ baseImageCollectionId: baseImageCollection.id }}
+        {baseImage ? (
+          <>
+            <FormRow
+              label={
+                <FormattedMessage
+                  id="forms.UpdateCampaignForm.baseImageCollectionLabel"
+                  defaultMessage="Base Image Collection"
+                />
+              }
+            >
+              <Link
+                route={Route.baseImageCollectionsEdit}
+                params={{
+                  baseImageCollectionId: baseImage.baseImageCollection.id,
+                }}
+              >
+                {baseImage.baseImageCollection.name}
+              </Link>
+            </FormRow>
+            <FormRow
+              label={
+                <FormattedMessage
+                  id="forms.UpdateCampaignForm.baseImageLabel"
+                  defaultMessage="Base Image"
+                />
+              }
+            >
+              <Link
+                route={Route.baseImagesEdit}
+                params={{
+                  baseImageCollectionId: baseImage.baseImageCollection.id,
+                  baseImageId: baseImage.id,
+                }}
+              >
+                {baseImage.name}
+              </Link>
+            </FormRow>
+          </>
+        ) : (
+          <FormRow
+            label={
+              <FormattedMessage
+                id="forms.UpdateCampaignForm.baseImageLabel"
+                defaultMessage="Base Image"
+              />
+            }
           >
-            {baseImageCollection.name}
-          </Link>
-        </FormRow>
-        <FormRow
-          label={
-            <FormattedMessage
-              id="forms.UpdateCampaignForm.baseImageLabel"
-              defaultMessage="Base Image"
-            />
-          }
-        >
-          <Link
-            route={Route.baseImagesEdit}
-            params={{
-              baseImageCollectionId: baseImageCollection.id,
-              baseImageId: baseImage.id,
-            }}
-          >
-            {baseImage.name}
-          </Link>
-        </FormRow>
+            <div className="d-flex align-content-center fst-italic text-muted">
+              <FormattedMessage
+                id="forms.UpdateCampaignForm.baseImageDeleted"
+                defaultMessage="The Base Image has been deleted"
+              />
+            </div>
+          </FormRow>
+        )}
         <FormRow
           label={
             <FormattedMessage

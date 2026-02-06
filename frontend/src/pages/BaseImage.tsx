@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2023-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2023 - 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -84,6 +82,9 @@ const DELETE_BASE_IMAGE_MUTATION = graphql`
       result {
         id
       }
+      errors {
+        message
+      }
     }
   }
 `;
@@ -111,7 +112,7 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
   const handleDeleteBaseImage = useCallback(() => {
     deleteBaseImage({
       variables: { baseImageId },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({
             route: Route.baseImageCollectionsEdit,
@@ -158,7 +159,7 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
     (baseImageChanges: BaseImageChanges) => {
       updateBaseImage({
         variables: { baseImageId, input: baseImageChanges },
-        onCompleted(data, errors) {
+        onCompleted(_data, errors) {
           if (errors) {
             const errorFeedback = errors
               .map(({ fields, message }) =>
