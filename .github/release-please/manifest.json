@@ -1,4 +1,5 @@
 {
   "backend": "0.13.0-rc.1",
-  "frontend": "0.13.0-rc.1"
+  "frontend": "0.13.0-rc.1",
+  "charts": "0.1.0"
 }
