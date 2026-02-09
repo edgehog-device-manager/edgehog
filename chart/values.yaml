@@ -1,0 +1,89 @@
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# -- namespace of the Edgehog deployment. By default everything is deployed to the edgehog namespace in the Kubernetes cluster, but Edgehog can be deployed in any namespace
+namespace: "edgehog"
+
+database:
+  # -- hostname of the PostgreSQL database.
+  hostname: "postgres-postgresql.edgehog-dev.svc.cluster.local"
+  # -- name of the PostgreSQL database.
+  name: "edgehog-db"
+  # -- secretName is the name of the secret in the namespace that contains "username" and "password" fields
+  secretName: "edgehog-db-connection"
+  # -- enableSsl: Whether to use SSL/TLS connection to the database
+  enableSsl: true
+
+backend:
+  # -- host of the Edgehog backend
+  host: "api.edgehog.customdomain.com"
+  # -- maxUploadSizeBytes is the maximum dimension for uploads, particularly relevant for OTA updates. If omitted, it defaults to 4 Gigabytes.
+  maxUploadSizeBytes: 2048
+  # -- Edgehog backend version.
+  version: "0.11"
+
+frontend:
+  # -- host of the frontend
+  host: "edgehog.customdomain.com"
+  # -- Edgehog backend version.
+  version: "0.11"
+
+deviceForwarder:
+  # -- host of the device forwarder. It should only contain the hostname without the http:// or https:// scheme
+  host: "forwarder.edgehog.customdomain.com"
+  # -- port for the instance of Edgehog Device Forwarder. It defaults to 443
+  port: 443
+  # -- secureSessions can be either true or false, it indicates whether devices use TLS to connect to the Edgehog Device Forwarder
+  secureSessions: true
+  # -- Edgehog backend version.
+  version: "0.1.0"
+
+letsencrypt:
+  # -- email address that will be used for the ACME account for LetsEncrypt
+  email: "admin@example.com"
+
+s3:
+  # -- provider of S3 storage. Currently can be set to "gcp"  (Google Cloud) or " minio"
+  provider: "minio"
+  # -- scheme (http or https) for the S3 storage
+  scheme: "http"
+  # -- host for the S3 storage
+  host: "test"
+  # -- port for the S3 storage. This has to be put in double quotes to force it to be interpreted as a string.
+  port: "test"
+  # -- bucket name for the S3 storage.
+  bucket: "test"
+  # -- assetHost for the S3 storage, e.g. storage.googleapis.com/<S3-BUCKET> for GCP or <S3-BUCKET>.s3.amazonaws.com for AWS.
+  assetHost: "test"
+  # -- region where the S3 storage resides.
+  region: "test"
+
+enabledSecrets:
+  ipbase: false
+  googleGeolocation: false
+  googleGeocoding: false
+
+astarte:
+  # -- apiDomain is the domain where Astarte APIs are reachable.
+  apiDomain: "http://api.astarte.customdomain.com"
+  # -- realm must match the name of the Realm created in Astarte and accessible at apiDomain
+  realm: "test"
+  # -- seedsRealmPrivateKeyFile is the path to the realm's private key file (e.g. test_private.pem)
+  realmPrivateKeyFile: "../test_private.pem"
+  # -- tenantPrivateKeyFile is the path to the tenant's private key file (e.g. acme_private.pem)
+  tenantPrivateKeyFile: "../acme_private.pem"
