@@ -31,7 +31,7 @@ export default defineConfig((env) => {
       setupFiles: "./src/setupTests.tsx",
       coverage: {
         provider: "v8",
-        reporter: ["lcov"],
+        reporter: ["lcov", "text", "text-summary"],
         exclude: ["src/api/__generated__/**"],
       },
     },
