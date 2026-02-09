@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,6 +21,19 @@
 name: "CodeQL"
 
 on:
+  push:
+    paths:
+      - "frontend/**"
+      - ".tool-versions"
+      - ".github/workflows/frontend-codeql-analysis.yaml"
+    branches:
+      - "main"
+      - "release-*"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".tool-versions"
+      - ".github/workflows/frontend-codeql-analysis.yaml"
   workflow_call:
   workflow_dispatch:
   schedule:
@@ -52,7 +65,9 @@ jobs:
         uses: actions/checkout@v6
         with:
           show-progress: false
-      - uses: github/codeql-action/init@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-      - uses: github/codeql-action/analyze@v4
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4

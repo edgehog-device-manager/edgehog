@@ -40,8 +40,6 @@ on:
 jobs:
   warmup-cache:
     uses: ./.github/workflows/frontend-warmup-cache.yaml
-  codeql:
-    uses: ./.github/workflows/frontend-codeql-analysis.yaml
   docker-build:
     uses: ./.github/workflows/frontend-docker-build.yaml
   build:
