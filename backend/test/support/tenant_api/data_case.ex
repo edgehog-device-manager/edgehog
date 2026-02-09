@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,41 +18,60 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule EdgehogWeb.ChannelCase do
+defmodule Edgehog.DataCase do
   @moduledoc """
-  This module defines the test case to be used by
-  channel tests.
+  This module defines the setup for tests requiring
+  access to the application's data layer.
 
-  Such tests rely on `Phoenix.ChannelTest` and also
-  import other functionality to make it easier
-  to build common data structures and query the data layer.
+  You may define functions here to be used as helpers in
+  your tests.
 
   Finally, if the test case interacts with the database,
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use EdgehogWeb.ChannelCase, async: true`, although
+  by setting `use Edgehog.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
 
   use ExUnit.CaseTemplate
 
+  import Mox
+
   alias Ecto.Adapters.SQL
 
   using do
     quote do
-      import EdgehogWeb.ChannelCase
-      # Import conveniences for testing with channels
-      import Phoenix.ChannelTest
+      import Ecto
+      import Ecto.Changeset
+      import Ecto.Query
+      import Edgehog.DataCase
+      import Mox
 
-      # The default endpoint for testing
-      @endpoint EdgehogWeb.Endpoint
+      alias Edgehog.Repo
     end
   end
+
+  setup :verify_on_exit!
 
   setup tags do
     pid = SQL.Sandbox.start_owner!(Edgehog.Repo, shared: not tags[:async])
     on_exit(fn -> SQL.Sandbox.stop_owner(pid) end)
-    :ok
+  end
+
+  @doc """
+  A helper that transforms changeset errors into a map of messages.
+
+      assert {:error, changeset} = Accounts.create_user(%{password: "short"})
+      assert "password is too short" in errors_on(changeset).password
+      assert %{password: ["password is too short"]} = errors_on(changeset)
+
+  """
+  def errors_on(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
+      Regex.replace(~r"%{(\w+)}", message, fn _, key ->
+        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+      end)
+    end)
   end
 end
