@@ -12,7 +12,8 @@
     ".reuse/templates/*",
     "**/schema.graphql",
     "frontend/**",
-    "backend/CHANGELOG.md"
+    "backend/CHANGELOG.md",
+    "chart/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/json-0.21.0.wasm",
