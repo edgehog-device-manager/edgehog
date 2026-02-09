@@ -55,16 +55,19 @@ import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import Alert from "@/components/Alert";
 
 const GET_CAMPAIGN_QUERY = graphql`
-  query UpdateCampaign_getCampaign_Query($campaignId: ID!, $first: Int!) {
+  query UpdateCampaign_getCampaign_Query(
+    $campaignId: ID!
+    $first: Int!
+    $after: String
+    $filter: CampaignTargetFilterInput = { status: { eq: SUCCESSFUL } }
+  ) {
     campaign(id: $campaignId) {
       name
       ...UpdateCampaignForm_CampaignFragment
       ...CampaignStatsChart_CampaignStatsChartFragment
       ...UpdateCampaign_RefreshFragment
-      ...UpdateTargetsTabs_SuccessfulFragment @arguments(first: $first)
-      ...UpdateTargetsTabs_FailedFragment @arguments(first: $first)
-      ...UpdateTargetsTabs_InProgressFragment @arguments(first: $first)
-      ...UpdateTargetsTabs_IdleFragment @arguments(first: $first)
+      ...UpdateTargetsTabs_UpdateTargetsFragment
+        @arguments(first: $first, after: $after, filter: $filter)
     }
   }
 `;

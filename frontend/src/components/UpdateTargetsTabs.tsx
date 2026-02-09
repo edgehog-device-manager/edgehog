@@ -18,96 +18,45 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
-import type { CampaignTargetStatus as CampaignTargetStatusType } from "@/api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
-import type { UpdateTargetsTabs_SuccessfulFragment$key } from "@/api/__generated__/UpdateTargetsTabs_SuccessfulFragment.graphql";
-import type { UpdateTargetsTabs_FailedFragment$key } from "@/api/__generated__/UpdateTargetsTabs_FailedFragment.graphql";
-import type { UpdateTargetsTabs_InProgressFragment$key } from "@/api/__generated__/UpdateTargetsTabs_InProgressFragment.graphql";
-import type { UpdateTargetsTabs_IdleFragment$key } from "@/api/__generated__/UpdateTargetsTabs_IdleFragment.graphql";
+import { UpdateCampaign_getCampaign_Query$data } from "@/api/__generated__/UpdateCampaign_getCampaign_Query.graphql";
+import { UpdateTargets_PaginationQuery } from "@/api/__generated__/UpdateTargets_PaginationQuery.graphql";
+import { UpdateTargetsTabs_UpdateTargetsFragment$key } from "@/api/__generated__/UpdateTargetsTabs_UpdateTargetsFragment.graphql";
 
+import CampaignTargetStatus, {
+  CampaignTargetStatusType,
+} from "@/components/CampaignTargetStatus";
+import type { ColumnId } from "@/components/UpdateTargetsTable";
+import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
-import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
-import type { ColumnId } from "@/components/UpdateTargetsTable";
-import CampaignTargetStatus from "@/components/CampaignTargetStatus";
-import { RECORDS_TO_LOAD_NEXT } from "@/constants";
+import Spinner from "./Spinner";
 
-const CAMPAIGN_TARGETS_SUCCESSFUL_FRAGMENT = graphql`
-  fragment UpdateTargetsTabs_SuccessfulFragment on Campaign
-  @refetchable(queryName: "UpdateTargetsTabs_SuccessfulPaginationQuery")
-  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
-    successfulCampaignTargets: campaignTargets(
-      first: $first
-      after: $after
-      filter: { status: { eq: SUCCESSFUL } }
-    ) @connection(key: "UpdateTargetsTabs_successfulCampaignTargets") {
-      edges {
-        node {
-          status
-          ...UpdateTargetsTable_TargetsFragment
-        }
-      }
+/* eslint-disable relay/unused-fields */
+const UPDATE_TARGETS_FRAGMENT = graphql`
+  fragment UpdateTargetsTabs_UpdateTargetsFragment on Campaign
+  @refetchable(queryName: "UpdateTargets_PaginationQuery")
+  @argumentDefinitions(
+    first: { type: "Int" }
+    after: { type: "String" }
+    filter: {
+      type: "CampaignTargetFilterInput"
+      defaultValue: { status: { eq: SUCCESSFUL } }
     }
-  }
-`;
-
-const CAMPAIGN_TARGETS_FAILED_FRAGMENT = graphql`
-  fragment UpdateTargetsTabs_FailedFragment on Campaign
-  @refetchable(queryName: "UpdateTargetsTabs_FailedPaginationQuery")
-  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
-    failedCampaignTargets: campaignTargets(
-      first: $first
-      after: $after
-      filter: { status: { eq: FAILED } }
-    ) @connection(key: "UpdateTargetsTabs_failedCampaignTargets") {
+  ) {
+    campaignTargets(first: $first, after: $after, filter: $filter)
+      @connection(key: "UpdateTargetsTabs_campaignTargets") {
       edges {
         node {
-          status
-          ...UpdateTargetsTable_TargetsFragment
+          __typename
         }
       }
-    }
-  }
-`;
-
-const CAMPAIGN_TARGETS_IN_PROGRESS_FRAGMENT = graphql`
-  fragment UpdateTargetsTabs_InProgressFragment on Campaign
-  @refetchable(queryName: "UpdateTargetsTabs_InProgressPaginationQuery")
-  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
-    inProgressCampaignTargets: campaignTargets(
-      first: $first
-      after: $after
-      filter: { status: { eq: IN_PROGRESS } }
-    ) @connection(key: "UpdateTargetsTabs_inProgressCampaignTargets") {
-      edges {
-        node {
-          status
-          ...UpdateTargetsTable_TargetsFragment
-        }
-      }
-    }
-  }
-`;
-
-const CAMPAIGN_TARGETS_IDLE_FRAGMENT = graphql`
-  fragment UpdateTargetsTabs_IdleFragment on Campaign
-  @refetchable(queryName: "UpdateTargetsTabs_IdlePaginationQuery")
-  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
-    idleCampaignTargets: campaignTargets(
-      first: $first
-      after: $after
-      filter: { status: { eq: IDLE } }
-    ) @connection(key: "UpdateTargetsTabs_idleCampaignTargets") {
-      edges {
-        node {
-          status
-          ...UpdateTargetsTable_TargetsFragment
-        }
-      }
+      ...UpdateTargetsTable_CampaignTargetEdgeFragment
     }
   }
 `;
@@ -125,98 +74,63 @@ const columnMap: Record<CampaignTargetStatusType, ColumnId[]> = {
   FAILED: ["deviceName", "otaOperationStatusCode", "completionTimestamp"],
 };
 
-const updateTargetTabs: CampaignTargetStatusType[] = [
+const campaignTargetTabs: CampaignTargetStatusType[] = [
   "SUCCESSFUL",
   "FAILED",
   "IN_PROGRESS",
   "IDLE",
 ];
 
-const tabConfig = {
-  SUCCESSFUL: {
-    fragment: CAMPAIGN_TARGETS_SUCCESSFUL_FRAGMENT,
-    dataField: "successfulCampaignTargets",
-  },
-  FAILED: {
-    fragment: CAMPAIGN_TARGETS_FAILED_FRAGMENT,
-    dataField: "failedCampaignTargets",
-  },
-  IN_PROGRESS: {
-    fragment: CAMPAIGN_TARGETS_IN_PROGRESS_FRAGMENT,
-    dataField: "inProgressCampaignTargets",
-  },
-  IDLE: {
-    fragment: CAMPAIGN_TARGETS_IDLE_FRAGMENT,
-    dataField: "idleCampaignTargets",
-  },
-} as const;
-
-const useActiveStatusPaginationFragment = (
-  activeTab: CampaignTargetStatusType,
-  updateCampaignRef: any,
-  isVisited: boolean,
-) => {
-  const config = tabConfig[activeTab];
-  return usePaginationFragment(
-    config.fragment,
-    isVisited ? updateCampaignRef : null,
-  );
-};
-
 type Props = {
-  campaignRef: UpdateTargetsTabs_SuccessfulFragment$key &
-    UpdateTargetsTabs_FailedFragment$key &
-    UpdateTargetsTabs_InProgressFragment$key &
-    UpdateTargetsTabs_IdleFragment$key;
+  campaignRef: NonNullable<UpdateCampaign_getCampaign_Query$data["campaign"]>;
 };
 
 const UpdateTargetsTabs = ({ campaignRef }: Props) => {
   const [activeTab, setActiveTab] =
     useState<CampaignTargetStatusType>("SUCCESSFUL");
+  const [committedTab, setCommittedTab] = useState(activeTab);
+  const [isTabDataLoading, setIsTabDataLoading] = useState(false);
 
-  const [visitedTabs, setVisitedTabs] = useState<Set<CampaignTargetStatusType>>(
-    new Set(["SUCCESSFUL"]),
-  );
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<
+      UpdateTargets_PaginationQuery,
+      UpdateTargetsTabs_UpdateTargetsFragment$key
+    >(UPDATE_TARGETS_FRAGMENT, campaignRef);
 
-  const handleTabChange = useCallback((newTab: CampaignTargetStatusType) => {
-    setActiveTab(newTab);
-    setVisitedTabs((prev) => new Set([...prev, newTab]));
-  }, []);
+  useEffect(() => {
+    setIsTabDataLoading(true);
 
-  // Only runs one fragment hook (for the active tab)
-  const currentTabFragment = useActiveStatusPaginationFragment(
-    activeTab,
-    campaignRef,
-    visitedTabs.has(activeTab),
-  );
+    refetch(
+      {
+        first: RECORDS_TO_LOAD_FIRST,
+        filter: { status: { eq: activeTab } },
+      },
+      {
+        fetchPolicy: "network-only",
+        onComplete: () => {
+          setCommittedTab(activeTab);
+          setIsTabDataLoading(false);
+        },
+      },
+    );
+  }, [activeTab, refetch]);
 
-  const isTabDataLoading =
-    !visitedTabs.has(activeTab) ||
-    (visitedTabs.has(activeTab) && !currentTabFragment?.data);
-
-  const visibleTargets = useMemo(() => {
-    const config = tabConfig[activeTab as keyof typeof tabConfig];
-    const campaignTargetsField = currentTabFragment?.data?.[config.dataField];
-
-    if (!campaignTargetsField?.edges) return [];
-    return campaignTargetsField.edges
-      .map((edge: any) => edge?.node)
-      .filter(Boolean);
-  }, [currentTabFragment?.data, activeTab]);
-
-  const loadNextCampaignTargets = useCallback(() => {
-    if (currentTabFragment?.hasNext && !currentTabFragment?.isLoadingNext) {
-      currentTabFragment.loadNext(RECORDS_TO_LOAD_NEXT);
+  const loadNextUpdateTargets = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
     }
-  }, [currentTabFragment]);
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const updateTargetsRef = data?.campaignTargets;
 
   const hiddenColumns = useMemo(() => {
-    const visible = columnMap[activeTab];
+    const visible = columnMap[committedTab];
     return columnIds.filter((c) => !visible.includes(c));
-  }, [activeTab]);
+  }, [committedTab]);
 
-  if (!campaignRef) return null;
-
+  if (!updateTargetsRef) {
+    return null;
+  }
   return (
     <div>
       <h3>
@@ -227,13 +141,13 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
       </h3>
       <div>
         <Nav role="tablist" as="ul" className="nav-tabs">
-          {updateTargetTabs.map((tab) => (
+          {campaignTargetTabs.map((tab) => (
             <NavItem key={tab} as="li" role="presentation">
               <NavLink
                 as="button"
                 type="button"
                 active={activeTab === tab}
-                onClick={() => handleTabChange(tab)}
+                onClick={() => setActiveTab(tab)}
               >
                 <CampaignTargetStatus status={tab} />
               </NavLink>
@@ -241,19 +155,19 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
           ))}
         </Nav>
 
-        {isTabDataLoading ? (
-          <div className="d-flex justify-content-center p-4">
-            <div className="spinner-border" role="status"></div>
-          </div>
-        ) : (
-          <UpdateTargetsTable
-            campaignTargetsRef={visibleTargets}
-            hiddenColumns={hiddenColumns}
-            isLoadingNext={currentTabFragment?.isLoadingNext ?? false}
-            hasNext={currentTabFragment?.hasNext ?? false}
-            loadNextCampaignTargets={loadNextCampaignTargets}
-          />
-        )}
+        <div className="deployment-targets-container">
+          {isTabDataLoading ? (
+            <Spinner />
+          ) : (
+            <UpdateTargetsTable
+              key={committedTab}
+              campaignTargetsRef={updateTargetsRef}
+              hiddenColumns={hiddenColumns}
+              loading={isLoadingNext}
+              onLoadMore={hasNext ? loadNextUpdateTargets : undefined}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

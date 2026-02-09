@@ -18,15 +18,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import _ from "lodash";
+import { useMemo } from "react";
 import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
   OtaOperationStatus,
   OtaOperationStatusCode,
-  UpdateTargetsTable_TargetsFragment$data,
-  UpdateTargetsTable_TargetsFragment$key,
-} from "@/api/__generated__/UpdateTargetsTable_TargetsFragment.graphql";
+  UpdateTargetsTable_CampaignTargetEdgeFragment$data,
+  UpdateTargetsTable_CampaignTargetEdgeFragment$key,
+} from "@/api/__generated__/UpdateTargetsTable_CampaignTargetEdgeFragment.graphql";
 
 import Icon from "@/components/Icon";
 import { createColumnHelper } from "@/components/Table";
@@ -36,19 +38,22 @@ import InfiniteTable from "./InfiniteTable";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
-  fragment UpdateTargetsTable_TargetsFragment on CampaignTarget
-  @relay(plural: true) {
-    device {
-      id
-      name
-    }
-    retryCount
-    latestAttempt
-    completionTimestamp
-    otaOperation {
-      status
-      statusProgress
-      statusCode
+  fragment UpdateTargetsTable_CampaignTargetEdgeFragment on CampaignTargetConnection {
+    edges {
+      node {
+        device {
+          id
+          name
+        }
+        retryCount
+        latestAttempt
+        completionTimestamp
+        otaOperation {
+          status
+          statusProgress
+          statusCode
+        }
+      }
     }
   }
 `;
@@ -159,7 +164,10 @@ const operationStatusCodeMessages = defineMessages<OtaOperationStatusCode>({
   },
 });
 
-type TableRecord = UpdateTargetsTable_TargetsFragment$data[number];
+type TableRecord = NonNullable<
+  NonNullable<UpdateTargetsTable_CampaignTargetEdgeFragment$data>["edges"]
+>[number]["node"];
+
 const columnIds = [
   "deviceName",
   "otaOperationStatus",
@@ -312,32 +320,34 @@ const columns = [
 type Props = {
   className?: string;
   hiddenColumns?: ColumnId[];
-  campaignTargetsRef: UpdateTargetsTable_TargetsFragment$key;
-  isLoadingNext: boolean;
-  hasNext: boolean;
-  loadNextCampaignTargets: () => void;
+  campaignTargetsRef: UpdateTargetsTable_CampaignTargetEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
 const UpdateTargetsTable = ({
   className,
   campaignTargetsRef,
   hiddenColumns = [],
-  isLoadingNext,
-  hasNext,
-  loadNextCampaignTargets,
+  loading = false,
+  onLoadMore,
 }: Props) => {
-  const updateTargets = useFragment(
+  const campaignTargetsFragment = useFragment(
     CAMPAIGN_TARGETS_TABLE_FRAGMENT,
     campaignTargetsRef,
   );
+
+  const campaignTargets = useMemo<TableRecord[]>(() => {
+    return _.compact(campaignTargetsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [campaignTargetsFragment]);
 
   return (
     <InfiniteTable
       className={className}
       columns={columns}
-      data={[...updateTargets]}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextCampaignTargets : undefined}
+      data={campaignTargets}
+      loading={loading}
+      onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
       hideSearch
     />
