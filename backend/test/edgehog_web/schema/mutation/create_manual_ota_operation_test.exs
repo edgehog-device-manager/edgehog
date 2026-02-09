@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
-  use EdgehogWeb.GraphqlCase
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.BaseImagesFixtures
   import Edgehog.DevicesFixtures
