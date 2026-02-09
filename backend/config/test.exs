@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ config :ash, warn_on_transaction_hooks?: false
 
 # In test we don't send emails.
 config :edgehog, Edgehog.Mailer, adapter: Swoosh.Adapters.Test
+
+# Disable PromEx metrics collection during tests
+config :edgehog, Edgehog.PromEx, disabled: true
 
 # Configure your database
 #

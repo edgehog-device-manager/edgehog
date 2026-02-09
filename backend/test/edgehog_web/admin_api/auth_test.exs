@@ -20,7 +20,7 @@
 
 defmodule EdgehogWeb.AdminAPI.AuthTest do
   # This can't be async: true since it modifies the Application env
-  use EdgehogWeb.AdminAPI.ConnCase, async: false
+  use EdgehogWeb.AdminAPI.ConnCase, async: true
 
   import Edgehog.AstarteFixtures
   import Edgehog.TenantsFixtures

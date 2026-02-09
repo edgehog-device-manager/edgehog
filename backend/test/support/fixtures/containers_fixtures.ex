@@ -445,4 +445,40 @@ defmodule Edgehog.ContainersFixtures do
 
     Ash.create!(Network.Deployment, params, tenant: tenant)
   end
+
+  @doc """
+  Generate a %DeviceMapping.Deployment{}
+  """
+  def device_mapping_deployment_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {realm_id, opts} =
+      case opts[:device_id] do
+        nil ->
+          Keyword.pop_lazy(opts, :realm_id, fn ->
+            AstarteFixtures.realm_fixture(tenant: tenant).id
+          end)
+
+        _ ->
+          {nil, Keyword.delete(opts, :realm_id)}
+      end
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        Edgehog.DevicesFixtures.device_fixture(realm_id: realm_id, tenant: tenant).id
+      end)
+
+    {device_mapping_id, opts} =
+      Keyword.pop_lazy(opts, :device_mapping_id, fn ->
+        device_mapping_fixture(tenant: tenant).id
+      end)
+
+    params =
+      Enum.into(opts, %{
+        device_id: device_id,
+        device_mapping_id: device_mapping_id
+      })
+
+    Ash.create!(Edgehog.Containers.DeviceMapping.Deployment, params, tenant: tenant)
+  end
 end

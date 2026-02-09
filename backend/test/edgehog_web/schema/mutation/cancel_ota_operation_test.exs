@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CancelOtaOperationTest do
-  use EdgehogWeb.GraphqlCase
+  use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.DevicesFixtures
   import Edgehog.OSManagementFixtures
