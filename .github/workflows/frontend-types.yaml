@@ -45,7 +45,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: npm install
         working-directory: frontend
-        run: npm i
+        run: npm ci
       - name: Check types
         working-directory: frontend
         run: npm run check-types
