@@ -12,7 +12,8 @@
     "**/schema.graphql",
     "frontend/**",
     "backend/CHANGELOG.md",
-    "doc/CHANGELOG.md"
+    "doc/CHANGELOG.md",
+    "chart/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/json-0.21.0.wasm",

@@ -4,3 +4,4 @@
 *           @edgehog-device-manager/cloud-devs
 /frontend/  @edgehog-device-manager/cloud-frontend-devs
 /backend/   @edgehog-device-manager/cloud-backend-devs
+/charts/    @edgehog-device-manager/platform-team
