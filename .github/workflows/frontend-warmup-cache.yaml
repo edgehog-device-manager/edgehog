@@ -29,7 +29,6 @@ defaults:
     shell: bash
     working-directory: frontend
 env:
-  MIX_ENV: test
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   warmup-cache:
