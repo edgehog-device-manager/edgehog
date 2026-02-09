@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2025 SECO Mind Srl
+  Copyright 2025 - 2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@
 import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 
-import { DeploymentTargetsTable_CampaignTargetsFragment$data } from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetsFragment.graphql";
+import { DeploymentTargetsTable_CampaignTargetEdgeFragment$data } from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetEdgeFragment.graphql";
 
 import CollapseItem from "@/components/CollapseItem";
 
 type DeploymentEventMessageProps = {
   event: NonNullable<
     NonNullable<
-      DeploymentTargetsTable_CampaignTargetsFragment$data[number]["deployment"]
+      NonNullable<
+        DeploymentTargetsTable_CampaignTargetEdgeFragment$data["edges"]
+      >[number]["node"]["deployment"]
     >["events"]["edges"]
   >[number]["node"];
 };

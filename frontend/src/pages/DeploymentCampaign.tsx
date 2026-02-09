@@ -58,16 +58,16 @@ const GET_CAMPAIGN_QUERY = graphql`
   query DeploymentCampaign_getCampaign_Query(
     $deploymentCampaignId: ID!
     $first: Int!
+    $after: String
+    $filter: CampaignTargetFilterInput = { status: { eq: SUCCESSFUL } }
   ) {
     campaign(id: $deploymentCampaignId) {
       name
       ...DeploymentCampaignForm_CampaignFragment
       ...CampaignStatsChart_CampaignStatsChartFragment
       ...DeploymentCampaign_RefreshFragment
-      ...DeploymentTargetsTabs_SuccessfulFragment @arguments(first: $first)
-      ...DeploymentTargetsTabs_FailedFragment @arguments(first: $first)
-      ...DeploymentTargetsTabs_InProgressFragment @arguments(first: $first)
-      ...DeploymentTargetsTabs_IdleFragment @arguments(first: $first)
+      ...DeploymentTargetsTabs_DeploymentTargetsFragment
+        @arguments(first: $first, after: $after, filter: $filter)
     }
   }
 `;

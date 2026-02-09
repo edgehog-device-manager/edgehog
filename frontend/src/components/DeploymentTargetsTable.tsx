@@ -18,47 +18,52 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import _ from "lodash";
+import { useMemo } from "react";
 import { FormattedDate, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  DeploymentTargetsTable_CampaignTargetsFragment$data,
-  DeploymentTargetsTable_CampaignTargetsFragment$key,
-} from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetsFragment.graphql";
+  DeploymentTargetsTable_CampaignTargetEdgeFragment$data,
+  DeploymentTargetsTable_CampaignTargetEdgeFragment$key,
+} from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetEdgeFragment.graphql";
 
-import { createColumnHelper } from "@/components/Table";
-import InfiniteTable from "@/components/InfiniteTable";
 import DeploymentEventMessage from "@/components/DeploymentEventMessage";
-import DeploymentStateComponent from "@/components/DeploymentState";
 import DeploymentReadiness from "@/components/DeploymentReadiness";
+import DeploymentStateComponent from "@/components/DeploymentState";
+import InfiniteTable from "@/components/InfiniteTable";
+import { createColumnHelper } from "@/components/Table";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
-  fragment DeploymentTargetsTable_CampaignTargetsFragment on CampaignTarget
-  @relay(plural: true) {
-    device {
-      id
-      name
-    }
-    retryCount
-    latestAttempt
-    completionTimestamp
-    deployment {
-      state
-      isReady
-      events(
-        filter: { type: { eq: ERROR } }
-        sort: [{ field: INSERTED_AT, order: DESC }]
-        first: 1
-      ) {
-        edges {
-          node {
-            message
-            type
-            insertedAt
-            addInfo
+  fragment DeploymentTargetsTable_CampaignTargetEdgeFragment on CampaignTargetConnection {
+    edges {
+      node {
+        device {
+          id
+          name
+        }
+        retryCount
+        latestAttempt
+        completionTimestamp
+        deployment {
+          state
+          isReady
+          events(
+            filter: { type: { eq: ERROR } }
+            sort: [{ field: INSERTED_AT, order: DESC }]
+            first: 1
+          ) {
+            edges {
+              node {
+                message
+                type
+                insertedAt
+                addInfo
+              }
+            }
           }
         }
       }
@@ -66,7 +71,9 @@ const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
   }
 `;
 
-type TableRecord = DeploymentTargetsTable_CampaignTargetsFragment$data[number];
+type TableRecord = NonNullable<
+  NonNullable<DeploymentTargetsTable_CampaignTargetEdgeFragment$data>["edges"]
+>[number]["node"];
 const columnIds = [
   "deviceName",
   "state",
@@ -219,31 +226,34 @@ const columns = [
 type Props = {
   className?: string;
   hiddenColumns?: ColumnId[];
-  campaignTargetsRef: DeploymentTargetsTable_CampaignTargetsFragment$key;
-  isLoadingNext: boolean;
-  hasNext: boolean;
-  loadNextCampaignTargets: () => void;
+  campaignTargetsRef: DeploymentTargetsTable_CampaignTargetEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
 };
 
 const DeploymentTargetsTable = ({
   className,
   campaignTargetsRef,
   hiddenColumns = [],
-  isLoadingNext,
-  hasNext,
-  loadNextCampaignTargets,
+  loading = false,
+  onLoadMore,
 }: Props) => {
-  const campaignTargets = useFragment(
+  const campaignTargetsFragment = useFragment(
     CAMPAIGN_TARGETS_TABLE_FRAGMENT,
     campaignTargetsRef,
   );
+
+  const campaignTargets = useMemo<TableRecord[]>(() => {
+    return _.compact(campaignTargetsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [campaignTargetsFragment]);
+
   return (
     <InfiniteTable
       className={className}
       columns={columns}
-      data={[...campaignTargets]}
-      loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextCampaignTargets : undefined}
+      data={campaignTargets}
+      loading={loading}
+      onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
       hideSearch
     />
