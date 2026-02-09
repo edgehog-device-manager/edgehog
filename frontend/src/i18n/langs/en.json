@@ -2032,6 +2032,12 @@
   "forms.DeploymentCampaignForm.channelLabel": {
     "defaultMessage": "Channel"
   },
+  "forms.DeploymentCampaignForm.increaseMaxInProgressOperations": {
+    "defaultMessage": "Increase Max Pending Operations"
+  },
+  "forms.DeploymentCampaignForm.increaseMaxPendOpsErrorFeedback": {
+    "defaultMessage": "Could not increase Max Pending Operations, please try again."
+  },
   "forms.DeploymentCampaignForm.maxInProgressOperations": {
     "defaultMessage": "Max Pending Operations"
   },

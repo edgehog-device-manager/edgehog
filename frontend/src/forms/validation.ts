@@ -585,6 +585,10 @@ const updateCampaignSchema = z.object({
 
 type UpdateCampaignFormData = z.infer<typeof updateCampaignSchema>;
 
+const campaignUpdateSchema = requiredNumber.int().positive();
+
+type CampaignFormUpdateData = z.infer<typeof campaignUpdateSchema>;
+
 /* ----------------------------- Container Schemas ----------------------------- */
 
 const ipv4PortRegex =
@@ -909,6 +913,7 @@ export type {
   TargetGroup,
   TargetGroupExtended,
   PartNumber,
+  CampaignFormUpdateData,
 };
 
 export {
@@ -936,4 +941,6 @@ export {
   releaseSchema,
   CapAddList,
   CapDropList,
+  campaignUpdateSchema,
+  messages,
 };

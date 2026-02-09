@@ -103,6 +103,8 @@ defmodule Edgehog.Campaigns do
         relay_id_translations input: [target_group_ids: :device_group]
       end
 
+      update Campaign, :increase_max_in_progress_operations, :increase_max_in_progress_operations
+
       destroy Channel, :delete_channel, :destroy
     end
   end
@@ -116,6 +118,7 @@ defmodule Edgehog.Campaigns do
       define :mark_campaign_successful, action: :mark_as_successful
       define :pause_campaign, action: :pause
       define :resume_campaign, action: :resume
+      define :increase_max_in_progress_operations, action: :increase_max_in_progress_operations
     end
 
     resource CampaignTarget do
