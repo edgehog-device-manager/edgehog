@@ -86,3 +86,21 @@ path = ".github/CODEOWNERS"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "chart/Chart.lock"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "chart/.helmignore"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "chart/templates/_helpers.tpl"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
