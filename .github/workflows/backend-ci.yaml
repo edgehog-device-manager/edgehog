@@ -35,6 +35,10 @@ on:
       - ".tool-versions"
       - ".github/workflows/backend-*.yaml"
 
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
   warmup-cache:
     uses: ./.github/workflows/backend-warmup-cache.yaml

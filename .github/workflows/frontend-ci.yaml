@@ -37,6 +37,10 @@ on:
       - ".tool-versions"
       - ".github/workflows/frontend-ci.yaml"
 
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
   warmup-cache:
     uses: ./.github/workflows/frontend-warmup-cache.yaml
