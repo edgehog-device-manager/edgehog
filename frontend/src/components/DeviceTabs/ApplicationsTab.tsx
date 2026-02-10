@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
     device(id: $id) {
       id
       online
+      capabilities
       systemModel {
         name
       }
@@ -76,7 +77,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
     };
   }, [handleRefetch]);
 
-  if (!device) {
+  if (!device || !device.capabilities.includes("CONTAINER_MANAGEMENT")) {
     return null;
   }
 
