@@ -1,0 +1,134 @@
+{
+  "interface_name": "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "description": "File transfer from a Server to a Device",
+  "doc": "Request a file transfer operation. Providing a URL from which the device will download a file with an HTTP GET request, the destination of the file to download is implementation specific.",
+  "mappings": [
+    {
+      "endpoint": "/request/id",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Transfer ID for the file",
+      "doc": "If the file is to be stored, this MUST be unique to the file (e.g. hash of the content). For a file that needs to be streamed, it can be unique for the single request (e.g. uuid)."
+    },
+    {
+      "endpoint": "/request/url",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "The URL to get the file from"
+    },
+    {
+      "endpoint": "/request/httpHeaderKey",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Keys for the HTTP headers, must be in the order of the values"
+    },
+    {
+      "endpoint": "/request/httpHeaderValue",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Values for the HTTP headers, must be in the order of the keys"
+    },
+    {
+      "endpoint": "/request/compression",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Compression to upload multiple files",
+      "doc": "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
+    },
+    {
+      "endpoint": "/request/fileSizeBytes",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "File size decompressed",
+      "doc": "Total file size (if multiple files) uncompressed in bytes. It's used to reserve this space on the device."
+    },
+    {
+      "endpoint": "/request/progress",
+      "type": "boolean",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Flag to enable the progress reporting of the download."
+    },
+    {
+      "endpoint": "/request/digest",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Digest of the file contents",
+      "doc": "Must be in the form sha256:deadbeaf, and should be used only if supported by the device."
+    },
+    {
+      "endpoint": "/request/fileName",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Name of the file to download",
+      "doc": "Optional file name of the file to download, default is empty"
+    },
+    {
+      "endpoint": "/request/ttlSeconds",
+      "type": "longinteger",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "TTL on how long to keep the file for",
+      "doc": "Optional ttl for how long to keep the file fore, if 0 is forever"
+    },
+    {
+      "endpoint": "/request/fileMode",
+      "type": "integer",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Unix mode for the file",
+      "doc": "Optional unix mode for the file, set to default if 0. All files are immutable, so setting it to writable has no effect."
+    },
+    {
+      "endpoint": "/request/userId",
+      "type": "integer",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Uid of the user owning the file",
+      "doc": "Optional unix uid of the user owning the file, set to default if -1."
+    },
+    {
+      "endpoint": "/request/groupId",
+      "type": "integer",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Gid of the user owning the file",
+      "doc": "Optional unix gid of the group owning the file, set to default if -1."
+    },
+    {
+      "endpoint": "/request/destination",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Destination for the file",
+      "doc": "Device-specific field, some default values are storage and streaming."
+    }
+  ]
+}

@@ -42,7 +42,7 @@ SPDX-License-Identifier = "CC0-1.0"
 [[annotations]]
 path = "backend/priv/astarte_resources/interfaces/**.json"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2023 Seco Mind Srl"
+SPDX-FileCopyrightText = "2023 - 2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]

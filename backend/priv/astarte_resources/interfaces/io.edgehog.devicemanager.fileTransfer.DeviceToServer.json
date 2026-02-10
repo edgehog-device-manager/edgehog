@@ -1,0 +1,70 @@
+{
+  "interface_name": "io.edgehog.devicemanager.fileTransfer.DeviceToServer",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "server",
+  "aggregation": "object",
+  "description": "File transfer from a Device to a Server",
+  "doc": "Request a file transfer operation. Providing an URL where the device will upload a file with an HTTP PUT request, the source of the file to upload is implementation specific.",
+  "mappings": [
+    {
+      "endpoint": "/request/id",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Transfer ID for the file"
+    },
+    {
+      "endpoint": "/request/url",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "The URL to upload the file to"
+    },
+    {
+      "endpoint": "/request/httpHeaderKey",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Keys for the HTTP headers, must be in the order of the values"
+    },
+    {
+      "endpoint": "/request/httpHeaderValue",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Values for the HTTP headers, must be in the order of the keys"
+    },
+    {
+      "endpoint": "/request/compression",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Compression to upload multiple files",
+      "doc": "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
+    },
+    {
+      "endpoint": "/request/progress",
+      "type": "boolean",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Flag to enable the progress reporting of the download."
+    },
+    {
+      "endpoint": "/request/source",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Source for the file",
+      "doc": "Device-specific field, some default values are storage and streaming."
+    }
+  ]
+}

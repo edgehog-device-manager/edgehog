@@ -1,0 +1,26 @@
+{
+  "interface_name": "io.edgehog.devicemanager.fileTransfer.Progress",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "device",
+  "aggregation": "object",
+  "description": "Progress of a file transfer.",
+  "doc": "If the request enabled progress reporting, the device will send the progress of the operation.",
+  "mappings": [
+    {
+      "endpoint": "/request/id",
+      "type": "string",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Transfer ID for the file"
+    },
+    {
+      "endpoint": "/request/progress",
+      "type": "integer",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Progress of the transfer in %"
+    }
+  ]
+}

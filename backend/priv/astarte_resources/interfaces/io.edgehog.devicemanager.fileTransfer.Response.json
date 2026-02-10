@@ -1,0 +1,38 @@
+{
+  "interface_name": "io.edgehog.devicemanager.fileTransfer.Response",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "device",
+  "aggregation": "object",
+  "description": "Response for a file transfer",
+  "doc": "Used by the device to report the transfer status upon completion. Used for both download and upload.",
+  "mappings": [
+    {
+      "endpoint": "/request/id",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Transfer ID for the file",
+      "doc": "Can be either for download or upload transfers."
+    },
+    {
+      "endpoint": "/request/code",
+      "type": "longinteger",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Success or error code for the transfer",
+      "doc": "A 0 code is a success, errors are POSIX errorno"
+    },
+    {
+      "endpoint": "/request/message",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Optional message for the response"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "interface_name": "io.edgehog.devicemanager.storage.File",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "description": "Property for the files stored on a device",
+  "doc": "Published when a file has been fully transferred and stored on the device.",
+  "mappings": [
+    {
+      "endpoint": "/%{requestId}/pathOnDevice",
+      "type": "string",
+      "description": "Path on the device for the transferred file"
+    },
+    {
+      "endpoint": "/%{requestId}/sizeBytes",
+      "type": "longinteger",
+      "description": "Size in bytes of the file"
+    }
+  ]
+}
