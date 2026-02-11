@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -129,6 +129,62 @@ defmodule Edgehog.Capabilities do
       },
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.apps.DeploymentUpdate",
+        major: 0,
+        minor: 1
+      }
+    ],
+    file_transfer_stream: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Progress",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Response",
+        major: 0,
+        minor: 1
+      }
+    ],
+    file_transfer_storage: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Progress",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Response",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.storage.File",
+        major: 0,
+        minor: 1
+      }
+    ],
+    file_transfer_read: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.DeviceToServer",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Progress",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Response",
         major: 0,
         minor: 1
       }

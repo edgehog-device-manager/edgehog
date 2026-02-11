@@ -1,6 +1,6 @@
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -734,6 +734,9 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         "CELLULAR_CONNECTION",
         "COMMANDS",
         "CONTAINER_MANAGEMENT",
+        "FILE_TRANSFER_STREAM",
+        "FILE_TRANSFER_STORAGE",
+        "FILE_TRANSFER_READ",
         "GEOLOCATION",
         "HARDWARE_INFO",
         "LED_BEHAVIORS",

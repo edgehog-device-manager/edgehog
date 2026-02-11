@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ defmodule Edgehog.Devices.Device.Types.Capability do
       cellular_connection: "The device provides information about its cellular connection.",
       commands: "The device supports commands, for example the rebooting command.",
       container_management: "The device supports running applications using containers.",
+      file_transfer_stream: "The device supports streaming files to and from it.",
+      file_transfer_storage: "The device supports transferring files to and from its storage units.",
+      file_transfer_read: "The device supports reading files from it.",
       geolocation: "The device can be geolocated.",
       hardware_info: "The device provides information about its hardware.",
       led_behaviors: "The device can be asked to blink its LED in a specific pattern.",
