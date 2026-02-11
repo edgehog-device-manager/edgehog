@@ -20,7 +20,7 @@
 
 defmodule EdgehogWeb.AuthTest do
   # This can't be async: true since it modifies the Application env
-  use EdgehogWeb.ConnCase, async: true
+  use EdgehogWeb.ConnCase
 
   alias Edgehog.Containers.ReconcilerMock
 
