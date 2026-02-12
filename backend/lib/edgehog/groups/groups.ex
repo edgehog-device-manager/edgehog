@@ -23,9 +23,13 @@ defmodule Edgehog.Groups do
   The Groups context.
   """
 
-  use Ash.Domain, extensions: [AshGraphql.Domain]
+  use Ash.Domain, extensions: [AshGraphql.Domain, Ash.Authorizer]
 
   alias Edgehog.Groups.DeviceGroup
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true

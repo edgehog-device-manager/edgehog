@@ -21,7 +21,10 @@
 defmodule Edgehog.Containers do
   @moduledoc false
   use Ash.Domain,
-    extensions: [AshGraphql.Domain]
+    extensions: [
+      AshGraphql.Domain,
+      Ash.Authorizer
+    ]
 
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Deployment
@@ -32,6 +35,10 @@ defmodule Edgehog.Containers do
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Volume
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true
