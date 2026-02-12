@@ -3662,6 +3662,12 @@ type Application implements Node {
   ): ReleaseConnection!
 }
 
+type system_model_part_number_result {
+  created: SystemModelPartNumber
+  updated: SystemModelPartNumber
+  destroyed: ID
+}
+
 enum SystemModelPartNumberSortField {
   ID
   PART_NUMBER
@@ -4004,6 +4010,12 @@ type SystemModel implements Node {
   localizedDescriptions(preferredLanguageTags: [String!]): [LocalizedAttribute!]
 }
 
+type hardware_type_part_number_result {
+  created: HardwareTypePartNumber
+  updated: HardwareTypePartNumber
+  destroyed: ID
+}
+
 enum HardwareTypePartNumberSortField {
   ID
   PART_NUMBER
@@ -4081,6 +4093,12 @@ type HardwareTypePartNumber {
   partNumber: String!
 
   hardwareType: HardwareType
+}
+
+type hardware_type_result {
+  created: HardwareType
+  updated: HardwareType
+  destroyed: ID
 }
 
 "The result of the :delete_hardware_type mutation"
@@ -5029,6 +5047,12 @@ type Tag {
   name: String!
 }
 
+type ota_operation_result {
+  created: OtaOperation
+  updated: OtaOperation
+  destroyed: ID
+}
+
 "The result of the :cancel_ota_operation mutation"
 type CancelOtaOperationResult {
   "The successful result of the mutation"
@@ -5273,6 +5297,12 @@ type TenantInfo {
 
   "The default locale supported by the tenant."
   defaultLocale: String!
+}
+
+type channels_result {
+  created: Channel
+  updated: Channel
+  destroyed: ID
 }
 
 "The result of the :delete_channel mutation"
@@ -5648,6 +5678,25 @@ type CampaignTarget {
   deployment: Deployment
 
   otaOperation: OtaOperation
+}
+
+type campaign_result {
+  updated: Campaign
+}
+
+type update_campaigns_result {
+  created: Campaign
+  updated: Campaign
+}
+
+type deployment_campaigns_result {
+  created: Campaign
+  updated: Campaign
+}
+
+type campaigns_result {
+  created: Campaign
+  updated: Campaign
 }
 
 "The result of the :resume_campaign mutation"
@@ -6465,6 +6514,36 @@ type RootMutationType {
 }
 
 type RootSubscriptionType {
+  campaigns(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+  ): campaigns_result
+  deploymentCampaigns(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    types: [String!]
+  ): deployment_campaigns_result
+  updateCampaigns(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    types: [String!]
+  ): update_campaigns_result
+  campaign(
+    "A filter to limit the results"
+    filter: CampaignFilterInput
+
+    id: ID!
+  ): campaign_result
+  channels(
+    "A filter to limit the results"
+    filter: ChannelFilterInput
+  ): channels_result
+  otaOperation(
+    "A filter to limit the results"
+    filter: OtaOperationFilterInput
+  ): ota_operation_result
   deviceGroup(
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
@@ -6473,6 +6552,18 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: DeviceFilterInput
   ): device_changed_result
+  hardwareType(
+    "A filter to limit the results"
+    filter: HardwareTypeFilterInput
+  ): hardware_type_result
+  hardwareTypePartNumber(
+    "A filter to limit the results"
+    filter: HardwareTypePartNumberFilterInput
+  ): hardware_type_part_number_result
+  systemModelPartNumber(
+    "A filter to limit the results"
+    filter: SystemModelPartNumberFilterInput
+  ): system_model_part_number_result
   baseImage(
     "A filter to limit the results"
     filter: BaseImageFilterInput

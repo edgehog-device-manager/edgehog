@@ -18,28 +18,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
 import {
-  fetchQuery,
+  ConnectionHandler,
   graphql,
-  useFragment,
   useMutation,
   usePreloadedQuery,
-  useRelayEnvironment,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
-import type { Subscription } from "relay-runtime";
+import { useParams } from "react-router-dom";
 
-import type { UpdateCampaign_getCampaign_Query } from "@/api/__generated__/UpdateCampaign_getCampaign_Query.graphql";
-import type { UpdateCampaign_RefreshFragment$key } from "@/api/__generated__/UpdateCampaign_RefreshFragment.graphql";
+import type {
+  UpdateCampaign_getCampaign_Query,
+  UpdateCampaign_getCampaign_Query$data,
+} from "@/api/__generated__/UpdateCampaign_getCampaign_Query.graphql";
 import type { UpdateCampaign_pauseCampaign_Mutation } from "@/api/__generated__/UpdateCampaign_pauseCampaign_Mutation.graphql";
 import type { UpdateCampaign_resumeCampaign_Mutation } from "@/api/__generated__/UpdateCampaign_resumeCampaign_Mutation.graphql";
 
+import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import CampaignStatsChart from "@/components/CampaignStatsChart";
 import Center from "@/components/Center";
 import Col from "@/components/Col";
 import Icon from "@/components/Icon";
@@ -47,12 +49,10 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
-import CampaignStatsChart from "@/components/CampaignStatsChart";
 import UpdateTargetsTabs from "@/components/UpdateTargetsTabs";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import UpdateCampaignForm from "@/forms/UpdateCampaignForm";
 import { Link, Route } from "@/Navigation";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
-import Alert from "@/components/Alert";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getCampaign_Query(
@@ -62,20 +62,14 @@ const GET_CAMPAIGN_QUERY = graphql`
     $filter: CampaignTargetFilterInput = { status: { eq: SUCCESSFUL } }
   ) {
     campaign(id: $campaignId) {
+      id
       name
+      status
       ...UpdateCampaignForm_CampaignFragment
       ...CampaignStatsChart_CampaignStatsChartFragment
-      ...UpdateCampaign_RefreshFragment
       ...UpdateTargetsTabs_UpdateTargetsFragment
         @arguments(first: $first, after: $after, filter: $filter)
     }
-  }
-`;
-
-const CAMPAIGN_REFRESH_FRAGMENT = graphql`
-  fragment UpdateCampaign_RefreshFragment on Campaign {
-    id
-    status
   }
 `;
 
@@ -107,63 +101,67 @@ const RESUME_CAMPAIGN_MUTATION = graphql`
   }
 `;
 
-type UpdateCampaignRefreshProps = {
-  campaignRef: UpdateCampaign_RefreshFragment$key;
-};
-const UpdateCampaignRefresh = ({ campaignRef }: UpdateCampaignRefreshProps) => {
-  const relayEnvironment = useRelayEnvironment();
-  const { id, status } = useFragment(CAMPAIGN_REFRESH_FRAGMENT, campaignRef);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // TODO: use GraphQL subscription (when available) to get updates about Update Campaign
-  const subscriptionRef = useRef<Subscription | null>(null);
-  useEffect(() => {
-    return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
+const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
+  subscription UpdateCampaign_campaignUpdated_Subscription($id: ID!) {
+    campaign(id: $id) {
+      updated {
+        id
+        status
+        outcome
+        idleTargetCount
+        inProgressTargetCount
+        failedTargetCount
+        successfulTargetCount
+        campaignTargets {
+          edges {
+            node {
+              id
+              device {
+                id
+                name
+              }
+              status
+              retryCount
+              latestAttempt
+              completionTimestamp
+              deployment {
+                state
+                isReady
+                events(
+                  filter: { type: { eq: ERROR } }
+                  sort: [{ field: INSERTED_AT, order: DESC }]
+                  first: 1
+                ) {
+                  edges {
+                    node {
+                      message
+                      type
+                      insertedAt
+                      addInfo
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (status === "FINISHED" || isRefreshing) {
-      return;
     }
-    const refreshTimerId = setTimeout(() => {
-      setIsRefreshing(true);
-      subscriptionRef.current = fetchQuery(
-        relayEnvironment,
-        GET_CAMPAIGN_QUERY,
-        { campaignId: id, first: RECORDS_TO_LOAD_FIRST },
-        { fetchPolicy: "network-only" },
-      ).subscribe({
-        complete: () => {
-          setIsRefreshing(false);
-        },
-        error: () => {
-          setIsRefreshing(false);
-        },
-      });
-    }, 10000);
-
-    return () => {
-      clearTimeout(refreshTimerId);
-    };
-  }, [id, status, relayEnvironment, isRefreshing, setIsRefreshing]);
-
-  return isRefreshing ? <Spinner className="ms-2 mx-auto" /> : null;
-};
+  }
+`;
 
 type CampaignActionsProps = {
-  campaignRef: UpdateCampaign_RefreshFragment$key;
+  updateCampaignId: string;
+  campaignData: UpdateCampaign_getCampaign_Query$data["campaign"];
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
 };
 
 const CampaignActions = ({
-  campaignRef,
+  updateCampaignId,
+  campaignData,
   setErrorFeedback,
 }: CampaignActionsProps) => {
-  const { id, status } = useFragment(CAMPAIGN_REFRESH_FRAGMENT, campaignRef);
+  const status = campaignData?.status;
 
   const [pauseCampaign, isPausing] =
     useMutation<UpdateCampaign_pauseCampaign_Mutation>(PAUSE_CAMPAIGN_MUTATION);
@@ -175,7 +173,7 @@ const CampaignActions = ({
 
   const handlePauseCampaign = useCallback(() => {
     pauseCampaign({
-      variables: { id },
+      variables: { id: updateCampaignId },
       onCompleted(data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           setErrorFeedback(null);
@@ -198,11 +196,11 @@ const CampaignActions = ({
         );
       },
     });
-  }, [id, pauseCampaign, setErrorFeedback]);
+  }, [updateCampaignId, pauseCampaign, setErrorFeedback]);
 
   const handleResumeCampaign = useCallback(() => {
     resumeCampaign({
-      variables: { id },
+      variables: { id: updateCampaignId },
       onCompleted(data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           setErrorFeedback(null);
@@ -225,7 +223,7 @@ const CampaignActions = ({
         );
       },
     });
-  }, [id, resumeCampaign, setErrorFeedback]);
+  }, [updateCampaignId, resumeCampaign, setErrorFeedback]);
 
   if (status === "PAUSED" || status === "PAUSING") {
     return (
@@ -269,15 +267,78 @@ const CampaignActions = ({
 };
 
 type UpdateCampaignContentProps = {
+  updateCampaignId: string;
   getCampaignQuery: PreloadedQuery<UpdateCampaign_getCampaign_Query>;
 };
 
 const UpdateCampaignContent = ({
+  updateCampaignId,
   getCampaignQuery,
 }: UpdateCampaignContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const { campaign } = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
+
+  useSubscription({
+    subscription: CAMPAIGN_UPDATE_SUBSCRIPTION,
+    variables: { id: updateCampaignId },
+    updater: (store) => {
+      const root = store.getRoot();
+      const campaignRoot = root.getLinkedRecord("campaign", {
+        id: updateCampaignId,
+      });
+      if (!campaignRoot) return;
+
+      const campaignTargets = campaignRoot.getLinkedRecord("campaignTargets");
+      const allEdges = campaignTargets?.getLinkedRecords("edges") ?? [];
+
+      const STATUS_CONFIGS = [
+        {
+          status: "SUCCESSFUL",
+          filters: { filter: { status: { eq: "SUCCESSFUL" } } },
+        },
+        {
+          status: "IN_PROGRESS",
+          filters: { filter: { status: { eq: "IN_PROGRESS" } } },
+        },
+        {
+          status: "IDLE",
+          filters: { filter: { status: { eq: "IDLE" } } },
+        },
+        {
+          status: "FAILED",
+          filters: { filter: { status: { eq: "FAILED" } } },
+        },
+      ];
+
+      for (const { status, filters } of STATUS_CONFIGS) {
+        const connection = ConnectionHandler.getConnection(
+          campaignRoot,
+          "DeploymentTargetsTabs_campaignTargets",
+          filters,
+        );
+        if (!connection) continue;
+
+        const nodes = allEdges
+          .map((e) => e?.getLinkedRecord("node"))
+          .filter(
+            (n): n is NonNullable<typeof n> =>
+              Boolean(n) && n?.getValue("status") === status,
+          );
+
+        const newEdges = nodes.map((node) =>
+          ConnectionHandler.createEdge(
+            store,
+            connection,
+            node,
+            "CampaignTargetEdge",
+          ),
+        );
+
+        connection.setLinkedRecords(newEdges, "edges");
+      }
+    },
+  });
 
   if (!campaign) {
     return (
@@ -302,9 +363,9 @@ const UpdateCampaignContent = ({
   return (
     <Page>
       <Page.Header title={campaign.name}>
-        <UpdateCampaignRefresh campaignRef={campaign} />
         <CampaignActions
-          campaignRef={campaign}
+          updateCampaignId={updateCampaignId}
+          campaignData={campaign}
           setErrorFeedback={setErrorFeedback}
         />
       </Page.Header>
@@ -364,7 +425,10 @@ const UpdateCampaignPage = () => {
         onReset={fetchCampaign}
       >
         {getCampaignQuery && (
-          <UpdateCampaignContent getCampaignQuery={getCampaignQuery} />
+          <UpdateCampaignContent
+            updateCampaignId={updateCampaignId}
+            getCampaignQuery={getCampaignQuery}
+          />
         )}
       </ErrorBoundary>
     </Suspense>

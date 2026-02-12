@@ -45,6 +45,7 @@ const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
           id
           name
         }
+        status
         retryCount
         latestAttempt
         completionTimestamp

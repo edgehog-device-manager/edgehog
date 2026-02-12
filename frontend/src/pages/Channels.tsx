@@ -22,10 +22,12 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
+  ConnectionHandler,
   graphql,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
 
 import { Channels_ChannelsFragment$key } from "@/api/__generated__/Channels_ChannelsFragment.graphql";
@@ -67,6 +69,44 @@ const CHANNELS_FRAGMENT = graphql`
   }
 `;
 
+const CHANNEL_UPDATED_SUBSCRIPTION = graphql`
+  subscription Channels_channel_updated_Subscription {
+    channels {
+      updated {
+        id
+        name
+        handle
+        targetGroups {
+          edges {
+            node {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const CHANNEL_CREATED_SUBSCRIPTION = graphql`
+  subscription Channels_channel_created_Subscription {
+    channels {
+      created {
+        id
+        name
+        handle
+        targetGroups {
+          edges {
+            node {
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 interface ChannelsLayoutContainerProps {
   channelsData: Channels_getChannels_Query["response"];
   searchText: string | null;
@@ -81,46 +121,129 @@ const ChannelsLayoutContainer = ({
       Channels_ChannelsFragment$key
     >(CHANNELS_FRAGMENT, channelsData);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
+  const normalizedSearchText = useMemo(
+    () => (searchText ?? "").trim(),
+    [searchText],
+  );
+
+  const connectionFilter = useMemo(() => {
+    if (!normalizedSearchText) return {};
+
+    return {
+      or: [
+        { name: { ilike: `%${normalizedSearchText}%` } },
+        { handle: { ilike: `%${normalizedSearchText}%` } },
+        {
+          targetGroups: {
+            name: {
+              ilike: `%${normalizedSearchText}%`,
             },
-            { fetchPolicy: "network-only" },
+          },
+        },
+      ],
+    };
+  }, [normalizedSearchText]);
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: CHANNEL_UPDATED_SUBSCRIPTION,
+        variables: {},
+      }),
+      [],
+    ),
+  );
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: CHANNEL_CREATED_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const channelRoot = store.getRootField("channels");
+          const newChannel = channelRoot?.getLinkedRecord("created");
+          if (!newChannel) return;
+
+          if (normalizedSearchText !== "") {
+            const search = normalizedSearchText.toLowerCase();
+
+            const name = String(
+              newChannel.getValue("name") ?? "",
+            ).toLowerCase();
+
+            const handle = String(
+              newChannel.getValue("handle") ?? "",
+            ).toLowerCase();
+
+            const targetGroupsConnection =
+              newChannel.getLinkedRecord("targetGroups");
+
+            const targetGroupEdges =
+              targetGroupsConnection?.getLinkedRecords("edges") ?? [];
+
+            const matchesTargetGroup = targetGroupEdges.some((edge) => {
+              const node = edge?.getLinkedRecord("node");
+              const groupName = String(
+                node?.getValue("name") ?? "",
+              ).toLowerCase();
+
+              return groupName.includes(search);
+            });
+
+            const matchesText =
+              name.includes(search) ||
+              handle.includes(search) ||
+              matchesTargetGroup;
+
+            if (!matchesText) {
+              return;
+            }
+          }
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "Channels_channels",
+            { filter: connectionFilter },
           );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { handle: { ilike: `%${text}%` } },
-                  {
-                    targetGroups: {
-                      name: {
-                        ilike: `%${text}%`,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
+
+          if (!connection) return;
+          const newChannelId = newChannel.getDataID();
+
+          const edges = connection.getLinkedRecords("edges") ?? [];
+          const alreadyPresent = edges.some(
+            (edge) =>
+              edge.getLinkedRecord("node")?.getDataID() === newChannelId,
           );
-        }
-      }, 500),
-    [refetch],
+          if (alreadyPresent) return;
+
+          const edge = ConnectionHandler.createEdge(
+            store,
+            connection,
+            newChannel,
+            "ChannelEdge",
+          );
+
+          ConnectionHandler.insertEdgeAfter(connection, edge);
+        },
+      }),
+      [connectionFilter, normalizedSearchText],
+    ),
   );
 
   useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
+    const handler = _.debounce(() => {
+      refetch(
+        { first: RECORDS_TO_LOAD_FIRST, filter: connectionFilter },
+        { fetchPolicy: "network-only" },
+      );
+    }, 500);
+
+    handler();
+
+    return () => {
+      handler.cancel();
+    };
+  }, [connectionFilter, refetch]);
 
   const loadNextChannels = useCallback(() => {
     if (hasNext && !isLoadingNext) {

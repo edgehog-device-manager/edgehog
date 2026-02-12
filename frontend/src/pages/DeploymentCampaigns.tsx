@@ -24,10 +24,12 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
+  ConnectionHandler,
   graphql,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
 
 import { DeploymentCampaigns_DeploymentCampaignsFragment$key } from "@/api/__generated__/DeploymentCampaigns_DeploymentCampaignsFragment.graphql";
@@ -69,6 +71,44 @@ const CAMPAIGNS_FRAGMENT = graphql`
   }
 `;
 
+const CAMPAIGN_UPDATED_SUBSCRIPTION = graphql`
+  subscription DeploymentCampaigns_campaign_updated_Subscription {
+    deploymentCampaigns {
+      updated {
+        id
+        status
+        outcome
+      }
+    }
+  }
+`;
+
+const CAMPAIGN_CREATED_SUBSCRIPTION = graphql`
+  subscription DeploymentCampaigns_campaign_created_Subscription {
+    deploymentCampaigns {
+      created {
+        id
+        name
+        status
+        outcome
+        channel {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
+const enumStatuses = [
+  "FINISHED",
+  "IDLE",
+  "IN_PROGRESS",
+  "PAUSED",
+  "PAUSING",
+] as const;
+const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
+
 interface DeploymentCampaignsLayoutContainerProps {
   campaignsData: DeploymentCampaigns_getCampaigns_Query["response"];
   searchText: string | null;
@@ -83,58 +123,140 @@ const DeploymentCampaignsLayoutContainer = ({
       DeploymentCampaigns_DeploymentCampaignsFragment$key
     >(CAMPAIGNS_FRAGMENT, campaignsData);
 
-  const debounceRefetch = useMemo(() => {
-    const enumStatuses = ["FINISHED", "IDLE", "IN_PROGRESS"] as const;
-    const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
+  const findMatches = <T extends readonly string[]>(
+    enums: T,
+    search: string,
+  ): T[number][] => {
+    const lower = search.toLowerCase();
+    return enums.filter((value) => value.toLowerCase().includes(lower));
+  };
 
-    const findMatches = <T extends readonly string[]>(
-      enums: T,
-      searchText: string,
-    ): T[number][] =>
-      enums.filter((value) =>
-        value.toLowerCase().includes(searchText.toLowerCase()),
-      );
+  const normalizedSearchText = useMemo(
+    () => (searchText ?? "").trim(),
+    [searchText],
+  );
 
-    return _.debounce((text: string) => {
-      if (text === "") {
-        refetch(
-          {
-            first: RECORDS_TO_LOAD_FIRST,
+  const connectionFilter = useMemo(() => {
+    if (!normalizedSearchText) return {};
+
+    return {
+      or: [
+        { name: { ilike: `%${normalizedSearchText}%` } },
+        {
+          channel: {
+            name: { ilike: `%${normalizedSearchText}%` },
           },
-          { fetchPolicy: "network-only" },
-        );
-      } else {
-        refetch(
-          {
-            first: RECORDS_TO_LOAD_FIRST,
-            filter: {
-              or: [
-                { name: { ilike: `%${text}%` } },
-                {
-                  channel: {
-                    name: { ilike: `%${text}%` },
-                  },
-                },
-                ...findMatches(enumStatuses, text).map((status) => ({
-                  status: { eq: status },
-                })),
-                ...findMatches(enumOutcomes, text).map((outcome) => ({
-                  outcome: { eq: outcome },
-                })),
-              ],
-            },
-          },
-          { fetchPolicy: "network-only" },
-        );
-      }
-    }, 500);
-  }, [refetch]);
+        },
+        ...findMatches(enumStatuses, normalizedSearchText).map((status) => ({
+          status: { eq: status },
+        })),
+        ...findMatches(enumOutcomes, normalizedSearchText).map((outcome) => ({
+          outcome: { eq: outcome },
+        })),
+      ],
+    };
+  }, [normalizedSearchText]);
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: CAMPAIGN_CREATED_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const campaignRoot = store.getRootField("deploymentCampaigns");
+          const newCampaign = campaignRoot?.getLinkedRecord("created");
+          if (!newCampaign) return;
+
+          if (normalizedSearchText !== "") {
+            const search = normalizedSearchText.toLowerCase();
+
+            const name = String(
+              newCampaign.getValue("name") ?? "",
+            ).toLowerCase();
+
+            const channel = newCampaign.getLinkedRecord("channel");
+            const channelName = String(
+              channel?.getValue("name") ?? "",
+            ).toLowerCase();
+
+            const status = String(
+              newCampaign.getValue("status") ?? "",
+            ).toLowerCase();
+
+            const outcome = String(
+              newCampaign.getValue("outcome") ?? "",
+            ).toLowerCase();
+
+            const matchesText =
+              name.includes(search) || channelName.includes(search);
+
+            const matchesStatus = status.includes(search);
+            const matchesOutcome = outcome.includes(search);
+
+            if (!matchesText && !matchesStatus && !matchesOutcome) {
+              return;
+            }
+          }
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "DeploymentCampaigns_deploymentCampaigns",
+            { filter: connectionFilter },
+          );
+
+          if (!connection) return;
+
+          const newCampaignId = newCampaign.getDataID();
+
+          const edges = connection.getLinkedRecords("edges") ?? [];
+          const alreadyPresent = edges.some(
+            (edge) =>
+              edge.getLinkedRecord("node")?.getDataID() === newCampaignId,
+          );
+
+          if (alreadyPresent) return;
+
+          const edge = ConnectionHandler.createEdge(
+            store,
+            connection,
+            newCampaign,
+            "CampaignEdge",
+          );
+
+          ConnectionHandler.insertEdgeAfter(connection, edge);
+        },
+      }),
+      [connectionFilter, normalizedSearchText],
+    ),
+  );
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: CAMPAIGN_UPDATED_SUBSCRIPTION,
+        variables: {},
+      }),
+      [],
+    ),
+  );
 
   useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
+    const handler = _.debounce(() => {
+      refetch(
+        {
+          first: RECORDS_TO_LOAD_FIRST,
+          filter: connectionFilter,
+        },
+        { fetchPolicy: "network-only" },
+      );
+    }, 500);
+
+    handler();
+
+    return () => {
+      handler.cancel();
+    };
+  }, [connectionFilter, refetch]);
 
   const loadNextDeploymentCampaigns = useCallback(() => {
     if (hasNext && !isLoadingNext) {

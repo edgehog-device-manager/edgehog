@@ -123,7 +123,7 @@ const DeviceGroupsLayoutContainer = ({
   );
 
   const connectionFilter = useMemo(() => {
-    if (normalizedSearchText === "") return undefined;
+    if (normalizedSearchText === "") return {};
 
     return {
       or: [
@@ -184,7 +184,7 @@ const DeviceGroupsLayoutContainer = ({
             "DeviceGroupEdge",
           );
 
-          ConnectionHandler.insertEdgeBefore(connection, edge);
+          ConnectionHandler.insertEdgeAfter(connection, edge);
         },
       }),
       [connectionFilter, normalizedSearchText],
@@ -225,40 +225,20 @@ const DeviceGroupsLayoutContainer = ({
     ),
   );
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { handle: { ilike: `%${text}%` } },
-                  { selector: { ilike: `%${text}%` } },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
-
   useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
+    const handler = _.debounce(() => {
+      refetch(
+        { first: RECORDS_TO_LOAD_FIRST, filter: connectionFilter },
+        { fetchPolicy: "network-only" },
+      );
+    }, 500);
+
+    handler();
+
+    return () => {
+      handler.cancel();
+    };
+  }, [connectionFilter, refetch]);
 
   const loadNextDeviceGroups = useCallback(() => {
     if (hasNext && !isLoadingNext) {
