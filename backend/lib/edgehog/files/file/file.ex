@@ -20,18 +20,16 @@
 
 defmodule Edgehog.Files.File do
   @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
+  use Edgehog.MultitenantResource,
     domain: Edgehog.Files,
-    extensions: [AshGraphql.Resource],
-    data_layer: AshPostgres.DataLayer
+    extensions: [AshGraphql.Resource]
 
   graphql do
     type :file
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read, :destroy, create: :*]
   end
 
   attributes do
