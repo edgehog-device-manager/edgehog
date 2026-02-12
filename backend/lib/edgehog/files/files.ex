@@ -20,7 +20,8 @@
 
 defmodule Edgehog.Files do
   @moduledoc false
-  use Ash.Domain, otp_app: :edgehog, extensions: [AshGraphql.Domain]
+  use Ash.Domain,
+    extensions: [AshGraphql.Domain]
 
   resources do
     resource Edgehog.Files.File
