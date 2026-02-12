@@ -24,7 +24,11 @@ defmodule Edgehog.Files do
   """
 
   use Ash.Domain,
-    extensions: [AshGraphql.Domain]
+    extensions: [AshGraphql.Domain, Ash.Authorizer]
+
+  authorization do
+    authorize :when_requested
+  end
 
   alias Edgehog.Files.File
   alias Edgehog.Files.FileDownloadRequest

@@ -23,12 +23,17 @@ defmodule Edgehog.Devices do
 
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain
+      AshGraphql.Domain,
+      Ash.Authorizer
     ]
 
   alias Edgehog.Devices.Device
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true
