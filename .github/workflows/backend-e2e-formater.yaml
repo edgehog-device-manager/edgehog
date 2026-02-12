@@ -16,27 +16,25 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Backend E2E tests
+name: Backend E2E formatter test
 on:
-  # Run when pushing to stable branches
-  push:
-    paths:
-      - "tools/e2e_test/**"
-      - ".tool-versions"
-      - ".github/workflows/backend-e2e-*.yaml"
-    branches:
-      - "main"
-      - "release-*"
-  # Run on pull requests matching apps
-  pull_request:
-    paths:
-      - "tools/e2e_test/**"
-      - ".tool-versions"
-      - ".github/workflows/backend-e2e-*.yaml"
-concurrency:
-  group: "${{ github.workflow }}-${{ github.ref }}"
-  cancel-in-progress: true
-
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+    working-directory: tools/e2e_test
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   run-e2e-formatter:
-    uses: ./.github/workflows/backend-e2e-formater.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Run E2E tests
+        run: cargo fmt --check
