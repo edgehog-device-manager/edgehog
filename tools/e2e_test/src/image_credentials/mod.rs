@@ -30,18 +30,20 @@ pub async fn test_image_credentials(client: client::EdgehogClient) -> eyre::Resu
     let label = Alphabetic.sample_string(&mut rand::rng(), 5);
     let password = Alphabetic.sample_string(&mut rand::rng(), 10);
 
-    let image_credentials_result = CreateImageCredentials::create_image_credentials(
-        &client,
-        &username,
-        &password,
-        &label
-    )
-    .await?;
+    let image_credentials_result =
+        CreateImageCredentials::create_image_credentials(&client, &username, &password, &label)
+            .await?;
+
+    println!("Image credentials creation result:");
+
+    println!(
+        "Image credentials creation result: {:?}",
+        image_credentials_result
+    );
 
     assert_eq!(image_credentials_result.errors, None);
 
-    let created_credentials = 
-        image_credentials_result
+    let created_credentials = image_credentials_result
         .data
         .expect("Error wile unwrapping image credentials creation result")
         .create_image_credentials
@@ -54,8 +56,8 @@ pub async fn test_image_credentials(client: client::EdgehogClient) -> eyre::Resu
 
     let id = created_credentials.id.clone();
 
-    let image_credentials = 
-    GetImageCredentials::get_image_credentials(&client, &id).await?
+    let image_credentials = GetImageCredentials::get_image_credentials(&client, &id)
+        .await?
         .data
         .expect(format!("Error while retrieving image credentials with id {}", &id).as_str())
         .image_credentials

@@ -47,6 +47,6 @@ impl CreateImageCredentials {
         };
         let variables = Variables { input };
         let request_body = CreateImageCredentials::build_query(variables);
-        client.send(&request_body) .await
+        client.send(&request_body).await
     }
 }

@@ -38,7 +38,9 @@ impl GetImageCredentials {
         id: &String,
     ) -> eyre::Result<Response<ResponseData>> {
         // this is the important line
-        let variables = Variables { id: String::from(id) };
+        let variables = Variables {
+            id: String::from(id),
+        };
         let request_body = GetImageCredentials::build_query(variables);
         client.send(&request_body).await
     }
