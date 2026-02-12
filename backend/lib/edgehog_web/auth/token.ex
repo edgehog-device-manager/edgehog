@@ -1,7 +1,6 @@
+# This file is part of Edgehog.
 #
-# This file is part of Astarte.
-#
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Auth.Token do
   @moduledoc false
@@ -42,7 +40,9 @@ defmodule EdgehogWeb.Auth.Token do
     # e_tga = Edgehog Tenant GraphQL API
     case Map.fetch(claims, "e_tga") do
       {:ok, claims} ->
-        {:ok, %{claims: claims}}
+        Edgehog.Actors.Actor
+        |> Ash.Changeset.for_create(:from_claims, %{claims: %{e_tga: claims}})
+        |> Ash.create()
 
       :error ->
         {:error, :no_valid_claims}

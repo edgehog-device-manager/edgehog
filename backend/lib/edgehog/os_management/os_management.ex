@@ -22,10 +22,15 @@ defmodule Edgehog.OSManagement do
   @moduledoc false
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain
+      AshGraphql.Domain,
+      Ash.Authorizer
     ]
 
   alias Edgehog.OSManagement.OTAOperation
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true

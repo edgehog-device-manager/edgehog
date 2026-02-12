@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +15,14 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers do
   @moduledoc false
   use Ash.Domain,
-    extensions: [AshGraphql.Domain]
+    extensions: [
+      AshGraphql.Domain,
+      Ash.Authorizer
+    ]
 
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Deployment
@@ -32,6 +33,10 @@ defmodule Edgehog.Containers do
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Volume
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true

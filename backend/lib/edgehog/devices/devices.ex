@@ -1,6 +1,6 @@
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,12 +23,17 @@ defmodule Edgehog.Devices do
 
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain
+      AshGraphql.Domain,
+      Ash.Authorizer
     ]
 
   alias Edgehog.Devices.Device
   alias Edgehog.Devices.HardwareType
   alias Edgehog.Devices.SystemModel
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true

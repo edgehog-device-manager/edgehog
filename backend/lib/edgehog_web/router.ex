@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2023 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Router do
   use EdgehogWeb, :router
@@ -25,12 +23,14 @@ defmodule EdgehogWeb.Router do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
     plug EdgehogWeb.Auth
+    plug EdgehogWeb.PopulateActor
     plug AshGraphql.Plug
   end
 
   pipeline :triggers do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
+    plug EdgehogWeb.PopulateActor
   end
 
   pipeline :admin_api do
