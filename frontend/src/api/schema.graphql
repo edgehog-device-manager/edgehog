@@ -793,6 +793,15 @@ enum DeviceCapability {
   "The device supports running applications using containers."
   CONTAINER_MANAGEMENT
 
+  "The device supports reading files from it."
+  FILE_TRANSFER_READ
+
+  "The device supports transferring files to and from its storage units."
+  FILE_TRANSFER_STORAGE
+
+  "The device supports streaming files to and from it."
+  FILE_TRANSFER_STREAM
+
   "The device can be geolocated."
   GEOLOCATION
 
@@ -1776,6 +1785,11 @@ type VolumeDeployment {
   ): [ContainerDeployment!]!
 }
 
+type volume_result {
+  created: Volume
+  destroyed: ID
+}
+
 "The result of the :delete_volume mutation"
 type DeleteVolumeResult {
   "The record that was successfully deleted"
@@ -2014,6 +2028,12 @@ type NetworkDeployment {
   ): [ContainerDeployment!]!
 }
 
+type network_result {
+  created: Network
+  updated: Network
+  destroyed: ID
+}
+
 "The result of the :delete_network mutation"
 type DeleteNetworkResult {
   "The record that was successfully deleted"
@@ -2206,6 +2226,11 @@ type Network implements Node {
   ): DeviceConnection!
 }
 
+type release_result {
+  created: Release
+  destroyed: ID
+}
+
 "The result of the :delete_release mutation"
 type DeleteReleaseResult {
   "The record that was successfully deleted"
@@ -2367,6 +2392,11 @@ type Release implements Node {
     "The number of records to skip."
     offset: Int
   ): [SystemModel!]!
+}
+
+type image_credentials_result {
+  created: ImageCredentials
+  destroyed: ID
 }
 
 "The result of the :delete_image_credentials mutation"
@@ -2534,6 +2564,11 @@ type ImageDeployment {
   image: Image
 }
 
+type image_result {
+  created: Image
+  destroyed: ID
+}
+
 input ImageFilterImageCredentialsId {
   isNil: Boolean
   eq: ID
@@ -2618,6 +2653,10 @@ type Image {
     "The number of records to skip."
     offset: Int
   ): [Container!]!
+}
+
+type deployment_event_result {
+  created: DeploymentEvent
 }
 
 enum DeploymentEventSortField {
@@ -3155,6 +3194,12 @@ type ContainerDeployment {
   ): DeviceMappingDeploymentConnection!
 }
 
+type container_result {
+  created: Container
+  updated: Container
+  destroyed: ID
+}
+
 enum ContainerSortField {
   ID
   RESTART_POLICY
@@ -3533,6 +3578,12 @@ type Container {
   ): DeviceMappingConnection!
 }
 
+type application_result {
+  created: Application
+  updated: Application
+  destroyed: ID
+}
+
 "The result of the :delete_application mutation"
 type DeleteApplicationResult {
   "The record that was successfully deleted"
@@ -3660,6 +3711,12 @@ type Application implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ReleaseConnection!
+}
+
+type system_model_part_number_result {
+  created: SystemModelPartNumber
+  updated: SystemModelPartNumber
+  destroyed: ID
 }
 
 enum SystemModelPartNumberSortField {
@@ -4004,6 +4061,12 @@ type SystemModel implements Node {
   localizedDescriptions(preferredLanguageTags: [String!]): [LocalizedAttribute!]
 }
 
+type hardware_type_part_number_result {
+  created: HardwareTypePartNumber
+  updated: HardwareTypePartNumber
+  destroyed: ID
+}
+
 enum HardwareTypePartNumberSortField {
   ID
   PART_NUMBER
@@ -4081,6 +4144,12 @@ type HardwareTypePartNumber {
   partNumber: String!
 
   hardwareType: HardwareType
+}
+
+type hardware_type_result {
+  created: HardwareType
+  updated: HardwareType
+  destroyed: ID
 }
 
 "The result of the :delete_hardware_type mutation"
@@ -5029,6 +5098,12 @@ type Tag {
   name: String!
 }
 
+type ota_operation_result {
+  created: OtaOperation
+  updated: OtaOperation
+  destroyed: ID
+}
+
 "The result of the :cancel_ota_operation mutation"
 type CancelOtaOperationResult {
   "The successful result of the mutation"
@@ -5648,6 +5723,19 @@ type CampaignTarget {
   deployment: Deployment
 
   otaOperation: OtaOperation
+}
+
+"The result of the :increase_max_in_progress_operations mutation"
+type IncreaseMaxInProgressOperationsResult {
+  "The successful result of the mutation"
+  result: Campaign
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input IncreaseMaxInProgressOperationsInput {
+  maxInProgressOperations: Int
 }
 
 "The result of the :resume_campaign mutation"
@@ -6307,6 +6395,11 @@ type RootMutationType {
   "Resumes a paused campaign rollout."
   resumeCampaign(id: ID!): ResumeCampaignResult
 
+  increaseMaxInProgressOperations(
+    id: ID!
+    input: IncreaseMaxInProgressOperationsInput
+  ): IncreaseMaxInProgressOperationsResult
+
   "Creates a new channel."
   createChannel(input: CreateChannelInput!): CreateChannelResult
 
@@ -6465,6 +6558,10 @@ type RootMutationType {
 }
 
 type RootSubscriptionType {
+  otaOperation(
+    "A filter to limit the results"
+    filter: OtaOperationFilterInput
+  ): ota_operation_result
   deviceGroup(
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
@@ -6473,6 +6570,47 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: DeviceFilterInput
   ): device_changed_result
+  hardwareType(
+    "A filter to limit the results"
+    filter: HardwareTypeFilterInput
+  ): hardware_type_result
+  hardwareTypePartNumber(
+    "A filter to limit the results"
+    filter: HardwareTypePartNumberFilterInput
+  ): hardware_type_part_number_result
+  systemModelPartNumber(
+    "A filter to limit the results"
+    filter: SystemModelPartNumberFilterInput
+  ): system_model_part_number_result
+  application(
+    "A filter to limit the results"
+    filter: ApplicationFilterInput
+  ): application_result
+  container(
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+  ): container_result
+  deploymentEvent(
+    "A filter to limit the results"
+    filter: DeploymentEventFilterInput
+  ): deployment_event_result
+  image("A filter to limit the results" filter: ImageFilterInput): image_result
+  imageCredentials(
+    "A filter to limit the results"
+    filter: ImageCredentialsFilterInput
+  ): image_credentials_result
+  release(
+    "A filter to limit the results"
+    filter: ReleaseFilterInput
+  ): release_result
+  network(
+    "A filter to limit the results"
+    filter: NetworkFilterInput
+  ): network_result
+  volume(
+    "A filter to limit the results"
+    filter: VolumeFilterInput
+  ): volume_result
   baseImage(
     "A filter to limit the results"
     filter: BaseImageFilterInput

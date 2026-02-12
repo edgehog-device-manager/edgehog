@@ -140,6 +140,13 @@ defmodule Edgehog.Campaigns.Campaign do
       change Changes.StartExecution
     end
 
+    update :increase_max_in_progress_operations do
+      require_atomic? false
+      argument :max_in_progress_operations, :integer
+
+      change Changes.IncreaseMaxInProgressOperations
+    end
+
     destroy :destroy do
       description "Deletes a Campaign"
       primary? true
@@ -242,5 +249,12 @@ defmodule Edgehog.Campaigns.Campaign do
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
     end
+  end
+
+  pub_sub do
+    prefix "campaigns"
+    module EdgehogWeb.Endpoint
+
+    publish :increase_max_in_progress_operations, [[:id, "*"]]
   end
 end

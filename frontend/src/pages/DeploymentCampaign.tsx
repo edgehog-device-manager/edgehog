@@ -327,7 +327,10 @@ const DeploymentCampaignContent = ({
         </Alert>
         <Row>
           <Col lg={9}>
-            <DeploymentCampaignForm campaignRef={campaign} />
+            <DeploymentCampaignForm
+              campaignRef={campaign}
+              setErrorFeedback={(e) => setErrorFeedback(e)}
+            />
           </Col>
           <Col lg={3}>
             <CampaignStatsChart campaignRef={campaign} />

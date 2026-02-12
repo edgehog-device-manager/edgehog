@@ -62,9 +62,17 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FirmwareUpgrade.Executor do
 
   defp handle_update(notification, state, data) do
     case notification.payload.action.name do
-      :update_status -> handle_update_status(notification, data)
-      :pause -> handle_mark_as_paused(state, data)
-      _ -> :keep_state_and_data
+      :update_status ->
+        handle_update_status(notification, data)
+
+      :pause ->
+        handle_mark_as_paused(state, data)
+
+      :increase_max_in_progress_operations ->
+        handle_increase_max_in_progress_operations(notification, data)
+
+      _ ->
+        :keep_state_and_data
     end
   end
 
@@ -118,5 +126,14 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FirmwareUpgrade.Executor do
   defp handle_mark_as_paused(_state, _data) do
     # Ignore pause requests in non-pauseable states (terminal states, already pausing, etc.)
     :keep_state_and_data
+  end
+
+  defp handle_increase_max_in_progress_operations(notification, data) do
+    data = %{
+      data
+      | mechanism: notification.payload.data.campaign_mechanism.value
+    }
+
+    {:keep_state, data}
   end
 end

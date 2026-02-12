@@ -18,26 +18,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { ReactNode, useCallback, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment, useMutation } from "react-relay/hooks";
 
 import type {
   DeploymentCampaignForm_CampaignFragment$data,
   DeploymentCampaignForm_CampaignFragment$key,
 } from "@/api/__generated__/DeploymentCampaignForm_CampaignFragment.graphql";
+import { DeploymentCampaignForm_IncreaseMaxInProgressOperations_Mutation } from "@/api/__generated__/DeploymentCampaignForm_IncreaseMaxInProgressOperations_Mutation.graphql";
 
 import Col from "@/components/Col";
 import Row from "@/components/Row";
 import CampaignOutcome from "@/components/CampaignOutcome";
 import CampaignStatus from "@/components/CampaignStatus";
 import { SimpleFormRow as FormRow } from "@/components/FormRow";
+import Form from "@/components/Form";
+import Button from "@/components/Button";
+import Icon from "@/components/Icon";
+import { campaignUpdateSchema, messages } from "@/forms/validation";
 import { Link, Route } from "@/Navigation";
 import { OperationType } from "./CreateDeploymentCampaign";
+import FormFeedback from "./FormFeedback";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const CAMPAIGN_FORM_FRAGMENT = graphql`
   fragment DeploymentCampaignForm_CampaignFragment on Campaign {
+    id
     ...CampaignStatus_CampaignStatusFragment
     ...CampaignOutcome_CampaignOutcomeFragment
     channel {
@@ -124,6 +132,102 @@ const CAMPAIGN_FORM_FRAGMENT = graphql`
   }
 `;
 
+const INCREASE_MAX_IN_PROGRESS_OPERATIONS_MUTATION = graphql`
+  mutation DeploymentCampaignForm_IncreaseMaxInProgressOperations_Mutation(
+    $campaignId: ID!
+    $input: IncreaseMaxInProgressOperationsInput!
+  ) {
+    increaseMaxInProgressOperations(id: $campaignId, input: $input) {
+      result {
+        id
+        ...CampaignStatus_CampaignStatusFragment
+        ...CampaignOutcome_CampaignOutcomeFragment
+        channel {
+          id
+          name
+        }
+        campaignMechanism {
+          __typename
+          ... on DeploymentDeploy {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentStart {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentStop {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentDelete {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentUpgrade {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+            targetRelease {
+              id
+              version
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 const MECHANISM_TO_OPERATION: Record<string, OperationType> = {
   DeploymentDeploy: "Deploy",
   DeploymentStart: "Start",
@@ -132,16 +236,126 @@ const MECHANISM_TO_OPERATION: Record<string, OperationType> = {
   DeploymentDelete: "Delete",
 };
 
-type CampaignMechanismColProps = {
-  campaignMechanism: DeploymentCampaignForm_CampaignFragment$data["campaignMechanism"];
+type CampaignMechanism = {
+  __typename:
+    | "DeploymentDeploy"
+    | "DeploymentStart"
+    | "DeploymentStop"
+    | "DeploymentUpgrade"
+    | "DeploymentDelete";
+  maxFailurePercentage: number;
+  maxInProgressOperations: number;
+  release: {
+    application: {
+      id: string;
+      name: string;
+    } | null;
+    id: string;
+    version: string;
+  } | null;
+  requestRetries: number;
+  requestTimeoutSeconds: number;
+  targetRelease?: {
+    id: string;
+    version: string;
+  };
 };
 
-const CampaignMechanismCol = ({
+type CampaignMechanismColContentProps = {
+  campaignId: string;
+  campaignMechanism: CampaignMechanism;
+  setErrorFeedback: (e: ReactNode) => void;
+};
+
+const CampaignMechanismColContent = ({
+  campaignId,
   campaignMechanism,
-}: CampaignMechanismColProps) => {
-  if (campaignMechanism.__typename === "%other") {
-    return null;
-  }
+  setErrorFeedback,
+}: CampaignMechanismColContentProps) => {
+  const intl = useIntl();
+
+  const [increaseMaxInProgressOperations, isIncreasingMaxInProgressOperations] =
+    useMutation<DeploymentCampaignForm_IncreaseMaxInProgressOperations_Mutation>(
+      INCREASE_MAX_IN_PROGRESS_OPERATIONS_MUTATION,
+    );
+
+  const [originalMaxInProgOperations, setOriginalMaxInProgOperations] =
+    useState(campaignMechanism.maxInProgressOperations);
+
+  const [maxInProgOperations, setMaxInProgOperations] = useState(
+    campaignMechanism.maxInProgressOperations,
+  );
+
+  const [isEditingValue, setIsEditingValue] = useState(false);
+
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const [isValidMaxInProgOpsInput, setIsValidMaxInProgOpsInput] =
+    useState(true);
+
+  const handleMaxInProgOperationsChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const input = Number(e.target.value);
+
+    validateMaxInProgOpsInput(input);
+    setMaxInProgOperations(input);
+  };
+
+  const validateMaxInProgOpsInput = (maxInProgOperations: number) => {
+    const parseResult = campaignUpdateSchema.safeParse(maxInProgOperations);
+    if (parseResult.success) {
+      if (
+        originalMaxInProgOperations &&
+        maxInProgOperations >= originalMaxInProgOperations
+      ) {
+        setIsValidMaxInProgOpsInput(true);
+        setValidationError("");
+      } else {
+        setIsValidMaxInProgOpsInput(false);
+        setValidationError(messages.numberMin.id);
+      }
+    } else {
+      setIsValidMaxInProgOpsInput(false);
+      setValidationError(parseResult.error.issues[0].message);
+    }
+  };
+
+  const handleUpdateMaxInProgOperations = useCallback(() => {
+    setIsEditingValue(false);
+    increaseMaxInProgressOperations({
+      variables: {
+        campaignId: campaignId,
+        input: { maxInProgressOperations: maxInProgOperations },
+      },
+      onCompleted(data, errors) {
+        if (errors) {
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+          return setErrorFeedback(errorFeedback);
+        }
+        setOriginalMaxInProgOperations(maxInProgOperations);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="forms.DeploymentCampaignForm.increaseMaxPendOpsErrorFeedback"
+            defaultMessage="Could not increase Max Pending Operations, please try again."
+          />,
+        );
+      },
+    });
+  }, [increaseMaxInProgressOperations, campaignId, maxInProgOperations]);
+
+  const handleCancelEditMaxInProgOperations = () => {
+    setMaxInProgOperations(originalMaxInProgOperations);
+    setIsValidMaxInProgOpsInput(true);
+    setValidationError(null);
+    setIsEditingValue(false);
+  };
 
   return (
     <Col lg>
@@ -153,7 +367,60 @@ const CampaignMechanismCol = ({
           />
         }
       >
-        {campaignMechanism.maxInProgressOperations}
+        <div
+          className={`d-flex align-items-center ${isIncreasingMaxInProgressOperations ? "pe-none" : ""}`}
+        >
+          <div>
+            <Form.Control
+              type="text"
+              value={maxInProgOperations}
+              readOnly={!isEditingValue}
+              min={originalMaxInProgOperations}
+              isInvalid={!isValidMaxInProgOpsInput}
+              onChange={handleMaxInProgOperationsChange}
+              className="p-0"
+              style={{ width: "4em" }}
+            />
+            {validationError && (
+              <FormFeedback
+                feedback={{
+                  messageId: validationError,
+                  values: { min: originalMaxInProgOperations },
+                }}
+              />
+            )}
+          </div>
+
+          {isEditingValue ? (
+            <>
+              <Button
+                type="submit"
+                className="border-0 bg-transparent p-0 px-2"
+                disabled={!isValidMaxInProgOpsInput}
+                onClick={handleUpdateMaxInProgOperations}
+              >
+                <Icon icon="check" className="text-success" />
+              </Button>
+              <Icon
+                icon="xMark"
+                className="text-danger"
+                role="button"
+                onClick={handleCancelEditMaxInProgOperations}
+              />
+            </>
+          ) : (
+            <Icon
+              icon="edit"
+              className="text-secondary px-2"
+              role="button"
+              onClick={() => setIsEditingValue(true)}
+              title={intl.formatMessage({
+                id: "forms.DeploymentCampaignForm.increaseMaxInProgressOperations",
+                defaultMessage: "Increase Max Pending Operations",
+              })}
+            />
+          )}
+        </div>
       </FormRow>
 
       <FormRow
@@ -202,11 +469,52 @@ const CampaignMechanismCol = ({
   );
 };
 
-type DeploymentCampaignProps = {
-  campaignRef: DeploymentCampaignForm_CampaignFragment$key;
+type CampaignMechanismColProps = {
+  campaignId: string;
+  campaignMechanismData: DeploymentCampaignForm_CampaignFragment$data["campaignMechanism"];
+  setErrorFeedback: (e: ReactNode) => void;
 };
 
-const DeploymentCampaign = ({ campaignRef }: DeploymentCampaignProps) => {
+const CampaignMechanismCol = ({
+  campaignId,
+  campaignMechanismData,
+  setErrorFeedback,
+}: CampaignMechanismColProps) => {
+  if (campaignMechanismData.__typename === "%other") {
+    return null;
+  }
+
+  // TODO: handle readonly type without mapping to mutable type
+  const campaignMechanism =
+    campaignMechanismData &&
+    ({
+      ...campaignMechanismData,
+      release: {
+        ...campaignMechanismData.release,
+        application: { ...campaignMechanismData.release?.application },
+      },
+      targetRelease: campaignMechanismData.__typename ===
+        "DeploymentUpgrade" && { ...campaignMechanismData.targetRelease },
+    } as CampaignMechanism);
+
+  return (
+    <CampaignMechanismColContent
+      campaignId={campaignId}
+      campaignMechanism={campaignMechanism}
+      setErrorFeedback={setErrorFeedback}
+    ></CampaignMechanismColContent>
+  );
+};
+
+type DeploymentCampaignProps = {
+  campaignRef: DeploymentCampaignForm_CampaignFragment$key;
+  setErrorFeedback: (e: ReactNode) => void;
+};
+
+const DeploymentCampaign = ({
+  campaignRef,
+  setErrorFeedback,
+}: DeploymentCampaignProps) => {
   const campaign = useFragment(CAMPAIGN_FORM_FRAGMENT, campaignRef);
 
   const { channel, campaignMechanism } = campaign;
@@ -333,7 +641,11 @@ const DeploymentCampaign = ({ campaignRef }: DeploymentCampaignProps) => {
         </FormRow>
       </Col>
 
-      <CampaignMechanismCol campaignMechanism={campaignMechanism} />
+      <CampaignMechanismCol
+        campaignId={campaign.id}
+        campaignMechanismData={campaignMechanism}
+        setErrorFeedback={setErrorFeedback}
+      />
     </Row>
   );
 };

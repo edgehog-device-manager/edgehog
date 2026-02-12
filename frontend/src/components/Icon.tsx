@@ -51,6 +51,8 @@ import {
   faCircleQuestion,
   faRotate,
   faCircleInfo,
+  faPenToSquare,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -87,6 +89,8 @@ const icons = {
   faCircleQuestion: faCircleQuestion,
   rotate: faRotate,
   faCircleInfo: faCircleInfo,
+  edit: faPenToSquare,
+  xMark: faXmark,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;
