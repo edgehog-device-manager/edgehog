@@ -1,6 +1,6 @@
 // This file is part of Edgehog.
 //
-// Copyright 2025 SECO Mind Srl
+// Copyright 2025 - 2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+mod containers;
 mod image_credentials;
 mod suite;
 
@@ -28,15 +29,18 @@ async fn main() -> eyre::Result<()> {
 mod test {
     use super::*;
 
+    use std::env;
     use suite::client::EdgehogClient;
     use suite::config::Config;
 
     fn test_config() -> Config {
         Config {
-            hostname: "api.edgehog.localhost".to_string(),
-            scheme: "http".to_string(),
-            bearer: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJlX3RnYSI6IioiLCJpYXQiOjE3Mzg5NDgzODh9.TTiXYs1LucAnS_6RGp7pWg-S30NSt7eqL7lU8BzT5BWlHctk7NYZwC6lftA6WeEb1HKEJfPoUqWeOeZ6oYA0AA".to_string(),
-            tenant: "test".to_string()
+            hostname: env::var("EDGEHOG_TEST_HOSTNAME")
+                .unwrap_or_else(|_| "api.edgehog.localhost".to_string()),
+            scheme: env::var("EDGEHOG_TEST_SCHEME").unwrap_or_else(|_| "http".to_string()),
+            bearer: env::var("EDGEHOG_TEST_BEARER")
+                .expect("Bearer token must be set in EDGEHOG_TEST_BEARER"),
+            tenant: env::var("EDGEHOG_TEST_TENANT").unwrap_or_else(|_| "test".to_string()),
         }
     }
 
