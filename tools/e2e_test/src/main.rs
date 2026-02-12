@@ -51,4 +51,14 @@ mod test {
         let client = EdgehogClient::create(&config)?;
         image_credentials::test_image_credentials(client).await
     }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
+    async fn application() -> eyre::Result<()> {
+        let config = test_config();
+
+        println!("Test config: {:?}", config);
+
+        let client = EdgehogClient::create(&config)?;
+        containers::test_application(client).await
+    }
 }
