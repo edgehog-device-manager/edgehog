@@ -130,7 +130,9 @@ defmodule Edgehog.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:absinthe_phoenix, "~> 2.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:libcluster, "~> 3.5"},
+      {:horde, "~> 0.10"}
     ]
   end
 
