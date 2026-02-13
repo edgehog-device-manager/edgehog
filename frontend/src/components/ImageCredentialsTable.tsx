@@ -41,6 +41,7 @@ const IMAGE_CREDENTIALS_TABLE_FRAGMENT = graphql`
         id
         label
         username
+        serveraddress
       }
     }
   }
@@ -75,6 +76,15 @@ const columns = [
       <FormattedMessage
         id="components.ImageCredentialsTable.usernameTitle"
         defaultMessage="Username"
+      />
+    ),
+    cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
+  }),
+  columnHelper.accessor("serveraddress", {
+    header: () => (
+      <FormattedMessage
+        id="components.ImageCredentialsTable.serveraddressTitle"
+        defaultMessage="Server Address"
       />
     ),
     cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,

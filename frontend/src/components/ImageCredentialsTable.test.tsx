@@ -64,6 +64,7 @@ const data: Data = {
 const labels = {
   label: "Label",
   username: "Username",
+  serveraddress: "Server Address",
 };
 
 const ComponentWithQuery = () => {
@@ -130,12 +131,15 @@ it("renders Image Credentials data in correct columns", () => {
   const columns = screen.getAllByRole("columnheader");
   const cells = screen.getAllByRole("cell");
 
-  expect(columns).toHaveLength(2);
-  expect(cells).toHaveLength(2);
+  expect(columns).toHaveLength(3);
+  expect(cells).toHaveLength(3);
 
   expect(columns[0]).toHaveTextContent(labels.label);
   expect(cells[0]).toHaveTextContent(record.node.label);
 
   expect(columns[1]).toHaveTextContent(labels.username);
   expect(cells[1]).toHaveTextContent(record.node.username);
+
+  expect(columns[2]).toHaveTextContent(labels.serveraddress);
+  expect(cells[2]).toHaveTextContent("");
 });
