@@ -95,6 +95,83 @@ const CAMPAIGN_CREATED_SUBSCRIPTION = graphql`
           id
           name
         }
+        campaignMechanism {
+          __typename
+          ... on DeploymentDeploy {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentStart {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentStop {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentDelete {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentUpgrade {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+            targetRelease {
+              id
+              version
+            }
+          }
+        }
       }
     }
   }

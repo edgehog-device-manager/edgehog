@@ -95,6 +95,24 @@ const CAMPAIGN_CREATED_SUBSCRIPTION = graphql`
           id
           name
         }
+        campaignMechanism {
+          __typename
+          ... on FirmwareUpgrade {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            forceDowngrade
+            baseImage {
+              id
+              name
+              baseImageCollection {
+                id
+                name
+              }
+            }
+          }
+        }
       }
     }
   }
