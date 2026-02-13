@@ -27,10 +27,7 @@ defmodule Edgehog.Campaigns.CampaignTarget.Changes.TriggerCampaignSubscription d
       campaign = result |> Ash.load!(:campaign) |> Map.get(:campaign)
 
       campaign
-      |> Ash.Changeset.for_update(:trigger_subscription, %{},
-        tenant: tenant,
-        load: [:campaign_targets, :successful_target_count]
-      )
+      |> Ash.Changeset.for_update(:trigger_subscription, %{}, tenant: tenant)
       |> Ash.update!()
 
       {:ok, result}

@@ -62,7 +62,6 @@ const GET_CAMPAIGN_QUERY = graphql`
     $filter: CampaignTargetFilterInput = { status: { eq: SUCCESSFUL } }
   ) {
     campaign(id: $campaignId) {
-      id
       name
       status
       ...UpdateCampaignForm_CampaignFragment

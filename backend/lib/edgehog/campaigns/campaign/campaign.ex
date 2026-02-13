@@ -175,9 +175,6 @@ defmodule Edgehog.Campaigns.Campaign do
       description """
       This is a nop action used only to trigger subscriptions.
       """
-
-      require_atomic? false
-      change fn changeset, _context -> changeset end
     end
 
     destroy :destroy do
