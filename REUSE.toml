@@ -12,7 +12,7 @@ SPDX-License-Identifier = "Apache-2.0"
 [[annotations]]
 path = "doc/versions.js"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2024 SECO Mind Srl"
+SPDX-FileCopyrightText = "2024-2026 SECO Mind Srl"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
