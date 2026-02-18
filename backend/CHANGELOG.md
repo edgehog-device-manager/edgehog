@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* **backend:** remove authentication bypass configuration
+
+### Features
+
+* Add `Pause` and `Resume` functionality for campaigns ([#1204](https://github.com/edgehog-device-manager/edgehog/issues/1204)) ([35a9aab](https://github.com/edgehog-device-manager/edgehog/commit/35a9aab42a458358bf87a60e37453b26a7ac0228)), closes [#277](https://github.com/edgehog-device-manager/edgehog/issues/277)
+* add GraphQL subscriptions for containers ([#1224](https://github.com/edgehog-device-manager/edgehog/issues/1224)) ([6c36e6d](https://github.com/edgehog-device-manager/edgehog/commit/6c36e6d0e632251f64a6ffef4a2a304f658f55ad))
+* add GraphQL subscriptions for OTA operations ([#1220](https://github.com/edgehog-device-manager/edgehog/issues/1220)) ([db679ce](https://github.com/edgehog-device-manager/edgehog/commit/db679ceebe687909871ed3fee9e59303b4397aa0))
+* Add subscriptions for HT and SMPN ([#1225](https://github.com/edgehog-device-manager/edgehog/issues/1225)) ([7d46654](https://github.com/edgehog-device-manager/edgehog/commit/7d466541e3b77f87d84884332046a677d102b441))
+* **backend:** add subscriptions to campaigns domain ([2bda866](https://github.com/edgehog-device-manager/edgehog/commit/2bda8661d064a4eb45ade539058930e1b54ddefb))
+* **backend:** allow deletion of BaseImage used in completed campaign ([46f7aa3](https://github.com/edgehog-device-manager/edgehog/commit/46f7aa34f585aabf2a37f4baef10a8ac4a5ea33d)), closes [#598](https://github.com/edgehog-device-manager/edgehog/issues/598)
+
+
+### Miscellaneous Chores
+
+* **backend:** remove authentication bypass configuration ([fb5585c](https://github.com/edgehog-device-manager/edgehog/commit/fb5585ccddc547a7bb5cb084265788d29472fec4))
+
 ## [0.11.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.10.0...v0.11.0) (2026-02-03)
 
 

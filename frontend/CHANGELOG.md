@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-18)
+
+
+### Features
+
+* Add `Pause` and `Resume` functionality for campaigns ([#1204](https://github.com/edgehog-device-manager/edgehog/issues/1204)) ([35a9aab](https://github.com/edgehog-device-manager/edgehog/commit/35a9aab42a458358bf87a60e37453b26a7ac0228)), closes [#277](https://github.com/edgehog-device-manager/edgehog/issues/277)
+* **backend:** allow deletion of BaseImage used in completed campaign ([46f7aa3](https://github.com/edgehog-device-manager/edgehog/commit/46f7aa34f585aabf2a37f4baef10a8ac4a5ea33d)), closes [#598](https://github.com/edgehog-device-manager/edgehog/issues/598)
+* **frontend:** add retry count column to campaign targets tables ([dfe0649](https://github.com/edgehog-device-manager/edgehog/commit/dfe0649be89060cd67f44e31909892549644363e))
+* **frontend:** add subscriptions ([ec7fe9c](https://github.com/edgehog-device-manager/edgehog/commit/ec7fe9c4badcd90ba211071b6d6be513ced36f36))
+* **frontend:** add subscriptions for campaigns ([6269990](https://github.com/edgehog-device-manager/edgehog/commit/6269990e2318acf9484608e0cafff6bf6fe65462))
+* **frontend:** allow deletion of BaseImage used in completed campaign ([b182943](https://github.com/edgehog-device-manager/edgehog/commit/b182943608d7076303b8c7542035fe156779fa8a)), closes [#598](https://github.com/edgehog-device-manager/edgehog/issues/598)
+
+
+### Bug Fixes
+
+* add text reporters to coverage output for visibility ([e7c56f8](https://github.com/edgehog-device-manager/edgehog/commit/e7c56f8c5bca9d5517b67041e3537a6bf2e8abb5))
+* **frontend:** fix Campaigns create subscription data ([898ad56](https://github.com/edgehog-device-manager/edgehog/commit/898ad56e5c2bac7413e1fdf031b5c9c6243cad6a))
+* Hide Applications tab when offline or unsupported ([004cbce](https://github.com/edgehog-device-manager/edgehog/commit/004cbce7fc9b1764469c09ff022375ddaf7f0488))
+
 ## [0.11.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.10.0...v0.11.0) (2026-02-03)
 
 
