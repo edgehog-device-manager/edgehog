@@ -60,7 +60,7 @@ SPDX-License-Identifier = "Apache-2.0"
 [[annotations]]
 path = "backend/priv/resource_snapshots/**"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2024 Seco Mind Srl"
+SPDX-FileCopyrightText = "2024 - 2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]

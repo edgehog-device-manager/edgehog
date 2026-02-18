@@ -99,6 +99,7 @@ config :edgehog, :ash_domains, [
   Edgehog.Campaigns,
   Edgehog.Containers,
   Edgehog.Devices,
+  Edgehog.Files,
   Edgehog.Forwarder,
   Edgehog.Groups,
   Edgehog.Labeling,
