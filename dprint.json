@@ -6,13 +6,13 @@
   "markup": {},
   "yaml": {},
   "graphql": {},
-  // let prettier manage the frontend formatting
   "excludes": [
     "**/*-lock.json",
     ".reuse/templates/*",
     "**/schema.graphql",
     "frontend/**",
-    "backend/CHANGELOG.md"
+    "backend/CHANGELOG.md",
+    "doc/CHANGELOG.md"
   ],
   "plugins": [
     "https://plugins.dprint.dev/json-0.21.0.wasm",

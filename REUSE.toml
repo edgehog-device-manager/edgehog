@@ -34,6 +34,12 @@ SPDX-FileCopyrightText = "2026 SECO Mind Srl"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
+path = "doc/CHANGELOG.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
 path = ["backend/priv/repo/seeds/keys/**.pem", "backend/priv/repo/seeds/keys/**.txt"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2023-2025 Seco Mind Srl"
