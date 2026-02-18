@@ -24,13 +24,16 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
+  ConnectionHandler,
   graphql,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
 
-import { Applications_ApplicationsFragment$key } from "@/api/__generated__/Applications_ApplicationsFragment.graphql";
+import type { Applications_ApplicationsFragment$key } from "@/api/__generated__/Applications_ApplicationsFragment.graphql";
+import type { Applications_ApplicationSubscription } from "@/api/__generated__/Applications_ApplicationSubscription.graphql";
 import type { Applications_getApplications_Query } from "@/api/__generated__/Applications_getApplications_Query.graphql";
 import { Applications_PaginationQuery } from "@/api/__generated__/Applications_PaginationQuery.graphql";
 
@@ -70,6 +73,25 @@ const APPLICATIONS_FRAGMENT = graphql`
     }
   }
 `;
+
+const APPLICATION_SUBSCRIPTION = graphql`
+  subscription Applications_ApplicationSubscription {
+    application {
+      created {
+        id
+        name
+        description
+      }
+      updated {
+        id
+        name
+        description
+      }
+      destroyed
+    }
+  }
+`;
+
 type SelectedApplication = TableRecord;
 
 interface ApplicationsLayoutContainerProps {
@@ -87,6 +109,88 @@ const ApplicationsLayoutContainer = ({
       Applications_PaginationQuery,
       Applications_ApplicationsFragment$key
     >(APPLICATIONS_FRAGMENT, applicationsData);
+
+  const normalizedSearchText = useMemo(
+    () => (searchText ?? "").trim(),
+    [searchText],
+  );
+
+  const connectionFilter = useMemo(() => {
+    if (normalizedSearchText === "") {
+      return { filter: {} };
+    }
+
+    return {
+      filter: {
+        or: [{ name: { ilike: `%${normalizedSearchText}%` } }],
+      },
+    };
+  }, [normalizedSearchText]);
+
+  useSubscription<Applications_ApplicationSubscription>(
+    useMemo(
+      () => ({
+        subscription: APPLICATION_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const applicationEvent = store.getRootField("application");
+          const createdApplication =
+            applicationEvent?.getLinkedRecord("created");
+
+          if (createdApplication) {
+            if (normalizedSearchText !== "") {
+              const search = normalizedSearchText.toLowerCase();
+              const name = String(
+                createdApplication.getValue("name") ?? "",
+              ).toLowerCase();
+
+              if (!name.includes(search)) {
+                return;
+              }
+            }
+
+            const connection = ConnectionHandler.getConnection(
+              store.getRoot(),
+              "Applications_applications",
+              connectionFilter,
+            );
+
+            if (!connection) return;
+
+            const newApplicationId = createdApplication.getDataID();
+            const edges = connection.getLinkedRecords("edges") ?? [];
+            const alreadyPresent = edges.some(
+              (edge) =>
+                edge.getLinkedRecord("node")?.getDataID() === newApplicationId,
+            );
+            if (alreadyPresent) return;
+
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              createdApplication,
+              "ApplicationEdge",
+            );
+
+            ConnectionHandler.insertEdgeAfter(connection, edge);
+          }
+
+          const destroyedId = applicationEvent?.getValue("destroyed");
+          if (!destroyedId || typeof destroyedId !== "string") return;
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "Applications_applications",
+            connectionFilter,
+          );
+          if (!connection) return;
+
+          ConnectionHandler.deleteNode(connection, destroyedId);
+        },
+      }),
+      [connectionFilter, normalizedSearchText],
+    ),
+  );
 
   const debounceRefetch = useMemo(
     () =>

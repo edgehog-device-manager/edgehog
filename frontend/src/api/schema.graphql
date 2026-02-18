@@ -20,13 +20,24 @@ input ContainerCreateWithNestedVolumesInput {
 }
 
 input ContainerCreateWithNestedDeviceMappingsInput {
-  pathOnHost: String!
-  pathInContainer: String!
   cgroupPermissions: String!
+  pathInContainer: String!
+  pathOnHost: String!
 }
 
 input CampaignCampaignMechanismFirmwareUpgradeInput {
-  baseImageId: ID
+  """
+  This boolean flag determines if the Base Image will be pushed to the
+  Device even if it already has a greater version of the Base Image.
+  """
+  forceDowngrade: Boolean
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Update Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress updates. The Update Campaign will have
@@ -34,12 +45,6 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering an OTA
-  Request lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -50,17 +55,12 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Update Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 
-  """
-  This boolean flag determines if the Base Image will be pushed to the
-  Device even if it already has a greater version of the Base Image.
-  """
-  forceDowngrade: Boolean
+  baseImageId: ID
 }
 
 "An object representing the properties of a Firmware Upgrade campaign mechanism."
@@ -106,9 +106,12 @@ type FirmwareUpgrade {
 }
 
 input CampaignCampaignMechanismDeploymentUpgradeInput {
-  releaseId: ID
-
-  targetReleaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -116,12 +119,6 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -132,11 +129,14 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
+
+  releaseId: ID
+
+  targetReleaseId: ID
 }
 
 "An object representing the properties of a Upgrade deployment campaign mechanism."
@@ -181,7 +181,12 @@ type DeploymentUpgrade {
 }
 
 input CampaignCampaignMechanismDeploymentDeleteInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -189,12 +194,6 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -205,11 +204,12 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
+
+  releaseId: ID
 }
 
 "An object representing the properties of a Delete deployment campaign mechanism."
@@ -249,7 +249,12 @@ type DeploymentDelete {
 }
 
 input CampaignCampaignMechanismDeploymentStopInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -257,12 +262,6 @@ input CampaignCampaignMechanismDeploymentStopInput {
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -273,11 +272,12 @@ input CampaignCampaignMechanismDeploymentStopInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
+
+  releaseId: ID
 }
 
 "An object representing the properties of a Stop deployment campaign mechanism."
@@ -317,7 +317,12 @@ type DeploymentStop {
 }
 
 input CampaignCampaignMechanismDeploymentStartInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -325,12 +330,6 @@ input CampaignCampaignMechanismDeploymentStartInput {
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -341,11 +340,12 @@ input CampaignCampaignMechanismDeploymentStartInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
+
+  releaseId: ID
 }
 
 "An object representing the properties of a Start deployment campaign mechanism."
@@ -385,7 +385,12 @@ type DeploymentStart {
 }
 
 input CampaignCampaignMechanismDeploymentDeployInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress deployments. The Update Campaign will
@@ -393,12 +398,6 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -409,11 +408,12 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
+
+  releaseId: ID
 }
 
 "An object representing the properties of a Deploy deployment campaign mechanism."
@@ -1375,27 +1375,27 @@ input ReleaseCreateContainersInput {
   image: ContainerCreateWithNestedImageInput
   hostname: String
   networks: [ContainerCreateWithNestedNetworksInput!]
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
   binds: [String!]
-  tmpfs: [String!]
-  privileged: Boolean
-  portBindings: [String!]
-  restartPolicy: String
-  networkMode: String
-  extraHosts: [String!]
   capAdd: [String!]
   capDrop: [String!]
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
+  extraHosts: [String!]
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
-  volumeDriver: String
-  storageOpt: [String!]
+  networkMode: String
+  portBindings: [String!]
+  privileged: Boolean
   readOnlyRootfs: Boolean
+  restartPolicy: String
+  storageOpt: [String!]
+  tmpfs: [String!]
+  volumeDriver: String
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {

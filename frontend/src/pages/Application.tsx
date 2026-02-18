@@ -25,10 +25,12 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
+  ConnectionHandler,
   graphql,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 
@@ -62,6 +64,7 @@ const GET_APPLICATION_QUERY = graphql`
     $filter: ReleaseFilterInput = {}
   ) {
     application(id: $applicationId) {
+      id
       name
       description
       ...Application_ReleasesFragment
@@ -93,6 +96,19 @@ const RELEASES_FRAGMENT = graphql`
   }
 `;
 
+const RELEASE_SUBSCRIPTION = graphql`
+  subscription Application_ReleaseSubscription {
+    release {
+      destroyed
+      created {
+        id
+        version
+        applicationId
+      }
+    }
+  }
+`;
+
 type SelectedRelease = ReleaseTableRecord;
 
 interface ApplicationContentProps {
@@ -119,6 +135,80 @@ const ReleasesLayoutContainer = ({
       Releases_PaginationQuery,
       Application_ReleasesFragment$key
     >(RELEASES_FRAGMENT, applicationRef);
+
+  const normalizedSearchText = useMemo(
+    () => (searchText ?? "").trim(),
+    [searchText],
+  );
+
+  const connectionFilter = useMemo(() => {
+    if (normalizedSearchText === "") return {};
+
+    return {
+      version: { ilike: `%${normalizedSearchText}%` },
+    };
+  }, [normalizedSearchText]);
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: RELEASE_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const releaseEvent = store.getRootField("release");
+
+          if (!releaseEvent) return;
+
+          const applicationRecord = store.get(applicationRef.id);
+          if (!applicationRecord) return;
+
+          const createdRelease = releaseEvent.getLinkedRecord("created");
+
+          if (createdRelease) {
+            if (normalizedSearchText !== "") {
+              const version = createdRelease.getValue("version");
+              if (
+                typeof version !== "string" ||
+                !version
+                  .toLowerCase()
+                  .includes(normalizedSearchText.toLowerCase())
+              ) {
+                return;
+              }
+            }
+
+            const connection = ConnectionHandler.getConnection(
+              applicationRecord,
+              "Application_releases",
+              { filter: connectionFilter },
+            );
+            if (!connection) return;
+
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              createdRelease,
+              "ReleasesEdge",
+            );
+            ConnectionHandler.insertEdgeAfter(connection, edge);
+          }
+
+          const destroyedId = releaseEvent.getValue("destroyed");
+          if (!destroyedId || typeof destroyedId !== "string") return;
+
+          const connection = ConnectionHandler.getConnection(
+            applicationRecord,
+            "Application_releases",
+            { filter: connectionFilter },
+          );
+          if (!connection) return;
+
+          ConnectionHandler.deleteNode(connection, destroyedId);
+        },
+      }),
+      [applicationRef.id, connectionFilter, normalizedSearchText],
+    ),
+  );
 
   const debounceRefetch = useMemo(
     () =>
