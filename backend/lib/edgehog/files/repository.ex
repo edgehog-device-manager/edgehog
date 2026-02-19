@@ -18,13 +18,44 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files do
+defmodule Edgehog.Files.Repository do
   @moduledoc false
-  use Ash.Domain,
-    extensions: [AshGraphql.Domain]
+  use Ash.Resource,
+    otp_app: :edgehog,
+    domain: Edgehog.Files,
+    extensions: [AshGraphql.Resource],
+    data_layer: AshPostgres.DataLayer
 
-  resources do
-    resource Edgehog.Files.File
-    resource Edgehog.Files.Repository
+  graphql do
+    type :repository
+  end
+
+  actions do
+    defaults [:read, :destroy]
+  end
+
+  attributes do
+    uuid_v7_primary_key :id
+
+    attribute :name, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :handle, :string do
+      allow_nil? false
+      public? true
+    end
+
+    attribute :description, :string do
+      public? true
+    end
+
+    timestamps()
+  end
+
+  postgres do
+    table "repositories"
+    repo Edgehog.Repo
   end
 end
