@@ -30,6 +30,16 @@ defmodule Edgehog.FilesFixtures do
   def unique_file_name, do: "file-#{System.unique_integer([:positive])}.bin"
 
   @doc """
+  Generate a unique repository name.
+  """
+  def unique_repository_name, do: "Repository #{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique repository handle.
+  """
+  def unique_repository_handle, do: "repo-#{System.unique_integer([:positive])}"
+
+  @doc """
   Generate a unique file digest.
   """
   def unique_file_digest do
@@ -111,21 +121,51 @@ defmodule Edgehog.FilesFixtures do
   def group_id(:system), do: 999
 
   @doc """
+  Generate a repository fixture.
+
+  ## Options
+
+    * `:tenant` - (required) The tenant to create the repository for
+    * `:name` - Repository name (default: auto-generated unique name)
+    * `:handle` - Repository handle (default: auto-generated unique handle)
+    * `:description` - Optional description
+  """
+  def repository_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        name: unique_repository_name(),
+        handle: unique_repository_handle()
+      })
+
+    Edgehog.Files.Repository
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
+  end
+
+  @doc """
   Generate a file with configurable POSIX metadata.
 
   ## Options
 
     * `:tenant` - (required) The tenant to create the file for
+    * `:repository_id` - The repository ID (default: auto-creates a new repository)
     * `:name` - File name (default: auto-generated unique name)
     * `:size` - File size in bytes (default: random between 1 and 1,000,000)
     * `:digest` - Content digest in format "algorithm:hash" (default: auto-generated sha256)
-    * `:mode` - POSIX file permissions (default: 0o644 for regular file)
-    * `:user_id` - POSIX user ID/UID (default: 0 for root)
-    * `:group_id` - POSIX group ID/GID (default: 0 for root group)
+    * `:mode` - POSIX file permissions (default: random mode)
+    * `:user_id` - POSIX user ID/UID (default: random UID)
+    * `:group_id` - POSIX group ID/GID (default: random GID)
     * `:url` - Download URL (default: auto-generated example.com URL)
   """
   def file_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {repository_id, opts} =
+      Keyword.pop_lazy(opts, :repository_id, fn ->
+        [tenant: tenant] |> repository_fixture() |> Map.fetch!(:id)
+      end)
 
     params =
       Enum.into(opts, %{
@@ -135,11 +175,12 @@ defmodule Edgehog.FilesFixtures do
         mode: random_file_mode(),
         user_id: random_user_id(),
         group_id: random_group_id(),
-        url: "https://example.com/files/#{System.unique_integer([:positive])}.bin"
+        url: "https://example.com/files/#{System.unique_integer([:positive])}.bin",
+        repository_id: repository_id
       })
 
     Edgehog.Files.File
-    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end
 end
