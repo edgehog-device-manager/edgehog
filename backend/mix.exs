@@ -21,11 +21,13 @@
 defmodule Edgehog.MixProject do
   use Mix.Project
 
+  @version "0.12.0"
+
   def project do
     [
       name: "Clea Edgehog",
       app: :edgehog,
-      version: "0.12.0",
+      version: @version,
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -34,7 +36,8 @@ defmodule Edgehog.MixProject do
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       dialyzer: dialyzer_opts(Mix.env()),
-      docs: docs()
+      docs: docs(),
+      source_url: "https://github.com/edgehog-device-manager/edgehog"
     ]
   end
 
@@ -66,11 +69,11 @@ defmodule Edgehog.MixProject do
   defp dialyzer_opts(:test) do
     [
       plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
-      plt_add_apps: [:ex_unit]
+      plt_add_apps: [:ex_unit, :mix]
     ]
   end
 
-  defp dialyzer_opts(_env), do: []
+  defp dialyzer_opts(_env), do: [plt_add_apps: [:mix]]
 
   # Specifies your project dependencies.
   #
@@ -142,7 +145,9 @@ defmodule Edgehog.MixProject do
     [
       main: "intro_user",
       logo: "docs/images/logo-favicon.png",
-      extras: extras(),
+      javascript_config_path: "../versions.js",
+      extras: Path.wildcard("docs/pages/*/*.md"),
+      filter_modules: ~r/Edgehog/,
       assets: %{"docs/images/" => "assets"},
       api_reference: false,
       groups_for_extras: [
@@ -155,41 +160,24 @@ defmodule Edgehog.MixProject do
         Tutorials: ~r"/tutorials/",
         "Developer guide": ~r"/devguide/"
       ],
-      groups_for_modules: [],
-      javascript_config_path: "docs/versions.js"
-    ]
-  end
-
-  defp extras do
-    [
-      "docs/pages/user/intro_user.md",
-      "docs/pages/user/core_concepts.md",
-      "docs/pages/user/hardware_types.md",
-      "docs/pages/user/system_models.md",
-      "docs/pages/user/devices.md",
-      "docs/pages/user/devices_and_runtime.md",
-      "docs/pages/user/attribute_value_sources.md",
-      "docs/pages/user/groups.md",
-      "docs/pages/user/channels.md",
-      "docs/pages/user/batch_operations.md",
-      "docs/pages/ota_updates/ota_update_concepts.md",
-      "docs/pages/ota_updates/base_images.md",
-      "docs/pages/ota_updates/base_image_collections.md",
-      "docs/pages/ota_updates/update_campaigns.md",
-      "docs/pages/ota_updates/ota_updates.md",
-      "docs/pages/containers/core_concepts.md",
-      "docs/pages/containers/volume_management.md",
-      "docs/pages/containers/network_management.md",
-      "docs/pages/containers/image_credentials_management.md",
-      "docs/pages/containers/applications_management.md",
-      "docs/pages/containers/deployment_campaigns.md",
-      "docs/pages/tutorials/edgehog_in_5_minutes.md",
-      "docs/pages/devguide/edgehog_just_in_time.md",
-      "docs/pages/devguide/typos_and_formatting.md",
-      "docs/pages/architecture/overview.md",
-      "docs/pages/integrating/interacting_with_edgehog.md",
-      "docs/pages/integrating/astarte_interfaces.md",
-      "docs/pages/admin/deploying_with_kubernetes.md"
+      groups_for_modules: [
+        "Astarte interaction": ~r"Edgehog.Astarte",
+        Campaigns: ~r"Edgehog.Campaigns",
+        Containers: ~r"Edgehog.Containers",
+        Devices: ~r"Edgehog.Devices",
+        "Device forwarder": ~r"Edgehog.Forwarder",
+        "Device groups": ~r"Edgehog.Groups",
+        "Device labels": ~r"Edgehog.Labeling",
+        "File transfer": ~r"Edgehog.Files",
+        "OS management": ~r"Edgehog.OSManagement",
+        "Base images": ~r"Edgehog.BaseImages",
+        Multitenancy: ~r"Edgehog.Tenants",
+        "Astarte trigger handling": ~r"Edgehog.Triggers",
+        Localization: ~r"Edgehog.Localization",
+        "Edgehog APIs and web configuration": ~r"EdgehogWeb",
+        "Other modules": ~r"Edgehog"
+      ],
+      source_ref: "v#{@version}/backend"
     ]
   end
 
