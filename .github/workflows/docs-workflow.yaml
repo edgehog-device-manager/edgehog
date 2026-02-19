@@ -19,36 +19,26 @@
 
 name: Edgehog docs generation
 
+# publish Generate and publish docs on pushes on main (or release branches) only
+# when backend or frontend files are touched.
 on:
-  push:
-    paths:
-      # Documentation pages
-      - "backend/docs/**"
-      # Schema files
-      - "backend/lib/edgehog_web/admin_api/**"
-      - "backend/lib/edgehog_web/schema.ex"
-      - "backend/lib/edgehog_web/schema/**"
-      # Ash resources, including new Ash domains
-      - "backend/lib/edgehog/**"
-      - "backend/mix.exs"
-      - "backend/mix.lock"
-      # SpectaQL configuration file
-      - "backend/.spectaql-config.yaml"
-      # The action itself, Elixir and Node.js versions
-      - ".tool-versions"
-      - ".github/workflows/docs-workflow.yaml"
-    branches:
-      # Create the snapshot only when it matters
-      - "main"
-      - "release-*"
+  workflow_call:
+    inputs:
+      release-made:
+        required: true
+        type: boolean
+      release-version:
+        type: string
+      publish:
+        type: boolean
+        default: true
 
-concurrency:
-  group: "${{ github.workflow }}-${{ github.ref }}"
-  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
 
 jobs:
   docs:
-    if: github.repository_owner == 'edgehog-device-manager'
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -80,11 +70,18 @@ jobs:
           repository: edgehog-device-manager/edgehog-astarte-interfaces
           path: edgehog-astarte-interfaces
           show-progress: false
-      - uses: .github/actions/gen-doc.yaml
+      - name: Compute docs version
+        id: compute-version
+        run: |
+          version=$(${{ inputs.release-made }} && echo ${{ inputs.release-version }} || echo "snapshot")
+          echo "version=$version" >> $GITHUB_OUTPUT
+      - uses: ./edgehog/.github/actions/doc-generate
         with:
           edgehog: edgehog
           docs: docs
           astarte-interfaces: edgehog-astarte-interfaces
-      - uses: .github/actions/publish-doc.yaml
+          version: ${{ steps.compute-version.outputs.version }}
+      - uses: ./edgehog/.github/actions/doc-publish
+        if: ${{ inputs.publish }}
         with:
           docs: docs
