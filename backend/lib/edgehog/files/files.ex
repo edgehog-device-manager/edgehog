@@ -19,12 +19,50 @@
 #
 
 defmodule Edgehog.Files do
-  @moduledoc false
+  @moduledoc """
+  The `Edgehog.Files` domain, which includes resources and logic related to file management.
+  """
+
   use Ash.Domain,
     extensions: [AshGraphql.Domain]
 
+  alias Edgehog.Files.File
+  alias Edgehog.Files.Repository
+
+  graphql do
+    root_level_errors? true
+
+    queries do
+      # get File, :file, :read do
+      #   description "Returns a single file."
+      # end
+
+      get Repository, :repository, :read do
+        description "Returns a single repository."
+      end
+
+      list Repository, :repositories, :read do
+        description "Returns a list of repositories."
+        relay? true
+        paginate_with :keyset
+      end
+    end
+
+    mutations do
+      create File, :create_file, :create do
+        relay_id_translations input: [repository_id: :repository]
+      end
+
+      destroy File, :delete_file, :destroy
+
+      create Repository, :create_repository, :create
+      update Repository, :update_repository, :update
+      destroy Repository, :delete_repository, :destroy
+    end
+  end
+
   resources do
-    resource Edgehog.Files.File
-    resource Edgehog.Files.Repository
+    resource File
+    resource Repository
   end
 end

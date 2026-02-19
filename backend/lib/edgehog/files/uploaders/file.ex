@@ -18,44 +18,33 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.Repository do
-  @moduledoc false
-  use Ash.Resource,
-    otp_app: :edgehog,
-    domain: Edgehog.Files,
-    extensions: [AshGraphql.Resource],
-    data_layer: AshPostgres.DataLayer
+defmodule Edgehog.Files.Uploaders.File do
+  @moduledoc """
+  Waffle uploader for files.
+  """
 
-  graphql do
-    type :repository
+  use Waffle.Definition
+
+  @async false
+  @acl :public_read
+  @versions [:original]
+
+  def validate(_) do
+    # TODO: everything is considered a valid file for now
+    true
   end
 
-  actions do
-    defaults [:read, :destroy]
+  def gcs_optional_params(_version, {_file, _scope}) do
+    [predefinedAcl: "publicRead"]
   end
 
-  attributes do
-    uuid_v7_primary_key :id
+  def storage_dir(_version, {_file, scope}) do
+    %{tenant_id: tenant_id, repository_id: repository_id} = scope
 
-    attribute :name, :string do
-      allow_nil? false
-      public? true
-    end
-
-    attribute :handle, :string do
-      allow_nil? false
-      public? true
-    end
-
-    attribute :description, :string do
-      public? true
-    end
-
-    timestamps()
+    "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files"
   end
 
-  postgres do
-    table "repositories"
-    repo Edgehog.Repo
+  def filename(_version, {_file, scope}) do
+    scope.file_name
   end
 end
