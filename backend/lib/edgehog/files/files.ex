@@ -64,5 +64,6 @@ defmodule Edgehog.Files do
   resources do
     resource File
     resource Repository
+    resource Edgehog.Files.FileDownloadRequest
   end
 end
