@@ -20,6 +20,12 @@
       "release-type": "node",
       "component": "frontend",
       "include-component-in-tag": false
+    },
+    "charts": {
+      "package-name": "charts",
+      "release-type": "helm",
+      "component": "charts",
+      "include-component-in-tag": false
     }
   },
   "plugins": [
