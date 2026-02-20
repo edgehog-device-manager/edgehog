@@ -21,10 +21,13 @@
 defmodule Edgehog.MixProject do
   use Mix.Project
 
+  @version "0.12.0"
+
   def project do
     [
+      name: "Clea Edgehog",
       app: :edgehog,
-      version: "0.12.0",
+      version: @version,
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
@@ -32,7 +35,9 @@ defmodule Edgehog.MixProject do
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      dialyzer: dialyzer_opts(Mix.env())
+      dialyzer: dialyzer_opts(Mix.env()),
+      docs: docs(),
+      source_url: "https://github.com/edgehog-device-manager/edgehog"
     ]
   end
 
@@ -130,7 +135,32 @@ defmodule Edgehog.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:absinthe_phoenix, "~> 2.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.24", only: :dev}
+    ]
+  end
+
+  # Add here additional documentation files
+  defp docs do
+    [
+      main: "intro_user",
+      logo: "docs/images/logo-favicon.png",
+      extras: Path.wildcard("docs/pages/*/*.md"),
+      assets: %{"docs/images/" => "assets"},
+      api_reference: false,
+      groups_for_extras: [
+        "User Guide": ~r"/user/",
+        "OTA Updates": ~r"/ota_updates/",
+        "Containers management": ~r"/containers/",
+        Architecture: ~r"/architecture/",
+        "Admin Guide": ~r"/admin/",
+        "Integrating with Edgehog": ~r"/integrating/",
+        Tutorials: ~r"/tutorials/",
+        "Developer guide": ~r"/devguide/"
+      ],
+      groups_for_modules: [],
+      javascript_config_path: "docs/versions.js",
+      source_ref: "v#{@version}/backend"
     ]
   end
 

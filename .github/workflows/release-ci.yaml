@@ -26,13 +26,20 @@ permissions:
   issues: write
   pull-requests: write
 
-name: release-please
+name: Release CI
 
 jobs:
-  release-please:
+  make-release:
     runs-on: ubuntu-latest
     steps:
       - uses: googleapis/release-please-action@v4
         with:
           config-file: .github/release-please/config.json
           manifest-file: .github/release-please/manifest.json
+  publish-docs:
+    needs: [make-release]
+    uses: .github/workflows/docs-workflow.yaml
+    with:
+      release-made: ${{ needs.make-release.outputs.backend--release_created }}
+      release-version: ${{ needs.make-release.outputs.backend--version }}
+      publish: github.repository_owner == 'edgehog-device-manager'
