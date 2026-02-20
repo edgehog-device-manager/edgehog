@@ -81,7 +81,7 @@ defmodule Edgehog.CapabilitiesTest do
           minor: 1
         },
         "io.edgehog.devicemanager.apps.AvailableImages" => %InterfaceVersion{major: 0, minor: 1},
-        "io.edgehog.devicemanager.apps.DeploymentEvent" => %InterfaceVersion{major: 0, minor: 2},
+        "io.edgehog.devicemanager.apps.DeploymentEvent" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.apps.CreateContainerRequest" => %InterfaceVersion{
           major: 0,
           minor: 1

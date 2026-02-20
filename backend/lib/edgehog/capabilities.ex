@@ -125,7 +125,7 @@ defmodule Edgehog.Capabilities do
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.apps.DeploymentEvent",
         major: 0,
-        minor: 2
+        minor: 1
       },
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.apps.DeploymentUpdate",
