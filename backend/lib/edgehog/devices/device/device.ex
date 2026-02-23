@@ -503,6 +503,12 @@ defmodule Edgehog.Devices.Device do
       writable? false
     end
 
+    has_many :file_download_requests, Edgehog.Files.FileDownloadRequest do
+      public? true
+      description "The existing file download requests for this device"
+      writable? false
+    end
+
     has_many :application_deployments, Deployment do
       public? true
     end

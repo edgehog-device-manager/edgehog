@@ -27,6 +27,7 @@ defmodule Edgehog.Files do
     extensions: [AshGraphql.Domain]
 
   alias Edgehog.Files.File
+  alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.Repository
 
   graphql do
@@ -58,12 +59,19 @@ defmodule Edgehog.Files do
       create Repository, :create_repository, :create
       update Repository, :update_repository, :update
       destroy Repository, :delete_repository, :destroy
+
+      create FileDownloadRequest, :create_file_download_request, :manual do
+        relay_id_translations input: [device_id: :device]
+      end
     end
   end
 
   resources do
     resource File
     resource Repository
-    resource Edgehog.Files.FileDownloadRequest
+
+    resource FileDownloadRequest do
+      define :send_file_download_request, args: [:file_download_request]
+    end
   end
 end
