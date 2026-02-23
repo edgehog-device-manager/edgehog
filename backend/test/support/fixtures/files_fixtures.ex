@@ -121,6 +121,57 @@ defmodule Edgehog.FilesFixtures do
   def group_id(:system), do: 999
 
   @doc """
+  Generate a file download request fixture.
+
+  ## Options
+
+    * `:tenant` - (required) The tenant to create the file download request for
+    * `:device_id` - The device ID (default: auto-creates a new device)
+    * `:url` - Download URL (default: auto-generated)
+    * `:file_name` - File name (default: auto-generated unique name)
+    * `:uncompressed_file_size_bytes` - File size in bytes (default: random)
+    * `:digest` - Content digest (default: auto-generated sha256)
+    * `:compression` - Compression type (default: "")
+    * `:ttl_seconds` - TTL (default: 0)
+    * `:file_mode` - POSIX file mode (default: random)
+    * `:user_id` - POSIX user ID (default: random)
+    * `:group_id` - POSIX group ID (default: random)
+    * `:destination` - Destination type (default: "storage")
+    * `:progress` - Progress reporting flag (default: false)
+    * `:status` - Status (default: nil)
+    * `:manual?` - Whether initiated manually (default: true)
+  """
+  def file_download_request_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
+      end)
+
+    params =
+      Enum.into(opts, %{
+        url: "https://example.com/ephemeral/#{System.unique_integer([:positive])}.bin",
+        file_name: unique_file_name(),
+        uncompressed_file_size_bytes: :rand.uniform(1_000_000),
+        digest: unique_file_digest(),
+        compression: "",
+        ttl_seconds: 0,
+        file_mode: random_file_mode(),
+        user_id: random_user_id(),
+        group_id: random_group_id(),
+        destination: "storage",
+        progress: false,
+        manual?: true,
+        device_id: device_id
+      })
+
+    Edgehog.Files.FileDownloadRequest
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
+  end
+
+  @doc """
   Generate a repository fixture.
 
   ## Options

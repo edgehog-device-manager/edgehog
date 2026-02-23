@@ -111,6 +111,11 @@ config :edgehog,
 config :edgehog, :astarte_deployment_command_module, Edgehog.Astarte.Device.DeploymentCommandMock
 config :edgehog, :astarte_deployment_update_module, Edgehog.Astarte.Device.DeploymentUpdateMock
 config :edgehog, :astarte_device_status_module, Edgehog.Astarte.Device.DeviceStatusMock
+
+config :edgehog,
+       :astarte_file_download_request_module,
+       Edgehog.Astarte.Device.FileDownloadRequestMock
+
 config :edgehog, :astarte_forwarder_session_module, Edgehog.Astarte.Device.ForwarderSessionMock
 config :edgehog, :astarte_geolocation_module, Edgehog.Astarte.Device.GeolocationMock
 config :edgehog, :astarte_hardware_info_module, Edgehog.Astarte.Device.HardwareInfoMock
@@ -127,6 +132,7 @@ config :edgehog, :astarte_trigger_data_layer, Edgehog.Astarte.Trigger.MockDataLa
 config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiScanResultMock
 config :edgehog, :base_images_storage_module, Edgehog.BaseImages.StorageMock
 config :edgehog, :container_reconciler, Edgehog.Containers.ReconcilerMock
+config :edgehog, :files_ephemeral_file_module, Edgehog.Files.EphemeralFileMock
 config :edgehog, :files_storage_module, Edgehog.Files.StorageMock
 config :edgehog, :os_management_ephemeral_image_module, Edgehog.OSManagement.EphemeralImageMock
 config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock
