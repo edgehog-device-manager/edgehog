@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2025 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 services:
   postgres:
@@ -77,8 +75,8 @@ services:
       - ${SEEDS_REALM_PRIVATE_KEY_FILE}:/keys/realm_private.pem:z
     depends_on:
       - postgres
-      - minio
-      - minio-init
+      - rustfs
+      - rustfs-init
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.edgehog-backend.rule=Host(`api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
@@ -115,35 +113,36 @@ services:
       - "traefik.http.routers.edgehog-device-forwarder.service=edgehog-device-forwarder"
       - "traefik.http.services.edgehog-device-forwarder.loadbalancer.server.port=4001"
 
-  minio:
-    image: minio/minio:RELEASE.2023-01-18T04-36-38Z
+  rustfs:
+    image: rustfs/rustfs:latest
     volumes:
-      - "minio-data-v2:/data"
+      - "rustfs-data-v2:/data"
     environment:
-      MINIO_ROOT_USER: "minioadmin"
-      MINIO_ROOT_PASSWORD: "minioadmin"
-    command: server --console-address ":9001" /data
+      RUSTFS_ACCESS_KEY: "rustfsadmin"
+      RUSTFS_SECRET_KEY: "rustfsadmin"
+      RUSTFS_CONSOLE_ENABLE: true
+    command: /data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.edgehog-minio-storage.rule=Host(`minio-storage.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
-      - "traefik.http.routers.edgehog-minio-storage.entrypoints=web"
-      - "traefik.http.routers.edgehog-minio-storage.service=edgehog-minio-storage"
-      - "traefik.http.services.edgehog-minio-storage.loadbalancer.server.port=9000"
-      - "traefik.http.routers.edgehog-minio-console.rule=Host(`minio.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
-      - "traefik.http.routers.edgehog-minio-console.entrypoints=web"
-      - "traefik.http.routers.edgehog-minio-console.service=edgehog-minio-console"
-      - "traefik.http.services.edgehog-minio-console.loadbalancer.server.port=9001"
+      - "traefik.http.routers.edgehog-rustfs-storage.rule=Host(`rustfs-storage.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.edgehog-rustfs-storage.entrypoints=web"
+      - "traefik.http.routers.edgehog-rustfs-storage.service=edgehog-rustfs-storage"
+      - "traefik.http.services.edgehog-rustfs-storage.loadbalancer.server.port=9000"
+      - "traefik.http.routers.edgehog-rustfs-console.rule=Host(`rustfs.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.edgehog-rustfs-console.entrypoints=web"
+      - "traefik.http.routers.edgehog-rustfs-console.service=edgehog-rustfs-console"
+      - "traefik.http.services.edgehog-rustfs-console.loadbalancer.server.port=9001"
 
-  minio-init:
+  rustfs-init:
     image: minio/mc:RELEASE.2023-01-11T03-14-16Z
     depends_on:
-      - minio
+      - rustfs
     entrypoint: |
       /bin/sh -c "
-      while ! curl -s http://minio:9000 >/dev/null; do sleep 0.1; done;
-      /usr/bin/mc alias set minio http://minio:9000 minioadmin minioadmin;
-      /usr/bin/mc mb minio/edgehog;
-      /usr/bin/mc anonymous set download minio/edgehog;
+      while ! curl -s http://rustfs:9000 >/dev/null; do sleep 0.1; done;
+      /usr/bin/mc alias set rustfs http://rustfs:9000 rustfsadmin rustfsadmin;
+      /usr/bin/mc mb rustfs/edgehog;
+      /usr/bin/mc anonymous set download rustfs/edgehog;
       exit 0;
       "
 
@@ -151,7 +150,7 @@ services:
     image: registry:3
     restart: on-failure
     environment:
-      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH: htpasswdocker run minio/mc ls playd
       REGISTRY_AUTH_HTPASSWD_REALM: Registry-Realm
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/registry.passwd
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
@@ -218,7 +217,7 @@ configs:
 volumes:
   postgres-data:
   pgadmin-data:
-  minio-data-v2:
+  rustfs-data-v2:
     driver: local
   registry-auth:
   registry-data:

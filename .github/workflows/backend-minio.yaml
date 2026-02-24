@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Minio Integration Test
+name: Rustfs Integration Test
 on:
   workflow_call:
   workflow_dispatch:
@@ -31,7 +31,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  integration-minio:
+  integration-rustfs:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -47,26 +47,27 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v6
-      - name: Start MinIO
+      - name: Start Rustfs
         run: |
           docker run -d \
-            --name minio \
+            --name rustfs \
             -p 9000:9000 \
             -p 9001:9001 \
-            -e MINIO_ROOT_USER=minioadmin \
-            -e MINIO_ROOT_PASSWORD=minioadmin \
-            minio/minio:latest \
-            server /data --console-address ":9001"
+            -e RUSTFS_ACCESS_KEY=rustfsadmin \
+            -e RUSTFS_SECRET_KEY=rustfsadmin \
+            -e RUSTFS_CONSOLE_ENABLE=false \
+            rustfs/rustfs:latest \
+            /data
 
-      - name: Wait for MinIO to be ready
+      - name: Wait for Rustfs to be ready
         run: |
-          echo "Waiting for MinIO to start..."
+          echo "Waiting for Rustfs to start..."
           for i in {1..30}; do
-            if curl -f http://localhost:9000/minio/health/live 2>/dev/null; then
-              echo "MinIO is ready!"
+            if curl -s http://localhost:9000/ 2>/dev/null; then
+              echo "Rustfs is ready!"
               break
             fi
-            echo "Attempt $i/30: MinIO not ready yet..."
+            echo "Attempt $i/30: Rustfs not ready yet..."
             sleep 2
           done
 
@@ -74,9 +75,9 @@ jobs:
         run: |
           wget https://dl.min.io/client/mc/release/linux-amd64/mc
           chmod +x ./mc
-          ./mc alias set minio http://localhost:9000 minioadmin minioadmin;
-          ./mc mb minio/edgehog;
-          ./mc anonymous set download minio/edgehog;
+          ./mc alias set rustfs http://localhost:9000 rustfsadmin rustfsadmin;
+          ./mc mb rustfs/edgehog;
+          ./mc anonymous set download rustfs/edgehog;
 
       - uses: team-alembic/staple-actions/actions/mix-task@main
         with:
@@ -88,8 +89,8 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_HOST: postgres
           STORAGE_TYPE: s3
-          S3_ACCESS_KEY_ID: minioadmin
-          S3_SECRET_ACCESS_KEY: minioadmin
+          S3_ACCESS_KEY_ID: rustfsadmin
+          S3_SECRET_ACCESS_KEY: rustfsadmin
           S3_REGION: local
           S3_SCHEME: http://
           S3_HOST: localhost
