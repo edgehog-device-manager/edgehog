@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@
 
 import { Navigate, useRoutes } from "react-router-dom";
 
-import Footer from "@/components/Footer";
-import Sidebar from "@/components/Sidebar";
-import Topbar from "@/components/Topbar";
+// import Footer from "@/components/Footer";
+// import Sidebar from "@/components/Sidebar";
+// import Topbar from "@/components/Topbar";
 import { useAuth } from "@/contexts/Auth";
 import { Route } from "@/Navigation";
 import Application from "@/pages/Application";
@@ -70,7 +70,7 @@ import DeploymentCampaign from "@/pages/DeploymentCampaign";
 import DeploymentCampaignCreate from "@/pages/DeploymentCampaignCreate";
 import Deployment from "@/pages/Deployment";
 
-import { bugs, repository, version } from "../package.json";
+// import { bugs, repository, version } from "../package.json";
 
 type RouterRule = {
   path: string;
@@ -139,20 +139,20 @@ function App() {
 
   return (
     <div data-testid="app" className="d-flex vh-100 flex-column">
-      {auth.isAuthenticated && (
+      {/* {auth.isAuthenticated && (
         <header className="flex-grow-0">
           <Topbar />
         </header>
-      )}
+      )} */}
       <main className="vh-100 flex-grow-1 d-flex  overflow-hidden">
-        {auth.isAuthenticated && (
+        {/* {auth.isAuthenticated && (
           <aside className="flex-grow-0 flex-shrink-0 overflow-auto">
             <Sidebar />
           </aside>
-        )}
+        )} */}
         <section className="flex-grow-1 overflow-auto">{RouterElement}</section>
       </main>
-      {auth.isAuthenticated && (
+      {/* {auth.isAuthenticated && (
         <Footer
           appName={"Edgehog Device Manager"}
           appVersion={version}
@@ -160,7 +160,7 @@ function App() {
           repoUrl={repository.url}
           issueTrackerUrl={bugs.url}
         />
-      )}
+      )} */}
     </div>
   );
 }
