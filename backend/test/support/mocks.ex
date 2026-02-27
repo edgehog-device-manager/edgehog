@@ -134,17 +134,11 @@ Mox.defmock(Edgehog.OSManagement.EphemeralImageMock,
 
 Mox.defmock(Edgehog.BaseImages.StorageMock, for: Edgehog.BaseImages.Storage)
 
-Mox.defmock(Edgehog.Files.StorageMock, for: Edgehog.Files.File.Storage)
-
 Mox.defmock(Edgehog.Tenants.ReconcilerMock, for: Edgehog.Tenants.Reconciler.Behaviour)
 Mox.defmock(Edgehog.Containers.ReconcilerMock, for: Edgehog.Containers.Reconciler.Behaviour)
 
 Mox.defmock(Edgehog.Astarte.Device.FileDownloadRequestMock,
   for: Edgehog.Astarte.Device.FileDownloadRequest.Behaviour
-)
-
-Mox.defmock(Edgehog.Files.EphemeralFileMock,
-  for: Edgehog.Files.EphemeralFile.Behaviour
 )
 
 Mox.defmock(Edgehog.Astarte.Device.AvailableImagesMock,

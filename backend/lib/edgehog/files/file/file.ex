@@ -24,7 +24,7 @@ defmodule Edgehog.Files.File do
     domain: Edgehog.Files,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Files.File.Changes
+  alias Edgehog.Files.File.ManualActions
 
   graphql do
     type :file
@@ -37,19 +37,12 @@ defmodule Edgehog.Files.File do
       description "Create a new file by uploading it to the storage."
       primary? true
 
-      accept [:name, :mode, :user_id, :group_id]
+      accept [:name, :size, :digest, :mode, :user_id, :group_id, :url]
 
       argument :repository_id, :uuid do
         description "The ID of the repository this file will belong to."
         allow_nil? false
       end
-
-      argument :file, Edgehog.Types.Upload do
-        description "The file to upload, which will be stored in the bucket."
-        allow_nil? false
-      end
-
-      change Changes.HandleFileUpload
 
       change manage_relationship(:repository_id, :repository, type: :append)
     end
@@ -65,16 +58,25 @@ defmodule Edgehog.Files.File do
     end
 
     destroy :destroy do
-      description "Deletes a file and its stored content."
+      description "Deletes a file"
       primary? true
-
-      # Needed because HandleFileDeletion is not atomic
-      require_atomic? false
-
-      change Changes.HandleFileDeletion
     end
 
     destroy :destroy_fixture
+
+    action :create_presigned_url, :map do
+      argument :filename, :string, allow_nil?: false
+      argument :repository_id, :uuid, allow_nil?: false
+
+      run ManualActions.CreatePresignedUrl
+    end
+
+    action :read_presigned_url, :map do
+      argument :filename, :string, allow_nil?: false
+      argument :repository_id, :uuid, allow_nil?: false
+
+      run ManualActions.ReadPresignedUrl
+    end
   end
 
   attributes do
@@ -135,6 +137,10 @@ defmodule Edgehog.Files.File do
       attribute_type :uuid
       allow_nil? false
     end
+  end
+
+  identities do
+    identity :unique_repository_file, [:name, :repository_id]
   end
 
   postgres do
