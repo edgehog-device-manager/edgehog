@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -140,6 +140,17 @@ if config_env() in [:prod, :test] do
       :prod -> edgehog_enable_s3_storage?
     end
 
+  # Parse the public/external S3 host from S3_ASSET_HOST so that presigned URL
+  # generation can embed the correct external address. The old Waffle upload path
+  # continues to use :ex_aws config
+  # (S3_HOST / S3_SCHEME / S3_PORT, i.e. the internal address) unaffected.
+  s3_presign_host_config =
+    if storage_type != "azure" do
+      asset_host = s3.asset_host || "http://localhost:9000"
+      uri = URI.parse(asset_host)
+      %{scheme: uri.scheme <> "://", host: uri.host, port: uri.port || 80}
+    end
+
   config :azurex, Azurex.Blob.Config,
     api_url: azure_api_url,
     default_container: azure.container,
@@ -149,7 +160,10 @@ if config_env() in [:prod, :test] do
   # Enable uploaders only when the S3 storage has been configured
   config :edgehog,
     enable_s3_storage?: edgehog_enable_s3_storage?,
-    max_upload_size_bytes: max_upload_size_bytes
+    max_upload_size_bytes: max_upload_size_bytes,
+    storage_type: String.to_atom(storage_type),
+    storage_bucket: waffle_bucket,
+    s3_presign_host_config: s3_presign_host_config
 
   config :ex_aws, :s3,
     scheme: s3.scheme,

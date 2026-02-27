@@ -18,23 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.File.Storage do
+defmodule Edgehog.Files.FileDownloadRequest.ManualActions.ReadPresignedUrl do
   @moduledoc """
-  Behaviour for file storage implementations.
+  The Storage context.
   """
+  use Ash.Resource.Actions.Implementation
 
-  alias Edgehog.Files.File
+  @impl Ash.Resource.Actions.Implementation
+  def run(input, _opts, context) do
+    tenant_id = context.tenant.tenant_id
+    file_download_request_id = input.arguments.file_download_request_id
+    filename = input.arguments.filename
 
-  @type upload :: %Plug.Upload{}
+    file_path =
+      "uploads/tenants/#{tenant_id}/ephemeral_file_download_requests/#{file_download_request_id}/files/#{filename}"
 
-  @callback store(
-              tenant_id :: String.t() | integer(),
-              file_name :: String.t(),
-              repository_id :: String.t() | integer(),
-              file :: upload()
-            ) ::
-              {:ok, file_url :: String.t()} | {:error, reason :: any()}
-
-  @callback delete(file :: %File{}) ::
-              :ok | {:error, reason :: any()}
+    Edgehog.Storage.read_presigned_url(file_path)
+  end
 end
