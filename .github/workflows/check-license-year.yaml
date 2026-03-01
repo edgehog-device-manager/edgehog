@@ -57,7 +57,7 @@ jobs:
           python -m pipx ensurepath
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
 
