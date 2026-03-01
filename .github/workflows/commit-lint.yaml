@@ -43,7 +43,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint Commits
-        uses: crate-ci/committed@v1.1.10
+        uses: crate-ci/committed@v1.1.11
   typos-in-commit-message:
     name: Spellcheck Commits
     runs-on: ubuntu-latest
