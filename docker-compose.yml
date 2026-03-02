@@ -85,7 +85,7 @@ services:
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: edgehogdevicemanager/edgehog-frontend:0.10.0
+    image: edgehogdevicemanager/edgehog-frontend:0.12.1
     build:
       context: frontend
     environment:
