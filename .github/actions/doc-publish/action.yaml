@@ -1,0 +1,59 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Edgehog doc publication
+description: |
+  Publishes edgehog documentation.
+inputs:
+  docs:
+    description: "The docs project location."
+    required: true
+
+defaults:
+  run:
+    shell: bash
+
+runs:
+  using: "composite"
+  steps:
+    # Upload as an artifact the generated HTML
+    - name: Upload HTML documentation
+      uses: actions/upload-artifact@v6
+      with:
+        name: docs_html
+        path: ${{ inputs.docs }}
+
+    # Commit and push changes to the docs repository
+    - name: Commit files
+      working-directory: ${{ inputs.docs }}
+      run: |
+        git config --local user.email "edgehog-machine@ispirata.com"
+        git config --local user.name "Edgehog Bot"
+        git add .
+        git commit -m "Update Documentation"
+    - name: Push changes
+      working-directory: ./docs
+      run: |
+        eval `ssh-agent -t 60 -s`
+        echo "${{ secrets.DOCS_DEPLOY_KEY }}" | ssh-add -
+        mkdir -p ~/.ssh/
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
+        git remote add topush "git@github.com:edgehog-device-manager/docs.git"
+        git fetch topush
+        git push topush main

@@ -71,3 +71,9 @@ jobs:
     uses: ./.github/workflows/backend-azurite.yaml
   docker-build:
     uses: ./.github/workflows/backend-docker-build.yaml
+  docs:
+    uses: ./.github/workflows/docs-workflow.yaml
+    with:
+      release-made: false
+      release-version: snapshot
+      publish: false
