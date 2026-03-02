@@ -56,7 +56,7 @@ jobs:
             -e RUSTFS_ACCESS_KEY=rustfsadmin \
             -e RUSTFS_SECRET_KEY=rustfsadmin \
             -e RUSTFS_CONSOLE_ENABLE=false \
-            rustfs/rustfs:latest \
+            rustfs/rustfs:1.0.0-alpha.83\
             /data
 
       - name: Wait for Rustfs to be ready
