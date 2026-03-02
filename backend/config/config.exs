@@ -95,6 +95,7 @@ config :edgehog, EdgehogWeb.Endpoint,
 
 config :edgehog, :ash_domains, [
   Edgehog.Astarte,
+  Edgehog.Actors,
   Edgehog.BaseImages,
   Edgehog.Campaigns,
   Edgehog.Containers,

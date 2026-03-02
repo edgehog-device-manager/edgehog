@@ -42,7 +42,9 @@ defmodule EdgehogWeb.Auth.Token do
     # e_tga = Edgehog Tenant GraphQL API
     case Map.fetch(claims, "e_tga") do
       {:ok, claims} ->
-        {:ok, %{claims: claims}}
+        Edgehog.Actors.Actor
+        |> Ash.Changeset.for_create(:from_claims, %{claims: %{e_tga: claims}})
+        |> Ash.create()
 
       :error ->
         {:error, :no_valid_claims}

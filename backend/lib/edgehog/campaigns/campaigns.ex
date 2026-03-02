@@ -25,12 +25,17 @@ defmodule Edgehog.Campaigns do
 
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain
+      AshGraphql.Domain,
+      Ash.Authorizer
     ]
 
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Campaigns.Channel
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true

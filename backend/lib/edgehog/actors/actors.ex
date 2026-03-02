@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2022 - 2025 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,33 +18,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Labeling do
+defmodule Edgehog.Actors do
   @moduledoc """
-  The Labeling context, containing all functionalities regarding tags and attributes assignment
+  The actors domain.
   """
 
-  use Ash.Domain, extensions: [AshGraphql.Domain, Ash.Authorizer]
+  use Ash.Domain
 
-  alias Edgehog.Labeling.Tag
-
-  authorization do
-    authorize :when_requested
-  end
-
-  graphql do
-    root_level_errors? true
-
-    queries do
-      list Tag, :existing_device_tags, :read_assigned_to_devices do
-        description "Returns the list of device tags associated to some device group."
-        relay? true
-        paginate_with :keyset
-      end
-    end
-  end
+  alias Edgehog.Actors.Actor
 
   resources do
-    resource Edgehog.Labeling.DeviceTag
-    resource Tag
+    resource Actor
   end
 end
