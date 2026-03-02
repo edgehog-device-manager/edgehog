@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +15,11 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Repo.Migrations.RemoveOldStateValues do
   @moduledoc """
   Updates values in the `deployment` table. Old state values might interfere with the correct behavior of edgehog, as incorrect states cannot be displayed by graphql (and fail matches in trigger handling).
-  This migraiton sets the most plausible actual state of deployments, relying on the fact that the container reconciler will eventually run for interesting (online) devices and will solve the actual state of applications.
+  This migration sets the most plausible actual state of deployments, relying on the fact that the container reconciler will eventually run for interesting (online) devices and will solve the actual state of applications.
 
   Rationale:
   - starting -> started :: deployments marked as `starting` should eventually have been started.
