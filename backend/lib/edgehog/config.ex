@@ -24,6 +24,7 @@ defmodule Edgehog.Config do
   """
   use Skogsra
 
+  alias Edgehog.Config.ClusteringStrategy
   alias Edgehog.Config.GeocodingProviders
   alias Edgehog.Config.GeolocationProviders
   alias Edgehog.Config.JWTPublicKeyPEMType
@@ -95,6 +96,26 @@ defmodule Edgehog.Config do
     os_env: "PREFERRED_GEOCODING_PROVIDERS",
     type: GeocodingProviders,
     default: [GoogleGeocoding]
+
+  @envdoc "The Erlang cluster strategy to use. One of `none`, `kubernetes`, `docker-compose`. Defaults to `none`."
+  app_env :clustering_strategy, :edgehog, :clustering_strategy,
+    os_env: "EDGEHOG_CLUSTERING_STRATEGY",
+    type: ClusteringStrategy,
+    default: :none
+
+  @envdoc "The endpoint label to query to get other edgehog instances. Defaults to `app=edgehog-backend`."
+  app_env :edgehog_clustering_kubernetes_selector,
+          :edgehog,
+          :edgehog_clustering_kubernetes_selector,
+          os_env: "EDGEHOG_CLUSTERING_KUBERNETES_SELECTOR",
+          type: :binary,
+          default: "app=edgehog-backend"
+
+  @envdoc "The Kubernetes namespace to use when `kubernetes` Erlang clustering strategy is used. Defaults to `edgehog`."
+  app_env :clustering_kubernetes_namespace, :edgehog, :clustering_kubernetes_namespace,
+    os_env: "EDGEHOG_CLUSTERING_KUBERNETES_NAMESPACE",
+    type: :binary,
+    default: "edgehog"
 
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
@@ -189,5 +210,41 @@ defmodule Edgehog.Config do
   def validate_admin_authentication! do
     admin_jwk!()
     :ok
+  end
+
+  @doc """
+  The clustering topology to use. The topology sets up node discovery.
+  """
+  def clustering_topologies! do
+    case clustering_strategy!() do
+      :none ->
+        []
+
+      :kubernetes ->
+        [
+          edgehog_k8s: [
+            strategy: Cluster.Strategy.Kubernetes,
+            config: [
+              mode: :ip,
+              kubernetes_node_basename: "edgehog",
+              kubernetes_selector: edgehog_clustering_kubernetes_selector!(),
+              kubernetes_namespace: clustering_kubernetes_namespace!(),
+              polling_interval: 10_000
+            ]
+          ]
+        ]
+
+      :docker_compose ->
+        [
+          edgehog: [
+            strategy: Cluster.Strategy.DNSPoll,
+            config: [
+              polling_interval: 5_000,
+              query: "edgehog-backend",
+              node_basename: "edgehog"
+            ]
+          ]
+        ]
+    end
   end
 end
