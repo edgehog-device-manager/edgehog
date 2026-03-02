@@ -73,28 +73,26 @@ defmodule EdgehogWeb.Schema.Query.RepositoryTest do
 
       repo_id = AshGraphql.Resource.encode_relay_id(repo)
       file_id = AshGraphql.Resource.encode_relay_id(file)
-
-      document = """
-      query ($id: ID!) {
-        repository(id: $id) {
-          id
-          name
-          files {
-            id
-            name
-          }
-        }
-      }
-      """
+      file_name = file.name
 
       repository =
-        [tenant: tenant, id: repo_id, document: document]
+        [tenant: tenant, id: repo_id]
         |> repository_query()
         |> extract_result!()
 
-      assert [returned_file] = repository["files"]
-      assert returned_file["id"] == file_id
-      assert returned_file["name"] == "firmware.bin"
+      assert %{
+               "files" => %{
+                 "count" => 1,
+                 "edges" => [
+                   %{
+                     "node" => %{
+                       "id" => ^file_id,
+                       "name" => ^file_name
+                     }
+                   }
+                 ]
+               }
+             } = repository
     end
   end
 
@@ -113,6 +111,15 @@ defmodule EdgehogWeb.Schema.Query.RepositoryTest do
         name
         handle
         description
+        files {
+          count
+          edges{
+            node{
+              id
+              name
+            }
+          }
+        }
       }
     }
     """

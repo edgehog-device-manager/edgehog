@@ -96,6 +96,12 @@ defmodule Edgehog.Config do
     type: GeocodingProviders,
     default: [GoogleGeocoding]
 
+  @envdoc "The AWS bucket for file management."
+  app_env :s3_bucket, :edgehog, :s3_bucket,
+    os_env: "S3_BUCKET",
+    type: :binary,
+    required: true
+
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
   """

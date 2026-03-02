@@ -223,9 +223,6 @@ defmodule Edgehog.FilesFixtures do
         name: unique_file_name(),
         size: :rand.uniform(1_000_000),
         digest: unique_file_digest(),
-        mode: random_file_mode(),
-        user_id: random_user_id(),
-        group_id: random_group_id(),
         url: "https://example.com/files/#{System.unique_integer([:positive])}.bin",
         repository_id: repository_id
       })

@@ -25,85 +25,75 @@ defmodule EdgehogWeb.Schema.Mutation.CreateRepositoryTest do
 
   describe "createRepository mutation" do
     test "creates repository with valid data", %{tenant: tenant} do
-      result =
-        [tenant: tenant, name: "My Repository", handle: "my-repository"]
+      repository =
+        [tenant: tenant, name: "Foobar", handle: "foobar"]
         |> create_repository_mutation()
         |> extract_result!()
 
       assert %{
                "id" => _,
-               "name" => "My Repository",
-               "handle" => "my-repository"
-             } = result
-    end
-
-    test "creates repository with description", %{tenant: tenant} do
-      result =
-        [
-          tenant: tenant,
-          name: "Described Repo",
-          handle: "described-repo",
-          description: "A repo with a description"
-        ]
-        |> create_repository_mutation()
-        |> extract_result!()
-
-      assert result["description"] == "A repo with a description"
-    end
-
-    test "creates repository without description (nil)", %{tenant: tenant} do
-      result =
-        [tenant: tenant, name: "No Desc", handle: "no-desc"]
-        |> create_repository_mutation()
-        |> extract_result!()
-
-      assert is_nil(result["description"])
+               "name" => "Foobar",
+               "handle" => "foobar",
+               "files" => %{
+                 "count" => 0,
+                 "edges" => []
+               }
+             } = repository
     end
 
     test "returns error for missing name", %{tenant: tenant} do
       result =
         create_repository_mutation(
           tenant: tenant,
-          name: nil,
-          handle: "some-handle"
+          name: nil
         )
 
       assert %{message: message} = extract_error!(result)
-      assert message =~ "name"
+      assert String.contains?(message, ~s<In field "name": Expected type "String!">)
     end
 
     test "returns error for missing handle", %{tenant: tenant} do
       result =
         create_repository_mutation(
           tenant: tenant,
-          name: "Some Name",
           handle: nil
         )
 
       assert %{message: message} = extract_error!(result)
-      assert message =~ "handle"
+      assert String.contains?(message, ~s<In field "handle": Expected type "String!">)
     end
 
     test "returns error for empty name", %{tenant: tenant} do
       result =
         create_repository_mutation(
           tenant: tenant,
-          name: "",
-          handle: "valid-handle"
+          name: ""
         )
 
-      assert %{fields: [:name], message: "is required"} = extract_error!(result)
+      assert %{fields: [:name], message: "is required"} =
+               extract_error!(result)
     end
 
     test "returns error for empty handle", %{tenant: tenant} do
       result =
         create_repository_mutation(
           tenant: tenant,
-          name: "Valid Name",
           handle: ""
         )
 
-      assert %{fields: [:handle], message: "is required"} = extract_error!(result)
+      assert %{fields: [:handle], message: "is required"} =
+               extract_error!(result)
+    end
+
+    test "returns error for invalid handle", %{tenant: tenant} do
+      result =
+        create_repository_mutation(
+          tenant: tenant,
+          handle: "123Invalid$"
+        )
+
+      assert %{fields: [:handle], message: "should start with" <> _} =
+               extract_error!(result)
     end
 
     test "returns error for duplicate name", %{tenant: tenant} do
@@ -112,11 +102,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateRepositoryTest do
       result =
         create_repository_mutation(
           tenant: tenant,
-          name: fixture.name,
-          handle: "different-handle"
+          name: fixture.name
         )
 
-      assert %{fields: [:name], message: "has already been taken"} = extract_error!(result)
+      assert %{fields: [:name], message: "has already been taken"} =
+               extract_error!(result)
     end
 
     test "returns error for duplicate handle", %{tenant: tenant} do
@@ -125,11 +115,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateRepositoryTest do
       result =
         create_repository_mutation(
           tenant: tenant,
-          name: "Different Name",
           handle: fixture.handle
         )
 
-      assert %{fields: [:handle], message: "has already been taken"} = extract_error!(result)
+      assert %{fields: [:handle], message: "has already been taken"} =
+               extract_error!(result)
     end
   end
 
@@ -141,7 +131,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateRepositoryTest do
           id
           name
           handle
-          description
+          files {
+            count
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
         }
       }
     }
@@ -149,31 +147,30 @@ defmodule EdgehogWeb.Schema.Mutation.CreateRepositoryTest do
 
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
-    {name, opts} = Keyword.pop_lazy(opts, :name, &unique_repository_name/0)
     {handle, opts} = Keyword.pop_lazy(opts, :handle, &unique_repository_handle/0)
-    description = Keyword.get(opts, :description)
+    {name, opts} = Keyword.pop_lazy(opts, :name, &unique_repository_name/0)
 
-    input =
-      %{
-        "name" => name,
-        "handle" => handle,
-        "description" => description
-      }
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-      |> Map.new()
+    input = %{
+      "handle" => handle,
+      "name" => name
+    }
 
     variables = %{"input" => input}
+
     document = Keyword.get(opts, :document, default_document)
+
+    context = %{tenant: tenant}
 
     Absinthe.run!(document, EdgehogWeb.Schema,
       variables: variables,
-      context: %{tenant: tenant}
+      context: context
     )
   end
 
   defp extract_error!(result) do
     assert is_nil(result[:data]["createRepository"])
     assert %{errors: [error]} = result
+
     error
   end
 
@@ -187,6 +184,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateRepositoryTest do
            } = result
 
     refute Map.get(result, :errors)
+
     assert repository
 
     repository

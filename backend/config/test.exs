@@ -132,8 +132,6 @@ config :edgehog, :astarte_trigger_data_layer, Edgehog.Astarte.Trigger.MockDataLa
 config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiScanResultMock
 config :edgehog, :base_images_storage_module, Edgehog.BaseImages.StorageMock
 config :edgehog, :container_reconciler, Edgehog.Containers.ReconcilerMock
-config :edgehog, :files_ephemeral_file_module, Edgehog.Files.EphemeralFileMock
-config :edgehog, :files_storage_module, Edgehog.Files.StorageMock
 config :edgehog, :os_management_ephemeral_image_module, Edgehog.OSManagement.EphemeralImageMock
 config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock
 
@@ -148,6 +146,15 @@ config :edgehog, ipbase_api_key: "test_api_key"
 config :edgehog,
   preferred_geolocation_providers: [Edgehog.Geolocation.GeolocationProviderMock],
   preferred_geocoding_providers: [Edgehog.Geolocation.GeocodingProviderMock]
+
+# config :edgehog, s3_bucket: "edgehog"
+
+# config :ex_aws, :s3,
+#   access_key_id: "dummy_key",
+#   secret_access_key: "dummy_secret",
+#   region: "us-east-1",
+#   scheme: "https://",
+#   host: "s3.amazonaws.com"
 
 config :goth,
   disabled: true
