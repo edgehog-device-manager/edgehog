@@ -51,7 +51,7 @@
     "react-router-dom": "^6.24.1",
     "react-select": "^5.8.0",
     "react-tooltip": "^5.30.0",
-    "relay-compiler": "^17.0.0",
+    "relay-compiler": "^20.1.1",
     "relay-runtime": "^17.0.0",
     "sass": "^1.77.6",
     "semver": "^7.3.8",
