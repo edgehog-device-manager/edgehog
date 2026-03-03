@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.13.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.0...v0.13.0) (2026-03-02)
+
+
+### Features
+
+* **backend:** Add single file download request feature ([799479c](https://github.com/edgehog-device-manager/edgehog/commit/799479c474b3b67a9cf7eb3e62879d282ed3a0ab))
+
+
+### Bug Fixes
+
+* **backend:** DeploymentEvent interface not working ([eed0dcb](https://github.com/edgehog-device-manager/edgehog/commit/eed0dcbb031653c791577f6bbe9677dcc65191c3))
+* Wrong endpoint type in ServerToDevice for fileSizeBytes ([d43c948](https://github.com/edgehog-device-manager/edgehog/commit/d43c94851a57bec9a870be8a6c0c65729e3b3023))
+
 ## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-18)
 
 
