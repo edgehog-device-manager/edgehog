@@ -25,12 +25,14 @@ defmodule EdgehogWeb.Router do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
     plug EdgehogWeb.Auth
+    plug EdgehogWeb.PopulateActor
     plug AshGraphql.Plug
   end
 
   pipeline :triggers do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
+    plug EdgehogWeb.PopulateActor
   end
 
   pipeline :admin_api do

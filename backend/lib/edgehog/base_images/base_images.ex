@@ -25,11 +25,16 @@ defmodule Edgehog.BaseImages do
 
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain
+      AshGraphql.Domain,
+      Ash.Authorizer
     ]
 
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.BaseImageCollection
+
+  authorization do
+    authorize :when_requested
+  end
 
   graphql do
     root_level_errors? true
