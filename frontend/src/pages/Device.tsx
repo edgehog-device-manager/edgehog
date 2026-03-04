@@ -80,6 +80,7 @@ import DeviceNetworkInterfacesTab from "@/components/DeviceTabs/NetworkInterface
 import DeviceLocationTab from "@/components/DeviceTabs/LocationTab";
 import DeviceWiFiScanResultsTab from "@/components/DeviceTabs/WiFiScanResultsTab";
 import DeviceSoftwareUpdateTab from "@/components/DeviceTabs/SoftwareUpdateTab";
+import DeviceFilesUploadTab from "@/components/DeviceTabs/FilesUploadTab";
 import DeviceApplicationsTab from "@/components/DeviceTabs/ApplicationsTab";
 import { Device_getBaseImageCollections_Query } from "@/api/__generated__/Device_getBaseImageCollections_Query.graphql";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
@@ -136,6 +137,7 @@ const GET_DEVICE_QUERY = graphql`
       ...SoftwareUpdateTab_otaOperations
       ...CellularConnectionTab_cellularConnection
       ...NetworkInterfacesTab_networkInterfaces
+      ...FilesUploadTab_fileDownloadRequests
       ...Device_connectionStatus
     }
     ...ApplicationsTab_deployedApplications
@@ -944,6 +946,7 @@ const DeviceContent = ({
               "device-network-interfaces-tab",
               "device-wifi-scan-results-tab",
               "device-software-update-tab",
+              "device-files-upload-tab",
               "applications-tab",
             ]}
           >
@@ -964,6 +967,7 @@ const DeviceContent = ({
                 getBaseImageCollsQuery={getBaseImageCollsQuery}
               />
             )}
+            <DeviceFilesUploadTab deviceRef={device} />
             <DeviceApplicationsTab deviceRef={deviceData} />
           </Tabs>
         </Stack>

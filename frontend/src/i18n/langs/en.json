@@ -804,6 +804,30 @@
   "components.DeviceTabs.CellularConnectionTab": {
     "defaultMessage": "Cellular Connection"
   },
+  "components.DeviceTabs.FilesUploadTab": {
+    "defaultMessage": "Files Upload"
+  },
+  "components.DeviceTabs.FilesUploadTab.error.presignedUrlMissingFields": {
+    "defaultMessage": "Presigned URL response is missing put_url or get_url."
+  },
+  "components.DeviceTabs.FilesUploadTab.error.presignedUrlParseFailed": {
+    "defaultMessage": "Failed to parse the presigned URL response."
+  },
+  "components.DeviceTabs.FilesUploadTab.error.unknownError": {
+    "defaultMessage": "An unknown error occurred."
+  },
+  "components.DeviceTabs.FilesUploadTab.error.uploadFailed": {
+    "defaultMessage": "File upload failed with status {status}: {statusText}{body}."
+  },
+  "components.DeviceTabs.FilesUploadTab.manualFilesUpload": {
+    "defaultMessage": "Manual Files Upload"
+  },
+  "components.DeviceTabs.FilesUploadTab.noRequests": {
+    "defaultMessage": "No file download requests have been sent yet."
+  },
+  "components.DeviceTabs.FilesUploadTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
   "components.DeviceTabs.HardwareInfoTab": {
     "defaultMessage": "Hardware Info"
   },
@@ -931,6 +955,48 @@
     "defaultMessage": "Tags",
     "description": "Title for the Tags column of the devices table"
   },
+  "components.FilesUploadTab.status.completed": {
+    "defaultMessage": "Completed"
+  },
+  "components.FilesUploadTab.status.failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.FilesUploadTab.status.inProgress": {
+    "defaultMessage": "In Progress"
+  },
+  "components.FilesUploadTab.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.FilesUploadTab.status.pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.FilesUploadTab.status.sent": {
+    "defaultMessage": "Sent"
+  },
+  "components.FilesUploadTab.table.destination": {
+    "defaultMessage": "Destination"
+  },
+  "components.FilesUploadTab.table.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.FilesUploadTab.table.fileSize": {
+    "defaultMessage": "File Size"
+  },
+  "components.FilesUploadTab.table.infinite": {
+    "defaultMessage": "Infinite"
+  },
+  "components.FilesUploadTab.table.message": {
+    "defaultMessage": "Message"
+  },
+  "components.FilesUploadTab.table.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.FilesUploadTab.table.status": {
+    "defaultMessage": "Status"
+  },
+  "components.FilesUploadTab.table.ttl": {
+    "defaultMessage": "TTL (s)"
+  },
   "components.Footer.edgehogHomeLinkLabel": {
     "defaultMessage": "Edgehog Homepage Link"
   },
@@ -981,6 +1047,36 @@
   },
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
+  },
+  "components.ManualFileDownloadRequestForm.archiveNameHint": {
+    "defaultMessage": "Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+  },
+  "components.ManualFileDownloadRequestForm.archiveNameLabel": {
+    "defaultMessage": "Archive Name"
+  },
+  "components.ManualFileDownloadRequestForm.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "components.ManualFileDownloadRequestForm.fileHint": {
+    "defaultMessage": "Select one or more files. Multiple files will be compressed into a tar.gz archive."
+  },
+  "components.ManualFileDownloadRequestForm.fileLabel": {
+    "defaultMessage": "Files"
+  },
+  "components.ManualFileDownloadRequestForm.filePlaceholder": {
+    "defaultMessage": "Click to select files..."
+  },
+  "components.ManualFileDownloadRequestForm.progressLabel": {
+    "defaultMessage": "Report Progress"
+  },
+  "components.ManualFileDownloadRequestForm.ttlHint": {
+    "defaultMessage": "Set to 0 for no expiry."
+  },
+  "components.ManualFileDownloadRequestForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "components.ManualFileDownloadRequestForm.uploadButton": {
+    "defaultMessage": "Upload"
   },
   "components.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
     "defaultMessage": "Base Image Collection"
