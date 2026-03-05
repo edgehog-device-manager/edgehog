@@ -90,6 +90,7 @@ services:
       context: frontend
     environment:
       BACKEND_URL: http://api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}/
+      HIDE_NAVIGATION_ELEMENTS: ${HIDE_NAVIGATION_ELEMENTS:-false}
     restart: on-failure
     labels:
       - "traefik.enable=true"
