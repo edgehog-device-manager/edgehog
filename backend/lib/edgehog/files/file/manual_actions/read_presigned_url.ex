@@ -18,33 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.Uploaders.File do
+defmodule Edgehog.Files.File.ManualActions.ReadPresignedUrl do
   @moduledoc """
-  Waffle uploader for files.
+  The Storage context.
   """
+  use Ash.Resource.Actions.Implementation
 
-  use Waffle.Definition
+  @impl Ash.Resource.Actions.Implementation
+  def run(input, _opts, context) do
+    tenant_id = context.tenant.tenant_id
+    repository_id = input.arguments.repository_id
+    filename = input.arguments.filename
 
-  @async false
-  @acl :public_read
-  @versions [:original]
-
-  def validate(_) do
-    # TODO: everything is considered a valid file for now
-    true
-  end
-
-  def gcs_optional_params(_version, {_file, _scope}) do
-    [predefinedAcl: "publicRead"]
-  end
-
-  def storage_dir(_version, {_file, scope}) do
-    %{tenant_id: tenant_id, repository_id: repository_id} = scope
-
-    "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files"
-  end
-
-  def filename(_version, {_file, scope}) do
-    scope.file_name
+    file_path = "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}"
+    Edgehog.Storage.read_presigned_url(file_path)
   end
 end
