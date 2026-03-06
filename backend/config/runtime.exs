@@ -234,6 +234,23 @@ if config_env() == :prod do
   url_port = System.get_env("URL_PORT", "443")
   url_scheme = System.get_env("URL_SCHEME", "https")
 
+  check_origin_default = ["#{url_scheme}://#{url_host}:#{url_port}"]
+
+  check_origin =
+    case System.get_env("CHECK_ORIGIN_ALLOWED_ORIGINS") do
+      nil ->
+        check_origin_default
+
+      raw_origins ->
+        parsed_origins =
+          raw_origins
+          |> String.split(",", trim: true)
+          |> Enum.map(&String.trim/1)
+          |> Enum.reject(&(&1 == ""))
+
+        if parsed_origins == [], do: check_origin_default, else: parsed_origins
+    end
+
   forwarder_secure_sessions? =
     System.get_env("EDGEHOG_FORWARDER_SECURE_SESSIONS", "true") == "true"
 
@@ -263,6 +280,7 @@ if config_env() == :prod do
       scheme: url_scheme,
       port: url_port
     ],
+    check_origin: check_origin,
     secret_key_base: secret_key_base
 
   if forwarder_hostname != nil &&
