@@ -32,8 +32,7 @@ defmodule EdgehogWeb.Endpoint do
   ]
 
   socket "/socket", EdgehogWeb.GqlSocket,
-    # TODO: Enable `check_origin` (and configure allowed origins) to mitigate Cross-Site WebSocket Hijacking.
-    websocket: [connect_info: [:peer_data, :x_headers], check_origin: false],
+    websocket: [connect_info: [:peer_data, :x_headers]],
     longpoll: [connect_info: [:peer_data, :x_headers]]
 
   plug PlugHeartbeat, path: "/health"
