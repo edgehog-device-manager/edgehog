@@ -1,0 +1,311 @@
+/*
+ * This file is part of Edgehog.
+ *
+ * Copyright 2026 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { FormattedMessage } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
+import {
+  ConnectionHandler,
+  graphql,
+  useMutation,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay/hooks";
+import { useParams } from "react-router-dom";
+
+import type { Repository_deleteRepository_Mutation } from "@/api/__generated__/Repository_deleteRepository_Mutation.graphql";
+import type {
+  Repository_getRepository_Query,
+  Repository_getRepository_Query$data,
+} from "@/api/__generated__/Repository_getRepository_Query.graphql";
+import type { Repository_updateRepository_Mutation } from "@/api/__generated__/Repository_updateRepository_Mutation.graphql";
+
+import { Link, Route, useNavigate } from "@/Navigation";
+import Alert from "@/components/Alert";
+import Center from "@/components/Center";
+import DeleteModal from "@/components/DeleteModal";
+import Page from "@/components/Page";
+import Result from "@/components/Result";
+import Spinner from "@/components/Spinner";
+import UpdateRepositoryForm, {
+  RepositoryOutputData,
+} from "@/forms/UpdateRepository";
+
+const GET_REPOSITORY_QUERY = graphql`
+  query Repository_getRepository_Query($repositoryId: ID!) {
+    repository(id: $repositoryId) {
+      id
+      name
+      handle
+      description
+      ...UpdateRepository_RepositoryFragment
+    }
+  }
+`;
+
+const UPDATE_REPOSITORY_MUTATION = graphql`
+  mutation Repository_updateRepository_Mutation(
+    $repositoryId: ID!
+    $input: UpdateRepositoryInput!
+  ) {
+    updateRepository(id: $repositoryId, input: $input) {
+      result {
+        id
+        name
+        handle
+        description
+        ...UpdateRepository_RepositoryFragment
+      }
+    }
+  }
+`;
+
+const DELETE_REPOSITORY_MUTATION = graphql`
+  mutation Repository_deleteRepository_Mutation($repositoryId: ID!) {
+    deleteRepository(id: $repositoryId) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
+interface RepositoryContentProps {
+  repository: NonNullable<Repository_getRepository_Query$data["repository"]>;
+}
+
+const RepositoryContent = ({ repository }: RepositoryContentProps) => {
+  const navigate = useNavigate();
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const repositoryId = repository.id;
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
+
+  const [deleteRepository, isDeletingRepository] =
+    useMutation<Repository_deleteRepository_Mutation>(
+      DELETE_REPOSITORY_MUTATION,
+    );
+
+  const handleDeleteRepository = useCallback(() => {
+    deleteRepository({
+      variables: { repositoryId },
+      onCompleted(data, errors) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          return navigate({ route: Route.repositories });
+        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.RepositoryUpdate.deletionErrorFeedback"
+            defaultMessage="Could not delete the repository, please try again."
+          />,
+        );
+        setShowDeleteModal(false);
+      },
+      updater(store, data) {
+        const repositoryId = data?.deleteRepository?.result?.id;
+        if (!repositoryId) {
+          return;
+        }
+
+        const root = store.getRoot();
+
+        const connection = ConnectionHandler.getConnection(
+          root,
+          "Repositories_repositories",
+        );
+
+        if (connection) {
+          ConnectionHandler.deleteNode(connection, repositoryId);
+        }
+
+        store.delete(repositoryId);
+      },
+    });
+  }, [deleteRepository, repositoryId, navigate]);
+
+  const [updateRepository, isUpdatingRepository] =
+    useMutation<Repository_updateRepository_Mutation>(
+      UPDATE_REPOSITORY_MUTATION,
+    );
+
+  const handleUpdateRepository = useCallback(
+    (repository: RepositoryOutputData) => {
+      updateRepository({
+        variables: { repositoryId, input: repository },
+        onCompleted(data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.RepositoryUpdate.creationErrorFeedback"
+              defaultMessage="Could not update the repository, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [updateRepository, repositoryId],
+  );
+
+  return (
+    <Page>
+      <Page.Header title={repository.name} />
+      <Page.Main>
+        <Alert
+          show={!!errorFeedback}
+          variant="danger"
+          onClose={() => setErrorFeedback(null)}
+          dismissible
+        >
+          {errorFeedback}
+        </Alert>
+        <UpdateRepositoryForm
+          repositoryRef={repository}
+          onSubmit={handleUpdateRepository}
+          onDelete={handleShowDeleteModal}
+          isLoading={isUpdatingRepository}
+        />
+        {showDeleteModal && (
+          <DeleteModal
+            confirmText={repository.handle}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteRepository}
+            isDeleting={isDeletingRepository}
+            title={
+              <FormattedMessage
+                id="pages.Repository.deleteModal.title"
+                defaultMessage="Delete repository"
+                description="Title for the confirmation modal to delete a Repository"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="pages.Repository.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the Repository <bold>{repository}</bold>."
+                description="Description for the confirmation modal to delete a Repository"
+                values={{
+                  repository: repository.name,
+                  bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
+          </DeleteModal>
+        )}
+      </Page.Main>
+    </Page>
+  );
+};
+
+type RepositoryWrapperProps = {
+  getRepositoryQuery: PreloadedQuery<Repository_getRepository_Query>;
+};
+
+const RepositoryWrapper = ({ getRepositoryQuery }: RepositoryWrapperProps) => {
+  const { repository } = usePreloadedQuery(
+    GET_REPOSITORY_QUERY,
+    getRepositoryQuery,
+  );
+
+  if (!repository) {
+    return (
+      <Result.NotFound
+        title={
+          <FormattedMessage
+            id="pages.Repository.repositoryNotFound.title"
+            defaultMessage="Repository not found."
+          />
+        }
+      >
+        <Link route={Route.repositories}>
+          <FormattedMessage
+            id="pages.Repository.repositoryNotFound.message"
+            defaultMessage="Return to the repository list."
+          />
+        </Link>
+      </Result.NotFound>
+    );
+  }
+
+  return <RepositoryContent repository={repository} />;
+};
+
+const RepositoryPage = () => {
+  const { repositoryId = "" } = useParams();
+
+  const [getRepositoryQuery, getRepository] =
+    useQueryLoader<Repository_getRepository_Query>(GET_REPOSITORY_QUERY);
+
+  const fetchRepository = useCallback(() => {
+    getRepository({ repositoryId }, { fetchPolicy: "network-only" });
+  }, [getRepository, repositoryId]);
+
+  useEffect(fetchRepository, [fetchRepository]);
+
+  return (
+    <Suspense
+      fallback={
+        <Center data-testid="page-loading">
+          <Spinner />
+        </Center>
+      }
+    >
+      <ErrorBoundary
+        FallbackComponent={(props) => (
+          <Center data-testid="page-error">
+            <Page.LoadingError onRetry={props.resetErrorBoundary} />
+          </Center>
+        )}
+        onReset={fetchRepository}
+      >
+        {getRepositoryQuery && (
+          <RepositoryWrapper getRepositoryQuery={getRepositoryQuery} />
+        )}
+      </ErrorBoundary>
+    </Suspense>
+  );
+};
+
+export default RepositoryPage;

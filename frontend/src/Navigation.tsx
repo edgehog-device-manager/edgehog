@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021-2025 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -72,6 +72,9 @@ enum Route {
   deploymentCampaigns = "/deployment-campaigns",
   deploymentCampaignsNew = "/deployment-campaigns/new",
   deploymentCampaignsEdit = "/deployment-campaigns/:deploymentCampaignId",
+  repositories = "/repositories",
+  repositoryNew = "/repositories/new",
+  repositoryEdit = "/repositories/:repositoryId/edit",
   login = "/login",
   logout = "/logout",
 }
@@ -129,6 +132,8 @@ const matchingParametricRoute = (
     case Route.deployments:
     case Route.deploymentCampaigns:
     case Route.deploymentCampaignsNew:
+    case Route.repositories:
+    case Route.repositoryNew:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -279,6 +284,14 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { deploymentCampaignId: params.deploymentCampaignId },
+          }
+        : null;
+
+    case Route.repositoryEdit:
+      return params && typeof params["repositoryId"] === "string"
+        ? {
+            route,
+            params: { repositoryId: params.repositoryId },
           }
         : null;
   }
@@ -494,6 +507,18 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.deploymentCampaignsEdit]: {
     id: "navigation.routeTitle.DeploymentCampaignsEdit",
     defaultMessage: "Edit Campaign",
+  },
+  [Route.repositories]: {
+    id: "navigation.routeTitle.Repositories",
+    defaultMessage: "Repositories",
+  },
+  [Route.repositoryNew]: {
+    id: "navigation.routeTitle.RepositoryNew",
+    defaultMessage: "Create Repository",
+  },
+  [Route.repositoryEdit]: {
+    id: "navigation.routeTitle.RepositoryEdit",
+    defaultMessage: "Edit Repository",
   },
 });
 

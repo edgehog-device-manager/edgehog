@@ -536,6 +536,19 @@ const fileDownloadRequestFormSchema = z.object({
   progress: z.boolean(),
 });
 
+const repositorySchema = z.object({
+  name: z.string().min(1),
+  handle: handleSchema.min(1),
+  description: z.string().optional(),
+});
+type RepositoryFormData = z.infer<typeof repositorySchema>;
+
+const repositoryUpdateSchema = repositorySchema.extend({
+  id: z.string(),
+  description: z.string().nullable(),
+});
+type RepositoryUpdateFormData = z.infer<typeof repositoryUpdateSchema>;
+
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
 const deploymentCampaignSchema = z
@@ -919,6 +932,8 @@ export type {
   TargetGroup,
   TargetGroupExtended,
   PartNumber,
+  RepositoryFormData,
+  RepositoryUpdateFormData,
 };
 
 export {
@@ -947,4 +962,6 @@ export {
   releaseSchema,
   CapAddList,
   CapDropList,
+  repositorySchema,
+  repositoryUpdateSchema,
 };
