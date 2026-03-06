@@ -526,6 +526,16 @@ const manualOtaFromFileSchema = z.object({
 
 type ManualOtaFromFileData = z.infer<typeof manualOtaFromFileSchema>;
 
+const fileDownloadRequestFormSchema = z.object({
+  file: z.instanceof(FileList).refine((files) => files.length > 0, {
+    message: messages.baseImageFileSchema.id,
+  }),
+  archiveName: z.string().optional(),
+  destination: z.enum(["STORAGE", "STREAMING"]),
+  ttlSeconds: z.number(messages.number.id).int().min(0),
+  progress: z.boolean(),
+});
+
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
 const deploymentCampaignSchema = z
@@ -930,6 +940,7 @@ export {
   baseImageFileSchema,
   manualOtaFromCollectionSchema,
   manualOtaFromFileSchema,
+  fileDownloadRequestFormSchema,
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
   updateCampaignSchema,

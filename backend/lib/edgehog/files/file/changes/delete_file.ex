@@ -18,44 +18,32 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.FileDownloadRequest.Changes.HandleEphemeralFileDeletion do
+defmodule Edgehog.Files.File.Changes.DeleteFile do
   @moduledoc """
-  Ash change responsible for deleting the ephemeral file associated
-  with a file download request when the request is deleted.
+  Deletes a file from the storage backend that was uploaded via a presigned URL.
   """
-
   use Ash.Resource.Change
-
-  alias Edgehog.Files.EphemeralFile
-
-  @ephemeral_file_module Application.compile_env(
-                           :edgehog,
-                           :files_ephemeral_file_module,
-                           EphemeralFile
-                         )
 
   @impl Ash.Resource.Change
   def change(%Ash.Changeset{valid?: false} = changeset, _opts, _context), do: changeset
 
   def change(changeset, _opts, _context) do
-    Ash.Changeset.after_transaction(changeset, &cleanup_file_url/2)
+    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+      delete_old_file(result)
+    end)
   end
 
-  defp cleanup_file_url(changeset, {:ok, file_download_request} = result) do
-    tenant_id = changeset.to_tenant
+  defp delete_old_file({:ok, file} = result) do
+    tenant_id = file.tenant_id
+    repository_id = file.repository_id
+    filename = file.name
 
-    # We do our best to clean up
-    _ =
-      @ephemeral_file_module.delete(
-        tenant_id,
-        file_download_request.id,
-        file_download_request.url
-      )
+    file_path = "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}"
+
+    _ = Edgehog.Storage.delete(file_path)
 
     result
   end
 
-  defp cleanup_file_url(_changeset, result) do
-    result
-  end
+  defp delete_old_file(result), do: result
 end

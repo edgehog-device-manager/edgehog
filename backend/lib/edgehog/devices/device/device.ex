@@ -61,7 +61,8 @@ defmodule Edgehog.Devices.Device do
     # datalayer subqueries so Ash can compose and support the functionality.
     paginate_relationship_with application_deployments: :relay,
                                ota_operations: :relay,
-                               tags: :relay
+                               tags: :relay,
+                               file_download_requests: :relay
 
     subscriptions do
       pubsub EdgehogWeb.Endpoint
