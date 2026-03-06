@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,9 @@ import DeploymentCampaignsPage from "@/pages/DeploymentCampaigns";
 import DeploymentCampaign from "@/pages/DeploymentCampaign";
 import DeploymentCampaignCreate from "@/pages/DeploymentCampaignCreate";
 import Deployment from "@/pages/Deployment";
+import Repositories from "@/pages/Repositories";
+import RepositoryCreatePage from "@/pages/RepositoryCreate";
+import Repository from "@/pages/Repository";
 
 import { bugs, repository, version } from "../package.json";
 
@@ -128,6 +131,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.deploymentCampaigns, element: <DeploymentCampaignsPage /> },
   { path: Route.deploymentCampaignsNew, element: <DeploymentCampaignCreate /> },
   { path: Route.deploymentCampaignsEdit, element: <DeploymentCampaign /> },
+  { path: Route.repositories, element: <Repositories /> },
+  { path: Route.repositoryNew, element: <RepositoryCreatePage /> },
+  { path: Route.repositoryEdit, element: <Repository /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

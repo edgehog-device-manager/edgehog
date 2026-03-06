@@ -24,6 +24,8 @@ defmodule Edgehog.Files.Repository do
     domain: Edgehog.Files,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Validations
+
   resource do
     description """
     A logical collection of files.
@@ -36,6 +38,8 @@ defmodule Edgehog.Files.Repository do
 
   graphql do
     type :repository
+
+    paginate_relationship_with files: :relay
   end
 
   actions do
@@ -60,16 +64,17 @@ defmodule Edgehog.Files.Repository do
     end
 
     destroy :destroy do
-      description "Deletes a repository and its associated files."
+      description "Deletes a repository"
       primary? true
-
-      # Needed because HandleFileDeletion is not atomic
-      require_atomic? false
-
-      # change Changes.HandleFileDeletion
     end
 
     destroy :destroy_fixture
+  end
+
+  validations do
+    validate Validations.handle(:handle) do
+      where changing(:handle)
+    end
   end
 
   attributes do

@@ -526,6 +526,29 @@ const manualOtaFromFileSchema = z.object({
 
 type ManualOtaFromFileData = z.infer<typeof manualOtaFromFileSchema>;
 
+const fileDownloadRequestFormSchema = z.object({
+  file: z.instanceof(FileList).refine((files) => files.length > 0, {
+    message: messages.baseImageFileSchema.id,
+  }),
+  archiveName: z.string().optional(),
+  destination: z.enum(["STORAGE", "STREAMING"]),
+  ttlSeconds: z.number(messages.number.id).int().min(0),
+  progress: z.boolean(),
+});
+
+const repositorySchema = z.object({
+  name: z.string().min(1),
+  handle: handleSchema.min(1),
+  description: z.string().optional(),
+});
+type RepositoryFormData = z.infer<typeof repositorySchema>;
+
+const repositoryUpdateSchema = repositorySchema.extend({
+  id: z.string(),
+  description: z.string().nullable(),
+});
+type RepositoryUpdateFormData = z.infer<typeof repositoryUpdateSchema>;
+
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
 const deploymentCampaignSchema = z
@@ -909,6 +932,8 @@ export type {
   TargetGroup,
   TargetGroupExtended,
   PartNumber,
+  RepositoryFormData,
+  RepositoryUpdateFormData,
 };
 
 export {
@@ -930,10 +955,13 @@ export {
   baseImageFileSchema,
   manualOtaFromCollectionSchema,
   manualOtaFromFileSchema,
+  fileDownloadRequestFormSchema,
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
   updateCampaignSchema,
   releaseSchema,
   CapAddList,
   CapDropList,
+  repositorySchema,
+  repositoryUpdateSchema,
 };

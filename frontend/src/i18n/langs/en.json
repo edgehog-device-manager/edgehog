@@ -804,6 +804,30 @@
   "components.DeviceTabs.CellularConnectionTab": {
     "defaultMessage": "Cellular Connection"
   },
+  "components.DeviceTabs.FilesUploadTab": {
+    "defaultMessage": "Files Upload"
+  },
+  "components.DeviceTabs.FilesUploadTab.error.presignedUrlMissingFields": {
+    "defaultMessage": "Presigned URL response is missing put_url or get_url."
+  },
+  "components.DeviceTabs.FilesUploadTab.error.presignedUrlParseFailed": {
+    "defaultMessage": "Failed to parse the presigned URL response."
+  },
+  "components.DeviceTabs.FilesUploadTab.error.unknownError": {
+    "defaultMessage": "An unknown error occurred."
+  },
+  "components.DeviceTabs.FilesUploadTab.error.uploadFailed": {
+    "defaultMessage": "File upload failed with status {status}: {statusText}{body}."
+  },
+  "components.DeviceTabs.FilesUploadTab.manualFilesUpload": {
+    "defaultMessage": "Manual Files Upload"
+  },
+  "components.DeviceTabs.FilesUploadTab.noRequests": {
+    "defaultMessage": "No file download requests have been sent yet."
+  },
+  "components.DeviceTabs.FilesUploadTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
   "components.DeviceTabs.HardwareInfoTab": {
     "defaultMessage": "Hardware Info"
   },
@@ -931,6 +955,48 @@
     "defaultMessage": "Tags",
     "description": "Title for the Tags column of the devices table"
   },
+  "components.FilesUploadTab.status.completed": {
+    "defaultMessage": "Completed"
+  },
+  "components.FilesUploadTab.status.failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.FilesUploadTab.status.inProgress": {
+    "defaultMessage": "In Progress"
+  },
+  "components.FilesUploadTab.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.FilesUploadTab.status.pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.FilesUploadTab.status.sent": {
+    "defaultMessage": "Sent"
+  },
+  "components.FilesUploadTab.table.destination": {
+    "defaultMessage": "Destination"
+  },
+  "components.FilesUploadTab.table.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.FilesUploadTab.table.fileSize": {
+    "defaultMessage": "File Size"
+  },
+  "components.FilesUploadTab.table.infinite": {
+    "defaultMessage": "Infinite"
+  },
+  "components.FilesUploadTab.table.message": {
+    "defaultMessage": "Message"
+  },
+  "components.FilesUploadTab.table.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.FilesUploadTab.table.status": {
+    "defaultMessage": "Status"
+  },
+  "components.FilesUploadTab.table.ttl": {
+    "defaultMessage": "TTL (s)"
+  },
   "components.Footer.edgehogHomeLinkLabel": {
     "defaultMessage": "Edgehog Homepage Link"
   },
@@ -981,6 +1047,36 @@
   },
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
+  },
+  "components.ManualFileDownloadRequestForm.archiveNameHint": {
+    "defaultMessage": "Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+  },
+  "components.ManualFileDownloadRequestForm.archiveNameLabel": {
+    "defaultMessage": "Archive Name"
+  },
+  "components.ManualFileDownloadRequestForm.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "components.ManualFileDownloadRequestForm.fileHint": {
+    "defaultMessage": "Select one or more files. Multiple files will be compressed into a tar.gz archive."
+  },
+  "components.ManualFileDownloadRequestForm.fileLabel": {
+    "defaultMessage": "Files"
+  },
+  "components.ManualFileDownloadRequestForm.filePlaceholder": {
+    "defaultMessage": "Click to select files..."
+  },
+  "components.ManualFileDownloadRequestForm.progressLabel": {
+    "defaultMessage": "Report Progress"
+  },
+  "components.ManualFileDownloadRequestForm.ttlHint": {
+    "defaultMessage": "Set to 0 for no expiry."
+  },
+  "components.ManualFileDownloadRequestForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "components.ManualFileDownloadRequestForm.uploadButton": {
+    "defaultMessage": "Upload"
   },
   "components.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -1104,6 +1200,14 @@
   "components.ReleasesTable.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the release."
   },
+  "components.RepositoriesTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the repositories table"
+  },
+  "components.RepositoriesTable.nameTitle": {
+    "defaultMessage": "Repository Name",
+    "description": "Title for the Name column of the repositories table"
+  },
   "components.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
@@ -1135,6 +1239,9 @@
   "components.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"
   },
+  "components.Sidebar.filesManagementGroupLabel": {
+    "defaultMessage": "Files Management"
+  },
   "components.Sidebar.hardwareTypesLabel": {
     "defaultMessage": "Hardware Types"
   },
@@ -1146,6 +1253,9 @@
   },
   "components.Sidebar.otaUpdatesGroupLabel": {
     "defaultMessage": "OTA Updates"
+  },
+  "components.Sidebar.repositoriesLabel": {
+    "defaultMessage": "Repositories"
   },
   "components.Sidebar.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
@@ -1936,6 +2046,18 @@
   "forms.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
   },
+  "forms.CreateRepository.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "forms.CreateRepository.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateRepository.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateRepository.submitButton": {
+    "defaultMessage": "Create"
+  },
   "forms.CreateSystemModel.addPartNumberButton": {
     "defaultMessage": "Add part number"
   },
@@ -2225,6 +2347,24 @@
   "forms.UpdateImageCredential.usernameLabel": {
     "defaultMessage": "Username"
   },
+  "forms.UpdateRepository.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateRepository.descriptionLabel": {
+    "defaultMessage": "Description"
+  },
+  "forms.UpdateRepository.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.UpdateRepository.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.UpdateRepository.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateRepository.submitButton": {
+    "defaultMessage": "Update"
+  },
   "forms.UpdateSystemModel.addPartNumberButton": {
     "defaultMessage": "Add part number"
   },
@@ -2395,6 +2535,15 @@
   },
   "navigation.routeTitle.ReleaseNew": {
     "defaultMessage": "Create Release"
+  },
+  "navigation.routeTitle.Repositories": {
+    "defaultMessage": "Repositories"
+  },
+  "navigation.routeTitle.RepositoryEdit": {
+    "defaultMessage": "Edit Repository"
+  },
+  "navigation.routeTitle.RepositoryNew": {
+    "defaultMessage": "Create Repository"
   },
   "navigation.routeTitle.SystemModels": {
     "defaultMessage": "System Models"
@@ -2830,6 +2979,38 @@
   },
   "pages.ReleaseCreate.title": {
     "defaultMessage": "Create Release for {applicationName}"
+  },
+  "pages.Repositories.createButton": {
+    "defaultMessage": "Create Repository"
+  },
+  "pages.Repositories.title": {
+    "defaultMessage": "Repositories"
+  },
+  "pages.Repository.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Repository <bold>{repository}</bold>.",
+    "description": "Description for the confirmation modal to delete a Repository"
+  },
+  "pages.Repository.deleteModal.title": {
+    "defaultMessage": "Delete repository",
+    "description": "Title for the confirmation modal to delete a Repository"
+  },
+  "pages.Repository.repositoryNotFound.message": {
+    "defaultMessage": "Return to the repository list."
+  },
+  "pages.Repository.repositoryNotFound.title": {
+    "defaultMessage": "Repository not found."
+  },
+  "pages.RepositoryCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the repository, please try again."
+  },
+  "pages.RepositoryCreate.title": {
+    "defaultMessage": "Create Repository"
+  },
+  "pages.RepositoryUpdate.creationErrorFeedback": {
+    "defaultMessage": "Could not update the repository, please try again."
+  },
+  "pages.RepositoryUpdate.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the repository, please try again."
   },
   "pages.SystemModel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>.",

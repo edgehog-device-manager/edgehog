@@ -18,24 +18,20 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.Uploaders.EphemeralFile do
-  @moduledoc false
-  use Waffle.Definition
+defmodule Edgehog.Files.File.ManualActions.CreatePresignedUrl do
+  @moduledoc """
+  The Storage context.
+  """
+  use Ash.Resource.Actions.Implementation
 
-  @async false
-  @acl :public_read
-  @versions [:original]
+  @impl Ash.Resource.Actions.Implementation
+  def run(input, _opts, context) do
+    tenant_id = context.tenant.tenant_id
+    repository_id = input.arguments.repository_id
+    filename = input.arguments.filename
 
-  def validate(_) do
-    # TODO: everything is considered a valid file for now
-    true
-  end
+    file_path = "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}"
 
-  def gcs_optional_params(_version, {_file, _scope}) do
-    [predefinedAcl: "publicRead"]
-  end
-
-  def storage_dir(_version, {_file, %{tenant_id: tenant_id, file_download_request_id: file_download_request_id}}) do
-    "uploads/tenants/#{tenant_id}/ephemeral_file_download_requests/#{file_download_request_id}"
+    Edgehog.Storage.create_presigned_urls(file_path)
   end
 end

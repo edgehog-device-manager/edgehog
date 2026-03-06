@@ -34,10 +34,6 @@ defmodule Edgehog.Files do
     root_level_errors? true
 
     queries do
-      # get File, :file, :read do
-      #   description "Returns a single file."
-      # end
-
       get Repository, :repository, :read do
         description "Returns a single repository."
       end
@@ -50,11 +46,33 @@ defmodule Edgehog.Files do
     end
 
     mutations do
+      action File, :create_file_presigned_url, :create_presigned_url do
+        description "Generates presigned URLs to upload and download a file via HTTP requests."
+        relay_id_translations input: [repository_id: :repository]
+      end
+
+      action File, :read_file_presigned_url, :read_presigned_url do
+        description "Reads presigned URLs to download a file via HTTP requests."
+        relay_id_translations input: [repository_id: :repository]
+      end
+
       create File, :create_file, :create do
         relay_id_translations input: [repository_id: :repository]
       end
 
       destroy File, :delete_file, :destroy
+
+      action FileDownloadRequest,
+             :create_file_download_request_presigned_url,
+             :create_presigned_url do
+        description "Generates presigned URLs to upload and download a file via HTTP requests."
+      end
+
+      action FileDownloadRequest,
+             :read_file_download_request_presigned_url,
+             :read_presigned_url do
+        description "Reads presigned URLs to download a file via HTTP requests."
+      end
 
       create Repository, :create_repository, :create
       update Repository, :update_repository, :update
