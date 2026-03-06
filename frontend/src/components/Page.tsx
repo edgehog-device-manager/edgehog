@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.networks:
       case Route.deployments:
       case Route.deploymentCampaigns:
+      case Route.repositories:
       case Route.login:
       case Route.logout:
         return [currentRoute];
@@ -181,6 +182,11 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.deploymentCampaignsEdit:
       case Route.deploymentCampaignsNew:
         return [{ route: Route.deploymentCampaigns }, currentRoute];
+
+      case Route.repositoryEdit:
+      case Route.repositoryNew:
+        return [{ route: Route.repositories }, currentRoute];
+
       default:
         return [];
     }

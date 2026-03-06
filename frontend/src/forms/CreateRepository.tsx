@@ -1,0 +1,127 @@
+/*
+ * This file is part of Edgehog.
+ *
+ * Copyright 2026 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { FormattedMessage } from "react-intl";
+
+import Button from "@/components/Button";
+import Form from "@/components/Form";
+import { FormRow } from "@/components/FormRow";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
+import { RepositoryFormData, repositorySchema } from "@/forms/validation";
+
+const initialData: RepositoryFormData = {
+  name: "",
+  handle: "",
+  description: "",
+};
+
+type Props = {
+  isLoading?: boolean;
+  onSubmit: (data: RepositoryFormData) => void;
+};
+
+const CreateRepository = ({ isLoading = false, onSubmit }: Props) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RepositoryFormData>({
+    mode: "onTouched",
+    defaultValues: initialData,
+    resolver: zodResolver(repositorySchema),
+  });
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Stack gap={3}>
+        <FormRow
+          id="repository-form-name"
+          label={
+            <FormattedMessage
+              id="forms.CreateRepository.nameLabel"
+              defaultMessage="Name"
+            />
+          }
+        >
+          <Form.Control {...register("name")} isInvalid={!!errors.name} />
+          <Form.Control.Feedback type="invalid">
+            {errors.name?.message && (
+              <FormattedMessage id={errors.name?.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id="repository-form-handle"
+          label={
+            <FormattedMessage
+              id="forms.CreateRepository.handleLabel"
+              defaultMessage="Handle"
+            />
+          }
+        >
+          <Form.Control {...register("handle")} isInvalid={!!errors.handle} />
+          <Form.Control.Feedback type="invalid">
+            {errors.handle?.message && (
+              <FormattedMessage id={errors.handle?.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <FormRow
+          id="repository-form-description"
+          label={
+            <FormattedMessage
+              id="forms.CreateRepository.descriptionLabel"
+              defaultMessage="Description"
+            />
+          }
+        >
+          <Form.Control
+            as="textarea"
+            rows={5}
+            {...register("description")}
+            isInvalid={!!errors.description}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.description?.message && (
+              <FormattedMessage id={errors.description?.message} />
+            )}
+          </Form.Control.Feedback>
+        </FormRow>
+
+        <div className="d-flex justify-content-end align-items-center">
+          <Button variant="primary" type="submit" disabled={isLoading}>
+            {isLoading && <Spinner size="sm" className="me-2" />}
+            <FormattedMessage
+              id="forms.CreateRepository.submitButton"
+              defaultMessage="Create"
+            />
+          </Button>
+        </div>
+      </Stack>
+    </form>
+  );
+};
+
+export default CreateRepository;

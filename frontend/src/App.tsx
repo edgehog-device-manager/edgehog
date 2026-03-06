@@ -69,6 +69,9 @@ import DeploymentCampaignsPage from "@/pages/DeploymentCampaigns";
 import DeploymentCampaign from "@/pages/DeploymentCampaign";
 import DeploymentCampaignCreate from "@/pages/DeploymentCampaignCreate";
 import Deployment from "@/pages/Deployment";
+import Repositories from "@/pages/Repositories";
+import RepositoryCreatePage from "@/pages/RepositoryCreate";
+import Repository from "@/pages/Repository";
 
 import { hideNavigationElements } from "@/api";
 import { bugs, repository, version } from "../package.json";
@@ -129,6 +132,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.deploymentCampaigns, element: <DeploymentCampaignsPage /> },
   { path: Route.deploymentCampaignsNew, element: <DeploymentCampaignCreate /> },
   { path: Route.deploymentCampaignsEdit, element: <DeploymentCampaign /> },
+  { path: Route.repositories, element: <Repositories /> },
+  { path: Route.repositoryNew, element: <RepositoryCreatePage /> },
+  { path: Route.repositoryEdit, element: <Repository /> },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];
