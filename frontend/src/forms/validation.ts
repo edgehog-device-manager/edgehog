@@ -549,6 +549,16 @@ const repositoryUpdateSchema = repositorySchema.extend({
 });
 type RepositoryUpdateFormData = z.infer<typeof repositoryUpdateSchema>;
 
+const fileSchema = z.object({
+  repository: z.string().min(1),
+  file: z.instanceof(FileList).refine((files) => files.length > 0, {
+    message: messages.baseImageFileSchema.id,
+  }),
+  archiveName: z.string().optional(),
+});
+
+type FileFormData = z.infer<typeof fileSchema>;
+
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
 const deploymentCampaignSchema = z
@@ -934,6 +944,7 @@ export type {
   PartNumber,
   RepositoryFormData,
   RepositoryUpdateFormData,
+  FileFormData,
 };
 
 export {
@@ -964,4 +975,5 @@ export {
   CapDropList,
   repositorySchema,
   repositoryUpdateSchema,
+  fileSchema,
 };

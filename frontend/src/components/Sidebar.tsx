@@ -149,6 +149,7 @@ const Sidebar = () => (
           Route.repositories,
           Route.repositoryNew,
           Route.repositoryEdit,
+          Route.filesNew,
         ]}
       />
     </SidebarItemGroup>

@@ -75,6 +75,7 @@ enum Route {
   repositories = "/repositories",
   repositoryNew = "/repositories/new",
   repositoryEdit = "/repositories/:repositoryId/edit",
+  filesNew = "/repositories/:repositoryId/files/new",
   login = "/login",
   logout = "/logout",
 }
@@ -288,6 +289,14 @@ const matchingParametricRoute = (
         : null;
 
     case Route.repositoryEdit:
+      return params && typeof params["repositoryId"] === "string"
+        ? {
+            route,
+            params: { repositoryId: params.repositoryId },
+          }
+        : null;
+
+    case Route.filesNew:
       return params && typeof params["repositoryId"] === "string"
         ? {
             route,
@@ -519,6 +528,10 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.repositoryEdit]: {
     id: "navigation.routeTitle.RepositoryEdit",
     defaultMessage: "Edit Repository",
+  },
+  [Route.filesNew]: {
+    id: "navigation.routeTitle.FileNew",
+    defaultMessage: "Create File",
   },
 });
 

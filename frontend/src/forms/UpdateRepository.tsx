@@ -35,6 +35,7 @@ import {
   RepositoryUpdateFormData,
   repositoryUpdateSchema,
 } from "@/forms/validation";
+import FormFeedback from "./FormFeedback";
 
 const UPDATE_REPOSITORY_FRAGMENT = graphql`
   fragment UpdateRepository_RepositoryFragment on Repository {
@@ -112,11 +113,7 @@ const UpdateRepository = ({
           }
         >
           <Form.Control {...register("name")} isInvalid={!!errors.name} />
-          <Form.Control.Feedback type="invalid">
-            {errors.name?.message && (
-              <FormattedMessage id={errors.name?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.name?.message} />
         </FormRow>
 
         <FormRow
@@ -129,11 +126,7 @@ const UpdateRepository = ({
           }
         >
           <Form.Control {...register("handle")} isInvalid={!!errors.handle} />
-          <Form.Control.Feedback type="invalid">
-            {errors.handle?.message && (
-              <FormattedMessage id={errors.handle?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.handle?.message} />
         </FormRow>
 
         <FormRow
@@ -150,11 +143,7 @@ const UpdateRepository = ({
             {...register("description")}
             isInvalid={!!errors.description}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.description?.message && (
-              <FormattedMessage id={errors.description?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.description?.message} />
         </FormRow>
 
         <Stack

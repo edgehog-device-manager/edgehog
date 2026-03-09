@@ -185,6 +185,18 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.repositoryNew:
         return [{ route: Route.repositories }, currentRoute];
 
+      case Route.filesNew:
+        return [
+          { route: Route.repositories },
+          {
+            route: Route.repositoryEdit,
+            params: {
+              repositoryId: currentRoute.params?.repositoryId,
+            },
+          },
+          currentRoute,
+        ];
+
       default:
         return [];
     }

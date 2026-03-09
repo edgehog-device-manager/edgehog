@@ -18,7 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import _ from "lodash";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -26,11 +27,14 @@ import {
   ConnectionHandler,
   graphql,
   useMutation,
+  usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 
+import { Files_PaginationQuery } from "@/api/__generated__/Files_PaginationQuery.graphql";
+import { Repository_FilesFragment$key } from "@/api/__generated__/Repository_FilesFragment.graphql";
 import type { Repository_deleteRepository_Mutation } from "@/api/__generated__/Repository_deleteRepository_Mutation.graphql";
 import type {
   Repository_getRepository_Query,
@@ -40,23 +44,57 @@ import type { Repository_updateRepository_Mutation } from "@/api/__generated__/R
 
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/Alert";
+import Button from "@/components/Button";
 import Center from "@/components/Center";
 import DeleteModal from "@/components/DeleteModal";
+import FilesTable from "@/components/FilesTable";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
+import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
+import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import UpdateRepositoryForm, {
   RepositoryOutputData,
 } from "@/forms/UpdateRepository";
 
+/* eslint-disable relay/unused-fields */
 const GET_REPOSITORY_QUERY = graphql`
-  query Repository_getRepository_Query($repositoryId: ID!) {
+  query Repository_getRepository_Query(
+    $repositoryId: ID!
+    $first: Int
+    $after: String
+    $filter: FileFilterInput = {}
+  ) {
     repository(id: $repositoryId) {
       id
       name
       handle
       description
       ...UpdateRepository_RepositoryFragment
+      ...Repository_FilesFragment
+        @arguments(first: $first, after: $after, filter: $filter)
+    }
+  }
+`;
+
+/* eslint-disable relay/unused-fields */
+const FILES_FRAGMENT = graphql`
+  fragment Repository_FilesFragment on Repository
+  @refetchable(queryName: "Files_PaginationQuery")
+  @argumentDefinitions(
+    first: { type: "Int" }
+    after: { type: "String" }
+    filter: { type: "FileFilterInput", defaultValue: {} }
+  ) {
+    id
+    files(first: $first, after: $after, filter: $filter)
+      @connection(key: "Repository_files") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...FilesTable_FileEdgeFragment
     }
   }
 `;
@@ -88,6 +126,79 @@ const DELETE_REPOSITORY_MUTATION = graphql`
   }
 `;
 
+interface FilesLayoutContainerProps {
+  repositoryRef: Repository_FilesFragment$key;
+  searchText: string | null;
+}
+
+const FilesLayoutContainer = ({
+  repositoryRef,
+  searchText,
+}: FilesLayoutContainerProps) => {
+  const { data, loadNext, hasNext, isLoadingNext, refetch } =
+    usePaginationFragment<Files_PaginationQuery, Repository_FilesFragment$key>(
+      FILES_FRAGMENT,
+      repositoryRef,
+    );
+
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: {
+                or: [
+                  { name: { ilike: `%${text}%` } },
+                  { url: { ilike: `%${text}%` } },
+                ],
+              },
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch],
+  );
+
+  useEffect(() => {
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+    return () => {
+      debounceRefetch.cancel();
+    };
+  }, [debounceRefetch, searchText]);
+
+  const loadNextFiles = useCallback(() => {
+    if (hasNext && !isLoadingNext) {
+      loadNext(RECORDS_TO_LOAD_NEXT);
+    }
+  }, [hasNext, isLoadingNext, loadNext]);
+
+  const filesRef = data?.files;
+
+  if (!filesRef) {
+    return null;
+  }
+
+  return (
+    <FilesTable
+      filesRef={filesRef}
+      loading={isLoadingNext}
+      onLoadMore={hasNext ? loadNextFiles : undefined}
+    />
+  );
+};
+
 interface RepositoryContentProps {
   repository: NonNullable<Repository_getRepository_Query$data["repository"]>;
 }
@@ -97,6 +208,7 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const [searchText, setSearchText] = useState<string | null>(null);
 
   const repositoryId = repository.id;
 
@@ -201,11 +313,42 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <UpdateRepositoryForm
+        <div className="mb-3">
+          <UpdateRepositoryForm
+            repositoryRef={repository}
+            onSubmit={handleUpdateRepository}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingRepository}
+          />
+        </div>
+        <hr className="bg-secondary border-2 border-top border-secondary" />
+        <div className="d-flex justify-content-between align-items-center gap-2">
+          <h3>
+            <FormattedMessage
+              id="pages.Repository.filesLabel"
+              defaultMessage="Files"
+            />
+          </h3>
+          <Button
+            variant="secondary"
+            as={Link}
+            route={Route.filesNew}
+            params={{ repositoryId }}
+          >
+            <FormattedMessage
+              id="pages.Repository.createFileButton"
+              defaultMessage="Create File"
+            />
+          </Button>
+        </div>
+        <SearchBox
+          className="flex-grow-1 pb-2"
+          value={searchText || ""}
+          onChange={setSearchText}
+        />
+        <FilesLayoutContainer
           repositoryRef={repository}
-          onSubmit={handleUpdateRepository}
-          onDelete={handleShowDeleteModal}
-          isLoading={isUpdatingRepository}
+          searchText={searchText}
         />
         {showDeleteModal && (
           <DeleteModal

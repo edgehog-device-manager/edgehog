@@ -979,6 +979,14 @@
   "components.FileDropzone.fileSizeSummary": {
     "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
   },
+  "components.FilesTable.nameTitle": {
+    "defaultMessage": "File Name",
+    "description": "Title for the File Name column of the files table"
+  },
+  "components.FilesTable.sizeTitle": {
+    "defaultMessage": "File Size",
+    "description": "Title for the File Size column of the files table"
+  },
   "components.FilesUploadTab.status.notTracked": {
     "defaultMessage": "Not Tracked"
   },
@@ -2022,6 +2030,12 @@
   "forms.CreateDeploymentCampaign.targetReleaseLabel": {
     "defaultMessage": "Target Release"
   },
+  "forms.CreateFile.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "forms.CreateFile.submitButton": {
+    "defaultMessage": "Create"
+  },
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
@@ -2518,6 +2532,9 @@
   "navigation.routeTitle.DevicesEdit": {
     "defaultMessage": "Device Details"
   },
+  "navigation.routeTitle.FileNew": {
+    "defaultMessage": "Create File"
+  },
   "navigation.routeTitle.HardwareTypes": {
     "defaultMessage": "Hardware Types"
   },
@@ -2861,6 +2878,15 @@
   "pages.Devices.title": {
     "defaultMessage": "Devices"
   },
+  "pages.FileCreate.repositoryNotFound.message": {
+    "defaultMessage": "Return to the Repository list."
+  },
+  "pages.FileCreate.repositoryNotFound.title": {
+    "defaultMessage": "Repository not found."
+  },
+  "pages.FileCreate.title": {
+    "defaultMessage": "Create File"
+  },
   "pages.HardwareType.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Hardware Type <bold>{hardwareType}</bold>.",
     "description": "Description for the confirmation modal to delete a Hardware Type"
@@ -3007,6 +3033,9 @@
   "pages.Repositories.title": {
     "defaultMessage": "Repositories"
   },
+  "pages.Repository.createFileButton": {
+    "defaultMessage": "Create File"
+  },
   "pages.Repository.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Repository <bold>{repository}</bold>.",
     "description": "Description for the confirmation modal to delete a Repository"
@@ -3014,6 +3043,9 @@
   "pages.Repository.deleteModal.title": {
     "defaultMessage": "Delete repository",
     "description": "Title for the confirmation modal to delete a Repository"
+  },
+  "pages.Repository.filesLabel": {
+    "defaultMessage": "Files"
   },
   "pages.Repository.repositoryNotFound.message": {
     "defaultMessage": "Return to the repository list."
