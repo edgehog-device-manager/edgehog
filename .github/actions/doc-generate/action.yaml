@@ -57,16 +57,20 @@ runs:
       shell: bash
       working-directory: ${{ inputs.edgehog }}
       run: |
-        ./tools/gen-docs-versions.sh > ${{ github.workspace }}/${{ inputs.docs }}/versions.js
+        ./tools/gen-docs-versions.sh > versions.js
     - name: Move doc to docs folder
       shell: bash
       run: |
-        cp -r "${{ inputs.edgehog }}/backend/doc" "${{ github.workspace }}/${{ inputs.docs }}/${{ inputs.version }}"
+        cp -r "${{ inputs.edgehog }}/backend/doc" "${{ inputs.docs }}/${{ inputs.version }}"
+    - name: Move version to docs folder
+      shell: bash
+      run: |
+        cp -r "${{ inputs.edgehog }}/versions.js" "${{ inputs.docs }}/versions.js"
     - name: link `versions.js`
       shell: bash
-      working-directory: ${{ inputs.docs }}/${{ inputs.version }}
+      working-directory: ${{ inputs.docs }}
       run: |
-        ln -s ../versions.js docs_config.js
+        ln -s versions.js ${{ inputs.version }}/docs_config.js
     - uses: actions/upload-artifact@v7
       with:
         name: edgehog-docs-bundle
