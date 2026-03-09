@@ -92,5 +92,7 @@ defmodule Edgehog.Files do
       define :set_progress
       define :set_status
     end
+
+    resource Edgehog.Files.FileUploadRequest
   end
 end
