@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,11 +80,14 @@ type PhoenixMessage = [
   PhoenixPayload,
 ];
 
-const applicationMetatag: HTMLElement = document.head.querySelector(
+const applicationMetatag: HTMLElement | null = document.head.querySelector(
   "[name=application-name]",
-)!;
+);
 const backendUrl =
-  applicationMetatag.dataset?.backendUrl || "http://localhost:4000";
+  applicationMetatag?.dataset?.backendUrl || "http://localhost:4000";
+
+const hideNavigationElements =
+  applicationMetatag?.dataset?.hideNavigationElements === "true";
 
 try {
   new URL(backendUrl);
@@ -316,4 +319,4 @@ const relayEnvironment = (session: Session) => {
 };
 
 export type { FetchGraphQL };
-export { fetchGraphQL, relayEnvironment };
+export { fetchGraphQL, relayEnvironment, hideNavigationElements };

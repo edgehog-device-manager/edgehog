@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021-2025 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2026 SECO Mind Srl
 # SPDX-License-Identifier: Apache-2.0
 FROM node:24.11.0 AS builder
 
@@ -13,3 +13,4 @@ FROM nginx:1
 COPY --from=builder /app/build/ /usr/share/nginx/html/
 ADD nginx.conf /etc/nginx/conf.d/default.conf
 ADD set-backend-url.sh /docker-entrypoint.d/set-backend-url.sh
+ADD hide-navigation-elements.sh /docker-entrypoint.d/hide-navigation-elements.sh
