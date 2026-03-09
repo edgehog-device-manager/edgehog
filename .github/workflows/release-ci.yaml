@@ -38,7 +38,7 @@ jobs:
           manifest-file: .github/release-please/manifest.json
   publish-docs:
     needs: [make-release]
-    uses: .github/workflows/docs-workflow.yaml
+    uses: ./.github/workflows/docs-ci.yaml
     with:
       release-made: ${{ needs.make-release.outputs.backend--release_created }}
       release-version: ${{ needs.make-release.outputs.backend--version }}

@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: Build and Test Frontend
+name: Frontend CI
 
 on:
   # Run when pushing to stable branches
