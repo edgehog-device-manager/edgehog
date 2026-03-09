@@ -42,4 +42,4 @@ jobs:
     with:
       release-made: ${{ needs.make-release.outputs.backend--release_created }}
       release-version: ${{ needs.make-release.outputs.backend--version }}
-      publish: github.repository_owner == 'edgehog-device-manager'
+      publish: ${{ github.repository_owner }} == 'edgehog-device-manager'
