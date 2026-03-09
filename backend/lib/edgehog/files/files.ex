@@ -91,5 +91,7 @@ defmodule Edgehog.Files do
     resource FileDownloadRequest do
       define :send_file_download_request, args: [:file_download_request]
     end
+
+    resource Edgehog.Files.FileUploadRequest
   end
 end
