@@ -147,30 +147,6 @@ defmodule Edgehog.StorageTest do
       assert result[:put_url] =~ expected_path
     end
 
-    test "read_presigned_url returns get presigned url only", %{tenant: tenant} do
-      filename = "My File 1"
-
-      repository = Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
-
-      result =
-        File
-        |> Ash.ActionInput.for_action(:read_presigned_url, %{
-          filename: filename,
-          repository_id: repository.id
-        })
-        |> Ash.run_action!(tenant: tenant)
-
-      assert is_map(result)
-      assert Map.has_key?(result, :get_url)
-
-      encoded_filename = URI.encode(filename)
-
-      expected_path =
-        "uploads/tenants/#{tenant.tenant_id}/repositories/#{repository.id}/files/#{encoded_filename}"
-
-      assert result[:get_url] =~ expected_path
-    end
-
     test "presigned URL files can be uploaded and deleted" do
       tenant = Edgehog.TenantsFixtures.tenant_fixture()
       filename = "upload-test.bin"

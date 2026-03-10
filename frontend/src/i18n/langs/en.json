@@ -979,6 +979,9 @@
   "components.FileDropzone.fileSizeSummary": {
     "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
   },
+  "components.FilesTable.downloadError": {
+    "defaultMessage": "Failed to download file"
+  },
   "components.FilesTable.nameTitle": {
     "defaultMessage": "File Name",
     "description": "Title for the File Name column of the files table"

@@ -51,11 +51,6 @@ defmodule Edgehog.Files do
         relay_id_translations input: [repository_id: :repository]
       end
 
-      action File, :read_file_presigned_url, :read_presigned_url do
-        description "Reads presigned URLs to download a file via HTTP requests."
-        relay_id_translations input: [repository_id: :repository]
-      end
-
       create File, :create_file, :create do
         relay_id_translations input: [repository_id: :repository]
       end

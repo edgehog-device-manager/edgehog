@@ -24,6 +24,7 @@ defmodule Edgehog.Files.File do
     domain: Edgehog.Files,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Files.File.Calculations
   alias Edgehog.Files.File.Changes
   alias Edgehog.Files.File.ManualActions
 
@@ -73,13 +74,6 @@ defmodule Edgehog.Files.File do
       argument :repository_id, :uuid, allow_nil?: false
 
       run ManualActions.CreatePresignedUrl
-    end
-
-    action :read_presigned_url, :map do
-      argument :filename, :string, allow_nil?: false
-      argument :repository_id, :uuid, allow_nil?: false
-
-      run ManualActions.ReadPresignedUrl
     end
   end
 
@@ -140,6 +134,16 @@ defmodule Edgehog.Files.File do
       attribute_public? false
       attribute_type :uuid
       allow_nil? false
+    end
+  end
+
+  calculations do
+    calculate :get_presigned_url, :string do
+      public? true
+
+      description "Get a presigned URL for downloading the file. The URL is valid for a limited time."
+
+      calculation Calculations.GetPresignedUrl
     end
   end
 

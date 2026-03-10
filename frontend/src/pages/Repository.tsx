@@ -127,11 +127,13 @@ const DELETE_REPOSITORY_MUTATION = graphql`
 `;
 
 interface FilesLayoutContainerProps {
+  setErrorFeedback: (feedback: React.ReactNode) => void;
   repositoryRef: Repository_FilesFragment$key;
   searchText: string | null;
 }
 
 const FilesLayoutContainer = ({
+  setErrorFeedback,
   repositoryRef,
   searchText,
 }: FilesLayoutContainerProps) => {
@@ -192,6 +194,7 @@ const FilesLayoutContainer = ({
 
   return (
     <FilesTable
+      setErrorFeedback={setErrorFeedback}
       filesRef={filesRef}
       loading={isLoadingNext}
       onLoadMore={hasNext ? loadNextFiles : undefined}
@@ -322,8 +325,8 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
           />
         </div>
         <hr className="bg-secondary border-2 border-top border-secondary" />
-        <div className="d-flex justify-content-between align-items-center gap-2">
-          <h3>
+        <div className="d-flex justify-content-between align-items-end">
+          <h3 className="m-0">
             <FormattedMessage
               id="pages.Repository.filesLabel"
               defaultMessage="Files"
@@ -342,11 +345,12 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
           </Button>
         </div>
         <SearchBox
-          className="flex-grow-1 pb-2"
+          className="flex-grow-1 pt-2 pb-2"
           value={searchText || ""}
           onChange={setSearchText}
         />
         <FilesLayoutContainer
+          setErrorFeedback={setErrorFeedback}
           repositoryRef={repository}
           searchText={searchText}
         />

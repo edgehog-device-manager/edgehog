@@ -5473,11 +5473,6 @@ input CreateFileInput {
   repositoryId: ID!
 }
 
-input ReadFilePresignedUrlInput {
-  filename: String!
-  repositoryId: ID!
-}
-
 input CreateFilePresignedUrlInput {
   filename: String!
   repositoryId: ID!
@@ -5674,6 +5669,9 @@ type File {
 
   "The repository this file belongs to."
   repository: Repository!
+
+  "Get a presigned URL for downloading the file. The URL is valid for a limited time."
+  getPresignedUrl: String
 }
 
 input RequestForwarderSessionInput {
@@ -7384,9 +7382,6 @@ type RootMutationType {
 
   "Generates presigned URLs to upload and download a file via HTTP requests."
   createFilePresignedUrl(input: CreateFilePresignedUrlInput!): JsonString!
-
-  "Reads presigned URLs to download a file via HTTP requests."
-  readFilePresignedUrl(input: ReadFilePresignedUrlInput!): JsonString!
 
   "Create a new file by uploading it to the storage."
   createFile(input: CreateFileInput!): CreateFileResult
