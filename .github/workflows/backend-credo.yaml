@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Credo
+name: backend credo
 on:
   workflow_call:
   workflow_dispatch:

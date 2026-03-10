@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Code formatting
+name: backend check format
 on:
   workflow_call:
   workflow_dispatch:

@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Test
+name: backend test
 on:
   workflow_call:
   workflow_dispatch:
@@ -57,4 +57,3 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_HOST: postgres

@@ -31,15 +31,20 @@ name: Release CI
 jobs:
   make-release:
     runs-on: ubuntu-latest
+    outputs:
+      backend--release_created: ${{ steps.release.outputs.backend--release_created }}
+      backend--version: ${{ steps.release.outputs.backend--version }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           config-file: .github/release-please/config.json
           manifest-file: .github/release-please/manifest.json
   publish-docs:
     needs: [make-release]
     uses: ./.github/workflows/docs-ci.yaml
+    secrets: inherit
     with:
       release-made: ${{ needs.make-release.outputs.backend--release_created }}
       release-version: ${{ needs.make-release.outputs.backend--version }}
-      publish: ${{ github.repository_owner }} == 'edgehog-device-manager'
+      publish: ${{ github.repository_owner == 'edgehog-device-manager' }}

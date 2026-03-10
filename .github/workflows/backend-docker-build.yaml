@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Docker build
+name: backend docker build
 on:
   workflow_call:
   workflow_dispatch:

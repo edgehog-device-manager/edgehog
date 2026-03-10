@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Mix Sobelow
+name: backend sobelow
 on:
   workflow_call:
   workflow_dispatch:

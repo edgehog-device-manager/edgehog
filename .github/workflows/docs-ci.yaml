@@ -86,3 +86,4 @@ jobs:
         if: ${{ inputs.publish }}
         with:
           docs: docs
+          deploy-key: ${{ secrets.DOCS_DEPLOY_KEY }}

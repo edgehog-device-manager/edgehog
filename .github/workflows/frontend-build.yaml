@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: frontend check types
+name: frontend build
 on:
   workflow_call:
   workflow_dispatch:

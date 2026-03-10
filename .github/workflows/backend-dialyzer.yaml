@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: Dialyzer
+name: backend dialyzer
 on:
   workflow_call:
   workflow_dispatch:

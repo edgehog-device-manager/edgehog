@@ -123,6 +123,12 @@ services:
       RUSTFS_SECRET_KEY: "rustfsadmin"
       RUSTFS_CONSOLE_ENABLE: true
     command: /data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -so /dev/null http://localhost:9000/ || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+      start_period: 3s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.edgehog-rustfs-storage.rule=Host(`rustfs-storage.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
@@ -137,12 +143,12 @@ services:
   rustfs-init:
     image: minio/mc:RELEASE.2023-01-11T03-14-16Z
     depends_on:
-      - rustfs
+      rustfs:
+        condition: service_healthy
     entrypoint: |
       /bin/sh -c "
-      while ! curl -s http://rustfs:9000 >/dev/null; do sleep 0.1; done;
       /usr/bin/mc alias set rustfs http://rustfs:9000 rustfsadmin rustfsadmin;
-      /usr/bin/mc mb rustfs/edgehog;
+      /usr/bin/mc mb --ignore-existing rustfs/edgehog;
       /usr/bin/mc anonymous set download rustfs/edgehog;
       exit 0;
       "
@@ -151,7 +157,7 @@ services:
     image: registry:3
     restart: on-failure
     environment:
-      REGISTRY_AUTH: htpasswdocker run minio/mc ls playd
+      REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: Registry-Realm
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/registry.passwd
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data

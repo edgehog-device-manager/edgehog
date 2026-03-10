@@ -63,16 +63,16 @@ jobs:
   coverage:
     needs: [warmup-cache]
     uses: ./.github/workflows/backend-coverage.yaml
-  minio:
+  rustfs:
     needs: [warmup-cache]
-    uses: ./.github/workflows/backend-minio.yaml
+    uses: ./.github/workflows/backend-rustfs.yaml
   azurite:
     needs: [warmup-cache]
     uses: ./.github/workflows/backend-azurite.yaml
   docker-build:
     uses: ./.github/workflows/backend-docker-build.yaml
   docs:
-    uses: ./.github/workflows/docs-workflow.yaml
+    uses: ./.github/workflows/docs-ci.yaml
     with:
       release-made: false
       release-version: snapshot
