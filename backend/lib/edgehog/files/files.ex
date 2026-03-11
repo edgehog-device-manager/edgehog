@@ -28,6 +28,7 @@ defmodule Edgehog.Files do
 
   alias Edgehog.Files.File
   alias Edgehog.Files.FileDownloadRequest
+  alias Edgehog.Files.FileUploadRequest
   alias Edgehog.Files.Repository
 
   authorization do
@@ -75,6 +76,10 @@ defmodule Edgehog.Files do
       create FileDownloadRequest, :create_managed_file_download_request, :managed do
         relay_id_translations input: [device_id: :device, file_id: :file]
       end
+
+      create FileUploadRequest, :create_file_upload_request, :send_request do
+        relay_id_translations input: [device_id: :device]
+      end
     end
   end
 
@@ -92,6 +97,12 @@ defmodule Edgehog.Files do
       define :set_status
     end
 
-    resource Edgehog.Files.FileUploadRequest
+    resource FileUploadRequest do
+      define :fetch_file_upload_request, action: :read, get_by: [:id]
+      define :set_file_upload_request_status, action: :update_status, args: [:status]
+      define :send_file_upload_request, args: [:file_upload_request]
+      define :set_file_upload_progress
+      define :set_file_upload_response
+    end
   end
 end

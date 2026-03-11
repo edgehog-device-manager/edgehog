@@ -220,6 +220,50 @@ defmodule Edgehog.FilesFixtures do
   end
 
   @doc """
+  Generate a file upload request fixture.
+
+  ## Options
+
+    * `:tenant` - (required) The tenant to create the file upload request for
+    * `:device_id` - The device ID (default: auto-creates a new device)
+    * `:url` - Upload URL (default: auto-generated)
+    * `:source` - Device source path/type (default: "storage")
+    * `:compression` - Compression type (default: "")
+    * `:progress_tracked` - Progress reporting flag (default: false)
+    * `:status` - Status (default: :pending)
+    * `:source_type` - Source type (default: "filesystem")
+    * `:progress_percentage` - Progress percentage (default: 0)
+    * `:response_code` - Response code (default: nil)
+    * `:response_message` - Response message (default: nil)
+    * `:http_headers` - HTTP headers map (default: %{})
+  """
+  def file_upload_request_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
+      end)
+
+    params =
+      Enum.into(opts, %{
+        url: "https://example.com/upload/#{System.unique_integer([:positive])}.bin",
+        source: "storage",
+        compression: "",
+        progress_tracked: false,
+        status: :pending,
+        source_type: "filesystem",
+        progress_percentage: 0,
+        http_headers: %{},
+        device_id: device_id
+      })
+
+    Edgehog.Files.FileUploadRequest
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
+  end
+
+  @doc """
   Generate a repository fixture.
 
   ## Options

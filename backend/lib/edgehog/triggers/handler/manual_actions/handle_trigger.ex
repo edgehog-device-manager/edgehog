@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024-2026 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -411,16 +411,31 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     )
   end
 
-  # TODO: add implementation when file_upload_request resource is added
   defp handle_event(
          %IncomingData{interface: @file_transfer_response, path: "/request", value: %{"type" => "device_to_server"}} =
-           _event,
-         _tenant,
+           event,
+         tenant,
          _realm_id,
          _device_id,
          _timestamp
        ) do
-    nil
+    file_upload_request_id = event.value["id"]
+    response_code = event.value["code"]
+    response_message = event.value["message"]
+
+    status =
+      case response_code do
+        0 -> :completed
+        _ -> :failed
+      end
+
+    file_upload_request = Files.fetch_file_upload_request!(file_upload_request_id, tenant: tenant)
+
+    Files.set_file_upload_response(
+      file_upload_request,
+      [status: status, response_code: response_code, response_message: response_message],
+      tenant: tenant
+    )
   end
 
   defp handle_event(
@@ -447,16 +462,37 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     )
   end
 
-  # TODO: add implementation when file_upload_request resource is added
   defp handle_event(
          %IncomingData{interface: @file_transfer_progress, path: "/request", value: %{"type" => "device_to_server"}} =
-           _event,
-         _tenant,
+           event,
+         tenant,
          _realm_id,
          _device_id,
          _timestamp
        ) do
-    nil
+    file_upload_request_id = event.value["id"]
+    progress_percentage = event.value["progress"]
+
+    file_upload_request = Files.fetch_file_upload_request!(file_upload_request_id, tenant: tenant)
+
+    case {file_upload_request.status, progress_percentage} do
+      {status, progress} when status in [:sent, :in_progress] and progress in 0..99 ->
+        Files.set_file_upload_progress(
+          file_upload_request,
+          [progress_percentage: progress_percentage, status: :in_progress],
+          tenant: tenant
+        )
+
+      {status, 100} when status in [:sent, :in_progress] ->
+        Files.set_file_upload_progress(
+          file_upload_request,
+          [progress_percentage: progress_percentage, status: :completed],
+          tenant: tenant
+        )
+
+      _other ->
+        {:ok, file_upload_request}
+    end
   end
 
   defp handle_event(_unhandled_event, tenant, realm_id, device_id, _timestamp) do
