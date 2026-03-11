@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name: Edgehog doc publication
+description: "Publishes Edgehog documentation to the docs repository."
 inputs:
   docs:
     description: "The docs project location."
@@ -26,15 +27,12 @@ inputs:
     description: "SSH deploy key for pushing docs."
     required: true
 
-defaults:
-  run:
-    shell: bash
-
 runs:
   using: "composite"
   steps:
     - name: Commit files
       working-directory: ${{ inputs.docs }}
+      shell: bash
       run: |
         git config --local user.email "edgehog-machine@ispirata.com"
         git config --local user.name "Edgehog Bot"
@@ -42,6 +40,7 @@ runs:
         git commit -m "Update Documentation"
     - name: Push changes
       working-directory: ./docs
+      shell: bash
       run: |
         eval `ssh-agent -t 60 -s`
         echo "${{ inputs.deploy-key }}" | ssh-add -

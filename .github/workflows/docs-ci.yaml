@@ -65,12 +65,14 @@ jobs:
           repository: edgehog-device-manager/docs
           path: docs
           show-progress: false
+          fetch-depth: 1
       - name: Checkout the interfaces repository
         uses: actions/checkout@v6
         with:
           repository: edgehog-device-manager/edgehog-astarte-interfaces
           path: edgehog-astarte-interfaces
           show-progress: false
+          fetch-depth: 1
       - name: Compute docs version
         id: compute-version
         run: |

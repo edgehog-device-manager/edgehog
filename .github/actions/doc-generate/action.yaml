@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 name: Docs generation
+description: "Generates documentation for the Edgehog project."
 inputs:
   edgehog:
     description: "The edgehog project location."
@@ -31,9 +32,6 @@ inputs:
   version:
     description: "The docs version to build."
     required: true
-
-permissions:
-  contents: read
 
 runs:
   using: "composite"

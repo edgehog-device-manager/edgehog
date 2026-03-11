@@ -67,9 +67,3 @@ jobs:
   audit:
     needs: [warmup-cache]
     uses: ./.github/workflows/frontend-audit.yaml
-  codeql:
-    uses: ./.github/workflows/frontend-codeql-analysis.yaml
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
