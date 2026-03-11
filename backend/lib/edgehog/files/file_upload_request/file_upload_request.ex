@@ -24,12 +24,61 @@ defmodule Edgehog.Files.FileUploadRequest do
     domain: Edgehog.Files,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Files.FileUploadRequest.Changes
+  alias Edgehog.Files.FileUploadRequest.ManualActions
+  alias Edgehog.Files.FileUploadRequest.Status
+
   graphql do
     type :file_upload_request
   end
 
   actions do
     defaults [:read, :destroy]
+
+    create :send_request do
+      accept [:source, :compression, :progress_enabled, :http_headers]
+
+      argument :device_id, :id do
+        allow_nil? false
+      end
+
+      change manage_relationship(:device_id, :device,
+               type: :append,
+               eager_validate_with: Edgehog.Devices
+             )
+
+      change set_attribute(:status, :sent)
+      change Changes.SetUploadUrl
+      change Changes.SendFileUploadRequest
+    end
+
+    create :create_fixture do
+      accept [
+        :url,
+        :source,
+        :compression,
+        :progress_enabled,
+        :status,
+        :progress_percentage,
+        :response_code,
+        :response_message,
+        :http_headers,
+        :device_id
+      ]
+    end
+
+    update :update_status do
+      accept [:status, :progress_percentage, :response_code, :response_message]
+    end
+
+    action :send_file_upload_request do
+      argument :file_upload_request, :struct do
+        constraints instance_of: __MODULE__
+        allow_nil? false
+      end
+
+      run ManualActions.SendFileUploadRequest
+    end
   end
 
   attributes do
@@ -46,18 +95,29 @@ defmodule Edgehog.Files.FileUploadRequest do
 
     attribute :compression, :string do
       public? true
+
+      default ""
     end
 
     attribute :progress_enabled, :boolean do
       public? true
+
+      default false
+      allow_nil? false
     end
 
-    attribute :status, :string do
+    attribute :status, Status do
       public? true
+
+      default :pending
+      allow_nil? false
     end
 
     attribute :progress_percentage, :integer do
       public? true
+
+      default 0
+      allow_nil? false
     end
 
     attribute :response_code, :integer do
@@ -68,6 +128,13 @@ defmodule Edgehog.Files.FileUploadRequest do
       public? true
     end
 
+    attribute :http_headers, :map do
+      public? true
+
+      default %{}
+      allow_nil? false
+    end
+
     timestamps()
   end
 
@@ -75,6 +142,7 @@ defmodule Edgehog.Files.FileUploadRequest do
     belongs_to :device, Edgehog.Devices.Device do
       allow_nil? false
       public? true
+      attribute_public? false
     end
   end
 
