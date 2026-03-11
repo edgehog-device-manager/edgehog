@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2023 - 2025 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Tenants.Reconciler do
   @moduledoc false
@@ -70,14 +68,8 @@ defmodule Edgehog.Tenants.Reconciler do
       schedule_reconciliation(@reconcile_interval)
     end
 
-    global_realm_query =
-      Edgehog.Astarte.Realm
-      |> Ash.Query.for_read(:global)
-      |> Ash.Query.load(:realm_management_client)
-
     Tenant
     |> Ash.read!()
-    |> Enum.map(&Ash.load!(&1, [realm: global_realm_query], tenant: &1))
     |> Enum.each(&start_reconciliation_task(&1, tenant_to_trigger_url_fun))
 
     {:noreply, state}
@@ -89,14 +81,13 @@ defmodule Edgehog.Tenants.Reconciler do
       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun
     } = state
 
-    tenant
-    |> Ash.load!([realm: [:realm_management_client]], tenant: tenant)
-    |> start_reconciliation_task(tenant_to_trigger_url_fun)
-
+    start_reconciliation_task(tenant, tenant_to_trigger_url_fun)
     {:noreply, state}
   end
 
   defp start_reconciliation_task(%Tenant{} = tenant, tenant_to_trigger_url_fun) do
+    tenant = Ash.load!(tenant, [realm: [:realm_management_client]], tenant: tenant)
+
     Task.Supervisor.start_child(TaskSupervisor, fn ->
       rm_client = tenant.realm.realm_management_client
 
