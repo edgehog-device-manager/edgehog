@@ -28,6 +28,7 @@ defmodule Edgehog.Files do
 
   alias Edgehog.Files.File
   alias Edgehog.Files.FileDownloadRequest
+  alias Edgehog.Files.FileUploadRequest
   alias Edgehog.Files.Repository
 
   graphql do
@@ -76,6 +77,10 @@ defmodule Edgehog.Files do
       create FileDownloadRequest, :create_file_download_request, :manual do
         relay_id_translations input: [device_id: :device]
       end
+
+      create FileUploadRequest, :create_file_upload_request, :send_request do
+        relay_id_translations input: [device_id: :device]
+      end
     end
   end
 
@@ -93,6 +98,10 @@ defmodule Edgehog.Files do
       define :set_status
     end
 
-    resource Edgehog.Files.FileUploadRequest
+    resource FileUploadRequest do
+      define :fetch_file_upload_request, action: :read, get_by: [:id], not_found_error?: false
+      define :update_file_upload_request_status, action: :update_status, args: [:status]
+      define :send_file_upload_request, args: [:file_upload_request]
+    end
   end
 end

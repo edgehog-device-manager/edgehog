@@ -141,6 +141,10 @@ Mox.defmock(Edgehog.Astarte.Device.FileDownloadRequestMock,
   for: Edgehog.Astarte.Device.FileDownloadRequest.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.FileUploadRequestMock,
+  for: Edgehog.Astarte.Device.FileUploadRequest.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.AvailableImagesMock,
   for: Edgehog.Astarte.Device.AvailableImages.Behaviour
 )
