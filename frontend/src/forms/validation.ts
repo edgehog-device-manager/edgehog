@@ -559,6 +559,27 @@ const fileSchema = z.object({
 
 type FileFormData = z.infer<typeof fileSchema>;
 
+const manualFileDownloadRequestFromRepositorySchema = z.object({
+  repository: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  }),
+  file: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    url: z.string().min(1).nullable(),
+    digest: z.string().min(1),
+    size: z.number().int().min(0),
+  }),
+  destination: z.enum(["STORAGE", "STREAMING"]),
+  ttlSeconds: z.number(messages.number.id).int().min(0),
+  progress: z.boolean(),
+});
+
+type ManualFileDownloadRequestFromRepositoryData = z.infer<
+  typeof manualFileDownloadRequestFromRepositorySchema
+>;
+
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
 const deploymentCampaignSchema = z
@@ -945,6 +966,7 @@ export type {
   RepositoryFormData,
   RepositoryUpdateFormData,
   FileFormData,
+  ManualFileDownloadRequestFromRepositoryData,
 };
 
 export {
@@ -976,4 +998,5 @@ export {
   repositorySchema,
   repositoryUpdateSchema,
   fileSchema,
+  manualFileDownloadRequestFromRepositorySchema,
 };

@@ -819,14 +819,20 @@
   "components.DeviceTabs.FilesUploadTab.error.uploadFailed": {
     "defaultMessage": "File upload failed with status {status}: {statusText}{body}."
   },
-  "components.DeviceTabs.FilesUploadTab.manualFilesUpload": {
-    "defaultMessage": "Manual Files Upload"
+  "components.DeviceTabs.FilesUploadTab.modeFile": {
+    "defaultMessage": "Direct File"
+  },
+  "components.DeviceTabs.FilesUploadTab.modeRepository": {
+    "defaultMessage": "Repository"
   },
   "components.DeviceTabs.FilesUploadTab.noRequests": {
     "defaultMessage": "No file download requests have been sent yet."
   },
   "components.DeviceTabs.FilesUploadTab.requestHistory": {
     "defaultMessage": "Request History"
+  },
+  "components.DeviceTabs.FilesUploadTab.uploadLocation": {
+    "defaultMessage": "Upload Location"
   },
   "components.DeviceTabs.HardwareInfoTab": {
     "defaultMessage": "Hardware Info"
@@ -979,6 +985,21 @@
   "components.FileDropzone.fileSizeSummary": {
     "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
   },
+  "components.FileSelect.ErrorFallback.message": {
+    "defaultMessage": "Failed to load files list."
+  },
+  "components.FileSelect.ErrorFallback.reloadButton": {
+    "defaultMessage": "Reload"
+  },
+  "components.FileSelect.fileOption": {
+    "defaultMessage": "Search or select a file..."
+  },
+  "components.FileSelect.noFilesAvailable": {
+    "defaultMessage": "No files available"
+  },
+  "components.FileSelect.noFilesFoundMatching": {
+    "defaultMessage": "No files found matching \"{inputValue}\""
+  },
   "components.FilesTable.downloadError": {
     "defaultMessage": "Failed to download file"
   },
@@ -1093,6 +1114,18 @@
     "defaultMessage": "TTL (seconds)"
   },
   "components.ManualFileDownloadRequestForm.uploadButton": {
+    "defaultMessage": "Upload"
+  },
+  "components.ManualFileDownloadRequestFromRepositoryForm.progressLabel": {
+    "defaultMessage": "Report Progress"
+  },
+  "components.ManualFileDownloadRequestFromRepositoryForm.ttlHint": {
+    "defaultMessage": "Set to 0 for no expiry."
+  },
+  "components.ManualFileDownloadRequestFromRepositoryForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "components.ManualFileDownloadRequestFromRepositoryForm.uploadButton": {
     "defaultMessage": "Upload"
   },
   "components.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
@@ -2212,6 +2245,24 @@
   },
   "forms.DeploymentCampaignForm.targetReleaseLabel": {
     "defaultMessage": "Target Release"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.fileLabel": {
+    "defaultMessage": "File"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesAvailable": {
+    "defaultMessage": "No repositories available"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesFoundMatching": {
+    "defaultMessage": "No repositories found matching \"{inputValue}\""
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.repositoryOption": {
+    "defaultMessage": "Search or select a repository..."
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.selectRepositoryHint": {
+    "defaultMessage": "Select a repository before selecting a file..."
   },
   "forms.ManualOtaFromFileCollection.baseImageCollectionOption": {
     "defaultMessage": "Search or select a base image collection..."

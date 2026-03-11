@@ -18,26 +18,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
 import {
   ConnectionHandler,
   graphql,
   useMutation,
   usePaginationFragment,
+  usePreloadedQuery,
+  useQueryLoader,
 } from "react-relay/hooks";
+import { useParams } from "react-router-dom";
 import { v7 as uuidv7 } from "uuid";
 
 import type { FilesUploadTab_PaginationQuery } from "@/api/__generated__/FilesUploadTab_PaginationQuery.graphql";
 import type { FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation } from "@/api/__generated__/FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation.graphql";
 import type { FilesUploadTab_createFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createFileDownloadRequest_Mutation.graphql";
 import type { FilesUploadTab_fileDownloadRequests$key } from "@/api/__generated__/FilesUploadTab_fileDownloadRequests.graphql";
+import type { FilesUploadTab_getRepositories_Query } from "@/api/__generated__/FilesUploadTab_getRepositories_Query.graphql";
 
 import Alert from "@/components/Alert";
 import FileDownloadRequestsTable from "@/components/FileDownloadRequestsTable";
+import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import type { FileDownloadRequestFormValues } from "@/forms/ManualFileDownloadRequestForm";
 import ManualFileDownloadRequestForm from "@/forms/ManualFileDownloadRequestForm";
+import ManualFileDownloadRequestFromRepositoryForm from "@/forms/ManualFileDownloadRequestFromRepositoryForm";
+import type { ManualFileDownloadRequestFromRepositoryData } from "@/forms/validation";
 import { computeDigest, createTarGzArchive } from "@/lib/files";
 
 // We use graphql fields below in columns configuration
@@ -69,6 +86,17 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
         }
       }
     }
+  }
+`;
+
+const GET_REPOSITORIES_QUERY = graphql`
+  query FilesUploadTab_getRepositories_Query(
+    $first: Int
+    $after: String
+    $filterRepositories: RepositoryFilterInput = {}
+  ) {
+    ...ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment
+      @arguments(filter: $filterRepositories)
   }
 `;
 
@@ -106,20 +134,29 @@ const DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
   }
 `;
 
-type FilesUploadTabProps = {
-  deviceRef: FilesUploadTab_fileDownloadRequests$key;
+const formatRelayErrors = (
+  errors: ReadonlyArray<{
+    fields?: ReadonlyArray<string> | null;
+    message: string;
+  }>,
+): string =>
+  errors
+    .map(({ fields, message }) =>
+      fields?.length ? `${fields.join(" ")} ${message}` : message,
+    )
+    .join(". \n");
+
+type ManualFileDownloadRequestFormWrapperProps = {
+  setErrorFeedback: (feedback: React.ReactNode) => void;
+  deviceId: string;
 };
 
-const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
+const ManualFileDownloadRequestFormWrapper = ({
+  setErrorFeedback,
+  deviceId,
+}: ManualFileDownloadRequestFormWrapperProps) => {
   const intl = useIntl();
-
   const [isUploading, setIsUploading] = useState(false);
-  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
-
-  const { data } = usePaginationFragment<
-    FilesUploadTab_PaginationQuery,
-    FilesUploadTab_fileDownloadRequests$key
-  >(DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
 
   const [getPresignedUrl] =
     useMutation<FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation>(
@@ -130,8 +167,6 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
     useMutation<FilesUploadTab_createFileDownloadRequest_Mutation>(
       DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION,
     );
-
-  const deviceId = data.id;
 
   // Warn user before leaving page during upload
   useEffect(() => {
@@ -212,14 +247,7 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
             },
             onCompleted(responseData, errors) {
               if (errors && errors.length > 0) {
-                const errorMessage = errors
-                  .map(({ fields, message }) =>
-                    fields && fields.length
-                      ? `${fields.join(" ")} ${message}`
-                      : message,
-                  )
-                  .join(". \n");
-                reject(new Error(errorMessage));
+                reject(new Error(formatRelayErrors(errors)));
                 return;
               }
               try {
@@ -303,14 +331,7 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
             },
             onCompleted(_responseData, errors) {
               if (errors && errors.length > 0) {
-                const errorMessage = errors
-                  .map(({ fields, message }) =>
-                    fields && fields.length
-                      ? `${fields.join(" ")} ${message}`
-                      : message,
-                  )
-                  .join(". \n");
-                reject(new Error(errorMessage));
+                reject(new Error(formatRelayErrors(errors)));
                 return;
               }
               resolve();
@@ -358,13 +379,198 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
         setIsUploading(false);
       }
     },
-    [deviceId, getPresignedUrl, createFileDownloadRequest],
+    [
+      deviceId,
+      getPresignedUrl,
+      createFileDownloadRequest,
+      intl,
+      setErrorFeedback,
+    ],
   );
+
+  return (
+    <ManualFileDownloadRequestForm
+      isLoading={isUploading}
+      onFileSubmit={handleFileUpload}
+    />
+  );
+};
+
+type ManualFileDownloadRequestFromRepositoryFormWrapperProps = {
+  setErrorFeedback: (feedback: React.ReactNode) => void;
+  repositoriesQueryRef: PreloadedQuery<FilesUploadTab_getRepositories_Query>;
+  deviceId: string;
+};
+
+const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
+  setErrorFeedback,
+  repositoriesQueryRef,
+  deviceId,
+}: ManualFileDownloadRequestFromRepositoryFormWrapperProps) => {
+  const intl = useIntl();
+  const [isUploading, setIsUploading] = useState(false);
+
+  const repositoriesData = usePreloadedQuery(
+    GET_REPOSITORIES_QUERY,
+    repositoriesQueryRef,
+  );
+
+  const [createFileDownloadRequest] =
+    useMutation<FilesUploadTab_createFileDownloadRequest_Mutation>(
+      DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION,
+    );
+
+  const handleFileUpload = useCallback(
+    async (values: ManualFileDownloadRequestFromRepositoryData) => {
+      setErrorFeedback(null);
+      setIsUploading(true);
+
+      try {
+        const { file, destination, ttlSeconds, progress } = values;
+
+        let compression: string | null = null;
+
+        if (/\.(tar\.gz|tgz)$/i.test(file.name)) {
+          compression = "tar.gz";
+        }
+
+        const fileDownloadRequestId = uuidv7();
+
+        // Default Unix file permissions since the repository doesn't store this metadata.
+        // Defaults: fileMode 0644 (rw-r--r--), userId -1, groupId -1.
+        const fileMode = 0o644;
+        const userId = -1;
+        const groupId = -1;
+
+        // Create the file download request with all metadata
+        await new Promise<void>((resolve, reject) => {
+          createFileDownloadRequest({
+            variables: {
+              input: {
+                deviceId,
+                fileDownloadRequestId,
+                url: file.url!,
+                fileName: file.name,
+                uncompressedFileSizeBytes: file.size,
+                digest: file.digest,
+                compression,
+                fileMode,
+                userId,
+                groupId,
+                destination,
+                progress,
+                ttlSeconds,
+              },
+            },
+            onCompleted(_responseData, errors) {
+              if (errors && errors.length > 0) {
+                reject(new Error(formatRelayErrors(errors)));
+                return;
+              }
+              resolve();
+            },
+            updater(store, data) {
+              const newRequestId = data?.createFileDownloadRequest?.result?.id;
+              if (!newRequestId) return;
+              const newRequest = store.get(newRequestId);
+              const storedDevice = store.get(deviceId);
+              if (!storedDevice || !newRequest) return;
+              const connection = ConnectionHandler.getConnection(
+                storedDevice,
+                "FilesUploadTab_fileDownloadRequests",
+              );
+              if (!connection) return;
+              const edges = connection.getLinkedRecords("edges") ?? [];
+              const alreadyPresent = edges.some(
+                (edge) =>
+                  edge.getLinkedRecord("node")?.getDataID() === newRequestId,
+              );
+              if (alreadyPresent) return;
+              const edge = ConnectionHandler.createEdge(
+                store,
+                connection,
+                newRequest,
+                "FileDownloadRequestEdge",
+              );
+              ConnectionHandler.insertEdgeBefore(connection, edge);
+            },
+            onError(error) {
+              reject(error);
+            },
+          });
+        });
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : intl.formatMessage({
+                id: "components.DeviceTabs.FilesUploadTab.error.unknownError",
+                defaultMessage: "An unknown error occurred.",
+              });
+        setErrorFeedback(message);
+      } finally {
+        setIsUploading(false);
+      }
+    },
+    [deviceId, createFileDownloadRequest, intl, setErrorFeedback],
+  );
+
+  return (
+    <ManualFileDownloadRequestFromRepositoryForm
+      repositoriesData={repositoriesData}
+      isLoading={isUploading}
+      onFileSubmit={handleFileUpload}
+    />
+  );
+};
+
+type FileDownloadRequestsContentProps = {
+  deviceRef: FilesUploadTab_fileDownloadRequests$key;
+};
+
+const FileDownloadRequestsContent = ({
+  deviceRef,
+}: FileDownloadRequestsContentProps) => {
+  const { data } = usePaginationFragment<
+    FilesUploadTab_PaginationQuery,
+    FilesUploadTab_fileDownloadRequests$key
+  >(DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
 
   const fileDownloadRequests = useMemo(
     () => data.fileDownloadRequests?.edges?.map((edge) => edge.node) ?? [],
     [data.fileDownloadRequests],
   );
+
+  return <FileDownloadRequestsTable requests={fileDownloadRequests} />;
+};
+
+type FilesUploadTabProps = {
+  deviceRef: FilesUploadTab_fileDownloadRequests$key;
+};
+
+const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
+  const intl = useIntl();
+  const { deviceId } = useParams();
+
+  const [updateMode, setUpdateMode] = useState<"repository" | "file">("file");
+
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const [getRepositoriesQuery, getRepositories] =
+    useQueryLoader<FilesUploadTab_getRepositories_Query>(
+      GET_REPOSITORIES_QUERY,
+    );
+
+  const fetchRepositories = useCallback(
+    () =>
+      getRepositories(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
+    [getRepositories],
+  );
+
+  useEffect(fetchRepositories, [fetchRepositories]);
 
   return (
     <Tab
@@ -375,12 +581,12 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
       })}
     >
       <div className="mt-3">
-        <h5>
+        <h6>
           <FormattedMessage
-            id="components.DeviceTabs.FilesUploadTab.manualFilesUpload"
-            defaultMessage="Manual Files Upload"
+            id="components.DeviceTabs.FilesUploadTab.uploadLocation"
+            defaultMessage="Upload Location"
           />
-        </h5>
+        </h6>
         <Alert
           show={!!errorFeedback}
           variant="danger"
@@ -389,12 +595,68 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
         >
           {errorFeedback}
         </Alert>
-        <ManualFileDownloadRequestForm
-          isLoading={isUploading}
-          onFileSubmit={handleFileUpload}
-        />
+
+        <Suspense fallback={<Spinner />}>
+          <Stack direction="vertical" gap={3} className="mt-3">
+            <div>
+              <ToggleButtonGroup
+                type="radio"
+                name="updateMode"
+                value={updateMode}
+                onChange={(mode) => setUpdateMode(mode)}
+                size="sm"
+              >
+                <ToggleButton
+                  id="mode-file"
+                  value="file"
+                  variant={
+                    updateMode === "file" ? "primary" : "outline-secondary"
+                  }
+                  className="fw-medium px-3"
+                >
+                  <FormattedMessage
+                    id="components.DeviceTabs.FilesUploadTab.modeFile"
+                    defaultMessage="Direct File"
+                  />
+                </ToggleButton>
+
+                <ToggleButton
+                  id="mode-collection"
+                  value="repository"
+                  variant={
+                    updateMode === "repository"
+                      ? "primary"
+                      : "outline-secondary"
+                  }
+                  className="fw-medium px-3"
+                >
+                  <FormattedMessage
+                    id="components.DeviceTabs.FilesUploadTab.modeRepository"
+                    defaultMessage="Repository"
+                  />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </div>
+            {updateMode === "file" ? (
+              <ManualFileDownloadRequestFormWrapper
+                setErrorFeedback={setErrorFeedback}
+                deviceId={deviceId || ""}
+              />
+            ) : (
+              getRepositoriesQuery && (
+                <ManualFileDownloadRequestFromRepositoryFormWrapper
+                  repositoriesQueryRef={getRepositoriesQuery}
+                  setErrorFeedback={setErrorFeedback}
+                  deviceId={deviceId || ""}
+                />
+              )
+            )}
+          </Stack>
+        </Suspense>
       </div>
+
       <hr />
+
       <div className="mt-4">
         <h5>
           <FormattedMessage
@@ -402,7 +664,8 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
             defaultMessage="Request History"
           />
         </h5>
-        <FileDownloadRequestsTable requests={fileDownloadRequests} />
+
+        <FileDownloadRequestsContent deviceRef={deviceRef} />
       </div>
     </Tab>
   );
