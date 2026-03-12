@@ -207,12 +207,7 @@ defmodule Edgehog.Devices.Device do
       upsert? true
       upsert_identity :unique_realm_device_id
 
-      # for fields that are interesting to us and already have the same name in
-      # the map you sent, (I dont have examples in this case)
-      upsert_fields [
-        :name,
-        :online
-      ]
+      upsert_fields [:online, :updated_at]
 
       accept [:realm_id]
 
@@ -221,8 +216,11 @@ defmodule Edgehog.Devices.Device do
 
       change Changes.InitializeFromDeviceStatus
 
+      # Only if created
       change set_attribute(:device_id, arg(:device_id))
       change set_attribute(:name, arg(:device_id))
+
+      # If updated or created
       change set_attribute(:online, arg(:connected))
     end
 
