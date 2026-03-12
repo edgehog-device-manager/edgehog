@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Devices.Reconciler.CoreTest do
   @moduledoc false
@@ -30,6 +28,7 @@ defmodule Edgehog.Devices.Reconciler.CoreTest do
   alias Edgehog.Astarte.Device.AvailableDevicesMock
   alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.AstarteFixtures
+  alias Edgehog.Devices.Device
   alias Edgehog.Devices.Reconciler.Core
 
   describe "Edgehog.Devices.Reconciler.Core.reconcile/1" do
@@ -65,10 +64,42 @@ defmodule Edgehog.Devices.Reconciler.CoreTest do
 
       Core.reconcile(tenant)
 
-      devices = Ash.read!(Edgehog.Devices.Device, tenant: tenant)
+      devices = Ash.read!(Device, tenant: tenant)
 
       assert [device] = devices
       assert %{device_id: ^device_id, online: true} = device
+    end
+
+    test "reconciles an existent device", %{tenant: tenant} do
+      device_name = "My device"
+      device = Edgehog.DevicesFixtures.device_fixture(tenant: tenant, name: device_name)
+      device_id = device.device_id
+
+      stub(DeviceStatusMock, :get, fn _client, _device_id ->
+        {:ok, device_status_fixture(%{online: true})}
+      end)
+
+      expect(AvailableDevicesMock, :get_device_list, fn _client ->
+        Stream.unfold([device_id], fn
+          [] -> nil
+          [h | t] -> {[h], t}
+        end)
+      end)
+
+      expect(AvailableDevicesMock, :get_device_status, fn _client, ^device_id ->
+        {:ok,
+         %{
+           "id" => device.device_id,
+           "connected" => true
+         }}
+      end)
+
+      Core.reconcile(tenant)
+
+      devices = Ash.read!(Device, tenant: tenant)
+
+      assert [returned_device] = devices
+      assert %{device_id: ^device_id, online: true, name: ^device_name} = returned_device
     end
   end
 end
