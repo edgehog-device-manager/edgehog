@@ -33,6 +33,7 @@ import {
   ImageCredentialUpdateFormData,
   imageCredentialUpdateSchema,
 } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 const IMAGE_CREDENTIAL_FRAGMENT = graphql`
   fragment UpdateImageCredential_imageCredential_Fragment on ImageCredentials {
@@ -90,11 +91,7 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
             isInvalid={!!errors.label}
           />
 
-          <Form.Control.Feedback type="invalid">
-            {errors.label?.message && (
-              <FormattedMessage id={errors.label?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.label?.message} />
         </FormRow>
         <FormRow
           id="image-credential-form-username"
@@ -110,11 +107,7 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
             readOnly
             isInvalid={!!errors.username}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.username?.message && (
-              <FormattedMessage id={errors.username?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.username?.message} />
         </FormRow>
         <Stack
           direction="horizontal"

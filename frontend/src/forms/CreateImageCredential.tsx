@@ -34,6 +34,7 @@ import {
   ImageCredentialFormData,
   imageCredentialSchema,
 } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 const initialData: ImageCredentialFormData = {
   label: "",
@@ -77,11 +78,7 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
           }
         >
           <Form.Control {...register("label")} isInvalid={!!errors.label} />
-          <Form.Control.Feedback type="invalid">
-            {errors.label?.message && (
-              <FormattedMessage id={errors.label?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.label?.message} />
         </FormRow>
 
         <FormRow
@@ -98,11 +95,7 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
             autoComplete="off"
             isInvalid={!!errors.username}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.username?.message && (
-              <FormattedMessage id={errors.username?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.username?.message} />
         </FormRow>
 
         <FormRow
@@ -139,11 +132,7 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
                 style={{ width: "1.4em" }}
               />
             </Button>
-            <Form.Control.Feedback type="invalid">
-              {errors.password?.message && (
-                <FormattedMessage id={errors.password?.message} />
-              )}
-            </Form.Control.Feedback>
+            <FormFeedback feedback={errors.password?.message} />
           </InputGroup>
         </FormRow>
 

@@ -19,7 +19,7 @@
  */
 
 import type { ReactNode } from "react";
-import { FormattedMessage } from "react-intl";
+import { useIntl } from "react-intl";
 import Form from "@/components/Form";
 
 type Feedback =
@@ -50,6 +50,9 @@ const parseFeedback = (value: Feedback): Feedback => {
 };
 
 const FormFeedback = ({ feedback }: Props) => {
+  const intl = useIntl();
+  const fmt = intl.formatMessage;
+
   const parsedFeedback = parseFeedback(feedback);
 
   if (parsedFeedback === undefined) {
@@ -59,14 +62,14 @@ const FormFeedback = ({ feedback }: Props) => {
   if (typeof parsedFeedback === "string") {
     return (
       <Form.Control.Feedback type="invalid">
-        <FormattedMessage id={parsedFeedback} />
+        {fmt({ id: parsedFeedback })}
       </Form.Control.Feedback>
     );
   }
   const { messageId, values } = parsedFeedback;
   return (
     <Form.Control.Feedback type="invalid">
-      <FormattedMessage id={messageId} values={values} />
+      {fmt({ id: messageId }, values)}
     </Form.Control.Feedback>
   );
 };

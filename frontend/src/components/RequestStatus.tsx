@@ -81,7 +81,7 @@ const RequestStatus = ({
   return (
     <div className="d-flex align-items-center">
       <Icon icon={iconName} className={iconClass} />
-      <span>{message ? <FormattedMessage id={message.id} /> : status}</span>
+      <span>{message ? <FormattedMessage {...message} /> : status}</span>
     </div>
   );
 };

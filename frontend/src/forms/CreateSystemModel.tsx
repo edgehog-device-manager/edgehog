@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2021-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2021 - 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -45,6 +43,7 @@ import { FormRow } from "@/components/FormRow";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import assets from "@/assets";
 import { SystemModelFormData, systemModelSchema } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment CreateSystemModel_OptionsFragment on RootQueryType
@@ -286,11 +285,7 @@ const CreateSystemModelForm = ({
                 }
               >
                 <Form.Control {...register("name")} isInvalid={!!errors.name} />
-                <Form.Control.Feedback type="invalid">
-                  {errors.name?.message && (
-                    <FormattedMessage id={errors.name?.message} />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback feedback={errors.name?.message} />
               </FormRow>
               <FormRow
                 id="system-model-form-handle"
@@ -305,11 +300,7 @@ const CreateSystemModelForm = ({
                   {...register("handle")}
                   isInvalid={!!errors.handle}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.handle?.message && (
-                    <FormattedMessage id={errors.handle?.message} />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback feedback={errors.handle?.message} />
               </FormRow>
               <FormRow
                 id="system-model-form-description"
@@ -364,11 +355,7 @@ const CreateSystemModelForm = ({
                     />
                   )}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.hardwareType && (
-                    <FormattedMessage id={errors.hardwareType?.id?.message} />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback feedback={errors.hardwareType?.id?.message} />
               </FormRow>
               <FormRow
                 id="system-model-form-part-numbers"
@@ -387,13 +374,9 @@ const CreateSystemModelForm = ({
                           {...register(`partNumbers.${index}.value`)}
                           isInvalid={!!errors.partNumbers?.[index]}
                         />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.partNumbers?.[index]?.value?.message && (
-                            <FormattedMessage
-                              id={errors.partNumbers?.[index]?.value?.message}
-                            />
-                          )}
-                        </Form.Control.Feedback>
+                        <FormFeedback
+                          feedback={errors.partNumbers?.[index]?.value?.message}
+                        />
                       </Stack>
                       <Button
                         className="mb-auto"

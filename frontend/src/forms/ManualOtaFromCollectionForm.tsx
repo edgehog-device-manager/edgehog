@@ -41,6 +41,7 @@ import Stack from "@/components/Stack";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { manualOtaFromCollectionSchema } from "@/forms/validation";
 import { ManualOtaFromCollectionData } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 const BASE_IMAGE_COLLECTIONS_FRAGMENT = graphql`
   fragment ManualOtaFromCollectionForm_baseImageCollections_Fragment on RootQueryType
@@ -244,11 +245,7 @@ const ManualOtaFromCollectionForm = ({
               />
             )}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.baseImageCollection && (
-              <FormattedMessage id={errors.baseImageCollection.id?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.baseImageCollection?.id?.message} />
         </Form.Group>
         <Form.Group as={Col} controlId="baseImage" className="w-100">
           <Form.Label column sm={3} className="text-nowrap">
@@ -279,11 +276,7 @@ const ManualOtaFromCollectionForm = ({
                   />
                 )}
               />
-              <Form.Control.Feedback type="invalid">
-                {errors.baseImage && (
-                  <FormattedMessage id={errors.baseImage.id?.message} />
-                )}
-              </Form.Control.Feedback>
+              <FormFeedback feedback={errors.baseImage?.id?.message} />
             </>
           ) : (
             <div className="d-flex align-content-center fst-italic text-muted">

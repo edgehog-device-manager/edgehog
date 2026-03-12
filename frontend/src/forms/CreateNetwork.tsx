@@ -20,7 +20,7 @@
 
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, FieldError, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
 import Button from "@/components/Button";
@@ -32,6 +32,7 @@ import Spinner from "@/components/Spinner";
 import MonacoJsonEditor from "@/components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
 import { NetworkFormData, networkSchema } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 const initialData: NetworkFormData = {
   label: "",
@@ -41,15 +42,6 @@ interface Props {
   isLoading?: boolean;
   onSubmit: (data: NetworkFormData) => void;
 }
-
-const ErrorMessage = ({ error }: { error?: FieldError }) => {
-  if (!error?.message) return null;
-  return (
-    <Form.Control.Feedback type="invalid" role="alert">
-      <FormattedMessage id={error.message} defaultMessage={error.message} />
-    </Form.Control.Feedback>
-  );
-};
 
 const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
   const {
@@ -75,7 +67,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         }
       >
         <Form.Control {...register("label")} isInvalid={!!errors.label} />
-        <ErrorMessage error={errors.label} />
+        <FormFeedback feedback={errors.label?.message} />
       </FormRow>
 
       <FormRow
@@ -88,7 +80,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         }
       >
         <Form.Control {...register("driver")} isInvalid={!!errors.driver} />
-        <ErrorMessage error={errors.driver} />
+        <FormFeedback feedback={errors.driver?.message} />
       </FormRow>
 
       <FormRow
@@ -130,7 +122,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
           {...register("internal")}
           isInvalid={!!errors.internal}
         />
-        <ErrorMessage error={errors.internal} />
+        <FormFeedback feedback={errors.internal?.message} />
       </FormRow>
 
       <FormRow
@@ -147,7 +139,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
           {...register("enableIpv6")}
           isInvalid={!!errors.enableIpv6}
         />
-        <ErrorMessage error={errors.enableIpv6} />
+        <FormFeedback feedback={errors.enableIpv6?.message} />
       </FormRow>
 
       <Row className="mt-4">

@@ -475,11 +475,7 @@ const CreateDeploymentCampaignForm = ({
               />
             )}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.application && (
-              <FormattedMessage id={errors.application?.id?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.application?.id?.message} />
         </FormRow>
 
         <FormRow
@@ -510,11 +506,7 @@ const CreateDeploymentCampaignForm = ({
                   />
                 )}
               />
-              <Form.Control.Feedback type="invalid">
-                {errors.release && (
-                  <FormattedMessage id={errors.release?.id?.message} />
-                )}
-              </Form.Control.Feedback>
+              <FormFeedback feedback={errors.release?.id?.message} />
             </>
           ) : (
             <div className="d-flex align-content-center fst-italic text-muted">
@@ -557,11 +549,7 @@ const CreateDeploymentCampaignForm = ({
                     />
                   )}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.targetRelease && (
-                    <FormattedMessage id={errors.targetRelease?.id?.message} />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback feedback={errors.targetRelease?.id?.message} />
               </>
             ) : (
               <div className="d-flex align-content-center fst-italic text-muted">
@@ -612,11 +600,7 @@ const CreateDeploymentCampaignForm = ({
               />
             )}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.channel && (
-              <FormattedMessage id={errors.channel?.id?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.channel?.id?.message} />
         </FormRow>
 
         <FormRow

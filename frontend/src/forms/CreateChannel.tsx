@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2023-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2023 - 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import _ from "lodash";
 import { useMemo, useCallback, useState, useEffect } from "react";
@@ -40,6 +38,7 @@ import {
   channelSchema,
   TargetGroup,
 } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 import { ChannelOutputData } from "./UpdateChannel";
 
 const CREATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
@@ -66,6 +65,9 @@ const CREATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
 // TargetGroupsErrors handles errors as unknown and uses type guards to render type-safe error message.
 // TODO: update RHF
 const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
+  const intl = useIntl();
+  const fmt = intl.formatMessage;
+
   if (errors == null) {
     return null;
   }
@@ -75,7 +77,7 @@ const TargetGroupsErrors = ({ errors }: { errors: unknown }) => {
       typeof (errors as Record<"message", unknown>).message === "string"
     ) {
       const message = (errors as Record<"message", string>).message;
-      return <FormattedMessage id={message} />;
+      return <>{fmt({ id: message })}</>;
     }
   }
   return null;
@@ -231,11 +233,7 @@ const CreateChannelForm = ({
           }
         >
           <Form.Control {...register("name")} isInvalid={!!errors.name} />
-          <Form.Control.Feedback type="invalid">
-            {errors.name?.message && (
-              <FormattedMessage id={errors.name?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.name?.message} />
         </FormRow>
         <FormRow
           id="create-channel-form-handle"
@@ -247,11 +245,7 @@ const CreateChannelForm = ({
           }
         >
           <Form.Control {...register("handle")} isInvalid={!!errors.handle} />
-          <Form.Control.Feedback type="invalid">
-            {errors.handle?.message && (
-              <FormattedMessage id={errors.handle?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.handle?.message} />
         </FormRow>
         <FormRow
           id="create-channel-form-target-groups"

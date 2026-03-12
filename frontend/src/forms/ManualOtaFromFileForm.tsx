@@ -27,6 +27,7 @@ import Button from "@/components/Button";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { manualOtaFromFileSchema } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 type ManualOtaOperation = (input: {
   imageFile?: File;
@@ -68,11 +69,7 @@ const ManualOtaFromFileForm = ({
             />
           </Form.Label>
           <Form.Control {...register("baseImageFile")} type="file" />
-          <Form.Control.Feedback type="invalid">
-            {errors.baseImageFile && (
-              <FormattedMessage id={errors.baseImageFile?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.baseImageFile?.message} />
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage

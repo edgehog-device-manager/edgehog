@@ -20,7 +20,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { Editor } from "@monaco-editor/react";
-import { FormattedMessage } from "react-intl";
+import { useIntl } from "react-intl";
 
 import Icon from "@/components/Icon";
 
@@ -45,6 +45,9 @@ const MonacoEditor = ({
   autoFormat = true,
   error,
 }: MonacoEditorProps) => {
+  const intl = useIntl();
+  const fmt = intl.formatMessage;
+
   const editorRef = useRef<any>(null);
   const lineHeight = 22;
   const [height, setHeight] = useState(initialLines * lineHeight);
@@ -111,7 +114,7 @@ const MonacoEditor = ({
       {error && (
         <p className="text-danger mt-2">
           <Icon icon="warning" className="me-2" />
-          <FormattedMessage id={error} defaultMessage={error} />
+          {fmt({ id: error, defaultMessage: error })}
         </p>
       )}
     </div>

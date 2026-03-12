@@ -62,7 +62,7 @@ const CampaignOutcome = ({ campaignRef }: Props) => {
       <div className="d-flex align-items-center">
         <Icon icon="circle" className={`me-2 ${colors[outcome]}`} />
         <span>
-          <FormattedMessage id={messages[outcome].id} />
+          <FormattedMessage {...messages[outcome]} />
         </span>
       </div>
     )

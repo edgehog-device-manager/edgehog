@@ -85,9 +85,7 @@ const columns = [
     cell: ({ getValue }) => {
       const technology = getValue();
       return (
-        technology && (
-          <FormattedMessage id={technologyMessages[technology].id} />
-        )
+        technology && <FormattedMessage {...technologyMessages[technology]} />
       );
     },
   }),

@@ -20,7 +20,7 @@
 
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, FieldError, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
 import Button from "@/components/Button";
@@ -32,6 +32,7 @@ import Spinner from "@/components/Spinner";
 import MonacoJsonEditor from "@/components/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
 import { VolumeFormData, volumeSchema } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 const initialData: VolumeFormData = {
   label: "",
@@ -41,15 +42,6 @@ interface Props {
   isLoading?: boolean;
   onSubmit: (data: VolumeFormData) => void;
 }
-
-const ErrorMessage = ({ error }: { error?: FieldError }) => {
-  if (!error?.message) return null;
-  return (
-    <Form.Control.Feedback type="invalid" role="alert">
-      <FormattedMessage id={error.message} defaultMessage={error.message} />
-    </Form.Control.Feedback>
-  );
-};
 
 const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
   const {
@@ -80,7 +72,7 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
           {...register("label")}
           isInvalid={!!errors.label}
         />
-        <ErrorMessage error={errors.label} />
+        <FormFeedback feedback={errors.label?.message} />
       </FormRow>
 
       <FormRow
@@ -98,7 +90,7 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
           {...register("driver")}
           isInvalid={!!errors.driver}
         />
-        <ErrorMessage error={errors.driver} />
+        <FormFeedback feedback={errors.driver?.message} />
       </FormRow>
 
       <FormRow

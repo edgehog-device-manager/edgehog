@@ -120,7 +120,7 @@ const OperationStatus = ({ status }: { status: OtaOperationStatus }) => (
   <div className="d-flex align-items-center">
     <Icon icon="circle" className={`me-2 ${getOperationStatusColor(status)}`} />
     <span>
-      <FormattedMessage id={operationStatusMessages[status].id} />
+      <FormattedMessage {...operationStatusMessages[status]} />
     </span>
   </div>
 );
@@ -248,7 +248,7 @@ const columns = [
         const statusCode = getValue();
         return (
           statusCode && (
-            <FormattedMessage id={operationStatusCodeMessages[statusCode].id} />
+            <FormattedMessage {...operationStatusCodeMessages[statusCode]} />
           )
         );
       },

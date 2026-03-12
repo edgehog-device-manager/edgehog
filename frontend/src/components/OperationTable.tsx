@@ -97,7 +97,7 @@ const OperationStatus = ({ status }: { status: OtaOperationFinalStatus }) => (
   <div className="d-flex align-items-center">
     <Icon icon="circle" className={`me-2 ${statusColors[status]}`} />
     <span>
-      <FormattedMessage id={statusMessages[status].id} />
+      <FormattedMessage {...statusMessages[status]} />
     </span>
   </div>
 );

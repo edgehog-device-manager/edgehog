@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2023-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2023 - 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -404,11 +402,7 @@ const CreateUpdateCampaignForm = ({
               />
             )}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.baseImageCollection && (
-              <FormattedMessage id={errors.baseImageCollection?.id?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.baseImageCollection?.id?.message} />
         </FormRow>
         <FormRow
           id="create-update-campaign-form-base-image"
@@ -439,11 +433,7 @@ const CreateUpdateCampaignForm = ({
                   />
                 )}
               />
-              <Form.Control.Feedback type="invalid">
-                {errors.baseImage && (
-                  <FormattedMessage id={errors.baseImage?.id?.message} />
-                )}
-              </Form.Control.Feedback>
+              <FormFeedback feedback={errors.baseImage?.id?.message} />
             </>
           ) : (
             <div className="d-flex align-content-center fst-italic text-muted">
@@ -492,11 +482,7 @@ const CreateUpdateCampaignForm = ({
               />
             )}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.channel && (
-              <FormattedMessage id={errors.channel?.id?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.channel?.id?.message} />
         </FormRow>
         <FormRow
           id="create-update-campaign-form-max-in-progress-operations"
@@ -594,11 +580,7 @@ const CreateUpdateCampaignForm = ({
             {...register("forceDowngrade")}
             isInvalid={!!errors.forceDowngrade}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.forceDowngrade?.message && (
-              <FormattedMessage id={errors.forceDowngrade.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.forceDowngrade?.message} />
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">

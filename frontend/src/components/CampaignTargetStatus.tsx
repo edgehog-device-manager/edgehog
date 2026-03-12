@@ -68,7 +68,7 @@ type CampaignTargetStatusProps = {
 const CampaignTargetStatus = ({ status }: CampaignTargetStatusProps) => (
   <span className={`campaign-target-status text-nowrap`}>
     <Icon icon="circle" className={`me-2 ${colors[status]}`} />
-    <FormattedMessage id={messages[status].id} />
+    <FormattedMessage {...messages[status]} />
   </span>
 );
 

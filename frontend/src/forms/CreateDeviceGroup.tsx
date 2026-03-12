@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2022-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2022 - 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
@@ -27,6 +25,7 @@ import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
+import FormFeedback from "@/forms/FormFeedback";
 import { DeviceGroupFormData, deviceGroupSchema } from "@/forms/validation";
 
 const initialData: DeviceGroupFormData = {
@@ -64,11 +63,7 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
           }
         >
           <Form.Control {...register("name")} isInvalid={!!errors.name} />
-          <Form.Control.Feedback type="invalid">
-            {errors.name?.message && (
-              <FormattedMessage id={errors.name?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.name?.message} />
         </FormRow>
         <FormRow
           id="device-group-form-handle"
@@ -80,11 +75,7 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
           }
         >
           <Form.Control {...register("handle")} isInvalid={!!errors.handle} />
-          <Form.Control.Feedback type="invalid">
-            {errors.handle?.message && (
-              <FormattedMessage id={errors.handle?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.handle?.message} />
         </FormRow>
         <FormRow
           id="device-group-form-selector"
@@ -101,11 +92,7 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
             {...register("selector")}
             isInvalid={!!errors.selector}
           />
-          <Form.Control.Feedback type="invalid">
-            {errors.selector?.message && (
-              <FormattedMessage id={errors.selector?.message} />
-            )}
-          </Form.Control.Feedback>
+          <FormFeedback feedback={errors.selector?.message} />
         </FormRow>
         <div className="d-flex justify-content-end align-items-center">
           <Button variant="primary" type="submit" disabled={isLoading}>

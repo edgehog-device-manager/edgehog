@@ -20,7 +20,7 @@
 
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useFieldArray, useWatch } from "react-hook-form";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import Select from "react-select";
 
 import {
@@ -79,6 +79,9 @@ type Section =
 // TargetGroupsErrors handles errors as unknown and uses type guards to render type-safe error message.
 // TODO: update RHF
 const NetworksErrors = ({ errors }: { errors: unknown }) => {
+  const intl = useIntl();
+  const fmt = intl.formatMessage;
+
   if (errors == null) {
     return null;
   }
@@ -88,7 +91,7 @@ const NetworksErrors = ({ errors }: { errors: unknown }) => {
       typeof (errors as Record<"message", unknown>).message === "string"
     ) {
       const message = (errors as Record<"message", string>).message;
-      return <FormattedMessage id={message} />;
+      return <>{fmt({ id: message })}</>;
     }
   }
   return null;
@@ -198,13 +201,11 @@ const ContainerForm = ({
                   {...register(`containers.${index}.image.reference` as const)}
                   isInvalid={!!errors.containers?.[index]?.image?.reference}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.containers?.[index]?.image?.reference?.message && (
-                    <FormattedMessage
-                      id={errors.containers[index].image.reference.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback
+                  feedback={
+                    errors.containers?.[index]?.image?.reference?.message
+                  }
+                />
               </FieldHelp>
             </FormRow>
 

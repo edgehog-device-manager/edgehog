@@ -127,7 +127,7 @@ const columns = [
     ),
     cell: ({ getValue }) => {
       const status = getValue();
-      return status && <FormattedMessage id={statusMessages[status].id} />;
+      return status && <FormattedMessage {...statusMessages[status]} />;
     },
   }),
   columnHelper.accessor("levelPercentage", {

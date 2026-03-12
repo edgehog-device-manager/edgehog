@@ -30,6 +30,7 @@ import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Icon from "@/components/Icon";
 import { ReleaseFormData } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 type DeviceMappingsData = NonNullable<
   ContainersTable_ContainerEdgeFragment$data["edges"]
@@ -131,13 +132,9 @@ const DeviceMappingsFormInput = ({
                   isInvalid={!!fieldErrors?.pathInContainer}
                   readOnly={readOnly}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {fieldErrors?.pathInContainer?.message && (
-                    <FormattedMessage
-                      id={fieldErrors.pathInContainer.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback
+                  feedback={fieldErrors?.pathInContainer?.message}
+                />
               </Col>
               <Col>
                 <Form.Control
@@ -150,11 +147,7 @@ const DeviceMappingsFormInput = ({
                   isInvalid={!!fieldErrors?.pathOnHost}
                   readOnly={readOnly}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {fieldErrors?.pathOnHost?.message && (
-                    <FormattedMessage id={fieldErrors.pathOnHost.message} />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback feedback={fieldErrors?.pathOnHost?.message} />
               </Col>
               <Col>
                 <Form.Control
@@ -167,13 +160,9 @@ const DeviceMappingsFormInput = ({
                   isInvalid={!!fieldErrors?.cgroupPermissions}
                   readOnly={readOnly}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {fieldErrors?.cgroupPermissions?.message && (
-                    <FormattedMessage
-                      id={fieldErrors.cgroupPermissions.message}
-                    />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback
+                  feedback={fieldErrors?.cgroupPermissions?.message}
+                />
               </Col>
               {!readOnly && (
                 <Col>
