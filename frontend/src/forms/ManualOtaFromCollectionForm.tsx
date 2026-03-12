@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { graphql, usePaginationFragment } from "react-relay";
 import _ from "lodash";
 import Select from "react-select";
@@ -105,14 +105,16 @@ const ManualOtaFromCollectionForm = ({
     handleSubmit,
     register,
     resetField,
-    watch,
   } = useForm({
     mode: "onTouched",
     defaultValues: fromCollectionInitialData,
     resolver: zodResolver(manualOtaFromCollectionSchema),
   });
 
-  const selectedBaseImageCollection = watch("baseImageCollection");
+  const selectedBaseImageCollection = useWatch({
+    control,
+    name: "baseImageCollection",
+  });
 
   const {
     data: baseImageCollPaginationData,

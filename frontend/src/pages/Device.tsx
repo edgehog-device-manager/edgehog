@@ -535,113 +535,119 @@ const DeviceContent = ({
     [deviceTags],
   );
 
-  const handleAddDeviceTags = useCallback((tags: string[]) => {
-    addDeviceTags({
-      variables: {
-        deviceId,
-        input: { tags },
-      },
-      onCompleted(data, errors) {
-        if (errors) {
-          handleAPIErrors(errors);
-          return;
-        }
-        // TODO refresh tags only when adding unexisting tags
-        refreshTags();
-      },
-      updater(store, data) {
-        if (!data?.addDeviceTags?.result) {
-          return;
-        }
-
-        const root = store.getRoot();
-        const deviceGroups = root.getLinkedRecords("deviceGroups");
-        if (!deviceGroups) {
-          return;
-        }
-
-        const device = store
-          .getRootField("addDeviceTags")
-          .getLinkedRecord("result");
-        const deviceId = device.getDataID();
-
-        const linkedGroups = new Set(
-          device
-            .getLinkedRecords("deviceGroups")
-            ?.map((deviceGroup) => deviceGroup.getDataID()),
-        );
-
-        deviceGroups.forEach((deviceGroup) => {
-          const devices = deviceGroup.getLinkedRecords("devices");
-          if (!devices) {
+  const handleAddDeviceTags = useCallback(
+    (tags: string[]) => {
+      addDeviceTags({
+        variables: {
+          deviceId,
+          input: { tags },
+        },
+        onCompleted(data, errors) {
+          if (errors) {
+            handleAPIErrors(errors);
             return;
           }
-          if (!linkedGroups.has(deviceGroup.getDataID())) {
-            return deviceGroup.setLinkedRecords(
-              devices.filter((device) => device.getDataID() !== deviceId),
-              "devices",
-            );
-          }
-          if (!devices.some((device) => device.getDataID() === deviceId)) {
-            deviceGroup.setLinkedRecords([...devices, device], "devices");
-          }
-        });
-      },
-    });
-  }, []);
-
-  const handleRemoveDeviceTags = useCallback((tags: string[]) => {
-    removeDeviceTags({
-      variables: {
-        deviceId,
-        input: { tags },
-      },
-      onCompleted(data, errors) {
-        if (errors) {
-          handleAPIErrors(errors);
-          return;
-        }
-      },
-      updater(store, data) {
-        if (!data?.removeDeviceTags?.result) {
-          return;
-        }
-
-        const root = store.getRoot();
-        const deviceGroups = root.getLinkedRecords("deviceGroups");
-        if (!deviceGroups) {
-          return;
-        }
-
-        const device = store
-          .getRootField("removeDeviceTags")
-          .getLinkedRecord("result");
-        const deviceId = device.getDataID();
-
-        const linkedGroups = new Set(
-          device
-            .getLinkedRecords("deviceGroups")
-            ?.map((deviceGroup) => deviceGroup.getDataID()),
-        );
-
-        deviceGroups.forEach((deviceGroup) => {
-          const devices = deviceGroup.getLinkedRecords("devices");
-          if (!devices) {
+          // TODO refresh tags only when adding unexisting tags
+          refreshTags();
+        },
+        updater(store, data) {
+          if (!data?.addDeviceTags?.result) {
             return;
           }
-          if (!linkedGroups.has(deviceGroup.getDataID())) {
-            return deviceGroup.setLinkedRecords(
-              devices.filter((device) => device.getDataID() !== deviceId),
-              "devices",
-            );
+
+          const root = store.getRoot();
+          const deviceGroups = root.getLinkedRecords("deviceGroups");
+          if (!deviceGroups) {
+            return;
           }
-          if (!devices.some((device) => device.getDataID() === deviceId)) {
-            deviceGroup.setLinkedRecords([...devices, device], "devices");
+
+          const device = store
+            .getRootField("addDeviceTags")
+            .getLinkedRecord("result");
+          const deviceId = device.getDataID();
+
+          const linkedGroups = new Set(
+            device
+              .getLinkedRecords("deviceGroups")
+              ?.map((deviceGroup) => deviceGroup.getDataID()),
+          );
+
+          deviceGroups.forEach((deviceGroup) => {
+            const devices = deviceGroup.getLinkedRecords("devices");
+            if (!devices) {
+              return;
+            }
+            if (!linkedGroups.has(deviceGroup.getDataID())) {
+              return deviceGroup.setLinkedRecords(
+                devices.filter((device) => device.getDataID() !== deviceId),
+                "devices",
+              );
+            }
+            if (!devices.some((device) => device.getDataID() === deviceId)) {
+              deviceGroup.setLinkedRecords([...devices, device], "devices");
+            }
+          });
+        },
+      });
+    },
+    [addDeviceTags, deviceId, handleAPIErrors, refreshTags],
+  );
+
+  const handleRemoveDeviceTags = useCallback(
+    (tags: string[]) => {
+      removeDeviceTags({
+        variables: {
+          deviceId,
+          input: { tags },
+        },
+        onCompleted(data, errors) {
+          if (errors) {
+            handleAPIErrors(errors);
+            return;
           }
-        });
-      },
-    });
-  }, []);
+        },
+        updater(store, data) {
+          if (!data?.removeDeviceTags?.result) {
+            return;
+          }
+
+          const root = store.getRoot();
+          const deviceGroups = root.getLinkedRecords("deviceGroups");
+          if (!deviceGroups) {
+            return;
+          }
+
+          const device = store
+            .getRootField("removeDeviceTags")
+            .getLinkedRecord("result");
+          const deviceId = device.getDataID();
+
+          const linkedGroups = new Set(
+            device
+              .getLinkedRecords("deviceGroups")
+              ?.map((deviceGroup) => deviceGroup.getDataID()),
+          );
+
+          deviceGroups.forEach((deviceGroup) => {
+            const devices = deviceGroup.getLinkedRecords("devices");
+            if (!devices) {
+              return;
+            }
+            if (!linkedGroups.has(deviceGroup.getDataID())) {
+              return deviceGroup.setLinkedRecords(
+                devices.filter((device) => device.getDataID() !== deviceId),
+                "devices",
+              );
+            }
+            if (!devices.some((device) => device.getDataID() === deviceId)) {
+              deviceGroup.setLinkedRecords([...devices, device], "devices");
+            }
+          });
+        },
+      });
+    },
+    [deviceId, removeDeviceTags],
+  );
 
   const handleTagsChange = useCallback(
     (updatedTags: string[]) => {
@@ -660,7 +666,7 @@ const DeviceContent = ({
         handleRemoveDeviceTags(tagsToBeRemoved);
       }
     },
-    [deviceTags],
+    [deviceTags, handleAddDeviceTags, handleRemoveDeviceTags],
   );
 
   const [getBaseImageCollsQuery, getBaseImageColls] =

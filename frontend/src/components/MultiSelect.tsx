@@ -114,7 +114,9 @@ const MultiSelect = <Option,>({
 
   const handleInputChange = useCallback(
     (searchText: string) => {
-      onInputChange && onInputChange(searchText);
+      if (onInputChange) {
+        onInputChange(searchText);
+      }
     },
     [onInputChange],
   );

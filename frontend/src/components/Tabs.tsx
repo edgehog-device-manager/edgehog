@@ -1,22 +1,20 @@
-/*
-  This file is part of Edgehog.
-
-  Copyright 2021 - 2025 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+// This file is part of Edgehog.
+//
+// Copyright 2021-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import {
   createContext,
@@ -72,29 +70,15 @@ const Tabs = ({
 
   const registerTab = useCallback((tabRef: TabRef) => {
     setTabRefs((refs) => _.uniqBy([...refs, tabRef], "eventKey"));
-    setActiveKey((activeKey) => activeKey ?? tabRef.eventKey);
   }, []);
 
   const unregisterTab = useCallback((eventKey: EventKey) => {
-    setTabRefs((tabRefs) => {
-      const newTabRefs = tabRefs.filter(
-        (tabRef) => tabRef.eventKey !== eventKey,
-      );
-      setActiveKey((activeKey) =>
-        activeKey === eventKey ? newTabRefs[0]?.eventKey : activeKey,
-      );
-      return newTabRefs;
-    });
+    setTabRefs((tabRefs) =>
+      tabRefs.filter((tabRef) => tabRef.eventKey !== eventKey),
+    );
+    // If the active tab is removed, clear the state so it falls back to the sorted default
+    setActiveKey((prevKey) => (prevKey === eventKey ? undefined : prevKey));
   }, []);
-
-  const contextValue = useMemo(
-    () => ({
-      activeKey,
-      registerTab,
-      unregisterTab,
-    }),
-    [activeKey, registerTab, unregisterTab],
-  );
 
   const sortedTabRefs = useMemo(() => {
     const tabRefsByEventKey = _.keyBy(tabRefs, "eventKey");
@@ -108,12 +92,17 @@ const Tabs = ({
     return sortedEventKeys.map((eventKey) => tabRefsByEventKey[eventKey]);
   }, [tabRefs, tabsOrder]);
 
-  useEffect(() => {
-    if (!activeKey && sortedTabRefs.length > 0) {
-      const fallback = defaultActiveKey ?? sortedTabRefs[0].eventKey;
-      setActiveKey(fallback);
-    }
-  }, [activeKey, defaultActiveKey, sortedTabRefs]);
+  const effectiveActiveKey =
+    activeKey ?? defaultActiveKey ?? sortedTabRefs[0]?.eventKey;
+
+  const contextValue = useMemo(
+    () => ({
+      activeKey: effectiveActiveKey,
+      registerTab,
+      unregisterTab,
+    }),
+    [effectiveActiveKey, registerTab, unregisterTab],
+  );
 
   return (
     <TabsContext.Provider value={contextValue}>
@@ -125,7 +114,7 @@ const Tabs = ({
                 <NavLink
                   as="button"
                   type="button"
-                  active={activeKey === tabRef.eventKey}
+                  active={effectiveActiveKey === tabRef.eventKey}
                   onClick={() => setActiveKey(tabRef.eventKey)}
                 >
                   {tabRef.title}
@@ -139,7 +128,6 @@ const Tabs = ({
     </TabsContext.Provider>
   );
 };
-
 const useTabs = (): TabsContextValue => {
   const tabsContextValue = useContext(TabsContext);
   if (tabsContextValue == null) {

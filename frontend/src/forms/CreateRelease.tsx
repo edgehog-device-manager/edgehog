@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay/hooks";
@@ -392,21 +392,23 @@ const CreateRelease = ({
 
   const [showImportSuccess, setShowImportSuccess] = useState(false);
   const [justImported, setJustImported] = useState(false);
-  const isImportingRef = useRef(false);
-  const importedContainersSnapshotRef = useRef<ContainerInputData[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importedContainersSnapshot, setImportedContainersSnapshot] = useState<
+    ContainerInputData[]
+  >([]);
 
   // Watch all form values to detect changes
   const formValues = useWatch({ control });
 
   // Helper function to check if a specific container is imported
   const isContainerImported = (containerIndex: number): boolean => {
-    return containerIndex < importedContainersSnapshotRef.current.length;
+    return containerIndex < importedContainersSnapshot.length;
   };
 
   // Helper function to check if a specific container is modified
   const isContainerModified = (containerIndex: number): boolean => {
     // If we just imported or are currently importing, don't show modified tags yet
-    if (justImported || isImportingRef.current) {
+    if (justImported || isImporting) {
       return false;
     }
 
@@ -414,8 +416,7 @@ const CreateRelease = ({
       return false;
     }
 
-    const importedContainer =
-      importedContainersSnapshotRef.current[containerIndex];
+    const importedContainer = importedContainersSnapshot[containerIndex];
     const currentContainer = formValues?.containers?.[containerIndex];
 
     if (!importedContainer || !currentContainer) {
@@ -437,10 +438,10 @@ const CreateRelease = ({
     const newContainers = currentContainers.filter((_, i) => i !== index);
 
     // Update imported containers data if needed
-    if (index < importedContainersSnapshotRef.current.length) {
-      const newSnapshot = [...importedContainersSnapshotRef.current];
+    if (index < importedContainersSnapshot.length) {
+      const newSnapshot = [...importedContainersSnapshot];
       newSnapshot.splice(index, 1);
-      importedContainersSnapshotRef.current = newSnapshot;
+      setImportedContainersSnapshot(newSnapshot);
     }
 
     // Update open container forms
@@ -824,12 +825,12 @@ const CreateRelease = ({
             });
 
             // Set importing flags to prevent premature modification detection
-            isImportingRef.current = true;
+            setIsImporting(true);
             setJustImported(true);
             setShowImportSuccess(true);
 
             // Store the imported containers snapshot
-            importedContainersSnapshotRef.current = mappedContainers;
+            setImportedContainersSnapshot(mappedContainers);
 
             // Use requestAnimationFrame to wait for the reset to complete
             requestAnimationFrame(() => {
@@ -837,17 +838,20 @@ const CreateRelease = ({
                 // After form has settled, take a snapshot of the actual form values
                 // This ensures we compare against what the form actually contains
                 const settledContainers = control._formValues.containers || [];
-                importedContainersSnapshotRef.current = JSON.parse(
+                const snapshotContainers = JSON.parse(
                   JSON.stringify(settledContainers),
                 );
+                setImportedContainersSnapshot(snapshotContainers);
 
                 // Clear flags after form reset is complete
-                isImportingRef.current = false;
+                setIsImporting(false);
                 setJustImported(false);
 
                 // Set all containers to be opened once the import is completed
                 setOpenIndexes(
-                  importedContainersSnapshotRef.current.map((_v, i) => i),
+                  snapshotContainers.map(
+                    (_v: ContainerInputData, i: number) => i,
+                  ),
                 );
               });
             });

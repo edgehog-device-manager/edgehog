@@ -170,13 +170,14 @@ const CreateBaseImageCollectionForm = ({
     resolver: zodResolver(baseImageCollectionSchema),
   });
 
-  const isSystemModelUsedByOtherBaseImageCollection = (
-    systemModel: SystemModelRecord,
-  ) =>
-    baseImageCollections.find(
-      (baseImageCollection: BaseImageCollectionRecord) =>
-        baseImageCollection.systemModel.id === systemModel.id,
-    ) !== undefined;
+  const isSystemModelUsedByOtherBaseImageCollection = useCallback(
+    (systemModel: SystemModelRecord) =>
+      baseImageCollections.find(
+        (baseImageCollection: BaseImageCollectionRecord) =>
+          baseImageCollection.systemModel.id === systemModel.id,
+      ) !== undefined,
+    [baseImageCollections],
+  );
 
   // Sort system models: available first, used ones last
   const systemModelOptions = useMemo(() => {
@@ -185,7 +186,7 @@ const CreateBaseImageCollectionForm = ({
       const model2Used = isSystemModelUsedByOtherBaseImageCollection(model2);
       return Number(model1Used) - Number(model2Used);
     });
-  }, [systemModels]);
+  }, [systemModels, isSystemModelUsedByOtherBaseImageCollection]);
 
   const getSystemModelLabel = useCallback(
     (systemModel: SystemModelRecord) => {
@@ -212,7 +213,7 @@ const CreateBaseImageCollectionForm = ({
         return systemModel.name;
       }
     },
-    [intl],
+    [intl, baseImageCollections],
   );
   const getSystemModelValue = (systemModel: SystemModelRecord) =>
     systemModel.id;

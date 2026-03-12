@@ -98,8 +98,10 @@ const NetworksErrors = ({ errors }: { errors: unknown }) => {
 };
 
 const reduceEnv = (env: EnvironmentVariable[]) =>
-  env.reduce((acc: any, envVar: EnvironmentVariable) => {
-    envVar ? (acc[envVar.key] = envVar.value) : acc;
+  env.reduce((acc: Record<string, string>, envVar: EnvironmentVariable) => {
+    if (envVar) {
+      acc[envVar.key] = envVar.value;
+    }
     return acc;
   }, {});
 

@@ -48,7 +48,7 @@ import ContainerStatusList from "@/components/ContainerStatusList";
 import "@/components/DeployedApplicationsTable.scss";
 
 // We use graphql fields below in columns configuration
-/* eslint-disable relay/unused-fields */
+
 const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
   fragment DeployedApplicationsTable_deployedApplications on Device
   @refetchable(queryName: "DeployedApplicationsTable_PaginationQuery") {
@@ -307,7 +307,7 @@ const DeployedApplicationsTable = ({
         };
       },
     );
-  }, [selectedDeployment?.upgradeTargetReleases]);
+  }, [selectedDeployment?.upgradeTargetReleases, systemModelName]);
 
   const selectedUpgradeReleaseOption = useMemo(() => {
     return (

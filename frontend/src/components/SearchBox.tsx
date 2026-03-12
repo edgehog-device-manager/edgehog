@@ -37,7 +37,9 @@ const SearchBox = ({ className = "", onChange, value }: Props) => {
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       const searchText = event.target.value;
-      onChange && onChange(searchText);
+      if (onChange) {
+        onChange(searchText);
+      }
     },
     [onChange],
   );

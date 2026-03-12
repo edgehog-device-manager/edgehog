@@ -138,8 +138,7 @@ const WiFiScanResultsTable = ({ className, deviceRef }: Props) => {
     );
   }
 
-  let connectedFound = false;
-  const wifiScanResults = data.wifiScanResults
+  const sorted = data.wifiScanResults
     .map((scanResult) => {
       const { timestamp, ...rest } = scanResult;
       return {
@@ -147,17 +146,14 @@ const WiFiScanResultsTable = ({ className, deviceRef }: Props) => {
         seenAt: new Date(timestamp),
       };
     })
-    .sort((scan1, scan2) => scan2.seenAt.getDate() - scan1.seenAt.getDate())
-    .map((scanResult) => {
-      if (!connectedFound && scanResult.connected) {
-        connectedFound = true;
-        return scanResult;
-      }
-      return {
-        ...scanResult,
-        connected: false,
-      };
-    });
+    .sort((scan1, scan2) => scan2.seenAt.getTime() - scan1.seenAt.getTime());
+
+  const firstConnectedIdx = sorted.findIndex((r) => r.connected);
+  const wifiScanResults = sorted.map((scanResult, idx) =>
+    scanResult.connected && idx !== firstConnectedIdx
+      ? { ...scanResult, connected: false }
+      : scanResult,
+  );
 
   return (
     <Table

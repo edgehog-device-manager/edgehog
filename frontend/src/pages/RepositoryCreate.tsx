@@ -116,7 +116,7 @@ const Repository = () => {
         },
       });
     },
-    [createRepository, navigate, errorFeedback],
+    [createRepository, navigate],
   );
 
   return (

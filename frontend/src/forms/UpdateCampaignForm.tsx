@@ -35,7 +35,7 @@ import { SimpleFormRow as FormRow } from "@/components/FormRow";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration
-/* eslint-disable relay/unused-fields */
+
 const CAMPAIGN_FORM_FRAGMENT = graphql`
   fragment UpdateCampaignForm_CampaignFragment on Campaign {
     ...CampaignStatus_CampaignStatusFragment

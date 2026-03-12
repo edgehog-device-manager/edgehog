@@ -113,7 +113,7 @@ const Application = () => {
         },
       });
     },
-    [createApplication, navigate, errorFeedback],
+    [createApplication, navigate],
   );
 
   return (

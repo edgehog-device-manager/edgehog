@@ -18,7 +18,7 @@
 
 import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
@@ -210,7 +210,6 @@ const CreateSystemModelForm = ({
     setValue,
     handleSubmit,
     formState: { isDirty, errors },
-    watch,
   } = useForm<SystemModelFormData>({
     mode: "onTouched",
     defaultValues: initialData,
@@ -240,7 +239,11 @@ const CreateSystemModelForm = ({
     [partNumbers],
   );
 
-  const pictureFile = watch("pictureFile");
+  const pictureFile = useWatch({
+    control,
+    name: "pictureFile",
+  });
+
   const picture =
     pictureFile instanceof FileList && pictureFile.length > 0
       ? URL.createObjectURL(pictureFile[0]) // picture is the new file

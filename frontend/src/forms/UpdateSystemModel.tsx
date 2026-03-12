@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -197,7 +197,6 @@ const UpdateSystemModelForm = ({
     setValue,
     handleSubmit,
     formState: { isDirty, errors },
-    watch,
   } = useForm<SystemModelUpdateFormData>({
     mode: "onTouched",
     defaultValues: transformInputData(systemModel, locale),
@@ -233,7 +232,11 @@ const UpdateSystemModelForm = ({
     reset(transformInputData(systemModel, locale));
   }, [reset, systemModel, locale]);
 
-  const pictureFile = watch("pictureFile");
+  const pictureFile = useWatch({
+    control,
+    name: "pictureFile",
+  });
+
   const picture =
     pictureFile instanceof FileList && pictureFile.length > 0
       ? URL.createObjectURL(pictureFile[0]) // picture is the new file

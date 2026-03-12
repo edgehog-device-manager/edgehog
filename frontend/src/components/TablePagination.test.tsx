@@ -1,27 +1,26 @@
-/*
-  This file is part of Edgehog.
-
-  Copyright 2021-2023 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
+// This file is part of Edgehog.
+//
+// Copyright 2021-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import { it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 import TablePagination from "./TablePagination";
+import userEvent from "@testing-library/user-event";
 
 it("renders correctly", () => {
   const pageChangeHandler = vi.fn();
@@ -128,7 +127,7 @@ it("shows there are more pages available", () => {
   expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
 });
 
-it("correctly notifies page index on change", () => {
+it("correctly notifies page index on change", async () => {
   const pageChangeHandler = vi.fn();
   render(
     <TablePagination
@@ -137,11 +136,16 @@ it("correctly notifies page index on change", () => {
       onPageChange={pageChangeHandler}
     />,
   );
-  screen.getByTestId("pagination-item-16").click();
+
+  const user = userEvent.setup();
+
+  await user.click(screen.getByTestId("pagination-item-16"));
   expect(pageChangeHandler).toHaveBeenCalledWith(16);
-  screen.getByTestId("pagination-first").click();
+
+  await user.click(screen.getByTestId("pagination-first"));
   expect(pageChangeHandler).toHaveBeenCalledWith(0);
-  screen.getByTestId("pagination-last").click();
+
+  await user.click(screen.getByTestId("pagination-last"));
   expect(pageChangeHandler).toHaveBeenCalledWith(29);
 });
 

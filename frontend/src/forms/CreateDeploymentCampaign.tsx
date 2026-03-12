@@ -22,7 +22,7 @@ import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "react-select";
 
@@ -197,7 +197,6 @@ const CreateDeploymentCampaignForm = ({
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     control,
     resetField,
   } = useForm<DeploymentCampaignFormData>({
@@ -210,9 +209,9 @@ const CreateDeploymentCampaignForm = ({
     onSubmit(transformOutputData(data));
   };
 
-  const selectedApp = watch("application");
-  const selectedRelease = watch("release");
-  const selectedOperationType = watch("operationType");
+  const selectedApp = useWatch({ control, name: "application" });
+  const selectedRelease = useWatch({ control, name: "release" });
+  const selectedOperationType = useWatch({ control, name: "operationType" });
 
   const {
     data: applicationPaginationData,

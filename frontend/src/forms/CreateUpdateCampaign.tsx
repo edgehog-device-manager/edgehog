@@ -20,7 +20,7 @@ import _ from "lodash";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Select from "react-select";
 
@@ -169,7 +169,6 @@ const CreateUpdateCampaignForm = ({
     register,
     handleSubmit,
     formState: { errors },
-    watch,
     resetField,
   } = useForm<UpdateCampaignFormData>({
     mode: "onTouched",
@@ -177,7 +176,10 @@ const CreateUpdateCampaignForm = ({
     resolver: zodResolver(updateCampaignSchema),
   });
 
-  const selectedBaseImageCollection = watch("baseImageCollection");
+  const selectedBaseImageCollection = useWatch({
+    control,
+    name: "baseImageCollection",
+  });
 
   const {
     data: baseImageCollPaginationData,

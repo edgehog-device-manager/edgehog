@@ -1,24 +1,22 @@
-/*
-  This file is part of Edgehog.
+// This file is part of Edgehog.
+//
+// Copyright 2021-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-  Copyright 2021 SECO Mind Srl
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-  SPDX-License-Identifier: Apache-2.0
-*/
-
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import RBFigure from "react-bootstrap/Figure";
 
 const placeholderImage =
@@ -32,14 +30,17 @@ interface Props {
 
 const Figure = ({ alt, className = "", src }: Props) => {
   const [imageSrc, setImageSrc] = useState(src || placeholderImage);
+  const [prevSrc, setPrevSrc] = useState(src);
+
+  // Update imageSrc during render when src prop changes
+  if (src !== prevSrc) {
+    setPrevSrc(src);
+    setImageSrc(src || placeholderImage);
+  }
 
   const handleError = useCallback(() => {
     setImageSrc(placeholderImage);
   }, []);
-
-  useEffect(() => {
-    setImageSrc(src || placeholderImage);
-  }, [src]);
 
   return (
     <RBFigure className={"w-100 " + className}>

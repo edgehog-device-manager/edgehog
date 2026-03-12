@@ -35,7 +35,7 @@ import { Link, Route } from "@/Navigation";
 import { OperationType } from "./CreateDeploymentCampaign";
 
 // We use graphql fields below in columns configuration
-/* eslint-disable relay/unused-fields */
+
 const CAMPAIGN_FORM_FRAGMENT = graphql`
   fragment DeploymentCampaignForm_CampaignFragment on Campaign {
     ...CampaignStatus_CampaignStatusFragment
