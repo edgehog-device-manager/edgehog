@@ -133,7 +133,7 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
-    file_transfer_stream: [
+    posix_file_transfer_stream: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice",
         major: 0,
@@ -150,9 +150,48 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
-    file_transfer_storage: [
+    posix_file_transfer_storage: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Progress",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Response",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.storage.File",
+        major: 0,
+        minor: 1
+      }
+    ],
+    windows_file_transfer_stream: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Progress",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.Response",
+        major: 0,
+        minor: 1
+      }
+    ],
+    windows_file_transfer_storage: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice",
         major: 0,
         minor: 1
       },
