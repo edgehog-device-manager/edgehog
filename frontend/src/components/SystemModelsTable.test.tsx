@@ -144,7 +144,7 @@ it("renders multiple Part Numbers separated by comma", async () => {
     },
   ]);
 
-  expect(screen.getByRole("cell", { name: "SM-PN1 , SM-PN2" })).toBeVisible();
+  expect(screen.getByRole("cell", { name: "SM-PN1, SM-PN2" })).toBeVisible();
 });
 
 it("renders System Model data in correct columns", async () => {

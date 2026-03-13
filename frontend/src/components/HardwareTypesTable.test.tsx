@@ -128,7 +128,7 @@ it("renders multiple Part Numbers separated by comma", () => {
     },
   ]);
 
-  expect(screen.getByRole("cell", { name: "HW-PN1 , HW-PN2" })).toBeVisible();
+  expect(screen.getByRole("cell", { name: "HW-PN1, HW-PN2" })).toBeVisible();
 });
 
 it("renders Hardware Type data in correct columns", () => {

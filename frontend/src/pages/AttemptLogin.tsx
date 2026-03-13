@@ -41,7 +41,8 @@ const AttemptLogin = () => {
     if (!tenantSlug || !authToken) {
       // Without new credentials, just go to `redirectTo` or default
       // authenticated route
-      return navigate(redirectTo, { replace: true });
+      navigate(redirectTo, { replace: true });
+      return;
     }
     const session: Session = {
       tenantSlug: tenantSlug,
