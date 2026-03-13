@@ -24,6 +24,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.AstarteFixtures
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.FilesFixtures
   import Edgehog.OSManagementFixtures
 
   alias Edgehog.Astarte.Device.DeviceStatusMock
@@ -37,6 +38,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   alias Edgehog.Containers.ReconcilerMock
   alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device
+  alias Edgehog.Files
   alias Edgehog.OSManagement
 
   require Ash.Query
@@ -1766,6 +1768,97 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       operation = OSManagement.fetch_ota_operation!(ota_operation.id, tenant: tenant)
       assert operation.status_code == nil
+    end
+  end
+
+  describe "process_event/2 for file uploads" do
+    setup %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
+
+      file_upload_request =
+        file_upload_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :sent
+        )
+
+      {:ok, cluster: cluster, realm: realm, device: device, file_upload_request: file_upload_request}
+    end
+
+    test "updates upload request progress on fileTransfer.Progress event", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant,
+        file_upload_request: file_upload_request
+      } = context
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      upload_progress_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.fileTransfer.Progress",
+          path: "/request",
+          value: %{
+            "id" => file_upload_request.id,
+            "progress" => 42
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, upload_progress_event)
+      |> response(200)
+
+      updated = Files.fetch_file_upload_request!(file_upload_request.id, tenant: tenant)
+
+      assert updated.status == :in_progress
+      assert updated.progress_percentage == 42
+    end
+
+    test "updates upload request terminal status on fileTransfer.Response event", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant,
+        file_upload_request: file_upload_request
+      } = context
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      upload_response_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.fileTransfer.Response",
+          path: "/request",
+          value: %{
+            "id" => file_upload_request.id,
+            "code" => 0,
+            "message" => "completed"
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, upload_response_event)
+      |> response(200)
+
+      updated = Files.fetch_file_upload_request!(file_upload_request.id, tenant: tenant)
+
+      assert updated.status == :completed
+      assert updated.response_code == 0
+      assert updated.response_message == "completed"
     end
   end
 
