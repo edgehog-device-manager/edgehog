@@ -4,9 +4,6 @@
     "DateTime": "string",
     "Upload": "File"
   },
-  "featureFlags": {
-    "enable_relay_resolver_transform": true
-  },
   "eagerEsModules": true,
   "language": "typescript",
   "typescriptExcludeUndefinedFromNullableUnion": true,
