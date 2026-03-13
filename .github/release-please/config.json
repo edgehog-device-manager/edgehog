@@ -7,13 +7,13 @@
       "package-name": "backend",
       "release-type": "elixir",
       "component": "backend",
-      "include-component-in-tag": true
+      "include-component-in-tag": false
     },
     "frontend": {
       "package-name": "frontend",
       "release-type": "node",
       "component": "frontend",
-      "include-component-in-tag": true
+      "include-component-in-tag": false
     }
   },
   "plugins": [

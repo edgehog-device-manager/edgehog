@@ -21,11 +21,6 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-
 name: Release CI
 
 jobs:
@@ -35,15 +30,20 @@ jobs:
       backend--release_created: ${{ steps.release.outputs.backend--release_created }}
       backend--version: ${{ steps.release.outputs.backend--version }}
     steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ vars.EDGEHOG_APP_APP_ID }}
+          private-key: ${{ secrets.EDGEHOG_APP_PRIVATE_KEY }}
       - uses: googleapis/release-please-action@v4
         id: release
         with:
+          token: ${{ steps.app-token.outputs.token }}
           config-file: .github/release-please/config.json
           manifest-file: .github/release-please/manifest.json
   publish-docs:
     needs: [make-release]
     uses: ./.github/workflows/docs-ci.yaml
-    secrets: inherit
     with:
       release-made: ${{ needs.make-release.outputs.backend--release_created }}
       release-version: ${{ needs.make-release.outputs.backend--version }}
