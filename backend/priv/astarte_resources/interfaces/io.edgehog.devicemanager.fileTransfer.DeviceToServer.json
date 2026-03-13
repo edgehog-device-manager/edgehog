@@ -58,13 +58,22 @@
       "description": "Flag to enable the progress reporting of the download."
     },
     {
+      "endpoint": "/request/sourceType",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Source from which the file should be read from.",
+      "doc": "String enum specifying the source type, with allowed values: [storage, streaming, filesystem]."
+    },
+    {
       "endpoint": "/request/source",
       "type": "string",
       "reliability": "guaranteed",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 3600,
-      "description": "Source for the file",
-      "doc": "Device-specific field, some default values are storage and streaming."
+      "description": "Source-specific information on what to upload to the server for the source.",
+      "doc": "The value depends on the selected source type: for 'storage' is the ID of an 'io.edgehog.devicemanager.storage.File' property, for 'streaming' it's an empty string, and for 'filesystem' is a path of a file on the device."
     }
   ]
 }
