@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.12.2](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.1...v0.12.2) (2026-03-12)
+
+
+### Bug Fixes
+
+* **backend:** Do not erase device names ([930d2925](https://github.com/edgehog-device-manager/edgehog/commit/930d2925))
+
+## [0.12.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.0...v0.12.1) (2026-02-27)
+
+
+### Bug Fixes
+
+* **backend:** DeploymentEvent interface not working ([fd8e9c5](https://github.com/edgehog-device-manager/edgehog/commit/fd8e9c5f537ad3184ac6b365b9ff7f378aaf4938))
+
 ## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-18)
 
 
