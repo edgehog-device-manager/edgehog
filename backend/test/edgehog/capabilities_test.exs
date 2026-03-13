@@ -62,6 +62,10 @@ defmodule Edgehog.CapabilitiesTest do
           major: 0,
           minor: 1
         },
+        "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
         "io.edgehog.devicemanager.fileTransfer.DeviceToServer" => %InterfaceVersion{
           major: 0,
           minor: 1
@@ -114,8 +118,10 @@ defmodule Edgehog.CapabilitiesTest do
         :cellular_connection,
         :commands,
         :container_management,
-        :file_transfer_stream,
-        :file_transfer_storage,
+        :posix_file_transfer_stream,
+        :posix_file_transfer_storage,
+        :windows_file_transfer_stream,
+        :windows_file_transfer_storage,
         :file_transfer_read,
         :geolocation,
         :hardware_info,
@@ -226,7 +232,7 @@ defmodule Edgehog.CapabilitiesTest do
       assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
 
-    test "returns file_transfer_stream capability when all required interfaces are present" do
+    test "returns posix_file_transfer_stream capability when all required interfaces are present" do
       device_introspection = %{
         "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice" => %InterfaceVersion{
           major: 0,
@@ -243,7 +249,7 @@ defmodule Edgehog.CapabilitiesTest do
       }
 
       expected_capabilities = [
-        :file_transfer_stream,
+        :posix_file_transfer_stream,
         :geolocation
       ]
 
@@ -252,7 +258,7 @@ defmodule Edgehog.CapabilitiesTest do
       assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
 
-    test "returns file_transfer_storage capability when all required interfaces are present" do
+    test "returns posix_file_transfer_storage capability when all required interfaces are present" do
       device_introspection = %{
         "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice" => %InterfaceVersion{
           major: 0,
@@ -273,8 +279,65 @@ defmodule Edgehog.CapabilitiesTest do
       }
 
       expected_capabilities = [
-        :file_transfer_storage,
-        :file_transfer_stream,
+        :posix_file_transfer_storage,
+        :posix_file_transfer_stream,
+        :geolocation
+      ]
+
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
+    end
+
+    test "returns windows_file_transfer_stream capability when all required interfaces are present" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.fileTransfer.Progress" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.fileTransfer.Response" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
+      }
+
+      expected_capabilities = [
+        :windows_file_transfer_stream,
+        :geolocation
+      ]
+
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
+    end
+
+    test "returns windows_file_transfer_storage capability when all required interfaces are present" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.fileTransfer.Progress" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.fileTransfer.Response" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.storage.File" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
+      }
+
+      expected_capabilities = [
+        :windows_file_transfer_storage,
+        :windows_file_transfer_stream,
         :geolocation
       ]
 
