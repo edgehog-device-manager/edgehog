@@ -144,6 +144,18 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
       run ManualActions.SendFileDownloadRequest
     end
+
+    update :set_path_on_device do
+      argument :path_on_device, :string, allow_nil?: false
+
+      change set_attribute(:path_on_device, arg(:path_on_device))
+    end
+
+    update :set_size_bytes do
+      argument :decompressed_file_size_bytes, :integer, allow_nil?: false
+
+      change set_attribute(:uncompressed_file_size_bytes, arg(:decompressed_file_size_bytes))
+    end
   end
 
   attributes do
@@ -214,6 +226,11 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     attribute :destination, :string do
       description "Destination-specific information on where to write the file to."
+      public? true
+    end
+
+    attribute :path_on_device, :string do
+      description "Path on the device for the transferred file"
       public? true
     end
 

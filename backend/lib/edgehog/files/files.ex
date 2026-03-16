@@ -84,7 +84,10 @@ defmodule Edgehog.Files do
     resource Repository
 
     resource FileDownloadRequest do
+      define :fetch_file_download_request, action: :read, get_by: [:id]
       define :send_file_download_request, args: [:file_download_request]
+      define :set_path_on_device, args: [:path_on_device]
+      define :set_size_bytes, args: [:decompressed_file_size_bytes]
     end
   end
 end

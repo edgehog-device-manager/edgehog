@@ -60,7 +60,7 @@ SPDX-License-Identifier = "Apache-2.0"
 [[annotations]]
 path = "backend/priv/astarte_resources/trigger_templates/**.json.eex"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2023-2025 Seco Mind Srl"
+SPDX-FileCopyrightText = "2023-2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   alias Edgehog.Containers.Deployment
   alias Edgehog.Devices
   alias Edgehog.Devices.Device
+  alias Edgehog.Files
   alias Edgehog.OSManagement
   alias Edgehog.Triggers.DeviceConnected
   alias Edgehog.Triggers.DeviceDeletionFinished
@@ -49,6 +50,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @ota_event "io.edgehog.devicemanager.OTAEvent"
   @ota_response "io.edgehog.devicemanager.OTAResponse"
   @system_info "io.edgehog.devicemanager.SystemInfo"
+  @file_storage "io.edgehog.devicemanager.storage.File"
 
   @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
@@ -360,6 +362,23 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     with {:ok, ota_operation} <-
            OSManagement.fetch_ota_operation(ota_operation_id, tenant: tenant) do
       OSManagement.update_ota_operation_status(ota_operation, status, status_attrs)
+    end
+  end
+
+  defp handle_event(%IncomingData{interface: @file_storage} = event, tenant, _realm_id, _device_id, _timestamp) do
+    case String.split(event.path, "/") do
+      ["", request_id, "pathOnDevice"] ->
+        file_download_request = Files.fetch_file_download_request!(request_id, tenant: tenant)
+
+        Files.set_path_on_device(file_download_request, event.value, tenant: tenant)
+
+      ["", request_id, "sizeBytes"] ->
+        file_download_request = Files.fetch_file_download_request!(request_id, tenant: tenant)
+
+        Files.set_size_bytes(file_download_request, event.value, tenant: tenant)
+
+      _ ->
+        {:error, :invalid_event_path}
     end
   end
 
