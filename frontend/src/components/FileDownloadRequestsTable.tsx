@@ -102,10 +102,25 @@ const columns = [
     ),
     cell: ({ getValue, row }) => {
       const destinationType = getValue();
-      const destination = row.original.destination;
 
       if (destinationType == "FILESYSTEM") {
-        return destination;
+        return (
+          <FormattedMessage
+            id="components.FilesUploadTab.table.destination.filesystem"
+            defaultMessage="FILESYSTEM: {destination}"
+            values={{ destination: row.original.destination ?? "" }}
+          />
+        );
+      }
+
+      if (destinationType == "STORAGE") {
+        return (
+          <FormattedMessage
+            id="components.FilesUploadTab.table.destination.storage"
+            defaultMessage="STORAGE: {path}"
+            values={{ path: row.original.pathOnDevice ?? "" }}
+          />
+        );
       }
 
       return destinationType;

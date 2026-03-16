@@ -4897,6 +4897,7 @@ enum FileDownloadRequestSortField {
   GROUP_ID
   DESTINATION_TYPE
   DESTINATION
+  PATH_ON_DEVICE
   PROGRESS
   STATUS
   STATUS_PROGRESS
@@ -4980,6 +4981,19 @@ input FileDownloadRequestFilterProgress {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+}
+
+input FileDownloadRequestFilterPathOnDevice {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
 }
 
 input FileDownloadRequestFilterDestination {
@@ -5166,6 +5180,9 @@ input FileDownloadRequestFilterInput {
   "Destination-specific information on where to write the file to."
   destination: FileDownloadRequestFilterDestination
 
+  "Path on the device for the transferred file"
+  pathOnDevice: FileDownloadRequestFilterPathOnDevice
+
   "Flag to enable the progress reporting of the download."
   progress: FileDownloadRequestFilterProgress
 
@@ -5230,6 +5247,9 @@ type FileDownloadRequest {
 
   "Destination-specific information on where to write the file to."
   destination: String
+
+  "Path on the device for the transferred file"
+  pathOnDevice: String
 
   "Flag to enable the progress reporting of the download."
   progress: Boolean

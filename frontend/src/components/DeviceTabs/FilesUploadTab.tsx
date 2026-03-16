@@ -77,6 +77,7 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
           message
           destinationType
           destination
+          pathOnDevice
           progress
           ttlSeconds
           digest
@@ -124,6 +125,7 @@ const DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         message
         destinationType
         destination
+        pathOnDevice
         progress
         ttlSeconds
         digest

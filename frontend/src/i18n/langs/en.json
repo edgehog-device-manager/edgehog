@@ -1017,6 +1017,12 @@
   "components.FilesUploadTab.table.destination": {
     "defaultMessage": "Destination"
   },
+  "components.FilesUploadTab.table.destination.filesystem": {
+    "defaultMessage": "FILESYSTEM: {destination}"
+  },
+  "components.FilesUploadTab.table.destination.storage": {
+    "defaultMessage": "STORAGE: {path}"
+  },
   "components.FilesUploadTab.table.fileName": {
     "defaultMessage": "File Name"
   },
