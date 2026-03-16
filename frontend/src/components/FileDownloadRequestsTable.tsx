@@ -93,14 +93,23 @@ const columns = [
       return progress != null ? `${progress}%` : null;
     },
   }),
-  columnHelper.accessor("destination", {
+  columnHelper.accessor("destinationType", {
     header: () => (
       <FormattedMessage
         id="components.FilesUploadTab.table.destination"
         defaultMessage="Destination"
       />
     ),
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue, row }) => {
+      const destinationType = getValue();
+      const destination = row.original.destination;
+
+      if (destinationType == "FILESYSTEM") {
+        return destination;
+      }
+
+      return destinationType;
+    },
   }),
   columnHelper.accessor("uncompressedFileSizeBytes", {
     header: () => (

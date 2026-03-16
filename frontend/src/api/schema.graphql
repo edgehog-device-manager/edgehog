@@ -712,6 +712,9 @@ enum FileDownloadRequestStatus {
 }
 
 enum FileDestination {
+  "Persist file on device filesystem (e.g., for use by other applications)"
+  FILESYSTEM
+
   "Persist file on device storage"
   STORAGE
 
@@ -821,12 +824,6 @@ enum DeviceCapability {
   "The device supports reading files from it."
   FILE_TRANSFER_READ
 
-  "The device supports transferring files to and from its storage units."
-  FILE_TRANSFER_STORAGE
-
-  "The device supports streaming files to and from it."
-  FILE_TRANSFER_STREAM
-
   "The device can be geolocated."
   GEOLOCATION
 
@@ -841,6 +838,12 @@ enum DeviceCapability {
 
   "The device provides information about its operating system."
   OPERATING_SYSTEM
+
+  "The device supports transferring files to and from its storage units."
+  POSIX_FILE_TRANSFER_STORAGE
+
+  "The device supports streaming files to and from it."
+  POSIX_FILE_TRANSFER_STREAM
 
   "The device supports remote terminal sessions."
   REMOTE_TERMINAL
@@ -865,6 +868,12 @@ enum DeviceCapability {
 
   "The device provides information about surrounding WiFi APs."
   WIFI
+
+  "The device supports transferring files to and from its storage units."
+  WINDOWS_FILE_TRANSFER_STORAGE
+
+  "The device supports streaming files to and from it."
+  WINDOWS_FILE_TRANSFER_STREAM
 }
 
 enum DeviceLedBehavior {
@@ -4850,7 +4859,10 @@ input CreateFileDownloadRequestInput {
   groupId: Int
 
   "Device-specific field, some default values are storage and streaming."
-  destination: FileDestination
+  destinationType: FileDestination
+
+  "Destination-specific information on where to write the file to."
+  destination: String
 
   "Flag to enable the progress reporting of the download."
   progress: Boolean
@@ -4883,6 +4895,7 @@ enum FileDownloadRequestSortField {
   FILE_MODE
   USER_ID
   GROUP_ID
+  DESTINATION_TYPE
   DESTINATION
   PROGRESS
   STATUS
@@ -4970,6 +4983,19 @@ input FileDownloadRequestFilterProgress {
 }
 
 input FileDownloadRequestFilterDestination {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  like: String
+  ilike: String
+}
+
+input FileDownloadRequestFilterDestinationType {
   isNil: Boolean
   eq: FileDestination
   notEq: FileDestination
@@ -5135,6 +5161,9 @@ input FileDownloadRequestFilterInput {
   groupId: FileDownloadRequestFilterGroupId
 
   "Device-specific field, some default values are storage and streaming."
+  destinationType: FileDownloadRequestFilterDestinationType
+
+  "Destination-specific information on where to write the file to."
   destination: FileDownloadRequestFilterDestination
 
   "Flag to enable the progress reporting of the download."
@@ -5197,7 +5226,10 @@ type FileDownloadRequest {
   groupId: Int
 
   "Device-specific field, some default values are storage and streaming."
-  destination: FileDestination
+  destinationType: FileDestination
+
+  "Destination-specific information on where to write the file to."
+  destination: String
 
   "Flag to enable the progress reporting of the download."
   progress: Boolean

@@ -1098,6 +1098,12 @@
   "components.ManualFileDownloadRequestForm.destinationLabel": {
     "defaultMessage": "Destination"
   },
+  "components.ManualFileDownloadRequestForm.destinationPathHint": {
+    "defaultMessage": "Absolute path on the target device where the file should be written."
+  },
+  "components.ManualFileDownloadRequestForm.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
   "components.ManualFileDownloadRequestForm.fileHint": {
     "defaultMessage": "Select files or a folder. Multiple items will be compressed into a tar.gz archive."
   },

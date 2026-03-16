@@ -75,6 +75,7 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
           statusProgress
           statusCode
           message
+          destinationType
           destination
           progress
           ttlSeconds
@@ -121,6 +122,7 @@ const DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         statusProgress
         statusCode
         message
+        destinationType
         destination
         progress
         ttlSeconds
@@ -189,8 +191,14 @@ const ManualFileDownloadRequestFormWrapper = ({
       setIsUploading(true);
 
       try {
-        const { files, archiveName, destination, ttlSeconds, progress } =
-          values;
+        const {
+          files,
+          archiveName,
+          destinationType,
+          destination,
+          ttlSeconds,
+          progress,
+        } = values;
 
         let uploadBlob: Blob;
         let fileName: string;
@@ -324,6 +332,7 @@ const ManualFileDownloadRequestFormWrapper = ({
                 fileMode,
                 userId,
                 groupId,
+                destinationType,
                 destination,
                 progress,
                 ttlSeconds,
@@ -426,7 +435,8 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
       setIsUploading(true);
 
       try {
-        const { file, destination, ttlSeconds, progress } = values;
+        const { file, destinationType, destination, ttlSeconds, progress } =
+          values;
 
         let compression: string | null = null;
 
@@ -457,6 +467,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
                 fileMode,
                 userId,
                 groupId,
+                destinationType,
                 destination,
                 progress,
                 ttlSeconds,

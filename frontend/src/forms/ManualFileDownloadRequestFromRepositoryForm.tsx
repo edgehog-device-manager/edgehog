@@ -75,7 +75,8 @@ export type RepositoryRecord = NonNullable<
 const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
   repository: { id: "", name: "" },
   file: { id: "", name: "", digest: "", url: "", size: 0 },
-  destination: "STORAGE",
+  destinationType: "STORAGE",
+  destination: null,
   ttlSeconds: 0,
   progress: false,
 };
@@ -83,6 +84,7 @@ const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
 const destinationOptions = [
   { value: "STORAGE", label: "Storage" },
   { value: "STREAMING", label: "Streaming" },
+  { value: "FILESYSTEM", label: "File System" },
 ];
 
 type ManualFileDownloadRequestFromRepositoryFormProps = {
@@ -113,6 +115,10 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
   });
 
   const selectedRepository = useWatch({ control, name: "repository" });
+  const selectedDestinationType = useWatch({
+    control,
+    name: "destinationType",
+  });
 
   const {
     data: repositoryPaginationData,
@@ -281,7 +287,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
       </FormRow>
 
       <FormRow
-        id="destination"
+        id="destinationType"
         label={
           <FormattedMessage
             id="components.ManualFileDownloadRequestForm.destinationLabel"
@@ -291,7 +297,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
       >
         <Controller
           control={control}
-          name="destination"
+          name="destinationType"
           render={({ field }) => {
             const selectedOption =
               destinationOptions.find((opt) => opt.value === field.value) ||
@@ -309,6 +315,36 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           }}
         />
       </FormRow>
+
+      {selectedDestinationType === "FILESYSTEM" && (
+        <FormRow
+          id="destination"
+          label={
+            <FormattedMessage
+              id="components.ManualFileDownloadRequestForm.destinationPathLabel"
+              defaultMessage="Destination Path"
+            />
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("destination")}
+            placeholder="/tmp/file.bin"
+            isInvalid={!!errors.destination}
+          />
+
+          {errors.destination ? (
+            <FormFeedback feedback={errors.destination.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="components.ManualFileDownloadRequestForm.destinationPathHint"
+                defaultMessage="Absolute path on the target device where the file should be written."
+              />
+            </Form.Text>
+          )}
+        </FormRow>
+      )}
 
       <FormRow
         id="ttlSeconds"

@@ -251,6 +251,22 @@ const requiredNumber = z.number({
     iss.input === undefined ? messages.required.id : messages.number.id,
 });
 
+const fileDestinationTypeSchema = z.enum([
+  "STORAGE",
+  "STREAMING",
+  "FILESYSTEM",
+]);
+
+const nullableDestinationSchema = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return value ?? null;
+  }
+
+  const trimmed = value.trim();
+
+  return trimmed === "" ? null : trimmed;
+}, z.string().nullable());
+
 /* ----------------------------- Schemas ----------------------------- */
 
 const handleSchema = z
@@ -526,15 +542,31 @@ const manualOtaFromFileSchema = z.object({
 
 type ManualOtaFromFileData = z.infer<typeof manualOtaFromFileSchema>;
 
-const fileDownloadRequestFormSchema = z.object({
-  file: z.instanceof(FileList).refine((files) => files.length > 0, {
-    message: messages.baseImageFileSchema.id,
-  }),
-  archiveName: z.string().optional(),
-  destination: z.enum(["STORAGE", "STREAMING"]),
-  ttlSeconds: z.number(messages.number.id).int().min(0),
-  progress: z.boolean(),
-});
+const fileDownloadRequestFormSchema = z
+  .object({
+    file: z.instanceof(FileList).refine((files) => files.length > 0, {
+      message: messages.baseImageFileSchema.id,
+    }),
+    archiveName: z.string().optional(),
+    destinationType: fileDestinationTypeSchema,
+    destination: nullableDestinationSchema,
+    ttlSeconds: z.number(messages.number.id).int().min(0),
+    progress: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.destinationType === "FILESYSTEM" && data.destination === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: messages.required.id,
+        path: ["destination"],
+      });
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    destination:
+      data.destinationType === "FILESYSTEM" ? data.destination : null,
+  }));
 
 const repositorySchema = z.object({
   name: z.string().min(1),
@@ -559,22 +591,38 @@ const fileSchema = z.object({
 
 type FileFormData = z.infer<typeof fileSchema>;
 
-const manualFileDownloadRequestFromRepositorySchema = z.object({
-  repository: z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-  }),
-  file: z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    url: z.string().min(1).nullable(),
-    digest: z.string().min(1),
-    size: z.number().int().min(0),
-  }),
-  destination: z.enum(["STORAGE", "STREAMING"]),
-  ttlSeconds: z.number(messages.number.id).int().min(0),
-  progress: z.boolean(),
-});
+const manualFileDownloadRequestFromRepositorySchema = z
+  .object({
+    repository: z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+    }),
+    file: z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+      url: z.string().min(1).nullable(),
+      digest: z.string().min(1),
+      size: z.number().int().min(0),
+    }),
+    destinationType: fileDestinationTypeSchema,
+    destination: nullableDestinationSchema,
+    ttlSeconds: z.number(messages.number.id).int().min(0),
+    progress: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.destinationType === "FILESYSTEM" && data.destination === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: messages.required.id,
+        path: ["destination"],
+      });
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    destination:
+      data.destinationType === "FILESYSTEM" ? data.destination : null,
+  }));
 
 type ManualFileDownloadRequestFromRepositoryData = z.infer<
   typeof manualFileDownloadRequestFromRepositorySchema

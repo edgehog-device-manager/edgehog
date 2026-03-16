@@ -20,7 +20,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import Select from "react-select";
 
@@ -34,12 +34,13 @@ import Spinner from "@/components/Spinner";
 import FormFeedback from "@/forms/FormFeedback";
 import { fileDownloadRequestFormSchema } from "@/forms/validation";
 
-type FileDestination = "STORAGE" | "STREAMING";
+type FileDestination = "STORAGE" | "STREAMING" | "FILESYSTEM";
 
 type FileDownloadRequestFormValues = {
   files: File[];
   archiveName?: string;
-  destination: FileDestination;
+  destinationType: FileDestination;
+  destination: string | null;
   ttlSeconds: number;
   progress: boolean;
 };
@@ -50,9 +51,10 @@ type ManualFileDownloadRequestFormProps = {
   onFileSubmit: (values: FileDownloadRequestFormValues) => void;
 };
 
-const destinationOptions = [
+const destinationTypeOptions = [
   { value: "STORAGE", label: "Storage" },
   { value: "STREAMING", label: "Streaming" },
+  { value: "FILESYSTEM", label: "File System" },
 ];
 
 const ManualFileDownloadRequestForm = ({
@@ -74,11 +76,17 @@ const ManualFileDownloadRequestForm = ({
     defaultValues: {
       file: undefined,
       archiveName: "",
-      destination: "STORAGE" as FileDestination,
+      destinationType: "STORAGE" as FileDestination,
+      destination: null,
       ttlSeconds: 0,
       progress: false,
     },
     resolver: zodResolver(fileDownloadRequestFormSchema),
+  });
+
+  const selectedDestinationType = useWatch({
+    control,
+    name: "destinationType",
   });
 
   const handleFilesChanged = (files: File[]) => {
@@ -97,7 +105,8 @@ const ManualFileDownloadRequestForm = ({
           selectedFiles.length > 1 && data.archiveName
             ? data.archiveName
             : undefined,
-        destination: data.destination as FileDestination,
+        destinationType: data.destinationType as FileDestination,
+        destination: data.destination,
         ttlSeconds: data.ttlSeconds,
         progress: data.progress,
       });
@@ -162,7 +171,7 @@ const ManualFileDownloadRequestForm = ({
       )}
 
       <FormRow
-        id="destination"
+        id="destinationType"
         label={
           <FormattedMessage
             id="components.ManualFileDownloadRequestForm.destinationLabel"
@@ -172,10 +181,10 @@ const ManualFileDownloadRequestForm = ({
       >
         <Controller
           control={control}
-          name={`destination`}
+          name={`destinationType`}
           render={({ field }) => {
             const selectedOption =
-              destinationOptions.find((opt) => opt.value === field.value) ||
+              destinationTypeOptions.find((opt) => opt.value === field.value) ||
               null;
 
             return (
@@ -184,12 +193,42 @@ const ManualFileDownloadRequestForm = ({
                 onChange={(option) => {
                   field.onChange(option ? option.value : null);
                 }}
-                options={destinationOptions}
+                options={destinationTypeOptions}
               />
             );
           }}
         />
       </FormRow>
+
+      {selectedDestinationType === "FILESYSTEM" && (
+        <FormRow
+          id="destination"
+          label={
+            <FormattedMessage
+              id="components.ManualFileDownloadRequestForm.destinationPathLabel"
+              defaultMessage="Destination Path"
+            />
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("destination")}
+            placeholder="/tmp/file.bin"
+            isInvalid={!!errors.destination}
+          />
+
+          {errors.destination ? (
+            <FormFeedback feedback={errors.destination.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="components.ManualFileDownloadRequestForm.destinationPathHint"
+                defaultMessage="Absolute path on the target device where the file should be written."
+              />
+            </Form.Text>
+          )}
+        </FormRow>
+      )}
 
       <FormRow
         id="ttlSeconds"
