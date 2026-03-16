@@ -39,6 +39,7 @@ defmodule Edgehog.Astarte.Device.FileDownloadRequest.RequestData do
     :fileMode,
     :userId,
     :groupId,
+    :destinationType,
     :destination
   ]
 
@@ -56,6 +57,7 @@ defmodule Edgehog.Astarte.Device.FileDownloadRequest.RequestData do
           fileMode: non_neg_integer(),
           userId: integer(),
           groupId: integer(),
+          destinationType: String.t(),
           destination: FileDestination.t()
         }
 end

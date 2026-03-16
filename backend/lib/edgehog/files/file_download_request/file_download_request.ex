@@ -59,6 +59,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
         :file_mode,
         :user_id,
         :group_id,
+        :destination_type,
         :destination,
         :progress
       ]
@@ -97,6 +98,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
         :file_mode,
         :user_id,
         :group_id,
+        :destination_type,
         :destination,
         :progress,
         :status,
@@ -203,11 +205,16 @@ defmodule Edgehog.Files.FileDownloadRequest do
       default -1
     end
 
-    attribute :destination, FileDestination do
-      description "Device-specific field, some default values are storage and streaming."
+    attribute :destination_type, FileDestination do
+      description "Device-specific field, supported values are storage, streaming and filesystem."
       public? true
 
       default "storage"
+    end
+
+    attribute :destination, :string do
+      description "Destination-specific information on where to write the file to."
+      public? true
     end
 
     attribute :progress, :boolean do

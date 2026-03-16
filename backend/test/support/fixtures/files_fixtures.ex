@@ -136,7 +136,8 @@ defmodule Edgehog.FilesFixtures do
     * `:file_mode` - POSIX file mode (default: random)
     * `:user_id` - POSIX user ID (default: random)
     * `:group_id` - POSIX group ID (default: random)
-    * `:destination` - Destination type (default: "storage")
+    * `:destination_type` - Destination type (default: "storage")
+    * `:destination` - Destination-specific information (default: nil)
     * `:progress` - Progress reporting flag (default: false)
     * `:status` - Status (default: nil)
     * `:manual?` - Whether initiated manually (default: true)
@@ -160,7 +161,8 @@ defmodule Edgehog.FilesFixtures do
         file_mode: random_file_mode(),
         user_id: random_user_id(),
         group_id: random_group_id(),
-        destination: "storage",
+        destination_type: "storage",
+        destination: nil,
         progress: false,
         manual?: true,
         device_id: device_id

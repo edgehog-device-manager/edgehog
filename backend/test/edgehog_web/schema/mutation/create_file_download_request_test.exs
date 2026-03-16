@@ -24,11 +24,14 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
   import Edgehog.DevicesFixtures
 
   alias Astarte.Client.APIError
+  alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.Astarte.Device.FileDownloadRequestMock
 
   describe "createFileDownloadRequest mutation" do
     test "creates file download request with all fields", %{tenant: tenant} do
-      expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
+      # This sets the capabilities to [] to avoid the check on the presence of the FileTransfer interface
+      expect(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+      expect(FileDownloadRequestMock, :request_download, fn _, _, _, _ -> :ok end)
 
       result =
         create_file_download_request_mutation(tenant: tenant)
@@ -37,7 +40,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
 
       assert file_download_request["id"] != "019c997a-49bc-7f65-be73-0970557338b3"
       assert file_download_request["url"] == "http://example/filename"
-      assert file_download_request["destination"] == "STORAGE"
+      assert file_download_request["destinationType"] == "STORAGE"
+      assert file_download_request["destination"] == nil
       assert file_download_request["progress"] == false
       assert file_download_request["ttlSeconds"] == 100_000
       assert file_download_request["fileName"] == "filename"
@@ -63,7 +67,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
     test "fails if Astarte API returns error", %{
       tenant: tenant
     } do
-      expect(FileDownloadRequestMock, :request_download, fn _, _, _ ->
+      expect(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+
+      expect(FileDownloadRequestMock, :request_download, fn _, _, _, _ ->
         {:error, %APIError{status: 500, response: "Internal Server Error"}}
       end)
 
@@ -85,6 +91,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
             id
             deviceId
           }
+          destinationType
           destination
           progress
           ttlSeconds
@@ -115,7 +122,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
 
     default_input = %{
       "deviceId" => device_id,
-      "destination" => "STORAGE",
+      "destinationType" => "STORAGE",
+      "destination" => nil,
       "progress" => false,
       "ttlSeconds" => 100_000,
       "url" => "http://example/filename",

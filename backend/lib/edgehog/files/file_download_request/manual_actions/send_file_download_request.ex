@@ -42,12 +42,13 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
       url: url,
       device: %{
         device_id: device_id,
-        appengine_client: client
+        appengine_client: client,
+        capabilities: capabilities
       }
     } =
       Ash.load!(
         input.arguments.file_download_request,
-        [:url, device: [:device_id, :appengine_client]],
+        [:url, device: [:device_id, :appengine_client, :capabilities]],
         reuse_values?: true
       )
 
@@ -64,17 +65,30 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
       digest: input.arguments.file_download_request.digest,
       fileName: input.arguments.file_download_request.file_name,
       ttlSeconds: input.arguments.file_download_request.ttl_seconds,
-      fileMode: input.arguments.file_download_request.file_mode,
-      userId: input.arguments.file_download_request.user_id,
-      groupId: input.arguments.file_download_request.group_id,
-      destination: input.arguments.file_download_request.destination
+      destinationType: input.arguments.file_download_request.destination_type,
+      destination: input.arguments.file_download_request.destination || ""
     }
+
+    {device_type, request_data} =
+      if :posix_file_transfer_storage in capabilities do
+        request_data = %{
+          request_data
+          | fileMode: input.arguments.file_download_request.file_mode,
+            userId: input.arguments.file_download_request.user_id,
+            groupId: input.arguments.file_download_request.group_id
+        }
+
+        {:posix, request_data}
+      else
+        {:windows, request_data}
+      end
 
     with {:error, %Astarte.Client.APIError{} = api_error} <-
            @file_download_request_module.request_download(
              client,
              device_id,
-             request_data
+             request_data,
+             device_type
            ) do
       reason =
         AstarteAPIError.exception(

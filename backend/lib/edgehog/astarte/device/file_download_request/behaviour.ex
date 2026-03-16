@@ -29,7 +29,8 @@ defmodule Edgehog.Astarte.Device.FileDownloadRequest.Behaviour do
   @callback request_download(
               client :: AppEngine.t(),
               device_id :: String.t(),
-              request_data :: RequestData.t()
+              request_data :: RequestData.t(),
+              device_type :: :posix | :windows
             ) ::
               :ok | {:error, term()}
 end
