@@ -147,8 +147,16 @@ if config_env() in [:prod, :test] do
   s3_presign_host_config =
     if storage_type != "azure" do
       asset_host = s3.asset_host || "http://localhost:9000"
-      uri = URI.parse(asset_host)
-      %{scheme: uri.scheme <> "://", host: uri.host, port: uri.port || 80}
+
+      normalized_asset_host =
+        if String.contains?(asset_host, "://"),
+          do: asset_host,
+          else: s3.scheme <> asset_host
+
+      uri = URI.parse(normalized_asset_host)
+      port = uri.port || if(s3.scheme == "https://", do: 443, else: 80)
+
+      %{scheme: s3.scheme, host: uri.host || "localhost", port: port}
     end
 
   config :azurex, Azurex.Blob.Config,
