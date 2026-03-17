@@ -156,6 +156,28 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
       change set_attribute(:uncompressed_file_size_bytes, arg(:decompressed_file_size_bytes))
     end
+
+    update :set_response do
+      argument :status, Status, allow_nil?: false
+      argument :status_code, :integer, allow_nil?: false
+      argument :message, :string, allow_nil?: true
+
+      change set_attribute(:status, arg(:status))
+      change set_attribute(:status_code, arg(:status_code))
+      change set_attribute(:message, arg(:message))
+    end
+
+    update :set_progress do
+      argument :status_progress, :integer, allow_nil?: false
+
+      change set_attribute(:status_progress, arg(:status_progress))
+    end
+
+    update :set_status do
+      argument :status, Status, allow_nil?: false
+
+      change set_attribute(:status, arg(:status))
+    end
   end
 
   attributes do
@@ -244,6 +266,8 @@ defmodule Edgehog.Files.FileDownloadRequest do
     attribute :status, Status do
       description "The status of the file download (e.g., 'pending', 'sent', 'in_progress', 'completed', 'failed')."
       public? true
+
+      default :pending
     end
 
     attribute :status_progress, :integer do

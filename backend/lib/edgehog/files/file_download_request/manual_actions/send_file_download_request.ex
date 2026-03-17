@@ -28,6 +28,7 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
   alias Edgehog.Astarte.Device
   alias Edgehog.Astarte.Device.FileDownloadRequest.RequestData
   alias Edgehog.Error.AstarteAPIError
+  alias Edgehog.Files
 
   @file_download_request_module Application.compile_env(
                                   :edgehog,
@@ -36,7 +37,14 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
                                 )
 
   @impl Ash.Resource.Actions.Implementation
-  def run(input, _opts, _context) do
+  def run(input, _opts, %{tenant: tenant} = _context) do
+    file_download_request =
+      Ash.load!(
+        input.arguments.file_download_request,
+        [:url, device: [:device_id, :appengine_client, :capabilities]],
+        reuse_values?: true
+      )
+
     %{
       id: file_download_request_id,
       url: url,
@@ -45,12 +53,7 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
         appengine_client: client,
         capabilities: capabilities
       }
-    } =
-      Ash.load!(
-        input.arguments.file_download_request,
-        [:url, device: [:device_id, :appengine_client, :capabilities]],
-        reuse_values?: true
-      )
+    } = file_download_request
 
     # TODO: HTTP headers (key/value) reserved for future bucket auth support.
     # Currently unused (set to ""), flow/config (env vs request) TBD.
@@ -59,23 +62,23 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
       url: url,
       httpHeaderKey: "",
       httpHeaderValue: "",
-      compression: input.arguments.file_download_request.compression || "",
-      fileSizeBytes: input.arguments.file_download_request.uncompressed_file_size_bytes,
-      progress: input.arguments.file_download_request.progress,
-      digest: input.arguments.file_download_request.digest,
-      fileName: input.arguments.file_download_request.file_name,
-      ttlSeconds: input.arguments.file_download_request.ttl_seconds,
-      destinationType: input.arguments.file_download_request.destination_type,
-      destination: input.arguments.file_download_request.destination || ""
+      compression: file_download_request.compression || "",
+      fileSizeBytes: file_download_request.uncompressed_file_size_bytes,
+      progress: file_download_request.progress,
+      digest: file_download_request.digest,
+      fileName: file_download_request.file_name,
+      ttlSeconds: file_download_request.ttl_seconds,
+      destinationType: file_download_request.destination_type,
+      destination: file_download_request.destination || ""
     }
 
     {device_type, request_data} =
       if :posix_file_transfer_storage in capabilities do
         request_data = %{
           request_data
-          | fileMode: input.arguments.file_download_request.file_mode,
-            userId: input.arguments.file_download_request.user_id,
-            groupId: input.arguments.file_download_request.group_id
+          | fileMode: file_download_request.file_mode,
+            userId: file_download_request.user_id,
+            groupId: file_download_request.group_id
         }
 
         {:posix, request_data}
@@ -83,20 +86,25 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
         {:windows, request_data}
       end
 
-    with {:error, %Astarte.Client.APIError{} = api_error} <-
-           @file_download_request_module.request_download(
-             client,
-             device_id,
-             request_data,
-             device_type
-           ) do
-      reason =
-        AstarteAPIError.exception(
-          status: api_error.status,
-          response: api_error.response
-        )
+    case @file_download_request_module.request_download(
+           client,
+           device_id,
+           request_data,
+           device_type
+         ) do
+      {:error, %Astarte.Client.APIError{} = api_error} ->
+        reason =
+          AstarteAPIError.exception(
+            status: api_error.status,
+            response: api_error.response
+          )
 
-      {:error, reason}
+        {:error, reason}
+
+      result ->
+        Files.set_status(file_download_request, %{status: :sent}, tenant: tenant)
+
+        result
     end
   end
 end
