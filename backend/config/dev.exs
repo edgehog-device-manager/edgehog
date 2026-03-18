@@ -22,6 +22,18 @@ url_host = System.get_env("URL_HOST", "localhost")
 url_port = System.get_env("URL_PORT", "4000")
 url_scheme = System.get_env("URL_SCHEME", "http")
 
+check_origin =
+  case System.get_env("CHECK_ORIGIN_ALLOWED_ORIGINS") do
+    nil ->
+      ["//localhost", "//127.0.0.1"]
+
+    raw_origins ->
+      raw_origins
+      |> String.split(",", trim: true)
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+  end
+
 database = %{
   username: System.get_env("DATABASE_USERNAME", "postgres"),
   password: System.get_env("DATABASE_PASSWORD", "postgres"),
@@ -64,7 +76,7 @@ config :edgehog, EdgehogWeb.Endpoint,
     scheme: url_scheme,
     port: url_port
   ],
-  check_origin: false,
+  check_origin: check_origin,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "uEb3NXr0KodsrjUUUo98VBEExFFAolxlfOW7ZzP/OGgd1R2pDhwMddZXjvUp/3MW",
