@@ -138,7 +138,7 @@ defmodule Edgehog.FilesFixtures do
     * `:group_id` - POSIX group ID (default: random)
     * `:destination_type` - Destination type (default: "storage")
     * `:destination` - Destination-specific information (default: nil)
-    * `:progress` - Progress reporting flag (default: false)
+    * `:progress_tracked` - Progress reporting flag (default: false)
     * `:status` - Status (default: nil)
     * `:manual?` - Whether initiated manually (default: true)
   """
@@ -163,7 +163,7 @@ defmodule Edgehog.FilesFixtures do
         group_id: random_group_id(),
         destination_type: "storage",
         destination: nil,
-        progress: false,
+        progress_tracked: false,
         manual?: true,
         device_id: device_id
       })
@@ -207,10 +207,6 @@ defmodule Edgehog.FilesFixtures do
     * `:name` - File name (default: auto-generated unique name)
     * `:size` - File size in bytes (default: random between 1 and 1,000,000)
     * `:digest` - Content digest in format "algorithm:hash" (default: auto-generated sha256)
-    * `:mode` - POSIX file permissions (default: random mode)
-    * `:user_id` - POSIX user ID/UID (default: random UID)
-    * `:group_id` - POSIX group ID/GID (default: random GID)
-    * `:url` - Download URL (default: auto-generated example.com URL)
   """
   def file_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
@@ -225,7 +221,6 @@ defmodule Edgehog.FilesFixtures do
         name: unique_file_name(),
         size: :rand.uniform(1_000_000),
         digest: unique_file_digest(),
-        url: "https://example.com/files/#{System.unique_integer([:positive])}.bin",
         repository_id: repository_id
       })
 

@@ -33,7 +33,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
       filename = "file-test.pdf"
       digest = "sha256:#{Base.encode16(:crypto.strong_rand_bytes(32))}"
       size = :rand.uniform(1_000_000)
-      file_url = "https://example.com/file-test.pdf"
 
       file =
         [
@@ -41,8 +40,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           repository_id: repository_id,
           name: filename,
           digest: digest,
-          size: size,
-          url: file_url
+          size: size
         ]
         |> create_file_mutation()
         |> extract_result!()
@@ -52,7 +50,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
                "name" => ^filename,
                "size" => ^size,
                "digest" => ^digest,
-               "url" => ^file_url,
+               "getPresignedUrl" => _url,
                "repository" => %{
                  "id" => ^repository_id
                }
@@ -89,7 +87,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           name: file.name,
           size: file.size,
           digest: file.digest,
-          url: file.url,
           repository_id: AshGraphql.Resource.encode_relay_id(repository)
         )
 
@@ -115,10 +112,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           name
           size
           digest
-          mode
-          userId
-          groupId
-          url
+          getPresignedUrl
           repository {
             id
             name
@@ -145,14 +139,12 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
       end)
 
     {size, opts} = Keyword.pop_lazy(opts, :size, fn -> :rand.uniform(1_000_000) end)
-    {url, opts} = Keyword.pop_lazy(opts, :url, fn -> "https://example.com/#{name}" end)
 
     variables = %{
       "input" => %{
         "name" => name,
         "size" => size,
         "digest" => digest,
-        "url" => url,
         "repositoryId" => repository_id
       }
     }

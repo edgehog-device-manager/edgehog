@@ -42,7 +42,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       assert file_download_request["url"] == "http://example/filename"
       assert file_download_request["destinationType"] == "STORAGE"
       assert file_download_request["destination"] == nil
-      assert file_download_request["progress"] == false
+      assert file_download_request["progressTracked"] == false
       assert file_download_request["ttlSeconds"] == 100_000
       assert file_download_request["fileName"] == "filename"
       assert file_download_request["uncompressedFileSizeBytes"] == 75_555
@@ -93,7 +93,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
           }
           destinationType
           destination
-          progress
+          progressTracked
           ttlSeconds
           url
           fileName
@@ -103,9 +103,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
           userId
           groupId
           status
-          statusProgress
-          statusCode
-          message
+          progressPercentage
+          responseCode
+          responseMessage
         }
       }
     }
@@ -124,7 +124,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       "deviceId" => device_id,
       "destinationType" => "STORAGE",
       "destination" => nil,
-      "progress" => false,
+      "progressTracked" => false,
       "ttlSeconds" => 100_000,
       "url" => "http://example/filename",
       "fileName" => "filename",

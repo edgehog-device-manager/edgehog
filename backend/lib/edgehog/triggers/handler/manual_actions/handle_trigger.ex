@@ -406,7 +406,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
     Files.set_response(
       file_download_request,
-      [status: status, status_code: response_code, message: response_message],
+      [status: status, response_code: response_code, response_message: response_message],
       tenant: tenant
     )
   end
@@ -442,7 +442,7 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
     Files.set_progress(
       file_download_request,
-      [status_progress: progress],
+      [progress_percentage: progress],
       tenant: tenant
     )
   end

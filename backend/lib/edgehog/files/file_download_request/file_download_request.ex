@@ -61,7 +61,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
         :group_id,
         :destination_type,
         :destination,
-        :progress
+        :progress_tracked
       ]
 
       argument :file_download_request_id, :uuid do
@@ -100,11 +100,11 @@ defmodule Edgehog.Files.FileDownloadRequest do
         :group_id,
         :destination_type,
         :destination,
-        :progress,
+        :progress_tracked,
         :status,
-        :status_progress,
-        :status_code,
-        :message,
+        :progress_percentage,
+        :response_code,
+        :response_message,
         :device_id,
         :manual?
       ]
@@ -127,13 +127,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
       argument :file_download_request_id, :uuid, allow_nil?: false
 
       run ManualActions.CreatePresignedUrl
-    end
-
-    action :read_presigned_url, :map do
-      argument :filename, :string, allow_nil?: false
-      argument :file_download_request_id, :uuid, allow_nil?: false
-
-      run ManualActions.ReadPresignedUrl
     end
 
     action :send_file_download_request do
@@ -159,18 +152,18 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     update :set_response do
       argument :status, Status, allow_nil?: false
-      argument :status_code, :integer, allow_nil?: false
-      argument :message, :string, allow_nil?: true
+      argument :response_code, :integer, allow_nil?: false
+      argument :response_message, :string, allow_nil?: true
 
       change set_attribute(:status, arg(:status))
-      change set_attribute(:status_code, arg(:status_code))
-      change set_attribute(:message, arg(:message))
+      change set_attribute(:response_code, arg(:response_code))
+      change set_attribute(:response_message, arg(:response_message))
     end
 
     update :set_progress do
-      argument :status_progress, :integer, allow_nil?: false
+      argument :progress_percentage, :integer, allow_nil?: false
 
-      change set_attribute(:status_progress, arg(:status_progress))
+      change set_attribute(:progress_percentage, arg(:progress_percentage))
     end
 
     update :set_status do
@@ -185,8 +178,9 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     attribute :url, :string do
       description "The URL from which the file can be downloaded."
-      allow_nil? false
       public? true
+
+      allow_nil? false
     end
 
     attribute :file_name, :string do
@@ -202,6 +196,8 @@ defmodule Edgehog.Files.FileDownloadRequest do
     attribute :digest, :string do
       description "The digest of the file being downloaded, used for integrity verification."
       public? true
+
+      allow_nil? false
     end
 
     attribute :compression, :string do
@@ -212,7 +208,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
     end
 
     attribute :ttl_seconds, :integer do
-      description "Optional ttl for how long to keep the file fore, if 0 is forever, default value is 0."
+      description "Optional ttl for how long to keep the file for, if 0 is forever, default value is 0."
       public? true
 
       default 0
@@ -243,20 +239,20 @@ defmodule Edgehog.Files.FileDownloadRequest do
       description "Device-specific field, supported values are storage, streaming and filesystem."
       public? true
 
-      default "storage"
+      allow_nil? false
     end
 
     attribute :destination, :string do
-      description "Destination-specific information on where to write the file to."
+      description "Destination-specific information on where to write the file to, when the destination_type is :filesystem"
       public? true
     end
 
     attribute :path_on_device, :string do
-      description "Path on the device for the transferred file"
+      description "Set by the device, represents the path where the file was stored when destination_type is :storage"
       public? true
     end
 
-    attribute :progress, :boolean do
+    attribute :progress_tracked, :boolean do
       description "Flag to enable the progress reporting of the download."
       public? true
 
@@ -270,18 +266,20 @@ defmodule Edgehog.Files.FileDownloadRequest do
       default :pending
     end
 
-    attribute :status_progress, :integer do
+    attribute :progress_percentage, :integer do
       description "The progress of the file download as a percentage (0-100)."
       public? true
+
+      constraints min: 0, max: 100
     end
 
-    attribute :status_code, :integer do
+    attribute :response_code, :integer do
       description "A 0 code is a success, errors are POSIX error numbers."
       public? true
     end
 
-    attribute :message, :string do
-      description "Optional message for the response."
+    attribute :response_message, :string do
+      description "Optional message for the response sent by the device."
       public? true
     end
 
