@@ -63,12 +63,6 @@ defmodule Edgehog.Files do
         description "Generates presigned URLs to upload and download a file via HTTP requests."
       end
 
-      action FileDownloadRequest,
-             :read_file_download_request_presigned_url,
-             :read_presigned_url do
-        description "Reads presigned URLs to download a file via HTTP requests."
-      end
-
       create Repository, :create_repository, :create
       update Repository, :update_repository, :update
       destroy Repository, :delete_repository, :destroy

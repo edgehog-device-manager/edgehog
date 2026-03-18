@@ -1812,8 +1812,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       request = Ash.get!(FileDownloadRequest, file_download_request.id, tenant: tenant)
       assert request.status == :completed
-      assert request.status_code == 0
-      assert request.message == "transfer complete"
+      assert request.response_code == 0
+      assert request.response_message == "transfer complete"
     end
 
     test "updates file download request status from fileTransfer.Response to failed", context do
@@ -1847,8 +1847,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       request = Ash.get!(FileDownloadRequest, file_download_request.id, tenant: tenant)
       assert request.status == :failed
-      assert request.status_code == 17
-      assert request.message == "File exists"
+      assert request.response_code == 17
+      assert request.response_message == "File exists"
     end
 
     test "updates file download request progress from fileTransfer.Progress", context do
@@ -1881,7 +1881,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       request = Ash.get!(FileDownloadRequest, file_download_request.id, tenant: tenant)
       assert request.status == :in_progress
-      assert request.status_progress == 80
+      assert request.progress_percentage == 80
     end
   end
 

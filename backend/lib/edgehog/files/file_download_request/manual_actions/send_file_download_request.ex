@@ -64,7 +64,7 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
       httpHeaderValue: "",
       compression: file_download_request.compression || "",
       fileSizeBytes: file_download_request.uncompressed_file_size_bytes,
-      progress: file_download_request.progress,
+      progress: file_download_request.progress_tracked,
       digest: file_download_request.digest,
       fileName: file_download_request.file_name,
       ttlSeconds: file_download_request.ttl_seconds,

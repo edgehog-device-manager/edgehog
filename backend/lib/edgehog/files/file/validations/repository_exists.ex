@@ -18,21 +18,22 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.FileDownloadRequest.ManualActions.ReadPresignedUrl do
-  @moduledoc """
-  The Storage context.
-  """
-  use Ash.Resource.Actions.Implementation
+defmodule Edgehog.Files.File.Validations.RepositoryExists do
+  @moduledoc false
 
-  @impl Ash.Resource.Actions.Implementation
-  def run(input, _opts, context) do
-    tenant_id = context.tenant.tenant_id
-    file_download_request_id = input.arguments.file_download_request_id
-    filename = input.arguments.filename
+  use Ash.Resource.Validation
 
-    file_path =
-      "uploads/tenants/#{tenant_id}/ephemeral_file_download_requests/#{file_download_request_id}/files/#{filename}"
+  alias Ash.Resource.Validation
 
-    Edgehog.Storage.read_presigned_url(file_path)
+  @impl Validation
+  def supports(_opts), do: [Ash.ActionInput]
+
+  @impl Validation
+  def validate(action_input, _opts, %{tenant: tenant} = _context) do
+    repository_id = action_input.arguments.repository_id
+
+    with {:ok, _repository} <- Ash.get(Edgehog.Files.Repository, repository_id, tenant: tenant) do
+      :ok
+    end
   end
 end
