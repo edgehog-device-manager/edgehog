@@ -51,6 +51,8 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   @ota_response "io.edgehog.devicemanager.OTAResponse"
   @system_info "io.edgehog.devicemanager.SystemInfo"
   @file_storage "io.edgehog.devicemanager.storage.File"
+  @file_transfer_response "io.edgehog.devicemanager.fileTransfer.Response"
+  @file_transfer_progress "io.edgehog.devicemanager.fileTransfer.Progress"
 
   @impl Ash.Resource.Actions.Implementation
   def run(input, _opts, _context) do
@@ -380,6 +382,81 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
       _ ->
         {:error, :invalid_event_path}
     end
+  end
+
+  defp handle_event(
+         %IncomingData{interface: @file_transfer_response, path: "/request", value: %{"type" => "server_to_device"}} =
+           event,
+         tenant,
+         _realm_id,
+         _device_id,
+         _timestamp
+       ) do
+    request_id = event.value["id"]
+    response_code = event.value["code"]
+    response_message = event.value["message"]
+
+    status =
+      case response_code do
+        0 -> :completed
+        _ -> :failed
+      end
+
+    file_download_request = Files.fetch_file_download_request!(request_id, tenant: tenant)
+
+    Files.set_response(
+      file_download_request,
+      [status: status, status_code: response_code, message: response_message],
+      tenant: tenant
+    )
+  end
+
+  # TODO: add implementation when file_upload_request resource is added
+  defp handle_event(
+         %IncomingData{interface: @file_transfer_response, path: "/request", value: %{"type" => "device_to_server"}} =
+           _event,
+         _tenant,
+         _realm_id,
+         _device_id,
+         _timestamp
+       ) do
+    nil
+  end
+
+  defp handle_event(
+         %IncomingData{interface: @file_transfer_progress, path: "/request", value: %{"type" => "server_to_device"}} =
+           event,
+         tenant,
+         _realm_id,
+         _device_id,
+         _timestamp
+       ) do
+    request_id = event.value["id"]
+    progress = event.value["progress"]
+
+    file_download_request = Files.fetch_file_download_request!(request_id, tenant: tenant)
+
+    if file_download_request.status == :sent do
+      Files.set_status(file_download_request, %{status: :in_progress}, tenant: tenant)
+    end
+
+    Files.set_progress(
+      file_download_request,
+      [status_progress: progress],
+      tenant: tenant
+    )
+  end
+
+  # TODO: add implementation when file_upload_request resource is added
+  defp handle_event(
+         %IncomingData{interface: @file_transfer_progress, path: "/request", value: %{"type" => "device_to_server"}} =
+           _event,
+         _tenant,
+         _realm_id,
+         _device_id,
+         _timestamp
+       ) do
+    nil
   end
 
   defp handle_event(_unhandled_event, tenant, realm_id, device_id, _timestamp) do

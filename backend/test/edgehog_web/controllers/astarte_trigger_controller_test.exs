@@ -24,6 +24,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.AstarteFixtures
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.FilesFixtures
   import Edgehog.OSManagementFixtures
 
   alias Edgehog.Astarte.Device.DeviceStatusMock
@@ -37,6 +38,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   alias Edgehog.Containers.ReconcilerMock
   alias Edgehog.Containers.Volume
   alias Edgehog.Devices.Device
+  alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.OSManagement
 
   require Ash.Query
@@ -1766,6 +1768,120 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
 
       operation = OSManagement.fetch_ota_operation!(ota_operation.id, tenant: tenant)
       assert operation.status_code == nil
+    end
+  end
+
+  describe "process_event/2 for file transfer events" do
+    setup %{tenant: tenant} do
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
+
+      {:ok, cluster: cluster, realm: realm, device: device}
+    end
+
+    test "updates file download request status from fileTransfer.Response to completed",
+         context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      file_download_request =
+        file_download_request_fixture(tenant: tenant, device_id: device.id, status: :pending)
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      response_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.fileTransfer.Response",
+          path: "/request",
+          value: %{
+            "type" => "server_to_device",
+            "id" => file_download_request.id,
+            "code" => 0,
+            "message" => "transfer complete"
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, response_event)
+      |> response(200)
+
+      request = Ash.get!(FileDownloadRequest, file_download_request.id, tenant: tenant)
+      assert request.status == :completed
+      assert request.status_code == 0
+      assert request.message == "transfer complete"
+    end
+
+    test "updates file download request status from fileTransfer.Response to failed", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      file_download_request =
+        file_download_request_fixture(tenant: tenant, device_id: device.id, status: :pending)
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      response_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.fileTransfer.Response",
+          path: "/request",
+          value: %{
+            "type" => "server_to_device",
+            "id" => file_download_request.id,
+            "code" => 17,
+            "message" => "File exists"
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, response_event)
+      |> response(200)
+
+      request = Ash.get!(FileDownloadRequest, file_download_request.id, tenant: tenant)
+      assert request.status == :failed
+      assert request.status_code == 17
+      assert request.message == "File exists"
+    end
+
+    test "updates file download request progress from fileTransfer.Progress", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      file_download_request =
+        file_download_request_fixture(tenant: tenant, device_id: device.id, status: :sent)
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      progress_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.fileTransfer.Progress",
+          path: "/request",
+          value: %{
+            "type" => "server_to_device",
+            "id" => file_download_request.id,
+            "progress" => 80
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, progress_event)
+      |> response(200)
+
+      request = Ash.get!(FileDownloadRequest, file_download_request.id, tenant: tenant)
+      assert request.status == :in_progress
+      assert request.status_progress == 80
     end
   end
 
