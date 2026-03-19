@@ -1033,7 +1033,7 @@
     "defaultMessage": "Infinite"
   },
   "components.FilesUploadTab.table.message": {
-    "defaultMessage": "Message"
+    "defaultMessage": "Response Message"
   },
   "components.FilesUploadTab.table.progress": {
     "defaultMessage": "Progress"

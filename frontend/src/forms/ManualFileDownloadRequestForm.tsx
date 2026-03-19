@@ -42,7 +42,7 @@ type FileDownloadRequestFormValues = {
   destinationType: FileDestination;
   destination: string | null;
   ttlSeconds: number;
-  progress: boolean;
+  progressTracked: boolean;
 };
 
 type ManualFileDownloadRequestFormProps = {
@@ -108,7 +108,7 @@ const ManualFileDownloadRequestForm = ({
         destinationType: data.destinationType as FileDestination,
         destination: data.destination,
         ttlSeconds: data.ttlSeconds,
-        progress: data.progress,
+        progressTracked: data.progress,
       });
       setSelectedFiles([]);
       reset();

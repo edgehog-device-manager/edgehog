@@ -600,14 +600,11 @@ const manualFileDownloadRequestFromRepositorySchema = z
     file: z.object({
       id: z.string().min(1),
       name: z.string().min(1),
-      url: z.string().min(1).nullable(),
-      digest: z.string().min(1),
-      size: z.number().int().min(0),
     }),
     destinationType: fileDestinationTypeSchema,
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
-    progress: z.boolean(),
+    progressTracked: z.boolean(),
   })
   .superRefine((data, ctx) => {
     if (data.destinationType === "FILESYSTEM" && data.destination === null) {

@@ -61,7 +61,6 @@ const CREATE_FILE_MUTATION = graphql`
     createFile(input: $input) {
       result {
         id
-        url
         name
       }
     }
@@ -129,13 +128,6 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
 
         const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
         const digest = await computeDigest(archiveData);
-
-        // Note: The browser File API does not expose Unix file permissions (fileMode),
-        // userId, or groupId. These are OS-level metadata not available in web browsers.
-        // We use sensible defaults: fileMode 0644 (rw-r--r--), userId -1, groupId -1.
-        const fileMode = 0o644;
-        const userId = -1;
-        const groupId = -1;
 
         // Get presigned URL from the backend
         const presignedUrls = await new Promise<{
@@ -225,13 +217,9 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
             variables: {
               input: {
                 repositoryId,
-                url: presignedUrls.get_url,
                 name: fileName,
                 size: uncompressedSize,
                 digest,
-                mode: fileMode,
-                userId,
-                groupId,
               },
             },
             onCompleted(data, errors) {
