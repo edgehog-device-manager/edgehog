@@ -24,6 +24,12 @@ defmodule Edgehog.Files.File.Calculations.GetPresignedUrl do
 
   alias Ash.Resource.Calculation
 
+  @files_storage_module Application.compile_env(
+                          :edgehog,
+                          :files_storage_module,
+                          Edgehog.Storage
+                        )
+
   @impl Calculation
   def load(_query, _opts, _context) do
     [:name, :repository_id]
@@ -38,7 +44,7 @@ defmodule Edgehog.Files.File.Calculations.GetPresignedUrl do
 
       file_path = "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}"
 
-      case Edgehog.Storage.read_presigned_url(file_path) do
+      case @files_storage_module.read_presigned_url(file_path) do
         {:ok, %{get_url: get_url}} -> get_url
         {:error, _reason} -> nil
       end

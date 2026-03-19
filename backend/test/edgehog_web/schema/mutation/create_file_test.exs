@@ -23,6 +23,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
 
   import Edgehog.FilesFixtures
 
+  alias Edgehog.StorageMock
+
   describe "createFile mutation" do
     test "creates file with valid data", %{tenant: tenant} do
       repository = repository_fixture(tenant: tenant)
@@ -33,6 +35,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
       filename = "file-test.pdf"
       digest = "sha256:#{Base.encode16(:crypto.strong_rand_bytes(32))}"
       size = :rand.uniform(1_000_000)
+
+      expect(StorageMock, :read_presigned_url, fn path ->
+        assert String.contains?(path, "uploads/tenants/")
+        assert String.contains?(path, "/repositories/#{repository.id}/")
+
+        assert String.ends_with?(path, filename)
+
+        {:ok, %{get_url: "http://example.test/#{path}"}}
+      end)
 
       file =
         [
@@ -96,7 +107,23 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
 
     test "succeeds for duplicate file name on a different repository", %{tenant: tenant} do
       fixture = file_fixture(tenant: tenant)
-      result = create_file_mutation(tenant: tenant, name: fixture.name)
+
+      result =
+        create_file_mutation(
+          tenant: tenant,
+          name: fixture.name,
+          document: """
+          mutation CreateFile($input: CreateFileInput!) {
+            createFile(input: $input) {
+              result {
+                id
+                name
+              }
+            }
+          }
+          """
+        )
+
       file = extract_result!(result)
 
       assert file["name"] == fixture.name

@@ -191,6 +191,50 @@ defmodule Edgehog.StorageTest do
       assert {:ok, %{status_code: 404}} =
                HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
     end
+
+    test "repository deletion deletes uploaded files from storage" do
+      tenant = Edgehog.TenantsFixtures.tenant_fixture()
+      filename = "repository-delete-test.bin"
+      contents = "repository deletion integration test contents"
+
+      repository = Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
+
+      %{put_url: put_url, get_url: get_url} =
+        File
+        |> Ash.ActionInput.for_action(:create_presigned_url, %{
+          filename: filename,
+          repository_id: repository.id
+        })
+        |> Ash.run_action!(tenant: tenant)
+
+      assert {:ok, %{status_code: upload_status}} =
+               HTTPoison.request(%HTTPoison.Request{
+                 method: :put,
+                 url: put_url,
+                 body: contents,
+                 headers: [
+                   {"x-ms-blob-type", "BlockBlob"},
+                   {"content-length", "#{byte_size(contents)}"}
+                 ]
+               })
+
+      assert upload_status in [200, 201]
+
+      assert {:ok, %{status_code: 200, body: ^contents}} =
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
+
+      _file =
+        Edgehog.FilesFixtures.file_fixture(
+          repository_id: repository.id,
+          tenant: tenant,
+          name: filename
+        )
+
+      repository |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
+
+      assert {:ok, %{status_code: 404}} =
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
+    end
   end
 
   describe "FileDownloadRequest presigned URL" do
