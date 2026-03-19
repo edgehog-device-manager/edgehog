@@ -67,8 +67,12 @@ defmodule Edgehog.Files do
       update Repository, :update_repository, :update
       destroy Repository, :delete_repository, :destroy
 
-      create FileDownloadRequest, :create_file_download_request, :manual do
+      create FileDownloadRequest, :create_manual_file_download_request, :manual do
         relay_id_translations input: [device_id: :device]
+      end
+
+      create FileDownloadRequest, :create_managed_file_download_request, :managed do
+        relay_id_translations input: [device_id: :device, file_id: :file]
       end
     end
   end

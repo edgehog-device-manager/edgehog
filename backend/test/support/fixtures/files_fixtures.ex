@@ -24,6 +24,8 @@ defmodule Edgehog.FilesFixtures do
   entities via the `Edgehog.Files` domain.
   """
 
+  alias Edgehog.Files.FileDownloadRequest
+
   @doc """
   Generate a unique file name.
   """
@@ -142,7 +144,7 @@ defmodule Edgehog.FilesFixtures do
     * `:status` - Status (default: nil)
     * `:manual?` - Whether initiated manually (default: true)
   """
-  def file_download_request_fixture(opts \\ []) do
+  def manual_file_download_request_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
 
     {device_id, opts} =
@@ -168,7 +170,51 @@ defmodule Edgehog.FilesFixtures do
         device_id: device_id
       })
 
-    Edgehog.Files.FileDownloadRequest
+    FileDownloadRequest
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
+  end
+
+  def managed_file_download_request_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
+      end)
+
+    {repository_id, opts} =
+      Keyword.pop_lazy(opts, :repository_id, fn ->
+        [tenant: tenant] |> repository_fixture() |> Map.fetch!(:id)
+      end)
+
+    {file, opts} =
+      Keyword.pop_lazy(opts, :file, fn ->
+        file_fixture(tenant: tenant, repository_id: repository_id)
+      end)
+
+    tenant_id = tenant.tenant_id
+    filename = file.name
+
+    params =
+      Enum.into(opts, %{
+        url: "https://example.com/uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}",
+        file_name: filename,
+        uncompressed_file_size_bytes: file.size,
+        digest: file.digest,
+        compression: "",
+        ttl_seconds: 0,
+        file_mode: random_file_mode(),
+        user_id: random_user_id(),
+        group_id: random_group_id(),
+        destination_type: "storage",
+        destination: nil,
+        progress_tracked: false,
+        manual?: false,
+        device_id: device_id
+      })
+
+    FileDownloadRequest
     |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end

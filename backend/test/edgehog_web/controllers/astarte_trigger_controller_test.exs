@@ -40,6 +40,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   alias Edgehog.Devices.Device
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.OSManagement
+  alias Edgehog.StorageMock
 
   require Ash.Query
 
@@ -1785,9 +1786,17 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       file_download_request =
-        file_download_request_fixture(tenant: tenant, device_id: device.id, status: :pending)
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :pending
+        )
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      expect(StorageMock, :delete, 1, fn _ ->
+        :ok
+      end)
 
       response_event = %{
         device_id: device.device_id,
@@ -1820,7 +1829,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       file_download_request =
-        file_download_request_fixture(tenant: tenant, device_id: device.id, status: :pending)
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :pending
+        )
+
+      expect(StorageMock, :delete, 1, fn _ ->
+        :ok
+      end)
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
@@ -1855,7 +1872,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       file_download_request =
-        file_download_request_fixture(tenant: tenant, device_id: device.id, status: :sent)
+        manual_file_download_request_fixture(tenant: tenant, device_id: device.id, status: :sent)
 
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
