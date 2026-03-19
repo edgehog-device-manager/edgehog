@@ -51,7 +51,7 @@ const columns = [
       />
     ),
     cell: ({ getValue, row }) => {
-      const progressTracked = row.original.progress;
+      const progressTracked = row.original.progressTracked;
 
       if (!progressTracked) {
         return (
@@ -68,7 +68,7 @@ const columns = [
       return <RequestStatus status={status} />;
     },
   }),
-  columnHelper.accessor("statusProgress", {
+  columnHelper.accessor("progressPercentage", {
     header: () => (
       <FormattedMessage
         id="components.FilesUploadTab.table.progress"
@@ -76,7 +76,7 @@ const columns = [
       />
     ),
     cell: ({ getValue, row }) => {
-      const progressTracked = row.original.progress;
+      const progressTracked = row.original.progressTracked;
 
       if (!progressTracked) {
         return (
@@ -162,15 +162,15 @@ const columns = [
       return ttl;
     },
   }),
-  columnHelper.accessor("message", {
+  columnHelper.accessor("responseMessage", {
     header: () => (
       <FormattedMessage
         id="components.FilesUploadTab.table.message"
-        defaultMessage="Message"
+        defaultMessage="Response Message"
       />
     ),
     cell: ({ getValue, row }) => {
-      const statusCode = row.original.statusCode;
+      const statusCode = row.original.responseCode;
       const message = getValue();
 
       if (!statusCode && !message) return null;

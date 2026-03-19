@@ -74,11 +74,11 @@ export type RepositoryRecord = NonNullable<
 
 const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
   repository: { id: "", name: "" },
-  file: { id: "", name: "", digest: "", url: "", size: 0 },
+  file: { id: "", name: "" },
   destinationType: "STORAGE",
   destination: null,
   ttlSeconds: 0,
-  progress: false,
+  progressTracked: false,
 };
 
 const destinationOptions = [
@@ -386,10 +386,10 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
       >
         <Form.Check
           type="checkbox"
-          {...register("progress")}
-          isInvalid={!!errors.progress}
+          {...register("progressTracked")}
+          isInvalid={!!errors.progressTracked}
         />
-        <FormFeedback feedback={errors.progress?.message} />
+        <FormFeedback feedback={errors.progressTracked?.message} />
       </FormRow>
 
       <Row>

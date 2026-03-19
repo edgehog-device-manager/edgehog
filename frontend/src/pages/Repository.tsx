@@ -158,10 +158,7 @@ const FilesLayoutContainer = ({
             {
               first: RECORDS_TO_LOAD_FIRST,
               filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { url: { ilike: `%${text}%` } },
-                ],
+                or: [{ name: { ilike: `%${text}%` } }],
               },
             },
             { fetchPolicy: "network-only" },
