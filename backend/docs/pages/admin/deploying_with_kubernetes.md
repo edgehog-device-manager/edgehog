@@ -491,6 +491,8 @@ spec:
         - env:
             - name: BACKEND_URL
               value: <BACKEND-HOST>
+            - name: HIDE_NAVIGATION_ELEMENTS
+              value: <HIDE-NAVIGATION-ELEMENTS>
           image: edgehogdevicemanager/edgehog-frontend:{{VERSION}} # TODO: replace {{VERSION}} with the actual version you want to deploy
           imagePullPolicy: Always
           name: edgehog-frontend
@@ -503,6 +505,7 @@ spec:
 Values to be replaced
 
 - `BACKEND-URL`: the API base URL of the Edgehog backend (see the [Creating DNS entries](#creating-dns-entries) section). This should be, e.g., `https://<BACKEND-HOST>`.
+- `HIDE-NAVIGATION-ELEMENTS`: can be `true|false`. `true` disable navigation elements, such as the navigation bar, the footer and the top bar.
 
 #### Device Forwarder
 
