@@ -22,13 +22,15 @@ defmodule Edgehog.TenantsTest do
   use Edgehog.DataCase, async: true
 
   import Edgehog.AstarteFixtures
+  import Edgehog.FilesFixtures
   import Edgehog.TenantsFixtures
 
   alias Ash.Error.Changes.Required
   alias Ash.Error.Invalid
   alias Edgehog.Astarte
-  alias Edgehog.BaseImages.StorageMock
+  alias Edgehog.BaseImages.StorageMock, as: BaseImagesStorageMock
   alias Edgehog.OSManagement.EphemeralImageMock
+  alias Edgehog.StorageMock
   alias Edgehog.Tenants
   alias Edgehog.Tenants.ReconcilerMock
   alias Edgehog.Tenants.Tenant
@@ -327,10 +329,19 @@ defmodule Edgehog.TenantsTest do
 
       base_image_collection = base_image_collection_fixture(tenant: tenant)
       base_image = base_image_fixture(tenant: tenant)
+      repository = repository_fixture(tenant: tenant)
+      file = file_fixture(tenant: tenant, repository_id: repository.id, name: "firmware.bin")
 
       device_group = device_group_fixture(tenant: tenant)
 
       manual_ota_operation = manual_ota_operation_fixture(device_id: device.id, tenant: tenant)
+
+      file_download_request =
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          file_name: "manual-upload.bin",
+          manual?: true
+        )
 
       channel = channel_fixture(tenant: tenant)
 
@@ -348,8 +359,15 @@ defmodule Edgehog.TenantsTest do
           tenant: tenant
         )
 
-      expect(StorageMock, :delete, fn to_delete ->
+      expect(BaseImagesStorageMock, :delete, fn to_delete ->
         assert to_delete.id == base_image.id
+        :ok
+      end)
+
+      test_pid = self()
+
+      expect(StorageMock, :delete, 2, fn path ->
+        send(test_pid, {:file_deleted, path})
         :ok
       end)
 
@@ -361,6 +379,15 @@ defmodule Edgehog.TenantsTest do
       end)
 
       assert :ok = Tenants.destroy_tenant(tenant)
+
+      expected_repository_path =
+        "uploads/tenants/#{tenant.tenant_id}/repositories/#{repository.id}/files/#{file.name}"
+
+      expected_ephemeral_path =
+        "uploads/tenants/#{tenant.tenant_id}/ephemeral_file_download_requests/#{file_download_request.id}/files/#{file_download_request.file_name}"
+
+      assert_received {:file_deleted, ^expected_repository_path}
+      assert_received {:file_deleted, ^expected_ephemeral_path}
 
       refute entry_exists?(Edgehog.Devices.HardwareType, hardware_type.id, tenant)
       refute entry_exists?(Edgehog.Devices.SystemModel, system_model.id, tenant)
@@ -381,6 +408,9 @@ defmodule Edgehog.TenantsTest do
       refute entry_exists?(Edgehog.Campaigns.Channel, channel.id, tenant)
       refute entry_exists?(Edgehog.Campaigns.Campaign, update_campaign.id, tenant)
       refute entry_exists?(Edgehog.Campaigns.CampaignTarget, update_target.id, tenant)
+      refute entry_exists?(Edgehog.Files.Repository, repository.id, tenant)
+      refute entry_exists?(Edgehog.Files.File, file.id, tenant)
+      refute entry_exists?(Edgehog.Files.FileDownloadRequest, file_download_request.id, tenant)
     end
   end
 
