@@ -136,7 +136,9 @@ defmodule Edgehog.MixProject do
       {:absinthe_phoenix, "~> 2.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.24", only: :dev}
+      {:ex_doc, "~> 0.24", only: :dev},
+      {:libcluster, "~> 3.5"},
+      {:horde, "~> 0.10"}
     ]
   end
 
