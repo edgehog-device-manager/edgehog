@@ -23,6 +23,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
 
   import Edgehog.FilesFixtures
 
+  alias Edgehog.StorageMock
+
   describe "createFile mutation" do
     test "creates file with valid data", %{tenant: tenant} do
       repository = repository_fixture(tenant: tenant)
@@ -33,7 +35,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
       filename = "file-test.pdf"
       digest = "sha256:#{Base.encode16(:crypto.strong_rand_bytes(32))}"
       size = :rand.uniform(1_000_000)
-      file_url = "https://example.com/file-test.pdf"
+
+      expect(StorageMock, :read_presigned_url, fn path ->
+        assert String.contains?(path, "uploads/tenants/")
+        assert String.contains?(path, "/repositories/#{repository.id}/")
+
+        assert String.ends_with?(path, filename)
+
+        {:ok, %{get_url: "http://example.test/#{path}"}}
+      end)
 
       file =
         [
@@ -41,8 +51,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           repository_id: repository_id,
           name: filename,
           digest: digest,
-          size: size,
-          url: file_url
+          size: size
         ]
         |> create_file_mutation()
         |> extract_result!()
@@ -52,7 +61,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
                "name" => ^filename,
                "size" => ^size,
                "digest" => ^digest,
-               "url" => ^file_url,
+               "getPresignedUrl" => _url,
                "repository" => %{
                  "id" => ^repository_id
                }
@@ -89,7 +98,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           name: file.name,
           size: file.size,
           digest: file.digest,
-          url: file.url,
           repository_id: AshGraphql.Resource.encode_relay_id(repository)
         )
 
@@ -99,7 +107,23 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
 
     test "succeeds for duplicate file name on a different repository", %{tenant: tenant} do
       fixture = file_fixture(tenant: tenant)
-      result = create_file_mutation(tenant: tenant, name: fixture.name)
+
+      result =
+        create_file_mutation(
+          tenant: tenant,
+          name: fixture.name,
+          document: """
+          mutation CreateFile($input: CreateFileInput!) {
+            createFile(input: $input) {
+              result {
+                id
+                name
+              }
+            }
+          }
+          """
+        )
+
       file = extract_result!(result)
 
       assert file["name"] == fixture.name
@@ -115,10 +139,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           name
           size
           digest
-          mode
-          userId
-          groupId
-          url
+          getPresignedUrl
           repository {
             id
             name
@@ -145,14 +166,12 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
       end)
 
     {size, opts} = Keyword.pop_lazy(opts, :size, fn -> :rand.uniform(1_000_000) end)
-    {url, opts} = Keyword.pop_lazy(opts, :url, fn -> "https://example.com/#{name}" end)
 
     variables = %{
       "input" => %{
         "name" => name,
         "size" => size,
         "digest" => digest,
-        "url" => url,
         "repositoryId" => repository_id
       }
     }

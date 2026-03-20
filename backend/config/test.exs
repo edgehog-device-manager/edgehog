@@ -132,6 +132,7 @@ config :edgehog, :astarte_trigger_data_layer, Edgehog.Astarte.Trigger.MockDataLa
 config :edgehog, :astarte_wifi_scan_result_module, Edgehog.Astarte.Device.WiFiScanResultMock
 config :edgehog, :base_images_storage_module, Edgehog.BaseImages.StorageMock
 config :edgehog, :container_reconciler, Edgehog.Containers.ReconcilerMock
+config :edgehog, :files_storage_module, Edgehog.StorageMock
 config :edgehog, :os_management_ephemeral_image_module, Edgehog.OSManagement.EphemeralImageMock
 config :edgehog, :reconciler_module, Edgehog.Tenants.ReconcilerMock
 

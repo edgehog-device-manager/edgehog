@@ -60,7 +60,7 @@ const GET_REPOSITORY_QUERY = graphql`
 `;
 
 // Fields url, digest, size are passed through to parent forms via onChange
-/* eslint-disable relay/unused-fields */
+
 const FILES_SELECT_OPTIONS_FRAGMENT = graphql`
   fragment FileSelect_FilesFragment on Repository
   @refetchable(queryName: "FileSelect_FilesPaginationQuery")
@@ -75,9 +75,6 @@ const FILES_SELECT_OPTIONS_FRAGMENT = graphql`
         node {
           id
           name
-          url
-          digest
-          size
         }
       }
     }

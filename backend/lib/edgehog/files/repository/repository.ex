@@ -31,8 +31,7 @@ defmodule Edgehog.Files.Repository do
     A logical collection of files.
 
     Repositories provide organization for files, similar to how
-    BaseImageCollections group BaseImages. Storage location is
-    configured at the application level, not per-repository.
+    BaseImageCollections group BaseImages.
     """
   end
 
@@ -66,6 +65,11 @@ defmodule Edgehog.Files.Repository do
     destroy :destroy do
       description "Deletes a repository"
       primary? true
+
+      change cascade_destroy(:files,
+               return_notifications?: true,
+               after_action?: false
+             )
     end
 
     destroy :destroy_fixture
