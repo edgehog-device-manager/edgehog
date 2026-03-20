@@ -1,0 +1,148 @@
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: edgehog-backend
+  name: edgehog-backend
+  namespace: {{ .Values.namespace | default "edgehog" }}
+spec:
+  replicas: 1 #TODO: make this customizable once clustering is available
+  selector:
+    matchLabels:
+      app: edgehog-backend
+  template:
+    metadata:
+      labels:
+        app: edgehog-backend
+    spec:
+      containers:
+      - name: edgehog-backend
+        image: "edgehogdevicemanager/edgehog-backend:{{ .Values.backend.version }}"
+        ports:
+        - containerPort: 4000
+          name: http
+          protocol: TCP
+        volumes:
+        - name: admin-public-key
+          secret:
+            secretName: edgehog-admin-api-public-key
+            items:
+            - key: admin_public.pem
+              path: admin_public.pem
+        env:
+        - name: DATABASE_SSL_VERIFY
+          value: "true"
+        - name: DATABASE_USE_OS_CERTS
+          value: "true"
+        - name: DATABASE_ENABLE_SSL
+          value: {{ .Values.database.enableSsl | quote }}
+        - name: SEEDS_ASTARTE_BASE_API_URL
+          value: {{ .Values.astarte.apiDomain | default "http://api.astarte.customdomain.com" | quote }}
+        - name: SEEDS_REALM
+          value: {{ .Values.astarte.realm | default "test" | quote }}
+        - name: SEEDS_REALM_PRIVATE_KEY_FILE
+          value: {{ .Values.astarte.realmPrivateKeyFile | default "../test_private.pem" | quote }}
+        - name: SEEDS_TENANT_PRIVATE_KEY_FILE
+          value: {{ .Values.astarte.tenantPrivateKeyFile | default "../acme_private.pem" | quote }}
+        - name: RELEASE_NAME
+          value: edgehog
+        - name: PORT
+          value: "4000"
+        - name: URL_HOST
+          value: {{ .Values.backend.host | quote }}
+        - name: DATABASE_HOSTNAME
+          value: {{ .Values.database.hostname | quote }}
+        - name: DATABASE_NAME
+          value: {{ .Values.database.name | quote }}
+        - name: DATABASE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: {{ .Values.database.secretName | quote }}
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: {{ .Values.database.secretName | quote }}
+        - name: SECRET_KEY_BASE
+          valueFrom:
+            secretKeyRef:
+              key: secret-key-base
+              name: edgehog-secret-key-base
+        - name: MAX_UPLOAD_SIZE_BYTES
+          value: {{ .Values.backend.maxUploadSizeBytes | default "4294967296" | quote }}
+        {{- if eq .Values.s3.provider "minio" }}
+        - name: S3_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: edgehog-minio-connection
+              key: minio-root-user
+        - name: S3_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: edgehog-minio-connection
+              key: minio-root-password
+        {{- else if eq .Values.s3.provider "gcp" }}
+        - name: S3_GCP_CREDENTIALS
+          valueFrom:
+            secretKeyRef:
+              key: gcp-credentials
+              name: edgehog-s3-credentials
+        - name: S3_SCHEME
+          value: {{ .Values.s3.scheme | default "http" | quote }}
+        - name: S3_HOST
+          value: {{ .Values.s3.host | quote }}
+        - name: S3_PORT
+          value: {{ .Values.s3.port | quote }}
+        - name: S3_BUCKET
+          value: {{ .Values.s3.bucket | quote }}
+        - name: S3_ASSET_HOST
+          value: {{ .Values.s3.assetHost | quote }}
+        - name: S3_REGION
+          value: {{ .Values.s3.region | quote }}
+        {{- end }}
+        - name: EDGEHOG_FORWARDER_HOSTNAME
+          value: {{ .Values.deviceForwarder.host | quote }}
+        - name: EDGEHOG_FORWARDER_PORT
+          value: {{ .Values.deviceForwarder.port | default "443" | quote }}
+        - name: EDGEHOG_FORWARDER_SECURE_SESSIONS
+          value: {{ .Values.deviceForwarder.secureSessions | default "true" | quote }}
+        {{- if .Values.enabledSecrets.ipbase }}
+        - name: IPBASE_API_KEY
+         valueFrom:
+           secretKeyRef:
+             key: api-key
+             name: edgehog-ipbase-credentials
+        {{- end }}
+        {{- if .Values.enabledSecrets.googleGeolocation }}
+        - name: GOOGLE_GEOCODING_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: api-key
+              name: edgehog-google-geocoding-credentials
+        {{- end }}
+        {{- if .Values.enabledSecrets.googleGeocoding }}
+        - name: GOOGLE_GEOLOCATION_API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: api-key
+              name: edgehog-google-geolocation-credentials
+        {{- end }}
