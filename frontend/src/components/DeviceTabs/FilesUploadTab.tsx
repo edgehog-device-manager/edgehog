@@ -229,6 +229,9 @@ const ManualFileDownloadRequestFormWrapper = ({
           destination,
           ttlSeconds,
           progressTracked,
+          fileMode,
+          userId,
+          groupId,
         } = values;
 
         let uploadBlob: Blob;
@@ -264,13 +267,6 @@ const ManualFileDownloadRequestFormWrapper = ({
         const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
         const fileDownloadRequestId = uuidv7();
         const digest = await computeDigest(archiveData);
-
-        // Note: The browser File API does not expose Unix file permissions (fileMode),
-        // userId, or groupId. These are OS-level metadata not available in web browsers.
-        // We use sensible defaults: fileMode 0 (rw-r--r--), userId -1, groupId -1.
-        const fileMode = 0;
-        const userId = -1;
-        const groupId = -1;
 
         // Get presigned URL from the backend
         const presignedUrls = await new Promise<{
@@ -473,6 +469,9 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
           destination,
           ttlSeconds,
           progressTracked,
+          fileMode,
+          userId,
+          groupId,
         } = values;
 
         let compression: string | null = null;
@@ -482,12 +481,6 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
         }
 
         const fileDownloadRequestId = uuidv7();
-
-        // Default Unix file permissions since the repository doesn't store this metadata.
-        // Defaults: fileMode 0 (rw-r--r--), userId -1, groupId -1.
-        const fileMode = 0;
-        const userId = -1;
-        const groupId = -1;
 
         // Create the file download request with all metadata
         await new Promise<void>((resolve, reject) => {

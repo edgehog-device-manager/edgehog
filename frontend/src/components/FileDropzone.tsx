@@ -22,6 +22,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 
 import CloseButton from "@/components/CloseButton";
+import Icon from "@/components/Icon";
 import Tag from "@/components/Tag";
 import { formatFileSize } from "@/lib/files";
 
@@ -193,6 +194,9 @@ const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
       >
         {files.length === 0 ? (
           <div className="py-2">
+            <div className="mb-2 text-secondary">
+              <Icon icon="folder" size="3x" />
+            </div>
             <p className="mb-1 text-muted">
               <FormattedMessage
                 id="components.FileDropzone.dropzonePrompt"
